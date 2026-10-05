@@ -519,6 +519,20 @@ export interface TailwindConfiguration {
 	 */
 	mergeFunctions?: string[];
 	/**
+	 * The CSS file that holds your Tailwind CSS configuration, such as
+	 * `"./src/app.css"`. A relative path starts from the folder of the Biome
+	 * configuration file.
+	 *
+	 * Biome reads the `@theme`, `@utility`, and `@custom-variant` rules in
+	 * this file and in the files it imports with `@import`, so that
+	 * `useTailwindSortedClasses` knows your theme values, utilities, and variants.
+	 *
+	 * To read the file, Biome scans your project when a Tailwind rule is
+	 * enabled. Setting this option also turns on `css.parser.tailwindDirectives`,
+	 * unless you set that option yourself.
+	 */
+	stylesheet?: string;
+	/**
 	 * Functions that describe a component's styles with an object, such as
 	 * `cva` and `tv`.
 	 *
@@ -3285,7 +3299,7 @@ export interface Nursery {
 	 */
 	useTailwindShorthandClasses?: UseTailwindShorthandClassesConfiguration;
 	/**
-	 * Enforce the sorting of CSS utility classes.
+	 * Enforce the sorting of Tailwind CSS classes.
 	 * See https://biomejs.dev/linter/rules/use-tailwind-sorted-classes
 	 */
 	useTailwindSortedClasses?: UseTailwindSortedClassesConfiguration;
@@ -6534,6 +6548,11 @@ export type UseStaticResponseMethodsConfiguration =
 export type UseStrictModeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStrictModeOptions;
+/**
+ * Options for the `noDuplicateClasses` assist action.
+ *
+ * Controls which JSX attributes and utility functions are checked for duplicate classes.
+ */
 export interface NoDuplicateClassesOptions {
 	/**
 	 * Additional attributes that will be sorted.
@@ -10440,16 +10459,7 @@ export interface UseSvelteKitResolveOptions {
 export type UseSvelteKitRuneImportsOptions = {};
 export type UseSvelteRequireEachKeyOptions = {};
 export type UseTailwindShorthandClassesOptions = {};
-export interface UseTailwindSortedClassesOptions {
-	/**
-	 * Additional attributes that will be sorted.
-	 */
-	attributes?: string[];
-	/**
-	 * Names of the functions or tagged templates that will be sorted.
-	 */
-	functions?: string[];
-}
+export type UseTailwindSortedClassesOptions = {};
 export type UseTopLevelHeadingOptions = {};
 export interface UseValidTestTitleOptions {
 	/**

@@ -1,3 +1,4 @@
+mod tailwind;
 pub(crate) mod traverse;
 mod visitor;
 
@@ -11,6 +12,7 @@ use std::collections::BTreeSet;
 use std::hash::{Hash, Hasher};
 use std::ops::Deref;
 use std::sync::Arc;
+pub use tailwind::{TailwindStylesheet, TailwindThemeEntry, TailwindUtility};
 pub use traverse::{CssClassStep, CssTraversalStep, ImportTreeDisplay, ImportTreeNode};
 pub(crate) use visitor::CssModuleVisitor;
 
@@ -125,8 +127,16 @@ impl Deref for CssModuleInfo {
 }
 
 impl CssModuleInfo {
-    pub(crate) fn new(imports: CssImports, classes: IndexMap<TextRange, TokenText>) -> Self {
-        let info = CssModuleInfoInner { imports, classes };
+    pub(crate) fn new(
+        imports: CssImports,
+        classes: IndexMap<TextRange, TokenText>,
+        tailwind: TailwindStylesheet,
+    ) -> Self {
+        let info = CssModuleInfoInner {
+            imports,
+            classes,
+            tailwind,
+        };
         Self(Arc::new(info))
     }
 
@@ -164,6 +174,10 @@ pub struct CssModuleInfoInner {
     /// Keys are class names (e.g., "header" from `.header`), values are the
     /// `TextRange` of the class selector in the source file.
     pub classes: IndexMap<TextRange, TokenText>,
+
+    /// The Tailwind CSS configuration this file declares, without the files it
+    /// imports.
+    pub tailwind: TailwindStylesheet,
 }
 
 pub type CssImports = ImportPathMap<CssImport>;

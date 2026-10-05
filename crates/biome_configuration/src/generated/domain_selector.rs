@@ -141,6 +141,7 @@ static TAILWIND_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noTailwindRawColors"),
         RuleFilter::Rule("nursery", "noTailwindRestyledComponents"),
         RuleFilter::Rule("nursery", "useTailwindShorthandClasses"),
+        RuleFilter::Rule("nursery", "useTailwindSortedClasses"),
     ]
 });
 static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {

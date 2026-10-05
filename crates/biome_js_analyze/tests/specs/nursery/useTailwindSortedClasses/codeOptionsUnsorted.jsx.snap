@@ -9,9 +9,9 @@ expression: codeOptionsUnsorted.jsx
 	{/* SHOULD emit diagnostics (class/className attributes supported by default) */}
 	<div class="px-2 foo p-4 bar" />
 	<div className="px-2 foo p-4 bar" />
-	{/* SHOULD emit diagnostics (customClassAttribute attribute specified in options) */}
+	{/* SHOULD emit diagnostics (customClassAttribute listed in tailwind.attributes) */}
 	<div customClassAttribute="px-2 foo p-4 bar" />
-	{/* SHOULD NOT emit diagnostics (notClassAttribute attribute NOT specified in options) */}
+	{/* SHOULD NOT emit diagnostics (notClassAttribute NOT listed in tailwind.attributes) */}
 	<div notClassAttribute="px-2 foo p-4 bar" />
 	{/* utility sorting */}
 	{/* SHOULD emit diagnostics (class attribute supported by default) */}
@@ -28,7 +28,7 @@ expression: codeOptionsUnsorted.jsx
 </>;
 
 // functions
-/* SHOULD emit diagnostics (functions specified in options) */
+/* SHOULD emit diagnostics (functions listed in tailwind.mergeFunctions) */
 clsx("px-2 foo p-4 bar");
 tw`px-2 foo p-4 bar`;
 tw.div`px-2 foo p-4 bar`;
@@ -48,7 +48,7 @@ notTemplateFunction.div`px-2 foo p-4 bar`;
 		],
 	}}
 />;
-/* SHOULD emit diagnostics (clsx function specified in options) */
+/* SHOULD emit diagnostics (clsx listed in tailwind.mergeFunctions) */
 clsx(["px-2 foo p-4 bar"]);
 clsx({
 	"px-2 foo p-4 bar": [
@@ -70,7 +70,7 @@ codeOptionsUnsorted.jsx:4:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━
   > 4 │ 	<div class="px-2 foo p-4 bar" />
       │ 	           ^^^^^^^^^^^^^^^^^^
     5 │ 	<div className="px-2 foo p-4 bar" />
-    6 │ 	{/* SHOULD emit diagnostics (customClassAttribute attribute specified in options) */}
+    6 │ 	{/* SHOULD emit diagnostics (customClassAttribute listed in tailwind.attributes) */}
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
@@ -83,7 +83,7 @@ codeOptionsUnsorted.jsx:4:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━
      4    │ - → <div·class="px-2·foo·p-4·bar"·/>
         4 │ + → <div·class="foo·bar·p-4·px-2"·/>
      5  5 │     <div className="px-2 foo p-4 bar" />
-     6  6 │     {/* SHOULD emit diagnostics (customClassAttribute attribute specified in options) */}
+     6  6 │     {/* SHOULD emit diagnostics (customClassAttribute listed in tailwind.attributes) */}
   
 
 ```
@@ -97,7 +97,7 @@ codeOptionsUnsorted.jsx:5:17 lint/nursery/useTailwindSortedClasses  FIXABLE  ━
     4 │ 	<div class="px-2 foo p-4 bar" />
   > 5 │ 	<div className="px-2 foo p-4 bar" />
       │ 	               ^^^^^^^^^^^^^^^^^^
-    6 │ 	{/* SHOULD emit diagnostics (customClassAttribute attribute specified in options) */}
+    6 │ 	{/* SHOULD emit diagnostics (customClassAttribute listed in tailwind.attributes) */}
     7 │ 	<div customClassAttribute="px-2 foo p-4 bar" />
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
@@ -110,7 +110,7 @@ codeOptionsUnsorted.jsx:5:17 lint/nursery/useTailwindSortedClasses  FIXABLE  ━
      4  4 │     <div class="px-2 foo p-4 bar" />
      5    │ - → <div·className="px-2·foo·p-4·bar"·/>
         5 │ + → <div·className="foo·bar·p-4·px-2"·/>
-     6  6 │     {/* SHOULD emit diagnostics (customClassAttribute attribute specified in options) */}
+     6  6 │     {/* SHOULD emit diagnostics (customClassAttribute listed in tailwind.attributes) */}
      7  7 │     <div customClassAttribute="px-2 foo p-4 bar" />
   
 
@@ -122,10 +122,10 @@ codeOptionsUnsorted.jsx:7:28 lint/nursery/useTailwindSortedClasses  FIXABLE  ━
   i These CSS classes should be sorted.
   
     5 │ 	<div className="px-2 foo p-4 bar" />
-    6 │ 	{/* SHOULD emit diagnostics (customClassAttribute attribute specified in options) */}
+    6 │ 	{/* SHOULD emit diagnostics (customClassAttribute listed in tailwind.attributes) */}
   > 7 │ 	<div customClassAttribute="px-2 foo p-4 bar" />
       │ 	                          ^^^^^^^^^^^^^^^^^^
-    8 │ 	{/* SHOULD NOT emit diagnostics (notClassAttribute attribute NOT specified in options) */}
+    8 │ 	{/* SHOULD NOT emit diagnostics (notClassAttribute NOT listed in tailwind.attributes) */}
     9 │ 	<div notClassAttribute="px-2 foo p-4 bar" />
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
@@ -135,10 +135,10 @@ codeOptionsUnsorted.jsx:7:28 lint/nursery/useTailwindSortedClasses  FIXABLE  ━
   i Unsafe fix: Sort the classes.
   
      5  5 │     <div className="px-2 foo p-4 bar" />
-     6  6 │     {/* SHOULD emit diagnostics (customClassAttribute attribute specified in options) */}
+     6  6 │     {/* SHOULD emit diagnostics (customClassAttribute listed in tailwind.attributes) */}
      7    │ - → <div·customClassAttribute="px-2·foo·p-4·bar"·/>
         7 │ + → <div·customClassAttribute="foo·bar·p-4·px-2"·/>
-     8  8 │     {/* SHOULD NOT emit diagnostics (notClassAttribute attribute NOT specified in options) */}
+     8  8 │     {/* SHOULD NOT emit diagnostics (notClassAttribute NOT listed in tailwind.attributes) */}
      9  9 │     <div notClassAttribute="px-2 foo p-4 bar" />
   
 
@@ -193,7 +193,7 @@ codeOptionsUnsorted.jsx:13:13 lint/nursery/useTailwindSortedClasses  FIXABLE  �
     11 11 │     {/* SHOULD emit diagnostics (class attribute supported by default) */}
     12 12 │     <div class="text-center custom-style1 p-4 bg-blue-500 text-white foo rounded-lg shadow-lg" />
     13    │ - → <div·class="flex·custom-layout·items-center·justify-center·h-screen·bg-gray-200·bar·text-lg·font-bold"·/>
-       13 │ + → <div·class="custom-layout·bar·flex·h-screen·items-center·justify-center·bg-gray-200·font-bold·text-lg"·/>
+       13 │ + → <div·class="custom-layout·bar·flex·h-screen·items-center·justify-center·bg-gray-200·text-lg·font-bold"·/>
     14 14 │     <div class="grid custom-grid grid-cols-3 gap-4 p-6 m-6 border border-gray-300 shadow-md rounded-md" />
     15 15 │     <div class="absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert" />
   
@@ -361,7 +361,7 @@ codeOptionsUnsorted.jsx:19:13 lint/nursery/useTailwindSortedClasses  FIXABLE  �
     17 17 │     <div class="flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200" />
     18 18 │     <div class="relative overflow-hidden custom-background bg-no-repeat bg-cover h-64 w-full foo m-2" />
     19    │ - → <div·class="underline·custom-text·foo·text-2xl·font-semibold·my-2"·/>
-       19 │ + → <div·class="custom-text·foo·my-2·font-semibold·text-2xl·underline"·/>
+       19 │ + → <div·class="custom-text·foo·my-2·text-2xl·font-semibold·underline"·/>
     20 20 │     <div class="flex-wrap custom-container justify-between items-start bar bg-purple-200 p-5 text-purple-700" />
     21 21 │     <div class="gap-8 bg-indigo-100 text-indigo-900 p-3 border-l-4 border-indigo-500 custom-border" />
   
@@ -417,7 +417,7 @@ codeOptionsUnsorted.jsx:21:13 lint/nursery/useTailwindSortedClasses  FIXABLE  �
     19 19 │     <div class="underline custom-text foo text-2xl font-semibold my-2" />
     20 20 │     <div class="flex-wrap custom-container justify-between items-start bar bg-purple-200 p-5 text-purple-700" />
     21    │ - → <div·class="gap-8·bg-indigo-100·text-indigo-900·p-3·border-l-4·border-indigo-500·custom-border"·/>
-       21 │ + → <div·class="custom-border·gap-8·border-indigo-500·border-l-4·bg-indigo-100·p-3·text-indigo-900"·/>
+       21 │ + → <div·class="custom-border·gap-8·border-l-4·border-indigo-500·bg-indigo-100·p-3·text-indigo-900"·/>
     22 22 │   </>;
     23 23 │   
   
@@ -430,7 +430,7 @@ codeOptionsUnsorted.jsx:26:6 lint/nursery/useTailwindSortedClasses  FIXABLE  ━
   i These CSS classes should be sorted.
   
     24 │ // functions
-    25 │ /* SHOULD emit diagnostics (functions specified in options) */
+    25 │ /* SHOULD emit diagnostics (functions listed in tailwind.mergeFunctions) */
   > 26 │ clsx("px-2 foo p-4 bar");
        │      ^^^^^^^^^^^^^^^^^^
     27 │ tw`px-2 foo p-4 bar`;
@@ -443,7 +443,7 @@ codeOptionsUnsorted.jsx:26:6 lint/nursery/useTailwindSortedClasses  FIXABLE  ━
   i Unsafe fix: Sort the classes.
   
     24 24 │   // functions
-    25 25 │   /* SHOULD emit diagnostics (functions specified in options) */
+    25 25 │   /* SHOULD emit diagnostics (functions listed in tailwind.mergeFunctions) */
     26    │ - clsx("px-2·foo·p-4·bar");
        26 │ + clsx("foo·bar·p-4·px-2");
     27 27 │   tw`px-2 foo p-4 bar`;
@@ -457,7 +457,7 @@ codeOptionsUnsorted.jsx:27:4 lint/nursery/useTailwindSortedClasses  FIXABLE  ━
 
   i These CSS classes should be sorted.
   
-    25 │ /* SHOULD emit diagnostics (functions specified in options) */
+    25 │ /* SHOULD emit diagnostics (functions listed in tailwind.mergeFunctions) */
     26 │ clsx("px-2 foo p-4 bar");
   > 27 │ tw`px-2 foo p-4 bar`;
        │    ^^^^^^^^^^^^^^^^
@@ -470,7 +470,7 @@ codeOptionsUnsorted.jsx:27:4 lint/nursery/useTailwindSortedClasses  FIXABLE  ━
   
   i Unsafe fix: Sort the classes.
   
-    25 25 │   /* SHOULD emit diagnostics (functions specified in options) */
+    25 25 │   /* SHOULD emit diagnostics (functions listed in tailwind.mergeFunctions) */
     26 26 │   clsx("px-2 foo p-4 bar");
     27    │ - tw`px-2·foo·p-4·bar`;
        27 │ + tw`foo·bar·p-4·px-2`;
@@ -593,124 +593,12 @@ codeOptionsUnsorted.jsx:39:3 lint/nursery/useTailwindSortedClasses  FIXABLE  ━
 ```
 
 ```
-codeOptionsUnsorted.jsx:40:4 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
-
-  i These CSS classes should be sorted.
-  
-    38 │ 	class={{
-    39 │ 		"px-2 foo p-4 bar": [
-  > 40 │ 			"px-2 foo p-4 bar",
-       │ 			^^^^^^^^^^^^^^^^^^
-    41 │ 			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
-    42 │ 		],
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Sort the classes.
-  
-    38 38 │     class={{
-    39 39 │       "px-2 foo p-4 bar": [
-    40    │ - → → → "px-2·foo·p-4·bar",
-       40 │ + → → → "foo·bar·p-4·px-2",
-    41 41 │         { "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
-    42 42 │       ],
-  
-
-```
-
-```
-codeOptionsUnsorted.jsx:41:6 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
-
-  i These CSS classes should be sorted.
-  
-    39 │ 		"px-2 foo p-4 bar": [
-    40 │ 			"px-2 foo p-4 bar",
-  > 41 │ 			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
-       │ 			  ^^^^^^^^^^^^^^^^^^
-    42 │ 		],
-    43 │ 	}}
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Sort the classes.
-  
-    39 39 │       "px-2 foo p-4 bar": [
-    40 40 │         "px-2 foo p-4 bar",
-    41    │ - → → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["px-2·foo·p-4·bar"]·},
-       41 │ + → → → {·"foo·bar·p-4·px-2":·"px-2·foo·p-4·bar",·custom:·["px-2·foo·p-4·bar"]·},
-    42 42 │       ],
-    43 43 │     }}
-  
-
-```
-
-```
-codeOptionsUnsorted.jsx:41:26 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
-
-  i These CSS classes should be sorted.
-  
-    39 │ 		"px-2 foo p-4 bar": [
-    40 │ 			"px-2 foo p-4 bar",
-  > 41 │ 			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
-       │ 			                      ^^^^^^^^^^^^^^^^^^
-    42 │ 		],
-    43 │ 	}}
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Sort the classes.
-  
-    39 39 │       "px-2 foo p-4 bar": [
-    40 40 │         "px-2 foo p-4 bar",
-    41    │ - → → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["px-2·foo·p-4·bar"]·},
-       41 │ + → → → {·"px-2·foo·p-4·bar":·"foo·bar·p-4·px-2",·custom:·["px-2·foo·p-4·bar"]·},
-    42 42 │       ],
-    43 43 │     }}
-  
-
-```
-
-```
-codeOptionsUnsorted.jsx:41:55 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
-
-  i These CSS classes should be sorted.
-  
-    39 │ 		"px-2 foo p-4 bar": [
-    40 │ 			"px-2 foo p-4 bar",
-  > 41 │ 			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
-       │ 			                                                   ^^^^^^^^^^^^^^^^^^
-    42 │ 		],
-    43 │ 	}}
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Sort the classes.
-  
-    39 39 │       "px-2 foo p-4 bar": [
-    40 40 │         "px-2 foo p-4 bar",
-    41    │ - → → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["px-2·foo·p-4·bar"]·},
-       41 │ + → → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["foo·bar·p-4·px-2"]·},
-    42 42 │       ],
-    43 43 │     }}
-  
-
-```
-
-```
 codeOptionsUnsorted.jsx:46:7 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
     44 │ />;
-    45 │ /* SHOULD emit diagnostics (clsx function specified in options) */
+    45 │ /* SHOULD emit diagnostics (clsx listed in tailwind.mergeFunctions) */
   > 46 │ clsx(["px-2 foo p-4 bar"]);
        │       ^^^^^^^^^^^^^^^^^^
     47 │ clsx({
@@ -723,7 +611,7 @@ codeOptionsUnsorted.jsx:46:7 lint/nursery/useTailwindSortedClasses  FIXABLE  ━
   i Unsafe fix: Sort the classes.
   
     44 44 │   />;
-    45 45 │   /* SHOULD emit diagnostics (clsx function specified in options) */
+    45 45 │   /* SHOULD emit diagnostics (clsx listed in tailwind.mergeFunctions) */
     46    │ - clsx(["px-2·foo·p-4·bar"]);
        46 │ + clsx(["foo·bar·p-4·px-2"]);
     47 47 │   clsx({
@@ -756,118 +644,6 @@ codeOptionsUnsorted.jsx:48:2 lint/nursery/useTailwindSortedClasses  FIXABLE  ━
        48 │ + → "foo·bar·p-4·px-2":·[
     49 49 │       "px-2 foo p-4 bar",
     50 50 │       { "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
-  
-
-```
-
-```
-codeOptionsUnsorted.jsx:49:3 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
-
-  i These CSS classes should be sorted.
-  
-    47 │ clsx({
-    48 │ 	"px-2 foo p-4 bar": [
-  > 49 │ 		"px-2 foo p-4 bar",
-       │ 		^^^^^^^^^^^^^^^^^^
-    50 │ 		{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
-    51 │ 	],
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Sort the classes.
-  
-    47 47 │   clsx({
-    48 48 │     "px-2 foo p-4 bar": [
-    49    │ - → → "px-2·foo·p-4·bar",
-       49 │ + → → "foo·bar·p-4·px-2",
-    50 50 │       { "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
-    51 51 │     ],
-  
-
-```
-
-```
-codeOptionsUnsorted.jsx:50:5 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
-
-  i These CSS classes should be sorted.
-  
-    48 │ 	"px-2 foo p-4 bar": [
-    49 │ 		"px-2 foo p-4 bar",
-  > 50 │ 		{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
-       │ 		  ^^^^^^^^^^^^^^^^^^
-    51 │ 	],
-    52 │ });
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Sort the classes.
-  
-    48 48 │     "px-2 foo p-4 bar": [
-    49 49 │       "px-2 foo p-4 bar",
-    50    │ - → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["px-2·foo·p-4·bar"]·},
-       50 │ + → → {·"foo·bar·p-4·px-2":·"px-2·foo·p-4·bar",·custom:·["px-2·foo·p-4·bar"]·},
-    51 51 │     ],
-    52 52 │   });
-  
-
-```
-
-```
-codeOptionsUnsorted.jsx:50:25 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
-
-  i These CSS classes should be sorted.
-  
-    48 │ 	"px-2 foo p-4 bar": [
-    49 │ 		"px-2 foo p-4 bar",
-  > 50 │ 		{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
-       │ 		                      ^^^^^^^^^^^^^^^^^^
-    51 │ 	],
-    52 │ });
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Sort the classes.
-  
-    48 48 │     "px-2 foo p-4 bar": [
-    49 49 │       "px-2 foo p-4 bar",
-    50    │ - → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["px-2·foo·p-4·bar"]·},
-       50 │ + → → {·"px-2·foo·p-4·bar":·"foo·bar·p-4·px-2",·custom:·["px-2·foo·p-4·bar"]·},
-    51 51 │     ],
-    52 52 │   });
-  
-
-```
-
-```
-codeOptionsUnsorted.jsx:50:54 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
-
-  i These CSS classes should be sorted.
-  
-    48 │ 	"px-2 foo p-4 bar": [
-    49 │ 		"px-2 foo p-4 bar",
-  > 50 │ 		{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
-       │ 		                                                   ^^^^^^^^^^^^^^^^^^
-    51 │ 	],
-    52 │ });
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Sort the classes.
-  
-    48 48 │     "px-2 foo p-4 bar": [
-    49 49 │       "px-2 foo p-4 bar",
-    50    │ - → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["px-2·foo·p-4·bar"]·},
-       50 │ + → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["foo·bar·p-4·px-2"]·},
-    51 51 │     ],
-    52 52 │   });
   
 
 ```

@@ -91,6 +91,10 @@ pub struct TailwindClassString {
     pub text: TokenText,
     /// The range of `text` in the host source file.
     pub inner_range: TextRange,
+    /// Whether `text` starts or ends with part of a class, such as `bar-` in
+    /// `` `bar-${color}` ``. Parse errors are expected then, so they aren't
+    /// reported.
+    pub has_partial_class: bool,
 }
 
 pub struct ParsedTailwindSyntax {
@@ -356,7 +360,7 @@ where
                 category: RuleCategory::Syntax,
             });
         }
-        if parsed.should_emit_diagnostics {
+        if parsed.should_emit_diagnostics && !class_string.has_partial_class {
             emit_parse_diagnostics(&mut ctx, &class_string, parsed.parse.diagnostics());
         }
         ctx.match_query(TailwindSyntaxMatch {
@@ -716,6 +720,7 @@ fn tailwind_class_string(
         key: TailwindSyntaxCacheKey::new(inner_range, kind),
         text,
         inner_range,
+        has_partial_class: false,
     }
 }
 
@@ -789,11 +794,25 @@ impl TailwindClassStringHost for JsTemplateChunkElement {
             return None;
         }
         let token = self.template_chunk_token().ok()?;
-        Some(tailwind_class_string(
-            token.token_text(),
-            token.text_trimmed_range().start(),
-            ClassStringHostKind::JsTemplateChunkElement,
-        ))
+        let text = token.text_trimmed();
+        // A class touching an interpolation, as in `` `bar-${color}` ``, continues
+        // past this chunk.
+        let syntax = self.syntax();
+        let has_partial_class = syntax.prev_sibling().is_some_and(|sibling| {
+            JsTemplateElement::can_cast(sibling.kind())
+                && !text.starts_with(|c: char| c.is_ascii_whitespace())
+        }) || syntax.next_sibling().is_some_and(|sibling| {
+            JsTemplateElement::can_cast(sibling.kind())
+                && !text.ends_with(|c: char| c.is_ascii_whitespace())
+        });
+        Some(TailwindClassString {
+            has_partial_class,
+            ..tailwind_class_string(
+                token.token_text(),
+                token.text_trimmed_range().start(),
+                ClassStringHostKind::JsTemplateChunkElement,
+            )
+        })
     }
 }
 

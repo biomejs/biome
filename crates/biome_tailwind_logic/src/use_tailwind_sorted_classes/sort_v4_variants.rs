@@ -43,8 +43,9 @@ use biome_tailwind_syntax::{
 };
 use smallvec::SmallVec;
 
+use super::design_system::{TailwindDesignSystem, ThemeLookup};
 use super::tailwind_preset_v4::{BREAKPOINT_VALUES, CONTAINER_VALUES, VARIANTS};
-use super::tailwind_preset_v4_types::{VariantCompare, VariantEntry, VariantKind};
+use super::tailwind_preset_v4_types::{ThemeNamespace, VariantCompare, VariantEntry, VariantKind};
 
 /// The variants a candidate carries, as the set of [VariantGroups]
 /// indices they occupy — a bitset compared as one big number.
@@ -138,6 +139,11 @@ pub(super) enum VariantKey {
         /// `group-hover/[.5]:` compares as `.5`, before `/menu`).
         modifier: Option<SyntaxNodeText>,
     },
+    /// A variant declared with `@custom-variant` in the user's stylesheet.
+    /// Tailwind registers these after its own variants, in declaration order.
+    Custom {
+        index: u16,
+    },
     Arbitrary(Text),
 }
 
@@ -153,6 +159,9 @@ impl Eq for VariantKey {}
 pub(super) enum VariantValue {
     Named(TokenText),
     Arbitrary(Text),
+    /// A breakpoint or container size the user's stylesheet defines, resolved
+    /// to its length (`3xl` → `120rem` for `--breakpoint-3xl: 120rem`).
+    Length(Text),
 }
 
 #[derive(Clone, Debug)]
@@ -191,15 +200,21 @@ impl VariantGroups {
     }
 }
 
-pub(super) fn variant_keys_from_candidate(candidate: &TwFullCandidate) -> Option<Vec<VariantKey>> {
+pub(super) fn variant_keys_from_candidate(
+    candidate: &TwFullCandidate,
+    design: &TailwindDesignSystem,
+) -> Option<Vec<VariantKey>> {
     let mut variants = Vec::new();
     for variant in candidate.variants() {
-        variants.push(variant_key_from_variant(&variant.ok()?)?);
+        variants.push(variant_key_from_variant(&variant.ok()?, design)?);
     }
     Some(variants)
 }
 
-fn variant_key_from_variant(variant: &AnyTwVariant) -> Option<VariantKey> {
+fn variant_key_from_variant(
+    variant: &AnyTwVariant,
+    design: &TailwindDesignSystem,
+) -> Option<VariantKey> {
     match variant {
         AnyTwVariant::TwArbitraryVariant(variant) => Some(VariantKey::Arbitrary(
             variant.selector_token().ok()?.token_text_trimmed().into(),
@@ -213,7 +228,7 @@ fn variant_key_from_variant(variant: &AnyTwVariant) -> Option<VariantKey> {
                     glued.value_token().ok()?.token_text_trimmed().into(),
                 ));
             }
-            let key = variant_key_from_segments(&segments)?;
+            let key = variant_key_from_segments(&segments, design)?;
             match expression.modifier() {
                 None => Some(key),
                 Some(modifier) => attach_modifier(key, &modifier),
@@ -280,22 +295,39 @@ fn variant_segments(segments: TwVariantSegmentList) -> Option<Vec<VariantSegment
     Some(result)
 }
 
-fn variant_key_from_segments(segments: &[VariantSegment]) -> Option<VariantKey> {
+fn variant_key_from_segments(
+    segments: &[VariantSegment],
+    design: &TailwindDesignSystem,
+) -> Option<VariantKey> {
     match segments.first()? {
         VariantSegment::Arbitrary(selector) if segments.len() == 1 => {
             Some(VariantKey::Arbitrary(selector.clone()))
         }
         VariantSegment::Named(name) => {
+            if let Some(key) = custom_variant(segments, design) {
+                return Some(key);
+            }
             let Some((root, entry, value_segments)) = variant_root_from_segments(segments) else {
                 // `@sm` glues the container root to its size with no `-` for
                 // the segment splitter to see (unlike `@max-lg` / `@min-[…]`,
                 // whose root is a registered dashed prefix).
-                return glued_container_variant(name);
+                return glued_container_variant(name, design);
             };
             match entry.kind {
-                VariantKind::Static if value_segments.is_empty() => Some(VariantKey::Static(root)),
+                VariantKind::Static if value_segments.is_empty() => {
+                    if entry.compare == VariantCompare::BreakpointAsc {
+                        // A breakpoint the stylesheet redefines or removes.
+                        return match design.theme_lookup(ThemeNamespace::Breakpoint, root) {
+                            ThemeLookup::Defined(length) => Some(min_width_variant(length)),
+                            ThemeLookup::Removed => None,
+                            ThemeLookup::Default => Some(VariantKey::Static(root)),
+                        };
+                    }
+                    Some(VariantKey::Static(root))
+                }
                 VariantKind::Functional => {
                     let value = variant_value_from_segments(value_segments)?;
+                    let value = resolve_size_value(entry.compare, value, design)?;
                     // A breakpoint or container size that cannot resolve
                     // to a length (`min-abc:`, `@max-[var(--w)]:`) is not
                     // a valid variant, so the candidate sorts as unknown.
@@ -309,13 +341,79 @@ fn variant_key_from_segments(segments: &[VariantSegment]) -> Option<VariantKey> 
                 }
                 VariantKind::Compound => Some(VariantKey::Compound {
                     root,
-                    variant: Box::new(variant_key_from_segments(value_segments)?),
+                    variant: Box::new(variant_key_from_segments(value_segments, design)?),
                     modifier: None,
                 }),
                 VariantKind::Static => None,
             }
         }
         VariantSegment::Arbitrary(_) | VariantSegment::CssVariable => None,
+    }
+}
+
+/// The variant the user's stylesheet declares for a name made of named
+/// segments: a `@custom-variant`, or a breakpoint such as `3xl` from
+/// `--breakpoint-3xl`. Built-in variants keep their place, so redefining
+/// `dark` with `@custom-variant` doesn't move it.
+fn custom_variant(
+    segments: &[VariantSegment],
+    design: &TailwindDesignSystem,
+) -> Option<VariantKey> {
+    if design.is_default() {
+        return None;
+    }
+    let mut name = String::new();
+    for segment in segments {
+        let VariantSegment::Named(segment) = segment else {
+            return None;
+        };
+        if !name.is_empty() {
+            name.push('-');
+        }
+        name.push_str(segment.text());
+    }
+    if VARIANTS.contains_key(name.as_str()) {
+        return None;
+    }
+    if let Some(index) = design.variant(&name) {
+        return Some(VariantKey::Custom { index });
+    }
+    match design.theme_lookup(ThemeNamespace::Breakpoint, &name) {
+        ThemeLookup::Defined(length) => Some(min_width_variant(length)),
+        ThemeLookup::Removed | ThemeLookup::Default => None,
+    }
+}
+
+/// A breakpoint variant with a resolved length. Tailwind gives `sm:` the same
+/// rank as `min-[40rem]:`, so a custom breakpoint sorts as a `min-*` variant.
+fn min_width_variant(length: &str) -> VariantKey {
+    VariantKey::Functional {
+        root: "min",
+        value: Some(VariantValue::Length(length.to_string().into())),
+    }
+}
+
+/// Resolves a named breakpoint or container size against the user's
+/// stylesheet. Returns `None` when the stylesheet removed the size.
+fn resolve_size_value(
+    compare: VariantCompare,
+    value: VariantValue,
+    design: &TailwindDesignSystem,
+) -> Option<VariantValue> {
+    let namespace = match compare {
+        VariantCompare::Default => return Some(value),
+        VariantCompare::BreakpointAsc | VariantCompare::BreakpointDesc => {
+            ThemeNamespace::Breakpoint
+        }
+        VariantCompare::ContainerAsc | VariantCompare::ContainerDesc => ThemeNamespace::Container,
+    };
+    let VariantValue::Named(name) = &value else {
+        return Some(value);
+    };
+    match design.theme_lookup(namespace, name.text()) {
+        ThemeLookup::Defined(length) => Some(VariantValue::Length(length.to_string().into())),
+        ThemeLookup::Removed => None,
+        ThemeLookup::Default => Some(value),
     }
 }
 
@@ -372,8 +470,18 @@ fn variant_root_from_segments(
 /// registry and the size is a no-copy [TokenText] slice past the `@`. A
 /// remainder that is not a known container size (`@container`) is not a
 /// sortable variant, matching Tailwind.
-fn glued_container_variant(name: &TokenText) -> Option<VariantKey> {
+fn glued_container_variant(name: &TokenText, design: &TailwindDesignSystem) -> Option<VariantKey> {
     let value = name.text().strip_prefix('@')?;
+    match design.theme_lookup(ThemeNamespace::Container, value) {
+        ThemeLookup::Defined(length) => {
+            return Some(VariantKey::Functional {
+                root: "@",
+                value: Some(VariantValue::Length(length.to_string().into())),
+            });
+        }
+        ThemeLookup::Removed => return None,
+        ThemeLookup::Default => {}
+    }
     if !CONTAINER_VALUES.contains_key(value) {
         return None;
     }
@@ -399,7 +507,7 @@ fn length_value_resolves(compare: VariantCompare, value: &VariantValue) -> bool 
     };
     match value {
         VariantValue::Named(name) => map.contains_key(name.text()),
-        VariantValue::Arbitrary(text) => !text.text().contains("var("),
+        VariantValue::Arbitrary(text) | VariantValue::Length(text) => !text.text().contains("var("),
     }
 }
 
@@ -428,6 +536,11 @@ impl Ord for VariantKey {
             }
             (Self::Arbitrary(_), _) => Ordering::Greater,
             (_, Self::Arbitrary(_)) => Ordering::Less,
+            (Self::Custom { index: left, .. }, Self::Custom { index: right, .. }) => {
+                left.cmp(right)
+            }
+            (Self::Custom { .. }, _) => Ordering::Greater,
+            (_, Self::Custom { .. }) => Ordering::Less,
             _ => compare_registered_variant_keys(self, other),
         }
     }
@@ -563,7 +676,7 @@ fn resolved_length(key: &VariantKey, container: bool) -> Option<&str> {
             ..
         } => map.get(name.text()).copied(),
         VariantKey::Functional {
-            value: Some(VariantValue::Arbitrary(text)),
+            value: Some(VariantValue::Arbitrary(text) | VariantValue::Length(text)),
             ..
         } => Some(text.text()),
         _ => None,
@@ -616,7 +729,10 @@ fn leading_integer(value: &str) -> Option<i64> {
         Some(b'+') => (false, &value[1..]),
         _ => (false, value),
     };
-    let end = digits.bytes().take_while(|byte| byte.is_ascii_digit()).count();
+    let end = digits
+        .bytes()
+        .take_while(|byte| byte.is_ascii_digit())
+        .count();
     let magnitude: i64 = digits[..end].parse().ok()?;
     Some(if negative { -magnitude } else { magnitude })
 }
@@ -639,7 +755,7 @@ fn variant_root(key: &VariantKey) -> &str {
         VariantKey::Static(root)
         | VariantKey::Functional { root, .. }
         | VariantKey::Compound { root, .. } => root,
-        VariantKey::Arbitrary(_) => "",
+        VariantKey::Custom { .. } | VariantKey::Arbitrary(_) => "",
     }
 }
 
@@ -654,9 +770,12 @@ impl Ord for VariantValue {
     fn cmp(&self, other: &Self) -> Ordering {
         match (self, other) {
             (Self::Named(left), Self::Named(right)) => left.cmp(right),
-            (Self::Arbitrary(left), Self::Arbitrary(right)) => left.cmp(right),
-            (Self::Named(_), Self::Arbitrary(_)) => Ordering::Less,
-            (Self::Arbitrary(_), Self::Named(_)) => Ordering::Greater,
+            (Self::Arbitrary(left), Self::Arbitrary(right))
+            | (Self::Length(left), Self::Length(right)) => left.cmp(right),
+            (Self::Named(_), _) => Ordering::Less,
+            (_, Self::Named(_)) => Ordering::Greater,
+            (Self::Arbitrary(_), Self::Length(_)) => Ordering::Less,
+            (Self::Length(_), Self::Arbitrary(_)) => Ordering::Greater,
         }
     }
 }

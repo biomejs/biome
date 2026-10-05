@@ -7,13 +7,13 @@ expression: quoteStyleInFunction.jsx
 // functions
 tw("content-[''] absolute");
 tw({ base: "content-[''] absolute" });
-tw({ variant: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } });
+tw({ variants: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } });
 tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center');
 
 // function in jsx attribute
 <div class={tw("content-[''] absolute")}>Hello</div>;
 <div class={tw({ base: "content-[''] absolute" })}>Hello</div>;
-<div class={tw({ variant: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } })}>Hello</div>;
+<div class={tw({ variants: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } })}>Hello</div>;
 <div class={tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center')} />;
 
 ```
@@ -28,7 +28,7 @@ quoteStyleInFunction.jsx:2:4 lint/nursery/useTailwindSortedClasses  FIXABLE  ━
   > 2 │ tw("content-[''] absolute");
       │    ^^^^^^^^^^^^^^^^^^^^^^^
     3 │ tw({ base: "content-[''] absolute" });
-    4 │ tw({ variant: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } });
+    4 │ tw({ variants: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } });
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
@@ -40,7 +40,7 @@ quoteStyleInFunction.jsx:2:4 lint/nursery/useTailwindSortedClasses  FIXABLE  ━
      2    │ - tw("content-['']·absolute");
         2 │ + tw("absolute·content-['']");
      3  3 │   tw({ base: "content-[''] absolute" });
-     4  4 │   tw({ variant: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } });
+     4  4 │   tw({ variants: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } });
   
 
 ```
@@ -54,7 +54,7 @@ quoteStyleInFunction.jsx:3:12 lint/nursery/useTailwindSortedClasses  FIXABLE  �
     2 │ tw("content-[''] absolute");
   > 3 │ tw({ base: "content-[''] absolute" });
       │            ^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ tw({ variant: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } });
+    4 │ tw({ variants: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } });
     5 │ tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center');
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
@@ -67,21 +67,21 @@ quoteStyleInFunction.jsx:3:12 lint/nursery/useTailwindSortedClasses  FIXABLE  �
      2  2 │   tw("content-[''] absolute");
      3    │ - tw({·base:·"content-['']·absolute"·});
         3 │ + tw({·base:·"absolute·content-['']"·});
-     4  4 │   tw({ variant: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } });
+     4  4 │   tw({ variants: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } });
      5  5 │   tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center');
   
 
 ```
 
 ```
-quoteStyleInFunction.jsx:4:23 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+quoteStyleInFunction.jsx:4:24 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
     2 │ tw("content-[''] absolute");
     3 │ tw({ base: "content-[''] absolute" });
-  > 4 │ tw({ variant: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } });
-      │                       ^^^^^^^^^^^^^^^^^^^^^^^
+  > 4 │ tw({ variants: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } });
+      │                        ^^^^^^^^^^^^^^^^^^^^^^^
     5 │ tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center');
     6 │ 
   
@@ -93,8 +93,8 @@ quoteStyleInFunction.jsx:4:23 lint/nursery/useTailwindSortedClasses  FIXABLE  �
   
      2  2 │   tw("content-[''] absolute");
      3  3 │   tw({ base: "content-[''] absolute" });
-     4    │ - tw({·variant:·{·dark:·"content-['']·absolute",·light:·"flex·gap-2·p-4·m-2·[&_svg:not([class*='size-'])]:w-4·items-center"·}·});
-        4 │ + tw({·variant:·{·dark:·"absolute·content-['']",·light:·"flex·gap-2·p-4·m-2·[&_svg:not([class*='size-'])]:w-4·items-center"·}·});
+     4    │ - tw({·variants:·{·dark:·"content-['']·absolute",·light:·"flex·gap-2·p-4·m-2·[&_svg:not([class*='size-'])]:w-4·items-center"·}·});
+        4 │ + tw({·variants:·{·dark:·"absolute·content-['']",·light:·"flex·gap-2·p-4·m-2·[&_svg:not([class*='size-'])]:w-4·items-center"·}·});
      5  5 │   tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center');
      6  6 │   
   
@@ -102,14 +102,14 @@ quoteStyleInFunction.jsx:4:23 lint/nursery/useTailwindSortedClasses  FIXABLE  �
 ```
 
 ```
-quoteStyleInFunction.jsx:4:55 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
+quoteStyleInFunction.jsx:4:56 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
     2 │ tw("content-[''] absolute");
     3 │ tw({ base: "content-[''] absolute" });
-  > 4 │ tw({ variant: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } });
-      │                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 4 │ tw({ variants: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } });
+      │                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │ tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center');
     6 │ 
   
@@ -121,8 +121,8 @@ quoteStyleInFunction.jsx:4:55 lint/nursery/useTailwindSortedClasses  FIXABLE  �
   
      2  2 │   tw("content-[''] absolute");
      3  3 │   tw({ base: "content-[''] absolute" });
-     4    │ - tw({·variant:·{·dark:·"content-['']·absolute",·light:·"flex·gap-2·p-4·m-2·[&_svg:not([class*='size-'])]:w-4·items-center"·}·});
-        4 │ + tw({·variant:·{·dark:·"content-['']·absolute",·light:·"m-2·flex·items-center·gap-2·p-4·[&_svg:not([class*='size-'])]:w-4"·}·});
+     4    │ - tw({·variants:·{·dark:·"content-['']·absolute",·light:·"flex·gap-2·p-4·m-2·[&_svg:not([class*='size-'])]:w-4·items-center"·}·});
+        4 │ + tw({·variants:·{·dark:·"content-['']·absolute",·light:·"m-2·flex·items-center·gap-2·p-4·[&_svg:not([class*='size-'])]:w-4"·}·});
      5  5 │   tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center');
      6  6 │   
   
@@ -135,7 +135,7 @@ quoteStyleInFunction.jsx:5:4 lint/nursery/useTailwindSortedClasses  FIXABLE  ━
   i These CSS classes should be sorted.
   
     3 │ tw({ base: "content-[''] absolute" });
-    4 │ tw({ variant: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } });
+    4 │ tw({ variants: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } });
   > 5 │ tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center');
       │    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ 
@@ -148,7 +148,7 @@ quoteStyleInFunction.jsx:5:4 lint/nursery/useTailwindSortedClasses  FIXABLE  ━
   i Unsafe fix: Sort the classes.
   
      3  3 │   tw({ base: "content-[''] absolute" });
-     4  4 │   tw({ variant: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } });
+     4  4 │   tw({ variants: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } });
      5    │ - tw('flex·gap-2·p-4·m-2·[&_svg:not([class*="size-"])]:w-4·items-center');
         5 │ + tw('m-2·flex·items-center·gap-2·p-4·[&_svg:not([class*="size-"])]:w-4');
      6  6 │   
@@ -166,7 +166,7 @@ quoteStyleInFunction.jsx:8:16 lint/nursery/useTailwindSortedClasses  FIXABLE  �
    > 8 │ <div class={tw("content-[''] absolute")}>Hello</div>;
        │                ^^^^^^^^^^^^^^^^^^^^^^^
      9 │ <div class={tw({ base: "content-[''] absolute" })}>Hello</div>;
-    10 │ <div class={tw({ variant: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } })}>Hello</div>;
+    10 │ <div class={tw({ variants: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } })}>Hello</div>;
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
@@ -179,7 +179,7 @@ quoteStyleInFunction.jsx:8:16 lint/nursery/useTailwindSortedClasses  FIXABLE  �
      8    │ - <div·class={tw("content-['']·absolute")}>Hello</div>;
         8 │ + <div·class={tw("absolute·content-['']")}>Hello</div>;
      9  9 │   <div class={tw({ base: "content-[''] absolute" })}>Hello</div>;
-    10 10 │   <div class={tw({ variant: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } })}>Hello</div>;
+    10 10 │   <div class={tw({ variants: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } })}>Hello</div>;
   
 
 ```
@@ -193,7 +193,7 @@ quoteStyleInFunction.jsx:9:24 lint/nursery/useTailwindSortedClasses  FIXABLE  �
      8 │ <div class={tw("content-[''] absolute")}>Hello</div>;
    > 9 │ <div class={tw({ base: "content-[''] absolute" })}>Hello</div>;
        │                        ^^^^^^^^^^^^^^^^^^^^^^^
-    10 │ <div class={tw({ variant: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } })}>Hello</div>;
+    10 │ <div class={tw({ variants: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } })}>Hello</div>;
     11 │ <div class={tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center')} />;
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
@@ -206,21 +206,21 @@ quoteStyleInFunction.jsx:9:24 lint/nursery/useTailwindSortedClasses  FIXABLE  �
      8  8 │   <div class={tw("content-[''] absolute")}>Hello</div>;
      9    │ - <div·class={tw({·base:·"content-['']·absolute"·})}>Hello</div>;
         9 │ + <div·class={tw({·base:·"absolute·content-['']"·})}>Hello</div>;
-    10 10 │   <div class={tw({ variant: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } })}>Hello</div>;
+    10 10 │   <div class={tw({ variants: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } })}>Hello</div>;
     11 11 │   <div class={tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center')} />;
   
 
 ```
 
 ```
-quoteStyleInFunction.jsx:10:35 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+quoteStyleInFunction.jsx:10:36 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
      8 │ <div class={tw("content-[''] absolute")}>Hello</div>;
      9 │ <div class={tw({ base: "content-[''] absolute" })}>Hello</div>;
-  > 10 │ <div class={tw({ variant: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } })}>Hello</div>;
-       │                                   ^^^^^^^^^^^^^^^^^^^^^^^
+  > 10 │ <div class={tw({ variants: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } })}>Hello</div>;
+       │                                    ^^^^^^^^^^^^^^^^^^^^^^^
     11 │ <div class={tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center')} />;
     12 │ 
   
@@ -232,8 +232,8 @@ quoteStyleInFunction.jsx:10:35 lint/nursery/useTailwindSortedClasses  FIXABLE  �
   
      8  8 │   <div class={tw("content-[''] absolute")}>Hello</div>;
      9  9 │   <div class={tw({ base: "content-[''] absolute" })}>Hello</div>;
-    10    │ - <div·class={tw({·variant:·{·dark:·"content-['']·absolute",·light:·"flex·gap-2·p-4·m-2·[&_svg:not([class*='size-'])]:w-4·items-center"·}·})}>Hello</div>;
-       10 │ + <div·class={tw({·variant:·{·dark:·"absolute·content-['']",·light:·"flex·gap-2·p-4·m-2·[&_svg:not([class*='size-'])]:w-4·items-center"·}·})}>Hello</div>;
+    10    │ - <div·class={tw({·variants:·{·dark:·"content-['']·absolute",·light:·"flex·gap-2·p-4·m-2·[&_svg:not([class*='size-'])]:w-4·items-center"·}·})}>Hello</div>;
+       10 │ + <div·class={tw({·variants:·{·dark:·"absolute·content-['']",·light:·"flex·gap-2·p-4·m-2·[&_svg:not([class*='size-'])]:w-4·items-center"·}·})}>Hello</div>;
     11 11 │   <div class={tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center')} />;
     12 12 │   
   
@@ -241,14 +241,14 @@ quoteStyleInFunction.jsx:10:35 lint/nursery/useTailwindSortedClasses  FIXABLE  �
 ```
 
 ```
-quoteStyleInFunction.jsx:10:67 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+quoteStyleInFunction.jsx:10:68 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
      8 │ <div class={tw("content-[''] absolute")}>Hello</div>;
      9 │ <div class={tw({ base: "content-[''] absolute" })}>Hello</div>;
-  > 10 │ <div class={tw({ variant: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } })}>Hello</div>;
-       │                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 10 │ <div class={tw({ variants: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } })}>Hello</div>;
+       │                                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     11 │ <div class={tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center')} />;
     12 │ 
   
@@ -260,8 +260,8 @@ quoteStyleInFunction.jsx:10:67 lint/nursery/useTailwindSortedClasses  FIXABLE  �
   
      8  8 │   <div class={tw("content-[''] absolute")}>Hello</div>;
      9  9 │   <div class={tw({ base: "content-[''] absolute" })}>Hello</div>;
-    10    │ - <div·class={tw({·variant:·{·dark:·"content-['']·absolute",·light:·"flex·gap-2·p-4·m-2·[&_svg:not([class*='size-'])]:w-4·items-center"·}·})}>Hello</div>;
-       10 │ + <div·class={tw({·variant:·{·dark:·"content-['']·absolute",·light:·"m-2·flex·items-center·gap-2·p-4·[&_svg:not([class*='size-'])]:w-4"·}·})}>Hello</div>;
+    10    │ - <div·class={tw({·variants:·{·dark:·"content-['']·absolute",·light:·"flex·gap-2·p-4·m-2·[&_svg:not([class*='size-'])]:w-4·items-center"·}·})}>Hello</div>;
+       10 │ + <div·class={tw({·variants:·{·dark:·"content-['']·absolute",·light:·"m-2·flex·items-center·gap-2·p-4·[&_svg:not([class*='size-'])]:w-4"·}·})}>Hello</div>;
     11 11 │   <div class={tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center')} />;
     12 12 │   
   
@@ -274,7 +274,7 @@ quoteStyleInFunction.jsx:11:16 lint/nursery/useTailwindSortedClasses  FIXABLE  �
   i These CSS classes should be sorted.
   
      9 │ <div class={tw({ base: "content-[''] absolute" })}>Hello</div>;
-    10 │ <div class={tw({ variant: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } })}>Hello</div>;
+    10 │ <div class={tw({ variants: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } })}>Hello</div>;
   > 11 │ <div class={tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center')} />;
        │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     12 │ 
@@ -286,7 +286,7 @@ quoteStyleInFunction.jsx:11:16 lint/nursery/useTailwindSortedClasses  FIXABLE  �
   i Unsafe fix: Sort the classes.
   
      9  9 │   <div class={tw({ base: "content-[''] absolute" })}>Hello</div>;
-    10 10 │   <div class={tw({ variant: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } })}>Hello</div>;
+    10 10 │   <div class={tw({ variants: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } })}>Hello</div>;
     11    │ - <div·class={tw('flex·gap-2·p-4·m-2·[&_svg:not([class*="size-"])]:w-4·items-center')}·/>;
        11 │ + <div·class={tw('m-2·flex·items-center·gap-2·p-4·[&_svg:not([class*="size-"])]:w-4')}·/>;
     12 12 │   

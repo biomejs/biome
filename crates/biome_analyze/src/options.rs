@@ -1,4 +1,4 @@
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashMap;
 
 use crate::{FixKind, Rule, RuleKey};
@@ -263,6 +263,7 @@ pub struct TailwindOptions {
     attributes: Option<Arc<[Box<str>]>>,
     merge_functions: Option<Arc<[Box<str>]>>,
     variant_functions: Option<Arc<[Box<str>]>>,
+    stylesheet: Option<Utf8PathBuf>,
 }
 
 impl TailwindOptions {
@@ -276,7 +277,21 @@ impl TailwindOptions {
             attributes: attributes.map(Arc::from),
             merge_functions: merge_functions.map(Arc::from),
             variant_functions: variant_functions.map(Arc::from),
+            stylesheet: None,
         }
+    }
+
+    /// Sets the path of the stylesheet that holds the Tailwind CSS
+    /// configuration.
+    pub fn with_stylesheet(mut self, stylesheet: Option<Utf8PathBuf>) -> Self {
+        self.stylesheet = stylesheet;
+        self
+    }
+
+    /// Returns the path of the stylesheet that holds the Tailwind CSS
+    /// configuration, if one is configured.
+    pub fn stylesheet(&self) -> Option<&Utf8Path> {
+        self.stylesheet.as_deref()
     }
 
     /// Returns the configured attribute replacement list, or `None` when defaults apply.

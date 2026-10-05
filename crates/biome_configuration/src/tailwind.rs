@@ -58,6 +58,20 @@ pub struct TailwindConfiguration {
     /// Defaults to `cva` and `tv`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub variant_functions: Option<Box<[Box<str>]>>,
+
+    /// The CSS file that holds your Tailwind CSS configuration, such as
+    /// `"./src/app.css"`. A relative path starts from the folder of the Biome
+    /// configuration file.
+    ///
+    /// Biome reads the `@theme`, `@utility`, and `@custom-variant` rules in
+    /// this file and in the files it imports with `@import`, so that
+    /// `useTailwindSortedClasses` knows your theme values, utilities, and variants.
+    ///
+    /// To read the file, Biome scans your project when a Tailwind rule is
+    /// enabled. Setting this option also turns on `css.parser.tailwindDirectives`,
+    /// unless you set that option yourself.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stylesheet: Option<String>,
 }
 
 impl From<TailwindConfiguration> for TailwindOptions {

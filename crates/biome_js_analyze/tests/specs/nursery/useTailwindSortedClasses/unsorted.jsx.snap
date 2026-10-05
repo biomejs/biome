@@ -9,7 +9,7 @@ expression: unsorted.jsx
 	{/* SHOULD emit diagnostics (class/className attributes supported by default) */}
 	<div class="px-2 foo p-4 bar" />
 	<div className="px-2 foo p-4 bar" />
-	{/* SHOULD NOT emit diagnostics (custom attributes not specified in options) */}
+	{/* SHOULD NOT emit diagnostics (custom attributes not listed in tailwind.attributes) */}
 	<div customClassAttribute="px-2 foo p-4 bar" />
 	<div notClassAttribute="px-2 foo p-4 bar" />
 	{/* utility sorting */}
@@ -25,7 +25,7 @@ expression: unsorted.jsx
 	<div class="flex-wrap custom-container justify-between items-start bar bg-purple-200 p-5 text-purple-700" />
 	<div class="gap-8 bg-indigo-100 text-indigo-900 p-3 border-l-4 border-indigo-500 custom-border" />
 	{/* variant sorting */}
-	{/* SHOULD emit diagnostics (arbitrary variants not supported yet) */}
+	{/* SHOULD emit diagnostics (arbitrary variants) */}
 	<div class="checked:text-center custom-style1 p-4 hover:bg-blue-500 focus:text-white foo hover:focus:rounded-lg shadow-lg" />
 	<div class="flex valid:required:bg-gray-200 custom-layout items-center required:justify-center valid:h-screen bar first-letter:text-lg font-bold" />
 	<div class="focus-within:hover:shadow-md grid custom-grid grid-cols-3 gap-4 p-6 m-6 focus-within:border focus-within:border-gray-300 optional:rounded-md" />
@@ -48,7 +48,7 @@ expression: unsorted.jsx
 </>;
 
 // functions
-/* SHOULD NOT emit diagnostics (functions not specified in options) */
+/* SHOULD emit diagnostics for clsx and tw (default merge functions), but not for the other functions */
 clsx("px-2 foo p-4 bar");
 tw`px-2 foo p-4 bar`;
 tw.div`px-2 foo p-4 bar`;
@@ -70,7 +70,7 @@ notTemplateFunction.div`px-2 foo p-4 bar`;
 		],
 	}}
 />;
-/* SHOULD NOT emit diagnostics (clsx function not specified in options) */
+/* SHOULD emit diagnostics for clsx strings and keys (default merge function), but not for object values */
 clsx(["px-2 foo p-4 bar"]);
 clsx({
 	"px-2 foo p-4 bar": [
@@ -92,7 +92,7 @@ unsorted.jsx:4:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   > 4 │ 	<div class="px-2 foo p-4 bar" />
       │ 	           ^^^^^^^^^^^^^^^^^^
     5 │ 	<div className="px-2 foo p-4 bar" />
-    6 │ 	{/* SHOULD NOT emit diagnostics (custom attributes not specified in options) */}
+    6 │ 	{/* SHOULD NOT emit diagnostics (custom attributes not listed in tailwind.attributes) */}
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
@@ -105,7 +105,7 @@ unsorted.jsx:4:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
      4    │ - → <div·class="px-2·foo·p-4·bar"·/>
         4 │ + → <div·class="foo·bar·p-4·px-2"·/>
      5  5 │     <div className="px-2 foo p-4 bar" />
-     6  6 │     {/* SHOULD NOT emit diagnostics (custom attributes not specified in options) */}
+     6  6 │     {/* SHOULD NOT emit diagnostics (custom attributes not listed in tailwind.attributes) */}
   
 
 ```
@@ -119,7 +119,7 @@ unsorted.jsx:5:17 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     4 │ 	<div class="px-2 foo p-4 bar" />
   > 5 │ 	<div className="px-2 foo p-4 bar" />
       │ 	               ^^^^^^^^^^^^^^^^^^
-    6 │ 	{/* SHOULD NOT emit diagnostics (custom attributes not specified in options) */}
+    6 │ 	{/* SHOULD NOT emit diagnostics (custom attributes not listed in tailwind.attributes) */}
     7 │ 	<div customClassAttribute="px-2 foo p-4 bar" />
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
@@ -132,7 +132,7 @@ unsorted.jsx:5:17 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
      4  4 │     <div class="px-2 foo p-4 bar" />
      5    │ - → <div·className="px-2·foo·p-4·bar"·/>
         5 │ + → <div·className="foo·bar·p-4·px-2"·/>
-     6  6 │     {/* SHOULD NOT emit diagnostics (custom attributes not specified in options) */}
+     6  6 │     {/* SHOULD NOT emit diagnostics (custom attributes not listed in tailwind.attributes) */}
      7  7 │     <div customClassAttribute="px-2 foo p-4 bar" />
   
 
@@ -187,7 +187,7 @@ unsorted.jsx:12:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     10 10 │     {/* SHOULD emit diagnostics (class attribute supported by default) */}
     11 11 │     <div class="text-center custom-style1 p-4 bg-blue-500 text-white foo rounded-lg shadow-lg" />
     12    │ - → <div·class="flex·custom-layout·items-center·justify-center·h-screen·bg-gray-200·bar·text-lg·font-bold"·/>
-       12 │ + → <div·class="custom-layout·bar·flex·h-screen·items-center·justify-center·bg-gray-200·font-bold·text-lg"·/>
+       12 │ + → <div·class="custom-layout·bar·flex·h-screen·items-center·justify-center·bg-gray-200·text-lg·font-bold"·/>
     13 13 │     <div class="grid custom-grid grid-cols-3 gap-4 p-6 m-6 border border-gray-300 shadow-md rounded-md" />
     14 14 │     <div class="absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert" />
   
@@ -355,7 +355,7 @@ unsorted.jsx:18:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     16 16 │     <div class="flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200" />
     17 17 │     <div class="relative overflow-hidden custom-background bg-no-repeat bg-cover h-64 w-full foo m-2" />
     18    │ - → <div·class="underline·custom-text·foo·text-2xl·font-semibold·my-2"·/>
-       18 │ + → <div·class="custom-text·foo·my-2·font-semibold·text-2xl·underline"·/>
+       18 │ + → <div·class="custom-text·foo·my-2·text-2xl·font-semibold·underline"·/>
     19 19 │     <div class="flex-wrap custom-container justify-between items-start bar bg-purple-200 p-5 text-purple-700" />
     20 20 │     <div class="gap-8 bg-indigo-100 text-indigo-900 p-3 border-l-4 border-indigo-500 custom-border" />
   
@@ -400,7 +400,7 @@ unsorted.jsx:20:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   > 20 │ 	<div class="gap-8 bg-indigo-100 text-indigo-900 p-3 border-l-4 border-indigo-500 custom-border" />
        │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     21 │ 	{/* variant sorting */}
-    22 │ 	{/* SHOULD emit diagnostics (arbitrary variants not supported yet) */}
+    22 │ 	{/* SHOULD emit diagnostics (arbitrary variants) */}
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
@@ -411,9 +411,9 @@ unsorted.jsx:20:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     18 18 │     <div class="underline custom-text foo text-2xl font-semibold my-2" />
     19 19 │     <div class="flex-wrap custom-container justify-between items-start bar bg-purple-200 p-5 text-purple-700" />
     20    │ - → <div·class="gap-8·bg-indigo-100·text-indigo-900·p-3·border-l-4·border-indigo-500·custom-border"·/>
-       20 │ + → <div·class="custom-border·gap-8·border-indigo-500·border-l-4·bg-indigo-100·p-3·text-indigo-900"·/>
+       20 │ + → <div·class="custom-border·gap-8·border-l-4·border-indigo-500·bg-indigo-100·p-3·text-indigo-900"·/>
     21 21 │     {/* variant sorting */}
-    22 22 │     {/* SHOULD emit diagnostics (arbitrary variants not supported yet) */}
+    22 22 │     {/* SHOULD emit diagnostics (arbitrary variants) */}
   
 
 ```
@@ -424,7 +424,7 @@ unsorted.jsx:23:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   i These CSS classes should be sorted.
   
     21 │ 	{/* variant sorting */}
-    22 │ 	{/* SHOULD emit diagnostics (arbitrary variants not supported yet) */}
+    22 │ 	{/* SHOULD emit diagnostics (arbitrary variants) */}
   > 23 │ 	<div class="checked:text-center custom-style1 p-4 hover:bg-blue-500 focus:text-white foo hover:focus:rounded-lg shadow-lg" />
        │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     24 │ 	<div class="flex valid:required:bg-gray-200 custom-layout items-center required:justify-center valid:h-screen bar first-letter:text-lg font-bold" />
@@ -437,7 +437,7 @@ unsorted.jsx:23:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   i Unsafe fix: Sort the classes.
   
     21 21 │     {/* variant sorting */}
-    22 22 │     {/* SHOULD emit diagnostics (arbitrary variants not supported yet) */}
+    22 22 │     {/* SHOULD emit diagnostics (arbitrary variants) */}
     23    │ - → <div·class="checked:text-center·custom-style1·p-4·hover:bg-blue-500·focus:text-white·foo·hover:focus:rounded-lg·shadow-lg"·/>
        23 │ + → <div·class="custom-style1·foo·p-4·shadow-lg·checked:text-center·hover:bg-blue-500·focus:text-white·hover:focus:rounded-lg"·/>
     24 24 │     <div class="flex valid:required:bg-gray-200 custom-layout items-center required:justify-center valid:h-screen bar first-letter:text-lg font-bold" />
@@ -451,7 +451,7 @@ unsorted.jsx:24:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
 
   i These CSS classes should be sorted.
   
-    22 │ 	{/* SHOULD emit diagnostics (arbitrary variants not supported yet) */}
+    22 │ 	{/* SHOULD emit diagnostics (arbitrary variants) */}
     23 │ 	<div class="checked:text-center custom-style1 p-4 hover:bg-blue-500 focus:text-white foo hover:focus:rounded-lg shadow-lg" />
   > 24 │ 	<div class="flex valid:required:bg-gray-200 custom-layout items-center required:justify-center valid:h-screen bar first-letter:text-lg font-bold" />
        │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -464,7 +464,7 @@ unsorted.jsx:24:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   
   i Unsafe fix: Sort the classes.
   
-    22 22 │     {/* SHOULD emit diagnostics (arbitrary variants not supported yet) */}
+    22 22 │     {/* SHOULD emit diagnostics (arbitrary variants) */}
     23 23 │     <div class="checked:text-center custom-style1 p-4 hover:bg-blue-500 focus:text-white foo hover:focus:rounded-lg shadow-lg" />
     24    │ - → <div·class="flex·valid:required:bg-gray-200·custom-layout·items-center·required:justify-center·valid:h-screen·bar·first-letter:text-lg·font-bold"·/>
        24 │ + → <div·class="custom-layout·bar·flex·items-center·font-bold·first-letter:text-lg·required:justify-center·valid:h-screen·valid:required:bg-gray-200"·/>
@@ -579,7 +579,7 @@ unsorted.jsx:29:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     27 27 │     <div class="checked:sm:inline-block bar hover:md:bg-green-300 hover:lg:text-green-800 p-2 rounded border sm:checked:border-green-500 custom-button" />
     28 28 │     {/* TODO: arbitrary variant */}
     29    │ - → <div·class="[&nth-child(2)]:[&nth-child(6)]:text-red-200·[&nth-child(2)]:text-red-300·group-hover:flex-col·focus:bg-red-100·py-4·text-red-500·hover:focus:bg-red-200·has-[:visited]:flex·print:text-red-50·[&nth-child(3)]:text-red-200··container"·/>
-       29 │ + → <div·class="container·py-4·text-red-500·focus:bg-red-100·hover:focus:bg-red-200·group-hover:flex-col·has-[:visited]:flex·print:text-red-50·[&nth-child(2)]:text-red-300·[&nth-child(3)]:text-red-200·[&nth-child(2)]:[&nth-child(6)]:text-red-200"·/>
+       29 │ + → <div·class="container·py-4·text-red-500·group-hover:flex-col·focus:bg-red-100·hover:focus:bg-red-200·has-[:visited]:flex·print:text-red-50·[&nth-child(2)]:text-red-300·[&nth-child(3)]:text-red-200·[&nth-child(2)]:[&nth-child(6)]:text-red-200"·/>
     30 30 │     <div class="text-black [&nth-child(2)]:focus:text-red-100 [&nth-child(1)]:group-first:text-red-100 [&nth-child(2)]:hover:focus:bg-red-900 group-first:text-yellow-400 [&nth-child(2)]:text-black focus:bg-sky-100 py-4 checked:visited:bg-yellow-300 hover:text-red-400" />
     31 31 │     <div class="group-aria-disabled:bg-red-50 group-[:visited]:text-red-400 group-target:font-bold" />
   
@@ -607,7 +607,7 @@ unsorted.jsx:30:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     28 28 │     {/* TODO: arbitrary variant */}
     29 29 │     <div class="[&nth-child(2)]:[&nth-child(6)]:text-red-200 [&nth-child(2)]:text-red-300 group-hover:flex-col focus:bg-red-100 py-4 text-red-500 hover:focus:bg-red-200 has-[:visited]:flex print:text-red-50 [&nth-child(3)]:text-red-200  container" />
     30    │ - → <div·class="text-black·[&nth-child(2)]:focus:text-red-100·[&nth-child(1)]:group-first:text-red-100·[&nth-child(2)]:hover:focus:bg-red-900·group-first:text-yellow-400·[&nth-child(2)]:text-black·focus:bg-sky-100·py-4·checked:visited:bg-yellow-300·hover:text-red-400"·/>
-       30 │ + → <div·class="py-4·text-black·checked:visited:bg-yellow-300·hover:text-red-400·focus:bg-sky-100·group-first:text-yellow-400·[&nth-child(1)]:group-first:text-red-100·[&nth-child(2)]:text-black·[&nth-child(2)]:focus:text-red-100·[&nth-child(2)]:hover:focus:bg-red-900"·/>
+       30 │ + → <div·class="py-4·text-black·group-first:text-yellow-400·checked:visited:bg-yellow-300·hover:text-red-400·focus:bg-sky-100·[&nth-child(1)]:group-first:text-red-100·[&nth-child(2)]:text-black·[&nth-child(2)]:focus:text-red-100·[&nth-child(2)]:hover:focus:bg-red-900"·/>
     31 31 │     <div class="group-aria-disabled:bg-red-50 group-[:visited]:text-red-400 group-target:font-bold" />
     32 32 │     <div class="group-has-[.custom-class]:focus:underline aria-[sort=ascending]:bg-red-300 group-aria-[sort=ascending]:text-yellow-200 has-[:checked]:focus:bg-yellow-300 text-red-400" />
   
@@ -635,7 +635,7 @@ unsorted.jsx:31:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     29 29 │     <div class="[&nth-child(2)]:[&nth-child(6)]:text-red-200 [&nth-child(2)]:text-red-300 group-hover:flex-col focus:bg-red-100 py-4 text-red-500 hover:focus:bg-red-200 has-[:visited]:flex print:text-red-50 [&nth-child(3)]:text-red-200  container" />
     30 30 │     <div class="text-black [&nth-child(2)]:focus:text-red-100 [&nth-child(1)]:group-first:text-red-100 [&nth-child(2)]:hover:focus:bg-red-900 group-first:text-yellow-400 [&nth-child(2)]:text-black focus:bg-sky-100 py-4 checked:visited:bg-yellow-300 hover:text-red-400" />
     31    │ - → <div·class="group-aria-disabled:bg-red-50·group-[:visited]:text-red-400·group-target:font-bold"·/>
-       31 │ + → <div·class="group-target:font-bold·group-[:visited]:text-red-400·group-aria-disabled:bg-red-50"·/>
+       31 │ + → <div·class="group-target:font-bold·group-aria-disabled:bg-red-50·group-[:visited]:text-red-400"·/>
     32 32 │     <div class="group-has-[.custom-class]:focus:underline aria-[sort=ascending]:bg-red-300 group-aria-[sort=ascending]:text-yellow-200 has-[:checked]:focus:bg-yellow-300 text-red-400" />
     33 33 │     {/* negative value utilities */}
   
@@ -663,7 +663,7 @@ unsorted.jsx:32:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     30 30 │     <div class="text-black [&nth-child(2)]:focus:text-red-100 [&nth-child(1)]:group-first:text-red-100 [&nth-child(2)]:hover:focus:bg-red-900 group-first:text-yellow-400 [&nth-child(2)]:text-black focus:bg-sky-100 py-4 checked:visited:bg-yellow-300 hover:text-red-400" />
     31 31 │     <div class="group-aria-disabled:bg-red-50 group-[:visited]:text-red-400 group-target:font-bold" />
     32    │ - → <div·class="group-has-[.custom-class]:focus:underline·aria-[sort=ascending]:bg-red-300·group-aria-[sort=ascending]:text-yellow-200·has-[:checked]:focus:bg-yellow-300·text-red-400"·/>
-       32 │ + → <div·class="text-red-400·has-[:checked]:focus:bg-yellow-300·group-has-[.custom-class]:focus:underline·aria-[sort=ascending]:bg-red-300·group-aria-[sort=ascending]:text-yellow-200"·/>
+       32 │ + → <div·class="text-red-400·group-aria-[sort=ascending]:text-yellow-200·group-has-[.custom-class]:focus:underline·has-[:checked]:focus:bg-yellow-300·aria-[sort=ascending]:bg-red-300"·/>
     33 33 │     {/* negative value utilities */}
     34 34 │     {/* SHOULD emit diagnostics (negative values like -ml-2 should be detected) */}
   
@@ -803,7 +803,7 @@ unsorted.jsx:39:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     37 37 │     <div class="text-center -mx-2 bg-blue-500 -my-4" />
     38 38 │     <div class="-top-2 absolute -left-4 right-0" />
     39    │ - → <div·class="-space-x-2·flex·-space-y-4·items-center"·/>
-       39 │ + → <div·class="flex·items-center·-space-x-2·-space-y-4"·/>
+       39 │ + → <div·class="flex·items-center·-space-y-4·-space-x-2"·/>
     40 40 │     <div class="hover:-ml-2 p-4 focus:-mt-1" />
     41 41 │     <div class="sm:-mx-4 lg:-my-2 md:p-2" />
   
@@ -862,6 +862,90 @@ unsorted.jsx:41:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
        41 │ + → <div·class="sm:-mx-4·md:p-2·lg:-my-2"·/>
     42 42 │   </>;
     43 43 │   
+  
+
+```
+
+```
+unsorted.jsx:46:6 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    44 │ // functions
+    45 │ /* SHOULD emit diagnostics for clsx and tw (default merge functions), but not for the other functions */
+  > 46 │ clsx("px-2 foo p-4 bar");
+       │      ^^^^^^^^^^^^^^^^^^
+    47 │ tw`px-2 foo p-4 bar`;
+    48 │ tw.div`px-2 foo p-4 bar`;
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+    44 44 │   // functions
+    45 45 │   /* SHOULD emit diagnostics for clsx and tw (default merge functions), but not for the other functions */
+    46    │ - clsx("px-2·foo·p-4·bar");
+       46 │ + clsx("foo·bar·p-4·px-2");
+    47 47 │   tw`px-2 foo p-4 bar`;
+    48 48 │   tw.div`px-2 foo p-4 bar`;
+  
+
+```
+
+```
+unsorted.jsx:47:4 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    45 │ /* SHOULD emit diagnostics for clsx and tw (default merge functions), but not for the other functions */
+    46 │ clsx("px-2 foo p-4 bar");
+  > 47 │ tw`px-2 foo p-4 bar`;
+       │    ^^^^^^^^^^^^^^^^
+    48 │ tw.div`px-2 foo p-4 bar`;
+    49 │ notClassFunction("px-2 foo p-4 bar");
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+    45 45 │   /* SHOULD emit diagnostics for clsx and tw (default merge functions), but not for the other functions */
+    46 46 │   clsx("px-2 foo p-4 bar");
+    47    │ - tw`px-2·foo·p-4·bar`;
+       47 │ + tw`foo·bar·p-4·px-2`;
+    48 48 │   tw.div`px-2 foo p-4 bar`;
+    49 49 │   notClassFunction("px-2 foo p-4 bar");
+  
+
+```
+
+```
+unsorted.jsx:48:8 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These CSS classes should be sorted.
+  
+    46 │ clsx("px-2 foo p-4 bar");
+    47 │ tw`px-2 foo p-4 bar`;
+  > 48 │ tw.div`px-2 foo p-4 bar`;
+       │        ^^^^^^^^^^^^^^^^
+    49 │ notClassFunction("px-2 foo p-4 bar");
+    50 │ notTemplateFunction`px-2 foo p-4 bar`;
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+    46 46 │   clsx("px-2 foo p-4 bar");
+    47 47 │   tw`px-2 foo p-4 bar`;
+    48    │ - tw.div`px-2·foo·p-4·bar`;
+       48 │ + tw.div`foo·bar·p-4·px-2`;
+    49 49 │   notClassFunction("px-2 foo p-4 bar");
+    50 50 │   notTemplateFunction`px-2 foo p-4 bar`;
   
 
 ```
@@ -1007,16 +1091,16 @@ unsorted.jsx:61:3 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
 ```
 
 ```
-unsorted.jsx:62:4 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:68:7 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
-    60 │ 	class={{
-    61 │ 		"px-2 foo p-4 bar": [
-  > 62 │ 			"px-2 foo p-4 bar",
-       │ 			^^^^^^^^^^^^^^^^^^
-    63 │ 			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
-    64 │ 		],
+    66 │ />;
+    67 │ /* SHOULD emit diagnostics for clsx strings and keys (default merge function), but not for object values */
+  > 68 │ clsx(["px-2 foo p-4 bar"]);
+       │       ^^^^^^^^^^^^^^^^^^
+    69 │ clsx({
+    70 │ 	"px-2 foo p-4 bar": [
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
@@ -1024,27 +1108,27 @@ unsorted.jsx:62:4 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   
   i Unsafe fix: Sort the classes.
   
-    60 60 │     class={{
-    61 61 │       "px-2 foo p-4 bar": [
-    62    │ - → → → "px-2·foo·p-4·bar",
-       62 │ + → → → "foo·bar·p-4·px-2",
-    63 63 │         { "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
-    64 64 │       ],
+    66 66 │   />;
+    67 67 │   /* SHOULD emit diagnostics for clsx strings and keys (default merge function), but not for object values */
+    68    │ - clsx(["px-2·foo·p-4·bar"]);
+       68 │ + clsx(["foo·bar·p-4·px-2"]);
+    69 69 │   clsx({
+    70 70 │   	"px-2 foo p-4 bar": [
   
 
 ```
 
 ```
-unsorted.jsx:63:6 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:70:2 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
-    61 │ 		"px-2 foo p-4 bar": [
-    62 │ 			"px-2 foo p-4 bar",
-  > 63 │ 			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
-       │ 			  ^^^^^^^^^^^^^^^^^^
-    64 │ 		],
-    65 │ 	}}
+    68 │ clsx(["px-2 foo p-4 bar"]);
+    69 │ clsx({
+  > 70 │ 	"px-2 foo p-4 bar": [
+       │ 	^^^^^^^^^^^^^^^^^^
+    71 │ 		"px-2 foo p-4 bar",
+    72 │ 		{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
@@ -1052,68 +1136,12 @@ unsorted.jsx:63:6 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   
   i Unsafe fix: Sort the classes.
   
-    61 61 │       "px-2 foo p-4 bar": [
-    62 62 │         "px-2 foo p-4 bar",
-    63    │ - → → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["px-2·foo·p-4·bar"]·},
-       63 │ + → → → {·"foo·bar·p-4·px-2":·"px-2·foo·p-4·bar",·custom:·["px-2·foo·p-4·bar"]·},
-    64 64 │       ],
-    65 65 │     }}
-  
-
-```
-
-```
-unsorted.jsx:63:26 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i These CSS classes should be sorted.
-  
-    61 │ 		"px-2 foo p-4 bar": [
-    62 │ 			"px-2 foo p-4 bar",
-  > 63 │ 			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
-       │ 			                      ^^^^^^^^^^^^^^^^^^
-    64 │ 		],
-    65 │ 	}}
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Sort the classes.
-  
-    61 61 │       "px-2 foo p-4 bar": [
-    62 62 │         "px-2 foo p-4 bar",
-    63    │ - → → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["px-2·foo·p-4·bar"]·},
-       63 │ + → → → {·"px-2·foo·p-4·bar":·"foo·bar·p-4·px-2",·custom:·["px-2·foo·p-4·bar"]·},
-    64 64 │       ],
-    65 65 │     }}
-  
-
-```
-
-```
-unsorted.jsx:63:55 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i These CSS classes should be sorted.
-  
-    61 │ 		"px-2 foo p-4 bar": [
-    62 │ 			"px-2 foo p-4 bar",
-  > 63 │ 			{ "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
-       │ 			                                                   ^^^^^^^^^^^^^^^^^^
-    64 │ 		],
-    65 │ 	}}
-  
-  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Unsafe fix: Sort the classes.
-  
-    61 61 │       "px-2 foo p-4 bar": [
-    62 62 │         "px-2 foo p-4 bar",
-    63    │ - → → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["px-2·foo·p-4·bar"]·},
-       63 │ + → → → {·"px-2·foo·p-4·bar":·"px-2·foo·p-4·bar",·custom:·["foo·bar·p-4·px-2"]·},
-    64 64 │       ],
-    65 65 │     }}
+    68 68 │   clsx(["px-2 foo p-4 bar"]);
+    69 69 │   clsx({
+    70    │ - → "px-2·foo·p-4·bar":·[
+       70 │ + → "foo·bar·p-4·px-2":·[
+    71 71 │       "px-2 foo p-4 bar",
+    72 72 │       { "px-2 foo p-4 bar": "px-2 foo p-4 bar", custom: ["px-2 foo p-4 bar"] },
   
 
 ```

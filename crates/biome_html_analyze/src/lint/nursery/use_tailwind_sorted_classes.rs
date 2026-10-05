@@ -1,27 +1,27 @@
-use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule,
-};
-use biome_analyze::shared::sorted_classes::{
-    sort::sort_class_name,
-    sort_config::DEFAULT_SORT_CONFIG,
-};
+use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_html_factory::make;
-use biome_html_syntax::{
-    HtmlAttribute, HtmlString, HtmlSyntaxKind, HtmlSyntaxToken, inner_string_text,
-};
-use biome_languages::HtmlFileSource;
+use biome_html_syntax::HtmlAttribute;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_tailwind_sorted_classes::UseTailwindSortedClassesOptions;
+use biome_tailwind_logic::syntax_service::TailwindSyntax;
+use biome_tailwind_logic::use_tailwind_sorted_classes::{TailwindDesignSystem, sort_class_list};
+use std::sync::Arc;
 
 use crate::HtmlRuleAction;
+use crate::tailwind::apply_fixed_class_string;
 
 declare_lint_rule! {
-    /// Enforce the sorting of CSS utility classes.
+    /// Enforce the sorting of Tailwind CSS classes.
     ///
-    /// This rule implements the same sorting algorithm as [Tailwind CSS](https://tailwindcss.com/blog/automatic-class-sorting-with-prettier#how-classes-are-sorted), but supports any utility class framework including [UnoCSS](https://unocss.dev/).
+    /// Classes are sorted in the same order as the official [Tailwind CSS Prettier plugin](https://github.com/tailwindlabs/prettier-plugin-tailwindcss),
+    /// which is the order in which Tailwind CSS writes their CSS. Classes that Tailwind CSS
+    /// doesn't know, such as your own CSS classes, come first and keep their original order.
     ///
-    /// It is analogous to [`prettier-plugin-tailwindcss`](https://github.com/tailwindlabs/prettier-plugin-tailwindcss).
+    /// To make the rule aware of your own theme values, utilities, and variants, point the
+    /// [`tailwind.stylesheet`](https://biomejs.dev/reference/configuration/#tailwindstylesheet)
+    /// option at the CSS file that holds your Tailwind CSS configuration. Without it, the rule
+    /// only knows the default configuration, and treats classes that use your own theme values,
+    /// utilities, or variants like classes that Tailwind CSS doesn't know.
     ///
     /// ## Examples
     ///
@@ -41,96 +41,56 @@ declare_lint_rule! {
     /// <div class="bar foo p-4 px-2"></div>
     /// ```
     ///
+    /// ## Recognized class strings
+    ///
+    /// This rule checks the attributes and functions recognized by the top-level
+    /// [`tailwind` configuration](https://biomejs.dev/reference/configuration/#tailwind).
+    ///
     pub UseTailwindSortedClasses {
         version: "2.5.0",
         name: "useTailwindSortedClasses",
         language: "html",
         recommended: false,
+        domains: &[RuleDomain::Tailwind],
         fix_kind: FixKind::Unsafe,
         issue_number: Some("9181"),
     }
 }
 
 impl Rule for UseTailwindSortedClasses {
-    type Query = Ast<HtmlAttribute>;
-    type State = HtmlSortedClassesState;
+    type Query = TailwindSyntax<HtmlAttribute>;
+    type State = Box<str>;
     type Signals = Option<Self::State>;
     type Options = UseTailwindSortedClassesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        let attribute = ctx.query();
-        let file_source = ctx.source_type::<HtmlFileSource>();
-        let options = ctx.options();
-
-        let name = attribute.name().ok()?;
-        let name_token = name.value_token().ok()?;
-        let name_text = name_token.text_trimmed();
-        let matches = if file_source.is_html() {
-            name_text.eq_ignore_ascii_case("class")
-                || options
-                    .attributes
-                    .iter()
-                    .flatten()
-                    .any(|attr| attr.eq_ignore_ascii_case(name_text))
-        } else {
-            name_text == "class"
-                || options
-                    .attributes
-                    .iter()
-                    .flatten()
-                    .any(|attr| attr.as_ref() == name_text)
+        let query = ctx.query();
+        if query.tailwind_has_errors() {
+            return None;
+        }
+        let value = query.node().html_string()?.inner_string_text().ok()?;
+        let design: &TailwindDesignSystem = match ctx.get_service::<Arc<TailwindDesignSystem>>() {
+            Some(design) => design,
+            None => TailwindDesignSystem::default_ref(),
         };
-        if !matches {
+        let sorted_value = sort_class_list(&query.tailwind_root(), design);
+        if sorted_value.is_empty() || value.text() == sorted_value {
             return None;
         }
-
-        let initializer = attribute.initializer()?;
-        let value = initializer.value().ok()?;
-        let html_string = value.as_html_string()?.clone();
-        let value_token = html_string.value_token().ok()?;
-        let inner_text = inner_string_text(&value_token);
-        let value_str = inner_text.text();
-
-        let sorted_value = sort_class_name(&inner_text, &DEFAULT_SORT_CONFIG);
-        if sorted_value.is_empty() {
-            return None;
-        }
-        if value_str != sorted_value {
-            let is_single_quote = value_token.text_trimmed().starts_with('\'');
-            return Some(HtmlSortedClassesState {
-                html_string,
-                sorted: sorted_value.into(),
-                is_single_quote,
-            });
-        }
-
-        None
+        Some(sorted_value.into())
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
             rule_category!(),
-            state.html_string.range(),
+            ctx.query().node().html_string()?.range(),
             "These CSS classes should be sorted.",
         ))
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<HtmlRuleAction> {
         let mut mutation = ctx.root().begin();
-
-        let new_token = if state.is_single_quote {
-            HtmlSyntaxToken::new_detached(
-                HtmlSyntaxKind::HTML_STRING_LITERAL,
-                &format!("'{}'", state.sorted),
-                [],
-                [],
-            )
-        } else {
-            make::html_string_literal(&state.sorted)
-        };
-
-        let new_html_string = make::html_string(new_token);
-        mutation.replace_node(state.html_string.clone(), new_html_string);
+        apply_fixed_class_string(&mut mutation, ctx.query().node(), state)?;
 
         Some(HtmlRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
@@ -142,10 +102,4 @@ impl Rule for UseTailwindSortedClasses {
             mutation,
         ))
     }
-}
-
-pub struct HtmlSortedClassesState {
-    html_string: HtmlString,
-    sorted: Box<str>,
-    is_single_quote: bool,
 }

@@ -3,7 +3,7 @@
 	{/* SHOULD emit diagnostics (class/className attributes supported by default) */}
 	<div class="px-2 foo p-4 bar" />
 	<div className="px-2 foo p-4 bar" />
-	{/* SHOULD NOT emit diagnostics (custom attributes not specified in options) */}
+	{/* SHOULD NOT emit diagnostics (custom attributes not listed in tailwind.attributes) */}
 	<div customClassAttribute="px-2 foo p-4 bar" />
 	<div notClassAttribute="px-2 foo p-4 bar" />
 	{/* utility sorting */}
@@ -19,7 +19,7 @@
 	<div class="flex-wrap custom-container justify-between items-start bar bg-purple-200 p-5 text-purple-700" />
 	<div class="gap-8 bg-indigo-100 text-indigo-900 p-3 border-l-4 border-indigo-500 custom-border" />
 	{/* variant sorting */}
-	{/* SHOULD emit diagnostics (arbitrary variants not supported yet) */}
+	{/* SHOULD emit diagnostics (arbitrary variants) */}
 	<div class="checked:text-center custom-style1 p-4 hover:bg-blue-500 focus:text-white foo hover:focus:rounded-lg shadow-lg" />
 	<div class="flex valid:required:bg-gray-200 custom-layout items-center required:justify-center valid:h-screen bar first-letter:text-lg font-bold" />
 	<div class="focus-within:hover:shadow-md grid custom-grid grid-cols-3 gap-4 p-6 m-6 focus-within:border focus-within:border-gray-300 optional:rounded-md" />
@@ -42,7 +42,7 @@
 </>;
 
 // functions
-/* SHOULD NOT emit diagnostics (functions not specified in options) */
+/* SHOULD emit diagnostics for clsx and tw (default merge functions), but not for the other functions */
 clsx("px-2 foo p-4 bar");
 tw`px-2 foo p-4 bar`;
 tw.div`px-2 foo p-4 bar`;
@@ -64,7 +64,7 @@ notTemplateFunction.div`px-2 foo p-4 bar`;
 		],
 	}}
 />;
-/* SHOULD NOT emit diagnostics (clsx function not specified in options) */
+/* SHOULD emit diagnostics for clsx strings and keys (default merge function), but not for object values */
 clsx(["px-2 foo p-4 bar"]);
 clsx({
 	"px-2 foo p-4 bar": [

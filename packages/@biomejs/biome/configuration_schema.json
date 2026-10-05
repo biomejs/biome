@@ -3962,6 +3962,7 @@
 			]
 		},
 		"NoDuplicateClassesOptions": {
+			"description": "Options for the `noDuplicateClasses` assist action.\n\nControls which JSX attributes and utility functions are checked for duplicate classes.",
 			"type": "object",
 			"properties": {
 				"attributes": {
@@ -7928,7 +7929,7 @@
 					]
 				},
 				"useTailwindSortedClasses": {
-					"description": "Enforce the sorting of CSS utility classes.\nSee https://biomejs.dev/linter/rules/use-tailwind-sorted-classes",
+					"description": "Enforce the sorting of Tailwind CSS classes.\nSee https://biomejs.dev/linter/rules/use-tailwind-sorted-classes",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseTailwindSortedClassesConfiguration" },
 						{ "type": "null" }
@@ -16925,6 +16926,10 @@
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
+				"stylesheet": {
+					"description": "The CSS file that holds your Tailwind CSS configuration, such as\n`\"./src/app.css\"`. A relative path starts from the folder of the Biome\nconfiguration file.\n\nBiome reads the `@theme`, `@utility`, and `@custom-variant` rules in\nthis file and in the files it imports with `@import`, so that\n`useTailwindSortedClasses` knows your theme values, utilities, and variants.\n\nTo read the file, Biome scans your project when a Tailwind rule is\nenabled. Setting this option also turns on `css.parser.tailwindDirectives`,\nunless you set that option yourself.",
+					"type": ["string", "null"]
+				},
 				"variantFunctions": {
 					"description": "Functions that describe a component's styles with an object, such as\n`cva` and `tv`.\n\nBiome checks every string passed directly to these functions. In an\nobject passed to them, Biome checks the classes under these properties:\n\n- `base`, `class`, and `className`: classes that always apply.\n- `variants`: classes for each version of the component, such as each\n  button size.\n- `slots`: classes for each part of the component, such as its icon.\n- `compoundVariants` and `compoundSlots`: only the `class` and\n  `className` of each entry.\n\nOther properties, such as `defaultVariants`, hold names rather than\nclasses, so Biome skips them. For example, Biome checks `\"rounded\"`,\n`\"px-2\"`, and `\"px-4\"` here, but not `\"small\"`:\n\n```js\ncva(\"rounded\", {\n    variants: {\n        size: { small: \"px-2\", large: \"px-4\" },\n    },\n    defaultVariants: { size: \"small\" },\n});\n```\n\nDefaults to `cva` and `tv`.",
 					"type": ["array", "null"],
@@ -19120,18 +19125,6 @@
 		},
 		"UseTailwindSortedClassesOptions": {
 			"type": "object",
-			"properties": {
-				"attributes": {
-					"description": "Additional attributes that will be sorted.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
-				"functions": {
-					"description": "Names of the functions or tagged templates that will be sorted.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				}
-			},
 			"additionalProperties": false
 		},
 		"UseTemplateConfiguration": {

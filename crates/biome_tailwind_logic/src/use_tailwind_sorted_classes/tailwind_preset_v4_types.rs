@@ -45,7 +45,7 @@ pub enum CssDataType {
 }
 
 // Theme namespaces (from default theme.css).
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, Hash, PartialEq, Eq)]
 #[repr(u8)]
 pub enum ThemeNamespace {
     Color,
@@ -71,6 +71,62 @@ pub enum ThemeNamespace {
 }
 
 impl ThemeNamespace {
+    pub const ALL: [Self; 20] = [
+        Self::Color,
+        Self::Spacing,
+        Self::Text,
+        Self::TextShadow,
+        Self::Font,
+        Self::FontWeight,
+        Self::Leading,
+        Self::Tracking,
+        Self::Breakpoint,
+        Self::Container,
+        Self::Radius,
+        Self::Shadow,
+        Self::InsetShadow,
+        Self::DropShadow,
+        Self::Blur,
+        Self::Perspective,
+        Self::Aspect,
+        Self::Ease,
+        Self::Animate,
+        Self::BackgroundImage,
+    ];
+
+    /// The name of the namespace in theme variables: `color` in
+    /// `--color-red-500`.
+    pub fn css_name(self) -> &'static str {
+        match self {
+            Self::Color => "color",
+            Self::Spacing => "spacing",
+            Self::Text => "text",
+            Self::TextShadow => "text-shadow",
+            Self::Font => "font",
+            Self::FontWeight => "font-weight",
+            Self::Leading => "leading",
+            Self::Tracking => "tracking",
+            Self::Breakpoint => "breakpoint",
+            Self::Container => "container",
+            Self::Radius => "radius",
+            Self::Shadow => "shadow",
+            Self::InsetShadow => "inset-shadow",
+            Self::DropShadow => "drop-shadow",
+            Self::Blur => "blur",
+            Self::Perspective => "perspective",
+            Self::Aspect => "aspect",
+            Self::Ease => "ease",
+            Self::Animate => "animate",
+            Self::BackgroundImage => "background-image",
+        }
+    }
+
+    pub fn from_css_name(name: &str) -> Option<Self> {
+        Self::ALL
+            .into_iter()
+            .find(|namespace| namespace.css_name() == name)
+    }
+
     pub fn keys(self) -> &'static phf::Set<&'static str> {
         match self {
             Self::Color => &THEME_KEYS_COLOR,

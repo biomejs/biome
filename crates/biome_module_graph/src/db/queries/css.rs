@@ -3,7 +3,9 @@ use crate::css_module_info::traverse::{
     CssClassStep, CssClassTraversal, CssPropertyBranch, CssPropertyTraversal,
 };
 use crate::traverse::UpwardTraversalVisitor;
-use crate::{CssPropertyDefinition, ImportTreeNode, ModuleDb, ModuleInfo, ModuleInfoKind};
+use crate::{
+    CssPropertyDefinition, ImportTreeNode, ModuleDb, ModuleInfo, ModuleInfoKind, TailwindStylesheet,
+};
 use biome_css_syntax::{TextRange, TextSize};
 use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexMap;
@@ -11,6 +13,44 @@ use rustc_hash::FxHashSet;
 use std::collections::VecDeque;
 
 // #region EXPORTED TRACKED QUERIES
+
+/// Returns the Tailwind CSS configuration of a stylesheet, including the CSS
+/// files it imports. Imported configuration comes first, in import order, the
+/// way Tailwind CSS inlines imports.
+///
+/// Tracked: depends on the CSS module info of the stylesheet and of every file
+/// it reaches through `@import`.
+#[salsa::tracked(returns(ref))]
+pub fn tailwind_stylesheet(db: &dyn ModuleDb, module: ModuleInfo) -> TailwindStylesheet {
+    let mut stylesheet = TailwindStylesheet::default();
+    let mut visited = FxHashSet::default();
+    collect_tailwind_stylesheet(db, module, &mut visited, &mut stylesheet);
+    stylesheet
+}
+
+fn collect_tailwind_stylesheet(
+    db: &dyn ModuleDb,
+    module: ModuleInfo,
+    visited: &mut FxHashSet<Utf8PathBuf>,
+    stylesheet: &mut TailwindStylesheet,
+) {
+    if !visited.insert(module.path(db).to_path_buf()) {
+        return;
+    }
+    let ModuleInfoKind::Css(css_info) = module.kind(db) else {
+        return;
+    };
+    for import in css_info.imports.iter() {
+        // `@import "tailwindcss"` doesn't resolve to a local file. Its
+        // configuration is the default one the sorter already knows.
+        if let Some(path) = import.resolve_css(db, module).path().as_path()
+            && let Some(imported) = db.module_for_path(path)
+        {
+            collect_tailwind_stylesheet(db, imported, visited, stylesheet);
+        }
+    }
+    stylesheet.extend(&css_info.tailwind);
+}
 
 /// Returns CSS class steps for a JS module by traversing its direct CSS imports.
 ///

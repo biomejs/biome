@@ -30,6 +30,7 @@ use biome_package::TurboJson;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::TextSize;
 use biome_tailwind_logic::syntax_service::TwSyntaxService;
+use biome_tailwind_logic::use_tailwind_sorted_classes::TailwindDesignSystem;
 use std::ops::Deref;
 use std::rc::Rc;
 use std::sync::{Arc, LazyLock};
@@ -281,6 +282,13 @@ where
 
     services.insert_service(Arc::new(AriaRoles));
     services.insert_service(TwSyntaxService::default());
+    services.insert_service(Arc::new(
+        module_db
+            .as_deref()
+            .map_or_else(TailwindDesignSystem::default, |module_db| {
+                TailwindDesignSystem::from_module_graph(module_db, options.tailwind())
+            }),
+    ));
     services.insert_service(source_type);
     if let Some(module_db) = module_db {
         services.insert_service(module_db);

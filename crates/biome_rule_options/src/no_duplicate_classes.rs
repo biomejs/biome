@@ -1,63 +1,70 @@
-use std::ops::Deref;
-
-use biome_deserialize::{Deserializable, DeserializableValue, DeserializationContext};
+use biome_deserialize::{
+    Deserializable, DeserializableTypes, DeserializableValue, DeserializationContext,
+    DeserializationDiagnostic, DeserializationVisitor, MapMembers, TextRange,
+};
+use biome_rowan::Text;
 use serde::{Deserialize, Serialize};
-
-use crate::use_tailwind_sorted_classes::UseTailwindSortedClassesOptions;
 
 /// Options for the `noDuplicateClasses` assist action.
 ///
 /// Controls which JSX attributes and utility functions are checked for duplicate classes.
-#[derive(Default, Clone, Debug, Eq, PartialEq)]
-pub struct NoDuplicateClassesOptions(UseTailwindSortedClassesOptions);
-
-impl Deref for NoDuplicateClassesOptions {
-    type Target = UseTailwindSortedClassesOptions;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+#[derive(Default, Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
+pub struct NoDuplicateClassesOptions {
+    /// Additional attributes that will be sorted.
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub attributes: Option<Box<[Box<str>]>>,
+    /// Names of the functions or tagged templates that will be sorted.
+    #[serde(skip_serializing_if = "Option::<_>::is_none")]
+    pub functions: Option<Box<[Box<str>]>>,
 }
-
 impl biome_deserialize::Merge for NoDuplicateClassesOptions {
     fn merge_with(&mut self, other: Self) {
-        self.0.merge_with(other.0);
+        if let Some(attributes) = other.attributes {
+            self.attributes = Some(attributes);
+        }
+        if let Some(functions) = other.functions {
+            self.functions = Some(functions);
+        }
     }
 }
 
-// Custom Serialize to match UseTailwindSortedClassesOptions format
-impl Serialize for NoDuplicateClassesOptions {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        self.0.serialize(serializer)
+impl NoDuplicateClassesOptions {
+    pub fn has_function(&self, name: &str) -> bool {
+        let iter = self.functions.iter().flatten();
+        for v in iter {
+            if v.as_ref() == name {
+                return true;
+            }
+        }
+        false
+    }
+
+    pub fn match_function(&self, name: &str) -> bool {
+        self.functions.iter().flatten().any(|matcher| {
+            let mut matcher_parts = matcher.split('.');
+            let mut name_parts = name.split('.');
+
+            let all_parts_match = matcher_parts
+                .by_ref()
+                .zip(name_parts.by_ref())
+                .all(|(m, p)| m == "*" || m == p);
+
+            all_parts_match && matcher_parts.next().is_none() && name_parts.next().is_none()
+        })
+    }
+
+    pub fn has_attribute(&self, name: &str) -> bool {
+        CLASS_ATTRIBUTES.contains(&name)
+            || self.attributes.iter().flatten().any(|v| v.as_ref() == name)
     }
 }
 
-// Custom Deserialize to match UseTailwindSortedClassesOptions format
-impl<'de> Deserialize<'de> for NoDuplicateClassesOptions {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        <UseTailwindSortedClassesOptions as serde::Deserialize>::deserialize(deserializer).map(Self)
-    }
-}
+/// Attributes that are always targets.
+const CLASS_ATTRIBUTES: [&str; 2] = ["class", "className"];
 
-// Custom JsonSchema to generate proper schema with distinct type name
-#[cfg(feature = "schema")]
-impl schemars::JsonSchema for NoDuplicateClassesOptions {
-    fn schema_name() -> std::borrow::Cow<'static, str> {
-        std::borrow::Cow::Borrowed("NoDuplicateClassesOptions")
-    }
-
-    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
-        // Generate schema based on the inner UseTailwindSortedClassesOptions but with our type name
-        // The schema is already correct, we just need the distinct type name (handled by schema_name)
-        UseTailwindSortedClassesOptions::json_schema(generator)
-    }
-}
+const ALLOWED_OPTIONS: &[&str] = &["attributes", "functions"];
 
 impl Deserializable for NoDuplicateClassesOptions {
     fn deserialize(
@@ -65,6 +72,53 @@ impl Deserializable for NoDuplicateClassesOptions {
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
-        <UseTailwindSortedClassesOptions as Deserializable>::deserialize(ctx, value, name).map(Self)
+        value.deserialize(ctx, NoDuplicateClassesOptionsVisitor, name)
+    }
+}
+
+struct NoDuplicateClassesOptionsVisitor;
+impl DeserializationVisitor for NoDuplicateClassesOptionsVisitor {
+    type Output = NoDuplicateClassesOptions;
+
+    const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
+
+    fn visit_map(
+        self,
+        ctx: &mut dyn DeserializationContext,
+        members: &mut MapMembers<'_>,
+        _range: TextRange,
+        _name: &str,
+    ) -> Option<Self::Output> {
+        let mut result = NoDuplicateClassesOptions::default();
+
+        let mut attributes = Vec::new();
+        for (key, value) in members.flatten() {
+            let Some(key_text) = Text::deserialize(ctx, &key, "") else {
+                continue;
+            };
+            match key_text.text() {
+                "attributes" => {
+                    if let Some(attributes_option) =
+                        Deserializable::deserialize(ctx, &value, &key_text)
+                    {
+                        attributes.extend::<Vec<Box<str>>>(attributes_option);
+                    }
+                }
+                "functions" => {
+                    result.functions = Deserializable::deserialize(ctx, &value, &key_text)
+                }
+                unknown_key => ctx.report(DeserializationDiagnostic::new_unknown_key(
+                    unknown_key,
+                    key.range(),
+                    ALLOWED_OPTIONS,
+                )),
+            }
+        }
+        result.attributes = if attributes.is_empty() {
+            None
+        } else {
+            Some(attributes.into_boxed_slice())
+        };
+        Some(result)
     }
 }

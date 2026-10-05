@@ -3,9 +3,9 @@
 	{/* SHOULD emit diagnostics (class/className attributes supported by default) */}
 	<div class="px-2 foo p-4 bar" />
 	<div className="px-2 foo p-4 bar" />
-	{/* SHOULD emit diagnostics (customClassAttribute attribute specified in options) */}
+	{/* SHOULD emit diagnostics (customClassAttribute listed in tailwind.attributes) */}
 	<div customClassAttribute="px-2 foo p-4 bar" />
-	{/* SHOULD NOT emit diagnostics (notClassAttribute attribute NOT specified in options) */}
+	{/* SHOULD NOT emit diagnostics (notClassAttribute NOT listed in tailwind.attributes) */}
 	<div notClassAttribute="px-2 foo p-4 bar" />
 	{/* utility sorting */}
 	{/* SHOULD emit diagnostics (class attribute supported by default) */}
@@ -22,7 +22,7 @@
 </>;
 
 // functions
-/* SHOULD emit diagnostics (functions specified in options) */
+/* SHOULD emit diagnostics (functions listed in tailwind.mergeFunctions) */
 clsx("px-2 foo p-4 bar");
 tw`px-2 foo p-4 bar`;
 tw.div`px-2 foo p-4 bar`;
@@ -42,7 +42,7 @@ notTemplateFunction.div`px-2 foo p-4 bar`;
 		],
 	}}
 />;
-/* SHOULD emit diagnostics (clsx function specified in options) */
+/* SHOULD emit diagnostics (clsx listed in tailwind.mergeFunctions) */
 clsx(["px-2 foo p-4 bar"]);
 clsx({
 	"px-2 foo p-4 bar": [

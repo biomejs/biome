@@ -1657,6 +1657,9 @@ pub struct ProjectScanComputer<'a> {
     configuration: &'a Configuration,
     skip: &'a [AnalyzerSelector],
     only: &'a [AnalyzerSelector],
+    /// Whether `tailwind.stylesheet` is set. Tailwind rules then need the
+    /// module graph to read the stylesheet.
+    has_tailwind_stylesheet: bool,
 }
 
 impl<'a> ProjectScanComputer<'a> {
@@ -1669,6 +1672,10 @@ impl<'a> ProjectScanComputer<'a> {
             configuration,
             skip: &[],
             only: &[],
+            has_tailwind_stylesheet: configuration
+                .tailwind
+                .as_ref()
+                .is_some_and(|tailwind| tailwind.stylesheet.is_some()),
         }
     }
 
@@ -1689,6 +1696,12 @@ impl<'a> ProjectScanComputer<'a> {
         if let Some(domains) = domains {
             for (domain, value) in domains.iter() {
                 if domain == &RuleDomain::Project && value != &RuleDomainValue::None {
+                    self.requires_project_scan = true;
+                }
+                if domain == &RuleDomain::Tailwind
+                    && value != &RuleDomainValue::None
+                    && self.has_tailwind_stylesheet
+                {
                     self.requires_project_scan = true;
                 }
                 if domain == &RuleDomain::Types && value != &RuleDomainValue::None {
@@ -1740,7 +1753,8 @@ impl<'a> ProjectScanComputer<'a> {
             for selector in self.only.iter() {
                 if selector.match_rule_name(group_name, metadata.name) {
                     let domains = metadata.domains;
-                    self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+                    self.requires_project_scan |= domains.contains(&RuleDomain::Project)
+                        || self.has_tailwind_stylesheet && domains.contains(&RuleDomain::Tailwind);
                     self.requires_types |= domains.contains(&RuleDomain::Types);
                     break;
                 }
@@ -1752,7 +1766,8 @@ impl<'a> ProjectScanComputer<'a> {
             && self.enabled_rules.contains(&filter)
         {
             let domains = metadata.domains;
-            self.requires_project_scan |= domains.contains(&RuleDomain::Project);
+            self.requires_project_scan |= domains.contains(&RuleDomain::Project)
+                || self.has_tailwind_stylesheet && domains.contains(&RuleDomain::Tailwind);
             self.requires_types |= domains.contains(&RuleDomain::Types);
         }
     }

@@ -1,5 +1,16 @@
 {
   "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "tailwind": {
+    "attributes": [
+      "class",
+      "className",
+      "customClassAttribute"
+    ],
+    "mergeFunctions": [
+      "clsx",
+      "tw"
+    ]
+  },
   "javascript": {
     "formatter": {
       "quoteStyle": "single",
@@ -9,13 +20,7 @@
   "linter": {
     "rules": {
       "nursery": {
-        "useTailwindSortedClasses": {
-          "level": "error",
-          "options": {
-            "attributes": ["customClassAttribute"],
-            "functions": ["clsx", "tw", "tw.*"]
-          }
-        }
+        "useTailwindSortedClasses": "error"
       }
     }
   }
