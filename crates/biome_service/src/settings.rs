@@ -7,7 +7,9 @@ pub(crate) use query::{SettingsQuery, SettingsSelectionKey};
 
 use crate::workspace::{FeatureKind, ScanKind};
 use crate::{WorkspaceError, is_dir};
-use biome_analyze::{AnalyzerOptions, AnalyzerRules, ExtendedConfigurationProvider};
+use biome_analyze::{
+    AnalyzerOptions, AnalyzerRules, ExtendedConfigurationProvider, options::TailwindOptions,
+};
 #[cfg(feature = "lang_css")]
 use biome_configuration::CssConfiguration;
 #[cfg(feature = "lang_js")]
@@ -118,6 +120,9 @@ pub struct Settings {
     pub override_settings: OverrideSettings,
     /// The VCS settings of the project
     pub vcs_settings: VcsSettings,
+
+    /// Settings used to recognize Tailwind class strings.
+    pub tailwind: TailwindOptions,
 
     // TODO: remove once HTML full support is stable
     #[cfg(feature = "lang_html")]
@@ -271,6 +276,10 @@ impl Settings {
                     .map(|p| p.as_path().to_path_buf()),
                 linter,
             )?;
+        }
+
+        if let Some(tailwind) = configuration.tailwind {
+            self.tailwind = tailwind.into();
         }
 
         // assist part

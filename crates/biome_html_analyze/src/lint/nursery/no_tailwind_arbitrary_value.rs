@@ -43,6 +43,11 @@ declare_lint_rule! {
     /// <div class="[&:nth-child(3)]:px-2"></div>
     /// ```
     ///
+    /// ## Recognized class strings
+    ///
+    /// This rule checks the attributes and functions recognized by the top-level
+    /// [`tailwind` configuration](https://biomejs.dev/reference/configuration/#tailwind).
+    ///
     pub NoTailwindArbitraryValue {
         version: "2.5.7",
         name: "noTailwindArbitraryValue",

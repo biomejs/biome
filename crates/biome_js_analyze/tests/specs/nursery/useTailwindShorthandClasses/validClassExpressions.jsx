@@ -9,7 +9,7 @@ const value = <div className={[
 ]} />;
 clsx({ 'size-4': 'w-4 h-4' });
 cva('', {
-    variants: { size: { 'w-4 h-4': 'size-4', small: { 'p-2': 'w-4 h-4' } } },
+    variants: { size: { 'w-4 h-4': 'size-4', small: { 'p-2': isSmall } } },
     defaultVariants: { size: 'w-4 h-4' },
     compoundVariants: [{ size: 'w-4 h-4', class: 'size-4' }],
 });

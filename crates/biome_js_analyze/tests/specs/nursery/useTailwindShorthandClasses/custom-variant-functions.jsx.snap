@@ -1,0 +1,361 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: custom-variant-functions.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+styles('w-4 h-4', {
+    base: 'px-2 py-2',
+    variants: {
+        size: { sm: 'mr-3 ml-3', md: { 'w-4 h-4': active }, lg: { icon: 'px-2 py-2' } },
+    },
+    compoundVariants: [{ size: 'sm', class: 'mr-3 ml-3' }],
+    compoundSlots: [{ slots: ['icon'], className: 'w-4 h-4' }],
+});
+cx('w-4 h-4', { 'px-2 py-2': active });
+
+```
+
+# Diagnostics
+```
+custom-variant-functions.jsx:2:9 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ styles('w-4 h-4', {
+      │         ^^^
+    3 │     base: 'px-2 py-2',
+    4 │     variants: {
+  
+  i Compressible utility used here.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ styles('w-4 h-4', {
+      │             ^^^
+    3 │     base: 'px-2 py-2',
+    4 │     variants: {
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - styles('w-4·h-4',·{
+        2 │ + styles('size-4',·{
+     3  3 │       base: 'px-2 py-2',
+     4  4 │       variants: {
+  
+
+```
+
+```
+custom-variant-functions.jsx:3:12 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    1 │ /* should generate diagnostics */
+    2 │ styles('w-4 h-4', {
+  > 3 │     base: 'px-2 py-2',
+      │            ^^^^
+    4 │     variants: {
+    5 │         size: { sm: 'mr-3 ml-3', md: { 'w-4 h-4': active }, lg: { icon: 'px-2 py-2' } },
+  
+  i Compressible utility used here.
+  
+    1 │ /* should generate diagnostics */
+    2 │ styles('w-4 h-4', {
+  > 3 │     base: 'px-2 py-2',
+      │                 ^^^^
+    4 │     variants: {
+    5 │         size: { sm: 'mr-3 ml-3', md: { 'w-4 h-4': active }, lg: { icon: 'px-2 py-2' } },
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   styles('w-4 h-4', {
+     3    │ - ····base:·'px-2·py-2',
+        3 │ + ····base:·'p-2',
+     4  4 │       variants: {
+     5  5 │           size: { sm: 'mr-3 ml-3', md: { 'w-4 h-4': active }, lg: { icon: 'px-2 py-2' } },
+  
+
+```
+
+```
+custom-variant-functions.jsx:5:27 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    3 │     base: 'px-2 py-2',
+    4 │     variants: {
+  > 5 │         size: { sm: 'mr-3 ml-3', md: { 'w-4 h-4': active }, lg: { icon: 'px-2 py-2' } },
+      │                           ^^^^
+    6 │     },
+    7 │     compoundVariants: [{ size: 'sm', class: 'mr-3 ml-3' }],
+  
+  i Compressible utility used here.
+  
+    3 │     base: 'px-2 py-2',
+    4 │     variants: {
+  > 5 │         size: { sm: 'mr-3 ml-3', md: { 'w-4 h-4': active }, lg: { icon: 'px-2 py-2' } },
+      │                      ^^^^
+    6 │     },
+    7 │     compoundVariants: [{ size: 'sm', class: 'mr-3 ml-3' }],
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     3  3 │       base: 'px-2 py-2',
+     4  4 │       variants: {
+     5    │ - ········size:·{·sm:·'mr-3·ml-3',·md:·{·'w-4·h-4':·active·},·lg:·{·icon:·'px-2·py-2'·}·},
+        5 │ + ········size:·{·sm:·'mx-3',·md:·{·'w-4·h-4':·active·},·lg:·{·icon:·'px-2·py-2'·}·},
+     6  6 │       },
+     7  7 │       compoundVariants: [{ size: 'sm', class: 'mr-3 ml-3' }],
+  
+
+```
+
+```
+custom-variant-functions.jsx:5:41 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    3 │     base: 'px-2 py-2',
+    4 │     variants: {
+  > 5 │         size: { sm: 'mr-3 ml-3', md: { 'w-4 h-4': active }, lg: { icon: 'px-2 py-2' } },
+      │                                         ^^^
+    6 │     },
+    7 │     compoundVariants: [{ size: 'sm', class: 'mr-3 ml-3' }],
+  
+  i Compressible utility used here.
+  
+    3 │     base: 'px-2 py-2',
+    4 │     variants: {
+  > 5 │         size: { sm: 'mr-3 ml-3', md: { 'w-4 h-4': active }, lg: { icon: 'px-2 py-2' } },
+      │                                             ^^^
+    6 │     },
+    7 │     compoundVariants: [{ size: 'sm', class: 'mr-3 ml-3' }],
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     3  3 │       base: 'px-2 py-2',
+     4  4 │       variants: {
+     5    │ - ········size:·{·sm:·'mr-3·ml-3',·md:·{·'w-4·h-4':·active·},·lg:·{·icon:·'px-2·py-2'·}·},
+        5 │ + ········size:·{·sm:·'mr-3·ml-3',·md:·{·'size-4':·active·},·lg:·{·icon:·'px-2·py-2'·}·},
+     6  6 │       },
+     7  7 │       compoundVariants: [{ size: 'sm', class: 'mr-3 ml-3' }],
+  
+
+```
+
+```
+custom-variant-functions.jsx:5:74 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    3 │     base: 'px-2 py-2',
+    4 │     variants: {
+  > 5 │         size: { sm: 'mr-3 ml-3', md: { 'w-4 h-4': active }, lg: { icon: 'px-2 py-2' } },
+      │                                                                          ^^^^
+    6 │     },
+    7 │     compoundVariants: [{ size: 'sm', class: 'mr-3 ml-3' }],
+  
+  i Compressible utility used here.
+  
+    3 │     base: 'px-2 py-2',
+    4 │     variants: {
+  > 5 │         size: { sm: 'mr-3 ml-3', md: { 'w-4 h-4': active }, lg: { icon: 'px-2 py-2' } },
+      │                                                                               ^^^^
+    6 │     },
+    7 │     compoundVariants: [{ size: 'sm', class: 'mr-3 ml-3' }],
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     3  3 │       base: 'px-2 py-2',
+     4  4 │       variants: {
+     5    │ - ········size:·{·sm:·'mr-3·ml-3',·md:·{·'w-4·h-4':·active·},·lg:·{·icon:·'px-2·py-2'·}·},
+        5 │ + ········size:·{·sm:·'mr-3·ml-3',·md:·{·'w-4·h-4':·active·},·lg:·{·icon:·'p-2'·}·},
+     6  6 │       },
+     7  7 │       compoundVariants: [{ size: 'sm', class: 'mr-3 ml-3' }],
+  
+
+```
+
+```
+custom-variant-functions.jsx:7:51 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+    5 │         size: { sm: 'mr-3 ml-3', md: { 'w-4 h-4': active }, lg: { icon: 'px-2 py-2' } },
+    6 │     },
+  > 7 │     compoundVariants: [{ size: 'sm', class: 'mr-3 ml-3' }],
+      │                                                   ^^^^
+    8 │     compoundSlots: [{ slots: ['icon'], className: 'w-4 h-4' }],
+    9 │ });
+  
+  i Compressible utility used here.
+  
+    5 │         size: { sm: 'mr-3 ml-3', md: { 'w-4 h-4': active }, lg: { icon: 'px-2 py-2' } },
+    6 │     },
+  > 7 │     compoundVariants: [{ size: 'sm', class: 'mr-3 ml-3' }],
+      │                                              ^^^^
+    8 │     compoundSlots: [{ slots: ['icon'], className: 'w-4 h-4' }],
+    9 │ });
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     5  5 │           size: { sm: 'mr-3 ml-3', md: { 'w-4 h-4': active }, lg: { icon: 'px-2 py-2' } },
+     6  6 │       },
+     7    │ - ····compoundVariants:·[{·size:·'sm',·class:·'mr-3·ml-3'·}],
+        7 │ + ····compoundVariants:·[{·size:·'sm',·class:·'mx-3'·}],
+     8  8 │       compoundSlots: [{ slots: ['icon'], className: 'w-4 h-4' }],
+     9  9 │   });
+  
+
+```
+
+```
+custom-variant-functions.jsx:8:52 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     6 │     },
+     7 │     compoundVariants: [{ size: 'sm', class: 'mr-3 ml-3' }],
+   > 8 │     compoundSlots: [{ slots: ['icon'], className: 'w-4 h-4' }],
+       │                                                    ^^^
+     9 │ });
+    10 │ cx('w-4 h-4', { 'px-2 py-2': active });
+  
+  i Compressible utility used here.
+  
+     6 │     },
+     7 │     compoundVariants: [{ size: 'sm', class: 'mr-3 ml-3' }],
+   > 8 │     compoundSlots: [{ slots: ['icon'], className: 'w-4 h-4' }],
+       │                                                        ^^^
+     9 │ });
+    10 │ cx('w-4 h-4', { 'px-2 py-2': active });
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     6  6 │       },
+     7  7 │       compoundVariants: [{ size: 'sm', class: 'mr-3 ml-3' }],
+     8    │ - ····compoundSlots:·[{·slots:·['icon'],·className:·'w-4·h-4'·}],
+        8 │ + ····compoundSlots:·[{·slots:·['icon'],·className:·'size-4'·}],
+     9  9 │   });
+    10 10 │   cx('w-4 h-4', { 'px-2 py-2': active });
+  
+
+```
+
+```
+custom-variant-functions.jsx:10:5 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     8 │     compoundSlots: [{ slots: ['icon'], className: 'w-4 h-4' }],
+     9 │ });
+  > 10 │ cx('w-4 h-4', { 'px-2 py-2': active });
+       │     ^^^
+    11 │ 
+  
+  i Compressible utility used here.
+  
+     8 │     compoundSlots: [{ slots: ['icon'], className: 'w-4 h-4' }],
+     9 │ });
+  > 10 │ cx('w-4 h-4', { 'px-2 py-2': active });
+       │         ^^^
+    11 │ 
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     8  8 │       compoundSlots: [{ slots: ['icon'], className: 'w-4 h-4' }],
+     9  9 │   });
+    10    │ - cx('w-4·h-4',·{·'px-2·py-2':·active·});
+       10 │ + cx('size-4',·{·'px-2·py-2':·active·});
+    11 11 │   
+  
+
+```
+
+```
+custom-variant-functions.jsx:10:18 lint/nursery/useTailwindShorthandClasses  FIXABLE  ━━━━━━━━━━━━━━
+
+  i These Tailwind classes can be replaced with a shorthand class.
+  
+     8 │     compoundSlots: [{ slots: ['icon'], className: 'w-4 h-4' }],
+     9 │ });
+  > 10 │ cx('w-4 h-4', { 'px-2 py-2': active });
+       │                  ^^^^
+    11 │ 
+  
+  i Compressible utility used here.
+  
+     8 │     compoundSlots: [{ slots: ['icon'], className: 'w-4 h-4' }],
+     9 │ });
+  > 10 │ cx('w-4 h-4', { 'px-2 py-2': active });
+       │                       ^^^^
+    11 │ 
+  
+  i Using fewer classes reduces duplication and improves readability.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the Tailwind shorthand classes.
+  
+     8  8 │       compoundSlots: [{ slots: ['icon'], className: 'w-4 h-4' }],
+     9  9 │   });
+    10    │ - cx('w-4·h-4',·{·'px-2·py-2':·active·});
+       10 │ + cx('w-4·h-4',·{·'p-2':·active·});
+    11 11 │   
+  
+
+```
