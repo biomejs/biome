@@ -1,0 +1,17 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "svelte/no-restricted-html-elements": [
+        "error",
+        "marquee",
+        "h1",
+        { "elements": ["h2", "h3"], "message": "Use the Heading component instead." },
+        { "elements": ["blink"] },
+        { "elements": ["marquee"], "message": "Use CSS animations instead." },
+        { "elements": ["h1"], "message": "Use the Title component instead." },
+        { "elements": ["h1"], "message": "Only one title per page." }
+      ]
+    }
+  }
+}
