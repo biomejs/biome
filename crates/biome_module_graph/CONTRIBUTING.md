@@ -89,13 +89,25 @@ limit, the guard makes the result unknown rather than assuming the expression is
 unaffected. The variable's ordinary type stays separate from the result at each
 read.
 
+A call to a local function can also narrow a variable when its return annotation
+states a type predicate, such as `value is string`. The function must have one
+signature, be declared in the same module, and never be reassigned. It must not
+be generic, async, or a generator. The annotation must name a parameter and a
+primitive type or literal value. Biome reads this contract without inferring the
+function body or the types of other arguments.
+
+Only identifier arguments can be narrowed by these guards. Imported or aliased
+guards, methods, optional calls, and calls with spread arguments are unsupported.
+So are declarations with default, rest, or destructured parameters, predicates
+on `this`, and predicates whose target is a named or compound type.
+
 An object shape such as `{}` can also describe `0` or `""`. Removing `null`
 therefore does not prove that the value is truthy. A `void` return annotation
 does not guarantee runtime `undefined` either. These cases must retain
 uncertainty.
 
-Narrowing does not support `var`, imported variables, predicate/assertion
-functions, or facts about individual object properties. Unsupported control flow
+Narrowing does not support `var`, imported variables, assertion functions,
+or facts about individual object properties. Unsupported control flow
 includes exception handlers, `switch`, `for-in`/`for-of`, destructuring, classes,
 and logical assignments. Roots that read the global `eval` or the implicit
 `arguments` object, directly or in a nested function, and roots that exceed a
