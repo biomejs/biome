@@ -1,0 +1,239 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { createApp, defineComponent } from "vue";
+
+defineComponent({
+	name: "Foo",
+});
+
+defineComponent(() => {}, {
+	name: "Foo",
+});
+
+defineComponent({
+	name: `Foo`,
+});
+
+createApp({
+	name: "Foo",
+});
+
+app.component("Foo", {
+	template: "<div />",
+});
+
+app.component("Bar", defineComponent({}));
+
+app.component(("Bar"), ({}));
+
+```
+
+# Diagnostics
+```
+invalid.js:5:8 lint/nursery/useVueMatchingComponentFileName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The component name "Foo" doesn't match the file name "invalid".
+  
+    4 │ defineComponent({
+  > 5 │ 	name: "Foo",
+      │ 	      ^^^^^
+    6 │ });
+    7 │ 
+  
+  i When a component and its file have different names, it's harder to find where the component is defined.
+  
+  i Rename the component or the file so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to "invalid".
+  
+     3  3 │   
+     4  4 │   defineComponent({
+     5    │ - → name:·"Foo",
+        5 │ + → name:·"invalid",
+     6  6 │   });
+     7  7 │   
+  
+
+```
+
+```
+invalid.js:9:8 lint/nursery/useVueMatchingComponentFileName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The component name "Foo" doesn't match the file name "invalid".
+  
+     8 │ defineComponent(() => {}, {
+   > 9 │ 	name: "Foo",
+       │ 	      ^^^^^
+    10 │ });
+    11 │ 
+  
+  i When a component and its file have different names, it's harder to find where the component is defined.
+  
+  i Rename the component or the file so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to "invalid".
+  
+     7  7 │   
+     8  8 │   defineComponent(() => {}, {
+     9    │ - → name:·"Foo",
+        9 │ + → name:·"invalid",
+    10 10 │   });
+    11 11 │   
+  
+
+```
+
+```
+invalid.js:13:8 lint/nursery/useVueMatchingComponentFileName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The component name "Foo" doesn't match the file name "invalid".
+  
+    12 │ defineComponent({
+  > 13 │ 	name: `Foo`,
+       │ 	      ^^^^^
+    14 │ });
+    15 │ 
+  
+  i When a component and its file have different names, it's harder to find where the component is defined.
+  
+  i Rename the component or the file so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to "invalid".
+  
+    11 11 │   
+    12 12 │   defineComponent({
+    13    │ - → name:·`Foo`,
+       13 │ + → name:·`invalid`,
+    14 14 │   });
+    15 15 │   
+  
+
+```
+
+```
+invalid.js:17:8 lint/nursery/useVueMatchingComponentFileName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The component name "Foo" doesn't match the file name "invalid".
+  
+    16 │ createApp({
+  > 17 │ 	name: "Foo",
+       │ 	      ^^^^^
+    18 │ });
+    19 │ 
+  
+  i When a component and its file have different names, it's harder to find where the component is defined.
+  
+  i Rename the component or the file so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to "invalid".
+  
+    15 15 │   
+    16 16 │   createApp({
+    17    │ - → name:·"Foo",
+       17 │ + → name:·"invalid",
+    18 18 │   });
+    19 19 │   
+  
+
+```
+
+```
+invalid.js:20:15 lint/nursery/useVueMatchingComponentFileName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The component name "Foo" doesn't match the file name "invalid".
+  
+    18 │ });
+    19 │ 
+  > 20 │ app.component("Foo", {
+       │               ^^^^^
+    21 │ 	template: "<div />",
+    22 │ });
+  
+  i When a component and its file have different names, it's harder to find where the component is defined.
+  
+  i Rename the component or the file so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to "invalid".
+  
+    18 18 │   });
+    19 19 │   
+    20    │ - app.component("Foo",·{
+       20 │ + app.component("invalid",·{
+    21 21 │   	template: "<div />",
+    22 22 │   });
+  
+
+```
+
+```
+invalid.js:24:15 lint/nursery/useVueMatchingComponentFileName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The component name "Bar" doesn't match the file name "invalid".
+  
+    22 │ });
+    23 │ 
+  > 24 │ app.component("Bar", defineComponent({}));
+       │               ^^^^^
+    25 │ 
+    26 │ app.component(("Bar"), ({}));
+  
+  i When a component and its file have different names, it's harder to find where the component is defined.
+  
+  i Rename the component or the file so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to "invalid".
+  
+    22 22 │   });
+    23 23 │   
+    24    │ - app.component("Bar",·defineComponent({}));
+       24 │ + app.component("invalid",·defineComponent({}));
+    25 25 │   
+    26 26 │   app.component(("Bar"), ({}));
+  
+
+```
+
+```
+invalid.js:26:15 lint/nursery/useVueMatchingComponentFileName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The component name "Bar" doesn't match the file name "invalid".
+  
+    24 │ app.component("Bar", defineComponent({}));
+    25 │ 
+  > 26 │ app.component(("Bar"), ({}));
+       │               ^^^^^^^
+    27 │ 
+  
+  i When a component and its file have different names, it's harder to find where the component is defined.
+  
+  i Rename the component or the file so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to "invalid".
+  
+    24 24 │   app.component("Bar", defineComponent({}));
+    25 25 │   
+    26    │ - app.component(("Bar"),·({}));
+       26 │ + app.component(("invalid"),·({}));
+    27 27 │   
+  
+
+```

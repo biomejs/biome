@@ -3201,6 +3201,11 @@ export interface Nursery {
 	 */
 	useVueConsistentDefinePropsDeclaration?: UseVueConsistentDefinePropsDeclarationConfiguration;
 	/**
+	 * Enforce that the name of a Vue component matches its file name.
+	 * See https://biomejs.dev/linter/rules/use-vue-matching-component-file-name
+	 */
+	useVueMatchingComponentFileName?: UseVueMatchingComponentFileNameConfiguration;
+	/**
 	 * Enforces Promise syntax when using Vue nextTick.
 	 * See https://biomejs.dev/linter/rules/use-vue-next-tick-promise
 	 */
@@ -5490,6 +5495,9 @@ export type UseVueBaseImportConfiguration =
 export type UseVueConsistentDefinePropsDeclarationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentDefinePropsDeclarationOptions;
+export type UseVueMatchingComponentFileNameConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueMatchingComponentFileNameOptions;
 export type UseVueNextTickPromiseConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueNextTickPromiseOptions;
@@ -8023,6 +8031,14 @@ export interface RuleWithUseVueConsistentDefinePropsDeclarationOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentDefinePropsDeclarationOptions;
 }
+export interface RuleWithUseVueMatchingComponentFileNameOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueMatchingComponentFileNameOptions;
+}
 export interface RuleWithUseVueNextTickPromiseOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueNextTickPromiseOptions;
@@ -10178,6 +10194,7 @@ export type UseVueBaseImportOptions = {};
 export interface UseVueConsistentDefinePropsDeclarationOptions {
 	style?: DeclarationStyle;
 }
+export type UseVueMatchingComponentFileNameOptions = {};
 export type UseVueNextTickPromiseOptions = {};
 export type UseVueValidVForOptions = {};
 export type NoAccumulatingSpreadOptions = {};
@@ -11498,6 +11515,7 @@ export type Category =
 	| "lint/nursery/useVarsOnTop"
 	| "lint/nursery/useVueBaseImport"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
+	| "lint/nursery/useVueMatchingComponentFileName"
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVueValidVFor"
 	| "lint/nursery/useVueValidVModel"

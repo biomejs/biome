@@ -1,0 +1,46 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+export default {
+	name: "Foo",
+	render() {
+		return <div />;
+	},
+};
+
+```
+
+# Diagnostics
+```
+invalid.jsx:3:8 lint/nursery/useVueMatchingComponentFileName  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The component name "Foo" doesn't match the file name "invalid".
+  
+    1 │ /* should generate diagnostics */
+    2 │ export default {
+  > 3 │ 	name: "Foo",
+      │ 	      ^^^^^
+    4 │ 	render() {
+    5 │ 		return <div />;
+  
+  i When a component and its file have different names, it's harder to find where the component is defined.
+  
+  i Rename the component or the file so that both names are the same.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Rename the component to "invalid".
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   export default {
+    3   │ - → name:·"Foo",
+      3 │ + → name:·"invalid",
+    4 4 │     render() {
+    5 5 │       return <div />;
+  
+
+```

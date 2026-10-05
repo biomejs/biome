@@ -107,6 +107,9 @@ impl AnalyzerServicesBuilder {
             } else {
                 let document_file_source = DocumentFileSource::from_path(&path_buf, false);
                 match document_file_source {
+                    // Vue, Svelte, and Astro files aren't plain JavaScript, so the module graph
+                    // can't parse them.
+                    DocumentFileSource::Js(file_source) if file_source.is_embedded() => {}
                     DocumentFileSource::Js(_) => js_paths.push(biome_path),
                     DocumentFileSource::Css(_) => css_paths.push(biome_path),
                     DocumentFileSource::Html(_) => html_paths.push(biome_path),

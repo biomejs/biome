@@ -561,6 +561,7 @@ pub mod use_vue_consistent_v_bind_style;
 pub mod use_vue_consistent_v_on_style;
 pub mod use_vue_define_macros_order;
 pub mod use_vue_hyphenated_attributes;
+pub mod use_vue_matching_component_file_name;
 pub mod use_vue_multi_word_component_names;
 pub mod use_vue_next_tick_promise;
 pub mod use_vue_v_for_key;
