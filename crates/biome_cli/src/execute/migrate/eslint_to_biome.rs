@@ -700,6 +700,34 @@ fn migrate_eslint_rule(
                 }
             }
         }
+        eslint_eslint::Rule::MaxStatements(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                // The ESLint and Biome defaults match, so options are only migrated when set.
+                let (severity, options) = match conf {
+                    eslint_eslint::RuleConf::Option(severity, options) => {
+                        (severity, options.into_biome_options(None))
+                    }
+                    eslint_eslint::RuleConf::Options(severity, options, top_level_options) => (
+                        severity,
+                        options.into_biome_options(Some(top_level_options)),
+                    ),
+                    eslint_eslint::RuleConf::Severity(_)
+                    | eslint_eslint::RuleConf::Spread(_, _) => {
+                        return;
+                    }
+                };
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.no_excessive_statements_per_function =
+                        Some(biome_config::RuleConfiguration::WithOptions(
+                            biome_config::RuleWithOptions {
+                                level: severity.into(),
+                                options,
+                            },
+                        ));
+                }
+            }
+        }
         eslint_eslint::Rule::NoConsole(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
                 && let eslint_eslint::RuleConf::Option(severity, rule_options) = conf

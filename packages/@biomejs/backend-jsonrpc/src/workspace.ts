@@ -2596,6 +2596,11 @@ export interface Nursery {
 	 */
 	noExcessiveSelectorClasses?: NoExcessiveSelectorClassesConfiguration;
 	/**
+	 * Enforce a maximum number of statements allowed in a function.
+	 * See https://biomejs.dev/linter/rules/no-excessive-statements-per-function
+	 */
+	noExcessiveStatementsPerFunction?: NoExcessiveStatementsPerFunctionConfiguration;
+	/**
 	 * Disallow extending the prototype of built-in objects.
 	 * See https://biomejs.dev/linter/rules/no-extend-native
 	 */
@@ -5127,6 +5132,9 @@ export type NoExcessiveNestedCallbacksConfiguration =
 export type NoExcessiveSelectorClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExcessiveSelectorClassesOptions;
+export type NoExcessiveStatementsPerFunctionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoExcessiveStatementsPerFunctionOptions;
 export type NoExtendNativeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExtendNativeOptions;
@@ -7370,6 +7378,10 @@ export interface RuleWithNoExcessiveNestedCallbacksOptions {
 export interface RuleWithNoExcessiveSelectorClassesOptions {
 	level: RulePlainConfiguration;
 	options?: NoExcessiveSelectorClassesOptions;
+}
+export interface RuleWithNoExcessiveStatementsPerFunctionOptions {
+	level: RulePlainConfiguration;
+	options?: NoExcessiveStatementsPerFunctionOptions;
 }
 export interface RuleWithNoExtendNativeOptions {
 	level: RulePlainConfiguration;
@@ -9774,6 +9786,17 @@ export interface NoExcessiveSelectorClassesOptions {
 	 */
 	maxClasses?: number;
 }
+export interface NoExcessiveStatementsPerFunctionOptions {
+	/**
+	 * When this option is set to `true`, a function that isn't nested in another function is
+	 * not checked, as long as it's the only such function in the file (default: false).
+	 */
+	ignoreTopLevelFunctions?: boolean;
+	/**
+	 * The maximum number of statements allowed in a function (default: 10).
+	 */
+	max?: number;
+}
 /**
  * Options for the `noExtendNative` rule.
  */
@@ -11354,6 +11377,7 @@ export type Category =
 	| "lint/nursery/noEmptyObjectKeys"
 	| "lint/nursery/noExcessiveNestedCallbacks"
 	| "lint/nursery/noExcessiveSelectorClasses"
+	| "lint/nursery/noExcessiveStatementsPerFunction"
 	| "lint/nursery/noExtendNative"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noIdenticalTestTitle"
