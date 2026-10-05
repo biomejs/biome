@@ -1,0 +1,17 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+
+<script>
+	let content;
+</script>
+
+{content}
+<div>{content}</div>
+{@debug content}
+
+```

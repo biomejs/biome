@@ -1,72 +1,94 @@
-use crate::css_module_info::{CssClassDefinition, CssClassReference};
-use crate::html_module_info::{HtmlEmbeddedContent, HtmlModuleInfo};
-use crate::module_graph::ModuleGraphFsProxy;
+use crate::ImportPathMap;
+use crate::css_module_info::{CssClassDefinition, CssClassReference, CssModuleVisitor};
+use crate::html_module_info::{HtmlImport, HtmlModuleInfo};
 use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
 use biome_css_syntax::{AnyCssRoot, CssClassSelector};
+use biome_db::ParsedSource;
 use biome_html_syntax::{
     AnyHtmlAttributeInitializer, HtmlElement, HtmlRoot, HtmlSelfClosingElement,
 };
 use biome_js_syntax::{AnyJsImportLike, AnyJsRoot};
-use biome_languages::CssFileSource;
 use biome_languages::css::EmbeddingStyleApplicability;
-use biome_resolver::{ResolveOptions, ResolvedPath, resolve};
+use biome_languages::{CssFileSource, LanguageDb};
 use biome_rowan::{AstNode, AstSeparatedList, Text, TextSize, TokenText, WalkEvent};
 use camino::{Utf8Path, Utf8PathBuf};
-use indexmap::{IndexMap, IndexSet};
+use indexmap::IndexSet;
 
-pub const SUPPORTED_CSS_EXTENSIONS: &[&str] = &["css"];
-
-/// Extension aliases to try when resolving HTML-like component imports.
-/// Mirrors the JS visitor's EXTENSION_ALIASES but adds framework extensions.
-const HTML_EXTENSION_ALIASES: &[(&str, &[&str])] = &[
-    ("js", &["ts", "tsx", "d.ts", "js", "jsx"]),
-    ("mjs", &["mts", "d.mts", "mjs"]),
-    ("cjs", &["cts", "d.cts", "cjs"]),
-];
-
-const HTML_SUPPORTED_EXTENSION_ALIASES: &[&str] = &[
-    "ts", "tsx", "mts", "cts", "js", "jsx", "mjs", "cjs", "json", "node",
-    // HTML-like framework component extensions
-    "vue", "astro", "svelte",
-];
-
-pub(crate) struct HtmlModuleVisitor<'a> {
+/// Parsed HTML and embedded-language roots used to build HTML module information.
+#[derive(Clone)]
+pub struct PreparedHtmlModule {
     html_root: HtmlRoot,
-    /// All embedded content blocks (CSS and JS) extracted from this HTML-like file.
-    embedded_content: &'a [HtmlEmbeddedContent],
-    file_path: Utf8PathBuf,
-    directory: &'a Utf8Path,
-    fs_proxy: &'a ModuleGraphFsProxy<'a>,
+    snippets: Vec<PreparedHtmlSnippet>,
 }
 
-impl<'a> HtmlModuleVisitor<'a> {
-    pub(crate) fn new(
-        html_root: HtmlRoot,
-        embedded_content: &'a [HtmlEmbeddedContent],
-        file_path: Utf8PathBuf,
-        directory: &'a Utf8Path,
-        fs_proxy: &'a ModuleGraphFsProxy<'a>,
-    ) -> Self {
+#[derive(Clone)]
+enum PreparedHtmlSnippet {
+    Css {
+        root: AnyCssRoot,
+        file_source: CssFileSource,
+        content_offset: TextSize,
+    },
+    JavaScript {
+        root: AnyJsRoot,
+        content_offset: TextSize,
+    },
+}
+
+/// Collects the parsed roots needed for HTML module resolution.
+pub fn prepare_html_module(db: &dyn LanguageDb, parsed_source: ParsedSource) -> PreparedHtmlModule {
+    let html_root = parsed_source.parsed(db).tree::<HtmlRoot>();
+    let snippets = parsed_source
+        .snippets(db)
+        .iter()
+        .filter_map(|snippet| {
+            let file_source = db.source_from_index(snippet.document_source_index(db))?;
+            let content_offset = snippet.content_offset(db);
+            if let Some(file_source) = file_source.to_css_file_source() {
+                Some(PreparedHtmlSnippet::Css {
+                    root: snippet.parsed(db).tree::<AnyCssRoot>(),
+                    file_source,
+                    content_offset,
+                })
+            } else if file_source.to_js_file_source().is_some() {
+                Some(PreparedHtmlSnippet::JavaScript {
+                    root: snippet.parsed(db).tree::<AnyJsRoot>(),
+                    content_offset,
+                })
+            } else {
+                None
+            }
+        })
+        .collect();
+    PreparedHtmlModule {
+        html_root,
+        snippets,
+    }
+}
+
+pub(crate) struct HtmlModuleVisitor {
+    prepared: PreparedHtmlModule,
+    file_path: Utf8PathBuf,
+}
+
+impl HtmlModuleVisitor {
+    pub(crate) fn new(prepared: PreparedHtmlModule, file_path: Utf8PathBuf) -> Self {
         Self {
-            html_root,
-            embedded_content,
+            prepared,
             file_path,
-            directory,
-            fs_proxy,
         }
     }
 
-    pub(crate) fn visit(self) -> HtmlModuleInfo {
+    pub(crate) fn visit(mut self) -> HtmlModuleInfo {
+        let html_root = self.prepared.html_root.clone();
         let mut style_classes = IndexSet::default();
         let mut referenced_classes = Vec::new();
         let mut imported_stylesheets = Vec::new();
-        let mut static_import_paths = IndexMap::default();
-        let mut dynamic_import_paths = IndexMap::default();
+        let mut import_paths = ImportPathMap::default();
 
         // Walk the HTML CST to collect class= references and <link> stylesheets.
         // Void elements like <link> and <meta> parse as HtmlSelfClosingElement;
         // normal elements parse as HtmlElement. Both must be handled.
-        for event in self.html_root.syntax().preorder() {
+        for event in html_root.syntax().preorder() {
             let WalkEvent::Enter(node) = event else {
                 continue;
             };
@@ -81,21 +103,25 @@ impl<'a> HtmlModuleVisitor<'a> {
             }
         }
 
-        // Dispatch each embedded content block to the appropriate collector.
-        for content in self.embedded_content {
-            match content {
-                // CSS block: collect class definitions (with applicability scoping).
-                HtmlEmbeddedContent::Css(css_root, file_source, content_offset) => {
-                    collect_css_classes(css_root, &mut style_classes, file_source, *content_offset);
+        for snippet in self.prepared.snippets.clone() {
+            match snippet {
+                PreparedHtmlSnippet::Css {
+                    root,
+                    file_source,
+                    content_offset,
+                } => {
+                    collect_css_classes(&root, &mut style_classes, &file_source, content_offset);
+                    let css_info = CssModuleVisitor::new(root).visit();
+                    imported_stylesheets.extend(css_info.imports.iter().map(|import| HtmlImport {
+                        range: import.range + content_offset,
+                        specifier: import.specifier.clone(),
+                        applicability: file_source.embedding_applicability(),
+                    }));
                 }
-                // JS block: collect static import paths for upward traversal.
-                HtmlEmbeddedContent::Js(js_root) => {
-                    self.collect_js_imports(
-                        js_root,
-                        &mut static_import_paths,
-                        &mut dynamic_import_paths,
-                    );
-                }
+                PreparedHtmlSnippet::JavaScript {
+                    root,
+                    content_offset,
+                } => self.collect_js_imports(&root, content_offset, &mut import_paths),
             }
         }
 
@@ -103,35 +129,40 @@ impl<'a> HtmlModuleVisitor<'a> {
             style_classes,
             referenced_classes,
             imported_stylesheets,
-            static_import_paths,
-            dynamic_import_paths,
+            import_paths,
         )
     }
 
     /// Walks a parsed JS/TS root (from an embedded `<script>` block) and
-    /// collects all static import specifiers with their resolved paths.
+    /// collects all static and dynamic import specifiers.
     fn collect_js_imports(
-        &self,
+        &mut self,
         js_root: &AnyJsRoot,
-        static_import_paths: &mut IndexMap<Text, ResolvedPath>,
-        dynamic_import_paths: &mut IndexMap<Text, ResolvedPath>,
+        content_offset: TextSize,
+        import_paths: &mut ImportPathMap<HtmlImport>,
     ) {
         for event in js_root.syntax().preorder() {
             let WalkEvent::Enter(node) = event else {
                 continue;
             };
-            // Only handle static module sources (import … from "…").
-            // Skip dynamic imports (import("…") / require("…")).
             if let Some(any_source) = AnyJsImportLike::cast_ref(&node) {
                 match any_source {
                     AnyJsImportLike::JsModuleSource(source) => {
+                        if source.imports_only_types() {
+                            continue;
+                        }
                         let Some(specifier) = source.inner_string_text().ok() else {
                             continue;
                         };
-                        let resolved = self.resolved_js_path_from_specifier(specifier.text());
-                        static_import_paths
-                            .entry(Text::from(specifier))
-                            .or_insert(resolved);
+                        let specifier: Text = specifier.into();
+                        import_paths.insert(
+                            specifier.clone(),
+                            HtmlImport {
+                                range: source.range() + content_offset,
+                                specifier,
+                                applicability: EmbeddingStyleApplicability::Global,
+                            },
+                        );
                     }
                     // require("") isn't actually supported in the environments we're interested in. For example require() shouldn't be
                     // supported in HTML-ish languages.
@@ -154,10 +185,15 @@ impl<'a> HtmlModuleVisitor<'a> {
                             continue;
                         };
 
-                        let resolved = self.resolved_js_path_from_specifier(argument.text());
-                        dynamic_import_paths
-                            .entry(Text::from(argument))
-                            .or_insert(resolved);
+                        let specifier: Text = argument.into();
+                        import_paths.insert(
+                            specifier.clone(),
+                            HtmlImport {
+                                range: source.range() + content_offset,
+                                specifier,
+                                applicability: EmbeddingStyleApplicability::Global,
+                            },
+                        );
                     }
                 }
             }
@@ -205,10 +241,10 @@ impl<'a> HtmlModuleVisitor<'a> {
     /// `<img class="hero" />`, `<input class="field" />`), and additionally
     /// handles `<link rel="stylesheet" href="...">` for stylesheet imports.
     fn visit_self_closing_element(
-        &self,
+        &mut self,
         element: HtmlSelfClosingElement,
         referenced_classes: &mut Vec<CssClassReference>,
-        imported_stylesheets: &mut Vec<ResolvedPath>,
+        imported_stylesheets: &mut Vec<HtmlImport>,
     ) {
         // Collect class= references from all self-closing elements.
         for attr in element.attributes() {
@@ -246,40 +282,12 @@ impl<'a> HtmlModuleVisitor<'a> {
             .find_attribute_by_name("href")
             .and_then(|href_attr| href_attr.as_static_value())
         {
-            let resolved = self.resolved_path_from_specifier(href_value.text());
-            imported_stylesheets.push(resolved);
+            imported_stylesheets.push(HtmlImport {
+                range: element.range(),
+                specifier: href_value.text().to_string().into(),
+                applicability: EmbeddingStyleApplicability::Global,
+            });
         }
-    }
-
-    fn resolved_path_from_specifier(&self, specifier: &str) -> ResolvedPath {
-        let options = ResolveOptions {
-            assume_relative: true,
-            condition_names: &[],
-            default_files: &[],
-            extensions: SUPPORTED_CSS_EXTENSIONS,
-            extension_aliases: &[],
-            ..Default::default()
-        };
-        let resolved = resolve(specifier, self.directory, self.fs_proxy, &options);
-        ResolvedPath::new(resolved)
-    }
-
-    /// Resolves a JS/TS/framework module specifier from an embedded `<script>`.
-    ///
-    /// Uses the same resolution options as `JsModuleVisitor::resolved_path_from_specifier`,
-    /// plus framework-specific extensions (`.vue`, `.astro`, `.svelte`).
-    fn resolved_js_path_from_specifier(&self, specifier: &str) -> ResolvedPath {
-        let options = ResolveOptions {
-            condition_names: &["types", "import", "default"],
-            default_files: &["index"],
-            extensions: HTML_SUPPORTED_EXTENSION_ALIASES,
-            extension_aliases: HTML_EXTENSION_ALIASES,
-            resolve_node_builtins: true,
-            resolve_types: true,
-            ..Default::default()
-        };
-        let resolved = resolve(specifier, self.directory, self.fs_proxy, &options);
-        ResolvedPath::new(resolved)
     }
 }
 

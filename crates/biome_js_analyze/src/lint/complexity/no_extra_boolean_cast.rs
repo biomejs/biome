@@ -9,7 +9,7 @@ use biome_js_syntax::{
     AnyJsExpression, JsAssignmentExpression, JsBinaryExpression, JsCallArgumentList,
     JsCallArguments, JsCallExpression, JsConditionalExpression, JsLogicalExpression,
     JsNewExpression, JsParenthesizedExpression, JsSequenceExpression, JsSyntaxNode,
-    JsUnaryExpression, JsUnaryOperator, T, is_in_boolean_context, is_negation,
+    JsUnaryExpression, JsUnaryOperator, OperatorPrecedence, T, is_in_boolean_context, is_negation,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, declare_node_union};
 use biome_rule_options::no_extra_boolean_cast::NoExtraBooleanCastOptions;
@@ -206,10 +206,9 @@ impl Rule for NoExtraBooleanCast {
             ExtraBooleanCastType::BooleanCall => "Remove redundant `Boolean` call",
         };
 
-        // Check if the Boolean call is inside a unary negation and the argument needs parentheses
+        // Check if removing the Boolean call requires preserving its grouping.
         let mut replacement = node_to_replace.clone();
 
-        // Only wrap in parentheses if this is a Boolean call inside a logical NOT with complex expression
         if matches!(extra_boolean_cast_type, ExtraBooleanCastType::BooleanCall) {
             let is_negated_boolean_call = node
                 .syntax()
@@ -218,7 +217,19 @@ impl Rule for NoExtraBooleanCast {
                 .and_then(|expr| expr.operator().ok())
                 .is_some_and(|op| op == JsUnaryOperator::LogicalNot);
 
-            if is_negated_boolean_call && needs_parentheses_when_negated(node_to_replace) {
+            let is_conditional_test = node
+                .syntax()
+                .parent()
+                .and_then(JsConditionalExpression::cast)
+                .and_then(|expression| expression.test().ok())
+                .is_some_and(|test| test.syntax() == node.syntax());
+
+            if (is_negated_boolean_call && needs_parentheses_when_negated(node_to_replace))
+                || (is_conditional_test
+                    && node_to_replace
+                        .precedence()
+                        .is_ok_and(|precedence| precedence <= OperatorPrecedence::Conditional))
+            {
                 replacement =
                     AnyJsExpression::JsParenthesizedExpression(make::js_parenthesized_expression(
                         make::token(T!['(']),

@@ -1,0 +1,171 @@
+/* should generate diagnostics */
+
+@property --angle {
+	syntax: "<angle>";
+	inherits: false;
+	initial-value: 10px;
+}
+
+@property --color {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: 10px;
+}
+
+@property --custom-ident {
+	syntax: "<custom-ident>";
+	inherits: false;
+	initial-value: 10px;
+}
+
+@property --image {
+	syntax: "<image>";
+	inherits: false;
+	initial-value: red;
+}
+
+@property --integer {
+	syntax: "<integer>";
+	inherits: false;
+	initial-value: 1.5;
+}
+
+@property --length {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: 10%;
+}
+
+@property --length-percentage {
+	syntax: "<length-percentage>";
+	inherits: false;
+	initial-value: red;
+}
+
+@property --number {
+	syntax: "<number>";
+	inherits: false;
+	initial-value: 1px;
+}
+
+@property --percentage {
+	syntax: "<percentage>";
+	inherits: false;
+	initial-value: 1px;
+}
+
+@property --resolution {
+	syntax: "<resolution>";
+	inherits: false;
+	initial-value: 2s;
+}
+
+@property --string {
+	syntax: "<string>";
+	inherits: false;
+	initial-value: unquoted;
+}
+
+@property --time {
+	syntax: "<time>";
+	inherits: false;
+	initial-value: 45deg;
+}
+
+@property --transform-function {
+	syntax: "<transform-function>";
+	inherits: false;
+	initial-value: translateX(10px) rotate(45deg);
+}
+
+@property --transform-list {
+	syntax: "<transform-list>";
+	inherits: false;
+	initial-value: 10px;
+}
+
+@property --url {
+	syntax: "<url>";
+	inherits: false;
+	initial-value: "image.png";
+}
+
+@property --keyword {
+	syntax: "compact | expanded";
+	inherits: false;
+	initial-value: other;
+}
+
+@property --alternative-type {
+	syntax: "<length> | auto";
+	inherits: false;
+	initial-value: red;
+}
+
+@property --space-separated {
+	syntax: "<length>+";
+	inherits: false;
+	initial-value: 10px, 20px;
+}
+
+@property --comma-separated {
+	syntax: "<color>#";
+	inherits: false;
+	initial-value: red blue;
+}
+
+@property --decimal-integer {
+	syntax: "<integer>";
+	inherits: false;
+	initial-value: 1.0;
+}
+
+@property --exponential-integer {
+	syntax: "<integer>";
+	inherits: false;
+	initial-value: 1e3;
+}
+
+@property --zero-resolution {
+	syntax: "<resolution>";
+	inherits: false;
+	initial-value: 0dpi;
+}
+
+@property --negative-resolution {
+	syntax: "<resolution>";
+	inherits: false;
+	initial-value: -1dppx;
+}
+
+@property --duplicate-descriptors {
+	syntax: "<color>";
+	syntax: "<length>";
+	inherits: false;
+	initial-value: 1px;
+	initial-value: red;
+}
+
+@property --duplicate-rule {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: red;
+}
+
+@property --duplicate-rule {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: red;
+}
+
+@property --sine-length {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: sin(1);
+}
+
+@property --safe-area-color {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: env(safe-area-inset-top);
+}

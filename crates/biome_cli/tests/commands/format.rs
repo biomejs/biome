@@ -1,3 +1,4 @@
+use crate::TestArgs as Args;
 use crate::configs::{
     CONFIG_DISABLED_FORMATTER, CONFIG_FILE_SIZE_LIMIT, CONFIG_FILES_INCLUDES_EXCLUDES_STDIN_PATH,
     CONFIG_FORMAT, CONFIG_FORMAT_JSONC, CONFIG_ISSUE_3175_1, CONFIG_ISSUE_3175_2,
@@ -9,7 +10,6 @@ use crate::{
 use biome_cli::CliDiagnostic;
 use biome_console::{BufferConsole, MarkupBuf, markup};
 use biome_fs::{FileSystemExt, MemoryFileSystem};
-use bpaf::Args;
 use camino::{Utf8Path, Utf8PathBuf};
 
 // six spaces
@@ -3575,7 +3575,7 @@ fn html_enabled_by_arg_format() {
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
-    assert_file_contents(&fs, file_path, "<!DOCTYPE html>\n");
+    assert_file_contents(&fs, file_path, "<!doctype html>\n");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

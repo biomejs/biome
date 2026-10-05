@@ -1,12 +1,11 @@
-use std::{fmt, rc::Rc};
-
+use crate::comments::{FormatMarkdownLeadingComment, MarkdownCommentStyle};
+use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding,
     LineWidth, TrailingNewline, TransformSourceMap, comments::Comments, printer::PrinterOptions,
 };
-use biome_markdown_syntax::MarkdownLanguage;
-
-use crate::comments::{FormatMarkdownLeadingComment, MarkdownCommentStyle};
+use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode};
+use std::{fmt, rc::Rc, str::FromStr};
 
 pub type MarkdownComments = Comments<MarkdownLanguage>;
 
@@ -24,6 +23,51 @@ pub struct MdFormatOptions {
     line_ending: LineEnding,
     line_width: LineWidth,
     trailing_newline: TrailingNewline,
+    prose_wrap: ProseWrap,
+}
+
+/// Controls whether Biome keeps, adds, or removes line breaks in Markdown paragraphs.
+///
+/// Manual line breaks are always kept. In Markdown, a manual line break is created by ending a
+/// line with two spaces or a backslash.
+#[derive(Debug, Default, Clone, Copy, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub enum ProseWrap {
+    /// Keep line breaks as written in the source file. This is the default.
+    #[default]
+    Preserve,
+    /// Wrap paragraphs to fit the configured `lineWidth`.
+    Always,
+    /// Remove line breaks from paragraphs so that each paragraph is on one line.
+    Never,
+}
+
+impl fmt::Display for ProseWrap {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            ProseWrap::Preserve => write!(f, "preserve"),
+            ProseWrap::Always => write!(f, "always"),
+            ProseWrap::Never => write!(f, "never"),
+        }
+    }
+}
+
+impl FromStr for ProseWrap {
+    type Err = &'static str;
+
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
+        match value {
+            "preserve" => Ok(Self::Preserve),
+            "always" => Ok(Self::Always),
+            "never" => Ok(Self::Never),
+            _ => Err("Unsupported value for this option"),
+        }
+    }
 }
 
 impl CstFormatContext for MarkdownFormatContext {
@@ -70,6 +114,7 @@ impl MdFormatOptions {
             line_ending: LineEnding::default(),
             line_width: LineWidth::default(),
             trailing_newline: TrailingNewline::default(),
+            prose_wrap: ProseWrap::default(),
         }
     }
 
@@ -97,14 +142,31 @@ impl MdFormatOptions {
         self.trailing_newline = trailing_newline;
         self
     }
+
+    pub fn with_prose_wrap(mut self, prose_wrap: ProseWrap) -> Self {
+        self.prose_wrap = prose_wrap;
+        self
+    }
+
+    pub fn prose_wrap(&self) -> ProseWrap {
+        self.prose_wrap
+    }
 }
 
 impl MarkdownFormatContext {
-    pub fn new(options: MdFormatOptions) -> Self {
+    pub fn new(
+        options: MdFormatOptions,
+        root: &MarkdownSyntaxNode,
+        source_map: Option<TransformSourceMap>,
+    ) -> Self {
         Self {
             options,
-            comments: Rc::new(MarkdownComments::default()),
-            source_map: None,
+            comments: Rc::new(MarkdownComments::from_node(
+                root,
+                &MarkdownCommentStyle,
+                source_map.as_ref(),
+            )),
+            source_map,
         }
     }
 
@@ -136,6 +198,7 @@ impl fmt::Display for MdFormatOptions {
         writeln!(f, "Indent width: {}", self.indent_width.value())?;
         writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.value())?;
-        writeln!(f, "Trailing newline: {}", self.trailing_newline.value())
+        writeln!(f, "Trailing newline: {}", self.trailing_newline.value())?;
+        writeln!(f, "Prose wrap: {}", self.prose_wrap)
     }
 }

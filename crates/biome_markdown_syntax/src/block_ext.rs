@@ -1,6 +1,10 @@
+use crate::html_comment_ext::{html_comment_ranges, normalize_quote_prefixes};
 use crate::list_ext::AnyListItem;
-use crate::{AnyMdBlock, AnyMdCodeBlock, AnyMdContainerBlock, AnyMdLeafBlock, MdParagraph};
-use biome_rowan::AstNodeList;
+use crate::{
+    AnyMdBlock, AnyMdCodeBlock, AnyMdContainerBlock, AnyMdInline, AnyMdLeafBlock, MdHtmlBlock,
+    MdParagraph, MdQuote,
+};
+use biome_rowan::{AstNode, AstNodeList};
 
 impl AnyMdBlock {
     pub const fn is_fenced_block(&self) -> bool {
@@ -72,6 +76,16 @@ impl AnyMdBlock {
         matches!(self, Self::AnyMdLeafBlock(AnyMdLeafBlock::MdHtmlBlock(_)))
     }
 
+    pub fn is_html_comment(&self) -> bool {
+        match self {
+            Self::AnyMdLeafBlock(AnyMdLeafBlock::MdHtmlBlock(block)) => block.is_html_comment(),
+            Self::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph)) => {
+                paragraph.is_html_comment()
+            }
+            _ => false,
+        }
+    }
+
     pub fn as_any_list_item(&self) -> Option<AnyListItem> {
         match self {
             Self::AnyMdContainerBlock(AnyMdContainerBlock::MdBulletListItem(item)) => {
@@ -86,6 +100,44 @@ impl AnyMdBlock {
 }
 
 impl MdParagraph {
+    pub fn is_html_comment(&self) -> bool {
+        let quote_depth = self
+            .syntax()
+            .ancestors()
+            .filter(|node| MdQuote::can_cast(node.kind()))
+            .count();
+        let mut has_comment = false;
+        for item in self.list() {
+            match item {
+                AnyMdInline::MdInlineHtml(html) => {
+                    let Ok(token) = html.value_token() else {
+                        return false;
+                    };
+                    if token.text_trimmed().trim().is_empty() && token.has_leading_comments() {
+                        has_comment = true;
+                        continue;
+                    }
+                    let text = normalize_quote_prefixes(token.text_trimmed(), quote_depth);
+                    if html_comment_ranges(&text).is_none() {
+                        return false;
+                    }
+                    has_comment = true;
+                }
+                AnyMdInline::MdTextual(textual) => {
+                    if !textual
+                        .value_token()
+                        .is_ok_and(|token| token.text_trimmed().chars().all(char::is_whitespace))
+                    {
+                        return false;
+                    }
+                }
+                AnyMdInline::MdQuotePrefix(_) => {}
+                _ => return false,
+            }
+        }
+        has_comment
+    }
+
     pub fn ends_with_newline(&self) -> bool {
         self.list().last().is_some_and(|item| {
             item.as_md_textual()
@@ -108,5 +160,26 @@ impl MdParagraph {
             }
             _ => false,
         }
+    }
+}
+
+impl MdHtmlBlock {
+    pub fn is_html_comment(&self) -> bool {
+        let Ok(content) = self.content() else {
+            return false;
+        };
+        let Ok(token) = content.value_token() else {
+            return false;
+        };
+        if token.text_trimmed().trim().is_empty() && token.has_leading_comments() {
+            return true;
+        }
+
+        let quote_depth = self
+            .syntax()
+            .ancestors()
+            .filter(|node| MdQuote::can_cast(node.kind()))
+            .count();
+        html_comment_ranges(&normalize_quote_prefixes(token.text_trimmed(), quote_depth)).is_some()
     }
 }

@@ -466,7 +466,7 @@ impl SemanticAssertions {
     ) {
         // Check every declaration assertion is ok
 
-        for (_, assertion) in self.declarations_assertions.iter() {
+        for assertion in self.declarations_assertions.values() {
             if let Some(events) = events_by_pos.get(&assertion.range.start()) {
                 match &events[0] {
                     SemanticEvent::DeclarationFound { .. } => {

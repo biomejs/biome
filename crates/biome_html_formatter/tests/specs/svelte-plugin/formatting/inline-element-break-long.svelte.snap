@@ -1,0 +1,66 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/inline-element-break-long.svelte
+---
+
+# Input
+
+```svelte
+<span><span>looooooooooong</span>looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span><span>hi</span><span>hi</span></span></span> <span>hi</span><div><span><span>looooooooooong</span>looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span><span>hi</span><span>hi</span></span></span><span>hi</span> <span><span>looooooooooong</span>looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span><span>hi</span><span>hi</span></span></span></div> <span><span>looooooooooong</span>looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span><span>hi</span><span>hi</span></span></span>
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -3,7 +3,8 @@
+     >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
+         ><span>hi</span><span>hi</span></span
+     ></span
+-> <span>hi</span>
++>
++<span>hi</span>
+ <div>
+     <span
+         ><span>looooooooooong</span
+```
+
+# Output
+
+```svelte
+<span
+    ><span>looooooooooong</span
+    >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
+        ><span>hi</span><span>hi</span></span
+    ></span
+>
+<span>hi</span>
+<div>
+    <span
+        ><span>looooooooooong</span
+        >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
+            ><span>hi</span><span>hi</span></span
+        ></span
+    ><span>hi</span>
+    <span
+        ><span>looooooooooong</span
+        >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
+            ><span>hi</span><span>hi</span></span
+        ></span
+    >
+</div>
+<span
+    ><span>looooooooooong</span
+    >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
+        ><span>hi</span><span>hi</span></span
+    ></span
+>
+```
+
+# Lines exceeding max width of 80 characters
+```
+   11:         >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
+   17:         >looooooooooonglooooooooooonglooooooooooonglooooooooooonglooooooooooong<span
+```

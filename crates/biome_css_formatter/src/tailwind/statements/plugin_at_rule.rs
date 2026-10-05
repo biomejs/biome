@@ -13,7 +13,14 @@ impl FormatNodeRule<TwPluginAtRule> for FormatTwPluginAtRule {
             semicolon_token,
         } = node.as_fields();
 
-        write!(f, [plugin_token.format(), space(), name.format()])?;
+        write!(
+            f,
+            [
+                plugin_token.format()?.with_text_case(CssCase::Lowercase),
+                space(),
+                name.format()
+            ]
+        )?;
         if let Some(block) = block {
             write!(f, [space(), block.format()])?;
             if let Some(semicolon_token) = semicolon_token {

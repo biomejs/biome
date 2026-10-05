@@ -1,5 +1,5 @@
 ---
-source: crates/biome_module_graph/tests/spec_tests_v2.rs
+source: crates/biome_module_graph/tests/spec_tests.rs
 expression: content
 ---
 
@@ -21,11 +21,11 @@ export const nullishBox = maybeBox ?? "fallback";
 ## Inferred types
 
 ```
-Binding maybeText "maybeText" => instanceof string | null
+Binding maybeText "maybeText" => string | null
 
 Expression "\"value\"" => string: value
 
-Binding zeroOrText "zeroOrText" => instanceof string | number: 0
+Binding zeroOrText "zeroOrText" => string | number: 0
 
 Expression "\"value\"" => string: value
 
@@ -35,7 +35,7 @@ Binding Box "Box" => class "Box" {
   type_args: []
 }
 
-Binding maybeBox "maybeBox" => instanceof instanceof Box | null
+Binding maybeBox "maybeBox" => instanceof Box | null
 
 Expression "new Box()" => instanceof Box
 
@@ -47,7 +47,7 @@ Expression "Box" => class "Box" {
 
 Binding nullishResult "nullishResult" => string
 
-Expression "maybeText" => instanceof string | null
+Expression "maybeText" => string | null
 
 Expression "maybeText ?? \"fallback\"" => string
 
@@ -55,7 +55,7 @@ Expression "\"fallback\"" => string: fallback
 
 Binding andResult "andResult" => string:  | number: 0 | bool: true
 
-Expression "zeroOrText" => instanceof string | number: 0
+Expression "zeroOrText" => string | number: 0
 
 Expression "zeroOrText && true" => string:  | number: 0 | bool: true
 
@@ -63,7 +63,7 @@ Expression "true" => bool: true
 
 Binding nullishBox "nullishBox" => instanceof Box | string: fallback
 
-Expression "maybeBox" => instanceof instanceof Box | null
+Expression "maybeBox" => instanceof Box | null
 
 Expression "maybeBox ?? \"fallback\"" => instanceof Box | string: fallback
 

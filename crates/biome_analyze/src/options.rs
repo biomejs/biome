@@ -4,16 +4,15 @@ use rustc_hash::FxHashMap;
 use crate::{FixKind, Rule, RuleKey};
 use std::any::{Any, TypeId};
 use std::borrow::Cow;
-use std::rc::Rc;
 use std::sync::Arc;
 
 /// A convenient new type data structure to store the options that belong to a rule
 #[derive(Debug)]
-pub struct RuleOptions(TypeId, Box<dyn Any>, Option<FixKind>);
+pub struct RuleOptions(TypeId, Box<dyn Any + Send + Sync>, Option<FixKind>);
 
 impl RuleOptions {
     /// Creates a new [RuleOptions]
-    pub fn new<O: 'static>(options: O, fix_kind: Option<FixKind>) -> Self {
+    pub fn new<O: 'static + Send + Sync>(options: O, fix_kind: Option<FixKind>) -> Self {
         Self(TypeId::of::<O>(), Box::new(options), fix_kind)
     }
 
@@ -53,11 +52,22 @@ impl AnalyzerRules {
     }
 }
 
+#[derive(Clone, Debug, Default)]
+struct AnalyzerRulesHandle(Arc<AnalyzerRules>);
+
+impl PartialEq for AnalyzerRulesHandle {
+    fn eq(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.0, &other.0)
+    }
+}
+
+impl Eq for AnalyzerRulesHandle {}
+
 /// A data structured derived from the `biome.json` file
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Eq, PartialEq)]
 pub struct AnalyzerConfiguration {
     /// A list of rules and their options
-    pub(crate) rules: Rc<AnalyzerRules>,
+    rules: AnalyzerRulesHandle,
 
     /// A collection of bindings that the analyzers should consider as "external".
     ///
@@ -87,7 +97,7 @@ pub struct AnalyzerConfiguration {
 
 impl AnalyzerConfiguration {
     pub fn with_rules(mut self, rules: AnalyzerRules) -> Self {
-        self.rules = Rc::new(rules);
+        self.rules = AnalyzerRulesHandle(Arc::new(rules));
         self
     }
 
@@ -133,7 +143,7 @@ impl AnalyzerConfiguration {
 }
 
 /// A set of information useful to the analyzer infrastructure
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Eq, PartialEq)]
 pub struct AnalyzerOptions {
     /// A data structured derived from the [`biome.json`] file
     pub(crate) configuration: AnalyzerConfiguration,
@@ -207,6 +217,7 @@ impl AnalyzerOptions {
     {
         self.configuration
             .rules
+            .0
             .get_rule_options::<R::Options>(&RuleKey::rule::<R>())
             .cloned()
     }
@@ -217,6 +228,7 @@ impl AnalyzerOptions {
     {
         self.configuration
             .rules
+            .0
             .get_rule_fix_kind(&RuleKey::rule::<R>())
     }
 
@@ -233,7 +245,7 @@ impl AnalyzerOptions {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum PreferredIndentation {
     /// Use tabs for indentation.
     #[default]
@@ -254,7 +266,7 @@ impl PreferredIndentation {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum PreferredQuote {
     /// Double quotes
     #[default]

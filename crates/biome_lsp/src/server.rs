@@ -10,7 +10,7 @@ use biome_console::markup;
 use biome_diagnostics::panic::PanicError;
 use biome_fs::{ConfigName, MemoryFileSystem, OsFileSystem};
 use biome_resolver::FsWithResolverProxy;
-use biome_service::workspace::db::DbState;
+use biome_service::db::DbState;
 use biome_service::workspace::{
     CloseProjectParams, GritSearchQuery, RageEntry, RageParams, RageResult, ServiceNotification,
 };
@@ -21,12 +21,15 @@ use futures::future::ready;
 use rustc_hash::FxHashMap;
 use serde_json::json;
 use std::panic::{AssertUnwindSafe, RefUnwindSafe};
+use std::pin::Pin;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
-use tokio::io::{AsyncRead, AsyncWrite};
+use std::task::{Context, Poll};
+use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 use tokio::sync::{Notify, watch};
 use tokio::task::spawn_blocking;
-use tower_lsp_server::jsonrpc::Result as LspResult;
+use tower::Service;
+use tower_lsp_server::jsonrpc::{Request as JsonRpcRequest, Result as LspResult};
 use tower_lsp_server::{ClientSocket, ls_types::*};
 use tower_lsp_server::{LanguageServer, LspService, Server};
 use tracing::{debug, error, info, instrument, warn};
@@ -35,12 +38,7 @@ pub struct LSPServer {
     pub(crate) session: SessionHandle,
     /// Map of all sessions connected to the same [ServerFactory] as this [LSPServer].
     sessions: Sessions,
-    /// If this is true the server will broadcast a shutdown signal once the
-    /// last client disconnected
-    stop_on_disconnect: bool,
-    /// This shared flag is set to true once at least one session has been
-    /// initialized on this server instance
-    is_initialized: Arc<AtomicBool>,
+    lifecycle: Arc<SessionLifecycle>,
 }
 
 impl RefUnwindSafe for LSPServer {}
@@ -54,18 +52,98 @@ where
     }))
 }
 
+const WATCHED_FILE_PATTERNS: [&str; 6] = [
+    "**/biome.{json,jsonc}",
+    "**/.biome.{json,jsonc}",
+    ".editorconfig",
+    "pnpm-workspace.yaml",
+    "**/.gitignore",
+    "**/.ignore",
+];
+
+/// Escapes a filesystem path before embedding it in an LSP string glob.
+///
+/// A [`RelativePattern`] keeps its base URI separate from its glob, but clients
+/// without relative-pattern support receive one string containing both. Glob
+/// metacharacters in the base path must therefore be represented as
+/// single-character ranges, and Windows separators must be converted to `/`.
+/// See the [LSP glob syntax] and [VS Code's escaping rules].
+///
+/// [LSP glob syntax]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#globPattern
+/// [VS Code's escaping rules]: https://code.visualstudio.com/docs/editor/glob-patterns#_common-questions
+fn escape_string_glob_base(path: &str) -> String {
+    let mut escaped = String::with_capacity(path.len());
+    for char in path.chars() {
+        match char {
+            '\\' if cfg!(windows) => escaped.push('/'),
+            '[' => escaped.push_str("[[]"),
+            ']' => escaped.push_str("[]]"),
+            '*' | '?' | '{' | '}' => {
+                escaped.push('[');
+                escaped.push(char);
+                escaped.push(']');
+            }
+            _ => escaped.push(char),
+        }
+    }
+    escaped
+}
+
+fn watched_file_watchers(
+    base_uri: OneOf<WorkspaceFolder, Uri>,
+    relative_pattern_support: bool,
+) -> Option<Vec<FileSystemWatcher>> {
+    if relative_pattern_support {
+        return Some(
+            WATCHED_FILE_PATTERNS
+                .into_iter()
+                .map(|pattern| FileSystemWatcher {
+                    glob_pattern: GlobPattern::Relative(RelativePattern {
+                        base_uri: base_uri.clone(),
+                        pattern: pattern.to_string(),
+                    }),
+                    kind: Some(WatchKind::all()),
+                })
+                .collect(),
+        );
+    }
+
+    let uri = match &base_uri {
+        OneOf::Left(folder) => &folder.uri,
+        OneOf::Right(uri) => uri,
+    };
+    if !uri.scheme().as_str().eq_ignore_ascii_case("file") {
+        warn!("Unable to register file watchers for non-file URI {uri:?}.");
+        return None;
+    }
+    let Some(path) = uri.to_file_path() else {
+        warn!("Unable to convert {uri:?} to a file path for file watchers.");
+        return None;
+    };
+    let base_path = escape_string_glob_base(&path.to_string_lossy());
+    let separator = if base_path.ends_with('/') || base_path.ends_with('\\') {
+        ""
+    } else {
+        "/"
+    };
+
+    Some(
+        WATCHED_FILE_PATTERNS
+            .into_iter()
+            .map(|pattern| FileSystemWatcher {
+                glob_pattern: GlobPattern::String(format!("{base_path}{separator}{pattern}")),
+                kind: Some(WatchKind::all()),
+            })
+            .collect(),
+    )
+}
+
 impl LSPServer {
-    fn new(
-        session: SessionHandle,
-        sessions: Sessions,
-        stop_on_disconnect: bool,
-        is_initialized: Arc<AtomicBool>,
-    ) -> Self {
+    fn new(session: SessionHandle, sessions: Sessions, lifecycle: Arc<SessionLifecycle>) -> Self {
         Self {
             session,
             sessions,
-            stop_on_disconnect,
-            is_initialized,
+            lifecycle,
         }
     }
 
@@ -147,105 +225,30 @@ impl LSPServer {
         );
 
         let watched_files_capability = if self.session.can_register_did_change_watched_files() {
-            if let Some(folders) = self.session.get_workspace_folders() {
-                let watchers = folders
-                    .iter()
-                    .flat_map(|folder| {
-                        vec![
-                            FileSystemWatcher {
-                                glob_pattern: GlobPattern::Relative(RelativePattern {
-                                    pattern: "**/biome.{json,jsonc}".to_string(),
-                                    base_uri: OneOf::Left(folder.clone()),
-                                }),
-                                kind: Some(WatchKind::all()),
-                            },
-                            FileSystemWatcher {
-                                glob_pattern: GlobPattern::Relative(RelativePattern {
-                                    pattern: "**/.biome.{json,jsonc}".to_string(),
-                                    base_uri: OneOf::Left(folder.clone()),
-                                }),
-                                kind: Some(WatchKind::all()),
-                            },
-                            FileSystemWatcher {
-                                glob_pattern: GlobPattern::Relative(RelativePattern {
-                                    pattern: ".editorconfig".to_string(),
-                                    base_uri: OneOf::Left(folder.clone()),
-                                }),
-                                kind: Some(WatchKind::all()),
-                            },
-                            FileSystemWatcher {
-                                glob_pattern: GlobPattern::Relative(RelativePattern {
-                                    pattern: "pnpm-workspace.yaml".to_string(),
-                                    base_uri: OneOf::Left(folder.clone()),
-                                }),
-                                kind: Some(WatchKind::all()),
-                            },
-                            FileSystemWatcher {
-                                glob_pattern: GlobPattern::Relative(RelativePattern {
-                                    pattern: "**/.gitignore".to_string(),
-                                    base_uri: OneOf::Left(folder.clone()),
-                                }),
-                                kind: Some(WatchKind::all()),
-                            },
-                            FileSystemWatcher {
-                                glob_pattern: GlobPattern::Relative(RelativePattern {
-                                    pattern: "**/.ignore".to_string(),
-                                    base_uri: OneOf::Left(folder.clone()),
-                                }),
-                                kind: Some(WatchKind::all()),
-                            },
-                        ]
-                    })
-                    .collect();
+            let base_uris: Vec<_> = match self.session.get_workspace_folders() {
+                Some(folders) if !folders.is_empty() => {
+                    folders.into_iter().map(OneOf::Left).collect()
+                }
+                _ => self
+                    .session
+                    .root_uri()
+                    .map(OneOf::Right)
+                    .into_iter()
+                    .collect(),
+            };
+            let relative_pattern_support = self.session.supports_relative_watched_file_patterns();
+            let watchers: Vec<_> = base_uris
+                .into_iter()
+                .filter_map(|base_uri| watched_file_watchers(base_uri, relative_pattern_support))
+                .flatten()
+                .collect();
+
+            if watchers.is_empty() {
+                CapabilityStatus::Disable
+            } else {
                 CapabilityStatus::Enable(Some(json!(DidChangeWatchedFilesRegistrationOptions {
                     watchers
                 })))
-            } else if let Some(base_uri) = self.session.base_uri() {
-                let base_path = self.session.base_path();
-                let value = DidChangeWatchedFilesRegistrationOptions {
-                    watchers: vec![
-                        FileSystemWatcher {
-                            glob_pattern: GlobPattern::Relative(RelativePattern {
-                                pattern: "**/biome.{json,jsonc}".to_string(),
-                                base_uri: OneOf::Right(base_uri.clone()),
-                            }),
-                            kind: Some(WatchKind::all()),
-                        },
-                        FileSystemWatcher {
-                            glob_pattern: GlobPattern::Relative(RelativePattern {
-                                pattern: "**/.biome.{json,jsonc}".to_string(),
-                                base_uri: OneOf::Right(base_uri),
-                            }),
-                            kind: Some(WatchKind::all()),
-                        },
-                        FileSystemWatcher {
-                            glob_pattern: GlobPattern::String(base_path.as_ref().map_or_else(
-                                || "**/.editorconfig".to_string(),
-                                |p| format!("{}/.editorconfig", p.as_path().as_str()),
-                            )),
-                            kind: Some(WatchKind::all()),
-                        },
-                        FileSystemWatcher {
-                            glob_pattern: GlobPattern::String(base_path.as_ref().map_or_else(
-                                || "**/pnpm-workspace.yaml".to_string(),
-                                |p| format!("{}/pnpm-workspace.yaml", p.as_path().as_str()),
-                            )),
-                            kind: Some(WatchKind::all()),
-                        },
-                        FileSystemWatcher {
-                            glob_pattern: GlobPattern::String("**/.gitignore".to_string()),
-                            kind: Some(WatchKind::all()),
-                        },
-                        FileSystemWatcher {
-                            glob_pattern: GlobPattern::String("**/.ignore".to_string()),
-
-                            kind: Some(WatchKind::all()),
-                        },
-                    ],
-                };
-                CapabilityStatus::Enable(Some(json!(value)))
-            } else {
-                CapabilityStatus::Disable
             }
         } else {
             CapabilityStatus::Disable
@@ -354,7 +357,7 @@ impl LanguageServer for LSPServer {
     #[tracing::instrument(level = "debug", skip_all)]
     async fn initialize(&self, params: InitializeParams) -> LspResult<InitializeResult> {
         info!("Starting Biome Language Server...");
-        self.is_initialized.store(true, Ordering::Relaxed);
+        self.lifecycle.mark_initialized();
 
         let server_capabilities = server_capabilities(&params.capabilities);
         if params.root_path.is_some() {
@@ -404,9 +407,6 @@ impl LanguageServer for LSPServer {
     }
 
     async fn shutdown(&self) -> LspResult<()> {
-        if self.stop_on_disconnect {
-            self.session.broadcast_shutdown();
-        }
         Ok(())
     }
 
@@ -605,22 +605,125 @@ impl LanguageServer for LSPServer {
 
 impl Drop for LSPServer {
     fn drop(&mut self) {
-        if let Ok(mut sessions) = self.sessions.lock() {
-            let _removed = sessions.remove(&self.session.key);
-            debug_assert!(_removed.is_some(), "Session did not exist.");
-
-            if self.stop_on_disconnect
-                && sessions.is_empty()
-                && self.is_initialized.load(Ordering::Relaxed)
-            {
-                self.session.cancellation.notify_one();
-            }
-        }
+        self.lifecycle.disconnect();
     }
 }
 
 /// Map of active sessions connected to a [ServerFactory].
 type Sessions = Arc<Mutex<FxHashMap<SessionKey, SessionHandle>>>;
+
+struct SessionLifecycle {
+    session_key: SessionKey,
+    sessions: Sessions,
+    cancellation: Arc<Notify>,
+    stop_on_disconnect: bool,
+    is_initialized: Arc<AtomicBool>,
+    is_disconnected: AtomicBool,
+}
+
+impl SessionLifecycle {
+    fn mark_initialized(&self) {
+        self.is_initialized.store(true, Ordering::Release);
+    }
+
+    fn disconnect(&self) {
+        if self.is_disconnected.swap(true, Ordering::AcqRel) {
+            return;
+        }
+
+        let Ok(mut sessions) = self.sessions.lock() else {
+            return;
+        };
+        let removed = sessions.remove(&self.session_key);
+        debug_assert!(removed.is_some(), "Session did not exist.");
+
+        if removed.is_some()
+            && self.stop_on_disconnect
+            && sessions.is_empty()
+            && self.is_initialized.load(Ordering::Acquire)
+        {
+            self.cancellation.notify_one();
+        }
+    }
+}
+
+struct DisconnectOnExit<S> {
+    inner: S,
+    lifecycle: Arc<SessionLifecycle>,
+}
+
+impl<S> DisconnectOnExit<S> {
+    fn new(inner: S, lifecycle: Arc<SessionLifecycle>) -> Self {
+        Self { inner, lifecycle }
+    }
+}
+
+impl<S> Service<JsonRpcRequest> for DisconnectOnExit<S>
+where
+    S: Service<JsonRpcRequest>,
+{
+    type Response = S::Response;
+    type Error = S::Error;
+    type Future = S::Future;
+
+    fn poll_ready(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        self.inner.poll_ready(cx)
+    }
+
+    fn call(&mut self, request: JsonRpcRequest) -> Self::Future {
+        let should_disconnect = request.method() == "exit";
+        let response = self.inner.call(request);
+
+        if should_disconnect {
+            self.lifecycle.disconnect();
+        }
+
+        response
+    }
+}
+
+struct DisconnectOnEof<R> {
+    inner: R,
+    lifecycle: Arc<SessionLifecycle>,
+}
+
+impl<R> DisconnectOnEof<R> {
+    fn new(inner: R, lifecycle: Arc<SessionLifecycle>) -> Self {
+        Self { inner, lifecycle }
+    }
+}
+
+impl<R> AsyncRead for DisconnectOnEof<R>
+where
+    R: AsyncRead + Unpin,
+{
+    fn poll_read(
+        self: Pin<&mut Self>,
+        cx: &mut Context<'_>,
+        buffer: &mut ReadBuf<'_>,
+    ) -> Poll<std::io::Result<()>> {
+        let this = self.get_mut();
+        let remaining = buffer.remaining();
+        let filled = buffer.filled().len();
+        let result = Pin::new(&mut this.inner).poll_read(cx, buffer);
+
+        match &result {
+            Poll::Ready(Ok(())) if remaining > 0 && buffer.filled().len() == filled => {
+                this.lifecycle.disconnect();
+            }
+            Poll::Ready(Err(_)) => this.lifecycle.disconnect(),
+            Poll::Pending | Poll::Ready(Ok(())) => {}
+        }
+
+        result
+    }
+}
+
+impl<R> Drop for DisconnectOnEof<R> {
+    fn drop(&mut self) {
+        self.lifecycle.disconnect();
+    }
+}
 
 /// Helper method for wrapping a [Workspace] method in a `custom_method` for
 /// the [LSPServer]
@@ -700,16 +803,17 @@ impl ServerFactory {
     /// Regular constructor for use in the daemon.
     pub fn new(stop_on_disconnect: bool, instruction_tx: Sender<WatcherInstruction>) -> Self {
         let (service_tx, service_rx) = watch::channel(ServiceNotification::IndexUpdated);
+        let fs: Arc<dyn FsWithResolverProxy> = Arc::new(OsFileSystem::default());
         Self {
             cancellation: Arc::default(),
+            db_state: Arc::new(DbState::lsp(fs.clone())),
             workspace: Arc::new(WorkspaceServer::new(
-                Arc::new(OsFileSystem::default()),
+                fs,
                 instruction_tx,
                 service_tx,
                 Arc::new(biome_service::workspace::GritSearchQuery::default()),
                 None,
             )),
-            db_state: Arc::new(DbState::lsp()),
             sessions: Sessions::default(),
             next_session_key: AtomicU64::new(0),
             stop_on_disconnect,
@@ -720,7 +824,7 @@ impl ServerFactory {
 
     /// Constructor for use in tests.
     pub fn new_with_fs(fs: Arc<dyn FsWithResolverProxy>) -> Self {
-        Self::new_with_fs_and_db_state(fs, Arc::new(DbState::lsp()))
+        Self::new_with_fs_and_db_state(fs.clone(), Arc::new(DbState::lsp(fs)))
     }
 
     /// Constructor for CLI socket tests.
@@ -728,7 +832,7 @@ impl ServerFactory {
     /// These tests exercise CLI traversal through the socket transport, but
     /// should keep the CLI database update strategy.
     pub fn new_cli_test_with_fs(fs: Arc<dyn FsWithResolverProxy>) -> Self {
-        Self::new_with_fs_and_db_state(fs, Arc::new(DbState::default()))
+        Self::new_with_fs_and_db_state(fs.clone(), Arc::new(DbState::new(fs)))
     }
 
     fn new_with_fs_and_db_state(fs: Arc<dyn FsWithResolverProxy>, db_state: Arc<DbState>) -> Self {
@@ -758,6 +862,15 @@ impl ServerFactory {
         let db_state = self.db_state.clone();
 
         let session_key = SessionKey(self.next_session_key.fetch_add(1, Ordering::Relaxed));
+        let lifecycle = Arc::new(SessionLifecycle {
+            session_key,
+            sessions: self.sessions.clone(),
+            cancellation: self.cancellation.clone(),
+            stop_on_disconnect: self.stop_on_disconnect,
+            is_initialized: self.is_initialized.clone(),
+            is_disconnected: AtomicBool::new(false),
+        });
+        let server_lifecycle = lifecycle.clone();
 
         let mut builder = LspService::build(move |client| {
             let session = Session::new(
@@ -773,12 +886,7 @@ impl ServerFactory {
             let mut sessions = self.sessions.lock().unwrap();
             sessions.insert(session_key, handle.clone());
 
-            LSPServer::new(
-                handle,
-                self.sessions.clone(),
-                self.stop_on_disconnect,
-                self.is_initialized.clone(),
-            )
+            LSPServer::new(handle, self.sessions.clone(), server_lifecycle)
         });
 
         builder = builder.custom_method(SYNTAX_TREE_REQUEST, LSPServer::syntax_tree_request);
@@ -806,6 +914,7 @@ impl ServerFactory {
         workspace_method!(builder, get_module_graph);
         workspace_method!(builder, get_type_info);
         workspace_method!(builder, change_file);
+        workspace_method!(builder, process_file);
         workspace_method!(builder, check_file_size);
         workspace_method!(builder, get_file_content);
         workspace_method!(builder, close_file);
@@ -822,7 +931,11 @@ impl ServerFactory {
         workspace_method!(builder, drop_pattern);
 
         let (service, socket) = builder.finish();
-        ServerConnection { socket, service }
+        ServerConnection {
+            socket,
+            service,
+            lifecycle,
+        }
     }
 
     /// Return a handle to the cancellation token for this server process
@@ -844,6 +957,7 @@ impl ServerFactory {
 pub struct ServerConnection {
     socket: ClientSocket,
     service: LspService<LSPServer>,
+    lifecycle: Arc<SessionLifecycle>,
 }
 
 impl ServerConnection {
@@ -859,11 +973,15 @@ impl ServerConnection {
         I: AsyncRead + Unpin,
         O: AsyncWrite,
     {
-        Server::new(stdin, stdout, self.socket)
-            .serve(self.service)
-            .await;
+        let stdin = DisconnectOnEof::new(stdin, self.lifecycle.clone());
+        let service = DisconnectOnExit::new(self.service, self.lifecycle);
+        Server::new(stdin, stdout, self.socket).serve(service).await;
     }
 }
+
+#[cfg(test)]
+#[path = "server_lifecycle.tests.rs"]
+mod server_lifecycle;
 
 #[cfg(test)]
 #[path = "server.tests.rs"]

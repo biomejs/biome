@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/gfm/strikethrough.md
+---
+
+# Input
+
+```md
+~~struck~~ text
+
+~~outer ~~inner~~ text~~
+
+~~*struck and emphasized*~~
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "parser": {
+      "gfm": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+~~struck~~ text
+
+~~outer ~~inner~~ text~~
+
+~~_struck and emphasized_~~
+
+```

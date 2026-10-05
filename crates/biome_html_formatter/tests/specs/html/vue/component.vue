@@ -1,2 +1,4 @@
-<Base title="500">
-</Base>
+<template>
+	<Base title="500">
+	</Base>
+</template>

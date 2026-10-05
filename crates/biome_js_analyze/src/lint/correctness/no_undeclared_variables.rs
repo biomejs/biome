@@ -1,11 +1,13 @@
 use crate::globals::{is_js_global, is_ts_global};
 use crate::services::embedded::EmbeddedService;
-use crate::services::semantic::SemanticServices;
+use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsFunction, JsSyntaxToken, TsAsExpression, TsReferenceType};
+use biome_js_syntax::{
+    AnyJsFunction, AnyJsIdentifierReference, JsSyntaxToken, TsAsExpression, TsReferenceType,
+};
 use biome_languages::JsFileSource;
 use biome_languages::javascript::Language;
 use biome_rowan::AstNode;
@@ -63,79 +65,73 @@ declare_lint_rule! {
 }
 
 impl Rule for NoUndeclaredVariables {
-    type Query = SemanticServices;
+    type Query = Semantic<AnyJsIdentifierReference>;
     type State = JsSyntaxToken;
-    type Signals = Box<[Self::State]>;
+    type Signals = Option<Self::State>;
     type Options = NoUndeclaredVariablesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let model = ctx.query();
+        let model = ctx.model();
+        let identifier = ctx.query();
+        if !model.is_unresolved_reference(identifier) {
+            return None;
+        }
         let source_type = ctx.source_type::<JsFileSource>();
         let embedded = ctx
             .get_service::<EmbeddedService>()
             .expect("embedded service");
         let flavor = model.flavor();
 
-        model
-            .all_unresolved_references()
-            .filter_map(|reference| {
-                let identifier = reference.tree();
-                let under_as_expression = identifier
-                    .parent::<TsReferenceType>()
-                    .and_then(|ty| ty.parent::<TsAsExpression>())
-                    .is_some();
+        let under_as_expression = identifier
+            .parent::<TsReferenceType>()
+            .and_then(|ty| ty.parent::<TsAsExpression>())
+            .is_some();
 
-                let token = identifier.value_token().ok()?;
-                let text = token.text_trimmed();
-                let token_text = token.token_text_trimmed();
-                // Semantic resolution handles declared `$store` bindings; this fallback keeps
-                // configured globals and embedded bindings aligned on `store`.
-                let store_name = flavor.store_reference_name(text);
+        let token = identifier.value_token().ok()?;
+        let text = token.text_trimmed();
+        let token_text = token.token_text_trimmed();
+        // Semantic resolution handles declared `$store` bindings; this fallback keeps
+        // configured globals and embedded bindings aligned on `store`.
+        let store_name = flavor.store_reference_name(text);
 
-                if ctx.is_global(text)
-                    || store_name.is_some_and(|store_name| ctx.is_global(store_name))
-                {
-                    return None;
-                }
+        if ctx.is_global(text) || store_name.is_some_and(|store_name| ctx.is_global(store_name)) {
+            return None;
+        }
 
-                if embedded.contains_binding(token_text)
-                    || store_name
-                        .is_some_and(|store_name| embedded.contains_binding_text(store_name))
-                {
-                    return None;
-                }
+        if embedded.contains_binding(token_text)
+            || store_name.is_some_and(|store_name| embedded.contains_binding_text(store_name))
+        {
+            return None;
+        }
 
-                // Typescript Const Assertion
-                if text == "const" && under_as_expression {
-                    return None;
-                }
+        // Typescript Const Assertion
+        if text == "const" && under_as_expression {
+            return None;
+        }
 
-                // arguments object within non-arrow functions
-                if text == "arguments" {
-                    let is_in_non_arrow_function =
-                        identifier.syntax().ancestors().skip(1).any(|ancestor| {
-                            !matches!(
-                                AnyJsFunction::cast(ancestor),
-                                None | Some(AnyJsFunction::JsArrowFunctionExpression(_))
-                            )
-                        });
-                    if is_in_non_arrow_function {
-                        return None;
-                    }
-                }
+        // arguments object within non-arrow functions
+        if text == "arguments" {
+            let is_in_non_arrow_function =
+                identifier.syntax().ancestors().skip(1).any(|ancestor| {
+                    !matches!(
+                        AnyJsFunction::cast(ancestor),
+                        None | Some(AnyJsFunction::JsArrowFunctionExpression(_))
+                    )
+                });
+            if is_in_non_arrow_function {
+                return None;
+            }
+        }
 
-                if is_global(text, source_type) {
-                    return None;
-                }
+        if is_global(text, source_type) {
+            return None;
+        }
 
-                if !ctx.options().check_types() && identifier.is_only_type() {
-                    return None;
-                }
+        if !ctx.options().check_types() && identifier.is_only_type() {
+            return None;
+        }
 
-                Some(token)
-            })
-            .collect::<Vec<_>>()
-            .into_boxed_slice()
+        Some(token)
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, token: &Self::State) -> Option<RuleDiagnostic> {

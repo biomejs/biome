@@ -1,0 +1,66 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue11278Invalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+export function patternSource(pattern: string) {
+    return new RegExp(pattern)?.source;
+}
+
+export function calledPatternSource(pattern: string) {
+    return RegExp(pattern)?.source;
+}
+
+```
+
+# Diagnostics
+```
+issue11278Invalid.ts:4:12 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    3 │ export function patternSource(pattern: string) {
+  > 4 │     return new RegExp(pattern)?.source;
+      │            ^^^^^^^^^^^^^^^^^^^
+    5 │ }
+    6 │ 
+  
+  i Replace ?. with ..
+  
+    3 │ export function patternSource(pattern: string) {
+  > 4 │     return new RegExp(pattern)?.source;
+      │                               ^^
+    5 │ }
+    6 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+issue11278Invalid.ts:8:12 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+     7 │ export function calledPatternSource(pattern: string) {
+   > 8 │     return RegExp(pattern)?.source;
+       │            ^^^^^^^^^^^^^^^
+     9 │ }
+    10 │ 
+  
+  i Replace ?. with ..
+  
+     7 │ export function calledPatternSource(pattern: string) {
+   > 8 │     return RegExp(pattern)?.source;
+       │                           ^^
+     9 │ }
+    10 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```

@@ -15,13 +15,13 @@ use biome_service::WorkspaceError;
 use biome_service::configuration::{
     LoadedConfiguration, ProjectScanComputer, load_configuration, load_editorconfig,
 };
+use biome_service::db::DbState;
 use biome_service::diagnostics::ConfigurationOutsideProject;
 use biome_service::file_handlers::astro::AstroFileHandler;
 use biome_service::file_handlers::svelte::SvelteFileHandler;
 use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::projects::ProjectKey;
 use biome_service::settings::{EditorFeature, ModuleGraphResolutionKind};
-use biome_service::workspace::db::DbState;
 use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
     PullDiagnosticsParams, RetryingWorkspace, SupportsFeatureParams,
@@ -289,8 +289,9 @@ impl Session {
     ///   again: dropping a `didChange` would leave our copy of the document
     ///   permanently out of sync with the editor.
     /// - **Background tasks** the server starts on its own, such as
-    ///   refreshing the diagnostics of the open documents, loading the
-    ///   configuration file, or scanning the project folder.
+    ///   refreshing the diagnostics of the open documents or loading the
+    ///   configuration file. Project scans run inside an epoch that queues
+    ///   setter-based writes instead of retrying the traversal.
     ///
     /// LSP request handlers (formatting, code actions, ...) should use
     /// [Self::workspace_for_request] instead.
@@ -816,6 +817,15 @@ impl Session {
         result
     }
 
+    pub(crate) fn supports_relative_watched_file_patterns(&self) -> bool {
+        self.initialize_params
+            .get()
+            .and_then(|c| c.client_capabilities.workspace.as_ref())
+            .and_then(|c| c.did_change_watched_files)
+            .and_then(|c| c.relative_pattern_support)
+            == Some(true)
+    }
+
     /// Whether the client supports `codeAction/resolve` for deferred edit computation.
     /// Whether the client supports `codeAction/resolve` for deferred edit computation.
     ///
@@ -888,7 +898,7 @@ impl Session {
     }
 
     /// Returns the root URI of the workspace as provided by the client
-    pub(crate) fn base_uri(&self) -> Option<Uri> {
+    pub(crate) fn root_uri(&self) -> Option<Uri> {
         let initialize_params = self.initialize_params.get()?;
         initialize_params.root_uri.clone()
     }
@@ -1604,14 +1614,16 @@ mod tests {
     fn create_test_session() -> Arc<Session> {
         let (watcher_tx, _) = bounded(0);
         let (service_tx, service_rx) = watch::channel(ServiceNotification::IndexUpdated);
+        let fs: Arc<dyn biome_resolver::FsWithResolverProxy> =
+            Arc::new(MemoryFileSystem::default());
         let workspace = Arc::new(WorkspaceServer::new(
-            Arc::new(MemoryFileSystem::default()),
+            fs.clone(),
             watcher_tx,
             service_tx,
             Arc::new(NoopQueryProvider {}),
             None,
         ));
-        let db_state = Arc::new(DbState::lsp());
+        let db_state = Arc::new(DbState::lsp(fs));
 
         let cancellation = Arc::new(Notify::new());
         let session_slot: Arc<Mutex<Option<Arc<Session>>>> = Arc::new(Mutex::new(None));

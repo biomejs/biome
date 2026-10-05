@@ -1,0 +1,25 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_astro_props.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+<Foo>
+  <Fragment slot="a">text</Fragment>
+  <Fragment slot="b">{text}</Fragment>
+</Foo>
+
+{item && (
+  <Foo>
+    <Fragment slot="a">text</Fragment>
+    <Fragment slot="b">{item.text}</Fragment>
+    <Fragment slot="empty"></Fragment>
+    <Fragment slot="element"><span>{item.text}</span></Fragment>
+    <Fragment slot="multiple"><span />{item.text}</Fragment>
+    <Fragment set:html={item.html}></Fragment>
+    <Fragment {...props}>{item.text}</Fragment>
+  </Foo>
+)}
+
+```

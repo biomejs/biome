@@ -1,0 +1,9 @@
+@forward   './button' /* module */as /* prefix */components_* /* exports */show $components_gap,components_reset with( $components_gap:4px !default );
+@forward './button' as components-*;
+@forward  './button' as Components_* hide components_internal ;
+@forward './button' as components*;
+@forward './button' as components\5f *;
+@forward
+'./button'
+as // prefix follows
+components_*; // forwarded

@@ -1,3 +1,5 @@
+#[cfg(feature = "module_graph")]
+use crate::db::WorkspaceDb;
 use crate::file_handlers::{ResolveBindingParams, ResolveDefinitionParams};
 use crate::workspace::{DefinitionReference, GoToDefinitionResult};
 #[cfg(feature = "module_graph")]
@@ -10,13 +12,12 @@ use biome_js_syntax::{
 };
 #[cfg(feature = "module_graph")]
 use biome_module_graph::{
-    JsOwnExport, ModuleDb, ModuleInfoKind, SymbolFromModuleInfo, find_js_exported_symbol,
+    JsExportedSymbolLookup, JsOwnExport, ModuleDb, ModuleInfoKind, SymbolFromModuleInfo,
+    find_js_exported_symbol,
 };
 #[cfg(feature = "module_graph")]
 use biome_rowan::TextRange;
 use biome_rowan::{AstNode, AstSeparatedList, TextSize, TokenAtOffset, TokenText};
-#[cfg(feature = "module_graph")]
-use biome_workspace_db::WorkspaceDb;
 #[cfg(feature = "module_graph")]
 use camino::Utf8Path;
 use std::ops::Add;
@@ -58,7 +59,7 @@ pub(crate) fn resolve_binding(params: ResolveBindingParams) -> Option<Definition
                 return Some(result);
             }
             return Some(DefinitionReference::Local {
-                range: binding.syntax().text_trimmed_range(),
+                range: binding.range(),
             });
         }
 
@@ -215,15 +216,12 @@ fn resolve_import_definition(
     module_db: &WorkspaceDb,
     result: &mut GoToDefinitionResult,
 ) -> Option<()> {
-    let module_info = module_db.module_info_for_path(current_path)?;
-    match module_info {
+    let source_module = module_db.module_for_path(current_path)?;
+    match source_module.kind(module_db) {
         ModuleInfoKind::Js(module_info) => {
-            let import_path = module_info
-                .static_import_paths
-                .get(specifier)
-                .or(module_info.dynamic_import_paths.get(specifier))?;
-
-            let target_path = import_path.resolved_path.as_path()?;
+            let import_path = module_info.import_paths.get(specifier)?;
+            let resolved = import_path.resolve_js(module_db, source_module);
+            let target_path = resolved.path().as_path()?;
 
             // Skip files not in the module graph
             if !module_db.contains(target_path) {
@@ -232,34 +230,36 @@ fn resolve_import_definition(
 
             let target_module = module_db.module_for_path(target_path)?;
 
-            match find_js_exported_symbol(
+            let mut lookup = find_js_exported_symbol(
                 module_db,
                 SymbolFromModuleInfo::new(module_db, local_name, target_module),
-            )
-            .or(find_js_exported_symbol(
-                module_db,
-                SymbolFromModuleInfo::new(module_db, "default", target_module),
-            )) {
-                None => {
+            );
+            if !matches!(lookup, JsExportedSymbolLookup::Found(_)) {
+                lookup = find_js_exported_symbol(
+                    module_db,
+                    SymbolFromModuleInfo::new(module_db, "default", target_module),
+                );
+            }
+            match lookup {
+                JsExportedSymbolLookup::Missing | JsExportedSymbolLookup::Unknown => {
                     result.store(
                         BiomePath::new(target_path),
                         TextRange::new(TextSize::from(0), TextSize::from(0)),
                     );
                 }
-                Some(own_export) => match own_export {
-                    JsOwnExport::Binding(range) => result.store(BiomePath::new(target_path), range),
+                JsExportedSymbolLookup::Found(own_export) => match own_export {
+                    JsOwnExport::Binding(range) => {
+                        result.store(BiomePath::new(target_path), *range)
+                    }
                     JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => {}
                 },
             }
         }
         ModuleInfoKind::Css(_) => {}
         ModuleInfoKind::Html(module_info) => {
-            let resolved_path = module_info
-                .static_import_paths
-                .get(specifier)
-                .or(module_info.dynamic_import_paths.get(specifier))?;
-
-            let target_path = resolved_path.as_path()?;
+            let html_import = module_info.import_paths.get(specifier)?;
+            let resolved = html_import.resolve_html(module_db, source_module);
+            let target_path = resolved.path().as_path()?;
 
             // Skip files not in the module graph
             if !module_db.contains(target_path) {
@@ -272,15 +272,15 @@ fn resolve_import_definition(
                     module_db,
                     SymbolFromModuleInfo::new(module_db, local_name, module),
                 ) {
-                    None => {
+                    JsExportedSymbolLookup::Missing | JsExportedSymbolLookup::Unknown => {
                         result.store(
                             BiomePath::new(target_path),
                             TextRange::new(TextSize::from(0), TextSize::from(0)),
                         );
                     }
-                    Some(own_export) => match own_export {
+                    JsExportedSymbolLookup::Found(own_export) => match own_export {
                         JsOwnExport::Binding(range) => {
-                            result.store(BiomePath::new(target_path), range)
+                            result.store(BiomePath::new(target_path), *range)
                         }
                         JsOwnExport::Type(_) | JsOwnExport::Namespace(_) => {}
                     },

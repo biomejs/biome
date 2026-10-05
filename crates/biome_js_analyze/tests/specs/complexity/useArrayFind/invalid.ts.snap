@@ -12,6 +12,7 @@ const found2 = [1, 2, 3].filter(x => x > 1).at(0);
 
 [1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1)[0].toString();
 [1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1).at(0)?.toString();
+[1, 2, 3].filter(x => x > 1)[0n];
 
 ```
 
@@ -98,7 +99,7 @@ invalid.ts:7:1 lint/complexity/useArrayFind ━━━━━━━━━━━━
   > 7 │ [1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1)[0].toString();
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     8 │ [1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1).at(0)?.toString();
-    9 │ 
+    9 │ [1, 2, 3].filter(x => x > 1)[0n];
   
   i Array#find() expresses that intent more clearly and can stop once it finds the first match.
   
@@ -112,10 +113,29 @@ invalid.ts:8:1 lint/complexity/useArrayFind ━━━━━━━━━━━━
 
   i This call uses Array#filter() to retrieve a single matching element.
   
-    7 │ [1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1)[0].toString();
-  > 8 │ [1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1).at(0)?.toString();
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    9 │ 
+     7 │ [1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1)[0].toString();
+   > 8 │ [1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1).at(0)?.toString();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ [1, 2, 3].filter(x => x > 1)[0n];
+    10 │ 
+  
+  i Array#find() expresses that intent more clearly and can stop once it finds the first match.
+  
+  i Use Array#find() instead.
+  
+
+```
+
+```
+invalid.ts:9:1 lint/complexity/useArrayFind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This call uses Array#filter() to retrieve a single matching element.
+  
+     7 │ [1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1)[0].toString();
+     8 │ [1, 2, 3].concat([56, 76, 4543]).filter(x => x > 1).at(0)?.toString();
+   > 9 │ [1, 2, 3].filter(x => x > 1)[0n];
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
   
   i Array#find() expresses that intent more clearly and can stop once it finds the first match.
   

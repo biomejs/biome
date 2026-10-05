@@ -1,0 +1,72 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_no_manifest.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<>
+	<div onFullscreenChange={handleFullscreenChange} />
+	<iframe credentialless />
+	<mask maskType="alpha" />
+</>;
+
+```
+
+# Diagnostics
+```
+invalid_no_manifest.jsx:3:7 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property 'onFullscreenChange' is not a valid DOM attribute.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <>
+  > 3 │ 	<div onFullscreenChange={handleFullscreenChange} />
+      │ 	     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 	<iframe credentialless />
+    5 │ 	<mask maskType="alpha" />
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
+
+```
+invalid_no_manifest.jsx:4:10 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property 'credentialless' is not a valid DOM attribute.
+  
+    2 │ <>
+    3 │ 	<div onFullscreenChange={handleFullscreenChange} />
+  > 4 │ 	<iframe credentialless />
+      │ 	        ^^^^^^^^^^^^^^
+    5 │ 	<mask maskType="alpha" />
+    6 │ </>;
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
+
+```
+invalid_no_manifest.jsx:5:8 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property 'maskType' is not a valid DOM attribute.
+  
+    3 │ 	<div onFullscreenChange={handleFullscreenChange} />
+    4 │ 	<iframe credentialless />
+  > 5 │ 	<mask maskType="alpha" />
+      │ 	      ^^^^^^^^^^^^^^^^
+    6 │ </>;
+    7 │ 
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```

@@ -15,6 +15,11 @@ impl FormatNodeRule<CssStartingStyleAtRuleDeclarator> for FormatCssStartingStyle
             starting_style_token,
         } = node.as_fields();
 
-        write!(f, [starting_style_token.format()])
+        write!(
+            f,
+            [starting_style_token
+                .format()?
+                .with_text_case(CssCase::Lowercase)]
+        )
     }
 }

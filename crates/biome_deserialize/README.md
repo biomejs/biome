@@ -1,3 +1,23 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-dark-transparent.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg">
+    <img alt="Shows the banner of Biome, with its logo and the phrase 'Biome - Toolchain of the web'." src="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg" width="400">
+  </picture>
+</p>
+
+<div align="center">
+
+[![Discord chat][discord-badge]][discord-url]
+[![cargo version][cargo-badge]][cargo-url]
+
+[discord-badge]: https://badgen.net/discord/online-members/BypW39g6Yc?icon=discord&label=discord&color=green
+[discord-url]: https://biomejs.dev/chat
+[cargo-badge]: https://badgen.net/crates/v/biome_deserialize?&color=green
+[cargo-url]: https://crates.io/crates/biome_deserialize/
+
+</div>
+
 # `biome_deserialize`
 
 `biome_deserialize` consists of data structures that know how to deserialize themselves
@@ -193,7 +213,7 @@ impl FromStr for Day {
 
 impl Deserializable for Day {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -248,7 +268,7 @@ enum Union {
 
 impl Deserializable for Union {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -296,7 +316,7 @@ The full example:
 ```rust
 impl Deserializable for Union {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -315,7 +335,7 @@ impl DeserializationVisitor for UnionVisitor {
     // Because we expect a `bool` or a `str`, we have to implement the associated method `visit_bool`.
     fn visit_bool(
         self,
-        _ctx: &mut impl DeserializationContext,
+        _ctx: &mut dyn DeserializationContext,
         value: bool,
         range: TextRange,
         _name: &str,
@@ -326,7 +346,7 @@ impl DeserializationVisitor for UnionVisitor {
     // Because we expect a `bool` or a `str`, we have to implement the associated method `visit_str`.
     fn visit_str(
         self,
-        _ctx: &mut impl DeserializationContext,
+        _ctx: &mut dyn DeserializationContext,
         value: Text,
         range: TextRange,
         _name: &str,
@@ -355,7 +375,7 @@ pub enum Variant { A, B }
 
 impl Deserializable for Variant {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -400,7 +420,7 @@ pub enum Variant { A, B }
 
 impl Deserializable for Variant {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -460,7 +480,7 @@ pub struct Person { name: String, age: u8 }
 
 impl Deserializable for Person {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -481,7 +501,7 @@ impl DeserializationVisitor for PersonVisitor {
     // Because we expect a `map`, we have to implement the associated method `visit_map`.
     fn visit_map(
         self,
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         // Iterator of key-value pairs.
         members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
         // range of the map in the source text.

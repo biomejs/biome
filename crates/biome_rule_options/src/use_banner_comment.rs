@@ -57,7 +57,7 @@ impl schemars::JsonSchema for BannerContent {
 
 impl Deserializable for BannerContent {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {

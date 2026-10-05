@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_grit_formatter"
-version              = "0.0.0"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Biome's GritQL formatter"
@@ -9,6 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+include              = ["src/**/*"]
 publish              = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

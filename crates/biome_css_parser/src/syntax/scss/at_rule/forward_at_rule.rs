@@ -8,6 +8,7 @@ use biome_css_syntax::CssSyntaxKind::{
     SCSS_FORWARD_AS_CLAUSE, SCSS_FORWARD_AT_RULE, SCSS_HIDE_CLAUSE, SCSS_SHOW_CLAUSE,
 };
 use biome_css_syntax::T;
+use biome_parser::diagnostic::expected_token;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
 
@@ -46,7 +47,7 @@ fn is_at_scss_forward_at_rule(p: &mut CssParser) -> bool {
     p.at(T![forward])
 }
 
-/// Parses the optional SCSS `as <prefix>-*` clause inside `@forward`.
+/// Parses the optional SCSS `as <prefix>*` clause inside `@forward`.
 ///
 /// # Example
 ///
@@ -66,23 +67,26 @@ fn parse_scss_forward_as_clause(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![as]);
     let prefix = parse_regular_identifier(p).or_add_diagnostic(p, expected_identifier);
-    let invalid_prefix = prefix
-        .as_ref()
-        .filter(|prefix| !prefix.text(p).ends_with('-'));
 
-    if let Some(prefix) = invalid_prefix {
+    // Ranges detect gaps before `*`, including comments, but allow whitespace inside escapes.
+    if let Some(prefix) = prefix
+        && p.at(T![*])
+        && prefix.range(p).end() != p.cur_range().start()
+    {
         p.error(
             p.err_builder(
-                "Expected the `@forward` prefix to end with `-` before `*`.",
+                "Expected `*` immediately after the `@forward` prefix.",
                 prefix.range(p).cover(p.cur_range()),
             )
-            .with_hint("Write the clause as `as prefix-*` without spaces."),
+            .with_hint("Write the prefix and `*` together, for example `as components_*`."),
         );
     }
 
-    // Consume a stray `-` in invalid forms like `theme - *` or `as -*`.
-    p.eat(T![-]);
-
+    // Recover a stray hyphen in invalid forms such as `as theme - *`.
+    if p.at(T![-]) {
+        p.error(expected_token(T![*]));
+        p.bump(T![-]);
+    }
     p.expect(T![*]);
 
     Present(m.complete(p, SCSS_FORWARD_AS_CLAUSE))

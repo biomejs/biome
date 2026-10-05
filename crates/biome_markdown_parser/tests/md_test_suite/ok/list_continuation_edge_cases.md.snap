@@ -41,8 +41,9 @@ lazy continuation line
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdHeader {
             indent: MdIndentTokenList [],
@@ -415,9 +416,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..507
+0: MD_ROOT@0..507
   0: (empty)
-  1: MD_BLOCK_LIST@0..507
+  1: (empty)
+  2: MD_BLOCK_LIST@0..507
     0: MD_HEADER@0..43
       0: MD_INDENT_TOKEN_LIST@0..0
       1: MD_HASH_LIST@0..1
@@ -650,6 +652,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@497..506 "next item" [] []
                 1: MD_TEXTUAL@506..507
                   0: MD_TEXTUAL_LITERAL@506..507 "\n" [] []
-  2: EOF@507..507 "" [] []
+  3: EOF@507..507 "" [] []
 
 ```

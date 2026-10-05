@@ -1,3 +1,8 @@
+#![expect(
+    clippy::disallowed_methods,
+    reason = "This rule stores CSS values that can span multiple tokens."
+)]
+
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_syntax::{AnyCssProperty, CssDashedIdentifier, CssDeclaration, CssSyntaxKind};
@@ -8,12 +13,16 @@ use biome_rule_options::no_missing_var_function::NoMissingVarFunctionOptions;
 use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
-    /// Disallow missing var function for css variables.
+    /// Require `var()` when using a declared CSS custom property.
     ///
-    /// This rule has the following limitations:
-    /// - It only reports custom properties that are defined and accessible within the same source.
-    /// - It does not check properties that can contain author-defined identifiers.
-    /// - It ignores the following properties:
+    /// Custom property names begin with `--`, but their values must be read with `var(--name)`.
+    /// Writing the name directly does not substitute the custom property's value.
+    ///
+    /// The rule has the following limits:
+    ///
+    /// - It reports only custom properties that are declared and visible in the same source.
+    /// - It skips properties where a name beginning with `--` can be an ordinary value.
+    /// - It skips the following properties:
     ///   - `animation`
     ///   - `animation-name`
     ///   - `container-name`
@@ -86,6 +95,9 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// An undeclared name is not reported because the rule cannot determine whether it was meant
+    /// to refer to a custom property:
+    ///
     /// ```css
     /// p {
     ///   color: --foo;
@@ -154,7 +166,6 @@ impl Rule for NoMissingVarFunction {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        let root = ctx.root();
         if is_wrapped_in_var(node) {
             return None;
         }
@@ -172,7 +183,7 @@ impl Rule for NoMissingVarFunction {
         if rule
             .declarations()
             .iter()
-            .flat_map(|decl| decl.property(&root).value())
+            .flat_map(|decl| decl.property().value())
             .any(|value| value.text() == custom_variable_name.text())
         {
             return Some(node.clone());
@@ -184,7 +195,7 @@ impl Rule for NoMissingVarFunction {
             if parent_rule
                 .declarations()
                 .iter()
-                .flat_map(|decl| decl.property(&root).value())
+                .flat_map(|decl| decl.property().value())
                 .any(|value| value.text() == custom_variable_name.text())
             {
                 return Some(node.clone());
@@ -232,6 +243,7 @@ fn is_wrapped_in_var(node: &CssDashedIdentifier) -> bool {
             //             ^^^^^^^^^^^^^^^^ CSS_GENERIC_COMPONENT_VALUE_LIST
             CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST => return false,
             CssSyntaxKind::CSS_FUNCTION => return parent.text_trimmed().starts_with("var"),
+            CssSyntaxKind::SCSS_LEGACY_IF_FUNCTION => return false,
             _ => {}
         }
         current_node = parent.parent();

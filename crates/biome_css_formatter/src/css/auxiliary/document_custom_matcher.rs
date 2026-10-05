@@ -27,7 +27,7 @@ impl FormatNodeRule<CssDocumentCustomMatcher> for FormatCssDocumentCustomMatcher
         write!(
             f,
             [
-                name.format(),
+                name.format()?.with_text_case(CssCase::Preserve),
                 l_paren_token.format(),
                 maybe_space,
                 value.format(),

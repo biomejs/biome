@@ -1,0 +1,62 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/event-binding/basic-ts.vue
+---
+
+# Input
+
+```vue
+<script setup lang="ts">
+let x = 1;
+function log(...args) {
+  console.log(...args);
+}
+</script>
+
+<template>
+  <div @click="if (x === 1 as number) { log('hello') } else { log('nonhello') };">{{ x }}</div>
+</template>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -7,13 +7,7 @@
+ 
+ <template>
+   <div
+-    @click="
+-      if (x === (1 as number)) {
+-        log('hello');
+-      } else {
+-        log('nonhello');
+-      }
+-    "
++    @click="if (x === 1 as number) { log('hello') } else { log('nonhello') };"
+   >
+     {{ x }}
+   </div>
+```
+
+# Output
+
+```vue
+<script setup lang="ts">
+let x = 1;
+function log(...args) {
+  console.log(...args);
+}
+</script>
+
+<template>
+  <div
+    @click="if (x === 1 as number) { log('hello') } else { log('nonhello') };"
+  >
+    {{ x }}
+  </div>
+</template>
+```

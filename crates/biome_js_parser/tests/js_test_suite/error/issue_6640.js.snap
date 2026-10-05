@@ -1,0 +1,175 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```js
+if)for(s of=>{ for(t of break
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsIfStatement {
+            if_token: IF_KW@0..2 "if" [] [],
+            l_paren_token: missing (required),
+            test: missing (required),
+            r_paren_token: R_PAREN@2..3 ")" [] [],
+            consequent: JsForOfStatement {
+                for_token: FOR_KW@3..6 "for" [] [],
+                await_token: missing (optional),
+                l_paren_token: L_PAREN@6..7 "(" [] [],
+                initializer: JsIdentifierAssignment {
+                    name_token: IDENT@7..9 "s" [] [Whitespace(" ")],
+                },
+                of_token: OF_KW@9..11 "of" [] [],
+                expression: JsBogusExpression {
+                    items: [
+                        FAT_ARROW@11..13 "=>" [] [],
+                        JsFunctionBody {
+                            l_curly_token: L_CURLY@13..15 "{" [] [Whitespace(" ")],
+                            directives: JsDirectiveList [],
+                            statements: JsStatementList [
+                                JsForOfStatement {
+                                    for_token: FOR_KW@15..18 "for" [] [],
+                                    await_token: missing (optional),
+                                    l_paren_token: L_PAREN@18..19 "(" [] [],
+                                    initializer: JsIdentifierAssignment {
+                                        name_token: IDENT@19..21 "t" [] [Whitespace(" ")],
+                                    },
+                                    of_token: OF_KW@21..24 "of" [] [Whitespace(" ")],
+                                    expression: missing (required),
+                                    r_paren_token: missing (required),
+                                    body: JsBreakStatement {
+                                        break_token: BREAK_KW@24..29 "break" [] [],
+                                        label: missing (optional),
+                                        semicolon_token: missing (optional),
+                                    },
+                                },
+                            ],
+                            r_curly_token: missing (required),
+                        },
+                    ],
+                },
+                r_paren_token: missing (required),
+                body: missing (required),
+            },
+            else_clause: missing (optional),
+        },
+    ],
+    eof_token: EOF@29..30 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..30
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..29
+    0: JS_IF_STATEMENT@0..29
+      0: IF_KW@0..2 "if" [] []
+      1: (empty)
+      2: (empty)
+      3: R_PAREN@2..3 ")" [] []
+      4: JS_FOR_OF_STATEMENT@3..29
+        0: FOR_KW@3..6 "for" [] []
+        1: (empty)
+        2: L_PAREN@6..7 "(" [] []
+        3: JS_IDENTIFIER_ASSIGNMENT@7..9
+          0: IDENT@7..9 "s" [] [Whitespace(" ")]
+        4: OF_KW@9..11 "of" [] []
+        5: JS_BOGUS_EXPRESSION@11..29
+          0: FAT_ARROW@11..13 "=>" [] []
+          1: JS_FUNCTION_BODY@13..29
+            0: L_CURLY@13..15 "{" [] [Whitespace(" ")]
+            1: JS_DIRECTIVE_LIST@15..15
+            2: JS_STATEMENT_LIST@15..29
+              0: JS_FOR_OF_STATEMENT@15..29
+                0: FOR_KW@15..18 "for" [] []
+                1: (empty)
+                2: L_PAREN@18..19 "(" [] []
+                3: JS_IDENTIFIER_ASSIGNMENT@19..21
+                  0: IDENT@19..21 "t" [] [Whitespace(" ")]
+                4: OF_KW@21..24 "of" [] [Whitespace(" ")]
+                5: (empty)
+                6: (empty)
+                7: JS_BREAK_STATEMENT@24..29
+                  0: BREAK_KW@24..29 "break" [] []
+                  1: (empty)
+                  2: (empty)
+            3: (empty)
+        6: (empty)
+        7: (empty)
+      5: (empty)
+  4: EOF@29..30 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+issue_6640.js:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `(` but instead found `)`
+  
+  > 1 │ if)for(s of=>{ for(t of break
+      │   ^
+    2 │ 
+  
+  i Remove )
+  
+issue_6640.js:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a parenthesis '(' but instead found '=>'.
+  
+  > 1 │ if)for(s of=>{ for(t of break
+      │            ^^
+    2 │ 
+  
+  i Expected a parenthesis '(' here.
+  
+  > 1 │ if)for(s of=>{ for(t of break
+      │            ^^
+    2 │ 
+  
+issue_6640.js:1:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression, or an assignment but instead found 'break'.
+  
+  > 1 │ if)for(s of=>{ for(t of break
+      │                         ^^^^^
+    2 │ 
+  
+  i Expected an expression, or an assignment here.
+  
+  > 1 │ if)for(s of=>{ for(t of break
+      │                         ^^^^^
+    2 │ 
+  
+issue_6640.js:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+    1 │ if)for(s of=>{ for(t of break
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ if)for(s of=>{ for(t of break
+  > 2 │ 
+      │ 
+  
+```

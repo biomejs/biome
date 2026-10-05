@@ -1,0 +1,15 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: entry.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+
+@import "./theme.css";
+
+.card {
+	color: var(--theme-color);
+}
+
+```

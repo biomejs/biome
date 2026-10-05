@@ -1210,6 +1210,7 @@ Most of the time, you actually want to compare against a `&str`, or a `TokenText
 Inherently, syntax trees are quite deeply nested. Biome's syntax data structures make heavy use of the `Result` and `Option` types to represent the absence of a value. It may be tempting to use `unwrap()` or `expect()` to avoid the `Result` and `Option` types, but this is not recommended because those panic. Sometimes, it's not convenient to use the `?` operator. Whatever the case may be, you might end up with something like this:
 
 ```rust
+// Avoid this
 if let Ok(object_member_name) = property_object_member.name() {
     if let Some(key_name) = object_member_name.name() {
         if key_name.text().trim() == "data" {
@@ -1221,6 +1222,7 @@ if let Ok(object_member_name) = property_object_member.name() {
 Rust provides comprehensive helper functions to avoid things like this, such as `map`, `filter`, and `and_then`. Which allows you to write code that is more concise and easier to read.
 
 ```rust
+// Do this instead
 property_object_member
   .name()
   .ok()
@@ -1230,6 +1232,26 @@ property_object_member
   .and_then(|value| match value {
 ...
 ```
+
+##### Using Weakly Typed Syntax Nodes
+
+It may be tempting to use the weakly typed syntax nodes, like `JsSyntaxNode`, as function parameters.
+
+```rust
+// Avoid this
+fn is_react_call(node: &JsSyntaxNode) -> bool { ... }
+```
+
+However, doing this is very error prone because you're allowed to call it with any node. It can result in false positives.
+
+Instead, you should protect the function by using strongly typed nodes that restrict the exact kinds of syntax that function is meant to accept.
+
+```rust
+// Do this instead
+fn is_react_call(node: &JsCallExpression) -> bool { ... }
+```
+
+You can use `declare_node_union!` to define custom sets of nodes. See: [Querying multiple node types via `declare_node_union!`](#querying-multiple-node-types-via-declare_node_union)
 
 ### Testing the Rule
 

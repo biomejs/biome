@@ -5,15 +5,23 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, JsBinaryOperator,
-    JsCallArgumentList, JsCallArguments, JsCallExpression, JsLogicalExpression, JsLogicalOperator,
-    JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator, T,
-    is_in_boolean_context, is_negation,
+    AnyJsExpression, AnyJsLiteralExpression, JsAwaitExpression, JsBinaryExpression,
+    JsBinaryOperator, JsCallArgumentList, JsCallArguments, JsCallExpression,
+    JsComputedMemberAssignment, JsComputedMemberExpression, JsExtendsClause, JsInExpression,
+    JsInstanceofExpression, JsLanguage, JsLogicalExpression, JsLogicalOperator, JsNewExpression,
+    JsParenthesizedExpression, JsSpread, JsStaticMemberAssignment, JsStaticMemberExpression,
+    JsTemplateExpression, JsUnaryExpression, JsUnaryOperator, JsxSpreadAttribute, JsxSpreadChild,
+    T, TsAsExpression, TsNonNullAssertionExpression, TsSatisfiesExpression,
+    TsTypeAssertionExpression,
+    binary_like_expression::{AnyJsBinaryLikeExpression, BinaryLikeOperator},
+    is_in_boolean_context,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TokenText};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxKindSet, TokenText};
 use biome_rule_options::use_explicit_length_check::UseExplicitLengthCheckOptions;
 
-use crate::JsRuleAction;
+use crate::{
+    JsRuleAction, ast_utils::needs_space_before_identifier_expression_replacement,
+};
 
 declare_lint_rule! {
     /// Enforce explicitly comparing the `length`, `size`, `byteLength` or `byteOffset` property of a value.
@@ -131,7 +139,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         severity: Severity::Information,
-        sources: &[RuleSource::EslintUnicorn("explicit-length-check").same()],
+        sources: &[RuleSource::EslintUnicorn("explicit-length-check").inspired()],
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -155,26 +163,32 @@ impl Rule for UseExplicitLengthCheck {
             return None;
         }
 
+        if member_expr.is_optional_chain() {
+            return None;
+        }
+
         // TODO. Handle cases when `length` property is not numeric
         // That requires type inference. Example: `{ length: "not a number" }`
 
-        let member_expr_syntax = member_expr.syntax();
-        let parent_syntax = member_expr_syntax.parent()?;
+        let member_expression = AnyJsExpression::from(member_expr.clone());
+        let member_expr_syntax = member_expression.syntax();
 
         if let Some((binary_expr, mut len_check, is_possibly_valid)) =
-            is_binary_expr_length_check(&parent_syntax)
+            member_expr
+                .parent::<JsBinaryExpression>()
+                .and_then(|binary_expr| is_binary_expr_length_check(&binary_expr))
         {
-            return get_boolean_ancestor(binary_expr.syntax())
+            return get_boolean_ancestor(&AnyJsExpression::from(binary_expr.clone()))
                 .map(|(expr, is_negative)| {
                     if is_negative {
                         len_check = len_check.opposite();
                     }
 
-                    UseExplicitLengthCheckState {
-                        check: len_check,
-                        node: expr,
-                        member_name: member_name.clone(),
-                    }
+                    UseExplicitLengthCheckState::new(
+                        len_check,
+                        expr,
+                        member_name.clone(),
+                    )
                 })
                 .or_else(|| {
                     // Binary expression is valid and was not wrapped in a boolean ancestor
@@ -182,51 +196,48 @@ impl Rule for UseExplicitLengthCheck {
                         return None;
                     }
 
-                    Some(UseExplicitLengthCheckState {
-                        check: len_check,
-                        node: AnyJsExpression::from(binary_expr),
+                    Some(UseExplicitLengthCheckState::new(
+                        len_check,
+                        AnyJsExpression::from(binary_expr),
                         member_name,
-                    })
+                    ))
                 });
         }
 
-        if let Some((boolean_expr, is_negative)) = get_boolean_ancestor(member_expr_syntax) {
+        if let Some((boolean_expr, is_negative)) = get_boolean_ancestor(&member_expression) {
             let check = if is_negative {
                 LengthCheck::Zero
             } else {
                 LengthCheck::NonZero
             };
 
-            return Some(UseExplicitLengthCheckState {
+            return Some(UseExplicitLengthCheckState::new(
                 check,
-                node: boolean_expr,
+                boolean_expr,
                 member_name,
-            });
+            ));
         }
 
-        if is_in_boolean_context(member_expr_syntax).unwrap_or(false) {
-            return Some(UseExplicitLengthCheckState {
-                check: LengthCheck::NonZero,
-                node: AnyJsExpression::cast_ref(member_expr_syntax)?,
+        if is_in_boolean_context(member_expr_syntax).unwrap_or(false)
+            || has_boolean_ancestor_through_logical_expression(&member_expression)
+        {
+            return Some(UseExplicitLengthCheckState::new(
+                LengthCheck::NonZero,
+                AnyJsExpression::cast_ref(member_expr_syntax)?,
                 member_name,
-            });
+            ));
         }
 
-        if let Some(logical_expr) = is_logical_expr(parent_syntax) {
-            // `const x = foo.length || 0` is valid case
-            // TODO. This handles simple cases. To know if right side is a number, we need type inference.
-            if logical_expr.operator().ok()? == JsLogicalOperator::LogicalOr
-                && logical_expr.right().ok()?.syntax().kind()
-                    == JsSyntaxKind::JS_NUMBER_LITERAL_EXPRESSION
-            {
+        if let Some(logical_expr) = get_parent_logical_expression(&member_expression) {
+            if logical_expr.operator().ok()? != JsLogicalOperator::LogicalAnd {
                 return None;
             }
 
-            return Some(UseExplicitLengthCheckState {
-                check: LengthCheck::NonZero,
-                node: AnyJsExpression::cast_ref(member_expr_syntax)?,
+            return Some(UseExplicitLengthCheckState::without_fix(
+                LengthCheck::NonZero,
+                AnyJsExpression::cast_ref(member_expr_syntax)?,
                 member_name,
-            });
+            ));
         }
 
         None
@@ -248,28 +259,53 @@ impl Rule for UseExplicitLengthCheck {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        if !state.can_fix {
+            return None;
+        }
+
         let member_expr = ctx.query();
         let mut mutation = ctx.root().begin();
-        let operator_kind = match state.check {
-            LengthCheck::Zero => T![===],
-            LengthCheck::NonZero => T![>],
+        let (operator_kind, operator) = match state.check {
+            LengthCheck::Zero => (T![===], JsBinaryOperator::StrictEquality),
+            LengthCheck::NonZero => (T![>], JsBinaryOperator::GreaterThan),
         };
 
-        let new_binary_expr = make::js_binary_expression(
-            member_expr.clone().trim_trailing_trivia()?.into(),
+        let member_expr = member_expr.clone().trim_trailing_trivia()?;
+        let state_starts_before_member =
+            state.node.syntax().first_token() != member_expr.syntax().first_token();
+        let new_binary_expr = AnyJsExpression::from(make::js_binary_expression(
+            member_expr.into(),
             make::token_decorated_with_space(operator_kind),
             AnyJsExpression::AnyJsLiteralExpression(
                 AnyJsLiteralExpression::JsNumberLiteralExpression(
                     make::js_number_literal_expression(make::js_number_literal("0")),
                 ),
             ),
-        );
+        ));
 
-        let mut new_node = new_binary_expr.into_syntax();
-        let parent = state.node.syntax().parent()?;
+        let mut new_node = if binary_replacement_needs_parentheses(&state.node, operator) {
+            make::js_parenthesized_expression(
+                make::token(T!['(']),
+                new_binary_expr,
+                make::token(T![')']),
+            )
+            .into_syntax()
+        } else {
+            new_binary_expr.into_syntax()
+        };
+        if state_starts_before_member {
+            new_node = new_node.prepend_trivia_pieces(
+                state
+                    .node
+                    .syntax()
+                    .first_token()?
+                    .leading_trivia()
+                    .pieces(),
+            )?;
+        }
         // In cases like `export default!foo.length` -> `export default foo.length === 0`
         // we need to add a space between keyword and expression
-        if does_node_needs_space_before_child(&parent) {
+        if needs_space_before_identifier_expression_replacement(&state.node) {
             // Make fake token to get leading trivia
             let leading_trivia = make::token_decorated_with_space(T![=])
                 .leading_trivia()
@@ -280,9 +316,9 @@ impl Rule for UseExplicitLengthCheck {
                 .prepend_trivia_pieces(leading_trivia)?;
         }
 
-        mutation.replace_element_discard_trivia(
-            state.node.clone().into_syntax().into(),
-            new_node.into(),
+        mutation.replace_node_discard_trivia(
+            state.node.clone(),
+            AnyJsExpression::cast(new_node)?,
         );
 
         let code = match state.check {
@@ -293,7 +329,7 @@ impl Rule for UseExplicitLengthCheck {
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-             markup! { "Replace "<Emphasis>"."{member_name}</Emphasis>" with "<Emphasis>"."{member_name}" "{code}</Emphasis> }.to_owned(),
+            markup! { "Replace "<Emphasis>"."{member_name}</Emphasis>" with "<Emphasis>"."{member_name}" "{code}</Emphasis> }.to_owned(),
             mutation,
         ))
     }
@@ -306,6 +342,27 @@ pub struct UseExplicitLengthCheckState {
     check: LengthCheck,
     node: AnyJsExpression,
     member_name: TokenText,
+    can_fix: bool,
+}
+
+impl UseExplicitLengthCheckState {
+    fn new(check: LengthCheck, node: AnyJsExpression, member_name: TokenText) -> Self {
+        Self {
+            check,
+            can_fix: !is_unsafe_negation_fix(&node),
+            node,
+            member_name,
+        }
+    }
+
+    fn without_fix(check: LengthCheck, node: AnyJsExpression, member_name: TokenText) -> Self {
+        Self {
+            check,
+            node,
+            member_name,
+            can_fix: false,
+        }
+    }
 }
 
 enum MemberPosition {
@@ -345,11 +402,9 @@ fn extract_binary_position_and_literal(
 }
 
 fn is_binary_expr_length_check(
-    node: &JsSyntaxNode,
+    binary_expr: &JsBinaryExpression,
 ) -> Option<(JsBinaryExpression, LengthCheck, bool)> {
-    let binary_expr = JsBinaryExpression::cast_ref(node)?;
-
-    let (member_position, literal) = extract_binary_position_and_literal(&binary_expr)?;
+    let (member_position, literal) = extract_binary_position_and_literal(binary_expr)?;
     let number = literal
         .as_js_number_literal_expression()?
         .as_number()?
@@ -389,7 +444,7 @@ fn is_binary_expr_length_check(
         _ => None,
     }?;
 
-    Some((binary_expr, length_check, is_valid))
+    Some((binary_expr.clone(), length_check, is_valid))
 }
 
 /// Get the boolean ancestor of the node
@@ -404,86 +459,126 @@ fn is_binary_expr_length_check(
 /// !(Boolean(!(!x)))
 /// ```
 /// Returns ancestor expression and whether it is negated
-fn get_boolean_ancestor(node: &JsSyntaxNode) -> Option<(AnyJsExpression, bool)> {
-    let mut boolean_node: Option<JsSyntaxNode> = None;
-    let mut current_node = node.parent()?;
+fn get_boolean_ancestor(node: &AnyJsExpression) -> Option<(AnyJsExpression, bool)> {
+    let mut boolean_node = None;
+    let mut current_node = node.clone();
     let mut is_negative = false;
 
     loop {
         if let Some(expr) = is_boolean_call(&current_node) {
-            let syntax = expr.into_syntax();
-            current_node = syntax.parent()?;
-            boolean_node = Some(syntax);
-        } else if let Some(expr) = is_negation(&current_node) {
-            let syntax = expr.into_syntax();
-            current_node = syntax.parent()?;
-            boolean_node = Some(syntax);
+            current_node = expr.into();
+            boolean_node = Some(current_node.clone());
+        } else if let Some(expr) = current_node
+            .parent::<JsUnaryExpression>()
+            .filter(|expr| expr.operator() == Ok(JsUnaryOperator::LogicalNot))
+        {
+            current_node = expr.into();
+            boolean_node = Some(current_node.clone());
             is_negative = !is_negative;
-        } else if current_node.kind() == JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION {
-            current_node = current_node.parent()?;
+        } else if let Some(expr) = current_node.parent::<JsParenthesizedExpression>() {
+            current_node = expr.into();
         } else {
             break;
         }
     }
 
-    Some((AnyJsExpression::cast(boolean_node?)?, is_negative))
+    Some((boolean_node?, is_negative))
 }
 
-/// Check if the SyntaxNode is a `Boolean` Call Expression
+/// Returns the parent `Boolean` call when the expression is its only argument.
 /// ## Example
 /// ```js
 /// Boolean(x)
 /// ```
-pub fn is_boolean_call(node: &JsSyntaxNode) -> Option<JsCallExpression> {
-    let expr = JsCallArgumentList::cast_ref(node)?
+fn is_boolean_call(node: &AnyJsExpression) -> Option<JsCallExpression> {
+    let expr = node
+        .parent::<JsCallArgumentList>()?
         .parent::<JsCallArguments>()?
         .parent::<JsCallExpression>()?;
     (expr.has_callee("Boolean") && expr.arguments().ok()?.args().len() < 2).then_some(expr)
 }
 
-/// Checks if expression is a logical expression with `&&` or `||` operator
-fn is_logical_expr(node: JsSyntaxNode) -> Option<JsLogicalExpression> {
-    let expr: JsLogicalExpression = JsLogicalExpression::cast(node)?;
+fn get_parent_logical_expression(expression: &AnyJsExpression) -> Option<JsLogicalExpression> {
+    let logical_expression = expression
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .find_map(JsLogicalExpression::cast)?;
+    let is_direct_operand = [
+        logical_expression.left().ok()?,
+        logical_expression.right().ok()?,
+    ]
+    .iter()
+    .any(|operand| operand.clone().omit_parentheses().syntax() == expression.syntax());
 
-    match expr.operator().ok()? {
-        JsLogicalOperator::LogicalAnd | JsLogicalOperator::LogicalOr => Some(expr),
-        _ => None,
+    is_direct_operand.then_some(logical_expression)
+}
+
+fn has_boolean_ancestor_through_logical_expression(node: &AnyJsExpression) -> bool {
+    let Some(logical_expression) = get_parent_logical_expression(node) else {
+        return false;
+    };
+    let mut current_expression = AnyJsExpression::from(logical_expression);
+
+    while let Some(parent) = get_parent_logical_expression(&current_expression) {
+        current_expression = parent.into();
     }
+
+    get_boolean_ancestor(&current_expression).is_some()
 }
 
-fn does_unary_expr_needs_space(node: &JsSyntaxNode) -> bool {
-    JsUnaryExpression::cast_ref(node).is_some_and(|expr| {
-        matches!(
-            expr.operator(),
-            Ok(JsUnaryOperator::Typeof | JsUnaryOperator::Void | JsUnaryOperator::Delete)
-        )
-    })
+fn is_unsafe_negation_fix(node: &AnyJsExpression) -> bool {
+    let Some(unary_expression) = JsUnaryExpression::cast_ref(node.syntax()) else {
+        return false;
+    };
+    if unary_expression.operator() != Ok(JsUnaryOperator::LogicalNot) {
+        return false;
+    }
+
+    node.syntax()
+        .parent()
+        .is_some_and(|parent| UNSAFE_NEGATION_FIX_PARENT_KINDS.matches(parent.kind()))
 }
 
-/// Checks if node needs space in case inserted child
-/// would produce syntax error without it.
-/// ## Example
-/// ```js
-/// export default!foo.length
-/// ```
-/// removing slash would produce syntax error without a space
-/// ```js
-/// export default foo.length
-/// ```
-pub(crate) fn does_node_needs_space_before_child(node: &JsSyntaxNode) -> bool {
-    matches!(
-        node.kind(),
-        JsSyntaxKind::JS_EXPORT_DEFAULT_EXPRESSION_CLAUSE
-            | JsSyntaxKind::JS_INSTANCEOF_EXPRESSION
-            | JsSyntaxKind::JS_YIELD_EXPRESSION
-            | JsSyntaxKind::JS_RETURN_STATEMENT
-            | JsSyntaxKind::JS_THROW_STATEMENT
-            | JsSyntaxKind::JS_NEW_EXPRESSION
-            | JsSyntaxKind::JS_AWAIT_EXPRESSION
-            | JsSyntaxKind::JS_IN_EXPRESSION
-            | JsSyntaxKind::JS_FOR_OF_STATEMENT
-            | JsSyntaxKind::JS_FOR_IN_STATEMENT
-            | JsSyntaxKind::JS_DO_WHILE_STATEMENT
-            | JsSyntaxKind::JS_CASE_CLAUSE
-    ) || does_unary_expr_needs_space(node)
+fn binary_replacement_needs_parentheses(
+    node: &AnyJsExpression,
+    replacement_operator: JsBinaryOperator,
+) -> bool {
+    let Some(parent) = node.syntax().parent() else {
+        return false;
+    };
+
+    if BINARY_REPLACEMENT_PARENTHESES_PARENT_KINDS.matches(parent.kind()) {
+        return true;
+    }
+
+    AnyJsBinaryLikeExpression::cast(parent)
+        .and_then(|parent| parent.operator().ok())
+        .is_some_and(|parent_operator| {
+            parent_operator.precedence()
+                >= BinaryLikeOperator::Binary(replacement_operator).precedence()
+        })
 }
+
+const BINARY_REPLACEMENT_PARENTHESES_PARENT_KINDS: SyntaxKindSet<JsLanguage> =
+    JsExtendsClause::KIND_SET
+        .union(TsAsExpression::KIND_SET)
+        .union(TsSatisfiesExpression::KIND_SET)
+        .union(TsTypeAssertionExpression::KIND_SET)
+        .union(JsUnaryExpression::KIND_SET)
+        .union(JsAwaitExpression::KIND_SET)
+        .union(TsNonNullAssertionExpression::KIND_SET)
+        .union(JsxSpreadChild::KIND_SET)
+        .union(JsSpread::KIND_SET)
+        .union(JsxSpreadAttribute::KIND_SET)
+        .union(JsCallExpression::KIND_SET)
+        .union(JsNewExpression::KIND_SET)
+        .union(JsTemplateExpression::KIND_SET)
+        .union(JsStaticMemberExpression::KIND_SET)
+        .union(JsStaticMemberAssignment::KIND_SET)
+        .union(JsComputedMemberExpression::KIND_SET)
+        .union(JsComputedMemberAssignment::KIND_SET);
+
+const UNSAFE_NEGATION_FIX_PARENT_KINDS: SyntaxKindSet<JsLanguage> = JsBinaryExpression::KIND_SET
+    .union(JsInExpression::KIND_SET)
+    .union(JsInstanceofExpression::KIND_SET);

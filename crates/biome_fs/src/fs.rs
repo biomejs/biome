@@ -35,6 +35,10 @@ impl ConfigName {
     pub const fn file_names() -> [&'static str; 4] {
         Self::BIOME_JSON
     }
+
+    pub fn matches_file_name(file_name: &str) -> bool {
+        Self::BIOME_JSON.contains(&file_name)
+    }
 }
 
 /// Represents the kind of filesystem entry a path points at.

@@ -46,3 +46,13 @@ class AsyncDisposableClass implements AsyncDisposable {
 }
 
 await using asyncDisposableInstance = new AsyncDisposableClass();
+
+const Symbol = {
+	dispose: "dispose",
+	asyncDispose: "asyncDispose",
+};
+
+const shadowedSymbolMembers = {
+	[Symbol.dispose]() {},
+	[Symbol.asyncDispose]() {},
+};

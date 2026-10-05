@@ -17,7 +17,12 @@ impl FormatNodeRule<CssValueAtRuleGenericProperty> for FormatCssValueAtRuleGener
 
         write!(
             f,
-            [name.format(), colon_token.format(), space(), value.format()]
+            [
+                name?.format().with_text_case(CssCase::Preserve),
+                colon_token.format(),
+                space(),
+                value.format()
+            ]
         )
     }
 }

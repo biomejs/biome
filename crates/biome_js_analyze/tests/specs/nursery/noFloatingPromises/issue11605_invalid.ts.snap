@@ -1,0 +1,380 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue11605_invalid.ts
+---
+# Input
+```ts
+interface Service {
+	go(): Promise<void>;
+}
+interface Context {
+	service: Service;
+}
+declare const context: Context;
+
+declare function test<T>(callback: (args: T) => Promise<void>): void;
+
+// Explicit type arguments on the call instantiate `T`.
+test<Context>(async (args) => {
+	const service = args.service;
+	service.go();
+});
+
+test<Context>(async (args) => {
+	args.service.go();
+});
+
+// Single unparenthesised parameter.
+test<Context>(async args => {
+	args.service.go();
+});
+
+// Destructured parameter.
+test<Context>(async ({ service }) => {
+	service.go();
+});
+
+// Non-generic callback parameter.
+declare function run(callback: (args: Context) => Promise<void>): void;
+run(async (args) => {
+	args.service.go();
+});
+
+// Function expression callback, and a parenthesised callback.
+run(async function (args) {
+	args.service.go();
+});
+run((async (args) => {
+	args.service.go();
+}));
+
+// Second argument, with a preceding argument selecting the overload.
+declare function schedule(kind: "sync", callback: (args: number) => void): void;
+declare function schedule(kind: "async", callback: (args: Context) => Promise<void>): void;
+schedule("async", async (args) => {
+	args.service.go();
+});
+
+// Callbacks with several parameters, typed by position.
+declare function each(callback: (item: Context, index: number) => Promise<void>): void;
+each(async (item, index) => {
+	item.service.go();
+});
+declare function reversed(callback: (index: number, item: Context) => Promise<void>): void;
+reversed(async (index, item) => {
+	item.service.go();
+});
+
+// A `this` parameter does not occupy an argument position.
+declare function bound(callback: (this: Window, item: Context) => Promise<void>): void;
+bound(async function (item) {
+	item.service.go();
+});
+
+// Callback passed to a constructor.
+declare class Job {
+	constructor(callback: (args: Context) => Promise<void>);
+}
+new Job(async (args) => {
+	args.service.go();
+});
+
+// Explicit type arguments on a plain call.
+declare function make<T>(): T;
+make<Service>().go();
+
+```
+
+# Diagnostics
+```
+issue11605_invalid.ts:14:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    12 │ test<Context>(async (args) => {
+    13 │ 	const service = args.service;
+  > 14 │ 	service.go();
+       │ 	^^^^^^^^^^^^^
+    15 │ });
+    16 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    14 │ → await·service.go();
+       │   ++++++             
+
+```
+
+```
+issue11605_invalid.ts:18:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    17 │ test<Context>(async (args) => {
+  > 18 │ 	args.service.go();
+       │ 	^^^^^^^^^^^^^^^^^^
+    19 │ });
+    20 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    18 │ → await·args.service.go();
+       │   ++++++                  
+
+```
+
+```
+issue11605_invalid.ts:23:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    21 │ // Single unparenthesised parameter.
+    22 │ test<Context>(async args => {
+  > 23 │ 	args.service.go();
+       │ 	^^^^^^^^^^^^^^^^^^
+    24 │ });
+    25 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    23 │ → await·args.service.go();
+       │   ++++++                  
+
+```
+
+```
+issue11605_invalid.ts:28:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    26 │ // Destructured parameter.
+    27 │ test<Context>(async ({ service }) => {
+  > 28 │ 	service.go();
+       │ 	^^^^^^^^^^^^^
+    29 │ });
+    30 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    28 │ → await·service.go();
+       │   ++++++             
+
+```
+
+```
+issue11605_invalid.ts:34:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    32 │ declare function run(callback: (args: Context) => Promise<void>): void;
+    33 │ run(async (args) => {
+  > 34 │ 	args.service.go();
+       │ 	^^^^^^^^^^^^^^^^^^
+    35 │ });
+    36 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    34 │ → await·args.service.go();
+       │   ++++++                  
+
+```
+
+```
+issue11605_invalid.ts:39:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    37 │ // Function expression callback, and a parenthesised callback.
+    38 │ run(async function (args) {
+  > 39 │ 	args.service.go();
+       │ 	^^^^^^^^^^^^^^^^^^
+    40 │ });
+    41 │ run((async (args) => {
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    39 │ → await·args.service.go();
+       │   ++++++                  
+
+```
+
+```
+issue11605_invalid.ts:42:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    40 │ });
+    41 │ run((async (args) => {
+  > 42 │ 	args.service.go();
+       │ 	^^^^^^^^^^^^^^^^^^
+    43 │ }));
+    44 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    42 │ → await·args.service.go();
+       │   ++++++                  
+
+```
+
+```
+issue11605_invalid.ts:49:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    47 │ declare function schedule(kind: "async", callback: (args: Context) => Promise<void>): void;
+    48 │ schedule("async", async (args) => {
+  > 49 │ 	args.service.go();
+       │ 	^^^^^^^^^^^^^^^^^^
+    50 │ });
+    51 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    49 │ → await·args.service.go();
+       │   ++++++                  
+
+```
+
+```
+issue11605_invalid.ts:55:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    53 │ declare function each(callback: (item: Context, index: number) => Promise<void>): void;
+    54 │ each(async (item, index) => {
+  > 55 │ 	item.service.go();
+       │ 	^^^^^^^^^^^^^^^^^^
+    56 │ });
+    57 │ declare function reversed(callback: (index: number, item: Context) => Promise<void>): void;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    55 │ → await·item.service.go();
+       │   ++++++                  
+
+```
+
+```
+issue11605_invalid.ts:59:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    57 │ declare function reversed(callback: (index: number, item: Context) => Promise<void>): void;
+    58 │ reversed(async (index, item) => {
+  > 59 │ 	item.service.go();
+       │ 	^^^^^^^^^^^^^^^^^^
+    60 │ });
+    61 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    59 │ → await·item.service.go();
+       │   ++++++                  
+
+```
+
+```
+issue11605_invalid.ts:65:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    63 │ declare function bound(callback: (this: Window, item: Context) => Promise<void>): void;
+    64 │ bound(async function (item) {
+  > 65 │ 	item.service.go();
+       │ 	^^^^^^^^^^^^^^^^^^
+    66 │ });
+    67 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    65 │ → await·item.service.go();
+       │   ++++++                  
+
+```
+
+```
+issue11605_invalid.ts:73:2 lint/nursery/noFloatingPromises  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    71 │ }
+    72 │ new Job(async (args) => {
+  > 73 │ 	args.service.go();
+       │ 	^^^^^^^^^^^^^^^^^^
+    74 │ });
+    75 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Add await operator.
+  
+    73 │ → await·args.service.go();
+       │   ++++++                  
+
+```
+
+```
+issue11605_invalid.ts:78:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    76 │ // Explicit type arguments on a plain call.
+    77 │ declare function make<T>(): T;
+  > 78 │ make<Service>().go();
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    79 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

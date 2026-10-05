@@ -19,15 +19,16 @@ impl FormatNodeRule<MdHeader> for FormatMdHeader {
         write!(f, [indent.format(), before.format()])?;
 
         if let Some(content) = content {
+            // Commented paragraphs are verbatim, including the separator after `#`.
+            if !content.syntax().has_comments_descendants() {
+                write!(f, [space()])?;
+            }
             write!(
                 f,
-                [
-                    space(),
-                    content.format().with_options(FormatMdParagraphOptions {
-                        trim_mode: TextPrintMode::Trim(TrimMode::Start),
-                        text_context: TextContext::Header,
-                    })
-                ]
+                [content.format().with_options(FormatMdParagraphOptions {
+                    trim_mode: TextPrintMode::Trim(TrimMode::Start),
+                    text_context: TextContext::Header,
+                })]
             )?;
         }
 

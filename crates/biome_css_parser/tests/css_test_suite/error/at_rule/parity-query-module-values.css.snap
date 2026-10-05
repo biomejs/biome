@@ -1,0 +1,736 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@media (min-width: tokens.$tablet) { .a { color: red; } }
+@media (tokens.$tablet <= width) { .b { color: red; } }
+@media (30rem < width <= tokens.$tablet) { .c { color: red; } }
+@media (min-width: (tokens.$tablet)) { .d { color: red; } }
+.after { color: blue; }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@1..7 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssBogusMediaQuery {
+                            items: [
+                                CssBogus {
+                                    items: [
+                                        L_PAREN@7..8 "(" [] [],
+                                        CssBogus {
+                                            items: [
+                                                CssIdentifier {
+                                                    value_token: IDENT@8..17 "min-width" [] [],
+                                                },
+                                                COLON@17..19 ":" [] [Whitespace(" ")],
+                                                CssBogusSupportsCondition {
+                                                    items: [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@19..25 "tokens" [] [],
+                                                        },
+                                                        DOT@25..26 "." [] [],
+                                                        ScssVariable {
+                                                            dollar_token: DOLLAR@26..27 "$" [] [],
+                                                            name: CssIdentifier {
+                                                                value_token: IDENT@27..33 "tablet" [] [],
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                        R_PAREN@33..35 ")" [] [Whitespace(" ")],
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@35..37 "{" [] [Whitespace(" ")],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssClassSelector {
+                                            dot_token: DOT@37..38 "." [] [],
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@38..40 "a" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@40..42 "{" [] [Whitespace(" ")],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@42..47 "color" [] [],
+                                                },
+                                                colon_token: COLON@47..49 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@49..52 "red" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@52..54 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@54..56 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@56..57 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@57..59 "@" [Newline("\n")] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@59..65 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssBogusMediaQuery {
+                            items: [
+                                CssBogus {
+                                    items: [
+                                        L_PAREN@65..66 "(" [] [],
+                                        CssBogus {
+                                            items: [
+                                                CssBogusSupportsCondition {
+                                                    items: [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@66..72 "tokens" [] [],
+                                                        },
+                                                        DOT@72..73 "." [] [],
+                                                        ScssVariable {
+                                                            dollar_token: DOLLAR@73..74 "$" [] [],
+                                                            name: CssIdentifier {
+                                                                value_token: IDENT@74..81 "tablet" [] [Whitespace(" ")],
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                                CssQueryFeatureRangeComparison {
+                                                    operator: LTEQ@81..84 "<=" [] [Whitespace(" ")],
+                                                },
+                                                CssIdentifier {
+                                                    value_token: IDENT@84..89 "width" [] [],
+                                                },
+                                            ],
+                                        },
+                                        R_PAREN@89..91 ")" [] [Whitespace(" ")],
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@91..93 "{" [] [Whitespace(" ")],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssClassSelector {
+                                            dot_token: DOT@93..94 "." [] [],
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@94..96 "b" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@96..98 "{" [] [Whitespace(" ")],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@98..103 "color" [] [],
+                                                },
+                                                colon_token: COLON@103..105 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@105..108 "red" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@108..110 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@110..112 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@112..113 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@113..115 "@" [Newline("\n")] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@115..121 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssBogusMediaQuery {
+                            items: [
+                                CssBogus {
+                                    items: [
+                                        L_PAREN@121..122 "(" [] [],
+                                        CssBogus {
+                                            items: [
+                                                CssRegularDimension {
+                                                    value_token: CSS_NUMBER_LITERAL@122..124 "30" [] [],
+                                                    unit_token: IDENT@124..128 "rem" [] [Whitespace(" ")],
+                                                },
+                                                CssQueryFeatureRangeComparison {
+                                                    operator: L_ANGLE@128..130 "<" [] [Whitespace(" ")],
+                                                },
+                                                CssIdentifier {
+                                                    value_token: IDENT@130..136 "width" [] [Whitespace(" ")],
+                                                },
+                                                CssQueryFeatureRangeComparison {
+                                                    operator: LTEQ@136..139 "<=" [] [Whitespace(" ")],
+                                                },
+                                                CssBogusSupportsCondition {
+                                                    items: [
+                                                        CssIdentifier {
+                                                            value_token: IDENT@139..145 "tokens" [] [],
+                                                        },
+                                                        DOT@145..146 "." [] [],
+                                                        ScssVariable {
+                                                            dollar_token: DOLLAR@146..147 "$" [] [],
+                                                            name: CssIdentifier {
+                                                                value_token: IDENT@147..153 "tablet" [] [],
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                        R_PAREN@153..155 ")" [] [Whitespace(" ")],
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@155..157 "{" [] [Whitespace(" ")],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssClassSelector {
+                                            dot_token: DOT@157..158 "." [] [],
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@158..160 "c" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@160..162 "{" [] [Whitespace(" ")],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@162..167 "color" [] [],
+                                                },
+                                                colon_token: COLON@167..169 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@169..172 "red" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@172..174 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@174..176 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@176..177 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@177..179 "@" [Newline("\n")] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@179..185 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssBogusMediaQuery {
+                            items: [
+                                CssBogus {
+                                    items: [
+                                        L_PAREN@185..186 "(" [] [],
+                                        CssBogus {
+                                            items: [
+                                                CssIdentifier {
+                                                    value_token: IDENT@186..195 "min-width" [] [],
+                                                },
+                                                COLON@195..197 ":" [] [Whitespace(" ")],
+                                                CssBogus {
+                                                    items: [
+                                                        ScssExpressionItemList [
+                                                            ScssParenthesizedExpression {
+                                                                l_paren_token: L_PAREN@197..198 "(" [] [],
+                                                                expression: ScssExpression {
+                                                                    items: ScssExpressionItemList [
+                                                                        ScssModuleMemberAccess {
+                                                                            module: CssIdentifier {
+                                                                                value_token: IDENT@198..204 "tokens" [] [],
+                                                                            },
+                                                                            dot_token: DOT@204..205 "." [] [],
+                                                                            member: ScssVariable {
+                                                                                dollar_token: DOLLAR@205..206 "$" [] [],
+                                                                                name: CssIdentifier {
+                                                                                    value_token: IDENT@206..212 "tablet" [] [],
+                                                                                },
+                                                                            },
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                r_paren_token: R_PAREN@212..213 ")" [] [],
+                                                            },
+                                                        ],
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                        R_PAREN@213..215 ")" [] [Whitespace(" ")],
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@215..217 "{" [] [Whitespace(" ")],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssClassSelector {
+                                            dot_token: DOT@217..218 "." [] [],
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@218..220 "d" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@220..222 "{" [] [Whitespace(" ")],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@222..227 "color" [] [],
+                                                },
+                                                colon_token: COLON@227..229 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@229..232 "red" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@232..234 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@234..236 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@236..237 "}" [] [],
+                },
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@237..239 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@239..245 "after" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@245..247 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@247..252 "color" [] [],
+                                },
+                                colon_token: COLON@252..254 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@254..258 "blue" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@258..260 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@260..261 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@261..262 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..262
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..261
+    0: CSS_AT_RULE@0..57
+      0: AT@0..1 "@" [] []
+      1: CSS_MEDIA_AT_RULE@1..57
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@1..35
+          0: MEDIA_KW@1..7 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@7..35
+            0: CSS_BOGUS_MEDIA_QUERY@7..35
+              0: CSS_BOGUS@7..35
+                0: L_PAREN@7..8 "(" [] []
+                1: CSS_BOGUS@8..33
+                  0: CSS_IDENTIFIER@8..17
+                    0: IDENT@8..17 "min-width" [] []
+                  1: COLON@17..19 ":" [] [Whitespace(" ")]
+                  2: CSS_BOGUS_SUPPORTS_CONDITION@19..33
+                    0: CSS_IDENTIFIER@19..25
+                      0: IDENT@19..25 "tokens" [] []
+                    1: DOT@25..26 "." [] []
+                    2: SCSS_VARIABLE@26..33
+                      0: DOLLAR@26..27 "$" [] []
+                      1: CSS_IDENTIFIER@27..33
+                        0: IDENT@27..33 "tablet" [] []
+                2: R_PAREN@33..35 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@35..57
+          0: L_CURLY@35..37 "{" [] [Whitespace(" ")]
+          1: CSS_RULE_LIST@37..56
+            0: CSS_QUALIFIED_RULE@37..56
+              0: CSS_SELECTOR_LIST@37..40
+                0: CSS_COMPOUND_SELECTOR@37..40
+                  0: CSS_NESTED_SELECTOR_LIST@37..37
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@37..40
+                    0: CSS_CLASS_SELECTOR@37..40
+                      0: DOT@37..38 "." [] []
+                      1: CSS_CUSTOM_IDENTIFIER@38..40
+                        0: IDENT@38..40 "a" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@40..56
+                0: L_CURLY@40..42 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_OR_RULE_LIST@42..54
+                  0: CSS_DECLARATION_WITH_SEMICOLON@42..54
+                    0: CSS_DECLARATION@42..52
+                      0: CSS_GENERIC_PROPERTY@42..52
+                        0: CSS_IDENTIFIER@42..47
+                          0: IDENT@42..47 "color" [] []
+                        1: COLON@47..49 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@49..52
+                          0: CSS_IDENTIFIER@49..52
+                            0: IDENT@49..52 "red" [] []
+                      1: (empty)
+                    1: SEMICOLON@52..54 ";" [] [Whitespace(" ")]
+                2: R_CURLY@54..56 "}" [] [Whitespace(" ")]
+          2: R_CURLY@56..57 "}" [] []
+    1: CSS_AT_RULE@57..113
+      0: AT@57..59 "@" [Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@59..113
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@59..91
+          0: MEDIA_KW@59..65 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@65..91
+            0: CSS_BOGUS_MEDIA_QUERY@65..91
+              0: CSS_BOGUS@65..91
+                0: L_PAREN@65..66 "(" [] []
+                1: CSS_BOGUS@66..89
+                  0: CSS_BOGUS_SUPPORTS_CONDITION@66..81
+                    0: CSS_IDENTIFIER@66..72
+                      0: IDENT@66..72 "tokens" [] []
+                    1: DOT@72..73 "." [] []
+                    2: SCSS_VARIABLE@73..81
+                      0: DOLLAR@73..74 "$" [] []
+                      1: CSS_IDENTIFIER@74..81
+                        0: IDENT@74..81 "tablet" [] [Whitespace(" ")]
+                  1: CSS_QUERY_FEATURE_RANGE_COMPARISON@81..84
+                    0: LTEQ@81..84 "<=" [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@84..89
+                    0: IDENT@84..89 "width" [] []
+                2: R_PAREN@89..91 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@91..113
+          0: L_CURLY@91..93 "{" [] [Whitespace(" ")]
+          1: CSS_RULE_LIST@93..112
+            0: CSS_QUALIFIED_RULE@93..112
+              0: CSS_SELECTOR_LIST@93..96
+                0: CSS_COMPOUND_SELECTOR@93..96
+                  0: CSS_NESTED_SELECTOR_LIST@93..93
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@93..96
+                    0: CSS_CLASS_SELECTOR@93..96
+                      0: DOT@93..94 "." [] []
+                      1: CSS_CUSTOM_IDENTIFIER@94..96
+                        0: IDENT@94..96 "b" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@96..112
+                0: L_CURLY@96..98 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_OR_RULE_LIST@98..110
+                  0: CSS_DECLARATION_WITH_SEMICOLON@98..110
+                    0: CSS_DECLARATION@98..108
+                      0: CSS_GENERIC_PROPERTY@98..108
+                        0: CSS_IDENTIFIER@98..103
+                          0: IDENT@98..103 "color" [] []
+                        1: COLON@103..105 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@105..108
+                          0: CSS_IDENTIFIER@105..108
+                            0: IDENT@105..108 "red" [] []
+                      1: (empty)
+                    1: SEMICOLON@108..110 ";" [] [Whitespace(" ")]
+                2: R_CURLY@110..112 "}" [] [Whitespace(" ")]
+          2: R_CURLY@112..113 "}" [] []
+    2: CSS_AT_RULE@113..177
+      0: AT@113..115 "@" [Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@115..177
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@115..155
+          0: MEDIA_KW@115..121 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@121..155
+            0: CSS_BOGUS_MEDIA_QUERY@121..155
+              0: CSS_BOGUS@121..155
+                0: L_PAREN@121..122 "(" [] []
+                1: CSS_BOGUS@122..153
+                  0: CSS_REGULAR_DIMENSION@122..128
+                    0: CSS_NUMBER_LITERAL@122..124 "30" [] []
+                    1: IDENT@124..128 "rem" [] [Whitespace(" ")]
+                  1: CSS_QUERY_FEATURE_RANGE_COMPARISON@128..130
+                    0: L_ANGLE@128..130 "<" [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@130..136
+                    0: IDENT@130..136 "width" [] [Whitespace(" ")]
+                  3: CSS_QUERY_FEATURE_RANGE_COMPARISON@136..139
+                    0: LTEQ@136..139 "<=" [] [Whitespace(" ")]
+                  4: CSS_BOGUS_SUPPORTS_CONDITION@139..153
+                    0: CSS_IDENTIFIER@139..145
+                      0: IDENT@139..145 "tokens" [] []
+                    1: DOT@145..146 "." [] []
+                    2: SCSS_VARIABLE@146..153
+                      0: DOLLAR@146..147 "$" [] []
+                      1: CSS_IDENTIFIER@147..153
+                        0: IDENT@147..153 "tablet" [] []
+                2: R_PAREN@153..155 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@155..177
+          0: L_CURLY@155..157 "{" [] [Whitespace(" ")]
+          1: CSS_RULE_LIST@157..176
+            0: CSS_QUALIFIED_RULE@157..176
+              0: CSS_SELECTOR_LIST@157..160
+                0: CSS_COMPOUND_SELECTOR@157..160
+                  0: CSS_NESTED_SELECTOR_LIST@157..157
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@157..160
+                    0: CSS_CLASS_SELECTOR@157..160
+                      0: DOT@157..158 "." [] []
+                      1: CSS_CUSTOM_IDENTIFIER@158..160
+                        0: IDENT@158..160 "c" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@160..176
+                0: L_CURLY@160..162 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_OR_RULE_LIST@162..174
+                  0: CSS_DECLARATION_WITH_SEMICOLON@162..174
+                    0: CSS_DECLARATION@162..172
+                      0: CSS_GENERIC_PROPERTY@162..172
+                        0: CSS_IDENTIFIER@162..167
+                          0: IDENT@162..167 "color" [] []
+                        1: COLON@167..169 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@169..172
+                          0: CSS_IDENTIFIER@169..172
+                            0: IDENT@169..172 "red" [] []
+                      1: (empty)
+                    1: SEMICOLON@172..174 ";" [] [Whitespace(" ")]
+                2: R_CURLY@174..176 "}" [] [Whitespace(" ")]
+          2: R_CURLY@176..177 "}" [] []
+    3: CSS_AT_RULE@177..237
+      0: AT@177..179 "@" [Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@179..237
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@179..215
+          0: MEDIA_KW@179..185 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@185..215
+            0: CSS_BOGUS_MEDIA_QUERY@185..215
+              0: CSS_BOGUS@185..215
+                0: L_PAREN@185..186 "(" [] []
+                1: CSS_BOGUS@186..213
+                  0: CSS_IDENTIFIER@186..195
+                    0: IDENT@186..195 "min-width" [] []
+                  1: COLON@195..197 ":" [] [Whitespace(" ")]
+                  2: CSS_BOGUS@197..213
+                    0: SCSS_EXPRESSION_ITEM_LIST@197..213
+                      0: SCSS_PARENTHESIZED_EXPRESSION@197..213
+                        0: L_PAREN@197..198 "(" [] []
+                        1: SCSS_EXPRESSION@198..212
+                          0: SCSS_EXPRESSION_ITEM_LIST@198..212
+                            0: SCSS_MODULE_MEMBER_ACCESS@198..212
+                              0: CSS_IDENTIFIER@198..204
+                                0: IDENT@198..204 "tokens" [] []
+                              1: DOT@204..205 "." [] []
+                              2: SCSS_VARIABLE@205..212
+                                0: DOLLAR@205..206 "$" [] []
+                                1: CSS_IDENTIFIER@206..212
+                                  0: IDENT@206..212 "tablet" [] []
+                        2: R_PAREN@212..213 ")" [] []
+                2: R_PAREN@213..215 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@215..237
+          0: L_CURLY@215..217 "{" [] [Whitespace(" ")]
+          1: CSS_RULE_LIST@217..236
+            0: CSS_QUALIFIED_RULE@217..236
+              0: CSS_SELECTOR_LIST@217..220
+                0: CSS_COMPOUND_SELECTOR@217..220
+                  0: CSS_NESTED_SELECTOR_LIST@217..217
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@217..220
+                    0: CSS_CLASS_SELECTOR@217..220
+                      0: DOT@217..218 "." [] []
+                      1: CSS_CUSTOM_IDENTIFIER@218..220
+                        0: IDENT@218..220 "d" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@220..236
+                0: L_CURLY@220..222 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_OR_RULE_LIST@222..234
+                  0: CSS_DECLARATION_WITH_SEMICOLON@222..234
+                    0: CSS_DECLARATION@222..232
+                      0: CSS_GENERIC_PROPERTY@222..232
+                        0: CSS_IDENTIFIER@222..227
+                          0: IDENT@222..227 "color" [] []
+                        1: COLON@227..229 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@229..232
+                          0: CSS_IDENTIFIER@229..232
+                            0: IDENT@229..232 "red" [] []
+                      1: (empty)
+                    1: SEMICOLON@232..234 ";" [] [Whitespace(" ")]
+                2: R_CURLY@234..236 "}" [] [Whitespace(" ")]
+          2: R_CURLY@236..237 "}" [] []
+    4: CSS_QUALIFIED_RULE@237..261
+      0: CSS_SELECTOR_LIST@237..245
+        0: CSS_COMPOUND_SELECTOR@237..245
+          0: CSS_NESTED_SELECTOR_LIST@237..237
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@237..245
+            0: CSS_CLASS_SELECTOR@237..245
+              0: DOT@237..239 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@239..245
+                0: IDENT@239..245 "after" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@245..261
+        0: L_CURLY@245..247 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@247..260
+          0: CSS_DECLARATION_WITH_SEMICOLON@247..260
+            0: CSS_DECLARATION@247..258
+              0: CSS_GENERIC_PROPERTY@247..258
+                0: CSS_IDENTIFIER@247..252
+                  0: IDENT@247..252 "color" [] []
+                1: COLON@252..254 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@254..258
+                  0: CSS_IDENTIFIER@254..258
+                    0: IDENT@254..258 "blue" [] []
+              1: (empty)
+            1: SEMICOLON@258..260 ";" [] [Whitespace(" ")]
+        2: R_CURLY@260..261 "}" [] []
+  2: EOF@261..262 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+parity-query-module-values.css:1:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS module member accesses are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+  > 1 │ @media (min-width: tokens.$tablet) { .a { color: red; } }
+      │                    ^^^^^^^^^^^^^^
+    2 │ @media (tokens.$tablet <= width) { .b { color: red; } }
+    3 │ @media (30rem < width <= tokens.$tablet) { .c { color: red; } }
+  
+parity-query-module-values.css:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS module member accesses are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    1 │ @media (min-width: tokens.$tablet) { .a { color: red; } }
+  > 2 │ @media (tokens.$tablet <= width) { .b { color: red; } }
+      │         ^^^^^^^^^^^^^^
+    3 │ @media (30rem < width <= tokens.$tablet) { .c { color: red; } }
+    4 │ @media (min-width: (tokens.$tablet)) { .d { color: red; } }
+  
+parity-query-module-values.css:3:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS module member accesses are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    1 │ @media (min-width: tokens.$tablet) { .a { color: red; } }
+    2 │ @media (tokens.$tablet <= width) { .b { color: red; } }
+  > 3 │ @media (30rem < width <= tokens.$tablet) { .c { color: red; } }
+      │                          ^^^^^^^^^^^^^^
+    4 │ @media (min-width: (tokens.$tablet)) { .d { color: red; } }
+    5 │ .after { color: blue; }
+  
+parity-query-module-values.css:4:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS parenthesized query values are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    2 │ @media (tokens.$tablet <= width) { .b { color: red; } }
+    3 │ @media (30rem < width <= tokens.$tablet) { .c { color: red; } }
+  > 4 │ @media (min-width: (tokens.$tablet)) { .d { color: red; } }
+      │                    ^^^^^^^^^^^^^^^^
+    5 │ .after { color: blue; }
+    6 │ 
+  
+```

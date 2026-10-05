@@ -3,15 +3,35 @@ use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lin
 use biome_console::markup;
 use biome_diagnostics::Severity;
 
+use biome_html_syntax::T;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_languages::HtmlFileSource;
 use biome_rowan::AstNode;
 use biome_rule_options::use_button_type::UseButtonTypeOptions;
 
-use crate::utils::is_html_tag;
-
 declare_lint_rule! {
-    /// Enforces the usage and validity of the attribute `type` for the element `button`
+    /// Require an explicit, valid `type` on every `<button>`.
+    ///
+    /// A button without a type defaults to `submit`, which can submit a surrounding form
+    /// unexpectedly. Use `button`, `submit`, or `reset` to state the intended behavior.
+    ///
+    /// A `button` element without a [`type` attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/button#type)
+    /// behaves as `type="submit"`.
+    /// Inside a `form`, clicking it submits the form, which often reloads the page.
+    /// That is rarely the intent of a button that opens a menu, toggles a panel, or runs a click handler.
+    ///
+    /// This is easy to miss in Vue, Svelte, and Astro components, because a `button` rendered by one component
+    /// can end up inside a `form` rendered by another.
+    /// An explicit `type` makes the button behave the same wherever it's rendered.
+    ///
+    /// The HTML specification defines three values for `type`:
+    /// - `button`: the button has no default behavior. Use it for buttons handled by JavaScript.
+    /// - `submit`: the button submits its form.
+    /// - `reset`: the button resets the controls of its form to their initial values.
+    ///
+    /// Browsers treat any other value the same as a missing `type`, so the rule reports invalid values too.
+    ///
+    /// In Vue, Svelte, and Astro files, the rule ignores `type` values bound to an expression,
+    /// such as `:type="buttonType"` or `type={buttonType}`, because their value can't be known statically.
     ///
     /// ## Examples
     ///
@@ -25,17 +45,39 @@ declare_lint_rule! {
     /// <button type="incorrectType">Do something</button>
     /// ```
     ///
+    /// Clicking this button submits the form instead of clearing it:
+    ///
+    /// ```html,expect_diagnostic
+    /// <form action="/search">
+    ///     <input name="query" />
+    ///     <button>Clear</button>
+    /// </form>
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```html
     /// <button type="button">Do something</button>
+    ///
+    /// <form action="/search">
+    ///     <input name="query" />
+    ///     <button type="reset">Clear</button>
+    ///     <button type="submit">Search</button>
+    /// </form>
     /// ```
     ///
     pub UseButtonType {
         version: "2.4.0",
         name: "useButtonType",
         language: "html",
-        sources: &[RuleSource::EslintReact("button-has-type").inspired(), RuleSource::EslintReactDom("no-missing-button-type").inspired(), RuleSource::EslintReactXyz("dom-no-missing-button-type").inspired(), RuleSource::HtmlEslint("require-button-type").same()],
+        sources: &[
+            RuleSource::EslintReact("button-has-type").inspired(),
+            RuleSource::EslintReactDom("no-missing-button-type").inspired(),
+            RuleSource::EslintReactXyz("dom-no-missing-button-type").inspired(),
+            RuleSource::EslintSvelte("button-has-type").same(),
+            RuleSource::EslintVueJs("html-button-has-type").same(),
+            RuleSource::HtmlEslint("require-button-type").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
     }
@@ -55,9 +97,8 @@ impl Rule for UseButtonType {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
 
-        if !is_html_tag(element, source_type, "button") {
+        if element.tag_name_kind() != Some(T![button]) {
             return None;
         }
 

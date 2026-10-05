@@ -1,7 +1,7 @@
-//! This module contains the configuration of `biome.json`
+//! This module contains the configuration of `biome.json`.
 //!
-//! The configuration is divided by "tool", and then it's possible to further customise it
-//! by language. The language might further option divided by tool.
+//! The configuration is divided by tool and can be further customized by language. Each
+//! language's configuration can contain tool-specific options.
 
 #![deny(clippy::use_self)]
 
@@ -71,7 +71,8 @@ use biome_console::fmt::{Display, Formatter};
 use biome_console::{KeyValuePair, markup};
 use biome_deserialize::{
     Deserializable, DeserializableTypes, DeserializableValidator, DeserializableValue,
-    DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, Text, TextRange,
+    DeserializationContext, DeserializationDiagnostic, DeserializationVisitor, MapMembers, Text,
+    TextRange,
 };
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::Severity;
@@ -135,7 +136,7 @@ pub const VERSION: &str = match option_env!("BIOME_VERSION") {
 
 pub type RootEnabled = Bool<true>;
 
-/// The configuration that is contained inside the file `biome.json`
+/// The configuration contained in `biome.json` or `biome.jsonc`.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -143,24 +144,35 @@ pub type RootEnabled = Bool<true>;
 #[serde(deny_unknown_fields, default, rename_all = "camelCase")]
 #[deserializable(with_validator)]
 pub struct Configuration {
-    /// A field for the JSON schema specification: https://json-schema.org/
+    /// The JSON Schema used to validate the configuration and provide editor completion. Biome
+    /// emits a diagnostic when a `biomejs.dev` schema URL specifies a version that differs from the
+    /// running CLI version.
     #[serde(rename = "$schema")]
     #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub schema: Option<Schema>,
 
-    /// Indicates whether this configuration file is at the root of a Biome
-    /// project. By default, this is `true`.
+    /// Marks whether this file is the root configuration for a Biome project. The root configuration
+    /// establishes the project's base settings, while `false` marks a configuration found inside the
+    /// project as nested rather than a second project root.
+    ///
+    /// Defaults to `true`. Biome implicitly treats `root` as `false` when a nested configuration uses
+    /// `"extends": "//"`. All other nested configurations must explicitly set `root` to `false`.
     #[cfg_attr(feature = "cli", bpaf(hide, hide_usage))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub root: Option<RootEnabled>,
 
-    /// A list of paths to other JSON files, used to extend the current configuration.
+    /// Extends the current configuration with settings from one or more other Biome configurations.
+    /// Use `"//"` in a nested configuration to extend the root configuration at any nesting depth.
+    /// Use an array to extend configurations by relative path or installed package specifier.
+    ///
+    /// Biome merges configurations from left to right. Later configurations take precedence for
+    /// single-value options, list entries are combined, and the current file is applied last.
     #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub extends: Option<Extends>,
 
-    /// The configuration of the VCS integration
+    /// The version control integration configuration.
     #[cfg_attr(
         feature = "cli",
         bpaf(external(vcs_configuration), optional, hide_usage)
@@ -168,7 +180,7 @@ pub struct Configuration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub vcs: Option<VcsConfiguration>,
 
-    /// The configuration of the filesystem
+    /// Configures which files Biome can discover and process.
     #[cfg_attr(
         feature = "cli",
         bpaf(external(files_configuration), optional, hide_usage)
@@ -176,35 +188,35 @@ pub struct Configuration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub files: Option<FilesConfiguration>,
 
-    /// The configuration of the formatter
+    /// Configures formatting for selected files.
     #[cfg_attr(feature = "cli", bpaf(external(formatter_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatter: Option<FormatterConfiguration>,
 
-    /// The configuration for the linter
+    /// The linter configuration.
     #[cfg_attr(feature = "cli", bpaf(external(linter_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub linter: Option<LinterConfiguration>,
 
-    /// Specific configuration for the JavaScript language
+    /// Configuration specific to JavaScript.
     #[cfg(feature = "lang_js")]
     #[cfg_attr(feature = "cli", bpaf(external(js_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub javascript: Option<JsConfiguration>,
 
-    /// Specific configuration for the Json language
+    /// Configuration specific to JSON.
     #[cfg(feature = "lang_json")]
     #[cfg_attr(feature = "cli", bpaf(external(json_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub json: Option<JsonConfiguration>,
 
-    /// Specific configuration for the Css language
+    /// Configuration specific to CSS.
     #[cfg(feature = "lang_css")]
     #[cfg_attr(feature = "cli", bpaf(external(css_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub css: Option<CssConfiguration>,
 
-    /// Specific configuration for the Markdown language
+    /// Configuration specific to Markdown.
     #[cfg_attr(
         feature = "cli",
         bpaf(external(markdown_configuration), optional, hide)
@@ -213,7 +225,7 @@ pub struct Configuration {
     #[cfg(feature = "lang_md")]
     pub markdown: Option<MarkdownConfiguration>,
 
-    /// Specific configuration for the YAML language
+    /// Configuration specific to YAML.
     #[cfg_attr(
         feature = "cli",
         bpaf(external(crate::yaml::yaml_configuration), optional, hide)
@@ -222,7 +234,7 @@ pub struct Configuration {
     #[cfg(feature = "lang_yaml")]
     pub yaml: Option<crate::yaml::YamlConfiguration>,
 
-    /// Specific configuration for the GraphQL language
+    /// Configuration specific to GraphQL.
     #[cfg(feature = "lang_graphql")]
     #[cfg_attr(
         all(feature = "cli", feature = "lang_graphql"),
@@ -234,29 +246,30 @@ pub struct Configuration {
     )]
     pub graphql: Option<crate::graphql::GraphqlConfiguration>,
 
-    /// Specific configuration for the GraphQL language
+    /// Configuration specific to GritQL.
     #[cfg_attr(feature = "cli", bpaf(external(grit_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub grit: Option<GritConfiguration>,
 
-    /// Specific configuration for the HTML language
+    /// Configuration specific to HTML.
     #[cfg(feature = "lang_html")]
     #[cfg_attr(feature = "cli", bpaf(external(html_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub html: Option<HtmlConfiguration>,
 
-    /// A list of granular patterns that should be applied only to a sub set of files
+    /// Configures settings for files selected by each override. When multiple overrides configure
+    /// the same single-value setting, the last matching override takes precedence.
     #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub overrides: Option<Overrides>,
 
-    /// List of plugins to load.
+    /// A list of GritQL plugins to load.
     #[cfg(feature = "plugins")]
     #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[cfg_attr(feature = "plugins", serde(skip_serializing_if = "Option::is_none"))]
     pub plugins: Option<biome_plugin_loader::Plugins>,
 
-    /// Specific configuration for assists
+    /// The assist configuration.
     #[cfg_attr(feature = "cli", bpaf(external(assist_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub assist: Option<AssistConfiguration>,
@@ -265,7 +278,7 @@ pub struct Configuration {
 impl DeserializableValidator for Configuration {
     fn validate(
         &mut self,
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         _name: &str,
         range: TextRange,
     ) -> bool {
@@ -540,7 +553,7 @@ static SCHEMA_REGEX: LazyLock<Regex> =
 
 impl Deserializable for Schema {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -551,7 +564,7 @@ impl Deserializable for Schema {
 
             fn visit_str(
                 self,
-                ctx: &mut impl DeserializationContext,
+                ctx: &mut dyn DeserializationContext,
                 value: Text,
                 range: TextRange,
                 _name: &str,
@@ -636,19 +649,19 @@ impl Display for Version<'_> {
 
 pub type FilesIgnoreUnknownEnabled = Bool<false>;
 
-/// The configuration of the filesystem
+/// The file handling configuration.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct FilesConfiguration {
-    /// The maximum allowed size for source code files in bytes. Files above
-    /// this limit will be ignored for performance reasons. Defaults to 1 MiB
+    /// The maximum source-file size in bytes. Biome skips larger files and emits a warning
+    /// diagnostic. Defaults to `1 MiB`.
     #[cfg_attr(feature = "cli", bpaf(long("files-max-size"), argument("NUMBER")))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_size: Option<MaxSize>,
 
-    /// Tells Biome to not emit diagnostics when handling files that it doesn't know
+    /// Prevents Biome from emitting diagnostics for unrecognized file types. Defaults to `false`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("files-ignore-unknown"), argument("true|false"), optional)
@@ -656,8 +669,16 @@ pub struct FilesConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore_unknown: Option<FilesIgnoreUnknownEnabled>,
 
-    /// A list of glob patterns. Biome will handle only those files/folders that will
-    /// match these patterns.
+    /// A list of glob patterns selecting which files and directories Biome can process. If omitted,
+    /// this option does not further restrict the supported files Biome can process. An empty list
+    /// selects no files. Biome ignores files under `node_modules` even when they match a pattern.
+    ///
+    /// The scanner uses these patterns and, when enabled, VCS ignore files while discovering nested
+    /// configuration and ignore files. When enabled rules use the `project` or `types` domains, it
+    /// also indexes source files and project dependencies. It may still discover required metadata or
+    /// index excluded source files needed for analysis. A pattern beginning with `!!` prevents the
+    /// scanner from indexing matching paths. Patterns are evaluated in order, and a pattern beginning
+    /// with `!` excludes matches.
     #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub includes: Option<Vec<biome_glob::NormalizedGlob>>,
@@ -665,8 +686,9 @@ pub struct FilesConfiguration {
     /// **Deprecated:** Please use _force-ignore syntax_ in `files.includes`
     /// instead: <https://biomejs.dev/reference/configuration/#filesincludes>
     ///
-    /// Set of file and folder names that should be unconditionally ignored by
-    /// Biome's scanner.
+    /// File or directory names that the scanner ignores unconditionally while crawling. Each value
+    /// matches a complete path component, not a glob. Ignored files are not added to the module graph,
+    /// so types are not inferred from them.
     #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub experimental_scanner_ignores: Option<Vec<String>>,
@@ -675,7 +697,7 @@ pub struct FilesConfiguration {
 impl FilesConfiguration {
     fn deserialize_field(
         &mut self,
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         name: &str,
         value: &impl DeserializableValue,
         range: TextRange,
@@ -743,7 +765,7 @@ impl FilesConfiguration {
 
 impl biome_deserialize::Deserializable for FilesConfiguration {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -753,10 +775,8 @@ impl biome_deserialize::Deserializable for FilesConfiguration {
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
             fn visit_map(
                 self,
-                ctx: &mut impl DeserializationContext,
-                members: impl Iterator<
-                    Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
-                >,
+                ctx: &mut dyn DeserializationContext,
+                members: &mut MapMembers<'_>,
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {

@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check '<TEMP_DIR>/extends_config_two_levels_deep/sub-project/sub-sub-project/test.js'
+```
+
 ## `biome.jsonc`
 
 ```json

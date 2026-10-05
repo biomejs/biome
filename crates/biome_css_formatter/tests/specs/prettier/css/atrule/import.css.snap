@@ -1,6 +1,5 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 249
 info: css/atrule/import.css
 ---
 
@@ -143,16 +142,15 @@ $family: unquote("Droid+Sans");
  
  @import url("foo.css");
  @import url("foo.css");
-@@ -59,22 +61,24 @@
+@@ -59,22 +61,25 @@
  @import url("bluish.css") projection, tv;
  @import url("bluish.css") projection, tv;
  @import url("very-very-very-very-very-very-very-very-very-very-long-name.css")
 -  projection,
 -  tv;
--@import url("very-very-very-very-very-very-very-very-very-very-long-name.css")
--  projection tv;
 +  projection, tv;
-+@import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
+ @import url("very-very-very-very-very-very-very-very-very-very-long-name.css")
+   projection tv;
  @import url("landscape.css") screen and (orientation: landscape);
 -@import "rounded-corners", "text-shadow";
  @import "rounded-corners", "text-shadow";
@@ -250,7 +248,8 @@ $dir: 'fonts';
 @import url("bluish.css") projection, tv;
 @import url("very-very-very-very-very-very-very-very-very-very-long-name.css")
   projection, tv;
-@import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
+@import url("very-very-very-very-very-very-very-very-very-very-long-name.css")
+  projection tv;
 @import url("landscape.css") screen and (orientation: landscape);
 @import "rounded-corners", "text-shadow";
 @import 'rounded-corners', 'text-shadow';
@@ -274,18 +273,25 @@ $family: unquote("Droid+Sans");
 
 # Errors
 ```
-import.css:6:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+import.css:6:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `projection`
+  × Expected a media query but instead found 'screen projection'.
   
     4 │ @import url("chrome://communicator/skin/");
     5 │ @import "common.css" screen, projection;
   > 6 │ @import "common.css" screen projection;
-      │                             ^^^^^^^^^^
+      │                      ^^^^^^^^^^^^^^^^^
     7 │ @import url('landscape.css') screen and (orientation:landscape);
     8 │ 
   
-  i Remove projection
+  i Expected a media query here.
+  
+    4 │ @import url("chrome://communicator/skin/");
+    5 │ @import "common.css" screen, projection;
+  > 6 │ @import "common.css" screen projection;
+      │                      ^^^^^^^^^^^^^^^^^
+    7 │ @import url('landscape.css') screen and (orientation:landscape);
+    8 │ 
   
 import.css:9:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -394,18 +400,25 @@ import.css:53:1 parse ━━━━━━━━━━━━━━━━━━━�
     54 │ 
     55 │ @import url("foo.css");
   
-import.css:73:91 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+import.css:73:80 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `tv`
+  × Expected a media query but instead found 'projection tv'.
   
     71 │   tv;
     72 │ @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection,tv;
   > 73 │ @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
-       │                                                                                           ^^
+       │                                                                                ^^^^^^^^^^^^^
     74 │ @import url('landscape.css') screen and (orientation:landscape);
     75 │ @import "rounded-corners", "text-shadow";
   
-  i Remove tv
+  i Expected a media query here.
+  
+    71 │   tv;
+    72 │ @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection,tv;
+  > 73 │ @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
+       │                                                                                ^^^^^^^^^^^^^
+    74 │ @import url('landscape.css') screen and (orientation:landscape);
+    75 │ @import "rounded-corners", "text-shadow";
   
 import.css:75:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -495,9 +508,4 @@ import.css:93:1 parse ━━━━━━━━━━━━━━━━━━━�
        │ 
   
 
-```
-
-# Lines exceeding max width of 80 characters
-```
-   65: @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
 ```

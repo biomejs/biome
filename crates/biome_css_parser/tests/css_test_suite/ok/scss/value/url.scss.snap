@@ -129,8 +129,30 @@ CssRoot {
                                         CssUrlFunction {
                                             name: URL_KW@76..79 "url" [] [],
                                             l_paren_token: L_PAREN@79..80 "(" [] [],
-                                            value: CssUrlValueRaw {
-                                                value_token: CSS_URL_VALUE_RAW_LITERAL@80..94 "fudge#{$x}.css" [] [],
+                                            value: ScssInterpolatedUrlValue {
+                                                parts: ScssInterpolatedUrlValuePartList [
+                                                    ScssUrlText {
+                                                        value_token: SCSS_URL_CONTENT_LITERAL@80..85 "fudge" [] [],
+                                                    },
+                                                    ScssInterpolation {
+                                                        hash_token: HASH@85..86 "#" [] [],
+                                                        l_curly_token: L_CURLY@86..87 "{" [] [],
+                                                        value: ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                ScssVariable {
+                                                                    dollar_token: DOLLAR@87..88 "$" [] [],
+                                                                    name: CssIdentifier {
+                                                                        value_token: IDENT@88..89 "x" [] [],
+                                                                    },
+                                                                },
+                                                            ],
+                                                        },
+                                                        r_curly_token: R_CURLY@89..90 "}" [] [],
+                                                    },
+                                                    ScssUrlText {
+                                                        value_token: SCSS_URL_CONTENT_LITERAL@90..94 ".css" [] [],
+                                                    },
+                                                ],
                                             },
                                             modifiers: CssUrlModifierList [],
                                             r_paren_token: R_PAREN@94..95 ")" [] [],
@@ -203,8 +225,48 @@ CssRoot {
                                         CssUrlFunction {
                                             name: URL_KW@148..151 "url" [] [],
                                             l_paren_token: L_PAREN@151..152 "(" [] [],
-                                            value: CssUrlValueRaw {
-                                                value_token: CSS_URL_VALUE_RAW_LITERAL@152..186 "http://box_#{$y}////fudge#{$x}.css" [] [],
+                                            value: ScssInterpolatedUrlValue {
+                                                parts: ScssInterpolatedUrlValuePartList [
+                                                    ScssUrlText {
+                                                        value_token: SCSS_URL_CONTENT_LITERAL@152..163 "http://box_" [] [],
+                                                    },
+                                                    ScssInterpolation {
+                                                        hash_token: HASH@163..164 "#" [] [],
+                                                        l_curly_token: L_CURLY@164..165 "{" [] [],
+                                                        value: ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                ScssVariable {
+                                                                    dollar_token: DOLLAR@165..166 "$" [] [],
+                                                                    name: CssIdentifier {
+                                                                        value_token: IDENT@166..167 "y" [] [],
+                                                                    },
+                                                                },
+                                                            ],
+                                                        },
+                                                        r_curly_token: R_CURLY@167..168 "}" [] [],
+                                                    },
+                                                    ScssUrlText {
+                                                        value_token: SCSS_URL_CONTENT_LITERAL@168..177 "////fudge" [] [],
+                                                    },
+                                                    ScssInterpolation {
+                                                        hash_token: HASH@177..178 "#" [] [],
+                                                        l_curly_token: L_CURLY@178..179 "{" [] [],
+                                                        value: ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                ScssVariable {
+                                                                    dollar_token: DOLLAR@179..180 "$" [] [],
+                                                                    name: CssIdentifier {
+                                                                        value_token: IDENT@180..181 "x" [] [],
+                                                                    },
+                                                                },
+                                                            ],
+                                                        },
+                                                        r_curly_token: R_CURLY@181..182 "}" [] [],
+                                                    },
+                                                    ScssUrlText {
+                                                        value_token: SCSS_URL_CONTENT_LITERAL@182..186 ".css" [] [],
+                                                    },
+                                                ],
                                             },
                                             modifiers: CssUrlModifierList [],
                                             r_paren_token: R_PAREN@186..187 ")" [] [],
@@ -280,8 +342,36 @@ CssRoot {
                                         CssUrlFunction {
                                             name: URL_KW@227..230 "url" [] [],
                                             l_paren_token: L_PAREN@230..231 "(" [] [],
-                                            value: CssUrlValueRaw {
-                                                value_token: CSS_URL_VALUE_RAW_LITERAL@231..251 "hadoop-#{$y+321}.css" [] [],
+                                            value: ScssInterpolatedUrlValue {
+                                                parts: ScssInterpolatedUrlValuePartList [
+                                                    ScssUrlText {
+                                                        value_token: SCSS_URL_CONTENT_LITERAL@231..238 "hadoop-" [] [],
+                                                    },
+                                                    ScssInterpolation {
+                                                        hash_token: HASH@238..239 "#" [] [],
+                                                        l_curly_token: L_CURLY@239..240 "{" [] [],
+                                                        value: ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                ScssBinaryExpression {
+                                                                    left: ScssVariable {
+                                                                        dollar_token: DOLLAR@240..241 "$" [] [],
+                                                                        name: CssIdentifier {
+                                                                            value_token: IDENT@241..242 "y" [] [],
+                                                                        },
+                                                                    },
+                                                                    operator: PLUS@242..243 "+" [] [],
+                                                                    right: CssNumber {
+                                                                        value_token: CSS_NUMBER_LITERAL@243..246 "321" [] [],
+                                                                    },
+                                                                },
+                                                            ],
+                                                        },
+                                                        r_curly_token: R_CURLY@246..247 "}" [] [],
+                                                    },
+                                                    ScssUrlText {
+                                                        value_token: SCSS_URL_CONTENT_LITERAL@247..251 ".css" [] [],
+                                                    },
+                                                ],
                                             },
                                             modifiers: CssUrlModifierList [],
                                             r_paren_token: R_PAREN@251..252 ")" [] [],
@@ -534,8 +624,27 @@ CssRoot {
                                         CssUrlFunction {
                                             name: URL_KW@1719..1722 "url" [] [],
                                             l_paren_token: L_PAREN@1722..1723 "(" [] [],
-                                            value: CssUrlValueRaw {
-                                                value_token: CSS_URL_VALUE_RAW_LITERAL@1723..1731 "a#{b}c  " [] [],
+                                            value: ScssInterpolatedUrlValue {
+                                                parts: ScssInterpolatedUrlValuePartList [
+                                                    ScssUrlText {
+                                                        value_token: SCSS_URL_CONTENT_LITERAL@1723..1724 "a" [] [],
+                                                    },
+                                                    ScssInterpolation {
+                                                        hash_token: HASH@1724..1725 "#" [] [],
+                                                        l_curly_token: L_CURLY@1725..1726 "{" [] [],
+                                                        value: ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                CssIdentifier {
+                                                                    value_token: IDENT@1726..1727 "b" [] [],
+                                                                },
+                                                            ],
+                                                        },
+                                                        r_curly_token: R_CURLY@1727..1728 "}" [] [],
+                                                    },
+                                                    ScssUrlText {
+                                                        value_token: SCSS_URL_CONTENT_LITERAL@1728..1731 "c" [] [Whitespace("  ")],
+                                                    },
+                                                ],
                                             },
                                             modifiers: CssUrlModifierList [],
                                             r_paren_token: R_PAREN@1731..1732 ")" [] [],
@@ -1301,8 +1410,40 @@ CssRoot {
                         url: CssUrlFunction {
                             name: URL_KW@2396..2399 "url" [] [],
                             l_paren_token: L_PAREN@2399..2400 "(" [] [],
-                            value: CssUrlValueRaw {
-                                value_token: CSS_URL_VALUE_RAW_LITERAL@2400..2495 "//fonts.googleapis.com/css?family=#{get-font-family(\"Roboto\")}:100,300,500,700,900&display=swap" [] [],
+                            value: ScssInterpolatedUrlValue {
+                                parts: ScssInterpolatedUrlValuePartList [
+                                    ScssUrlText {
+                                        value_token: SCSS_URL_CONTENT_LITERAL@2400..2434 "//fonts.googleapis.com/css?family=" [] [],
+                                    },
+                                    ScssInterpolation {
+                                        hash_token: HASH@2434..2435 "#" [] [],
+                                        l_curly_token: L_CURLY@2435..2436 "{" [] [],
+                                        value: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                CssFunction {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@2436..2451 "get-font-family" [] [],
+                                                    },
+                                                    l_paren_token: L_PAREN@2451..2452 "(" [] [],
+                                                    items: CssParameterList [
+                                                        ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                CssString {
+                                                                    value_token: CSS_STRING_LITERAL@2452..2460 "\"Roboto\"" [] [],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                    r_paren_token: R_PAREN@2460..2461 ")" [] [],
+                                                },
+                                            ],
+                                        },
+                                        r_curly_token: R_CURLY@2461..2462 "}" [] [],
+                                    },
+                                    ScssUrlText {
+                                        value_token: SCSS_URL_CONTENT_LITERAL@2462..2495 ":100,300,500,700,900&display=swap" [] [],
+                                    },
+                                ],
                             },
                             modifiers: CssUrlModifierList [],
                             r_paren_token: R_PAREN@2495..2496 ")" [] [],
@@ -1383,8 +1524,22 @@ CssRoot {
                     0: CSS_URL_FUNCTION@76..95
                       0: URL_KW@76..79 "url" [] []
                       1: L_PAREN@79..80 "(" [] []
-                      2: CSS_URL_VALUE_RAW@80..94
-                        0: CSS_URL_VALUE_RAW_LITERAL@80..94 "fudge#{$x}.css" [] []
+                      2: SCSS_INTERPOLATED_URL_VALUE@80..94
+                        0: SCSS_INTERPOLATED_URL_VALUE_PART_LIST@80..94
+                          0: SCSS_URL_TEXT@80..85
+                            0: SCSS_URL_CONTENT_LITERAL@80..85 "fudge" [] []
+                          1: SCSS_INTERPOLATION@85..90
+                            0: HASH@85..86 "#" [] []
+                            1: L_CURLY@86..87 "{" [] []
+                            2: SCSS_EXPRESSION@87..89
+                              0: SCSS_EXPRESSION_ITEM_LIST@87..89
+                                0: SCSS_VARIABLE@87..89
+                                  0: DOLLAR@87..88 "$" [] []
+                                  1: CSS_IDENTIFIER@88..89
+                                    0: IDENT@88..89 "x" [] []
+                            3: R_CURLY@89..90 "}" [] []
+                          2: SCSS_URL_TEXT@90..94
+                            0: SCSS_URL_CONTENT_LITERAL@90..94 ".css" [] []
                       3: CSS_URL_MODIFIER_LIST@94..94
                       4: R_PAREN@94..95 ")" [] []
               1: (empty)
@@ -1433,8 +1588,34 @@ CssRoot {
                     0: CSS_URL_FUNCTION@148..187
                       0: URL_KW@148..151 "url" [] []
                       1: L_PAREN@151..152 "(" [] []
-                      2: CSS_URL_VALUE_RAW@152..186
-                        0: CSS_URL_VALUE_RAW_LITERAL@152..186 "http://box_#{$y}////fudge#{$x}.css" [] []
+                      2: SCSS_INTERPOLATED_URL_VALUE@152..186
+                        0: SCSS_INTERPOLATED_URL_VALUE_PART_LIST@152..186
+                          0: SCSS_URL_TEXT@152..163
+                            0: SCSS_URL_CONTENT_LITERAL@152..163 "http://box_" [] []
+                          1: SCSS_INTERPOLATION@163..168
+                            0: HASH@163..164 "#" [] []
+                            1: L_CURLY@164..165 "{" [] []
+                            2: SCSS_EXPRESSION@165..167
+                              0: SCSS_EXPRESSION_ITEM_LIST@165..167
+                                0: SCSS_VARIABLE@165..167
+                                  0: DOLLAR@165..166 "$" [] []
+                                  1: CSS_IDENTIFIER@166..167
+                                    0: IDENT@166..167 "y" [] []
+                            3: R_CURLY@167..168 "}" [] []
+                          2: SCSS_URL_TEXT@168..177
+                            0: SCSS_URL_CONTENT_LITERAL@168..177 "////fudge" [] []
+                          3: SCSS_INTERPOLATION@177..182
+                            0: HASH@177..178 "#" [] []
+                            1: L_CURLY@178..179 "{" [] []
+                            2: SCSS_EXPRESSION@179..181
+                              0: SCSS_EXPRESSION_ITEM_LIST@179..181
+                                0: SCSS_VARIABLE@179..181
+                                  0: DOLLAR@179..180 "$" [] []
+                                  1: CSS_IDENTIFIER@180..181
+                                    0: IDENT@180..181 "x" [] []
+                            3: R_CURLY@181..182 "}" [] []
+                          4: SCSS_URL_TEXT@182..186
+                            0: SCSS_URL_CONTENT_LITERAL@182..186 ".css" [] []
                       3: CSS_URL_MODIFIER_LIST@186..186
                       4: R_PAREN@186..187 ")" [] []
               1: (empty)
@@ -1485,8 +1666,26 @@ CssRoot {
                     0: CSS_URL_FUNCTION@227..252
                       0: URL_KW@227..230 "url" [] []
                       1: L_PAREN@230..231 "(" [] []
-                      2: CSS_URL_VALUE_RAW@231..251
-                        0: CSS_URL_VALUE_RAW_LITERAL@231..251 "hadoop-#{$y+321}.css" [] []
+                      2: SCSS_INTERPOLATED_URL_VALUE@231..251
+                        0: SCSS_INTERPOLATED_URL_VALUE_PART_LIST@231..251
+                          0: SCSS_URL_TEXT@231..238
+                            0: SCSS_URL_CONTENT_LITERAL@231..238 "hadoop-" [] []
+                          1: SCSS_INTERPOLATION@238..247
+                            0: HASH@238..239 "#" [] []
+                            1: L_CURLY@239..240 "{" [] []
+                            2: SCSS_EXPRESSION@240..246
+                              0: SCSS_EXPRESSION_ITEM_LIST@240..246
+                                0: SCSS_BINARY_EXPRESSION@240..246
+                                  0: SCSS_VARIABLE@240..242
+                                    0: DOLLAR@240..241 "$" [] []
+                                    1: CSS_IDENTIFIER@241..242
+                                      0: IDENT@241..242 "y" [] []
+                                  1: PLUS@242..243 "+" [] []
+                                  2: CSS_NUMBER@243..246
+                                    0: CSS_NUMBER_LITERAL@243..246 "321" [] []
+                            3: R_CURLY@246..247 "}" [] []
+                          2: SCSS_URL_TEXT@247..251
+                            0: SCSS_URL_CONTENT_LITERAL@247..251 ".css" [] []
                       3: CSS_URL_MODIFIER_LIST@251..251
                       4: R_PAREN@251..252 ")" [] []
               1: (empty)
@@ -1654,8 +1853,20 @@ CssRoot {
                     0: CSS_URL_FUNCTION@1719..1732
                       0: URL_KW@1719..1722 "url" [] []
                       1: L_PAREN@1722..1723 "(" [] []
-                      2: CSS_URL_VALUE_RAW@1723..1731
-                        0: CSS_URL_VALUE_RAW_LITERAL@1723..1731 "a#{b}c  " [] []
+                      2: SCSS_INTERPOLATED_URL_VALUE@1723..1731
+                        0: SCSS_INTERPOLATED_URL_VALUE_PART_LIST@1723..1731
+                          0: SCSS_URL_TEXT@1723..1724
+                            0: SCSS_URL_CONTENT_LITERAL@1723..1724 "a" [] []
+                          1: SCSS_INTERPOLATION@1724..1728
+                            0: HASH@1724..1725 "#" [] []
+                            1: L_CURLY@1725..1726 "{" [] []
+                            2: SCSS_EXPRESSION@1726..1727
+                              0: SCSS_EXPRESSION_ITEM_LIST@1726..1727
+                                0: CSS_IDENTIFIER@1726..1727
+                                  0: IDENT@1726..1727 "b" [] []
+                            3: R_CURLY@1727..1728 "}" [] []
+                          2: SCSS_URL_TEXT@1728..1731
+                            0: SCSS_URL_CONTENT_LITERAL@1728..1731 "c" [] [Whitespace("  ")]
                       3: CSS_URL_MODIFIER_LIST@1731..1731
                       4: R_PAREN@1731..1732 ")" [] []
               1: (empty)
@@ -2151,8 +2362,28 @@ CssRoot {
             0: CSS_URL_FUNCTION@2396..2496
               0: URL_KW@2396..2399 "url" [] []
               1: L_PAREN@2399..2400 "(" [] []
-              2: CSS_URL_VALUE_RAW@2400..2495
-                0: CSS_URL_VALUE_RAW_LITERAL@2400..2495 "//fonts.googleapis.com/css?family=#{get-font-family(\"Roboto\")}:100,300,500,700,900&display=swap" [] []
+              2: SCSS_INTERPOLATED_URL_VALUE@2400..2495
+                0: SCSS_INTERPOLATED_URL_VALUE_PART_LIST@2400..2495
+                  0: SCSS_URL_TEXT@2400..2434
+                    0: SCSS_URL_CONTENT_LITERAL@2400..2434 "//fonts.googleapis.com/css?family=" [] []
+                  1: SCSS_INTERPOLATION@2434..2462
+                    0: HASH@2434..2435 "#" [] []
+                    1: L_CURLY@2435..2436 "{" [] []
+                    2: SCSS_EXPRESSION@2436..2461
+                      0: SCSS_EXPRESSION_ITEM_LIST@2436..2461
+                        0: CSS_FUNCTION@2436..2461
+                          0: CSS_IDENTIFIER@2436..2451
+                            0: IDENT@2436..2451 "get-font-family" [] []
+                          1: L_PAREN@2451..2452 "(" [] []
+                          2: CSS_PARAMETER_LIST@2452..2460
+                            0: SCSS_EXPRESSION@2452..2460
+                              0: SCSS_EXPRESSION_ITEM_LIST@2452..2460
+                                0: CSS_STRING@2452..2460
+                                  0: CSS_STRING_LITERAL@2452..2460 "\"Roboto\"" [] []
+                          3: R_PAREN@2460..2461 ")" [] []
+                    3: R_CURLY@2461..2462 "}" [] []
+                  2: SCSS_URL_TEXT@2462..2495
+                    0: SCSS_URL_CONTENT_LITERAL@2462..2495 ":100,300,500,700,900&display=swap" [] []
               3: CSS_URL_MODIFIER_LIST@2495..2495
               4: R_PAREN@2495..2496 ")" [] []
             1: (empty)

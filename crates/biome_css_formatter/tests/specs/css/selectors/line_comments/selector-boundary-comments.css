@@ -1,0 +1,26 @@
+.a
+// before +
++
+// after +
+.b
+// before block
+{color:red}
+
+.a// before +
++.b{color:orange}
+
+.a+// after +
+.b{color:purple}
+
+.before// keep with >
+>.middle+.after{color:navy}
+
+.before>// keep after >
+.middle+.after{color:teal}
+
+.before>.middle// keep with +
++.after{color:maroon}
+
+.before
+// descendant
+.middle+.after{color:olive}

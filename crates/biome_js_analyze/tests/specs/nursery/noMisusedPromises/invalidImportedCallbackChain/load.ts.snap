@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: load.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+export async function load(value: number): Promise<number> {
+	return value;
+}
+
+```

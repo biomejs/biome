@@ -5,19 +5,20 @@ use biome_parser::{
     parse_recovery::{ParseRecovery, RecoveryResult},
     prelude::ParsedSyntax::{self, *},
 };
+use biome_rowan::TextRange;
 use biome_yaml_syntax::{T, YamlSyntaxKind};
 
 use super::{
     YamlParser,
     parse_error::{
-        expected_flow_mapping_closing_quote, expected_flow_mapping_entry,
+        expected_flow_mapping_closing_brace, expected_flow_mapping_entry,
         expected_flow_sequence_closing_bracket, expected_flow_sequence_entry,
     },
     property::{PropertyList, is_at_property},
 };
 
 pub(crate) fn parse_any_flow_node(p: &mut YamlParser) -> ParsedSyntax {
-    let property_list = PropertyList.parse_list(p);
+    let property_list = PropertyList::default().parse_list(p);
     let property_empty = property_list.range(p).is_empty();
 
     if is_at_flow_json_node(p) {
@@ -105,7 +106,7 @@ fn parse_flow_mapping(p: &mut YamlParser) -> CompletedMarker {
     p.bump(T!['{']);
     FlowMapEntryList.parse_list(p);
     if !p.eat(T!['}']) {
-        p.error(expected_flow_mapping_closing_quote(p.cur_range()));
+        p.error(expected_flow_mapping_closing_brace(p.cur_range()));
     }
 
     m.complete(p, YAML_FLOW_MAPPING)
@@ -147,14 +148,15 @@ impl ParseSeparatedList for FlowSequenceEntryList {
             // Plain yaml key, or empty key with props
             let alias_node = parse_alias_node(p);
             if p.at(T![:]) {
+                let key_range = alias_node.range(p);
                 let m = alias_node.precede(p);
-                parse_flow_map_value(p);
+                parse_flow_map_implicit_value(p, key_range);
                 Present(m.complete(p, YAML_FLOW_MAP_IMPLICIT_ENTRY))
             } else {
                 Present(alias_node)
             }
         } else {
-            let property_list = PropertyList.parse_list(p);
+            let property_list = PropertyList::default().parse_list(p);
             let property_empty = property_list.range(p).is_empty();
 
             if is_at_flow_json_node(p) {
@@ -162,8 +164,9 @@ impl ParseSeparatedList for FlowSequenceEntryList {
                 // Flow sequence entry allows for a compact form for a mapping of single key/value pair
                 // e.g. [a, b, c: d, e: f], which is equivalent to [a, b, {c: d}, {e: f}]
                 if p.at(T![:]) {
+                    let key_range = flow_json_node.range(p);
                     let m = flow_json_node.precede(p);
-                    parse_flow_map_value(p);
+                    parse_flow_map_implicit_value(p, key_range);
                     Present(m.complete(p, YAML_FLOW_MAP_IMPLICIT_ENTRY))
                 } else {
                     Present(flow_json_node)
@@ -173,8 +176,9 @@ impl ParseSeparatedList for FlowSequenceEntryList {
                 let flow_yaml_node = parse_flow_yaml_node(p, property_list);
                 // Yeah, this too, compact form of single key value pair
                 if p.at(T![:]) {
+                    let key_range = flow_yaml_node.range(p);
                     let m = flow_yaml_node.precede(p);
-                    parse_flow_map_value(p);
+                    parse_flow_map_implicit_value(p, key_range);
                     Present(m.complete(p, YAML_FLOW_MAP_IMPLICIT_ENTRY))
                 } else {
                     Present(flow_yaml_node)
@@ -271,7 +275,7 @@ fn parse_flow_map_explicit_entry(p: &mut YamlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T![?]);
 
-    let property_list = PropertyList.parse_list(p);
+    let property_list = PropertyList::default().parse_list(p);
     let property_empty = property_list.range(p).is_empty();
 
     if is_at_flow_json_node(p) {
@@ -303,7 +307,7 @@ fn parse_flow_map_explicit_entry(p: &mut YamlParser) -> ParsedSyntax {
 }
 
 fn parse_flow_map_implicit_entry(p: &mut YamlParser) -> ParsedSyntax {
-    let property_list = PropertyList.parse_list(p);
+    let property_list = PropertyList::default().parse_list(p);
     let property_empty = property_list.range(p).is_empty();
 
     if is_at_flow_json_node(p) {
@@ -338,6 +342,25 @@ fn parse_flow_map_implicit_entry(p: &mut YamlParser) -> ParsedSyntax {
             Absent
         }
     }
+}
+
+fn parse_flow_map_implicit_value(p: &mut YamlParser, key_range: TextRange) {
+    debug_assert!(p.at(T![:]), "Expected an implicit mapping value");
+
+    if p.has_preceding_line_break()
+        || p.text(key_range)
+            .bytes()
+            .any(|byte| matches!(byte, b'\n' | b'\r'))
+    {
+        p.error(
+            p.err_builder(
+                "An implicit mapping key must fit on a single line.",
+                key_range.cover(p.cur_range()),
+            )
+            .with_hint("Move `:` to the key's line, or add `?` before a multiline key."),
+        );
+    }
+    parse_flow_map_value(p);
 }
 
 fn parse_flow_map_value(p: &mut YamlParser) {

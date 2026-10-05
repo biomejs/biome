@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::write;
+use biome_formatter::{format_args, write};
 use biome_js_syntax::{JsSvelteSnippetRoot, JsSvelteSnippetRootFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsSvelteSnippetRoot;
@@ -11,6 +11,12 @@ impl FormatNodeRule<JsSvelteSnippetRoot> for FormatJsSvelteSnippetRoot {
             parameters,
         } = node.as_fields();
 
-        write!(f, [name.format(), parameters.format(), eof_token.format()])
+        write!(
+            f,
+            [
+                group(&format_args![name.format(), parameters.format()]),
+                eof_token.format()
+            ]
+        )
     }
 }

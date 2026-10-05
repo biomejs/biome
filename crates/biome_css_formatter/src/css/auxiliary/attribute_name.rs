@@ -8,6 +8,12 @@ impl FormatNodeRule<CssAttributeName> for FormatCssAttributeName {
     fn fmt_fields(&self, node: &CssAttributeName, f: &mut CssFormatter) -> FormatResult<()> {
         let CssAttributeNameFields { namespace, name } = node.as_fields();
 
-        write!(f, [namespace.format(), name.format()])
+        write!(
+            f,
+            [
+                namespace.format(),
+                name?.format().with_text_case(CssCase::Preserve)
+            ]
+        )
     }
 }

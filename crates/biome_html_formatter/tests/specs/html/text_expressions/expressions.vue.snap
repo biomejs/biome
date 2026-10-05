@@ -20,9 +20,11 @@ info: text_expressions/expressions.vue
 
 ```vue
 <template>
-	{{ x => {
-	return "hello"
-} }}
+	{{
+		(x) => {
+			return "hello";
+		}
+	}}
 </template>
 
 ```

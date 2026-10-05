@@ -2,6 +2,25 @@
 source: crates/biome_plugin_loader/src/lib.rs
 expression: content
 ---
+# Plugin
+
+## `/my-plugin/biome-manifest.jsonc`
+
+```jsonc
+{
+    "version": 1,
+    "rules": ["rules/1.js"]
+}
+```
+
+# Input
+
+No input was analyzed.
+
+# Diagnostics
+
+```block
 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unsupported rule format for plugin rule rules/1.js
+```

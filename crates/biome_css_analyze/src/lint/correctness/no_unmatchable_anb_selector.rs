@@ -11,11 +11,14 @@ use biome_rowan::{AstNode, SyntaxNodeCast};
 use biome_rule_options::no_unmatchable_anb_selector::NoUnmatchableAnbSelectorOptions;
 
 declare_lint_rule! {
-    /// Disallow unmatchable An+B selectors.
+    /// Disallow `An+B` formulas that cannot select an element.
     ///
-    /// Selectors that always evaluate to 0 will not match any elements.
-    /// For more details about the An+B syntax, see:
-    /// https://www.w3.org/TR/css-syntax-3/#anb-microsyntax
+    /// Pseudo-classes such as `:nth-child()` use an `An+B` formula to describe element positions:
+    /// `A` controls the interval and `B` is the starting offset. Element positions begin at `1`, so
+    /// a formula that produces only `0` can never match.
+    ///
+    /// See the [CSS syntax specification](https://www.w3.org/TR/css-syntax-3/#anb-microsyntax)
+    /// for the complete formula syntax.
     ///
     /// ## Examples
     ///
@@ -61,7 +64,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("selector-anb-no-unmatchable").same()],
+        sources: &[RuleSource::Stylelint("selector-anb-no-unmatchable").same(), RuleSource::EslintCss("no-unmatchable-selectors").inspired()],
     }
 }
 

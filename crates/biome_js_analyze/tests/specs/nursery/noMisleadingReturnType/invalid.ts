@@ -209,3 +209,17 @@ function literalAssertionNarrows(b: boolean): string { if (b) return "a" as "a";
 function satisfiesDoesNotWiden(b: boolean): string { if (b) return "a" satisfies string; return "b" satisfies string; }
 function doubleCastNarrows(b: boolean): string { if (b) return "a" as unknown as "a"; return "b" as unknown as "b"; }
 function singleAssertedBooleanLiteral(): boolean { return false as false; }
+
+function longGenericConstraintChain<
+    T8 extends { value: string },
+    T7 extends T8,
+    T6 extends T7,
+    T5 extends T6,
+    T4 extends T5,
+    T3 extends T4,
+    T2 extends T3,
+    T1 extends T2,
+    T0 extends T1,
+>(value: T0): object {
+    return value;
+}

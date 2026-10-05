@@ -11,6 +11,7 @@ use std::{
 };
 
 use anyhow::{Context as _, Result, bail};
+use biome_string_case::StrLikeExtension;
 use xtask_codegen::generate_global_types::{
     SourcePin,
     collect::{CollectorOutput, CoverageOutcome, collect},
@@ -528,7 +529,7 @@ fn fixture_git_repo_with_malformed_lib() -> Result<FixtureRepo> {
     })
 }
 
-/// Builds a fixture repo with Error, Disposable, and AsyncDisposable declarations.
+/// Builds a fixture repo from the generated-globals declaration fixture.
 fn fixture_git_repo_with_generated_globals() -> Result<FixtureRepo> {
     let repo = fixture_git_repo(SINGLE_LIB_ENTRY)?;
     write_profile_root_placeholders(repo.path())?;
@@ -741,8 +742,12 @@ mod tests {
 
         for needle in [
             "//! This is a generated file. Don't modify it by hand! Run 'just gen-global-types' to re-generate the file.",
-            "pub(crate) const MIGRATED_PREDEFINED_IDS: &[crate::globals::GlobalTypeId] =",
-            "pub(crate) fn set_generated_global_type_data(",
+            "pub(crate) mod ids {",
+            "pub(crate) const GENERATED_GLOBAL_NAMES: &[&str] =",
+            "pub(crate) const TYPE_GLOBALS: &[(&str, crate::globals::GlobalTypeId)] =",
+            "pub(crate) const VALUE_GLOBALS: &[(&str, crate::globals::GlobalTypeId)] =",
+            "pub(crate) static GENERATED_GLOBAL_BUILDERS: [fn() -> crate::TypeData;",
+            "pub(crate) fn generated_local_types(",
         ] {
             assert!(
                 content.contains(needle),
@@ -994,19 +999,36 @@ mod tests {
         let generated = fs::read_to_string(&output_path)
             .with_context(|| format!("failed to read {}", output_path.display()))?;
 
-        assert!(generated.contains("crate::globals::ERROR_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("crate::globals::ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("crate::globals::ERROR_CALL_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("crate::globals::DISPOSABLE_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("crate::globals::DISPOSABLE_DISPOSE_ID_GLOBAL_TYPE_ID"));
-        assert!(generated.contains("crate::globals::ASYNC_DISPOSABLE_ID_GLOBAL_TYPE_ID"));
-        assert!(
-            generated.contains("crate::globals::ASYNC_DISPOSABLE_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID")
-        );
-        assert!(generated.contains("builder.set_type_data("));
+        let builders = generated
+            .split_once("pub(crate) static GENERATED_GLOBAL_BUILDERS")
+            .and_then(|(_, rest)| rest.split_once("];"))
+            .map(|(table, _)| table)
+            .context("generated module should contain the builder table")?;
+        for name in [
+            "ERROR",
+            "ERROR_CONSTRUCT",
+            "ERROR_CALL",
+            "SYMBOL",
+            "SYMBOL_DISPOSE",
+            "SYMBOL_ASYNC_DISPOSE",
+            "DISPOSABLE",
+            "DISPOSABLE_DISPOSE",
+            "ASYNC_DISPOSABLE",
+            "ASYNC_DISPOSABLE_ASYNC_DISPOSE",
+            "DATE",
+            "MATH",
+        ] {
+            assert!(generated.contains(&format!("const {name}_ID_GLOBAL_TYPE_ID: GlobalTypeId")));
+            let builder = format!("global_{},", name.to_ascii_lowercase_cow());
+            assert!(
+                builders.lines().any(|line| line.trim() == builder),
+                "builder table should contain `{builder}`"
+            );
+        }
         assert!(generated.contains("crate::TypeData::Interface("));
         assert!(generated.contains("crate::TypeData::Constructor("));
         assert!(generated.contains("crate::TypeData::Function("));
+        assert!(generated.contains("crate::TypeData::Symbol"));
         assert!(generated.contains("crate::TypeMemberKind::ComputedValue("));
         // Pin the async flag at the rendered-source level: the `AsyncDisposable` helper must emit
         // `is_async: true` and the synchronous helpers `is_async: false`, so a regression back to a
@@ -1137,7 +1159,7 @@ mod tests {
         assert_eq!(name.kind(), &LoweredMemberKind::Named { optional: false });
         assert_eq!(
             name.type_reference(),
-            &LoweredTypeReference::Predefined("GLOBAL_STRING_ID")
+            &LoweredTypeReference::Predefined("GLOBAL_STRING_KEYWORD_ID")
         );
 
         let message = class
@@ -1149,7 +1171,7 @@ mod tests {
         );
         assert_eq!(
             message.type_reference(),
-            &LoweredTypeReference::Predefined("GLOBAL_STRING_ID")
+            &LoweredTypeReference::Predefined("GLOBAL_STRING_KEYWORD_ID")
         );
         let stack = class
             .member("stack")
@@ -1157,7 +1179,7 @@ mod tests {
         assert_eq!(stack.kind(), &LoweredMemberKind::Named { optional: true });
         assert_eq!(
             stack.type_reference(),
-            &LoweredTypeReference::Predefined("GLOBAL_STRING_ID")
+            &LoweredTypeReference::Predefined("GLOBAL_STRING_KEYWORD_ID")
         );
         let prototype = class
             .member("prototype")
@@ -1190,7 +1212,7 @@ mod tests {
             .expect("Error constructor helper should be lowered");
         assert_eq!(
             constructor.id_constant(),
-            "ERROR_CONSTRUCTOR_ID_GLOBAL_TYPE_ID"
+            "ERROR_CONSTRUCT_ID_GLOBAL_TYPE_ID"
         );
 
         let call = lowered
@@ -1286,34 +1308,132 @@ mod tests {
     }
 
     #[test]
-    fn lowerer_rejects_error_interface_extends_clause() -> Result<()> {
+    fn lowerer_lowers_symbol_globals() -> Result<()> {
+        let lowered = lowered_from_fixture("manifest.disposables.d.ts")?;
+
+        let symbol = lowered.global("Symbol").expect("Symbol should be lowered");
+        assert_eq!(symbol.id_constant(), "SYMBOL_ID_GLOBAL_TYPE_ID");
+        let LoweredTypeData::Class(symbol_class) = symbol.data() else {
+            bail!("Symbol should lower to class data");
+        };
+        assert_eq!(symbol_class.name(), "Symbol");
+        let dispose = symbol_class
+            .member("dispose")
+            .expect("Symbol.dispose should be lowered");
+        assert_eq!(dispose.kind(), &LoweredMemberKind::NamedStatic);
+        assert_eq!(
+            dispose.type_reference(),
+            &LoweredTypeReference::Global("GLOBAL_SYMBOL_DISPOSE_ID".into())
+        );
+        let async_dispose = symbol_class
+            .member("asyncDispose")
+            .expect("Symbol.asyncDispose should be lowered");
+        assert_eq!(async_dispose.kind(), &LoweredMemberKind::NamedStatic);
+        assert_eq!(
+            async_dispose.type_reference(),
+            &LoweredTypeReference::Global("GLOBAL_SYMBOL_ASYNC_DISPOSE_ID".into())
+        );
+
+        let dispose_helper = lowered
+            .global("Symbol.dispose")
+            .expect("Symbol.dispose helper should be lowered");
+        assert_eq!(
+            dispose_helper.id_constant(),
+            "SYMBOL_DISPOSE_ID_GLOBAL_TYPE_ID"
+        );
+        assert!(matches!(dispose_helper.data(), LoweredTypeData::Symbol));
+
+        let async_dispose_helper = lowered
+            .global("Symbol.asyncDispose")
+            .expect("Symbol.asyncDispose helper should be lowered");
+        assert_eq!(
+            async_dispose_helper.id_constant(),
+            "SYMBOL_ASYNC_DISPOSE_ID_GLOBAL_TYPE_ID"
+        );
+        assert!(matches!(
+            async_dispose_helper.data(),
+            LoweredTypeData::Symbol
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn lowerer_lowers_weak_map_global() -> Result<()> {
+        let lowered = lowered_from_fixture("manifest.disposables.d.ts")?;
+
+        let weak_map = lowered
+            .global("WeakMap")
+            .expect("WeakMap should be lowered");
+        assert_eq!(weak_map.id_constant(), "WEAK_MAP_ID_GLOBAL_TYPE_ID");
+        // Without `declare var WeakMap`, the declaration only names a type.
+        let LoweredTypeData::Interface(weak_map_interface) = weak_map.data() else {
+            bail!("WeakMap should lower to interface data");
+        };
+        assert_eq!(weak_map_interface.name(), "WeakMap");
+        assert!(weak_map_interface.members().is_empty());
+
+        Ok(())
+    }
+
+    #[test]
+    fn lowerer_lowers_date_global() -> Result<()> {
+        let lowered = lowered_from_fixture("manifest.date.d.ts")?;
+
+        let date = lowered.global("Date").expect("Date should be lowered");
+        assert_eq!(date.id_constant(), "DATE_ID_GLOBAL_TYPE_ID");
+        let LoweredTypeData::Interface(date_interface) = date.data() else {
+            bail!("Date should lower to interface data");
+        };
+        assert_eq!(date_interface.name(), "Date");
+        assert!(date_interface.type_parameters().is_empty());
+        assert_eq!(date_interface.members().len(), 2);
+
+        Ok(())
+    }
+
+    #[test]
+    fn lowerer_lowers_date_type_parameters_from_declarations() -> Result<()> {
+        let lowered = lowered_from_fixture("manifest.date-type-parameters.d.ts")?;
+        let LoweredTypeData::Interface(interface) = lowered.global("Date").unwrap().data() else {
+            bail!("expected interface");
+        };
+        assert_eq!(
+            interface.member("value").unwrap().type_reference(),
+            &interface.type_parameters()[0]
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn lowerer_reports_inconsistent_weak_map_type_parameter_count() -> Result<()> {
+        let lowered = lowered_from_fixture("manifest.weak-map-wrong-type-parameters.d.ts")?;
+        assert!(lowered.gaps().iter().any(|gap| gap.owner == "WeakMap"
+            && gap.detail == "merged declarations have different type parameter counts"));
+        Ok(())
+    }
+
+    #[test]
+    fn lowerer_rejects_missing_symbol_member() -> Result<()> {
         expect_error_contains(
-            lowered_from_fixture("manifest.error-extends.d.ts"),
-            "Error interface extends clauses are not supported",
+            lowered_from_fixture("manifest.symbol-missing-async-dispose.d.ts"),
+            "AsyncDisposable requires Symbol.asyncDispose to be declared as a unique symbol",
         )
     }
 
     #[test]
-    fn lowerer_rejects_error_constructor_extends_clause() -> Result<()> {
+    fn lowerer_rejects_non_unique_symbol_member() -> Result<()> {
         expect_error_contains(
-            lowered_from_fixture("manifest.error-constructor-extends.d.ts"),
-            "ErrorConstructor extends clauses are not supported",
+            lowered_from_fixture("manifest.symbol-wrong-type.d.ts"),
+            "Disposable requires Symbol.dispose to be declared as a unique symbol",
         )
     }
 
     #[test]
-    fn lowerer_rejects_error_constructor_type_alias() -> Result<()> {
+    fn lowerer_requires_disposal_keys_on_the_referenced_constructor() -> Result<()> {
         expect_error_contains(
-            lowered_from_fixture("manifest.error-constructor-type-alias.d.ts"),
-            "type aliases are not supported in ErrorConstructor",
-        )
-    }
-
-    #[test]
-    fn lowerer_rejects_error_constructor_value_declarations() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.error-constructor-unsupported-value.d.ts"),
-            "value-side ErrorConstructor declarations are not supported",
+            lowered_from_fixture("manifest.symbol-wrong-constructor.d.ts"),
+            "Disposable requires Symbol.dispose to be declared as a unique symbol",
         )
     }
 
@@ -1327,12 +1447,12 @@ mod tests {
     }
 
     #[test]
-    fn comparator_rejects_missing_disposable_globals() -> Result<()> {
+    fn comparator_rejects_missing_symbol_global() -> Result<()> {
         let lowered = lowered_from_fixture("manifest.error.d.ts")?;
 
         expect_error_contains(
             compare_lowered_globals(&lowered),
-            "generated globals contain 3 entries, expected 7",
+            "generated globals are missing the Symbol global",
         )
     }
 
@@ -1357,26 +1477,10 @@ mod tests {
     }
 
     #[test]
-    fn lowerer_rejects_unsupported_error_members() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.error-unsupported-index.d.ts"),
-            "index signatures are not supported in the Error global",
-        )
-    }
-
-    #[test]
     fn lowerer_rejects_unresolved_error_member_references() -> Result<()> {
         expect_error_contains(
             lowered_from_fixture("manifest.error-named-reference.d.ts"),
             "unresolved type reference ErrorOptions in Error global",
-        )
-    }
-
-    #[test]
-    fn lowerer_rejects_unsupported_error_value_declarations() -> Result<()> {
-        expect_error_contains(
-            lowered_from_fixture("manifest.error-unsupported-value.d.ts"),
-            "unsupported value-side Error declaration",
         )
     }
 

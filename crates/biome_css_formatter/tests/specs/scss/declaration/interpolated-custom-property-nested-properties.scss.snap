@@ -12,11 +12,11 @@ $slot:color;
 .box{
 --#{$name}:{
 color:red;
-}
+};
 
 --theme-#{$slot}:{
 background:blue;
-}
+};
 }
 
 ```
@@ -30,12 +30,12 @@ $slot: color;
 
 .box {
 	--#{$name}: {
-		color: red;
-	}
+		color:red;
+	};
 
 	--theme-#{$slot}: {
-		background: blue;
-	}
+		background:blue;
+	};
 }
 
 ```

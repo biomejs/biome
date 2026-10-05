@@ -51,7 +51,7 @@ JsModule {
                         attributes: JsxAttributeList [],
                         r_angle_token: R_ANGLE@8..9 ">" [] [],
                     },
-                    children: JsxChildList [],
+                    elements: JsxChildList [],
                     closing_element: JsxClosingElement {
                         l_angle_token: L_ANGLE@9..10 "<" [] [],
                         slash_token: SLASH@10..11 "/" [] [],
@@ -100,7 +100,7 @@ JsModule {
                         attributes: JsxAttributeList [],
                         r_angle_token: R_ANGLE@27..28 ">" [] [],
                     },
-                    children: JsxChildList [],
+                    elements: JsxChildList [],
                     closing_element: JsxClosingElement {
                         l_angle_token: L_ANGLE@28..29 "<" [] [],
                         slash_token: SLASH@29..30 "/" [] [],
@@ -131,7 +131,7 @@ JsModule {
                         attributes: JsxAttributeList [],
                         r_angle_token: R_ANGLE@43..44 ">" [] [],
                     },
-                    children: JsxChildList [],
+                    elements: JsxChildList [],
                     closing_element: JsxClosingElement {
                         l_angle_token: L_ANGLE@44..45 "<" [] [],
                         slash_token: SLASH@45..46 "/" [] [],

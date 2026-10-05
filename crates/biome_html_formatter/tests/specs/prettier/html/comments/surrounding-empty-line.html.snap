@@ -71,7 +71,7 @@ See console log:
 ```diff
 --- Prettier
 +++ Biome
-@@ -25,32 +25,28 @@
+@@ -25,29 +25,26 @@
      789
  
  
@@ -79,11 +79,11 @@ See console log:
 +-->
 +</ul>
  <span
--  ><!--
+   ><!--
 ---><span>a</span
 -  ><!--
 ---><span>b</span
-   ><!--
+-  ><!--
 ---></span>
 +--><span>a</span><!--
 +--><span>b</span><!--
@@ -103,26 +103,16 @@ See console log:
 +>
  
  <span
--  ><!--
--1 --><span>a</span
    ><!--
+-1 --><span>a</span
+-  ><!--
 -2 --><span>b</span
 -  ><!--
 +1 --><span>a</span><!--
 +2 --><span>b</span><!--
  3 --></span
  >
--
- 123<!---->456 123<!--x-->456
  
- <!-- A
-@@ -68,4 +64,4 @@
- 
-     See console log:
-     TypeError: Cannot read property 'name' of null in [null]
---->
-+-->
-\ No newline at end of file
 ```
 
 # Output
@@ -177,6 +167,7 @@ See console log:
 2 --><span>b</span><!--
 3 --></span
 >
+
 123<!---->456 123<!--x-->456
 
 <!-- A
@@ -194,4 +185,5 @@ See console log:
 
     See console log:
     TypeError: Cannot read property 'name' of null in [null]
--->```
+-->
+```

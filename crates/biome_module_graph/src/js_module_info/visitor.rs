@@ -2,62 +2,46 @@ use crate::css_module_info::CssClassReference;
 use biome_js_semantic::ScopeId;
 use biome_js_syntax::{
     AnyJsArrayBindingPatternElement, AnyJsBinding, AnyJsBindingPattern, AnyJsDeclarationClause,
-    AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause,
-    AnyJsImportLike, AnyJsObjectBindingPatternMember, AnyJsRoot, AnyJsxAttributeName,
-    AnyJsxAttributeValue, AnyTsIdentifierBinding, AnyTsModuleName, JsExport, JsExportFromClause,
-    JsExportNamedFromClause, JsExportNamedSpecifierList, JsIdentifierBinding,
-    JsVariableDeclaratorList, JsxAttribute, TsExportAssignmentClause, unescape_js_string,
+    AnyJsExportClause, AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportLike,
+    AnyJsObjectBindingPatternMember, AnyJsRoot, AnyJsxAttributeName, AnyJsxAttributeValue,
+    AnyTsIdentifierBinding, AnyTsModuleName, JsExport, JsExportFromClause, JsExportNamedFromClause,
+    JsExportNamedSpecifierList, JsIdentifierBinding, JsVariableDeclaratorList, JsxAttribute,
+    TsExportAssignmentClause, unescape_js_string,
 };
-use biome_js_type_info::{ImportSymbol, TypeData, TypeReference, TypeResolver};
-use biome_resolver::{ResolveOptions, resolve};
+use biome_js_type_info::{ImportSymbol, RawTypeCollector, TypeData, TypeReference};
 use biome_rowan::{AstNode, TokenText, WalkEvent};
-use camino::{Utf8Path, Utf8PathBuf};
+use camino::Utf8PathBuf;
 
 use crate::{
-    JsImport, JsImportPhase, JsModuleInfo, JsReexport, SUPPORTED_EXTENSIONS,
+    JsImport, JsImportPhase, JsModuleInfo, JsReexport,
     js_module_info::collector::{JsCollectedExport, TypeInferenceMode},
-    module_graph::ModuleGraphFsProxy,
 };
 
-use super::{ResolvedPath, collector::JsModuleInfoCollector};
+use super::collector::JsModuleInfoCollector;
 
-/// Extensions to try to resolve based on the extension in the import specifier.
-/// ref: https://www.typescriptlang.org/docs/handbook/modules/reference.html#the-moduleresolution-compiler-option
-const EXTENSION_ALIASES: &[(&str, &[&str])] = &[
-    ("js", &["ts", "tsx", "d.ts", "js", "jsx"]),
-    ("mjs", &["mts", "d.mts", "mjs"]),
-    ("cjs", &["cts", "d.cts", "cjs"]),
-];
-
-pub(crate) struct JsModuleVisitor<'a> {
+pub(crate) struct JsModuleVisitor {
     root: AnyJsRoot,
     file_path: Utf8PathBuf,
-    directory: &'a Utf8Path,
-    fs_proxy: &'a ModuleGraphFsProxy<'a>,
     semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
     inference_mode: TypeInferenceMode,
 }
 
-impl<'a> JsModuleVisitor<'a> {
+impl JsModuleVisitor {
     pub fn new(
         root: AnyJsRoot,
         file_path: Utf8PathBuf,
-        directory: &'a Utf8Path,
-        fs_proxy: &'a ModuleGraphFsProxy,
         semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
         inference_mode: TypeInferenceMode,
     ) -> Self {
         Self {
             root,
             file_path,
-            directory,
-            fs_proxy,
             semantic_model,
             inference_mode,
         }
     }
 
-    pub fn collect_info(self) -> JsModuleInfo {
+    pub fn collect_info(mut self) -> JsModuleInfo {
         let mut collector = JsModuleInfoCollector::new(self.semantic_model.clone());
 
         let iter = self.root.syntax().preorder();
@@ -120,52 +104,36 @@ impl<'a> JsModuleVisitor<'a> {
         jsx_string.inner_string_text().ok()
     }
 
-    fn visit_import(&self, node: AnyJsImportLike, collector: &mut JsModuleInfoCollector) {
+    fn visit_import(&mut self, node: AnyJsImportLike, collector: &mut JsModuleInfoCollector) {
         let Some(specifier) = node.inner_string_text() else {
             return;
         };
 
-        let resolved_path = self.resolved_path_from_specifier(specifier.text());
-
         match node {
             AnyJsImportLike::JsModuleSource(source) => {
                 // TODO: support defer or source imports
-                let phase = if let Some(clause) = source.parent::<AnyJsImportClause>() {
-                    match clause {
-                        AnyJsImportClause::JsImportDefaultClause(clause)
-                            if clause.type_token().is_some() =>
-                        {
-                            JsImportPhase::Type
-                        }
-                        AnyJsImportClause::JsImportNamedClause(clause)
-                            if clause.type_token().is_some() =>
-                        {
-                            JsImportPhase::Type
-                        }
-                        AnyJsImportClause::JsImportNamespaceClause(clause)
-                            if clause.type_token().is_some() =>
-                        {
-                            JsImportPhase::Type
-                        }
-                        _ => JsImportPhase::Default,
-                    }
+                let phase = if source.imports_only_types() {
+                    JsImportPhase::Type
                 } else {
                     JsImportPhase::Default
                 };
 
-                collector.register_static_import_path(specifier, resolved_path, phase);
+                collector.register_static_import_path(specifier, phase);
             }
             AnyJsImportLike::JsCallExpression(_) | AnyJsImportLike::JsImportCallExpression(_) => {
                 collector.register_dynamic_import_path(
                     specifier,
-                    resolved_path,
                     JsImportPhase::Default, // TODO: support defer or source imports
                 );
             }
         }
     }
 
-    fn visit_export(&self, node: JsExport, collector: &mut JsModuleInfoCollector) -> Option<()> {
+    fn visit_export(
+        &mut self,
+        node: JsExport,
+        collector: &mut JsModuleInfoCollector,
+    ) -> Option<()> {
         match node.export_clause().ok()? {
             AnyJsExportClause::AnyJsDeclarationClause(node) => {
                 self.visit_export_declaration_clause(node, collector)
@@ -314,7 +282,7 @@ impl<'a> JsModuleVisitor<'a> {
     }
 
     fn visit_export_from_clause(
-        &self,
+        &mut self,
         node: JsExportFromClause,
         collector: &mut JsModuleInfoCollector,
     ) -> Option<()> {
@@ -324,7 +292,6 @@ impl<'a> JsModuleVisitor<'a> {
             .inner_string_text()
             .ok()?;
         let import = JsImport {
-            resolved_path: self.resolved_path_from_specifier(&specifier),
             specifier: specifier.into(),
             symbol: ImportSymbol::All,
         };
@@ -354,7 +321,7 @@ impl<'a> JsModuleVisitor<'a> {
     }
 
     fn visit_export_named_from_clause(
-        &self,
+        &mut self,
         node: JsExportNamedFromClause,
         collector: &mut JsModuleInfoCollector,
     ) -> Option<()> {
@@ -363,8 +330,6 @@ impl<'a> JsModuleVisitor<'a> {
             .as_js_module_source()?
             .inner_string_text()
             .ok()?;
-        let resolved_path = self.resolved_path_from_specifier(&import_specifier);
-
         for specifier in node.specifiers() {
             let Ok(specifier) = specifier else {
                 continue;
@@ -385,7 +350,6 @@ impl<'a> JsModuleVisitor<'a> {
                 reexport: JsReexport {
                     import: JsImport {
                         specifier: import_specifier.clone().into(),
-                        resolved_path: resolved_path.clone(),
                         symbol: ImportSymbol::Named(imported_name),
                     },
                     export_range: None,
@@ -511,20 +475,6 @@ impl<'a> JsModuleVisitor<'a> {
         let name = binding.name_token().ok()?.token_text_trimmed();
         collector.register_export_with_name(name.clone(), name);
         Some(())
-    }
-
-    fn resolved_path_from_specifier(&self, specifier: &str) -> ResolvedPath {
-        let options = ResolveOptions {
-            condition_names: &["types", "import", "default"],
-            default_files: &["index"],
-            extensions: SUPPORTED_EXTENSIONS,
-            extension_aliases: EXTENSION_ALIASES,
-            resolve_node_builtins: true,
-            resolve_types: true,
-            ..Default::default()
-        };
-        let resolved_path = resolve(specifier, self.directory, self.fs_proxy, &options);
-        ResolvedPath::new(resolved_path)
     }
 }
 

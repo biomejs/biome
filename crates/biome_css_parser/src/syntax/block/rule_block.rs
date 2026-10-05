@@ -11,6 +11,7 @@ use crate::syntax::block::ParseBlockBody;
 pub(crate) fn parse_rule_block(p: &mut CssParser) -> CompletedMarker {
     RuleBlock.parse_block_body(p)
 }
+
 struct RuleBlock;
 
 impl ParseBlockBody for RuleBlock {

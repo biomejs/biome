@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome format --stdin-file-path mock.cc --files-ignore-unknown true
+```
+
 # Input messages
 
 ```block
@@ -12,4 +18,8 @@ function f() {return{}}
 
 ```block
 function f() {return{}}
+```
+
+```block
+The content was not formatted because the path `mock.cc` is ignored.
 ```

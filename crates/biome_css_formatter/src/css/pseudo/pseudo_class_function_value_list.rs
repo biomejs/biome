@@ -1,5 +1,5 @@
-use crate::css::value::identifier::FormatCssIdentifierOptions;
 use crate::prelude::*;
+use crate::utils::case::pseudo_identifier_case;
 use biome_css_syntax::{CssPseudoClassFunctionValueList, CssPseudoClassFunctionValueListFields};
 use biome_formatter::{format_args, write};
 
@@ -23,8 +23,7 @@ impl FormatNodeRule<CssPseudoClassFunctionValueList> for FormatCssPseudoClassFun
         write!(
             f,
             [
-                name.format()
-                    .with_options(FormatCssIdentifierOptions::default().with_lowercasing()),
+                name.format().with_text_case(pseudo_identifier_case(&name)),
                 group(&format_args![
                     l_paren_token.format(),
                     soft_block_indent_with_maybe_space(&values.format(), should_insert_space),

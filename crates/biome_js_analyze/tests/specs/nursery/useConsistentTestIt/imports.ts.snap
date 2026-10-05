@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: imports.ts
+---
+# Input
+```ts
+import { fc, test } from "@fast-check/vitest";
+
+test.prop([fc.string()])("length is non-negative", (s) => s.length >= 0);
+
+```
+
+# Diagnostics
+```
+imports.ts:3:1 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test function test is inconsistent with the configured preferred function it.
+  
+    1 │ import { fc, test } from "@fast-check/vitest";
+    2 │ 
+  > 3 │ test.prop([fc.string()])("length is non-negative", (s) => s.length >= 0);
+      │ ^^^^
+    4 │ 
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use it instead.
+  
+    1   │ - import·{·fc,·test·}·from·"@fast-check/vitest";
+      1 │ + import·{·fc,·test·as·it·}·from·"@fast-check/vitest";
+    2 2 │   
+    3   │ - test.prop([fc.string()])("length·is·non-negative",·(s)·=>·s.length·>=·0);
+      3 │ + it.prop([fc.string()])("length·is·non-negative",·(s)·=>·s.length·>=·0);
+    4 4 │   
+  
+
+```

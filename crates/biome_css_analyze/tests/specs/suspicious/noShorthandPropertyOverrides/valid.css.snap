@@ -25,4 +25,19 @@ a { border-block-end: 1px solid; border: 20px dashed black; }
 
 a { border-block-start: 1px solid; border: 20px dashed black; }
 
+body {
+	font-size: var(--foo);
+}
+
+@supports (font: -apple-system-body) {
+	body {
+		font-size: -apple-system-body;
+	}
+}
+
+body {
+	font-size: var(--foo);
+	@supports (font: -apple-system-body) {}
+}
+
 ```

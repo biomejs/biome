@@ -1215,7 +1215,11 @@ impl ParseNodeList for TypeMembers {
     const LIST_KIND: Self::Kind = TS_TYPE_MEMBER_LIST;
 
     fn parse_element(&mut self, p: &mut JsParser) -> ParsedSyntax {
-        parse_ts_type_member(p, self.context)
+        if p.cur().is_metavariable() {
+            parse_metavariable(p)
+        } else {
+            parse_ts_type_member(p, self.context)
+        }
     }
 
     fn is_at_list_end(&self, p: &mut JsParser) -> bool {
@@ -2151,10 +2155,10 @@ pub(crate) fn parse_ts_type_arguments_in_expression(
         }
         TypeArgumentsList::new(TypeContext::default(), false).parse_list(p);
         p.re_lex(JsReLexContext::BinaryOperator);
-        p.expect(T![>]);
+        let closed = p.expect(T![>]);
         let arguments = m.complete(p, TS_TYPE_ARGUMENTS);
 
-        if p.last() == Some(T![>]) && can_follow_type_arguments_in_expr(p, context) {
+        if closed && can_follow_type_arguments_in_expr(p, context) {
             Ok(Present(arguments))
         } else {
             Err(())

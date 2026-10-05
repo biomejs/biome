@@ -1,3 +1,5 @@
+#![expect(clippy::disallowed_methods, reason = "This rule compares CSS values that can span multiple tokens.")]
+
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -14,13 +16,11 @@ use std::sync::LazyLock;
 use crate::utils::vendor_prefixed;
 
 declare_lint_rule! {
-    /// Disallow non-standard direction values for linear gradient functions.
+    /// Disallow non-standard directions in linear gradients.
     ///
-    /// A valid and standard direction value is one of the following:
-    /// - an angle
-    /// - to plus a side-or-corner (`to top`, `to bottom`, `to left`, `to right`; `to top right`, `to right top`, `to bottom left`, etc.)
-    ///
-    /// A common mistake (matching outdated non-standard syntax) is to use just a side-or-corner without the preceding to.
+    /// A gradient direction must be either an angle with a unit, such as `45deg`, or a side or
+    /// corner preceded by `to`, such as `to top` or `to bottom right`. Writing only `top` or a
+    /// unitless number uses invalid or outdated syntax.
     ///
     /// ## Examples
     ///

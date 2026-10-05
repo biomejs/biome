@@ -44,9 +44,9 @@ declare_lint_rule! {
     ///
     /// Components (custom elements) are excluded from this check, as they may receive
     /// class names as props or use scoped styling. A component is identified by:
-    /// - Tag names starting with an uppercase letter (e.g., `MyComponent`)
-    /// - Tag names containing a hyphen (e.g., `my-component`)
-    /// - Member expressions (e.g., `Component.Item`)
+    /// - tag names starting with an uppercase letter, such as `MyComponent`;
+    /// - tag names containing a hyphen, such as `my-component`;
+    /// - member expressions, such as `Component.Item`.
     ///
     /// ## No false positives on unstyled files
     ///
@@ -143,7 +143,7 @@ impl Rule for NoUndeclaredClasses {
 
             // Only build the import tree for diagnostic display when the class is missing.
             if !found_class && let Some(module) = db.module_for_path(file_path) {
-                let import_tree = build_import_tree_for_html(db, module);
+                let import_tree = build_import_tree_for_html(db, module).clone();
                 let start = TextSize::from(class_data.inner_file_start + class_offset);
                 let end = start + TextSize::from(class_name.len() as u32);
                 signals.push(UndeclaredClass {

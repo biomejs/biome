@@ -6,9 +6,9 @@ use biome_rowan::AstNode;
 use biome_rule_options::use_graphql_naming_convention::UseGraphqlNamingConventionOptions;
 
 declare_lint_rule! {
-    /// Validates that all enum values are capitalized.
+    /// Require uppercase names for GraphQL enum values.
     ///
-    /// By convention in GraphQL, enum values are all caps.
+    /// GraphQL convention writes enum values with uppercase letters, such as `IN_PROGRESS`.
     ///
     /// ## Examples
     ///
@@ -45,9 +45,10 @@ impl Rule for UseGraphqlNamingConvention {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        if node
-            .syntax()
-            .text_trimmed()
+        let value = node.value().ok()?;
+        let value_token = value.value_token().ok()?;
+        if value_token
+            .token_text_trimmed()
             .chars()
             .any(|c| c.is_lowercase())
         {
@@ -58,20 +59,18 @@ impl Rule for UseGraphqlNamingConvention {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        //
-        // Read our guidelines to write great diagnostics:
-        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
-        //
+        let node = ctx.query();
+        let value = node.value().ok()?;
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                ctx.query().range(),
+                value.range(),
                 markup! {
                     "Enum values should be in all caps."
                 },
             )
             .note(markup! {
-                    "Change the enum value to be in all caps."
+                "Change the enum value to be in all caps."
             }),
         )
     }

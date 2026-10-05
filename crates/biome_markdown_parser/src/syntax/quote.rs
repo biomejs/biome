@@ -49,22 +49,19 @@ use crate::syntax::{
 
 /// Check if we're at the start of a block quote (`>`).
 pub(crate) fn at_quote(p: &mut MarkdownParser) -> bool {
-    p.lookahead(|p| {
-        let at_virtual_line_start = p.state().virtual_line_start == Some(p.cur_range().start());
-        if !p.at_line_start() && !p.at_start_of_input() && !at_virtual_line_start {
-            return false;
-        }
-        let mut indent = p.line_start_leading_indent();
-        if at_virtual_line_start && indent > 0 {
-            // Treat virtual line start as column 0.
-            indent = 0;
-        }
-        if indent > MAX_BLOCK_PREFIX_INDENT {
-            return false;
-        }
-        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
-        p.at(T![>])
-    })
+    let at_virtual_line_start = p.state().virtual_line_start == Some(p.cur_range().start());
+    if !p.is_at_line_start() && !at_virtual_line_start {
+        return false;
+    }
+    let mut leading_indent = p.line_start_leading_indent();
+    if at_virtual_line_start && leading_indent > 0 {
+        leading_indent = 0;
+    }
+    if leading_indent > MAX_BLOCK_PREFIX_INDENT {
+        return false;
+    }
+    let indent = p.peek_line_indent(MAX_BLOCK_PREFIX_INDENT);
+    p.nth_at(indent.token_count, T![>])
 }
 
 /// Parse a block quote.
@@ -87,7 +84,7 @@ pub(crate) fn parse_quote(p: &mut MarkdownParser) -> ParsedSyntax {
         // Wrap recovery tokens in MdBogusBlock (a valid AnyMdBlock child)
         // so they don't attach as Skipped trivia on normal content nodes.
         let bogus_m = p.start();
-        p.skip_line_indent(MAX_BLOCK_PREFIX_INDENT);
+        p.consume_line_indent_as_whitespace_trivia(MAX_BLOCK_PREFIX_INDENT);
         try_bump_quote_marker(p);
         let has_indented_code = at_quote_indented_code_start(p);
         emit_optional_marker_space(p, has_indented_code);
@@ -342,10 +339,11 @@ impl QuoteBlockList {
     fn handle_line_start_prefix(&mut self, p: &mut MarkdownParser) -> bool {
         self.line_started_with_prefix = self.first_line;
 
-        if !self.first_line && !p.at(NEWLINE) && (p.at_line_start() || p.has_preceding_line_break())
+        if !self.first_line
+            && !p.at(NEWLINE)
+            && (p.is_at_line_start() || p.has_preceding_line_break())
         {
-            if has_quote_prefix(p, self.depth) {
-                consume_quote_prefix(p, self.depth);
+            if consume_quote_prefix(p, self.depth) {
                 relex_after_quote_prefix_consumed(p);
                 self.line_started_with_prefix = true;
             } else {
@@ -381,7 +379,7 @@ impl QuoteBlockList {
 
     /// Check if lazy continuation should stop.
     fn should_stop_lazy_continuation(&self, p: &MarkdownParser) -> bool {
-        (p.at_blank_line() || has_empty_line_before(p) || self.last_block_was_paragraph)
+        (p.is_at_blank_line() || has_empty_line_before(p) || self.last_block_was_paragraph)
             && !self.line_started_with_prefix
     }
 
@@ -423,7 +421,7 @@ impl QuoteBlockList {
 }
 
 fn quote_link_reference_before_dash_thematic_break(p: &mut MarkdownParser, depth: usize) -> bool {
-    if !p.at(NEWLINE) || p.at_blank_line() {
+    if !p.at(NEWLINE) || p.is_at_blank_line() {
         return false;
     }
 
@@ -658,12 +656,10 @@ fn parse_code_block_newline(p: &mut MarkdownParser, depth: usize) -> bool {
         return false;
     }
 
-    if !has_quote_prefix(p, depth) {
-        return false;
-    }
-
     let continues_code_block = p.lookahead(|p| {
-        consume_quote_prefix(p, depth);
+        if !consume_quote_prefix(p, depth) {
+            return false;
+        }
 
         // Blank lines (consecutive newlines) are allowed in indented code.
         if p.at(NEWLINE) {
@@ -725,20 +721,32 @@ pub(crate) fn has_quote_prefix(p: &mut MarkdownParser, depth: usize) -> bool {
 }
 
 pub(crate) fn consume_quote_prefix(p: &mut MarkdownParser, depth: usize) -> bool {
-    if depth == 0 || !has_quote_prefix(p, depth) {
+    if depth == 0 {
         return false;
     }
 
-    consume_quote_prefix_impl(p, depth, true)
+    let checkpoint = p.checkpoint();
+    if consume_quote_prefix_impl(p, depth, true) {
+        true
+    } else {
+        p.rewind(checkpoint);
+        false
+    }
 }
 
 /// Consume quote prefix tokens without updating virtual line start.
 pub(crate) fn consume_quote_prefix_without_virtual(p: &mut MarkdownParser, depth: usize) -> bool {
-    if depth == 0 || !has_quote_prefix(p, depth) {
+    if depth == 0 {
         return false;
     }
 
-    consume_quote_prefix_impl(p, depth, false)
+    let checkpoint = p.checkpoint();
+    if consume_quote_prefix_impl(p, depth, false) {
+        true
+    } else {
+        p.rewind(checkpoint);
+        false
+    }
 }
 
 fn consume_quote_prefix_impl(
@@ -746,7 +754,7 @@ fn consume_quote_prefix_impl(
     depth: usize,
     set_virtual_line_start: bool,
 ) -> bool {
-    if !p.at_line_start() && !p.at_start_of_input() && !p.has_preceding_line_break() {
+    if !p.is_at_line_start() && !p.has_preceding_line_break() {
         return false;
     }
 

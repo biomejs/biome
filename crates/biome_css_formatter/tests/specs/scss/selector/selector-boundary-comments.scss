@@ -1,0 +1,82 @@
+.a
+// before >
+>
+// after >
+.b
+// before block
+{color:red}
+
+.a
+// before +
++
+// after +
+.b{color:blue}
+
+.a
+// before ~
+~
+// after ~
+.b{color:green}
+
+.a
+// before ||
+||
+// after ||
+.b{color:black}
+
+.a
+// descendant
+.b{color:pink}
+
+.x
+// before forced-flat +
++
+// after forced-flat +
+.y,// row
+.z{color:teal}
+
+.parent{.a
+// nested before +
++
+// nested after +
+.b
+// nested before block
+{color:white}}
+
+.before// keep with >
+>.middle+.after{color:navy}
+
+.before>// keep after >
+.middle+.after{color:teal}
+
+.before>.middle// keep with +
++.after{color:maroon}
+
+.before>
+
+// blank after >
+.middle+.after{color:olive}
+
+.before
+// descendant chain
+.middle+.after{color:purple}
+
+.parent{&/* before parent */>/* after parent */.child{color:red}}
+
+#{foo}/* before interpolation */+/* after interpolation */.child{color:blue}
+
+%foo/* before placeholder */~/* after placeholder */%bar{color:green}
+
+.parent{&>
+// biome-ignore format: reason
+.CHILD:HOVER{color:black}}
+
+.parent{&>
+// normal
+// biome-ignore format: reason
+.CHILD:HOVER{color:white}}
+
+.parent{/* parent short */
+&   .child{color:navy}
+/* parent long */
+&   .selector-with-a-very-long-name-one    .selector-with-a-very-long-name-two   .selector-with-a-very-long-name-three{color:maroon}}

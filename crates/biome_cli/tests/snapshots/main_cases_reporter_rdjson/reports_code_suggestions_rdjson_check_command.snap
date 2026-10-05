@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check --reporter=rdjson --only=style/useConst --error-on-warnings main.js
+```
+
 ## `main.js`
 
 ```js
@@ -49,6 +55,7 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
         }
       },
       "message": "This let declares a variable that is only assigned once.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {

@@ -38,7 +38,6 @@ mod eslint_unicorn;
 mod ignorefile;
 mod node;
 mod prettier;
-mod unsupported_rules;
 
 pub(crate) struct MigratePayload<'a> {
     pub(crate) session: CliSession<'a>,

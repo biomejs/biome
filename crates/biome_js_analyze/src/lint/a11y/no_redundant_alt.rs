@@ -5,6 +5,7 @@ use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsTemplateElement, AnyJsxAttributeValue,
+    JsTemplateExpression,
 };
 use biome_rowan::AstNode;
 use biome_rule_options::is_redundant_alt;
@@ -46,7 +47,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noRedundantAlt",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("img-redundant-alt").same()],
+        sources: &[
+            RuleSource::EslintJsxA11y("img-redundant-alt").same(),
+            RuleSource::EslintAstro("jsx-a11y/img-redundant-alt").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
     }
@@ -81,6 +85,7 @@ impl Rule for NoRedundantAlt {
                 AnyJsxAttributeValue::JsxString(aria_hidden) => {
                     aria_hidden.inner_string_text().ok()?.text() == "false"
                 }
+                AnyJsxAttributeValue::JsTemplateExpression(_) => false,
             };
 
             if !is_false {
@@ -102,19 +107,7 @@ impl Rule for NoRedundantAlt {
                         AnyJsLiteralExpression::JsStringLiteralExpression(expr),
                     ) => is_redundant_alt(expr.inner_string_text().ok()?.text()).then_some(alt),
                     AnyJsExpression::JsTemplateExpression(expr) => {
-                        let contain_redundant_alt =
-                            expr.elements().into_iter().any(|template_element| {
-                                match template_element {
-                                    AnyJsTemplateElement::JsTemplateChunkElement(node) => {
-                                        node.template_chunk_token().ok().is_some_and(|token| {
-                                            is_redundant_alt(token.text_trimmed())
-                                        })
-                                    }
-                                    AnyJsTemplateElement::JsTemplateElement(_) => false,
-                                }
-                            });
-
-                        contain_redundant_alt.then_some(alt)
+                        template_contains_redundant_alt(&expr).then_some(alt)
                     }
 
                     _ => None,
@@ -123,6 +116,9 @@ impl Rule for NoRedundantAlt {
             AnyJsxAttributeValue::JsxString(ref value) => {
                 let inner_string_text = value.inner_string_text().ok()?;
                 is_redundant_alt(inner_string_text.text()).then_some(alt)
+            }
+            AnyJsxAttributeValue::JsTemplateExpression(ref expr) => {
+                template_contains_redundant_alt(expr).then_some(alt)
             }
         }
     }
@@ -141,4 +137,15 @@ impl Rule for NoRedundantAlt {
             }),
         )
     }
+}
+
+fn template_contains_redundant_alt(expr: &JsTemplateExpression) -> bool {
+    expr.elements()
+        .into_iter()
+        .any(|template_element| match template_element {
+            AnyJsTemplateElement::JsTemplateChunkElement(node) => node
+                .template_chunk_token()
+                .is_ok_and(|token| is_redundant_alt(token.text_trimmed())),
+            AnyJsTemplateElement::JsTemplateElement(_) => false,
+        })
 }

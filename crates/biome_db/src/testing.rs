@@ -138,6 +138,26 @@ where
     })
 }
 
+/// Counts `WillExecute` events for the tracked function named `query_name`.
+///
+/// This supports assertions for internal queries whose function item is not
+/// visible to an integration test.
+pub fn function_query_will_execute_count_by_name(
+    db: &dyn salsa::Database,
+    query_name: &str,
+    events: &[Event],
+) -> usize {
+    events
+        .iter()
+        .filter(|event| {
+            let salsa::EventKind::WillExecute { database_key } = event.kind else {
+                return false;
+            };
+            db.ingredient_debug_name(database_key.ingredient_index()) == query_name
+        })
+        .count()
+}
+
 fn find_will_execute_event<'a, Q, I>(
     db: &dyn salsa::Database,
     query: Q,

@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_js_syntax"
-version              = "0.5.7"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "SyntaxKind and common rowan definitions for biome_js_parser"
@@ -9,6 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+include              = ["LICENSE", "src/**/*"]
 publish              = true
 
 [dependencies]
@@ -20,6 +21,7 @@ camino              = { workspace = true }
 enumflags2          = { workspace = true }
 schemars            = { workspace = true, optional = true }
 serde               = { workspace = true, features = ["derive"] }
+smallvec            = { workspace = true }
 
 [dev-dependencies]
 biome_js_factory = { path = "../biome_js_factory" }

@@ -1,4 +1,5 @@
 <!-- should not generate diagnostics -->
+<template>
 <CustomHtml lang="lorem" />
 <custom-html lang="lorem"></custom-html>
 <html lang="en-US"></html>
@@ -12,3 +13,4 @@
 <!-- Static Vue bindings with valid language codes are valid -->
 <html :lang="'en'"></html>
 <html v-bind:lang="'en-US'"></html>
+</template>

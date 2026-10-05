@@ -25,3 +25,15 @@ describe('template titles', () => {
 // Duplicate describe titles using no-substitution templates
 describe(`suite alpha`, () => {});
 describe(`suite alpha`, () => {});
+
+// Duplicate test titles inside a suite
+suite('my suite', () => {
+  it('should do bar', () => {});
+  it('should do bar', () => {});
+});
+
+// Duplicate suite titles inside a suite
+suite('outer suite', () => {
+  suite('nested', () => {});
+  suite('nested', () => {});
+});

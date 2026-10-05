@@ -1,3 +1,4 @@
+<template>
 <p class="flex" dir="auto" id="hello" v-show="ok" v-foo:bar.baz v-text="msg"></p>
 
 <div
@@ -61,3 +62,4 @@
 <div @click.stop="doThis" v-on:click="doThis" @click.prevent="doThis" @scroll.passive="onScroll"></div>
 
 <div v-html="html" v-text="msg"></div>
+</template>

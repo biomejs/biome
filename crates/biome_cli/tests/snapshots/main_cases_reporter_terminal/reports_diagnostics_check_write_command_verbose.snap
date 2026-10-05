@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check --write --max-diagnostics=5 --verbose main.ts index.ts index.css
+```
+
 ## `index.css`
 
 ```css
@@ -78,23 +84,19 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-index.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+index.css:3:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a declaration item but instead found '}'.
   
-    1 │ .brokenStyle {
-    2 │ 	color: f(
-  > 3 │ }
-      │ ^
+  > 3 │ .brokenStyle { color: f( }
+      │                          ^
     4 │ 
     5 │ .style {
   
   i Expected a declaration item here.
   
-    1 │ .brokenStyle {
-    2 │ 	color: f(
-  > 3 │ }
-      │ ^
+  > 3 │ .brokenStyle { color: f( }
+      │                          ^
     4 │ 
     5 │ .style {
   
@@ -102,15 +104,14 @@ index.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━
 ```
 
 ```block
-index.css:2:9 lint/correctness/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+index.css:3:23 lint/correctness/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected unknown function: f
   
-    1 │ .brokenStyle {
-  > 2 │ 	color: f(
-      │ 	       ^
-    3 │ }
+  > 3 │ .brokenStyle { color: f( }
+      │                       ^
     4 │ 
+    5 │ .style {
   
   i Use a known function instead.
   
@@ -120,15 +121,16 @@ index.css:2:9 lint/correctness/noUnknownFunction ━━━━━━━━━━�
 ```
 
 ```block
-index.css:6:9 lint/correctness/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+index.css:7:17 lint/correctness/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected unknown function: fakeFunction
   
     5 │ .style {
-  > 6 │ 	color: fakeFunction();
-      │ 	       ^^^^^^^^^^^^
-    7 │ }
-    8 │ 
+    6 │                 color:
+  > 7 │                 fakeFunction()
+      │                 ^^^^^^^^^^^^
+    8 │ }
+    9 │ 
   
   i Use a known function instead.
   

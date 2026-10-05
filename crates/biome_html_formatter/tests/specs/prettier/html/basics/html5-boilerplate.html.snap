@@ -68,35 +68,6 @@ info: html/basics/html5-boilerplate.html
      <![endif]-->
  
      <!-- Add your site or application content here -->
-@@ -35,24 +31,15 @@
-       integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-       crossorigin="anonymous"
-     ></script>
--    <script>
--      window.jQuery ||
--        document.write(
--          '<script src="js/vendor/jquery-3.3.1.min.js"><\/script>',
--        );
--    </script>
-+    <script
-+    >window.jQuery || document.write('<script src="js/vendor/jquery-3.3.1.min.js"><\/script>')</script>
-     <script src="js/plugins.js"></script>
-     <script src="js/main.js"></script>
- 
-     <!-- Google Analytics: change UA-XXXXX-Y to be your site's ID. -->
-     <script>
--      window.ga = function () {
--        ga.q.push(arguments);
--      };
--      ga.q = [];
--      ga.l = +new Date();
--      ga("create", "UA-XXXXX-Y", "auto");
--      ga("send", "pageview");
-+      window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
-+      ga('create', 'UA-XXXXX-Y', 'auto'); ga('send', 'pageview')
-     </script>
-     <script
-       src="https://www.google-analytics.com/analytics.js"
 ```
 
 # Output
@@ -135,15 +106,24 @@ info: html/basics/html5-boilerplate.html
       integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
       crossorigin="anonymous"
     ></script>
-    <script
-    >window.jQuery || document.write('<script src="js/vendor/jquery-3.3.1.min.js"><\/script>')</script>
+    <script>
+      window.jQuery ||
+        document.write(
+          '<script src="js/vendor/jquery-3.3.1.min.js"><\/script>',
+        );
+    </script>
     <script src="js/plugins.js"></script>
     <script src="js/main.js"></script>
 
     <!-- Google Analytics: change UA-XXXXX-Y to be your site's ID. -->
     <script>
-      window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
-      ga('create', 'UA-XXXXX-Y', 'auto'); ga('send', 'pageview')
+      window.ga = function () {
+        ga.q.push(arguments);
+      };
+      ga.q = [];
+      ga.l = +new Date();
+      ga("create", "UA-XXXXX-Y", "auto");
+      ga("send", "pageview");
     </script>
     <script
       src="https://www.google-analytics.com/analytics.js"
@@ -157,6 +137,4 @@ info: html/basics/html5-boilerplate.html
 # Lines exceeding max width of 80 characters
 ```
    23:     <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
-   35:     >window.jQuery || document.write('<script src="js/vendor/jquery-3.3.1.min.js"><\/script>')</script>
-   41:       window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
 ```

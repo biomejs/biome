@@ -15,16 +15,15 @@ use biome_rule_options::no_unknown_media_feature_name::NoUnknownMediaFeatureName
 use crate::utils::is_media_feature_name;
 
 declare_lint_rule! {
-    /// Disallow unknown media feature names.
+    /// Disallow unrecognized feature names in media queries.
     ///
-    /// This rule considers media feature names defined in the CSS Specifications, up to and including Editor's Drafts, to be known.
-    /// This rule also checks vendor-prefixed media feature names.
+    /// Media features describe conditions such as viewport width, display resolution, or user
+    /// preferences. The rule recognizes names from CSS specifications, including editor drafts,
+    /// and validates vendor-prefixed names.
     ///
-    /// Data sources of known CSS media feature are:
-    /// - MDN reference on [CSS media feature](https://developer.mozilla.org/en-US/docs/Web/CSS/@media)
-    /// - W3C reference on [Media Queries Level 3](https://www.w3.org/TR/mediaqueries-3/)
-    /// - W3C reference on [Media Queries Level 4](https://www.w3.org/TR/mediaqueries-4/)
-    /// - W3C reference on [Media Queries Level 5](https://www.w3.org/TR/mediaqueries-5/)
+    /// See [MDN's media-query reference](https://developer.mozilla.org/en-US/docs/Web/CSS/@media)
+    /// and the W3C specifications for [Media Queries Level 4](https://www.w3.org/TR/mediaqueries-4/)
+    /// and [Level 5](https://www.w3.org/TR/mediaqueries-5/).
     ///
     /// ## Examples
     ///
@@ -66,6 +65,11 @@ declare_lint_rule! {
     ///
     /// ```css
     /// @media screen and (-webkit-width > 320px) {}
+    /// ```
+    ///
+    /// ```css
+    /// @custom-media --mobile (max-width: 768px);
+    /// @media screen and (--mobile) {}
     /// ```
     ///
     pub NoUnknownMediaFeatureName {
@@ -155,9 +159,7 @@ fn is_invalid_feature_name_included_in_css_media_type_query(
             match css_media_and_type_query.right().ok()? {
                 AnyCssMediaTypeCondition::AnyCssMediaConditionOperand(
                     any_css_media_condition_operand,
-                ) => {
-                    has_invalid_media_condition_operand(any_css_media_condition_operand)
-                }
+                ) => has_invalid_media_condition_operand(any_css_media_condition_operand),
                 AnyCssMediaTypeCondition::CssMediaAndCondition(css_media_and_condition) => {
                     is_css_media_and_condition_invalid(css_media_and_condition)
                 }
@@ -387,7 +389,8 @@ fn media_feature_name_from_query_name(name: AnyCssQueryFeatureName) -> Option<Me
         AnyCssQueryFeatureName::CssIdentifier(identifier) => Some(MediaFeatureName::Literal(
             identifier.value_token().ok()?.token_text_trimmed(),
         )),
-        AnyCssQueryFeatureName::ScssInterpolatedIdentifier(_)
+        AnyCssQueryFeatureName::CssDashedIdentifier(_)
+        | AnyCssQueryFeatureName::ScssInterpolatedIdentifier(_)
         | AnyCssQueryFeatureName::ScssVariable(_) => Some(MediaFeatureName::Dynamic),
     }
 }

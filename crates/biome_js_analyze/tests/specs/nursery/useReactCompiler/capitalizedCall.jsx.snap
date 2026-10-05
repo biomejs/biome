@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: capitalizedCall.jsx
+---
+# Input
+```jsx
+// should not generate diagnostics
+
+function Component(props) {
+    if (props.compact) {
+        return <span />;
+    }
+    return OtherComponent();
+}
+
+function OtherComponent() {
+    return <div />;
+}
+
+```

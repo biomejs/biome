@@ -1,0 +1,17 @@
+@variant @xl {
+	div {
+		background: red;
+	}
+}
+
+@variant @max-xl {
+	div {
+		background: red;
+	}
+}
+
+.my-element {
+	@variant @2xl {
+		background: black;
+	}
+}

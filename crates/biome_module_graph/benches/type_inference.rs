@@ -2,15 +2,110 @@ use biome_fs::{BiomePath, FileSystem, MemoryFileSystem};
 use biome_js_parser::JsParserOptions;
 use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::AnyJsRoot;
+use biome_js_type_info::interned_types::{
+    CallArgumentType as InferredCallArgumentType, LocalTypeId, TypeData as InferredTypeData,
+};
 use biome_languages::JsFileSource;
 use biome_module_graph::{
-    ModuleInfo, ModuleInfoKind, PathInfoCache, TypeInferenceMode, infer_module_types_bottom_up,
-    resolve_js_module_with_inference_mode,
+    BindingTypeInput, CallArgumentTypeInput, ExpressionTypeInput, LocalTypeInput, ModuleDb,
+    ModuleInfo, ModuleInfoKind, NormalizeTypeInput, SymbolFromModuleInfo, TypeInferenceMode,
+    infer_binding_type, infer_call_argument_type, infer_export_type,
+    infer_expression_is_array_of_promises, infer_expression_is_promise, infer_expression_type,
+    infer_local_type, infer_module_types, infer_module_types_bottom_up, normalize_type,
+    resolve_js_module_with_inference_mode, type_inference::TypeInferenceClassification,
 };
-use biome_project_layout::ProjectLayout;
-use biome_workspace_db::WorkspaceDb;
+use biome_rowan::TextRange;
+use biome_service::db::WorkspaceDb;
 use divan::Bencher;
 use std::sync::Arc;
+
+#[path = "support/integration.rs"]
+mod integration;
+
+#[divan::bench(args = integration::ZOD_TANSTACK_FORM_CASES)]
+fn bench_zod_tanstack_form_cold_module(bencher: Bencher, case: &str) {
+    bencher
+        .with_inputs(|| integration::build_db(integration::ZOD_TANSTACK_FORM_FILES, case))
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
+
+#[divan::bench]
+fn bench_svelte_valibot_cold_module(bencher: Bencher) {
+    bencher
+        .with_inputs(|| integration::build_db(integration::SVELTE_VALIBOT_FILES, "/stores.ts"))
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
+
+#[divan::bench]
+fn bench_type_challenges_query_string_parser_cold_module(bencher: Bencher) {
+    bencher
+        .with_inputs(|| {
+            integration::build_db(
+                integration::TYPE_CHALLENGES_FILES,
+                "/query_string_parser.ts",
+            )
+        })
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
+
+#[divan::bench]
+fn bench_drizzle_typebox_cold_module(bencher: Bencher) {
+    bencher
+        .with_inputs(|| integration::build_db(integration::DRIZZLE_TYPEBOX_FILES, "/queries.ts"))
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
+
+#[divan::bench(args = integration::EFFECT_ARKTYPE_CASES)]
+fn bench_effect_arktype_cold_module(bencher: Bencher, case: &str) {
+    bencher
+        .with_inputs(|| integration::build_db(integration::EFFECT_ARKTYPE_FILES, case))
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
+
+#[divan::bench(args = integration::KYSELY_TS_PATTERN_CASES)]
+fn bench_kysely_ts_pattern_cold_module(bencher: Bencher, case: &str) {
+    bencher
+        .with_inputs(|| integration::build_db(integration::KYSELY_TS_PATTERN_FILES, case))
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
+
+#[divan::bench(args = integration::HONO_VALIBOT_CASES)]
+fn bench_hono_valibot_cold_module(bencher: Bencher, case: &str) {
+    bencher
+        .with_inputs(|| integration::build_db(integration::HONO_VALIBOT_FILES, case))
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
+
+#[divan::bench(args = integration::TRPC_ZOD_QUERY_CASES)]
+fn bench_trpc_zod_query_cold_module(bencher: Bencher, case: &str) {
+    bencher
+        .with_inputs(|| integration::build_db(integration::TRPC_ZOD_QUERY_FILES, case))
+        .bench_local_values(|(db, module)| {
+            divan::black_box(infer_module_types_bottom_up(&db, module));
+            db
+        });
+}
 
 #[cfg(target_os = "windows")]
 #[global_allocator]
@@ -54,6 +149,11 @@ const INDEX_D_TS_CASES: &[(&str, &[u8])] = &[
     ),
 ];
 
+/// Creates a database whose resolver reads the files of `fs`.
+fn workspace_db(fs: &MemoryFileSystem) -> WorkspaceDb {
+    WorkspaceDb::new(Arc::new(MemoryFileSystem::from_files(fs.files.0.clone())))
+}
+
 fn index_d_ts_cases() -> impl Iterator<Item = &'static str> {
     INDEX_D_TS_CASES.iter().map(|(name, _content)| *name)
 }
@@ -76,18 +176,15 @@ fn bench_index_d_ts_salsa_end_to_end(bencher: Bencher, name: &str) {
             (fs, path, root, semantic_model)
         })
         .bench_local_values(|(fs, path, root, semantic_model)| {
-            let path_info_cache = PathInfoCache::default();
+            let db = workspace_db(&fs);
             let (module_info, _, _) = resolve_js_module_with_inference_mode(
+                &db,
                 root,
                 &path,
-                &fs,
-                &ProjectLayout::default(),
                 semantic_model,
-                &path_info_cache,
                 TypeInferenceMode::RawTypesOnly,
             );
 
-            let db = WorkspaceDb::default();
             let module = ModuleInfo::new(
                 &db,
                 path.as_path().to_path_buf(),
@@ -110,6 +207,237 @@ fn bench_index_d_ts_salsa_memoized(bencher: Bencher, name: &str) {
         .bench_local_values(|(db, module)| {
             divan::black_box(infer_module_types_bottom_up(&db, module));
             db
+        });
+}
+
+#[divan::bench(name = "bench_normalize_terminal_type")]
+fn bench_normalize_terminal_type(bencher: Bencher) {
+    bencher
+        .with_inputs(|| {
+            let (db, module) = build_source_db("terminal.ts", "export const value = 1;");
+            infer_module_types_bottom_up(&db, module);
+            (db, module)
+        })
+        .bench_local_refs(|(db, module)| {
+            let input = NormalizeTypeInput::new(&*db, *module, InferredTypeData::Number);
+            divan::black_box(normalize_type(&*db, input));
+        });
+}
+
+#[divan::bench(name = "bench_normalize_local_alias")]
+fn bench_normalize_local_alias(bencher: Bencher) {
+    bencher
+        .with_inputs(|| {
+            let (db, module) = build_source_db(
+                "alias.ts",
+                r#"
+                    export type Alias = string | number;
+                    export declare const value: Alias;
+                "#,
+            );
+            infer_module_types_bottom_up(&db, module);
+            let value_range = binding_range_by_name(&db, module, "value");
+            (db, module, value_range)
+        })
+        .bench_local_refs(|(db, module, value_range)| {
+            let inferred = infer_module_types(&*db, *module).expect("types must be inferred");
+            let ty = inferred
+                .binding_type_data
+                .get(value_range)
+                .expect("value binding must have a type")
+                .ty;
+            let input = NormalizeTypeInput::new(&*db, *module, ty);
+            divan::black_box(normalize_type(&*db, input));
+        });
+}
+
+#[divan::bench(name = "bench_infer_argument_type_many_overloads")]
+fn bench_infer_argument_type_many_overloads(bencher: Bencher) {
+    bencher
+        .with_inputs(|| {
+            let source = overloaded_function_source(32);
+            let (db, module) = build_source_db("overloads.ts", &source);
+            infer_module_types_bottom_up(&db, module);
+            let callee_range = overload_binding_range_by_name(&db, module, "overloaded", 32);
+            let callback_range = binding_range_by_name(&db, module, "callback");
+            let validation_input =
+                overload_benchmark_input(&db, module, callee_range, callback_range, 30);
+            assert_eq!(
+                infer_call_argument_type(&db, validation_input),
+                Some(InferredTypeData::Number),
+                "benchmark callee must contain the 32-parameter overload"
+            );
+            (db, module, callee_range, callback_range)
+        })
+        .bench_local_refs(|(db, module, callee_range, callback_range)| {
+            let input = overload_benchmark_input(&*db, *module, *callee_range, *callback_range, 31);
+            divan::black_box(infer_call_argument_type(&*db, input));
+        });
+}
+
+#[divan::bench(name = "bench_distinct_binding_lookup_queries")]
+fn bench_distinct_binding_lookup_queries(bencher: Bencher) {
+    bencher
+        .with_inputs(|| {
+            let (db, module) = build_source_db("bindings.ts", &declaration_heavy_source(128));
+            let ModuleInfoKind::Js(info) = module.kind(&db) else {
+                panic!("module must contain JavaScript information");
+            };
+            let ranges = info.raw_binding_types.keys().copied().collect::<Vec<_>>();
+            (db, module, ranges)
+        })
+        .bench_local_refs(|(db, module, ranges)| {
+            for range in ranges {
+                let input = BindingTypeInput::new(&*db, *module, *range);
+                divan::black_box(infer_binding_type(&*db, input));
+            }
+        });
+}
+
+#[divan::bench(name = "bench_cyclic_declaration_promise_lookup")]
+fn bench_cyclic_declaration_promise_lookup(bencher: Bencher) {
+    let (db, module, range) = cyclic_declaration_promise_lookup_input();
+    let input = ExpressionTypeInput::new(&db, module, range);
+    divan::black_box(infer_expression_is_array_of_promises(&db, input));
+    assert_eq!(
+        infer_expression_is_promise(&db, input),
+        TypeInferenceClassification::Indeterminate
+    );
+    let ty = infer_expression_type(&db, input).expect("Promise chain must have a type");
+    let ty = normalize_type(&db, NormalizeTypeInput::new(&db, module, ty));
+    assert!(
+        ty.is_promise_instance(&db),
+        "Promise chain must resolve to a Promise, got {ty:?}"
+    );
+
+    bencher
+        .with_inputs(cyclic_declaration_promise_lookup_input)
+        .bench_local_values(|(db, module, range)| {
+            let input = ExpressionTypeInput::new(&db, module, range);
+            divan::black_box(infer_expression_is_array_of_promises(&db, input));
+            divan::black_box(infer_expression_is_promise(&db, input));
+            let ty = infer_expression_type(&db, input).expect("Promise chain must have a type");
+            let input = NormalizeTypeInput::new(&db, module, ty);
+            divan::black_box(normalize_type(&db, input));
+            db
+        });
+}
+
+const RECURSIVE_ALIAS_CASES: &[(&str, &str, &str)] = &[
+    // A recursive alias whose branches collapse to a self-instantiation with
+    // `infer` parameters, as in react-hook-form's `FieldPathValue`.
+    // See https://github.com/biomejs/biome/issues/11810.
+    (
+        "path_value",
+        r#"
+        type PathValue<T, P extends string> = P extends `${infer K}.${infer R}`
+            ? K extends keyof T
+                ? PathValue<T[K], R>
+                : T extends ReadonlyArray<infer V>
+                    ? PathValue<V, R>
+                    : never
+            : P extends keyof T
+                ? T[P]
+                : never;
+        declare function useController<T, N extends string>(props: {
+            name: N;
+        }): { field: { value: PathValue<T, N> } };
+        const { field } = useController<{ items: string[] }, "items">({ name: "items" });
+        field.value.length;
+        "#,
+        "field.value.length",
+    ),
+    // A recursive alias that re-instantiates itself with its own arguments,
+    // as in zustand's `Mutate<StoreApi<T>, []>`.
+    // See https://github.com/biomejs/biome/issues/11813.
+    (
+        "self_instantiation",
+        r#"
+        interface Api { get(): number }
+        type Rec<T, L> = L extends [] ? T : Rec<T, []>;
+        declare const api: Rec<Api, []>;
+        api.get();
+        "#,
+        "api.get()",
+    ),
+];
+
+fn recursive_alias_cases() -> impl Iterator<Item = &'static str> {
+    RECURSIVE_ALIAS_CASES.iter().map(|(name, _, _)| *name)
+}
+
+#[divan::bench(name = "bench_recursive_alias_member_lookup", args = recursive_alias_cases())]
+fn bench_recursive_alias_member_lookup(bencher: Bencher, name: &str) {
+    bencher
+        .with_inputs(|| recursive_alias_member_lookup_input(name))
+        .bench_local_values(|(db, module, range)| {
+            let input = ExpressionTypeInput::new(&db, module, range);
+            let ty = infer_expression_type(&db, input).expect("member access must have a type");
+            let input = NormalizeTypeInput::new(&db, module, ty);
+            divan::black_box(normalize_type(&db, input));
+            db
+        });
+}
+
+#[divan::bench(name = "bench_distinct_local_type_lookup_queries")]
+fn bench_distinct_local_type_lookup_queries(bencher: Bencher) {
+    bencher
+        .with_inputs(|| {
+            let (db, module) = build_source_db("local_types.ts", &declaration_heavy_source(128));
+            let ModuleInfoKind::Js(info) = module.kind(&db) else {
+                panic!("module must contain JavaScript information");
+            };
+            let type_count = info.raw_types.len();
+            (db, module, type_count)
+        })
+        .bench_local_refs(|(db, module, type_count)| {
+            for index in 0..*type_count {
+                let input = LocalTypeInput::new(&*db, *module, LocalTypeId::new(index));
+                divan::black_box(infer_local_type(&*db, input));
+            }
+        });
+}
+
+#[divan::bench(name = "bench_distinct_export_lookup_queries")]
+fn bench_distinct_export_lookup_queries(bencher: Bencher) {
+    bencher
+        .with_inputs(|| {
+            let (db, module) = build_source_db("exports.ts", &declaration_heavy_source(128));
+            let ModuleInfoKind::Js(info) = module.kind(&db) else {
+                panic!("module must contain JavaScript information");
+            };
+            let names = info.exports.keys().cloned().collect::<Vec<_>>();
+            (db, module, names)
+        })
+        .bench_local_refs(|(db, module, names)| {
+            for name in names {
+                let input = SymbolFromModuleInfo::new(&*db, name.to_string(), *module);
+                divan::black_box(infer_export_type(&*db, input));
+            }
+        });
+}
+
+#[divan::bench(name = "bench_distinct_expression_lookup_queries")]
+fn bench_distinct_expression_lookup_queries(bencher: Bencher) {
+    bencher
+        .with_inputs(|| expression_query_inputs(128))
+        .bench_local_refs(|(db, module, ranges)| {
+            for range in ranges {
+                let input = ExpressionTypeInput::new(&*db, *module, *range);
+                divan::black_box(infer_expression_type(&*db, input));
+            }
+        });
+}
+
+#[divan::bench(name = "bench_distinct_selective_promise_queries")]
+fn bench_distinct_selective_promise_queries(bencher: Bencher) {
+    bencher
+        .with_inputs(|| expression_query_inputs(128))
+        .bench_local_refs(|(db, module, ranges)| {
+            for range in ranges {
+                let input = ExpressionTypeInput::new(&*db, *module, *range);
+                divan::black_box(infer_expression_is_promise(&*db, input));
+            }
         });
 }
 
@@ -171,17 +499,15 @@ fn bench_index_d_ts_salsa_incremental_first_run(bencher: Bencher) {
             (fs, modules)
         })
         .bench_local_values(|(fs, modules)| {
-            let db = WorkspaceDb::default();
+            let db = workspace_db(&fs);
             let mut index_module = None;
             for (name, root, semantic_model) in modules {
                 let path = BiomePath::new(name);
                 let (module_info, _, _) = resolve_js_module_with_inference_mode(
+                    &db,
                     root,
                     &path,
-                    &fs,
-                    &ProjectLayout::default(),
                     semantic_model,
-                    &PathInfoCache::default(),
                     TypeInferenceMode::RawTypesOnly,
                 );
                 let module = ModuleInfo::new(
@@ -212,7 +538,7 @@ fn bench_index_d_ts_salsa_incremental(bencher: Bencher) {
             }
             fs.insert("index.ts".into(), INDEX_TS_BEFORE_EDIT);
 
-            let db = WorkspaceDb::default();
+            let db = workspace_db(&fs);
             let mut index_module = None;
             for name in index_d_ts_cases().chain(["index.ts"]) {
                 let path = BiomePath::new(name);
@@ -220,12 +546,10 @@ fn bench_index_d_ts_salsa_incremental(bencher: Bencher) {
                 let semantic_model =
                     Arc::new(semantic_model(&root, SemanticModelOptions::default()));
                 let (module_info, _, _) = resolve_js_module_with_inference_mode(
+                    &db,
                     root,
                     &path,
-                    &fs,
-                    &ProjectLayout::default(),
                     semantic_model,
-                    &PathInfoCache::default(),
                     TypeInferenceMode::RawTypesOnly,
                 );
                 let module = ModuleInfo::new(
@@ -247,17 +571,15 @@ fn bench_index_d_ts_salsa_incremental(bencher: Bencher) {
             let path = BiomePath::new("index.ts");
             let root = get_js_root(&fs, &path);
             let semantic_model = Arc::new(semantic_model(&root, SemanticModelOptions::default()));
-            (db, index_module, fs, root, semantic_model)
+            (db, index_module, root, semantic_model)
         })
-        .bench_local_values(|(mut db, index_module, fs, root, semantic_model)| {
+        .bench_local_values(|(mut db, index_module, root, semantic_model)| {
             let path = BiomePath::new("index.ts");
             let (module_info, _, _) = resolve_js_module_with_inference_mode(
+                &db,
                 root,
                 &path,
-                &fs,
-                &ProjectLayout::default(),
                 semantic_model,
-                &PathInfoCache::default(),
                 TypeInferenceMode::RawTypesOnly,
             );
             salsa::Setter::to(
@@ -267,6 +589,238 @@ fn bench_index_d_ts_salsa_incremental(bencher: Bencher) {
             divan::black_box(infer_module_types_bottom_up(&db, index_module));
             db
         });
+}
+
+fn build_source_db(name: &str, content: &str) -> (WorkspaceDb, ModuleInfo) {
+    let fs = MemoryFileSystem::default();
+    fs.insert(name.into(), content.as_bytes());
+
+    let path = BiomePath::new(name);
+    let root = get_js_root(&fs, &path);
+    let semantic_model = Arc::new(semantic_model(&root, SemanticModelOptions::default()));
+    let db = workspace_db(&fs);
+    let (module_info, _, _) = resolve_js_module_with_inference_mode(
+        &db,
+        root,
+        &path,
+        semantic_model,
+        TypeInferenceMode::RawTypesOnly,
+    );
+    let module = ModuleInfo::new(
+        &db,
+        path.as_path().to_path_buf(),
+        ModuleInfoKind::Js(module_info),
+    );
+    db.modules
+        .pin()
+        .insert(path.as_path().to_path_buf(), module);
+    (db, module)
+}
+
+fn binding_range_by_name(db: &dyn ModuleDb, module: ModuleInfo, name: &str) -> TextRange {
+    let ModuleInfoKind::Js(info) = module.kind(db) else {
+        panic!("module must contain JavaScript information");
+    };
+    info.semantic_model
+        .all_bindings()
+        .find(|binding| {
+            binding
+                .tree()
+                .name_token()
+                .is_ok_and(|token| token.text_trimmed() == name)
+        })
+        .unwrap_or_else(|| panic!("{name} binding must exist"))
+        .syntax()
+        .text_trimmed_range()
+}
+
+fn overload_binding_range_by_name(
+    db: &dyn ModuleDb,
+    module: ModuleInfo,
+    name: &str,
+    signature_count: usize,
+) -> TextRange {
+    let ModuleInfoKind::Js(info) = module.kind(db) else {
+        panic!("module must contain JavaScript information");
+    };
+    let inferred = infer_module_types(db, module).expect("types must be inferred");
+    info.semantic_model
+        .all_bindings()
+        .filter(|binding| {
+            binding
+                .tree()
+                .name_token()
+                .is_ok_and(|token| token.text_trimmed() == name)
+        })
+        .find_map(|binding| {
+            let range = binding.range();
+            let ty = inferred
+                .binding_type_data
+                .get(&range)
+                .map(|data| inferred.resolve_type(db, data.ty))?;
+            matches!(
+                ty,
+                InferredTypeData::Object(object)
+                    if object
+                        .members(db)
+                        .iter()
+                        .filter(|member| member.kind.is_call_signature())
+                        .count()
+                        >= signature_count
+            )
+            .then_some(range)
+        })
+        .unwrap_or_else(|| panic!("{name} overload binding must exist"))
+}
+
+fn overload_benchmark_input<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    callee_range: TextRange,
+    callback_range: TextRange,
+    argument_index: usize,
+) -> CallArgumentTypeInput<'db> {
+    let inferred = infer_module_types(db, module).expect("types must be inferred");
+    let callee = inferred
+        .binding_type_data
+        .get(&callee_range)
+        .expect("overloaded binding must have a type")
+        .ty;
+    let callback = inferred
+        .binding_type_data
+        .get(&callback_range)
+        .expect("callback binding must have a type")
+        .ty;
+    let mut args = vec![InferredCallArgumentType::Argument(InferredTypeData::Number); 31];
+    args.push(InferredCallArgumentType::Argument(callback));
+    CallArgumentTypeInput::new(db, callee, args.into_boxed_slice(), argument_index)
+}
+
+fn overloaded_function_source(overload_count: usize) -> String {
+    let mut source = String::new();
+    for arity in 1..=overload_count {
+        source.push_str("export declare function overloaded(");
+        for index in 0..arity {
+            if index > 0 {
+                source.push_str(", ");
+            }
+            if arity == overload_count && index + 1 == arity {
+                source.push_str("callback: () => void");
+            } else {
+                source.push_str(&format!("value{index}: number"));
+            }
+        }
+        source.push_str("): void;\n");
+    }
+    source.push_str("export const callback = () => {};\n");
+    source
+}
+
+fn declaration_heavy_source(declaration_count: usize) -> String {
+    let mut source = String::new();
+    for index in 0..declaration_count {
+        source.push_str(&format!(
+            "export interface Value{index} {{ field: number; }}\n\
+             export const value{index}: Value{index} = {{ field: {index} }};\n"
+        ));
+    }
+    source
+}
+
+fn cyclic_declaration_promise_lookup_input() -> (WorkspaceDb, ModuleInfo, TextRange) {
+    const CONSUMER_SOURCE: &str = r#"
+        import { load } from "./loader";
+        export interface Consumer {}
+        load().then(() => {});
+    "#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/loader.ts".into(),
+        r#"
+            import type { Consumer } from "./consumer";
+            export function load(): Promise<void> {
+                return Promise.resolve();
+            }
+            export type LoaderConsumer = Consumer;
+        "#,
+    );
+    fs.insert("/src/consumer.ts".into(), CONSUMER_SOURCE);
+
+    let db = workspace_db(&fs);
+    let mut consumer = None;
+    for name in ["/src/loader.ts", "/src/consumer.ts"] {
+        let path = BiomePath::new(name);
+        let root = get_js_root(&fs, &path);
+        let semantic_model = Arc::new(semantic_model(&root, SemanticModelOptions::default()));
+        let (module_info, _, _) = resolve_js_module_with_inference_mode(
+            &db,
+            root,
+            &path,
+            semantic_model,
+            TypeInferenceMode::RawTypesOnly,
+        );
+        let module = ModuleInfo::new(
+            &db,
+            path.as_path().to_path_buf(),
+            ModuleInfoKind::Js(module_info),
+        );
+        db.modules
+            .pin()
+            .insert(path.as_path().to_path_buf(), module);
+        if name == "/src/consumer.ts" {
+            consumer = Some(module);
+        }
+    }
+
+    let consumer = consumer.expect("consumer module must exist");
+    let ModuleInfoKind::Js(info) = consumer.kind(&db) else {
+        panic!("consumer module must contain JavaScript information");
+    };
+    let range = info
+        .raw_expressions
+        .keys()
+        .copied()
+        .find(|range| {
+            CONSUMER_SOURCE.get(usize::from(range.start())..usize::from(range.end()))
+                == Some("load().then(() => {})")
+        })
+        .expect("Promise chain must be collected");
+    (db, consumer, range)
+}
+
+fn recursive_alias_member_lookup_input(name: &str) -> (WorkspaceDb, ModuleInfo, TextRange) {
+    let (_, source, expression) = RECURSIVE_ALIAS_CASES
+        .iter()
+        .find(|(case_name, _, _)| *case_name == name)
+        .expect("cannot find test case");
+
+    let (db, module) = build_source_db("recursive_alias.ts", source);
+    let ModuleInfoKind::Js(info) = module.kind(&db) else {
+        panic!("module must contain JavaScript information");
+    };
+    let range = info
+        .raw_expressions
+        .keys()
+        .copied()
+        .find(|range| {
+            source.get(usize::from(range.start())..usize::from(range.end())) == Some(*expression)
+        })
+        .expect("member access must be collected");
+    (db, module, range)
+}
+
+fn expression_query_inputs(count: usize) -> (WorkspaceDb, ModuleInfo, Vec<TextRange>) {
+    let mut source = String::new();
+    for index in 0..count {
+        source.push_str(&format!("Promise.resolve({index});\n"));
+    }
+    let (db, module) = build_source_db("promises.ts", &source);
+    let ModuleInfoKind::Js(info) = module.kind(&db) else {
+        panic!("module must contain JavaScript information");
+    };
+    let ranges = info.raw_expressions.keys().copied().collect();
+    (db, module, ranges)
 }
 
 fn build_inferred_db(name: &str) -> (WorkspaceDb, ModuleInfo, ModuleInfoKind) {
@@ -281,19 +835,16 @@ fn build_inferred_db(name: &str) -> (WorkspaceDb, ModuleInfo, ModuleInfoKind) {
     let path = BiomePath::new(name);
     let root = get_js_root(&fs, &path);
     let semantic_model = Arc::new(semantic_model(&root, SemanticModelOptions::default()));
-    let path_info_cache = PathInfoCache::default();
+    let db = workspace_db(&fs);
     let (module_info, _, _) = resolve_js_module_with_inference_mode(
+        &db,
         root,
         &path,
-        &fs,
-        &ProjectLayout::default(),
         semantic_model,
-        &path_info_cache,
         TypeInferenceMode::RawTypesOnly,
     );
 
     let kind = ModuleInfoKind::Js(module_info);
-    let db = WorkspaceDb::default();
     let module = ModuleInfo::new(&db, path.as_path().to_path_buf(), kind.clone());
     db.modules
         .pin()

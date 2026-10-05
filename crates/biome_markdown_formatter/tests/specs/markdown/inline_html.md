@@ -1,0 +1,1 @@
+Something <!-- comment --> inline.

@@ -17,21 +17,12 @@ const VIEW_TRANSITION_PSEUDO_ELEMENTS: [&str; 5] = [
     "view-transition-new",
 ];
 
-fn is_root_in_view_transition_pseudo_element(type_selector: &CssTypeSelector) -> bool {
-    // Only check if the type selector is "root"
-    let Some(type_selector_text) = type_selector
-        .ident()
-        .ok()
-        .and_then(|ident| ident.as_css_identifier().and_then(|ident| ident.value_token().ok()))
-        .map(|token| token.token_text_trimmed().text().to_string())
-    else {
-        return false;
-    };
-
-    if type_selector_text != "root" {
-        return false;
-    }
-
+/// Returns whether the type selector is the argument of a view transition
+/// pseudo-element, such as `page` in `::view-transition-group(page)`.
+///
+/// That argument names a `view-transition-name` rather than an element, so it
+/// can be any author-defined identifier.
+fn is_in_view_transition_pseudo_element(type_selector: &CssTypeSelector) -> bool {
     // According to the AST structure: CssTypeSelector -> CssCompoundSelector -> CssPseudoElementFunctionSelector
     type_selector
         .syntax()
@@ -39,21 +30,25 @@ fn is_root_in_view_transition_pseudo_element(type_selector: &CssTypeSelector) ->
         .and_then(CssPseudoElementFunctionSelector::cast)
         .and_then(|func| func.name().ok())
         .and_then(|name| name.value_token().ok())
-        .map(|token| token.token_text_trimmed().text().to_string())
-        .is_some_and(|name_text| VIEW_TRANSITION_PSEUDO_ELEMENTS.contains(&name_text.as_str()))
+        .is_some_and(|token| {
+            let name = token.text_trimmed();
+            VIEW_TRANSITION_PSEUDO_ELEMENTS
+                .iter()
+                .any(|pseudo_element| pseudo_element.eq_ignore_ascii_case(name))
+        })
 }
 
 declare_lint_rule! {
-    /// Disallow unknown type selectors.
+    /// Disallow unrecognized element names in type selectors.
     ///
-    /// This rule considers tags defined in the HTML, SVG, and MathML specifications to be known.
-    /// For details on known CSS type selectors, see the following links
-    /// - https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors
-    /// - https://developer.mozilla.org/ja/docs/Web/HTML/Element
-    /// - https://developer.mozilla.org/ja/docs/Web/SVG/Element
-    /// - https://developer.mozilla.org/ja/docs/Web/MathML/Element
+    /// A type selector targets elements by tag name, as in `button {}`. Names from the HTML, SVG,
+    /// and MathML specifications are recognized. Valid custom-element names such as `x-button` are
+    /// also allowed.
     ///
-    /// This rule allows custom elements.
+    /// See the [MDN type-selector reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors)
+    /// and the element references for [HTML](https://developer.mozilla.org/en-US/docs/Web/HTML/Element),
+    /// [SVG](https://developer.mozilla.org/en-US/docs/Web/SVG/Element), and
+    /// [MathML](https://developer.mozilla.org/en-US/docs/Web/MathML/Element).
     ///
     /// ## Examples
     ///
@@ -104,9 +99,7 @@ impl Rule for NoUnknownTypeSelector {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let css_type_selector = ctx.query();
 
-        // Skip "root" type selectors that are inside View Transition pseudo-element function parameters
-        // (e.g., `root` in `::view-transition-old(root)`)
-        if is_root_in_view_transition_pseudo_element(css_type_selector) {
+        if is_in_view_transition_pseudo_element(css_type_selector) {
             return None;
         }
 

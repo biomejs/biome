@@ -4,10 +4,10 @@ expression: Page.astro
 ---
 # Input
 ```astro
-<!-- should not generate diagnostics -->
 ---
 import Button from "./Button.astro";
 ---
+<!-- should not generate diagnostics -->
 
 <div class="page"><Button /></div>
 

@@ -1,8 +1,8 @@
 use crate::parser::CssParser;
 use crate::syntax::block::parse_declaration_or_rule_list_block;
 use crate::syntax::scss::{
-    is_at_scss_interpolation, parse_scss_interpolation_or_identifier,
-    parse_scss_regular_interpolation,
+    expect_scss_semicolon_at_rule, is_at_scss_interpolation,
+    parse_scss_interpolation_or_identifier, parse_scss_regular_interpolation,
 };
 use crate::syntax::{CssSyntaxFeatures, is_at_identifier, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::*;
@@ -71,7 +71,11 @@ fn complete_unknown_at_rule(p: &mut CssParser, m: Marker) -> ParsedSyntax {
         parse_declaration_or_rule_list_block(p);
         CSS_UNKNOWN_BLOCK_AT_RULE
     } else {
-        p.expect(T![;]);
+        if CssSyntaxFeatures::Scss.is_supported(p) {
+            expect_scss_semicolon_at_rule(p);
+        } else {
+            p.expect(T![;]);
+        }
         CSS_UNKNOWN_VALUE_AT_RULE
     };
 

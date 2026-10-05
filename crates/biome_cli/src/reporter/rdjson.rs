@@ -3,7 +3,7 @@ use crate::runner::execution::Execution;
 use crate::{DiagnosticsPayload, TraversalSummary};
 use biome_console::markup;
 use biome_diagnostics::display::SourceFile;
-use biome_diagnostics::{Error, Location, PrintDescription, Visit};
+use biome_diagnostics::{Error, Location, PrintDescription, Severity, Visit};
 use biome_rowan::{TextRange, TextSize};
 use biome_text_edit::{CompressedOp, DiffOp, TextEdit};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -108,6 +108,7 @@ fn diagnostic_to_rdjson<'a>(diagnostic: &'a Error) -> Option<RdJsonDiagnostic<'a
         code,
         location,
         message,
+        severity: diagnostic.severity().into(),
         suggestions,
     })
 }
@@ -305,8 +306,30 @@ struct RdJsonDiagnostic<'a> {
     #[serde(skip_serializing_if = "Option::is_none")]
     location: Option<RdJsonLocation>,
     message: String,
+    severity: RdJsonSeverity,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     suggestions: Vec<RdJsonSuggestion>,
+}
+
+/// Severity of a [Reviewdog Diagnostic](https://github.com/reviewdog/reviewdog/blob/master/proto/rdf/reviewdog.proto).
+#[derive(Serialize)]
+enum RdJsonSeverity {
+    #[serde(rename = "ERROR")]
+    Error,
+    #[serde(rename = "WARNING")]
+    Warning,
+    #[serde(rename = "INFO")]
+    Info,
+}
+
+impl From<Severity> for RdJsonSeverity {
+    fn from(severity: Severity) -> Self {
+        match severity {
+            Severity::Fatal | Severity::Error => Self::Error,
+            Severity::Warning => Self::Warning,
+            Severity::Information | Severity::Hint => Self::Info,
+        }
+    }
 }
 
 #[derive(Serialize)]

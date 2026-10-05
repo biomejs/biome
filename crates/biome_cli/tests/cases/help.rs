@@ -1,8 +1,8 @@
+use crate::TestArgs as Args;
 use crate::run_cli;
 use crate::snap_test::{SnapshotPayload, assert_cli_snapshot};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use bpaf::Args;
 #[test]
 fn unknown_command() {
     let mut console = BufferConsole::default();

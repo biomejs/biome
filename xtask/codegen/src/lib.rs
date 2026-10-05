@@ -8,6 +8,7 @@ pub mod generate_analyzer_rule_options;
 #[cfg(feature = "global_types")]
 pub mod generate_global_types;
 mod generate_grit_mappings;
+mod generate_js_plugin_ast;
 mod generate_macros;
 pub mod generate_new_analyzer_rule;
 mod generate_node_factory;
@@ -107,6 +108,13 @@ pub enum TaskCommand {
     Configuration,
     #[bpaf(command)]
     MigrateEslint,
+    /// Prints the metadata of every rule, and the upstream rules they reference, as JSON
+    #[bpaf(command, long("rules-metadata"))]
+    RulesMetadata {
+        /// Write the JSON to this file instead of stdout. Relative paths are resolved against the repository root.
+        #[bpaf(long("out"), argument("PATH"))]
+        out: Option<std::path::PathBuf>,
+    },
     /// Generate the JSON schema for the Biome configuration file format
     #[bpaf(command)]
     Schema,
@@ -129,6 +137,9 @@ pub enum TaskCommand {
     /// Generates Baseline data for CSS features from web-features
     #[bpaf(command, long("css-baseline"))]
     CssBaseline,
+    /// Generates CSS keywords from @webref/css
+    #[bpaf(command, long("css-keywords"))]
+    CssKeywords,
     /// Generates e18e module replacement data
     #[bpaf(command, long("module-replacements"))]
     ModuleReplacements,

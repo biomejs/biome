@@ -1,0 +1,189 @@
+---
+source: crates/biome_js_transform/tests/spec_tests.rs
+expression: annotations.ts
+---
+# Input
+```ts
+function foo<T>(a: T, b?: number, ...rest: string[]): T | undefined {
+	let x!: number;
+	x = b as number;
+	const y = foo<string>;
+	return a;
+}
+const bar = <T,>(a: T): T => a;
+function baz(this: Window, a?: boolean) {}
+
+```
+
+# Transformations
+```diff
+@@ -1,4 +1,4 @@
+-function foo<T>(a: T, b?: number, ...rest: string[]): T | undefined {
++function foo   (a: T, b?: number, ...rest: string[]): T | undefined {
+ 	let x!: number;
+ 	x = b as number;
+ 	const y = foo<string>;
+
+```
+
+```diff
+@@ -1,4 +1,4 @@
+-function foo<T>(a: T, b?: number, ...rest: string[]): T | undefined {
++function foo<T>(a   , b?: number, ...rest: string[]): T | undefined {
+ 	let x!: number;
+ 	x = b as number;
+ 	const y = foo<string>;
+
+```
+
+```diff
+@@ -1,4 +1,4 @@
+-function foo<T>(a: T, b?: number, ...rest: string[]): T | undefined {
++function foo<T>(a: T, b : number, ...rest: string[]): T | undefined {
+ 	let x!: number;
+ 	x = b as number;
+ 	const y = foo<string>;
+
+```
+
+```diff
+@@ -1,4 +1,4 @@
+-function foo<T>(a: T, b?: number, ...rest: string[]): T | undefined {
++function foo<T>(a: T, b?        , ...rest: string[]): T | undefined {
+ 	let x!: number;
+ 	x = b as number;
+ 	const y = foo<string>;
+
+```
+
+```diff
+@@ -1,4 +1,4 @@
+-function foo<T>(a: T, b?: number, ...rest: string[]): T | undefined {
++function foo<T>(a: T, b?: number, ...rest          ): T | undefined {
+ 	let x!: number;
+ 	x = b as number;
+ 	const y = foo<string>;
+
+```
+
+```diff
+@@ -1,4 +1,4 @@
+-function foo<T>(a: T, b?: number, ...rest: string[]): T | undefined {
++function foo<T>(a: T, b?: number, ...rest: string[])                {
+ 	let x!: number;
+ 	x = b as number;
+ 	const y = foo<string>;
+
+```
+
+```diff
+@@ -1,5 +1,5 @@
+ function foo<T>(a: T, b?: number, ...rest: string[]): T | undefined {
+-	let x!: number;
++	let x         ;
+ 	x = b as number;
+ 	const y = foo<string>;
+ 	return a;
+
+```
+
+```diff
+@@ -1,6 +1,6 @@
+ function foo<T>(a: T, b?: number, ...rest: string[]): T | undefined {
+ 	let x!: number;
+-	x = b as number;
++	x = b          ;
+ 	const y = foo<string>;
+ 	return a;
+ }
+
+```
+
+```diff
+@@ -1,7 +1,7 @@
+ function foo<T>(a: T, b?: number, ...rest: string[]): T | undefined {
+ 	let x!: number;
+ 	x = b as number;
+-	const y = foo<string>;
++	const y = foo        ;
+ 	return a;
+ }
+ const bar = <T,>(a: T): T => a;
+
+```
+
+```diff
+@@ -4,5 +4,5 @@
+ 	const y = foo<string>;
+ 	return a;
+ }
+-const bar = <T,>(a: T): T => a;
++const bar =     (a: T): T => a;
+ function baz(this: Window, a?: boolean) {}
+
+```
+
+```diff
+@@ -4,5 +4,5 @@
+ 	const y = foo<string>;
+ 	return a;
+ }
+-const bar = <T,>(a: T): T => a;
++const bar = <T,>(a   ): T => a;
+ function baz(this: Window, a?: boolean) {}
+
+```
+
+```diff
+@@ -4,5 +4,5 @@
+ 	const y = foo<string>;
+ 	return a;
+ }
+-const bar = <T,>(a: T): T => a;
++const bar = <T,>(a: T)    => a;
+ function baz(this: Window, a?: boolean) {}
+
+```
+
+```diff
+@@ -5,4 +5,4 @@
+ 	return a;
+ }
+ const bar = <T,>(a: T): T => a;
+-function baz(this: Window, a?: boolean) {}
++function baz(              a?: boolean) {}
+
+```
+
+```diff
+@@ -5,4 +5,4 @@
+ 	return a;
+ }
+ const bar = <T,>(a: T): T => a;
+-function baz(this: Window, a?: boolean) {}
++function baz(this: Window, a : boolean) {}
+
+```
+
+```diff
+@@ -5,4 +5,4 @@
+ 	return a;
+ }
+ const bar = <T,>(a: T): T => a;
+-function baz(this: Window, a?: boolean) {}
++function baz(this: Window, a?         ) {}
+
+```
+
+# Final output
+```ts
+function foo   (a   , b         , ...rest          )                {
+	let x         ;
+	x = b          ;
+	const y = foo        ;
+	return a;
+}
+const bar =     (a   )    => a;
+function baz(              a          ) {}
+
+```

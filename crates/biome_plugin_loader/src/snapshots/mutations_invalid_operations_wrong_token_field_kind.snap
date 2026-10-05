@@ -1,0 +1,48 @@
+---
+source: crates/biome_plugin_loader/src/analyzer_js_plugin.rs
+expression: content
+---
+# Plugin
+
+## `/plugin.js`
+
+```js
+import {
+	ast,
+	createMutation,
+	defineRule,
+	factory,
+	registerDiagnostic,
+} from "@biomejs/runtime/plugin";
+
+export const fixer = defineRule({
+	query: ast("JS_MODULE"),
+	run(root) {
+		const statement = root.items[0];
+		const call = statement.expression;
+		const args = call.arguments;
+		const list = args.children()[0];
+		const [first, second] = args.args;
+		const token = first.token("valueToken");
+		const mutation = createMutation(root);
+		first.withValueToken(factory.token("COMMA"));
+	},
+});
+```
+
+# Input
+
+## `/file.js`
+
+```js
+call(1,2);
+```
+
+# Diagnostics
+
+```block
+/file.js plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Rule fixer errored: TypeError: JsNumberLiteralExpression.withValueToken() for field valueToken received a token that does not match the allowed token choices: "js_number_literal". Pass a matching JsAstToken from node.token("valueToken") or factory.token(). (/plugin.js:14:21)
+        at run (/plugin.js:14:21)
+```

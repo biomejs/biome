@@ -1,0 +1,4 @@
+.root {
+    <<<ROME_RANGE_START>>>div   span[foo='bar short\
+short']<<<ROME_RANGE_END>>>{color:red}
+}

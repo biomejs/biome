@@ -163,7 +163,7 @@ fn semantic_model_is_memoized() {
 }
 
 // Test-only downstream tracked function that reads from js_semantic_model
-#[salsa::tracked]
+#[salsa::tracked(returns(copy))]
 fn binding_count(db: &dyn LanguageDb, file: ParsedSource) -> usize {
     let model = semantic_model_from_source(db, file);
     model.data.bindings.len()

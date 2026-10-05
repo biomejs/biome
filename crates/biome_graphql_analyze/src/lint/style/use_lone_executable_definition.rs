@@ -7,10 +7,10 @@ use biome_rowan::{AstNode, AstNodeList, TextRange};
 use biome_rule_options::use_lone_executable_definition::UseLoneExecutableDefinitionOptions;
 
 declare_lint_rule! {
-    /// Require queries, mutations, subscriptions or fragments each to be located in separate files.
+    /// Require one executable GraphQL definition per file.
     ///
-    /// This rule ensures that each GraphQL document only contains a single operation (query, mutation, or subscription) or fragment definition.
-    /// Having multiple executable definitions in a single file can make code harder to maintain, test, and understand.
+    /// An executable definition is a query, mutation, subscription, or fragment. Keeping each one
+    /// in a separate file makes operations easier to locate, test, and maintain.
     ///
     /// ## Examples
     ///

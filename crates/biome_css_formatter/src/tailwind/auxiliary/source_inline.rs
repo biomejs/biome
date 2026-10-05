@@ -19,7 +19,7 @@ impl FormatNodeRule<TwSourceInline> for FormatTwSourceInline {
             write!(
                 f,
                 [
-                    inline_token.format(),
+                    inline_token.format()?.with_text_case(CssCase::Preserve),
                     l_paren_token.format(),
                     space(),
                     &content.format(),
@@ -31,7 +31,7 @@ impl FormatNodeRule<TwSourceInline> for FormatTwSourceInline {
             write!(
                 f,
                 [
-                    inline_token.format(),
+                    inline_token.format()?.with_text_case(CssCase::Preserve),
                     l_paren_token.format(),
                     &content.format(),
                     r_paren_token.format(),

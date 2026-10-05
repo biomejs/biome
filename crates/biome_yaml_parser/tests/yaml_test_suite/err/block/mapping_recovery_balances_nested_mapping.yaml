@@ -1,0 +1,6 @@
+root:
+  valid: value
+  @
+  nested:
+    key: value
+next: value

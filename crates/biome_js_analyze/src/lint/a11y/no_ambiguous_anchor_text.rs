@@ -61,7 +61,10 @@ declare_lint_rule! {
         language: "js",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::EslintJsxA11y("anchor-ambiguous-text").same()],
+        sources: &[
+            RuleSource::EslintJsxA11y("anchor-ambiguous-text").same(),
+            RuleSource::EslintAstro("jsx-a11y/anchor-ambiguous-text").same(),
+        ],
     }
 }
 
@@ -172,7 +175,7 @@ fn get_accessible_child_text(node: &JsxElement) -> String {
     };
 
     let raw_child_text = node
-        .children()
+        .elements()
         .into_iter()
         .map(|child| match child {
             AnyJsxChild::JsxText(element) => {

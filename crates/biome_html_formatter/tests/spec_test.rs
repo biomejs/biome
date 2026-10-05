@@ -14,6 +14,7 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
 
     let config = Configuration {
         html: Some(HtmlConfiguration {
+            experimental_full_support_enabled: Some(true.into()),
             formatter: Some(HtmlFormatterConfiguration {
                 enabled: Some(true.into()),
                 ..Default::default()

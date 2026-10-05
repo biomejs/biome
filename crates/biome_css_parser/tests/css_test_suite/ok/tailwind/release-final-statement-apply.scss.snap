@@ -1,0 +1,453 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.explicit { @apply py-3; width: 1px; }
+.final { @apply py-3 }
+.block-comment { @apply mb-2 /* utility */ }
+.line-comment {
+  @apply clear-both // utility
+  /* close */
+}
+.slashes { @apply w-1/2 bg-[url(http://example.com/a.svg)] content-['/*x*/']; }
+.after { width: 1px; }
+@apply py-3
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..10 "explicit" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@10..12 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssAtRule {
+                        at_token: AT@12..13 "@" [] [],
+                        rule: TwApplyAtRule {
+                            apply_token: APPLY_KW@13..19 "apply" [] [Whitespace(" ")],
+                            classes: TwApplyClassList [
+                                CssIdentifier {
+                                    value_token: IDENT@19..23 "py-3" [] [],
+                                },
+                            ],
+                            semicolon_token: SEMICOLON@23..25 ";" [] [Whitespace(" ")],
+                        },
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@25..30 "width" [] [],
+                                },
+                                colon_token: COLON@30..32 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@32..33 "1" [] [],
+                                            unit_token: IDENT@33..35 "px" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@35..37 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@37..38 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@38..40 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@40..46 "final" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@46..48 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssAtRule {
+                        at_token: AT@48..49 "@" [] [],
+                        rule: TwApplyAtRule {
+                            apply_token: APPLY_KW@49..55 "apply" [] [Whitespace(" ")],
+                            classes: TwApplyClassList [
+                                CssIdentifier {
+                                    value_token: IDENT@55..60 "py-3" [] [Whitespace(" ")],
+                                },
+                            ],
+                            semicolon_token: missing (optional),
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@60..61 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@61..63 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@63..77 "block-comment" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@77..79 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssAtRule {
+                        at_token: AT@79..80 "@" [] [],
+                        rule: TwApplyAtRule {
+                            apply_token: APPLY_KW@80..86 "apply" [] [Whitespace(" ")],
+                            classes: TwApplyClassList [
+                                CssIdentifier {
+                                    value_token: IDENT@86..105 "mb-2" [] [Whitespace(" "), Comments("/* utility */"), Whitespace(" ")],
+                                },
+                            ],
+                            semicolon_token: missing (optional),
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@105..106 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@106..108 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@108..121 "line-comment" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@121..122 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssAtRule {
+                        at_token: AT@122..126 "@" [Newline("\n"), Whitespace("  ")] [],
+                        rule: TwApplyAtRule {
+                            apply_token: APPLY_KW@126..132 "apply" [] [Whitespace(" ")],
+                            classes: TwApplyClassList [
+                                CssIdentifier {
+                                    value_token: IDENT@132..153 "clear-both" [] [Whitespace(" "), Comments("// utility")],
+                                },
+                            ],
+                            semicolon_token: missing (optional),
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@153..169 "}" [Newline("\n"), Whitespace("  "), Comments("/* close */"), Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@169..171 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@171..179 "slashes" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@179..181 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssAtRule {
+                        at_token: AT@181..182 "@" [] [],
+                        rule: TwApplyAtRule {
+                            apply_token: APPLY_KW@182..188 "apply" [] [Whitespace(" ")],
+                            classes: TwApplyClassList [
+                                CssIdentifier {
+                                    value_token: IDENT@188..194 "w-1/2" [] [Whitespace(" ")],
+                                },
+                                CssIdentifier {
+                                    value_token: IDENT@194..229 "bg-[url(http://example.com/a.svg)]" [] [Whitespace(" ")],
+                                },
+                                CssIdentifier {
+                                    value_token: IDENT@229..246 "content-['/*x*/']" [] [],
+                                },
+                            ],
+                            semicolon_token: SEMICOLON@246..248 ";" [] [Whitespace(" ")],
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@248..249 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@249..251 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@251..257 "after" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@257..259 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@259..264 "width" [] [],
+                                },
+                                colon_token: COLON@264..266 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@266..267 "1" [] [],
+                                            unit_token: IDENT@267..269 "px" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@269..271 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@271..272 "}" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@272..274 "@" [Newline("\n")] [],
+            rule: TwApplyAtRule {
+                apply_token: APPLY_KW@274..280 "apply" [] [Whitespace(" ")],
+                classes: TwApplyClassList [
+                    CssIdentifier {
+                        value_token: IDENT@280..284 "py-3" [] [],
+                    },
+                ],
+                semicolon_token: missing (optional),
+            },
+        },
+    ],
+    eof_token: EOF@284..284 "" [] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..284
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..284
+    0: CSS_QUALIFIED_RULE@0..38
+      0: CSS_SELECTOR_LIST@0..10
+        0: CSS_COMPOUND_SELECTOR@0..10
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..10
+            0: CSS_CLASS_SELECTOR@0..10
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..10
+                0: IDENT@1..10 "explicit" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@10..38
+        0: L_CURLY@10..12 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@12..37
+          0: CSS_AT_RULE@12..25
+            0: AT@12..13 "@" [] []
+            1: TW_APPLY_AT_RULE@13..25
+              0: APPLY_KW@13..19 "apply" [] [Whitespace(" ")]
+              1: TW_APPLY_CLASS_LIST@19..23
+                0: CSS_IDENTIFIER@19..23
+                  0: IDENT@19..23 "py-3" [] []
+              2: SEMICOLON@23..25 ";" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_WITH_SEMICOLON@25..37
+            0: CSS_DECLARATION@25..35
+              0: CSS_GENERIC_PROPERTY@25..35
+                0: CSS_IDENTIFIER@25..30
+                  0: IDENT@25..30 "width" [] []
+                1: COLON@30..32 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@32..35
+                  0: SCSS_EXPRESSION_ITEM_LIST@32..35
+                    0: CSS_REGULAR_DIMENSION@32..35
+                      0: CSS_NUMBER_LITERAL@32..33 "1" [] []
+                      1: IDENT@33..35 "px" [] []
+              1: (empty)
+            1: SEMICOLON@35..37 ";" [] [Whitespace(" ")]
+        2: R_CURLY@37..38 "}" [] []
+    1: CSS_QUALIFIED_RULE@38..61
+      0: CSS_SELECTOR_LIST@38..46
+        0: CSS_COMPOUND_SELECTOR@38..46
+          0: CSS_NESTED_SELECTOR_LIST@38..38
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@38..46
+            0: CSS_CLASS_SELECTOR@38..46
+              0: DOT@38..40 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@40..46
+                0: IDENT@40..46 "final" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@46..61
+        0: L_CURLY@46..48 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@48..60
+          0: CSS_AT_RULE@48..60
+            0: AT@48..49 "@" [] []
+            1: TW_APPLY_AT_RULE@49..60
+              0: APPLY_KW@49..55 "apply" [] [Whitespace(" ")]
+              1: TW_APPLY_CLASS_LIST@55..60
+                0: CSS_IDENTIFIER@55..60
+                  0: IDENT@55..60 "py-3" [] [Whitespace(" ")]
+              2: (empty)
+        2: R_CURLY@60..61 "}" [] []
+    2: CSS_QUALIFIED_RULE@61..106
+      0: CSS_SELECTOR_LIST@61..77
+        0: CSS_COMPOUND_SELECTOR@61..77
+          0: CSS_NESTED_SELECTOR_LIST@61..61
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@61..77
+            0: CSS_CLASS_SELECTOR@61..77
+              0: DOT@61..63 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@63..77
+                0: IDENT@63..77 "block-comment" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@77..106
+        0: L_CURLY@77..79 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@79..105
+          0: CSS_AT_RULE@79..105
+            0: AT@79..80 "@" [] []
+            1: TW_APPLY_AT_RULE@80..105
+              0: APPLY_KW@80..86 "apply" [] [Whitespace(" ")]
+              1: TW_APPLY_CLASS_LIST@86..105
+                0: CSS_IDENTIFIER@86..105
+                  0: IDENT@86..105 "mb-2" [] [Whitespace(" "), Comments("/* utility */"), Whitespace(" ")]
+              2: (empty)
+        2: R_CURLY@105..106 "}" [] []
+    3: CSS_QUALIFIED_RULE@106..169
+      0: CSS_SELECTOR_LIST@106..121
+        0: CSS_COMPOUND_SELECTOR@106..121
+          0: CSS_NESTED_SELECTOR_LIST@106..106
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@106..121
+            0: CSS_CLASS_SELECTOR@106..121
+              0: DOT@106..108 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@108..121
+                0: IDENT@108..121 "line-comment" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@121..169
+        0: L_CURLY@121..122 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@122..153
+          0: CSS_AT_RULE@122..153
+            0: AT@122..126 "@" [Newline("\n"), Whitespace("  ")] []
+            1: TW_APPLY_AT_RULE@126..153
+              0: APPLY_KW@126..132 "apply" [] [Whitespace(" ")]
+              1: TW_APPLY_CLASS_LIST@132..153
+                0: CSS_IDENTIFIER@132..153
+                  0: IDENT@132..153 "clear-both" [] [Whitespace(" "), Comments("// utility")]
+              2: (empty)
+        2: R_CURLY@153..169 "}" [Newline("\n"), Whitespace("  "), Comments("/* close */"), Newline("\n")] []
+    4: CSS_QUALIFIED_RULE@169..249
+      0: CSS_SELECTOR_LIST@169..179
+        0: CSS_COMPOUND_SELECTOR@169..179
+          0: CSS_NESTED_SELECTOR_LIST@169..169
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@169..179
+            0: CSS_CLASS_SELECTOR@169..179
+              0: DOT@169..171 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@171..179
+                0: IDENT@171..179 "slashes" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@179..249
+        0: L_CURLY@179..181 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@181..248
+          0: CSS_AT_RULE@181..248
+            0: AT@181..182 "@" [] []
+            1: TW_APPLY_AT_RULE@182..248
+              0: APPLY_KW@182..188 "apply" [] [Whitespace(" ")]
+              1: TW_APPLY_CLASS_LIST@188..246
+                0: CSS_IDENTIFIER@188..194
+                  0: IDENT@188..194 "w-1/2" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@194..229
+                  0: IDENT@194..229 "bg-[url(http://example.com/a.svg)]" [] [Whitespace(" ")]
+                2: CSS_IDENTIFIER@229..246
+                  0: IDENT@229..246 "content-['/*x*/']" [] []
+              2: SEMICOLON@246..248 ";" [] [Whitespace(" ")]
+        2: R_CURLY@248..249 "}" [] []
+    5: CSS_QUALIFIED_RULE@249..272
+      0: CSS_SELECTOR_LIST@249..257
+        0: CSS_COMPOUND_SELECTOR@249..257
+          0: CSS_NESTED_SELECTOR_LIST@249..249
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@249..257
+            0: CSS_CLASS_SELECTOR@249..257
+              0: DOT@249..251 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@251..257
+                0: IDENT@251..257 "after" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@257..272
+        0: L_CURLY@257..259 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@259..271
+          0: CSS_DECLARATION_WITH_SEMICOLON@259..271
+            0: CSS_DECLARATION@259..269
+              0: CSS_GENERIC_PROPERTY@259..269
+                0: CSS_IDENTIFIER@259..264
+                  0: IDENT@259..264 "width" [] []
+                1: COLON@264..266 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@266..269
+                  0: SCSS_EXPRESSION_ITEM_LIST@266..269
+                    0: CSS_REGULAR_DIMENSION@266..269
+                      0: CSS_NUMBER_LITERAL@266..267 "1" [] []
+                      1: IDENT@267..269 "px" [] []
+              1: (empty)
+            1: SEMICOLON@269..271 ";" [] [Whitespace(" ")]
+        2: R_CURLY@271..272 "}" [] []
+    6: CSS_AT_RULE@272..284
+      0: AT@272..274 "@" [Newline("\n")] []
+      1: TW_APPLY_AT_RULE@274..284
+        0: APPLY_KW@274..280 "apply" [] [Whitespace(" ")]
+        1: TW_APPLY_CLASS_LIST@280..284
+          0: CSS_IDENTIFIER@280..284
+            0: IDENT@280..284 "py-3" [] []
+        2: (empty)
+  2: EOF@284..284 "" [] []
+
+```

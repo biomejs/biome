@@ -1,0 +1,35 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+
+{#each boxes as box}
+	{@const volume = box.width * box.height * box.depth}
+	<p>{volume}</p>
+{/each}
+
+```
+
+# Diagnostics
+```
+invalid.svelte:4:2 lint/nursery/noSvelteLegacyConst ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Avoid legacy Svelte {@const} tags.
+  
+    3 │ {#each boxes as box}
+  > 4 │ 	{@const volume = box.width * box.height * box.depth}
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 	<p>{volume}</p>
+    6 │ {/each}
+  
+  i {@const} legacy syntax is less versatile. Declaration tags are the preferred syntax for deriving values in Svelte markup.
+  
+  i Remove the @ and add $state() or $derived() runes if the value should be reactive, for example: {const area = $derived(box.width * box.height)}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

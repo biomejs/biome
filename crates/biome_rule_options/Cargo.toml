@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_rule_options"
-version              = "0.0.1"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "This crate is internally used to share lint rule options across analyzers"
@@ -9,6 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+include              = ["!**/*_test.*", "!**/*_tests.*", "src/**/*"]
 publish              = true
 
 [dependencies]
@@ -21,6 +22,7 @@ biome_js_syntax          = { workspace = true }
 biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_string_case        = { workspace = true, features = ["biome_rowan"] }
+biome_unicode_table      = { workspace = true }
 camino                   = { workspace = true }
 enumflags2               = { workspace = true }
 regex                    = { workspace = true }

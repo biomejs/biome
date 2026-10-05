@@ -5,12 +5,16 @@ use biome_parser::{
     prelude::ParsedSyntax::{self, *},
     token_set,
 };
+use biome_rowan::{TextRange, TextSize};
 use biome_yaml_syntax::YamlSyntaxKind::{self, *};
 
 use super::YamlParser;
 
 #[derive(Default)]
-pub(crate) struct PropertyList;
+pub(crate) struct PropertyList {
+    seen_anchor: bool,
+    seen_tag: bool,
+}
 
 impl ParseNodeList for PropertyList {
     type Kind = YamlSyntaxKind;
@@ -20,8 +24,31 @@ impl ParseNodeList for PropertyList {
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         if p.at(ANCHOR_PROPERTY_LITERAL) {
+            if self.seen_anchor {
+                let diagnostic = p.err_builder(
+                    "A YAML node can have only one anchor property.",
+                    p.cur_range(),
+                );
+                p.error(diagnostic);
+            }
+            self.seen_anchor = true;
             Present(parse_anchor_property(p))
         } else if p.at(TAG_PROPERTY_LITERAL) {
+            if let Some(range) = undeclared_named_tag_handle_range(p) {
+                p.error(
+                    p.err_builder(
+                        "This tag handle is not declared in the current document.",
+                        range,
+                    )
+                    .with_hint("Declare this handle with `%TAG` before the document's `---`."),
+                );
+            }
+            if self.seen_tag {
+                let diagnostic =
+                    p.err_builder("A YAML node can have only one tag property.", p.cur_range());
+                p.error(diagnostic);
+            }
+            self.seen_tag = true;
             Present(parse_tag_property(p))
         } else {
             Absent
@@ -43,6 +70,25 @@ impl ParseNodeList for PropertyList {
             |p, range| p.err_builder("expected property", range),
         )
     }
+}
+
+fn undeclared_named_tag_handle_range(p: &YamlParser) -> Option<TextRange> {
+    let text = p.cur_text();
+    if text.starts_with("!!") || text.starts_with("!<") {
+        return None;
+    }
+    let handle_len = text
+        .as_bytes()
+        .get(1..)?
+        .iter()
+        .position(|byte| *byte == b'!')?
+        + 2;
+    let handle = text.get(..handle_len)?;
+    if p.is_tag_handle_declared(handle) {
+        return None;
+    }
+    let length = TextSize::try_from(handle_len).ok()?;
+    Some(TextRange::at(p.cur_range().start(), length))
 }
 
 fn parse_anchor_property(p: &mut YamlParser) -> CompletedMarker {

@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "bun:sqlite": "1.0.0"
+  }
+}

@@ -476,7 +476,14 @@ impl AnyJsAssignmentLike {
 
                 write!(f, [modifiers.format(), space(),])?;
 
-                let width = write_member_name(&name?.into(), f)?;
+                let name = name?;
+
+                if f.context().comments().is_suppressed(name.syntax()) {
+                    write!(f, [format_suppressed_node(name.syntax())])?;
+                    return Ok(false);
+                }
+
+                let width = write_member_name(&name.into(), f)?;
 
                 write!(f, [property_annotation.format()])?;
                 let text_width_for_break =
@@ -494,7 +501,14 @@ impl AnyJsAssignmentLike {
 
                 write!(f, [modifiers.format(), space(),])?;
 
-                let width = write_member_name(&name?.into(), f)?;
+                let name = name?;
+
+                if f.context().comments().is_suppressed(name.syntax()) {
+                    write!(f, [format_suppressed_node(name.syntax())])?;
+                    return Ok(false);
+                }
+
+                let width = write_member_name(&name.into(), f)?;
 
                 write!(f, [question_mark_token.format()])?;
                 let text_width_for_break =

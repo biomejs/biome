@@ -1,5 +1,5 @@
 ---
-source: crates/biome_module_graph/tests/spec_tests_v2.rs
+source: crates/biome_module_graph/tests/spec_tests.rs
 expression: content
 ---
 
@@ -36,15 +36,15 @@ Binding T "T" => T
 
 Binding value "value" => instanceof T
 
-Expression "this" => instanceof Box
+Expression "this" => instanceof Box<T>
 
 Expression "this.value = value" => unknown
 
 Expression "value" => instanceof T
 
-Binding explicit "explicit" => instanceof Box<string: value>
+Binding explicit "explicit" => instanceof Box<string>
 
-Expression "new Box<string>(\"value\")" => instanceof Box<string: value>
+Expression "new Box<string>(\"value\")" => instanceof Box<string>
 
 Expression "Box" => class "Box" {
   extends: none
@@ -54,11 +54,11 @@ Expression "Box" => class "Box" {
 
 Expression "\"value\"" => string: value
 
-Binding explicitValue "explicitValue" => string: value
+Binding explicitValue "explicitValue" => string
 
-Expression "explicit" => instanceof Box<string: value>
+Expression "explicit" => instanceof Box<string>
 
-Expression "explicit.value" => string: value
+Expression "explicit.value" => string
 
 Binding inferred "inferred" => instanceof Box<number: 1>
 

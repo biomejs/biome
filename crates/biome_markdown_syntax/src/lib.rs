@@ -4,6 +4,8 @@ pub mod emphasis_ext;
 #[macro_use]
 mod generated;
 pub mod block_ext;
+mod header_ext;
+pub mod html_comment_ext;
 pub mod inline_ext;
 pub mod list_ext;
 mod syntax_node;
@@ -16,6 +18,7 @@ pub use self::generated::*;
 use biome_rowan::{
     AstNode, RawSyntaxKind, SyntaxKind, TextRange, TextSize, TokenText, TriviaPieceKind,
 };
+pub use header_ext::AnyMdHeader;
 
 impl From<u16> for MarkdownSyntaxKind {
     fn from(d: u16) -> Self {
@@ -55,7 +58,7 @@ impl SyntaxKind for MarkdownSyntaxKind {
     }
 
     fn is_root(&self) -> bool {
-        matches!(self, Self::MD_DOCUMENT)
+        matches!(self, Self::MD_ROOT)
     }
 
     fn is_list(&self) -> bool {
@@ -70,6 +73,17 @@ impl SyntaxKind for MarkdownSyntaxKind {
 
     fn to_string(&self) -> Option<&'static str> {
         Self::to_string(self)
+    }
+
+    fn is_allowed_before_suppressions(&self) -> bool {
+        matches!(
+            self,
+            Self::UNICODE_BOM
+                | Self::FENCE
+                | Self::MD_FRONTMATTER_LITERAL
+                | Self::NEWLINE
+                | Self::MD_INDENT_CHAR
+        )
     }
 }
 

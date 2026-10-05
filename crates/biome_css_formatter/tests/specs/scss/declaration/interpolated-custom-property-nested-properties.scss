@@ -4,9 +4,9 @@ $slot:color;
 .box{
 --#{$name}:{
 color:red;
-}
+};
 
 --theme-#{$slot}:{
 background:blue;
-}
+};
 }

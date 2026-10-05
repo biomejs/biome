@@ -128,6 +128,10 @@ expression: snapshot
 /* http://browserbu.gs/css-hacks/media-min-width-0-backslash-0/ */
 @media screen and (min-width: 0\0) {
 }
+
+@media (--mobile) {}
+@media only screen and (--mobile) {}
+
 ```
 
 
@@ -3209,7 +3213,7 @@ CssRoot {
                                 left: CssMediaFeatureInParens {
                                     l_paren_token: L_PAREN@3140..3141 "(" [] [],
                                     feature: CssQueryFeatureBoolean {
-                                        name: CssIdentifier {
+                                        name: CssDashedIdentifier {
                                             value_token: IDENT@3141..3149 "--modern" [] [],
                                         },
                                     },
@@ -4080,17 +4084,78 @@ CssRoot {
                 },
             },
         },
+        CssAtRule {
+            at_token: AT@4111..4114 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@4114..4120 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssMediaConditionQuery {
+                            condition: CssMediaFeatureInParens {
+                                l_paren_token: L_PAREN@4120..4121 "(" [] [],
+                                feature: CssQueryFeatureBoolean {
+                                    name: CssDashedIdentifier {
+                                        value_token: IDENT@4121..4129 "--mobile" [] [],
+                                    },
+                                },
+                                r_paren_token: R_PAREN@4129..4131 ")" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@4131..4132 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@4132..4133 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@4133..4135 "@" [Newline("\n")] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@4135..4141 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssMediaAndTypeQuery {
+                            left: CssMediaTypeQuery {
+                                modifier: ONLY_KW@4141..4146 "only" [] [Whitespace(" ")],
+                                ty: CssMediaType {
+                                    value: CssIdentifier {
+                                        value_token: IDENT@4146..4153 "screen" [] [Whitespace(" ")],
+                                    },
+                                },
+                            },
+                            and_token: AND_KW@4153..4157 "and" [] [Whitespace(" ")],
+                            right: CssMediaFeatureInParens {
+                                l_paren_token: L_PAREN@4157..4158 "(" [] [],
+                                feature: CssQueryFeatureBoolean {
+                                    name: CssDashedIdentifier {
+                                        value_token: IDENT@4158..4166 "--mobile" [] [],
+                                    },
+                                },
+                                r_paren_token: R_PAREN@4166..4168 ")" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@4168..4169 "{" [] [],
+                    rules: CssRuleList [],
+                    r_curly_token: R_CURLY@4169..4170 "}" [] [],
+                },
+            },
+        },
     ],
-    eof_token: EOF@4111..4111 "" [] [],
+    eof_token: EOF@4170..4171 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..4111
+0: CSS_ROOT@0..4171
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..4111
+  1: CSS_ROOT_ITEM_LIST@0..4170
     0: CSS_AT_RULE@0..17
       0: AT@0..1 "@" [] []
       1: CSS_MEDIA_AT_RULE@1..17
@@ -6153,7 +6218,7 @@ CssRoot {
                 0: CSS_MEDIA_FEATURE_IN_PARENS@3140..3151
                   0: L_PAREN@3140..3141 "(" [] []
                   1: CSS_QUERY_FEATURE_BOOLEAN@3141..3149
-                    0: CSS_IDENTIFIER@3141..3149
+                    0: CSS_DASHED_IDENTIFIER@3141..3149
                       0: IDENT@3141..3149 "--modern" [] []
                   2: R_PAREN@3149..3151 ")" [] [Whitespace(" ")]
                 1: AND_KW@3151..3155 "and" [] [Whitespace(" ")]
@@ -6742,6 +6807,46 @@ CssRoot {
           0: L_CURLY@4108..4109 "{" [] []
           1: CSS_RULE_LIST@4109..4109
           2: R_CURLY@4109..4111 "}" [Newline("\n")] []
-  2: EOF@4111..4111 "" [] []
+    100: CSS_AT_RULE@4111..4133
+      0: AT@4111..4114 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@4114..4133
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@4114..4131
+          0: MEDIA_KW@4114..4120 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@4120..4131
+            0: CSS_MEDIA_CONDITION_QUERY@4120..4131
+              0: CSS_MEDIA_FEATURE_IN_PARENS@4120..4131
+                0: L_PAREN@4120..4121 "(" [] []
+                1: CSS_QUERY_FEATURE_BOOLEAN@4121..4129
+                  0: CSS_DASHED_IDENTIFIER@4121..4129
+                    0: IDENT@4121..4129 "--mobile" [] []
+                2: R_PAREN@4129..4131 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@4131..4133
+          0: L_CURLY@4131..4132 "{" [] []
+          1: CSS_RULE_LIST@4132..4132
+          2: R_CURLY@4132..4133 "}" [] []
+    101: CSS_AT_RULE@4133..4170
+      0: AT@4133..4135 "@" [Newline("\n")] []
+      1: CSS_MEDIA_AT_RULE@4135..4170
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@4135..4168
+          0: MEDIA_KW@4135..4141 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@4141..4168
+            0: CSS_MEDIA_AND_TYPE_QUERY@4141..4168
+              0: CSS_MEDIA_TYPE_QUERY@4141..4153
+                0: ONLY_KW@4141..4146 "only" [] [Whitespace(" ")]
+                1: CSS_MEDIA_TYPE@4146..4153
+                  0: CSS_IDENTIFIER@4146..4153
+                    0: IDENT@4146..4153 "screen" [] [Whitespace(" ")]
+              1: AND_KW@4153..4157 "and" [] [Whitespace(" ")]
+              2: CSS_MEDIA_FEATURE_IN_PARENS@4157..4168
+                0: L_PAREN@4157..4158 "(" [] []
+                1: CSS_QUERY_FEATURE_BOOLEAN@4158..4166
+                  0: CSS_DASHED_IDENTIFIER@4158..4166
+                    0: IDENT@4158..4166 "--mobile" [] []
+                2: R_PAREN@4166..4168 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@4168..4170
+          0: L_CURLY@4168..4169 "{" [] []
+          1: CSS_RULE_LIST@4169..4169
+          2: R_CURLY@4169..4170 "}" [] []
+  2: EOF@4170..4171 "" [Newline("\n")] []
 
 ```

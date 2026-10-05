@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome check --format-with-errors=true --css-parse-css-modules=true file.module.css
+```
+
 ## `file.module.css`
 
 ```css

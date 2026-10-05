@@ -32,6 +32,29 @@ video::cue-region(#scroll
  active active active
  active ) {}
 
+::part(
+	/* inside function */
+	active
+) {}
+
+::part(
+  /* inside function */
+  active) {}
+
+::cue(/* selector */ b) {}
+
+::highlight(/* identifier */ sample) {}
+
+::part(/* inside empty function */) {}
+
+::part(
+  /* inside empty function */
+) {}
+
+::/* before opening parenthesis */ part(active) {}
+
+::part/* before opening parenthesis */(active) {}
+
 ```
 
 
@@ -69,6 +92,36 @@ video::cue-region(#scroll > .div) {
 	active
 	active
 ) {
+}
+
+::part(
+	/* inside function */
+	active
+) {
+}
+
+::part(
+	/* inside function */
+	active
+) {
+}
+
+::cue(/* selector */ b) {
+}
+
+::highlight(/* identifier */ sample) {
+}
+
+::part(/* inside empty function */) {
+}
+
+::part(/* inside empty function */) {
+}
+
+::/* before opening parenthesis */ part(active) {
+}
+
+::/* before opening parenthesis */ part(active) {
 }
 
 ```

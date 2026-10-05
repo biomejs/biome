@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: ambientDeclarations.ts
+---
+# Input
+```ts
+/** @deprecated Use Grid2. */
+declare const Grid: unknown;
+export { Grid };
+
+/** @deprecated Use generateText. */
+declare function generateObject(): void;
+export { generateObject };
+
+```

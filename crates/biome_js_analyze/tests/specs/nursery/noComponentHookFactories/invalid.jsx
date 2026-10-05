@@ -177,3 +177,19 @@ function setup() {
   }
   return Tooltip;
 }
+
+// Hook defined with a function expression initializer
+function createStoredHook(key) {
+  const useStored = function () {
+    return useState(key);
+  };
+  return useStored;
+}
+
+// Hook defined with a parenthesized arrow initializer
+function createWrappedHook(key) {
+  const useWrapped = (() => {
+    return useState(key);
+  });
+  return useWrapped;
+}

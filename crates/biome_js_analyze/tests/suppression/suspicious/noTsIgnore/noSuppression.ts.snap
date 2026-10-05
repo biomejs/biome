@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: noSuppression.ts
+---
+# Input
+```ts
+// biome-ignore lint/suspicious/noTsIgnore: test
+// @ts-ignore
+const test = aaaa as Node
+
+```

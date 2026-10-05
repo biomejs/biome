@@ -1,15 +1,15 @@
 use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_analyze::{RuleDomain, RuleSource};
+use biome_aria_metadata::AriaAttribute;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::AnyJsxAttributeName;
 use biome_js_syntax::{AnyJsxElementName, JsxAttribute, jsx_ext::AnyJsxElement};
-use biome_package::PackageJson;
-use biome_rowan::{AstNode, TokenText};
+use biome_rowan::AstNode;
 use biome_rule_options::no_unknown_attribute::NoUnknownAttributeOptions;
-use camino::Utf8PathBuf;
+use biome_string_case::StrLikeExtension;
 use rustc_hash::FxHashMap;
-use std::sync::{Arc, LazyLock};
+use std::str::FromStr;
+use std::sync::LazyLock;
 
 use crate::services::manifest::Manifest;
 
@@ -19,6 +19,14 @@ declare_lint_rule! {
     /// In JSX, most DOM properties and attributes should be camelCased to be consistent with standard JavaScript style.
     /// This can be a possible source of error if you are used to writing plain HTML.
     /// Only `data-*` and `aria-*` attributes are allowed to use hyphens and lowercase letters in JSX.
+    ///
+    /// Transition event handlers (`onTransitionCancel`, `onTransitionRun`, `onTransitionStart`, and their capture variants)
+    /// require a React dependency range in `package.json` that allows React 19 or later.
+    ///
+    /// Fullscreen event handlers (`onFullscreenChange`, `onFullscreenError`, and their capture variants),
+    /// `credentialless`, and `maskType` require a React dependency range in `package.json` that allows React 19.3 or later.
+    /// Without that dependency, these properties are reported as unknown.
+    /// `credentialless` is only allowed on `<iframe>`, and `maskType` is only allowed on `<mask>`.
     ///
     /// ## Examples
     ///
@@ -39,23 +47,13 @@ declare_lint_rule! {
     /// ### Valid
     ///
     /// ```jsx
-    /// <div className="foo" />
-    /// ```
-    ///
-    /// ```jsx
-    /// <div onClick={() => {}} />
-    /// ```
-    ///
-    /// ```jsx
-    /// <div htmlFor="bar" />
-    /// ```
-    ///
-    /// ```jsx
-    /// <div data-foo="bar" />
-    /// ```
-    ///
-    /// ```jsx
-    /// <div aria-label="Close" />
+    /// <>
+    ///     <div className="foo" />
+    ///     <div onClick={() => {}} />
+    ///     <div htmlFor="bar" />
+    ///     <div data-foo="bar" />
+    ///     <div aria-label="Close" />
+    /// </>
     /// ```
     ///
     /// ## Options
@@ -86,11 +84,168 @@ declare_lint_rule! {
     }
 }
 
-/**
- * Popover API properties added in React 19
- */
-const POPOVER_API_PROPS: &[&str] = &[
+pub enum NoUnknownAttributeState {
+    UnknownProp,
+    UnknownPropWithStandardName {
+        standard_name: &'static str,
+    },
+    InvalidPropOnTag {
+        name: &'static str,
+        allowed_tags: &'static [&'static str],
+    },
+}
+
+impl Rule for NoUnknownAttribute {
+    type Query = Manifest<JsxAttribute>;
+    type State = NoUnknownAttributeState;
+    type Signals = Option<Self::State>;
+    type Options = NoUnknownAttributeOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let node = ctx.query();
+
+        let node_name = node.name().ok()?.syntax().text_trimmed().into_text();
+
+        if ctx
+            .options()
+            .ignore()
+            .iter()
+            .any(|ignored| ignored.as_ref() == node_name.text())
+        {
+            return None;
+        }
+        let name: &str = if let Some(element) = DOM_PROPERTIES_IGNORE_CASE
+            .iter()
+            .find(|element| element.eq_ignore_ascii_case(&node_name))
+        {
+            element
+        } else {
+            node_name.text()
+        };
+
+        let element = attribute_element(node)?;
+
+        // Ignore tags like <Foo.bar />
+        if tag_name_has_dot(&element)? {
+            return None;
+        }
+
+        // Handle data-* attributes
+        if is_valid_data_attribute(name) {
+            return None;
+        }
+
+        // Handle aria-* attributes
+        if AriaAttribute::from_str(name).is_ok() {
+            return None;
+        }
+
+        let tag_name = element.name_value_token().ok()?;
+        let tag_name = tag_name.text_trimmed();
+
+        // Special case for fbt/fbs nodes
+        if tag_name == "fbt" || tag_name == "fbs" {
+            return None;
+        }
+
+        // Only validate HTML/DOM elements, not React components
+        if !is_valid_html_tag_in_jsx(&element, tag_name) {
+            return None;
+        }
+
+        if find_ignore_ascii_case(REACT_19_3_PROPS, name).is_some()
+            && !ctx
+                .manifest
+                .as_ref()
+                .is_some_and(|manifest| manifest.matches_dependency("react", ">=19.3.0"))
+        {
+            return Some(NoUnknownAttributeState::UnknownProp);
+        }
+
+        if let Some((&name, &allowed_tags)) = ATTRIBUTE_TAGS_LOOKUP.get_key_value(name) {
+            if allowed_tags.binary_search(&tag_name).is_err() {
+                return Some(NoUnknownAttributeState::InvalidPropOnTag { name, allowed_tags });
+            }
+            return None;
+        }
+
+        if let Some(standard_name) = get_standard_name(ctx, name) {
+            if standard_name != name {
+                return Some(NoUnknownAttributeState::UnknownPropWithStandardName {
+                    standard_name,
+                });
+            }
+            return None;
+        }
+
+        Some(NoUnknownAttributeState::UnknownProp)
+    }
+
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let node = ctx.query();
+        let name = node.name().ok()?.syntax().text_trimmed();
+        match state {
+            NoUnknownAttributeState::UnknownProp => Some(
+                RuleDiagnostic::new(
+                    rule_category!(),
+                    node.range(),
+                    markup! {
+                        "The property '"{format_args!("{name}")}"' is not a valid DOM attribute."
+                    },
+                )
+                .note(markup! {
+                    "This property is not recognized as a valid HTML/DOM attribute or React prop."
+                })
+                .note(markup! {
+                    "Check the spelling or consider using a valid data-* attribute for custom properties."
+                }),
+            ),
+            NoUnknownAttributeState::UnknownPropWithStandardName { standard_name } => Some(
+                RuleDiagnostic::new(
+                    rule_category!(),
+                    node.range(),
+                    markup! {
+                        "Property '"{format_args!("{name}")}"' is not a valid React prop name."
+                    },
+                )
+                .note(markup! {
+                    "React uses camelCased props, while HTML uses kebab-cased attributes."
+                })
+                .note(markup! {
+                        "Use '"{standard_name}"' instead of '"{format_args!("{name}")}"' for React components."
+                }),
+            ),
+            NoUnknownAttributeState::InvalidPropOnTag { name, allowed_tags } => {
+                let tag_name = attribute_element(node)?.name_value_token().ok()?;
+                Some(
+                    RuleDiagnostic::new(
+                        rule_category!(),
+                        node.range(),
+                        markup! {
+                            "Property '" {name} "' is not valid on a <" {tag_name.text_trimmed()} "> element."
+                        },
+                    )
+                    .note(markup! {
+                        "This attribute is restricted and cannot be used on this HTML element"
+                    })
+                    .note(markup! {
+                           "This attribute is only allowed on: "{allowed_tags.join(",")}
+                    }),
+                )
+            }
+        }
+    }
+}
+
+/// Properties added in React 19: the Popover API and transition events.
+const REACT_19_PROPS: &[&str] = &[
     "onBeforeToggle",
+    "onTransitionCancel",
+    "onTransitionCancelCapture",
+    "onTransitionRun",
+    "onTransitionRunCapture",
+    "onTransitionStart",
+    "onTransitionStartCapture",
     "popover",
     "popoverTarget",
     "popoverTargetAction",
@@ -102,14 +257,21 @@ const POPOVER_API_PROPS_LOWERCASE: &[&str] = &[
     "popovertarget",
     "popovertargetaction",
 ];
+
+const REACT_19_3_PROPS: &[&str] = &[
+    "credentialless",
+    "maskType",
+    "onFullscreenChange",
+    "onFullscreenChangeCapture",
+    "onFullscreenError",
+    "onFullscreenErrorCapture",
+];
+
 const ATTRIBUTE_TAGS_MAP: &[(&str, &[&str])] = &[
-    ("abbr", &["th", "td"]),
+    ("abbr", &["td", "th"]),
     (
         "align",
-        &[
-            "applet", "caption", "col", "colgroup", "hr", "iframe", "img", "table", "tbody", "td",
-            "tfoot", "th", "thead", "tr",
-        ],
+        &["applet", "caption", "col", "colgroup", "hr", "iframe", "img", "table", "tbody", "td", "tfoot", "th", "thead", "tr"],
     ),
     ("allowFullScreen", &["iframe", "video"]),
     ("as", &["link"]),
@@ -119,9 +281,10 @@ const ATTRIBUTE_TAGS_MAP: &[(&str, &[&str])] = &[
     ("closedby", &["dialog"]),
     ("controls", &["audio", "video"]),
     ("controlsList", &["audio", "video"]),
+    ("credentialless", &["iframe"]),
     (
         "crossOrigin",
-        &["script", "img", "video", "audio", "link", "image"],
+        &["audio", "image", "img", "link", "script", "video"],
     ),
     ("disablePictureInPicture", &["video"]),
     ("disableRemotePlayback", &["audio", "video"]),
@@ -129,36 +292,13 @@ const ATTRIBUTE_TAGS_MAP: &[(&str, &[&str])] = &[
     ("download", &["a", "area"]),
     (
         "fill",
-        &[
-            "altGlyph",
-            "circle",
-            "ellipse",
-            "g",
-            "line",
-            "marker",
-            "mask",
-            "path",
-            "polygon",
-            "polyline",
-            "rect",
-            "svg",
-            "symbol",
-            "text",
-            "textPath",
-            "tref",
-            "tspan",
-            "use",
-            "animate",
-            "animateColor",
-            "animateMotion",
-            "animateTransform",
-            "set",
-        ],
+        &["altGlyph", "animate", "animateColor", "animateMotion", "animateTransform", "circle", "ellipse", "g", "line", "marker", "mask", "path", "polygon", "polyline", "rect", "set", "svg", "symbol", "text", "textPath", "tref", "tspan", "use"],
     ),
     ("focusable", &["svg"]),
     ("imageSizes", &["link"]),
     ("imageSrcSet", &["link"]),
     ("loop", &["audio", "video"]),
+    ("maskType", &["mask"]),
     ("mozAllowFullScreen", &["iframe", "video"]),
     ("muted", &["audio", "video"]),
     ("noModule", &["script"]),
@@ -173,15 +313,11 @@ const ATTRIBUTE_TAGS_MAP: &[(&str, &[&str])] = &[
     ("onEnded", &["audio", "video"]),
     (
         "onError",
-        &[
-            "audio", "video", "img", "link", "source", "script", "picture", "iframe",
-        ],
+        &["audio", "iframe", "img", "link", "picture", "script", "source", "video"],
     ),
     (
         "onLoad",
-        &[
-            "script", "img", "link", "picture", "iframe", "object", "source",
-        ],
+        &["iframe", "img", "link", "object", "picture", "script", "source"],
     ),
     ("onLoadStart", &["audio", "video"]),
     ("onLoadedData", &["audio", "video"]),
@@ -207,9 +343,7 @@ const ATTRIBUTE_TAGS_MAP: &[(&str, &[&str])] = &[
     ("scrolling", &["iframe"]),
     (
         "valign",
-        &[
-            "tr", "td", "th", "thead", "tbody", "tfoot", "colgroup", "col",
-        ],
+        &["col", "colgroup", "tbody", "td", "tfoot", "th", "thead", "tr"],
     ),
     ("viewBox", &["marker", "pattern", "svg", "symbol", "view"]),
     ("webkitAllowFullScreen", &["iframe", "video"]),
@@ -218,66 +352,6 @@ const ATTRIBUTE_TAGS_MAP: &[(&str, &[&str])] = &[
 
 static ATTRIBUTE_TAGS_LOOKUP: LazyLock<FxHashMap<&'static str, &'static [&'static str]>> =
     LazyLock::new(|| ATTRIBUTE_TAGS_MAP.iter().copied().collect());
-
-const ARIA_PROPERTIES: [&str; 53] = [
-    // See https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes
-    // Global attributes
-    "aria-atomic",
-    "aria-braillelabel",
-    "aria-brailleroledescription",
-    "aria-busy",
-    "aria-controls",
-    "aria-current",
-    "aria-describedby",
-    "aria-description",
-    "aria-details",
-    "aria-disabled",
-    "aria-dropeffect",
-    "aria-errormessage",
-    "aria-flowto",
-    "aria-grabbed",
-    "aria-haspopup",
-    "aria-hidden",
-    "aria-invalid",
-    "aria-keyshortcuts",
-    "aria-label",
-    "aria-labelledby",
-    "aria-live",
-    "aria-owns",
-    "aria-relevant",
-    "aria-roledescription",
-    // Widget attributes
-    "aria-autocomplete",
-    "aria-checked",
-    "aria-expanded",
-    "aria-level",
-    "aria-modal",
-    "aria-multiline",
-    "aria-multiselectable",
-    "aria-orientation",
-    "aria-placeholder",
-    "aria-pressed",
-    "aria-readonly",
-    "aria-required",
-    "aria-selected",
-    "aria-sort",
-    "aria-valuemax",
-    "aria-valuemin",
-    "aria-valuenow",
-    "aria-valuetext",
-    // Relationship attributes
-    "aria-activedescendant",
-    "aria-colcount",
-    "aria-colindex",
-    "aria-colindextext",
-    "aria-colspan",
-    "aria-posinset",
-    "aria-rowcount",
-    "aria-rowindex",
-    "aria-rowindextext",
-    "aria-rowspan",
-    "aria-setsize",
-];
 
 const DOM_PROPERTIES_IGNORE_CASE: [&str; 5] = [
     "allowFullScreen",
@@ -524,13 +598,11 @@ const DOM_PROPERTY_NAMES: &[&str] = &[
     "hanging",
     "headers",
     "height",
-    "height",
     "hidden",
     "high",
     "horizAdvX",
     "horizOriginX",
     "href",
-    "hreflang",
     "hrefLang",
     "htmlFor",
     "httpEquiv",
@@ -613,7 +685,6 @@ const DOM_PROPERTY_NAMES: &[&str] = &[
     "onAnimationEnd",
     "onAnimationEndCapture",
     "onAnimationIteration",
-    "onAnimationIteration",
     "onAnimationStart",
     "onAnimationStartCapture",
     "onAuxClick",
@@ -626,7 +697,6 @@ const DOM_PROPERTY_NAMES: &[&str] = &[
     "onCanPlayCapture",
     "onCanPlayThrough",
     "onCanPlayThroughCapture",
-    "onChange",
     "onChange",
     "onChangeCapture",
     "onClick",
@@ -694,9 +764,7 @@ const DOM_PROPERTY_NAMES: &[&str] = &[
     "onLoadStart",
     "onLoadStartCapture",
     "onLostPointerCapture",
-    "onLostPointerCapture",
     "onLostPointerCaptureCapture",
-    "onMouseDown",
     "onMouseDown",
     "onMouseDownCapture",
     "onMouseEnter",
@@ -794,7 +862,6 @@ const DOM_PROPERTY_NAMES: &[&str] = &[
     "patternTransform",
     "patternUnits",
     "ping",
-    "ping",
     "placeholder",
     "pointerEvents",
     "points",
@@ -814,12 +881,10 @@ const DOM_PROPERTY_NAMES: &[&str] = &[
     "readOnly",
     "ref",
     "referrerPolicy",
-    "referrerPolicy",
     "refX",
     "refY",
     "rel",
-    "rel",
-    "rendering-intent",
+    "renderingIntent",
     "repeatCount",
     "repeatDur",
     "required",
@@ -973,10 +1038,6 @@ fn is_valid_data_attribute(name: &str) -> bool {
     data_name.chars().all(|c| c != ':')
 }
 
-fn is_valid_aria_attribute(name: &str) -> bool {
-    ARIA_PROPERTIES.contains(&name)
-}
-
 fn is_valid_html_tag_in_jsx(node: &AnyJsxElement, tag_name: &str) -> bool {
     let matches_tag_convention = tag_name.char_indices().all(|(i, c)| {
         if i == 0 {
@@ -993,6 +1054,10 @@ fn is_valid_html_tag_in_jsx(node: &AnyJsxElement, tag_name: &str) -> bool {
     false
 }
 
+fn attribute_element(attribute: &JsxAttribute) -> Option<AnyJsxElement> {
+    AnyJsxElement::cast(attribute.syntax().parent()?.parent()?)
+}
+
 fn tag_name_has_dot(node: &AnyJsxElement) -> Option<bool> {
     Some(matches!(
         node.name().ok()?,
@@ -1000,39 +1065,17 @@ fn tag_name_has_dot(node: &AnyJsxElement) -> Option<bool> {
     ))
 }
 
-pub enum NoUnknownAttributeState {
-    UnknownProp {
-        name: Box<str>,
-    },
-    UnknownPropWithStandardName {
-        name: Box<str>,
-        standard_name: Box<str>,
-    },
-    InvalidPropOnTag {
-        name: Box<str>,
-        tag_name: TokenText,
-        allowed_tags: &'static [&'static str],
-    },
-}
-
 fn get_standard_name(ctx: &RuleContext<NoUnknownAttribute>, name: &str) -> Option<&'static str> {
     if let Some(&standard_name) = DOM_ATTRIBUTE_LOOKUP.get(name) {
         return Some(standard_name);
     }
     let is_react_19_or_later = ctx
-        .get_service::<Option<(Utf8PathBuf, Arc<PackageJson>)>>()
-        .and_then(|manifest| {
-            manifest
-                .as_ref()
-                .map(|(_, package_json)| package_json.matches_dependency("react", ">=19.0.0"))
-        })
-        .unwrap_or(false);
+        .manifest
+        .as_ref()
+        .is_some_and(|manifest| manifest.matches_dependency("react", ">=19.0.0"));
 
     if is_react_19_or_later {
-        if let Some(&prop) = POPOVER_API_PROPS
-            .iter()
-            .find(|&&element| element.eq_ignore_ascii_case(name))
-        {
+        if let Some(prop) = find_ignore_ascii_case(REACT_19_PROPS, name) {
             return Some(prop);
         }
     } else if let Some(&prop) = POPOVER_API_PROPS_LOWERCASE
@@ -1042,160 +1085,52 @@ fn get_standard_name(ctx: &RuleContext<NoUnknownAttribute>, name: &str) -> Optio
         return Some(prop);
     }
 
-    DOM_PROPERTY_NAMES
-        .iter()
-        .find(|&&element| element.eq_ignore_ascii_case(name))
-        .copied()
+    find_ignore_ascii_case(DOM_PROPERTY_NAMES, name)
+        .or_else(|| find_ignore_ascii_case(REACT_19_3_PROPS, name))
 }
 
-impl Rule for NoUnknownAttribute {
-    type Query = Manifest<JsxAttribute>;
-    type State = NoUnknownAttributeState;
-    type Signals = Option<Self::State>;
-    type Options = NoUnknownAttributeOptions;
+/// Finds `name` in `names`, which must be sorted case-insensitively.
+fn find_ignore_ascii_case(names: &'static [&'static str], name: &str) -> Option<&'static str> {
+    names
+        .binary_search_by(|probe| probe.cmp_ignore_ascii_case(name))
+        .ok()
+        .map(|index| names[index])
+}
 
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-        let options = ctx.options();
-
-        let node_name = match node.name().ok()? {
-            AnyJsxAttributeName::JsxName(name) => name.syntax().text_trimmed(),
-            AnyJsxAttributeName::JsxNamespaceName(name) => name.syntax().text_trimmed(),
-        };
-
-        let node_name = node_name.into_text();
-
-        if options
-            .ignore
-            .iter()
-            .flatten()
-            .any(|ignored| ignored.as_ref() == node_name.text())
-        {
-            return None;
+    fn assert_sorted_ignore_ascii_case(names: &[&str]) {
+        for pair in names.windows(2) {
+            assert_eq!(
+                pair[0].cmp_ignore_ascii_case(pair[1]),
+                std::cmp::Ordering::Less,
+                "{} must come before {}",
+                pair[0],
+                pair[1]
+            );
         }
-        let name = if let Some(element) = DOM_PROPERTIES_IGNORE_CASE
-            .iter()
-            .find(|element| element.eq_ignore_ascii_case(&node_name))
-        {
-            element
-        } else {
-            &node_name.text()
-        };
-
-        let parent = node.syntax().parent()?.parent()?;
-        let element = AnyJsxElement::cast_ref(&parent)?;
-
-        // Ignore tags like <Foo.bar />
-        if tag_name_has_dot(&element)? {
-            return None;
-        }
-
-        // Handle data-* attributes
-        if is_valid_data_attribute(name) {
-            return None;
-        }
-
-        // Handle aria-* attributes
-        if is_valid_aria_attribute(name) {
-            return None;
-        }
-
-        let tag_name = element.name_value_token().ok()?.token_text_trimmed();
-
-        // Special case for fbt/fbs nodes
-        if tag_name == "fbt" || tag_name == "fbs" {
-            return None;
-        }
-
-        // Only validate HTML/DOM elements, not React components
-        if !is_valid_html_tag_in_jsx(&element, &tag_name) {
-            return None;
-        }
-
-        let allowed_tags = ATTRIBUTE_TAGS_LOOKUP.get(name);
-
-        if let Some(allowed_tags) = allowed_tags {
-            if !allowed_tags.contains(&tag_name.trim()) {
-                return Some(NoUnknownAttributeState::InvalidPropOnTag {
-                    name: (*name).into(),
-                    tag_name,
-                    allowed_tags,
-                });
-            }
-            return None;
-        }
-
-        if let Some(standard_name) = get_standard_name(ctx, name) {
-            if standard_name != *name {
-                return Some(NoUnknownAttributeState::UnknownPropWithStandardName {
-                    name: (*name).into(),
-                    standard_name: standard_name.into(),
-                });
-            }
-            return None;
-        }
-
-        Some(NoUnknownAttributeState::UnknownProp {
-            name: (*name).into(),
-        })
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
-        match state {
-            NoUnknownAttributeState::UnknownProp { name } => Some(
-                RuleDiagnostic::new(
-                    rule_category!(),
-                    node.range(),
-                    markup! {
-                        "The property '"{name}"' is not a valid DOM attribute."
-                    },
-                )
-                .note(markup! {
-                    "This property is not recognized as a valid HTML/DOM attribute or React prop."
-                })
-                .note(markup! {
-                    "Check the spelling or consider using a valid data-* attribute for custom properties."
-                }),
-            ),
-            NoUnknownAttributeState::UnknownPropWithStandardName {
-                name,
-                standard_name,
-            } => Some(
-                RuleDiagnostic::new(
-                    rule_category!(),
-                    node.range(),
-                    markup! {
-                        "Property '"{name}"' is not a valid React prop name."
-                    },
-                )
-                .note(markup! {
-                    "React uses camelCased props, while HTML uses kebab-cased attributes."
-                })
-                .note(markup! {
-                        "Use '"{standard_name}"' instead of '"{name}"' for React components."
-                }),
-            ),
-            NoUnknownAttributeState::InvalidPropOnTag {
-                name,
-                tag_name,
-                allowed_tags,
-            } => Some(
-                RuleDiagnostic::new(
-                    rule_category!(),
-                    node.range(),
-                    markup! {
-                        "Property '" {name} "' is not valid on a <" {tag_name.text()} "> element."
-                    },
-                )
-                .note(markup! {
-                    "This attribute is restricted and cannot be used on this HTML element"
-                })
-                .note(markup! {
-                       "This attribute is only allowed on: "{allowed_tags.join(",")}
-                }),
-            ),
+    #[test]
+    fn props_are_sorted() {
+        assert_sorted_ignore_ascii_case(REACT_19_PROPS);
+        assert_sorted_ignore_ascii_case(REACT_19_3_PROPS);
+        assert_sorted_ignore_ascii_case(DOM_PROPERTY_NAMES);
+    }
+
+    #[test]
+    fn attribute_tags_are_sorted() {
+        for (name, tags) in ATTRIBUTE_TAGS_MAP {
+            for pair in tags.windows(2) {
+                assert!(
+                    pair[0] < pair[1],
+                    "{name}: {} must come before {}",
+                    pair[0],
+                    pair[1]
+                );
+            }
         }
     }
 }

@@ -4,8 +4,6 @@
 
 @forward "theme" hide , $color;
 
-@forward "theme" as theme*;
-
 @forward "theme" as theme - *;
 
 @forward "theme" as theme-;

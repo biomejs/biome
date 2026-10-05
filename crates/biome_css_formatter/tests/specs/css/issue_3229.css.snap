@@ -52,26 +52,28 @@ foo
 # Formatted
 
 ```css
-foo /* a comment */ .aRule {
+foo /* a comment */
+.aRule {
+	color: red;
+}
+
+foo /* a comment */
+
+.aRule {
 	color: red;
 }
 
 foo
-	/* a comment */
 
-	.aRule {
-	color: red;
-}
+/* a comment */
 
-foo
-	/* a comment */
-
-	.aRule {
+.aRule {
 	color: red;
 }
 
 /* input */
 foo
+
 /* a comment */
 
 .aRule {

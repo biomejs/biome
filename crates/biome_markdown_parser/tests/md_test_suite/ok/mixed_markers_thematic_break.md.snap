@@ -16,8 +16,9 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdThematicBreakBlock {
             parts: MdThematicBreakPartList [
@@ -76,9 +77,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..14
+0: MD_ROOT@0..14
   0: (empty)
-  1: MD_BLOCK_LIST@0..14
+  1: (empty)
+  2: MD_BLOCK_LIST@0..14
     0: MD_THEMATIC_BREAK_BLOCK@0..5
       0: MD_THEMATIC_BREAK_PART_LIST@0..5
         0: MD_THEMATIC_BREAK_CHAR@0..1
@@ -110,6 +112,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@9..13 "item" [] []
                 1: MD_TEXTUAL@13..14
                   0: MD_TEXTUAL_LITERAL@13..14 "\n" [] []
-  2: EOF@14..14 "" [] []
+  3: EOF@14..14 "" [] []
 
 ```

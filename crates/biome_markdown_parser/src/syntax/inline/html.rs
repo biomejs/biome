@@ -1,11 +1,10 @@
-use biome_markdown_syntax::T;
 use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
 use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
+use biome_rowan::TextSize;
 
 use crate::MarkdownParser;
-use crate::lexer::MarkdownLexContext;
-use crate::syntax::inline_span_crosses_setext;
+use crate::syntax::{inline_span_crosses_block_boundary, inline_span_crosses_setext};
 
 // #region is_inline_html — top-level dispatcher and HTML construct predicates
 
@@ -30,32 +29,33 @@ pub(crate) fn is_inline_html(text: &str) -> Option<usize> {
 
 /// HTML comment: `<!-- ... -->` per CommonMark §6.8.
 ///
-/// Special cases: `<!-->` and `<!--->` are valid degenerate comments per spec.
-/// The body must not end with `-`, and `<!--` must not be immediately followed
-/// by `>` or `->` (those are the degenerate forms, handled explicitly).
+/// CommonMark also accepts `<!-->`, `<!--->`, and internal `--` as raw HTML.
+/// These forms need not qualify as comment trivia.
 fn is_html_comment(bytes: &[u8], text: &str) -> Option<usize> {
     if !bytes.starts_with(b"<!--") {
         return None;
     }
-
-    let rest = &bytes[4..];
-
-    // Degenerate comments: <!-->  and  <!--->
-    if rest.starts_with(b">") {
+    let rest = &text[4..];
+    if rest.starts_with('>') {
         return Some(5);
     }
-    if rest.starts_with(b"->") {
+    if rest.starts_with("->") {
         return Some(6);
     }
+    let close = rest.find("-->")?;
+    (!rest[..close].ends_with('-')).then_some(4 + close + 3)
+}
 
-    // Find closing --> after <!--
-    let pos = text[4..].find("-->")?;
-    let body = &text[4..4 + pos];
-    // Body must not end with '-'
-    if body.ends_with('-') {
-        return None;
+/// Consumes a complete inline HTML span during token lookahead.
+pub(super) fn skip_inline_html_in_lookahead(p: &mut MarkdownParser) -> bool {
+    let Some(len) = inline_html_len(p) else {
+        return false;
+    };
+    let end = p.cur_range().start() + TextSize::from(len as u32);
+    while !p.at(EOF) && p.cur_range().start() < end {
+        p.bump_any();
     }
-    Some(4 + pos + 3)
+    true
 }
 
 /// Processing instruction: `<? ... ?>` per CommonMark §6.8.
@@ -393,69 +393,53 @@ fn is_html_attr_name_continue(b: u8) -> bool {
 
 // #region parse_inline_html — CST node construction
 
-/// Parse raw inline HTML per CommonMark §6.8.
-///
-/// Grammar: MdInlineHtml = value: MdInlineItemList
-///
-/// Includes: open tags, close tags, comments, processing instructions,
-/// declarations, and CDATA sections.
-pub(crate) fn parse_inline_html(p: &mut MarkdownParser) -> ParsedSyntax {
+fn inline_html_len(p: &mut MarkdownParser) -> Option<usize> {
     if !p.at(L_ANGLE) {
-        return Absent;
+        return None;
     }
 
     // Check if this is valid inline HTML and whether it crosses a blockquote
     // marker. Both checks use the source text, so scope the borrow here.
     let html_len = {
         let source = p.source_after_current();
-        let len = match is_inline_html(source) {
-            Some(len) => len,
-            None => return Absent,
-        };
-        // Reject spans where `>` immediately follows a newline (optionally
-        // preceded by 0-3 spaces). In that position `>` is a blockquote
-        // marker per §5.1, not the closing bracket of an open tag.
-        if inline_html_crosses_blockquote_marker(&source[..len]) {
-            return Absent;
+        let len = is_inline_html(source)?;
+        // Comments can contain existing quote prefixes; an open tag cannot use
+        // a quote prefix as its closing bracket.
+        if !source.starts_with("<!--") && inline_html_crosses_blockquote_marker(&source[..len]) {
+            return None;
         }
         len
     };
 
     // Per CommonMark §4.3, setext heading underlines take priority over inline HTML.
     // If this HTML tag spans across a line that is a setext underline, treat `<` as literal.
-    if inline_span_crosses_setext(p, html_len) {
+    let crosses_boundary = if p.source_after_current().starts_with("<!--") {
+        inline_span_crosses_block_boundary(p, html_len)
+    } else {
+        inline_span_crosses_setext(p, html_len)
+    };
+    if crosses_boundary {
+        return None;
+    }
+    Some(html_len)
+}
+
+/// Parse raw inline HTML per CommonMark §6.8.
+///
+/// Grammar: MdInlineHtml = value: 'md_html_literal'
+///
+/// Includes: open tags, close tags, comments, processing instructions,
+/// declarations, and CDATA sections.
+pub(crate) fn parse_inline_html(p: &mut MarkdownParser) -> ParsedSyntax {
+    let Some(html_len) = inline_html_len(p) else {
         return Absent;
-    }
+    };
 
-    // Valid inline HTML - create the node
-    // Use checkpoint so we can rewind if token boundaries don't align
-    let checkpoint = p.checkpoint();
     let m = p.start();
-
-    // Create content as inline item list containing textual nodes
-    let content = p.start();
-
-    // Track remaining bytes to consume
-    let mut remaining = html_len;
-
-    while remaining > 0 && !p.at(T![EOF]) {
-        let token_len = p.cur_text().len();
-
-        // If the current token is larger than remaining bytes, token boundaries
-        // don't align with our validated HTML - rewind and treat as text
-        if token_len > remaining {
-            m.abandon(p);
-            p.rewind(checkpoint);
-            return Absent;
-        }
-
-        let text_m = p.start();
-        p.bump_remap(MD_TEXTUAL_LITERAL);
-        text_m.complete(p, MD_TEXTUAL);
-        remaining -= token_len;
-    }
-
-    content.complete(p, MD_INLINE_ITEM_LIST);
+    let end = p.cur_range().start() + TextSize::from(html_len as u32);
+    p.re_lex_span(end, MD_HTML_LITERAL);
+    p.source_mut().record_html_comment_trivia();
+    p.bump(MD_HTML_LITERAL);
 
     Present(m.complete(p, MD_INLINE_HTML))
 }
@@ -571,6 +555,20 @@ fn is_email_autolink(text: &str) -> bool {
     true
 }
 
+#[inline]
+fn autolink_content(source: &str) -> Option<&str> {
+    let bytes = source.as_bytes();
+    if bytes.first() != Some(&b'<') {
+        return None;
+    }
+
+    let after_open = &source[1..];
+    let close_pos = after_open
+        .bytes()
+        .position(|byte| matches!(byte, b'>' | b'\n' | b'\r' | b'<'))?;
+    (after_open.as_bytes()[close_pos] == b'>').then_some(&after_open[..close_pos])
+}
+
 /// Parse an autolink (`<https://example.com>` or `<user@example.com>`).
 ///
 /// Grammar: MdAutolink = '<' value: MdInlineItemList '>'
@@ -582,26 +580,16 @@ pub(crate) fn parse_autolink(p: &mut MarkdownParser) -> ParsedSyntax {
         return Absent;
     }
 
-    // Look ahead to find the closing > and check if content is valid
-    let source = p.source_after_current();
-
-    // Skip the < and find >
-    let after_open = &source[1..];
-    let close_pos = match after_open.find('>') {
-        Some(pos) => pos,
-        None => return Absent, // No closing >
+    let content_len = {
+        let source = p.source_after_current();
+        let Some(content) = autolink_content(source) else {
+            return Absent;
+        };
+        if !is_uri_autolink(content) && !is_email_autolink(content) {
+            return Absent;
+        }
+        content.len()
     };
-
-    // Check for newline before > (not allowed in autolinks)
-    let content = &after_open[..close_pos];
-    if content.contains('\n') || content.contains('\r') {
-        return Absent;
-    }
-
-    // Must be either URI or email autolink
-    if !is_uri_autolink(content) && !is_email_autolink(content) {
-        return Absent;
-    }
 
     // Valid autolink - parse it
     let m = p.start();
@@ -609,25 +597,16 @@ pub(crate) fn parse_autolink(p: &mut MarkdownParser) -> ParsedSyntax {
     // <
     p.bump(L_ANGLE);
 
-    // Content as inline item list containing textual nodes.
-    // Autolinks don't process backslash escapes, but the lexer may combine
-    // `\>` into a single escape token. We re-lex in CodeSpan context where
-    // backslash is literal, so `\` and `>` are separate tokens.
-    p.relex_code_span();
-
     let content_m = p.start();
-    while !p.at(R_ANGLE) && !p.at(T![EOF]) && !p.at_inline_end() {
-        let text_m = p.start();
-        p.bump_remap_with_context(MD_TEXTUAL_LITERAL, MarkdownLexContext::CodeSpan);
-        text_m.complete(p, MD_TEXTUAL);
-    }
+    let text_m = p.start();
+    let end = p.cur_range().start() + TextSize::from(content_len as u32);
+    p.re_lex_span(end, MD_TEXTUAL_LITERAL);
+    p.bump(MD_TEXTUAL_LITERAL);
+    text_m.complete(p, MD_TEXTUAL);
     content_m.complete(p, MD_INLINE_ITEM_LIST);
 
     // >
     p.expect(R_ANGLE);
-
-    // Re-lex back to regular context
-    p.force_relex_regular();
 
     Present(m.complete(p, MD_AUTOLINK))
 }

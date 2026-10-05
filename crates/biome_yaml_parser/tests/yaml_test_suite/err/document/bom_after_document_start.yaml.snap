@@ -1,0 +1,69 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+---
+﻿value
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: DIRECTIVE_END@0..3 "---" [] [],
+            node: missing (optional),
+            dotdotdot_token: missing (optional),
+        },
+        YamlBogus {
+            items: [
+                ERROR_TOKEN@3..7 "\u{feff}" [Newline("\n")] [],
+                FLOW_START@7..7 "" [] [],
+                PLAIN_LITERAL@7..13 "value\n" [] [],
+                FLOW_END@13..13 "" [] [],
+            ],
+        },
+    ],
+    eof_token: EOF@13..13 "" [] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..13
+  0: YAML_DOCUMENT_LIST@0..13
+    0: YAML_DOCUMENT@0..3
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: DIRECTIVE_END@0..3 "---" [] []
+      3: (empty)
+      4: (empty)
+    1: YAML_BOGUS@3..13
+      0: ERROR_TOKEN@3..7 "\u{feff}" [Newline("\n")] []
+      1: FLOW_START@7..7 "" [] []
+      2: PLAIN_LITERAL@7..13 "value\n" [] []
+      3: FLOW_END@13..13 "" [] []
+  1: EOF@13..13 "" [] []
+
+```
+
+## Diagnostics
+
+```
+bom_after_document_start.yaml:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × A byte order mark is only allowed at the start of a document.
+  
+    1 │ ---
+  > 2 │ �value
+      │ ^
+    3 │ 
+  
+```

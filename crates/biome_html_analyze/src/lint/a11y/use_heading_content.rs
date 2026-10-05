@@ -2,9 +2,14 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlElementList};
+use biome_html_syntax::element_ext::AnyHtmlTagElement;
+use biome_html_syntax::{
+    AnyAstroDirective, AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, AnyVueDirective,
+    HtmlElementList, HtmlSyntaxKind, T,
+};
 use biome_languages::HtmlFileSource;
-use biome_rowan::AstNode;
+use biome_parser::{TokenSet, token_set};
+use biome_rowan::{AstNode, AstNodeList};
 use biome_rule_options::use_heading_content::UseHeadingContentOptions;
 
 use crate::a11y::{
@@ -13,7 +18,6 @@ use crate::a11y::{
     html_self_closing_element_has_non_empty_attribute,
     html_self_closing_element_has_truthy_aria_hidden,
 };
-use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforce that heading elements (`h1`, `h2`, etc.) have content and that the content is
@@ -60,6 +64,18 @@ declare_lint_rule! {
     /// <h1><span aria-hidden="true">hidden</span> visible content</h1>
     /// ```
     ///
+    /// Directives that render the heading text are treated as content: `set:html`
+    /// and `set:text` in Astro files, `v-html` and `v-text` in Vue files. Headings
+    /// that use them are not reported.
+    ///
+    /// ```astro
+    /// <h1 set:html={heading} />
+    /// ```
+    ///
+    /// ```vue
+    /// <template><h1 v-text="heading"></h1></template>
+    /// ```
+    ///
     /// ## Accessibility guidelines
     ///
     /// - [WCAG 2.4.6](https://www.w3.org/TR/UNDERSTANDING-WCAG20/navigation-mechanisms-descriptive.html)
@@ -74,7 +90,8 @@ declare_lint_rule! {
     }
 }
 
-const HEADING_ELEMENTS: [&str; 6] = ["h1", "h2", "h3", "h4", "h5", "h6"];
+const HEADING_ELEMENTS: TokenSet<HtmlSyntaxKind> =
+    token_set!(T![h1], T![h2], T![h3], T![h4], T![h5], T![h6]);
 
 impl Rule for UseHeadingContent {
     type Query = Ast<AnyHtmlElement>;
@@ -88,9 +105,9 @@ impl Rule for UseHeadingContent {
         let source_type = ctx.source_type::<HtmlFileSource>();
 
         let tag_element = node.clone().as_any_html_tag_element()?;
-        let is_heading = HEADING_ELEMENTS
-            .iter()
-            .any(|&h| is_html_tag(&tag_element, source_type, h));
+        let is_heading = tag_element
+            .tag_name_kind()
+            .is_some_and(|kind| HEADING_ELEMENTS.contains(kind));
 
         if !is_heading {
             return None;
@@ -104,6 +121,13 @@ impl Rule for UseHeadingContent {
         // If the heading has an accessible name (aria-label, aria-labelledby, title),
         // screen readers can announce it even without visible content
         if has_accessible_name(&tag_element) {
+            return None;
+        }
+
+        // Astro's `set:html` / `set:text` and Vue's `v-html` / `v-text` render the
+        // heading's text, so the heading does have content even though the element
+        // looks empty.
+        if has_content_injecting_directive(&tag_element, source_type) {
             return None;
         }
 
@@ -143,6 +167,43 @@ impl Rule for UseHeadingContent {
     }
 }
 
+/// Checks if the element carries a directive that renders its content.
+///
+/// Astro's `set:html` / `set:text` and Vue's `v-html` / `v-text` all render the
+/// bound expression as the element's children, so the element has content even
+/// when it is written as empty or self-closing.
+///
+/// Refs: <https://docs.astro.build/en/reference/directives-reference/#sethtml>,
+/// <https://vuejs.org/api/built-in-directives.html#v-html>
+fn has_content_injecting_directive(
+    element: &AnyHtmlTagElement,
+    source_type: &HtmlFileSource,
+) -> bool {
+    element.attributes().iter().any(|attribute| match attribute {
+        // set:html={expr} / set:text={expr}
+        AnyHtmlAttribute::AnyAstroDirective(AnyAstroDirective::AstroSetDirective(directive))
+            if source_type.is_astro() =>
+        {
+            directive
+                .value()
+                .ok()
+                .and_then(|value| value.name().ok())
+                .and_then(|name| name.token_text_trimmed())
+                .is_some_and(|name| matches!(name.text(), "html" | "text"))
+        }
+        // v-html="expr" / v-text="expr"
+        AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueDirective(directive))
+            if source_type.is_vue() =>
+        {
+            directive.name_token().is_ok_and(|name| {
+                let name = name.text_trimmed();
+                name.eq_ignore_ascii_case("v-html") || name.eq_ignore_ascii_case("v-text")
+            })
+        }
+        _ => false,
+    })
+}
+
 /// Checks if an `HtmlElementList` contains accessible content.
 ///
 /// Text nodes, text expressions, and embedded content are considered accessible.
@@ -150,6 +211,10 @@ impl Rule for UseHeadingContent {
 fn has_accessible_content(children: &HtmlElementList, is_html: bool, is_astro: bool) -> bool {
     children.into_iter().any(|child| match &child {
         AnyHtmlElement::AnyHtmlContent(content) => is_accessible_text_content(content),
+        // A fragment renders nothing itself, so its children carry the content.
+        AnyHtmlElement::AstroFragment(fragment) => {
+            has_accessible_content(&fragment.children(), is_html, is_astro)
+        }
         AnyHtmlElement::HtmlElement(element) => {
             if html_element_has_truthy_aria_hidden(element) {
                 return false;

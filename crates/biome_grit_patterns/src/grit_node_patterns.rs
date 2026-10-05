@@ -10,7 +10,7 @@ use grit_pattern_matcher::pattern::{
     ResolvedPattern, State,
 };
 use grit_util::error::GritResult;
-use grit_util::{AnalysisLogs, AstNode, Language};
+use grit_util::{AnalysisLogs, Language};
 
 /// Check if two syntax kinds are compatible for import pattern matching
 fn are_import_kinds_compatible(
@@ -153,7 +153,7 @@ impl Matcher<GritQueryContext> for GritNodePattern {
                 let source_slot = match (pattern_js_kind, node_js_kind, slot_index) {
                     // type_token, phase_token
                     (JS_IMPORT_DEFAULT_CLAUSE, JS_IMPORT_NAMED_CLAUSE, 0 | 1) => None,
-                    // default_specifier -> first named specifier
+                    // default_specifier -> named_specifiers
                     (JS_IMPORT_DEFAULT_CLAUSE, JS_IMPORT_NAMED_CLAUSE, 2) => Some(1),
                     // from_token, source, assertion
                     (JS_IMPORT_DEFAULT_CLAUSE, JS_IMPORT_NAMED_CLAUSE, 3..=5) => {
@@ -173,18 +173,6 @@ impl Matcher<GritQueryContext> for GritNodePattern {
 
                 match source_slot {
                     None => GritResolvedPattern::from_empty_binding(node.clone(), *slot_index),
-                    Some(1)
-                        if pattern_js_kind == JS_IMPORT_DEFAULT_CLAUSE
-                            && node_js_kind == JS_IMPORT_NAMED_CLAUSE =>
-                    {
-                        // Special case: default_specifier -> first named specifier
-                        node.child_by_slot_index(1)
-                            .and_then(|specifiers| specifiers.children().next())
-                            .map_or(
-                                GritResolvedPattern::from_empty_binding(node.clone(), *slot_index),
-                                GritResolvedPattern::from_node_binding,
-                            )
-                    }
                     Some(source) => get_child(source),
                 }
             } else {

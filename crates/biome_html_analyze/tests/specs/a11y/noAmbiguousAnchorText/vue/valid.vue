@@ -1,8 +1,12 @@
-/* should not generate diagnostics */
-<a>documentation</a>
+<template>
+	/* should not generate diagnostics */
+	<a>documentation</a>
 
-<a aria-label="tutorial on using eslint-plugin-jsx-a11y">click here</a>
+	<a>{{stringVariable}}</a>
 
-<a><span aria-label="tutorial on using eslint-plugin-jsx-a11y">click here</span></a>
+	<a aria-label="tutorial on using eslint-plugin-jsx-a11y">click here</a>
 
-<a><img alt="documentation" /></a>
+	<a><span aria-label="tutorial on using eslint-plugin-jsx-a11y">click here</span></a>
+
+	<a><img alt="documentation" /></a>
+</template>

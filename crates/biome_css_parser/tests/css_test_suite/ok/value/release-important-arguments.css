@@ -1,0 +1,2 @@
+a { color: red !important; }
+b { color: if(style(--enabled: true): red; else: blue) !important; }

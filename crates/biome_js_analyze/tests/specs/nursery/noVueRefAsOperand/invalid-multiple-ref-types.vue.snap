@@ -91,27 +91,6 @@ invalid-multiple-ref-types.vue:9:1 lint/nursery/noVueRefAsOperand ━━━━�
 ```
 
 ```
-invalid-multiple-ref-types.vue:21:13 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Ref value is accessed without `.value`.
-  
-    19 │ });
-    20 │ const refs = toRefs(state2)
-  > 21 │ console.log(refs.foo2)
-       │             ^^^^^^^^^
-    22 │ const { foo2 } = toRefs(state2)
-    23 │ console.log(`${foo2}`)
-  
-  i Without `.value`, Vue cannot track changes to the ref, which may break reactivity.
-  
-  i Use `.value` to access ref value.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
 invalid-multiple-ref-types.vue:23:16 lint/nursery/noVueRefAsOperand ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Ref value is accessed without `.value`.

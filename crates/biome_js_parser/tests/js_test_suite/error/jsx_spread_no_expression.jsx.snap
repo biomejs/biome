@@ -31,7 +31,7 @@ JsModule {
                         attributes: JsxAttributeList [],
                         r_angle_token: R_ANGLE@5..6 ">" [] [],
                     },
-                    children: JsxChildList [
+                    elements: JsxChildList [
                         JsxSpreadChild {
                             l_curly_token: L_CURLY@6..7 "{" [] [],
                             dotdotdot_token: DOT3@7..10 "..." [] [],

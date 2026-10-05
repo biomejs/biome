@@ -1,0 +1,12 @@
+<!-- should not generate diagnostics -->
+
+<script setup>
+const staticClasses = clsx("size-4");
+const templateClasses = tw.div`truncate`;
+</script>
+
+<template>
+  <div :class="clsx('size-4', active && 'p-2')" />
+  <div :class="['truncate', selected && 'hover:size-6']" />
+  <div :class="{ 'mx-3': active }" />
+</template>

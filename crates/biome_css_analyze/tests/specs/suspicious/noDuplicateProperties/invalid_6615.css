@@ -1,0 +1,6 @@
+.class {
+    @mixin hover {
+        color: red;
+        color: blue;
+    }
+}

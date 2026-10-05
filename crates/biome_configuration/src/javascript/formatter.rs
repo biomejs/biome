@@ -15,13 +15,13 @@ use serde::{Deserialize, Serialize};
 pub type JsFormatterEnabled = Bool<true>;
 pub type BracketSameLineEnabled = Bool<false>;
 
-/// Formatting options specific to the JavaScript files
+/// Formatting options specific to JavaScript and languages that extend it.
 #[derive(Clone, Default, Debug, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsFormatterConfiguration {
-    /// Control the formatter for JavaScript (and its super languages) files.
+    /// Enables or disables the formatter for JavaScript and languages that extend it.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("javascript-formatter-enabled"), argument("true|false"))
@@ -29,7 +29,7 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<JsFormatterEnabled>,
 
-    /// The type of quotes used in JSX. Defaults to double.
+    /// Selects the preferred quote style for JSX attribute values. Defaults to `double`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("jsx-quote-style"), argument("double|single"))
@@ -37,7 +37,10 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub jsx_quote_style: Option<QuoteStyle>,
 
-    /// When properties in objects are quoted. Defaults to asNeeded.
+    /// Controls whether quotes around object property names are preserved. `asNeeded` removes
+    /// quotes when the property name is valid without them, while `preserve` keeps quotes around
+    /// property names that were quoted in the input. Defaults to `asNeeded` in configuration
+    /// (`as-needed` on the CLI).
     #[cfg_attr(
         feature = "cli",
         bpaf(long("quote-properties"), argument("preserve|as-needed"))
@@ -45,7 +48,11 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub quote_properties: Option<QuoteProperties>,
 
-    /// Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
+    /// Controls trailing commas in multiline comma-separated structures. `all` adds trailing commas
+    /// wherever syntax permits, including function parameters and calls. `es5` adds them only in
+    /// constructs supported by ES5, such as array and object literals, and excludes function
+    /// parameters, function calls, and TypeScript type parameters. `none` removes trailing commas.
+    /// Defaults to `all`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("trailing-commas"), argument("all|es5|none"))
@@ -53,7 +60,8 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trailing_commas: Option<TrailingCommas>,
 
-    /// Whether the formatter prints semicolons for all statements or only in for statements where it is necessary because of ASI.
+    /// Prints semicolons after every statement or only where needed to avoid automatic semicolon
+    /// insertion hazards. Defaults to `always`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("semicolons"), argument("always|as-needed"))
@@ -61,7 +69,9 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub semicolons: Option<Semicolons>,
 
-    /// Whether to add non-necessary parentheses to arrow functions. Defaults to "always".
+    /// Controls parentheses around arrow-function parameters. `always` always prints parentheses,
+    /// while `asNeeded` omits them when an arrow function has one parameter and the syntax permits
+    /// it. Defaults to `always`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("arrow-parentheses"), argument("always|as-needed"))
@@ -69,7 +79,10 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub arrow_parentheses: Option<ArrowParentheses>,
 
-    /// Whether to hug the closing bracket of multiline HTML/JSX tags to the end of the last line, rather than being alone on the following line. Defaults to false.
+    /// Controls the placement of the closing bracket for multiline JSX opening tags. Biome places
+    /// the bracket at the end of the last attribute line when enabled and on its own line after the
+    /// last attribute when disabled. Self-closing JSX elements are unaffected. If unset, inherits
+    /// the global bracket placement setting.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("bracket-same-line"), argument("true|false"))
@@ -77,7 +90,8 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_same_line: Option<BracketSameLine>,
 
-    /// The indent style applied to JavaScript (and its super languages) files.
+    /// The indent style applied to JavaScript and languages that extend it. If unset, inherits the
+    /// global indentation style.
     #[cfg_attr(
         feature = "cli",
         bpaf(
@@ -89,7 +103,8 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_style: Option<IndentStyle>,
 
-    /// The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
+    /// The indentation width applied to JavaScript and languages that extend it. If unset,
+    /// inherits the global indentation width.
     #[cfg_attr(
         feature = "cli",
         bpaf(
@@ -101,7 +116,8 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
 
-    /// The type of line ending applied to JavaScript (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
+    /// The line ending applied to JavaScript and languages that extend it. If unset, inherits the
+    /// global line ending.
     #[cfg_attr(
         feature = "cli",
         bpaf(
@@ -113,7 +129,8 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 
-    /// What's the max width of a line applied to JavaScript (and its super languages) files. Defaults to 80.
+    /// The preferred maximum line width applied to JavaScript and languages that extend it. If
+    /// unset, inherits the global line width.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("javascript-formatter-line-width"), argument("NUMBER"))
@@ -121,7 +138,8 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_width: Option<LineWidth>,
 
-    /// The type of quotes used in JavaScript code. Defaults to double.
+    /// Selects the preferred quote style for JavaScript and TypeScript string literals. Biome may
+    /// use the alternate quote when that avoids additional escaping. Defaults to `double`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("javascript-formatter-quote-style"), argument("double|single"))
@@ -130,7 +148,8 @@ pub struct JsFormatterConfiguration {
     pub quote_style: Option<QuoteStyle>,
 
     // it's also a top-level configurable property.
-    /// The attribute position style in JSX elements. Defaults to auto.
+    /// The attribute position style in JSX elements. If unset, inherits the global attribute
+    /// position setting.
     #[cfg_attr(
         feature = "cli",
         bpaf(
@@ -142,7 +161,9 @@ pub struct JsFormatterConfiguration {
     pub attribute_position: Option<AttributePosition>,
 
     // it's also a top-level configurable property.
-    /// Whether to insert spaces around brackets in object literals. Defaults to true.
+    /// Controls spaces inside the braces of single-line object literals. Biome formats `{value: 1}`
+    /// when disabled and `{ value: 1 }` when enabled. If unset, inherits the global bracket spacing
+    /// setting.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("javascript-formatter-bracket-spacing"), argument("true|false"))
@@ -151,15 +172,16 @@ pub struct JsFormatterConfiguration {
     pub bracket_spacing: Option<BracketSpacing>,
 
     // it's also a top-level configurable property.
-    /// Whether to insert spaces inside delimiters (after the opening delimiter and before the
-    /// closing delimiter). Only applies when the content fits on a single line. Spaces are not
-    /// added before the opening delimiter (e.g., `function f()` stays `function f()`, not
-    /// `function f ()`), and empty delimiters are not affected (e.g., `fn()` stays `fn()`).
-    /// For JavaScript and TypeScript, affects parentheses (e.g., `foo( a, b )`), square brackets
-    /// (e.g., `[ a, b ]`), template literal interpolations (e.g., `${ expr }`), TypeScript angle
-    /// brackets (e.g., `foo< T >()`), JSX expression braces (e.g., `{ value }`), and the logical
-    /// NOT operator (e.g., `! x`, but in chains only after the last one: `!! x`). Defaults to
-    /// false.
+    /// Controls spaces immediately inside supported JavaScript and TypeScript delimiters when their
+    /// content fits on one line. This affects parentheses, square brackets, template
+    /// interpolations, TypeScript angle brackets, and JSX expression braces. Empty delimiters are
+    /// unchanged.
+    ///
+    /// It also controls spacing after logical NOT operators. In a chain of logical NOT operators,
+    /// only the final operator receives a following space. Biome doesn't add spaces before opening
+    /// delimiters.
+    ///
+    /// If unset, inherits the global delimiter spacing setting.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("javascript-formatter-delimiter-spacing"), argument("true|false"))
@@ -167,12 +189,9 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub delimiter_spacing: Option<DelimiterSpacing>,
 
-    /// Whether to expand arrays and objects on multiple lines.
-    /// When set to `auto`, object literals are formatted on multiple lines if the first property has a newline,
-    /// and array literals are formatted on a single line if it fits in the line.
-    /// When set to `always`, these literals are formatted on multiple lines, regardless of length of the list.
-    /// When set to `never`, these literals are formatted on a single line if it fits in the line.
-    /// When formatting `package.json`, Biome will use `always` unless configured otherwise. Defaults to "auto".
+    /// Uses the same `auto`, `always`, and `never` behavior as the global expansion setting.
+    ///
+    /// If unset, inherits the global expansion setting.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("javascript-formatter-expand"), argument("auto|always|never"))
@@ -180,7 +199,8 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub expand: Option<Expand>,
 
-    /// When breaking binary expressions into multiple lines, whether to break them before or after the binary operator. Defaults to "after".
+    /// When breaking binary expressions into multiple lines, whether to break them before or after
+    /// the binary operator. Defaults to `after`.
     #[cfg_attr(
         feature = "cli",
         bpaf(
@@ -191,16 +211,8 @@ pub struct JsFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub operator_linebreak: Option<OperatorLinebreak>,
 
-    /// Whether to add a trailing newline at the end of the file.
-    ///
-    /// Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
-    /// - https://thoughtbot.com/blog/no-newline-at-end-of-file
-    /// - https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
-    /// - https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
-    ///
-    /// Disable the option at your own risk.
-    ///
-    /// Defaults to true.
+    /// Whether to add a trailing newline at the end of the file. If unset, inherits the global
+    /// trailing newline setting.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("javascript-formatter-trailing-newline"), argument("true|false"))

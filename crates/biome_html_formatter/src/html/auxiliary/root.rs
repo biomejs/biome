@@ -10,6 +10,7 @@ impl FormatNodeRule<HtmlRoot> for FormatHtmlRoot {
             bom_token,
             directive,
             frontmatter,
+            processing_instruction,
             eof_token,
         } = node.as_fields();
 
@@ -21,18 +22,32 @@ impl FormatNodeRule<HtmlRoot> for FormatHtmlRoot {
             write!(f, [frontmatter.format(), empty_line()])?;
         }
 
+        if let Some(processing_instruction) = processing_instruction {
+            write!(
+                f,
+                [group(&processing_instruction.format()), hard_line_break()]
+            )?;
+        }
+
         if let Some(directive) = directive {
             directive.format().fmt(f)?;
         }
 
         html.format().fmt(f)?;
 
+        write!(f, [format_trailing_comments(node.syntax())])?;
+
+        write!(f, [format_removed(&eof_token?)])?;
+
         if f.options().trailing_newline().value() {
             write!(f, [hard_line_break()])?;
         }
 
-        write!(f, [format_removed(&eof_token?)])?;
+        Ok(())
+    }
 
+    fn fmt_trailing_comments(&self, _: &HtmlRoot, _: &mut HtmlFormatter) -> FormatResult<()> {
+        // Formatted as part of `fmt_fields`.
         Ok(())
     }
 }

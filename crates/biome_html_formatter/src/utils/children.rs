@@ -7,22 +7,22 @@ use biome_console::{
     fmt::{Display, Formatter as ConsoleFormatter},
     markup,
 };
-use biome_formatter::{
-    Buffer, Format, FormatElement, FormatResult, comments::CommentStyle, prelude::*,
-};
-use biome_html_syntax::{
-    AnyHtmlContent, AnyHtmlElement, HtmlClosingElement, HtmlLanguage, HtmlSyntaxToken,
-};
+use biome_formatter::{Buffer, Format, FormatElement, FormatResult, prelude::*};
+use biome_html_syntax::{AnyHtmlContent, AnyHtmlElement, HtmlLanguage, HtmlSyntaxToken};
 use biome_rowan::{
     AstNode, SyntaxResult, TextLen, TextRange, TextSize, TokenText, syntax::SyntaxTrivia,
 };
+use biome_suppression::SuppressionKind;
+use biome_unicode_table::{
+    is_cjk_punctuation, is_cjk_segment_break_character, is_default_ignorable_code_point,
+};
 
 use crate::{
-    HtmlFormatter, comments::HtmlCommentStyle, context::HtmlFormatContext,
+    HtmlFormatter, comments::HtmlComments, context::HtmlFormatContext,
     utils::metadata::get_element_css_display,
 };
 
-pub(crate) static HTML_WHITESPACE_CHARS: [u8; 4] = [b' ', b'\n', b'\t', b'\r'];
+pub(crate) static HTML_WHITESPACE_CHARS: [u8; 4] = *b" \n\t\r";
 
 /// Meaningful HTML text is defined to be text that has either non-whitespace
 /// characters, or does not contain a newline. Whitespace is defined as ASCII
@@ -71,7 +71,6 @@ impl HtmlWord {
         self.text.chars().count() == 1
     }
 
-    #[cfg(debug_assertions)]
     fn text(&self) -> &str {
         &self.text
     }
@@ -142,6 +141,9 @@ pub(crate) enum HtmlChild {
     /// The text between `<div>` and `<test />` is an empty line text.
     EmptyLine,
 
+    /// An authored segment break that must not be converted to a space.
+    PreservedSegmentBreak,
+
     /// Any other content that isn't a text. Should be formatted as is.
     NonText(AnyHtmlElement),
 
@@ -153,7 +155,10 @@ pub(crate) enum HtmlChild {
 
 impl HtmlChild {
     pub(crate) const fn is_any_whitespace(&self) -> bool {
-        matches!(self, Self::Whitespace | Self::EmptyLine | Self::Newline)
+        matches!(
+            self,
+            Self::Whitespace | Self::EmptyLine | Self::Newline | Self::PreservedSegmentBreak
+        )
     }
 }
 
@@ -203,6 +208,7 @@ impl fmt::Display for HtmlChildDetail<'_> {
             HtmlChild::Whitespace => fmt.write_str("\" \""),
             HtmlChild::Newline => fmt.write_str("\\n"),
             HtmlChild::EmptyLine => fmt.write_str("\\n\\n"),
+            HtmlChild::PreservedSegmentBreak => fmt.write_str("preserved \\n"),
             HtmlChild::NonText(element) => std::write!(fmt, "{}", HtmlElementDetail(element)),
             HtmlChild::Verbatim(element) => std::write!(fmt, "{}", HtmlElementDetail(element)),
         }
@@ -241,6 +247,7 @@ const fn html_child_kind(child: &HtmlChild) -> &'static str {
         HtmlChild::Whitespace => "Whitespace",
         HtmlChild::Newline => "Newline",
         HtmlChild::EmptyLine => "EmptyLine",
+        HtmlChild::PreservedSegmentBreak => "SegmentBreak",
         HtmlChild::NonText(_) => "NonText",
         HtmlChild::Verbatim(_) => "Verbatim",
     }
@@ -249,7 +256,7 @@ const fn html_child_kind(child: &HtmlChild) -> &'static str {
 pub(crate) fn html_split_children<I>(
     children: I,
     opening_r_angle: Option<&HtmlSyntaxToken>,
-    closing_element: Option<&HtmlClosingElement>,
+    closing_token: Option<&HtmlSyntaxToken>,
     f: &mut HtmlFormatter,
 ) -> SyntaxResult<Vec<HtmlChild>>
 where
@@ -258,7 +265,12 @@ where
     let mut builder = HtmlSplitChildrenBuilder::new();
 
     if let Some(opening_r_angle) = opening_r_angle {
-        push_trivia_children(&mut builder, &opening_r_angle.trailing_trivia(), false);
+        push_trivia_children(
+            &mut builder,
+            &opening_r_angle.trailing_trivia(),
+            false,
+            f.comments(),
+        );
     }
 
     let mut prev_child_was_content = false;
@@ -326,7 +338,20 @@ where
                 // SAFETY: We just checked this above.
                 match chunks.next().unwrap() {
                     (_, HtmlTextChunk::Whitespace(whitespace)) => {
-                        if whitespace.contains('\n') && !prev_child_was_content {
+                        let preserves_segment_break = prev_child_was_content
+                            && builder.buffer.last().is_some_and(|previous| {
+                                let HtmlChild::Word(previous) = previous else {
+                                    return false;
+                                };
+                                let Some((_, HtmlTextChunk::Word(next))) = chunks.peek() else {
+                                    return false;
+                                };
+                                should_preserve_cjk_segment_break(previous.text(), whitespace, next)
+                            });
+
+                        if preserves_segment_break {
+                            builder.entry(HtmlChild::PreservedSegmentBreak);
+                        } else if whitespace.contains('\n') && !prev_child_was_content {
                             if chunks.peek().is_none() {
                                 // A text only consisting of whitespace that also contains a new line isn't considered meaningful text.
                                 // It can be entirely removed from the content without changing the semantics.
@@ -346,13 +371,23 @@ where
                                 continue;
                             }
 
-                            builder.entry(HtmlChild::Newline)
+                            // Text that follows a blank line keeps it, the same
+                            // way an element that follows one does.
+                            if whitespace.bytes().filter(|byte| *byte == b'\n').count() > 1 {
+                                builder.entry(HtmlChild::EmptyLine)
+                            } else {
+                                builder.entry(HtmlChild::Newline)
+                            }
                         } else {
                             // if there's newlines before a comment, we need to preserve them
                             if whitespace.contains('\n')
                                 && matches!(chunks.peek(), Some(&(_, HtmlTextChunk::Comment(_))))
                             {
-                                builder.entry(HtmlChild::Newline)
+                                if whitespace.bytes().filter(|byte| *byte == b'\n').count() > 1 {
+                                    builder.entry(HtmlChild::EmptyLine)
+                                } else {
+                                    builder.entry(HtmlChild::Newline)
+                                }
                             } else {
                                 builder.entry(HtmlChild::Whitespace)
                             }
@@ -363,10 +398,11 @@ where
             }
 
             let mut prev_chunk_was_comment = false;
+            let mut previous_word = None;
             while let Some(chunk) = chunks.next() {
                 match chunk {
                     (_, HtmlTextChunk::Whitespace(whitespace)) => {
-                        // Only handle trailing whitespace. Words must always be joined by new lines
+                        // Fill handles ordinary inter-word whitespace; semantic separators remain children.
                         let newlines = whitespace.chars().filter(|b| *b == '\n').count();
                         match chunks.peek() {
                             Some(&(_, HtmlTextChunk::Comment(_))) => {
@@ -386,9 +422,16 @@ where
                                     builder.entry(HtmlChild::Whitespace)
                                 }
                             }
-                            _ => {
-                                // if the previous chunk was a comment, we need to preserve the whitespace before the next chunk.
-                                if prev_chunk_was_comment {
+                            Some(&(_, HtmlTextChunk::Word(next_word))) => {
+                                if previous_word.is_some_and(|previous_word| {
+                                    should_preserve_cjk_segment_break(
+                                        previous_word,
+                                        whitespace,
+                                        next_word,
+                                    )
+                                }) {
+                                    builder.entry(HtmlChild::PreservedSegmentBreak);
+                                } else if prev_chunk_was_comment {
                                     if newlines >= 2 {
                                         builder.entry(HtmlChild::EmptyLine)
                                     } else if newlines == 1 {
@@ -398,6 +441,7 @@ where
                                     }
                                 }
                             }
+                            Some(_) => {}
                         }
                     }
 
@@ -408,6 +452,7 @@ where
                         let source_position = value_token.text_range().start() + relative_start;
 
                         builder.entry(HtmlChild::Word(HtmlWord::new(text, source_position)));
+                        previous_word = Some(word);
                     }
                     (relative_start, HtmlTextChunk::Comment(word)) => {
                         let text = value_token
@@ -418,53 +463,77 @@ where
                         // Skip suppression comments here - they will be formatted as part of the
                         // verbatim output for the next (suppressed) element. This prevents the
                         // comment from being printed twice.
-                        if !HtmlCommentStyle::is_suppression(text.text()) {
+                        if !f
+                            .comments()
+                            .suppression_kind(TextRange::at(source_position, word.text_len()))
+                            .is_some_and(SuppressionKind::is_classic)
+                        {
                             builder.entry(HtmlChild::Comment(HtmlWord::new(text, source_position)));
                         }
                     }
                 }
                 prev_chunk_was_comment = matches!(chunk, (_, HtmlTextChunk::Comment(_)));
+                if prev_chunk_was_comment {
+                    previous_word = None;
+                }
             }
 
             prev_child_was_content = true;
         } else {
-            let text = child.to_string();
-            let mut chunks = HtmlSplitChunksIterator::new(&text).peekable();
-
-            // Text starting with a whitespace
-            if let Some((_, HtmlTextChunk::Whitespace(_whitespace))) = chunks.peek() {
-                // SAFETY: We just checked this above.
-                match chunks.next().unwrap() {
-                    (_, HtmlTextChunk::Whitespace(whitespace)) => {
-                        if whitespace.contains('\n') {
-                            // A text only consisting of whitespace that also contains a new line isn't considered meaningful text.
-                            // It can be entirely removed from the content without changing the semantics.
-                            let newlines = whitespace.chars().filter(|c| *c == '\n').count();
-
-                            // Keep up to one blank line between tags.
-                            // ```html
-                            // <div>
-                            //
-                            //   <MyElement />
-                            // </div>
-                            // ```
-                            if newlines > 1 {
-                                builder.entry(HtmlChild::EmptyLine);
-                            } else {
-                                builder.entry(HtmlChild::Newline);
+            // Only the leading whitespace of the child's text (including trivia) matters here,
+            // so scan the text chunk by chunk and stop at the first non-whitespace character
+            // instead of stringifying the whole subtree.
+            let mut has_leading_whitespace = false;
+            let mut newlines = 0usize;
+            let _ = child
+                .syntax()
+                .text_with_trivia()
+                .try_for_each_chunk(|chunk| {
+                    for c in chunk.chars() {
+                        match c {
+                            '\n' => {
+                                has_leading_whitespace = true;
+                                newlines += 1;
                             }
-                        } else {
-                            builder.entry(HtmlChild::Whitespace)
+                            ' ' | '\t' | '\r' => has_leading_whitespace = true,
+                            _ => return Err(()),
                         }
                     }
-                    _ => unreachable!(),
+                    Ok(())
+                });
+
+            // Text starting with a whitespace
+            if has_leading_whitespace {
+                if newlines > 0 {
+                    // A text only consisting of whitespace that also contains a new line isn't considered meaningful text.
+                    // It can be entirely removed from the content without changing the semantics.
+
+                    // Keep up to one blank line between tags.
+                    // ```html
+                    // <div>
+                    //
+                    //   <MyElement />
+                    // </div>
+                    // ```
+                    if newlines > 1 {
+                        builder.entry(HtmlChild::EmptyLine);
+                    } else {
+                        builder.entry(HtmlChild::Newline);
+                    }
+                } else {
+                    builder.entry(HtmlChild::Whitespace)
                 }
             }
 
             let is_suppressed = f.comments().is_suppressed(child.syntax());
 
             if let Some(first_token) = child.syntax().first_token() {
-                push_trivia_children(&mut builder, &first_token.leading_trivia(), is_suppressed);
+                push_trivia_children(
+                    &mut builder,
+                    &first_token.leading_trivia(),
+                    is_suppressed,
+                    f.comments(),
+                );
             }
 
             for comment in f.comments().leading_comments(child.syntax()) {
@@ -478,7 +547,12 @@ where
             }
 
             if let Some(last_token) = child.syntax().last_token() {
-                push_trivia_children(&mut builder, &last_token.trailing_trivia(), is_suppressed);
+                push_trivia_children(
+                    &mut builder,
+                    &last_token.trailing_trivia(),
+                    is_suppressed,
+                    f.comments(),
+                );
             }
 
             for comment in f.comments().trailing_comments(child.syntax()) {
@@ -489,17 +563,21 @@ where
         }
     }
 
-    // Include trailing whitespace from the closing element's l_angle_token leading trivia.
+    // Include trailing whitespace from the leading trivia of the closing token, which is the
+    // closing element's `<`, or the `{:` or `{/` that ends a Svelte block's children.
     // We do this because it makes handling whitespace sensitivity easier. We take the full content
     // of what is within the element so that we can properly classify what whitespace is meaningful
     // and what isn't.
     //
     // The reason this is necessary is because the trivia adjacent to the closing tag is attached to
     // the closing tag's leading trivia, not the content's trailing trivia.
-    if let Some(closing_element) = closing_element
-        && let Ok(l_angle_token) = closing_element.l_angle_token()
-    {
-        push_trivia_children(&mut builder, &l_angle_token.leading_trivia(), false);
+    if let Some(closing_token) = closing_token {
+        push_trivia_children(
+            &mut builder,
+            &closing_token.leading_trivia(),
+            false,
+            f.comments(),
+        );
     }
 
     Ok(builder.finish())
@@ -509,6 +587,7 @@ fn push_trivia_children(
     builder: &mut HtmlSplitChildrenBuilder,
     trivia: &SyntaxTrivia<HtmlLanguage>,
     skip_comments: bool,
+    comments: &HtmlComments,
 ) {
     let mut whitespace = PendingWhitespace::default();
 
@@ -518,7 +597,11 @@ fn push_trivia_children(
         } else if piece.is_comments() {
             whitespace.flush(builder);
 
-            if skip_comments || HtmlCommentStyle::is_suppression(piece.text()) {
+            if skip_comments
+                || comments
+                    .suppression_kind(piece.text_range())
+                    .is_some_and(SuppressionKind::is_classic)
+            {
                 // never add comments as children if the node is suppressed, because they will be handled as part of the verbatim content for the suppressed node. This also prevents comments from being added twice in cases where they are included both in the trivia for a node and as leading/trailing comments for the same node.
                 continue;
             }
@@ -564,11 +647,11 @@ impl PendingWhitespace {
     }
 }
 
-/// The builder is used to:
-/// 1. Remove [HtmlChild::EmptyLine], [HtmlChild::Newline], [HtmlChild::Whitespace] if a next element is [HtmlChild::Whitespace]
-/// 2. Don't push a new element [HtmlChild::EmptyLine], [HtmlChild::Newline], [HtmlChild::Whitespace] if previous one is [HtmlChild::EmptyLine], [HtmlChild::Newline], [HtmlChild::Whitespace]
+/// Collects split children while coalescing adjacent whitespace markers.
 ///
-/// [Prettier applies]: https://github.com/prettier/prettier/blob/b0d9387b95cdd4e9d50f5999d3be53b0b5d03a97/src/language-js/print/jsx.js#L144-L180
+/// [HtmlChild::EmptyLine] remains dominant because it represents a user-authored blank line.
+/// A single newline following ordinary whitespace is retained only when the container's children
+/// started on a new line, preserving multiline source layout without expanding compact elements.
 #[derive(Debug)]
 struct HtmlSplitChildrenBuilder {
     buffer: Vec<HtmlChild>,
@@ -580,18 +663,29 @@ impl HtmlSplitChildrenBuilder {
     }
 
     fn entry(&mut self, child: HtmlChild) {
+        let children_started_on_new_line = matches!(
+            self.buffer.first(),
+            Some(HtmlChild::Newline | HtmlChild::EmptyLine)
+        );
         match self.buffer.last_mut() {
             Some(last @ (HtmlChild::EmptyLine | HtmlChild::Newline | HtmlChild::Whitespace)) => {
-                if matches!(child, HtmlChild::Whitespace) {
-                    *last = child;
-                } else if matches!(
-                    child,
+                match child {
+                    HtmlChild::EmptyLine => *last = HtmlChild::EmptyLine,
+                    HtmlChild::Newline
+                        if children_started_on_new_line
+                            && matches!(last, HtmlChild::Whitespace) =>
+                    {
+                        *last = HtmlChild::Newline;
+                    }
+                    HtmlChild::Whitespace if !matches!(last, HtmlChild::EmptyLine) => {
+                        *last = HtmlChild::Whitespace;
+                    }
+                    HtmlChild::Whitespace | HtmlChild::Newline => {}
                     HtmlChild::NonText(_)
-                        | HtmlChild::Word(_)
-                        | HtmlChild::Comment(_)
-                        | HtmlChild::Verbatim(_)
-                ) {
-                    self.buffer.push(child);
+                    | HtmlChild::Word(_)
+                    | HtmlChild::Comment(_)
+                    | HtmlChild::PreservedSegmentBreak
+                    | HtmlChild::Verbatim(_) => self.buffer.push(child),
                 }
             }
             _ => self.buffer.push(child),
@@ -727,6 +821,60 @@ impl<'a> Iterator for HtmlSplitChunksIterator<'a> {
 }
 
 impl FusedIterator for HtmlSplitChunksIterator<'_> {}
+
+fn should_preserve_cjk_segment_break(before: &str, whitespace: &str, after: &str) -> bool {
+    if !whitespace.contains(['\n', '\r']) {
+        return false;
+    }
+
+    let before = before
+        .chars()
+        .rev()
+        .find(|character| !is_default_ignorable_code_point(*character));
+    let after = after
+        .chars()
+        .find(|character| !is_default_ignorable_code_point(*character));
+
+    let (Some(before), Some(after)) = (before, after) else {
+        return false;
+    };
+
+    (is_cjk_segment_break_character(before) && is_cjk_segment_break_character(after))
+        || is_cjk_punctuation(before)
+        || is_cjk_punctuation(after)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::should_preserve_cjk_segment_break;
+
+    #[test]
+    fn preserves_cjk_segment_breaks() {
+        assert!(should_preserve_cjk_segment_break("漢", "\n", "字"));
+        assert!(should_preserve_cjk_segment_break("漢", "\r", "字"));
+        assert!(should_preserve_cjk_segment_break("漢", "\r\n", "字"));
+        assert!(should_preserve_cjk_segment_break("Ａ", "\n", "Ｂ"));
+        assert!(should_preserve_cjk_segment_break("ｱ", "\n", "ｲ"));
+        assert!(should_preserve_cjk_segment_break("Latin，", "\n", "text"));
+        assert!(should_preserve_cjk_segment_break("Latin", "\n", "、日本語"));
+        assert!(should_preserve_cjk_segment_break("Latin～", "\n", "text"));
+        assert!(should_preserve_cjk_segment_break("Latin　", "\n", "text"));
+        assert!(should_preserve_cjk_segment_break(
+            "葛\u{fe00}\u{ad}",
+            "\n",
+            "\u{200e}福"
+        ));
+    }
+
+    #[test]
+    fn does_not_preserve_other_segment_breaks() {
+        assert!(!should_preserve_cjk_segment_break("한", "\n", "글"));
+        assert!(!should_preserve_cjk_segment_break("😀", "\n", "😀"));
+        assert!(!should_preserve_cjk_segment_break("₩", "\n", "₩"));
+        assert!(!should_preserve_cjk_segment_break("Latin", "\n", "text"));
+        assert!(!should_preserve_cjk_segment_break("漢", " ", "字"));
+    }
+}
 
 /// An iterator adaptor that allows a lookahead of three tokens
 ///

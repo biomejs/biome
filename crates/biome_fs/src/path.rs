@@ -13,6 +13,13 @@ use std::hash::Hash;
 use std::path::{Path, PathBuf};
 use std::{fs::File, io, io::Write, ops::Deref};
 
+/// Returns whether `path` contains a directory component named `node_modules`.
+#[inline]
+pub fn is_node_modules_path(path: &Utf8Path) -> bool {
+    path.components()
+        .any(|component| component.as_str().as_bytes() == b"node_modules")
+}
+
 /// The priority of the file
 // NOTE: The order of the variants is important, the one on the top has the highest priority
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Ord, PartialOrd, Hash)]
@@ -196,9 +203,7 @@ impl BiomePath {
     /// Returns `true` if the path is inside `node_modules`
     #[inline(always)]
     pub fn is_dependency(&self) -> bool {
-        self.path
-            .components()
-            .any(|component| component.as_str().as_bytes() == b"node_modules")
+        is_node_modules_path(&self.path)
     }
 
     /// Whether this is a file named `package.json`
@@ -327,6 +332,22 @@ impl Ord for BiomePath {
 #[cfg(test)]
 mod test {
     use crate::path::FileKinds;
+    use camino::Utf8Path;
+
+    use super::is_node_modules_path;
+
+    #[test]
+    fn detects_node_modules_paths() {
+        assert!(is_node_modules_path(Utf8Path::new(
+            "/project/node_modules/package/index.js"
+        )));
+        assert!(is_node_modules_path(Utf8Path::new(
+            "project/packages/app/node_modules/package/index.js"
+        )));
+        assert!(!is_node_modules_path(Utf8Path::new(
+            "/project/node_modules_backup/package/index.js"
+        )));
+    }
 
     #[test]
     fn test_biome_paths() {

@@ -103,7 +103,7 @@ info: css/units.css
 }
 
 .unknown {
-	a: 5unknown;
+	a: 5Unknown;
 	/* http://browserbu.gs/css-hacks/media-min-width-0-backslash-0/ */
 	a: 0\0;
 }

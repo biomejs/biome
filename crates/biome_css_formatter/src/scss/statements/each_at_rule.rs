@@ -16,7 +16,7 @@ impl FormatNodeRule<ScssEachAtRule> for FormatScssEachAtRule {
         write!(
             f,
             [
-                each_token.format(),
+                each_token.format()?.with_text_case(CssCase::Lowercase),
                 group(&format_args![
                     space(),
                     indent(&group(&header.format())),

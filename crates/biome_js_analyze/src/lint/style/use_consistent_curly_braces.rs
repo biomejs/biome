@@ -52,7 +52,10 @@ declare_lint_rule! {
         language: "jsx",
         recommended: false,
         severity: Severity::Information,
-        sources: &[RuleSource::EslintReact("jsx-curly-brace-presence").inspired()],
+        sources: &[
+            RuleSource::EslintReact("jsx-curly-brace-presence").inspired(),
+            RuleSource::EslintStylistic("jsx-curly-brace-presence").inspired(),
+        ],
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -181,6 +184,15 @@ impl Rule for UseConsistentCurlyBraces {
                                         make::js_string_literal_expression(node.value_token()?),
                                     ),
                                 ),
+                                make::token(T!['}']),
+                            );
+                            Ok(AnyJsxAttributeValue::JsxExpressionAttributeValue(value))
+                        }
+                        // Unreachable: `handle_attr_init_clause` never signals on a template.
+                        AnyJsxAttributeValue::JsTemplateExpression(node) => {
+                            let value = make::jsx_expression_attribute_value(
+                                make::token(T!['{']),
+                                AnyJsExpression::JsTemplateExpression(node),
                                 make::token(T!['}']),
                             );
                             Ok(AnyJsxAttributeValue::JsxExpressionAttributeValue(value))
@@ -347,7 +359,7 @@ fn handle_attr_init_clause(
                 None
             }
         }
-        AnyJsxAttributeValue::JsxString(_) => None,
+        AnyJsxAttributeValue::JsxString(_) | AnyJsxAttributeValue::JsTemplateExpression(_) => None,
     }
 }
 

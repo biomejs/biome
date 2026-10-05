@@ -69,13 +69,17 @@ impl FormatNodeRule<MdIndentCodeBlock> for FormatMdIndentCodeBlock {
                     for item in content.iter() {
                         match &item {
                             AnyMdInline::MdIndentToken(indent) if stripper.strip_indent_token() => {
-                                f.context().comments().is_suppressed(indent.syntax());
+                                f.context()
+                                    .comments()
+                                    .mark_suppression_checked(indent.syntax());
                                 write!(f, [format_removed(&indent.md_indent_char_token()?)])?;
                             }
                             AnyMdInline::MdTextual(textual) => {
                                 let token = textual.value_token()?;
                                 if let Some(stripped) = stripper.strip_text(token.text()) {
-                                    f.context().comments().is_suppressed(textual.syntax());
+                                    f.context()
+                                        .comments()
+                                        .mark_suppression_checked(textual.syntax());
                                     write!(
                                         f,
                                         [format_replaced(

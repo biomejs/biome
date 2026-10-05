@@ -8,7 +8,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsArrowFunctionParameters, AnyJsFunction, AnyJsParameter, JsAssignmentExpression,
+    AnyJsArrowFunctionParameters, AnyJsExpression, AnyJsFunction, AnyJsParameter,
+    JsAssignmentExpression,
     JsCallExpression, JsFunctionExpression, JsInitializerClause, JsPropertyClassMember,
     JsPropertyObjectMember, JsSyntaxNode, JsSyntaxToken,
 };
@@ -118,9 +119,7 @@ impl Rule for NoComponentHookFactories {
                 }
 
                 // Hooks are cheap to detect by name; check before the heavier component detection.
-                if let Some(token) =
-                    get_simple_binding_token(decl).filter(|t| is_react_hook_name(t.text_trimmed()))
-                {
+                if let Some(token) = get_hook_binding_token(decl) {
                     let parent_fn = find_parent_function(syntax)?;
                     if is_hoc_like(&parent_fn) || is_inside_test_mock_callback(syntax) {
                         return None;
@@ -199,23 +198,37 @@ impl Rule for NoComponentHookFactories {
     }
 }
 
-/// Returns the identifier token of the declared name for simple function/variable declarations.
-/// Used to detect hooks by naming convention before heavier component detection.
-fn get_simple_binding_token(node: &AnyPotentialReactComponentDeclaration) -> Option<JsSyntaxToken> {
+/// Selects declarations that bind a function to a hook name, as determined by
+/// [is_react_hook_name].
+fn get_hook_binding_token(node: &AnyPotentialReactComponentDeclaration) -> Option<JsSyntaxToken> {
     match node {
         AnyPotentialReactComponentDeclaration::JsFunctionDeclaration(decl) => decl
             .id()
             .ok()?
             .as_js_identifier_binding()?
             .name_token()
-            .ok(),
-        AnyPotentialReactComponentDeclaration::JsVariableDeclarator(decl) => decl
-            .id()
-            .ok()?
-            .as_any_js_binding()?
-            .as_js_identifier_binding()?
-            .name_token()
-            .ok(),
+            .ok()
+            .filter(|name| is_react_hook_name(name.text_trimmed())),
+        AnyPotentialReactComponentDeclaration::JsVariableDeclarator(decl) => {
+            let name = decl
+                .id()
+                .ok()?
+                .as_any_js_binding()?
+                .as_js_identifier_binding()?
+                .name_token()
+                .ok()?;
+            if !is_react_hook_name(name.text_trimmed()) {
+                return None;
+            }
+
+            let initializer = decl.initializer()?.expression().ok()?.inner_expression()?;
+            matches!(
+                initializer,
+                AnyJsExpression::JsArrowFunctionExpression(_)
+                    | AnyJsExpression::JsFunctionExpression(_)
+            )
+            .then_some(name)
+        }
         _ => None,
     }
 }

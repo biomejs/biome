@@ -2,11 +2,18 @@ use crate::TestFormatLanguage;
 use crate::check_reformat::{CheckReformat, ReformatError};
 use crate::snapshot_builder::{SnapshotBuilder, SnapshotOutput};
 use crate::utils::{PrettierDiff, get_prettier_diff, strip_prettier_placeholders};
+use biome_configuration::{Configuration, formatter::FormatterConfiguration};
 use biome_formatter::{FormatLanguage, FormatOptions, Printed};
+use biome_fs::{BiomePath, MemoryFileSystem};
+use biome_languages::DocumentFileSource;
 use biome_parser::AnyParse;
 use biome_rowan::{TextRange, TextSize};
+use biome_service::workspace::{
+    FileContent, FormatFileParams, OpenFileParams, OpenProjectParams, OpenProjectResult,
+    UpdateSettingsParams, server,
+};
 use camino::Utf8Path;
-use std::sync::OnceLock;
+use std::sync::{Arc, OnceLock};
 use std::{fmt, fs::read_to_string, ops::Range};
 
 const PRETTIER_IGNORE: &str = "prettier-ignore";
@@ -116,6 +123,7 @@ where
     language: L,
     // options: <L::ServiceLanguage as ServiceLanguage>::FormatOptions,
     format_language: L::FormatLanguage,
+    document_file_source: Option<DocumentFileSource>,
 }
 
 enum FormatAttempt {
@@ -151,7 +159,13 @@ where
             test_file,
             language,
             format_language,
+            document_file_source: None,
         }
+    }
+
+    pub fn with_document_file_source(mut self, source: DocumentFileSource) -> Self {
+        self.document_file_source = Some(source);
+        self
     }
 
     fn format_for_snapshot(&self, parsed: &AnyParse) -> Option<FormatAttempt> {
@@ -176,35 +190,32 @@ where
         &self,
         syntax: &biome_rowan::SyntaxNode<L::ServiceLanguage>,
     ) -> Option<Result<Printed, PrettierSnapshotError>> {
-        match self.test_file.range() {
-            (Some(start), Some(end)) => self.format_range_once(syntax, start, end),
-            _ => Some(self.format_node_once(syntax)),
-        }
-    }
+        let range = match self.test_file.range() {
+            (Some(start), Some(end)) => {
+                // Skip reversed range tests because TextRange cannot represent them.
+                if end < start {
+                    return None;
+                }
 
-    fn format_range_once(
-        &self,
-        syntax: &biome_rowan::SyntaxNode<L::ServiceLanguage>,
-        start: usize,
-        end: usize,
-    ) -> Option<Result<Printed, PrettierSnapshotError>> {
-        // Skip reversed range tests because TextRange cannot represent them.
-        if end < start {
-            return None;
+                Some(TextRange::new(
+                    TextSize::try_from(start).unwrap(),
+                    TextSize::try_from(end).unwrap(),
+                ))
+            }
+            _ => None,
+        };
+
+        if range.is_none() && self.document_file_source.is_some() {
+            return Some(self.format_document(self.test_file.parse_input()));
         }
 
-        Some(
-            self.language
-                .format_range(
-                    self.format_language.clone(),
-                    syntax,
-                    TextRange::new(
-                        TextSize::try_from(start).unwrap(),
-                        TextSize::try_from(end).unwrap(),
-                    ),
-                )
+        Some(match range {
+            Some(range) => self
+                .language
+                .format_range(self.format_language.clone(), syntax, range)
                 .map_err(|err| PrettierSnapshotError::Format(err.to_string())),
-        )
+            None => self.format_node_once(syntax),
+        })
     }
 
     fn format_node_once(
@@ -219,6 +230,66 @@ where
                     .print()
                     .map_err(|err| PrettierSnapshotError::Format(err.to_string()))
             })
+    }
+
+    fn format_document(&self, source: &str) -> Result<Printed, PrettierSnapshotError> {
+        let workspace = server(Arc::new(MemoryFileSystem::default()), None);
+        let OpenProjectResult { project_key } = workspace
+            .open_project(OpenProjectParams {
+                path: BiomePath::new(""),
+                open_uninitialized: true,
+            })
+            .map_err(|error| PrettierSnapshotError::Format(error.to_string()))?;
+
+        let options = self.format_language.options();
+        let mut configuration = Configuration {
+            formatter: Some(FormatterConfiguration {
+                format_with_errors: Some(true.into()),
+                indent_style: Some(options.indent_style()),
+                indent_width: Some(options.indent_width()),
+                line_ending: Some(options.line_ending()),
+                line_width: Some(options.line_width()),
+                trailing_newline: Some(options.trailing_newline()),
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+        self.language
+            .configure_formatter(&mut configuration, &self.format_language);
+
+        workspace
+            .update_settings(UpdateSettingsParams {
+                project_key,
+                configuration,
+                workspace_directory: None,
+                extended_configurations: vec![],
+                module_graph_resolution_kind: Default::default(),
+            })
+            .map_err(|error| PrettierSnapshotError::Format(error.to_string()))?;
+
+        let path = BiomePath::new(self.test_file.input_file());
+        workspace
+            .open_file(OpenFileParams {
+                project_key,
+                path: path.clone(),
+                content: FileContent::FromClient {
+                    content: source.to_string(),
+                    version: 0,
+                },
+                document_file_source: self.document_file_source,
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            })
+            .map_err(|error| PrettierSnapshotError::Format(error.to_string()))?;
+
+        workspace
+            .format_file(FormatFileParams {
+                project_key,
+                path,
+                inline_config: None,
+            })
+            .map_err(|error| PrettierSnapshotError::Format(error.to_string()))
     }
 
     fn finish_formatted_output(
@@ -264,6 +335,11 @@ where
         syntax: &biome_rowan::SyntaxNode<L::ServiceLanguage>,
         formatted: &str,
     ) -> Result<(), PrettierSnapshotError> {
+        if self.document_file_source.is_some() {
+            let printed = self.format_document(formatted)?;
+            return Self::verify_embedded_reformat(&printed, formatted);
+        }
+
         let check_reformat = CheckReformat::new(
             syntax,
             formatted,
@@ -275,6 +351,34 @@ where
         check_reformat
             .check_reformat()
             .map_err(PrettierSnapshotError::Reformat)
+    }
+
+    /// The embed-aware counterpart of [`CheckReformat`]. The IR of a document
+    /// holding embedded snippets is assembled by the workspace rather than by a
+    /// single formatter, so there is no second IR to diff against; the printed
+    /// output is all there is to compare.
+    fn verify_embedded_reformat(
+        printed: &Printed,
+        formatted: &str,
+    ) -> Result<(), PrettierSnapshotError> {
+        if printed.as_code() == formatted {
+            return Ok(());
+        }
+
+        let mut output_diff = Vec::new();
+        similar::TextDiff::from_lines(printed.as_code(), formatted)
+            .unified_diff()
+            .header("re-formatted", "formatted")
+            .to_writer(&mut output_diff)
+            .expect("writing a diff to a buffer cannot fail");
+
+        Err(PrettierSnapshotError::Reformat(
+            ReformatError::OutputMismatch {
+                output_diff: String::from_utf8(output_diff)
+                    .expect("the diff of two strings is utf8"),
+                ir_diff: None,
+            },
+        ))
     }
 
     pub fn test(self) {

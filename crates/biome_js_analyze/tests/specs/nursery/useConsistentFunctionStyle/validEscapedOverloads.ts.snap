@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validEscapedOverloads.ts
+---
+# Input
+```ts
+// should not generate diagnostics
+function f(value: string): string;
+function \u0066(value: string) { return value; }
+
+function \u0067(value: string): string;
+function g(value: string) { return value; }
+
+export function exported(value: string): string;
+export function \u{65}xported(value: string) { return value; }
+
+function \u{10400}(value: string): string;
+function 𐐀(value: string) { return value; }
+
+```

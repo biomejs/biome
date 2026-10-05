@@ -13,23 +13,37 @@ use serde::{Deserialize, Serialize};
 
 pub type ExperimentalFullSupportEnabled = Bool<false>;
 
-/// Options applied to HTML files
+/// Options applied to HTML and languages that extend it.
+///
+/// Full HTML support and the HTML formatter are experimental. Biome aims to minimize breaking
+/// changes, but bug fixes and new features may change formatting output or diagnostics.
+///
+/// Language-specific settings take precedence over corresponding global settings. Global settings
+/// apply when their language-specific counterparts are omitted, unless stated otherwise.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct HtmlConfiguration {
-    /// Enables full support for HTML, Vue, Svelte and Astro files.
+    /// Enables Biome's experimental full support for `.html`, `.vue`, `.svelte`, and `.astro` files.
+    /// In this mode, Biome parses the complete document and can analyze or format its markup and
+    /// supported embedded languages.
+    ///
+    /// When disabled, `.vue`, `.svelte`, and `.astro` files use legacy handling, which extracts their
+    /// JavaScript or TypeScript portions and leaves the rest unchanged. This option selects how
+    /// these files are processed. It does not enable the HTML formatter. Set
+    /// `html.formatter.enabled` to `true` to format complete HTML, Vue, Svelte, and Astro files.
+    /// Defaults to `false`.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(feature = "cli", bpaf(hide))]
     pub experimental_full_support_enabled: Option<ExperimentalFullSupportEnabled>,
 
-    /// HTML parsing options
+    /// HTML parsing options.
     #[cfg_attr(feature = "cli", bpaf(hide, pure(Default::default())))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub parser: Option<HtmlParserConfiguration>,
 
-    /// HTML formatter options
+    /// HTML formatter options.
     #[cfg_attr(
         feature = "cli",
         bpaf(external(html_formatter_configuration), optional)
@@ -37,11 +51,12 @@ pub struct HtmlConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatter: Option<HtmlFormatterConfiguration>,
 
-    /// HTML linter options
+    /// HTML linter options.
     #[cfg_attr(feature = "cli", bpaf(external(html_linter_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub linter: Option<HtmlLinterConfiguration>,
 
+    /// HTML assist options.
     #[cfg_attr(feature = "cli", bpaf(external(html_assist_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub assist: Option<HtmlAssistConfiguration>,
@@ -53,30 +68,34 @@ pub type HtmlAssistEnabled = Bool<true>;
 pub type HtmlParseInterpolation = Bool<false>;
 pub type HtmlParseVue = Bool<false>;
 
-/// Options that changes how the HTML parser behaves
+/// Options that change how the HTML parser behaves.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct HtmlParserConfiguration {
-    /// Enables the parsing of double text expressions such as `{{ expression }}` inside `.html` files
+    /// Enables double-curly interpolation expressions such as `{{ expression }}` in `.html` files.
+    /// Defaults to `false`.
     pub interpolation: Option<HtmlParseInterpolation>,
 
-    /// Enables parsing of Vue syntax (v-if, v-bind, etc.) in `.html` files. If this option is enabled, it also enables `interpolation` implicitly.
+    /// Enables parsing Vue syntax (`v-if`, `v-bind`, etc.) in `.html` files. Enabling this option
+    /// also enables `interpolation` implicitly.
     ///
     /// Biome will already automatically enable Vue parsing in `.vue` files, so you probably don't need
     /// to enable this option. This only affects `.html` files, and does not change how `.vue`, `.svelte`,
-    /// or `.astro` files are parsed.
+    /// or `.astro` files are parsed. Defaults to `false`.
     pub vue: Option<HtmlParseVue>,
 }
 
-/// Options that changes how the HTML formatter behaves
+/// Options that change how the HTML formatter behaves.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct HtmlFormatterConfiguration {
-    /// Control the formatter for HTML (and its super languages) files.
+    /// Enables or disables the formatter for HTML and languages that extend it. The formatter is
+    /// experimental and disabled by default. Formatting complete HTML, Vue, Svelte, and Astro files
+    /// requires `html.experimentalFullSupportEnabled` to be `true`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("html-formatter-enabled"), argument("true|false"), optional)
@@ -84,7 +103,8 @@ pub struct HtmlFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<HtmlFormatterEnabled>,
 
-    /// The indent style applied to HTML (and its super languages) files.
+    /// The indent style applied to HTML and languages that extend it. If unset, inherits the global
+    /// indentation style.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("html-formatter-indent-style"), argument("tab|space"), optional)
@@ -92,7 +112,8 @@ pub struct HtmlFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_style: Option<IndentStyle>,
 
-    /// The size of the indentation applied to HTML (and its super languages) files. Default to 2.
+    /// The indentation width applied to HTML and languages that extend it. If unset, inherits the
+    /// global indentation width.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("html-formatter-indent-width"), argument("NUMBER"), optional)
@@ -100,7 +121,8 @@ pub struct HtmlFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_width: Option<IndentWidth>,
 
-    /// The type of line ending applied to HTML (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.
+    /// The line ending applied to HTML and languages that extend it. If unset, inherits the global
+    /// line ending.
     #[cfg_attr(
         feature = "cli",
         bpaf(
@@ -112,7 +134,8 @@ pub struct HtmlFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_ending: Option<LineEnding>,
 
-    /// What's the max width of a line applied to HTML (and its super languages) files. Defaults to 80.
+    /// The preferred maximum line width for HTML and languages that extend it. If unset, inherits
+    /// the global line width.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("html-formatter-line-width"), argument("NUMBER"), optional)
@@ -120,7 +143,8 @@ pub struct HtmlFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub line_width: Option<LineWidth>,
 
-    /// The attribute position style in HTML elements. Defaults to auto.
+    /// The attribute position style in HTML elements. If unset, inherits the global attribute
+    /// position setting.
     #[cfg_attr(
         feature = "cli",
         bpaf(
@@ -132,7 +156,10 @@ pub struct HtmlFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub attribute_position: Option<AttributePosition>,
 
-    /// Whether to hug the closing bracket of multiline HTML tags to the end of the last line, rather than being alone on the following line. Defaults to false.
+    /// Controls the placement of the closing bracket for multiline HTML opening tags. Biome places
+    /// the bracket at the end of the last attribute line when enabled and on its own line after the
+    /// last attribute when disabled. This option also affects self-closing HTML elements. If unset,
+    /// inherits the global `bracketSameLine` setting.
     #[cfg_attr(
         feature = "cli",
         bpaf(
@@ -144,7 +171,9 @@ pub struct HtmlFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub bracket_same_line: Option<BracketSameLine>,
 
-    /// Whether to account for whitespace sensitivity when formatting HTML (and its super languages). Defaults to "css".
+    /// Controls how the formatter treats whitespace around text and child elements in HTML, Vue,
+    /// Svelte, and Astro markup. The `ignore` setting should be used only when whitespace cannot
+    /// affect rendered output. Defaults to `css`.
     #[cfg_attr(
         feature = "cli",
         bpaf(
@@ -156,7 +185,8 @@ pub struct HtmlFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub whitespace_sensitivity: Option<WhitespaceSensitivity>,
 
-    /// Whether to indent the `<script>` and `<style>` tags for HTML (and its super languages). Defaults to false.
+    /// Controls whether the content of `<script>` and `<style>` tags is indented by one level in
+    /// HTML, Vue, Svelte, and Astro files. Defaults to `false`.
     #[cfg_attr(
         feature = "cli",
         bpaf(
@@ -168,7 +198,7 @@ pub struct HtmlFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub indent_script_and_style: Option<IndentScriptAndStyle>,
 
-    /// Whether void elements should be self-closed. Defaults to never.
+    /// Controls whether void elements are self-closed. Defaults to `never`.
     #[cfg_attr(
         feature = "cli",
         bpaf(
@@ -180,16 +210,9 @@ pub struct HtmlFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub self_close_void_elements: Option<SelfCloseVoidElements>,
 
-    /// Whether to add a trailing newline at the end of the file.
-    ///
-    /// Setting this option to `false` is **highly discouraged** because it could cause many problems with other tools:
-    /// - https://thoughtbot.com/blog/no-newline-at-end-of-file
-    /// - https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804
-    /// - https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files
-    ///
-    /// Disable the option at your own risk.
-    ///
-    /// Defaults to true.
+    /// Whether to add a trailing newline at the end of the file. Unlike other language-specific
+    /// trailing newline settings, this option defaults to `true` instead of inheriting the global
+    /// setting.
     #[cfg_attr(
         feature = "cli",
         bpaf(
@@ -202,13 +225,13 @@ pub struct HtmlFormatterConfiguration {
     pub trailing_newline: Option<TrailingNewline>,
 }
 
-/// Options that changes how the HTML linter behaves
+/// Options that change how the HTML linter behaves.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct HtmlLinterConfiguration {
-    /// Control the linter for HTML (and its super languages) files.
+    /// Enables or disables the linter for HTML and languages that extend it.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("html-linter-enabled"), argument("true|false"), optional)
@@ -217,13 +240,13 @@ pub struct HtmlLinterConfiguration {
     pub enabled: Option<HtmlLinterEnabled>,
 }
 
-/// Options that changes how the HTML assist behaves
+/// Options that change how HTML assist behaves.
 #[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct HtmlAssistConfiguration {
-    /// Control the assist for HTML (and its super languages) files.
+    /// Enables or disables assist actions for HTML and languages that extend it.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("html-assist-enabled"), argument("true|false"))

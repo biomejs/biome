@@ -10,32 +10,26 @@ use biome_diagnostics::Applicability;
 use biome_html_syntax::{
     AnyAstroDirective, AnyHtmlAttribute, AnySvelteBindingProperty, AnySvelteDirective,
     AnyVueDirective, AnyVueDirectiveArgument, AstroDirectiveValue, HtmlAttributeList, HtmlLanguage,
-    HtmlOpeningElement, HtmlSelfClosingElement, SvelteDirectiveValue,
+    HtmlOpeningElement, HtmlProcessingInstruction, HtmlSelfClosingElement, SvelteDirectiveValue,
 };
 use biome_rowan::{AstNode, AstNodeExt, BatchMutationExt, SyntaxToken};
 use biome_rule_options::use_sorted_attributes::{SortOrder, UseSortedAttributesOptions};
 use std::{borrow::Cow, cmp::Ordering, iter::zip};
 
 declare_source_rule! {
-    /// Enforce attribute sorting in HTML elements.
+    /// Sort HTML attributes and framework directives into a consistent order.
     ///
-    /// This rule checks if HTML attributes, along with Astro, Svelte, and Vue directives,
-    /// are sorted in a consistent way.
-    /// The sort order is:
-    /// - Regular HTML attributes, sorted alphabetically according to the `sortOrder` option
-    /// - Astro directives, sorted alphabetically according to `sortOrder`
-    /// - Svelte directives, sorted according to eslint-plugin-svelte's [`sort-attributes` rule](https://sveltejs.github.io/eslint-plugin-svelte/rules/sort-attributes/)
-    /// - Vue directives, sorted according to the [Vue.js Style Guide](https://eslint.vuejs.org/rules/attributes-order)
+    /// Regular HTML attributes and Astro directives are sorted by name. Svelte directives follow
+    /// the order from eslint-plugin-svelte's
+    /// [`sort-attributes` rule](https://sveltejs.github.io/eslint-plugin-svelte/rules/sort-attributes/),
+    /// and Vue directives follow the
+    /// [Vue attribute-order convention](https://eslint.vuejs.org/rules/attributes-order).
+    /// Attributes within the same category use the configured `sortOrder`.
     ///
-    /// If two attributes belong to the same category, they will be sorted alphabetically
-    /// according to `sortOrder`.
-    ///
-    /// This rule will not consider spread props or the [Vue `v-bind="object"` syntax](https://vuejs.org/guide/essentials/template-syntax.html#dynamically-binding-multiple-attributes)
-    /// as sortable.
-    /// Instead, it will sort each group of consecutive sortable attributes within the element,
-    /// leaving any spread props or `v-bind="object"` attributes in place.
-    /// This prevents breaking the override of certain props using spread
-    /// props or `v-bind="object"`.
+    /// A spread attribute or Vue's
+    /// [`v-bind="object"`](https://vuejs.org/guide/essentials/template-syntax.html#dynamically-binding-multiple-attributes)
+    /// can provide or replace several attributes. The action leaves each spread in place and sorts
+    /// only the consecutive attributes on either side, preserving override behavior.
     ///
     /// ## Examples
     ///
@@ -93,18 +87,13 @@ declare_source_rule! {
     ///
     /// ## Options
     ///
-    /// The following options are available
-    ///
     /// ### `sortOrder`
-    /// The sort ordering to enforce.
-    /// Values:
     ///
-    /// - `"[natural](https://en.wikipedia.org/wiki/Natural_sort_order)"`
-    /// - `"[lexicographic](https://en.wikipedia.org/wiki/Lexicographic_order)"`
+    /// Selects `natural` or `lexicographic` ordering. Natural ordering compares numbers by value,
+    /// so `data-2` comes before `data-11`, and is the default. Lexicographic ordering compares names
+    /// character by character.
     ///
-    /// Default: `"natural"`
-    ///
-    /// #### Examples for `"sortOrder": "lexicographic"`
+    /// The following configuration uses lexicographic order:
     ///
     /// ```json,options
     /// {
@@ -113,7 +102,7 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
-    /// ```html,use_options,expect_diagnostic
+    /// ```html,use_options,expect_diff
     /// <textarea id="mytextarea" name="textarea" rows="5" cols="20" data-1="" data-2="" data-11="" data-12="">Hello, world!</textarea>
     /// ```
     ///
@@ -135,6 +124,17 @@ impl Rule for UseSortedAttributes {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let attrs = ctx.query();
+
+        if attrs
+            .syntax()
+            .ancestors()
+            .skip(1)
+            .find_map(HtmlProcessingInstruction::cast)
+            .is_some()
+        {
+            return vec![].into_boxed_slice();
+        }
+
         let options = ctx.options();
 
         let mut current_attr_group = AttributeGroup::default();
@@ -364,30 +364,31 @@ impl SortableHtmlAttribute {
                 }
             }
             AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueVBindShorthandDirective(dir)) => {
-                if let Ok(arg) = dir.arg().and_then(|arg| arg.arg()) {
-                    match arg {
-                        AnyVueDirectiveArgument::VueBogusDirectiveArgument(_) => {
-                            SortCategory::Unknown
-                        }
-                        AnyVueDirectiveArgument::VueDynamicArgument(_) => {
-                            SortCategory::VueOtherAttribute
-                        }
-                        AnyVueDirectiveArgument::VueStaticArgument(arg) => {
-                            if let Ok(arg_name) =
-                                arg.name_token().as_ref().map(|token| token.text_trimmed())
-                            {
-                                match arg_name {
-                                    "is" => SortCategory::VueDefinition,
-                                    "key" => SortCategory::VueUnique,
-                                    _ => SortCategory::VueOtherAttribute,
-                                }
-                            } else {
-                                SortCategory::VueCustomDirective
+                let Ok(directive_arg) = dir.arg() else {
+                    return SortCategory::VueCustomDirective;
+                };
+                // Argument-less `:="props"` is equivalent to `v-bind="props"`.
+                let Some(arg) = directive_arg.arg() else {
+                    return SortCategory::VueOtherAttribute;
+                };
+                match arg {
+                    AnyVueDirectiveArgument::VueBogusDirectiveArgument(_) => SortCategory::Unknown,
+                    AnyVueDirectiveArgument::VueDynamicArgument(_) => {
+                        SortCategory::VueOtherAttribute
+                    }
+                    AnyVueDirectiveArgument::VueStaticArgument(arg) => {
+                        if let Ok(arg_name) =
+                            arg.name_token().as_ref().map(|token| token.text_trimmed())
+                        {
+                            match arg_name {
+                                "is" => SortCategory::VueDefinition,
+                                "key" => SortCategory::VueUnique,
+                                _ => SortCategory::VueOtherAttribute,
                             }
+                        } else {
+                            SortCategory::VueCustomDirective
                         }
                     }
-                } else {
-                    SortCategory::VueCustomDirective
                 }
             }
             AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueVOnShorthandDirective(_)) => {
@@ -485,13 +486,12 @@ impl SortableAttribute for SortableHtmlAttribute {
                     "v-on" | "v-bind" | "v-slot" => dir
                         .arg()?
                         .arg()
-                        .ok()
                         .and_then(|arg| vue_directive_arg_token(&arg)),
                     _ => dir.name_token().ok(),
                 }
             }
             AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueVBindShorthandDirective(dir)) => {
-                vue_directive_arg_token(&dir.arg().ok()?.arg().ok()?)
+                vue_directive_arg_token(&dir.arg().ok()?.arg()?)
             }
             AnyHtmlAttribute::AnyVueDirective(AnyVueDirective::VueVSlotShorthandDirective(dir)) => {
                 vue_directive_arg_token(&dir.arg().ok()?)

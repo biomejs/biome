@@ -1,3 +1,8 @@
+//! Collects raw type information from one JavaScript or TypeScript syntax tree.
+//!
+//! This pass records local declarations, expressions, and references. Database
+//! queries resolve imports and turn these raw entries into inferred types later.
+
 use std::borrow::Cow;
 use std::str::FromStr;
 
@@ -10,41 +15,45 @@ use biome_js_syntax::{
     AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyTsModuleName, AnyTsName,
     AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
-    JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArguments,
-    JsClassDeclaration, JsClassExportDefaultDeclaration, JsClassExpression, JsClassMemberList,
-    JsConstructorParameters, JsExtendsClause, JsForInStatement, JsForOfStatement,
-    JsForVariableDeclaration, JsFormalParameter, JsFunctionBody, JsFunctionDeclaration,
-    JsFunctionExpression, JsGetterObjectMember, JsInitializerClause, JsLogicalExpression,
-    JsLogicalOperator, JsMethodObjectMember, JsNewExpression, JsObjectBindingPattern,
-    JsObjectExpression, JsParameters, JsPropertyClassMember, JsPropertyObjectMember,
+    JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArgumentList,
+    JsCallArguments, JsCallExpression, JsClassDeclaration, JsClassExportDefaultDeclaration,
+    JsClassExpression, JsClassMemberList, JsConstructorParameters, JsExtendsClause,
+    JsForInStatement, JsForOfStatement, JsForVariableDeclaration, JsFormalParameter,
+    JsFunctionBody, JsFunctionDeclaration, JsFunctionExpression, JsGetterObjectMember,
+    JsInitializerClause, JsLogicalExpression, JsLogicalOperator, JsMethodObjectMember,
+    JsNewExpression, JsObjectBindingPattern, JsObjectExpression, JsParameterList, JsParameters,
+    JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember,
     JsReferenceIdentifier, JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsSyntaxKind,
     JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
     JsVariableDeclarator, TsDeclareFunctionDeclaration, TsExternalModuleDeclaration,
-    TsInstantiationExpression, TsInterfaceDeclaration, TsModuleDeclaration,
+    TsInstantiationExpression, TsInterfaceDeclaration, TsMappedType, TsModuleDeclaration,
     TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
     TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter,
     TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
-use biome_rowan::{AstNode, SyntaxResult, Text, TextRange, TokenText};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxResult, Text, TextRange, TokenText};
+use rustc_hash::FxHashMap;
 
 use crate::globals::{
-    GLOBAL_GLOBAL_ID, GLOBAL_INSTANCEOF_PROMISE_ID, GLOBAL_NUMBER_ID, GLOBAL_STRING_ID,
-    GLOBAL_UNDEFINED_ID,
+    GLOBAL_GLOBAL_ID, GLOBAL_INSTANCEOF_PROMISE_ID, GLOBAL_NUMBER_KEYWORD_ID,
+    GLOBAL_STRING_KEYWORD_ID, GLOBAL_UNDEFINED_ID,
 };
 use crate::literal::{BooleanLiteral, NumberLiteral, RegexpLiteral, StringLiteral};
 use crate::{
     AssertsReturnType, CallArgumentType, Class, Constructor, ConstructorParameter,
     DestructureField, Function, FunctionParameter, FunctionParameterBinding, GenericTypeParameter,
-    Interface, Literal, Module, NamedFunctionParameter, Namespace, Object, Path,
-    PatternFunctionParameter, PredicateReturnType, ResolvedTypeId, ReturnType, ScopeId, Tuple,
-    TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberAccessibility, TypeMemberKind,
-    TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier, TypeResolver,
+    IndexedAccessType, Interface, Intersection, Literal, MappedType, MappedTypeKeys,
+    MappedTypeModifier, Module, NamedFunctionParameter, Namespace, Object, Path,
+    PatternFunctionParameter, PredicateReturnType, RawTypeCollector, RawTypeId, ReturnType,
+    ScopeId, Tuple, TupleElementType, TypeData, TypeInstance, TypeMember, TypeMemberAccessibility,
+    TypeMemberKind, TypeOperator, TypeOperatorType, TypeReference, TypeReferenceQualifier,
     TypeofAdditionExpression, TypeofAwaitExpression, TypeofBitwiseNotExpression,
-    TypeofCallExpression, TypeofConditionalExpression, TypeofDestructureExpression,
-    TypeofExpression, TypeofIndexExpression, TypeofIterableValueOfExpression,
-    TypeofLogicalAndExpression, TypeofLogicalOrExpression, TypeofNewExpression,
-    TypeofNullishCoalescingExpression, TypeofStaticMemberExpression, TypeofThisOrSuperExpression,
-    TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue,
+    TypeofCallArgumentExpression, TypeofCallExpression, TypeofComputedMemberExpression,
+    TypeofConditionalExpression, TypeofDestructureExpression, TypeofExpression,
+    TypeofIndexExpression, TypeofIterableValueOfExpression, TypeofLogicalAndExpression,
+    TypeofLogicalOrExpression, TypeofNewExpression, TypeofNullishCoalescingExpression,
+    TypeofParameterExpression, TypeofStaticMemberExpression, TypeofThisOrSuperExpression,
+    TypeofTypeofExpression, TypeofUnaryMinusExpression, TypeofValue, Union,
 };
 
 const MAX_CONST_ASSERTION_DEPTH: usize = 50;
@@ -54,7 +63,7 @@ impl TypeData {
     /// associated types.
     pub fn apply_array_binding_pattern(
         &self,
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         pattern: &JsArrayBindingPattern,
     ) -> Box<[(Text, TypeReference)]> {
@@ -64,7 +73,7 @@ impl TypeData {
             .enumerate()
             .filter_map(|(i, elem)| elem.ok().map(|elem| (i, elem)))
             .filter_map(|(i, elem)| {
-                self.apply_array_binding_pattern_element(resolver, scope_id, i, elem)
+                self.apply_array_binding_pattern_element(collector, scope_id, i, elem)
             })
             .flatten()
             .collect()
@@ -72,12 +81,12 @@ impl TypeData {
 
     fn apply_array_binding_pattern_element(
         &self,
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         i: usize,
         elem: AnyJsArrayBindingPatternElement,
     ) -> Option<Box<[(Text, TypeReference)]>> {
-        let reference = resolver.reference_to_registered_data(self);
+        let reference = collector.reference_to_registered_data(self);
         match elem {
             AnyJsArrayBindingPatternElement::JsArrayBindingPatternElement(elem) => {
                 match elem.pattern().ok()? {
@@ -86,7 +95,7 @@ impl TypeData {
                         let name = text_from_token(binding.name_token())?;
                         Box::new([(
                             name,
-                            resolver.reference_to_owned_data(Self::destructuring_of(
+                            collector.reference_to_owned_data(Self::destructuring_of(
                                 reference,
                                 DestructureField::Index(i),
                             )),
@@ -94,11 +103,11 @@ impl TypeData {
                     }),
                     AnyJsBindingPattern::JsArrayBindingPattern(pattern) => Some({
                         let data = Self::destructuring_of(reference, DestructureField::Index(i));
-                        data.apply_array_binding_pattern(resolver, scope_id, &pattern)
+                        data.apply_array_binding_pattern(collector, scope_id, &pattern)
                     }),
                     AnyJsBindingPattern::JsObjectBindingPattern(pattern) => Some({
                         let data = Self::destructuring_of(reference, DestructureField::Index(i));
-                        data.apply_object_binding_pattern(resolver, scope_id, &pattern)
+                        data.apply_object_binding_pattern(collector, scope_id, &pattern)
                     }),
                 }
             }
@@ -109,7 +118,7 @@ impl TypeData {
                         let name = text_from_token(binding.name_token())?;
                         Box::new([(
                             name,
-                            resolver.reference_to_owned_data(Self::destructuring_of(
+                            collector.reference_to_owned_data(Self::destructuring_of(
                                 reference,
                                 DestructureField::RestFrom(i),
                             )),
@@ -117,7 +126,7 @@ impl TypeData {
                     }),
                     AnyJsBindingPattern::JsArrayBindingPattern(pattern) => Some({
                         let data = Self::destructuring_of(reference, DestructureField::RestFrom(i));
-                        data.apply_array_binding_pattern(resolver, scope_id, &pattern)
+                        data.apply_array_binding_pattern(collector, scope_id, &pattern)
                     }),
                     AnyJsBindingPattern::JsObjectBindingPattern(_pattern) => {
                         // An array rest element destructures into another array,
@@ -135,7 +144,7 @@ impl TypeData {
     /// associated types.
     pub fn apply_object_binding_pattern(
         &self,
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         pattern: &JsObjectBindingPattern,
     ) -> Box<[(Text, TypeReference)]> {
@@ -181,7 +190,7 @@ impl TypeData {
                     names.push(name.clone());
                 }
 
-                self.apply_object_binding_pattern_member(resolver, scope_id, &names, name, member)
+                self.apply_object_binding_pattern_member(collector, scope_id, &names, name, member)
             })
             .flatten()
             .collect()
@@ -189,13 +198,13 @@ impl TypeData {
 
     fn apply_object_binding_pattern_member(
         &self,
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         names: &[Text],
         member_name: Option<Text>,
         member: AnyJsObjectBindingPatternMember,
     ) -> Option<Box<[(Text, TypeReference)]>> {
-        let reference = resolver.reference_to_registered_data(self);
+        let reference = collector.reference_to_registered_data(self);
         match member {
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(prop) => {
                 let member_name = member_name?;
@@ -205,7 +214,7 @@ impl TypeData {
                         let name = text_from_token(binding.name_token())?;
                         Box::new([(
                             name,
-                            resolver.reference_to_owned_data(Self::destructuring_of(
+                            collector.reference_to_owned_data(Self::destructuring_of(
                                 reference,
                                 DestructureField::Name(member_name),
                             )),
@@ -214,12 +223,12 @@ impl TypeData {
                     AnyJsBindingPattern::JsArrayBindingPattern(pattern) => Some({
                         let data =
                             Self::destructuring_of(reference, DestructureField::Name(member_name));
-                        data.apply_array_binding_pattern(resolver, scope_id, &pattern)
+                        data.apply_array_binding_pattern(collector, scope_id, &pattern)
                     }),
                     AnyJsBindingPattern::JsObjectBindingPattern(pattern) => Some({
                         let data =
                             Self::destructuring_of(reference, DestructureField::Name(member_name));
-                        data.apply_object_binding_pattern(resolver, scope_id, &pattern)
+                        data.apply_object_binding_pattern(collector, scope_id, &pattern)
                     }),
                 }
             }
@@ -227,7 +236,7 @@ impl TypeData {
                 let member_name = member_name?;
                 Box::new([(
                     member_name.clone(),
-                    resolver.reference_to_owned_data(Self::destructuring_of(
+                    collector.reference_to_owned_data(Self::destructuring_of(
                         reference,
                         DestructureField::Name(member_name),
                     )),
@@ -239,7 +248,7 @@ impl TypeData {
                 let name = text_from_token(binding.name_token())?;
                 Box::new([(
                     name,
-                    resolver.reference_to_owned_data(Self::destructuring_of(
+                    collector.reference_to_owned_data(Self::destructuring_of(
                         reference,
                         DestructureField::RestExcept(names.iter().cloned().collect()),
                     )),
@@ -260,16 +269,16 @@ impl TypeData {
     }
 
     pub fn from_any_js_declaration(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &AnyJsDeclaration,
     ) -> Self {
         match decl {
             AnyJsDeclaration::JsClassDeclaration(decl) => {
-                Self::from_js_class_declaration(resolver, scope_id, decl)
+                Self::from_js_class_declaration(collector, scope_id, decl)
             }
             AnyJsDeclaration::JsFunctionDeclaration(decl) => {
-                Self::from_js_function_declaration(resolver, scope_id, decl)
+                Self::from_js_function_declaration(collector, scope_id, decl)
             }
             AnyJsDeclaration::JsVariableDeclaration(_) => {
                 // Variable declarations don't have a type;
@@ -277,7 +286,7 @@ impl TypeData {
                 Self::unknown()
             }
             AnyJsDeclaration::TsDeclareFunctionDeclaration(decl) => {
-                Self::from_ts_declare_function_declaration(resolver, scope_id, decl)
+                Self::from_ts_declare_function_declaration(collector, scope_id, decl)
             }
             AnyJsDeclaration::TsEnumDeclaration(_decl) => {
                 // TODO: Handle enum declarations.
@@ -295,29 +304,29 @@ impl TypeData {
                 Self::unknown()
             }
             AnyJsDeclaration::TsInterfaceDeclaration(decl) => {
-                Self::from_ts_interface_declaration(resolver, scope_id, decl).unwrap_or_default()
+                Self::from_ts_interface_declaration(collector, scope_id, decl).unwrap_or_default()
             }
             AnyJsDeclaration::TsModuleDeclaration(decl) => {
                 Self::from_ts_module_declaration(decl).unwrap_or_default()
             }
             AnyJsDeclaration::TsTypeAliasDeclaration(decl) => {
-                Self::from_ts_type_alias_declaration(resolver, scope_id, decl).unwrap_or_default()
+                Self::from_ts_type_alias_declaration(collector, scope_id, decl).unwrap_or_default()
             }
         }
     }
 
     pub fn from_any_js_declaration_clause(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: AnyJsDeclarationClause,
     ) -> Self {
         decl.into_declaration()
-            .map(|decl| Self::from_any_js_declaration(resolver, scope_id, &decl))
+            .map(|decl| Self::from_any_js_declaration(collector, scope_id, &decl))
             .unwrap_or_default()
     }
 
     pub fn from_any_js_export_default_declaration(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &AnyJsExportDefaultDeclaration,
     ) -> Self {
@@ -334,30 +343,25 @@ impl TypeData {
                         .type_parameters()
                         .map(|params| {
                             TypeReference::types_from_ts_type_parameters(
-                                resolver, scope_id, &params,
+                                collector, scope_id, &params,
                             )
                         })
                         .unwrap_or_default(),
                     extends: decl.extends_clause().and_then(|extends| {
-                        reference_to_extends_clause(resolver, scope_id, extends)
+                        reference_to_extends_clause(collector, scope_id, extends)
                     }),
                     implements: decl
                         .implements_clause()
                         .map(|implements| {
                             TypeReference::types_from_ts_type_list(
-                                resolver,
+                                collector,
                                 scope_id,
                                 implements.types(),
                             )
                         })
                         .unwrap_or_default(),
-                    members: decl
-                        .members()
-                        .into_iter()
-                        .filter_map(|member| {
-                            TypeMember::from_any_js_class_member(resolver, scope_id, &member)
-                        })
-                        .collect(),
+                    members: TypeMember::collect_class_members(collector, scope_id, decl.members())
+                        .into_boxed_slice(),
                 }))
             }
             AnyJsExportDefaultDeclaration::JsFunctionExportDefaultDeclaration(decl) => {
@@ -365,7 +369,7 @@ impl TypeData {
                 Self::Function(Box::new(Function {
                     is_async,
                     type_parameters: generic_params_from_ts_type_params(
-                        resolver,
+                        collector,
                         scope_id,
                         decl.type_parameters(),
                     ),
@@ -376,12 +380,12 @@ impl TypeData {
                         .and_then(|id| id.name_token().ok())
                         .map(|token| token.token_text_trimmed().into()),
                     parameters: function_params_from_js_params(
-                        resolver,
+                        collector,
                         scope_id,
                         decl.parameters(),
                     ),
                     return_type: function_return_type(
-                        resolver,
+                        collector,
                         scope_id,
                         is_async,
                         decl.return_type_annotation(),
@@ -394,7 +398,7 @@ impl TypeData {
                 Self::Function(Box::new(Function {
                     is_async,
                     type_parameters: generic_params_from_ts_type_params(
-                        resolver,
+                        collector,
                         scope_id,
                         decl.type_parameters(),
                     ),
@@ -405,12 +409,12 @@ impl TypeData {
                         .and_then(|id| id.name_token().ok())
                         .map(|token| token.token_text_trimmed().into()),
                     parameters: function_params_from_js_params(
-                        resolver,
+                        collector,
                         scope_id,
                         decl.parameters(),
                     ),
                     return_type: function_return_type(
-                        resolver,
+                        collector,
                         scope_id,
                         is_async,
                         decl.return_type_annotation(),
@@ -426,7 +430,7 @@ impl TypeData {
     }
 
     pub fn from_any_js_expression(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         expr: &AnyJsExpression,
     ) -> Self {
@@ -434,12 +438,13 @@ impl TypeData {
             AnyJsExpression::AnyJsLiteralExpression(expr) => {
                 Self::from_any_js_literal_expression(expr).unwrap_or_default()
             }
-            AnyJsExpression::JsArrayExpression(expr) => Self::Tuple(Box::new(Tuple(
-                expr.elements()
+            AnyJsExpression::JsArrayExpression(expr) => Self::Tuple(Box::new(Tuple {
+                elements: expr
+                    .elements()
                     .into_iter()
                     .filter_map(|el| match el {
                         Ok(AnyJsArrayElement::AnyJsExpression(expr)) => Some(TupleElementType {
-                            ty: resolver.reference_to_resolved_expression(scope_id, &expr),
+                            ty: collector.reference_to_resolved_expression(scope_id, &expr),
                             name: None,
                             is_optional: false,
                             is_rest: false,
@@ -447,7 +452,7 @@ impl TypeData {
                         Ok(AnyJsArrayElement::JsSpread(spread)) => spread
                             .argument()
                             .ok()
-                            .map(|expr| resolver.reference_to_resolved_expression(scope_id, &expr))
+                            .map(|expr| collector.reference_to_resolved_expression(scope_id, &expr))
                             .map(|ty| TupleElementType {
                                 ty,
                                 name: None,
@@ -462,26 +467,27 @@ impl TypeData {
                         }),
                     })
                     .collect(),
-            ))),
+                is_inferred_array: true,
+            })),
             AnyJsExpression::JsArrowFunctionExpression(expr) => {
-                Self::from_js_arrow_function_expression(resolver, scope_id, expr)
+                Self::from_js_arrow_function_expression(collector, scope_id, expr)
             }
             AnyJsExpression::JsAwaitExpression(expr) => {
                 Self::from(TypeofExpression::Await(TypeofAwaitExpression {
                     argument: expr
                         .argument()
-                        .map(|arg| resolver.reference_to_resolved_expression(scope_id, &arg))
+                        .map(|arg| collector.reference_to_resolved_expression(scope_id, &arg))
                         .unwrap_or_default(),
                 }))
             }
             AnyJsExpression::JsBinaryExpression(expr) => {
-                Self::from_js_binary_expression(resolver, scope_id, expr)
+                Self::from_js_binary_expression(collector, scope_id, expr)
             }
             AnyJsExpression::JsCallExpression(expr) => match expr.callee() {
                 Ok(callee) => Self::from(TypeofExpression::Call(TypeofCallExpression {
-                    callee: resolver.reference_to_resolved_expression(scope_id, &callee),
+                    callee: callee_reference(collector, scope_id, &callee, expr.type_arguments()),
                     arguments: CallArgumentType::types_from_js_call_arguments(
-                        resolver,
+                        collector,
                         scope_id,
                         expr.arguments().ok(),
                     ),
@@ -489,7 +495,7 @@ impl TypeData {
                 Err(_) => Self::unknown(),
             },
             AnyJsExpression::JsClassExpression(expr) => {
-                Self::from_js_class_expression(resolver, scope_id, expr)
+                Self::from_js_class_expression(collector, scope_id, expr)
             }
             AnyJsExpression::JsComputedMemberExpression(expr) => {
                 match (expr.object(), expr.member()) {
@@ -500,13 +506,16 @@ impl TypeData {
                         )),
                     ) => unescaped_text_from_token(member.value_token())
                         .map(|member| {
-                            Self::from(TypeofExpression::StaticMember(
-                                TypeofStaticMemberExpression {
-                                    object: resolver
-                                        .reference_to_resolved_expression(scope_id, &object),
-                                    member,
-                                },
-                            ))
+                            let expression = TypeofStaticMemberExpression {
+                                object: collector
+                                    .reference_to_resolved_expression(scope_id, &object),
+                                member,
+                            };
+                            Self::from(if expr.is_optional_chain() {
+                                TypeofExpression::OptionalChainStaticMember(expression)
+                            } else {
+                                TypeofExpression::StaticMember(expression)
+                            })
                         })
                         .unwrap_or_default(),
                     (
@@ -517,15 +526,27 @@ impl TypeData {
                     ) => unescaped_text_from_token(member.value_token())
                         .map(|member| match member.parse() {
                             Ok(index) => {
-                                Self::from(TypeofExpression::Index(TypeofIndexExpression {
-                                    object: resolver
+                                let expression = TypeofIndexExpression {
+                                    object: collector
                                         .reference_to_resolved_expression(scope_id, &object),
                                     index,
-                                }))
+                                };
+                                Self::from(if expr.is_optional_chain() {
+                                    TypeofExpression::OptionalChainIndex(expression)
+                                } else {
+                                    TypeofExpression::Index(expression)
+                                })
                             }
                             Err(_) => Self::unknown(),
                         })
                         .unwrap_or_default(),
+                    (Ok(object), Ok(member)) => Self::from(TypeofExpression::ComputedMember(
+                        TypeofComputedMemberExpression {
+                            object: collector.reference_to_resolved_expression(scope_id, &object),
+                            member: collector.reference_to_resolved_expression(scope_id, &member),
+                            is_optional_chain: expr.is_optional_chain(),
+                        },
+                    )),
                     _ => Self::unknown(),
                 }
             }
@@ -533,20 +554,20 @@ impl TypeData {
                 Self::from(TypeofExpression::Conditional(TypeofConditionalExpression {
                     test: expr
                         .test()
-                        .map(|sub| resolver.reference_to_resolved_expression(scope_id, &sub))
+                        .map(|sub| collector.reference_to_resolved_expression(scope_id, &sub))
                         .unwrap_or_default(),
                     consequent: expr
                         .consequent()
-                        .map(|sub| resolver.reference_to_resolved_expression(scope_id, &sub))
+                        .map(|sub| collector.reference_to_resolved_expression(scope_id, &sub))
                         .unwrap_or_default(),
                     alternate: expr
                         .alternate()
-                        .map(|sub| resolver.reference_to_resolved_expression(scope_id, &sub))
+                        .map(|sub| collector.reference_to_resolved_expression(scope_id, &sub))
                         .unwrap_or_default(),
                 }))
             }
             AnyJsExpression::JsFunctionExpression(expr) => {
-                Self::from_js_function_expression(resolver, scope_id, expr)
+                Self::from_js_function_expression(collector, scope_id, expr)
             }
             AnyJsExpression::JsIdentifierExpression(expr) => expr
                 .name()
@@ -557,41 +578,37 @@ impl TypeData {
             }
             AnyJsExpression::JsInstanceofExpression(_expr) => Self::Boolean,
             AnyJsExpression::JsLogicalExpression(expr) => {
-                Self::from_js_logical_expression(resolver, scope_id, expr).unwrap_or_default()
+                Self::from_js_logical_expression(collector, scope_id, expr).unwrap_or_default()
             }
             AnyJsExpression::JsNewExpression(expr) => {
-                Self::from_js_new_expression(resolver, scope_id, expr).unwrap_or_default()
+                Self::from_js_new_expression(collector, scope_id, expr).unwrap_or_default()
             }
-            AnyJsExpression::JsObjectExpression(expr) => Self::object_with_members(
-                expr.members()
-                    .into_iter()
-                    .flatten()
-                    .filter_map(|member| {
-                        TypeMember::from_any_js_object_member(resolver, scope_id, &member)
-                    })
-                    .collect(),
-            ),
+            AnyJsExpression::JsObjectExpression(expr) => {
+                Self::from_js_object_expression(collector, scope_id, expr)
+            }
             AnyJsExpression::JsParenthesizedExpression(expr) => expr
                 .expression()
-                .map(|expr| resolver.resolve_expression(scope_id, &expr).into_owned())
+                .map(|expr| collector.resolve_expression(scope_id, &expr).into_owned())
                 .unwrap_or_default(),
             AnyJsExpression::JsPostUpdateExpression(_)
             | AnyJsExpression::JsPreUpdateExpression(_) => Self::number(),
             AnyJsExpression::JsSequenceExpression(expr) => expr
                 .right()
-                .map(|expr| resolver.resolve_expression(scope_id, &expr).into_owned())
+                .map(|expr| collector.resolve_expression(scope_id, &expr).into_owned())
                 .unwrap_or_default(),
             AnyJsExpression::JsStaticMemberExpression(expr) => match (expr.object(), expr.member())
             {
                 (Ok(object), Ok(member)) => text_from_any_js_name(member)
                     .map(|member| {
-                        Self::from(TypeofExpression::StaticMember(
-                            TypeofStaticMemberExpression {
-                                object: resolver
-                                    .reference_to_resolved_expression(scope_id, &object),
-                                member,
-                            },
-                        ))
+                        let expression = TypeofStaticMemberExpression {
+                            object: collector.reference_to_resolved_expression(scope_id, &object),
+                            member,
+                        };
+                        Self::from(if expr.is_optional_chain() {
+                            TypeofExpression::OptionalChainStaticMember(expression)
+                        } else {
+                            TypeofExpression::StaticMember(expression)
+                        })
                     })
                     .unwrap_or_default(),
                 _ => Self::unknown(),
@@ -610,13 +627,21 @@ impl TypeData {
                     return Self::unknown();
                 };
                 if is_const_reference_type(&annotation) {
-                    type_data_from_const_assertion_expression(resolver, scope_id, &inner)
+                    type_data_from_const_assertion_expression(collector, scope_id, &inner)
                 } else {
-                    Self::from_any_ts_type(resolver, scope_id, &annotation)
+                    let ty = Self::from_any_ts_type(collector, scope_id, &annotation);
+                    if matches!(ty, Self::Object(_) | Self::Tuple(_)) {
+                        // Keep asserted shapes behind a reference so const inference
+                        // does not mistake the annotation for a fresh literal.
+                        Self::Reference(collector.reference_to_owned_data(ty))
+                    } else {
+                        ty
+                    }
                 }
             }
             AnyJsExpression::TsInstantiationExpression(expr) => {
-                Self::from_ts_instantiation_expression(resolver, scope_id, expr).unwrap_or_default()
+                Self::from_ts_instantiation_expression(collector, scope_id, expr)
+                    .unwrap_or_default()
             }
             AnyJsExpression::TsTypeAssertionExpression(expr) => {
                 let Ok(annotation) = expr.ty() else {
@@ -626,13 +651,20 @@ impl TypeData {
                     return Self::unknown();
                 };
                 if is_const_reference_type(&annotation) {
-                    type_data_from_const_assertion_expression(resolver, scope_id, &inner)
+                    type_data_from_const_assertion_expression(collector, scope_id, &inner)
                 } else {
-                    Self::from_any_ts_type(resolver, scope_id, &annotation)
+                    let ty = Self::from_any_ts_type(collector, scope_id, &annotation);
+                    if matches!(ty, Self::Object(_) | Self::Tuple(_)) {
+                        // Keep asserted shapes behind a reference so const inference
+                        // does not mistake the annotation for a fresh literal.
+                        Self::Reference(collector.reference_to_owned_data(ty))
+                    } else {
+                        ty
+                    }
                 }
             }
             AnyJsExpression::JsUnaryExpression(expr) => {
-                Self::from_js_unary_expression(resolver, scope_id, expr)
+                Self::from_js_unary_expression(collector, scope_id, expr)
             }
             _ => {
                 // TODO: Much
@@ -665,7 +697,7 @@ impl TypeData {
     }
 
     pub fn from_any_ts_type(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         ty: &AnyTsType,
     ) -> Self {
@@ -675,7 +707,7 @@ impl TypeData {
             AnyTsType::TsArrayType(ty) => Self::array_of(
                 scope_id,
                 ty.element_type()
-                    .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
+                    .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
                     .unwrap_or_default(),
             ),
             AnyTsType::TsBigintLiteralType(ty) => match (ty.minus_token(), ty.literal_token()) {
@@ -690,9 +722,15 @@ impl TypeData {
             AnyTsType::TsBigintType(_) => Self::BigInt,
             AnyTsType::TsBogusType(_) => Self::unknown(),
             AnyTsType::TsBooleanLiteralType(ty) => match ty.literal() {
-                Ok(token) => Self::Literal(Box::new(Literal::Boolean(
-                    BooleanLiteral::parse(token.text_trimmed()).unwrap(),
-                ))),
+                Ok(token) => match token.kind() {
+                    JsSyntaxKind::TRUE_KW => {
+                        Self::Literal(Box::new(Literal::Boolean(BooleanLiteral::from(true))))
+                    }
+                    JsSyntaxKind::FALSE_KW => {
+                        Self::Literal(Box::new(Literal::Boolean(BooleanLiteral::from(false))))
+                    }
+                    _ => Self::unknown(),
+                },
                 Err(_) => Self::unknown(),
             },
             AnyTsType::TsBooleanType(_) => Self::Boolean,
@@ -701,94 +739,107 @@ impl TypeData {
                 // infer a union of both the possibilities.
                 let types = Box::new([
                     ty.true_type()
-                        .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
+                        .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
                         .unwrap_or_default(),
                     ty.false_type()
-                        .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
+                        .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
                         .unwrap_or_default(),
                 ]);
 
-                Self::union_of(resolver, types)
+                Self::Union(Box::new(Union(types)))
             }
             AnyTsType::TsConstructorType(ty) => Self::Constructor(Box::new(Constructor {
                 type_parameters: generic_params_from_ts_type_params(
-                    resolver,
+                    collector,
                     scope_id,
                     ty.type_parameters(),
                 ),
-                parameters: constructor_params_from_js_params(resolver, scope_id, ty.parameters()),
+                parameters: constructor_params_from_js_params(collector, scope_id, ty.parameters()),
                 return_type: ty
                     .return_type()
                     .ok()
-                    .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty)),
+                    .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty)),
             })),
             AnyTsType::TsFunctionType(ty) => Self::Function(Box::new(Function {
                 is_async: false,
                 type_parameters: generic_params_from_ts_type_params(
-                    resolver,
+                    collector,
                     scope_id,
                     ty.type_parameters(),
                 ),
                 name: None,
-                parameters: function_params_from_js_params(resolver, scope_id, ty.parameters()),
+                parameters: function_params_from_js_params(collector, scope_id, ty.parameters()),
                 return_type: ty
                     .return_type()
                     .ok()
-                    .and_then(|ty| ReturnType::from_any_ts_return_type(resolver, scope_id, &ty))
+                    .and_then(|ty| ReturnType::from_any_ts_return_type(collector, scope_id, &ty))
                     .unwrap_or_default(),
             })),
             AnyTsType::TsImportType(_) => {
                 // TODO: Handle import types (`import("./module").T`).
                 Self::unknown()
             }
-            AnyTsType::TsIndexedAccessType(_) => {
-                // TODO: Handle type indexing (`T[U]`).
-                Self::unknown()
-            }
+            AnyTsType::TsIndexedAccessType(ty) => match (ty.object_type(), ty.index_type()) {
+                (Ok(object), Ok(index)) => Self::IndexedAccess(Box::new(IndexedAccessType {
+                    object: TypeReference::from_any_ts_type(collector, scope_id, &object),
+                    index: TypeReference::from_any_ts_type(collector, scope_id, &index),
+                })),
+                _ => Self::unknown(),
+            },
             AnyTsType::TsInferType(_) => {
                 // TODO: Handle `infer T` syntax.
                 Self::unknown()
             }
-            AnyTsType::TsIntersectionType(ty) => Self::intersection_of(
+            AnyTsType::TsIntersectionType(ty) => Self::Intersection(Box::new(Intersection(
                 ty.types()
                     .into_iter()
                     .flatten()
-                    .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
+                    .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
                     .collect(),
-            ),
-            AnyTsType::TsMappedType(_) => {
-                // TODO: Handle mapped types (`type T<U> = { [K in keyof U]: V }`).
-                Self::unknown()
-            }
+            ))),
+            AnyTsType::TsMappedType(ty) => Self::from_ts_mapped_type(collector, scope_id, ty),
             AnyTsType::TsNeverType(_) => Self::NeverKeyword,
             AnyTsType::TsNonPrimitiveType(_) => Self::ObjectKeyword,
             AnyTsType::TsNullLiteralType(_) => Self::Null,
-            AnyTsType::TsNumberLiteralType(ty) => {
-                if ty.literal_token().is_err() {
-                    return Self::unknown();
+            AnyTsType::TsNumberLiteralType(ty) => match ty.literal_token() {
+                Ok(token) if ty.minus_token().is_some() => Literal::Number(NumberLiteral::new(
+                    format!("-{}", token.text_trimmed()).into(),
+                ))
+                .into(),
+                Ok(token) => {
+                    Literal::Number(NumberLiteral::new(token.token_text_trimmed().into())).into()
                 }
-
-                Literal::Number(NumberLiteral::new(ty.to_trimmed_text())).into()
-            }
-            AnyTsType::TsNumberType(_) => Self::reference(GLOBAL_NUMBER_ID),
-            AnyTsType::TsObjectType(ty) => Self::object_with_members(
-                ty.members()
+                Err(_) => Self::unknown(),
+            },
+            AnyTsType::TsNumberType(_) => Self::reference(GLOBAL_NUMBER_KEYWORD_ID),
+            AnyTsType::TsObjectType(ty) => {
+                let mut has_unknown_members = false;
+                let members = ty
+                    .members()
                     .into_iter()
                     .filter_map(|member| {
-                        TypeMember::from_any_ts_type_member(resolver, scope_id, &member)
+                        let member =
+                            TypeMember::from_any_ts_type_member(collector, scope_id, &member);
+                        has_unknown_members |= member.is_none();
+                        member
                     })
-                    .collect(),
-            ),
+                    .collect();
+                Self::Object(Box::new(Object {
+                    prototype: None,
+                    members,
+                    has_unknown_members,
+                }))
+            }
             AnyTsType::TsParenthesizedType(ty) => ty
                 .ty()
-                .map(|ty| Self::from_any_ts_type(resolver, scope_id, &ty))
+                .map(|ty| Self::from_any_ts_type(collector, scope_id, &ty))
                 .unwrap_or_default(),
-            AnyTsType::TsReferenceType(ty) => Self::from_ts_reference_type(resolver, scope_id, ty),
+            AnyTsType::TsReferenceType(ty) => Self::from_ts_reference_type(collector, scope_id, ty),
             AnyTsType::TsStringLiteralType(ty) => match ty.inner_string_text() {
                 Ok(token) => Literal::String(token.text().into()).into(),
                 Err(_) => Self::unknown(),
             },
-            AnyTsType::TsStringType(_) => Self::reference(GLOBAL_STRING_ID),
+            AnyTsType::TsStringType(_) => Self::reference(GLOBAL_STRING_KEYWORD_ID),
             AnyTsType::TsSymbolType(_) => Self::Symbol,
             AnyTsType::TsTemplateLiteralType(ty) => {
                 Self::Literal(Box::new(Literal::Template(ty.to_string().into())))
@@ -801,13 +852,16 @@ impl TypeData {
                     .map(|el| {
                         el.map(|el| {
                             TupleElementType::from_any_ts_tuple_type_element(
-                                resolver, scope_id, &el,
+                                collector, scope_id, &el,
                             )
                         })
                     })
                     .collect();
                 match elements {
-                    Ok(elements) => Self::Tuple(Box::new(Tuple(elements))),
+                    Ok(elements) => Self::Tuple(Box::new(Tuple {
+                        elements,
+                        is_inferred_array: false,
+                    })),
                     Err(_) => Self::unknown(),
                 }
             }
@@ -818,22 +872,22 @@ impl TypeData {
                 .map_or(Self::unknown(), |operator| {
                     Self::TypeOperator(Box::new(TypeOperatorType {
                         operator,
-                        ty: TypeReference::from_any_ts_type(resolver, scope_id, &ty),
+                        ty: TypeReference::from_any_ts_type(collector, scope_id, &ty),
                     }))
                 }),
                 _ => Self::unknown(),
             },
-            AnyTsType::TsTypeofType(ty) => Self::from_ts_typeof_type(resolver, scope_id, ty),
+            AnyTsType::TsTypeofType(ty) => Self::from_ts_typeof_type(collector, scope_id, ty),
             AnyTsType::TsUndefinedType(_) => Self::Undefined,
             AnyTsType::TsUnionType(ty) => {
                 let types = ty
                     .types()
                     .into_iter()
                     .flatten()
-                    .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
+                    .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
                     .collect();
 
-                Self::union_of(resolver, types)
+                Self::Union(Box::new(Union(types)))
             }
             AnyTsType::TsUnknownType(_) => Self::UnknownKeyword,
             AnyTsType::TsVoidType(_) => Self::VoidKeyword,
@@ -841,16 +895,16 @@ impl TypeData {
     }
 
     pub fn from_any_ts_type_result(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         ty: SyntaxResult<AnyTsType>,
     ) -> Self {
-        ty.map(|ty| Self::from_any_ts_type(resolver, scope_id, &ty))
+        ty.map(|ty| Self::from_any_ts_type(collector, scope_id, &ty))
             .unwrap_or_default()
     }
 
     pub fn from_js_arrow_function_expression(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         expr: &JsArrowFunctionExpression,
     ) -> Self {
@@ -858,7 +912,7 @@ impl TypeData {
         Self::Function(Box::new(Function {
             is_async,
             type_parameters: generic_params_from_ts_type_params(
-                resolver,
+                collector,
                 scope_id,
                 expr.type_parameters(),
             ),
@@ -877,12 +931,12 @@ impl TypeData {
                     })])
                 }
                 Ok(AnyJsArrowFunctionParameters::JsParameters(params)) => {
-                    function_params_from_js_params(resolver, scope_id, Ok(params))
+                    function_params_from_js_params(collector, scope_id, Ok(params))
                 }
                 Err(_) => Box::default(),
             },
             return_type: function_return_type(
-                resolver,
+                collector,
                 scope_id,
                 is_async,
                 expr.return_type_annotation(),
@@ -892,7 +946,7 @@ impl TypeData {
     }
 
     pub fn from_js_binary_expression(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         expr: &JsBinaryExpression,
     ) -> Self {
@@ -901,8 +955,8 @@ impl TypeData {
             return Self::unknown();
         };
 
-        let left = resolver.resolve_expression(scope_id, &left).into_owned();
-        let right = resolver.resolve_expression(scope_id, &right);
+        let left = collector.resolve_expression(scope_id, &left).into_owned();
+        let right = collector.resolve_expression(scope_id, &right);
 
         match operator {
             JsBinaryOperator::BitwiseAnd
@@ -935,8 +989,8 @@ impl TypeData {
             JsBinaryOperator::Plus => {
                 let right = right.into_owned();
                 Self::from(TypeofExpression::Addition(TypeofAdditionExpression {
-                    left: resolver.reference_to_owned_data(left),
-                    right: resolver.reference_to_owned_data(right),
+                    left: collector.reference_to_owned_data(left),
+                    right: collector.reference_to_owned_data(right),
                 }))
             }
             JsBinaryOperator::StrictEquality => match (left, right.as_ref()) {
@@ -955,7 +1009,7 @@ impl TypeData {
     }
 
     pub fn from_js_class_declaration(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &JsClassDeclaration,
     ) -> Self {
@@ -968,25 +1022,29 @@ impl TypeData {
                 .and_then(|id| id.name_token().ok())
                 .map(|token| token.token_text_trimmed().into()),
             type_parameters: generic_params_from_ts_type_params(
-                resolver,
+                collector,
                 scope_id,
                 decl.type_parameters(),
             ),
             extends: decl
                 .extends_clause()
-                .and_then(|extends| reference_to_extends_clause(resolver, scope_id, extends)),
+                .and_then(|extends| reference_to_extends_clause(collector, scope_id, extends)),
             implements: decl
                 .implements_clause()
                 .map(|implements| {
-                    TypeReference::types_from_ts_type_list(resolver, scope_id, implements.types())
+                    TypeReference::types_from_ts_type_list(collector, scope_id, implements.types())
                 })
                 .unwrap_or_default(),
-            members: TypeMember::members_from_class_member_list(resolver, scope_id, decl.members()),
+            members: TypeMember::members_from_class_member_list(
+                collector,
+                scope_id,
+                decl.members(),
+            ),
         }))
     }
 
     pub fn from_js_class_expression(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &JsClassExpression,
     ) -> Self {
@@ -998,25 +1056,29 @@ impl TypeData {
                 .and_then(|id| id.name_token().ok())
                 .map(|token| token.token_text_trimmed().into()),
             type_parameters: generic_params_from_ts_type_params(
-                resolver,
+                collector,
                 scope_id,
                 decl.type_parameters(),
             ),
             extends: decl
                 .extends_clause()
-                .and_then(|extends| reference_to_extends_clause(resolver, scope_id, extends)),
+                .and_then(|extends| reference_to_extends_clause(collector, scope_id, extends)),
             implements: decl
                 .implements_clause()
                 .map(|implements| {
-                    TypeReference::types_from_ts_type_list(resolver, scope_id, implements.types())
+                    TypeReference::types_from_ts_type_list(collector, scope_id, implements.types())
                 })
                 .unwrap_or_default(),
-            members: TypeMember::members_from_class_member_list(resolver, scope_id, decl.members()),
+            members: TypeMember::members_from_class_member_list(
+                collector,
+                scope_id,
+                decl.members(),
+            ),
         }))
     }
 
     pub fn from_js_function_declaration(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &JsFunctionDeclaration,
     ) -> Self {
@@ -1024,7 +1086,7 @@ impl TypeData {
         Self::Function(Box::new(Function {
             is_async,
             type_parameters: generic_params_from_ts_type_params(
-                resolver,
+                collector,
                 scope_id,
                 decl.type_parameters(),
             ),
@@ -1034,9 +1096,9 @@ impl TypeData {
                 .as_ref()
                 .and_then(|binding| binding.as_js_identifier_binding())
                 .and_then(|binding| text_from_token(binding.name_token())),
-            parameters: function_params_from_js_params(resolver, scope_id, decl.parameters()),
+            parameters: function_params_from_js_params(collector, scope_id, decl.parameters()),
             return_type: function_return_type(
-                resolver,
+                collector,
                 scope_id,
                 is_async,
                 decl.return_type_annotation(),
@@ -1046,7 +1108,7 @@ impl TypeData {
     }
 
     pub fn from_js_function_expression(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         expr: &JsFunctionExpression,
     ) -> Self {
@@ -1054,7 +1116,7 @@ impl TypeData {
         Self::Function(Box::new(Function {
             is_async,
             type_parameters: generic_params_from_ts_type_params(
-                resolver,
+                collector,
                 scope_id,
                 expr.type_parameters(),
             ),
@@ -1063,9 +1125,9 @@ impl TypeData {
                 .as_ref()
                 .and_then(|binding| binding.as_js_identifier_binding())
                 .and_then(|binding| text_from_token(binding.name_token())),
-            parameters: function_params_from_js_params(resolver, scope_id, expr.parameters()),
+            parameters: function_params_from_js_params(collector, scope_id, expr.parameters()),
             return_type: function_return_type(
-                resolver,
+                collector,
                 scope_id,
                 is_async,
                 expr.return_type_annotation(),
@@ -1075,17 +1137,17 @@ impl TypeData {
     }
 
     pub fn from_js_logical_expression(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         expr: &JsLogicalExpression,
     ) -> Option<Self> {
         let left = expr
             .left()
-            .map(|left| TypeReference::from_any_js_expression(resolver, scope_id, &left))
+            .map(|left| TypeReference::from_any_js_expression(collector, scope_id, &left))
             .ok()?;
         let right = expr
             .right()
-            .map(|right| TypeReference::from_any_js_expression(resolver, scope_id, &right))
+            .map(|right| TypeReference::from_any_js_expression(collector, scope_id, &right))
             .ok()?;
 
         match expr.operator().ok()? {
@@ -1104,48 +1166,186 @@ impl TypeData {
     }
 
     pub fn from_js_new_expression(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         expr: &JsNewExpression,
     ) -> Option<Self> {
         Some(Self::from(TypeofExpression::New(TypeofNewExpression {
-            callee: resolver.reference_to_resolved_expression(scope_id, &expr.callee().ok()?),
+            callee: callee_reference(
+                collector,
+                scope_id,
+                &expr.callee().ok()?,
+                expr.type_arguments(),
+            ),
             arguments: CallArgumentType::types_from_js_call_arguments(
-                resolver,
+                collector,
                 scope_id,
                 expr.arguments(),
             ),
         })))
     }
 
+    /// Types parameter `parameter_index` (not counting `this`) of the
+    /// callback `function` as the corresponding parameter of the type
+    /// expected for its argument position. Returns `None` when the callback
+    /// is not a direct argument of a call or `new` expression.
+    pub fn from_contextual_callback_parameter(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        function: &JsSyntaxNode,
+        parameter_index: usize,
+        has_initializer: bool,
+    ) -> Option<Self> {
+        let mut argument = function.clone();
+        let mut parent = argument.parent()?;
+        while JsParenthesizedExpression::can_cast(parent.kind()) {
+            argument = parent;
+            parent = argument.parent()?;
+        }
+        let argument_list = JsCallArgumentList::cast(parent)?;
+        let argument_range = argument.text_trimmed_range();
+        let argument_index = argument_list.iter().position(|item| {
+            item.is_ok_and(|item| item.syntax().text_trimmed_range() == argument_range)
+        })?;
+        let call_like = argument_list
+            .parent::<JsCallArguments>()?
+            .syntax()
+            .parent()?;
+        let (callee, type_arguments, is_constructor) =
+            if let Some(call) = JsCallExpression::cast_ref(&call_like) {
+                (call.callee().ok()?, call.type_arguments(), false)
+            } else {
+                let new = JsNewExpression::cast_ref(&call_like)?;
+                (new.callee().ok()?, new.type_arguments(), true)
+            };
+
+        let callee = callee_reference(collector, scope_id, &callee, type_arguments);
+        let arguments = argument_list
+            .iter()
+            .enumerate()
+            .map(|(index, item)| match item {
+                Ok(item) if index != argument_index => {
+                    CallArgumentType::from_any_js_call_argument(collector, scope_id, &item)
+                }
+                _ => CallArgumentType::Argument(TypeReference::unknown()),
+            })
+            .collect();
+
+        let expected = collector.reference_to_owned_data(Self::from(
+            TypeofExpression::CallArgument(TypeofCallArgumentExpression {
+                callee,
+                arguments,
+                index: argument_index.try_into().ok()?,
+                is_constructor,
+            }),
+        ));
+        Some(Self::from(TypeofExpression::Parameter(
+            TypeofParameterExpression {
+                function: expected,
+                index: parameter_index.try_into().ok()?,
+                has_initializer,
+            },
+        )))
+    }
+
+    /// Contextual type of an unannotated parameter of a function expression
+    /// or arrow function; see [`Self::from_contextual_callback_parameter`].
+    pub fn from_contextual_js_formal_parameter(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        param: &JsFormalParameter,
+    ) -> Option<Self> {
+        if param.type_annotation().is_some() {
+            return None;
+        }
+        let param_range = param.syntax().text_trimmed_range();
+        let parameter_list = param.parent::<JsParameterList>()?;
+        let parameter_index = parameter_list
+            .iter()
+            .filter_map(Result::ok)
+            .filter(|item| !matches!(item, AnyJsParameter::TsThisParameter(_)))
+            .position(|item| item.syntax().text_trimmed_range() == param_range)?;
+        let function = parameter_list.parent::<JsParameters>()?.syntax().parent()?;
+        if !matches!(
+            function.kind(),
+            JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION | JsSyntaxKind::JS_FUNCTION_EXPRESSION
+        ) {
+            return None;
+        }
+        Self::from_contextual_callback_parameter(
+            collector,
+            scope_id,
+            &function,
+            parameter_index,
+            param.initializer().is_some(),
+        )
+    }
+
+    /// Contextual type of the single unparenthesised arrow parameter, as in
+    /// `run(value => value)`; see [`Self::from_contextual_callback_parameter`].
+    pub fn from_contextual_js_arrow_function_binding(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        expr: &JsArrowFunctionExpression,
+    ) -> Option<Self> {
+        match expr.parameters().ok()? {
+            AnyJsArrowFunctionParameters::AnyJsBinding(_) => {
+                Self::from_contextual_callback_parameter(
+                    collector,
+                    scope_id,
+                    expr.syntax(),
+                    0,
+                    false,
+                )
+            }
+            AnyJsArrowFunctionParameters::JsParameters(_) => None,
+        }
+    }
+
     pub fn from_ts_instantiation_expression(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         expr: &TsInstantiationExpression,
     ) -> Option<Self> {
         let expression = expr.expression().ok()?;
         let arguments = expr.arguments().ok();
         Some(Self::instance_of(TypeInstance {
-            ty: resolver.reference_to_resolved_expression(scope_id, &expression),
+            ty: collector.reference_to_resolved_expression(scope_id, &expression),
             type_parameters: TypeReference::types_from_ts_type_arguments(
-                resolver, scope_id, arguments,
+                collector, scope_id, arguments,
             ),
         }))
     }
 
+    /// Infers the type of an object literal from the members it writes.
+    ///
+    /// Source members that inference cannot turn into a [`TypeMember`], such as
+    /// a spread, are left out of the result and recorded through
+    /// [`Object::has_unknown_members`] so callers can tell an object that is
+    /// missing a name from one that was only partially modelled.
     pub fn from_js_object_expression(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         expr: &JsObjectExpression,
     ) -> Self {
-        Self::object_with_members(
-            expr.members()
-                .into_iter()
-                .filter_map(|member| {
-                    TypeMember::from_any_js_object_member(resolver, scope_id, &member.ok()?)
-                })
-                .collect(),
-        )
+        let mut has_unknown_members = false;
+        let members = expr
+            .members()
+            .into_iter()
+            .filter_map(|member| {
+                let member = member.ok().and_then(|member| {
+                    TypeMember::from_any_js_object_member(collector, scope_id, &member)
+                });
+                has_unknown_members |= member.is_none();
+                member
+            })
+            .collect();
+
+        Self::Object(Box::new(Object {
+            prototype: None,
+            members,
+            has_unknown_members,
+        }))
     }
 
     pub fn from_js_reference_identifier(scope_id: ScopeId, id: &JsReferenceIdentifier) -> Self {
@@ -1157,26 +1357,49 @@ impl TypeData {
     }
 
     pub fn from_js_unary_expression(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         expr: &JsUnaryExpression,
     ) -> Self {
+        if let Ok(operator @ (JsUnaryOperator::Minus | JsUnaryOperator::Plus)) = expr.operator()
+            && let Ok(argument) = expr.argument()
+            && let AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsNumberLiteralExpression(literal),
+            ) = argument.omit_parentheses()
+            && let Some(text) = text_from_token(literal.value_token())
+        {
+            let text = if operator == JsUnaryOperator::Minus {
+                format!("-{text}").into()
+            } else {
+                text
+            };
+            return Literal::Number(NumberLiteral::new(text)).into();
+        }
         expr.operator()
             .map(|operator| match operator {
                 JsUnaryOperator::BitwiseNot => {
                     Self::from(TypeofExpression::BitwiseNot(TypeofBitwiseNotExpression {
                         argument: expr
                             .argument()
-                            .map(|arg| resolver.reference_to_resolved_expression(scope_id, &arg))
+                            .map(|arg| collector.reference_to_resolved_expression(scope_id, &arg))
                             .unwrap_or_default(),
                     }))
                 }
                 JsUnaryOperator::Delete => Self::Boolean,
                 JsUnaryOperator::Minus => {
                     Self::from(TypeofExpression::UnaryMinus(TypeofUnaryMinusExpression {
+                        is_literal_argument: expr.argument().is_ok_and(|argument| {
+                            matches!(
+                                argument,
+                                AnyJsExpression::AnyJsLiteralExpression(
+                                    AnyJsLiteralExpression::JsNumberLiteralExpression(_)
+                                        | AnyJsLiteralExpression::JsBigintLiteralExpression(_)
+                                )
+                            )
+                        }),
                         argument: expr
                             .argument()
-                            .map(|arg| resolver.reference_to_resolved_expression(scope_id, &arg))
+                            .map(|arg| collector.reference_to_resolved_expression(scope_id, &arg))
                             .unwrap_or_default(),
                     }))
                 }
@@ -1186,7 +1409,7 @@ impl TypeData {
                     Self::from(TypeofExpression::Typeof(TypeofTypeofExpression {
                         argument: expr
                             .argument()
-                            .map(|arg| resolver.reference_to_resolved_expression(scope_id, &arg))
+                            .map(|arg| collector.reference_to_resolved_expression(scope_id, &arg))
                             .unwrap_or_default(),
                     }))
                 }
@@ -1196,30 +1419,30 @@ impl TypeData {
     }
 
     pub fn from_js_variable_declarator<'a>(
-        resolver: &'a mut dyn TypeResolver,
+        collector: &'a mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &JsVariableDeclarator,
     ) -> Option<Cow<'a, Self>> {
         let ty = match decl.variable_annotation() {
             Some(annotation) => {
                 let data = Self::from_any_ts_type(
-                    resolver,
+                    collector,
                     scope_id,
                     &annotation.type_annotation().ok()??.ty().ok()?,
                 );
                 Cow::Owned(match data {
                     Self::InstanceOf(type_instance) => Self::InstanceOf(type_instance),
-                    _ => Self::instance_of(resolver.reference_to_owned_data(data)),
+                    _ => Self::instance_of(collector.reference_to_owned_data(data)),
                 })
             }
-            None => resolver.resolve_expression(scope_id, &decl.initializer()?.expression().ok()?),
+            None => collector.resolve_expression(scope_id, &decl.initializer()?.expression().ok()?),
         };
 
         Some(ty)
     }
 
     pub fn from_ts_declare_function_declaration(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &TsDeclareFunctionDeclaration,
     ) -> Self {
@@ -1227,7 +1450,7 @@ impl TypeData {
         Self::Function(Box::new(Function {
             is_async,
             type_parameters: generic_params_from_ts_type_params(
-                resolver,
+                collector,
                 scope_id,
                 decl.type_parameters(),
             ),
@@ -1237,9 +1460,9 @@ impl TypeData {
                 .as_ref()
                 .and_then(|binding| binding.as_js_identifier_binding())
                 .and_then(|binding| text_from_token(binding.name_token())),
-            parameters: function_params_from_js_params(resolver, scope_id, decl.parameters()),
+            parameters: function_params_from_js_params(collector, scope_id, decl.parameters()),
             return_type: function_return_type(
-                resolver,
+                collector,
                 scope_id,
                 is_async,
                 decl.return_type_annotation(),
@@ -1261,28 +1484,28 @@ impl TypeData {
     }
 
     pub fn from_ts_interface_declaration(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &TsInterfaceDeclaration,
     ) -> Option<Self> {
         Some(Self::from(Interface {
             name: text_from_token(decl.id().ok()?.as_ts_identifier_binding()?.name_token())?,
             type_parameters: generic_params_from_ts_type_params(
-                resolver,
+                collector,
                 scope_id,
                 decl.type_parameters(),
             ),
             extends: decl
                 .extends_clause()
                 .map(|extends| {
-                    TypeReference::types_from_ts_type_list(resolver, scope_id, extends.types())
+                    TypeReference::types_from_ts_type_list(collector, scope_id, extends.types())
                 })
                 .unwrap_or_default(),
             members: decl
                 .members()
                 .into_iter()
                 .filter_map(|member| {
-                    TypeMember::from_any_ts_type_member(resolver, scope_id, &member)
+                    TypeMember::from_any_ts_type_member(collector, scope_id, &member)
                 })
                 .collect(),
         }))
@@ -1301,7 +1524,7 @@ impl TypeData {
     }
 
     pub fn from_ts_reference_type(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         ty: &TsReferenceType,
     ) -> Self {
@@ -1311,7 +1534,7 @@ impl TypeData {
             .map(|qualifier| {
                 Self::instance_of(TypeReference::from(qualifier.with_type_parameters(
                     TypeReference::types_from_ts_type_arguments(
-                        resolver,
+                        collector,
                         scope_id,
                         ty.type_arguments(),
                     ),
@@ -1321,23 +1544,86 @@ impl TypeData {
     }
 
     pub fn from_ts_type_alias_declaration(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &TsTypeAliasDeclaration,
     ) -> Option<Self> {
         Some(match decl.type_parameters() {
             Some(params) => Self::instance_of(TypeInstance {
-                ty: TypeReference::from_any_ts_type(resolver, scope_id, &decl.ty().ok()?),
+                ty: TypeReference::from_any_ts_type(collector, scope_id, &decl.ty().ok()?),
                 type_parameters: TypeReference::types_from_ts_type_parameters(
-                    resolver, scope_id, &params,
+                    collector, scope_id, &params,
                 ),
             }),
-            None => Self::from_any_ts_type(resolver, scope_id, &decl.ty().ok()?),
+            None => Self::from_any_ts_type(collector, scope_id, &decl.ty().ok()?),
         })
     }
 
+    /// Collects a mapped type such as `{ [K in keyof T]?: T[K] }`.
+    ///
+    /// The mapped type declares `K` in its own scope, so its keys and property
+    /// type are collected from that scope. Key remapping with an `as` clause
+    /// is not supported and results in an unknown type.
+    pub fn from_ts_mapped_type(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        ty: &TsMappedType,
+    ) -> Self {
+        if ty.as_clause().is_some() {
+            return Self::unknown();
+        }
+        let Some(type_parameter) = GenericTypeParameter::from_ts_mapped_type(ty) else {
+            return Self::unknown();
+        };
+
+        let scope_id = collector.scope_for_node(ty.syntax()).unwrap_or(scope_id);
+        let type_parameter = collector
+            .register_and_resolve(Self::from(type_parameter))
+            .into();
+        // `[K in (keyof T)]` iterates the same keys as `[K in keyof T]`.
+        let mut keys = ty.keys_type();
+        while let Ok(AnyTsType::TsParenthesizedType(parenthesized)) = keys {
+            keys = parenthesized.ty();
+        }
+        let keys = match keys {
+            Ok(AnyTsType::TsTypeOperatorType(operator))
+                if operator
+                    .operator_token()
+                    .is_ok_and(|token| token.text_trimmed() == "keyof") =>
+            {
+                MappedTypeKeys::Keyof(
+                    operator
+                        .ty()
+                        .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
+                        .unwrap_or_default(),
+                )
+            }
+            keys => MappedTypeKeys::Type(
+                keys.map(|keys| TypeReference::from_any_ts_type(collector, scope_id, &keys))
+                    .unwrap_or_default(),
+            ),
+        };
+        let property_ty = ty
+            .mapped_type()
+            .and_then(|annotation| annotation.ty().ok())
+            .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
+            .unwrap_or_default();
+
+        Self::MappedType(Box::new(MappedType {
+            type_parameter,
+            keys,
+            ty: property_ty,
+            readonly_modifier: ty
+                .readonly_modifier()
+                .map(|modifier| mapped_type_modifier(modifier.operator_token())),
+            optional_modifier: ty
+                .optional_modifier()
+                .map(|modifier| mapped_type_modifier(modifier.operator_token())),
+        }))
+    }
+
     pub fn from_ts_typeof_type(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         ty: &TsTypeofType,
     ) -> Self {
@@ -1349,7 +1635,7 @@ impl TypeData {
                 let qualifier = if type_arguments.is_some() {
                     qualifier.without_type_only().with_type_parameters(
                         TypeReference::types_from_ts_type_arguments(
-                            resolver,
+                            collector,
                             scope_id,
                             type_arguments,
                         ),
@@ -1366,6 +1652,7 @@ impl TypeData {
         Self::Object(Box::new(Object {
             prototype: None,
             members,
+            has_unknown_members: false,
         }))
     }
 
@@ -1377,7 +1664,7 @@ impl TypeData {
     }
 
     pub fn typed_bindings_from_js_binding_pattern(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         ty: Self,
         pattern: &AnyJsBindingPattern,
@@ -1385,7 +1672,7 @@ impl TypeData {
     ) -> Option<Box<[(Text, TypeReference)]>> {
         let ty = if is_awaited {
             Self::from(TypeofExpression::Await(TypeofAwaitExpression {
-                argument: resolver.reference_to_owned_data(ty),
+                argument: collector.reference_to_owned_data(ty),
             }))
         } else {
             ty
@@ -1397,48 +1684,47 @@ impl TypeData {
                 let name_token = binding.name_token().ok()?;
                 Box::new([(
                     name_token.token_text_trimmed().into(),
-                    resolver.reference_to_owned_data(ty),
+                    collector.reference_to_owned_data(ty),
                 )])
             }),
             AnyJsBindingPattern::JsArrayBindingPattern(pattern) => {
-                Some(ty.apply_array_binding_pattern(resolver, scope_id, pattern))
+                Some(ty.apply_array_binding_pattern(collector, scope_id, pattern))
             }
             AnyJsBindingPattern::JsObjectBindingPattern(pattern) => {
-                Some(ty.apply_object_binding_pattern(resolver, scope_id, pattern))
+                Some(ty.apply_object_binding_pattern(collector, scope_id, pattern))
             }
         }
     }
 
     pub fn typed_bindings_from_js_for_statement(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &JsForVariableDeclaration,
     ) -> Option<Box<[(Text, TypeReference)]>> {
         let parent = decl.syntax().parent()?;
         let (is_awaited, ty) = if JsForInStatement::can_cast(parent.kind()) {
             (false, Self::string())
-        } else if let Some(for_of) = JsForOfStatement::cast(parent) {
+        } else {
+            let for_of = JsForOfStatement::cast(parent)?;
             let ty = Self::from(TypeofExpression::IterableValueOf(
                 TypeofIterableValueOfExpression {
                     ty: TypeReference::from_any_js_expression(
-                        resolver,
+                        collector,
                         scope_id,
                         &for_of.expression().ok()?,
                     ),
                 },
             ));
             (for_of.await_token().is_some(), ty)
-        } else {
-            return None;
         };
 
         let declarator = decl.declarator().ok()?;
         let binding = declarator.id().ok()?;
-        Self::typed_bindings_from_js_binding_pattern(resolver, scope_id, ty, &binding, is_awaited)
+        Self::typed_bindings_from_js_binding_pattern(collector, scope_id, ty, &binding, is_awaited)
     }
 
     pub fn typed_bindings_from_js_variable_declaration(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &JsVariableDeclaration,
     ) -> Box<[(Text, TypeReference)]> {
@@ -1446,26 +1732,26 @@ impl TypeData {
             .into_iter()
             .flatten()
             .filter_map(|decl| {
-                Self::typed_bindings_from_js_variable_declarator(resolver, scope_id, &decl)
+                Self::typed_bindings_from_js_variable_declarator(collector, scope_id, &decl)
             })
             .flatten()
             .collect()
     }
 
     pub fn typed_bindings_from_js_variable_declarator(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         decl: &JsVariableDeclarator,
     ) -> Option<Box<[(Text, TypeReference)]>> {
         let pattern = decl.id().ok()?;
-        let ty = Self::from_js_variable_declarator(resolver, scope_id, decl)?.into_owned();
-        Self::typed_bindings_from_js_binding_pattern(resolver, scope_id, ty, &pattern, false)
+        let ty = Self::from_js_variable_declarator(collector, scope_id, decl)?.into_owned();
+        Self::typed_bindings_from_js_binding_pattern(collector, scope_id, ty, &pattern, false)
     }
 }
 
 impl CallArgumentType {
     pub fn types_from_js_call_arguments(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         arguments: Option<JsCallArguments>,
     ) -> Box<[Self]> {
@@ -1474,25 +1760,25 @@ impl CallArgumentType {
                 args.args()
                     .into_iter()
                     .flatten()
-                    .map(|arg| Self::from_any_js_call_argument(resolver, scope_id, &arg))
+                    .map(|arg| Self::from_any_js_call_argument(collector, scope_id, &arg))
                     .collect()
             })
             .unwrap_or_default()
     }
 
     pub fn from_any_js_call_argument(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         arg: &AnyJsCallArgument,
     ) -> Self {
         match arg {
             AnyJsCallArgument::AnyJsExpression(expr) => {
-                Self::Argument(resolver.reference_to_resolved_expression(scope_id, expr))
+                Self::Argument(collector.reference_to_resolved_expression(scope_id, expr))
             }
             AnyJsCallArgument::JsSpread(spread) => Self::Spread(
                 spread
                     .argument()
-                    .map(|arg| resolver.reference_to_resolved_expression(scope_id, &arg))
+                    .map(|arg| collector.reference_to_resolved_expression(scope_id, &arg))
                     .unwrap_or_default(),
             ),
         }
@@ -1501,26 +1787,26 @@ impl CallArgumentType {
 
 impl ConstructorParameter {
     pub fn from_any_js_constructor_parameter(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         param: &AnyJsConstructorParameter,
     ) -> Self {
         match param {
             AnyJsConstructorParameter::AnyJsFormalParameter(param) => Self {
                 parameter: FunctionParameter::from_any_js_formal_parameter(
-                    resolver, scope_id, param,
+                    collector, scope_id, param,
                 ),
                 accessibility: None,
             },
             AnyJsConstructorParameter::JsRestParameter(param) => Self {
-                parameter: FunctionParameter::from_js_rest_parameter(resolver, scope_id, param),
+                parameter: FunctionParameter::from_js_rest_parameter(collector, scope_id, param),
                 accessibility: None,
             },
             AnyJsConstructorParameter::TsPropertyParameter(param) => param
                 .formal_parameter()
                 .map(|formal_param| Self {
                     parameter: FunctionParameter::from_any_js_formal_parameter(
-                        resolver,
+                        collector,
                         scope_id,
                         &formal_param,
                     ),
@@ -1533,7 +1819,7 @@ impl ConstructorParameter {
     }
 
     pub fn params_from_js_constructor_parameters(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         params: &JsConstructorParameters,
     ) -> Box<[Self]> {
@@ -1542,43 +1828,43 @@ impl ConstructorParameter {
             .parameters
             .into_iter()
             .flatten()
-            .map(|param| Self::from_any_js_constructor_parameter(resolver, scope_id, &param))
+            .map(|param| Self::from_any_js_constructor_parameter(collector, scope_id, &param))
             .collect()
     }
 }
 
 impl FunctionParameter {
     pub fn from_any_js_formal_parameter(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         param: &AnyJsFormalParameter,
     ) -> Self {
         match param {
             AnyJsFormalParameter::JsFormalParameter(param) => {
-                Self::from_js_formal_parameter(resolver, scope_id, param)
+                Self::from_js_formal_parameter(collector, scope_id, param)
             }
             _ => Self::default(),
         }
     }
 
     pub fn from_any_js_parameter(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         param: &AnyJsParameter,
     ) -> Self {
         match param {
             AnyJsParameter::AnyJsFormalParameter(param) => {
-                Self::from_any_js_formal_parameter(resolver, scope_id, param)
+                Self::from_any_js_formal_parameter(collector, scope_id, param)
             }
             AnyJsParameter::JsRestParameter(param) => {
-                Self::from_js_rest_parameter(resolver, scope_id, param)
+                Self::from_js_rest_parameter(collector, scope_id, param)
             }
             AnyJsParameter::TsThisParameter(param) => Self::Named(NamedFunctionParameter {
                 name: Text::new_static("this"),
                 ty: param
                     .type_annotation()
                     .and_then(|annotation| annotation.ty().ok())
-                    .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
+                    .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
                     .unwrap_or_default(),
                 is_optional: false,
                 is_rest: false,
@@ -1587,12 +1873,12 @@ impl FunctionParameter {
     }
 
     pub fn from_js_formal_parameter(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         param: &JsFormalParameter,
     ) -> Self {
         Self::from_binding_with_annotation(
-            resolver,
+            collector,
             scope_id,
             param.binding(),
             param.type_annotation(),
@@ -1602,12 +1888,12 @@ impl FunctionParameter {
     }
 
     pub fn from_js_rest_parameter(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         param: &JsRestParameter,
     ) -> Self {
         Self::from_binding_with_annotation(
-            resolver,
+            collector,
             scope_id,
             param.binding(),
             param.type_annotation(),
@@ -1617,7 +1903,7 @@ impl FunctionParameter {
     }
 
     fn from_binding_with_annotation(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         binding: SyntaxResult<AnyJsBindingPattern>,
         annotation: Option<TsTypeAnnotation>,
@@ -1633,14 +1919,14 @@ impl FunctionParameter {
             .map(|token| token.token_text_trimmed().into());
         let ty_data = annotation
             .and_then(|annotation| annotation.ty().ok())
-            .map(|ty| TypeData::from_any_ts_type(resolver, scope_id, &ty))
+            .map(|ty| TypeData::from_any_ts_type(collector, scope_id, &ty))
             .unwrap_or_default();
         // Optional parameters can be called without a value, so include `undefined` in the type
         let ty = if is_optional {
-            let ty_ref = resolver.reference_to_owned_data(ty_data.clone());
-            ResolvedTypeId::new(resolver.level(), resolver.optional(ty_ref)).into()
+            let ty_ref = collector.reference_to_owned_data(ty_data.clone());
+            RawTypeId::Local(collector.optional(ty_ref)).into()
         } else {
-            resolver.reference_to_owned_data(ty_data.clone())
+            collector.reference_to_owned_data(ty_data.clone())
         };
         if let Some(name) = name {
             Self::Named(NamedFunctionParameter {
@@ -1654,7 +1940,7 @@ impl FunctionParameter {
                 .ok()
                 .and_then(|binding| {
                     FunctionParameterBinding::bindings_from_any_js_binding_pattern_of_type(
-                        resolver, scope_id, &binding, &ty_data,
+                        collector, scope_id, &binding, &ty_data,
                     )
                 })
                 .unwrap_or_default();
@@ -1668,7 +1954,7 @@ impl FunctionParameter {
     }
 
     pub fn params_from_js_parameters(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         params: &JsParameters,
     ) -> Box<[Self]> {
@@ -1677,7 +1963,7 @@ impl FunctionParameter {
             .items
             .into_iter()
             .flatten()
-            .map(|param| Self::from_any_js_parameter(resolver, scope_id, &param))
+            .map(|param| Self::from_any_js_parameter(collector, scope_id, &param))
             .collect()
     }
 }
@@ -1690,7 +1976,7 @@ impl From<(Text, TypeReference)> for FunctionParameterBinding {
 
 impl FunctionParameterBinding {
     pub fn bindings_from_any_js_binding_pattern_of_type(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         pattern: &AnyJsBindingPattern,
         ty: &TypeData,
@@ -1701,17 +1987,17 @@ impl FunctionParameterBinding {
                 let name = text_from_token(binding.name_token())?;
                 Some(Box::new([Self {
                     name,
-                    ty: resolver.reference_to_registered_data(ty),
+                    ty: collector.reference_to_registered_data(ty),
                 }]))
             }
             AnyJsBindingPattern::JsArrayBindingPattern(pattern) => Some(
-                ty.apply_array_binding_pattern(resolver, scope_id, pattern)
+                ty.apply_array_binding_pattern(collector, scope_id, pattern)
                     .into_iter()
                     .map(Into::into)
                     .collect(),
             ),
             AnyJsBindingPattern::JsObjectBindingPattern(pattern) => Some(
-                ty.apply_object_binding_pattern(resolver, scope_id, pattern)
+                ty.apply_object_binding_pattern(collector, scope_id, pattern)
                     .into_iter()
                     .map(Into::into)
                     .collect(),
@@ -1722,7 +2008,7 @@ impl FunctionParameterBinding {
 
 impl GenericTypeParameter {
     pub fn from_ts_type_parameter(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         param: &TsTypeParameter,
     ) -> Option<Self> {
@@ -1730,27 +2016,47 @@ impl GenericTypeParameter {
             .name()
             .and_then(|name| name.ident_token())
             .map(|name| Self {
+                is_const: param
+                    .modifiers()
+                    .into_iter()
+                    .any(|modifier| modifier.as_ts_const_modifier().is_some()),
                 name: name.token_text_trimmed().into(),
                 constraint: param
                     .constraint()
                     .and_then(|constraint| constraint.ty().ok())
                     .map(|constraint_ty| {
-                        TypeReference::from_any_ts_type(resolver, scope_id, &constraint_ty)
+                        TypeReference::from_any_ts_type(collector, scope_id, &constraint_ty)
                     })
                     .unwrap_or_default(),
                 default: param
                     .default()
                     .and_then(|default| default.ty().ok())
                     .map(|default_ty| {
-                        TypeReference::from_any_ts_type(resolver, scope_id, &default_ty)
+                        TypeReference::from_any_ts_type(collector, scope_id, &default_ty)
                     })
                     .unwrap_or_default(),
             })
             .ok()
     }
 
+    /// Builds the type parameter a mapped type declares, such as `K` in
+    /// `{ [K in keyof T]: T[K] }`.
+    ///
+    /// The parameter carries no constraint. The mapped type records the keys
+    /// it iterates separately, and the parameter must be identical wherever
+    /// it is built so references to `K` can be substituted.
+    pub fn from_ts_mapped_type(ty: &TsMappedType) -> Option<Self> {
+        let name = ty.property_name().ok()?.ident_token().ok()?;
+        Some(Self {
+            name: name.token_text_trimmed().into(),
+            constraint: TypeReference::unknown(),
+            default: TypeReference::unknown(),
+            is_const: false,
+        })
+    }
+
     pub fn params_from_ts_type_parameters(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         params: &TsTypeParameters,
     ) -> Box<[Self]> {
@@ -1758,20 +2064,20 @@ impl GenericTypeParameter {
             .items()
             .into_iter()
             .flatten()
-            .filter_map(|param| Self::from_ts_type_parameter(resolver, scope_id, &param))
+            .filter_map(|param| Self::from_ts_type_parameter(collector, scope_id, &param))
             .collect()
     }
 }
 
 impl ReturnType {
     pub fn from_any_ts_return_type(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         ty: &AnyTsReturnType,
     ) -> Option<Self> {
         match ty {
             AnyTsReturnType::AnyTsType(ty) => Some(Self::Type(TypeReference::from_any_ts_type(
-                resolver, scope_id, ty,
+                collector, scope_id, ty,
             ))),
             AnyTsReturnType::TsAssertsReturnType(ty) => {
                 ty.parameter_name().ok().and_then(|parameter_name| {
@@ -1781,14 +2087,21 @@ impl ReturnType {
                                 text_from_token(identifier.value_token())?
                             }
                             AnyTsTypePredicateParameterName::TsThisType(_) => {
-                                Text::new_static("text")
+                                Text::new_static("this")
                             }
                         },
-                        ty: ty
-                            .predicate()
-                            .and_then(|asserts| asserts.ty().ok())
-                            .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
-                            .unwrap_or_default(),
+                        ty: match ty.predicate() {
+                            Some(predicate) => predicate
+                                .ty()
+                                .ok()
+                                .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
+                                .unwrap_or_default(),
+                            // Bare assertions require truthiness, rather than a specific type.
+                            // `Conditional` marks a value whose truthiness decides a condition,
+                            // and no type annotation resolves to it, so it cannot be confused
+                            // with an `asserts value is T` predicate.
+                            None => collector.reference_to_owned_data(TypeData::Conditional),
+                        },
                     })))
                 })
             }
@@ -1800,12 +2113,12 @@ impl ReturnType {
                                 text_from_token(identifier.value_token())?
                             }
                             AnyTsTypePredicateParameterName::TsThisType(_) => {
-                                Text::new_static("text")
+                                Text::new_static("this")
                             }
                         },
                         ty: ty
                             .ty()
-                            .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
+                            .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
                             .unwrap_or_default(),
                     })))
                 })
@@ -1816,13 +2129,13 @@ impl ReturnType {
 
 impl TupleElementType {
     pub fn from_any_ts_tuple_type_element(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         el: &AnyTsTupleTypeElement,
     ) -> Self {
         match el {
             AnyTsTupleTypeElement::AnyTsType(ty) => Self {
-                ty: TypeReference::from_any_ts_type(resolver, scope_id, ty),
+                ty: TypeReference::from_any_ts_type(collector, scope_id, ty),
                 name: None,
                 is_optional: false,
                 is_rest: false,
@@ -1830,7 +2143,7 @@ impl TupleElementType {
             AnyTsTupleTypeElement::TsNamedTupleTypeElement(el) => Self {
                 ty: el
                     .ty()
-                    .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
+                    .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
                     .unwrap_or_default(),
                 name: el
                     .name()
@@ -1842,7 +2155,7 @@ impl TupleElementType {
             AnyTsTupleTypeElement::TsOptionalTupleTypeElement(el) => Self {
                 ty: el
                     .ty()
-                    .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
+                    .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
                     .unwrap_or_default(),
                 name: None,
                 is_optional: true,
@@ -1851,7 +2164,7 @@ impl TupleElementType {
             AnyTsTupleTypeElement::TsRestTupleTypeElement(el) => Self {
                 ty: el
                     .ty()
-                    .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
+                    .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
                     .unwrap_or_default(),
                 name: None,
                 is_optional: false,
@@ -1863,7 +2176,7 @@ impl TupleElementType {
 
 impl TypeMember {
     pub fn from_any_js_class_member(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         member: &AnyJsClassMember,
     ) -> Option<Self> {
@@ -1872,13 +2185,29 @@ impl TypeMember {
                 let constructor = Constructor {
                     type_parameters: [].into(),
                     parameters: constructor_params_from_js_constructor_params(
-                        resolver,
+                        collector,
                         scope_id,
                         member.parameters(),
                     ),
                     return_type: None,
                 };
-                let ty = resolver.register_and_resolve(constructor.into());
+                let ty = collector.register_and_resolve(constructor.into());
+                Some(Self {
+                    kind: TypeMemberKind::Constructor,
+                    ty: ty.into(),
+                })
+            }
+            AnyJsClassMember::TsConstructorSignatureClassMember(member) => {
+                let constructor = Constructor {
+                    type_parameters: [].into(),
+                    parameters: constructor_params_from_js_constructor_params(
+                        collector,
+                        scope_id,
+                        member.parameters(),
+                    ),
+                    return_type: None,
+                };
+                let ty = collector.register_and_resolve(constructor.into());
                 Some(Self {
                     kind: TypeMemberKind::Constructor,
                     ty: ty.into(),
@@ -1889,31 +2218,71 @@ impl TypeMember {
                 let function = Function {
                     is_async,
                     type_parameters: generic_params_from_ts_type_params(
-                        resolver,
+                        collector,
                         scope_id,
                         member.type_parameters(),
                     ),
                     name: name.name().map(text_from_class_member_name),
                     parameters: function_params_from_js_params(
-                        resolver,
+                        collector,
                         scope_id,
                         member.parameters(),
                     ),
                     return_type: function_return_type(
-                        resolver,
+                        collector,
                         scope_id,
                         is_async,
                         member.return_type_annotation(),
                         member.body().ok().map(AnyJsFunctionBody::JsFunctionBody),
                     ),
                 };
-                let ty = resolver.register_and_resolve(function.into());
+                let ty = collector.register_and_resolve(function.into());
                 let is_static = member
                     .modifiers()
                     .into_iter()
                     .any(|modifier| modifier.as_js_static_modifier().is_some());
-                Self::from_class_member_info(resolver, scope_id, name, ty.into(), is_static, false)
+                Self::from_class_member_info(collector, scope_id, name, ty.into(), is_static, false)
             }),
+            AnyJsClassMember::TsMethodSignatureClassMember(member) => {
+                member.name().ok().and_then(|name| {
+                    let is_async = member.async_token().is_some();
+                    let function = Function {
+                        is_async,
+                        type_parameters: generic_params_from_ts_type_params(
+                            collector,
+                            scope_id,
+                            member.type_parameters(),
+                        ),
+                        name: name.name().map(text_from_class_member_name),
+                        parameters: function_params_from_js_params(
+                            collector,
+                            scope_id,
+                            member.parameters(),
+                        ),
+                        return_type: function_return_type(
+                            collector,
+                            scope_id,
+                            is_async,
+                            member.return_type_annotation(),
+                            None,
+                        ),
+                    };
+                    let ty = collector.register_and_resolve(function.into());
+                    let is_static = member
+                        .modifiers()
+                        .into_iter()
+                        .any(|modifier| modifier.as_js_static_modifier().is_some());
+                    let is_optional = member.question_mark_token().is_some();
+                    Self::from_class_member_info(
+                        collector,
+                        scope_id,
+                        name,
+                        ty.into(),
+                        is_static,
+                        is_optional,
+                    )
+                })
+            }
             AnyJsClassMember::JsPropertyClassMember(member) => {
                 member.name().ok().and_then(|name| {
                     let ty = match member
@@ -1922,11 +2291,11 @@ impl TypeMember {
                         .flatten()
                         .and_then(|annotation| annotation.ty().ok())
                     {
-                        Some(ty) => TypeReference::from_any_ts_type(resolver, scope_id, &ty),
+                        Some(ty) => TypeReference::from_any_ts_type(collector, scope_id, &ty),
                         None => member
                             .value()
                             .and_then(|initializer| initializer.expression().ok())
-                            .map(|expr| resolver.reference_to_resolved_expression(scope_id, &expr))
+                            .map(|expr| collector.reference_to_resolved_expression(scope_id, &expr))
                             .unwrap_or_default(),
                     };
                     let is_static = member
@@ -1939,7 +2308,7 @@ impl TypeMember {
                         .and_then(|annotation| annotation.as_ts_optional_property_annotation())
                         .is_some();
                     Self::from_class_member_info(
-                        resolver,
+                        collector,
                         scope_id,
                         name,
                         ty,
@@ -1957,7 +2326,7 @@ impl TypeMember {
                         name: Some(name.clone()),
                         parameters: [].into(),
                         return_type: ReturnType::Type(getter_return_type(
-                            resolver,
+                            collector,
                             scope_id,
                             member.return_type(),
                             member.body().ok(),
@@ -1965,13 +2334,13 @@ impl TypeMember {
                     };
                     Self {
                         kind: TypeMemberKind::Getter(name),
-                        ty: resolver.reference_to_owned_data(function.into()),
+                        ty: collector.reference_to_owned_data(function.into()),
                     }
                 })
             }
             AnyJsClassMember::TsInitializedPropertySignatureClassMember(member) => {
                 member.name().ok().and_then(|name| {
-                    let ty = resolver.reference_to_resolved_expression(
+                    let ty = collector.reference_to_resolved_expression(
                         scope_id,
                         &member.value().ok()?.expression().ok()?,
                     );
@@ -1981,7 +2350,7 @@ impl TypeMember {
                         .any(|modifier| modifier.as_js_static_modifier().is_some());
                     let is_optional = member.question_mark_token().is_some();
                     Self::from_class_member_info(
-                        resolver,
+                        collector,
                         scope_id,
                         name,
                         ty,
@@ -1997,7 +2366,7 @@ impl TypeMember {
                         .and_then(|annotation| annotation.type_annotation().ok())
                         .flatten()
                         .and_then(|annotation| annotation.ty().ok())
-                        .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
+                        .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
                         .unwrap_or_default();
                     let is_static = member
                         .modifiers()
@@ -2009,7 +2378,7 @@ impl TypeMember {
                         .and_then(|annotation| annotation.as_ts_optional_property_annotation())
                         .is_some();
                     Self::from_class_member_info(
-                        resolver,
+                        collector,
                         scope_id,
                         name,
                         ty,
@@ -2026,7 +2395,7 @@ impl TypeMember {
     }
 
     pub fn from_any_js_object_member(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         member: &AnyJsObjectMember,
     ) -> Option<Self> {
@@ -2040,7 +2409,7 @@ impl TypeMember {
                         name: Some(name.clone().into()),
                         parameters: [].into(),
                         return_type: ReturnType::Type(getter_return_type(
-                            resolver,
+                            collector,
                             scope_id,
                             member.return_type(),
                             member.body().ok(),
@@ -2048,7 +2417,7 @@ impl TypeMember {
                     };
                     Self {
                         kind: TypeMemberKind::Getter(name.into()),
-                        ty: resolver.register_and_resolve(function.into()).into(),
+                        ty: collector.register_and_resolve(function.into()).into(),
                     }
                 })
             }
@@ -2058,8 +2427,8 @@ impl TypeMember {
                 .and_then(|name| match name {
                     AnyJsObjectMemberName::JsComputedMemberName(name) => {
                         name.expression().ok().map(|expr| {
-                            TypeMemberKind::IndexSignature(TypeReference::from_any_js_expression(
-                                resolver, scope_id, &expr,
+                            TypeMemberKind::ComputedValue(computed_member_reference(
+                                collector, scope_id, &expr,
                             ))
                         })
                     }
@@ -2074,7 +2443,7 @@ impl TypeMember {
                     let function = Function {
                         is_async,
                         type_parameters: generic_params_from_ts_type_params(
-                            resolver,
+                            collector,
                             scope_id,
                             member.type_parameters(),
                         ),
@@ -2083,12 +2452,12 @@ impl TypeMember {
                             _ => None,
                         },
                         parameters: function_params_from_js_params(
-                            resolver,
+                            collector,
                             scope_id,
                             member.parameters(),
                         ),
                         return_type: function_return_type(
-                            resolver,
+                            collector,
                             scope_id,
                             is_async,
                             member.return_type_annotation(),
@@ -2097,7 +2466,7 @@ impl TypeMember {
                     };
                     Self {
                         kind,
-                        ty: resolver.register_and_resolve(function.into()).into(),
+                        ty: collector.register_and_resolve(function.into()).into(),
                     }
                 }),
             AnyJsObjectMember::JsPropertyObjectMember(member) => member
@@ -2106,8 +2475,8 @@ impl TypeMember {
                 .and_then(|name| match name {
                     AnyJsObjectMemberName::JsComputedMemberName(name) => {
                         name.expression().ok().map(|expr| {
-                            TypeMemberKind::IndexSignature(TypeReference::from_any_js_expression(
-                                resolver, scope_id, &expr,
+                            TypeMemberKind::ComputedValue(computed_member_reference(
+                                collector, scope_id, &expr,
                             ))
                         })
                     }
@@ -2128,7 +2497,7 @@ impl TypeMember {
                         kind,
                         ty: value
                             .map(|value| {
-                                resolver.reference_to_resolved_expression(scope_id, &value)
+                                collector.reference_to_resolved_expression(scope_id, &value)
                             })
                             .unwrap_or_default(),
                     }
@@ -2143,7 +2512,7 @@ impl TypeMember {
                 .and_then(|name| text_from_token(name.value_token()))
                 .map(|name| Self {
                     kind: TypeMemberKind::Named(name.clone()),
-                    ty: resolver.reference_to_owned_data(TypeData::from(TypeofValue {
+                    ty: collector.reference_to_owned_data(TypeData::from(TypeofValue {
                         identifier: name,
                         ty: TypeReference::unknown(),
                         scope_id: Some(scope_id),
@@ -2161,34 +2530,35 @@ impl TypeMember {
     }
 
     pub fn from_any_ts_type_member(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         member: &AnyTsTypeMember,
     ) -> Option<Self> {
         match member {
             AnyTsTypeMember::JsBogusMember(_) => None,
+            AnyTsTypeMember::JsMetavariable(_) => None,
             AnyTsTypeMember::TsCallSignatureTypeMember(member) => {
                 let function = Function {
                     is_async: false,
                     type_parameters: generic_params_from_ts_type_params(
-                        resolver,
+                        collector,
                         scope_id,
                         member.type_parameters(),
                     ),
                     name: None,
                     parameters: function_params_from_js_params(
-                        resolver,
+                        collector,
                         scope_id,
                         member.parameters(),
                     ),
                     return_type: return_type_from_annotation(
-                        resolver,
+                        collector,
                         scope_id,
                         member.return_type_annotation(),
                     )
                     .unwrap_or_default(),
                 };
-                let ty = resolver.register_and_resolve(function.into());
+                let ty = collector.register_and_resolve(function.into());
                 Some(Self {
                     kind: TypeMemberKind::CallSignature,
                     ty: ty.into(),
@@ -2197,18 +2567,22 @@ impl TypeMember {
             AnyTsTypeMember::TsConstructSignatureTypeMember(member) => {
                 let constructor = Constructor {
                     type_parameters: generic_params_from_ts_type_params(
-                        resolver,
+                        collector,
                         scope_id,
                         member.type_parameters(),
                     ),
                     parameters: constructor_params_from_js_params(
-                        resolver,
+                        collector,
                         scope_id,
                         member.parameters(),
                     ),
-                    return_type: type_from_annotation(resolver, scope_id, member.type_annotation()),
+                    return_type: type_from_annotation(
+                        collector,
+                        scope_id,
+                        member.type_annotation(),
+                    ),
                 };
-                let ty = resolver.register_and_resolve(constructor.into());
+                let ty = collector.register_and_resolve(constructor.into());
                 Some(Self {
                     kind: TypeMemberKind::Constructor,
                     ty: ty.into(),
@@ -2222,16 +2596,16 @@ impl TypeMember {
                     name: Some(name.clone().into()),
                     parameters: [].into(),
                     return_type: ReturnType::Type(getter_return_type(
-                        resolver,
+                        collector,
                         scope_id,
                         member.type_annotation(),
                         None,
                     )),
                 };
-                let ty = resolver.register_and_resolve(function.into()).into();
+                let ty = collector.register_and_resolve(function.into()).into();
                 Some(Self {
                     kind: TypeMemberKind::Getter(name.into()),
-                    ty: ResolvedTypeId::new(resolver.level(), resolver.optional(ty)).into(),
+                    ty: RawTypeId::Local(collector.optional(ty)).into(),
                 })
             }
             AnyTsTypeMember::TsIndexSignatureTypeMember(member) => {
@@ -2239,12 +2613,12 @@ impl TypeMember {
                     .parameter()
                     .and_then(|parameter| parameter.type_annotation())
                     .and_then(|annotation| annotation.ty())
-                    .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
+                    .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
                     .ok()?;
                 let value_ty = member
                     .type_annotation()
                     .and_then(|annotation| annotation.ty())
-                    .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
+                    .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
                     .ok()?;
                 Some(Self {
                     kind: TypeMemberKind::IndexSignature(key_ty),
@@ -2252,38 +2626,47 @@ impl TypeMember {
                 })
             }
             AnyTsTypeMember::TsMethodSignatureTypeMember(member) => {
+                let type_parameters = member.type_parameters();
+                // Reusing the enclosing scope lets nongeneric signatures share raw types.
+                let scope_id = if type_parameters.is_some() {
+                    collector
+                        .scope_for_node(member.syntax())
+                        .unwrap_or(scope_id)
+                } else {
+                    scope_id
+                };
                 member.name().ok().and_then(|name| name.name()).map(|name| {
                     let function = Function {
                         is_async: false,
                         type_parameters: generic_params_from_ts_type_params(
-                            resolver,
+                            collector,
                             scope_id,
-                            member.type_parameters(),
+                            type_parameters,
                         ),
                         name: Some(name.clone().into()),
                         parameters: function_params_from_js_params(
-                            resolver,
+                            collector,
                             scope_id,
                             member.parameters(),
                         ),
                         return_type: return_type_from_annotation(
-                            resolver,
+                            collector,
                             scope_id,
                             member.return_type_annotation(),
                         )
                         .unwrap_or_default(),
                     };
-                    let ty = resolver.register_and_resolve(function.into()).into();
+                    let ty = collector.register_and_resolve(function.into()).into();
                     let is_optional = member.optional_token().is_some();
-                    Self::from_name_and_optional_type(resolver, name, ty, is_optional)
+                    Self::from_name_and_optional_type(collector, name, ty, is_optional)
                 })
             }
             AnyTsTypeMember::TsPropertySignatureTypeMember(member) => {
                 member.name().ok().and_then(|name| name.name()).map(|name| {
-                    let ty = type_from_annotation(resolver, scope_id, member.type_annotation())
+                    let ty = type_from_annotation(collector, scope_id, member.type_annotation())
                         .unwrap_or_default();
                     let is_optional = member.optional_token().is_some();
-                    Self::from_name_and_optional_type(resolver, name, ty, is_optional)
+                    Self::from_name_and_optional_type(collector, name, ty, is_optional)
                 })
             }
             AnyTsTypeMember::TsSetterSignatureTypeMember(_member) => {
@@ -2295,7 +2678,7 @@ impl TypeMember {
 
     #[inline]
     fn from_class_member_info(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         name: AnyJsClassMemberName,
         ty: TypeReference,
@@ -2303,8 +2686,8 @@ impl TypeMember {
         is_optional: bool,
     ) -> Option<Self> {
         let kind = match name {
-            AnyJsClassMemberName::JsComputedMemberName(name) => TypeMemberKind::IndexSignature(
-                TypeReference::from_any_js_expression(resolver, scope_id, &name.expression().ok()?),
+            AnyJsClassMemberName::JsComputedMemberName(name) => TypeMemberKind::ComputedValue(
+                computed_member_reference(collector, scope_id, &name.expression().ok()?),
             ),
             _ => {
                 let name = text_from_class_member_name(name.name()?);
@@ -2322,8 +2705,8 @@ impl TypeMember {
             kind,
             ty: match is_optional {
                 true => {
-                    let id = resolver.optional(ty);
-                    resolver.reference_to_id(id)
+                    let id = collector.optional(ty);
+                    collector.reference_to_id(id)
                 }
                 false => ty,
             },
@@ -2332,7 +2715,7 @@ impl TypeMember {
 
     #[inline]
     fn from_name_and_optional_type(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         name: TokenText,
         ty: TypeReference,
         is_optional: bool,
@@ -2345,29 +2728,26 @@ impl TypeMember {
                 TypeMemberKind::Named(name)
             },
             ty: match is_optional {
-                true => ResolvedTypeId::new(resolver.level(), resolver.optional(ty)).into(),
+                true => RawTypeId::Local(collector.optional(ty)).into(),
                 false => ty,
             },
         }
     }
 
     fn members_from_class_member_list(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         member_list: JsClassMemberList,
     ) -> Box<[Self]> {
-        let mut members: Vec<_> = member_list
-            .into_iter()
-            .filter_map(|member| Self::from_any_js_class_member(resolver, scope_id, &member))
-            .collect();
+        let mut members = Self::collect_class_members(collector, scope_id, member_list);
 
         // Extend members with those from constructor definitions:
         let num_members = members.len();
         for i in 0..num_members {
             let member = &members[i];
             if member.is_constructor()
-                && let Some(member_ty) = resolver.resolve_and_get(&member.ty)
-                && let TypeData::Constructor(constructor) = member_ty.as_raw_data()
+                && let Some(member_ty) = collector.get_by_reference(&member.ty)
+                && let TypeData::Constructor(constructor) = member_ty
             {
                 for param in &constructor.parameters {
                     if let Some(_accessibility) = param.accessibility
@@ -2389,25 +2769,142 @@ impl TypeMember {
 
         members.into()
     }
+
+    fn collect_class_members(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        member_list: JsClassMemberList,
+    ) -> Vec<Self> {
+        enum CollectedMember {
+            Direct(TypeMember),
+            MethodOverload {
+                member: TypeMember,
+                signatures: Vec<TypeReference>,
+            },
+        }
+
+        let mut collected = Vec::new();
+        let mut overloads_by_name = FxHashMap::default();
+        for syntax_member in member_list {
+            let is_method_signature = matches!(
+                &syntax_member,
+                AnyJsClassMember::TsMethodSignatureClassMember(_)
+            );
+            let is_method_implementation =
+                matches!(&syntax_member, AnyJsClassMember::JsMethodClassMember(_));
+            let Some(member) = Self::from_any_js_class_member(collector, scope_id, &syntax_member)
+            else {
+                continue;
+            };
+            if !is_method_signature && (!is_method_implementation || overloads_by_name.is_empty()) {
+                collected.push(CollectedMember::Direct(member));
+                continue;
+            }
+
+            let Some(name) = member.kind.name() else {
+                collected.push(CollectedMember::Direct(member));
+                continue;
+            };
+            let key = (name, member.is_static());
+
+            if is_method_signature {
+                if let Some(index) = overloads_by_name.get(&key).copied()
+                    && let CollectedMember::MethodOverload { signatures, .. } =
+                        &mut collected[index]
+                {
+                    signatures.push(member.ty);
+                } else {
+                    overloads_by_name.insert(key, collected.len());
+                    collected.push(CollectedMember::MethodOverload {
+                        signatures: vec![member.ty.clone()],
+                        member,
+                    });
+                }
+            } else if is_method_implementation
+                && let Some(index) = overloads_by_name.get(&key).copied()
+                && let CollectedMember::MethodOverload {
+                    member: representative,
+                    ..
+                } = &mut collected[index]
+            {
+                *representative = member;
+            } else {
+                collected.push(CollectedMember::Direct(member));
+            }
+        }
+
+        collected
+            .into_iter()
+            .map(|collected| match collected {
+                CollectedMember::Direct(member) => member,
+                CollectedMember::MethodOverload {
+                    mut member,
+                    signatures,
+                } => {
+                    member.ty = match signatures.as_slice() {
+                        [signature] => signature.clone(),
+                        _ => collector.reference_to_owned_data(TypeData::object_with_members(
+                            signatures
+                                .into_iter()
+                                .map(|ty| Self {
+                                    kind: TypeMemberKind::CallSignature,
+                                    ty,
+                                })
+                                .collect(),
+                        )),
+                    };
+                    member
+                }
+            })
+            .collect()
+    }
+}
+
+fn computed_member_reference(
+    collector: &mut dyn RawTypeCollector,
+    scope_id: ScopeId,
+    expression: &AnyJsExpression,
+) -> TypeReference {
+    if let Some(member) = expression.as_js_static_member_expression()
+        && let Ok(object) = member.object()
+        && let Some(identifier) = object.as_js_identifier_expression()
+        && let (Some(object_name), Some(member_name)) = (
+            identifier
+                .name()
+                .ok()
+                .and_then(|name| text_from_token(name.value_token())),
+            member.member().ok().and_then(text_from_any_js_name),
+        )
+        && object_name.text() == "Symbol"
+        && matches!(member_name.text(), "dispose" | "asyncDispose")
+    {
+        return TypeReferenceQualifier::from_path(
+            scope_id,
+            Path::Qualified(vec![object_name, member_name].into_boxed_slice()),
+        )
+        .into();
+    }
+
+    TypeReference::from_any_js_expression(collector, scope_id, expression)
 }
 
 impl TypeReference {
     pub fn from_any_js_expression(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         expr: &AnyJsExpression,
     ) -> Self {
-        let data = TypeData::from_any_js_expression(resolver, scope_id, expr);
-        resolver.reference_to_owned_data(data)
+        let data = TypeData::from_any_js_expression(collector, scope_id, expr);
+        collector.reference_to_owned_data(data)
     }
 
     pub fn from_any_ts_type(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         ty: &AnyTsType,
     ) -> Self {
-        let data = TypeData::from_any_ts_type(resolver, scope_id, ty);
-        resolver.reference_to_owned_data(data)
+        let data = TypeData::from_any_ts_type(collector, scope_id, ty);
+        collector.reference_to_owned_data(data)
     }
 
     pub fn from_name(scope_id: ScopeId, name: TokenText) -> Self {
@@ -2418,16 +2915,16 @@ impl TypeReference {
     }
 
     pub fn from_ts_reference_type(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         ty: &TsReferenceType,
     ) -> Self {
-        let data = TypeData::from_ts_reference_type(resolver, scope_id, ty);
-        resolver.reference_to_owned_data(data)
+        let data = TypeData::from_ts_reference_type(collector, scope_id, ty);
+        collector.reference_to_owned_data(data)
     }
 
     pub fn types_from_ts_type_arguments(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         arguments: Option<TsTypeArguments>,
     ) -> Box<[Self]> {
@@ -2436,26 +2933,26 @@ impl TypeReference {
                 args.ts_type_argument_list()
                     .into_iter()
                     .filter_map(Result::ok)
-                    .map(|ty| Self::from_any_ts_type(resolver, scope_id, &ty))
+                    .map(|ty| Self::from_any_ts_type(collector, scope_id, &ty))
                     .collect()
             })
             .unwrap_or_default()
     }
 
     pub fn types_from_ts_type_list(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         types: TsTypeList,
     ) -> Box<[Self]> {
         types
             .into_iter()
             .filter_map(Result::ok)
-            .map(|ty| Self::from_ts_reference_type(resolver, scope_id, &ty))
+            .map(|ty| Self::from_ts_reference_type(collector, scope_id, &ty))
             .collect()
     }
 
     pub fn types_from_ts_type_parameters(
-        resolver: &mut dyn TypeResolver,
+        collector: &mut dyn RawTypeCollector,
         scope_id: ScopeId,
         params: &TsTypeParameters,
     ) -> Box<[Self]> {
@@ -2464,8 +2961,8 @@ impl TypeReference {
             .into_iter()
             .map(|param| match param {
                 Ok(param) => {
-                    GenericTypeParameter::from_ts_type_parameter(resolver, scope_id, &param)
-                        .map(|generic| resolver.register_and_resolve(TypeData::from(generic)))
+                    GenericTypeParameter::from_ts_type_parameter(collector, scope_id, &param)
+                        .map(|generic| collector.register_and_resolve(TypeData::from(generic)))
                         .map(Self::from)
                         .unwrap_or_default()
                 }
@@ -2648,20 +3145,20 @@ impl TypeofThisOrSuperExpression {
 }
 
 fn reference_to_extends_clause(
-    resolver: &mut dyn TypeResolver,
+    collector: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     extends: JsExtendsClause,
 ) -> Option<TypeReference> {
     let super_class = extends.super_class().ok()?;
-    let super_class = resolver.reference_to_resolved_expression(scope_id, &super_class);
+    let super_class = collector.reference_to_resolved_expression(scope_id, &super_class);
     let type_parameters =
-        TypeReference::types_from_ts_type_arguments(resolver, scope_id, extends.type_arguments());
+        TypeReference::types_from_ts_type_arguments(collector, scope_id, extends.type_arguments());
 
     if type_parameters.is_empty() {
         Some(super_class)
     } else {
         Some(
-            resolver.reference_to_owned_data(TypeData::instance_of(TypeInstance {
+            collector.reference_to_owned_data(TypeData::instance_of(TypeInstance {
                 ty: super_class,
                 type_parameters,
             })),
@@ -2687,20 +3184,22 @@ impl TypeMemberAccessibility {
 
 #[inline]
 fn constructor_params_from_js_constructor_params(
-    resolver: &mut dyn TypeResolver,
+    collector: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     params: SyntaxResult<JsConstructorParameters>,
 ) -> Box<[ConstructorParameter]> {
     params
         .map(|params| {
-            ConstructorParameter::params_from_js_constructor_parameters(resolver, scope_id, &params)
+            ConstructorParameter::params_from_js_constructor_parameters(
+                collector, scope_id, &params,
+            )
         })
         .unwrap_or_default()
 }
 
 #[inline]
 fn constructor_params_from_js_params(
-    resolver: &mut dyn TypeResolver,
+    collector: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     params: SyntaxResult<JsParameters>,
 ) -> Box<[ConstructorParameter]> {
@@ -2712,7 +3211,9 @@ fn constructor_params_from_js_params(
                 .into_iter()
                 .flatten()
                 .map(|param| ConstructorParameter {
-                    parameter: FunctionParameter::from_any_js_parameter(resolver, scope_id, &param),
+                    parameter: FunctionParameter::from_any_js_parameter(
+                        collector, scope_id, &param,
+                    ),
                     accessibility: None,
                 })
                 .collect()
@@ -2720,25 +3221,45 @@ fn constructor_params_from_js_params(
         .unwrap_or_default()
 }
 
+/// Callee reference of a call or `new` expression, instantiated with its
+/// explicit type arguments when present.
+fn callee_reference(
+    collector: &mut dyn RawTypeCollector,
+    scope_id: ScopeId,
+    callee: &AnyJsExpression,
+    type_arguments: Option<TsTypeArguments>,
+) -> TypeReference {
+    let callee = collector.reference_to_resolved_expression(scope_id, callee);
+    let type_parameters =
+        TypeReference::types_from_ts_type_arguments(collector, scope_id, type_arguments);
+    if type_parameters.is_empty() {
+        return callee;
+    }
+    collector.reference_to_owned_data(TypeData::instance_of(TypeInstance {
+        ty: callee,
+        type_parameters,
+    }))
+}
+
 #[inline]
 fn function_params_from_js_params(
-    resolver: &mut dyn TypeResolver,
+    collector: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     params: SyntaxResult<JsParameters>,
 ) -> Box<[FunctionParameter]> {
     params
-        .map(|params| FunctionParameter::params_from_js_parameters(resolver, scope_id, &params))
+        .map(|params| FunctionParameter::params_from_js_parameters(collector, scope_id, &params))
         .unwrap_or_default()
 }
 
 fn function_return_type(
-    resolver: &mut dyn TypeResolver,
+    collector: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     is_async: bool,
     annotation: Option<TsReturnTypeAnnotation>,
     body: Option<AnyJsFunctionBody>,
 ) -> ReturnType {
-    if let Some(return_ty) = return_type_from_annotation(resolver, scope_id, annotation) {
+    if let Some(return_ty) = return_type_from_annotation(collector, scope_id, annotation) {
         return if is_async && return_ty.as_type().is_some_and(|ty| !ty.is_known()) {
             ReturnType::Type(GLOBAL_INSTANCEOF_PROMISE_ID.into())
         } else {
@@ -2747,11 +3268,11 @@ fn function_return_type(
     }
 
     let mut return_ty = match body {
-        Some(AnyJsFunctionBody::AnyJsExpression(return_expr)) => resolver
+        Some(AnyJsFunctionBody::AnyJsExpression(return_expr)) => collector
             .resolve_expression(scope_id, &return_expr)
             .into_owned(),
         Some(AnyJsFunctionBody::JsFunctionBody(body)) => {
-            type_from_function_body(resolver, scope_id, body)
+            type_from_function_body(collector, scope_id, body)
         }
         None => {
             return ReturnType::Type(match is_async {
@@ -2762,38 +3283,46 @@ fn function_return_type(
     };
 
     if is_async {
-        return_ty = TypeData::promise_of(scope_id, resolver.reference_to_owned_data(return_ty));
+        return_ty = TypeData::promise_of(scope_id, collector.reference_to_owned_data(return_ty));
     }
 
-    ReturnType::Type(resolver.reference_to_owned_data(return_ty))
+    ReturnType::Type(collector.reference_to_owned_data(return_ty))
 }
 
 fn getter_return_type(
-    resolver: &mut dyn TypeResolver,
+    collector: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     annotation: Option<TsTypeAnnotation>,
     body: Option<JsFunctionBody>,
 ) -> TypeReference {
-    if let Some(return_ty) = type_from_annotation(resolver, scope_id, annotation) {
+    if let Some(return_ty) = type_from_annotation(collector, scope_id, annotation) {
         return return_ty;
     }
 
     let return_ty = match body {
-        Some(body) => type_from_function_body(resolver, scope_id, body),
+        Some(body) => type_from_function_body(collector, scope_id, body),
         None => return TypeReference::unknown(),
     };
 
-    resolver.reference_to_owned_data(return_ty)
+    collector.reference_to_owned_data(return_ty)
+}
+
+/// A modifier without an operator, such as `?`, adds like `+?` does.
+fn mapped_type_modifier(operator_token: Option<JsSyntaxToken>) -> MappedTypeModifier {
+    match operator_token {
+        Some(token) if token.kind() == JsSyntaxKind::MINUS => MappedTypeModifier::Remove,
+        _ => MappedTypeModifier::Add,
+    }
 }
 
 #[inline]
 fn generic_params_from_ts_type_params(
-    resolver: &mut dyn TypeResolver,
+    collector: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     params: Option<TsTypeParameters>,
 ) -> Box<[TypeReference]> {
     params
-        .map(|params| TypeReference::types_from_ts_type_parameters(resolver, scope_id, &params))
+        .map(|params| TypeReference::types_from_ts_type_parameters(collector, scope_id, &params))
         .unwrap_or_default()
 }
 
@@ -2822,13 +3351,13 @@ fn path_from_any_ts_module_name(module_name: AnyTsModuleName) -> Option<Path> {
 
 #[inline]
 fn return_type_from_annotation(
-    resolver: &mut dyn TypeResolver,
+    collector: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     annotation: Option<TsReturnTypeAnnotation>,
 ) -> Option<ReturnType> {
     annotation
         .and_then(|annotation| annotation.ty().ok())
-        .and_then(|ty| ReturnType::from_any_ts_return_type(resolver, scope_id, &ty))
+        .and_then(|ty| ReturnType::from_any_ts_return_type(collector, scope_id, &ty))
 }
 
 #[inline]
@@ -2880,17 +3409,17 @@ fn text_from_token(token: SyntaxResult<JsSyntaxToken>) -> Option<Text> {
 
 #[inline]
 fn type_from_annotation(
-    resolver: &mut dyn TypeResolver,
+    collector: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     annotation: Option<TsTypeAnnotation>,
 ) -> Option<TypeReference> {
     annotation
         .and_then(|annotation| annotation.ty().ok())
-        .map(|ty| TypeReference::from_any_ts_type(resolver, scope_id, &ty))
+        .map(|ty| TypeReference::from_any_ts_type(collector, scope_id, &ty))
 }
 
 fn type_from_function_body(
-    resolver: &mut dyn TypeResolver,
+    collector: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     body: JsFunctionBody,
 ) -> TypeData {
@@ -2902,7 +3431,7 @@ fn type_from_function_body(
             return_statement.argument().map_or(
                 TypeData::Reference(GLOBAL_UNDEFINED_ID.into()),
                 |argument| {
-                    resolver
+                    collector
                         .resolve_expression(scope_id, &argument)
                         .into_owned()
                 },
@@ -2916,10 +3445,10 @@ fn type_from_function_body(
         _ => {
             let return_types = return_types
                 .into_iter()
-                .map(|ty| resolver.reference_to_owned_data(ty))
+                .map(|ty| collector.reference_to_owned_data(ty))
                 .collect();
 
-            TypeData::union_of(resolver, return_types)
+            TypeData::Union(Box::new(Union(return_types)))
         }
     }
 }
@@ -2931,7 +3460,7 @@ fn is_const_reference_type(type_annotation: &AnyTsType) -> bool {
     };
 
     reference_type.type_arguments().is_none()
-        && reference_type.name().ok().is_some_and(|name| {
+        && reference_type.name().is_ok_and(|name| {
             name.as_js_reference_identifier()
                 .and_then(|identifier| identifier.value_token().ok())
                 .is_some_and(|token| token.text_trimmed() == "const")
@@ -2961,7 +3490,7 @@ fn expression_is_const_assertion(expression: &AnyJsExpression) -> bool {
 
 /// Builds the type produced by a const assertion expression.
 fn type_data_from_const_assertion_expression(
-    resolver: &mut dyn TypeResolver,
+    collector: &mut dyn RawTypeCollector,
     scope_id: ScopeId,
     expression: &AnyJsExpression,
 ) -> TypeData {
@@ -2991,25 +3520,25 @@ fn type_data_from_const_assertion_expression(
         }
     }
 
-    let inner_type = resolver
+    let inner_type = collector
         .resolve_expression(scope_id, &expression)
         .into_owned();
-    apply_deep_const(resolver, inner_type)
+    apply_deep_const(collector, inner_type)
 }
 
 /// Applies const assertion conversion to inferred tuple and object types.
-fn apply_deep_const(resolver: &mut dyn TypeResolver, inner_type: TypeData) -> TypeData {
-    apply_deep_const_inner(resolver, inner_type, 0)
+fn apply_deep_const(collector: &mut dyn RawTypeCollector, inner_type: TypeData) -> TypeData {
+    apply_deep_const_inner(collector, inner_type, 0)
 }
 
 /// Recursively applies `as const` to tuple elements and object members.
 fn apply_deep_const_inner(
-    resolver: &mut dyn TypeResolver,
+    collector: &mut dyn RawTypeCollector,
     inner_type: TypeData,
     depth: usize,
 ) -> TypeData {
     if depth >= MAX_CONST_ASSERTION_DEPTH {
-        return inner_type;
+        return TypeData::unknown();
     }
 
     match inner_type {
@@ -3018,13 +3547,16 @@ fn apply_deep_const_inner(
                 .elements()
                 .iter()
                 .map(|element| TupleElementType {
-                    ty: apply_deep_const_reference(resolver, &element.ty, depth + 1),
+                    ty: apply_deep_const_reference(collector, &element.ty, depth + 1),
                     name: element.name.clone(),
                     is_optional: element.is_optional,
                     is_rest: element.is_rest,
                 })
                 .collect();
-            TypeData::Tuple(Box::new(Tuple(elements)))
+            TypeData::Tuple(Box::new(Tuple {
+                elements,
+                is_inferred_array: false,
+            }))
         }
         TypeData::Object(object) => TypeData::Object(Box::new(Object {
             prototype: object.prototype.clone(),
@@ -3033,9 +3565,10 @@ fn apply_deep_const_inner(
                 .iter()
                 .map(|member| TypeMember {
                     kind: member.kind.clone().with_const_asserted(),
-                    ty: apply_deep_const_reference(resolver, &member.ty, depth + 1),
+                    ty: apply_deep_const_reference(collector, &member.ty, depth + 1),
                 })
                 .collect(),
+            has_unknown_members: object.has_unknown_members,
         })),
         _ => inner_type,
     }
@@ -3043,23 +3576,20 @@ fn apply_deep_const_inner(
 
 /// Resolves a type reference, applies const assertion conversion, and stores the result.
 fn apply_deep_const_reference(
-    resolver: &mut dyn TypeResolver,
+    collector: &mut dyn RawTypeCollector,
     type_reference: &TypeReference,
     depth: usize,
 ) -> TypeReference {
     if depth >= MAX_CONST_ASSERTION_DEPTH {
-        return type_reference.clone();
+        return TypeReference::unknown();
     }
 
-    let Some(inner_type) = resolver
-        .resolve_and_get(type_reference)
-        .map(|resolved| resolved.to_data())
-    else {
+    let Some(inner_type) = collector.get_by_reference(type_reference).cloned() else {
         return type_reference.clone();
     };
 
-    let inner_type = apply_deep_const_inner(resolver, inner_type, depth);
-    resolver.reference_to_owned_data(inner_type)
+    let inner_type = apply_deep_const_inner(collector, inner_type, depth);
+    collector.reference_to_owned_data(inner_type)
 }
 
 #[inline]

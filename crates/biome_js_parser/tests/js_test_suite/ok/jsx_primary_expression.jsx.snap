@@ -43,7 +43,7 @@ JsModule {
                                             attributes: JsxAttributeList [],
                                             r_angle_token: R_ANGLE@13..14 ">" [] [],
                                         },
-                                        children: JsxChildList [
+                                        elements: JsxChildList [
                                             JsxText {
                                                 value_token: JSX_TEXT_LITERAL@14..18 "abcd" [] [],
                                             },

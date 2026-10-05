@@ -17,7 +17,7 @@ impl FormatNodeRule<ScssDebugAtRule> for FormatScssDebugAtRule {
         write!(
             f,
             [
-                debug_token.format(),
+                debug_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
                 value.format(),
                 format_scss_statement_at_rule_semicolon(semicolon_token)

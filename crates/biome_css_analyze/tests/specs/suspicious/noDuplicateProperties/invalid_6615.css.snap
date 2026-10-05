@@ -1,0 +1,41 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid_6615.css
+---
+# Input
+```css
+.class {
+    @mixin hover {
+        color: red;
+        color: blue;
+    }
+}
+
+```
+
+# Diagnostics
+```
+invalid_6615.css:4:9 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    2 │     @mixin hover {
+    3 │         color: red;
+  > 4 │         color: blue;
+      │         ^^^^^
+    5 │     }
+    6 │ }
+  
+  i color is already defined here.
+  
+    1 │ .class {
+    2 │     @mixin hover {
+  > 3 │         color: red;
+      │         ^^^^^
+    4 │         color: blue;
+    5 │     }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```

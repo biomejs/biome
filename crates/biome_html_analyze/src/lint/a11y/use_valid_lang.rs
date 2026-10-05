@@ -3,15 +3,18 @@ use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_aria_metadata::{is_valid_country, is_valid_language, is_valid_script};
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_html_syntax::T;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_languages::HtmlFileSource;
 use biome_rowan::TextRange;
 use biome_rule_options::use_valid_lang::UseValidLangOptions;
 
-use crate::utils::is_html_tag;
-
 declare_lint_rule! {
-    /// Ensure that the attribute passed to the `lang` attribute is a correct ISO language and/or country.
+    /// Require a supported language tag on the `<html>` element.
+    ///
+    /// For static values, the rule accepts a language code such as `en`, optionally followed by a
+    /// script or region (`zh-Hant` or `en-GB`), or by both (`zh-Hant-TW`). Tags with additional
+    /// variants or extensions are outside the supported subset and are reported. Dynamic values are
+    /// not evaluated.
     ///
     /// ## Examples
     ///
@@ -64,9 +67,8 @@ impl Rule for UseValidLang {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
 
-        if !is_html_tag(node, source_type, "html") {
+        if node.tag_name_kind().is_none_or(|tag| tag != T![html]) {
             return None;
         }
 

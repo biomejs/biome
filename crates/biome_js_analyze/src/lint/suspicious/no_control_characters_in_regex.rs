@@ -61,6 +61,37 @@ declare_lint_rule! {
     }
 }
 
+impl Rule for NoControlCharactersInRegex {
+    type Query = Ast<JsRegexLiteralExpression>;
+    type State = TextRange;
+    type Signals = Box<[Self::State]>;
+    type Options = NoControlCharactersInRegexOptions;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let node = ctx.query();
+        let Ok((pattern, flags)) = node.decompose() else {
+            return Default::default();
+        };
+        let pattern_start = node.range().start() + TextSize::from(1);
+        collect_control_characters(pattern_start, pattern.text(), flags.text(), false)
+            .unwrap_or_default()
+            .into_boxed_slice()
+    }
+
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            state,
+            markup! {
+                "Unexpected control character in a regular expression."
+            },
+        ).note(
+            markup! {
+                "Control characters are unusual and potentially incorrect inputs, so they are disallowed."
+            }
+        ))
+    }
+}
 fn decode_hex(digits: &[u8]) -> Option<u32> {
     str::from_utf8(digits)
         .ok()
@@ -149,36 +180,4 @@ fn collect_control_characters(
         }
     }
     Some(control_chars)
-}
-
-impl Rule for NoControlCharactersInRegex {
-    type Query = Ast<JsRegexLiteralExpression>;
-    type State = TextRange;
-    type Signals = Box<[Self::State]>;
-    type Options = NoControlCharactersInRegexOptions;
-
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let node = ctx.query();
-        let Ok((pattern, flags)) = node.decompose() else {
-            return Default::default();
-        };
-        let pattern_start = node.range().start() + TextSize::from(1);
-        collect_control_characters(pattern_start, pattern.text(), flags.text(), false)
-            .unwrap_or_default()
-            .into_boxed_slice()
-    }
-
-    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            state,
-            markup! {
-                "Unexpected control character in a regular expression."
-            },
-        ).note(
-            markup! {
-                "Control characters are unusual and potentially incorrect inputs, so they are disallowed."
-            }
-        ))
-    }
 }

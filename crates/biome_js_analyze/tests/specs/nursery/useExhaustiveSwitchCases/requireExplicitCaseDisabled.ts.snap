@@ -1,0 +1,70 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: requireExplicitCaseDisabled.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+declare const letter: "A" | "B";
+switch (letter) {
+	default:
+		throw new Error("Unexpected letter");
+}
+
+switch (letter) {
+	case "A":
+		break;
+	default:
+		break;
+}
+
+switch (letter) {
+	case "A":
+	case "B":
+		break;
+}
+
+switch (letter) {
+	case "A":
+		break;
+}
+
+```
+
+# Diagnostics
+```
+requireExplicitCaseDisabled.ts:22:1 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    20 │ }
+    21 │ 
+  > 22 │ switch (letter) {
+       │ ^^^^^^^^^^^^^^^^^
+  > 23 │ 	case "A":
+  > 24 │ 		break;
+  > 25 │ }
+       │ ^
+    26 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - "B"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    22 22 │   switch (letter) {
+    23 23 │     case "A":
+    24    │ - → → break;
+       24 │ + → → break;
+       25 │ + → case·"B":·throw·new·Error("TODO:·Not·implemented·yet");
+    25 26 │   }
+    26 27 │   
+  
+
+```

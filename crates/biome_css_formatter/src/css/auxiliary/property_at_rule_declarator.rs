@@ -16,6 +16,13 @@ impl FormatNodeRule<CssPropertyAtRuleDeclarator> for FormatCssPropertyAtRuleDecl
             name,
         } = node.as_fields();
 
-        write!(f, [property_token.format(), space(), name.format()])
+        write!(
+            f,
+            [
+                property_token.format()?.with_text_case(CssCase::Lowercase),
+                space(),
+                name.format()
+            ]
+        )
     }
 }

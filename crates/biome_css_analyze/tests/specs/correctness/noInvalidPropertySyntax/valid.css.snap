@@ -1,0 +1,20 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+
+@property --universal {
+  syntax: "*";
+  inherits: false;
+}
+
+@property --components {
+  syntax: "<length> | auto";
+  inherits: true;
+  initial-value: 0px;
+}
+
+```

@@ -2,33 +2,44 @@ mod go_to;
 #[cfg(feature = "html_embeds")]
 mod parse_embedded_nodes;
 
+#[cfg(feature = "html_embeds")]
+use super::LintSnippetAnalyzer;
 use super::{
     AnalyzerCapabilities, AnalyzerVisitorBuilder, AnalyzerVisitorResult, Capabilities,
     CodeActionsParams, DebugCapabilities, DocumentFileSource, EditorCapabilities, EnabledForPath,
-    ExtensionHandler, FixAllParams, FormatterCapabilities, LintParams, LintResults, ParseResult,
-    ParserCapabilities, ProcessFixAll, ProcessLint, SearchCapabilities, UpdateSnippetsNodes,
+    ExtensionHandler, FixAllParams, FixedFileResult, FormatterCapabilities, LintParams,
+    LintResults, ParseResult, ParsedOrigin, ParserCapabilities, ProcessFixAll, ProcessLint,
+    SearchCapabilities, UpdateSnippetsNodes,
 };
 #[cfg(not(feature = "html_embeds"))]
 use super::{ParseEmbedResult, ParseEmbeddedParams};
-use crate::configuration::to_analyzer_rules;
+use crate::configuration::to_analyzer_rules_by_indices;
+use crate::db::WorkspaceDb;
 #[cfg(feature = "html_embeds")]
 use crate::embed::EmbedContent;
 use crate::file_handlers::html::go_to::{resolve_binding_html, resolve_definition};
 #[cfg(feature = "html_embeds")]
 use crate::file_handlers::html::parse_embedded_nodes::parse_embedded_nodes;
+#[cfg(feature = "html_embeds")]
+use crate::file_handlers::{css, javascript, json};
 use crate::settings::{
-    OverrideSettings, SettingsWithEditor, check_feature_activity, check_override_feature_activity,
+    OverrideSettings, SettingsIdentity, SettingsWithEditor, check_feature_activity,
+    check_override_feature_activity, finalize_analyzer_options,
 };
 use crate::workspace::CodeAction;
 use crate::workspace::FixFileMode;
-use crate::workspace::{FixFileResult, PullActionsResult};
+use crate::workspace::PullActionsResult;
 use crate::{
     WorkspaceError,
     settings::{ServiceLanguage, Settings},
     workspace::GetSyntaxTreeResult,
 };
+#[cfg(feature = "html_embeds")]
+use biome_analyze::SnippetAnalyzer;
+use biome_analyze::SuppressionComment;
 use biome_analyze::{
-    ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
+    ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, AnalyzerSuppression,
+    ControlFlow, Never, Suppression,
 };
 use biome_configuration::html::{
     HtmlAssistConfiguration, HtmlAssistEnabled, HtmlFormatterConfiguration, HtmlFormatterEnabled,
@@ -36,20 +47,18 @@ use biome_configuration::html::{
     HtmlParserConfiguration,
 };
 #[cfg(feature = "html_embeds")]
+use biome_css_parser::{CssParserOptions, parse_css};
+#[cfg(feature = "html_embeds")]
 use biome_css_syntax::CssLanguage;
-use biome_db::{AnyParsedSource, ParsedSnippet};
-#[cfg(feature = "html_embeds")]
-use biome_formatter::FormatElement;
-#[cfg(feature = "html_embeds")]
-use biome_formatter::format_element::{Interned, LineMode};
-#[cfg(feature = "html_embeds")]
-use biome_formatter::prelude::{Document, Tag};
+use biome_db::AnyParsedSource;
 use biome_formatter::{
     AttributePosition, BracketSameLine, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
     TrailingNewline,
 };
 use biome_fs::BiomePath;
-use biome_html_analyze::{HtmlAnalyzerServices, analyze};
+#[cfg(feature = "html_embeds")]
+use biome_html_analyze::analyze_with_snippets;
+use biome_html_analyze::{HtmlAnalyzerServices, HtmlSuppression, analyze};
 use biome_html_factory::make::ident;
 use biome_html_formatter::context::SelfCloseVoidElements;
 use biome_html_formatter::{
@@ -61,20 +70,212 @@ use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::{AnyEmbeddedContent, AnyHtmlTagElement};
 use biome_html_syntax::{HtmlAttribute, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
 #[cfg(feature = "html_embeds")]
-use biome_js_syntax::JsLanguage;
+use biome_html_syntax::{HtmlElementList, HtmlSingleTextExpression, HtmlTextExpression};
+#[cfg(feature = "html_embeds")]
+use biome_js_analyze::JsSuppression;
+#[cfg(feature = "html_embeds")]
+use biome_js_parser::{JsParserOptions, parse as parse_js};
+#[cfg(feature = "html_embeds")]
+use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxToken, JsTemplateChunkElement};
 #[cfg(feature = "html_embeds")]
 use biome_json_syntax::JsonLanguage;
-#[cfg(feature = "html_embeds")]
-use biome_languages::{HtmlFileSource, JsFileSource, LanguageDb};
+use biome_languages::HtmlFileSource;
 #[cfg(feature = "html_embeds")]
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, BatchMutation, NodeCache, SendNode};
-use biome_workspace_db::WorkspaceDb;
+#[cfg(feature = "html_embeds")]
+use biome_rowan::TokenAtOffset;
+use biome_rowan::{AstNode, BatchMutation, NodeCache, SendNode, TextRange, TextSize};
 use camino::Utf8Path;
-use either::Either;
+#[cfg(feature = "html_embeds")]
+use rustc_hash::FxHashMap;
 use std::borrow::Cow;
 use std::fmt::Debug;
 use tracing::{debug_span, error, instrument, trace_span};
+
+struct HtmlSuppressionService {
+    html: HtmlSuppression,
+    #[cfg(feature = "html_embeds")]
+    snippets: FxHashMap<TextRange, (JsSyntaxToken, TextSize)>,
+}
+
+impl HtmlSuppressionService {
+    #[cfg(not(feature = "html_embeds"))]
+    fn new(
+        _root: &HtmlRoot,
+        _source: HtmlFileSource,
+        _parsed: &ParsedOrigin,
+        _db: &WorkspaceDb,
+    ) -> Self {
+        Self {
+            html: HtmlSuppression,
+        }
+    }
+
+    #[cfg(feature = "html_embeds")]
+    fn new(
+        root: &HtmlRoot,
+        source: HtmlFileSource,
+        parsed: &ParsedOrigin,
+        db: &WorkspaceDb,
+    ) -> Self {
+        let mut snippets = FxHashMap::default();
+        if source.is_astro() {
+            let existing: FxHashMap<_, _> = parsed
+                .snippets(db)
+                .filter(|snippet| {
+                    snippet
+                        .file_source(db)
+                        .and_then(|source| source.to_js_file_source())
+                        .is_some_and(|source| source.as_embedding_kind().is_astro_template())
+                })
+                .filter_map(|snippet| Self::comment_only_token(&snippet.parsed_origin().parse(db)))
+                .map(|token| (token.token_text(), token))
+                .collect();
+            for expression in root
+                .syntax()
+                .descendants()
+                .filter_map(HtmlSingleTextExpression::cast)
+            {
+                if expression.parent::<HtmlElementList>().is_none() {
+                    continue;
+                }
+                let Some(token) = expression
+                    .expression()
+                    .and_then(|body| body.html_literal_token().ok())
+                else {
+                    continue;
+                };
+                let range = token.text_range();
+                // Host fixes may shift a comment without changing its guest text.
+                let Some(guest_token) = existing.get(&token.token_text()) else {
+                    continue;
+                };
+                if let Some(guest_token) =
+                    Self::host_comment_token(root, range, guest_token.clone())
+                {
+                    snippets.insert(token.text_trimmed_range(), (guest_token, range.start()));
+                }
+            }
+        }
+        Self {
+            html: HtmlSuppression,
+            snippets,
+        }
+    }
+
+    #[cfg(feature = "html_embeds")]
+    fn comment_only_token(parsed: &AnyParse) -> Option<JsSyntaxToken> {
+        if parsed.has_errors() {
+            return None;
+        }
+        let AnyJsRoot::JsExpressionTemplateRoot(guest) = parsed.tree::<AnyJsRoot>() else {
+            return None;
+        };
+        if guest.expression().is_some() {
+            return None;
+        }
+        let eof = guest.eof_token().ok()?;
+        if !(eof.has_leading_comments() || eof.has_trailing_comments())
+            || eof.leading_trivia().has_skipped()
+            || eof.trailing_trivia().has_skipped()
+        {
+            return None;
+        }
+        Some(eof)
+    }
+
+    #[cfg(feature = "html_embeds")]
+    fn host_comment_token(
+        root: &HtmlRoot,
+        range: TextRange,
+        eof: JsSyntaxToken,
+    ) -> Option<JsSyntaxToken> {
+        let token = match root.syntax().token_at_offset(range.start()) {
+            TokenAtOffset::Single(token) | TokenAtOffset::Between(_, token) => token,
+            TokenAtOffset::None => return None,
+        };
+        if token.text_range() != range {
+            return None;
+        }
+        let body = HtmlTextExpression::cast(token.parent()?)?;
+        let expression = body.parent::<HtmlSingleTextExpression>()?;
+        expression.parent::<HtmlElementList>()?;
+        expression.l_curly_token().ok()?;
+        expression.r_curly_token().ok()?;
+        if eof.text() != token.text() {
+            return None;
+        }
+        Some(eof)
+    }
+}
+
+/// Identifies template comments owned by HTML analysis while retaining their
+/// guest parse for formatting and suppression extraction.
+#[cfg(feature = "html_embeds")]
+pub(crate) fn is_astro_template_comment(
+    host: &ParsedOrigin,
+    source: DocumentFileSource,
+    snippet: &super::ParsedSnippetOrigin,
+    db: &WorkspaceDb,
+) -> bool {
+    if !source
+        .to_html_file_source()
+        .is_some_and(|source| source.is_astro())
+        || !snippet
+            .file_source(db)
+            .and_then(|source| source.to_js_file_source())
+            .is_some_and(|source| source.as_embedding_kind().is_astro_template())
+    {
+        return false;
+    }
+    let Some(token) =
+        HtmlSuppressionService::comment_only_token(&snippet.parsed_origin().parse(db))
+    else {
+        return false;
+    };
+    HtmlSuppressionService::host_comment_token(&host.tree(db), snippet.content_range(db), token)
+        .is_some()
+}
+
+impl Suppression for HtmlSuppressionService {
+    type Diagnostic = <HtmlSuppression as Suppression>::Diagnostic;
+
+    fn parse_comment<'a>(
+        &self,
+        text: &'a str,
+        range: TextRange,
+    ) -> Vec<Result<AnalyzerSuppression<'a>, Self::Diagnostic>> {
+        self.html.parse_comment(text, range)
+    }
+
+    #[cfg(feature = "html_embeds")]
+    fn parse_snippet(&self, range: TextRange) -> Vec<SuppressionComment<'_, Self::Diagnostic>> {
+        let Some((token, offset)) = self.snippets.get(&range) else {
+            return Vec::new();
+        };
+        token
+            .leading_trivia()
+            .pieces()
+            .chain(token.trailing_trivia().pieces())
+            .filter(|piece| piece.is_comments())
+            .filter_map(|piece| {
+                let relative_range = piece.text_range() - token.text_range().start();
+                let text = &token.text()[relative_range];
+                let range = relative_range + *offset;
+                let suppressions = JsSuppression.parse_comment(text, range);
+                (!suppressions.is_empty()).then_some(SuppressionComment {
+                    range,
+                    suppressions,
+                })
+            })
+            .collect()
+    }
+
+    #[cfg(not(feature = "html_embeds"))]
+    fn parse_snippet(&self, _range: TextRange) -> Vec<SuppressionComment<'_, Self::Diagnostic>> {
+        Vec::new()
+    }
+}
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -172,9 +373,10 @@ impl ServiceLanguage for HtmlLanguage {
         global: &crate::settings::FormatSettings,
         overrides: &crate::settings::OverrideSettings,
         language: &Self::FormatterSettings,
-        path: &biome_fs::BiomePath,
-        file_source: &super::DocumentFileSource,
+        override_indices: &[usize],
+        file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
+        let file_source = file_source.to_html_file_source().unwrap_or_default();
         let indent_style = language
             .indent_style
             .or(global.indent_style)
@@ -204,20 +406,19 @@ impl ServiceLanguage for HtmlLanguage {
         let self_close_void_elements = language.self_close_void_elements.unwrap_or_default();
         let trailing_newline = language.trailing_newline.unwrap_or_default();
 
-        let mut options =
-            HtmlFormatOptions::new(file_source.to_html_file_source().unwrap_or_default())
-                .with_indent_style(indent_style)
-                .with_indent_width(indent_width)
-                .with_line_width(line_width)
-                .with_line_ending(line_ending)
-                .with_attribute_position(attribute_position)
-                .with_bracket_same_line(bracket_same_line)
-                .with_whitespace_sensitivity(whitespace_sensitivity)
-                .with_indent_script_and_style(indent_script_and_style)
-                .with_self_close_void_elements(self_close_void_elements)
-                .with_trailing_newline(trailing_newline);
+        let mut options = HtmlFormatOptions::new(file_source)
+            .with_indent_style(indent_style)
+            .with_indent_width(indent_width)
+            .with_line_width(line_width)
+            .with_line_ending(line_ending)
+            .with_attribute_position(attribute_position)
+            .with_bracket_same_line(bracket_same_line)
+            .with_whitespace_sensitivity(whitespace_sensitivity)
+            .with_indent_script_and_style(indent_script_and_style)
+            .with_self_close_void_elements(self_close_void_elements)
+            .with_trailing_newline(trailing_newline);
 
-        overrides.apply_override_html_format_options(path, &mut options);
+        overrides.apply_override_html_format_options_by_indices(override_indices, &mut options);
 
         options
     }
@@ -226,17 +427,13 @@ impl ServiceLanguage for HtmlLanguage {
         global: &Settings,
         _language: &Self::LinterSettings,
         _environment: Option<&Self::EnvironmentSettings>,
-        path: &biome_fs::BiomePath,
+        override_indices: &[usize],
         _file_source: &super::DocumentFileSource,
-        suppression_reason: Option<&str>,
     ) -> AnalyzerOptions {
-        let configuration =
-            AnalyzerConfiguration::default().with_rules(to_analyzer_rules(global, path.as_path()));
+        let configuration = AnalyzerConfiguration::default()
+            .with_rules(to_analyzer_rules_by_indices(global, override_indices));
 
-        AnalyzerOptions::default()
-            .with_file_path(path.as_path())
-            .with_configuration(configuration)
-            .with_suppression_reason(suppression_reason)
+        AnalyzerOptions::default().with_configuration(configuration)
     }
 
     fn formatter_enabled_for_file_path(settings: &Settings, path: &Utf8Path) -> bool {
@@ -346,6 +543,92 @@ impl ServiceLanguage for HtmlLanguage {
     }
 }
 
+#[salsa::interned]
+struct HtmlFormatOptionsInput {
+    settings: SettingsIdentity,
+    override_indices: Box<[usize]>,
+    file_source: DocumentFileSource,
+}
+
+#[salsa::tracked(returns(clone))]
+fn resolved_html_format_options<'db>(
+    db: &'db dyn salsa::Database,
+    input: HtmlFormatOptionsInput<'db>,
+) -> HtmlFormatOptions {
+    input
+        .settings(db)
+        .as_ref()
+        .format_options::<HtmlLanguage>(input.override_indices(db), input.file_source(db))
+}
+
+#[salsa::interned]
+struct HtmlAnalyzerOptionsInput {
+    settings: SettingsIdentity,
+    override_indices: Box<[usize]>,
+    file_source: DocumentFileSource,
+}
+
+#[salsa::tracked(returns(clone))]
+fn resolved_html_analyzer_options<'db>(
+    db: &'db dyn salsa::Database,
+    input: HtmlAnalyzerOptionsInput<'db>,
+) -> AnalyzerOptions {
+    input
+        .settings(db)
+        .as_ref()
+        .analyzer_options::<HtmlLanguage>(input.override_indices(db), input.file_source(db))
+}
+
+pub(in crate::file_handlers) fn resolve_format_options(
+    _path: &BiomePath,
+    source: &DocumentFileSource,
+    settings: &SettingsWithEditor,
+    workspace_db: &WorkspaceDb,
+) -> HtmlFormatOptions {
+    let query = settings.query();
+    if query.inline_settings().is_some() {
+        return settings.format_options::<HtmlLanguage>(source);
+    }
+    let selected_settings = query
+        .selection()
+        .selected_settings(workspace_db, query.project());
+    let query_db = workspace_db.settings_query_db();
+    let input = HtmlFormatOptionsInput::new(
+        &query_db,
+        selected_settings,
+        query.override_indices(),
+        *source,
+    );
+    resolved_html_format_options(&query_db, input)
+}
+
+fn resolve_analyzer_options(
+    path: &BiomePath,
+    working_directory: Option<&Utf8Path>,
+    source: &DocumentFileSource,
+    suppression_reason: Option<&str>,
+    settings: &SettingsWithEditor,
+    workspace_db: &WorkspaceDb,
+) -> AnalyzerOptions {
+    let query = settings.query();
+    let options = if query.inline_settings().is_some() {
+        settings.analyzer_options::<HtmlLanguage>(source)
+    } else {
+        let selected_settings = query
+            .selection()
+            .selected_settings(workspace_db, query.project());
+        let query_db = workspace_db.settings_query_db();
+        let input = HtmlAnalyzerOptionsInput::new(
+            &query_db,
+            selected_settings,
+            query.override_indices(),
+            *source,
+        );
+        resolved_html_analyzer_options(&query_db, input)
+    };
+    finalize_analyzer_options(options, path, working_directory, suppression_reason)
+}
+
 #[derive(Debug, Default, PartialEq, Eq)]
 pub(crate) struct HtmlFileHandler;
 
@@ -436,7 +719,7 @@ struct ParsedEmbed {
     /// The parsed snippet + file source, ready to push to `nodes`.
     node: (AnyParse, EmbedContent, DocumentFileSource),
     /// If JS was parsed, the resolved JsFileSource (for `embedded_file_source` capture).
-    js_file_source: Option<JsFileSource>,
+    js_file_source: Option<biome_languages::JsFileSource>,
 }
 
 /// Shared parsing context passed to `parse_matched_embed`.
@@ -470,10 +753,10 @@ fn debug_formatter_ir(
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
-    let options = settings.format_options::<HtmlLanguage>(path, document_file_source);
+    let options = resolve_format_options(path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
-    let formatted = format_node(options, &tree, false)?;
+    let formatted = format_node(options, &tree, Vec::new())?;
 
     let root_element = formatted.into_document();
     Ok(root_element.to_string())
@@ -483,14 +766,14 @@ fn debug_formatter_ir(
 fn format(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: super::ParsedOrigin,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<HtmlLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
-    let formatted = format_node(options, &tree, true)?;
+    let formatted = format_node(options, &tree, Vec::new())?;
 
     match formatted.print() {
         Ok(printed) => Ok(printed),
@@ -502,82 +785,74 @@ fn format(
 fn format_embedded(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: super::ParsedOrigin,
     settings: &SettingsWithEditor,
-    embedded_nodes: Vec<ParsedSnippet>,
+    embedded_nodes: Vec<super::ParsedSnippetOrigin>,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
-    let options = settings.format_options::<HtmlLanguage>(biome_path, document_file_source);
+    let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
-    let indent_script_and_style = options.indent_script_and_style().value();
-    let mut formatted = format_node(options, &tree, true)?;
+
+    // The HTML formatter writes a placeholder for each snippet, and the closure
+    // below replaces it with the formatted code. A snippet that can't be
+    // formatted keeps the HTML formatter's output.
+    let snippets: FxHashMap<TextRange, super::ParsedSnippetOrigin> = embedded_nodes
+        .into_iter()
+        .map(|snippet| (snippet.content_range(&workspace_db), snippet))
+        .collect();
+    let mut formatted = format_node(options, &tree, snippets.keys().copied().collect())?;
     formatted.format_embedded(move |range| {
-        let mut iter = embedded_nodes.iter();
-        let snippet = iter.find(|node| node.content_range(&workspace_db) == range)?;
-        let snippet_file_source =
-            workspace_db.source_from_index(snippet.document_source_index(&workspace_db))?;
+        let snippet = snippets.get(&range)?;
+        let snippet_file_source = snippet.file_source(&workspace_db)?;
+        let parse = snippet.parsed_origin().parse(&workspace_db);
+        if parse.has_errors() {
+            return None;
+        }
 
-        let wrap_document = |document: Document, should_indent: bool| {
-            if indent_script_and_style && should_indent {
-                let elements = vec![
-                    FormatElement::Line(LineMode::Hard),
-                    FormatElement::Tag(Tag::StartIndent),
-                    FormatElement::Line(LineMode::Hard),
-                    FormatElement::Interned(Interned::new(document.into_elements())),
-                    FormatElement::Tag(Tag::EndIndent),
-                ];
-
-                Document::new(elements)
-            } else {
-                let elements = vec![
-                    FormatElement::Line(LineMode::Hard),
-                    FormatElement::Interned(Interned::new(document.into_elements())),
-                ];
-                Document::new(elements)
-            }
-        };
-
-        match snippet_file_source {
-            DocumentFileSource::Js(file_source) => {
-                let js_options =
-                    settings.format_options::<JsLanguage>(biome_path, &snippet_file_source);
-                let node = snippet
-                    .parsed(&workspace_db)
-                    .clone()
-                    .embedded_syntax::<JsLanguage>();
-                let formatted =
-                    biome_js_formatter::format_node_with_offset(js_options, &node).ok()?;
-
-                Some(wrap_document(
-                    formatted.into_document(),
-                    !file_source.as_embedding_kind().is_astro_frontmatter(),
-                ))
+        let document = match snippet_file_source {
+            DocumentFileSource::Js(_) => {
+                // The JavaScript formatter adds a space after a comment that is
+                // the only content of an expression, such as `{/* note */}`.
+                if let AnyJsRoot::JsExpressionTemplateRoot(root) = parse.tree::<AnyJsRoot>()
+                    && root.expression().is_none()
+                {
+                    return None;
+                }
+                let js_options = javascript::resolve_format_options(
+                    biome_path,
+                    &snippet_file_source,
+                    settings,
+                    &workspace_db,
+                );
+                let node = parse.embedded_syntax::<JsLanguage>();
+                biome_js_formatter::format_node_with_offset(js_options, &node)
+                    .ok()?
+                    .into_document()
             }
             DocumentFileSource::Json(_) => {
                 let json_options =
-                    settings.format_options::<JsonLanguage>(biome_path, &snippet_file_source);
-                let node = snippet
-                    .parsed(&workspace_db)
-                    .clone()
-                    .embedded_syntax::<JsonLanguage>();
-                let formatted =
-                    biome_json_formatter::format_node_with_offset(json_options, &node).ok()?;
-                Some(wrap_document(formatted.into_document(), true))
+                    json::resolve_format_options(&snippet_file_source, settings, &workspace_db);
+                let node = parse.embedded_syntax::<JsonLanguage>();
+                biome_json_formatter::format_node_with_offset(json_options, &node)
+                    .ok()?
+                    .into_document()
             }
             DocumentFileSource::Css(_) => {
-                let css_options =
-                    settings.format_options::<CssLanguage>(biome_path, &snippet_file_source);
-                let node = snippet
-                    .parsed(&workspace_db)
-                    .clone()
-                    .embedded_syntax::<CssLanguage>();
-                let formatted =
-                    biome_css_formatter::format_node_with_offset(css_options, &node).ok()?;
-                Some(wrap_document(formatted.into_document(), true))
+                let css_options = css::resolve_format_options(
+                    biome_path,
+                    &snippet_file_source,
+                    settings,
+                    &workspace_db,
+                );
+                let node = parse.embedded_syntax::<CssLanguage>();
+                biome_css_formatter::format_node_with_offset(css_options, &node)
+                    .ok()?
+                    .into_document()
             }
-            _ => None,
-        }
+            _ => return None,
+        };
+        Some(document)
     });
 
     // Propagate expand flags again after inserting embedded content,
@@ -594,9 +869,9 @@ fn format_embedded(
 fn format_embedded(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: super::ParsedOrigin,
     settings: &SettingsWithEditor,
-    embedded_nodes: Vec<ParsedSnippet>,
+    embedded_nodes: Vec<super::ParsedSnippetOrigin>,
     workspace_db: WorkspaceDb,
 ) -> Result<Printed, WorkspaceError> {
     let _ = embedded_nodes;
@@ -611,12 +886,13 @@ fn format_embedded(
 
 #[tracing::instrument(level = "debug", skip(params))]
 fn lint(params: LintParams) -> LintResults {
-    let workspace_settings = &params.settings;
-    let analyzer_options = workspace_settings.analyzer_options::<HtmlLanguage>(
+    let analyzer_options = resolve_analyzer_options(
         params.path,
         params.working_directory,
         &params.language,
         params.suppression_reason.as_deref(),
+        params.settings,
+        &params.workspace_db,
     );
     let tree = params.parsed_source.tree(&params.workspace_db);
 
@@ -625,13 +901,12 @@ fn lint(params: LintParams) -> LintResults {
         disabled_rules,
         analyzer_options,
         ..
-    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+    } = AnalyzerVisitorBuilder::new(params.settings, &params.workspace_db, analyzer_options)
         .with_only(params.only)
         .with_skip(params.skip)
         .with_path(params.path.as_path())
         .with_enabled_selectors(params.enabled_selectors)
         .with_project_layout(params.project_layout.clone())
-        .with_cache(params.analyzer_cache)
         .finish();
 
     let filter = AnalysisFilter {
@@ -641,6 +916,49 @@ fn lint(params: LintParams) -> LintResults {
         range: None,
     };
 
+    #[cfg(feature = "html_embeds")]
+    let mut snippets = {
+        let mut snippets: Vec<Box<dyn SnippetAnalyzer<Never, Output = LintResults> + '_>> =
+            Vec::new();
+        for snippet in params
+            .parsed_source
+            .snippets(&params.workspace_db)
+            .for_analysis(&params.parsed_source, params.language, &params.workspace_db)
+        {
+            let Some(language) = snippet.file_source(&params.workspace_db) else {
+                continue;
+            };
+            let offset = snippet.content_offset(&params.workspace_db);
+            let snippet_params = params.for_snippet(&snippet, language);
+            let analyzer = if language.to_js_file_source().is_some() {
+                LintSnippetAnalyzer::new(
+                    snippet_params,
+                    offset,
+                    &biome_js_analyze::METADATA,
+                    javascript::lint_with_inspector,
+                )
+            } else if language.to_css_file_source().is_some() {
+                LintSnippetAnalyzer::new(
+                    snippet_params,
+                    offset,
+                    &biome_css_analyze::METADATA,
+                    css::lint_with_inspector,
+                )
+            } else if language.to_json_file_source().is_some() {
+                LintSnippetAnalyzer::new(
+                    snippet_params,
+                    offset,
+                    &biome_json_analyze::METADATA,
+                    json::lint_with_inspector,
+                )
+            } else {
+                continue;
+            };
+            snippets.push(Box::new(analyzer));
+        }
+        snippets
+    };
+
     let mut process_lint = ProcessLint::new(&params);
 
     let source_type = params.language.to_html_file_source().unwrap_or_default();
@@ -648,7 +966,7 @@ fn lint(params: LintParams) -> LintResults {
         module_db: {
             #[cfg(feature = "module_graph")]
             {
-                Some(params.workspace_db.rc_module_db())
+                Some(params.module_db.clone())
             }
             #[cfg(not(feature = "module_graph"))]
             {
@@ -656,20 +974,50 @@ fn lint(params: LintParams) -> LintResults {
             }
         },
         project_layout: Some(params.project_layout.clone()),
-    };
+        ..HtmlAnalyzerServices::default()
+    }
+    .with_language_db(params.workspace_db.rc_language_db());
+    #[cfg(feature = "html_embeds")]
+    let html_services = html_services.with_embedded_data(params.embedded_data.clone());
+    let suppression = HtmlSuppressionService::new(
+        &tree,
+        source_type,
+        &params.parsed_source,
+        &params.workspace_db,
+    );
+    #[cfg(feature = "html_embeds")]
+    let (_, analyze_diagnostics) = analyze_with_snippets(
+        &tree,
+        filter,
+        &analyzer_options,
+        source_type,
+        html_services,
+        Some(Box::new(suppression)),
+        &mut snippets,
+        |signal| process_lint.process_signal(signal),
+    );
+    #[cfg(not(feature = "html_embeds"))]
     let (_, analyze_diagnostics) = analyze(
         &tree,
         filter,
         &analyzer_options,
         source_type,
         html_services,
+        Some(Box::new(suppression)),
         |signal| process_lint.process_signal(signal),
     );
 
-    process_lint.into_result(
+    let results = process_lint.into_result(
         params.parsed_source.serde_diagnostics(&params.workspace_db),
         analyze_diagnostics,
-    )
+    );
+    #[cfg(feature = "html_embeds")]
+    let mut results = results;
+    #[cfg(feature = "html_embeds")]
+    for snippet in snippets {
+        results.extend(snippet.into_output());
+    }
+    results
 }
 
 pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
@@ -689,7 +1037,6 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         categories,
         working_directory,
         compute_actions,
-        analyzer_cache,
     } = params;
     let _ = debug_span!("Code actions HTML", range =? range, path =? path).entered();
     let tree = parsed_source.tree(&workspace_db);
@@ -700,11 +1047,13 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             actions: Vec::new(),
         };
     };
-    let analyzer_options = settings.analyzer_options::<HtmlLanguage>(
+    let analyzer_options = resolve_analyzer_options(
         path,
         working_directory,
         &language,
         suppression_reason.as_deref(),
+        settings,
+        &workspace_db,
     );
     let mut actions = Vec::new();
     let AnalyzerVisitorResult {
@@ -712,13 +1061,12 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         disabled_rules,
         analyzer_options,
         ..
-    } = AnalyzerVisitorBuilder::new(settings.as_ref(), analyzer_options)
+    } = AnalyzerVisitorBuilder::new(settings, &workspace_db, analyzer_options)
         .with_only(only)
         .with_skip(skip)
         .with_path(path.as_path())
         .with_enabled_selectors(rules)
         .with_project_layout(project_layout.clone())
-        .with_cache(analyzer_cache)
         .finish();
 
     let filter = AnalysisFilter {
@@ -740,14 +1088,19 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             }
         },
         project_layout: Some(project_layout),
-    };
+        ..HtmlAnalyzerServices::default()
+    }
+    .with_language_db(workspace_db.rc_language_db());
 
+    let suppression =
+        HtmlSuppressionService::new(&tree, source_type, &parsed_source.into(), &workspace_db);
     analyze(
         &tree,
         filter,
         &analyzer_options,
         source_type,
         html_services,
+        Some(Box::new(suppression)),
         |signal| {
             if compute_actions {
                 actions.extend(
@@ -786,26 +1139,23 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 }
 
 #[tracing::instrument(level = "debug", skip(params))]
-pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
+pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
     let mut tree: HtmlRoot = params.parsed_source.tree(&params.workspace_db);
 
-    // Compute final rules (taking `overrides` into account)
-    let rules = params
-        .settings
-        .as_ref()
-        .as_linter_rules(params.biome_path.as_path());
-    let analyzer_options = params.settings.analyzer_options::<HtmlLanguage>(
+    let analyzer_options = resolve_analyzer_options(
         params.biome_path,
         params.working_directory,
         &params.document_file_source,
         params.suppression_reason.as_deref(),
+        params.settings,
+        &params.workspace_db,
     );
     let AnalyzerVisitorResult {
         enabled_rules,
         disabled_rules,
         analyzer_options,
         fixable_rules,
-    } = AnalyzerVisitorBuilder::new(params.settings.as_ref(), analyzer_options)
+    } = AnalyzerVisitorBuilder::new(params.settings, &params.workspace_db, analyzer_options)
         .with_only(params.only)
         .with_skip(params.skip)
         .with_path(params.biome_path.as_path())
@@ -820,11 +1170,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         range: None,
     };
 
-    let mut process_fix_all = ProcessFixAll::new(
-        &params,
-        rules,
-        tree.syntax().text_range_with_trivia().len().into(),
-    );
+    let mut process_fix_all =
+        ProcessFixAll::new(&params, tree.syntax().text_range_with_trivia().len().into());
 
     let source_type = params
         .document_file_source
@@ -838,7 +1185,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 module_db: {
                     #[cfg(feature = "module_graph")]
                     {
-                        Some(params.workspace_db.rc_module_db())
+                        Some(params.module_db.clone())
                     }
                     #[cfg(not(feature = "module_graph"))]
                     {
@@ -846,15 +1193,32 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                     }
                 },
                 project_layout: Some(params.project_layout.clone()),
-            };
+                ..HtmlAnalyzerServices::default()
+            }
+            .with_language_db(params.workspace_db.rc_language_db());
+            #[cfg(feature = "html_embeds")]
+            let html_services = html_services.with_embedded_data(params.embedded_data.clone());
 
+            let suppression = HtmlSuppressionService::new(
+                &tree,
+                source_type,
+                &params.parsed_source,
+                &params.workspace_db,
+            );
             let (_, _) = analyze(
                 &tree,
                 filter,
                 &analyzer_options,
                 source_type,
                 html_services,
-                |signal| process_fix_all.collect_signal(signal, &mut pending_actions),
+                Some(Box::new(suppression)),
+                |signal| {
+                    if params.collect_final_diagnostics {
+                        process_fix_all.collect_signal(signal, &mut pending_actions)
+                    } else {
+                        process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions)
+                    }
+                },
             );
 
             let result = process_fix_all.process_batch_actions(pending_actions, |root| {
@@ -866,27 +1230,9 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             })?;
 
             if result.is_none() {
-                return process_fix_all.finish(
-                    || {
-                        Ok(if params.should_format {
-                            Either::Left(format_node(
-                                params.settings.format_options::<HtmlLanguage>(
-                                    params.biome_path,
-                                    &params.document_file_source,
-                                ),
-                                tree.syntax(),
-                                // NOTE: this is important that stays false. In this instance, the formatting of embedded
-                                // nodes has already happened, because the workspace during fix_all() process the embedded nodes
-                                // first, and then the root document. This means the embedded nodes don't need to be formatted and can
-                                // be printed verbatim by the formatter.
-                                false,
-                            ))
-                        } else {
-                            Either::Right(tree.syntax().to_string())
-                        })
-                    },
-                    params.embeds_initial_indent,
-                );
+                return Ok(Some(
+                    process_fix_all.finish(tree.syntax().as_send().unwrap()),
+                ));
             }
         }
     }
@@ -905,7 +1251,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             module_db: {
                 #[cfg(feature = "module_graph")]
                 {
-                    Some(params.workspace_db.rc_module_db())
+                    Some(params.module_db.clone())
                 }
                 #[cfg(not(feature = "module_graph"))]
                 {
@@ -913,14 +1259,25 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 }
             },
             project_layout: Some(params.project_layout.clone()),
-        };
+            ..HtmlAnalyzerServices::default()
+        }
+        .with_language_db(params.workspace_db.rc_language_db());
+        #[cfg(feature = "html_embeds")]
+        let html_services = html_services.with_embedded_data(params.embedded_data.clone());
 
+        let suppression = HtmlSuppressionService::new(
+            &tree,
+            source_type,
+            &params.parsed_source,
+            &params.workspace_db,
+        );
         let (_, _) = analyze(
             &tree,
             fixable_filter,
             &analyzer_options,
             source_type,
             html_services,
+            Some(Box::new(suppression)),
             |signal| process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions),
         );
 
@@ -938,12 +1295,12 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     }
 
     // Phase 2: all rules for final diagnostics
-    {
+    if params.collect_final_diagnostics {
         let html_services = HtmlAnalyzerServices {
             module_db: {
                 #[cfg(feature = "module_graph")]
                 {
-                    Some(params.workspace_db.rc_module_db())
+                    Some(params.module_db.clone())
                 }
                 #[cfg(not(feature = "module_graph"))]
                 {
@@ -951,41 +1308,38 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 }
             },
             project_layout: Some(params.project_layout.clone()),
-        };
+            ..HtmlAnalyzerServices::default()
+        }
+        .with_language_db(params.workspace_db.rc_language_db());
+        #[cfg(feature = "html_embeds")]
+        let html_services = html_services.with_embedded_data(params.embedded_data.clone());
+        let suppression = HtmlSuppressionService::new(
+            &tree,
+            source_type,
+            &params.parsed_source,
+            &params.workspace_db,
+        );
         let (_, _) = analyze(
             &tree,
             filter,
             &analyzer_options,
             source_type,
             html_services,
+            Some(Box::new(suppression)),
             |signal| process_fix_all.collect_diagnostic_only(signal),
         );
     }
 
-    process_fix_all.finish(
-        || {
-            Ok(if params.should_format {
-                Either::Left(format_node(
-                    params.settings.format_options::<HtmlLanguage>(
-                        params.biome_path,
-                        &params.document_file_source,
-                    ),
-                    tree.syntax(),
-                    false,
-                ))
-            } else {
-                Either::Right(tree.syntax().to_string())
-            })
-        },
-        params.embeds_initial_indent,
-    )
+    Ok(Some(
+        process_fix_all.finish(tree.syntax().as_send().unwrap()),
+    ))
 }
 
 #[instrument(level = "debug", skip_all)]
 pub(crate) fn update_snippets(
-    root: AnyParsedSource,
+    root: super::ParsedOrigin,
     workspace_db: WorkspaceDb,
-    new_snippets: Vec<UpdateSnippetsNodes>,
+    mut new_snippets: Vec<UpdateSnippetsNodes>,
 ) -> Result<SendNode, WorkspaceError> {
     let tree: HtmlRoot = root.tree(&workspace_db);
     let mut mutation = BatchMutation::new(tree.syntax().clone());
@@ -995,12 +1349,13 @@ pub(crate) fn update_snippets(
         .filter_map(AnyEmbeddedContent::cast);
 
     for element in iterator {
-        let Some(snippet) = new_snippets
+        let Some(snippet_index) = new_snippets
             .iter()
-            .find(|snippet| snippet.range == element.range())
+            .position(|snippet| snippet.range == element.range())
         else {
             continue;
         };
+        let snippet = new_snippets.swap_remove(snippet_index);
 
         if let Some(value_token) = element.value_token() {
             let new_token_text = if snippet.needs_reindent {
@@ -1011,10 +1366,18 @@ pub(crate) fn update_snippets(
                 let leading_trivia = read_leading_trivia(old_text);
                 let trailing_trivia = read_trailing_trivia(old_text);
                 let indent_prefix = content_indent_prefix(&leading_trivia);
-                let reindented = reindent_embedded_code(snippet.new_code.trim(), indent_prefix);
-                format!("{}{}{}", leading_trivia, reindented, trailing_trivia)
+                let mut reconstructed = String::new();
+                reconstructed.push_str(&leading_trivia);
+                push_reindented_code(
+                    &mut reconstructed,
+                    snippet.new_code.trim(),
+                    indent_prefix,
+                    &snippet.verbatim_ranges,
+                );
+                reconstructed.push_str(&trailing_trivia);
+                reconstructed
             } else {
-                snippet.new_code.clone()
+                snippet.new_code
             };
 
             mutation.replace_token(value_token, ident(&new_token_text));
@@ -1105,23 +1468,106 @@ fn content_indent_prefix(leading_trivia: &str) -> &str {
     }
 }
 
-/// Prefixes every line of `code` after the first with `indent`. Empty
-/// lines are left alone so no trailing whitespace sneaks in.
-fn reindent_embedded_code(code: &str, indent: &str) -> String {
-    if indent.is_empty() {
-        return code.to_string();
+/// Returns byte ranges in `code` whose content must not receive an extra
+/// indentation prefix during re-indentation: template literal bodies and
+/// multi-line block comments in JS/TS source.
+#[cfg(feature = "html_embeds")]
+pub(crate) fn js_verbatim_ranges(code: &str) -> Vec<TextRange> {
+    let parsed = parse_js(
+        code,
+        biome_languages::JsFileSource::js_module(),
+        JsParserOptions::default(),
+    );
+    let root = parsed.syntax();
+    let mut ranges = Vec::new();
+
+    for descendant in root.descendants() {
+        if let Some(chunk) = JsTemplateChunkElement::cast(descendant)
+            && let Ok(token) = chunk.template_chunk_token()
+            && token.text().contains(['\n', '\r'])
+        {
+            ranges.push(token.text_range());
+        }
     }
-    let mut out = String::new();
-    for (i, line) in code.split('\n').enumerate() {
-        if i > 0 {
-            out.push('\n');
-            if !line.is_empty() {
-                out.push_str(indent);
+
+    for token in root.descendants_tokens(biome_rowan::Direction::Next) {
+        for piece in token
+            .leading_trivia()
+            .pieces()
+            .chain(token.trailing_trivia().pieces())
+        {
+            if let Some(comment) = piece.as_comments()
+                && comment.has_newline()
+            {
+                ranges.push(piece.text_range());
             }
         }
-        out.push_str(line);
     }
-    out
+
+    ranges
+}
+
+/// Returns byte ranges in `code` whose content must not receive an extra
+/// indentation prefix during re-indentation: multi-line block comments in
+/// CSS source.
+#[cfg(feature = "html_embeds")]
+pub(crate) fn css_verbatim_ranges(code: &str) -> Vec<TextRange> {
+    let parsed = parse_css(
+        code,
+        biome_languages::CssFileSource::css(),
+        CssParserOptions::default(),
+    );
+    let root = parsed.syntax();
+    let mut ranges = Vec::new();
+
+    for token in root.descendants_tokens(biome_rowan::Direction::Next) {
+        for piece in token
+            .leading_trivia()
+            .pieces()
+            .chain(token.trailing_trivia().pieces())
+        {
+            if let Some(comment) = piece.as_comments()
+                && comment.has_newline()
+            {
+                ranges.push(piece.text_range());
+            }
+        }
+    }
+
+    ranges
+}
+
+/// Prefixes every line of `code` after the first with `indent` and appends
+/// the result to `output`. Lines whose starting byte position falls inside
+/// one of the `verbatim_ranges` (template literal bodies, block comments)
+/// are left untouched. Empty lines are also left alone so no trailing
+/// whitespace sneaks in.
+fn push_reindented_code(
+    output: &mut String,
+    code: &str,
+    indent: &str,
+    verbatim_ranges: &[TextRange],
+) {
+    if indent.is_empty() {
+        output.push_str(code);
+        return;
+    }
+
+    let mut byte_offset: u32 = 0;
+    for (i, line) in code.split('\n').enumerate() {
+        if i > 0 {
+            output.push('\n');
+            let line_start = TextSize::from(byte_offset);
+            let in_verbatim = verbatim_ranges
+                .iter()
+                .any(|r| r.start() < line_start && line_start < r.end());
+            if !line.is_empty() && !in_verbatim {
+                output.push_str(indent);
+            }
+        }
+        output.push_str(line);
+        byte_offset += line.len() as u32 + 1; // +1 for the '\n' separator
+    }
 }
 
 /// Checks if the attribute belongs to a component element rather than a
@@ -1139,7 +1585,16 @@ fn is_component_element(attr: &HtmlAttribute) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{content_indent_prefix, reindent_embedded_code};
+    use super::{
+        content_indent_prefix, css_verbatim_ranges, js_verbatim_ranges, push_reindented_code,
+    };
+    use biome_rowan::TextRange;
+
+    fn reindent_embedded_code(code: &str, indent: &str, verbatim_ranges: &[TextRange]) -> String {
+        let mut output = String::new();
+        push_reindented_code(&mut output, code, indent, verbatim_ranges);
+        output
+    }
 
     #[test]
     fn content_indent_prefix_reads_indent_after_last_newline() {
@@ -1157,23 +1612,87 @@ mod tests {
     #[test]
     fn reindent_embedded_code_prefixes_every_line_after_the_first() {
         assert_eq!(
-            reindent_embedded_code("p {\n\tcolor: red;\n}", "\t\t\t"),
+            reindent_embedded_code("p {\n\tcolor: red;\n}", "\t\t\t", &[]),
             "p {\n\t\t\t\tcolor: red;\n\t\t\t}"
         );
     }
 
     #[test]
     fn reindent_embedded_code_is_a_noop_when_indent_is_empty() {
-        assert_eq!(reindent_embedded_code("a\nb\nc", ""), "a\nb\nc");
+        assert_eq!(reindent_embedded_code("a\nb\nc", "", &[]), "a\nb\nc");
     }
 
     #[test]
     fn reindent_embedded_code_leaves_single_line_input_unchanged() {
-        assert_eq!(reindent_embedded_code("oneline", "\t\t"), "oneline");
+        assert_eq!(reindent_embedded_code("oneline", "\t\t", &[]), "oneline");
     }
 
     #[test]
     fn reindent_embedded_code_does_not_indent_empty_lines() {
-        assert_eq!(reindent_embedded_code("a\n\nb", "  "), "a\n\n  b");
+        assert_eq!(reindent_embedded_code("a\n\nb", "  ", &[]), "a\n\n  b");
+    }
+
+    #[test]
+    fn reindent_skips_js_template_literal_continuation_lines() {
+        let code = "const x = `line one\n  line two`;\nconst y = 1;";
+        let ranges = js_verbatim_ranges(code);
+        assert_eq!(
+            reindent_embedded_code(code, "  ", &ranges),
+            "const x = `line one\n  line two`;\n  const y = 1;"
+        );
+    }
+
+    #[test]
+    fn reindent_skips_js_block_comment_continuation_lines() {
+        let code = "/* first line\n   continuation */\n.foo { color: red; }";
+        let ranges = js_verbatim_ranges(code);
+        assert_eq!(
+            reindent_embedded_code(code, "  ", &ranges),
+            "/* first line\n   continuation */\n  .foo { color: red; }"
+        );
+    }
+
+    #[test]
+    fn reindent_skips_css_block_comment_continuation_lines() {
+        let code = "/* first line\n   continuation */\n.foo { color: red; }";
+        let ranges = css_verbatim_ranges(code);
+        assert_eq!(
+            reindent_embedded_code(code, "  ", &ranges),
+            "/* first line\n   continuation */\n  .foo { color: red; }"
+        );
+    }
+
+    #[test]
+    fn reindent_skips_template_literal_continuation_at_exact_range_boundary() {
+        // The template chunk starts right after the opening backtick. The
+        // reindent check uses strict `<` so that a line whose first byte is
+        // the chunk start is still treated as verbatim. The line after the
+        // closing backtick falls outside the chunk and should receive the
+        // host indent.
+        let code = "const x = `\ncontinuation\n`;";
+        let ranges = js_verbatim_ranges(code);
+        assert_eq!(
+            reindent_embedded_code(code, "  ", &ranges),
+            "const x = `\ncontinuation\n  `;"
+        );
+    }
+
+    #[test]
+    fn verbatim_ranges_from_untrimmed_code_shift_offsets() {
+        // If verbatim ranges are computed from untrimmed code (e.g. with a
+        // leading newline), all byte offsets shift by one. The continuation
+        // line then lands exactly on range.start() and slips past the strict
+        // `<` check, so it wrongly receives the host indent. This test
+        // documents that behaviour — the caller must always pass trimmed code.
+        let trimmed = "const x = `\ncontinuation\n`;";
+        let untrimmed = "\nconst x = `\ncontinuation\n`;"; // leading '\n' shifts ranges +1
+
+        let wrong_ranges = js_verbatim_ranges(untrimmed); // chunk now at [12, 26)
+        assert_eq!(
+            reindent_embedded_code(trimmed, "  ", &wrong_ranges),
+            // "continuation" at byte 12 fails `12 < 12` → wrongly indented;
+            // "`;" at byte 25 satisfies `12 < 25 < 26` → false-positive verbatim.
+            "const x = `\n  continuation\n`;"
+        );
     }
 }

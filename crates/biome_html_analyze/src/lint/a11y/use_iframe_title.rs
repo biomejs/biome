@@ -3,15 +3,18 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_languages::HtmlFileSource;
+use biome_html_syntax::{T, element_ext::AnyHtmlTagElement};
 use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::use_iframe_title::UseIframeTitleOptions;
 
-use crate::{a11y::has_non_empty_attribute, utils::is_html_tag};
+use crate::a11y::has_non_empty_attribute;
 
 declare_lint_rule! {
-    /// Enforces the usage of the attribute `title` for the element `iframe`.
+    /// Require a `title` on every `<iframe>`.
+    ///
+    /// Screen readers use the title to identify the embedded content before a user enters the
+    /// frame. A static HTML title must be non-empty and should describe the frame's purpose. Vue
+    /// bindings are accepted without evaluating the value they produce at runtime.
     ///
     /// :::note
     /// In `.html` files, this rule matches `iframe` elements case-insensitively (e.g., `<IFRAME>`, `<IFrame>`).
@@ -60,9 +63,7 @@ impl Rule for UseIframeTitle {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
-
-        if !is_html_tag(element, source_type, "iframe") {
+        if element.tag_name_kind() != Some(T![iframe]) {
             return None;
         }
 

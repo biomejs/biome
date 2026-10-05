@@ -17,7 +17,7 @@ impl FormatNodeRule<ScssWarnAtRule> for FormatScssWarnAtRule {
         write!(
             f,
             [
-                warn_token.format(),
+                warn_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
                 value.format(),
                 format_scss_statement_at_rule_semicolon(semicolon_token)

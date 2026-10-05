@@ -1,4 +1,3 @@
-use crate::DestructureField;
 use crate::format_type_info::FormatTypeOptions;
 use crate::interned_types::{
     CallArgumentType, ConstructorParameter, FunctionParameter, FunctionParameterBinding,
@@ -8,6 +7,8 @@ use crate::interned_types::{
     NamedFunctionParameter, PatternFunctionParameter, ReturnType, TupleElementType, TypeData,
     TypeDb, TypeMember, TypeMemberKind, TypeofExpression,
 };
+use crate::interned_types::{InternedMappedType, MappedTypeKeys};
+use crate::{DestructureField, MappedTypeModifier};
 use biome_formatter::prelude::*;
 use biome_formatter::{FormatContext, TransformSourceMap, format_args, write};
 use biome_rowan::Text;
@@ -54,18 +55,22 @@ impl Display for InferredTypeDisplay<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let formatted =
             biome_formatter::format!(FormatInferredTypeContext::new(self.db), [self.ty])
-                .expect("Formatting not to throw any FormatErrors");
-        f.write_str(
-            formatted
-                .print()
-                .expect("Expected a valid document")
-                .as_code(),
-        )
+                .map_err(|_| std::fmt::Error)?;
+        let printed = formatted.print().map_err(|_| std::fmt::Error)?;
+        f.write_str(printed.as_code())
     }
 }
 
+/// Formats an inferred type, returning `unknown` if the formatter cannot build
+/// or print its internal document.
 pub fn format_inferred_type<'db>(db: &'db dyn TypeDb, ty: TypeData<'db>) -> String {
-    InferredTypeDisplay::new(db, ty).to_string()
+    let Ok(formatted) = biome_formatter::format!(FormatInferredTypeContext::new(db), [ty]) else {
+        return "unknown".to_string();
+    };
+    formatted.print().map_or_else(
+        |_| "unknown".to_string(),
+        |printed| printed.as_code().to_string(),
+    )
 }
 
 impl<'db> Format<FormatInferredTypeContext<'db>> for TypeData<'db> {
@@ -73,7 +78,6 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeData<'db> {
         let db = f.context().db();
         match *self {
             Self::Unknown => write!(f, [token("unknown")]),
-            Self::Divergent(_) => write!(f, [token("divergent")]),
             Self::Global => write!(f, [token("globalThis")]),
             Self::BigInt => write!(f, [token("BigInt")]),
             Self::Boolean => write!(f, [token("boolean")]),
@@ -110,6 +114,26 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeData<'db> {
                     )
                 }
             }
+            Self::GlobalLocal(local) => {
+                let data = local.expand(db);
+                write!(f, [&data])
+            }
+            Self::GlobalType(id) => {
+                if let Some(name) = crate::globals_ids::global_type_name(id.as_type_id()) {
+                    write!(f, [text(name, None)])
+                } else {
+                    write!(
+                        f,
+                        [&format_args![
+                            token("global"),
+                            space(),
+                            token("type"),
+                            space(),
+                            text(&id.index().to_string(), None)
+                        ]]
+                    )
+                }
+            }
             Self::Intersection(intersection) => write!(
                 f,
                 [FmtInferredTypeList {
@@ -133,6 +157,17 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeData<'db> {
                 ]]
             ),
             Self::Literal(literal) => write!(f, [literal]),
+            Self::IndexedAccess(access) => write!(
+                f,
+                [
+                    token("("),
+                    access.object(db),
+                    token(")["),
+                    access.index(db),
+                    token("]")
+                ]
+            ),
+            Self::MappedType(mapped) => write!(f, [mapped]),
             Self::InstanceOf(instance) => {
                 write!(f, [&format_args![token("instanceof"), space(), instance]])
             }
@@ -165,6 +200,15 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for InternedObject<'db> {
                 write!(f, [token("No prototype")])
             }
         });
+        // Objects with a complete member list are the common case, so the
+        // marker is only printed when it carries information.
+        let unknown_members = format_with(|f| {
+            if self.has_unknown_members(db) {
+                write!(f, [token("unknown members"), hard_line_break()])
+            } else {
+                Ok(())
+            }
+        });
         write!(
             f,
             [&format_args![
@@ -172,6 +216,7 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for InternedObject<'db> {
                 space(),
                 token("{"),
                 &group(&block_indent(&format_args![
+                    unknown_members,
                     token("prototype:"),
                     space(),
                     prototype,
@@ -180,6 +225,47 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for InternedObject<'db> {
                     space(),
                     FmtInferredTypeMembers(self.members(db)),
                 ])),
+                token("}")
+            ]]
+        )
+    }
+}
+
+impl<'db> Format<FormatInferredTypeContext<'db>> for InternedMappedType<'db> {
+    fn fmt(&self, f: &mut Formatter<FormatInferredTypeContext<'db>>) -> FormatResult<()> {
+        let db = f.context().db();
+        let readonly = format_with(|f| match self.readonly_modifier(db) {
+            Some(MappedTypeModifier::Add) => write!(f, [token("readonly"), space()]),
+            Some(MappedTypeModifier::Remove) => write!(f, [token("-readonly"), space()]),
+            None => Ok(()),
+        });
+        let keys = format_with(|f| match self.keys(db) {
+            MappedTypeKeys::Keyof(ty) => write!(f, [token("keyof"), space(), ty]),
+            MappedTypeKeys::Type(ty) => write!(f, [ty]),
+        });
+        let optional = format_with(|f| match self.optional_modifier(db) {
+            Some(MappedTypeModifier::Add) => write!(f, [token("?")]),
+            Some(MappedTypeModifier::Remove) => write!(f, [token("-?")]),
+            None => Ok(()),
+        });
+        write!(
+            f,
+            [&format_args![
+                token("{"),
+                space(),
+                readonly,
+                token("["),
+                *self.type_parameter(db),
+                space(),
+                token("in"),
+                space(),
+                keys,
+                token("]"),
+                optional,
+                token(":"),
+                space(),
+                self.ty(db),
+                space(),
                 token("}")
             ]]
         )
@@ -373,8 +459,27 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeMemberKind<'db> {
             Self::IndexSignature(ty) | Self::ConstAssertedIndexSignature(ty) => {
                 write!(f, [token("["), ty, token("]")])
             }
+            Self::ComputedStatic(ty) | Self::ConstAssertedComputedStatic(ty) => {
+                write!(
+                    f,
+                    [
+                        token("static computed"),
+                        space(),
+                        token("["),
+                        ty,
+                        token("]")
+                    ]
+                )
+            }
             Self::ComputedValue(ty) | Self::ConstAssertedComputedValue(ty) => {
                 write!(f, [token("computed"), space(), token("["), ty, token("]")])
+            }
+            Self::ComputedStaticNamed(name, _)
+            | Self::ConstAssertedComputedStaticNamed(name, _) => {
+                write!(f, [text(&std::format!("static computed [{name}]"), None)])
+            }
+            Self::ComputedValueNamed(name, _) | Self::ConstAssertedComputedValueNamed(name, _) => {
+                write!(f, [text(&std::format!("computed [{name}]"), None)])
             }
             Self::Named(name) | Self::ConstAssertedNamed(name) => {
                 write!(f, [text(&std::format!("\"{name}\""), None)])
@@ -546,6 +651,9 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for InternedTypeInstance<'db> {
 
 impl<'db> Format<FormatInferredTypeContext<'db>> for InternedGenericTypeParameter<'db> {
     fn fmt(&self, f: &mut Formatter<FormatInferredTypeContext<'db>>) -> FormatResult<()> {
+        if self.is_const(f.context().db()) {
+            write!(f, [token("const"), space()])?;
+        }
         let db = f.context().db();
         let constraint = format_with(|f| {
             if let Some(constraint) = self.constraint(db) {
@@ -709,6 +817,26 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                     token(")")
                 ]]
             ),
+            Self::CallArgument(argument) => {
+                write!(f, [token("CallArgument"), space()])?;
+                if argument.is_constructor {
+                    write!(f, [token("new"), space()])?;
+                }
+                write!(
+                    f,
+                    [&format_args![
+                        &argument.callee,
+                        token("("),
+                        group(&soft_block_indent(&FmtInferredCallArgumentTypes(
+                            &argument.arguments
+                        ))),
+                        token(")"),
+                        token("["),
+                        text(&argument.index.to_string(), None),
+                        token("]"),
+                    ]]
+                )
+            }
             Self::Conditional(expr) => write!(
                 f,
                 [&group(&format_args![
@@ -757,11 +885,27 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                     ]]
                 ),
             },
+            Self::ComputedMember(expr) => write!(
+                f,
+                [
+                    &expr.object,
+                    token(if expr.is_optional_chain { "?.[" } else { "[" }),
+                    &expr.member,
+                    token("]"),
+                ]
+            ),
             Self::Index(expr) => write!(
                 f,
                 [&format_args![
                     &expr.object,
                     text(&std::format!("[{}]", expr.index), None)
+                ]]
+            ),
+            Self::OptionalChainIndex(expr) => write!(
+                f,
+                [&format_args![
+                    &expr.object,
+                    text(&std::format!("?.[{}]", expr.index), None)
                 ]]
             ),
             Self::IterableValueOf(expr) => write!(
@@ -805,6 +949,17 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
                     token(")")
                 ]]
             ),
+            Self::Parameter(parameter) => write!(
+                f,
+                [&format_args![
+                    token("Parameter"),
+                    space(),
+                    &parameter.function,
+                    token("["),
+                    text(&parameter.index.to_string(), None),
+                    token("]"),
+                ]]
+            ),
             Self::NullishCoalescing(expr) => write!(
                 f,
                 [&format_args![&group(&format_args![
@@ -817,6 +972,9 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeofExpression<'db> {
             ),
             Self::StaticMember(expr) => {
                 write!(f, [&format_args![&expr.object, token("."), &expr.member]])
+            }
+            Self::OptionalChainStaticMember(expr) => {
+                write!(f, [&format_args![&expr.object, token("?."), &expr.member]])
             }
             Self::Super(_) => write!(f, [token("super")]),
             Self::This(_) => write!(f, [token("this")]),

@@ -1,0 +1,13 @@
+$suffix: ".active";
+.card:not(.disabled)#{$suffix} { color: red; }
+.card[data-state]#{$suffix} { color: blue; }
+.card#{$suffix} { color: red; }
+.card:hover#{$suffix} { color: red; }
+.card:not(.disabled) #{$suffix} { color: red; }
+.card[data-state]
+#{$suffix} { color: blue; }
+.card:not(.disabled)#{$suffix}Tail { color: red; }
+.card[data-state]#{$suffix}#{$suffix} { color: blue; }
+*#{$suffix} { color: red; }
+.card:not(.disabled)#id { color: red; }
+.card[data-state]#id { color: blue; }

@@ -1,0 +1,33 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: markdown/list_lazy_continuation.md
+---
+
+# Input
+
+```md
+## Canonical
+
+- d - e
+
+## Unformatted
+
+   - d
+    - e
+
+```
+
+
+# Formatted
+
+```md
+## Canonical
+
+- d - e
+
+## Unformatted
+
+- d - e
+
+```

@@ -19,27 +19,33 @@ let a = () => {
 ```
 
 # Transformations
-```ts
-var StatusA;
-(function (StatusA) {
-	StatusA[(StatusA["Enabled"] = 0)] = "Enabled";
-	StatusA[(StatusA["Disabled"] = 1)] = "Disabled";
-})(StatusA || (StatusA = {}));
+```diff
+@@ -1,11 +1 @@
+-enum StatusA {
+-	Enabled,
+-	Disabled
+-}
+-
+-let a = () => {
+-	enum StatusB {
+-		Enabled = "Enabled",
+-		Disabled = "Disabled"
+-	}
+-};
++var StatusA;(function(StatusA){StatusA[StatusA["Enabled"]=0]="Enabled";StatusA[StatusA["Disabled"]=1]="Disabled";})(StatusA||(StatusA={}));
 
 ```
 
-```ts
-enum StatusA {
-	Enabled,
-	Disabled,
-}
-
-let a = () => {
-	var StatusB;
-	(function (StatusB) {
-		StatusB[(StatusB["Enabled"] = "Enabled")] = "Enabled";
-		StatusB[(StatusB["Disabled"] = "Disabled")] = "Disabled";
-	})(StatusB || (StatusB = {}));
-};
+```diff
+@@ -4,8 +4,5 @@
+ }
+ 
+ let a = () => {
+-	enum StatusB {
+-		Enabled = "Enabled",
+-		Disabled = "Disabled"
+-	}
++	var StatusB;(function(StatusB){StatusB[StatusB["Enabled"]="Enabled"]="Enabled";StatusB[StatusB["Disabled"]="Disabled"]="Disabled";})(StatusB||(StatusB={}));
+ };
 
 ```

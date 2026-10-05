@@ -78,7 +78,10 @@ impl Rule for NoDeprecatedMediaType {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let media_type = node.value().ok().and_then(|v| v.value_token().ok())?;
+        let media_type = node
+            .value()
+            .ok()
+            .and_then(|value| value.as_css_identifier()?.value_token().ok())?;
         let media_type = media_type.text_trimmed();
 
         // Check allow list from options
@@ -107,7 +110,7 @@ impl Rule for NoDeprecatedMediaType {
             .query()
             .value()
             .ok()
-            .and_then(|v| v.value_token().ok())?;
+            .and_then(|value| value.as_css_identifier()?.value_token().ok())?;
         let media_type = media_type.text_trimmed();
         Some(
             RuleDiagnostic::new(

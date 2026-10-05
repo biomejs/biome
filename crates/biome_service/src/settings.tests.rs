@@ -1,6 +1,6 @@
 use crate::scanner::ScanKind;
 use crate::settings::{
-    LanguageSettings, ModuleGraphResolutionKind, ServiceLanguage, Settings,
+    LanguageSettings, ModuleGraphResolutionKind, ServiceLanguage, Settings, VcsIgnoredPatterns,
     to_json_language_settings,
 };
 use biome_analyze::RuleFilter;
@@ -76,21 +76,71 @@ fn correctly_computes_analyzer_options() {
     settings
         .merge_with_configuration(configuration, None, vec![])
         .expect("valid configuration");
-    let environment = JsLanguage::resolve_environment(&settings);
-    let language = JsLanguage::lookup_settings(&settings.languages);
-    let options = JsLanguage::resolve_analyzer_options(
-        &settings,
-        &language.linter,
-        environment,
-        &BiomePath::new(Utf8PathBuf::new()),
+    let options = settings.analyzer_options::<JsLanguage>(
+        &[],
         &DocumentFileSource::from_language_id("javascript", None),
-        None,
     );
 
     assert_eq!(
         options.jsx_runtime(),
         Some(biome_analyze::options::JsxRuntime::ReactClassic)
     );
+}
+
+#[test]
+fn vue_template_expressions_get_instance_properties() {
+    use biome_languages::JsFileSource;
+    use biome_languages::javascript::JsEmbeddingKind;
+
+    let settings = Settings::default();
+    let template_source = JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+        is_class_attribute: false,
+        setup: false,
+        is_source: false,
+        event_handler: false,
+        allow_statements: false,
+        slot_props: false,
+    });
+    let options =
+        settings.analyzer_options::<JsLanguage>(&[], &DocumentFileSource::from(template_source));
+
+    assert!(options.globals().contains(&"$slots".into()));
+    assert!(!options.globals().contains(&"$event".into()));
+}
+
+#[test]
+fn vue_event_handlers_get_dollar_event() {
+    use biome_languages::JsFileSource;
+    use biome_languages::javascript::JsEmbeddingKind;
+
+    let settings = Settings::default();
+    let event_handler_source =
+        JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Vue {
+            is_class_attribute: false,
+            setup: false,
+            is_source: false,
+            event_handler: true,
+            allow_statements: false,
+            slot_props: false,
+        });
+    let options = settings
+        .analyzer_options::<JsLanguage>(&[], &DocumentFileSource::from(event_handler_source));
+
+    assert!(options.globals().contains(&"$event".into()));
+    assert!(options.globals().contains(&"$slots".into()));
+}
+
+#[test]
+fn vue_script_setup_does_not_get_instance_properties() {
+    let settings = Settings::default();
+    let options = settings.analyzer_options::<JsLanguage>(
+        &[],
+        &DocumentFileSource::from(biome_languages::JsFileSource::vue_setup()),
+    );
+
+    assert!(options.globals().contains(&"defineProps".into()));
+    assert!(!options.globals().contains(&"$slots".into()));
+    assert!(!options.globals().contains(&"$event".into()));
 }
 
 #[test]
@@ -366,6 +416,21 @@ fn test_project_scan_disables_module_graph_type_inference() {
         !project_kind.is_modules_and_types(),
         "Project scan should NOT enable type inference"
     );
+}
+
+#[test]
+fn vcs_ignore_whitelist_patterns_apply_to_child_paths() {
+    let ignored_patterns = VcsIgnoredPatterns::Git {
+        root: VcsIgnoredPatterns::git_ignore(
+            Utf8Path::new("repo"),
+            &["/*", "!/src", "!/biome.jsonc", "!/.gitignore"],
+        )
+        .unwrap(),
+        nested: vec![],
+    };
+
+    assert!(!ignored_patterns.is_ignored(Utf8Path::new("repo/src/file.js"), false, None));
+    assert!(ignored_patterns.is_ignored(Utf8Path::new("repo/tests/file.js"), false, None));
 }
 
 fn resolve_html_parse_options(

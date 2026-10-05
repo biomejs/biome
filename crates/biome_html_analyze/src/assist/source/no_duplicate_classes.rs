@@ -8,22 +8,17 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_html_factory::make;
-use biome_html_syntax::{
-    HtmlAttribute, HtmlString, HtmlSyntaxKind, HtmlSyntaxToken, inner_string_text,
-};
+use biome_html_syntax::{HtmlAttribute, HtmlString, inner_string_text};
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_duplicate_classes::NoDuplicateClassesOptions;
 
 use crate::HtmlRuleAction;
 
 declare_source_rule! {
-    /// Remove duplicate CSS classes.
+    /// Remove repeated CSS class names from HTML `class` attributes.
     ///
-    /// Detects and removes duplicate CSS classes in HTML `class` attributes.
-    ///
-    /// This action helps keep your class strings clean by detecting and removing duplicates.
-    ///
-    /// Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
+    /// Duplicate class names do not change the rendered style and often indicate a copy-and-paste
+    /// mistake or merge conflict. The action keeps the first occurrence and removes later repeats.
     ///
     /// ## Examples
     ///
@@ -111,7 +106,7 @@ impl Rule for NoDuplicateClasses {
 
         // Create the new string token with proper quotes
         let new_token = if state.is_single_quote {
-            html_string_literal_single_quotes(&state.deduplicated)
+            make::html_string_literal_single_quotes(&state.deduplicated)
         } else {
             make::html_string_literal(&state.deduplicated)
         };
@@ -129,14 +124,4 @@ impl Rule for NoDuplicateClasses {
             mutation,
         ))
     }
-}
-
-/// Create a new string literal token with single quotes
-fn html_string_literal_single_quotes(text: &str) -> HtmlSyntaxToken {
-    HtmlSyntaxToken::new_detached(
-        HtmlSyntaxKind::HTML_STRING_LITERAL,
-        &format!("'{text}'"),
-        [],
-        [],
-    )
 }

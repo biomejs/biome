@@ -23,7 +23,9 @@ pub enum FormatElement {
     /// A space token, see [crate::builders::space] for documentation.
     Space,
     HardSpace,
-    /// A new line, see [crate::builders::soft_line_break], [crate::builders::hard_line_break], and [crate::builders::soft_line_break_or_space] for documentation.
+    /// A new line, see [crate::builders::soft_line_break], [crate::builders::hard_line_break],
+    /// [crate::builders::literal_line_break_without_parent], and
+    /// [crate::builders::soft_line_break_or_space] for documentation.
     Line(LineMode),
 
     /// Forces the parent group to print in expanded mode.
@@ -136,11 +138,29 @@ pub enum LineMode {
     Hard,
     /// See [crate::builders::empty_line] for documentation.
     Empty,
+    /// See [crate::builders::literal_line_break_without_parent] for documentation.
+    Literal {
+        /// Source offset of the represented LF when source maps are enabled.
+        source_position: Option<TextSize>,
+    },
 }
 
 impl LineMode {
     pub const fn is_hard(&self) -> bool {
         matches!(self, Self::Hard)
+    }
+
+    pub(crate) const fn is_literal(&self) -> bool {
+        matches!(self, Self::Literal { .. })
+    }
+
+    pub(crate) const fn literal_source_position(&self) -> Option<TextSize> {
+        match self {
+            Self::Literal {
+                source_position, ..
+            } => *source_position,
+            _ => None,
+        }
     }
 }
 
@@ -289,7 +309,10 @@ impl FormatElements for FormatElement {
         match self {
             Self::ExpandParent => true,
             Self::Tag(Tag::StartGroup(group)) => !group.mode().is_flat(),
-            Self::Line(line_mode) => matches!(line_mode, LineMode::Hard | LineMode::Empty),
+            Self::Line(line_mode) => matches!(
+                line_mode,
+                LineMode::Hard | LineMode::Empty | LineMode::Literal { .. }
+            ),
 
             Self::Text { text_width, .. } | Self::LocatedTokenText { text_width, .. } => {
                 text_width.is_multiline()
@@ -359,8 +382,26 @@ pub enum TextWidth {
 
 impl TextWidth {
     pub fn from_text(text: &str, indent_width: IndentWidth) -> Self {
+        const fn is_printable_ascii(byte: u8) -> bool {
+            matches!(byte, b' '..=b'~')
+        }
+
         let mut width = 0u32;
 
+        for (index, byte) in text.bytes().enumerate() {
+            match byte {
+                b'\t' => width = width.saturating_add(indent_width.value() as u32),
+                b'\n' => return Self::Multiline,
+                byte if is_printable_ascii(byte) => width = width.saturating_add(1),
+                _ => return Self::from_text_slow(&text[index..], indent_width, width),
+            }
+        }
+
+        Self::Width(Width::new(width))
+    }
+
+    #[cold]
+    fn from_text_slow(text: &str, indent_width: IndentWidth, mut width: u32) -> Self {
         for c in text.chars() {
             let char_width = match c {
                 '\t' => indent_width.value() as u32,
@@ -531,7 +572,8 @@ impl FusedIterator for BestFittingVariantsIter<'_> {}
 pub trait FormatElements {
     /// Returns true if this [FormatElement] is guaranteed to break across multiple lines by the printer.
     /// This is the case if this format element recursively contains a:
-    /// * [crate::builders::empty_line] or [crate::builders::hard_line_break]
+    /// * [crate::builders::empty_line], [crate::builders::hard_line_break], or
+    ///   [crate::builders::literal_line_break_without_parent]
     /// * A token containing '\n'
     ///
     /// Use this with caution, this is only a heuristic and the printer may print the element over multiple
@@ -562,7 +604,25 @@ pub trait FormatElements {
 
 #[cfg(test)]
 mod tests {
-    use crate::format_element::{LINE_TERMINATORS, normalize_newlines};
+    use crate::IndentWidth;
+    use crate::format_element::{LINE_TERMINATORS, TextWidth, normalize_newlines};
+
+    #[test]
+    fn text_width() {
+        let indent_width = IndentWidth::try_from(4).unwrap();
+        let width = |text| {
+            TextWidth::from_text(text, indent_width)
+                .width()
+                .map(super::Width::value)
+        };
+
+        assert_eq!(width("printable ASCII ~"), Some(17));
+        assert_eq!(width("a\tb"), Some(6));
+        assert_eq!(width("a\nb"), None);
+        assert_eq!(width("a寿司b"), Some(6));
+        assert_eq!(width("a\u{200b}b"), Some(2));
+        assert_eq!(width("a\0\rb"), Some(2));
+    }
 
     #[test]
     fn test_normalize_newlines() {

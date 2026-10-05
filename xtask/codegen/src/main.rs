@@ -5,11 +5,15 @@ mod generate_configuration;
 #[cfg(feature = "external_data")]
 mod generate_css_baseline;
 #[cfg(feature = "external_data")]
+mod generate_css_keywords;
+#[cfg(feature = "external_data")]
 mod generate_license;
 #[cfg(feature = "configuration")]
 mod generate_migrate_eslint;
 #[cfg(feature = "external_data")]
 mod generate_module_replacements;
+#[cfg(feature = "rules_metadata")]
+mod generate_rules_metadata;
 mod move_rule;
 use xtask_glue::{Result, project_root, pushd};
 
@@ -22,11 +26,15 @@ use crate::generate_configuration::generate_rules_configuration;
 #[cfg(feature = "external_data")]
 use crate::generate_css_baseline::generate_css_baseline;
 #[cfg(feature = "external_data")]
+use crate::generate_css_keywords::generate_css_keywords;
+#[cfg(feature = "external_data")]
 use crate::generate_license::generate_license;
 #[cfg(feature = "configuration")]
 use crate::generate_migrate_eslint::generate_migrate_eslint;
 #[cfg(feature = "external_data")]
 use crate::generate_module_replacements::generate_module_replacements;
+#[cfg(feature = "rules_metadata")]
+use crate::generate_rules_metadata::generate_rules_metadata;
 use crate::move_rule::move_rule;
 
 #[cfg(feature = "global_types")]
@@ -61,6 +69,12 @@ fn main() -> Result<()> {
             #[cfg(feature = "configuration")]
             generate_migrate_eslint(Overwrite)?;
         }
+        TaskCommand::RulesMetadata { out } => {
+            #[cfg(feature = "rules_metadata")]
+            generate_rules_metadata(out)?;
+            #[cfg(not(feature = "rules_metadata"))]
+            let _ = out;
+        }
         TaskCommand::Schema => {
             #[cfg(feature = "schema")]
             xtask_codegen::generate_schema::generate_configuration_schema(Overwrite)?;
@@ -86,6 +100,10 @@ fn main() -> Result<()> {
         TaskCommand::CssBaseline => {
             #[cfg(feature = "external_data")]
             generate_css_baseline(Overwrite)?;
+        }
+        TaskCommand::CssKeywords => {
+            #[cfg(feature = "external_data")]
+            generate_css_keywords(Overwrite)?;
         }
         TaskCommand::ModuleReplacements => {
             #[cfg(feature = "external_data")]

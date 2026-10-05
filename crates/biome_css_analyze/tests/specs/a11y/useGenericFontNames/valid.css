@@ -9,6 +9,8 @@ b { font-family: initial; }
 b { font-family: unset; }
 b { font-family: serif; }
 b { font-family: sans-serif; }
+b { font-family: math; }
+b { font-family: "STIX Two Math", math; }
 b { font-family: Courier, monospace; }
 b { font: 1em/1.5 "Whatever Fanciness", cursive; }
 a { font-family: Helvetica Neue, sans-serif, Apple Color Emoji; }

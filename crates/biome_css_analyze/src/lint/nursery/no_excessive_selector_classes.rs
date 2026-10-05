@@ -21,14 +21,14 @@ declare_lint_rule! {
     /// For example, `.foo, .bar.baz` is treated as two selectors, and only `.bar.baz`
     /// contributes two class selectors.
     ///
-    /// Nested selectors are checked as written instead of being resolved against their parent selector.
-    /// For example, in `.foo { &.bar {} }`, the nested selector `&.bar` contributes one class selector.
+    /// Nested selectors are checked as written instead of being combined with their parent. For
+    /// example, in `.foo { &.bar {} }`, the nested selector `&.bar` contributes one class.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// The following example will show a diagnostic when `maxClasses` is set to `1`:
+    /// This example reports a diagnostic when `maxClasses` is `1`:
     ///
     /// ```json,options
     /// {
@@ -163,7 +163,9 @@ fn is_reportable_selector(selector: &AnyCssSelector) -> bool {
     // Count class selectors anywhere in the selector subtree so pseudo-class
     // arguments such as :is(.foo, .bar) and :nth-child(... of .foo) contribute
     // to the same top-level selector total.
-    let (AnyCssSelector::CssCompoundSelector(_) | AnyCssSelector::CssComplexSelector(_)) = selector
+    let (AnyCssSelector::CssCompoundSelector(_)
+    | AnyCssSelector::CssComplexSelector(_)
+    | AnyCssSelector::ScssPartialCombinatorSelector(_)) = selector
     else {
         return false;
     };

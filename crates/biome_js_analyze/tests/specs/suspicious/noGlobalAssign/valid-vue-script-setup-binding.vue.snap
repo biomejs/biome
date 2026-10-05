@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-vue-script-setup-binding.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script setup>
+const open = defineModel();
+</script>
+
+<template>
+  <button @click="open = !open">Toggle</button>
+</template>
+
+```

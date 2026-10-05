@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-vue-script-setup-instance-properties.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+const s = $slots;
+</script>
+
+<template>
+  <div>{{ s }}</div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-vue-script-setup-instance-properties.vue:3:11 lint/correctness/noUndeclaredVariables ━━━━━━━━━━
+
+  × The $slots variable is undeclared.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup>
+  > 3 │ const s = $slots;
+      │           ^^^^^^
+    4 │ </script>
+    5 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```

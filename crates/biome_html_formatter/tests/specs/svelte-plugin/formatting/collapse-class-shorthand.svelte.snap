@@ -1,0 +1,28 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/collapse-class-shorthand.svelte
+---
+
+# Input
+
+```svelte
+<input class:active={active} />
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1 @@
+-<input class:active />
++<input class:active={active} />
+```
+
+# Output
+
+```svelte
+<input class:active={active} />
+```

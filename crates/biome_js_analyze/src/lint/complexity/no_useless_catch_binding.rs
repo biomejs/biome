@@ -12,10 +12,10 @@ use crate::lint::correctness::no_unused_variables::is_unused;
 use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
-    /// Disallow unused catch bindings.
+    /// Disallow unused error parameters in `catch` clauses.
     ///
-    /// This rule disallows unnecessary catch bindings in accordance with ECMAScript 2019.
-    /// See also: the ECMAScript 2019 “optional catch binding” feature in the language specification.
+    /// JavaScript allows `catch {}` when the caught error is not needed. Omitting an unused
+    /// parameter makes it clear that the error is intentionally ignored.
     ///
     /// ## Examples
     ///

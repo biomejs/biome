@@ -1,7 +1,9 @@
+use crate::markdown::auxiliary::code_content::FormatMdCodeContentOptions;
 use crate::markdown::lists::inline_item_list::FormatMdFormatInlineItemListOptions;
 use crate::prelude::*;
+use crate::quote::quote_line_prefix;
 use crate::shared::{TextContext, TextPrintMode};
-use biome_formatter::{FormatRuleWithOptions, write};
+use biome_formatter::{FormatRuleWithOptions, format_args, write};
 use biome_markdown_syntax::{AnyMdInline, MdFencedCodeBlock, MdFencedCodeBlockFields};
 
 #[derive(Debug, Clone, Default)]
@@ -32,18 +34,27 @@ impl FormatNodeRule<MdFencedCodeBlock> for FormatMdFencedCodeBlock {
         let normalized_fence: String = std::iter::repeat_n('`', fence_len).collect();
 
         let inside_list = self.text_context.is_list();
-        let excess = if inside_list { indent.len() } else { 0 };
+        let has_quote_prefix = content
+            .iter()
+            .any(|item| matches!(item, AnyMdInline::MdQuotePrefix(_)));
+        let has_code_content = content
+            .iter()
+            .any(|item| matches!(item, AnyMdInline::MdCodeContent(_)));
+        let opening_fence_indent = indent
+            .iter()
+            .map(|token| token.md_indent_char_token().map(|token| token.text().len()))
+            .sum::<Result<usize, _>>()?;
 
-        if excess > 0 {
-            for token in indent.iter() {
-                let char_token = token.md_indent_char_token()?;
-                f.context()
-                    .comments()
-                    .mark_suppression_checked(token.syntax());
-                write!(f, [format_removed(&char_token)])?;
+        for token in indent.iter() {
+            if has_quote_prefix {
+                write!(f, [token.format()])?;
+                continue;
             }
-        } else {
-            write!(f, [indent.format()])?;
+            let char_token = token.md_indent_char_token()?;
+            f.context()
+                .comments()
+                .mark_suppression_checked(token.syntax());
+            write!(f, [format_removed(&char_token)])?;
         }
 
         write!(
@@ -58,31 +69,64 @@ impl FormatNodeRule<MdFencedCodeBlock> for FormatMdFencedCodeBlock {
                 ),
                 code_list.format(),
                 hard_line_break(),
-                content
-                    .format()
-                    .with_options(FormatMdFormatInlineItemListOptions {
-                        print_mode: if inside_list {
-                            TextPrintMode::Fill
-                        } else {
-                            TextPrintMode::Clean
-                        },
-                        keep_fences_in_italics: false,
-                        text_context: self.text_context,
-                    }),
+                format_with(|f| {
+                    if has_quote_prefix {
+                        // These lines include their quote and list prefixes in the source.
+                        // Applying list alignment before them would move `>` into the list content.
+                        write!(
+                            f,
+                            [dedent_to_root(&format_args![
+                                hard_line_break(),
+                                content.format().with_options(
+                                    FormatMdFormatInlineItemListOptions {
+                                        print_mode: TextPrintMode::Clean,
+                                        keep_fences_in_italics: true,
+                                        text_context: TextContext::Neutral,
+                                    }
+                                )
+                            ])]
+                        )
+                    } else if !has_code_content {
+                        content
+                            .format()
+                            .with_options(FormatMdFormatInlineItemListOptions {
+                                print_mode: if inside_list {
+                                    TextPrintMode::Fill
+                                } else {
+                                    TextPrintMode::Clean
+                                },
+                                keep_fences_in_italics: false,
+                                text_context: self.text_context,
+                            })
+                            .fmt(f)
+                    } else {
+                        for item in content.iter() {
+                            match item {
+                                AnyMdInline::MdCodeContent(code) => code
+                                    .format()
+                                    .with_options(FormatMdCodeContentOptions {
+                                        opening_fence_indent,
+                                    })
+                                    .fmt(f)?,
+                                item => item.format().fmt(f)?,
+                            }
+                        }
+                        Ok(())
+                    }
+                }),
             ]
         )?;
 
-        let r_fence_excess = if inside_list { r_fence_indent.len() } else { 0 };
-        let r_fence_tokens: Vec<_> = r_fence_indent.iter().collect();
-        for token in r_fence_tokens.iter().take(r_fence_excess) {
+        for token in r_fence_indent.iter() {
+            if has_quote_prefix {
+                write!(f, [token.format()])?;
+                continue;
+            }
             let char_token = token.md_indent_char_token()?;
             f.context()
                 .comments()
                 .mark_suppression_checked(token.syntax());
             write!(f, [format_removed(&char_token)])?;
-        }
-        for token in r_fence_tokens.iter().skip(r_fence_excess) {
-            write!(f, [token.format()])?;
         }
 
         if let Some(r_fence) = r_fence {
@@ -95,6 +139,18 @@ impl FormatNodeRule<MdFencedCodeBlock> for FormatMdFencedCodeBlock {
                         Some(r_fence.text_trimmed_range().start())
                     )
                 )]
+            )?;
+        } else if has_quote_prefix {
+            let prefix = quote_line_prefix(node.syntax())?;
+            write!(
+                f,
+                [dedent_to_root(&format_with(|f| {
+                    write!(f, [hard_line_break(), prefix.format(true)])?;
+                    for _ in 0..opening_fence_indent {
+                        write!(f, [token(" ")])?;
+                    }
+                    write!(f, [text(&normalized_fence, None)])
+                }))]
             )?;
         } else {
             write!(f, [text(&normalized_fence, None)])?;

@@ -1,0 +1,92 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```html
+<!DoCtYpE hTmL>
+<html></html>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: missing (optional),
+    directive: HtmlDirective {
+        l_angle_token: L_ANGLE@0..1 "<" [] [],
+        excl_token: BANG@1..2 "!" [] [],
+        doctype_token: DOCTYPE_KW@2..10 "DoCtYpE" [] [Whitespace(" ")],
+        name_token: missing (optional),
+        html_token: HTML_KW@10..14 "hTmL" [] [],
+        quirk_token: missing (optional),
+        public_id_token: missing (optional),
+        system_id_token: missing (optional),
+        r_angle_token: R_ANGLE@14..15 ">" [] [],
+    },
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@15..17 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_KW@17..21 "html" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@21..22 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@22..23 "<" [] [],
+                slash_token: SLASH@23..24 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_KW@24..28 "html" [] [],
+                },
+                r_angle_token: R_ANGLE@28..29 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@29..30 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..30
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: HTML_DIRECTIVE@0..15
+    0: L_ANGLE@0..1 "<" [] []
+    1: BANG@1..2 "!" [] []
+    2: DOCTYPE_KW@2..10 "DoCtYpE" [] [Whitespace(" ")]
+    3: (empty)
+    4: HTML_KW@10..14 "hTmL" [] []
+    5: (empty)
+    6: (empty)
+    7: (empty)
+    8: R_ANGLE@14..15 ">" [] []
+  4: HTML_ELEMENT_LIST@15..29
+    0: HTML_ELEMENT@15..29
+      0: HTML_OPENING_ELEMENT@15..22
+        0: L_ANGLE@15..17 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@17..21
+          0: HTML_KW@17..21 "html" [] []
+        2: HTML_ATTRIBUTE_LIST@21..21
+        3: R_ANGLE@21..22 ">" [] []
+      1: HTML_ELEMENT_LIST@22..22
+      2: HTML_CLOSING_ELEMENT@22..29
+        0: L_ANGLE@22..23 "<" [] []
+        1: SLASH@23..24 "/" [] []
+        2: HTML_TAG_NAME@24..28
+          0: HTML_KW@24..28 "html" [] []
+        3: R_ANGLE@28..29 ">" [] []
+  5: EOF@29..30 "" [Newline("\n")] []
+
+```

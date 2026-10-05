@@ -1,14 +1,15 @@
 use super::super::{
-    is_at_scss_interpolation, is_nth_at_scss_interpolation, parse_scss_interpolation_or_identifier,
-    parse_scss_regular_interpolation,
+    complete_scss_interpolated_identifier, is_at_scss_interpolation, is_nth_at_scss_interpolation,
+    parse_scss_interpolated_name, parse_scss_interpolation_or_identifier,
 };
 use super::query_feature::parse_scss_interpolated_query_feature_from_head;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::error::AnyInParensChainParseRecovery;
 use crate::syntax::at_rule::feature::expected_any_query_feature;
 use crate::syntax::at_rule::media::{
-    expected_any_media_in_parens, parse_any_media_condition_operand, parse_media_and_condition,
-    parse_media_not_condition, parse_media_or_condition, recover_missing_and_rhs,
+    expected_any_media_in_parens, is_at_media_condition_operator,
+    parse_any_media_condition_operand, parse_media_and_condition, parse_media_not_condition,
+    parse_media_or_condition, recover_missing_and_rhs,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
@@ -16,7 +17,13 @@ use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
 
-/// Returns true when Sass interpolation can start a media query operand.
+/// Returns whether Sass interpolation can start a media query operand.
+///
+/// Examples:
+/// ```scss
+/// @media #{$query} {}
+/// @media (color) and #{$query} {}
+/// ```
 #[inline]
 pub(crate) fn is_at_scss_media_query(p: &mut CssParser) -> bool {
     is_at_scss_interpolation(p)
@@ -37,17 +44,51 @@ pub(crate) fn parse_scss_media_query(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    let m = p.start();
-    // Guarded by `is_at_scss_media_query` above.
-    parse_scss_regular_interpolation(p).ok();
-
-    Present(m.complete(p, SCSS_MEDIA_QUERY))
+    let query = p.start();
+    parse_scss_media_type_query(p);
+    Present(query.complete(p, SCSS_MEDIA_QUERY))
 }
 
-/// Returns true when Sass interpolation starts a parenthesized media branch.
+/// Parses the media-type query nested in a bare interpolated media query.
+///
+/// ```scss
+/// @media #{$query} {}
+/// ```
+///
+/// `ScssMediaQuery` uses the shared media-type shape so bare interpolation and
+/// interpolated fragments have the same CST structure.
+#[inline]
+fn parse_scss_media_type_query(p: &mut CssParser) -> CompletedMarker {
+    let query = p.start();
+    parse_scss_media_type(p);
+    query.complete(p, CSS_MEDIA_TYPE_QUERY)
+}
+
+/// Parses the media type nested in a bare interpolated media query.
+///
+/// ```scss
+/// @media #{$query} {}
+/// ```
+#[inline]
+fn parse_scss_media_type(p: &mut CssParser) -> CompletedMarker {
+    let media_type = p.start();
+
+    // Guarded by `is_at_scss_media_query` before the enclosing query starts.
+    parse_scss_interpolated_name(p).ok();
+
+    media_type.complete(p, CSS_MEDIA_TYPE)
+}
+
+/// Returns whether Sass interpolation starts a parenthesized media branch.
 ///
 /// The parser still decides after the shared head whether this is a nested
 /// media condition or a query feature.
+///
+/// Examples:
+/// ```scss
+/// @media (#{$query} and (color)) {}
+/// @media (#{$feature}: #{$value}) {}
+/// ```
 #[inline]
 pub(crate) fn is_at_scss_interpolated_media_in_parens(p: &mut CssParser) -> bool {
     p.at(T!['(']) && is_nth_at_scss_interpolation(p, 1)
@@ -80,7 +121,8 @@ pub(crate) fn parse_scss_interpolated_media_in_parens(p: &mut CssParser) -> Pars
     };
 
     let kind = if head.kind(p) == SCSS_INTERPOLATION && is_at_media_condition_operator(p) {
-        let query = head.precede(p).complete(p, SCSS_MEDIA_QUERY);
+        let name = complete_scss_interpolated_identifier(p, head);
+        let query = complete_scss_media_query_from_name(p, name);
         parse_scss_media_condition_from_query(p, query);
         CSS_MEDIA_CONDITION_IN_PARENS
     } else {
@@ -107,41 +149,54 @@ pub(crate) fn parse_scss_media_condition(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    parse_scss_media_query(p).map(|query| parse_scss_media_condition_from_query(p, query))
-}
-
-#[inline]
-pub(crate) fn is_at_scss_media_condition(p: &mut CssParser) -> bool {
-    is_at_scss_media_query(p)
-}
-
-/// Parses a media query list item that starts with Sass interpolation.
-///
-/// Examples:
-/// ```scss
-/// @media #{$query} {}
-/// @media #{$query} and not (color) {}
-/// @media #{$query} or (color) {}
-/// ```
-#[inline]
-pub(crate) fn parse_scss_media_query_or_condition_query(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_scss_media_query(p) {
-        return Absent;
-    }
-
     parse_scss_media_query(p).map(|query| {
         if is_at_media_condition_operator(p) {
             parse_scss_media_condition_from_query(p, query)
-                .precede(p)
-                .complete(p, CSS_MEDIA_CONDITION_QUERY)
         } else {
             query
         }
     })
 }
 
+/// Returns whether Sass interpolation can start a media condition.
+///
+/// Examples:
+/// ```scss
+/// @media #{$query} and not (color) {}
+/// @media #{$query} or (color) {}
+/// ```
 #[inline]
-fn parse_scss_media_condition_from_query(
+pub(crate) fn is_at_scss_media_condition(p: &mut CssParser) -> bool {
+    is_at_scss_media_query(p)
+}
+
+/// Completes an already-parsed interpolated name as a SCSS media query.
+///
+/// ```scss
+/// @media (#{$query} and (color)) {}
+/// ```
+///
+/// The parenthesized media parser shares the completed name with query-feature
+/// parsing until the following operator selects the media-query branch.
+#[inline]
+fn complete_scss_media_query_from_name(
+    p: &mut CssParser,
+    name: CompletedMarker,
+) -> CompletedMarker {
+    let media_type = name.precede(p).complete(p, CSS_MEDIA_TYPE);
+    let type_query = media_type.precede(p).complete(p, CSS_MEDIA_TYPE_QUERY);
+    type_query.precede(p).complete(p, SCSS_MEDIA_QUERY)
+}
+
+/// Extends `query` with the following SCSS media-condition operator.
+///
+/// Examples:
+/// ```scss
+/// @media #{$query} and not (color) {}
+/// @media #{$query} or (color) {}
+/// ```
+#[inline]
+pub(crate) fn parse_scss_media_condition_from_query(
     p: &mut CssParser,
     query: CompletedMarker,
 ) -> CompletedMarker {
@@ -150,11 +205,6 @@ fn parse_scss_media_condition_from_query(
         T![or] => parse_media_or_condition(p, query),
         _ => query,
     }
-}
-
-#[inline]
-fn is_at_media_condition_operator(p: &mut CssParser) -> bool {
-    p.at(T![and]) || p.at(T![or])
 }
 
 /// Parses an `and` chain after an interpolation-led media query.

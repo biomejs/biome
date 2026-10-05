@@ -36,7 +36,7 @@ use crate::ts::types::unknown_type::FormatTsUnknownType;
 use crate::ts::types::void_type::FormatTsVoidType;
 use crate::verbatim::format_suppressed_node_skip_comments;
 use crate::{js::auxiliary::metavariable::FormatJsMetavariable, prelude::*};
-use biome_formatter::{FormatRuleWithOptions, comments::CommentStyle, write};
+use biome_formatter::{FormatRuleWithOptions, write};
 use biome_js_syntax::{AnyTsType, JsLanguage, TsUnionType, TsUnionTypeVariantList};
 use biome_rowan::{AstSeparatedElement, AstSeparatedList};
 

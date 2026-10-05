@@ -1,0 +1,46 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/quoted_code_comments.md
+---
+
+# Input
+
+```md
+> - test
+>   ```md
+>   <!-- biome-ignore format: literal code -->
+>   - This is a long long
+>     long long long long
+>     long long paragraph.
+>   ```
+
+#    Formatted heading
+
+>   ```html
+>   <!-- keep -->
+>   x
+>   ```
+
+```
+
+
+# Formatted
+
+```md
+> - test
+>
+>   ```md
+>   <!-- biome-ignore format: literal code -->
+>   - This is a long long
+>     long long long long
+>     long long paragraph.
+>   ```
+
+# Formatted heading
+
+>   ```html
+>   <!-- keep -->
+>   x
+>   ```
+
+```

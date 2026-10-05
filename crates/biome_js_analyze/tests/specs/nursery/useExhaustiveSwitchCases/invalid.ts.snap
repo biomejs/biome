@@ -126,6 +126,11 @@ function exhaustiveSwitchOnAsConstStringDiscriminant(): void {
 	switch (wrappedSwitch.kind) {
 	}
 }
+declare const bigintUnion: 1n | 2n;
+switch (bigintUnion) {
+	case 1n:
+		break;
+}
 
 ```
 
@@ -709,7 +714,7 @@ invalid.ts:120:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━
   > 121 │ 	}
         │ 	^
     122 │ }
-    123 │ 
+    123 │ declare const bigintUnion: 1n | 2n;
   
   i Some variants of the union type are not handled here.
   
@@ -723,5 +728,31 @@ invalid.ts:120:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━
   
     120 │ → switch·(wrappedSwitch.kind)·{case·"wrapped":·throw·new·Error("TODO:·Not·implemented·yet");
         │                                +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+```
+
+```
+invalid.ts:124:1 lint/nursery/useExhaustiveSwitchCases ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    122 │ }
+    123 │ declare const bigintUnion: 1n | 2n;
+  > 124 │ switch (bigintUnion) {
+        │ ^^^^^^^^^^^^^^^^^^^^^^
+  > 125 │ 	case 1n:
+  > 126 │ 		break;
+  > 127 │ }
+        │ ^
+    128 │ 
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - 2n
+  
 
 ```

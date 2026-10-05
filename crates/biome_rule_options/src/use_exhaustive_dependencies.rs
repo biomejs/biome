@@ -27,7 +27,7 @@ pub struct UseExhaustiveDependenciesOptions {
 }
 
 fn non_empty_optional<T: IsEmpty>(
-    ctx: &mut impl DeserializationContext,
+    ctx: &mut dyn DeserializationContext,
     value: &Option<T>,
     name: &str,
     range: TextRange,
@@ -103,7 +103,7 @@ pub struct Hook {
 impl DeserializableValidator for Hook {
     fn validate(
         &mut self,
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         _name: &str,
         range: TextRange,
     ) -> bool {
@@ -192,7 +192,7 @@ impl schemars::JsonSchema for StableHookResult {
 
 impl biome_deserialize::Deserializable for StableHookResult {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -210,8 +210,8 @@ impl DeserializationVisitor for StableResultVisitor {
 
     fn visit_array(
         self,
-        ctx: &mut impl DeserializationContext,
-        items: impl Iterator<Item = Option<impl DeserializableValue>>,
+        ctx: &mut dyn DeserializationContext,
+        items: &mut dyn ExactSizeIterator<Item = Option<Box<dyn DeserializableValue>>>,
         range: TextRange,
         _name: &str,
     ) -> Option<Self::Output> {
@@ -250,7 +250,7 @@ impl DeserializationVisitor for StableResultVisitor {
 
     fn visit_bool(
         self,
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: bool,
         range: TextRange,
         _name: &str,
@@ -272,7 +272,7 @@ impl DeserializationVisitor for StableResultVisitor {
 
     fn visit_number(
         self,
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: biome_deserialize::TextNumber,
         range: TextRange,
         name: &str,
@@ -295,7 +295,7 @@ impl DeserializationVisitor for StableResultArrayVisitor {
 
     fn visit_str(
         self,
-        _ctx: &mut impl DeserializationContext,
+        _ctx: &mut dyn DeserializationContext,
         value: Text,
         _range: TextRange,
         _name: &str,
@@ -305,7 +305,7 @@ impl DeserializationVisitor for StableResultArrayVisitor {
 
     fn visit_number(
         self,
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: biome_deserialize::TextNumber,
         range: TextRange,
         name: &str,
@@ -323,7 +323,7 @@ impl DeserializationVisitor for StableResultIndexVisitor {
 
     fn visit_number(
         self,
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: biome_deserialize::TextNumber,
         range: TextRange,
         _name: &str,

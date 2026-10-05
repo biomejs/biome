@@ -4,10 +4,10 @@ expression: invalid.astro
 ---
 # Input
 ```astro
-<!-- should generate diagnostics -->
 ---
 // Astro frontmatter
 ---
+<!-- should generate diagnostics -->
 <a></a>
 <a>    </a>
 <a aria-hidden="true">content</a>
@@ -34,6 +34,13 @@ expression: invalid.astro
 <!-- Hidden input is not accessible -->
 <a><input type="hidden" /></a>
 
+<!-- Labels alone do not provide anchor content -->
+<a aria-label="Navigate to dashboard"></a>
+<a title="Go to settings page"></a>
+<a aria-labelledby="dashboard-label"></a>
+<a aria-label={label} />
+<a title={label}>    </a>
+
 ```
 
 # Diagnostics
@@ -42,8 +49,8 @@ invalid.astro:5:1 lint/a11y/useAnchorContent ━━━━━━━━━━━�
 
   × Provide screen reader accessible content when using a elements.
   
-    3 │ // Astro frontmatter
-    4 │ ---
+    3 │ ---
+    4 │ <!-- should generate diagnostics -->
   > 5 │ <a></a>
       │ ^^^^^^^
     6 │ <a>    </a>
@@ -65,7 +72,7 @@ invalid.astro:6:1 lint/a11y/useAnchorContent ━━━━━━━━━━━�
 
   × Provide screen reader accessible content when using a elements.
   
-    4 │ ---
+    4 │ <!-- should generate diagnostics -->
     5 │ <a></a>
   > 6 │ <a>    </a>
       │ ^^^^^^^^^^^
@@ -298,6 +305,120 @@ invalid.astro:29:1 lint/a11y/useAnchorContent ━━━━━━━━━━━�
   > 29 │ <a><input type="hidden" /></a>
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     30 │ 
+    31 │ <!-- Labels alone do not provide anchor content -->
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.astro:32:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    31 │ <!-- Labels alone do not provide anchor content -->
+  > 32 │ <a aria-label="Navigate to dashboard"></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ <a title="Go to settings page"></a>
+    34 │ <a aria-labelledby="dashboard-label"></a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.astro:33:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    31 │ <!-- Labels alone do not provide anchor content -->
+    32 │ <a aria-label="Navigate to dashboard"></a>
+  > 33 │ <a title="Go to settings page"></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ <a aria-labelledby="dashboard-label"></a>
+    35 │ <a aria-label={label} />
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.astro:34:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    32 │ <a aria-label="Navigate to dashboard"></a>
+    33 │ <a title="Go to settings page"></a>
+  > 34 │ <a aria-labelledby="dashboard-label"></a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ <a aria-label={label} />
+    36 │ <a title={label}>    </a>
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.astro:35:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    33 │ <a title="Go to settings page"></a>
+    34 │ <a aria-labelledby="dashboard-label"></a>
+  > 35 │ <a aria-label={label} />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ <a title={label}>    </a>
+    37 │ 
+  
+  i All links on a page should have content that is accessible to screen readers.
+  
+  i Accessible content refers to digital content that is designed and structured in a way that makes it easy for people with disabilities to access, understand, and interact with using assistive technologies.
+  
+  i Follow these links for more information,
+     WCAG 2.4.4
+     WCAG 4.1.2
+  
+
+```
+
+```
+invalid.astro:36:1 lint/a11y/useAnchorContent ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide screen reader accessible content when using a elements.
+  
+    34 │ <a aria-labelledby="dashboard-label"></a>
+    35 │ <a aria-label={label} />
+  > 36 │ <a title={label}>    </a>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ 
   
   i All links on a page should have content that is accessible to screen readers.
   

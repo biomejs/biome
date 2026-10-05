@@ -4,7 +4,6 @@ expression: valid-astro-attribute-expressions.astro
 ---
 # Input
 ```astro
-<!-- should not generate diagnostics -->
 ---
 const handler = () => {};
 const dynamicId = "foo";
@@ -16,6 +15,7 @@ const dataTheme = "dark";
 const items = ["a", "b", "c"];
 const showList = true;
 ---
+<!-- should not generate diagnostics -->
 
 <html>
     <head><title>{pageTitle}</title></head>

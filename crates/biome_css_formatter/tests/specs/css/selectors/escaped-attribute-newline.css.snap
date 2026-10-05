@@ -1,0 +1,51 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/selectors/escaped-attribute-newline.css
+---
+
+# Input
+
+```css
+div   span[foo='bar short\
+short']{color:red}
+
+div   span[foo='bar long long long\
+ long long long long long long long long long long long long']{color:red}
+
+div{&   span[foo='bar short\
+short']{color:red}}
+
+div{&   span[foo='bar long long long\
+ long long long long long long long long long long long long']{color:red}}
+
+```
+
+
+# Formatted
+
+```css
+div span[foo="bar short\
+short"] {
+	color: red;
+}
+
+div span[foo="bar long long long\
+ long long long long long long long long long long long long"] {
+	color: red;
+}
+
+div {
+	& span[foo="bar short\
+short"] {
+		color: red;
+	}
+}
+
+div {
+	& span[foo="bar long long long\
+ long long long long long long long long long long long long"] {
+		color: red;
+	}
+}
+
+```

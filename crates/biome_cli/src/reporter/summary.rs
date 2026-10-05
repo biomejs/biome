@@ -5,7 +5,6 @@ use crate::reporter::{
 use crate::runner::execution::Execution;
 use crate::{DiagnosticsPayload, TraversalSummary};
 
-use biome_analyze::profiling::DisplayProfiles;
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{MarkupBuf, markup};
 use biome_diagnostics::advice::ListAdvice;
@@ -81,11 +80,6 @@ impl ReporterVisitor for SummaryReporterVisitor {
         writer.log(markup! {
             {ConsoleTraversalSummary(execution, &summary, verbose)}
         });
-
-        let profiles = biome_analyze::profiling::drain_sorted_by_total(false);
-        if !profiles.is_empty() {
-            writer.log(markup! {{ DisplayProfiles(profiles, None) }});
-        }
 
         Ok(())
     }

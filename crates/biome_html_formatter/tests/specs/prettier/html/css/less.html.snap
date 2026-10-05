@@ -27,40 +27,25 @@ info: html/css/less.html
 ```
 
 
-# Prettier differences
-
-```diff
---- Prettier
-+++ Biome
-@@ -8,7 +8,7 @@
+# Error
+```text
+reformat: output mismatch
+--- re-formatted
++++ formatted
+@@ -1,6 +1,5 @@
+ <style type="text/less">
+   
+-  
+   @nice-blue: #5B83AD;
+   @light-blue: @nice-blue + #111;
+ 
+@@ -10,7 +9,6 @@
  </style>
  
  <style lang="less">
--  @nice-blue: #5b83ad;
-+  @nice-blue: #5B83AD;
+-  
+   
+   @nice-blue: #5B83AD;
    @light-blue: @nice-blue + #111;
- 
-   #header {
-```
 
-# Output
-
-```html
-<style type="text/less">
-  @nice-blue: #5B83AD;
-  @light-blue: @nice-blue + #111;
-
-  #header {
-    color: @light-blue;
-  }
-</style>
-
-<style lang="less">
-  @nice-blue: #5B83AD;
-  @light-blue: @nice-blue + #111;
-
-  #header {
-    color: @light-blue;
-  }
-</style>
 ```

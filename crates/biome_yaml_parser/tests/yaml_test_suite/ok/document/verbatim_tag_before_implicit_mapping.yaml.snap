@@ -1,0 +1,94 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+---
+!<tag:clarkevans.com,2002:invoice>
+invoice: 34843
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: DIRECTIVE_END@0..3 "---" [] [],
+            node: YamlBlockInBlockNode {
+                properties: YamlPropertyList [],
+                content: YamlBlockMapping {
+                    mapping_start_token: MAPPING_START@3..4 "" [Newline("\n")] [],
+                    entries: YamlBlockMapEntryList [
+                        YamlBlockMapImplicitEntry {
+                            key: YamlFlowYamlNode {
+                                properties: YamlPropertyList [
+                                    YamlTagProperty {
+                                        value_token: TAG_PROPERTY_LITERAL@4..38 "!<tag:clarkevans.com,2002:invoice>" [] [],
+                                    },
+                                ],
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@38..46 "invoice" [Newline("\n")] [],
+                                },
+                            },
+                            colon_token: COLON@46..48 ":" [] [Whitespace(" ")],
+                            value: YamlFlowInBlockNode {
+                                flow_start_token: FLOW_START@48..48 "" [] [],
+                                flow: YamlFlowYamlNode {
+                                    properties: YamlPropertyList [],
+                                    content: YamlPlainScalar {
+                                        value_token: PLAIN_LITERAL@48..53 "34843" [] [],
+                                    },
+                                },
+                                flow_end_token: FLOW_END@53..53 "" [] [],
+                            },
+                        },
+                    ],
+                    mapping_end_token: MAPPING_END@53..54 "" [Newline("\n")] [],
+                },
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@54..54 "" [] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..54
+  0: YAML_DOCUMENT_LIST@0..54
+    0: YAML_DOCUMENT@0..54
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: DIRECTIVE_END@0..3 "---" [] []
+      3: YAML_BLOCK_IN_BLOCK_NODE@3..54
+        0: YAML_PROPERTY_LIST@3..3
+        1: YAML_BLOCK_MAPPING@3..54
+          0: MAPPING_START@3..4 "" [Newline("\n")] []
+          1: YAML_BLOCK_MAP_ENTRY_LIST@4..53
+            0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@4..53
+              0: YAML_FLOW_YAML_NODE@4..46
+                0: YAML_PROPERTY_LIST@4..38
+                  0: YAML_TAG_PROPERTY@4..38
+                    0: TAG_PROPERTY_LITERAL@4..38 "!<tag:clarkevans.com,2002:invoice>" [] []
+                1: YAML_PLAIN_SCALAR@38..46
+                  0: PLAIN_LITERAL@38..46 "invoice" [Newline("\n")] []
+              1: COLON@46..48 ":" [] [Whitespace(" ")]
+              2: YAML_FLOW_IN_BLOCK_NODE@48..53
+                0: FLOW_START@48..48 "" [] []
+                1: YAML_FLOW_YAML_NODE@48..53
+                  0: YAML_PROPERTY_LIST@48..48
+                  1: YAML_PLAIN_SCALAR@48..53
+                    0: PLAIN_LITERAL@48..53 "34843" [] []
+                2: FLOW_END@53..53 "" [] []
+          2: MAPPING_END@53..54 "" [Newline("\n")] []
+      4: (empty)
+  1: EOF@54..54 "" [] []
+
+```

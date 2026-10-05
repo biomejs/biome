@@ -1,0 +1,99 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+ 	key: value
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlBlockInBlockNode {
+                properties: YamlPropertyList [],
+                content: YamlBlockMapping {
+                    mapping_start_token: MAPPING_START@0..2 "" [Whitespace(" \t")] [],
+                    entries: YamlBlockMapEntryList [
+                        YamlBlockMapImplicitEntry {
+                            key: YamlFlowYamlNode {
+                                properties: YamlPropertyList [],
+                                content: YamlPlainScalar {
+                                    value_token: PLAIN_LITERAL@2..5 "key" [] [],
+                                },
+                            },
+                            colon_token: COLON@5..7 ":" [] [Whitespace(" ")],
+                            value: YamlFlowInBlockNode {
+                                flow_start_token: FLOW_START@7..7 "" [] [],
+                                flow: YamlFlowYamlNode {
+                                    properties: YamlPropertyList [],
+                                    content: YamlPlainScalar {
+                                        value_token: PLAIN_LITERAL@7..12 "value" [] [],
+                                    },
+                                },
+                                flow_end_token: FLOW_END@12..12 "" [] [],
+                            },
+                        },
+                    ],
+                    mapping_end_token: MAPPING_END@12..12 "" [] [],
+                },
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@12..13 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..13
+  0: YAML_DOCUMENT_LIST@0..12
+    0: YAML_DOCUMENT@0..12
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: (empty)
+      3: YAML_BLOCK_IN_BLOCK_NODE@0..12
+        0: YAML_PROPERTY_LIST@0..0
+        1: YAML_BLOCK_MAPPING@0..12
+          0: MAPPING_START@0..2 "" [Whitespace(" \t")] []
+          1: YAML_BLOCK_MAP_ENTRY_LIST@2..12
+            0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@2..12
+              0: YAML_FLOW_YAML_NODE@2..5
+                0: YAML_PROPERTY_LIST@2..2
+                1: YAML_PLAIN_SCALAR@2..5
+                  0: PLAIN_LITERAL@2..5 "key" [] []
+              1: COLON@5..7 ":" [] [Whitespace(" ")]
+              2: YAML_FLOW_IN_BLOCK_NODE@7..12
+                0: FLOW_START@7..7 "" [] []
+                1: YAML_FLOW_YAML_NODE@7..12
+                  0: YAML_PROPERTY_LIST@7..7
+                  1: YAML_PLAIN_SCALAR@7..12
+                    0: PLAIN_LITERAL@7..12 "value" [] []
+                2: FLOW_END@12..12 "" [] []
+          2: MAPPING_END@12..12 "" [] []
+      4: (empty)
+  1: EOF@12..13 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+tab_after_space_indentation.yaml:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Tabs are not allowed for indentation in YAML.
+  
+  > 1 │  	key: value
+      │  ^^
+    2 │ 
+  
+```

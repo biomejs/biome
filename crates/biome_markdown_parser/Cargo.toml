@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_markdown_parser"
-version              = "0.0.1"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Biome's Markdown parser"
@@ -9,7 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
-publish              = false
+publish              = true
 
 # cargo-workspaces metadata
 [package.metadata.workspaces]
@@ -38,9 +38,10 @@ unicode-bom            = { workspace = true }
 # Self-dependency to enable test_utils for integration tests.
 # Integration tests are compiled as separate crates and can only access public API,
 # so we need to enable the feature here to make to_html available for spec tests.
+biome_configuration   = { path = "../biome_configuration", features = ["lang_md"] }
 biome_markdown_parser = { path = ".", features = ["test_utils"] }
 biome_test_utils      = { path = "../biome_test_utils" }
-criterion             = { package = "codspeed-criterion-compat", version = "=3.0.5" }
+criterion             = { package = "codspeed-criterion-compat", version = "=5.0.1" }
 insta                 = { workspace = true }
 quickcheck            = { workspace = true }
 quickcheck_macros     = { workspace = true }

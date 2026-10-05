@@ -1,0 +1,110 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```tsx
+x && <C data-x=`t${x}` />
+
+```
+
+
+## AST
+
+```
+JsExpressionTemplateRoot {
+    expression: JsLogicalExpression {
+        left: JsIdentifierExpression {
+            name: JsReferenceIdentifier {
+                value_token: IDENT@0..2 "x" [] [Whitespace(" ")],
+            },
+        },
+        operator_token: AMP2@2..5 "&&" [] [Whitespace(" ")],
+        right: JsxTagExpression {
+            tag: JsxSelfClosingElement {
+                l_angle_token: L_ANGLE@5..6 "<" [] [],
+                name: JsxReferenceIdentifier {
+                    value_token: JSX_IDENT@6..8 "C" [] [Whitespace(" ")],
+                },
+                type_arguments: missing (optional),
+                attributes: JsxAttributeList [
+                    JsxAttribute {
+                        name: JsxName {
+                            value_token: JSX_IDENT@8..14 "data-x" [] [],
+                        },
+                        initializer: JsxAttributeInitializerClause {
+                            eq_token: EQ@14..15 "=" [] [],
+                            value: JsTemplateExpression {
+                                tag: missing (optional),
+                                type_arguments: missing (optional),
+                                l_tick_token: BACKTICK@15..16 "`" [] [],
+                                elements: JsTemplateElementList [
+                                    JsTemplateChunkElement {
+                                        template_chunk_token: TEMPLATE_CHUNK@16..17 "t" [] [],
+                                    },
+                                    JsTemplateElement {
+                                        dollar_curly_token: DOLLAR_CURLY@17..19 "${" [] [],
+                                        expression: JsIdentifierExpression {
+                                            name: JsReferenceIdentifier {
+                                                value_token: IDENT@19..20 "x" [] [],
+                                            },
+                                        },
+                                        r_curly_token: R_CURLY@20..21 "}" [] [],
+                                    },
+                                ],
+                                r_tick_token: BACKTICK@21..23 "`" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                ],
+                slash_token: SLASH@23..24 "/" [] [],
+                r_angle_token: R_ANGLE@24..25 ">" [] [],
+            },
+        },
+    },
+    eof_token: EOF@25..26 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_EXPRESSION_TEMPLATE_ROOT@0..26
+  0: JS_LOGICAL_EXPRESSION@0..25
+    0: JS_IDENTIFIER_EXPRESSION@0..2
+      0: JS_REFERENCE_IDENTIFIER@0..2
+        0: IDENT@0..2 "x" [] [Whitespace(" ")]
+    1: AMP2@2..5 "&&" [] [Whitespace(" ")]
+    2: JSX_TAG_EXPRESSION@5..25
+      0: JSX_SELF_CLOSING_ELEMENT@5..25
+        0: L_ANGLE@5..6 "<" [] []
+        1: JSX_REFERENCE_IDENTIFIER@6..8
+          0: JSX_IDENT@6..8 "C" [] [Whitespace(" ")]
+        2: (empty)
+        3: JSX_ATTRIBUTE_LIST@8..23
+          0: JSX_ATTRIBUTE@8..23
+            0: JSX_NAME@8..14
+              0: JSX_IDENT@8..14 "data-x" [] []
+            1: JSX_ATTRIBUTE_INITIALIZER_CLAUSE@14..23
+              0: EQ@14..15 "=" [] []
+              1: JS_TEMPLATE_EXPRESSION@15..23
+                0: (empty)
+                1: (empty)
+                2: BACKTICK@15..16 "`" [] []
+                3: JS_TEMPLATE_ELEMENT_LIST@16..21
+                  0: JS_TEMPLATE_CHUNK_ELEMENT@16..17
+                    0: TEMPLATE_CHUNK@16..17 "t" [] []
+                  1: JS_TEMPLATE_ELEMENT@17..21
+                    0: DOLLAR_CURLY@17..19 "${" [] []
+                    1: JS_IDENTIFIER_EXPRESSION@19..20
+                      0: JS_REFERENCE_IDENTIFIER@19..20
+                        0: IDENT@19..20 "x" [] []
+                    2: R_CURLY@20..21 "}" [] []
+                4: BACKTICK@21..23 "`" [] [Whitespace(" ")]
+        4: SLASH@23..24 "/" [] []
+        5: R_ANGLE@24..25 ">" [] []
+  1: EOF@25..26 "" [Newline("\n")] []
+
+```

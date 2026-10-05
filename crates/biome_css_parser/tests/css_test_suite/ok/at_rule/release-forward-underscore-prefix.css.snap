@@ -1,0 +1,214 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@forward "./button" as components_*;
+@forward "./button" as components-*;
+@forward "./button" as components*;
+.native { color: red; width: 1px; }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssUnknownValueAtRule {
+                name: CssIdentifier {
+                    value_token: IDENT@1..9 "forward" [] [Whitespace(" ")],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        CSS_STRING_LITERAL@9..20 "\"./button\"" [] [Whitespace(" ")],
+                        AS_KW@20..23 "as" [] [Whitespace(" ")],
+                        IDENT@23..34 "components_" [] [],
+                        STAR@34..35 "*" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@35..36 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@36..38 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: CssIdentifier {
+                    value_token: IDENT@38..46 "forward" [] [Whitespace(" ")],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        CSS_STRING_LITERAL@46..57 "\"./button\"" [] [Whitespace(" ")],
+                        AS_KW@57..60 "as" [] [Whitespace(" ")],
+                        IDENT@60..71 "components-" [] [],
+                        STAR@71..72 "*" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@72..73 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@73..75 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: CssIdentifier {
+                    value_token: IDENT@75..83 "forward" [] [Whitespace(" ")],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        CSS_STRING_LITERAL@83..94 "\"./button\"" [] [Whitespace(" ")],
+                        AS_KW@94..97 "as" [] [Whitespace(" ")],
+                        IDENT@97..107 "components" [] [],
+                        STAR@107..108 "*" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@108..109 ";" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@109..111 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@111..118 "native" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@118..120 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@120..125 "color" [] [],
+                                },
+                                colon_token: COLON@125..127 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@127..130 "red" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@130..132 ";" [] [Whitespace(" ")],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@132..137 "width" [] [],
+                                },
+                                colon_token: COLON@137..139 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@139..140 "1" [] [],
+                                        unit_token: IDENT@140..142 "px" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@142..144 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@144..145 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@145..146 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..146
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..145
+    0: CSS_AT_RULE@0..36
+      0: AT@0..1 "@" [] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@1..36
+        0: CSS_IDENTIFIER@1..9
+          0: IDENT@1..9 "forward" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@9..35
+          0: CSS_STRING_LITERAL@9..20 "\"./button\"" [] [Whitespace(" ")]
+          1: AS_KW@20..23 "as" [] [Whitespace(" ")]
+          2: IDENT@23..34 "components_" [] []
+          3: STAR@34..35 "*" [] []
+        2: SEMICOLON@35..36 ";" [] []
+    1: CSS_AT_RULE@36..73
+      0: AT@36..38 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@38..73
+        0: CSS_IDENTIFIER@38..46
+          0: IDENT@38..46 "forward" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@46..72
+          0: CSS_STRING_LITERAL@46..57 "\"./button\"" [] [Whitespace(" ")]
+          1: AS_KW@57..60 "as" [] [Whitespace(" ")]
+          2: IDENT@60..71 "components-" [] []
+          3: STAR@71..72 "*" [] []
+        2: SEMICOLON@72..73 ";" [] []
+    2: CSS_AT_RULE@73..109
+      0: AT@73..75 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@75..109
+        0: CSS_IDENTIFIER@75..83
+          0: IDENT@75..83 "forward" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@83..108
+          0: CSS_STRING_LITERAL@83..94 "\"./button\"" [] [Whitespace(" ")]
+          1: AS_KW@94..97 "as" [] [Whitespace(" ")]
+          2: IDENT@97..107 "components" [] []
+          3: STAR@107..108 "*" [] []
+        2: SEMICOLON@108..109 ";" [] []
+    3: CSS_QUALIFIED_RULE@109..145
+      0: CSS_SELECTOR_LIST@109..118
+        0: CSS_COMPOUND_SELECTOR@109..118
+          0: CSS_NESTED_SELECTOR_LIST@109..109
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@109..118
+            0: CSS_CLASS_SELECTOR@109..118
+              0: DOT@109..111 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@111..118
+                0: IDENT@111..118 "native" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@118..145
+        0: L_CURLY@118..120 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@120..144
+          0: CSS_DECLARATION_WITH_SEMICOLON@120..132
+            0: CSS_DECLARATION@120..130
+              0: CSS_GENERIC_PROPERTY@120..130
+                0: CSS_IDENTIFIER@120..125
+                  0: IDENT@120..125 "color" [] []
+                1: COLON@125..127 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@127..130
+                  0: CSS_IDENTIFIER@127..130
+                    0: IDENT@127..130 "red" [] []
+              1: (empty)
+            1: SEMICOLON@130..132 ";" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_WITH_SEMICOLON@132..144
+            0: CSS_DECLARATION@132..142
+              0: CSS_GENERIC_PROPERTY@132..142
+                0: CSS_IDENTIFIER@132..137
+                  0: IDENT@132..137 "width" [] []
+                1: COLON@137..139 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@139..142
+                  0: CSS_REGULAR_DIMENSION@139..142
+                    0: CSS_NUMBER_LITERAL@139..140 "1" [] []
+                    1: IDENT@140..142 "px" [] []
+              1: (empty)
+            1: SEMICOLON@142..144 ";" [] [Whitespace(" ")]
+        2: R_CURLY@144..145 "}" [] []
+  2: EOF@145..146 "" [Newline("\n")] []
+
+```

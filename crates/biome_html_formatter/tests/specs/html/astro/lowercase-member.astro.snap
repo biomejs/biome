@@ -25,6 +25,9 @@ let Data;
 
 ```astro
 ---
+let form;
+let foo;
+let Data;
 ---
 
 <form.Field></form.Field>

@@ -1,0 +1,15 @@
+@layer   #{$layers} ;
+
+@LAYER #{ $layer }{
+  .a { color: red; }
+}
+
+@layer reset,#{$name},   components;
+
+@layer theme-#{$name}.Base {}
+
+@layer framework.#{$sub};
+
+@layer #{$a}.#{$b},#{$c}-suffix;
+
+@import url("theme.css") layer(#{$layer});

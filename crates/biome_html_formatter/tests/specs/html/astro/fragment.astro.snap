@@ -1,0 +1,30 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: astro/fragment.astro
+---
+
+# Input
+
+```astro
+---
+const a = 1;
+---
+<><p>a</p></>
+<body><><span>b</span></></body>
+
+```
+
+
+# Formatted
+
+```astro
+---
+const a = 1;
+---
+
+<><p>a</p></>
+<body>
+	<><span>b</span></>
+</body>
+
+```

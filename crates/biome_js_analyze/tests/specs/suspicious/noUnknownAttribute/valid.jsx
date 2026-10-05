@@ -193,4 +193,6 @@
 			Greetings, one and all!
 		</div>
 	</div>
+	<link hrefLang="en" />
+	<path renderingIntent="auto" />
 </>;

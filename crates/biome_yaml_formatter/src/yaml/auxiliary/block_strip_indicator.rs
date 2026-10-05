@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use biome_rowan::AstNode;
-use biome_yaml_syntax::YamlBlockStripIndicator;
+use biome_formatter::write;
+use biome_yaml_syntax::{YamlBlockStripIndicator, YamlBlockStripIndicatorFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatYamlBlockStripIndicator;
 impl FormatNodeRule<YamlBlockStripIndicator> for FormatYamlBlockStripIndicator {
@@ -9,6 +9,7 @@ impl FormatNodeRule<YamlBlockStripIndicator> for FormatYamlBlockStripIndicator {
         node: &YamlBlockStripIndicator,
         f: &mut YamlFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let YamlBlockStripIndicatorFields { minus_token } = node.as_fields();
+        write!(f, [minus_token.format()])
     }
 }

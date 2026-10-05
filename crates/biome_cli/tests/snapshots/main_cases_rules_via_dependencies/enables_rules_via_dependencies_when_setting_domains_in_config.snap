@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint '<TEMP_DIR>/enables_rules_via_dependencies_when_setting_domains_in_config'
+```
+
 ## `biome.json`
 
 ```json

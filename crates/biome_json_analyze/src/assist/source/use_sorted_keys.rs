@@ -16,15 +16,18 @@ use biome_string_case::comparable_token::ComparableToken;
 use std::{cmp::Ordering, ops::Not};
 
 declare_source_rule! {
-    /// Sort the keys of a JSON object in natural order.
+    /// Sort keys in a JSON object.
     ///
     /// :::note
-    /// For consistent ordering in `package.json` files, use the action [useSortedPackageJson](https://biomejs.dev/assist/actions/use-sorted-package-json)
+    /// For `package.json`, use
+    /// [useSortedPackageJson](https://biomejs.dev/assist/actions/use-sorted-package-json), which
+    /// follows package-specific conventions.
     /// :::
     ///
-    /// [Natural order](https://en.wikipedia.org/wiki/Natural_sort_order) means
-    /// that uppercase letters come before lowercase letters (e.g. `A` < `a` <
-    /// `B` < `b`) and numbers are compared in a human way (e.g. `9` < `10`).
+    /// By default, the action uses
+    /// [natural order](https://en.wikipedia.org/wiki/Natural_sort_order): uppercase letters come
+    /// before lowercase letters (`A` before `a`), and numbers are compared by value (`item9`
+    /// before `item10`).
     ///
     /// ## Examples
     ///
@@ -39,12 +42,13 @@ declare_source_rule! {
     /// ```
     ///
     /// ## Options
-    /// This actions accepts following options
     ///
     /// ### `sortOrder`
-    /// This options supports `natural` and `lexicographic` values. Where as `natural` is the default.
     ///
-    /// Following will apply the natural sort order.
+    /// Selects `natural` or `lexicographic` ordering. Natural ordering compares numbers by value
+    /// and is the default. Lexicographic ordering compares keys character by character.
+    ///
+    /// The following configuration uses natural order:
     ///
     /// ```json,options
     /// {
@@ -53,6 +57,7 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
+    ///
     /// ```json,use_options,expect_diff
     /// {
     ///     "val13": 1,
@@ -63,7 +68,7 @@ declare_source_rule! {
     /// }
     /// ```
     ///
-    /// Following will apply the lexicographic sort order.
+    /// The following configuration uses lexicographic order.
     ///
     /// ```json,options
     /// {
@@ -72,6 +77,7 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
+    ///
     /// ```json,use_options,expect_diff
     /// {
     ///     "val13": 1,
@@ -83,11 +89,10 @@ declare_source_rule! {
     /// ```
     ///
     /// ### `groupByNesting`
-    /// When enabled, groups object keys by their value's nesting depth before sorting alphabetically.
-    /// Simple values (primitives, single-line arrays, and single-line objects) are sorted first,
-    /// followed by nested values (multi-line arrays and multi-line objects).
     ///
-    /// > Default: `false`
+    /// Groups keys by the shape of their values before sorting by name. Strings, numbers, booleans,
+    /// `null`, and single-line arrays or objects come first. Multi-line arrays and objects come
+    /// afterward. Defaults to `false`.
     ///
     /// ```json,options
     /// {
@@ -96,7 +101,7 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
-    /// ```json,use_options,expect_diagnostic
+    /// ```json,use_options,expect_diff
     /// {
     ///     "name": "Sample",
     ///     "details": {

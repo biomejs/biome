@@ -37,7 +37,7 @@ JsModule {
                         attributes: JsxAttributeList [],
                         r_angle_token: R_ANGLE@2..3 ">" [] [],
                     },
-                    children: JsxChildList [
+                    elements: JsxChildList [
                         JsxText {
                             value_token: JSX_TEXT_LITERAL@3..7 "test" [] [],
                         },
@@ -66,7 +66,7 @@ JsModule {
                         attributes: JsxAttributeList [],
                         r_angle_token: R_ANGLE@15..16 ">" [] [],
                     },
-                    children: JsxChildList [
+                    elements: JsxChildList [
                         JsxText {
                             value_token: JSX_TEXT_LITERAL@16..39 "   whitespace handling " [] [],
                         },
@@ -95,7 +95,7 @@ JsModule {
                         attributes: JsxAttributeList [],
                         r_angle_token: R_ANGLE@47..48 ">" [] [],
                     },
-                    children: JsxChildList [
+                    elements: JsxChildList [
                         JsxText {
                             value_token: JSX_TEXT_LITERAL@48..77 " multi\n   line\n         node\n" [] [],
                         },
@@ -124,7 +124,7 @@ JsModule {
                         attributes: JsxAttributeList [],
                         r_angle_token: R_ANGLE@88..89 ">" [] [],
                     },
-                    children: JsxChildList [
+                    elements: JsxChildList [
                         JsxText {
                             value_token: JSX_TEXT_LITERAL@89..95 "\\u3333" [] [],
                         },

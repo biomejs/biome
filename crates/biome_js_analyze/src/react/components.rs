@@ -1,13 +1,16 @@
 use biome_js_syntax::export_ext::{AnyJsExported, ExportedItem};
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsExpression, JsArrowFunctionExpression, JsAssignmentExpression,
-    JsCallArgumentList, JsCallArguments, JsCallExpression, JsClassDeclaration,
-    JsClassExportDefaultDeclaration, JsExportDefaultExpressionClause, JsExtendsClause,
-    JsFunctionDeclaration, JsFunctionExportDefaultDeclaration, JsFunctionExpression,
-    JsInitializerClause, JsLanguage, JsMethodClassMember, JsMethodObjectMember,
-    JsPropertyClassMember, JsPropertyObjectMember, JsSyntaxToken, JsVariableDeclarator,
+    AnyJsBinding, AnyJsExpression, AnyJsFormalParameter, AnyJsFunction, AnyJsParameter,
+    JsArrowFunctionExpression, JsAssignmentExpression, JsCallArgumentList, JsCallArguments,
+    JsCallExpression, JsClassDeclaration, JsClassExportDefaultDeclaration,
+    JsExportDefaultExpressionClause, JsExtendsClause, JsFunctionDeclaration,
+    JsFunctionExportDefaultDeclaration, JsFunctionExpression, JsInitializerClause, JsLanguage,
+    JsMethodClassMember, JsMethodObjectMember, JsObjectBindingPattern, JsPropertyClassMember,
+    JsPropertyObjectMember, JsSyntaxToken, JsVariableDeclarator,
 };
-use biome_rowan::{AstNode, AstSeparatedList, SyntaxNode, TextRange, declare_node_union};
+use biome_rowan::{
+    AstNode, AstSeparatedList, SyntaxNode, SyntaxResult, TextRange, declare_node_union,
+};
 
 // This module provides utilities for analyzing React components in JavaScript/JSX code.
 // It is mainly useful for identifying React components, their names,
@@ -47,10 +50,6 @@ use biome_rowan::{AstNode, AstSeparatedList, SyntaxNode, TextRange, declare_node
 // class MyComponent extends PureComponent { ... } // class component extending a pure component imported from React-like library
 // ```
 
-/// React Function components may have no more than one parameter (props).
-/// Parameter count in case of wrapped components (in memo or forwardRef) is not checked.
-const REACT_COMPONENT_PARAMS_LIMIT: usize = 1;
-
 /// Represents information about a React component.
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) struct ReactComponentInfo {
@@ -84,7 +83,7 @@ impl ReactComponentInfo {
     ) -> Option<Self> {
         let name = function_declaration.name()?;
 
-        if function_declaration.param_count()? > REACT_COMPONENT_PARAMS_LIMIT {
+        if !function_declaration.has_valid_react_component_params()? {
             return None;
         }
 
@@ -98,6 +97,7 @@ impl ReactComponentInfo {
             start_range: function_declaration.start_range(),
             kind: ReactComponentKind::Function(ReactFunctionComponentInfo {
                 wrappers: Box::new([]),
+                function: AnyJsFunction::cast_ref(function_declaration.syntax()),
             }),
         })
     }
@@ -250,7 +250,9 @@ impl ReactComponentInfo {
         // check if it's a function expression.
         if wrappers.is_empty() {
             let function_expression = function_expression?;
-            if function_expression.param_count()? > REACT_COMPONENT_PARAMS_LIMIT {
+            // Unwrapped expressions keep the classic one-parameter limit.
+            // `forwardRef((props, ref) => ...)` skips this check via wrappers.
+            if function_expression.param_count()? > 1 {
                 return None;
             }
             name_hint = function_expression.name();
@@ -269,6 +271,7 @@ impl ReactComponentInfo {
             start_range: expression.syntax().first_token()?.text_range(),
             kind: ReactComponentKind::Function(ReactFunctionComponentInfo {
                 wrappers: wrappers.into_boxed_slice(),
+                function: AnyJsFunction::cast_ref(expression.syntax()),
             }),
         })
     }
@@ -372,6 +375,7 @@ impl ReactComponentInfo {
                 start_range: expression.syntax().first_token()?.text_range(),
                 kind: ReactComponentKind::Function(ReactFunctionComponentInfo {
                     wrappers: wrappers.into_boxed_slice(),
+                    function: AnyJsFunction::cast_ref(function_expression.syntax()),
                 }),
             })
         } else if let Some(function_or_method) = AnyJsFunctionOrMethodDeclaration::cast_ref(syntax)
@@ -380,6 +384,22 @@ impl ReactComponentInfo {
         } else {
             None
         }
+    }
+
+    /// Returns the object binding pattern of the component's props parameter, if any.
+    pub(crate) fn props_object_pattern(&self) -> Option<JsObjectBindingPattern> {
+        let ReactComponentKind::Function(info) = &self.kind else {
+            return None;
+        };
+        let parameters = info.function.as_ref()?.parenthesized_parameters()?;
+        let first_parameter = parameters.items().into_iter().next()?.ok()?;
+        first_parameter
+            .as_any_js_formal_parameter()?
+            .as_js_formal_parameter()?
+            .binding()
+            .ok()?
+            .as_js_object_binding_pattern()
+            .cloned()
     }
 }
 
@@ -487,14 +507,14 @@ impl AnyJsFunctionOrMethodDeclaration {
         }
     }
 
-    fn param_count(&self) -> Option<usize> {
+    fn parameters(&self) -> Option<impl Iterator<Item = SyntaxResult<AnyJsParameter>>> {
         let parameters = match self {
             Self::JsFunctionExportDefaultDeclaration(decl) => decl.parameters(),
             Self::JsFunctionDeclaration(decl) => decl.parameters(),
             Self::JsMethodClassMember(method) => method.parameters(),
             Self::JsMethodObjectMember(method) => method.parameters(),
         };
-        parameters.ok().map(|params| params.items().len())
+        Some(parameters.ok()?.items().into_iter())
     }
 
     fn start_range(&self) -> TextRange {
@@ -552,6 +572,78 @@ impl AnyJsProperty {
     }
 }
 
+/// Shared helpers for recognizing React function components.
+trait ReactComponent {
+    /// Whether this node's parameters are valid for a React function component.
+    ///
+    /// Function components may have zero or one parameter (`props`). Named
+    /// declarations may also have a second `ref`-like parameter for components
+    /// passed to `forwardRef()`, for example `forwardRef(MyComponent)`.
+    fn has_valid_react_component_params(&self) -> Option<bool>;
+
+    fn is_ref_parameter(parameter: &AnyJsParameter) -> bool {
+        let name = match parameter {
+            AnyJsParameter::AnyJsFormalParameter(AnyJsFormalParameter::JsFormalParameter(
+                parameter,
+            )) => parameter.binding().ok().and_then(|binding| {
+                binding
+                    .as_any_js_binding()?
+                    .as_js_identifier_binding()?
+                    .name_token()
+                    .ok()
+            }),
+            AnyJsParameter::AnyJsFormalParameter(
+                AnyJsFormalParameter::JsBogusParameter(_) | AnyJsFormalParameter::JsMetavariable(_),
+            )
+            | AnyJsParameter::JsRestParameter(_)
+            | AnyJsParameter::TsThisParameter(_) => None,
+        };
+
+        name.is_some_and(|name| {
+            let name = name.text_trimmed();
+            name == "ref" || name.ends_with("Ref") || name.ends_with("ref")
+        })
+    }
+
+    fn check_parameters(
+        parameters: impl Iterator<Item = SyntaxResult<AnyJsParameter>>,
+        allow_ref_parameter: bool,
+    ) -> Option<bool> {
+        let mut parameters = parameters;
+        let first = parameters.next().transpose().ok()?;
+        let second = parameters.next().transpose().ok()?;
+
+        if parameters.next().is_some() {
+            return Some(false);
+        }
+
+        Some(match (first, second) {
+            (None | Some(_), None) => true,
+            (Some(_), Some(second)) => allow_ref_parameter && Self::is_ref_parameter(&second),
+            (None, Some(_)) => false,
+        })
+    }
+}
+
+impl ReactComponent for AnyJsFunctionOrMethodDeclaration {
+    fn has_valid_react_component_params(&self) -> Option<bool> {
+        // Only standalone function declarations can be passed to `forwardRef(...)`.
+        // Class/object methods with a second ref-like param are not render functions.
+        let allow_ref_parameter = matches!(
+            self,
+            Self::JsFunctionDeclaration(_) | Self::JsFunctionExportDefaultDeclaration(_)
+        );
+        Self::check_parameters(self.parameters()?, allow_ref_parameter)
+    }
+}
+
+impl ReactComponent for ReactComponentInfo {
+    fn has_valid_react_component_params(&self) -> Option<bool> {
+        // Parameter shapes are validated while constructing the info.
+        Some(true)
+    }
+}
+
 /// Checks whether the given function name belongs to a React component, based
 /// on the official convention for React component naming: React component names
 /// must start with a capital letter.
@@ -579,6 +671,8 @@ declare_node_union! {
 pub(crate) struct ReactFunctionComponentInfo {
     /// List of wrappers that was used to wrap the component.
     pub(crate) wrappers: Box<[ReactFunctionComponentWrapper]>,
+    /// The function that implements the component, when it is a function or arrow.
+    function: Option<AnyJsFunction>,
 }
 
 /// Represents a React class component.
@@ -679,6 +773,33 @@ mod test {
         }
 
         source
+    }
+
+    fn function_of(component: &ReactComponentInfo) -> Option<AnyJsFunction> {
+        match &component.kind {
+            ReactComponentKind::Function(info) => info.function.clone(),
+            _ => None,
+        }
+    }
+
+    fn props_object_pattern(code: &str) -> Option<JsObjectBindingPattern> {
+        let source = parse_jsx(code);
+        let declaration = source
+            .syntax()
+            .descendants()
+            .find_map(AnyPotentialReactComponentDeclaration::cast)?;
+        ReactComponentInfo::from_declaration(declaration.syntax())?.props_object_pattern()
+    }
+
+    #[test]
+    fn props_object_pattern_returns_destructured_props() {
+        assert!(props_object_pattern("function C({ a }) { return null; }").is_some());
+        assert!(props_object_pattern("const C = ({ a }) => null;").is_some());
+        assert!(props_object_pattern("const C = memo(({ a }) => null);").is_some());
+        // Not destructured.
+        assert!(props_object_pattern("function C(props) { return null; }").is_none());
+        // No parameters.
+        assert!(props_object_pattern("function C() { return null; }").is_none());
     }
 
     #[test]
@@ -1867,6 +1988,14 @@ mod test {
                         return <div>Hello, world!</div>;
                     }
 
+                    function MyForwardRefComponent(props, ref) {
+                        return <div>Hello, world!</div>;
+                    }
+
+                    function MyForwardedInput(props, forwardedRef) {
+                        return <div>Hello, world!</div>;
+                    }
+
                     export function MyComponent3(param) {
                         return <div>Hello, world!</div>;
                     }
@@ -1883,7 +2012,7 @@ mod test {
                 .filter_map(AnyJsFunctionOrMethodDeclaration::cast)
                 .collect::<Vec<_>>();
 
-            assert_eq!(funcs.len(), 4);
+            assert_eq!(funcs.len(), 6);
 
             for func in funcs {
                 let component_info = ReactComponentInfo::from_declaration(func.syntax());
@@ -1895,6 +2024,7 @@ mod test {
                         start_range: func.start_range(),
                         kind: ReactComponentKind::Function(ReactFunctionComponentInfo {
                             wrappers: Box::new([]),
+                            function: AnyJsFunction::cast_ref(func.syntax()),
                         }),
                     })
                 )
@@ -2139,6 +2269,7 @@ mod test {
                                 ]),
                                 _ => Box::new([]),
                             },
+                            function: function_of(&component_info),
                         }),
                     }
                 )
@@ -2252,7 +2383,8 @@ mod test {
                         name_hint: None,
                         start_range: component_info.start_range,
                         kind: ReactComponentKind::Function(ReactFunctionComponentInfo {
-                            wrappers: Box::new([])
+                            wrappers: Box::new([]),
+                            function: function_of(&component_info),
                         }),
                     }
                 )

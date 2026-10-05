@@ -15,8 +15,9 @@ bar]
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdParagraph {
             list: MdInlineItemList [
@@ -49,9 +50,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..10
+0: MD_ROOT@0..10
   0: (empty)
-  1: MD_BLOCK_LIST@0..10
+  1: (empty)
+  2: MD_BLOCK_LIST@0..10
     0: MD_PARAGRAPH@0..10
       0: MD_INLINE_ITEM_LIST@0..10
         0: MD_REFERENCE_LINK@0..9
@@ -67,6 +69,6 @@ MdDocument {
           3: (empty)
         1: MD_TEXTUAL@9..10
           0: MD_TEXTUAL_LITERAL@9..10 "\n" [] []
-  2: EOF@10..10 "" [] []
+  3: EOF@10..10 "" [] []
 
 ```

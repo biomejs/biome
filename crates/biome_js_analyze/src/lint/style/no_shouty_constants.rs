@@ -14,7 +14,11 @@ use biome_rowan::{AstNode, BatchMutationExt, SyntaxNodeCast, SyntaxToken};
 use biome_rule_options::no_shouty_constants::NoShoutyConstantsOptions;
 
 declare_lint_rule! {
-    /// Disallow the use of constants which its value is the upper-case version of its name.
+    /// Disallow constants whose string value is the same as their uppercase name.
+    ///
+    /// A declaration such as `const FOO = "FOO"` adds an unnecessary name without providing
+    /// additional meaning. Use the string directly instead. The rule ignores exported constants
+    /// and constants referenced more than once.
     ///
     /// ## Examples
     ///
@@ -162,12 +166,12 @@ impl Rule for NoShoutyConstants {
                 AnyJsExpression::JsIdentifierExpression(node),
                 AnyJsExpression::AnyJsLiteralExpression(literal),
             );
-        } else if let Some(node) = state
+        } else {
+            let node = state
             .reference
             .syntax()
             .parent()?
-            .cast::<JsShorthandPropertyObjectMember>()
-        {
+            .cast::<JsShorthandPropertyObjectMember>()?;
             // for replacing JsShorthandPropertyObjectMember
             let new_element = js_property_object_member(
                 AnyJsObjectMemberName::JsLiteralMemberName(js_literal_member_name(
@@ -186,8 +190,6 @@ impl Rule for NoShoutyConstants {
             );
 
             batch.replace_element(node.into_syntax().into(), new_element.into_syntax().into());
-        } else {
-            return None;
         }
 
         Some(JsRuleAction::new(

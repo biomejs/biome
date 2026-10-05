@@ -1,0 +1,47 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid_issue_11512.css
+---
+# Input
+```css
+/* should generate diagnostics */
+.a th {
+    color: red;
+}
+
+.a .b .c th {
+    color: green;
+}
+
+.a .b th {
+    color: blue;
+}
+
+```
+
+# Diagnostics
+```
+invalid_issue_11512.css:10:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 2, 1)
+  
+     8 │ }
+     9 │ 
+  > 10 │ .a .b th {
+       │ ^^^^^^^^
+    11 │     color: blue;
+    12 │ }
+  
+  i This selector specificity is (0, 3, 1)
+  
+    4 │ }
+    5 │ 
+  > 6 │ .a .b .c th {
+      │ ^^^^^^^^^^^
+    7 │     color: green;
+    8 │ }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```

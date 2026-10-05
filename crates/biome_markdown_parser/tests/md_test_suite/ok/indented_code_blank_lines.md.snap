@@ -18,8 +18,9 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdIndentCodeBlock {
             content: MdInlineItemList [
@@ -66,9 +67,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..24
+0: MD_ROOT@0..24
   0: (empty)
-  1: MD_BLOCK_LIST@0..24
+  1: (empty)
+  2: MD_BLOCK_LIST@0..24
     0: MD_INDENT_CODE_BLOCK@0..24
       0: MD_INLINE_ITEM_LIST@0..24
         0: MD_INDENT_TOKEN@0..4
@@ -93,6 +95,6 @@ MdDocument {
           0: MD_TEXTUAL_LITERAL@18..23 "    x" [] []
         10: MD_TEXTUAL@23..24
           0: MD_TEXTUAL_LITERAL@23..24 "\n" [] []
-  2: EOF@24..24 "" [] []
+  3: EOF@24..24 "" [] []
 
 ```

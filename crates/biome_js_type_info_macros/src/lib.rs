@@ -3,7 +3,7 @@
 mod resolvable_derive;
 
 use proc_macro::TokenStream;
-use proc_macro_error2::*;
+use proc_macro_error3::*;
 use syn::{DeriveInput, parse_macro_input};
 
 /// Implements the `Resolvable` trait for a given type.

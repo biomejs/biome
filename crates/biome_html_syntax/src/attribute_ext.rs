@@ -1,9 +1,10 @@
 use crate::{
     AnyHtmlAttribute, AnyHtmlAttributeInitializer, AnySvelteTemplateElement, AnyVueDirective,
-    HtmlAttribute, HtmlAttributeList, HtmlAttributeName, static_value::StaticValue,
+    HtmlAttribute, HtmlAttributeList, HtmlAttributeName, HtmlString, is_quoted,
+    static_value::StaticValue,
 };
 use biome_aria::Attribute;
-use biome_rowan::{AstNodeList, TokenText};
+use biome_rowan::{AstNode, AstNodeList, TextRange, TokenText};
 use biome_string_case::StrOnlyExtension;
 
 /// Extracts a static value from a Vue directive's binding value.
@@ -23,10 +24,7 @@ fn vue_binding_static_value(value: AnyHtmlAttributeInitializer) -> Option<Static
             // Only return a static value if the inner content is a JS string literal
             // (starts and ends with the same quote character). Plain identifiers like
             // `roleValue` are dynamic references and should not be treated as static.
-            if inner.len() >= 2
-                && ((inner.starts_with('"') && inner.ends_with('"'))
-                    || (inner.starts_with('\'') && inner.ends_with('\'')))
-            {
+            if is_quoted(inner) {
                 Some(StaticValue::String(token))
             } else {
                 None
@@ -76,6 +74,11 @@ impl AnyHtmlAttributeInitializer {
 }
 
 impl HtmlAttribute {
+    /// Returns the attribute value when its initializer is an HTML string.
+    pub fn html_string(&self) -> Option<HtmlString> {
+        self.initializer()?.value().ok()?.as_html_string().cloned()
+    }
+
     /// Extracts the value from an attribute's initializer.
     ///
     /// Returns `None` if the attribute has no initializer or the value cannot be extracted.
@@ -112,31 +115,55 @@ impl AnyHtmlAttribute {
     pub fn name(&self) -> Option<TokenText> {
         match self {
             Self::HtmlAttribute(attr) => attr.name().ok()?.token_text_trimmed(),
+            Self::HtmlAttributeSingleTextExpression(attr) => attr
+                .expression()
+                .ok()
+                .and_then(|expr| expr.html_literal_token().ok())
+                .map(|html_literal| html_literal.token_text_trimmed()),
             Self::AnyVueDirective(vue) => match vue {
                 // :attr="..." — shorthand Vue binding
                 AnyVueDirective::VueVBindShorthandDirective(d) => d
                     .arg()
                     .ok()
-                    .and_then(|arg| arg.arg().ok())
+                    .and_then(|arg| arg.arg())
                     .and_then(|arg| arg.as_vue_static_argument().cloned())
                     .and_then(|s| s.name_token().ok())
                     .map(|t| t.token_text_trimmed()),
                 // v-bind:attr="..." — full Vue binding
                 AnyVueDirective::VueDirective(d) if d.is_binding() => d
                     .arg()
-                    .and_then(|arg| arg.arg().ok())
+                    .and_then(|arg| arg.arg())
                     .and_then(|arg| arg.as_vue_static_argument().cloned())
                     .and_then(|s| s.name_token().ok())
                     .map(|t| t.token_text_trimmed()),
                 _ => None,
             },
-            Self::AnySvelteDirective(_)
-            | Self::HtmlAttributeDoubleTextExpression(_)
-            | Self::HtmlAttributeSingleTextExpression(_)
-            | Self::HtmlBogusAttribute(_)
-            | Self::HtmlSpreadAttribute(_)
-            | Self::AnyAstroDirective(_)
-            | Self::SvelteAttachAttribute(_) => None,
+            _ => None,
+        }
+    }
+
+    pub fn range(&self) -> TextRange {
+        match self {
+            Self::AngularStructuralDirective(angular_structural_directive) => {
+                angular_structural_directive.range()
+            }
+            Self::AngularTemplateRefVariable(angular_template_ref_variable) => {
+                angular_template_ref_variable.range()
+            }
+            Self::AnyAngularBinding(any_angular_binding) => any_angular_binding.range(),
+            Self::AnyAstroDirective(any_astro_directive) => any_astro_directive.range(),
+            Self::AnySvelteDirective(any_svelte_directive) => any_svelte_directive.range(),
+            Self::AnyVueDirective(any_vue_directive) => any_vue_directive.range(),
+            Self::HtmlAttribute(html_attribute) => html_attribute.range(),
+            Self::HtmlAttributeDoubleTextExpression(html_attribute_double_text_expression) => {
+                html_attribute_double_text_expression.range()
+            }
+            Self::HtmlAttributeSingleTextExpression(html_attribute_single_text_expression) => {
+                html_attribute_single_text_expression.range()
+            }
+            Self::HtmlBogusAttribute(html_bogus_attribute) => html_bogus_attribute.range(),
+            Self::HtmlSpreadAttribute(html_spread_attribute) => html_spread_attribute.range(),
+            Self::SvelteAttachAttribute(svelte_attach_attribute) => svelte_attach_attribute.range(),
         }
     }
 
@@ -152,13 +179,7 @@ impl AnyHtmlAttribute {
                 }
                 _ => None,
             },
-            Self::AnySvelteDirective(_)
-            | Self::HtmlAttributeDoubleTextExpression(_)
-            | Self::HtmlAttributeSingleTextExpression(_)
-            | Self::HtmlBogusAttribute(_)
-            | Self::HtmlSpreadAttribute(_)
-            | Self::AnyAstroDirective(_)
-            | Self::SvelteAttachAttribute(_) => None,
+            _ => None,
         }
     }
 
@@ -185,7 +206,7 @@ impl AnyHtmlAttribute {
                 AnyVueDirective::VueVBindShorthandDirective(d) => d
                     .arg()
                     .ok()
-                    .and_then(|arg| arg.arg().ok())
+                    .and_then(|arg| arg.arg())
                     .and_then(|arg| arg.as_vue_static_argument().cloned())
                     .and_then(|s| s.name_token().ok())
                     .is_some_and(|t| t.text_trimmed().eq_ignore_ascii_case(name_to_lookup)),
@@ -194,7 +215,7 @@ impl AnyHtmlAttribute {
                 AnyVueDirective::VueDirective(d) => {
                     d.is_binding()
                         && d.arg()
-                            .and_then(|arg| arg.arg().ok())
+                            .and_then(|arg| arg.arg())
                             .and_then(|arg| arg.as_vue_static_argument().cloned())
                             .and_then(|s| s.name_token().ok())
                             .is_some_and(|t| t.text_trimmed().eq_ignore_ascii_case(name_to_lookup))
@@ -244,7 +265,7 @@ impl AnyHtmlAttribute {
                     AnyVueDirective::VueDirective(d) => {
                         d.is_event_listener()
                             && d.arg()
-                                .and_then(|arg| arg.arg().ok())
+                                .and_then(|arg| arg.arg())
                                 .and_then(|arg| arg.as_vue_static_argument().cloned())
                                 .and_then(|s| s.name_token().ok())
                                 .is_some_and(|t| {
@@ -405,7 +426,7 @@ impl HtmlAttributeList {
                 AnyVueDirective::VueDirective(d) => {
                     d.is_event_listener()
                         && d.arg()
-                            .and_then(|arg| arg.arg().ok())
+                            .and_then(|arg| arg.arg())
                             .and_then(|arg| arg.as_vue_static_argument().cloned())
                             .and_then(|s| s.name_token().ok())
                             .is_some_and(|t| t.text_trimmed().eq_ignore_ascii_case(name_to_lookup))
@@ -434,7 +455,7 @@ impl HtmlAttributeList {
                 AnyVueDirective::VueVBindShorthandDirective(d) => d
                     .arg()
                     .ok()
-                    .and_then(|arg| arg.arg().ok())
+                    .and_then(|arg| arg.arg())
                     .and_then(|arg| arg.as_vue_static_argument().cloned())
                     .and_then(|s| s.name_token().ok())
                     .is_some_and(|t| t.text_trimmed() == name_to_lookup),
@@ -443,7 +464,7 @@ impl HtmlAttributeList {
                 AnyVueDirective::VueDirective(d) => {
                     d.is_binding()
                         && d.arg()
-                            .and_then(|arg| arg.arg().ok())
+                            .and_then(|arg| arg.arg())
                             .and_then(|arg| arg.as_vue_static_argument().cloned())
                             .and_then(|s| s.name_token().ok())
                             .is_some_and(|t| t.text_trimmed() == name_to_lookup)

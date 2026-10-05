@@ -1,0 +1,513 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<>
+    <div><li>Item in a div</li><li /></div>
+    <ul><div><li>Indirect child</li></div></ul>
+    <ol><section><li /></section></ol>
+    <menu><div><li /></div></menu>
+    <dl><li>Not a description list item</li></dl>
+    <custom-list><li /></custom-list>
+    <div><li {...props} /></div>
+    <List><div><li /></div></List>
+</>;
+<div><><li>Nested fragment item</li><li /></></div>;
+<div>{<li>Expression item</li>}{<li />}</div>;
+<div>{visible && <li />}</div>;
+<div>{visible ? <li /> : <li>Fallback</li>}</div>;
+<div>{items.map(item => <li key={item}>{item}</li>)}</div>;
+<div>{items.flatMap(item => [<li key={item} />])}</div>;
+<div>{items?.map(function (item) { return <li key={item} />; })}</div>;
+<div>{Array.from(items, item => (<li key={item} />))}</div>;
+<div>{[<li key="a" />]}</div>;
+<div>{items.map(item => <><li key={item} /></>)}</div>;
+<ul>{items.map(item => <div key={item}><li /></div>)}</ul>;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:3:10 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <>
+  > 3 │     <div><li>Item in a div</li><li /></div>
+      │          ^^^^
+    4 │     <ul><div><li>Indirect child</li></div></ul>
+    5 │     <ol><section><li /></section></ol>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:3:32 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <>
+  > 3 │     <div><li>Item in a div</li><li /></div>
+      │                                ^^^^^^
+    4 │     <ul><div><li>Indirect child</li></div></ul>
+    5 │     <ol><section><li /></section></ol>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:4:14 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    2 │ <>
+    3 │     <div><li>Item in a div</li><li /></div>
+  > 4 │     <ul><div><li>Indirect child</li></div></ul>
+      │              ^^^^
+    5 │     <ol><section><li /></section></ol>
+    6 │     <menu><div><li /></div></menu>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:5:18 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    3 │     <div><li>Item in a div</li><li /></div>
+    4 │     <ul><div><li>Indirect child</li></div></ul>
+  > 5 │     <ol><section><li /></section></ol>
+      │                  ^^^^^^
+    6 │     <menu><div><li /></div></menu>
+    7 │     <dl><li>Not a description list item</li></dl>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:6:16 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    4 │     <ul><div><li>Indirect child</li></div></ul>
+    5 │     <ol><section><li /></section></ol>
+  > 6 │     <menu><div><li /></div></menu>
+      │                ^^^^^^
+    7 │     <dl><li>Not a description list item</li></dl>
+    8 │     <custom-list><li /></custom-list>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:7:9 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    5 │     <ol><section><li /></section></ol>
+    6 │     <menu><div><li /></div></menu>
+  > 7 │     <dl><li>Not a description list item</li></dl>
+      │         ^^^^
+    8 │     <custom-list><li /></custom-list>
+    9 │     <div><li {...props} /></div>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:8:18 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+     6 │     <menu><div><li /></div></menu>
+     7 │     <dl><li>Not a description list item</li></dl>
+   > 8 │     <custom-list><li /></custom-list>
+       │                  ^^^^^^
+     9 │     <div><li {...props} /></div>
+    10 │     <List><div><li /></div></List>
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:9:10 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+     7 │     <dl><li>Not a description list item</li></dl>
+     8 │     <custom-list><li /></custom-list>
+   > 9 │     <div><li {...props} /></div>
+       │          ^^^^^^^^^^^^^^^^^
+    10 │     <List><div><li /></div></List>
+    11 │ </>;
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:10:16 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+     8 │     <custom-list><li /></custom-list>
+     9 │     <div><li {...props} /></div>
+  > 10 │     <List><div><li /></div></List>
+       │                ^^^^^^
+    11 │ </>;
+    12 │ <div><><li>Nested fragment item</li><li /></></div>;
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:12:8 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    10 │     <List><div><li /></div></List>
+    11 │ </>;
+  > 12 │ <div><><li>Nested fragment item</li><li /></></div>;
+       │        ^^^^
+    13 │ <div>{<li>Expression item</li>}{<li />}</div>;
+    14 │ <div>{visible && <li />}</div>;
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:12:37 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    10 │     <List><div><li /></div></List>
+    11 │ </>;
+  > 12 │ <div><><li>Nested fragment item</li><li /></></div>;
+       │                                     ^^^^^^
+    13 │ <div>{<li>Expression item</li>}{<li />}</div>;
+    14 │ <div>{visible && <li />}</div>;
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:13:7 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    11 │ </>;
+    12 │ <div><><li>Nested fragment item</li><li /></></div>;
+  > 13 │ <div>{<li>Expression item</li>}{<li />}</div>;
+       │       ^^^^
+    14 │ <div>{visible && <li />}</div>;
+    15 │ <div>{visible ? <li /> : <li>Fallback</li>}</div>;
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:13:33 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    11 │ </>;
+    12 │ <div><><li>Nested fragment item</li><li /></></div>;
+  > 13 │ <div>{<li>Expression item</li>}{<li />}</div>;
+       │                                 ^^^^^^
+    14 │ <div>{visible && <li />}</div>;
+    15 │ <div>{visible ? <li /> : <li>Fallback</li>}</div>;
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:14:18 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    12 │ <div><><li>Nested fragment item</li><li /></></div>;
+    13 │ <div>{<li>Expression item</li>}{<li />}</div>;
+  > 14 │ <div>{visible && <li />}</div>;
+       │                  ^^^^^^
+    15 │ <div>{visible ? <li /> : <li>Fallback</li>}</div>;
+    16 │ <div>{items.map(item => <li key={item}>{item}</li>)}</div>;
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:15:17 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    13 │ <div>{<li>Expression item</li>}{<li />}</div>;
+    14 │ <div>{visible && <li />}</div>;
+  > 15 │ <div>{visible ? <li /> : <li>Fallback</li>}</div>;
+       │                 ^^^^^^
+    16 │ <div>{items.map(item => <li key={item}>{item}</li>)}</div>;
+    17 │ <div>{items.flatMap(item => [<li key={item} />])}</div>;
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:15:26 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    13 │ <div>{<li>Expression item</li>}{<li />}</div>;
+    14 │ <div>{visible && <li />}</div>;
+  > 15 │ <div>{visible ? <li /> : <li>Fallback</li>}</div>;
+       │                          ^^^^
+    16 │ <div>{items.map(item => <li key={item}>{item}</li>)}</div>;
+    17 │ <div>{items.flatMap(item => [<li key={item} />])}</div>;
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:16:25 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    14 │ <div>{visible && <li />}</div>;
+    15 │ <div>{visible ? <li /> : <li>Fallback</li>}</div>;
+  > 16 │ <div>{items.map(item => <li key={item}>{item}</li>)}</div>;
+       │                         ^^^^^^^^^^^^^^^
+    17 │ <div>{items.flatMap(item => [<li key={item} />])}</div>;
+    18 │ <div>{items?.map(function (item) { return <li key={item} />; })}</div>;
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:17:30 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    15 │ <div>{visible ? <li /> : <li>Fallback</li>}</div>;
+    16 │ <div>{items.map(item => <li key={item}>{item}</li>)}</div>;
+  > 17 │ <div>{items.flatMap(item => [<li key={item} />])}</div>;
+       │                              ^^^^^^^^^^^^^^^^^
+    18 │ <div>{items?.map(function (item) { return <li key={item} />; })}</div>;
+    19 │ <div>{Array.from(items, item => (<li key={item} />))}</div>;
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:18:43 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    16 │ <div>{items.map(item => <li key={item}>{item}</li>)}</div>;
+    17 │ <div>{items.flatMap(item => [<li key={item} />])}</div>;
+  > 18 │ <div>{items?.map(function (item) { return <li key={item} />; })}</div>;
+       │                                           ^^^^^^^^^^^^^^^^^
+    19 │ <div>{Array.from(items, item => (<li key={item} />))}</div>;
+    20 │ <div>{[<li key="a" />]}</div>;
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:19:34 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    17 │ <div>{items.flatMap(item => [<li key={item} />])}</div>;
+    18 │ <div>{items?.map(function (item) { return <li key={item} />; })}</div>;
+  > 19 │ <div>{Array.from(items, item => (<li key={item} />))}</div>;
+       │                                  ^^^^^^^^^^^^^^^^^
+    20 │ <div>{[<li key="a" />]}</div>;
+    21 │ <div>{items.map(item => <><li key={item} /></>)}</div>;
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:20:8 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    18 │ <div>{items?.map(function (item) { return <li key={item} />; })}</div>;
+    19 │ <div>{Array.from(items, item => (<li key={item} />))}</div>;
+  > 20 │ <div>{[<li key="a" />]}</div>;
+       │        ^^^^^^^^^^^^^^
+    21 │ <div>{items.map(item => <><li key={item} /></>)}</div>;
+    22 │ <ul>{items.map(item => <div key={item}><li /></div>)}</ul>;
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:21:27 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    19 │ <div>{Array.from(items, item => (<li key={item} />))}</div>;
+    20 │ <div>{[<li key="a" />]}</div>;
+  > 21 │ <div>{items.map(item => <><li key={item} /></>)}</div>;
+       │                           ^^^^^^^^^^^^^^^^^
+    22 │ <ul>{items.map(item => <div key={item}><li /></div>)}</ul>;
+    23 │ 
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsx:22:40 lint/nursery/noMisplacedListElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This <li> element is outside a list container.
+  
+    20 │ <div>{[<li key="a" />]}</div>;
+    21 │ <div>{items.map(item => <><li key={item} /></>)}</div>;
+  > 22 │ <ul>{items.map(item => <div key={item}><li /></div>)}</ul>;
+       │                                        ^^^^^^
+    23 │ 
+  
+  i List items need a list container to form a valid HTML list.
+  
+  i Make this element a direct child of <ul>, <ol>, or <menu>.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

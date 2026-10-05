@@ -1,5 +1,6 @@
 pub(crate) mod error;
 
+use crate::lexer::{CssCustomPropertyCommentMode, CssLexContext};
 use crate::parser::CssParser;
 use crate::syntax::at_rule::error::{AnyInParensChainParseRecovery, AnyInParensParseRecovery};
 use crate::syntax::at_rule::supports::error::{
@@ -7,17 +8,23 @@ use crate::syntax::at_rule::supports::error::{
 };
 use crate::syntax::block::parse_conditional_block;
 use crate::syntax::declaration::parse_declaration_important;
-use crate::syntax::parse_error::{expected_declaration, expected_selector, scss_only_syntax_error};
+use crate::syntax::parse_error::{
+    expected_component_value, expected_declaration, expected_selector, scss_only_syntax_error,
+};
 use crate::syntax::property::{
-    END_OF_PROPERTY_VALUE_TOKEN_SET, is_at_generic_property, is_nth_at_direct_generic_property,
-    parse_generic_property_name, parse_property_value_with_end_set,
+    END_OF_PROPERTY_VALUE_TOKEN_SET, is_at_generic_property, is_at_legacy_ie_filter_property,
+    is_at_legacy_ie_filter_value, is_nth_at_direct_generic_property, parse_generic_property_name,
+    parse_property_value_with_end_set, parse_supports_custom_property_value,
 };
 use crate::syntax::scss::{
-    is_at_scss_supports_interpolated_condition, is_nth_at_scss_interpolated_property_name,
-    parse_scss_supports_interpolated_condition,
+    complete_scss_interpolated_identifier, is_at_scss_interpolated_property_name,
+    is_at_scss_interpolation, is_at_scss_supports_interpolated_condition,
+    is_nth_at_scss_interpolated_property_name, parse_scss_interpolated_property_name,
+    parse_scss_interpolation_or_identifier, parse_scss_supports_interpolated_condition,
+    parse_scss_variable,
 };
 use crate::syntax::selector::parse_selector;
-use crate::syntax::{CssSyntaxFeatures, parse_any_css_value};
+use crate::syntax::{CssSyntaxFeatures, is_nth_at_identifier, parse_any_css_value};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_recovery::ParseRecovery;
@@ -127,11 +134,22 @@ pub(crate) fn parse_any_supports_condition(p: &mut CssParser) -> ParsedSyntax {
     if is_at_supports_not_condition(p) {
         parse_supports_not_condition(p)
     } else {
-        parse_any_supports_condition_in_parens(p, None).map(|lhs| match p.cur() {
-            T![and] => parse_supports_and_condition(p, lhs),
-            T![or] => parse_supports_or_condition(p, lhs),
-            _ => lhs,
-        })
+        parse_any_supports_condition_in_parens(p, None)
+            .map(|lhs| parse_supports_condition_from_head(p, lhs))
+    }
+}
+
+/// Parses a logical operator after an existing supports operand.
+///
+/// ```scss
+/// @supports (#{$condition} and (color: red)) {}
+/// ```
+#[inline]
+fn parse_supports_condition_from_head(p: &mut CssParser, head: CompletedMarker) -> CompletedMarker {
+    match p.cur() {
+        T![and] => parse_supports_and_condition(p, head),
+        T![or] => parse_supports_or_condition(p, head),
+        _ => head,
     }
 }
 
@@ -226,6 +244,20 @@ fn parse_any_supports_condition_in_parens(
 ) -> ParsedSyntax {
     if is_at_supports_feature_selector(p) {
         parse_supports_feature_selector(p)
+    } else if is_at_scss_supports_feature_declaration(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_supports_feature_declaration,
+            |p, marker| {
+                scss_only_syntax_error(
+                    p,
+                    "SCSS variable supports declaration names",
+                    marker.range(p),
+                )
+            },
+        )
+    } else if is_at_scss_interpolated_supports_in_parens(p) {
+        parse_scss_interpolated_supports_in_parens(p)
     } else if is_at_supports_feature_declaration(p) {
         parse_supports_feature_declaration(p)
     } else if is_at_supports_condition_in_parens(p) {
@@ -236,6 +268,14 @@ fn parse_any_supports_condition_in_parens(
             parse_scss_supports_interpolated_condition,
             |p, marker| {
                 scss_only_syntax_error(p, "SCSS interpolated supports conditions", marker.range(p))
+            },
+        )
+    } else if is_at_scss_interpolated_property_name(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_interpolated_property_name,
+            |p, marker| {
+                scss_only_syntax_error(p, "SCSS interpolated supports values", marker.range(p))
             },
         )
     } else {
@@ -303,9 +343,97 @@ fn parse_supports_feature_selector(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_supports_feature_declaration(p: &mut CssParser) -> bool {
-    p.at(T!['('])
-        && (is_nth_at_direct_generic_property(p, 1)
-            || is_nth_at_scss_interpolated_property_name(p, 1))
+    p.at(T!['(']) && is_nth_at_direct_generic_property(p, 1)
+}
+
+/// Returns whether a parenthesized supports branch starts with an interpolated
+/// name or condition.
+///
+/// ```scss
+/// @supports (#{$condition}) {}
+/// @supports (margin-#{$side}: 0) {}
+/// ```
+#[inline]
+fn is_at_scss_interpolated_supports_in_parens(p: &mut CssParser) -> bool {
+    p.at(T!['(']) && is_nth_at_scss_interpolated_property_name(p, 1)
+}
+
+/// Parses a parenthesized supports branch that starts with interpolation.
+///
+/// ```scss
+/// @supports (#{$condition}) {}
+/// @supports (#{$property}: grid) {}
+/// ```
+#[inline]
+fn parse_scss_interpolated_supports_in_parens(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_scss_interpolated_supports_in_parens(p) {
+        return Absent;
+    }
+
+    let branch = p.start();
+    p.bump(T!['(']);
+
+    let Some(head) = CssSyntaxFeatures::Scss
+        .parse_exclusive_syntax(p, parse_scss_interpolated_supports_head, |p, marker| {
+            let feature = if p.at(T![:]) {
+                "SCSS interpolated property names"
+            } else if marker.kind(p) == SCSS_SUPPORTS_INTERPOLATED_CONDITION {
+                "SCSS interpolated supports conditions"
+            } else {
+                "SCSS interpolated supports values"
+            };
+            scss_only_syntax_error(p, feature, marker.range(p))
+        })
+        .or_add_diagnostic(p, expected_any_supports_condition)
+    else {
+        p.expect(T![')']);
+        return Present(branch.complete(p, CSS_SUPPORTS_CONDITION_IN_PARENS));
+    };
+
+    let kind = if p.at(T![:]) {
+        complete_supports_declaration_from_name(p, head, false);
+        CSS_SUPPORTS_FEATURE_DECLARATION
+    } else {
+        parse_supports_condition_from_head(p, head);
+        CSS_SUPPORTS_CONDITION_IN_PARENS
+    };
+
+    p.expect(T![')']);
+    Present(branch.complete(p, kind))
+}
+
+/// Parses interpolation before the following token decides whether it is a
+/// property name or a condition.
+///
+/// ```scss
+/// @supports (#{$property}: grid) {}
+/// @supports (#{$condition} and (color: red)) {}
+/// ```
+#[inline]
+fn parse_scss_interpolated_supports_head(p: &mut CssParser) -> ParsedSyntax {
+    // Bare interpolation must keep its value shape until `:` selects a name.
+    // Other heads use the property parser to preserve dashed custom properties.
+    let head = if is_at_scss_interpolation(p) {
+        parse_scss_interpolation_or_identifier(p)
+    } else {
+        parse_scss_interpolated_property_name(p)
+    };
+    let Present(head) = head else {
+        return Absent;
+    };
+
+    if head.kind(p) != SCSS_INTERPOLATION {
+        return Present(head);
+    }
+
+    if p.at(T![:]) {
+        Present(complete_scss_interpolated_identifier(p, head))
+    } else {
+        Present(
+            head.precede(p)
+                .complete(p, SCSS_SUPPORTS_INTERPOLATED_CONDITION),
+        )
+    }
 }
 
 #[inline]
@@ -326,6 +454,36 @@ fn parse_supports_feature_declaration(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
+fn is_at_scss_supports_feature_declaration(p: &mut CssParser) -> bool {
+    p.at(T!['(']) && p.nth_at(1, T![$]) && is_nth_at_identifier(p, 2)
+}
+
+#[inline]
+fn parse_scss_supports_feature_declaration(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_scss_supports_feature_declaration(p) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    p.bump(T!['(']);
+    // The entry predicate already matched `$` followed by an identifier.
+    parse_scss_variable(p).ok();
+    p.expect(T![:]);
+    parse_property_value_with_end_set(
+        p,
+        false,
+        false,
+        END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET.union(token_set![T!['{']]),
+        END_OF_PROPERTY_VALUE_TOKEN_SET,
+    );
+    parse_declaration_important(p).ok();
+    p.expect(T![')']);
+
+    Present(m.complete(p, SCSS_SUPPORTS_FEATURE_DECLARATION))
+}
+
+#[inline]
 pub(crate) fn is_at_supports_property(p: &mut CssParser) -> bool {
     is_at_generic_property(p)
 }
@@ -336,32 +494,85 @@ pub(crate) fn parse_supports_declaration(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    let m = p.start();
-    parse_supports_generic_property(p).ok();
-    parse_declaration_important(p).ok();
-    Present(m.complete(p, CSS_DECLARATION))
+    let is_legacy_ie_filter_property = is_at_legacy_ie_filter_property(p);
+    let Some(name) = parse_generic_property_name(p).ok() else {
+        return Absent;
+    };
+
+    Present(complete_supports_declaration_from_name(
+        p,
+        name,
+        is_legacy_ie_filter_property,
+    ))
 }
 
-#[inline]
-fn parse_supports_generic_property(p: &mut CssParser) -> ParsedSyntax {
-    let m = p.start();
+fn complete_supports_declaration_from_name(
+    p: &mut CssParser,
+    name: CompletedMarker,
+    is_legacy_ie_filter_property: bool,
+) -> CompletedMarker {
+    let property = parse_supports_generic_property_from_name(p, name, is_legacy_ie_filter_property);
+    let declaration = property.precede(p);
+    parse_declaration_important(p).ok();
+    declaration.complete(p, CSS_DECLARATION)
+}
 
-    parse_generic_property_name(p).ok();
+fn parse_supports_generic_property_from_name(
+    p: &mut CssParser,
+    name: CompletedMarker,
+    is_legacy_ie_filter_property: bool,
+) -> CompletedMarker {
+    let is_custom_property = matches!(
+        name.kind(p),
+        CSS_DASHED_IDENTIFIER | SCSS_INTERPOLATED_DASHED_IDENTIFIER
+    );
+    let property = name.precede(p);
 
-    p.expect(T![:]);
-    parse_supports_property_value(p);
+    let is_scss_custom_property = CssSyntaxFeatures::Scss.is_supported(p) && is_custom_property;
+    let has_colon = if is_scss_custom_property {
+        p.expect_with_context(
+            T![:],
+            CssLexContext::CustomPropertyValue(CssCustomPropertyCommentMode::ScssLineComments),
+        )
+    } else {
+        p.expect(T![:])
+    };
+    let is_legacy_filter_value = !CssSyntaxFeatures::Scss.is_supported(p)
+        && is_legacy_ie_filter_property
+        && is_at_legacy_ie_filter_value(p);
+    let value = parse_supports_property_value(p, is_scss_custom_property, is_legacy_filter_value);
 
-    Present(m.complete(p, CSS_GENERIC_PROPERTY))
+    if has_colon
+        && is_scss_custom_property
+        && value.range(p).is_empty()
+        && !p.source().has_preceding_block_comment()
+    {
+        p.error(expected_component_value(p, p.cur_range()));
+    }
+
+    property.complete(p, CSS_GENERIC_PROPERTY)
 }
 
 const END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET: TokenSet<CssSyntaxKind> =
     token_set!(T!['}'], T![;], T![')'], T![!]);
 
+/// Parses a supports-declaration value, including raw custom-property values
+/// such as `$gap` in `@supports (--space: $gap) {}`.
 #[inline]
-fn parse_supports_property_value(p: &mut CssParser) {
-    parse_property_value_with_end_set(
-        p,
-        END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET,
-        END_OF_PROPERTY_VALUE_TOKEN_SET,
-    );
+fn parse_supports_property_value(
+    p: &mut CssParser,
+    is_scss_custom_property: bool,
+    is_legacy_filter_value: bool,
+) -> CompletedMarker {
+    if is_scss_custom_property {
+        parse_supports_custom_property_value(p, END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET)
+    } else {
+        parse_property_value_with_end_set(
+            p,
+            false,
+            is_legacy_filter_value,
+            END_OF_SUPPORTS_PROPERTY_VALUE_TOKEN_SET,
+            END_OF_PROPERTY_VALUE_TOKEN_SET,
+        )
+    }
 }

@@ -29,4 +29,13 @@ impl FormatNodeRule<SvelteAwaitCatchBlock> for FormatSvelteAwaitCatchBlock {
 
         write!(f, [hard_line_break()])
     }
+
+    fn fmt_leading_comments(
+        &self,
+        _node: &SvelteAwaitCatchBlock,
+        _f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        // handled by element list formatter
+        Ok(())
+    }
 }

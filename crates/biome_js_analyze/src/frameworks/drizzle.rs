@@ -20,8 +20,7 @@ pub(crate) fn has_where_in_chain(node: &SyntaxNode<biome_js_syntax::JsLanguage>)
             && let Some(name) = member.as_js_name()
             && name
                 .value_token()
-                .ok()
-                .is_some_and(|t| t.token_text_trimmed() == "where")
+                .is_ok_and(|t| t.token_text_trimmed() == "where")
         {
             // Only count `.where(...)` as a where clause, not bare `.where` property access.
             let is_called = parent

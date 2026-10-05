@@ -1,0 +1,97 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/value/release-if-routing-legacy.scss
+---
+
+# Input
+
+```scss
+$name: "icon";
+$condition: "(display: grid)";
+$args:(true,red,blue);
+.legacy{
+ named:if( $condition:true ,$if-true:red ,$if-false:blue );
+ spread:if( $args... /* end */ );
+ uppercase:IF( true ,red,blue );
+ mixed-case:If( true ,red,blue );
+ escaped:\69 f( true ,red,blue );
+ escaped-uppercase:\49 F( true ,red,blue );
+ empty:if( /* empty */ );
+ url-call:url(if( true ,"dark.png" ,"light.png" ));
+ string:if( ("#{if(true, '),:;', ':')}" == ':') , red,blue );
+ url:if( (url(//cdn.example/a,b:c.png)) ,red,blue );
+ interpolation:if( (url(images/#{$name}.png)) ,red,blue );
+ mixed:if( true ,if( sass(true):red;else:blue ),blue );
+ comments:if( /* before */ not /* condition */ false /* after */ , /* first */ red ,blue );
+ raw:if( not url(https://example.com/a[b:c,d) ,red,blue );
+ quotes:if( not "#{if(false, ")", ":,")}" ,red,blue );
+ map:if( (a:b) ,red,blue );
+ spaced-url:if(not url (true and ")"),red ,blue );
+ commented-src:if(not src/**/(true and ")"),red ,blue );
+ media:if(media(#{$condition}), red, blue);
+ supports:if(supports(#{$condition}), red, blue);
+}
+
+$formats: null;
+$isVariable: false;
+.fontsource{ formats:if(not $formats or $formats == all ,if($isVariable ,woff2 ,(woff2 ,woff)) ,$formats); }
+$media-width: 12rem;
+.richie{ direction:if(($media-width and $media-width > 0) ,'horizontal' ,'vertical'); }
+
+```
+
+
+# Formatted
+
+```scss
+$name: "icon";
+$condition: "(display: grid)";
+$args: (true, red, blue);
+.legacy {
+	named: if($condition: true, $if-true: red, $if-false: blue);
+	spread: if($args... /* end */);
+	uppercase: IF(true, red, blue);
+	mixed-case: If(true, red, blue);
+	escaped: \69 f(true, red, blue);
+	escaped-uppercase: \49 F(true, red, blue);
+	empty: if(/* empty */);
+	url-call: url(if(true, "dark.png", "light.png"));
+	string: if(("#{if(true, '),:;', ':')}" == ":"), red, blue);
+	url: if((url(//cdn.example/a,b:c.png)), red, blue);
+	interpolation: if((url(images/#{$name}.png)), red, blue);
+	mixed: if(true, if(sass(true): red; else: blue), blue);
+	comments: if(
+		/* before */ not /* condition */ false /* after */,
+		/* first */ red,
+		blue
+	);
+	raw: if(not url(https://example.com/a[b:c,d), red, blue);
+	quotes: if(not "#{if(false, ")", ":,")}", red, blue);
+	map: if(
+		(
+			a: b,
+		),
+		red,
+		blue
+	);
+	spaced-url: if(not url (true and ")"), red, blue);
+	commented-src: if(not src /**/ (true and ")"), red, blue);
+	media: if(media(#{$condition}), red, blue);
+	supports: if(supports(#{$condition}), red, blue);
+}
+
+$formats: null;
+$isVariable: false;
+.fontsource {
+	formats: if(
+		not $formats or $formats == all,
+		if($isVariable, woff2, (woff2, woff)),
+		$formats
+	);
+}
+$media-width: 12rem;
+.richie {
+	direction: if(($media-width and $media-width > 0), "horizontal", "vertical");
+}
+
+```

@@ -1,0 +1,387 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```vue
+<template>
+	<div class="a">markup</div>
+</template>
+
+<template lang="pug">
+	.test
+		#foo
+</template>
+
+<docs>
+This block is prose, and it may mention a `<my-component>` without closing it.
+</docs>
+
+<i18n>
+{ "en": { "hello": "Hello" } }
+</i18n>
+
+<custom lang="javascript">
+const foo = "</"
+</custom>
+
+<div>
+	This is custom, not a div.
+</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: TEMPLATE_KW@1..9 "template" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@9..10 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@10..13 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlTagName {
+                            value_token: DIV_KW@13..17 "div" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            HtmlAttribute {
+                                name: HtmlAttributeName {
+                                    value_token: HTML_LITERAL@17..22 "class" [] [],
+                                },
+                                initializer: HtmlAttributeInitializerClause {
+                                    eq_token: EQ@22..23 "=" [] [],
+                                    value: HtmlString {
+                                        value_token: HTML_STRING_LITERAL@23..26 "\"a\"" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@26..27 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlContent {
+                            value_token: HTML_LITERAL@27..33 "markup" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@33..34 "<" [] [],
+                        slash_token: SLASH@34..35 "/" [] [],
+                        name: HtmlTagName {
+                            value_token: DIV_KW@35..38 "div" [] [],
+                        },
+                        r_angle_token: R_ANGLE@38..39 ">" [] [],
+                    },
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@39..41 "<" [Newline("\n")] [],
+                slash_token: SLASH@41..42 "/" [] [],
+                name: HtmlTagName {
+                    value_token: TEMPLATE_KW@42..50 "template" [] [],
+                },
+                r_angle_token: R_ANGLE@50..51 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@51..54 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: TEMPLATE_KW@54..63 "template" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@63..67 "lang" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@67..68 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@68..73 "\"pug\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@73..74 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlEmbeddedContent {
+                    value_token: HTML_LITERAL@74..89 "\n\t.test\n\t\t#foo\n" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@89..90 "<" [] [],
+                slash_token: SLASH@90..91 "/" [] [],
+                name: HtmlTagName {
+                    value_token: TEMPLATE_KW@91..99 "template" [] [],
+                },
+                r_angle_token: R_ANGLE@99..100 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@100..103 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_UNKNOWN_TAG@103..107 "docs" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@107..108 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlEmbeddedContent {
+                    value_token: HTML_LITERAL@108..188 "\nThis block is prose, and it may mention a `<my-component>` without closing it.\n" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@188..189 "<" [] [],
+                slash_token: SLASH@189..190 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_UNKNOWN_TAG@190..194 "docs" [] [],
+                },
+                r_angle_token: R_ANGLE@194..195 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@195..198 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_UNKNOWN_TAG@198..202 "i18n" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@202..203 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlEmbeddedContent {
+                    value_token: HTML_LITERAL@203..235 "\n{ \"en\": { \"hello\": \"Hello\" } }\n" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@235..236 "<" [] [],
+                slash_token: SLASH@236..237 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_UNKNOWN_TAG@237..241 "i18n" [] [],
+                },
+                r_angle_token: R_ANGLE@241..242 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@242..245 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: HTML_UNKNOWN_TAG@245..252 "custom" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@252..256 "lang" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@256..257 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@257..269 "\"javascript\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@269..270 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlEmbeddedContent {
+                    value_token: HTML_LITERAL@270..288 "\nconst foo = \"</\"\n" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@288..289 "<" [] [],
+                slash_token: SLASH@289..290 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_UNKNOWN_TAG@290..296 "custom" [] [],
+                },
+                r_angle_token: R_ANGLE@296..297 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@297..300 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@300..303 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@303..304 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlEmbeddedContent {
+                    value_token: HTML_LITERAL@304..333 "\n\tThis is custom, not a div.\n" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@333..334 "<" [] [],
+                slash_token: SLASH@334..335 "/" [] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@335..338 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@338..339 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@339..340 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..340
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..339
+    0: HTML_ELEMENT@0..51
+      0: HTML_OPENING_ELEMENT@0..10
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..9
+          0: TEMPLATE_KW@1..9 "template" [] []
+        2: HTML_ATTRIBUTE_LIST@9..9
+        3: R_ANGLE@9..10 ">" [] []
+      1: HTML_ELEMENT_LIST@10..39
+        0: HTML_ELEMENT@10..39
+          0: HTML_OPENING_ELEMENT@10..27
+            0: L_ANGLE@10..13 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_TAG_NAME@13..17
+              0: DIV_KW@13..17 "div" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@17..26
+              0: HTML_ATTRIBUTE@17..26
+                0: HTML_ATTRIBUTE_NAME@17..22
+                  0: HTML_LITERAL@17..22 "class" [] []
+                1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@22..26
+                  0: EQ@22..23 "=" [] []
+                  1: HTML_STRING@23..26
+                    0: HTML_STRING_LITERAL@23..26 "\"a\"" [] []
+            3: R_ANGLE@26..27 ">" [] []
+          1: HTML_ELEMENT_LIST@27..33
+            0: HTML_CONTENT@27..33
+              0: HTML_LITERAL@27..33 "markup" [] []
+          2: HTML_CLOSING_ELEMENT@33..39
+            0: L_ANGLE@33..34 "<" [] []
+            1: SLASH@34..35 "/" [] []
+            2: HTML_TAG_NAME@35..38
+              0: DIV_KW@35..38 "div" [] []
+            3: R_ANGLE@38..39 ">" [] []
+      2: HTML_CLOSING_ELEMENT@39..51
+        0: L_ANGLE@39..41 "<" [Newline("\n")] []
+        1: SLASH@41..42 "/" [] []
+        2: HTML_TAG_NAME@42..50
+          0: TEMPLATE_KW@42..50 "template" [] []
+        3: R_ANGLE@50..51 ">" [] []
+    1: HTML_ELEMENT@51..100
+      0: HTML_OPENING_ELEMENT@51..74
+        0: L_ANGLE@51..54 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@54..63
+          0: TEMPLATE_KW@54..63 "template" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@63..73
+          0: HTML_ATTRIBUTE@63..73
+            0: HTML_ATTRIBUTE_NAME@63..67
+              0: HTML_LITERAL@63..67 "lang" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@67..73
+              0: EQ@67..68 "=" [] []
+              1: HTML_STRING@68..73
+                0: HTML_STRING_LITERAL@68..73 "\"pug\"" [] []
+        3: R_ANGLE@73..74 ">" [] []
+      1: HTML_ELEMENT_LIST@74..89
+        0: HTML_EMBEDDED_CONTENT@74..89
+          0: HTML_LITERAL@74..89 "\n\t.test\n\t\t#foo\n" [] []
+      2: HTML_CLOSING_ELEMENT@89..100
+        0: L_ANGLE@89..90 "<" [] []
+        1: SLASH@90..91 "/" [] []
+        2: HTML_TAG_NAME@91..99
+          0: TEMPLATE_KW@91..99 "template" [] []
+        3: R_ANGLE@99..100 ">" [] []
+    2: HTML_ELEMENT@100..195
+      0: HTML_OPENING_ELEMENT@100..108
+        0: L_ANGLE@100..103 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@103..107
+          0: HTML_UNKNOWN_TAG@103..107 "docs" [] []
+        2: HTML_ATTRIBUTE_LIST@107..107
+        3: R_ANGLE@107..108 ">" [] []
+      1: HTML_ELEMENT_LIST@108..188
+        0: HTML_EMBEDDED_CONTENT@108..188
+          0: HTML_LITERAL@108..188 "\nThis block is prose, and it may mention a `<my-component>` without closing it.\n" [] []
+      2: HTML_CLOSING_ELEMENT@188..195
+        0: L_ANGLE@188..189 "<" [] []
+        1: SLASH@189..190 "/" [] []
+        2: HTML_TAG_NAME@190..194
+          0: HTML_UNKNOWN_TAG@190..194 "docs" [] []
+        3: R_ANGLE@194..195 ">" [] []
+    3: HTML_ELEMENT@195..242
+      0: HTML_OPENING_ELEMENT@195..203
+        0: L_ANGLE@195..198 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@198..202
+          0: HTML_UNKNOWN_TAG@198..202 "i18n" [] []
+        2: HTML_ATTRIBUTE_LIST@202..202
+        3: R_ANGLE@202..203 ">" [] []
+      1: HTML_ELEMENT_LIST@203..235
+        0: HTML_EMBEDDED_CONTENT@203..235
+          0: HTML_LITERAL@203..235 "\n{ \"en\": { \"hello\": \"Hello\" } }\n" [] []
+      2: HTML_CLOSING_ELEMENT@235..242
+        0: L_ANGLE@235..236 "<" [] []
+        1: SLASH@236..237 "/" [] []
+        2: HTML_TAG_NAME@237..241
+          0: HTML_UNKNOWN_TAG@237..241 "i18n" [] []
+        3: R_ANGLE@241..242 ">" [] []
+    4: HTML_ELEMENT@242..297
+      0: HTML_OPENING_ELEMENT@242..270
+        0: L_ANGLE@242..245 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@245..252
+          0: HTML_UNKNOWN_TAG@245..252 "custom" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@252..269
+          0: HTML_ATTRIBUTE@252..269
+            0: HTML_ATTRIBUTE_NAME@252..256
+              0: HTML_LITERAL@252..256 "lang" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@256..269
+              0: EQ@256..257 "=" [] []
+              1: HTML_STRING@257..269
+                0: HTML_STRING_LITERAL@257..269 "\"javascript\"" [] []
+        3: R_ANGLE@269..270 ">" [] []
+      1: HTML_ELEMENT_LIST@270..288
+        0: HTML_EMBEDDED_CONTENT@270..288
+          0: HTML_LITERAL@270..288 "\nconst foo = \"</\"\n" [] []
+      2: HTML_CLOSING_ELEMENT@288..297
+        0: L_ANGLE@288..289 "<" [] []
+        1: SLASH@289..290 "/" [] []
+        2: HTML_TAG_NAME@290..296
+          0: HTML_UNKNOWN_TAG@290..296 "custom" [] []
+        3: R_ANGLE@296..297 ">" [] []
+    5: HTML_ELEMENT@297..339
+      0: HTML_OPENING_ELEMENT@297..304
+        0: L_ANGLE@297..300 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@300..303
+          0: DIV_KW@300..303 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@303..303
+        3: R_ANGLE@303..304 ">" [] []
+      1: HTML_ELEMENT_LIST@304..333
+        0: HTML_EMBEDDED_CONTENT@304..333
+          0: HTML_LITERAL@304..333 "\n\tThis is custom, not a div.\n" [] []
+      2: HTML_CLOSING_ELEMENT@333..339
+        0: L_ANGLE@333..334 "<" [] []
+        1: SLASH@334..335 "/" [] []
+        2: HTML_TAG_NAME@335..338
+          0: DIV_KW@335..338 "div" [] []
+        3: R_ANGLE@338..339 ">" [] []
+  5: EOF@339..340 "" [Newline("\n")] []
+
+```

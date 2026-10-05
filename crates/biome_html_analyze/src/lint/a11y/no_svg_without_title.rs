@@ -1,21 +1,22 @@
 use biome_analyze::{Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{AnyHtmlElement, HtmlAttribute, HtmlElementList};
-use biome_languages::HtmlFileSource;
+use biome_html_syntax::{AnyHtmlElement, HtmlAttribute, HtmlElementList, T};
 use biome_rowan::AstNode;
 use biome_rule_options::no_svg_without_title::NoSvgWithoutTitleOptions;
 
 use crate::Aria;
-use crate::{a11y::is_aria_hidden_true, utils::is_html_tag};
+use crate::a11y::is_aria_hidden_true;
 
 declare_lint_rule! {
-    /// Enforces the usage of the `title` element for the `svg` element.
+    /// Require a supported labeling pattern for non-decorative SVG elements.
     ///
-    /// It is not possible to specify the `alt` attribute for the `svg` as for the `img`.
-    /// To make svg accessible, the following methods are available:
-    /// - provide the `title` element as the first child to `svg`
-    /// - provide `role="img"` and `aria-label` or `aria-labelledby` to `svg`
+    /// An `<svg>` cannot use the `alt` attribute available to `<img>`. The rule accepts a non-empty
+    /// `<title>` as the first child. An SVG with an image role may instead have an `aria-label`
+    /// attribute, or an `aria-labelledby` value that matches a child element's `id`. The rule checks
+    /// that `aria-label` exists but does not check whether its value is empty.
+    ///
+    /// Decorative SVGs marked with `aria-hidden="true"` or `role="presentation"` are ignored.
     ///
     /// ## Examples
     ///
@@ -127,10 +128,8 @@ impl Rule for NoSvgWithoutTitle {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
-
         let tag_element = node.clone().as_any_html_tag_element()?;
-        if !is_html_tag(&tag_element, source_type, "svg") {
+        if tag_element.tag_name_kind() != Some(T![svg]) {
             return None;
         }
 

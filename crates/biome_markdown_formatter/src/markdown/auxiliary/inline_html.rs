@@ -4,6 +4,6 @@ use biome_markdown_syntax::MdInlineHtml;
 pub(crate) struct FormatMdInlineHtml;
 impl FormatNodeRule<MdInlineHtml> for FormatMdInlineHtml {
     fn fmt_fields(&self, node: &MdInlineHtml, f: &mut MarkdownFormatter) -> FormatResult<()> {
-        node.value().format().fmt(f)
+        node.value_token().format().fmt(f)
     }
 }

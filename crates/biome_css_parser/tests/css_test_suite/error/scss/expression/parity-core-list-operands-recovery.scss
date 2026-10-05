@@ -1,0 +1,5 @@
+$x: [not $];
+.after-not { color: blue; }
+
+$x: [foo + ];
+.after-binary { color: green; }

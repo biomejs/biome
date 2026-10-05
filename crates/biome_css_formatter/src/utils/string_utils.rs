@@ -16,37 +16,14 @@ use biome_string_case::StrLikeExtension;
 
 use crate::{AsFormat, CssFormatter, prelude::CssFormatContext};
 
-pub(crate) struct FormatTokenAsLowercase {
-    token: SyntaxToken<CssLanguage>,
-}
-
-impl From<SyntaxToken<CssLanguage>> for FormatTokenAsLowercase {
-    fn from(value: SyntaxToken<CssLanguage>) -> Self {
-        Self { token: value }
-    }
-}
-
-impl Format<CssFormatContext> for FormatTokenAsLowercase {
-    fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
-        let original = self.token.text_trimmed();
-        match original.to_ascii_lowercase_cow() {
-            Cow::Borrowed(_) => write!(f, [self.token.format()]),
-            Cow::Owned(lowercase) => write!(
-                f,
-                [format_replaced(
-                    &self.token,
-                    &text(&lowercase, Some(self.token.text_trimmed_range().start())),
-                )]
-            ),
-        }
-    }
-}
-
 #[derive(Eq, PartialEq, Debug)]
 pub(crate) enum StringLiteralParentKind {
     /// Variants to track tokens that are inside a CssCharsetRule
     /// @charset must always have double quotes: https://www.w3.org/TR/css-syntax-3/#determine-the-fallback-encoding
     CharsetAtRule,
+    /// Attribute values preserve escaped source newlines without expanding the
+    /// surrounding selector group.
+    AttributeMatcherValue,
     /// other types, will add more later
     Others,
 }
@@ -90,6 +67,10 @@ impl<'token> FormatLiteralStringToken<'token> {
         CleanedStringLiteralText {
             text: content,
             token,
+            literal_line_breaks: matches!(
+                self.parent_kind,
+                StringLiteralParentKind::AttributeMatcherValue
+            ),
         }
     }
 }
@@ -97,27 +78,33 @@ impl<'token> FormatLiteralStringToken<'token> {
 pub(crate) struct CleanedStringLiteralText<'a> {
     token: &'a CssSyntaxToken,
     text: Cow<'a, str>,
+    /// Whether embedded LF characters use non-propagating literal lines.
+    ///
+    /// Attribute matcher values enable this to preserve escaped newlines
+    /// without expanding the surrounding selector group.
+    literal_line_breaks: bool,
 }
 
-impl Format<CssFormatContext> for CleanedStringLiteralText<'_> {
-    fn fmt(&self, f: &mut Formatter<CssFormatContext>) -> FormatResult<()> {
-        format_replaced(
-            self.token,
-            &syntax_token_cow_slice(
-                self.text.clone(),
-                self.token,
-                self.token.text_trimmed_range().start(),
-            ),
-        )
-        .fmt(f)
+impl CleanedStringLiteralText<'_> {
+    fn fmt(self, f: &mut Formatter<CssFormatContext>) -> FormatResult<()> {
+        let Self {
+            token,
+            text,
+            literal_line_breaks,
+        } = self;
+        let text = syntax_token_cow_slice(text, token, token.text_trimmed_range().start());
+
+        if literal_line_breaks {
+            format_replaced(token, &text.with_literal_line_breaks()).fmt(f)
+        } else {
+            format_replaced(token, &text).fmt(f)
+        }
     }
 }
 
 impl Format<CssFormatContext> for FormatLiteralStringToken<'_> {
     fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
-        let cleaned = self.clean_text(f.options());
-
-        cleaned.fmt(f)
+        self.clean_text(f.options()).fmt(f)
     }
 }
 
@@ -239,7 +226,7 @@ impl<'token> LiteralStringNormaliser<'token> {
                 // However, Prettier preserve single quotes.
                 Cow::Borrowed(self.get_token().text_trimmed())
             }
-            StringLiteralParentKind::Others => {
+            StringLiteralParentKind::AttributeMatcherValue | StringLiteralParentKind::Others => {
                 let string_information = self
                     .token
                     .compute_string_information(self.chosen_quote_style);
@@ -309,18 +296,37 @@ impl<'token> LiteralStringNormaliser<'token> {
     }
 }
 
+/// Canonicalizes known CSS dimension units unless source casing is preserved.
 pub(crate) struct FormatDimensionUnit {
     token: SyntaxToken<CssLanguage>,
+    preserve_source_case: bool,
 }
 
 impl From<SyntaxToken<CssLanguage>> for FormatDimensionUnit {
     fn from(value: SyntaxToken<CssLanguage>) -> Self {
-        Self { token: value }
+        Self {
+            token: value,
+            preserve_source_case: false,
+        }
+    }
+}
+
+impl FormatDimensionUnit {
+    /// Preserves source-owned spelling, such as unknown units and `attr(data PX)`.
+    pub(crate) fn preserve_source_case(value: SyntaxToken<CssLanguage>) -> Self {
+        Self {
+            token: value,
+            preserve_source_case: true,
+        }
     }
 }
 
 impl Format<CssFormatContext> for FormatDimensionUnit {
     fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
+        if self.preserve_source_case {
+            return write!(f, [self.token.format()]);
+        }
+
         let original = self.token.text_trimmed();
 
         match original.to_ascii_lowercase_cow() {

@@ -7,14 +7,18 @@ use biome_aria_metadata::AriaAttribute;
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::{AnyHtmlAttribute, AnyVueDirective};
-use biome_rowan::{AstNode, BatchMutationExt, TokenText};
+use biome_rowan::{BatchMutationExt, TokenText};
 use biome_rule_options::use_valid_aria_props::UseValidAriaPropsOptions;
 use biome_string_case::StrLikeExtension;
 
 use crate::HtmlRuleAction;
 
 declare_lint_rule! {
-    /// Ensures that ARIA properties `aria-*` are all valid.
+    /// Disallow unknown `aria-*` attributes.
+    ///
+    /// ARIA (Accessible Rich Internet Applications) attributes describe an element to assistive
+    /// technologies. Browsers ignore misspelled or unknown ARIA attributes, so users may not
+    /// receive the intended name, state, or other accessibility information.
     ///
     /// ## Examples
     ///
@@ -109,8 +113,7 @@ fn extract_attribute_name(attr: &AnyHtmlAttribute) -> Option<TokenText> {
             AnyVueDirective::VueVBindShorthandDirective(d) => Some(
                 d.arg()
                     .ok()?
-                    .arg()
-                    .ok()?
+                    .arg()?
                     .as_vue_static_argument()?
                     .name_token()
                     .ok()?
@@ -122,8 +125,7 @@ fn extract_attribute_name(attr: &AnyHtmlAttribute) -> Option<TokenText> {
                 }
                 Some(
                     d.arg()?
-                        .arg()
-                        .ok()?
+                        .arg()?
                         .as_vue_static_argument()?
                         .name_token()
                         .ok()?

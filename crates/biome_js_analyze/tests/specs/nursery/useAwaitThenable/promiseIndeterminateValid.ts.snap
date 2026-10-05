@@ -1,0 +1,27 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: promiseIndeterminateValid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+declare const unknownValue: unknown;
+declare const anyValue: any;
+declare const poisoned: number | unknown;
+
+interface Cycle extends Cycle {}
+declare const cycle: Cycle;
+
+async function consume(): Promise<void> {
+	await unknownValue;
+	await anyValue;
+	await poisoned;
+	await cycle;
+}
+
+async function consumeGeneric<T>(value: T): Promise<void> {
+	await value;
+}
+
+```

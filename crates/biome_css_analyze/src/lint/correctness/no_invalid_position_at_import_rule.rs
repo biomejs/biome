@@ -8,9 +8,10 @@ use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_invalid_position_at_import_rule::NoInvalidPositionAtImportRuleOptions;
 
 declare_lint_rule! {
-    /// Disallow the use of `@import` at-rules in invalid positions.
+    /// Disallow `@import` after other rules.
     ///
-    /// Any `@import` rules must precede all other valid at-rules and style rules in a stylesheet (ignoring `@charset` and `@layer`), or else the `@import` rule is invalid.
+    /// An `@import` must appear before style rules and most at-rules. Only `@charset` and `@layer`
+    /// may appear before it. Browsers ignore an `@import` placed later in the stylesheet.
     ///
     /// ## Examples
     ///
@@ -34,7 +35,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("no-invalid-position-at-import-rule").same()],
+        sources: &[RuleSource::Stylelint("no-invalid-position-at-import-rule").same(), RuleSource::EslintCss("no-invalid-at-rule-placement").inspired()],
     }
 }
 

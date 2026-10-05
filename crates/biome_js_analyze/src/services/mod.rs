@@ -3,6 +3,7 @@ pub mod control_flow;
 pub mod database;
 pub mod embedded;
 pub mod manifest;
+pub mod react_compiler;
 pub mod semantic;
 pub mod semantic_class;
 pub mod turborepo;

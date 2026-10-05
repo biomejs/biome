@@ -17,6 +17,9 @@ use biome_console::{Console, MarkupBuf};
 use biome_deserialize::Merge;
 use biome_diagnostics::{Category, category};
 use biome_fs::FileSystem;
+use biome_module_graph::type_inference::profiling::{
+    TypeInferenceProfileSnapshot, TypeInferenceProfilerGuard,
+};
 use biome_service::configuration::ProjectScanComputer;
 use biome_service::workspace::{
     FeatureKind, FeatureName, FeaturesBuilder, FeaturesSupported, FixFileMode, ScanKind,
@@ -50,6 +53,7 @@ pub(crate) struct LintCommandPayload {
     pub(crate) json_parser: Option<JsonParserConfiguration>,
     pub(crate) css_parser: Option<CssParserConfiguration>,
     pub(crate) profile_rules: bool,
+    pub(crate) profile_type_inference: bool,
     pub(crate) watch: bool,
 }
 
@@ -78,6 +82,11 @@ struct LintExecution {
     suppression_reason: Option<String>,
     /// It skips parse errors
     skip_parse_errors: bool,
+
+    profile_rules: bool,
+
+    /// The type inference profiler
+    type_inference_profile: Option<TypeInferenceProfilerGuard>,
 }
 
 impl Execution for LintExecution {
@@ -153,6 +162,20 @@ impl Execution for LintExecution {
     fn is_lint(&self) -> bool {
         true
     }
+
+    fn is_rule_profiling_enabled(&self) -> bool {
+        self.profile_rules
+    }
+
+    fn is_type_inference_profiling_enabled(&self) -> bool {
+        self.type_inference_profile.is_some()
+    }
+
+    fn take_type_inference_profile(&self) -> Option<TypeInferenceProfileSnapshot> {
+        self.type_inference_profile
+            .as_ref()
+            .map(TypeInferenceProfilerGuard::drain)
+    }
 }
 
 impl TraversalCommand for LintCommandPayload {
@@ -184,6 +207,26 @@ impl TraversalCommand for LintCommandPayload {
             suppression_reason: self.suppression_reason.clone(),
         })?;
 
+        let type_inference_profile = if self.profile_type_inference {
+            if cli_options.use_server {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--profile-type-inference",
+                    "--use-server",
+                    "Type-inference profiling is available only for in-process CLI analysis.",
+                ));
+            }
+            if self.stdin_file_path.is_some() {
+                return Err(CliDiagnostic::incompatible_arguments(
+                    "--profile-type-inference",
+                    "--stdin-file-path",
+                    "Type-inference profiling requires files processed by the CLI traversal.",
+                ));
+            }
+
+            Some(TypeInferenceProfilerGuard::start())
+        } else {
+            None
+        };
         if self.profile_rules {
             biome_analyze::profiling::enable();
         }
@@ -197,6 +240,8 @@ impl TraversalCommand for LintCommandPayload {
             suppress: self.suppress,
             suppression_reason: self.suppression_reason.clone(),
             skip_parse_errors: cli_options.skip_parse_errors,
+            profile_rules: self.profile_rules,
+            type_inference_profile,
         }))
     }
 

@@ -1,5 +1,6 @@
+use crate::lexer::HtmlLexerOptions;
 use crate::token_source::{
-    HtmlLexContext, HtmlReLexContext, HtmlTokenSource, HtmlTokenSourceCheckpoint,
+    HtmlFramework, HtmlLexContext, HtmlReLexContext, HtmlTokenSource, HtmlTokenSourceCheckpoint,
     TextExpressionKind,
 };
 use biome_html_factory::HtmlSyntaxFactory;
@@ -23,9 +24,18 @@ pub(crate) struct HtmlParser<'source> {
 
 impl<'source> HtmlParser<'source> {
     pub fn new(source: &'source str, options: HtmlParserOptions) -> Self {
+        let framework = options.framework();
+        let lexer_options = HtmlLexerOptions {
+            framework,
+            text_expression: options.text_expression,
+        };
         Self {
             context: ParserContext::default(),
-            source: HtmlTokenSource::from_str(source),
+            source: HtmlTokenSource::from_str(
+                source,
+                HtmlLexContext::Regular { framework },
+                lexer_options,
+            ),
             options,
         }
     }
@@ -145,9 +155,24 @@ pub struct HtmlParserOptions {
     pub(crate) vue: bool,
     pub(crate) svelte: bool,
     pub(crate) is_html: bool,
+    pub(crate) angular: bool,
 }
 
 impl HtmlParserOptions {
+    pub(crate) fn framework(&self) -> HtmlFramework {
+        if self.vue {
+            HtmlFramework::Vue
+        } else if self.svelte {
+            HtmlFramework::Svelte
+        } else if self.frontmatter {
+            HtmlFramework::Astro
+        } else if self.angular {
+            HtmlFramework::Angular
+        } else {
+            HtmlFramework::Plain
+        }
+    }
+
     pub fn with_single_text_expression(mut self) -> Self {
         self.text_expression = Some(TextExpressionKind::Single);
         self
@@ -189,6 +214,15 @@ impl HtmlParserOptions {
         self
     }
 
+    pub fn set_angular(&mut self, value: bool) {
+        self.angular = value;
+    }
+
+    pub fn with_angular(mut self) -> Self {
+        self.angular = true;
+        self
+    }
+
     pub fn is_html(&self) -> bool {
         self.is_html
     }
@@ -216,6 +250,9 @@ impl From<&HtmlFileSource> for HtmlParserOptions {
             }
             HtmlVariant::Svelte => {
                 options = options.with_single_text_expression().with_svelte();
+            }
+            HtmlVariant::Angular => {
+                options = options.with_double_text_expression().with_angular();
             }
         }
 

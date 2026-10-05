@@ -14,25 +14,17 @@ use crate::services::semantic::Semantic;
 declare_lint_rule! {
     /// Disallow duplicate selectors.
     ///
-    /// This rule checks for duplicate selectors across a stylesheet. A duplicate
-    /// occurs when two rules have the same fully-resolved selector list (after
-    /// sorting for order-independence), within the same at-rule context.
+    /// Two rules are duplicates when their selectors target the same elements within the same
+    /// surrounding at-rules. The comparison treats equivalent spellings as equal:
     ///
-    /// Selectors are **normalized** before comparison so that equivalent selectors
-    /// written differently are still caught:
-    /// - Whitespace differences are ignored.
-    /// - HTML type selectors are compared case-insensitively (`DIV` == `div`).
-    /// - Compound selector parts are order-normalized, so `.a.b` and `.b.a` are
-    ///   considered equal.
-    /// - Selector list order is ignored: `.a, .b` and `.b, .a` are equal.
+    /// - whitespace differences are ignored;
+    /// - HTML element names are compared without case (`DIV` equals `div`);
+    /// - the order of combined parts is ignored (`.a.b` equals `.b.a`);
+    /// - the order of a selector list is ignored (`.a, .b` equals `.b, .a`).
     ///
-    /// CSS nesting is fully resolved before comparison:
-    /// `a { & b {} }` produces the resolved selector `a b`, which is compared
-    /// against all other resolved selectors in the same context.
-    ///
-    /// Selectors are only compared within the same at-rule context. A selector
-    /// inside `@media` is not considered a duplicate of the same selector at the
-    /// top level.
+    /// Nested selectors are expanded before comparison. For example, `a { & b {} }` is compared as
+    /// `a b`. A selector inside an at-rule such as `@media` is compared only with selectors inside
+    /// the same at-rule, not with a matching selector at the top level.
     ///
     /// ## Examples
     ///

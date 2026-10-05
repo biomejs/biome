@@ -19,22 +19,17 @@ use biome_string_case::comparable_token::ComparableToken;
 use crate::GraphqlRuleAction;
 
 declare_source_rule! {
-    /// Sort the members of an enum in natural order.
+    /// Sort GraphQL enum values in natural order.
     ///
-    /// Enforce a consistent natural sort order for GraphQL enum values.
-    ///
-    /// Keeping enum values sorted makes schema definitions easier to review and maintain,
-    /// especially as enums grow over time.
-    ///
-    /// Members are sorted in a [Natural order](https://en.wikipedia.org/wiki/Natural_sort_order),
-    /// meaning that uppercase letters come before lowercase letters (e.g. `A` < `a` < `B` < `b`)
-    /// and numbers are compared to their numerical value (e.g. `9` < `10`).
+    /// Natural order compares numbers by value, so `ROLE_9` comes before `ROLE_10`. It places
+    /// uppercase letters before lowercase letters when names otherwise match. Keeping values
+    /// sorted makes growing enums easier to scan and review.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```graphql,expect_diagnostic
+    /// ```graphql,expect_diff
     /// enum Role {
     ///   SUPER_ADMIN
     ///   ADMIN

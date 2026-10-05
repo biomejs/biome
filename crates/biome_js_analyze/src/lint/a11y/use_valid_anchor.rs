@@ -79,7 +79,11 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useValidAnchor",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("anchor-is-valid").same(), RuleSource::EslintQwik("jsx-a").same()],
+        sources: &[
+            RuleSource::EslintJsxA11y("anchor-is-valid").same(),
+            RuleSource::EslintQwik("jsx-a").same(),
+            RuleSource::EslintAstro("jsx-a11y/anchor-is-valid").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
     }
@@ -156,6 +160,10 @@ impl Rule for UseValidAnchor {
 
         if name.text_trimmed() == "a" {
             let anchor_attribute = node.find_attribute_by_name("href");
+            if anchor_attribute.is_none() && node.has_shorthand_attribute("href") {
+                return None;
+            }
+
             let on_click_attribute = node.find_attribute_by_name("onClick");
 
             match (anchor_attribute, on_click_attribute) {

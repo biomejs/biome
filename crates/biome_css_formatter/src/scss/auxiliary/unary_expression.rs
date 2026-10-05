@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use biome_css_syntax::{
-    AnyCssFunction, ScssParenthesizedExpression, ScssUnaryExpression, ScssUnaryExpressionFields, T,
-    is_in_scss_control_condition_sequence,
+    AnyCssValue, AnyScssExpression, CssSyntaxToken, ScssParenthesizedExpression,
+    ScssUnaryExpression, ScssUnaryExpressionFields, T, is_in_scss_control_condition_sequence,
 };
 use biome_formatter::write;
 
@@ -18,10 +18,6 @@ impl FormatNodeRule<ScssUnaryExpression> for FormatScssUnaryExpression {
 
         let is_parenthesized = ScssParenthesizedExpression::can_cast(expression.syntax().kind());
         let is_spaced_not_expression = matches!(operator.kind(), T![not]) && !is_parenthesized;
-        let is_source_spaced_minus_function = matches!(operator.kind(), T![-])
-            && AnyCssFunction::can_cast(expression.syntax().kind())
-            && operator.has_trailing_whitespace();
-
         if is_spaced_not_expression {
             let separator = format_with(|f| {
                 if is_in_scss_control_condition_sequence(node) {
@@ -31,12 +27,50 @@ impl FormatNodeRule<ScssUnaryExpression> for FormatScssUnaryExpression {
                 }
             });
 
-            write!(f, [operator.format(), separator, expression.format()])
-        } else if is_source_spaced_minus_function {
-            // Prettier keeps the source space in `- pow()`.
-            write!(f, [operator.format(), space(), expression.format()])
+            write!(
+                f,
+                [
+                    operator.format().with_text_case(CssCase::Preserve),
+                    separator,
+                    expression.format().with_text_case(CssCase::Preserve)
+                ]
+            )
+        } else if needs_space_after_minus(&operator, &expression) {
+            write!(
+                f,
+                [
+                    operator.format().with_text_case(CssCase::Preserve),
+                    space(),
+                    expression.format().with_text_case(CssCase::Preserve)
+                ]
+            )
         } else {
-            write!(f, [operator.format(), expression.format()])
+            write!(
+                f,
+                [
+                    operator.format().with_text_case(CssCase::Preserve),
+                    expression.format().with_text_case(CssCase::Preserve)
+                ]
+            )
         }
+    }
+}
+
+/// Keeps unary `-` separate from function names and module namespaces.
+fn needs_space_after_minus(operator: &CssSyntaxToken, expression: &AnyScssExpression) -> bool {
+    if operator.kind() != T![-] {
+        return false;
+    }
+
+    match expression.as_any_css_value() {
+        Some(AnyCssValue::ScssModuleMemberAccess(_)) => true,
+        Some(AnyCssValue::ScssInterpolatedValue(value)) => value
+            .items()
+            .first()
+            .is_some_and(|part| part.as_scss_namespaced_variable().is_some()),
+        Some(AnyCssValue::AnyCssFunction(function)) => {
+            operator.text_trimmed_range().end() < function.syntax().text_trimmed_range().start()
+        }
+        _ => false,
     }
 }

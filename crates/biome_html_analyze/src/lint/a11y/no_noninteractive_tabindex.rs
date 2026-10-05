@@ -5,17 +5,20 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::AnyHtmlAttribute;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
-use biome_rowan::{AstNode, BatchMutationExt, TextRange, TokenText};
+use biome_rowan::{BatchMutationExt, TextRange, TokenText};
 use biome_rule_options::no_noninteractive_tabindex::NoNoninteractiveTabindexOptions;
 
 use crate::{Aria, HtmlRuleAction};
 
 declare_lint_rule! {
-    /// Enforce that `tabindex` is not assigned to non-interactive HTML elements.
+    /// Require a negative integer `tabindex` on non-interactive elements.
     ///
-    /// When using the tab key to navigate a webpage, limit it to interactive elements.
-    /// You don't need to add tabindex to items in an unordered list as assistive technology can navigate through the HTML.
-    /// Keep the tab ring small, which is the order of elements when tabbing, for a more efficient and accessible browsing experience.
+    /// Pressing Tab moves keyboard focus through interactive controls. Adding a non-interactive
+    /// element to that order creates a keyboard stop with no expected action and can confuse users.
+    /// Assistive technologies can navigate structural content without adding it to the tab order.
+    ///
+    /// For a static value, only a negative integer is accepted. Zero, positive integers, empty
+    /// values, and other text are reported. Dynamic values are not evaluated.
     ///
     /// ## Examples
     ///

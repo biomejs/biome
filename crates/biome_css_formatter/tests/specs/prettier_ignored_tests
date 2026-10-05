@@ -5,6 +5,7 @@
 # YAML/custom front matter (not CSS syntax)
 css/front-matter/
 css/yaml/
+scss/yaml/
 
 # PostCSS-specific syntax (mixins, variable interpolation, nesting props)
 css/postcss-plugins/

@@ -17,9 +17,9 @@ impl FormatNodeRule<ScssFunctionAtRule> for FormatScssFunctionAtRule {
         write!(
             f,
             [
-                function_token.format(),
+                function_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
-                name.format(),
+                name?.format().with_text_case(CssCase::Preserve),
                 parameters.format(),
                 space(),
                 block.format()

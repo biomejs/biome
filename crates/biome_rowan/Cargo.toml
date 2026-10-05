@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_rowan"
-version              = "0.5.7"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Biome's custom Rowan definition"
@@ -9,6 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+include              = ["LICENSE-*", "src/**/*"]
 publish              = true
 
 [[bench]]

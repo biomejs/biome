@@ -1,0 +1,52 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/region-markers.svelte
+---
+
+# Input
+
+```svelte
+<!-- #region STYLES -->
+<style></style>
+<!-- #endregion -->
+
+<!-- #region MARKUP -->
+<body></body>
+
+<!-- #endregion -->
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,8 +1,8 @@
++<!-- #region STYLES -->
++<style></style>
++<!-- #endregion -->
++
+ <!-- #region MARKUP -->
+ <body></body>
+ 
+-<!-- #endregion -->
+-
+-<!-- #region STYLES -->
+-<style></style>
+ <!-- #endregion -->
+```
+
+# Output
+
+```svelte
+<!-- #region STYLES -->
+<style></style>
+<!-- #endregion -->
+
+<!-- #region MARKUP -->
+<body></body>
+
+<!-- #endregion -->
+```

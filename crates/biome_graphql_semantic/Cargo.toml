@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_graphql_semantic"
-version              = "0.0.0"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Biome's semantic model for GraphQL"
@@ -9,6 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+include              = ["!**/tests/**/*", "src/**/*"]
 publish              = true
 
 [dependencies]

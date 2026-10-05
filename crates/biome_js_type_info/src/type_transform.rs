@@ -1,0 +1,898 @@
+//! Bounded transformations of interned types.
+//!
+//! Each [`TypeData`] value exposes its immediate type-valued fields as slots.
+//! Transformations visit those slots iteratively and rebuild their parent after
+//! the nested types have been transformed. The traversal remains private;
+//! callers use semantic operations such as generic substitution.
+
+use crate::TypeOperator;
+use crate::interned_types::{TypeData, TypeDataSlotRebuilder, TypeDb};
+use crate::type_operations::{indexed_access, keyof, mapped_type};
+use rustc_hash::FxHashSet;
+
+pub(crate) const MAX_TYPE_SUBSTITUTION_STEPS: usize = 1024;
+const MAX_TYPE_NORMALIZATION_STEPS: usize = 1024;
+
+/// A generic type and the type that replaces its references.
+///
+/// Substitution does not cross a declaration that shadows the same generic.
+/// For example, substituting the outer `T` with `string` changes `value`, but
+/// preserves the `T` declared by `map`:
+///
+/// ```ts
+/// type Container<T> = {
+///     value: T;
+///     map: <T>(value: T) => T;
+/// };
+///
+/// type Substituted = {
+///     value: string;
+///     map: <T>(value: T) => T;
+/// };
+/// ```
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
+pub struct TypeSubstitution<'db> {
+    /// Type to replace.
+    pub generic: TypeData<'db>,
+    /// Replacement type.
+    pub replacement: TypeData<'db>,
+}
+
+impl<'db> TypeSubstitution<'db> {
+    /// Returns the generic whose redeclaration shadows this substitution.
+    ///
+    /// A substitution replaces references to a pattern, such as `T` or
+    /// `T[K]`. Inside a nested declaration that declares the same generic
+    /// again, the references belong to the nested generic, so the substitution
+    /// must not apply there. The returned generic is the one to look for in
+    /// those declarations:
+    ///
+    /// - For `T`, or an instance of `T` without type arguments, it is `T`.
+    /// - For an indexed access `T[K]`, it is the index `K`.
+    ///
+    /// In this example, evaluating `Outer` replaces `Source[K]` with the type
+    /// of each property of `Source`. The nested mapped type declares its own
+    /// `K`, so its `Source[K]` refers to the inner `K`. That access is left
+    /// for the nested mapped type to evaluate:
+    ///
+    /// ```ts
+    /// type Source = { a: number; b: string };
+    /// type Outer = {
+    ///     [K in keyof Source]: {
+    ///         value: Source[K];
+    ///         nested: { [K in keyof Source]: Source[K] };
+    ///     };
+    /// };
+    /// ```
+    fn binder_generic(self, db: &'db dyn TypeDb) -> TypeData<'db> {
+        let generic = match self.generic {
+            TypeData::IndexedAccess(access) => access.index(db),
+            generic => generic,
+        };
+        if let TypeData::InstanceOf(instance) = generic
+            && instance.type_parameters(db).is_empty()
+            && matches!(instance.ty(db), TypeData::Generic(_))
+        {
+            instance.ty(db)
+        } else {
+            generic
+        }
+    }
+}
+
+/// Failure produced by a bounded type transformation.
+///
+/// [`TypeTransformResult`] retains these cases as variants for direct matching;
+/// [`TypeTransformResult::into_result`] converts them to this error type.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum TypeTransformError {
+    /// The transformation exceeded its step limit.
+    StepLimitExceeded,
+    /// The replacements did not match the extracted slots.
+    InvalidRebuild,
+}
+
+impl std::fmt::Display for TypeTransformError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            Self::StepLimitExceeded => "type transformation exceeded its step limit",
+            Self::InvalidRebuild => "replacement types could not rebuild their parent",
+        })
+    }
+}
+
+impl std::error::Error for TypeTransformError {}
+
+/// Result of transforming a type and its nested slots.
+///
+/// A transformed value is returned only after every visited parent has been
+/// rebuilt. The failure variants distinguish an exhausted traversal budget
+/// from disagreement between slot extraction and reconstruction.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[must_use = "a type transformation failure must be handled"]
+pub enum TypeTransformResult<T> {
+    /// Every required type was transformed.
+    Transformed(T),
+    /// The transformation exceeded its step limit.
+    LimitExceeded,
+    /// The replacements did not match the extracted slots.
+    InvalidRebuild,
+}
+
+impl<T> TypeTransformResult<T> {
+    /// Applies `map` to a transformed value while preserving failures.
+    pub fn map<U>(self, map: impl FnOnce(T) -> U) -> TypeTransformResult<U> {
+        match self {
+            Self::Transformed(value) => TypeTransformResult::Transformed(map(value)),
+            Self::LimitExceeded => TypeTransformResult::LimitExceeded,
+            Self::InvalidRebuild => TypeTransformResult::InvalidRebuild,
+        }
+    }
+
+    /// Applies `map` to the transformed value, or returns `default` on failure.
+    pub fn map_or<U>(self, default: U, map: impl FnOnce(T) -> U) -> U {
+        match self {
+            Self::Transformed(value) => map(value),
+            Self::LimitExceeded | Self::InvalidRebuild => default,
+        }
+    }
+
+    /// Applies `map` to the transformed value, or computes a fallback on failure.
+    pub fn map_or_else<U>(self, default: impl FnOnce() -> U, map: impl FnOnce(T) -> U) -> U {
+        match self {
+            Self::Transformed(value) => map(value),
+            Self::LimitExceeded | Self::InvalidRebuild => default(),
+        }
+    }
+
+    /// Returns the transformed value.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the transformation failed.
+    pub fn unwrap(self) -> T {
+        self.expect("type transformation failed")
+    }
+
+    /// Returns the transformed value using `message` if the transformation failed.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the transformation failed.
+    pub fn expect(self, message: &str) -> T {
+        match self {
+            Self::Transformed(value) => value,
+            Self::LimitExceeded => panic!("{message}: step limit exceeded"),
+            Self::InvalidRebuild => panic!("{message}: invalid slot reconstruction"),
+        }
+    }
+
+    /// Returns whether every required type was transformed.
+    pub const fn is_transformed(&self) -> bool {
+        matches!(self, Self::Transformed(_))
+    }
+
+    /// Converts this domain-specific result into a standard [`Result`].
+    pub fn into_result(self) -> Result<T, TypeTransformError> {
+        match self {
+            Self::Transformed(value) => Ok(value),
+            Self::LimitExceeded => Err(TypeTransformError::StepLimitExceeded),
+            Self::InvalidRebuild => Err(TypeTransformError::InvalidRebuild),
+        }
+    }
+}
+
+impl<T> From<Result<T, TypeTransformError>> for TypeTransformResult<T> {
+    fn from(result: Result<T, TypeTransformError>) -> Self {
+        match result {
+            Ok(value) => Self::Transformed(value),
+            Err(TypeTransformError::StepLimitExceeded) => Self::LimitExceeded,
+            Err(TypeTransformError::InvalidRebuild) => Self::InvalidRebuild,
+        }
+    }
+}
+
+enum TypeTransformEvent<'db> {
+    Enter(TypeData<'db>),
+    Rebuild {
+        rebuilder: TypeDataSlotRebuilder<'db>,
+    },
+    Exit {
+        source: TypeData<'db>,
+        transformed: TypeData<'db>,
+    },
+}
+
+pub(crate) enum TypeTransformAction<'db> {
+    Descend(TypeData<'db>),
+    Replace(TypeData<'db>),
+}
+
+pub(crate) trait TypeTransform<'db> {
+    /// Chooses whether to visit a type's slots or replace the type directly.
+    fn enter(&mut self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeTransformAction<'db>;
+
+    /// Transforms a type after its slots have been transformed.
+    fn leave(&mut self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeData<'db>;
+}
+
+pub(crate) struct TypeDataTransformer {
+    remaining_steps: usize,
+}
+
+impl TypeDataTransformer {
+    pub(crate) fn new(max_steps: usize) -> Self {
+        Self {
+            remaining_steps: max_steps,
+        }
+    }
+
+    /// Transforms `root` and its nested slots.
+    ///
+    /// Each visited type consumes one step. Reusing this transformer shares the
+    /// remaining steps across roots. A type already being transformed is reused
+    /// without consuming another step.
+    ///
+    /// Slot extraction and reconstruction must agree on slot count and order.
+    pub(crate) fn transform<'db>(
+        &mut self,
+        root: TypeData<'db>,
+        db: &'db dyn TypeDb,
+        operation: &mut impl TypeTransform<'db>,
+    ) -> TypeTransformResult<TypeData<'db>> {
+        let mut stack = Vec::from([TypeTransformEvent::Enter(root)]);
+        let mut results = Vec::new();
+        let mut active = FxHashSet::default();
+
+        while let Some(event) = stack.pop() {
+            match event {
+                TypeTransformEvent::Enter(source) => {
+                    if active.contains(&source) {
+                        results.push(source);
+                        continue;
+                    }
+                    if self.remaining_steps == 0 {
+                        return TypeTransformResult::LimitExceeded;
+                    }
+                    self.remaining_steps -= 1;
+
+                    let transformed = match operation.enter(db, source) {
+                        TypeTransformAction::Replace(transformed) => {
+                            results.push(transformed);
+                            continue;
+                        }
+                        TypeTransformAction::Descend(transformed) => transformed,
+                    };
+                    let slots = transformed.type_slots(db);
+                    let slot_count = slots.len();
+                    if slot_count == 0 {
+                        results.push(operation.leave(db, transformed));
+                        continue;
+                    }
+
+                    active.insert(source);
+                    active.insert(transformed);
+                    let queued_entries = stack
+                        .iter()
+                        .filter(|event| matches!(event, TypeTransformEvent::Enter(_)))
+                        .count();
+                    let available_steps = self.remaining_steps.saturating_sub(queued_entries);
+                    let new_types = slots.iter().filter(|ty| !active.contains(ty)).count();
+                    if new_types > available_steps {
+                        return TypeTransformResult::LimitExceeded;
+                    }
+
+                    let rebuilder = slots.into_rebuilder();
+                    stack.push(TypeTransformEvent::Exit {
+                        source,
+                        transformed,
+                    });
+                    let rebuild_index = stack.len();
+                    stack.extend(
+                        rebuilder
+                            .slots()
+                            .iter()
+                            .rev()
+                            .copied()
+                            .map(TypeTransformEvent::Enter),
+                    );
+                    // The rebuild runs after every slot has been transformed.
+                    stack.insert(rebuild_index, TypeTransformEvent::Rebuild { rebuilder });
+                }
+                TypeTransformEvent::Rebuild { rebuilder } => {
+                    let slot_count = rebuilder.len();
+                    let Some(start) = results.len().checked_sub(slot_count) else {
+                        return TypeTransformResult::InvalidRebuild;
+                    };
+                    let replacements = results.split_off(start);
+                    match rebuilder.rebuild_if_changed(db, replacements) {
+                        TypeTransformResult::Transformed(rebuilt) => {
+                            results.push(operation.leave(db, rebuilt));
+                        }
+                        TypeTransformResult::LimitExceeded => {
+                            return TypeTransformResult::LimitExceeded;
+                        }
+                        TypeTransformResult::InvalidRebuild => {
+                            return TypeTransformResult::InvalidRebuild;
+                        }
+                    }
+                }
+                TypeTransformEvent::Exit {
+                    source,
+                    transformed,
+                } => {
+                    active.remove(&source);
+                    active.remove(&transformed);
+                }
+            }
+        }
+
+        match results.as_slice() {
+            [result] => TypeTransformResult::Transformed(*result),
+            _ => TypeTransformResult::InvalidRebuild,
+        }
+    }
+}
+
+/// Replaces generic references using several substitutions at once.
+///
+/// Replacements are inserted as they are and never visited again, so the
+/// substitutions `T -> U` and `U -> T` swap the two parameters.
+///
+/// A nested declaration masks only the substitutions for the parameters it
+/// declares. The other substitutions still apply inside it. For example,
+/// substituting `T` with `string` and `U` with `number` preserves the `T`
+/// declared by `map`, but replaces the `U` inside it:
+///
+/// ```ts
+/// type Container<T, U> = {
+///     value: T;
+///     map: <T>(value: T) => [T, U];
+/// };
+///
+/// type Substituted = {
+///     value: string;
+///     map: <T>(value: T) => [T, number];
+/// };
+/// ```
+///
+/// A generic parameter without a substitution is kept as it is, including its
+/// constraint and default. Rewriting either would intern a different parameter
+/// that no longer matches the existing references to it.
+pub(crate) struct TypeSubstituter<'a, 'db> {
+    /// Substitutions to apply, with at most one replacement per generic.
+    substitutions: &'a [TypeSubstitution<'db>],
+    /// Type parameters declared by the declarations that enclose the type
+    /// being visited. A substitution doesn't apply while its generic is in
+    /// this list.
+    shadowed: Vec<TypeData<'db>>,
+    /// Length of `shadowed` when each type being visited was entered. Leaving
+    /// a type truncates `shadowed` back to that length, which drops the
+    /// parameters the type declared.
+    scopes: Vec<usize>,
+}
+
+impl<'a, 'db> TypeSubstituter<'a, 'db> {
+    pub(crate) fn new(substitutions: &'a [TypeSubstitution<'db>]) -> Self {
+        Self {
+            substitutions,
+            shadowed: Vec::new(),
+            scopes: Vec::new(),
+        }
+    }
+
+    pub(crate) fn substitute(
+        &mut self,
+        transformer: &mut TypeDataTransformer,
+        db: &'db dyn TypeDb,
+        ty: TypeData<'db>,
+    ) -> TypeTransformResult<TypeData<'db>> {
+        transformer.transform(ty, db, self)
+    }
+}
+
+impl<'db> TypeTransform<'db> for TypeSubstituter<'_, 'db> {
+    fn enter(&mut self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeTransformAction<'db> {
+        // A global's supporting type may mention the global's type parameters.
+        let ty = ty.expand_global_local(db);
+        if let Some(substitution) = self.substitutions.iter().find(|substitution| {
+            substitution.generic == ty && !self.shadowed.contains(&substitution.binder_generic(db))
+        }) {
+            return TypeTransformAction::Replace(substitution.replacement);
+        }
+        if matches!(ty, TypeData::Generic(_))
+            || self.substitutions.iter().all(|substitution| {
+                let generic = substitution.binder_generic(db);
+                self.shadowed.contains(&generic) || ty.declares_generic(db, generic)
+            })
+        {
+            return TypeTransformAction::Replace(ty);
+        }
+
+        self.scopes.push(self.shadowed.len());
+        if let Some(parameters) = ty.declared_type_parameters(db) {
+            self.shadowed.extend_from_slice(parameters);
+        }
+        TypeTransformAction::Descend(ty)
+    }
+
+    fn leave(&mut self, _db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeData<'db> {
+        if let Some(length) = self.scopes.pop() {
+            self.shadowed.truncate(length);
+        }
+        ty
+    }
+}
+
+struct TypeNormalizer<Resolve> {
+    resolve: Resolve,
+}
+
+impl<'db, Resolve> TypeTransform<'db> for TypeNormalizer<Resolve>
+where
+    Resolve: FnMut(TypeData<'db>) -> TypeData<'db>,
+{
+    fn enter(&mut self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeTransformAction<'db> {
+        let ty = (self.resolve)(ty);
+        if let TypeData::TypeofValue(value) = ty
+            && value.ty(db) == TypeData::Unknown
+        {
+            TypeTransformAction::Replace(ty)
+        } else if let TypeData::IndexedAccess(access) = ty
+            && access.index(db).is_never_supported_index()
+        {
+            // The access normalizes to unknown in `leave` whatever its object
+            // is, so the object, which can be large, is not normalized.
+            TypeTransformAction::Replace(TypeData::Unknown)
+        } else {
+            TypeTransformAction::Descend(ty)
+        }
+    }
+
+    fn leave(&mut self, db: &'db dyn TypeDb, ty: TypeData<'db>) -> TypeData<'db> {
+        match ty {
+            TypeData::InstanceOf(instance)
+                if instance
+                    .ty(db)
+                    .should_flatten_instance(instance.type_parameters(db)) =>
+            {
+                instance.ty(db)
+            }
+            TypeData::MergedReference(reference) => {
+                let targets = reference.targets(db).collect::<Vec<_>>();
+                match targets.first().copied() {
+                    Some(first) if targets.iter().all(|target| *target == first) => first,
+                    _ => TypeData::MergedReference(reference),
+                }
+            }
+            TypeData::TypeofType(value) => value.ty(db),
+            TypeData::TypeofValue(value) => value.ty(db),
+            TypeData::TypeOperator(operator) if operator.operator(db) == TypeOperator::Keyof => {
+                keyof(db, operator.ty(db)).unwrap_or(TypeData::Unknown)
+            }
+            TypeData::IndexedAccess(access) => {
+                indexed_access(db, access.object(db), access.index(db)).unwrap_or_else(|| {
+                    // `T[K]` with an unsubstituted `K` is not unknown: a
+                    // mapped type still substitutes its keys for `K` after
+                    // normalizing its property type.
+                    if access.index(db).is_generic_reference(db) {
+                        TypeData::IndexedAccess(access)
+                    } else {
+                        TypeData::Unknown
+                    }
+                })
+            }
+            // A mapped type whose keys are not resolved stays unevaluated so it
+            // can still be instantiated by a later substitution.
+            TypeData::MappedType(mapped) => {
+                mapped_type(db, mapped).unwrap_or(TypeData::MappedType(mapped))
+            }
+            ty => ty,
+        }
+    }
+}
+
+impl<'db> TypeData<'db> {
+    /// Resolves nested type handles and simplifies structural wrappers.
+    ///
+    /// The resolver is invoked before descending into each type. A `typeof`
+    /// value whose resolved type is unknown remains wrapped so its identity can
+    /// be resolved by a later inference pass.
+    pub fn normalize_nested_types(
+        self,
+        db: &'db dyn TypeDb,
+        resolve: impl FnMut(Self) -> Self,
+    ) -> TypeTransformResult<Self> {
+        TypeDataTransformer::new(MAX_TYPE_NORMALIZATION_STEPS).transform(
+            self,
+            db,
+            &mut TypeNormalizer { resolve },
+        )
+    }
+
+    /// Replaces references to a generic throughout this type.
+    ///
+    /// Nested declarations of the same generic remain unchanged. Unmatched
+    /// generic declarations are also preserved as interned identities rather
+    /// than rebuilt from their constraints or defaults.
+    pub fn substitute_type(
+        self,
+        db: &'db dyn TypeDb,
+        substitution: TypeSubstitution<'db>,
+    ) -> TypeTransformResult<Self> {
+        self.substitute_types(db, std::slice::from_ref(&substitution))
+    }
+
+    /// Replaces generic references simultaneously, without substituting inside
+    /// their replacements. Each generic must have at most one replacement.
+    /// Nested declarations shadow only the bindings for their own parameters.
+    /// An indexed access becomes [`Self::Unknown`] if either operand is that
+    /// type or an instance of it.
+    /// Other indexed accesses and type operators remain unevaluated; callers can
+    /// use [`Self::normalize_nested_types`] after resolving their operands.
+    pub fn substitute_types(
+        self,
+        db: &'db dyn TypeDb,
+        substitutions: &[TypeSubstitution<'db>],
+    ) -> TypeTransformResult<Self> {
+        if substitutions.is_empty() {
+            return TypeTransformResult::Transformed(self);
+        }
+        TypeDataTransformer::new(MAX_TYPE_SUBSTITUTION_STEPS).transform(
+            self,
+            db,
+            &mut TypeSubstituter::new(substitutions),
+        )
+    }
+
+    /// Replaces references inside a root generic declaration without replacing
+    /// the root's declared type parameters.
+    ///
+    /// This is used after inference binds a root generic. For example, binding
+    /// `T` to `string` preserves the declaration of `T`, while replacing its
+    /// parameter and return-type references:
+    ///
+    /// ```ts
+    /// declare function identity<T>(value: T): T;
+    ///
+    /// // Internal representation after root-body substitution of T with string:
+    /// declare function identity<T>(value: string): string;
+    /// ```
+    ///
+    /// Nested declarations that shadow `T` remain unchanged.
+    pub fn substitute_type_in_root_body(
+        self,
+        db: &'db dyn TypeDb,
+        substitution: TypeSubstitution<'db>,
+    ) -> TypeTransformResult<Self> {
+        if !self.declares_generic(db, substitution.binder_generic(db)) {
+            return self.substitute_type(db, substitution);
+        }
+
+        let root_type_parameter_count = self.declared_type_parameters(db).map_or(0, <[_]>::len);
+        let slots = self.type_slots(db);
+        let mut replacements = Vec::with_capacity(slots.len());
+        let mut transformer = TypeDataTransformer::new(MAX_TYPE_SUBSTITUTION_STEPS);
+        let mut substituter = TypeSubstituter::new(std::slice::from_ref(&substitution));
+        for (index, ty) in slots.iter().enumerate() {
+            if index < root_type_parameter_count {
+                replacements.push(ty);
+            } else {
+                match substituter.substitute(&mut transformer, db, ty) {
+                    TypeTransformResult::Transformed(ty) => replacements.push(ty),
+                    TypeTransformResult::LimitExceeded => {
+                        return TypeTransformResult::LimitExceeded;
+                    }
+                    TypeTransformResult::InvalidRebuild => {
+                        return TypeTransformResult::InvalidRebuild;
+                    }
+                }
+            }
+        }
+        slots.rebuild(db, replacements)
+    }
+
+    /// Returns the generic parameters declared directly by this type.
+    ///
+    /// Classes, constructors, functions, interfaces, and mapped types are
+    /// generic binders. `Some(&[])` identifies one of those binders without
+    /// parameters, while `None` identifies a type that cannot declare generic
+    /// parameters.
+    fn declared_type_parameters(self, db: &'db dyn TypeDb) -> Option<&'db [Self]> {
+        match self {
+            Self::Class(class) => Some(class.type_parameters(db)),
+            Self::Constructor(constructor) => Some(constructor.type_parameters(db)),
+            Self::Function(function) => Some(function.type_parameters(db)),
+            Self::Interface(interface) => Some(interface.type_parameters(db)),
+            Self::MappedType(mapped) => Some(std::slice::from_ref(mapped.type_parameter(db))),
+            _ => None,
+        }
+    }
+
+    fn declares_generic(self, db: &'db dyn TypeDb, generic: Self) -> bool {
+        self.declared_type_parameters(db)
+            .is_some_and(|parameters| parameters.contains(&generic))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::interned_types::{
+        InternedFunction, InternedGenericTypeParameter, InternedIndexedAccessType,
+        InternedTypeofType, ReturnType,
+    };
+    use biome_rowan::Text;
+
+    #[salsa::db]
+    #[derive(Default)]
+    struct TestDb {
+        storage: salsa::Storage<Self>,
+    }
+
+    #[salsa::db]
+    impl salsa::Database for TestDb {}
+
+    #[salsa::db]
+    impl biome_db::Db for TestDb {
+        fn parsed_source_for_path(
+            &self,
+            _path: &camino::Utf8Path,
+        ) -> Option<biome_db::ParsedSource> {
+            None
+        }
+    }
+
+    #[salsa::db]
+    impl TypeDb for TestDb {}
+
+    fn generic<'db>(db: &'db TestDb, name: &'static str) -> TypeData<'db> {
+        TypeData::Generic(InternedGenericTypeParameter::new(
+            db,
+            false,
+            None,
+            None,
+            Text::from(name),
+        ))
+    }
+
+    #[test]
+    fn simultaneous_substitution_does_not_substitute_replacements() {
+        let db = TestDb::default();
+        let t = generic(&db, "T");
+        let u = generic(&db, "U");
+        let substitutions = [
+            TypeSubstitution {
+                generic: t,
+                replacement: u,
+            },
+            TypeSubstitution {
+                generic: u,
+                replacement: t,
+            },
+        ];
+        for (source, expected) in [(t, u), (u, t)] {
+            assert_eq!(
+                source.substitute_types(&db, &substitutions).unwrap(),
+                expected
+            );
+            let reversed = [substitutions[1], substitutions[0]];
+            assert_eq!(source.substitute_types(&db, &reversed).unwrap(), expected);
+        }
+    }
+
+    #[test]
+    fn simultaneous_substitution_preserves_shadowed_bindings() {
+        let db = TestDb::default();
+        let t = generic(&db, "T");
+        let u = generic(&db, "U");
+        let reference_t = TypeData::instance_of(&db, t, Box::default());
+        let function = |return_type| {
+            TypeData::Function(InternedFunction::new(
+                &db,
+                vec![t].into_boxed_slice(),
+                Box::default(),
+                ReturnType::Type(return_type),
+                false,
+                None,
+            ))
+        };
+        let source = TypeData::union_from_types(
+            &db,
+            vec![
+                function(TypeData::union_from_types(&db, vec![reference_t, u])),
+                reference_t,
+            ],
+        );
+        let substitutions = [
+            TypeSubstitution {
+                generic: t,
+                replacement: TypeData::String,
+            },
+            TypeSubstitution {
+                generic: reference_t,
+                replacement: TypeData::String,
+            },
+            TypeSubstitution {
+                generic: u,
+                replacement: TypeData::Number,
+            },
+        ];
+        let expected = TypeData::union_from_types(
+            &db,
+            vec![
+                function(TypeData::union_from_types(
+                    &db,
+                    vec![reference_t, TypeData::Number],
+                )),
+                TypeData::String,
+            ],
+        );
+        assert_eq!(
+            source.substitute_types(&db, &substitutions).unwrap(),
+            expected
+        );
+    }
+
+    #[test]
+    fn simultaneous_substitution_preserves_unmatched_generic_identity() {
+        let db = TestDb::default();
+        let t = generic(&db, "T");
+        let u = TypeData::Generic(InternedGenericTypeParameter::new(
+            &db,
+            false,
+            Some(t),
+            Some(t),
+            Text::from("U"),
+        ));
+        assert_eq!(
+            u.substitute_types(
+                &db,
+                &[TypeSubstitution {
+                    generic: t,
+                    replacement: TypeData::String
+                },]
+            )
+            .unwrap(),
+            u
+        );
+    }
+
+    #[test]
+    fn substitution_leaves_indexed_access_normalization_to_the_caller() {
+        let db = TestDb::default();
+        let t = generic(&db, "T");
+        let source =
+            TypeData::IndexedAccess(InternedIndexedAccessType::new(&db, t, TypeData::Number));
+        let replacement = TypeData::array_instance(&db, vec![TypeData::String].into_boxed_slice());
+        let substitution = TypeSubstitution {
+            generic: t,
+            replacement,
+        };
+        let expected = TypeData::IndexedAccess(InternedIndexedAccessType::new(
+            &db,
+            replacement,
+            TypeData::Number,
+        ));
+        assert_eq!(source.substitute_type(&db, substitution).unwrap(), expected);
+        assert_eq!(
+            source.substitute_types(&db, &[substitution]).unwrap(),
+            expected
+        );
+        assert_eq!(
+            expected.normalize_nested_types(&db, |ty| ty).unwrap(),
+            TypeData::String,
+        );
+    }
+
+    #[test]
+    fn substitution_propagates_unknown_indexed_operands() {
+        let db = TestDb::default();
+        let t = generic(&db, "T");
+        let u = generic(&db, "U");
+        let array = TypeData::array_instance(&db, vec![TypeData::String].into_boxed_slice());
+        let wrapped_unknown = TypeData::instance_of(&db, TypeData::Unknown, Box::default());
+        let substitutions = [
+            TypeSubstitution {
+                generic: t,
+                replacement: array,
+            },
+            TypeSubstitution {
+                generic: u,
+                replacement: wrapped_unknown,
+            },
+        ];
+        for (object, index) in [
+            (t, TypeData::Unknown),
+            (t, wrapped_unknown),
+            (TypeData::Unknown, TypeData::Number),
+            (wrapped_unknown, TypeData::Number),
+            (t, u),
+            (u, TypeData::Number),
+        ] {
+            let source =
+                TypeData::IndexedAccess(InternedIndexedAccessType::new(&db, object, index));
+            assert_eq!(
+                source.substitute_types(&db, &substitutions).unwrap(),
+                TypeData::Unknown,
+            );
+        }
+    }
+
+    #[test]
+    fn substitution_propagates_unknown_instances_with_type_arguments() {
+        let db = TestDb::default();
+        let t = generic(&db, "T");
+        let instance = TypeData::instance_of(&db, t, vec![TypeData::String].into_boxed_slice());
+        let array = TypeData::array_instance(&db, vec![TypeData::String].into_boxed_slice());
+        let substitutions = [TypeSubstitution {
+            generic: t,
+            replacement: TypeData::Unknown,
+        }];
+        for (object, index) in [(instance, TypeData::Number), (array, instance)] {
+            let source =
+                TypeData::IndexedAccess(InternedIndexedAccessType::new(&db, object, index));
+            assert_eq!(
+                source.substitute_types(&db, &substitutions).unwrap(),
+                TypeData::Unknown,
+            );
+        }
+    }
+
+    #[test]
+    fn simultaneous_substitution_preserves_deferred_indexed_operands() {
+        let db = TestDb::default();
+        let t = generic(&db, "T");
+        let u = generic(&db, "U");
+        let substitutions = [TypeSubstitution {
+            generic: t,
+            replacement: u,
+        }];
+        for index in [TypeData::Number, generic(&db, "K")] {
+            let source = TypeData::IndexedAccess(InternedIndexedAccessType::new(&db, t, index));
+            let expected = TypeData::IndexedAccess(InternedIndexedAccessType::new(&db, u, index));
+            assert_eq!(
+                source.substitute_types(&db, &substitutions).unwrap(),
+                expected,
+            );
+        }
+    }
+
+    #[test]
+    fn simultaneous_substitution_respects_the_work_limit() {
+        let db = TestDb::default();
+        let t = generic(&db, "T");
+        let substitutions = [TypeSubstitution {
+            generic: t,
+            replacement: TypeData::String,
+        }];
+        let mut source = t;
+        for _ in 1..MAX_TYPE_SUBSTITUTION_STEPS {
+            source = TypeData::TypeofType(InternedTypeofType::new(&db, source));
+        }
+        assert!(
+            source
+                .substitute_types(&db, &substitutions)
+                .is_transformed()
+        );
+        source = TypeData::TypeofType(InternedTypeofType::new(&db, source));
+        assert_eq!(
+            source.substitute_types(&db, &substitutions),
+            TypeTransformResult::LimitExceeded
+        );
+    }
+
+    #[test]
+    #[should_panic(expected = "type transformation failed: step limit exceeded")]
+    fn unwrap_panics_on_limit_exceeded() {
+        let result: TypeTransformResult<()> = TypeTransformResult::LimitExceeded;
+        result.unwrap();
+    }
+
+    #[test]
+    #[should_panic(expected = "substitution failed: invalid slot reconstruction")]
+    fn expect_panics_on_invalid_rebuild() {
+        let result: TypeTransformResult<()> = TypeTransformResult::InvalidRebuild;
+        result.expect("substitution failed");
+    }
+}

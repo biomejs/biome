@@ -71,7 +71,10 @@ impl Rule for Monorepo {
             token(T![:]).with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
             AnyJsonValue::JsonBooleanValue(json_boolean_value(token(T![false]))),
         ));
-        separators.push(token(T![,]));
+
+        if !member_list.is_empty() {
+            separators.push(token(T![,]));
+        }
 
         let new_list = json_member_list(list, separators);
 

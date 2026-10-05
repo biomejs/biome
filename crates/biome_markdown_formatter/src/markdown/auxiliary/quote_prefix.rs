@@ -16,7 +16,9 @@ impl FormatNodeRule<MdQuotePrefix> for FormatMdQuotePrefix {
 
         if self.should_remove {
             for token in pre_marker_indent.iter() {
-                f.context().comments().is_suppressed(token.syntax());
+                f.context()
+                    .comments()
+                    .mark_suppression_checked(token.syntax());
                 write!(
                     f,
                     [format_removed(&token.md_quote_pre_marker_indent_token()?)]

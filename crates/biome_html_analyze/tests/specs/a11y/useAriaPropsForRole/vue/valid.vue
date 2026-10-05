@@ -1,5 +1,6 @@
 <!-- should not generate diagnostics: Vue v-bind shorthand (:aria-*) bindings satisfy required aria props -->
 <template>
+	<span :role="roleValue"></span>
 	<span role="checkbox" :aria-checked="isChecked"></span>
 	<span role="radio" :aria-checked="true"></span>
 	<span role="switch" :aria-checked="dynamicValue"></span>
@@ -12,6 +13,7 @@
 		:aria-valuenow="current"
 	></span>
 	<span role="meter" :aria-valuenow="progress"></span>
+	<span role="separator"></span>
 	<!-- static Vue role bindings with all required aria props are valid -->
 	<span :role="'checkbox'" :aria-checked="'true'"></span>
 	<span v-bind:role="'radio'" :aria-checked="'false'"></span>

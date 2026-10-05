@@ -1,0 +1,16 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid_6615.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+.class {
+    color: red;
+
+    @mixin hover {
+        color: blue;
+    }
+}
+
+```

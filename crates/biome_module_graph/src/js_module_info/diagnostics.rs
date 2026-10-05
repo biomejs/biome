@@ -1,4 +1,3 @@
-use crate::js_module_info::utils::MAX_NUM_TYPES;
 use biome_console::fmt::Formatter;
 use biome_console::markup;
 use biome_diagnostics::{
@@ -33,18 +32,8 @@ impl Diagnostic for ExceededTypesLimitDiagnostic {
     }
 
     fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
-        // format with a thousand separators for readability:
-        let num = MAX_NUM_TYPES
-            .to_string()
-            .as_bytes()
-            .rchunks(3)
-            .rev()
-            .map(|bytes| std::str::from_utf8(bytes).unwrap())
-            .collect::<Vec<_>>()
-            .join(",");
-
         fmt.write_markup(markup! {
-            "Biome encountered an unusually large amount of types which exceeded the limit of "{num}"."
+            "Biome encountered an unusually large number of types and reached the limit of 200,000."
         })?;
 
         fmt.write_str("\n\n")?;

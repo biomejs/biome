@@ -3,6 +3,7 @@ use crate::settings::Settings;
 use crate::workspace::ScanKind;
 use biome_analyze::{
     AnalyzerRules, Queryable, RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
+    RuleMetadata,
 };
 use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue};
 use biome_configuration::diagnostics::{
@@ -36,6 +37,10 @@ use biome_json_analyze::METADATA as json_lint_metadata;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::JsonLanguage;
+#[cfg(feature = "lang_md")]
+use biome_markdown_analyze::METADATA as md_lint_metadata;
+#[cfg(feature = "lang_md")]
+use biome_markdown_syntax::MarkdownLanguage;
 use biome_resolver::{FsWithResolverProxy, ResolveOptions, is_relative_specifier, resolve};
 use biome_rowan::Language;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -97,10 +102,10 @@ impl LoadedConfiguration {
         let ConfigurationPayload {
             external_resolution_base_path,
             configuration_file_path,
-            deserialized,
+            deserialized_configuration: partial_configuration,
+            mut diagnostics,
             loaded_location,
         } = value;
-        let (partial_configuration, mut diagnostics) = deserialized.consume();
 
         let mut extended_configurations: Vec<(Utf8PathBuf, Configuration)> = vec![];
 
@@ -218,14 +223,15 @@ pub fn load_configuration(
 
 #[derive(Debug)]
 pub struct ConfigurationPayload {
-    /// The result of the deserialization
-    pub deserialized: Deserialized<Configuration>,
     /// The path of where the `biome.json` or `biome.jsonc` file was found. This contains the file name.
     pub configuration_file_path: Utf8PathBuf,
     /// The base path where the external configuration in a package should be resolved from
     pub external_resolution_base_path: Utf8PathBuf,
-
     pub loaded_location: LoadedLocation,
+    /// Diagnostics emitted during the deserialization of the configuration
+    pub diagnostics: Vec<Error>,
+    /// The deserialized configuration.
+    pub deserialized_configuration: Option<Configuration>,
 }
 
 /// - [Result]: if an error occurred while loading the configuration file.
@@ -289,7 +295,8 @@ pub fn read_config(
     };
 
     // We search for the first non-root `biome.json` or `biome.jsonc` files:
-    let mut deserialized = None;
+    let mut deserialized_configuration = None;
+    let mut diagnostics = vec![];
     let mut predicate = |file_path: &Utf8Path, content: &str| -> bool {
         let parser_options = match file_path.extension() {
             Some("json") => JsonParserOptions::default(),
@@ -304,12 +311,17 @@ pub fn read_config(
             .deserialized
             .as_ref()
             .is_some_and(|config| if seek_root { config.is_root() } else { true });
+        if deserialized_content.has_errors() {
+            diagnostics = deserialized_content.into_diagnostics();
+            return true;
+        }
+        let (configuration, errors) = deserialized_content.consume();
         if is_found {
-            deserialized = Some(deserialized_content);
+            deserialized_configuration = configuration;
+            diagnostics = errors;
         }
         is_found
     };
-
     let Some((auto_search_result, loaded_location)) = fs
         .auto_search_files_with_predicate(
             &configuration_directory,
@@ -337,7 +349,8 @@ pub fn read_config(
     Ok(Some(ConfigurationPayload {
         // SAFETY: unwrapping is safe because the predicate in the search above would
         // only return `true` if it assigned `Some` value:
-        deserialized: deserialized.unwrap(),
+        deserialized_configuration,
+        diagnostics,
         configuration_file_path: auto_search_result.file_path,
         external_resolution_base_path,
         loaded_location,
@@ -368,8 +381,10 @@ fn load_user_config(
                 LoadedLocation::ParentFolder
             }
         });
+        let (deserialized_configuration, diagnostics) = deserialized.consume();
         Ok(Some(ConfigurationPayload {
-            deserialized,
+            deserialized_configuration,
+            diagnostics,
             configuration_file_path: config_file_path.to_path_buf(),
             external_resolution_base_path,
             loaded_location,
@@ -406,8 +421,10 @@ fn load_user_config(
                 LoadedLocation::ParentFolder
             }
         });
+        let (deserialized_configuration, diagnostics) = deserialized.consume();
         Ok(Some(ConfigurationPayload {
-            deserialized,
+            deserialized_configuration,
+            diagnostics,
             configuration_file_path: result.file_path.to_path_buf(),
             external_resolution_base_path,
             loaded_location,
@@ -528,6 +545,14 @@ pub fn create_config(
 
 /// Returns the rules applied to a specific [Path], given the [Settings]
 pub fn to_analyzer_rules(settings: &Settings, path: &Utf8Path) -> AnalyzerRules {
+    let override_indices = settings.matching_override_indices(path);
+    to_analyzer_rules_by_indices(settings, &override_indices)
+}
+
+pub(crate) fn to_analyzer_rules_by_indices(
+    settings: &Settings,
+    override_indices: &[usize],
+) -> AnalyzerRules {
     let mut analyzer_rules = AnalyzerRules::default();
     if let Some(rules) = settings.linter.rules.as_ref() {
         #[cfg(feature = "lang_js")]
@@ -539,6 +564,8 @@ pub fn to_analyzer_rules(settings: &Settings, path: &Utf8Path) -> AnalyzerRules 
         push_to_analyzer_rules(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
         #[cfg(feature = "lang_html")]
         push_to_analyzer_rules(rules, html_lint_metadata.deref(), &mut analyzer_rules);
+        #[cfg(feature = "lang_md")]
+        push_to_analyzer_rules(rules, md_lint_metadata.deref(), &mut analyzer_rules);
     }
     if let Some(rules) = settings.assist.actions.as_ref() {
         #[cfg(feature = "lang_js")]
@@ -550,9 +577,12 @@ pub fn to_analyzer_rules(settings: &Settings, path: &Utf8Path) -> AnalyzerRules 
         push_to_analyzer_assist(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
         #[cfg(feature = "lang_html")]
         push_to_analyzer_assist(rules, html_lint_metadata.deref(), &mut analyzer_rules);
+        #[cfg(feature = "lang_md")]
+        push_to_analyzer_assist(rules, md_lint_metadata.deref(), &mut analyzer_rules);
     }
-    let overrides = &settings.override_settings;
-    overrides.override_analyzer_rules(path, analyzer_rules)
+    settings
+        .override_settings
+        .override_analyzer_rules_by_indices(override_indices, analyzer_rules)
 }
 
 pub trait ConfigurationExt {
@@ -882,26 +912,34 @@ impl<'a> ProjectScanComputer<'a> {
         }
     }
 
+    #[inline]
     fn check_rule<R, L>(&mut self)
     where
         L: Language,
         R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
-        let filter = RuleFilter::Rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
+        self.check_rule_name(<R::Group as RuleGroup>::NAME, &R::METADATA);
+    }
+
+    fn check_rule_name(&mut self, group_name: &'static str, metadata: &RuleMetadata) {
+        let filter = RuleFilter::Rule(group_name, metadata.name);
 
         if !self.only.is_empty() {
             for selector in self.only.iter() {
-                if selector.match_rule::<R>() {
-                    let domains = R::METADATA.domains;
+                if selector.match_rule_name(group_name, metadata.name) {
+                    let domains = metadata.domains;
                     self.requires_project_scan |= domains.contains(&RuleDomain::Project);
                     self.requires_types |= domains.contains(&RuleDomain::Types);
                     break;
                 }
             }
-        } else if !self.skip.iter().any(|s| s.match_rule::<R>())
+        } else if !self
+            .skip
+            .iter()
+            .any(|s| s.match_rule_name(group_name, metadata.name))
             && self.enabled_rules.contains(&filter)
         {
-            let domains = R::METADATA.domains;
+            let domains = metadata.domains;
             self.requires_project_scan |= domains.contains(&RuleDomain::Project);
             self.requires_types |= domains.contains(&RuleDomain::Types);
         }
@@ -957,6 +995,17 @@ impl RegistryVisitor<HtmlLanguage> for ProjectScanComputer<'_> {
             + 'static,
     {
         self.check_rule::<R, HtmlLanguage>();
+    }
+}
+
+#[cfg(feature = "lang_md")]
+impl RegistryVisitor<MarkdownLanguage> for ProjectScanComputer<'_> {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = MarkdownLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.check_rule::<R, MarkdownLanguage>();
     }
 }
 #[cfg(test)]

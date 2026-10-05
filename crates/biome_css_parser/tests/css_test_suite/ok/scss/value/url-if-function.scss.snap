@@ -1,0 +1,526 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+$dark: true;
+
+.a {
+  background: url(if(sass($dark): "dark.png"; else: "light.png"));
+  background: url(if(sass($dark): "dark.png"));
+  background: url(if(not sass($dark): "light.png"; else: "dark.png";));
+  background: url(if($dark, "dark.png", "light.png"));
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        ScssVariableDeclaration {
+            name: ScssVariable {
+                dollar_token: DOLLAR@0..1 "$" [] [],
+                name: CssIdentifier {
+                    value_token: IDENT@1..5 "dark" [] [],
+                },
+            },
+            colon_token: COLON@5..7 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssIdentifier {
+                        value_token: IDENT@7..11 "true" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@11..12 ";" [] [],
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@12..15 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@15..17 "a" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@17..18 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@18..31 "background" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@31..33 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssUrlFunction {
+                                            name: URL_KW@33..36 "url" [] [],
+                                            l_paren_token: L_PAREN@36..37 "(" [] [],
+                                            value: ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    CssIfFunction {
+                                                        if_token: IF_KW@37..39 "if" [] [],
+                                                        l_paren_token: L_PAREN@39..40 "(" [] [],
+                                                        css_if_branch_list: CssIfBranchList [
+                                                            CssIfBranch {
+                                                                condition: CssIfSassTest {
+                                                                    sass_token: SASS_KW@40..44 "sass" [] [],
+                                                                    l_paren_token: L_PAREN@44..45 "(" [] [],
+                                                                    test: ScssExpression {
+                                                                        items: ScssExpressionItemList [
+                                                                            ScssVariable {
+                                                                                dollar_token: DOLLAR@45..46 "$" [] [],
+                                                                                name: CssIdentifier {
+                                                                                    value_token: IDENT@46..50 "dark" [] [],
+                                                                                },
+                                                                            },
+                                                                        ],
+                                                                    },
+                                                                    r_paren_token: R_PAREN@50..51 ")" [] [],
+                                                                },
+                                                                colon_token: COLON@51..53 ":" [] [Whitespace(" ")],
+                                                                value: CssGenericComponentValueList [
+                                                                    CssString {
+                                                                        value_token: CSS_STRING_LITERAL@53..63 "\"dark.png\"" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                            SEMICOLON@63..65 ";" [] [Whitespace(" ")],
+                                                            CssIfBranch {
+                                                                condition: CssElseKeyword {
+                                                                    else_token: ELSE_KW@65..69 "else" [] [],
+                                                                },
+                                                                colon_token: COLON@69..71 ":" [] [Whitespace(" ")],
+                                                                value: CssGenericComponentValueList [
+                                                                    CssString {
+                                                                        value_token: CSS_STRING_LITERAL@71..82 "\"light.png\"" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        ],
+                                                        r_paren_token: R_PAREN@82..83 ")" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            modifiers: CssUrlModifierList [],
+                                            r_paren_token: R_PAREN@83..84 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@84..85 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@85..98 "background" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@98..100 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssUrlFunction {
+                                            name: URL_KW@100..103 "url" [] [],
+                                            l_paren_token: L_PAREN@103..104 "(" [] [],
+                                            value: ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    CssIfFunction {
+                                                        if_token: IF_KW@104..106 "if" [] [],
+                                                        l_paren_token: L_PAREN@106..107 "(" [] [],
+                                                        css_if_branch_list: CssIfBranchList [
+                                                            CssIfBranch {
+                                                                condition: CssIfSassTest {
+                                                                    sass_token: SASS_KW@107..111 "sass" [] [],
+                                                                    l_paren_token: L_PAREN@111..112 "(" [] [],
+                                                                    test: ScssExpression {
+                                                                        items: ScssExpressionItemList [
+                                                                            ScssVariable {
+                                                                                dollar_token: DOLLAR@112..113 "$" [] [],
+                                                                                name: CssIdentifier {
+                                                                                    value_token: IDENT@113..117 "dark" [] [],
+                                                                                },
+                                                                            },
+                                                                        ],
+                                                                    },
+                                                                    r_paren_token: R_PAREN@117..118 ")" [] [],
+                                                                },
+                                                                colon_token: COLON@118..120 ":" [] [Whitespace(" ")],
+                                                                value: CssGenericComponentValueList [
+                                                                    CssString {
+                                                                        value_token: CSS_STRING_LITERAL@120..130 "\"dark.png\"" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                        ],
+                                                        r_paren_token: R_PAREN@130..131 ")" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            modifiers: CssUrlModifierList [],
+                                            r_paren_token: R_PAREN@131..132 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@132..133 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@133..146 "background" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@146..148 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssUrlFunction {
+                                            name: URL_KW@148..151 "url" [] [],
+                                            l_paren_token: L_PAREN@151..152 "(" [] [],
+                                            value: ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    CssIfFunction {
+                                                        if_token: IF_KW@152..154 "if" [] [],
+                                                        l_paren_token: L_PAREN@154..155 "(" [] [],
+                                                        css_if_branch_list: CssIfBranchList [
+                                                            CssIfBranch {
+                                                                condition: CssIfTestBooleanNotExpr {
+                                                                    not_token: NOT_KW@155..159 "not" [] [Whitespace(" ")],
+                                                                    expression: CssIfSassTest {
+                                                                        sass_token: SASS_KW@159..163 "sass" [] [],
+                                                                        l_paren_token: L_PAREN@163..164 "(" [] [],
+                                                                        test: ScssExpression {
+                                                                            items: ScssExpressionItemList [
+                                                                                ScssVariable {
+                                                                                    dollar_token: DOLLAR@164..165 "$" [] [],
+                                                                                    name: CssIdentifier {
+                                                                                        value_token: IDENT@165..169 "dark" [] [],
+                                                                                    },
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                        r_paren_token: R_PAREN@169..170 ")" [] [],
+                                                                    },
+                                                                },
+                                                                colon_token: COLON@170..172 ":" [] [Whitespace(" ")],
+                                                                value: CssGenericComponentValueList [
+                                                                    CssString {
+                                                                        value_token: CSS_STRING_LITERAL@172..183 "\"light.png\"" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                            SEMICOLON@183..185 ";" [] [Whitespace(" ")],
+                                                            CssIfBranch {
+                                                                condition: CssElseKeyword {
+                                                                    else_token: ELSE_KW@185..189 "else" [] [],
+                                                                },
+                                                                colon_token: COLON@189..191 ":" [] [Whitespace(" ")],
+                                                                value: CssGenericComponentValueList [
+                                                                    CssString {
+                                                                        value_token: CSS_STRING_LITERAL@191..201 "\"dark.png\"" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                            SEMICOLON@201..202 ";" [] [],
+                                                        ],
+                                                        r_paren_token: R_PAREN@202..203 ")" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            modifiers: CssUrlModifierList [],
+                                            r_paren_token: R_PAREN@203..204 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@204..205 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@205..218 "background" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@218..220 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssUrlFunction {
+                                            name: URL_KW@220..223 "url" [] [],
+                                            l_paren_token: L_PAREN@223..224 "(" [] [],
+                                            value: missing (optional),
+                                            modifiers: CssUrlModifierList [
+                                                ScssLegacyIfFunction {
+                                                    if_token: IF_KW@224..226 "if" [] [],
+                                                    l_paren_token: L_PAREN@226..227 "(" [] [],
+                                                    items: CssParameterList [
+                                                        ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                ScssVariable {
+                                                                    dollar_token: DOLLAR@227..228 "$" [] [],
+                                                                    name: CssIdentifier {
+                                                                        value_token: IDENT@228..232 "dark" [] [],
+                                                                    },
+                                                                },
+                                                            ],
+                                                        },
+                                                        COMMA@232..234 "," [] [Whitespace(" ")],
+                                                        ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                CssString {
+                                                                    value_token: CSS_STRING_LITERAL@234..244 "\"dark.png\"" [] [],
+                                                                },
+                                                            ],
+                                                        },
+                                                        COMMA@244..246 "," [] [Whitespace(" ")],
+                                                        ScssExpression {
+                                                            items: ScssExpressionItemList [
+                                                                CssString {
+                                                                    value_token: CSS_STRING_LITERAL@246..257 "\"light.png\"" [] [],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                    r_paren_token: R_PAREN@257..258 ")" [] [],
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@258..259 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@259..260 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@260..262 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@262..263 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..263
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..262
+    0: SCSS_VARIABLE_DECLARATION@0..12
+      0: SCSS_VARIABLE@0..5
+        0: DOLLAR@0..1 "$" [] []
+        1: CSS_IDENTIFIER@1..5
+          0: IDENT@1..5 "dark" [] []
+      1: COLON@5..7 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@7..11
+        0: SCSS_EXPRESSION_ITEM_LIST@7..11
+          0: CSS_IDENTIFIER@7..11
+            0: IDENT@7..11 "true" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@11..11
+      4: SEMICOLON@11..12 ";" [] []
+    1: CSS_QUALIFIED_RULE@12..262
+      0: CSS_SELECTOR_LIST@12..17
+        0: CSS_COMPOUND_SELECTOR@12..17
+          0: CSS_NESTED_SELECTOR_LIST@12..12
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@12..17
+            0: CSS_CLASS_SELECTOR@12..17
+              0: DOT@12..15 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@15..17
+                0: IDENT@15..17 "a" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@17..262
+        0: L_CURLY@17..18 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@18..260
+          0: CSS_DECLARATION_WITH_SEMICOLON@18..85
+            0: CSS_DECLARATION@18..84
+              0: CSS_GENERIC_PROPERTY@18..84
+                0: CSS_IDENTIFIER@18..31
+                  0: IDENT@18..31 "background" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@31..33 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@33..84
+                  0: SCSS_EXPRESSION_ITEM_LIST@33..84
+                    0: CSS_URL_FUNCTION@33..84
+                      0: URL_KW@33..36 "url" [] []
+                      1: L_PAREN@36..37 "(" [] []
+                      2: SCSS_EXPRESSION@37..83
+                        0: SCSS_EXPRESSION_ITEM_LIST@37..83
+                          0: CSS_IF_FUNCTION@37..83
+                            0: IF_KW@37..39 "if" [] []
+                            1: L_PAREN@39..40 "(" [] []
+                            2: CSS_IF_BRANCH_LIST@40..82
+                              0: CSS_IF_BRANCH@40..63
+                                0: CSS_IF_SASS_TEST@40..51
+                                  0: SASS_KW@40..44 "sass" [] []
+                                  1: L_PAREN@44..45 "(" [] []
+                                  2: SCSS_EXPRESSION@45..50
+                                    0: SCSS_EXPRESSION_ITEM_LIST@45..50
+                                      0: SCSS_VARIABLE@45..50
+                                        0: DOLLAR@45..46 "$" [] []
+                                        1: CSS_IDENTIFIER@46..50
+                                          0: IDENT@46..50 "dark" [] []
+                                  3: R_PAREN@50..51 ")" [] []
+                                1: COLON@51..53 ":" [] [Whitespace(" ")]
+                                2: CSS_GENERIC_COMPONENT_VALUE_LIST@53..63
+                                  0: CSS_STRING@53..63
+                                    0: CSS_STRING_LITERAL@53..63 "\"dark.png\"" [] []
+                              1: SEMICOLON@63..65 ";" [] [Whitespace(" ")]
+                              2: CSS_IF_BRANCH@65..82
+                                0: CSS_ELSE_KEYWORD@65..69
+                                  0: ELSE_KW@65..69 "else" [] []
+                                1: COLON@69..71 ":" [] [Whitespace(" ")]
+                                2: CSS_GENERIC_COMPONENT_VALUE_LIST@71..82
+                                  0: CSS_STRING@71..82
+                                    0: CSS_STRING_LITERAL@71..82 "\"light.png\"" [] []
+                            3: R_PAREN@82..83 ")" [] []
+                      3: CSS_URL_MODIFIER_LIST@83..83
+                      4: R_PAREN@83..84 ")" [] []
+              1: (empty)
+            1: SEMICOLON@84..85 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@85..133
+            0: CSS_DECLARATION@85..132
+              0: CSS_GENERIC_PROPERTY@85..132
+                0: CSS_IDENTIFIER@85..98
+                  0: IDENT@85..98 "background" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@98..100 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@100..132
+                  0: SCSS_EXPRESSION_ITEM_LIST@100..132
+                    0: CSS_URL_FUNCTION@100..132
+                      0: URL_KW@100..103 "url" [] []
+                      1: L_PAREN@103..104 "(" [] []
+                      2: SCSS_EXPRESSION@104..131
+                        0: SCSS_EXPRESSION_ITEM_LIST@104..131
+                          0: CSS_IF_FUNCTION@104..131
+                            0: IF_KW@104..106 "if" [] []
+                            1: L_PAREN@106..107 "(" [] []
+                            2: CSS_IF_BRANCH_LIST@107..130
+                              0: CSS_IF_BRANCH@107..130
+                                0: CSS_IF_SASS_TEST@107..118
+                                  0: SASS_KW@107..111 "sass" [] []
+                                  1: L_PAREN@111..112 "(" [] []
+                                  2: SCSS_EXPRESSION@112..117
+                                    0: SCSS_EXPRESSION_ITEM_LIST@112..117
+                                      0: SCSS_VARIABLE@112..117
+                                        0: DOLLAR@112..113 "$" [] []
+                                        1: CSS_IDENTIFIER@113..117
+                                          0: IDENT@113..117 "dark" [] []
+                                  3: R_PAREN@117..118 ")" [] []
+                                1: COLON@118..120 ":" [] [Whitespace(" ")]
+                                2: CSS_GENERIC_COMPONENT_VALUE_LIST@120..130
+                                  0: CSS_STRING@120..130
+                                    0: CSS_STRING_LITERAL@120..130 "\"dark.png\"" [] []
+                            3: R_PAREN@130..131 ")" [] []
+                      3: CSS_URL_MODIFIER_LIST@131..131
+                      4: R_PAREN@131..132 ")" [] []
+              1: (empty)
+            1: SEMICOLON@132..133 ";" [] []
+          2: CSS_DECLARATION_WITH_SEMICOLON@133..205
+            0: CSS_DECLARATION@133..204
+              0: CSS_GENERIC_PROPERTY@133..204
+                0: CSS_IDENTIFIER@133..146
+                  0: IDENT@133..146 "background" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@146..148 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@148..204
+                  0: SCSS_EXPRESSION_ITEM_LIST@148..204
+                    0: CSS_URL_FUNCTION@148..204
+                      0: URL_KW@148..151 "url" [] []
+                      1: L_PAREN@151..152 "(" [] []
+                      2: SCSS_EXPRESSION@152..203
+                        0: SCSS_EXPRESSION_ITEM_LIST@152..203
+                          0: CSS_IF_FUNCTION@152..203
+                            0: IF_KW@152..154 "if" [] []
+                            1: L_PAREN@154..155 "(" [] []
+                            2: CSS_IF_BRANCH_LIST@155..202
+                              0: CSS_IF_BRANCH@155..183
+                                0: CSS_IF_TEST_BOOLEAN_NOT_EXPR@155..170
+                                  0: NOT_KW@155..159 "not" [] [Whitespace(" ")]
+                                  1: CSS_IF_SASS_TEST@159..170
+                                    0: SASS_KW@159..163 "sass" [] []
+                                    1: L_PAREN@163..164 "(" [] []
+                                    2: SCSS_EXPRESSION@164..169
+                                      0: SCSS_EXPRESSION_ITEM_LIST@164..169
+                                        0: SCSS_VARIABLE@164..169
+                                          0: DOLLAR@164..165 "$" [] []
+                                          1: CSS_IDENTIFIER@165..169
+                                            0: IDENT@165..169 "dark" [] []
+                                    3: R_PAREN@169..170 ")" [] []
+                                1: COLON@170..172 ":" [] [Whitespace(" ")]
+                                2: CSS_GENERIC_COMPONENT_VALUE_LIST@172..183
+                                  0: CSS_STRING@172..183
+                                    0: CSS_STRING_LITERAL@172..183 "\"light.png\"" [] []
+                              1: SEMICOLON@183..185 ";" [] [Whitespace(" ")]
+                              2: CSS_IF_BRANCH@185..201
+                                0: CSS_ELSE_KEYWORD@185..189
+                                  0: ELSE_KW@185..189 "else" [] []
+                                1: COLON@189..191 ":" [] [Whitespace(" ")]
+                                2: CSS_GENERIC_COMPONENT_VALUE_LIST@191..201
+                                  0: CSS_STRING@191..201
+                                    0: CSS_STRING_LITERAL@191..201 "\"dark.png\"" [] []
+                              3: SEMICOLON@201..202 ";" [] []
+                            3: R_PAREN@202..203 ")" [] []
+                      3: CSS_URL_MODIFIER_LIST@203..203
+                      4: R_PAREN@203..204 ")" [] []
+              1: (empty)
+            1: SEMICOLON@204..205 ";" [] []
+          3: CSS_DECLARATION_WITH_SEMICOLON@205..260
+            0: CSS_DECLARATION@205..259
+              0: CSS_GENERIC_PROPERTY@205..259
+                0: CSS_IDENTIFIER@205..218
+                  0: IDENT@205..218 "background" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@218..220 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@220..259
+                  0: SCSS_EXPRESSION_ITEM_LIST@220..259
+                    0: CSS_URL_FUNCTION@220..259
+                      0: URL_KW@220..223 "url" [] []
+                      1: L_PAREN@223..224 "(" [] []
+                      2: (empty)
+                      3: CSS_URL_MODIFIER_LIST@224..258
+                        0: SCSS_LEGACY_IF_FUNCTION@224..258
+                          0: IF_KW@224..226 "if" [] []
+                          1: L_PAREN@226..227 "(" [] []
+                          2: CSS_PARAMETER_LIST@227..257
+                            0: SCSS_EXPRESSION@227..232
+                              0: SCSS_EXPRESSION_ITEM_LIST@227..232
+                                0: SCSS_VARIABLE@227..232
+                                  0: DOLLAR@227..228 "$" [] []
+                                  1: CSS_IDENTIFIER@228..232
+                                    0: IDENT@228..232 "dark" [] []
+                            1: COMMA@232..234 "," [] [Whitespace(" ")]
+                            2: SCSS_EXPRESSION@234..244
+                              0: SCSS_EXPRESSION_ITEM_LIST@234..244
+                                0: CSS_STRING@234..244
+                                  0: CSS_STRING_LITERAL@234..244 "\"dark.png\"" [] []
+                            3: COMMA@244..246 "," [] [Whitespace(" ")]
+                            4: SCSS_EXPRESSION@246..257
+                              0: SCSS_EXPRESSION_ITEM_LIST@246..257
+                                0: CSS_STRING@246..257
+                                  0: CSS_STRING_LITERAL@246..257 "\"light.png\"" [] []
+                          3: R_PAREN@257..258 ")" [] []
+                      4: R_PAREN@258..259 ")" [] []
+              1: (empty)
+            1: SEMICOLON@259..260 ";" [] []
+        2: R_CURLY@260..262 "}" [Newline("\n")] []
+  2: EOF@262..263 "" [Newline("\n")] []
+
+```

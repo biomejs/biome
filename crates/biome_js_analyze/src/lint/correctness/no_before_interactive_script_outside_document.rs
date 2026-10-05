@@ -82,15 +82,6 @@ impl Rule for NoBeforeInteractiveScriptOutsideDocument {
     type Options = NoBeforeInteractiveScriptOutsideDocumentOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let is_in_app_dir = ctx
-            .file_path()
-            .ancestors()
-            .any(|a| a.file_name().is_some_and(|f| f == "app" && a.is_dir()));
-        // should not run in app dir
-        if is_in_app_dir {
-            return None;
-        }
-
         let jsx_element = ctx.query();
 
         let semantic_model = ctx.model();
@@ -108,7 +99,17 @@ impl Rule for NoBeforeInteractiveScriptOutsideDocument {
             return None;
         }
 
+        // The path checks below hit the filesystem, so run them only once
+        // the element is known to be a `beforeInteractive` `next/script`.
         let path = ctx.file_path();
+
+        // should not run in app dir
+        let is_in_app_dir = path
+            .ancestors()
+            .any(|a| a.file_name().is_some_and(|f| f == "app" && a.is_dir()));
+        if is_in_app_dir {
+            return None;
+        }
 
         let file_name = path.file_stem()?;
 

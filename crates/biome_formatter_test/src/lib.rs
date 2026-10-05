@@ -1,5 +1,6 @@
 #![deny(clippy::use_self)]
 
+use biome_configuration::Configuration;
 use biome_formatter::{
     CstFormatContext, FormatLanguage, FormatResult, Formatted, Printed, SourceMapGeneration,
 };
@@ -55,4 +56,11 @@ pub trait TestFormatLanguage {
         settings: &Settings,
         file_source: &DocumentFileSource,
     ) -> Self::FormatLanguage;
+
+    fn configure_formatter(
+        &self,
+        _configuration: &mut Configuration,
+        _format_language: &Self::FormatLanguage,
+    ) {
+    }
 }

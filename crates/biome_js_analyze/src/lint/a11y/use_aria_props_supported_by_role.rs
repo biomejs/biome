@@ -40,7 +40,10 @@ declare_lint_rule! {
         version: "1.9.0",
         name: "useAriaPropsSupportedByRole",
         language: "js",
-        sources: &[RuleSource::EslintJsxA11y("role-supports-aria-props").same()],
+        sources: &[
+            RuleSource::EslintJsxA11y("role-supports-aria-props").same(),
+            RuleSource::EslintAstro("jsx-a11y/role-supports-aria-props").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
     }

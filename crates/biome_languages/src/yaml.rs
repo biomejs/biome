@@ -24,6 +24,15 @@ impl YamlFileSource {
         }
     }
 
+    /// Returns a possible file extension for this source without a leading dot.
+    ///
+    /// ## Warning
+    ///
+    /// Don't use this function to write files on disk, as it might support "multiple extensions for the same file"
+    pub const fn file_extension(&self) -> &'static str {
+        "yaml"
+    }
+
     pub fn is_well_known_yaml_file(file_name: &str) -> bool {
         Self::WELL_KNOWN_YAML_FILES
             .binary_search(&file_name)

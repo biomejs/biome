@@ -34,8 +34,10 @@
       "!**/undefined",
       "!**/benchmark/target",
       "!**/benches",
+      "!!**/e2e-tests",
       "!!**/target",
-      "!!.cargo"
+      "!!.cargo",
+      "!!packages/@biomejs/runtime/type-tests"
     ]
   },
   "formatter": {

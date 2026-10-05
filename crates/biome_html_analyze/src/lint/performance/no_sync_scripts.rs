@@ -3,17 +3,17 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::{HtmlOpeningElement, element_ext::AnyHtmlTagElement};
-use biome_languages::HtmlFileSource;
+use biome_html_syntax::{HtmlOpeningElement, T, element_ext::AnyHtmlTagElement};
 use biome_rowan::AstNode;
 use biome_rule_options::no_sync_scripts::NoSyncScriptsOptions;
 
-use crate::utils::is_html_tag;
-
 declare_lint_rule! {
-    /// Prevent the usage of synchronous scripts.
+    /// Disallow external scripts that block HTML parsing.
     ///
-    /// A synchronous script can impact your webpage performance, read more on how to [Efficiently load third-party JavaScript](https://web.dev/articles/efficiently-load-third-party-javascript).
+    /// A `<script src>` without `async`, `defer`, or `type="module"` pauses page parsing while the
+    /// script downloads and runs. This can delay rendering. See
+    /// [Efficiently load third-party JavaScript](https://web.dev/articles/efficiently-load-third-party-javascript)
+    /// for loading strategies.
     ///
     /// ## Examples
     ///
@@ -49,13 +49,8 @@ impl Rule for NoSyncScripts {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let binding = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
 
-        if !is_html_tag(
-            &AnyHtmlTagElement::from(binding.clone()),
-            source_type,
-            "script",
-        ) {
+        if AnyHtmlTagElement::from(binding.clone()).tag_name_kind() != Some(T![script]) {
             return None;
         }
 

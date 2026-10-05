@@ -38,3 +38,23 @@ test.concurrent.each(arr)(
   "works as expected", () => {
   expect();
 });
+
+suite("test", () => {
+  it(``, async () => {
+  });
+});
+
+suite(`${foo + bar}`, 
+  () => {}
+);
+
+suite("with retry option", { retry: 2 }, () => {
+  it("does something", () => {});
+});
+
+fsuite("focused suite", () => {});
+
+xsuite("skipped suite", () => {});
+
+test.suite("test suite", () => {});
+

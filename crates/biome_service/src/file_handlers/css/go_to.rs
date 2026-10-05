@@ -17,14 +17,15 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
         let path = params.path.as_path();
         #[cfg(feature = "module_graph")]
         if let Some(module) = params.workspace_db.module_for_path(path) {
-            for (css_path, mut range, content_offset) in find_css_class_definition(
+            for (css_path, range, content_offset) in find_css_class_definition(
                 &params.workspace_db,
                 SymbolFromModuleInfo::new(&params.workspace_db, class_name, module),
             ) {
                 // For inline `<style>` blocks, the range is snippet-local.
                 // Apply the content_offset to get parent document coordinates.
+                let mut range = *range;
                 if let Some(offset) = content_offset {
-                    range += offset;
+                    range += *offset;
                 }
                 result.store(BiomePath::new(css_path), range);
             }
@@ -45,7 +46,7 @@ pub(crate) fn resolve_definition(params: ResolveDefinitionParams) -> Option<GoTo
         let semantic_model = css_semantic_model(&params.workspace_db, &params.parsed_source);
         for rule in semantic_model.rules() {
             for selector in rule.selectors() {
-                let node = selector.node(&semantic_model.root());
+                let node = selector.node();
                 for class_sel in node
                     .syntax()
                     .descendants()

@@ -34,13 +34,19 @@ struct FormatAttrNameItem {
 impl Format<CssFormatContext> for FormatAttrNameItem {
     fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
         let separator = self.element.trailing_separator()?;
-        let node = self.element.node()?;
 
-        write!(f, [node.format()])?;
+        write!(
+            f,
+            [self
+                .element
+                .node()?
+                .format()
+                .with_text_case(CssCase::Preserve)]
+        )?;
 
         if let Some(token) = separator {
             if self.last {
-                FormatCssSyntaxToken.format_removed(token, f)?;
+                FormatCssSyntaxToken::default().format_removed(token, f)?;
             } else {
                 write![f, [soft_line_break_or_space(), token.format()]]?;
             }

@@ -5,8 +5,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyFunctionLike, JsAwaitExpression, JsForOfStatement, JsLanguage, JsYieldExpression,
-    TextRange, WalkEvent,
+    AnyFunctionLike, JsAwaitExpression, JsForOfStatement, JsForVariableDeclaration, JsLanguage,
+    JsVariableDeclaration, JsYieldExpression, TextRange, WalkEvent,
 };
 use biome_rowan::{AstNode, AstNodeList, Language, SyntaxNode, TextSize};
 use biome_rule_options::use_await::UseAwaitOptions;
@@ -14,11 +14,11 @@ use biome_rule_options::use_await::UseAwaitOptions;
 declare_lint_rule! {
     /// Ensure `async` functions utilize `await`.
     ///
-    /// This rule reports `async` functions that lack an `await` expression. As `async`
-    /// functions return a promise, the use of `await` is often necessary to capture the
-    /// resolved value and handle the asynchronous operation appropriately. Without `await`,
-    /// the function operates synchronously and might not leverage the advantages of async
-    /// functions.
+    /// This rule reports `async` functions that lack an `await` expression or another
+    /// operation that requires async semantics. As `async` functions return a promise, the
+    /// use of `await` is often necessary to capture the resolved value and handle the
+    /// asynchronous operation appropriately. Without `await`, the function operates
+    /// synchronously and might not leverage the advantages of async functions.
     ///
     /// ## Examples
     ///
@@ -52,6 +52,12 @@ declare_lint_rule! {
     /// async function* delegateToAsyncIterable() {
     ///   yield* otherAsyncIterable();
     /// }
+    ///
+    /// // `await using` awaits asynchronous resource disposal
+    /// async function consumeResource() {
+    ///   await using resource = acquire();
+    ///   consume(resource);
+    /// }
     /// ```
     pub UseAwait {
         version: "1.4.0",
@@ -66,81 +72,7 @@ declare_lint_rule! {
     }
 }
 
-#[derive(Default)]
-struct MissingAwaitVisitor {
-    /// Vector to hold a function node and a boolean indicating whether the function
-    /// contains an `await` expression or not.
-    stack: Vec<(TextSize, bool)>,
-}
-
-impl Visitor for MissingAwaitVisitor {
-    type Language = JsLanguage;
-
-    fn visit(
-        &mut self,
-        event: &WalkEvent<SyntaxNode<Self::Language>>,
-        mut ctx: VisitorContext<Self::Language>,
-    ) {
-        match event {
-            WalkEvent::Enter(node) => {
-                if let Some(node) = AnyFunctionLike::cast_ref(node)
-                    && node.is_async()
-                {
-                    self.stack.push((node.range().start(), false));
-                }
-                if let Some((_, has_await)) = self.stack.last_mut() {
-                    if JsAwaitExpression::can_cast(node.kind()) {
-                        *has_await = true;
-                    } else if let Some(for_of) = JsForOfStatement::cast_ref(node) {
-                        *has_await = *has_await || for_of.await_token().is_some();
-                    } else if let Some(yield_expr) = JsYieldExpression::cast_ref(node) {
-                        *has_await = *has_await
-                            || yield_expr
-                                .argument()
-                                .is_some_and(|arg| arg.star_token().is_some());
-                    }
-                }
-            }
-            WalkEvent::Leave(node) => {
-                if let Some(node) = AnyFunctionLike::cast_ref(node)
-                    && let Some((function_start_range, has_await)) = self.stack.last().copied()
-                    && function_start_range == node.range().start()
-                {
-                    self.stack.pop();
-                    if !has_await && node.is_async() {
-                        ctx.match_query(MissingAwait(node));
-                    }
-                }
-            }
-        }
-    }
-}
-
 pub struct MissingAwait(AnyFunctionLike);
-
-impl QueryMatch for MissingAwait {
-    fn text_range(&self) -> TextRange {
-        self.0.range()
-    }
-}
-
-impl Queryable for MissingAwait {
-    type Input = Self;
-    type Language = JsLanguage;
-    type Output = AnyFunctionLike;
-    type Services = ();
-
-    fn build_visitor(
-        analyzer: &mut impl AddVisitor<Self::Language>,
-        _: &<Self::Language as Language>::Root,
-    ) {
-        analyzer.add_visitor(Phases::Syntax, MissingAwaitVisitor::default);
-    }
-
-    fn unwrap_match(_: &ServiceBag, query: &Self::Input) -> Self::Output {
-        query.0.clone()
-    }
-}
 
 impl Rule for UseAwait {
     type Query = MissingAwait;
@@ -171,5 +103,85 @@ impl Rule for UseAwait {
                 "Remove this "<Emphasis>"async"</Emphasis>" modifier, or add an "<Emphasis>"await"</Emphasis>" expression in the function."
             }),
         )
+    }
+}
+
+#[derive(Default)]
+struct MissingAwaitVisitor {
+    /// Vector to hold a function node and a boolean indicating whether the function
+    /// contains an `await` expression or not.
+    stack: Vec<(TextSize, bool)>,
+}
+
+impl Visitor for MissingAwaitVisitor {
+    type Language = JsLanguage;
+
+    fn visit(
+        &mut self,
+        event: &WalkEvent<SyntaxNode<Self::Language>>,
+        mut ctx: VisitorContext<Self::Language>,
+    ) {
+        match event {
+            WalkEvent::Enter(node) => {
+                if let Some(node) = AnyFunctionLike::cast_ref(node)
+                    && node.is_async()
+                {
+                    self.stack.push((node.range().start(), false));
+                }
+                if let Some((_, has_await)) = self.stack.last_mut() {
+                    if JsAwaitExpression::can_cast(node.kind()) {
+                        *has_await = true;
+                    } else if let Some(for_of) = JsForOfStatement::cast_ref(node) {
+                        *has_await = *has_await || for_of.await_token().is_some();
+                    } else if let Some(declaration) = JsVariableDeclaration::cast_ref(node) {
+                        *has_await = *has_await || declaration.await_token().is_some();
+                    } else if let Some(declaration) = JsForVariableDeclaration::cast_ref(node) {
+                        *has_await = *has_await || declaration.await_token().is_some();
+                    } else if let Some(yield_expr) = JsYieldExpression::cast_ref(node) {
+                        *has_await = *has_await
+                            || yield_expr
+                                .argument()
+                                .is_some_and(|arg| arg.star_token().is_some());
+                    }
+                }
+            }
+            WalkEvent::Leave(node) => {
+                if let Some(node) = AnyFunctionLike::cast_ref(node)
+                    && let Some((function_start_range, has_await)) = self.stack.last().copied()
+                    && function_start_range == node.range().start()
+                {
+                    self.stack.pop();
+                    if !has_await && node.is_async() {
+                        ctx.match_query(MissingAwait(node));
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+impl QueryMatch for MissingAwait {
+    fn text_range(&self) -> TextRange {
+        self.0.range()
+    }
+}
+
+impl Queryable for MissingAwait {
+    type Input = Self;
+    type Language = JsLanguage;
+    type Output = AnyFunctionLike;
+    type Services = ();
+
+    fn build_visitor(
+        analyzer: &mut impl AddVisitor<Self::Language>,
+        _: &<Self::Language as Language>::Root,
+    ) {
+        analyzer.add_visitor(Phases::Syntax, MissingAwaitVisitor::default);
+    }
+
+    fn unwrap_match(_: &ServiceBag, query: &Self::Input) -> Self::Output {
+        query.0.clone()
     }
 }

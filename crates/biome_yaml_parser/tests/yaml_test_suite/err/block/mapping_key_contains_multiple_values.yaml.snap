@@ -53,18 +53,14 @@ YamlRoot {
                                 FLOW_START@20..20 "" [] [],
                                 PLAIN_LITERAL@20..22 "40" [] [],
                                 FLOW_END@22..22 "" [] [],
+                                MAPPING_END@22..22 "" [] [],
                             ],
                         },
                     ],
-                    mapping_end_token: MAPPING_END@22..22 "" [] [],
+                    mapping_end_token: MAPPING_END@22..23 "" [Newline("\n")] [],
                 },
             },
             dotdotdot_token: missing (optional),
-        },
-        YamlBogus {
-            items: [
-                MAPPING_END@22..23 "" [Newline("\n")] [],
-            ],
         },
     ],
     eof_token: EOF@23..23 "" [] [],
@@ -76,13 +72,13 @@ YamlRoot {
 ```
 0: YAML_ROOT@0..23
   0: YAML_DOCUMENT_LIST@0..23
-    0: YAML_DOCUMENT@0..22
+    0: YAML_DOCUMENT@0..23
       0: (empty)
       1: YAML_DIRECTIVE_LIST@0..0
       2: (empty)
-      3: YAML_BLOCK_IN_BLOCK_NODE@0..22
+      3: YAML_BLOCK_IN_BLOCK_NODE@0..23
         0: YAML_PROPERTY_LIST@0..0
-        1: YAML_BLOCK_MAPPING@0..22
+        1: YAML_BLOCK_MAPPING@0..23
           0: MAPPING_START@0..0 "" [] []
           1: YAML_BLOCK_MAP_ENTRY_LIST@0..22
             0: YAML_BLOCK_MAP_IMPLICIT_ENTRY@0..11
@@ -108,10 +104,9 @@ YamlRoot {
               6: FLOW_START@20..20 "" [] []
               7: PLAIN_LITERAL@20..22 "40" [] []
               8: FLOW_END@22..22 "" [] []
-          2: MAPPING_END@22..22 "" [] []
+              9: MAPPING_END@22..22 "" [] []
+          2: MAPPING_END@22..23 "" [Newline("\n")] []
       4: (empty)
-    1: YAML_BOGUS@22..23
-      0: MAPPING_END@22..23 "" [Newline("\n")] []
   1: EOF@23..23 "" [] []
 
 ```
@@ -134,14 +129,5 @@ mapping_key_contains_multiple_values.yaml:2:9 parse ━━━━━━━━━�
   > 2 │   "aaa" 'a' acb: 40
       │         ^^^^^^^^^^^
     3 │ 
-  
-mapping_key_contains_multiple_values.yaml:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected end of file.
-  
-    1 │ a:
-    2 │   "aaa" 'a' acb: 40
-  > 3 │ 
-      │ 
   
 ```

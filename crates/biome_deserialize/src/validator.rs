@@ -14,7 +14,7 @@ pub trait DeserializableValidator {
     /// should be rejected.
     fn validate(
         &mut self,
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         name: &str,
         range: TextRange,
     ) -> bool;
@@ -22,7 +22,7 @@ pub trait DeserializableValidator {
 
 /// Validates whether the given value is non-empty.
 pub fn non_empty<T: IsEmpty>(
-    ctx: &mut impl DeserializationContext,
+    ctx: &mut dyn DeserializationContext,
     value: &T,
     name: &str,
     range: TextRange,

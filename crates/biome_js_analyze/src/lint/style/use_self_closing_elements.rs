@@ -103,7 +103,7 @@ impl Rule for UseSelfClosingElements {
             .opening_element()
             .is_ok_and(|node| node.name().is_ok_and(|name| name.as_jsx_name().is_some()));
 
-        if node.children().is_empty() && !(ctx.options().ignore_html_elements() && is_html_element)
+        if node.elements().is_empty() && !(ctx.options().ignore_html_elements() && is_html_element)
         {
             Some(())
         } else {
@@ -162,9 +162,14 @@ impl Rule for UseSelfClosingElements {
             l_angle_token.ok()?,
             name.ok()?,
             attributes,
-            JsSyntaxToken::new_detached(T![/], &slash_token, leading_trivia, []),
             r_angle_token,
-        );
+        )
+        .with_slash_token(JsSyntaxToken::new_detached(
+            T![/],
+            &slash_token,
+            leading_trivia,
+            [],
+        ));
         if let Some(type_arguments) = type_arguments {
             self_closing_element_builder =
                 self_closing_element_builder.with_type_arguments(type_arguments);

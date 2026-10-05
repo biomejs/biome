@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validTypes.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script lang="ts">
+	type Props = { name: string };
+	export type { Props };
+
+	let { name }: Props = $props();
+</script>
+
+<p>{name}</p>
+
+```

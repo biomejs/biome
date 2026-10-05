@@ -15,7 +15,7 @@ pub struct PluginManifest {
 
 // There's only one manifest version now.
 pub fn supported_version(
-    ctx: &mut impl DeserializationContext,
+    ctx: &mut dyn DeserializationContext,
     value: &u8,
     name: &str,
     range: TextRange,

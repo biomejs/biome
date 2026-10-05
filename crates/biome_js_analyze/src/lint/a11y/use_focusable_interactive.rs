@@ -43,7 +43,10 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "useFocusableInteractive",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("interactive-supports-focus").same()],
+        sources: &[
+            RuleSource::EslintJsxA11y("interactive-supports-focus").same(),
+            RuleSource::EslintAstro("jsx-a11y/interactive-supports-focus").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
     }
@@ -100,5 +103,5 @@ impl Rule for UseFocusableInteractive {
 /// Checks if the given role attribute value is interactive or not based on ARIA roles.
 fn attribute_has_interactive_role(role_attribute_value: &AnyJsxAttributeValue) -> Option<bool> {
     let role = AriaRole::from_roles(role_attribute_value.as_static_value()?.text())?;
-    Some(role.is_interactive() && !role.is_composite())
+    Some(role != AriaRole::Separator && role.is_interactive() && !role.is_composite())
 }

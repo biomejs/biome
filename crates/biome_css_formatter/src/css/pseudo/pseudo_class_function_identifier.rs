@@ -1,5 +1,5 @@
-use crate::css::value::identifier::FormatCssIdentifierOptions;
 use crate::prelude::*;
+use crate::utils::case::pseudo_identifier_case;
 use biome_css_syntax::{CssPseudoClassFunctionIdentifier, CssPseudoClassFunctionIdentifierFields};
 use biome_formatter::{format_args, write};
 
@@ -19,15 +19,18 @@ impl FormatNodeRule<CssPseudoClassFunctionIdentifier> for FormatCssPseudoClassFu
         } = node.as_fields();
 
         let should_insert_space = f.options().delimiter_spacing().value();
+        let name = name?;
 
         write!(
             f,
             [
-                name.format()?
-                    .with_options(FormatCssIdentifierOptions::default().with_lowercasing()),
+                name.format().with_text_case(pseudo_identifier_case(&name)),
                 group(&format_args![
                     l_paren_token.format(),
-                    soft_block_indent_with_maybe_space(&ident.format(), should_insert_space),
+                    soft_block_indent_with_maybe_space(
+                        &ident?.format().with_text_case(CssCase::Preserve),
+                        should_insert_space
+                    ),
                     r_paren_token.format()
                 ])
             ]

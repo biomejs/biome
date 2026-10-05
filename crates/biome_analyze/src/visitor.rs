@@ -19,7 +19,7 @@ pub struct VisitorContext<'phase, 'query, L: Language> {
     pub options: &'phase AnalyzerOptions,
 }
 
-impl<L: Language> VisitorContext<'_, '_, L> {
+impl<'phase, L: Language> VisitorContext<'phase, '_, L> {
     pub fn match_query<T: QueryMatch>(&mut self, query: T) {
         self.query_matcher.match_query(MatchQueryParams {
             phase: self.phase,
@@ -31,6 +31,16 @@ impl<L: Language> VisitorContext<'_, '_, L> {
             options: self.options,
         })
     }
+
+    pub fn push_signal(&mut self, signal: SignalEntry<'phase, L>) {
+        self.signal_queue.push(signal);
+    }
+}
+
+/// Mutable services available before a phase starts traversing its syntax tree.
+pub struct VisitorStartContext<'a, L: Language> {
+    pub root: &'a LanguageRoot<L>,
+    pub services: &'a mut ServiceBag,
 }
 
 /// Mutable context objects provided to the finish hook of visitors
@@ -44,6 +54,11 @@ pub struct VisitorFinishContext<'a, L: Language> {
 /// the syntax tree, and emit rule query matches through the [crate::RuleRegistry]
 pub trait Visitor {
     type Language: Language;
+
+    /// Initializes services before any visitor in this phase receives walk events.
+    fn start(&mut self, ctx: VisitorStartContext<Self::Language>) {
+        let _ = ctx;
+    }
 
     fn visit(
         &mut self,

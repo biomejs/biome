@@ -23,6 +23,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         SvelteEachBlock {
@@ -47,11 +48,11 @@ HtmlRoot {
                     l_angle_token: L_ANGLE@50..53 "<" [Newline("\n"), Whitespace("\t")] [],
                     name: HtmlMemberName {
                         object: HtmlComponentName {
-                            value_token: HTML_LITERAL@53..61 "InputOTP" [] [],
+                            value_token: HTML_COMPONENT_LITERAL@53..61 "InputOTP" [] [],
                         },
                         dot_token: DOT@61..62 "." [] [],
-                        member: HtmlTagName {
-                            value_token: HTML_LITERAL@62..67 "Slot" [] [Whitespace(" ")],
+                        member: HtmlComponentName {
+                            value_token: HTML_COMPONENT_LITERAL@62..67 "Slot" [] [Whitespace(" ")],
                         },
                     },
                     attributes: HtmlAttributeList [
@@ -107,11 +108,11 @@ HtmlRoot {
                     l_angle_token: L_ANGLE@126..129 "<" [Newline("\n"), Whitespace("\t")] [],
                     name: HtmlMemberName {
                         object: HtmlComponentName {
-                            value_token: HTML_LITERAL@129..137 "InputOTP" [] [],
+                            value_token: HTML_COMPONENT_LITERAL@129..137 "InputOTP" [] [],
                         },
                         dot_token: DOT@137..138 "." [] [],
-                        member: HtmlTagName {
-                            value_token: HTML_LITERAL@138..143 "Slot" [] [Whitespace(" ")],
+                        member: HtmlComponentName {
+                            value_token: HTML_COMPONENT_LITERAL@138..143 "Slot" [] [Whitespace(" ")],
                         },
                     },
                     attributes: HtmlAttributeList [
@@ -146,7 +147,8 @@ HtmlRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..160
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..160
     0: SVELTE_EACH_BLOCK@0..84
       0: SVELTE_EACH_OPENING_BLOCK@0..50
         0: SV_CURLY_HASH@0..2 "{#" [] []
@@ -164,10 +166,10 @@ HtmlRoot {
           0: L_ANGLE@50..53 "<" [Newline("\n"), Whitespace("\t")] []
           1: HTML_MEMBER_NAME@53..67
             0: HTML_COMPONENT_NAME@53..61
-              0: HTML_LITERAL@53..61 "InputOTP" [] []
+              0: HTML_COMPONENT_LITERAL@53..61 "InputOTP" [] []
             1: DOT@61..62 "." [] []
-            2: HTML_TAG_NAME@62..67
-              0: HTML_LITERAL@62..67 "Slot" [] [Whitespace(" ")]
+            2: HTML_COMPONENT_NAME@62..67
+              0: HTML_COMPONENT_LITERAL@62..67 "Slot" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@67..74
             0: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@67..74
               0: L_CURLY@67..68 "{" [] []
@@ -206,10 +208,10 @@ HtmlRoot {
           0: L_ANGLE@126..129 "<" [Newline("\n"), Whitespace("\t")] []
           1: HTML_MEMBER_NAME@129..143
             0: HTML_COMPONENT_NAME@129..137
-              0: HTML_LITERAL@129..137 "InputOTP" [] []
+              0: HTML_COMPONENT_LITERAL@129..137 "InputOTP" [] []
             1: DOT@137..138 "." [] []
-            2: HTML_TAG_NAME@138..143
-              0: HTML_LITERAL@138..143 "Slot" [] [Whitespace(" ")]
+            2: HTML_COMPONENT_NAME@138..143
+              0: HTML_COMPONENT_LITERAL@138..143 "Slot" [] [Whitespace(" ")]
           2: HTML_ATTRIBUTE_LIST@143..150
             0: HTML_ATTRIBUTE_SINGLE_TEXT_EXPRESSION@143..150
               0: L_CURLY@143..144 "{" [] []
@@ -223,6 +225,6 @@ HtmlRoot {
         0: SV_CURLY_SLASH@152..155 "{/" [Newline("\n")] []
         1: EACH_KW@155..159 "each" [] []
         2: R_CURLY@159..160 "}" [] []
-  4: EOF@160..161 "" [Newline("\n")] []
+  5: EOF@160..161 "" [Newline("\n")] []
 
 ```

@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-issue-7722.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+import type { mySymbol } from "./helpers.ts";
+
+class MyClass {
+    declare [mySymbol]: number;
+}
+
+console.log(MyClass);
+
+```

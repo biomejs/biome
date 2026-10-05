@@ -1,0 +1,25 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/suppression_global.md
+---
+
+# Input
+
+```md
+<!-- biome-ignore-all format: preserve this generated document -->
+#    Preserved     heading
+
+-    preserved item
+
+```
+
+
+# Formatted
+
+```md
+<!-- biome-ignore-all format: preserve this generated document -->
+#    Preserved     heading
+
+-    preserved item
+
+```

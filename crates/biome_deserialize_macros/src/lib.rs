@@ -5,7 +5,7 @@ mod merge_derive;
 mod util;
 
 use proc_macro::TokenStream;
-use proc_macro_error2::*;
+use proc_macro_error3::*;
 use syn::{DeriveInput, parse_macro_input};
 
 /// Derives the [biome_deserialize::Deserializable] trait for a custom enum or

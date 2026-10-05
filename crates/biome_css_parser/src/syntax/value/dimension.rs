@@ -1,3 +1,4 @@
+use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -11,11 +12,11 @@ pub(crate) fn is_at_any_dimension(p: &mut CssParser) -> bool {
 }
 
 #[inline]
-pub(crate) fn parse_any_dimension(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_any_dimension(p: &mut CssParser, context: CssLexContext) -> ParsedSyntax {
     if is_at_percentage_dimension(p) {
-        parse_percentage_dimension(p)
+        parse_percentage_dimension(p, context)
     } else if is_at_regular_dimension(p) {
-        parse_regular_dimension(p)
+        parse_regular_dimension(p, context)
     } else {
         Absent
     }
@@ -25,17 +26,20 @@ pub(crate) fn is_at_percentage_dimension(p: &mut CssParser) -> bool {
     p.at(CSS_PERCENTAGE_VALUE)
 }
 #[inline]
-pub(crate) fn parse_percentage_dimension(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_percentage_dimension(
+    p: &mut CssParser,
+    context: CssLexContext,
+) -> ParsedSyntax {
     if !is_at_percentage_dimension(p) {
         return Absent;
     }
 
     let m = p.start();
     // Re-cast the value portion of the dimension as a number literal.
-    p.bump_remap(CSS_NUMBER_LITERAL);
+    p.bump_remap_with_context(CSS_NUMBER_LITERAL, context);
     // CSS_PERCENTAGE_VALUE guarantees the `%` will be the next token,
     // but we can use expect just to be safe.
-    p.expect(T![%]);
+    p.expect_with_context(T![%], context);
     Present(m.complete(p, CSS_PERCENTAGE))
 }
 
@@ -45,14 +49,14 @@ pub(crate) fn is_at_regular_dimension(p: &mut CssParser) -> bool {
 }
 
 #[inline]
-pub(crate) fn parse_regular_dimension(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_regular_dimension(p: &mut CssParser, context: CssLexContext) -> ParsedSyntax {
     if !is_at_regular_dimension(p) {
         return Absent;
     }
 
     let m = p.start();
     // Re-cast the value portion of the dimension as a number literal.
-    p.bump_remap(CSS_NUMBER_LITERAL);
+    p.bump_remap_with_context(CSS_NUMBER_LITERAL, context);
 
     // Any identifier is valid as a dimension unit, but for known units we
     // use `CssRegularDimension` as a convenience elsewhere to know that the
@@ -67,7 +71,7 @@ pub(crate) fn parse_regular_dimension(p: &mut CssParser) -> ParsedSyntax {
     // number parsed previously, but the lexer will most likely treat it
     // as a keyword (like `px` as PX_KW), so it needs to be re-cast to just
     // an ident.
-    p.bump_remap(T![ident]);
+    p.bump_remap_with_context(T![ident], context);
 
     Present(m.complete(p, kind))
 }

@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome ci --reporter=rdjson main.ts index.ts
+```
+
 ## `index.ts`
 
 ```ts
@@ -69,6 +75,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
         }
       },
       "message": "This import is unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -104,6 +111,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
         }
       },
       "message": "Several of these imports are unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -139,6 +147,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
         }
       },
       "message": "This variable f is unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -174,6 +183,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
         }
       },
       "message": "This variable f is unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -209,6 +219,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
         }
       },
       "message": "This import is unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -244,6 +255,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
         }
       },
       "message": "Several of these imports are unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -279,6 +291,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
         }
       },
       "message": "This variable f is unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -314,6 +327,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
         }
       },
       "message": "This variable f is unused.",
+      "severity": "WARNING",
       "suggestions": [
         {
           "range": {
@@ -349,6 +363,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
         }
       },
       "message": "Sort these imports.",
+      "severity": "ERROR",
       "suggestions": [
         {
           "range": {
@@ -384,6 +399,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
         }
       },
       "message": "Using == may be unsafe if you are relying on type coercion.",
+      "severity": "ERROR",
       "suggestions": [
         {
           "range": {
@@ -419,6 +435,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
         }
       },
       "message": "This is an unexpected use of the debugger statement.",
+      "severity": "ERROR",
       "suggestions": [
         {
           "range": {
@@ -453,7 +470,8 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "This variable implicitly has the any type."
+      "message": "This variable implicitly has the any type.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -473,7 +491,8 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "This variable implicitly has the any type."
+      "message": "This variable implicitly has the any type.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -493,7 +512,8 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "'z' is redeclared in the same scope."
+      "message": "'z' is redeclared in the same scope.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -513,13 +533,15 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "'f' is redeclared in the same scope."
+      "message": "'f' is redeclared in the same scope.",
+      "severity": "ERROR"
     },
     {
       "code": {
         "value": "format"
       },
-      "message": "File content differs from formatting output"
+      "message": "File content differs from formatting output",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -540,6 +562,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
         }
       },
       "message": "Sort these imports.",
+      "severity": "ERROR",
       "suggestions": [
         {
           "range": {
@@ -575,6 +598,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
         }
       },
       "message": "Using == may be unsafe if you are relying on type coercion.",
+      "severity": "ERROR",
       "suggestions": [
         {
           "range": {
@@ -610,6 +634,7 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
         }
       },
       "message": "This is an unexpected use of the debugger statement.",
+      "severity": "ERROR",
       "suggestions": [
         {
           "range": {
@@ -644,7 +669,8 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "This variable implicitly has the any type."
+      "message": "This variable implicitly has the any type.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -664,7 +690,8 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "This variable implicitly has the any type."
+      "message": "This variable implicitly has the any type.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -684,7 +711,8 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "'z' is redeclared in the same scope."
+      "message": "'z' is redeclared in the same scope.",
+      "severity": "ERROR"
     },
     {
       "code": {
@@ -704,13 +732,15 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
           }
         }
       },
-      "message": "'f' is redeclared in the same scope."
+      "message": "'f' is redeclared in the same scope.",
+      "severity": "ERROR"
     },
     {
       "code": {
         "value": "format"
       },
-      "message": "File content differs from formatting output"
+      "message": "File content differs from formatting output",
+      "severity": "ERROR"
     }
   ]
 }

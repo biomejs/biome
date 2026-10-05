@@ -1,0 +1,33 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/comments/function-argument-comments.css
+---
+
+# Input
+
+```css
+.comments{
+value:outerFunctionWithAnExtremelyLongName(1,
+/* comment */
+nestedFunctionWithAnExtremelyLongName(firstArgumentWithLongName,secondArgumentWithLongName,thirdArgumentWithLongName));
+}
+
+```
+
+
+# Formatted
+
+```css
+.comments {
+	value: outerFunctionWithAnExtremelyLongName(
+		1,
+		/* comment */
+		nestedFunctionWithAnExtremelyLongName(
+				firstArgumentWithLongName,
+				secondArgumentWithLongName,
+				thirdArgumentWithLongName
+			)
+	);
+}
+
+```

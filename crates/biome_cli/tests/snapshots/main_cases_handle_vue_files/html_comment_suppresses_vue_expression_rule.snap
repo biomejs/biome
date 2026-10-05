@@ -1,0 +1,38 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --error-on-warnings file.vue
+```
+
+## `biome.json`
+
+```json
+{
+  "html": { "experimentalFullSupportEnabled": true },
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "correctness": { "noUndeclaredVariables": "error" }
+    }
+  }
+}
+```
+
+## `file.vue`
+
+```vue
+<template>
+  <!-- biome-ignore lint/correctness/noUndeclaredVariables: intentionally external -->
+  <div :title="missingValue" />
+</template>
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

@@ -1,0 +1,194 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+- [] vertical tab
+- [
+] line feed
+- [] carriage return
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdBulletListItem {
+            md_bullet_list: MdBulletList [
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@0..1 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@1..2 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdReferenceLink {
+                                    l_brack_token: L_BRACK@2..3 "[" [] [],
+                                    text: MdInlineItemList [
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@3..4 "\u{b}" [] [],
+                                        },
+                                    ],
+                                    r_brack_token: R_BRACK@4..5 "]" [] [],
+                                    label: missing (optional),
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@5..18 " vertical tab" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@18..19 "\n" [] [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@19..20 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@20..21 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdReferenceLink {
+                                    l_brack_token: L_BRACK@21..22 "[" [] [],
+                                    text: MdInlineItemList [
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@22..23 "\n" [] [],
+                                        },
+                                    ],
+                                    r_brack_token: R_BRACK@23..24 "]" [] [],
+                                    label: missing (optional),
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@24..34 " line feed" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@34..35 "\n" [] [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                MdBullet {
+                    prefix: MdListMarkerPrefix {
+                        pre_marker_indent: MdIndentTokenList [],
+                        marker: MINUS@35..36 "-" [] [],
+                        post_marker_space_token: MD_LIST_POST_MARKER_SPACE@36..37 " " [] [],
+                        content_indent: MdIndentTokenList [],
+                    },
+                    content: MdBlockList [
+                        MdParagraph {
+                            list: MdInlineItemList [
+                                MdReferenceLink {
+                                    l_brack_token: L_BRACK@37..38 "[" [] [],
+                                    text: MdInlineItemList [
+                                        MdTextual {
+                                            value_token: MD_TEXTUAL_LITERAL@38..39 "\r" [] [],
+                                        },
+                                    ],
+                                    r_brack_token: R_BRACK@39..40 "]" [] [],
+                                    label: missing (optional),
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@40..56 " carriage return" [] [],
+                                },
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@56..57 "\n" [] [],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@57..57 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..57
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..57
+    0: MD_BULLET_LIST_ITEM@0..57
+      0: MD_BULLET_LIST@0..57
+        0: MD_BULLET@0..19
+          0: MD_LIST_MARKER_PREFIX@0..2
+            0: MD_INDENT_TOKEN_LIST@0..0
+            1: MINUS@0..1 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@1..2 " " [] []
+            3: MD_INDENT_TOKEN_LIST@2..2
+          1: MD_BLOCK_LIST@2..19
+            0: MD_PARAGRAPH@2..19
+              0: MD_INLINE_ITEM_LIST@2..19
+                0: MD_REFERENCE_LINK@2..5
+                  0: L_BRACK@2..3 "[" [] []
+                  1: MD_INLINE_ITEM_LIST@3..4
+                    0: MD_TEXTUAL@3..4
+                      0: MD_TEXTUAL_LITERAL@3..4 "\u{b}" [] []
+                  2: R_BRACK@4..5 "]" [] []
+                  3: (empty)
+                1: MD_TEXTUAL@5..18
+                  0: MD_TEXTUAL_LITERAL@5..18 " vertical tab" [] []
+                2: MD_TEXTUAL@18..19
+                  0: MD_TEXTUAL_LITERAL@18..19 "\n" [] []
+        1: MD_BULLET@19..35
+          0: MD_LIST_MARKER_PREFIX@19..21
+            0: MD_INDENT_TOKEN_LIST@19..19
+            1: MINUS@19..20 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@20..21 " " [] []
+            3: MD_INDENT_TOKEN_LIST@21..21
+          1: MD_BLOCK_LIST@21..35
+            0: MD_PARAGRAPH@21..35
+              0: MD_INLINE_ITEM_LIST@21..35
+                0: MD_REFERENCE_LINK@21..24
+                  0: L_BRACK@21..22 "[" [] []
+                  1: MD_INLINE_ITEM_LIST@22..23
+                    0: MD_TEXTUAL@22..23
+                      0: MD_TEXTUAL_LITERAL@22..23 "\n" [] []
+                  2: R_BRACK@23..24 "]" [] []
+                  3: (empty)
+                1: MD_TEXTUAL@24..34
+                  0: MD_TEXTUAL_LITERAL@24..34 " line feed" [] []
+                2: MD_TEXTUAL@34..35
+                  0: MD_TEXTUAL_LITERAL@34..35 "\n" [] []
+        2: MD_BULLET@35..57
+          0: MD_LIST_MARKER_PREFIX@35..37
+            0: MD_INDENT_TOKEN_LIST@35..35
+            1: MINUS@35..36 "-" [] []
+            2: MD_LIST_POST_MARKER_SPACE@36..37 " " [] []
+            3: MD_INDENT_TOKEN_LIST@37..37
+          1: MD_BLOCK_LIST@37..57
+            0: MD_PARAGRAPH@37..57
+              0: MD_INLINE_ITEM_LIST@37..57
+                0: MD_REFERENCE_LINK@37..40
+                  0: L_BRACK@37..38 "[" [] []
+                  1: MD_INLINE_ITEM_LIST@38..39
+                    0: MD_TEXTUAL@38..39
+                      0: MD_TEXTUAL_LITERAL@38..39 "\r" [] []
+                  2: R_BRACK@39..40 "]" [] []
+                  3: (empty)
+                1: MD_TEXTUAL@40..56
+                  0: MD_TEXTUAL_LITERAL@40..56 " carriage return" [] []
+                2: MD_TEXTUAL@56..57
+                  0: MD_TEXTUAL_LITERAL@56..57 "\n" [] []
+  3: EOF@57..57 "" [] []
+
+```

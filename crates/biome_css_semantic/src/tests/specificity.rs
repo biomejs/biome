@@ -396,3 +396,57 @@ fn test_specificity_deeply_nested_rules() {
     // assert_eq!(id_selector.resolved().to_string(), "#id");
     // assert_eq!(&id_selector.specificity, &Specificity(1, 1, 2));
 }
+
+#[test]
+fn test_specificity_scss_partial_combinator_selector() {
+    let parse = parse_css(
+        ".sidebar > { .error {} }",
+        CssFileSource::scss(),
+        CssParserOptions::default(),
+    );
+    assert!(parse.diagnostics().is_empty(), "{:#?}", parse.diagnostics());
+
+    let root = parse.tree();
+    let model = semantic_model(&root);
+    let rules = model.rules();
+    let partial = rules.first().expect("expected the partial selector rule");
+    assert_eq!(partial.selectors[0].specificity, Specificity(0, 1, 0));
+
+    let child_id = partial.child_ids.first().expect("expected the nested rule");
+    let child = model
+        .get_rule_by_id(child_id)
+        .expect("expected the nested rule in the semantic model");
+    assert_eq!(child.selectors[0].specificity, Specificity(0, 2, 0));
+}
+
+#[test]
+fn test_specificity_scss_interpolated_sub_selector() {
+    let parse = parse_css(
+        "*#{$suffix}, [hidden]#{$suffix}, :not(.item)#{$suffix}, [hidden]#{$suffix}.active#id {}",
+        CssFileSource::scss(),
+        CssParserOptions::default(),
+    );
+    assert!(parse.diagnostics().is_empty(), "{:#?}", parse.diagnostics());
+
+    let root = parse.tree();
+    let model = semantic_model(&root);
+    let rules = model.rules();
+    let rule = rules
+        .first()
+        .expect("expected the interpolated selector rule");
+    let specificities = rule
+        .selectors
+        .iter()
+        .map(|selector| selector.specificity)
+        .collect::<Vec<_>>();
+
+    assert_eq!(
+        specificities,
+        [
+            Specificity(0, 0, 0),
+            Specificity(0, 1, 0),
+            Specificity(0, 1, 0),
+            Specificity(1, 2, 0),
+        ]
+    );
+}

@@ -1,17 +1,19 @@
 mod any;
 mod function;
 mod interpolated_string;
+mod interpolated_url;
 mod interpolated_value;
 mod parent_selector;
 
 use crate::parser::CssParser;
-use crate::syntax::scss::parse_scss_expression_until;
+use crate::syntax::parse_error::scss_only_syntax_error;
+use crate::syntax::scss::{is_at_scss_unary_operator, parse_scss_expression_until};
 use crate::syntax::value::function::is_at_any_function_with_context;
 use crate::syntax::{
     CssSyntaxFeatures, ValueParsingContext, ValueParsingMode, is_at_any_value_with_context,
     is_at_css_wide_keyword, is_at_identifier,
 };
-use biome_css_syntax::{CssSyntaxKind, T};
+use biome_css_syntax::{CssSyntaxKind, CssSyntaxKind::CSS_BOGUS_CUSTOM_IDENTIFIER, T};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::{Parser, SyntaxFeature, TokenSet, token_set};
@@ -24,6 +26,7 @@ pub(crate) use function::{
 pub(crate) use interpolated_string::{
     is_at_scss_interpolated_string, parse_scss_interpolated_string,
 };
+pub(crate) use interpolated_url::parse_scss_interpolated_url_value;
 pub(crate) use interpolated_value::{
     is_at_scss_interpolated_function_or_value, is_at_scss_interpolated_value_head,
     is_at_scss_suffixed_interpolated_value, parse_scss_interpolated_function_or_value,
@@ -40,7 +43,7 @@ pub(crate) const SCSS_BRACKETED_VALUE_EXPRESSION_END_SET: TokenSet<CssSyntaxKind
 /// Parses a Sass expression item inside the shared bracketed-value parser.
 ///
 /// This keeps plain CSS custom identifiers on the fallback path, while parsing
-/// Sass-only values and CSS-wide keywords as expressions.
+/// Sass-only values, unary operators and CSS-wide keywords as expressions.
 ///
 /// Examples:
 /// ```scss
@@ -57,16 +60,21 @@ pub(crate) fn parse_scss_bracketed_value_expression_item(p: &mut CssParser) -> P
         return Absent;
     }
 
-    parse_scss_expression_until(p, SCSS_BRACKETED_VALUE_EXPRESSION_END_SET)
+    CssSyntaxFeatures::Scss.parse_exclusive_syntax_with_kind(
+        p,
+        |p| parse_scss_expression_until(p, SCSS_BRACKETED_VALUE_EXPRESSION_END_SET),
+        |p, marker| scss_only_syntax_error(p, "SCSS bracketed expressions", marker.range(p)),
+        Some(CSS_BOGUS_CUSTOM_IDENTIFIER),
+    )
 }
 
 #[inline]
 fn is_at_scss_bracketed_value_expression_item(p: &mut CssParser) -> bool {
-    if !CssSyntaxFeatures::Scss.is_supported(p) {
-        return false;
-    }
+    // CSS grid line names may use `not` as a custom identifier.
+    let is_unary_expression =
+        (!p.at(T![not]) || CssSyntaxFeatures::Scss.is_supported(p)) && is_at_scss_unary_operator(p);
 
-    if p.at(T!['(']) {
+    if p.at(T!['(']) || is_unary_expression {
         return true;
     }
 

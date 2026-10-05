@@ -1,0 +1,88 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/custom-blocks.vue
+---
+
+# Input
+
+```vue
+<template>
+<div    class="a"   >formatted as markup</div>
+</template>
+
+<template lang="pug">
+  .test
+    #foo
+  .bla
+</template>
+
+<template lang="">
+<div    class="b"   >an empty lang names no preprocessor, so this is markup</div>
+</template>
+
+<template lang>
+<div    class="c"   >and so does no value at all</div>
+</template>
+
+<docs>
+This block is prose, and it may mention a `<my-component>` without closing it.
+</docs>
+
+<i18n>
+{
+  "en":   { "hello":   "Hello" }
+}
+</i18n>
+
+<custom   lang="javascript"  >
+const foo =            "</"
+</custom>
+
+```
+
+
+# Formatted
+
+```vue
+<template>
+	<div class="a">formatted as markup</div>
+</template>
+
+<template lang="pug">
+  .test
+    #foo
+  .bla
+</template>
+
+<template lang="">
+	<div class="b">an empty lang names no preprocessor, so this is markup</div>
+</template>
+
+<template lang>
+	<div class="c">and so does no value at all</div>
+</template>
+
+<docs>
+This block is prose, and it may mention a `<my-component>` without closing it.
+</docs>
+
+<i18n>
+{
+  "en":   { "hello":   "Hello" }
+}
+</i18n>
+
+<custom lang="javascript">
+const foo =            "</"
+</custom>
+
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"\n  .test\n    #foo\n  .bla\n" => 87..112
+"\nThis block is prose, and it may mention a `<my-component>` without closing it.\n" => 319..399
+"\n{\n  \"en\":   { \"hello\":   \"Hello\" }\n}\n" => 414..452
+"\nconst foo =            \"</\"\n" => 487..516

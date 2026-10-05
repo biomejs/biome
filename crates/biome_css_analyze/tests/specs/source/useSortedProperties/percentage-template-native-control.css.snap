@@ -1,0 +1,44 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: percentage-template-native-control.css
+---
+# Input
+```css
+/* should generate diagnostics */
+.host {
+    color: red;
+    display: block;
+    @keyframes inner { from { opacity: 0; } to { opacity: 1; } }
+}
+
+```
+
+# Diagnostics
+```
+percentage-template-native-control.css:2:7 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ .host {
+      │       ^
+  > 3 │     color: red;
+  > 4 │     display: block;
+  > 5 │     @keyframes inner { from { opacity: 0; } to { opacity: 1; } }
+  > 6 │ }
+      │ ^
+    7 │ 
+  
+  i Safe fix: Sort these properties
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   .host {
+    3   │ - ····color:·red;
+    4   │ - ····display:·block;
+      3 │ + ····display:·block;
+      4 │ + ····color:·red;
+    5 5 │       @keyframes inner { from { opacity: 0; } to { opacity: 1; } }
+    6 6 │   }
+  
+
+```

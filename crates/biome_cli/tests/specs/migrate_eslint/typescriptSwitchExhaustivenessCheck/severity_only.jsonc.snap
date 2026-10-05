@@ -1,0 +1,76 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: severity_only.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"overrides": [
+		{
+			"files": ["*.test.ts"],
+			"rules": { "@typescript-eslint/switch-exhaustiveness-check": ["warn"] }
+		},
+		{
+			"files": ["*.js"],
+			"rules": { "@typescript-eslint/switch-exhaustiveness-check": "off" }
+		}
+	],
+	"rules": { "@typescript-eslint/switch-exhaustiveness-check": "error" }
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"preset": "none",
+			"nursery": {
+				"useExhaustiveSwitchCases": {
+					"level": "error",
+					"options": { "requireExplicitCase": true }
+				}
+			}
+		}
+	},
+	"overrides": [
+		{
+			"includes": ["*.test.ts"],
+			"linter": {
+				"rules": {
+					"nursery": {
+						"useExhaustiveSwitchCases": {
+							"level": "warn",
+							"options": { "requireExplicitCase": true }
+						}
+					}
+				}
+			}
+		},
+		{
+			"includes": ["*.js"],
+			"linter": {
+				"rules": {
+					"nursery": {
+						"useExhaustiveSwitchCases": {
+							"level": "off",
+							"options": { "requireExplicitCase": true }
+						}
+					}
+				}
+			}
+		}
+	]
+}
+
+```

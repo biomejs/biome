@@ -1,0 +1,168 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```html
+<div>before {{
+	value => {
+		return value;
+	}
+}} after</div>
+
+<p>{{
+	first
+}} middle {{
+	second
+}}</p>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@1..4 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@4..5 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@5..12 "before" [] [Whitespace(" ")],
+                },
+                HtmlDoubleTextExpression {
+                    l_double_curly_token: L_DOUBLE_CURLY@12..14 "{{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@14..46 "\n\tvalue => {\n\t\treturn value;\n\t}\n" [] [],
+                    },
+                    r_double_curly_token: R_DOUBLE_CURLY@46..49 "}}" [] [Whitespace(" ")],
+                },
+                HtmlContent {
+                    value_token: HTML_LITERAL@49..54 "after" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@54..55 "<" [] [],
+                slash_token: SLASH@55..56 "/" [] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@56..59 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@59..60 ">" [] [],
+            },
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@60..63 "<" [Newline("\n"), Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: P_KW@63..64 "p" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@64..65 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlDoubleTextExpression {
+                    l_double_curly_token: L_DOUBLE_CURLY@65..67 "{{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@67..75 "\n\tfirst\n" [] [],
+                    },
+                    r_double_curly_token: R_DOUBLE_CURLY@75..78 "}}" [] [Whitespace(" ")],
+                },
+                HtmlContent {
+                    value_token: HTML_LITERAL@78..85 "middle" [] [Whitespace(" ")],
+                },
+                HtmlDoubleTextExpression {
+                    l_double_curly_token: L_DOUBLE_CURLY@85..87 "{{" [] [],
+                    expression: HtmlTextExpression {
+                        html_literal_token: HTML_LITERAL@87..96 "\n\tsecond\n" [] [],
+                    },
+                    r_double_curly_token: R_DOUBLE_CURLY@96..98 "}}" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@98..99 "<" [] [],
+                slash_token: SLASH@99..100 "/" [] [],
+                name: HtmlTagName {
+                    value_token: P_KW@100..101 "p" [] [],
+                },
+                r_angle_token: R_ANGLE@101..102 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@102..103 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..103
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..102
+    0: HTML_ELEMENT@0..60
+      0: HTML_OPENING_ELEMENT@0..5
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_TAG_NAME@1..4
+          0: DIV_KW@1..4 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@4..4
+        3: R_ANGLE@4..5 ">" [] []
+      1: HTML_ELEMENT_LIST@5..54
+        0: HTML_CONTENT@5..12
+          0: HTML_LITERAL@5..12 "before" [] [Whitespace(" ")]
+        1: HTML_DOUBLE_TEXT_EXPRESSION@12..49
+          0: L_DOUBLE_CURLY@12..14 "{{" [] []
+          1: HTML_TEXT_EXPRESSION@14..46
+            0: HTML_LITERAL@14..46 "\n\tvalue => {\n\t\treturn value;\n\t}\n" [] []
+          2: R_DOUBLE_CURLY@46..49 "}}" [] [Whitespace(" ")]
+        2: HTML_CONTENT@49..54
+          0: HTML_LITERAL@49..54 "after" [] []
+      2: HTML_CLOSING_ELEMENT@54..60
+        0: L_ANGLE@54..55 "<" [] []
+        1: SLASH@55..56 "/" [] []
+        2: HTML_TAG_NAME@56..59
+          0: DIV_KW@56..59 "div" [] []
+        3: R_ANGLE@59..60 ">" [] []
+    1: HTML_ELEMENT@60..102
+      0: HTML_OPENING_ELEMENT@60..65
+        0: L_ANGLE@60..63 "<" [Newline("\n"), Newline("\n")] []
+        1: HTML_TAG_NAME@63..64
+          0: P_KW@63..64 "p" [] []
+        2: HTML_ATTRIBUTE_LIST@64..64
+        3: R_ANGLE@64..65 ">" [] []
+      1: HTML_ELEMENT_LIST@65..98
+        0: HTML_DOUBLE_TEXT_EXPRESSION@65..78
+          0: L_DOUBLE_CURLY@65..67 "{{" [] []
+          1: HTML_TEXT_EXPRESSION@67..75
+            0: HTML_LITERAL@67..75 "\n\tfirst\n" [] []
+          2: R_DOUBLE_CURLY@75..78 "}}" [] [Whitespace(" ")]
+        1: HTML_CONTENT@78..85
+          0: HTML_LITERAL@78..85 "middle" [] [Whitespace(" ")]
+        2: HTML_DOUBLE_TEXT_EXPRESSION@85..98
+          0: L_DOUBLE_CURLY@85..87 "{{" [] []
+          1: HTML_TEXT_EXPRESSION@87..96
+            0: HTML_LITERAL@87..96 "\n\tsecond\n" [] []
+          2: R_DOUBLE_CURLY@96..98 "}}" [] []
+      2: HTML_CLOSING_ELEMENT@98..102
+        0: L_ANGLE@98..99 "<" [] []
+        1: SLASH@99..100 "/" [] []
+        2: HTML_TAG_NAME@100..101
+          0: P_KW@100..101 "p" [] []
+        3: R_ANGLE@101..102 ">" [] []
+  5: EOF@102..103 "" [Newline("\n")] []
+
+```

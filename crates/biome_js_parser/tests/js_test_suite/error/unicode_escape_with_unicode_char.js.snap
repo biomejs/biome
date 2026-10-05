@@ -20,7 +20,7 @@ JsModule {
     items: JsModuleItemList [
         JsBogusStatement {
             items: [
-                JsBogus {
+                JsBogusVariableDeclaration {
                     items: [
                         CONST_KW@0..6 "const" [] [Whitespace(" ")],
                         JsBogus {
@@ -68,7 +68,7 @@ JsModule {
   2: JS_DIRECTIVE_LIST@0..0
   3: JS_MODULE_ITEM_LIST@0..16
     0: JS_BOGUS_STATEMENT@0..15
-      0: JS_BOGUS@0..15
+      0: JS_BOGUS_VARIABLE_DECLARATION@0..15
         0: CONST_KW@0..6 "const" [] [Whitespace(" ")]
         1: JS_BOGUS@6..15
           0: JS_BOGUS@6..15

@@ -1,0 +1,73 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/prettier-ignore-range-2.svelte
+---
+
+# Input
+
+```svelte
+<div>
+    
+    I need to adhere sadly</div>
+
+<!-- prettier-ignore-start -->
+
+<div      > format madness here </div>
+
+<p>
+    I'm
+    freeeee!
+</p>
+
+<!-- prettier-ignore-end -->
+<script>
+    const a = true;
+</script>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,16 +1,12 @@
+-<script>
+-    const a = true;
+-</script>
+-
+ <div>I need to adhere sadly</div>
+ 
+ <!-- prettier-ignore-start -->
+ 
+ <div      > format madness here </div>
+ 
+-<p>
+-    I'm
+-    freeeee!
+-</p>
++<p>I'm freeeee!</p>
+ 
+ <!-- prettier-ignore-end -->
++<script>
++    const a = true;
++</script>
+```
+
+# Output
+
+```svelte
+<div>I need to adhere sadly</div>
+
+<!-- prettier-ignore-start -->
+
+<div      > format madness here </div>
+
+<p>I'm freeeee!</p>
+
+<!-- prettier-ignore-end -->
+<script>
+    const a = true;
+</script>
+```

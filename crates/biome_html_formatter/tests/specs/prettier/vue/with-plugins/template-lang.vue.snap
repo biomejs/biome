@@ -1,0 +1,38 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/with-plugins/template-lang.vue
+---
+
+# Input
+
+```vue
+<template lang="uppercase-rocks">
+hello,
+world!
+</template>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,4 +1,4 @@
+ <template lang="uppercase-rocks">
+-HELLO,
+-WORLD!
++hello,
++world!
+ </template>
+```
+
+# Output
+
+```vue
+<template lang="uppercase-rocks">
+hello,
+world!
+</template>
+```

@@ -136,9 +136,7 @@ impl AnyStyleSink {
             })
             .filter(|property| {
                 property
-                    .value()
-                    .ok()
-                    .is_some_and(|value| has_color_literal_value(&value))
+                    .value().is_ok_and(|value| has_color_literal_value(&value))
             })
             .map(|property| property.range())
             .collect()
@@ -152,13 +150,9 @@ fn has_color_literal_value(value: &AnyJsExpression) -> bool {
         ) => true,
         AnyJsExpression::JsConditionalExpression(conditional) => {
             conditional
-                .consequent()
-                .ok()
-                .is_some_and(|consequent| consequent.is_string_literal())
+                .consequent().is_ok_and(|consequent| consequent.is_string_literal())
                 || conditional
-                    .alternate()
-                    .ok()
-                    .is_some_and(|alternate| alternate.is_string_literal())
+                    .alternate().is_ok_and(|alternate| alternate.is_string_literal())
         }
         _ => false,
     }

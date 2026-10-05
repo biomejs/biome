@@ -22,20 +22,22 @@ declare_node_union! {
 }
 
 declare_lint_rule! {
-    /// Disallow functions declared inside loops that capture unsafe outer variables.
+    /// Disallow functions created inside loops when they use variables that can change.
     ///
-    /// Functions created in loops can easily observe values from a later iteration instead of the
-    /// iteration where they were created. This rule reports functions that capture outer bindings
-    /// which may be reassigned while the loop continues.
+    /// A function created in a loop can run after the loop has moved to a later iteration. If the
+    /// function reads a variable declared outside it, the function may observe the variable's later
+    /// value instead of the value from the iteration that created the function.
     ///
-    /// The rule ignores plain immediately invoked function expressions (IIFEs), but still reports
-    /// async, generator, and self-referential IIFEs because they can escape the current iteration.
+    /// The rule ignores an immediately invoked function expression (IIFE), which is called as soon
+    /// as it is created. It still reports async or generator IIFEs, and IIFEs that refer to their
+    /// own name, because those functions can outlive the current iteration.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// Using `var` for the iteration variable creates a single binding shared across all iterations, so it's unsafe to capture.
+    /// A `var` iteration variable is shared by every iteration, so a function created in the loop
+    /// can observe a later value.
     ///
     /// ```js,expect_diagnostic
     /// for (var i = 0; i < 10; i++) {
@@ -55,7 +57,8 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// Using `let` or `const` for the iteration variable creates a fresh binding each iteration, so it's safe to capture.
+    /// A `let` or `const` iteration variable is created separately for each iteration, so the
+    /// function keeps the expected value.
     ///
     /// ```js
     /// for (let i = 0; i < 10; i++) {
@@ -551,9 +554,7 @@ fn is_iife(function: &AnySkippableIife) -> bool {
 
         if let Some(call) = parent.clone().cast::<JsCallExpression>() {
             return call
-                .callee()
-                .ok()
-                .is_some_and(|callee| callee.syntax() == &current);
+                .callee().is_ok_and(|callee| callee.syntax() == &current);
         }
 
         return false;

@@ -4,7 +4,6 @@ use biome_db::ParsedSource;
 use biome_diagnostics::category;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to_string};
 use biome_js_parser::{JsParserOptions, Parse, parse};
-use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_js_syntax::{TextRange, TextSize};
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 use biome_package::{Dependencies, PackageJson};
@@ -61,11 +60,9 @@ fn quick_test() {
     let rule_filter = RuleFilter::Rule("nursery", "useExplicitType");
 
     let dependencies = Dependencies(Box::new([("buffer".into(), "latest".into())]));
-    let semantic_model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
 
     let services = crate::JsAnalyzerServices::default()
         .with_source_type(JsFileSource::tsx())
-        .with_semantic_model(&semantic_model)
         .with_project_layout(project_layout_with_top_level_dependencies(dependencies));
 
     crate::analyze(
@@ -117,11 +114,8 @@ fn quick_test_suppression() {
         JsFileSource::js_module(),
         JsParserOptions::default(),
     );
-    let semantic_model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
 
-    let services = JsAnalyzerServices::from(&parsed.tree())
-        .with_semantic_model(&semantic_model)
-        .with_language_db(embedded_db(&parsed));
+    let services = JsAnalyzerServices::from(&parsed.tree()).with_language_db(embedded_db(&parsed));
     let options = AnalyzerOptions::default();
     crate::analyze(
         &parsed.tree(),
@@ -206,10 +200,7 @@ fn suppression() {
 
     let mut lint_ranges: Vec<TextRange> = Vec::new();
     let mut parse_ranges: Vec<TextRange> = Vec::new();
-    let semantic_model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
-    let services = JsAnalyzerServices::from(&parsed.tree())
-        .with_semantic_model(&semantic_model)
-        .with_language_db(embedded_db(&parsed));
+    let services = JsAnalyzerServices::from(&parsed.tree()).with_language_db(embedded_db(&parsed));
     let options = AnalyzerOptions::default();
     crate::analyze(
         &parsed.tree(),
@@ -287,7 +278,7 @@ fn suppression_syntax() {
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let code = diag.category().unwrap();
@@ -331,7 +322,7 @@ let bar = 33;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -382,7 +373,7 @@ debugger;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -428,7 +419,7 @@ debugger;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -476,7 +467,7 @@ debugger;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -525,7 +516,7 @@ let bar = 33;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let code = diag.category().unwrap();
@@ -572,7 +563,7 @@ let bar = 33;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -617,7 +608,7 @@ let bar = 33;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -665,7 +656,7 @@ let bar = 33;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -715,7 +706,7 @@ let c;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let code = diag.category().unwrap();
@@ -766,7 +757,7 @@ debugger;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 has_diagnostics = true;
@@ -818,7 +809,7 @@ let d;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
@@ -856,11 +847,8 @@ const foo0 = function (bar: string) {
     };
     let options = AnalyzerOptions::default();
     let root = parsed.tree();
-    let semantic_model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
 
-    let services = crate::JsAnalyzerServices::default()
-        .with_source_type(JsFileSource::ts())
-        .with_semantic_model(&semantic_model);
+    let services = crate::JsAnalyzerServices::default().with_source_type(JsFileSource::ts());
 
     crate::analyze(&root, filter, &options, &[], services, |signal| {
         if let Some(diag) = signal.diagnostic() {
@@ -907,7 +895,7 @@ a == b;
         filter,
         &options,
         &[],
-        Default::default(),
+        JsAnalyzerServices::default(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 has_diagnostics = true;

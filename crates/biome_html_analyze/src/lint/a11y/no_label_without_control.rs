@@ -177,7 +177,10 @@ fn has_accessible_label(
     while let Some(event) = child_iter.next() {
         match event {
             WalkEvent::Enter(child) => match child.kind() {
-                HtmlSyntaxKind::HTML_TEXT_EXPRESSION | HtmlSyntaxKind::HTML_CONTENT => {
+                HtmlSyntaxKind::HTML_TEXT_EXPRESSION
+                | HtmlSyntaxKind::HTML_SINGLE_TEXT_EXPRESSION
+                | HtmlSyntaxKind::HTML_DOUBLE_TEXT_EXPRESSION
+                | HtmlSyntaxKind::HTML_CONTENT => {
                     return true;
                 }
                 HtmlSyntaxKind::HTML_ELEMENT

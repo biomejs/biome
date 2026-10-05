@@ -1,0 +1,58 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/block-element-break-children.svelte
+---
+
+# Input
+
+```svelte
+<div><div>asd</div><span>asd</span></div>
+
+<div><span>asd</span><div>asd</div></div>
+
+<div> <div>asd</div> <span>asd</span> </div>
+
+<div> <span>asd</span> <div>asd</div> </div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -8,12 +8,6 @@
+     <div>asd</div>
+ </div>
+ 
+-<div>
+-    <div>asd</div>
+-    <span>asd</span>
+-</div>
++<div><div>asd</div> <span>asd</span> </div>
+ 
+-<div>
+-    <span>asd</span>
+-    <div>asd</div>
+-</div>
++<div> <span>asd</span> <div>asd</div> </div>
+```
+
+# Output
+
+```svelte
+<div>
+    <div>asd</div>
+    <span>asd</span>
+</div>
+
+<div>
+    <span>asd</span>
+    <div>asd</div>
+</div>
+
+<div><div>asd</div> <span>asd</span> </div>
+
+<div> <span>asd</span> <div>asd</div> </div>
+```

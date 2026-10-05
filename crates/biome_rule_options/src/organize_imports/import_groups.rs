@@ -2,7 +2,7 @@ use biome_console::markup;
 use biome_deserialize::{Deserializable, DeserializationContext, DeserializationDiagnostic, Text};
 use biome_deserialize_macros::Deserializable;
 use biome_glob::{CandidatePath, Glob};
-use biome_resolver::is_builtin_node_module;
+use biome_resolver::{is_builtin_bun_module, is_builtin_node_module};
 use biome_string_case::comparable_token::ComparableToken;
 
 use super::import_source::{ImportSource, ImportSourceKind};
@@ -104,7 +104,7 @@ impl ImportGroup {
 }
 impl Deserializable for ImportGroup {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl biome_deserialize::DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -177,7 +177,7 @@ impl GroupMatcher {
 }
 impl Deserializable for GroupMatcher {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl biome_deserialize::DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -234,7 +234,7 @@ impl NegatableImportKindMatcher {
 }
 impl biome_deserialize::Deserializable for NegatableImportKindMatcher {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl biome_deserialize::DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -356,7 +356,7 @@ pub enum SourcesMatcher {
 }
 impl Deserializable for SourcesMatcher {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl biome_deserialize::DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -410,7 +410,7 @@ impl SourceMatcher {
 }
 impl biome_deserialize::Deserializable for SourceMatcher {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl biome_deserialize::DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -555,9 +555,8 @@ impl PredefinedSourceMatcher {
         match self {
             Self::Alias => source_kind == ImportSourceKind::Alias,
             Self::Bun => {
-                (source_kind == ImportSourceKind::Package && source == "bun")
-                    || (source_kind == ImportSourceKind::ProtocolPackage
-                        && source.starts_with("bun:"))
+                (source_kind == ImportSourceKind::ProtocolPackage && source.starts_with("bun:"))
+                    || (source_kind == ImportSourceKind::Package && is_builtin_bun_module(source))
             }
             Self::Node => {
                 (source_kind == ImportSourceKind::ProtocolPackage && source.starts_with("node:"))

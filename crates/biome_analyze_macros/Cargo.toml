@@ -1,13 +1,13 @@
 [package]
 name                 = "biome_analyze_macros"
-version              = "0.0.0"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Procedural macros for Biome analyzer code generation"
 homepage.workspace   = true
 repository.workspace = true
 license.workspace    = true
-publish              = false
+publish              = true
 
 [lib]
 proc-macro = true

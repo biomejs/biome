@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::{AnyHtmlAttribute, AnyVueDirective, HtmlAttributeList};
-use biome_rowan::{AstNode, AstNodeList, TextRange, TokenText};
+use biome_rowan::{AstNodeList, TextRange, TokenText};
 use biome_rule_options::no_duplicate_attributes::NoDuplicateAttributesOptions;
 use std::collections::HashSet;
 
@@ -138,7 +138,7 @@ fn attribute_key(attribute: &AnyHtmlAttribute) -> Option<(TokenText, TextRange)>
             }
 
             let argument = directive.arg()?;
-            let argument = argument.arg().ok()?;
+            let argument = argument.arg()?;
             let static_argument = argument.as_vue_static_argument()?;
             let name_token = static_argument.name_token().ok()?;
 
@@ -153,7 +153,7 @@ fn attribute_key(attribute: &AnyHtmlAttribute) -> Option<(TokenText, TextRange)>
         // Shorthand bind: :foo
         AnyVueDirective::VueVBindShorthandDirective(directive) => {
             let argument = directive.arg().ok()?;
-            let argument = argument.arg().ok()?;
+            let argument = argument.arg()?;
             let static_argument = argument.as_vue_static_argument()?;
             let name_token = static_argument.name_token().ok()?;
 

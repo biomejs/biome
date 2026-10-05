@@ -1,4 +1,5 @@
 <!-- should not generate diagnostics -->
+<template>
 <span role="button"></span>
 <a tabIndex="0" role="button" />
 <a href="http://x.y.z" role="button" />
@@ -109,3 +110,4 @@
 <tr role="treegrid" />
 <tr role="treeitem" />
 <li role="treeitem" />
+</template>

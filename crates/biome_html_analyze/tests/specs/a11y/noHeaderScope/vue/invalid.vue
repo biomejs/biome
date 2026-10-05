@@ -1,4 +1,5 @@
 <!-- should generate diagnostics -->
+<template>
 <div scope="col"></div>
 <div v-bind:scope="scopeValue"></div>
 <div :scope="scopeValue"></div>
@@ -10,3 +11,4 @@
 <!-- static Vue bindings on non-<th> elements should also be flagged -->
 <div :scope="'col'"></div>
 <td v-bind:scope="'row'"></td>
+</template>

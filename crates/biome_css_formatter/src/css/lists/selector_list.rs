@@ -1,3 +1,4 @@
+use crate::css::selectors::complex_selector::is_left_selector_preceded_by_comment;
 use crate::prelude::*;
 use biome_css_syntax::CssSelectorList;
 
@@ -24,63 +25,20 @@ impl FormatRule<CssSelectorList> for FormatCssSelectorList {
         let mut joiner = f.join_with(&separator);
 
         for formatted in node.format_separated(",") {
-            // The selector case here like:
-            // .a b {}
-            // .a is a left computed selector
-            let computed_selector =
-                formatted
-                    .node()?
-                    .as_css_complex_selector()
-                    .and_then(|complex_selector| {
-                        complex_selector
-                            .left()
-                            .ok()?
-                            .as_css_compound_selector()
-                            .cloned()
-                    });
+            let selector = formatted.node()?;
+            let complex_selector = selector.as_css_complex_selector();
+            let is_left_preceded_by_comment = complex_selector
+                .and_then(|selector| selector.left().ok())
+                .is_some_and(|left| is_left_selector_preceded_by_comment(&left));
 
-            if let Some(computed_selector) = computed_selector {
-                // Case like:
-                // .a b {}
-                // /* some long comment */
-                // .a c {}
-                //
-                // if .a has leading comments, it should be formatted without indent.
-                // Otherwise the formatted result will be like:
-                // .a b {}
-                // /* some long comment */
-                //   .a c {}
-                let simple_selector_has_leading_comments = computed_selector
-                    .simple_selector()
-                    .and_then(|simple_selector| simple_selector.as_css_type_selector().cloned())
-                    .and_then(|type_selector| {
-                        type_selector
-                            .ident()
-                            .ok()?
-                            .as_css_identifier()
-                            .and_then(|ident| ident.value_token().ok())
-                    })
-                    .is_some_and(|value_token| value_token.has_leading_comments());
-
-                // Sub selector same as the Simple Selector above:
-                // .a b {}
-                // /* some long comment */
-                // d c {}
-                // d is the Sub selector, so we also need to check if it has leading comments.
-                let sub_selector_has_leading_comments = computed_selector
-                    .sub_selectors()
-                    .first()
-                    .and_then(|sub_selector| sub_selector.as_css_class_selector().cloned())
-                    .and_then(|class_selector| class_selector.dot_token().ok())
-                    .is_some_and(|value_token| value_token.has_leading_comments());
-
-                if simple_selector_has_leading_comments || sub_selector_has_leading_comments {
-                    joiner.entry(&group(&formatted));
-                    continue;
-                }
+            // A leading comment already establishes the list indentation. Adding
+            // another indent would move the selector away from its comment.
+            if is_left_preceded_by_comment {
+                joiner.entry(&group(&formatted));
+                continue;
             }
 
-            if formatted.node()?.as_css_complex_selector().is_some() {
+            if complex_selector.is_some() {
                 // Each complex selector gets `indent` added in case it breaks over
                 // multiple lines. The break is added here rather than in each
                 // selector both for simplicity and to avoid recursively adding

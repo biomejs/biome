@@ -142,7 +142,7 @@ impl Rule for UseVueConsistentVOnStyle {
                 let initializer = dir.initializer();
                 // Build VueVOnShorthandDirective: at_token '@' + arg + modifiers (+initializer)
                 let at_token = HtmlSyntaxToken::new_detached(T![@], "@", [], []);
-                let inner = dir.arg()?.arg().ok()?;
+                let inner = dir.arg()?.arg()?;
                 let mut builder = make::vue_v_on_shorthand_directive(at_token, inner, modifiers);
                 if let Some(init) = initializer {
                     builder = builder.with_initializer(init);
@@ -168,7 +168,9 @@ impl Rule for UseVueConsistentVOnStyle {
 
                 // Build VueDirectiveArgument with ':' token and same inner arg
                 let colon = HtmlSyntaxToken::new_detached(HtmlSyntaxKind::COLON, ":", [], []);
-                let arg = make::vue_directive_argument(colon, any_arg);
+                let arg = make::vue_directive_argument(colon)
+                    .with_arg(any_arg)
+                    .build();
                 let mut builder = make::vue_directive(name_token, modifiers).with_arg(arg);
                 if let Some(init) = initializer {
                     builder = builder.with_initializer(init);

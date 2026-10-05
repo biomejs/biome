@@ -5,8 +5,11 @@ use crate::syntax::block::{
     parse_declaration_block, parse_declaration_or_rule_list_block, parse_rule_block,
 };
 use crate::syntax::parse_error::{expected_identifier, expected_string, expected_tw_source};
+use crate::syntax::scss::expect_scss_semicolon_at_rule;
 use crate::syntax::selector::SelectorList;
-use crate::syntax::{is_at_identifier, parse_identifier, parse_regular_identifier, parse_string};
+use crate::syntax::{
+    CssSyntaxFeatures, is_at_identifier, parse_identifier, parse_regular_identifier, parse_string,
+};
 use biome_css_syntax::CssSyntaxKind::{self, *};
 use biome_css_syntax::T;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
@@ -181,7 +184,11 @@ pub(crate) fn parse_apply_at_rule(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
     p.bump_with_context(T![apply], CssLexContext::TailwindUtility);
     ApplyClassList.parse_list(p);
-    p.expect(T![;]);
+    if CssSyntaxFeatures::Scss.is_supported(p) {
+        expect_scss_semicolon_at_rule(p);
+    } else {
+        p.expect(T![;]);
+    }
 
     Present(m.complete(p, TW_APPLY_AT_RULE))
 }

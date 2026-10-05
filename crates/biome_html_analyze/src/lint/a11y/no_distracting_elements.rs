@@ -2,14 +2,13 @@ use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_html_syntax::AnyHtmlElement;
-use biome_languages::HtmlFileSource;
+use biome_html_syntax::{AnyHtmlElement, HtmlSyntaxKind, T};
+use biome_parser::{TokenSet, token_set};
 use biome_rowan::BatchMutationExt;
 use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_distracting_elements::NoDistractingElementsOptions;
 
 use crate::HtmlRuleAction;
-use crate::utils::is_html_tag;
 
 declare_lint_rule! {
     /// Enforces that no distracting elements are used.
@@ -51,6 +50,8 @@ declare_lint_rule! {
     }
 }
 
+const DISTRACTING_ELEMENTS: TokenSet<HtmlSyntaxKind> = token_set!(T![marquee], T![blink]);
+
 impl Rule for NoDistractingElements {
     type Query = Ast<AnyHtmlElement>;
     type State = TokenText;
@@ -59,12 +60,11 @@ impl Rule for NoDistractingElements {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
-        let source_type = ctx.source_type::<HtmlFileSource>();
-
         let tag_element = element.clone().as_any_html_tag_element()?;
         let element_name = tag_element.tag_name()?;
-        if is_html_tag(&tag_element, source_type, "marquee")
-            || is_html_tag(&tag_element, source_type, "blink")
+        if tag_element
+            .tag_name_kind()
+            .is_some_and(|kind| DISTRACTING_ELEMENTS.contains(kind))
         {
             return Some(element_name);
         }

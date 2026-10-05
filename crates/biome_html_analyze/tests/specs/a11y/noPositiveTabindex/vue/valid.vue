@@ -1,4 +1,5 @@
 <!-- should not generate diagnostics -->
+<template>
 <div tabindex="0"></div>
 <div v-bind:tabindex="tabindexValue"></div>
 <div :tabindex="tabindexValue"></div>
@@ -11,3 +12,4 @@
 <div :tabindex="'0'"></div>
 <div v-bind:tabindex="'0'"></div>
 <div :tabindex="'-1'"></div>
+</template>

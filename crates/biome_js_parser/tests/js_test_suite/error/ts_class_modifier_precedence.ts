@@ -11,7 +11,7 @@ abstract class Test extends Base {
     override static base2: string;
     // Accessor
     readonly accessor e: string;
-    override accessor f: string;
+    accessor override f: string;
     // abstract
     override abstract base3: string;
     // override

@@ -68,6 +68,42 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ## Caveats
+    ///
+    /// Removing a trailing `return;` can make TypeScript report error TS7030 ("Not all code paths return a value").
+    /// This happens when the same function returns a value on another path and the
+    /// [`noImplicitReturns`](https://www.typescriptlang.org/tsconfig/#noImplicitReturns) compiler option is enabled.
+    /// In the following example, the rule reports the `return;`, but removing it breaks the type check when that option is enabled:
+    ///
+    /// ```ts,expect_diagnostic
+    /// function foo(flag: boolean) {
+    ///     if (flag) {
+    ///         return 1;
+    ///     }
+    ///     return;
+    /// }
+    /// ```
+    ///
+    /// The same applies to JavaScript files that are checked with `checkJs`.
+    /// Biome doesn't read the `noImplicitReturns` option from `tsconfig.json`, so the rule can't tell whether it is enabled.
+    ///
+    /// If the `return;` is intentional, you can suppress this specific diagnostic with an
+    /// [inline suppression](https://biomejs.dev/analyzer/suppressions/#inline-suppressions):
+    ///
+    /// ```ts
+    /// function foo(flag: boolean) {
+    ///     if (flag) {
+    ///         return 1;
+    ///     }
+    ///     // biome-ignore lint/complexity/noUselessReturn: required by noImplicitReturns
+    ///     return;
+    /// }
+    /// ```
+    ///
+    /// Alternatively, you can [disable this rule's fix](https://biomejs.dev/linter/#configure-the-code-fix)
+    /// by setting its `fix` option to `"none"`.
+    /// This disables the fix for every `return;` reported by the rule, not only those affected by `noImplicitReturns`.
+    ///
     pub NoUselessReturn {
         version: "2.3.15",
         name: "noUselessReturn",
@@ -133,8 +169,23 @@ impl Rule for NoUselessReturn {
     }
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
+        let ret = ctx.query();
+
+        // The direct body of an `if`, `else` or label is mandatory, so only a
+        // statement in a list can be removed.
+        ret.parent::<JsStatementList>()?;
+
+        // The removal below keeps comments around the statement but drops those inside it.
+        if has_comments_between_tokens(ret) {
+            return None;
+        }
+
         let mut mutation = ctx.root().begin();
-        mutation.remove_node(ctx.query().clone());
+        if ret.syntax().has_leading_comments() || ret.syntax().has_trailing_comments() {
+            mutation.remove_node_keep_trivia(ret.clone());
+        } else {
+            mutation.remove_node(ret.clone());
+        }
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
@@ -143,6 +194,20 @@ impl Rule for NoUselessReturn {
             mutation,
         ))
     }
+}
+
+/// Returns `true` if a comment sits between the `return` keyword and its
+/// semicolon, as in `return /* note */;`.
+///
+/// Comments before the statement or after its semicolon are ignored.
+fn has_comments_between_tokens(ret: &JsReturnStatement) -> bool {
+    let Some(semicolon) = ret.semicolon_token() else {
+        return false;
+    };
+    semicolon.has_leading_comments()
+        || ret
+            .return_token()
+            .is_ok_and(|token| token.has_trailing_comments())
 }
 
 /// Check if the return statement is inside a loop or switch statement

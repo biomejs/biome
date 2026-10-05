@@ -1,0 +1,20 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+require.resolve("./entry")
+require[method]("./entry")
+
+arguments.length
+const { length } = arguments
+
+Object.__defineGetter__
+const { __defineGetter__ } = Object
+
+const { ensure } = somethingElse
+({ length } = arguments)
+
+```

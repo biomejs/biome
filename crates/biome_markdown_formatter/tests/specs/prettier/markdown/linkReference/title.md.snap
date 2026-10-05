@@ -53,94 +53,80 @@ info: markdown/linkReference/title.md
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,36 +1,29 @@
--[ref]: https://example.com "bar"
-+[ref]: https://example.com (bar)
+@@ -1,27 +1,20 @@
+ [ref]: https://example.com "bar"
  [other-ref]: https://example.com (Shakespeare's "Romeo and Juliet" is a famous play)
 -
- [a]: https://example.com "\""
- [a]: https://example.com '\"'
- [a]: https://example.com (\")
+-[a]: https://example.com "\""
+-[a]: https://example.com '\"'
+-[a]: https://example.com (\")
 -
--[a]: https://example.com "'"
++[a]: https://example.com '"'
++[a]: https://example.com '"'
++[a]: https://example.com '"'
++[a]: https://example.com "'"
+ [a]: https://example.com "'"
 -
-+[a]: https://example.com "\'"
- [a]: https://example.com '\''
- [a]: https://example.com (\')
+-[a]: https://example.com '\''
+-[a]: https://example.com (\')
 -
--[a]: https://example.com "'"
+ [a]: https://example.com "'"
 -[a]: https://example.com ")"
 -
-+[a]: https://example.com "\'"
-+[a]: https://example.com '\)'
- [a]: https://example.com (\))
+-[a]: https://example.com (\))
 -
- [a]: https://example.com "\\\""
- [a]: https://example.com '\\\''
- [a]: https://example.com (\\\))
+-[a]: https://example.com "\\\""
+-[a]: https://example.com '\\\''
+-[a]: https://example.com (\\\))
 -
--[a]: https://example.com "'"
+ [a]: https://example.com "'"
 -[a]: https://example.com '"'
 -[a]: https://example.com '"'
--[a]: https://example.com "\\a\\a"
--[a]: https://example.com "\\a\\a"
--[a]: https://example.com "\\a\\a"
++[a]: https://example.com ")"
++[a]: https://example.com ")"
++[a]: https://example.com '\\"'
++[a]: https://example.com "\\'"
++[a]: https://example.com "\\)"
 +[a]: https://example.com "\\'"
 +[a]: https://example.com '\\"'
-+[a]: https://example.com (\\")
-+[a]: https://example.com "\a\a"
-+[a]: https://example.com '\a\a'
-+[a]: https://example.com (\a\a)
++[a]: https://example.com '\\"'
  [a]: https://example.com "\\a\\a"
--[a]: https://example.com "\\a\\a"
--[a]: https://example.com "\\a\\a"
-+[a]: https://example.com '\\a\\a'
-+[a]: https://example.com (\\a\\a)
-+[a]: https://example.com "\\\a\\\a"
-+[a]: https://example.com '\\\a\\\a'
-+[a]: https://example.com (\\\a\\\a)
- [a]: https://example.com "\\\\a\\\\a"
--[a]: https://example.com "\\\\a\\\\a"
--[a]: https://example.com "\\\\a\\\\a"
--[a]: https://example.com "\\\\a\\\\a"
--[a]: https://example.com "\\\\a\\\\a"
--[a]: https://example.com "\\\\a\\\\a"
-+[a]: https://example.com '\\\\a\\\\a'
-+[a]: https://example.com (\\\\a\\\\a)
+ [a]: https://example.com "\\a\\a"
+ [a]: https://example.com "\\a\\a"
 ```
 
 # Output
 
 ```md
-[ref]: https://example.com (bar)
+[ref]: https://example.com "bar"
 [other-ref]: https://example.com (Shakespeare's "Romeo and Juliet" is a famous play)
-[a]: https://example.com "\""
-[a]: https://example.com '\"'
-[a]: https://example.com (\")
-[a]: https://example.com "\'"
-[a]: https://example.com '\''
-[a]: https://example.com (\')
-[a]: https://example.com "\'"
-[a]: https://example.com '\)'
-[a]: https://example.com (\))
-[a]: https://example.com "\\\""
-[a]: https://example.com '\\\''
-[a]: https://example.com (\\\))
+[a]: https://example.com '"'
+[a]: https://example.com '"'
+[a]: https://example.com '"'
+[a]: https://example.com "'"
+[a]: https://example.com "'"
+[a]: https://example.com "'"
+[a]: https://example.com "'"
+[a]: https://example.com ")"
+[a]: https://example.com ")"
+[a]: https://example.com '\\"'
+[a]: https://example.com "\\'"
+[a]: https://example.com "\\)"
 [a]: https://example.com "\\'"
 [a]: https://example.com '\\"'
-[a]: https://example.com (\\")
-[a]: https://example.com "\a\a"
-[a]: https://example.com '\a\a'
-[a]: https://example.com (\a\a)
+[a]: https://example.com '\\"'
 [a]: https://example.com "\\a\\a"
-[a]: https://example.com '\\a\\a'
-[a]: https://example.com (\\a\\a)
-[a]: https://example.com "\\\a\\\a"
-[a]: https://example.com '\\\a\\\a'
-[a]: https://example.com (\\\a\\\a)
+[a]: https://example.com "\\a\\a"
+[a]: https://example.com "\\a\\a"
+[a]: https://example.com "\\a\\a"
+[a]: https://example.com "\\a\\a"
+[a]: https://example.com "\\a\\a"
 [a]: https://example.com "\\\\a\\\\a"
-[a]: https://example.com '\\\\a\\\\a'
-[a]: https://example.com (\\\\a\\\\a)
+[a]: https://example.com "\\\\a\\\\a"
+[a]: https://example.com "\\\\a\\\\a"
+[a]: https://example.com "\\\\a\\\\a"
+[a]: https://example.com "\\\\a\\\\a"
+[a]: https://example.com "\\\\a\\\\a"
 ```
 
 # Lines exceeding max width of 80 characters

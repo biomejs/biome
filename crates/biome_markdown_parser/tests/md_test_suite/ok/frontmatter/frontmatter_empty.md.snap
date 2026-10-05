@@ -1,0 +1,74 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+---
+---
+
+Content
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: MdFrontmatter {
+        l_fence_token: FENCE@0..3 "---" [] [],
+        content: MdFrontmatterContent {
+            value_token: MD_FRONTMATTER_LITERAL@3..4 "\n" [] [],
+        },
+        r_fence_token: FENCE@4..7 "---" [] [],
+    },
+    value: MdBlockList [
+        MdNewline {
+            value_token: NEWLINE@7..8 "\n" [] [],
+        },
+        MdNewline {
+            value_token: NEWLINE@8..9 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@9..16 "Content" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@16..17 "\n" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@17..17 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..17
+  0: (empty)
+  1: MD_FRONTMATTER@0..7
+    0: FENCE@0..3 "---" [] []
+    1: MD_FRONTMATTER_CONTENT@3..4
+      0: MD_FRONTMATTER_LITERAL@3..4 "\n" [] []
+    2: FENCE@4..7 "---" [] []
+  2: MD_BLOCK_LIST@7..17
+    0: MD_NEWLINE@7..8
+      0: NEWLINE@7..8 "\n" [] []
+    1: MD_NEWLINE@8..9
+      0: NEWLINE@8..9 "\n" [] []
+    2: MD_PARAGRAPH@9..17
+      0: MD_INLINE_ITEM_LIST@9..17
+        0: MD_TEXTUAL@9..16
+          0: MD_TEXTUAL_LITERAL@9..16 "Content" [] []
+        1: MD_TEXTUAL@16..17
+          0: MD_TEXTUAL_LITERAL@16..17 "\n" [] []
+  3: EOF@17..17 "" [] []
+
+```

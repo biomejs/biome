@@ -1,0 +1,131 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+a {background-image:url(@/assets/svg/for-css/check.svg
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@0..2 "a" [] [Whitespace(" ")],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+            ],
+            block: CssBogusBlock {
+                items: [
+                    L_CURLY@2..3 "{" [] [],
+                    CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@3..19 "background-image" [] [],
+                                    },
+                                    colon_token: COLON@19..20 ":" [] [],
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssUrlFunction {
+                                                name: URL_KW@20..23 "url" [] [],
+                                                l_paren_token: L_PAREN@23..24 "(" [] [],
+                                                value: CssUrlValueRaw {
+                                                    value_token: CSS_URL_VALUE_RAW_LITERAL@24..54 "@/assets/svg/for-css/check.svg" [] [],
+                                                },
+                                                modifiers: CssUrlModifierList [],
+                                                r_paren_token: missing (required),
+                                            },
+                                        ],
+                                    },
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: missing (optional),
+                        },
+                    ],
+                ],
+            },
+        },
+    ],
+    eof_token: EOF@54..54 "" [] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..54
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..54
+    0: CSS_QUALIFIED_RULE@0..54
+      0: CSS_SELECTOR_LIST@0..2
+        0: CSS_COMPOUND_SELECTOR@0..2
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: CSS_TYPE_SELECTOR@0..2
+            0: (empty)
+            1: CSS_IDENTIFIER@0..2
+              0: IDENT@0..2 "a" [] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@2..2
+      1: CSS_BOGUS_BLOCK@2..54
+        0: L_CURLY@2..3 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@3..54
+          0: CSS_DECLARATION_WITH_SEMICOLON@3..54
+            0: CSS_DECLARATION@3..54
+              0: CSS_GENERIC_PROPERTY@3..54
+                0: CSS_IDENTIFIER@3..19
+                  0: IDENT@3..19 "background-image" [] []
+                1: COLON@19..20 ":" [] []
+                2: SCSS_EXPRESSION@20..54
+                  0: SCSS_EXPRESSION_ITEM_LIST@20..54
+                    0: CSS_URL_FUNCTION@20..54
+                      0: URL_KW@20..23 "url" [] []
+                      1: L_PAREN@23..24 "(" [] []
+                      2: CSS_URL_VALUE_RAW@24..54
+                        0: CSS_URL_VALUE_RAW_LITERAL@24..54 "@/assets/svg/for-css/check.svg" [] []
+                      3: CSS_URL_MODIFIER_LIST@54..54
+                      4: (empty)
+              1: (empty)
+            1: (empty)
+  2: EOF@54..54 "" [] []
+
+```
+
+## Diagnostics
+
+```
+release-url-asset-aliases.scss:1:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid url raw value
+  
+  > 1 │ a {background-image:url(@/assets/svg/for-css/check.svg
+      │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+release-url-asset-aliases.scss:1:55 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead the file ends
+  
+  > 1 │ a {background-image:url(@/assets/svg/for-css/check.svg
+      │                                                       
+  
+  i the file ends here
+  
+  > 1 │ a {background-image:url(@/assets/svg/for-css/check.svg
+      │                                                       
+  
+```

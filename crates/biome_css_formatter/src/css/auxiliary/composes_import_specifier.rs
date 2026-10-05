@@ -12,6 +12,14 @@ impl FormatNodeRule<CssComposesImportSpecifier> for FormatCssComposesImportSpeci
     ) -> FormatResult<()> {
         let CssComposesImportSpecifierFields { from_token, source } = node.as_fields();
 
-        write![f, [space(), from_token.format(), space(), source.format()]]
+        write![
+            f,
+            [
+                space(),
+                from_token.format()?.with_text_case(CssCase::Preserve),
+                space(),
+                source?.format().with_text_case(CssCase::Preserve)
+            ]
+        ]
     }
 }

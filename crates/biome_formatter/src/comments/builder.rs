@@ -1,6 +1,6 @@
 use super::{
-    CommentPlacement, CommentStyle, CommentTextPosition, DecoratedComment, SourceComment,
-    TransformSourceMap, map::CommentsMap,
+    CommentPlacement, CommentStyle, CommentSuppressionTarget, CommentTextPosition, CommentsData,
+    DecoratedComment, SourceComment, TransformSourceMap, map::CommentsMap,
 };
 use crate::source_map::{DeletedRangeEntry, DeletedRanges};
 use crate::{TextRange, TextSize};
@@ -8,6 +8,7 @@ use biome_rowan::syntax::SyntaxElementKey;
 use biome_rowan::{
     Direction, Language, SyntaxElement, SyntaxKind, SyntaxNode, SyntaxToken, WalkEvent,
 };
+use biome_suppression::SuppressionKind;
 use rustc_hash::FxHashSet;
 
 /// Extracts all comments from a syntax tree.
@@ -22,6 +23,15 @@ pub(super) struct CommentsBuilderVisitor<'a, Style: CommentStyle> {
     following_node_index: Option<usize>,
     parents: Vec<SyntaxNode<Style::Language>>,
     last_token: Option<SyntaxToken<Style::Language>>,
+    root: Option<SyntaxNode<Style::Language>>,
+    /// Whether the formatted root has a parent, which is the case when only a
+    /// part of a document is formatted (range and on-type formatting).
+    is_sub_tree: bool,
+    /// Whether the formatted root is a list.
+    is_list_root: bool,
+    /// Where the text of the root's first token starts. Comments that come
+    /// before this offset sit in front of the whole formatted sub-tree.
+    root_content_start: TextSize,
 }
 
 impl<'a, Style> CommentsBuilderVisitor<'a, Style>
@@ -39,16 +49,40 @@ where
             following_node_index: Default::default(),
             parents: Default::default(),
             last_token: Default::default(),
+            root: Default::default(),
+            is_sub_tree: false,
+            is_list_root: false,
+            root_content_start: TextSize::default(),
         }
     }
 
     pub(super) fn visit(
         mut self,
         root: &SyntaxNode<Style::Language>,
-    ) -> (
-        CommentsMap<SyntaxElementKey, SourceComment<Style::Language>>,
-        FxHashSet<SyntaxElementKey>,
-    ) {
+    ) -> CommentsData<Style::Language> {
+        if !root.has_comments_descendants() && !root.has_skipped_descendants() {
+            return self.builder.finish(root);
+        }
+
+        // A root with a parent means that only a part of a document is
+        // formatted (range and on-type formatting). Full documents always
+        // start at a parentless root and take none of the subtree paths
+        // below.
+        self.is_sub_tree = root.parent().is_some();
+        self.is_list_root = root.kind().is_list();
+        self.root = Some(root.clone());
+        self.root_content_start = root.text_trimmed_range().start();
+
+        // Lists are normally skipped because comments belong to the parent or
+        // to a child. When the formatted root is itself a list, there is no
+        // parent to take that role, so the list goes onto the stack: comments
+        // between its children are then enclosed by the list instead of by
+        // the child that follows them.
+        let push_list_root = self.is_sub_tree && self.is_list_root;
+        if push_list_root {
+            self.parents.push(root.clone());
+        }
+
         for event in root.preorder_with_tokens(Direction::Next) {
             match event {
                 WalkEvent::Enter(SyntaxElement::Node(node)) => {
@@ -64,6 +98,10 @@ where
                     // Handled as part of enter
                 }
             }
+        }
+
+        if push_list_root {
+            self.parents.pop();
         }
 
         assert!(
@@ -89,7 +127,7 @@ where
 
         self.flush_comments(None);
 
-        self.builder.finish()
+        self.builder.finish(root)
     }
 
     fn visit_node(&mut self, event: WalkEvent<SyntaxNode<Style::Language>>) {
@@ -172,6 +210,7 @@ where
                     lines_after: 0,
                     text_position: position,
                     kind,
+                    suppression_kind: None,
                     comment,
                 });
 
@@ -190,7 +229,9 @@ where
 
         // Set following node to `None` because it now becomes the enclosing node.
         if let Some(following_node) = self.following_node() {
-            self.flush_comments(Some(&following_node.clone()));
+            if !self.pending_comments.is_empty() {
+                self.flush_comments(Some(&following_node.clone()));
+            }
             self.following_node_index = None;
 
             // The following node is only set after entering a node
@@ -245,11 +286,134 @@ where
     }
 
     fn flush_comments(&mut self, following: Option<&SyntaxNode<Style::Language>>) {
-        for mut comment in self.pending_comments.drain(..) {
-            comment.following = following.cloned();
+        if self.pending_comments.is_empty() {
+            return;
+        }
 
-            let placement = self.style.place_comment(comment);
-            self.builder.add_comment(placement);
+        for comment in &mut self.pending_comments {
+            comment.following = following.cloned();
+            comment.suppression_kind = self.style.suppression_kind(comment);
+            if let Some(kind) = &comment.suppression_kind {
+                self.builder
+                    .suppression_comments
+                    .push((comment.piece().text_range(), kind.clone()));
+            }
+            self.builder.global_suppression |= comment
+                .suppression_kind()
+                .is_some_and(SuppressionKind::is_global);
+        }
+
+        for comment in self.pending_comments.drain(..) {
+            let suppress_placement = if comment
+                .suppression_kind()
+                .is_some_and(SuppressionKind::is_classic)
+            {
+                match self.style.suppression_target(&comment) {
+                    CommentSuppressionTarget::CommentPlacement => true,
+                    CommentSuppressionTarget::Node(node) => {
+                        self.builder.suppressed_or_skipped.insert(node.key());
+                        false
+                    }
+                }
+            } else {
+                false
+            };
+
+            // A comment that comes before the formatted root itself always
+            // becomes a leading comment of the root, printed before
+            // everything else. The placement rules are skipped because they
+            // need to see the code around the comment, and here everything
+            // before the comment is outside of the formatted root.
+            //
+            // Lists don't print their own comments, so a comment before a
+            // list root goes through the normal placement instead and ends up
+            // on the list's first child.
+            let placement = if (self.is_sub_tree || self.builder.global_suppression)
+                && !self.is_list_root
+                && comment.piece().text_range().end() <= self.root_content_start
+            {
+                let root = self
+                    .root
+                    .clone()
+                    .expect("Expected the root to be set before visiting comments.");
+                CommentPlacement::leading(root, comment)
+            } else {
+                self.style.place_comment(comment)
+            };
+            let placement = Self::normalize_placement_into_formatted_tree(&self.root, placement);
+            let key = self.builder.add_comment(placement);
+            if suppress_placement {
+                self.builder.suppressed_or_skipped.insert(key);
+            }
+        }
+    }
+
+    /// Makes sure that every comment ends up on a node that is part of the
+    /// formatted tree. The formatter only prints comments attached to nodes
+    /// it visits; a comment attached to any other node is silently lost.
+    ///
+    /// When only a part of a document is formatted, a placement rule can pick
+    /// a node that lies outside of that part. Take `for (;;) continue; /* a */`:
+    /// when only the `continue` statement is formatted, the rule for the
+    /// comment picks the surrounding `for` loop, and the loop is not part of
+    /// what gets printed.
+    ///
+    /// In that case the comment is moved back onto the formatted tree itself:
+    /// a comment written before the tree becomes a leading comment of it, and
+    /// a comment written after it becomes a trailing comment. When the tree
+    /// is a list, the comment goes on the first or last child instead,
+    /// because lists don't print their own comments.
+    fn normalize_placement_into_formatted_tree(
+        root: &Option<SyntaxNode<Style::Language>>,
+        placement: CommentPlacement<Style::Language>,
+    ) -> CommentPlacement<Style::Language> {
+        let Some(root) = root else {
+            return placement;
+        };
+
+        match placement {
+            CommentPlacement::Leading { node, comment }
+            | CommentPlacement::Trailing { node, comment }
+            | CommentPlacement::Dangling { node, comment }
+                if !node.ancestors().any(|ancestor| &ancestor == root) =>
+            {
+                let root_content = root.text_trimmed_range();
+                let comment_range = comment.piece().text_range();
+
+                // Only comments before or after the whole formatted tree can
+                // legitimately end up on an outside node. An inner comment
+                // placed outside means a placement rule resolved a wrong node.
+                debug_assert!(
+                    comment_range.end() <= root_content.start()
+                        || comment_range.start() >= root_content.end(),
+                    "A comment inside of the formatted tree was placed on a node outside of it.\nComment: {comment:#?}\nNode: {node:#?}"
+                );
+
+                // The anchor must be a node whose format rule prints comments,
+                // which excludes lists: use the closest child instead.
+                if comment_range.start() >= root_content.end() {
+                    let anchor = if root.kind().is_list() {
+                        root.last_child()
+                    } else {
+                        Some(root.clone())
+                    };
+                    match anchor {
+                        Some(anchor) => CommentPlacement::trailing(anchor, comment),
+                        None => CommentPlacement::dangling(root.clone(), comment),
+                    }
+                } else {
+                    let anchor = if root.kind().is_list() {
+                        root.first_child()
+                    } else {
+                        Some(root.clone())
+                    };
+                    match anchor {
+                        Some(anchor) => CommentPlacement::leading(anchor, comment),
+                        None => CommentPlacement::dangling(root.clone(), comment),
+                    }
+                }
+            }
+            placement => placement,
         }
     }
 
@@ -290,6 +454,7 @@ where
                     lines_after: 0, // Will be initialized after
                     text_position: position,
                     kind: Style::get_comment_kind(&comment),
+                    suppression_kind: None,
                     comment,
                 });
 
@@ -368,17 +533,19 @@ where
 
 struct CommentsBuilder<L: Language> {
     comments: CommentsMap<SyntaxElementKey, SourceComment<L>>,
-    skipped: FxHashSet<SyntaxElementKey>,
+    suppressed_or_skipped: FxHashSet<SyntaxElementKey>,
+    suppression_comments: Vec<(TextRange, SuppressionKind)>,
+    global_suppression: bool,
 }
 
 impl<L: Language> CommentsBuilder<L> {
-    fn add_comment(&mut self, placement: CommentPlacement<L>) {
+    fn add_comment(&mut self, placement: CommentPlacement<L>) -> SyntaxElementKey {
         match placement {
             CommentPlacement::Leading { node, comment } => {
-                self.push_leading_comment(&node, comment);
+                self.push_leading_comment(&node, comment)
             }
             CommentPlacement::Trailing { node, comment } => {
-                self.push_trailing_comment(&node, comment);
+                self.push_trailing_comment(&node, comment)
             }
             CommentPlacement::Dangling { node, comment } => {
                 self.push_dangling_comment(&node, comment)
@@ -394,20 +561,16 @@ impl<L: Language> CommentsBuilder<L> {
                                 // a; // comment
                                 // b
                                 // ```
-                                self.push_trailing_comment(&preceding, comment);
+                                self.push_trailing_comment(&preceding, comment)
                             }
                             (Some(preceding), None) => {
-                                self.push_trailing_comment(&preceding, comment);
+                                self.push_trailing_comment(&preceding, comment)
                             }
                             (None, Some(following)) => {
-                                self.push_leading_comment(&following, comment);
+                                self.push_leading_comment(&following, comment)
                             }
-                            (None, None) => {
-                                self.push_dangling_comment(
-                                    &comment.enclosing_node().clone(),
-                                    comment,
-                                );
-                            }
+                            (None, None) => self
+                                .push_dangling_comment(&comment.enclosing_node().clone(), comment),
                         }
                     }
                     CommentTextPosition::OwnLine => {
@@ -419,18 +582,12 @@ impl<L: Language> CommentsBuilder<L> {
                             // b
                             // ```
                             // attach the comment to the `b` expression statement
-                            (_, Some(following)) => {
-                                self.push_leading_comment(&following, comment);
-                            }
+                            (_, Some(following)) => self.push_leading_comment(&following, comment),
                             (Some(preceding), None) => {
-                                self.push_trailing_comment(&preceding, comment);
+                                self.push_trailing_comment(&preceding, comment)
                             }
-                            (None, None) => {
-                                self.push_dangling_comment(
-                                    &comment.enclosing_node().clone(),
-                                    comment,
-                                );
-                            }
+                            (None, None) => self
+                                .push_dangling_comment(&comment.enclosing_node().clone(), comment),
                         }
                     }
                     CommentTextPosition::SameLine => {
@@ -445,23 +602,19 @@ impl<L: Language> CommentsBuilder<L> {
                                 if preceding.text_range_with_trivia().end()
                                     == comment.piece().as_piece().token().text_range().end()
                                 {
-                                    self.push_trailing_comment(&preceding, comment);
+                                    self.push_trailing_comment(&preceding, comment)
                                 } else {
-                                    self.push_leading_comment(&following, comment);
+                                    self.push_leading_comment(&following, comment)
                                 }
                             }
                             (Some(preceding), None) => {
-                                self.push_trailing_comment(&preceding, comment);
+                                self.push_trailing_comment(&preceding, comment)
                             }
                             (None, Some(following)) => {
-                                self.push_leading_comment(&following, comment);
+                                self.push_leading_comment(&following, comment)
                             }
-                            (None, None) => {
-                                self.push_dangling_comment(
-                                    &comment.enclosing_node().clone(),
-                                    comment,
-                                );
-                            }
+                            (None, None) => self
+                                .push_dangling_comment(&comment.enclosing_node().clone(), comment),
                         }
                     }
                 }
@@ -470,36 +623,48 @@ impl<L: Language> CommentsBuilder<L> {
     }
 
     fn mark_has_skipped(&mut self, token: &SyntaxToken<L>) {
-        self.skipped.insert(token.key());
+        self.suppressed_or_skipped.insert(token.key());
     }
 
-    fn push_leading_comment(&mut self, node: &SyntaxNode<L>, comment: impl Into<SourceComment<L>>) {
+    fn push_leading_comment(
+        &mut self,
+        node: &SyntaxNode<L>,
+        comment: impl Into<SourceComment<L>>,
+    ) -> SyntaxElementKey {
         self.comments.push_leading(node.key(), comment.into());
+        node.key()
     }
 
     fn push_dangling_comment(
         &mut self,
         node: &SyntaxNode<L>,
         comment: impl Into<SourceComment<L>>,
-    ) {
+    ) -> SyntaxElementKey {
         self.comments.push_dangling(node.key(), comment.into());
+        node.key()
     }
 
     fn push_trailing_comment(
         &mut self,
         node: &SyntaxNode<L>,
         comment: impl Into<SourceComment<L>>,
-    ) {
+    ) -> SyntaxElementKey {
         self.comments.push_trailing(node.key(), comment.into());
+        node.key()
     }
 
-    fn finish(
-        self,
-    ) -> (
-        CommentsMap<SyntaxElementKey, SourceComment<L>>,
-        FxHashSet<SyntaxElementKey>,
-    ) {
-        (self.comments, self.skipped)
+    fn finish(mut self, root: &SyntaxNode<L>) -> CommentsData<L> {
+        self.suppression_comments
+            .sort_unstable_by_key(|(range, _)| *range);
+        CommentsData {
+            root: Some(root.clone()),
+            comments: self.comments,
+            suppressed_or_skipped: self.suppressed_or_skipped,
+            suppression_comments: self.suppression_comments,
+            global_suppression: self.global_suppression,
+            #[cfg(debug_assertions)]
+            checked_suppressions: Default::default(),
+        }
     }
 }
 
@@ -507,7 +672,9 @@ impl<L: Language> Default for CommentsBuilder<L> {
     fn default() -> Self {
         Self {
             comments: CommentsMap::new(),
-            skipped: FxHashSet::default(),
+            suppressed_or_skipped: FxHashSet::default(),
+            suppression_comments: Vec::new(),
+            global_suppression: false,
         }
     }
 }
@@ -639,8 +806,8 @@ impl<'a> SourceParentheses<'a> {
 mod tests {
     use super::CommentsBuilderVisitor;
     use crate::comments::{
-        CommentKind, CommentPlacement, CommentStyle, CommentTextPosition, CommentsMap,
-        DecoratedComment, SourceComment,
+        CommentKind, CommentPlacement, CommentStyle, CommentSuppressionTarget, CommentTextPosition,
+        Comments, CommentsMap, DecoratedComment, SourceComment,
     };
     use crate::{TextSize, TransformSourceMap, TransformSourceMapBuilder};
     use biome_js_parser::{JsParserOptions, parse_module};
@@ -651,10 +818,183 @@ mod tests {
     };
     use biome_rowan::syntax::SyntaxElementKey;
     use biome_rowan::{
-        AstNode, BatchMutation, SyntaxNode, SyntaxNodeOptionExt, SyntaxTriviaPieceComments,
-        TextRange, chain_trivia_pieces,
+        AstNode, BatchMutation, Direction, SyntaxNode, SyntaxNodeOptionExt, SyntaxToken,
+        SyntaxTriviaPieceComments, TextRange, TriviaPiece, TriviaPieceKind, chain_trivia_pieces,
     };
-    use std::cell::RefCell;
+    use biome_suppression::SuppressionKind;
+    use std::cell::{Cell, RefCell};
+
+    #[test]
+    fn suppression_kind_is_computed_once() {
+        let source = "// ordinary comment\n// biome-ignore-all format: generated\nfirst();\n// biome-ignore format: layout\nsecond();\n// biome-ignore lint: unrelated\nthird();";
+        let root = parse_module(source, JsParserOptions::default()).syntax();
+        let style = CountingCommentStyle::default();
+        let comments = Comments::from_node(&root, &style, None);
+        let ranges: Vec<_> = root
+            .descendants_tokens(Direction::Next)
+            .flat_map(|token| {
+                token
+                    .leading_trivia()
+                    .pieces()
+                    .chain(token.trailing_trivia().pieces())
+            })
+            .filter_map(|piece| piece.as_comments())
+            .map(|comment| comment.text_range())
+            .collect();
+        let kinds = [
+            None,
+            Some(SuppressionKind::All),
+            Some(SuppressionKind::Classic),
+            None,
+        ];
+        assert_eq!(ranges.len(), kinds.len());
+
+        for _ in 0..3 {
+            for node in root.descendants() {
+                comments.is_suppressed(&node);
+                assert!(comments.is_global_suppressed(&node));
+            }
+            for (&range, kind) in ranges.iter().zip(&kinds).rev() {
+                assert_eq!(comments.suppression_kind(range), kind.as_ref());
+                assert_eq!(
+                    comments.suppression_kind(TextRange::empty(range.start())),
+                    None
+                );
+            }
+        }
+        assert_eq!(style.kind_calls.get(), 4);
+        assert_eq!(style.targets.get(), 1);
+        assert_eq!(comments.leading_comments(&root).len(), 2);
+    }
+
+    #[test]
+    fn suppressed_nodes_and_skipped_tokens_remain_distinct() {
+        let suppression = "// biome-ignore format: layout";
+        let root = JsSyntaxNode::new_detached(
+            JsSyntaxKind::JS_MODULE,
+            [
+                Some(
+                    JsSyntaxNode::new_detached(
+                        JsSyntaxKind::JS_EXPRESSION_STATEMENT,
+                        [Some(
+                            SyntaxToken::new_detached(
+                                JsSyntaxKind::IDENT,
+                                &std::format!("{suppression}\nx"),
+                                [
+                                    TriviaPiece::single_line_comment(TextSize::of(suppression)),
+                                    TriviaPiece::newline(1),
+                                ],
+                                [],
+                            )
+                            .into(),
+                        )],
+                    )
+                    .into(),
+                ),
+                Some(
+                    JsSyntaxNode::new_detached(
+                        JsSyntaxKind::JS_EXPRESSION_STATEMENT,
+                        [Some(
+                            SyntaxToken::new_detached(
+                                JsSyntaxKind::IDENT,
+                                "?y",
+                                [TriviaPiece::new(TriviaPieceKind::Skipped, 1)],
+                                [],
+                            )
+                            .into(),
+                        )],
+                    )
+                    .into(),
+                ),
+            ],
+        );
+        let comments = Comments::from_node(&root, &TestCommentStyle::default(), None);
+        let mut nodes = root.children();
+        let suppressed = nodes.next().unwrap();
+        let with_skipped = nodes.next().unwrap();
+
+        assert!(comments.is_suppressed(&suppressed));
+        assert!(!comments.has_skipped(&suppressed.first_token().unwrap()));
+        assert!(!comments.is_suppressed(&with_skipped));
+        assert!(comments.has_skipped(&with_skipped.first_token().unwrap()));
+        assert!(!comments.has_comments(&with_skipped));
+        assert!(!comments.is_suppressed(&root));
+        assert!(!comments.is_global_suppressed(&root));
+    }
+
+    #[test]
+    fn suppression_target_is_independent_of_placement() {
+        let root = parse_module(
+            "first();\n// biome-ignore format: layout\nsecond();",
+            JsParserOptions::default(),
+        )
+        .syntax();
+        let statements: Vec<_> = root
+            .descendants()
+            .filter(|node| node.kind() == JsSyntaxKind::JS_EXPRESSION_STATEMENT)
+            .collect();
+        for explicit_target in [false, true] {
+            let style = CountingCommentStyle {
+                explicit_target,
+                ..Default::default()
+            };
+            let comments = Comments::from_node(&root, &style, None);
+            assert!(comments.has_trailing_comments(&statements[0]));
+            assert!(!comments.has_comments(&statements[1]));
+            assert_eq!(comments.is_suppressed(&statements[0]), !explicit_target);
+            assert_eq!(comments.is_suppressed(&statements[1]), explicit_target);
+            assert!(!comments.is_global_suppressed(&root));
+            assert_eq!(style.kind_calls.get(), 1);
+            assert_eq!(style.targets.get(), 1);
+        }
+    }
+
+    #[derive(Default)]
+    struct CountingCommentStyle {
+        kind_calls: Cell<usize>,
+        targets: Cell<usize>,
+        explicit_target: bool,
+    }
+
+    impl CommentStyle for CountingCommentStyle {
+        type Language = JsLanguage;
+
+        fn suppression_kind(
+            &self,
+            comment: &DecoratedComment<JsLanguage>,
+        ) -> Option<SuppressionKind> {
+            self.kind_calls.set(self.kind_calls.get() + 1);
+            TestCommentStyle::default().suppression_kind(comment)
+        }
+
+        fn suppression_target(
+            &self,
+            comment: &DecoratedComment<JsLanguage>,
+        ) -> CommentSuppressionTarget<JsLanguage> {
+            assert_eq!(comment.suppression_kind(), Some(&SuppressionKind::Classic));
+            self.targets.set(self.targets.get() + 1);
+            if self.explicit_target {
+                CommentSuppressionTarget::Node(comment.following_node().unwrap().clone())
+            } else {
+                CommentSuppressionTarget::CommentPlacement
+            }
+        }
+
+        fn get_comment_kind(_: &SyntaxTriviaPieceComments<JsLanguage>) -> CommentKind {
+            CommentKind::Line
+        }
+
+        fn place_comment(
+            &self,
+            comment: DecoratedComment<JsLanguage>,
+        ) -> CommentPlacement<JsLanguage> {
+            if let Some(preceding) = comment.preceding_node() {
+                CommentPlacement::trailing(preceding.clone(), comment)
+            } else {
+                CommentPlacement::Default(comment)
+            }
+        }
+    }
 
     #[test]
     fn leading_comment() {
@@ -903,7 +1243,7 @@ b;"#;
 
         let style = TestCommentStyle::default();
         let comments_builder = CommentsBuilderVisitor::new(&style, Some(&source_map));
-        let (comments, _) = comments_builder.visit(&transformed);
+        let comments = comments_builder.visit(&transformed).comments;
 
         let decorated_comments = style.finish();
 
@@ -1020,6 +1360,130 @@ b;"#;
         assert!(!comments.trailing(&sequence.syntax().key()).is_empty());
     }
 
+    /// Comments between the children of a list that is the formatted root are
+    /// enclosed by the list itself, and the surrounding children are siblings.
+    #[test]
+    fn list_as_sub_tree_root() {
+        let root = parse_module(
+            "function test() {\n\tfirst();\n\n\t// comment\n\tsecond();\n}",
+            JsParserOptions::default(),
+        )
+        .syntax();
+
+        let list = root
+            .descendants()
+            .find(|node| node.kind() == JsSyntaxKind::JS_STATEMENT_LIST)
+            .unwrap();
+
+        let (decorated, _) = extract_comments_from_node(&list);
+
+        assert_eq!(decorated.len(), 1);
+        let comment = &decorated[0];
+        assert_eq!(comment.enclosing_node(), &list);
+        assert_eq!(
+            comment.preceding_node().and_then(|node| node.parent()),
+            Some(list.clone())
+        );
+        assert_eq!(
+            comment.following_node().and_then(|node| node.parent()),
+            Some(list)
+        );
+    }
+
+    /// Comments before the first token of a sub-tree root become leading
+    /// comments of the root without going through the placement rules.
+    #[test]
+    fn sub_tree_root_leading_comments() {
+        let root = parse_module(
+            "// comment\nif (a) {\n\tb();\n}",
+            JsParserOptions::default(),
+        )
+        .syntax();
+
+        let if_statement = root
+            .descendants()
+            .find(|node| node.kind() == JsSyntaxKind::JS_IF_STATEMENT)
+            .unwrap();
+
+        let (decorated, comments) = extract_comments_from_node(&if_statement);
+
+        assert!(decorated.is_empty());
+        assert_eq!(comments.leading(&if_statement.key()).len(), 1);
+    }
+
+    /// Comments before the first child of a list root are attached to that
+    /// child, because list format rules never print their own comments.
+    #[test]
+    fn list_root_leading_comments() {
+        let root = parse_module(
+            "function test() {\n\t// comment\n\tfirst();\n\tsecond();\n}",
+            JsParserOptions::default(),
+        )
+        .syntax();
+
+        let list = root
+            .descendants()
+            .find(|node| node.kind() == JsSyntaxKind::JS_STATEMENT_LIST)
+            .unwrap();
+        let first_statement = list.first_child().unwrap();
+
+        let (decorated, comments) = extract_comments_from_node(&list);
+
+        assert_eq!(decorated.len(), 1);
+        assert!(comments.leading(&list.key()).is_empty());
+        assert_eq!(comments.leading(&first_statement.key()).len(), 1);
+    }
+
+    /// A parentless root keeps the full-document behavior: its leading
+    /// comments still go through the placement rules.
+    #[test]
+    fn parentless_root_leading_comments() {
+        let root = parse_module(
+            "// comment\nif (a) {\n\tb();\n}",
+            JsParserOptions::default(),
+        )
+        .syntax();
+
+        let (decorated, comments) = extract_comments_from_node(&root);
+
+        assert_eq!(decorated.len(), 1);
+        assert!(comments.leading(&root.key()).is_empty());
+    }
+
+    #[test]
+    fn skipped_trivia_without_comments_is_collected() {
+        let root = JsSyntaxNode::new_detached(
+            JsSyntaxKind::JS_MODULE,
+            [Some(
+                SyntaxToken::new_detached(
+                    JsSyntaxKind::IDENT,
+                    "?value",
+                    [TriviaPiece::new(TriviaPieceKind::Skipped, 1)],
+                    [],
+                )
+                .into(),
+            )],
+        );
+        let token = root.first_token().unwrap();
+        let style = TestCommentStyle::default();
+        let comments = Comments::from_node(&root, &style, None);
+
+        assert!(comments.has_skipped(&token));
+        assert!(!comments.is_suppressed(&root));
+    }
+
+    fn extract_comments_from_node(
+        root: &JsSyntaxNode,
+    ) -> (
+        Vec<DecoratedComment<JsLanguage>>,
+        CommentsMap<SyntaxElementKey, SourceComment<JsLanguage>>,
+    ) {
+        let style = TestCommentStyle::default();
+        let builder = CommentsBuilderVisitor::new(&style, None);
+        let comments = builder.visit(root).comments;
+        (style.finish(), comments)
+    }
+
     fn extract_comments(
         source: &str,
     ) -> (
@@ -1042,7 +1506,7 @@ b;"#;
 
         let style = TestCommentStyle::default();
         let builder = CommentsBuilderVisitor::new(&style, source_map);
-        let (comments, _) = builder.visit(&tree.syntax());
+        let comments = builder.visit(&tree.syntax()).comments;
 
         (tree.syntax(), style.finish(), comments)
     }
@@ -1054,14 +1518,6 @@ b;"#;
 
     impl CommentStyle for TestCommentStyle {
         type Language = JsLanguage;
-
-        fn is_suppression(_: &str) -> bool {
-            false
-        }
-
-        fn is_global_suppression(_: &str) -> bool {
-            false
-        }
 
         fn get_comment_kind(_: &SyntaxTriviaPieceComments<Self::Language>) -> CommentKind {
             CommentKind::Block

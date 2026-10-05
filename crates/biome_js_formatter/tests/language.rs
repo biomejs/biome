@@ -6,7 +6,7 @@ use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::JsLanguage;
 use biome_languages::{DocumentFileSource, JsFileSource};
 use biome_parser::AnyParse;
-use biome_service::settings::{ServiceLanguage, Settings};
+use biome_service::settings::Settings;
 
 pub struct JsTestFormatLanguage {
     source_type: JsFileSource,
@@ -34,12 +34,9 @@ impl TestFormatLanguage for JsTestFormatLanguage {
         settings: &Settings,
         file_source: &DocumentFileSource,
     ) -> Self::FormatLanguage {
-        let language_settings = &settings.languages.javascript.formatter;
-        let options = Self::ServiceLanguage::resolve_format_options(
-            &settings.formatter,
-            &settings.override_settings,
-            language_settings,
-            &BiomePath::new(""),
+        let path = BiomePath::new("");
+        let options = settings.format_options::<Self::ServiceLanguage>(
+            &settings.matching_override_indices(path.as_path()),
             file_source,
         );
         JsFormatLanguage::new(options)

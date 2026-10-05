@@ -1,7 +1,6 @@
 use crate::HtmlFormatter;
-use crate::comments::HtmlCommentStyle;
 use crate::context::HtmlFormatContext;
-use biome_formatter::comments::{CommentKind, CommentStyle, SourceComment};
+use biome_formatter::comments::{CommentKind, SourceComment};
 use biome_formatter::format_element::tag::VerbatimKind;
 use biome_formatter::formatter::Formatter;
 use biome_formatter::prelude::{
@@ -15,6 +14,7 @@ use biome_formatter::{
 };
 use biome_html_syntax::{HtmlLanguage, HtmlSyntaxNode};
 use biome_rowan::{Direction, SyntaxElement, TextRange};
+use biome_suppression::SuppressionKind;
 
 /// "Formats" a node according to its original formatting in the source text. Being able to format
 /// a node "as is" is useful if a node contains syntax errors. Formatting a node with syntax errors
@@ -264,8 +264,10 @@ fn format_leading_comments_impl(
         );
         biome_formatter::write!(f, [format_comment])?;
 
-        // Check if this is a suppression comment
-        let is_suppression = HtmlCommentStyle::is_suppression(comment.piece().text());
+        let is_suppression = f
+            .comments()
+            .suppression_kind(comment.piece().text_range())
+            .is_some_and(SuppressionKind::is_classic);
 
         match comment.kind() {
             CommentKind::Block | CommentKind::InlineBlock => {

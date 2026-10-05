@@ -1,0 +1,233 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+interface SyncHandler {
+	(): string;
+}
+interface AsyncHandler {
+	(): Promise<string>;
+}
+type VoidHandler = () => void;
+
+declare function run(handler: SyncHandler): number;
+declare function run(handler: AsyncHandler): string;
+
+declare function schedule(handler: VoidHandler): number;
+declare function schedule(handler: AsyncHandler): string;
+
+export const ran = run(async () => "value");
+export const scheduled = schedule(async () => "value");
+```
+
+## Inferred types
+
+```
+Binding SyncHandler "SyncHandler" => interface "SyncHandler" {
+  extends: []
+  type_args: []
+  members: [
+    ():
+      sync Function {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: string
+      }
+  ]
+}
+
+Binding AsyncHandler "AsyncHandler" => interface "AsyncHandler" {
+  extends: []
+  type_args: []
+  members: [
+    ():
+      sync Function {
+        accepts: {
+          params: []
+          type_args: []
+        }
+        returns: instanceof Promise<string>
+      }
+  ]
+}
+
+Binding VoidHandler "VoidHandler" => sync Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: void
+}
+
+Binding run "run" => sync Function "run" {
+  accepts: {
+    params: [
+      required handler: instanceof SyncHandler
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Binding handler "handler" => instanceof SyncHandler
+
+Binding run "run" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "run" {
+        accepts: {
+          params: [
+            required handler: instanceof SyncHandler
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "run" {
+        accepts: {
+          params: [
+            required handler: instanceof AsyncHandler
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+  ]
+}
+
+Binding handler "handler" => instanceof AsyncHandler
+
+Binding schedule "schedule" => sync Function "schedule" {
+  accepts: {
+    params: [
+      required handler: instanceof VoidHandler
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Binding handler "handler" => instanceof VoidHandler
+
+Binding schedule "schedule" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "schedule" {
+        accepts: {
+          params: [
+            required handler: instanceof VoidHandler
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "schedule" {
+        accepts: {
+          params: [
+            required handler: instanceof AsyncHandler
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+  ]
+}
+
+Binding handler "handler" => instanceof AsyncHandler
+
+Binding ran "ran" => string
+
+Expression "run" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "run" {
+        accepts: {
+          params: [
+            required handler: instanceof SyncHandler
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "run" {
+        accepts: {
+          params: [
+            required handler: instanceof AsyncHandler
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+  ]
+}
+
+Expression "run(async () => \"value\")" => string
+
+Expression "async () => \"value\"" => async Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<string: value>
+}
+
+Expression "\"value\"" => string: value
+
+Binding scheduled "scheduled" => number
+
+Expression "schedule" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "schedule" {
+        accepts: {
+          params: [
+            required handler: instanceof VoidHandler
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+    ,
+    ():
+      sync Function "schedule" {
+        accepts: {
+          params: [
+            required handler: instanceof AsyncHandler
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+  ]
+}
+
+Expression "schedule(async () => \"value\")" => number
+
+Expression "async () => \"value\"" => async Function {
+  accepts: {
+    params: []
+    type_args: []
+  }
+  returns: instanceof Promise<string: value>
+}
+
+Expression "\"value\"" => string: value
+```

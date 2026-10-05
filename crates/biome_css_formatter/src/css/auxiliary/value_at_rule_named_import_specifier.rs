@@ -23,11 +23,11 @@ impl FormatNodeRule<CssValueAtRuleNamedImportSpecifier>
         write!(
             f,
             [
-                name.format(),
+                name?.format().with_text_case(CssCase::Preserve),
                 space(),
-                as_token.format(),
+                as_token.format()?.with_text_case(CssCase::Preserve),
                 space(),
-                local_name.format()
+                local_name?.format().with_text_case(CssCase::Preserve)
             ]
         )
     }

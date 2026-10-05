@@ -1,0 +1,79 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: invalid.md
+---
+# Input
+```md
+<!-- should generate diagnostics -->
+
+# One
+
+### Three
+
+##### Five
+
+```
+
+# Diagnostics
+```
+invalid.md:5:1 lint/nursery/useConsistentHeadingLevel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This heading skipped a level.
+  
+    3 │ # One
+    4 │ 
+  > 5 │ ### Three
+      │ ^^^^^^^^^
+    6 │ 
+    7 │ ##### Five
+  
+  i The previous heading has level1.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ 
+  > 3 │ # One
+      │ ^^^^^
+    4 │ 
+    5 │ ### Three
+  
+  i headings should follow a consistent level order. Failing to do so could cause issues when the file is transformed into HTML.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Change the level of the heading.
+  
+    5 │ ###·Three
+      │   -      
+
+```
+
+```
+invalid.md:7:1 lint/nursery/useConsistentHeadingLevel  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This heading skipped a level.
+  
+    5 │ ### Three
+    6 │ 
+  > 7 │ ##### Five
+      │ ^^^^^^^^^^
+    8 │ 
+  
+  i The previous heading has level3.
+  
+    3 │ # One
+    4 │ 
+  > 5 │ ### Three
+      │ ^^^^^^^^^
+    6 │ 
+    7 │ ##### Five
+  
+  i headings should follow a consistent level order. Failing to do so could cause issues when the file is transformed into HTML.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Change the level of the heading.
+  
+    7 │ #####·Five
+      │     -     
+
+```

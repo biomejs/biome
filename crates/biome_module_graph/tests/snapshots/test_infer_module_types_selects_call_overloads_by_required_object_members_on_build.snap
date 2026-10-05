@@ -1,0 +1,234 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+interface Options {
+	initial?: string;
+}
+interface DefinedOptions extends Options {
+	initial: string;
+}
+
+type DefinedResult = { isPending: false };
+type MaybeResult = { isPending: true } | { isPending: false };
+
+declare function query(options: DefinedOptions): DefinedResult;
+declare function query(options: Options): MaybeResult;
+
+declare function select(options: { kind: "text" }): string;
+declare function select(options: { kind: "number" }): number;
+
+export const { isPending } = query({});
+export const selected = select({ kind: "number" });
+```
+
+## Inferred types
+
+```
+Binding Options "Options" => interface "Options" {
+  extends: []
+  type_args: []
+  members: ["initial"?: string | undefined]
+}
+
+Binding DefinedOptions "DefinedOptions" => interface "DefinedOptions" {
+  extends: [instanceof Options]
+  type_args: []
+  members: ["initial": string]
+}
+
+Binding DefinedResult "DefinedResult" => Object {
+  prototype: No prototype
+  members: ["isPending": bool: false]
+}
+
+Binding MaybeResult "MaybeResult" =>
+  Object {
+    prototype: No prototype
+    members: ["isPending": bool: true]
+  }
+  | DefinedResult
+
+Binding query "query" => sync Function "query" {
+  accepts: {
+    params: [
+      required options: instanceof DefinedOptions
+    ]
+    type_args: []
+  }
+  returns: instanceof DefinedResult
+}
+
+Binding options "options" => instanceof DefinedOptions
+
+Binding query "query" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "query" {
+        accepts: {
+          params: [
+            required options: instanceof DefinedOptions
+          ]
+          type_args: []
+        }
+        returns: instanceof DefinedResult
+      }
+    ,
+    ():
+      sync Function "query" {
+        accepts: {
+          params: [
+            required options: instanceof Options
+          ]
+          type_args: []
+        }
+        returns: instanceof MaybeResult
+      }
+  ]
+}
+
+Binding options "options" => instanceof Options
+
+Binding select "select" => sync Function "select" {
+  accepts: {
+    params: [
+      required options: Object {
+        prototype: No prototype
+        members: ["kind": string: text]
+      }
+    ]
+    type_args: []
+  }
+  returns: string
+}
+
+Binding options "options" => Object {
+  prototype: No prototype
+  members: ["kind": string: text]
+}
+
+Binding select "select" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required options: Object {
+              prototype: No prototype
+              members: ["kind": string: text]
+            }
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required options: Object {
+              prototype: No prototype
+              members: ["kind": string: number]
+            }
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+  ]
+}
+
+Binding options "options" => Object {
+  prototype: No prototype
+  members: ["kind": string: number]
+}
+
+Binding isPending "isPending" => boolean
+
+Expression "query" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "query" {
+        accepts: {
+          params: [
+            required options: instanceof DefinedOptions
+          ]
+          type_args: []
+        }
+        returns: instanceof DefinedResult
+      }
+    ,
+    ():
+      sync Function "query" {
+        accepts: {
+          params: [
+            required options: instanceof Options
+          ]
+          type_args: []
+        }
+        returns: instanceof MaybeResult
+      }
+  ]
+}
+
+Expression "query({})" => instanceof MaybeResult
+
+Expression "{}" => Object {
+  prototype: No prototype
+  members: []
+}
+
+Binding selected "selected" => number
+
+Expression "select" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required options: Object {
+              prototype: No prototype
+              members: ["kind": string: text]
+            }
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+    ,
+    ():
+      sync Function "select" {
+        accepts: {
+          params: [
+            required options: Object {
+              prototype: No prototype
+              members: ["kind": string: number]
+            }
+          ]
+          type_args: []
+        }
+        returns: number
+      }
+  ]
+}
+
+Expression "select({ kind: \"number\" })" => number
+
+Expression "{ kind: \"number\" }" => Object {
+  prototype: No prototype
+  members: ["kind": string: number]
+}
+
+Expression "\"number\"" => string: number
+```

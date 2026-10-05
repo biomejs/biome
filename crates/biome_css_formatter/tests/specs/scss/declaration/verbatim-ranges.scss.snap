@@ -1,0 +1,31 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/declaration/verbatim-ranges.scss
+---
+
+# Input
+
+```scss
+.ranges{
+background:/* before url */url( images/#{ /* first */ $name   /* last */ }.png )/* after url */;
+content:/* before string */"#{ /* first */ mix(  ".5" , $amount ) /* last */ }"/* after string */;
+}
+
+```
+
+
+# Formatted
+
+```scss
+.ranges {
+	background:/* before url */ url(images/#{ /* first */ $name   /* last */ }.png) /* after url */;
+	content:/* before string */ "#{ /* first */ mix(  "0.5" , $amount ) /* last */ }" /* after string */;
+}
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2: 	background:/* before url */ url(images/#{ /* first */ $name   /* last */ }.png) /* after url */;
+    3: 	content:/* before string */ "#{ /* first */ mix(  "0.5" , $amount ) /* last */ }" /* after string */;
+```

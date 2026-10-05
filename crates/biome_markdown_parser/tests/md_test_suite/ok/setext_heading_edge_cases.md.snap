@@ -28,8 +28,9 @@ Foo\
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdSetextHeader {
             content: MdInlineItemList [
@@ -172,9 +173,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..66
+0: MD_ROOT@0..66
   0: (empty)
-  1: MD_BLOCK_LIST@0..66
+  1: (empty)
+  2: MD_BLOCK_LIST@0..66
     0: MD_SETEXT_HEADER@0..11
       0: MD_INLINE_ITEM_LIST@0..7
         0: MD_TEXTUAL@0..3
@@ -261,6 +263,6 @@ MdDocument {
                   0: MD_TEXTUAL_LITERAL@62..65 "baz" [] []
                 1: MD_TEXTUAL@65..66
                   0: MD_TEXTUAL_LITERAL@65..66 "\n" [] []
-  2: EOF@66..66 "" [] []
+  3: EOF@66..66 "" [] []
 
 ```

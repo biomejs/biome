@@ -34,7 +34,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useValidLang",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("lang").same()],
+        sources: &[
+            RuleSource::EslintJsxA11y("lang").same(),
+            RuleSource::EslintAstro("jsx-a11y/lang").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
     }

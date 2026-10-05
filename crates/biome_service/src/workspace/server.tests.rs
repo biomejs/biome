@@ -1,19 +1,1976 @@
 use super::*;
+#[cfg(feature = "module_graph")]
+use crate::scanner::WorkspaceWatcherBridge;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
 use crate::workspace::UpdateSettingsParams;
+use biome_analyze::RuleCategoriesBuilder;
 use biome_configuration::{
-    FormatterConfiguration, JsConfiguration,
+    FormatterConfiguration, HtmlConfiguration, JsConfiguration,
     analyzer::AnalyzerSelector,
     javascript::{JsFormatterConfiguration, JsParserConfiguration, JsResolverConfiguration},
+    json::{JsonConfiguration, JsonFormatterConfiguration},
 };
 use biome_css_syntax::CssLanguage;
-use biome_formatter::{IndentStyle, LineWidth};
+use biome_formatter::{IndentStyle, LineWidth, QuoteStyle};
 use biome_fs::MemoryFileSystem;
 use biome_js_syntax::JsLanguage;
-use biome_rowan::TextSize;
+use biome_json_formatter::context::TrailingCommas;
+use biome_languages::css::CssEmbeddingKind;
+use biome_rowan::{TextRange, TextSize};
 use camino::Utf8Path;
+use salsa::plumbing::AsId;
+use std::panic::AssertUnwindSafe;
 use std::str::FromStr;
+use std::time::{Duration, Instant};
+
+fn wait_until(timeout: Duration, mut predicate: impl FnMut() -> bool) -> bool {
+    let deadline = Instant::now() + timeout;
+    while !predicate() {
+        if Instant::now() >= deadline {
+            return false;
+        }
+        std::thread::yield_now();
+    }
+    true
+}
+
+/// Returns the bridge through which the watcher reports filesystem changes.
+#[cfg(feature = "module_graph")]
+fn watcher(workspace: &LocalWorkspace) -> ScannerWatcherBridge<'_, LocalWorkspace> {
+    ScannerWatcherBridge::new((&workspace.server.scanner, workspace))
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn tsconfig_change_reresolves_existing_importers() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert("/project/package.json".into(), br#"{"name":"project"}"#);
+    fs.insert(
+        "/project/tsconfig.json".into(),
+        br#"{"references":[{"path":"../shared/base.json"}]}"#,
+    );
+    fs.insert(
+        "/shared/base.json".into(),
+        br#"{"compilerOptions":{"paths":{"@dep":["../project/src/first"]}}}"#,
+    );
+    fs.insert(
+        "/project/src/index.ts".into(),
+        b"import { value } from '@dep';",
+    );
+    fs.insert("/project/src/first.ts".into(), b"export const value = 1;");
+    fs.insert("/project/src/second.ts".into(), b"export const value = 2;");
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        fs.clone(),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/shared/base.json"),
+            content: FileContent::FromClient {
+                content: r#"{"compilerOptions":{"paths":{"@dep":["../project/src/first"]}}}"#
+                    .into(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+    let resolved_import = |db: &WorkspaceDb| {
+        let module = db.module_for_path(Utf8Path::new("/project/src/index.ts"))?;
+        let ModuleInfoKind::Js(info) = module.kind(db) else {
+            return None;
+        };
+        info.import_paths
+            .get("@dep")?
+            .resolve_js(db, module)
+            .path()
+            .as_path()
+            .map(Utf8Path::to_path_buf)
+    };
+    assert_eq!(
+        resolved_import(&workspace.get_db()),
+        Some(Utf8PathBuf::from("/project/src/first.ts"))
+    );
+
+    workspace
+        .change_file(ChangeFileParams {
+            project_key,
+            path: BiomePath::new("/shared/base.json"),
+            content: r#"{"compilerOptions":{"paths":{"@dep":["../project/src/second"]}}}"#.into(),
+            version: 2,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    assert_eq!(
+        resolved_import(&workspace.get_db()),
+        Some(Utf8PathBuf::from("/project/src/second.ts"))
+    );
+
+    workspace
+        .close_file(CloseFileParams {
+            project_key,
+            path: BiomePath::new("/shared/base.json"),
+        })
+        .unwrap();
+
+    assert_eq!(
+        resolved_import(&workspace.get_db()),
+        Some(Utf8PathBuf::from("/project/src/first.ts"))
+    );
+
+    fs.insert(
+        "/project/tsconfig.json".into(),
+        br#"{"compilerOptions":{"paths":{"@dep":["./src/second"]}}}"#,
+    );
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new("/project/tsconfig.json"))
+        .unwrap();
+
+    assert_eq!(
+        resolved_import(&workspace.get_db()),
+        Some(Utf8PathBuf::from("/project/src/second.ts"))
+    );
+
+    fs.remove(Utf8Path::new("/project/tsconfig.json"));
+    watcher(&workspace)
+        .unload_file(Utf8Path::new("/project/tsconfig.json"), project_key)
+        .unwrap();
+
+    assert_eq!(resolved_import(&workspace.get_db()), None);
+}
+
+/// Creates an Owned-mode workspace for `project_path` and scans it.
+#[cfg(feature = "module_graph")]
+fn scanned_lsp_workspace(
+    fs: &Arc<MemoryFileSystem>,
+    project_path: &str,
+) -> (LocalWorkspace, ProjectKey) {
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        fs.clone(),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new(project_path),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new(project_path)),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+    (workspace, project_key)
+}
+
+/// Returns the path `specifier` resolves to when imported by `importer`.
+#[cfg(feature = "module_graph")]
+fn resolved_import(
+    workspace: &LocalWorkspace,
+    importer: &str,
+    specifier: &str,
+) -> Option<Utf8PathBuf> {
+    let db = workspace.get_db();
+    let module = db.module_for_path(Utf8Path::new(importer))?;
+    let ModuleInfoKind::Js(info) = module.kind(&db) else {
+        return None;
+    };
+    info.import_paths
+        .get(specifier)?
+        .resolve_js(&db, module)
+        .path()
+        .as_path()
+        .map(Utf8Path::to_path_buf)
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn watcher_updates_retry_when_a_write_is_pending() {
+    const TIMEOUT: Duration = Duration::from_secs(5);
+    const DEPENDENCY: &str = "/project/node_modules/dependency/index.ts";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert("/project/package.json".into(), br#"{"name":"project"}"#);
+    fs.insert(
+        "/project/src/index.ts".into(),
+        b"import { value } from 'dependency';",
+    );
+    let (workspace, project_key) = scanned_lsp_workspace(&fs, "/project");
+    fs.insert(DEPENDENCY.into(), b"export const value = 1;");
+
+    // The retained read keeps the setter pending, so the watcher update must
+    // read the database while a write is waiting.
+    let retained_db = workspace.get_db();
+    let watcher_result = std::thread::scope(|scope| {
+        let update = scope.spawn(|| {
+            workspace
+                .db_state
+                .insert_root_settings(project_key, Settings::default());
+        });
+        assert!(wait_until(TIMEOUT, || workspace.db_state.pending_setters() == 1));
+
+        let watcher_update =
+            scope.spawn(|| watcher(&workspace).index_file(project_key, BiomePath::new(DEPENDENCY)));
+        std::thread::sleep(Duration::from_millis(50));
+        drop(retained_db);
+
+        update.join().expect("the setter completes");
+        watcher_update.join()
+    });
+
+    assert!(
+        watcher_result
+            .expect("the watcher update must not unwind")
+            .is_ok(),
+        "the watcher update succeeds after the write completes"
+    );
+    assert_eq!(
+        resolved_import(&workspace, "/project/src/index.ts", "dependency"),
+        Some(Utf8PathBuf::from(DEPENDENCY))
+    );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn renaming_a_manifest_indexes_newly_reachable_dependencies() {
+    const INDEX: &str = "/project/src/index.ts";
+    const DECLARATION: &str = "/project/node_modules/dependency/index.d.ts";
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert("/project/package.json".into(), br#"{"name":"project"}"#);
+    fs.insert(
+        "/project/tsconfig.json".into(),
+        br#"{"compilerOptions":{"paths":{"dependency":["./stub.d.ts"]}}}"#,
+    );
+    fs.insert(
+        "/project/stub.d.ts".into(),
+        b"export declare const value: number;",
+    );
+    fs.insert(
+        "/project/node_modules/dependency/package.json".into(),
+        br#"{"name":"dependency","types":"index.d.ts"}"#,
+    );
+    fs.insert(DECLARATION.into(), b"export declare const value: string;");
+    fs.insert(INDEX.into(), b"import { value } from 'dependency';");
+    let (workspace, project_key) = scanned_lsp_workspace(&fs, "/project");
+    assert_eq!(
+        resolved_import(&workspace, INDEX, "dependency"),
+        Some(Utf8PathBuf::from("/project/stub.d.ts"))
+    );
+    assert!(
+        workspace
+            .get_db()
+            .module_for_path(Utf8Path::new(DECLARATION))
+            .is_none()
+    );
+
+    // The watcher reports the source of a rename, and paths that no longer
+    // exist, through `unload_path`.
+    fs.remove(Utf8Path::new("/project/tsconfig.json"));
+    watcher(&workspace)
+        .unload_path(Utf8Path::new("/project/tsconfig.json"), project_key)
+        .unwrap();
+
+    assert_eq!(
+        resolved_import(&workspace, INDEX, "dependency"),
+        Some(Utf8PathBuf::from(DECLARATION))
+    );
+    assert!(
+        workspace
+            .get_db()
+            .module_for_path(Utf8Path::new(DECLARATION))
+            .is_some(),
+        "the newly reachable declaration file is indexed"
+    );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn only_the_watcher_refreshes_resolver_path_info() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert("/project/package.json".into(), br#"{"name":"project"}"#);
+    fs.insert(
+        "/project/src/index.ts".into(),
+        b"import { value } from 'dependency';",
+    );
+    let (workspace, project_key) = scanned_lsp_workspace(&fs, "/project");
+    const INDEX: &str = "/project/src/index.ts";
+    assert_eq!(resolved_import(&workspace, INDEX, "dependency"), None);
+
+    fs.insert(
+        "/project/node_modules/dependency/index.ts".into(),
+        b"export const value = 1;",
+    );
+    // Dependency indexing uses the same trigger as watcher updates, but it
+    // must not refresh the path info the scanner already published.
+    workspace
+        .open_file_internal(
+            OpenFileReason::Index(IndexTrigger::Update),
+            OpenFileParams {
+                project_key,
+                path: BiomePath::new("/project/node_modules/dependency/index.ts"),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            },
+        )
+        .unwrap();
+    assert_eq!(resolved_import(&workspace, INDEX, "dependency"), None);
+
+    watcher(&workspace)
+        .index_file(
+            project_key,
+            BiomePath::new("/project/node_modules/dependency/index.ts"),
+        )
+        .unwrap();
+    assert_eq!(
+        resolved_import(&workspace, INDEX, "dependency"),
+        Some(Utf8PathBuf::from(
+            "/project/node_modules/dependency/index.ts"
+        ))
+    );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn workspace_manifest_update_refreshes_hoisted_dependencies() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert(
+        "/repo/package.json".into(),
+        br#"{"name":"repo","workspaces":["packages/*"]}"#,
+    );
+    fs.insert("/repo/packages/a/package.json".into(), br#"{"name":"a"}"#);
+    fs.insert(
+        "/repo/packages/a/src/index.ts".into(),
+        b"import { value } from 'foo';",
+    );
+    let (workspace, project_key) = scanned_lsp_workspace(&fs, "/repo");
+    const INDEX: &str = "/repo/packages/a/src/index.ts";
+    assert_eq!(resolved_import(&workspace, INDEX, "foo"), None);
+
+    // `npm install foo -w packages/a` hoists the package to the root and
+    // only produces watcher events for the manifest.
+    fs.insert(
+        "/repo/node_modules/foo/package.json".into(),
+        br#"{"name":"foo"}"#,
+    );
+    fs.insert(
+        "/repo/node_modules/foo/index.ts".into(),
+        b"export const value = 1;",
+    );
+    fs.insert(
+        "/repo/packages/a/package.json".into(),
+        br#"{"name":"a","dependencies":{"foo":"1.0.0"}}"#,
+    );
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new("/repo/packages/a/package.json"))
+        .unwrap();
+
+    assert_eq!(
+        resolved_import(&workspace, INDEX, "foo"),
+        Some(Utf8PathBuf::from("/repo/node_modules/foo/index.ts"))
+    );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn imported_json_documents_are_not_resolver_manifests() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert("/project/package.json".into(), br#"{"name":"project"}"#);
+    fs.insert("/project/src/data.json".into(), br#"{"value":1}"#);
+    fs.insert(
+        "/project/src/index.ts".into(),
+        // The bare specifier makes the resolver read the package manifest.
+        b"import data from './data.json'; import 'dependency';",
+    );
+    let (workspace, _) = scanned_lsp_workspace(&fs, "/project");
+
+    assert_eq!(
+        resolved_import(&workspace, "/project/src/index.ts", "./data.json"),
+        Some(Utf8PathBuf::from("/project/src/data.json"))
+    );
+    assert!(
+        workspace
+            .db_state
+            .is_resolver_manifest(Utf8Path::new("/project/package.json"))
+    );
+    assert!(
+        !workspace
+            .db_state
+            .is_resolver_manifest(Utf8Path::new("/project/src/data.json"))
+    );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn added_dependency_directory_reresolves_existing_importers() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert("/project/package.json".into(), br#"{"name":"project"}"#);
+    fs.insert(
+        "/project/src/index.ts".into(),
+        b"import { value } from 'dependency'; import addon from 'dependency/native.node';",
+    );
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        fs.clone(),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+
+    let resolved_import = |db: &WorkspaceDb, specifier: &str| {
+        let module = db.module_for_path(Utf8Path::new("/project/src/index.ts"))?;
+        let ModuleInfoKind::Js(info) = module.kind(db) else {
+            return None;
+        };
+        info.import_paths
+            .get(specifier)?
+            .resolve_js(db, module)
+            .path()
+            .as_path()
+            .map(Utf8Path::to_path_buf)
+    };
+    assert_eq!(resolved_import(&workspace.get_db(), "dependency"), None);
+    assert_eq!(
+        resolved_import(&workspace.get_db(), "dependency/native.node"),
+        None
+    );
+
+    fs.insert(
+        "/project/node_modules/dependency/index.ts".into(),
+        b"export const value = 1;",
+    );
+    watcher(&workspace)
+        .index_file(
+            project_key,
+            BiomePath::new("/project/node_modules/dependency/index.ts"),
+        )
+        .unwrap();
+
+    assert_eq!(
+        resolved_import(&workspace.get_db(), "dependency"),
+        Some(Utf8PathBuf::from(
+            "/project/node_modules/dependency/index.ts"
+        ))
+    );
+    assert_eq!(
+        resolved_import(&workspace.get_db(), "dependency/native.node"),
+        None
+    );
+
+    fs.insert(
+        "/project/node_modules/dependency/native.node".into(),
+        b"native",
+    );
+    watcher(&workspace)
+        .index_file(
+            project_key,
+            BiomePath::new("/project/node_modules/dependency/native.node"),
+        )
+        .unwrap();
+
+    assert_eq!(
+        resolved_import(&workspace.get_db(), "dependency/native.node"),
+        Some(Utf8PathBuf::from(
+            "/project/node_modules/dependency/native.node"
+        ))
+    );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn package_types_change_discovers_unrecorded_target() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert("/project/package.json".into(), br#"{"name":"project"}"#);
+    fs.insert(
+        "/project/src/index.ts".into(),
+        b"import type { Value } from 'dependency';",
+    );
+    fs.insert(
+        "/project/node_modules/dependency/package.json".into(),
+        br#"{"types":"a.d.ts"}"#,
+    );
+    fs.insert(
+        "/project/node_modules/dependency/a.d.ts".into(),
+        b"export type Value = string;",
+    );
+    fs.insert(
+        "/project/node_modules/dependency/b.d.ts".into(),
+        b"export type Value = number;",
+    );
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        fs.clone(),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
+    let project_key = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap()
+        .project_key;
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+
+    let resolved_import = |db: &WorkspaceDb| {
+        let module = db.module_for_path(Utf8Path::new("/project/src/index.ts"))?;
+        let ModuleInfoKind::Js(info) = module.kind(db) else {
+            return None;
+        };
+        info.import_paths
+            .get("dependency")?
+            .resolve_js(db, module)
+            .path()
+            .as_path()
+            .map(Utf8Path::to_path_buf)
+    };
+    assert_eq!(
+        resolved_import(&workspace.get_db()),
+        Some(Utf8PathBuf::from("/project/node_modules/dependency/a.d.ts"))
+    );
+
+    fs.insert(
+        "/project/node_modules/dependency/package.json".into(),
+        br#"{"types":"b.d.ts"}"#,
+    );
+    watcher(&workspace)
+        .index_file(
+            project_key,
+            BiomePath::new("/project/node_modules/dependency/package.json"),
+        )
+        .unwrap();
+
+    assert_eq!(
+        resolved_import(&workspace.get_db()),
+        Some(Utf8PathBuf::from("/project/node_modules/dependency/b.d.ts"))
+    );
+    assert!(
+        workspace
+            .get_db()
+            .module_for_path(Utf8Path::new("/project/node_modules/dependency/b.d.ts"))
+            .is_some()
+    );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
+fn shared_manifest_refresh_preserves_project_settings_and_dependency_ownership() {
+    let fs = Arc::new(MemoryFileSystem::default());
+    fs.insert("/first/package.json".into(), br#"{"name":"first"}"#);
+    fs.insert("/first/index.ts".into(), b"export const first = 1;");
+    fs.insert("/second/package.json".into(), br#"{"name":"second"}"#);
+    fs.insert(
+        "/second/tsconfig.json".into(),
+        br#"{"references":[{"path":"../shared/base.json"}]}"#,
+    );
+    fs.insert(
+        "/shared/base.json".into(),
+        br#"{"compilerOptions":{"paths":{"@dep":["../second/current"]}}}"#,
+    );
+    fs.insert("/second/current.ts".into(), b"export const value = 1;");
+    fs.insert(
+        "/second/index.ts".into(),
+        b"import { value } from '@dep'; export async function second(): Promise<void> { console.log(value); }",
+    );
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        fs.clone(),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
+    let first_project = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/first"),
+            open_uninitialized: true,
+        })
+        .unwrap()
+        .project_key;
+    let second_project = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/second"),
+            open_uninitialized: true,
+        })
+        .unwrap()
+        .project_key;
+    for (project_key, path, resolution_kind) in [
+        (first_project, "/first", ModuleGraphResolutionKind::Modules),
+        (
+            second_project,
+            "/second",
+            ModuleGraphResolutionKind::ModulesAndTypes,
+        ),
+    ] {
+        workspace
+            .update_settings(UpdateSettingsParams {
+                project_key,
+                workspace_directory: Some(BiomePath::new(path)),
+                configuration: Configuration::default(),
+                extended_configurations: vec![],
+                module_graph_resolution_kind: resolution_kind,
+            })
+            .unwrap();
+        workspace
+            .scan_project(ScanProjectParams {
+                project_key,
+                watch: false,
+                force: false,
+                scan_kind: ScanKind::TypeAware,
+                verbose: false,
+            })
+            .unwrap();
+    }
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key: first_project,
+            path: BiomePath::new("/shared/base.json"),
+            content: FileContent::FromClient {
+                content: r#"{"compilerOptions":{"paths":{"@dep":["../second/current"]}}}"#.into(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key: second_project,
+            path: BiomePath::new("/second/index.ts"),
+            content: FileContent::FromClient {
+                content: "import { value } from '@dep'; export async function second(): Promise<void> { console.log(value); }".into(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let second_raw_types = |db: &WorkspaceDb| {
+        let module = db
+            .module_for_path(Utf8Path::new("/second/index.ts"))
+            .expect("the second module must be indexed");
+        let ModuleInfoKind::Js(module) = module.kind(db) else {
+            panic!("the second module must be JavaScript");
+        };
+        format!("{:?}", module.raw_types)
+    };
+    let before = second_raw_types(&workspace.get_db());
+    assert!(before.contains("Promise"));
+
+    fs.insert("/second/generated.ts".into(), b"export const value = 2;");
+    workspace
+        .change_file(ChangeFileParams {
+            project_key: first_project,
+            path: BiomePath::new("/shared/base.json"),
+            content: r#"{"compilerOptions":{"paths":{"@dep":["../second/generated"]}}}"#.into(),
+            version: 2,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    assert_eq!(second_raw_types(&workspace.get_db()), before);
+    let db = workspace.get_db();
+    let module = db
+        .module_for_path(Utf8Path::new("/second/index.ts"))
+        .expect("the second module must be indexed");
+    let ModuleInfoKind::Js(info) = module.kind(&db) else {
+        panic!("the second module must be JavaScript");
+    };
+    let resolved_path = info.import_paths.get("@dep").and_then(|import| {
+        import
+            .resolve_js(&db, module)
+            .path()
+            .as_path()
+            .map(Utf8Path::to_path_buf)
+    });
+    assert_eq!(
+        resolved_path,
+        Some(Utf8PathBuf::from("/second/generated.ts"))
+    );
+    assert!(
+        db.module_for_path(Utf8Path::new("/second/generated.ts"))
+            .is_some()
+    );
+}
+
+#[cfg(feature = "plugins")]
+#[test]
+fn close_project_removes_descendant_plugin_caches() {
+    let (workspace, project_key) =
+        setup_workspace_and_open_project(MemoryFileSystem::default(), "/project");
+    let plugin_caches = workspace.server.plugin_caches.pin();
+    plugin_caches.insert(Utf8PathBuf::from("/project"), PluginCache::default());
+    plugin_caches.insert(
+        Utf8PathBuf::from("/project/packages/nested"),
+        PluginCache::default(),
+    );
+    plugin_caches.insert(
+        Utf8PathBuf::from("/project-sibling"),
+        PluginCache::default(),
+    );
+    drop(plugin_caches);
+
+    workspace
+        .close_project(CloseProjectParams { project_key })
+        .unwrap();
+
+    let plugin_caches = workspace.server.plugin_caches.pin();
+    assert!(!plugin_caches.contains_key(Utf8Path::new("/project")));
+    assert!(!plugin_caches.contains_key(Utf8Path::new("/project/packages/nested")));
+    assert!(plugin_caches.contains_key(Utf8Path::new("/project-sibling")));
+}
+
+fn assert_settings_query_routes(db_state: fn(Arc<dyn FsWithResolverProxy>) -> DbState) {
+    const PATH: &str = "/project/file.js";
+    const SOURCE: &str = "knownGlobal; const value={foo:\"bar\"};";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), SOURCE.as_bytes());
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        Arc::new(fs),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = db_state(workspace.server.fs.clone());
+    let project_key = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap()
+        .project_key;
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::from_client(SOURCE),
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let formatted = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            inline_config: None,
+        })
+        .unwrap();
+    assert!(formatted.as_code().contains("\"bar\""));
+
+    let range = TextRange::new(TextSize::from(0), TextSize::from(SOURCE.len() as u32));
+    workspace
+        .format_range(FormatRangeParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            range,
+            inline_config: None,
+        })
+        .unwrap();
+    let object_end = TextSize::from((SOURCE.find('}').unwrap() + 1) as u32);
+    workspace
+        .format_on_type(FormatOnTypeParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            offset: object_end,
+            inline_config: None,
+        })
+        .unwrap();
+
+    let no_undeclared =
+        AnalyzerSelector::from_str("lint/correctness/noUndeclaredVariables").unwrap();
+    let diagnostics = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            only: vec![no_undeclared],
+            skip: vec![],
+            enabled_rules: vec![no_undeclared],
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+    assert_eq!(diagnostics.diagnostics.len(), 1);
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    formatter: Some(JsFormatterConfiguration {
+                        quote_style: Some(QuoteStyle::Single),
+                        ..Default::default()
+                    }),
+                    globals: Some(["knownGlobal".into()].into_iter().collect()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    let formatted = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            inline_config: None,
+        })
+        .unwrap();
+    assert!(formatted.as_code().contains("'bar'"));
+    let diagnostics = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            only: vec![no_undeclared],
+            skip: vec![],
+            enabled_rules: vec![no_undeclared],
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+    assert!(diagnostics.diagnostics.is_empty());
+
+    let inline_configuration = biome_deserialize::json::deserialize_from_json_str::<Configuration>(
+        r#"{
+                "javascript": { "formatter": { "quoteStyle": "single" } },
+                "overrides": [{
+                    "includes": ["**/*.js"],
+                    "javascript": { "formatter": { "quoteStyle": "double" } }
+                }]
+            }"#,
+        biome_json_parser::JsonParserOptions::default(),
+        "",
+    )
+    .into_deserialized()
+    .unwrap();
+    let inline = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            inline_config: Some(inline_configuration),
+        })
+        .unwrap();
+    assert!(inline.as_code().contains("\"bar\""));
+    let persistent = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            inline_config: None,
+        })
+        .unwrap();
+    assert!(persistent.as_code().contains("'bar'"));
+}
+
+#[test]
+fn settings_query_routes_in_shared_and_owned_modes() {
+    assert_settings_query_routes(DbState::new);
+    assert_settings_query_routes(DbState::lsp);
+}
+
+#[test]
+fn json_language_hint_preserves_path_specific_sources() {
+    const BIOME_JSON: &str = r#"{"formatter": {}}"#;
+    const BIOME_JSONC: &str = "{\n// comment\n\"formatter\": {},\n}";
+    const PACKAGE_JSON: &str = r#"{"name":"example"}"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        Utf8PathBuf::from("/project/biome.json"),
+        BIOME_JSON.as_bytes(),
+    );
+    fs.insert(
+        Utf8PathBuf::from("/project/.biome.jsonc"),
+        BIOME_JSONC.as_bytes(),
+    );
+    fs.insert(
+        Utf8PathBuf::from("/project/package.json"),
+        PACKAGE_JSON.as_bytes(),
+    );
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                json: Some(JsonConfiguration {
+                    formatter: Some(JsonFormatterConfiguration {
+                        trailing_commas: Some(TrailingCommas::All),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    for path in [
+        "/project/biome.json",
+        "/project/.biome.jsonc",
+        "/project/package.json",
+    ] {
+        workspace
+            .open_file(OpenFileParams {
+                project_key,
+                path: BiomePath::new(path),
+                content: FileContent::FromServer,
+                document_file_source: Some(JsonFileSource::json().into()),
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            })
+            .unwrap();
+    }
+
+    let source = workspace
+        .get_file_source(Utf8Path::new("/project/biome.json"), false)
+        .to_json_file_source()
+        .unwrap();
+    assert!(source.kind().is_biome_json());
+    assert!(!source.allow_trailing_commas());
+
+    let source = workspace
+        .get_file_source(Utf8Path::new("/project/.biome.jsonc"), false)
+        .to_json_file_source()
+        .unwrap();
+    assert!(source.kind().is_biome_json());
+    assert!(source.allow_comments());
+    assert!(source.allow_trailing_commas());
+
+    let source = workspace
+        .get_file_source(Utf8Path::new("/project/package.json"), false)
+        .to_json_file_source()
+        .unwrap();
+    assert!(source.kind().is_package_json());
+
+    let formatted = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: BiomePath::new("/project/biome.json"),
+            inline_config: None,
+        })
+        .unwrap();
+    assert!(!formatted.as_code().contains("\"formatter\": {},"));
+
+    let formatted = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: BiomePath::new("/project/.biome.jsonc"),
+            inline_config: None,
+        })
+        .unwrap();
+    assert!(formatted.as_code().contains("\"formatter\": {},"));
+}
+
+#[test]
+fn settings_query_preserves_sequential_analyzer_rule_options() {
+    const PATH: &str = "/project/file.js";
+    const SOURCE: &str = "console.log('allowed');";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), SOURCE.as_bytes());
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    let configuration = biome_deserialize::json::deserialize_from_json_str::<Configuration>(
+        r#"{
+            "linter": {
+                "rules": {
+                    "suspicious": {
+                        "noConsole": {
+                            "level": "error",
+                            "options": { "allow": ["log"] }
+                        }
+                    }
+                }
+            },
+            "overrides": [{
+                "includes": ["**/*.js"],
+                "linter": { "rules": { "suspicious": "on" } }
+            }]
+        }"#,
+        biome_json_parser::JsonParserOptions::default(),
+        "",
+    )
+    .into_deserialized()
+    .unwrap();
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration,
+            workspace_directory: Some(BiomePath::new("/project")),
+            extended_configurations: Vec::new(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::from_client(SOURCE),
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let no_console = AnalyzerSelector::from_str("lint/suspicious/noConsole").unwrap();
+    for inline_config in [None, Some(Configuration::default())] {
+        let diagnostics = workspace
+            .pull_diagnostics(PullDiagnosticsParams {
+                project_key,
+                path: BiomePath::new(PATH),
+                categories: RuleCategoriesBuilder::default().with_lint().build(),
+                only: vec![no_console],
+                skip: Vec::new(),
+                enabled_rules: vec![no_console],
+                include_code_fix: false,
+                inline_config,
+                max_diagnostics: None,
+                diagnostic_level: Severity::Hint,
+                enforce_assist: false,
+            })
+            .unwrap();
+        assert!(diagnostics.diagnostics.is_empty());
+    }
+}
+
+#[test]
+fn settings_query_uses_inline_analyzer_override_indices() {
+    const PATH: &str = "/project/src/file.js";
+    const SOURCE: &str = "debugger;\nconsole.log('value');";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), SOURCE.as_bytes());
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    let project_configuration =
+        biome_deserialize::json::deserialize_from_json_str::<Configuration>(
+            r#"{
+                "linter": {
+                    "enabled": true,
+                    "rules": {
+                        "recommended": false,
+                        "suspicious": { "noConsole": "warn" }
+                    }
+                },
+                "overrides": [{
+                    "includes": ["**/tests/*.js"],
+                    "linter": {
+                        "rules": { "suspicious": { "noDebugger": "error" } }
+                    }
+                }]
+            }"#,
+            biome_json_parser::JsonParserOptions::default(),
+            "",
+        )
+        .into_deserialized()
+        .unwrap();
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration: project_configuration,
+            workspace_directory: Some(BiomePath::new("/project")),
+            extended_configurations: Vec::new(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::from_client(SOURCE),
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let inline_configuration = biome_deserialize::json::deserialize_from_json_str::<Configuration>(
+        r#"{
+                "overrides": [{
+                    "includes": ["**/src/*.js"],
+                    "linter": {
+                        "rules": { "suspicious": { "noConsole": "error" } }
+                    }
+                }]
+            }"#,
+        biome_json_parser::JsonParserOptions::default(),
+        "",
+    )
+    .into_deserialized()
+    .unwrap();
+    let diagnostics = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            only: Vec::new(),
+            skip: Vec::new(),
+            enabled_rules: Vec::new(),
+            include_code_fix: false,
+            inline_config: Some(inline_configuration),
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+
+    assert_eq!(diagnostics.diagnostics.len(), 1);
+    assert_eq!(diagnostics.diagnostics[0].severity(), Severity::Error);
+}
+
+#[test]
+fn process_file_is_stateless_and_reports_diagnostics_for_final_output() {
+    const PATH: &str = "/project/file.js";
+    const SOURCE: &str = "debugger;\nundeclared()";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), SOURCE.as_bytes());
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::from_client(SOURCE),
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let no_debugger = AnalyzerSelector::from_str("lint/suspicious/noDebugger").unwrap();
+    let no_undeclared =
+        AnalyzerSelector::from_str("lint/correctness/noUndeclaredVariables").unwrap();
+    let result = workspace
+        .process_file(ProcessFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromServer,
+            categories: RuleCategoriesBuilder::default()
+                .with_syntax()
+                .with_lint()
+                .build(),
+            only: vec![no_debugger, no_undeclared],
+            skip: vec![],
+            enabled_rules: vec![no_debugger, no_undeclared],
+            fix_file_mode: Some(FixFileMode::SafeAndUnsafeFixes),
+            suppression_reason: None,
+            format: true,
+            write: true,
+            include_code_fix: true,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+            skip_parse_errors: false,
+        })
+        .unwrap();
+
+    let output = result.output.unwrap();
+    assert_eq!(output, "undeclared();\n");
+    assert_eq!(result.applied_fixes, 1);
+    assert_eq!(result.diagnostics.len(), 1);
+    let span = result.diagnostics[0].location().span.unwrap();
+    assert_eq!(&output[span], "undeclared");
+    assert_eq!(
+        workspace
+            .get_file_content(GetFileContentParams {
+                project_key,
+                path: BiomePath::new(PATH),
+            })
+            .unwrap(),
+        SOURCE
+    );
+}
+
+/// Closing a file evicts its own cached parsed source through
+/// `DbState::remove_file`, and closing a project evicts the cached parsed
+/// sources of the files still open under its root through
+/// `DbState::unload_path`. Neither operation touches parsed sources that
+/// belong to a different project.
+#[test]
+fn close_file_and_close_project_evict_cached_parsed_sources() {
+    const PATH_A: &str = "/project/file_a.js";
+    const PATH_B: &str = "/project/nested/file_b.js";
+    const OTHER_PATH: &str = "/other/file_c.js";
+    const SOURCE: &str = "let a = 1;";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH_A), SOURCE.as_bytes());
+    fs.insert(Utf8PathBuf::from(PATH_B), SOURCE.as_bytes());
+    fs.insert(Utf8PathBuf::from(OTHER_PATH), SOURCE.as_bytes());
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    let other_project_key = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/other"),
+            open_uninitialized: true,
+        })
+        .unwrap()
+        .project_key;
+
+    for (key, path) in [
+        (project_key, PATH_A),
+        (project_key, PATH_B),
+        (other_project_key, OTHER_PATH),
+    ] {
+        workspace
+            .open_file(OpenFileParams {
+                project_key: key,
+                path: BiomePath::new(path),
+                content: FileContent::from_client(SOURCE),
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            })
+            .unwrap();
+    }
+
+    assert_eq!(
+        workspace.get_db().parsed_sources_len(),
+        3,
+        "opening all three files must add three entries to the parsed source cache"
+    );
+
+    workspace
+        .close_file(CloseFileParams {
+            project_key,
+            path: BiomePath::new(PATH_A),
+        })
+        .unwrap();
+
+    assert!(
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(PATH_A))
+            .is_none(),
+        "closing a file must evict its cached parsed source"
+    );
+    assert!(
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(PATH_B))
+            .is_some(),
+        "closing a file must not evict the cached parsed source of a file that is still open"
+    );
+    assert_eq!(
+        workspace.get_db().parsed_sources_len(),
+        2,
+        "closing a file must remove only its own entry from the parsed source cache"
+    );
+
+    workspace
+        .close_project(CloseProjectParams { project_key })
+        .unwrap();
+
+    assert!(
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(PATH_B))
+            .is_none(),
+        "closing a project must evict cached parsed sources still open under its root"
+    );
+    assert!(
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(OTHER_PATH))
+            .is_some(),
+        "closing a project must not evict cached parsed sources outside its root"
+    );
+    assert_eq!(
+        workspace.get_db().parsed_sources_len(),
+        1,
+        "closing a project must remove only the entries under its root from the parsed source cache"
+    );
+}
+
+#[test]
+fn process_file_preserves_embedded_content_after_formatting() {
+    const PATH: &str = "/project/file.html";
+    const SOURCE: &str = "<style>#id{color:red}</style><div></div>";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), SOURCE.as_bytes());
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                html: Some(HtmlConfiguration {
+                    experimental_full_support_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::from_client(SOURCE),
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .process_file(ProcessFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromServer,
+            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            fix_file_mode: Some(FixFileMode::SafeFixes),
+            suppression_reason: None,
+            format: true,
+            write: true,
+            include_code_fix: false,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+            skip_parse_errors: false,
+        })
+        .unwrap();
+
+    let output = result.output.unwrap();
+    assert!(output.contains("#id"));
+    assert!(output.contains("color: red"));
+    assert!(!output.contains("<style></style>"));
+    assert_eq!(
+        workspace
+            .get_file_content(GetFileContentParams {
+                project_key,
+                path: BiomePath::new(PATH),
+            })
+            .unwrap(),
+        SOURCE
+    );
+}
+
+#[test]
+fn change_file_resumes_module_update_after_cancellation() {
+    const BASE_PATH: &str = "/project/base.ts";
+    const INDEX_PATH: &str = "/project/index.ts";
+    const OLD_BASE: &str = "export function task(): void {}";
+    const NEW_BASE: &str = "export async function task(): Promise<void> {}";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(BASE_PATH), OLD_BASE.as_bytes());
+    fs.insert(
+        Utf8PathBuf::from(INDEX_PATH),
+        b"import { task } from './base';\ntask();",
+    );
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        Arc::new(fs),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap();
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::ModulesAndTypes,
+        })
+        .unwrap();
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::TypeAware,
+            verbose: false,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(BASE_PATH),
+            content: FileContent::FromClient {
+                content: OLD_BASE.into(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let initial_diagnostics = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            path: BiomePath::new(INDEX_PATH),
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noFloatingPromises").unwrap()],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+    assert!(initial_diagnostics.diagnostics.is_empty());
+
+    let params = ChangeFileParams {
+        project_key,
+        path: BiomePath::new(BASE_PATH),
+        content: NEW_BASE.into(),
+        version: 2,
+        inline_config: None,
+        editor_features: None,
+    };
+    workspace
+        .server
+        .cancel_change_file_after_document_update
+        .store(true, Ordering::Release);
+
+    let cancelled = salsa::Cancelled::catch(AssertUnwindSafe(|| {
+        workspace.as_workspace().change_file(params.clone())
+    }));
+    assert!(matches!(cancelled, Err(salsa::Cancelled::PendingWrite)));
+
+    let db = workspace.get_db();
+    let module = db
+        .module_for_path(Utf8Path::new(BASE_PATH))
+        .expect("base module must remain registered");
+    let ModuleInfoKind::Js(js_info) = module.kind(&db) else {
+        panic!("base module must be JavaScript");
+    };
+    assert!(!format!("{:?}", js_info.raw_types).contains("Promise"));
+    drop(db);
+
+    workspace.change_file(params).unwrap();
+
+    let db = workspace.get_db();
+    let module = db
+        .module_for_path(Utf8Path::new(BASE_PATH))
+        .expect("base module must remain registered");
+    let ModuleInfoKind::Js(js_info) = module.kind(&db) else {
+        panic!("base module must be JavaScript");
+    };
+    assert!(format!("{:?}", js_info.raw_types).contains("Promise"));
+    drop(db);
+
+    let diagnostics = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            path: BiomePath::new(INDEX_PATH),
+            only: vec![AnalyzerSelector::from_str("lint/nursery/noFloatingPromises").unwrap()],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+    assert_eq!(diagnostics.diagnostics.len(), 1);
+}
+
+#[test]
+fn owned_scan_uses_replacement_updates() {
+    const PATH: &str = "/project/index.js";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), b"export const value = 1;");
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        Arc::new(fs),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::Modules,
+        })
+        .unwrap();
+
+    let scan = || {
+        workspace
+            .scan_project(ScanProjectParams {
+                project_key,
+                watch: false,
+                force: true,
+                scan_kind: ScanKind::Project,
+                verbose: false,
+            })
+            .unwrap();
+    };
+
+    scan();
+    let first = workspace
+        .get_db()
+        .get_parsed_source(Utf8Path::new(PATH))
+        .unwrap();
+    scan();
+    let second = workspace
+        .get_db()
+        .get_parsed_source(Utf8Path::new(PATH))
+        .unwrap();
+
+    assert_ne!(first.as_id(), second.as_id());
+}
+
+#[test]
+fn scanner_epoch_queues_setters_without_cancelling_scan() {
+    const PATH: &str = "/project/package.json";
+    const TIMEOUT: Duration = Duration::from_secs(5);
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), b"{}");
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        Arc::new(fs),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    let test_state = &workspace.server.scanner_test_state;
+    test_state
+        .pause_file_settings_read
+        .store(true, Ordering::Release);
+    let initial_setter_attempts = workspace.db_state.setter_gate_attempts();
+
+    let (scan_paused, setter_queued, pending_setters, scan_result, update_result) =
+        std::thread::scope(|scope| {
+            let scan_workspace = &workspace;
+            let scan = scope.spawn(move || {
+                scan_workspace
+                    .as_workspace()
+                    .scan_project(ScanProjectParams {
+                        project_key,
+                        watch: false,
+                        force: true,
+                        scan_kind: ScanKind::Project,
+                        verbose: false,
+                    })
+            });
+            let scan_paused = wait_until(TIMEOUT, || {
+                test_state
+                    .file_settings_read_attempts
+                    .load(Ordering::Acquire)
+                    >= 1
+            });
+
+            let update = scan_paused.then(|| {
+                let update_workspace = &workspace;
+                scope.spawn(move || {
+                    update_workspace
+                        .as_workspace()
+                        .update_settings(UpdateSettingsParams {
+                            project_key,
+                            workspace_directory: Some(BiomePath::new("/project")),
+                            configuration: Configuration::default(),
+                            extended_configurations: vec![],
+                            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+                        })
+                })
+            });
+            let setter_queued = update.as_ref().is_some_and(|_| {
+                wait_until(TIMEOUT, || {
+                    workspace.db_state.setter_gate_attempts() > initial_setter_attempts
+                })
+            });
+            let pending_setters = workspace.db_state.pending_setters();
+
+            test_state
+                .pause_file_settings_read
+                .store(false, Ordering::Release);
+            let scan_result = scan.join().unwrap();
+            let update_result = update.map(|update| update.join().unwrap());
+
+            (
+                scan_paused,
+                setter_queued,
+                pending_setters,
+                scan_result,
+                update_result,
+            )
+        });
+
+    assert!(scan_paused, "the scanner did not reach the settings read");
+    assert!(
+        setter_queued,
+        "the settings update did not reach the setter gate"
+    );
+    assert_eq!(
+        pending_setters, 0,
+        "a setter queued behind the scanner epoch must not cancel reads"
+    );
+    assert!(scan_result.is_ok());
+    assert!(update_result.is_some_and(|result| result.is_ok()));
+    assert_eq!(
+        test_state.project_scan_attempts.load(Ordering::Acquire),
+        1,
+        "the project scan should not restart"
+    );
+    assert_eq!(
+        test_state.file_index_attempts.load(Ordering::Acquire),
+        1,
+        "the file indexing operation should not restart"
+    );
+    assert_eq!(
+        test_state.file_commit_attempts.load(Ordering::Acquire),
+        1,
+        "the parsed file should be committed once"
+    );
+}
+
+#[test]
+fn incremental_index_retries_pending_write() {
+    const PATH: &str = "/project/package.json";
+    const TIMEOUT: Duration = Duration::from_secs(5);
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), b"{}");
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        Arc::new(fs),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration::default(),
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    let retained_db = workspace.get_db();
+    let test_state = &workspace.server.scanner_test_state;
+    test_state
+        .pause_file_settings_read
+        .store(true, Ordering::Release);
+    let initial_index_attempts = test_state.file_index_attempts.load(Ordering::Acquire);
+    let initial_settings_read_attempts = test_state
+        .file_settings_read_attempts
+        .load(Ordering::Acquire);
+
+    let (setter_pending, first_attempt_paused, retry_observed, update_result, index_result) =
+        std::thread::scope(|scope| {
+            let update_workspace = &workspace;
+            let update = scope.spawn(move || {
+                update_workspace
+                    .as_workspace()
+                    .update_settings(UpdateSettingsParams {
+                        project_key,
+                        workspace_directory: Some(BiomePath::new("/project")),
+                        configuration: Configuration::default(),
+                        extended_configurations: vec![],
+                        module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+                    })
+            });
+            let setter_pending = wait_until(TIMEOUT, || workspace.db_state.pending_setters() == 1);
+
+            let index = setter_pending.then(|| {
+                let index_workspace = workspace.as_workspace();
+                scope.spawn(move || {
+                    WorkspaceScannerBridge::index_file(
+                        &index_workspace,
+                        project_key,
+                        BiomePath::new(PATH),
+                        IndexTrigger::Update,
+                    )
+                })
+            });
+            let first_attempt_paused = index.as_ref().is_some_and(|_| {
+                wait_until(TIMEOUT, || {
+                    test_state
+                        .file_settings_read_attempts
+                        .load(Ordering::Acquire)
+                        > initial_settings_read_attempts
+                })
+            });
+            test_state
+                .pause_file_settings_read
+                .store(false, Ordering::Release);
+            let retry_observed = first_attempt_paused
+                && wait_until(TIMEOUT, || {
+                    test_state.file_index_attempts.load(Ordering::Acquire)
+                        >= initial_index_attempts + 2
+                });
+
+            drop(retained_db);
+            let update_result = update.join();
+            let index_result = index.map(|index| index.join());
+
+            (
+                setter_pending,
+                first_attempt_paused,
+                retry_observed,
+                update_result,
+                index_result,
+            )
+        });
+
+    assert!(setter_pending, "the settings update did not become pending");
+    assert!(first_attempt_paused, "incremental indexing did not start");
+    assert!(retry_observed, "incremental indexing was not retried");
+    assert!(matches!(update_result, Ok(Ok(_))));
+    assert!(matches!(index_result, Some(Ok(Ok(_)))));
+    assert!(
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(PATH))
+            .is_some()
+    );
+}
+
+#[test]
+fn retrying_workspace_does_not_retry_project_scan() {
+    let fs = MemoryFileSystem::default();
+    let (watcher_tx, _) = crossbeam::channel::unbounded();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        Arc::new(fs),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new("/project"),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    workspace
+        .server
+        .scanner_test_state
+        .cancel_first_scan_attempt
+        .store(true, Ordering::Release);
+
+    let result = salsa::Cancelled::catch(AssertUnwindSafe(|| {
+        crate::workspace::RetryingWorkspace::new(workspace.as_workspace()).scan_project(
+            ScanProjectParams {
+                project_key,
+                watch: false,
+                force: true,
+                scan_kind: ScanKind::Project,
+                verbose: false,
+            },
+        )
+    }));
+
+    assert!(matches!(result, Err(salsa::Cancelled::PendingWrite)));
+    assert_eq!(
+        workspace
+            .server
+            .scanner_test_state
+            .project_scan_attempts
+            .load(Ordering::Acquire),
+        1,
+        "a project scan must not be retried from the beginning"
+    );
+}
 
 #[test]
 fn commonjs_file_rejects_import_statement() {
@@ -316,6 +2273,81 @@ fn format_html_with_scripts_and_css() {
     	</head>
     </html>
     "#);
+}
+
+#[test]
+fn format_html_preserves_template_literal_and_block_comment_indentation() {
+    // Regression: re-formatting an HTML file whose embedded <script> contains a
+    // template literal or whose <style> contains a block comment must not gain
+    // extra indentation on each run.
+    const FILE_CONTENT: &str = r#"<html>
+    <head>
+        <script>
+            const sql = `
+                SELECT *
+                FROM users
+            `;
+        </script>
+        <style>
+            /*
+             * A block comment.
+             */
+            .foo {
+                color: red;
+            }
+        </style>
+    </head>
+</html>"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/file.html"), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/file.html"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let first = workspace
+        .format_file(FormatFileParams {
+            path: Utf8PathBuf::from("/project/file.html").into(),
+            project_key,
+            inline_config: None,
+        })
+        .unwrap();
+
+    workspace
+        .change_file(ChangeFileParams {
+            project_key,
+            path: BiomePath::new("/project/file.html"),
+            content: first.as_code().to_string(),
+            version: 1,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let second = workspace
+        .format_file(FormatFileParams {
+            path: Utf8PathBuf::from("/project/file.html").into(),
+            project_key,
+            inline_config: None,
+        })
+        .unwrap();
+
+    assert_eq!(
+        first.as_code(),
+        second.as_code(),
+        "format_file must be idempotent for template literals and block comments"
+    );
 }
 
 #[test]
@@ -760,6 +2792,61 @@ const items = ['a', 'b'];
 }
 
 #[test]
+fn astro_attribute_expression_accepts_tsx() {
+    const FILE_CONTENT: &str = r#"---
+import Icon from './Icon.astro';
+const total = 1;
+---
+<Icon count={total as number} on={(e: Event) => e} icon={<Icon />} />
+"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from("/project/file.astro"), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new("/project/file.astro"),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics_and_actions(PullDiagnosticsAndActionsParams {
+            path: BiomePath::new("/project/file.astro"),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            project_key,
+            categories: Default::default(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    assert!(
+        result.diagnostics.is_empty(),
+        "Expected no diagnostics for TSX syntax in an Astro attribute expression, got: {:#?}",
+        result.diagnostics
+    );
+}
+
+#[test]
 fn format_js_with_embedded_css() {
     const FILE_PATH: &str = "/project/file.js";
     const FILE_CONTENT: &str = r#"const Foo = styled.div`
@@ -826,6 +2913,75 @@ const Bar = styled(Component)`
     	color: red;
     `;
     ");
+}
+
+#[test]
+fn stores_string_jsx_style_attributes_as_css_snippets() {
+    const FILE_PATH: &str = "/project/file.jsx";
+    const FILE_CONTENT: &str = r#"const Valid = <div style="color: red" />;
+const Component = <Component style="color: orange" />;
+const Namespaced = <div css:style="color: purple" />;
+const Malformed = <. style="color: black" />;
+const Expression = <div style={"color: blue"} />;
+const Object = <div style={{ color: "green" }} />;
+const Empty = <div style />;"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let db = workspace.get_db();
+    let snippets = workspace.get_snippets(Utf8Path::new(FILE_PATH));
+    let style_snippets = snippets
+        .iter()
+        .filter(|snippet| {
+            db.source_from_index(snippet.document_source_index(&db))
+                .and_then(|source| source.to_css_file_source())
+                .is_some_and(|source| {
+                    matches!(
+                        source.as_embedding_kind(),
+                        CssEmbeddingKind::HtmlStyleAttribute
+                    )
+                })
+        })
+        .collect::<Vec<_>>();
+
+    assert_eq!(style_snippets.len(), 1);
+    assert_eq!(
+        style_snippets[0]
+            .parsed(&db)
+            .clone()
+            .embedded_syntax::<CssLanguage>()
+            .text_with_trivia()
+            .to_string(),
+        "color: red"
+    );
 }
 
 #[test]
@@ -3019,6 +5175,145 @@ fn go_to_definition_css_class_via_transitive_import() {
 }
 
 #[test]
+fn fix_file_respects_inline_format_with_errors() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = "let a = 1; this is not valid javascript";
+    const FORMATTED: &str = "const a = 1;\nthis;\nis;\nnot;\nvalid;\njavascript;\n";
+
+    for (project_format_with_errors, inline_format_with_errors, expected) in [
+        (false, true, FORMATTED),
+        (true, false, "const a = 1; this is not valid javascript"),
+    ] {
+        let fs = MemoryFileSystem::default();
+        fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+        let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+        workspace
+            .update_settings(UpdateSettingsParams {
+                project_key,
+                configuration: Configuration {
+                    formatter: Some(FormatterConfiguration {
+                        format_with_errors: Some(project_format_with_errors.into()),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+                workspace_directory: Some(BiomePath::new("/project")),
+                extended_configurations: vec![],
+                module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+            })
+            .unwrap();
+        workspace
+            .open_file(OpenFileParams {
+                project_key,
+                path: BiomePath::new(FILE_PATH),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            })
+            .unwrap();
+
+        let use_const = AnalyzerSelector::from_str("lint/style/useConst").unwrap();
+        let result = workspace
+            .fix_file(FixFileParams {
+                project_key,
+                path: BiomePath::new(FILE_PATH),
+                fix_file_mode: FixFileMode::SafeFixes,
+                should_format: true,
+                only: vec![use_const],
+                skip: vec![],
+                enabled_rules: vec![use_const],
+                rule_categories: RuleCategoriesBuilder::default().with_lint().build(),
+                suppression_reason: None,
+                inline_config: Some(Configuration {
+                    formatter: Some(FormatterConfiguration {
+                        format_with_errors: Some(inline_format_with_errors.into()),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                }),
+            })
+            .unwrap();
+
+        assert_eq!(result.code, expected);
+    }
+}
+
+#[test]
+fn fix_file_is_idempotent_for_template_literals_and_css_block_comments() {
+    // Regression: reindent_embedded_code was adding the host indentation prefix
+    // to continuation lines inside template literals and CSS block comments, so
+    // each successive `biome check --write` stacked another indent level.
+    // HTML files exercise the update_snippets → reindent_embedded_code path.
+    const FILE_PATH: &str = "/project/page.html";
+    const FILE_CONTENT: &str = "<html>\n\t<head>\n\t\t<script>\n\t\t\tconst sql = `\n\t\t\t\tSELECT *\n\t\t\t\tFROM users\n\t\t\t`;\n\t\t</script>\n\t\t<style>\n\t\t\t/*\n\t\t\t * A block comment.\n\t\t\t */\n\t\t\t.foo { color: red; }\n\t\t</style>\n\t</head>\n</html>\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let first = workspace
+        .fix_file(FixFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            fix_file_mode: FixFileMode::SafeFixes,
+            should_format: true,
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            rule_categories: RuleCategories::default(),
+            suppression_reason: None,
+            inline_config: None,
+        })
+        .unwrap();
+
+    workspace
+        .change_file(ChangeFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: first.code.clone(),
+            version: 1,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let second = workspace
+        .fix_file(FixFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            fix_file_mode: FixFileMode::SafeFixes,
+            should_format: true,
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            rule_categories: RuleCategories::default(),
+            suppression_reason: None,
+            inline_config: None,
+        })
+        .unwrap();
+
+    assert_eq!(
+        first.code, second.code,
+        "fix_file must be idempotent: template literal and block comment continuation lines must not gain an extra indent on each run"
+    );
+}
+
+#[test]
 fn go_to_definition_cursor_before_embedded_script_does_not_underflow() {
     const HTML_CONTENT: &str = "\
 <div>foo</div>
@@ -3093,4 +5388,270 @@ const x = 1;
         result.is_none_or(|definition| definition.matches.is_empty()),
         "cursor before an embedded script should not resolve to any definition"
     );
+}
+
+#[test]
+#[cfg(feature = "js_plugin")]
+fn javascript_plugin_mutation_fixes_respect_modes_and_preserve_source() {
+    use biome_diagnostics::Applicability;
+    use biome_plugin_loader::{PluginConfiguration, Plugins};
+
+    const PLUGIN_SOURCE: &str = r#"import { createMutation, factory, registerDiagnostic, ast, defineRule } from "@biomejs/runtime/plugin";
+
+export const useLet = defineRule({
+    query: ast("JS_VARIABLE_DECLARATION"),
+    run(node) {
+        const kindToken = node.token("kindToken");
+        if (kindToken?.text !== "var") {
+            return;
+        }
+        const m = createMutation(node);
+        m.replaceToken(kindToken, factory.token("LET_KW"));
+        m.replaceToken(node.declarators[0].id.token("nameToken"), factory.token("IDENT", "renamed"));
+        registerDiagnostic(node, "warning", "Use a named let binding.", {
+            mutation: m,
+            message: "Use let",
+            kind: "FIX_KIND",
+        });
+    },
+});"#;
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str =
+        "const prefix = 'λ';\n/* café */\nvar /* keep */ café = '漢'; // suffix\n";
+    const FIXED_CONTENT: &str =
+        "const prefix = 'λ';\n/* café */\nlet /* keep */ renamed = '漢'; // suffix\n";
+
+    for (kind, applicability) in [
+        ("safe", Applicability::Always),
+        ("unsafe", Applicability::MaybeIncorrect),
+    ] {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            Utf8PathBuf::from("/project/plugin.js"),
+            PLUGIN_SOURCE.replace("FIX_KIND", kind),
+        );
+        fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+        let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+        workspace
+            .update_settings(UpdateSettingsParams {
+                project_key,
+                workspace_directory: Some(BiomePath::new("/project")),
+                configuration: Configuration {
+                    plugins: Some(Plugins(vec![PluginConfiguration::Path(
+                        "plugin.js".to_string(),
+                    )])),
+                    ..Default::default()
+                },
+                extended_configurations: vec![],
+                module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+            })
+            .unwrap();
+        workspace
+            .open_file(OpenFileParams {
+                project_key,
+                path: BiomePath::new(FILE_PATH),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            })
+            .unwrap();
+
+        let diagnostics = workspace
+            .pull_diagnostics_and_actions(PullDiagnosticsAndActionsParams {
+                project_key,
+                path: BiomePath::new(FILE_PATH),
+                only: vec![AnalyzerSelector::Plugin],
+                skip: vec![],
+                enabled_rules: vec![],
+                categories: RuleCategoriesBuilder::default().with_lint().build(),
+                inline_config: None,
+            })
+            .unwrap();
+        assert_eq!(diagnostics.diagnostics.len(), 1, "{kind}: {diagnostics:?}");
+        let (diagnostic, actions) = &diagnostics.diagnostics[0];
+        assert_eq!(diagnostic.severity(), Severity::Warning);
+        assert_eq!(
+            &FILE_CONTENT[diagnostic.location().span.unwrap()],
+            "var /* keep */ café = '漢'"
+        );
+        assert_eq!(actions.len(), 1);
+        let suggestion = actions[0].suggestion.as_ref().unwrap();
+        assert_eq!(suggestion.applicability, applicability);
+        assert_eq!(suggestion.msg, biome_console::markup!("Use let").to_owned());
+        assert_eq!(
+            suggestion.suggestion.new_string(FILE_CONTENT),
+            FIXED_CONTENT
+        );
+
+        for mode in [
+            FixFileMode::SafeFixes,
+            FixFileMode::SafeAndUnsafeFixes,
+            FixFileMode::ApplySuppressions,
+        ] {
+            let result = workspace
+                .fix_file(FixFileParams {
+                    project_key,
+                    path: BiomePath::new(FILE_PATH),
+                    fix_file_mode: mode,
+                    should_format: false,
+                    only: vec![AnalyzerSelector::Plugin],
+                    skip: vec![],
+                    enabled_rules: vec![],
+                    rule_categories: RuleCategoriesBuilder::default().with_lint().build(),
+                    suppression_reason: None,
+                    inline_config: None,
+                })
+                .unwrap();
+            let applies = mode == FixFileMode::SafeAndUnsafeFixes
+                || (mode == FixFileMode::SafeFixes && kind == "safe");
+            assert_eq!(
+                result.code,
+                if applies { FIXED_CONTENT } else { FILE_CONTENT },
+                "{kind}: {mode:?}"
+            );
+            assert_eq!(
+                result.actions.len(),
+                usize::from(applies),
+                "{kind}: {mode:?}"
+            );
+            assert_eq!(
+                result.skipped_suggested_fixes,
+                u32::from(mode == FixFileMode::SafeFixes && kind == "unsafe"),
+                "{kind}: {mode:?}"
+            );
+            assert_eq!(result.errors, 0);
+            if applies {
+                assert_eq!(
+                    result.actions[0].rule_name,
+                    Some(("plugin".into(), "anonymous".into()))
+                );
+            }
+        }
+    }
+}
+
+#[test]
+#[cfg(feature = "js_plugin")]
+fn typescript_plugin_reports_diagnostics_through_the_workspace() {
+    use biome_plugin_loader::{PluginConfiguration, Plugins};
+
+    const PLUGIN_PATH: &str = "/project/plugin.ts";
+    const PLUGIN_SOURCE: &str = r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
+import type { Severity } from "@biomejs/runtime/plugin";
+
+export const noTopLevelVar = defineRule({
+    query: ast("JS_VARIABLE_STATEMENT"),
+    run(node): void {
+        if (
+            node.parent?.kind === "JS_MODULE_ITEM_LIST" &&
+            node.parent.parent?.kind === "JS_MODULE" &&
+            node.declaration?.kindToken === "var"
+        ) {
+            registerDiagnostic(
+                node,
+                "warning" satisfies Severity,
+                "Use let or const instead of a top-level var declaration.",
+            );
+        }
+    },
+});
+
+export const reportArguments = defineRule({
+    query: ast("JS_CALL_ARGUMENT_LIST"),
+    run(list): void {
+        registerDiagnostic(list, "warning", "Argument list.");
+        for (const arg of list.children()) {
+            registerDiagnostic(arg, "warning", `Argument: ${arg.text}`);
+        }
+    },
+});"#;
+    const FILE_PATH: &str = "/project/file.ts";
+    const FILE_CONTENT: &str = "var foo: number = 1;\nexport const bar: string = `${foo}`;\nexport function nested() {\n    var local: number = 2;\n    return local;\n}\nnested(3, 4);\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PLUGIN_PATH), PLUGIN_SOURCE);
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration: Configuration {
+                plugins: Some(Plugins(vec![PluginConfiguration::Path(
+                    "plugin.ts".to_string(),
+                )])),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .pull_diagnostics(PullDiagnosticsParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            categories: RuleCategories::default(),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            include_code_fix: false,
+            inline_config: None,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+        })
+        .unwrap();
+
+    assert_eq!(result.parse_errors, 0);
+
+    let diagnostics: Vec<_> = result
+        .diagnostics
+        .iter()
+        .filter(|diagnostic| diagnostic.category() == Some(biome_diagnostics::category!("plugin")))
+        .collect();
+    assert_eq!(diagnostics.len(), 4, "{:#?}", result.diagnostics);
+    let diagnostic = diagnostics[0];
+    assert_eq!(diagnostic.severity(), Severity::Warning);
+    assert_eq!(
+        serde_json::to_value(diagnostic).unwrap()["description"],
+        "Use let or const instead of a top-level var declaration."
+    );
+    assert_eq!(
+        diagnostic.location().span,
+        Some(TextRange::new(TextSize::from(0), TextSize::from(20)))
+    );
+    for (text, message) in [
+        ("3, 4", "Argument list."),
+        ("3", "Argument: 3"),
+        ("4", "Argument: 4"),
+    ] {
+        let start = FILE_CONTENT.find(text).unwrap() as u32;
+        let range = TextRange::new(
+            TextSize::from(start),
+            TextSize::from(start + text.len() as u32),
+        );
+        let diagnostic = diagnostics
+            .iter()
+            .find(|diagnostic| serde_json::to_value(diagnostic).unwrap()["description"] == message)
+            .unwrap();
+        assert_eq!(diagnostic.severity(), Severity::Warning);
+        assert_eq!(diagnostic.location().span, Some(range));
+    }
 }

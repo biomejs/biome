@@ -1,0 +1,90 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: promiseStaticMethodsInvalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+const promises = [Promise.resolve(1), Promise.resolve(2)];
+
+Promise.allSettled(promises);
+Promise.any(promises);
+Promise.race(promises);
+Promise.try(() => 1);
+
+```
+
+# Diagnostics
+```
+promiseStaticMethodsInvalid.ts:4:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    2 │ const promises = [Promise.resolve(1), Promise.resolve(2)];
+    3 │ 
+  > 4 │ Promise.allSettled(promises);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ Promise.any(promises);
+    6 │ Promise.race(promises);
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+promiseStaticMethodsInvalid.ts:5:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    4 │ Promise.allSettled(promises);
+  > 5 │ Promise.any(promises);
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+    6 │ Promise.race(promises);
+    7 │ Promise.try(() => 1);
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+promiseStaticMethodsInvalid.ts:6:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    4 │ Promise.allSettled(promises);
+    5 │ Promise.any(promises);
+  > 6 │ Promise.race(promises);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ Promise.try(() => 1);
+    8 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+promiseStaticMethodsInvalid.ts:7:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    5 │ Promise.any(promises);
+    6 │ Promise.race(promises);
+  > 7 │ Promise.try(() => 1);
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

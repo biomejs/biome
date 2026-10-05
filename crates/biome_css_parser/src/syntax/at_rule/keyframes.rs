@@ -4,7 +4,9 @@ use crate::syntax::at_rule::parse_error::{
     expected_keyframes_item, expected_keyframes_item_selector,
     expected_percentage_after_timeline_range_name,
 };
-use crate::syntax::block::{ParseBlockBody, parse_declaration_block};
+use crate::syntax::block::{
+    ParseBlockBody, is_at_declaration_or_rule_item, parse_declaration_or_statement_block,
+};
 use crate::syntax::css_modules::{
     CSS_MODULES_SCOPE_SET, expected_any_css_module_scope, local_or_global_not_allowed,
 };
@@ -18,7 +20,7 @@ use crate::syntax::scss::{
 use crate::syntax::value::dimension::{is_at_percentage_dimension, parse_percentage_dimension};
 use crate::syntax::{
     CssSyntaxFeatures, is_at_declaration, is_at_identifier, is_at_string, parse_custom_identifier,
-    parse_string,
+    parse_string, try_parse,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -285,7 +287,7 @@ fn parse_scss_keyframes_variable_declaration(p: &mut CssParser) -> ParsedSyntax 
 #[inline]
 fn parse_keyframes_item(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
-    KeyframesSelectorList.parse_list(p);
+    KeyframesSelectorList::default().parse_list(p);
     // `parse_list` will take care of recovering invalid selectors, but if
     // _none_ are present, we still want to add a diagnostic to explain the
     // error while continuing the rest of the parse, since we know that the
@@ -294,12 +296,57 @@ fn parse_keyframes_item(p: &mut CssParser) -> ParsedSyntax {
         p.error(expected_keyframes_item_selector(p, p.cur_range()))
     }
 
-    parse_declaration_block(p);
+    parse_declaration_or_statement_block(p);
 
     Present(m.complete(p, CSS_KEYFRAMES_ITEM))
 }
 
-struct KeyframesSelectorListParseRecovery;
+pub(crate) fn parse_scss_template_keyframes_item(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_keyframes_item_selector(p) {
+        return Absent;
+    }
+
+    let marker = if is_at_percentage_dimension(p) {
+        let marker = p.start();
+        KeyframesSelectorList {
+            template: true,
+            has_explicit_percentage: false,
+        }
+        .parse_list(p);
+        marker
+    } else {
+        // An interpolation or `from` can also start an ordinary selector template.
+        let Ok(marker) = try_parse(p, |p| {
+            let marker = p.start();
+            let mut selectors = KeyframesSelectorList {
+                template: true,
+                has_explicit_percentage: false,
+            };
+            selectors.parse_list(p);
+            if selectors.has_explicit_percentage && p.at(T!['{']) {
+                Ok(marker)
+            } else {
+                marker.abandon(p);
+                Err(())
+            }
+        }) else {
+            return Absent;
+        };
+        marker
+    };
+
+    if !p.at(T!['{']) {
+        p.expect(T!['{']);
+        return Present(marker.complete(p, CSS_BOGUS));
+    }
+
+    parse_declaration_or_statement_block(p);
+    Present(marker.complete(p, CSS_KEYFRAMES_ITEM))
+}
+
+struct KeyframesSelectorListParseRecovery {
+    template: bool,
+}
 
 impl ParseRecovery for KeyframesSelectorListParseRecovery {
     type Kind = CssSyntaxKind;
@@ -322,11 +369,20 @@ impl ParseRecovery for KeyframesSelectorListParseRecovery {
         // 	   color: blue;
         // 	} <----- a recover point
         // }
-        is_at_keyframes_item_selector(p) || is_at_keyframes_selector_list_end(p)
+        is_at_keyframes_item_selector(p)
+            || is_at_keyframes_selector_list_end(p)
+            || (self.template && is_at_template_keyframes_selector_list_end(p))
     }
 }
 
-struct KeyframesSelectorList;
+#[derive(Default)]
+struct KeyframesSelectorList {
+    template: bool,
+    /// A percentage selector (`50%`) or interpolated selector with a `%` suffix
+    /// (`#{$step}%`) identifies a keyframe header. Plain `from` or `#{$name}`
+    /// can also be ordinary selectors.
+    has_explicit_percentage: bool,
+}
 
 impl ParseSeparatedList for KeyframesSelectorList {
     type Kind = CssSyntaxKind;
@@ -334,11 +390,22 @@ impl ParseSeparatedList for KeyframesSelectorList {
     const LIST_KIND: Self::Kind = CSS_KEYFRAMES_SELECTOR_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_keyframes_item_selector(p)
+        // CSS recovery changes the selector's kind, so identify interpolation before parsing.
+        let starts_with_interpolation = is_at_scss_keyframes_selector(p);
+        let selector = parse_keyframes_item_selector(p);
+        if let Present(ref selector) = selector {
+            let is_literal_percentage = selector.kind(p) == CSS_KEYFRAMES_PERCENTAGE_SELECTOR;
+            let has_interpolated_percentage_suffix =
+                starts_with_interpolation && p.last() == Some(T![%]);
+            self.has_explicit_percentage |=
+                is_literal_percentage || has_interpolated_percentage_suffix;
+        }
+        selector
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
         p.at(T!['{'])
+            || (self.template && (p.at(T!['}']) || is_at_template_keyframes_selector_list_end(p)))
     }
 
     fn recover(
@@ -348,7 +415,9 @@ impl ParseSeparatedList for KeyframesSelectorList {
     ) -> RecoveryResult {
         parsed_element.or_recover(
             p,
-            &KeyframesSelectorListParseRecovery,
+            &KeyframesSelectorListParseRecovery {
+                template: self.template,
+            },
             expected_keyframes_item_selector,
         )
     }
@@ -356,6 +425,13 @@ impl ParseSeparatedList for KeyframesSelectorList {
     fn separating_element_kind(&mut self) -> Self::Kind {
         T![,]
     }
+}
+
+/// Stops a template header before `;` or a block item that cannot be a keyframe selector.
+///
+/// This preserves `color: red;` or `.child {}` after a step with a missing `{`.
+fn is_at_template_keyframes_selector_list_end(p: &mut CssParser) -> bool {
+    p.at(T![;]) || (!is_at_keyframes_item_selector(p) && is_at_declaration_or_rule_item(p))
 }
 
 fn is_at_keyframes_selector_list_end(p: &mut CssParser) -> bool {
@@ -447,7 +523,7 @@ fn parse_keyframes_range_selector(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump_ts(TIMELINE_RANGE_NAME_SET);
-    parse_percentage_dimension(p)
+    parse_percentage_dimension(p, CssLexContext::Regular)
         .or_add_diagnostic(p, expected_percentage_after_timeline_range_name);
 
     Present(m.complete(p, CSS_KEYFRAMES_RANGE_SELECTOR))
@@ -461,7 +537,7 @@ fn parse_keyframes_percentage_selector(p: &mut CssParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    parse_percentage_dimension(p).ok();
+    parse_percentage_dimension(p, CssLexContext::Regular).ok();
 
     Present(m.complete(p, CSS_KEYFRAMES_PERCENTAGE_SELECTOR))
 }

@@ -10,50 +10,62 @@ use std::str::FromStr;
 pub type ExperimentalEmbeddedSnippetsEnabled = Bool<false>;
 pub type ExperimentalPnpmCatalogsEnabled = Bool<false>;
 
-/// A set of options applied to the JavaScript files
+/// Options applied to JavaScript, TypeScript, JSX, TSX, and supported languages that embed
+/// JavaScript.
+///
+/// Language-specific settings take precedence over corresponding global settings. Global settings
+/// apply when their language-specific counterparts are omitted, unless stated otherwise.
 #[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsConfiguration {
-    /// Parsing options
+    /// JavaScript parser options.
     #[cfg_attr(feature = "cli", bpaf(external(js_parser_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub parser: Option<JsParserConfiguration>,
 
-    /// Formatting options
+    /// JavaScript formatter options.
     #[cfg_attr(feature = "cli", bpaf(external(js_formatter_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub formatter: Option<JsFormatterConfiguration>,
 
-    /// Linter options
+    /// JavaScript linter options.
     #[cfg_attr(feature = "cli", bpaf(external(js_linter_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub linter: Option<JsLinterConfiguration>,
 
-    /// Assist options
+    /// JavaScript assist options.
     #[cfg_attr(feature = "cli", bpaf(external(js_assist_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub assist: Option<JsAssistConfiguration>,
 
-    /// Module/dependency resolver options
+    /// JavaScript module and dependency resolver options.
     #[cfg_attr(feature = "cli", bpaf(external(js_resolver_configuration), optional))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub resolver: Option<JsResolverConfiguration>,
 
-    /// A list of global bindings that should be ignored by the analyzers
+    /// A list of additional names that Biome's JavaScript linter treats as predefined global
+    /// bindings.
     ///
-    /// If defined here, they should not emit diagnostics.
+    /// Use this for globals supplied by a runtime, framework, or external script that are not
+    /// declared in the source file.
     #[cfg_attr(feature = "cli", bpaf(pure(Default::default()), hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub globals: Option<rustc_hash::FxHashSet<Box<str>>>,
 
-    /// Indicates the type of runtime or transformation used for interpreting JSX.
+    /// Configures how the analyzer accounts for imports used by JSX. This option does not transform
+    /// JSX or select a runtime for a build tool. Defaults to `transparent`.
     #[cfg_attr(feature = "cli", bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub jsx_runtime: Option<JsxRuntime>,
 
-    /// Enables support for embedding snippets.
+    /// Enables experimental parsing, formatting, linting, diagnostics, and fixes for CSS and
+    /// GraphQL snippets embedded in JavaScript and TypeScript template literals.
+    ///
+    /// Biome recognizes CSS in `css` and `styled` templates and GraphQL in `gql` and `graphql`
+    /// templates or calls. Templates containing interpolations are not currently supported.
+    /// Defaults to `false`.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(feature = "cli", bpaf(hide))]
     pub experimental_embedded_snippets_enabled: Option<ExperimentalEmbeddedSnippetsEnabled>,
@@ -87,7 +99,7 @@ pub struct JsResolverConfiguration {
     /// - Biome only reads top-level `catalog` / `catalogs` mappings and scalar
     ///   string entries.
     ///
-    /// Default: `false`.
+    /// Defaults to `false`.
     #[cfg_attr(feature = "cli", bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub experimental_pnpm_catalogs: Option<ExperimentalPnpmCatalogsEnabled>,
@@ -97,28 +109,25 @@ pub type UnsafeParameterDecoratorsEnabled = Bool<false>;
 pub type JsxEverywhere = Bool<true>;
 pub type JsGritMetavariable = Bool<false>;
 
-/// Options that changes how the JavaScript parser behaves
+/// Options that change how the JavaScript parser behaves.
 #[derive(Clone, Debug, Default, Deserializable, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "cli", derive(Bpaf))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsParserConfiguration {
-    /// It enables the experimental and unsafe parsing of parameter decorators
-    ///
-    /// These decorators belong to an old proposal, and they are subject to change.
+    /// Enables parsing decorators on class parameters. This syntax belongs to an old experimental
+    /// proposal and may change. Defaults to `false`.
     #[cfg_attr(feature = "cli", bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub unsafe_parameter_decorators_enabled: Option<UnsafeParameterDecoratorsEnabled>,
 
-    /// Enables parsing of Grit metavariables.
-    /// Defaults to `false`.
+    /// Enables parsing Grit metavariables in JavaScript and TypeScript syntax. Defaults to `false`.
     #[cfg_attr(feature = "cli", bpaf(hide))]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub grit_metavariables: Option<JsGritMetavariable>,
 
-    /// When enabled, files like `.js`/`.mjs`/`.cjs` may contain JSX syntax.
-    ///
-    /// Defaults to `true`.
+    /// Controls whether `.js`, `.mjs`, and `.cjs` files may contain JSX syntax. Disabling this
+    /// option causes JSX in those files to raise a diagnostic. Defaults to `true`.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("jsx-everywhere"), argument("true|false"), optional)
@@ -127,7 +136,7 @@ pub struct JsParserConfiguration {
     pub jsx_everywhere: Option<JsxEverywhere>,
 }
 
-/// Indicates the type of runtime or transformation used for interpreting JSX.
+/// How Biome's analyzer accounts for imports used by JSX.
 #[derive(
     Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
 )]
@@ -135,12 +144,12 @@ pub struct JsParserConfiguration {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum JsxRuntime {
-    /// Indicates a modern or native JSX environment, that doesn't require
-    /// special handling by Biome.
+    /// An automatic or native JSX environment that doesn't require an in-scope factory import.
     #[default]
     Transparent,
 
-    /// Indicates a classic React environment that requires the `React` import.
+    /// A classic React environment that requires the React import, or custom JSX factory imports
+    /// configured in `tsconfig.json`.
     ///
     /// Corresponds to the `react` value for the `jsx` option in TypeScript's
     /// `tsconfig.json`.
@@ -171,7 +180,7 @@ pub type JsLinterEnabled = Bool<true>;
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsLinterConfiguration {
-    /// Control the linter for JavaScript (and its super languages) files.
+    /// Enables or disables the linter for JavaScript and languages that extend it.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("javascript-linter-enabled"), argument("true|false"))
@@ -188,7 +197,7 @@ pub type JsAssistEnabled = Bool<true>;
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct JsAssistConfiguration {
-    /// Control the assist for JavaScript (and its super languages) files.
+    /// Enables or disables assist actions for JavaScript and languages that extend it.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("javascript-assist-enabled"), argument("true|false"))

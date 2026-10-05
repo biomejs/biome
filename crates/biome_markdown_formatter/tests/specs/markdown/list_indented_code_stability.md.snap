@@ -1,0 +1,74 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/list_indented_code_stability.md
+---
+
+# Input
+
+```md
+-     code
+  - nested
+
+---
+
+-     code
+
+  - nested
+
+---
+
+-		code
+
+---
+
+   -    item 1
+        - item 1-1
+        - item 1-2
+
+    top level indented code block
+
+---
+
+1. item 1
+    1. item 1-1
+    2. item 1-2
+100. item 1
+
+    top level indented code block
+
+```
+
+
+# Formatted
+
+```md
+-     code
+  - nested
+
+---
+
+-     code
+  - nested
+
+---
+
+-       code
+
+---
+
+   -    item 1
+        - item 1-1
+        - item 1-2
+
+    top level indented code block
+
+---
+
+1. item 1
+   1. item 1-1
+      2. item 1-2
+2.   item 1
+
+    top level indented code block
+
+```

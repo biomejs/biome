@@ -15,7 +15,7 @@ impl FormatNodeRule<TwReferenceAtRule> for FormatTwReferenceAtRule {
         write!(
             f,
             [
-                reference_token.format(),
+                reference_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
                 path.format(),
                 semicolon_token.format()

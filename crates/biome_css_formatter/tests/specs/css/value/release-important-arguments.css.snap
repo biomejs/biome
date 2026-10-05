@@ -1,0 +1,25 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/value/release-important-arguments.css
+---
+
+# Input
+
+```css
+a{color:red!important}
+b{color:if(style(--enabled:true):red;else:blue)!important}
+
+```
+
+
+# Formatted
+
+```css
+a {
+	color: red !important;
+}
+b {
+	color: if(style(--enabled: true): red; else: blue) !important;
+}
+
+```

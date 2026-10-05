@@ -1,0 +1,74 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/vue/self_closing.vue
+---
+
+# Input
+
+```vue
+<template>
+  <div />
+</template>
+
+<script>
+foo( )
+</script>
+
+<template>
+<div class="container">
+  <HomeH />
+  <HomeA />
+  <HomeX />
+  <HomeY />
+</div>
+</template>
+
+<template>
+  <Foo><Bar
+         attr
+                                     /></Foo>
+</template>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -3,7 +3,7 @@
+ </template>
+ 
+ <script>
+-foo( )
++foo();
+ </script>
+ 
+ <template>
+```
+
+# Output
+
+```vue
+<template>
+  <div />
+</template>
+
+<script>
+foo();
+</script>
+
+<template>
+  <div class="container">
+    <HomeH />
+    <HomeA />
+    <HomeX />
+    <HomeY />
+  </div>
+</template>
+
+<template>
+  <Foo><Bar attr /></Foo>
+</template>
+```

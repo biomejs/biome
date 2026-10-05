@@ -86,9 +86,12 @@ fn bench_formatter(criterion: &mut Criterion) {
                     &code,
                     |b, _| {
                         fn format(root: HtmlRoot) -> Printed {
-                            let formatted =
-                                format_node(HtmlFormatOptions::default(), root.syntax(), false)
-                                    .unwrap();
+                            let formatted = format_node(
+                                HtmlFormatOptions::default(),
+                                root.syntax(),
+                                Vec::new(),
+                            )
+                            .unwrap();
                             let printed = formatted.print();
                             drop(formatted);
                             printed.expect("Document to be valid")
@@ -117,7 +120,7 @@ fn bench_formatter(criterion: &mut Criterion) {
         group.bench_with_input(BenchmarkId::new(&id, "format"), code, |b, _| {
             fn format(root: HtmlRoot) -> Printed {
                 let formatted =
-                    format_node(HtmlFormatOptions::default(), root.syntax(), false).unwrap();
+                    format_node(HtmlFormatOptions::default(), root.syntax(), Vec::new()).unwrap();
                 let printed = formatted.print();
                 drop(formatted);
                 printed.expect("Document to be valid")

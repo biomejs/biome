@@ -8,9 +8,10 @@ use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_unknown_at_rules::NoUnknownAtRulesOptions;
 
 declare_lint_rule! {
-    /// Disallow unknown at-rules.
+    /// Disallow unrecognized CSS at-rules.
     ///
-    /// For details on known at-rules, see the [MDN web docs](https://developer.mozilla.org/en-US/docs/Web/CSS/At-rule).
+    /// An at-rule begins with `@` and controls CSS behavior, as in `@media` or `@font-face`. See
+    /// [MDN's at-rule reference](https://developer.mozilla.org/en-US/docs/Web/CSS/At-rule).
     ///
     /// ## Examples
     ///
@@ -44,7 +45,8 @@ declare_lint_rule! {
      ///
      /// ### `ignore`
      ///
-     /// A list of unknown at-rule names to ignore (case-insensitive).
+     /// Lists additional at-rule names to allow, without regard to letter case. Defaults to an
+     /// empty list.
      ///
      /// ```json,options
      /// {
@@ -71,7 +73,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("at-rule-no-unknown").same()],
+        sources: &[RuleSource::Stylelint("at-rule-no-unknown").same(), RuleSource::EslintCss("no-invalid-at-rules").inspired()],
     }
 }
 
@@ -123,10 +125,7 @@ impl Rule for NoUnknownAtRules {
             return None;
         }
 
-        Some(NoUnknownAtRuleState {
-            range,
-            name,
-        })
+        Some(NoUnknownAtRuleState { range, name })
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

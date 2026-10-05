@@ -74,8 +74,9 @@ expression: snapshot
 ## AST
 
 ```
-MdDocument {
+MdRoot {
     bom_token: missing (optional),
+    frontmatter: missing (optional),
     value: MdBlockList [
         MdBulletListItem {
             md_bullet_list: MdBulletList [
@@ -96,13 +97,7 @@ MdDocument {
                                     l_tick_token: BACKTICK@68..69 "`" [] [],
                                     content: MdInlineItemList [
                                         MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@69..70 "-" [] [],
-                                        },
-                                        MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@70..71 "-" [] [],
-                                        },
-                                        MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@71..84 "reporter=json" [] [],
+                                            value_token: MD_TEXTUAL_LITERAL@69..84 "--reporter=json" [] [],
                                         },
                                     ],
                                     r_tick_token: BACKTICK@84..85 "`" [] [],
@@ -114,13 +109,7 @@ MdDocument {
                                     l_tick_token: BACKTICK@90..91 "`" [] [],
                                     content: MdInlineItemList [
                                         MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@91..92 "-" [] [],
-                                        },
-                                        MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@92..93 "-" [] [],
-                                        },
-                                        MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@93..113 "reporter=json-pretty" [] [],
+                                            value_token: MD_TEXTUAL_LITERAL@91..113 "--reporter=json-pretty" [] [],
                                         },
                                     ],
                                     r_tick_token: BACKTICK@113..114 "`" [] [],
@@ -138,13 +127,7 @@ MdDocument {
                                     l_tick_token: BACKTICK@123..124 "`" [] [],
                                     content: MdInlineItemList [
                                         MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@124..125 "-" [] [],
-                                        },
-                                        MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@125..126 "-" [] [],
-                                        },
-                                        MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@126..139 "reporter=json" [] [],
+                                            value_token: MD_TEXTUAL_LITERAL@124..139 "--reporter=json" [] [],
                                         },
                                     ],
                                     r_tick_token: BACKTICK@139..140 "`" [] [],
@@ -174,13 +157,7 @@ MdDocument {
                                     l_tick_token: BACKTICK@233..234 "`" [] [],
                                     content: MdInlineItemList [
                                         MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@234..235 "-" [] [],
-                                        },
-                                        MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@235..236 "-" [] [],
-                                        },
-                                        MdTextual {
-                                            value_token: MD_TEXTUAL_LITERAL@236..256 "reporter=json-pretty" [] [],
+                                            value_token: MD_TEXTUAL_LITERAL@234..256 "--reporter=json-pretty" [] [],
                                         },
                                     ],
                                     r_tick_token: BACKTICK@256..257 "`" [] [],
@@ -244,9 +221,10 @@ MdDocument {
 ## CST
 
 ```
-0: MD_DOCUMENT@0..2001
+0: MD_ROOT@0..2001
   0: (empty)
-  1: MD_BLOCK_LIST@0..2001
+  1: (empty)
+  2: MD_BLOCK_LIST@0..2001
     0: MD_BULLET_LIST_ITEM@0..2001
       0: MD_BULLET_LIST@0..2001
         0: MD_BULLET@0..2001
@@ -263,24 +241,16 @@ MdDocument {
                 1: MD_INLINE_CODE@68..85
                   0: BACKTICK@68..69 "`" [] []
                   1: MD_INLINE_ITEM_LIST@69..84
-                    0: MD_TEXTUAL@69..70
-                      0: MD_TEXTUAL_LITERAL@69..70 "-" [] []
-                    1: MD_TEXTUAL@70..71
-                      0: MD_TEXTUAL_LITERAL@70..71 "-" [] []
-                    2: MD_TEXTUAL@71..84
-                      0: MD_TEXTUAL_LITERAL@71..84 "reporter=json" [] []
+                    0: MD_TEXTUAL@69..84
+                      0: MD_TEXTUAL_LITERAL@69..84 "--reporter=json" [] []
                   2: BACKTICK@84..85 "`" [] []
                 2: MD_TEXTUAL@85..90
                   0: MD_TEXTUAL_LITERAL@85..90 " and " [] []
                 3: MD_INLINE_CODE@90..114
                   0: BACKTICK@90..91 "`" [] []
                   1: MD_INLINE_ITEM_LIST@91..113
-                    0: MD_TEXTUAL@91..92
-                      0: MD_TEXTUAL_LITERAL@91..92 "-" [] []
-                    1: MD_TEXTUAL@92..93
-                      0: MD_TEXTUAL_LITERAL@92..93 "-" [] []
-                    2: MD_TEXTUAL@93..113
-                      0: MD_TEXTUAL_LITERAL@93..113 "reporter=json-pretty" [] []
+                    0: MD_TEXTUAL@91..113
+                      0: MD_TEXTUAL_LITERAL@91..113 "--reporter=json-pretty" [] []
                   2: BACKTICK@113..114 "`" [] []
                 4: MD_TEXTUAL@114..120
                   0: MD_TEXTUAL_LITERAL@114..120 ". With" [] []
@@ -291,12 +261,8 @@ MdDocument {
                 7: MD_INLINE_CODE@123..140
                   0: BACKTICK@123..124 "`" [] []
                   1: MD_INLINE_ITEM_LIST@124..139
-                    0: MD_TEXTUAL@124..125
-                      0: MD_TEXTUAL_LITERAL@124..125 "-" [] []
-                    1: MD_TEXTUAL@125..126
-                      0: MD_TEXTUAL_LITERAL@125..126 "-" [] []
-                    2: MD_TEXTUAL@126..139
-                      0: MD_TEXTUAL_LITERAL@126..139 "reporter=json" [] []
+                    0: MD_TEXTUAL@124..139
+                      0: MD_TEXTUAL_LITERAL@124..139 "--reporter=json" [] []
                   2: BACKTICK@139..140 "`" [] []
                 8: MD_TEXTUAL@140..197
                   0: MD_TEXTUAL_LITERAL@140..197 ", the diagnostics and the summary will be printed in the " [] []
@@ -315,12 +281,8 @@ MdDocument {
                 13: MD_INLINE_CODE@233..257
                   0: BACKTICK@233..234 "`" [] []
                   1: MD_INLINE_ITEM_LIST@234..256
-                    0: MD_TEXTUAL@234..235
-                      0: MD_TEXTUAL_LITERAL@234..235 "-" [] []
-                    1: MD_TEXTUAL@235..236
-                      0: MD_TEXTUAL_LITERAL@235..236 "-" [] []
-                    2: MD_TEXTUAL@236..256
-                      0: MD_TEXTUAL_LITERAL@236..256 "reporter=json-pretty" [] []
+                    0: MD_TEXTUAL@234..256
+                      0: MD_TEXTUAL_LITERAL@234..256 "--reporter=json-pretty" [] []
                   2: BACKTICK@256..257 "`" [] []
                 14: MD_TEXTUAL@257..354
                   0: MD_TEXTUAL_LITERAL@257..354 ", you can print the same information, but formatted using the same options of your configuration." [] []
@@ -350,6 +312,6 @@ MdDocument {
                 0: MD_HTML_LITERAL@471..2000 "<details>\n  <summary>Example of output when running `biome format` command</summary>\n  ```json\n  {\n    \"summary\": {\n      \"changed\": 0,\n      \"unchanged\": 1,\n      \"errors\": 1,\n      \"warnings\": 0,\n      \"skipped\": 0,\n      \"suggestedFixesSkipped\": 0,\n      \"diagnosticsNotPrinted\": 0\n    },\n    \"diagnostics\": [\n      {\n        \"category\": \"format\",\n        \"severity\": \"error\",\n        \"description\": \"Formatter would have printed the following content:\",\n        \"message\": [\n          {\n            \"elements\": [],\n            \"content\": \"Formatter would have printed the following content:\"\n          }\n        ],\n        \"advices\": {\n          \"advices\": [\n            {\n              \"diff\": {\n                \"dictionary\": \"  statement();\\n\",\n                \"ops\": [\n                  { \"diffOp\": { \"delete\": { \"range\": [0, 2] } } },\n                  { \"diffOp\": { \"equal\": { \"range\": [2, 12] } } },\n                  { \"diffOp\": { \"delete\": { \"range\": [0, 2] } } },\n                  { \"diffOp\": { \"equal\": { \"range\": [12, 13] } } },\n                  { \"diffOp\": { \"delete\": { \"range\": [0, 2] } } },\n                  { \"diffOp\": { \"insert\": { \"range\": [13, 15] } } }\n                ]\n              }\n            }\n          ]\n        },\n        \"verboseAdvices\": { \"advices\": [] },\n        \"location\": {\n          \"path\": { \"file\": \"format.js\" },\n          \"span\": null,\n          \"sourceCode\": null\n        },\n        \"tags\": [],\n        \"source\": null\n      }\n    ],\n    \"command\": \"format\"\n  }\n  ```\n  </details>" [] []
             7: MD_NEWLINE@2000..2001
               0: NEWLINE@2000..2001 "\n" [] []
-  2: EOF@2001..2001 "" [] []
+  3: EOF@2001..2001 "" [] []
 
 ```

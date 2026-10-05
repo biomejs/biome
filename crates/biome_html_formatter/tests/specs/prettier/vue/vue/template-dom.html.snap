@@ -30,7 +30,7 @@ new Vue({el: '#app'})
      <div v-if="foo ===    'foo'"></div>
      <script>
 -      new Vue({el: '#app'})
-+new Vue({el: '#app'})
++      new Vue({ el: "#app" });
      </script>
    </body>
  </html>
@@ -39,12 +39,12 @@ new Vue({el: '#app'})
 # Output
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <body>
     <div v-if="foo ===    'foo'"></div>
     <script>
-new Vue({el: '#app'})
+      new Vue({ el: "#app" });
     </script>
   </body>
 </html>

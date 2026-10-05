@@ -28,7 +28,7 @@ pub enum RuleConfiguration<T: Default + Merge> {
 }
 impl<T: Default + Merge + Deserializable> Deserializable for RuleConfiguration<T> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         rule_name: &str,
     ) -> Option<Self> {
@@ -76,7 +76,7 @@ impl<T: Clone + Default + Merge> Merge for RuleConfiguration<T> {
         }
     }
 }
-impl<T: Clone + Default + Merge + 'static + Debug> RuleConfiguration<T> {
+impl<T: Clone + Default + Merge + Send + Sync + 'static + Debug> RuleConfiguration<T> {
     pub fn get_options(&self) -> Option<RuleOptions> {
         match self {
             Self::Plain(_) => None,
@@ -137,7 +137,7 @@ impl<T: Default + Merge> Default for RuleFixConfiguration<T> {
 }
 impl<T: Default + Merge + Deserializable> Deserializable for RuleFixConfiguration<T> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         rule_name: &str,
     ) -> Option<Self> {
@@ -185,7 +185,7 @@ impl<T: Clone + Default + Merge> Merge for RuleFixConfiguration<T> {
         }
     }
 }
-impl<T: Clone + Default + Merge + 'static> RuleFixConfiguration<T> {
+impl<T: Clone + Default + Merge + Send + Sync + 'static> RuleFixConfiguration<T> {
     pub fn get_options(&self) -> Option<RuleOptions> {
         match self {
             Self::Plain(_) => None,
@@ -286,14 +286,15 @@ impl From<RuleAssistPlainConfiguration> for Severity {
 #[serde(rename_all = "camelCase")]
 pub enum RulePlainConfiguration {
     #[default]
+    /// Disables the rule.
     Off,
-    /// Enables the rule using the default severity of the rule
+    /// Enables the rule using its individual default severity.
     On,
-    /// Enables the rule, and it will emit a diagnostic with information severity
+    /// Enables the rule and emits diagnostics with information severity.
     Info,
-    /// Enables the rule, and it will emit a diagnostic with warning severity
+    /// Enables the rule and emits diagnostics with warning severity.
     Warn,
-    /// Enables the rule, and it will emit a diagnostic with error severity
+    /// Enables the rule and emits diagnostics with error severity.
     Error,
 }
 
@@ -305,7 +306,7 @@ pub enum RuleAssistConfiguration<T: Default> {
 }
 impl<T: Default + Deserializable> Deserializable for RuleAssistConfiguration<T> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
@@ -353,7 +354,7 @@ impl<T: Clone + Default> Merge for RuleAssistConfiguration<T> {
         }
     }
 }
-impl<T: Clone + Default + 'static> RuleAssistConfiguration<T> {
+impl<T: Clone + Default + Send + Sync + 'static> RuleAssistConfiguration<T> {
     pub fn get_options(&self) -> Option<RuleOptions> {
         match self {
             Self::Plain(_) => None,
@@ -407,7 +408,9 @@ where
 #[serde(rename_all = "camelCase")]
 pub enum RuleAssistPlainConfiguration {
     #[default]
+    /// Disables the assist rule.
     Off,
+    /// Enables the assist rule.
     On,
 }
 impl RuleAssistPlainConfiguration {
@@ -462,7 +465,8 @@ where
             "properties": {
                 "level": level_schema,
                 "options": options_schema,
-            }
+            },
+            "additionalProperties": false,
         })
     }
 }
@@ -522,7 +526,8 @@ pub struct RuleWithFixOptions<T: Default + Merge> {
     /// The severity of the emitted diagnostics by the rule
     #[deserializable(required)]
     pub level: RulePlainConfiguration,
-    /// The kind of the code actions emitted by the rule
+    /// Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and
+    /// `unsafe` reclassify its applicability. This setting does not change the fix itself.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub fix: Option<FixKind>,
     /// Rule's options
@@ -550,7 +555,12 @@ where
     fn json_schema(generator: &mut schemars::generate::SchemaGenerator) -> schemars::Schema {
         // Generate schemas for the inner types
         let level_schema = generator.subschema_for::<RulePlainConfiguration>();
-        let fix_schema = generator.subschema_for::<Option<FixKind>>();
+        let mut fix_schema = generator.subschema_for::<Option<FixKind>>();
+        fix_schema.insert(
+            "description".to_string(),
+            "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself."
+                .into(),
+        );
         let options_schema = generator.subschema_for::<T>();
 
         // Create an object schema with level, fix, and options properties
@@ -575,13 +585,10 @@ pub enum AnalyzerSelector {
 }
 
 impl AnalyzerSelector {
-    pub fn match_rule<R>(&self) -> bool
-    where
-        R: Rule,
-    {
+    pub fn match_rule_name(&self, group_name: &str, rule_name: &str) -> bool {
         match self {
-            Self::Rule(rule) => rule.match_rule::<R>(),
-            Self::Domain(domain) => domain.match_rule::<R>(),
+            Self::Rule(rule) => rule.match_rule_name(group_name, rule_name),
+            Self::Domain(domain) => domain.match_rule_name(group_name, rule_name),
             Self::Plugin => false,
         }
     }
@@ -761,7 +768,14 @@ impl RuleSelector {
     where
         R: Rule,
     {
-        RuleFilter::from(*self).match_rule::<R>()
+        self.match_rule_name(
+            <R::Group as biome_analyze::RuleGroup>::NAME,
+            R::METADATA.name,
+        )
+    }
+
+    fn match_rule_name(&self, group_name: &str, rule_name: &str) -> bool {
+        RuleFilter::from(*self).match_rule_name(group_name, rule_name)
     }
 }
 
@@ -1060,15 +1074,15 @@ where
 #[serde(rename_all = "camelCase")]
 pub enum GroupPlainConfiguration {
     #[default]
-    /// It disables all the rules of this group
+    /// Disables all rules in the group.
     Off,
-    /// It enables all the rules of this group, with their default severity
+    /// Enables all rules in the group using each rule's individual default severity.
     On,
-    /// It enables all the rules of this group, and set their severity to "info"
+    /// Enables all rules in the group with information severity.
     Info,
-    /// It enables all the rules of this group, and set their severity to "warn"
+    /// Enables all rules in the group with warning severity.
     Warn,
-    /// It enables all the rules of this group, and set their severity to "error+"
+    /// Enables all rules in the group with error severity.
     Error,
 }
 
@@ -1196,7 +1210,7 @@ where
 
 impl<G: Deserializable> Deserializable for SeverityOrGroup<G> {
     fn deserialize(
-        ctx: &mut impl DeserializationContext,
+        ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {

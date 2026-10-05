@@ -1,18 +1,21 @@
 //! Top level functions for parsing a script or module, also includes module specific items.
 
 use super::module::parse_module_body;
-use super::stmt::parse_statements;
+use super::stmt::{VariableDeclarationParent, parse_statements, parse_variable_declaration};
 use crate::JsParser;
 use crate::prelude::*;
 use crate::state::{ChangeParserState, EnableStrictMode, SignatureFlags};
 use crate::syntax::binding::parse_binding;
 use crate::syntax::expr::{ExpressionContext, parse_expression};
-use crate::syntax::function::{ParameterContext, parse_parameter_list};
+use crate::syntax::function::{
+    ParameterContext, parse_parameter_list, parse_vue_slot_parameters_list,
+};
 use crate::syntax::js_parse_error;
+use crate::syntax::jsx::skip_astro_html_comments;
 use crate::syntax::stmt::parse_directives;
 use crate::syntax::typescript::TypeContext;
-use biome_js_syntax::JsSyntaxKind;
 use biome_js_syntax::JsSyntaxKind::*;
+use biome_js_syntax::{JsSyntaxKind, T};
 use biome_languages::javascript::ModuleKind;
 // test_err js unterminated_unicode_codepoint
 // let s = "\u{200";
@@ -37,6 +40,14 @@ pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
     // are handlers, and all other expressions are inline statements.
     if p.source_type().is_vue_event_handler() {
         return parse_vue_event_handler(p, m);
+    }
+
+    if p.source_type().is_svelte_declaration() {
+        return parse_svelte_declaration(p, m);
+    }
+
+    if p.source_type().is_vue_slot_props() {
+        return parse_vue_slot_props(p, m);
     }
 
     // Handle template expressions (Vue {{ }}, Svelte { }, Astro { })
@@ -72,6 +83,39 @@ pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
     result
 }
 
+fn parse_svelte_declaration(p: &mut JsParser, m: Marker) -> CompletedMarker {
+    let declaration_recovery = p.start();
+    if !p.at(T![let]) && !p.at(T![const]) {
+        p.error(p.err_builder("Expected a `let` or `const` declaration", p.cur_range()));
+    }
+    let declaration = parse_variable_declaration(p, VariableDeclarationParent::VariableStatement)
+        .or_add_diagnostic(p, |p, range| {
+            p.err_builder("Expected a `let` or `const` declaration", range)
+        });
+    p.eat(T![;]);
+
+    if !p.at(EOF) {
+        let recovery = if let Some(declaration) = declaration {
+            declaration_recovery.abandon(p);
+            declaration.undo_completion(p)
+        } else {
+            declaration_recovery
+        };
+        p.error(js_parse_error::template_expression_trailing_code(
+            p,
+            p.cur_range(),
+        ));
+        while !p.at(EOF) {
+            p.bump_any();
+        }
+        recovery.complete(p, JS_BOGUS_VARIABLE_DECLARATION);
+    } else {
+        declaration_recovery.abandon(p);
+    }
+
+    m.complete(p, JS_SVELTE_DECLARATION_ROOT)
+}
+
 /// Parses template expressions like Vue {{ expr }}, Svelte { expr }, or Astro { expr }.
 /// These should always parse as expressions, never as statements.
 /// This fixes issues where `{ duration }` was incorrectly parsed as a block statement
@@ -85,11 +129,22 @@ fn parse_template_expression(p: &mut JsParser, m: Marker) -> CompletedMarker {
     }
     // Parse as a single expression with default context
     // This allows { } to be parsed as object literals, not block statements
+    if p.source_type().as_embedding_kind().is_astro_template() {
+        skip_astro_html_comments(p);
+    }
     let expr_marker = p.start();
     let expr_result = parse_expression(p, ExpressionContext::default());
 
-    // Check if we got a valid expression
     let has_expression = !expr_result.is_absent();
+
+    // Astro renders a body that holds only comments as nothing, the way JSX does
+    // for `{/* c */}` children.
+    let is_empty_astro_body = p.at(EOF) && p.source_type().as_embedding_kind().is_astro_template();
+
+    if !has_expression && is_empty_astro_body {
+        expr_marker.abandon(p);
+        return m.complete(p, JS_EXPRESSION_TEMPLATE_ROOT);
+    }
 
     if !has_expression {
         p.error(js_parse_error::template_expression_expected_expression(
@@ -173,6 +228,14 @@ fn parse_vue_event_handler(p: &mut JsParser, m: Marker) -> CompletedMarker {
     }
 
     m.complete(p, JS_SCRIPT)
+}
+
+/// Parses the value of a Vue slot directive: `v-slot="{ item }: { item: Item }"`.
+/// Vue compiles the value as the parameters of an arrow function, so the
+/// value is a parameter list without the surrounding parentheses.
+fn parse_vue_slot_props(p: &mut JsParser, m: Marker) -> CompletedMarker {
+    parse_vue_slot_parameters_list(p);
+    m.complete(p, JS_VUE_SLOT_PROPS_ROOT)
 }
 
 /// Parses a Svelte snippet declaration: `add(a: any, b: float)`.

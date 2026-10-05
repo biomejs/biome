@@ -132,26 +132,6 @@ info: css/inline-url/inline_url.css
 }
 ```
 
-# Errors
-```
-inline_url.css:29:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    28 │ .validUnqotedUrlsThatAreParsedByLess {
-  > 29 │   background: url(@foo);
-       │                   ^
-    30 │ }
-    31 │ 
-  
-  i Expected one of:
-  
-  - function
-  - identifier
-  
-
-```
-
 # Lines exceeding max width of 80 characters
 ```
    11:   background-image: url(/images/product/simple_product_manager/breadcrumb/chevron_right.png);

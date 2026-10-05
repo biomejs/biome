@@ -49,20 +49,21 @@ text
 ```diff
 --- Prettier
 +++ Biome
-@@ -36,13 +36,9 @@
- 
+@@ -37,12 +37,14 @@
      <script
        long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
--    >
+     >
 -      new Vue({el: '#js-app'})
--    </script>
-+    >new Vue({el: '#js-app'})</script>
++      new Vue({ el: "#js-app" });
+     </script>
      <style
        long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
--    >
+     >
 -      .a {color: #f00}
--    </style>
-+    >.a {color: #f00}</style>
++      .a {
++        color: #f00;
++      }
+     </style>
    </body>
  </html>
 ```
@@ -70,7 +71,7 @@ text
 # Output
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -108,10 +109,16 @@ text
 
     <script
       long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
-    >new Vue({el: '#js-app'})</script>
+    >
+      new Vue({ el: "#js-app" });
+    </script>
     <style
       long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
-    >.a {color: #f00}</style>
+    >
+      .a {
+        color: #f00;
+      }
+    </style>
   </body>
 </html>
 ```
@@ -124,5 +131,5 @@ text
    26:           :long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
    29:           :long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
    38:       long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
-   41:       long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+   43:       long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
 ```

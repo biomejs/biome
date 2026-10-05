@@ -1,0 +1,206 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalidCasing.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<FONT></FONT>
+<Center></Center>
+<aCrOnYm></aCrOnYm>
+<APPLET></APPLET>
+<ISINDEX></ISINDEX>
+<LiStInG></LiStInG>
+<MULTICOL></MULTICOL>
+<NEXTID></NEXTID>
+<SPACER></SPACER>
+
+```
+
+# Diagnostics
+```
+invalidCasing.html:2:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The FONT element is obsolete.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <FONT></FONT>
+      │  ^^^^
+    3 │ <Center></Center>
+    4 │ <aCrOnYm></aCrOnYm>
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidCasing.html:3:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Center element is obsolete.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <FONT></FONT>
+  > 3 │ <Center></Center>
+      │  ^^^^^^
+    4 │ <aCrOnYm></aCrOnYm>
+    5 │ <APPLET></APPLET>
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidCasing.html:4:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The aCrOnYm element is obsolete.
+  
+    2 │ <FONT></FONT>
+    3 │ <Center></Center>
+  > 4 │ <aCrOnYm></aCrOnYm>
+      │  ^^^^^^^
+    5 │ <APPLET></APPLET>
+    6 │ <ISINDEX></ISINDEX>
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidCasing.html:5:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The APPLET element is obsolete.
+  
+    3 │ <Center></Center>
+    4 │ <aCrOnYm></aCrOnYm>
+  > 5 │ <APPLET></APPLET>
+      │  ^^^^^^
+    6 │ <ISINDEX></ISINDEX>
+    7 │ <LiStInG></LiStInG>
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidCasing.html:6:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The ISINDEX element is obsolete.
+  
+    4 │ <aCrOnYm></aCrOnYm>
+    5 │ <APPLET></APPLET>
+  > 6 │ <ISINDEX></ISINDEX>
+      │  ^^^^^^^
+    7 │ <LiStInG></LiStInG>
+    8 │ <MULTICOL></MULTICOL>
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidCasing.html:7:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The LiStInG element is obsolete.
+  
+    5 │ <APPLET></APPLET>
+    6 │ <ISINDEX></ISINDEX>
+  > 7 │ <LiStInG></LiStInG>
+      │  ^^^^^^^
+    8 │ <MULTICOL></MULTICOL>
+    9 │ <NEXTID></NEXTID>
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidCasing.html:8:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The MULTICOL element is obsolete.
+  
+     6 │ <ISINDEX></ISINDEX>
+     7 │ <LiStInG></LiStInG>
+   > 8 │ <MULTICOL></MULTICOL>
+       │  ^^^^^^^^
+     9 │ <NEXTID></NEXTID>
+    10 │ <SPACER></SPACER>
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidCasing.html:9:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The NEXTID element is obsolete.
+  
+     7 │ <LiStInG></LiStInG>
+     8 │ <MULTICOL></MULTICOL>
+   > 9 │ <NEXTID></NEXTID>
+       │  ^^^^^^
+    10 │ <SPACER></SPACER>
+    11 │ 
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidCasing.html:10:2 lint/nursery/noObsoleteTags ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The SPACER element is obsolete.
+  
+     8 │ <MULTICOL></MULTICOL>
+     9 │ <NEXTID></NEXTID>
+  > 10 │ <SPACER></SPACER>
+       │  ^^^^^^
+    11 │ 
+  
+  i Obsolete elements are no longer part of conforming HTML.
+  
+  i Use standard HTML elements for structure and semantics, and CSS for presentation.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

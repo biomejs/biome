@@ -1,0 +1,228 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@media (width: 1 + 2 { .inside {} } .after { color: blue; }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssMediaAtRule {
+                declarator: CssMediaAtRuleDeclarator {
+                    media_token: MEDIA_KW@1..7 "media" [] [Whitespace(" ")],
+                    queries: CssMediaQueryList [
+                        CssBogusMediaQuery {
+                            items: [
+                                CssBogus {
+                                    items: [
+                                        L_PAREN@7..8 "(" [] [],
+                                        CssBogus {
+                                            items: [
+                                                CssIdentifier {
+                                                    value_token: IDENT@8..13 "width" [] [],
+                                                },
+                                                COLON@13..15 ":" [] [Whitespace(" ")],
+                                                CssBogus {
+                                                    items: [
+                                                        ScssExpressionItemList [
+                                                            ScssBinaryExpression {
+                                                                left: CssNumber {
+                                                                    value_token: CSS_NUMBER_LITERAL@15..17 "1" [] [Whitespace(" ")],
+                                                                },
+                                                                operator: PLUS@17..19 "+" [] [Whitespace(" ")],
+                                                                right: CssNumber {
+                                                                    value_token: CSS_NUMBER_LITERAL@19..21 "2" [] [Whitespace(" ")],
+                                                                },
+                                                            },
+                                                        ],
+                                                    ],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@21..23 "{" [] [Whitespace(" ")],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssClassSelector {
+                                            dot_token: DOT@23..24 "." [] [],
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@24..31 "inside" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@31..32 "{" [] [],
+                                items: CssDeclarationOrRuleList [],
+                                r_curly_token: R_CURLY@32..34 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@34..36 "}" [] [Whitespace(" ")],
+                },
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@36..37 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@37..43 "after" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@43..45 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@45..50 "color" [] [],
+                                },
+                                colon_token: COLON@50..52 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@52..56 "blue" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@56..58 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@58..59 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@59..60 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..60
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..59
+    0: CSS_AT_RULE@0..36
+      0: AT@0..1 "@" [] []
+      1: CSS_MEDIA_AT_RULE@1..36
+        0: CSS_MEDIA_AT_RULE_DECLARATOR@1..21
+          0: MEDIA_KW@1..7 "media" [] [Whitespace(" ")]
+          1: CSS_MEDIA_QUERY_LIST@7..21
+            0: CSS_BOGUS_MEDIA_QUERY@7..21
+              0: CSS_BOGUS@7..21
+                0: L_PAREN@7..8 "(" [] []
+                1: CSS_BOGUS@8..21
+                  0: CSS_IDENTIFIER@8..13
+                    0: IDENT@8..13 "width" [] []
+                  1: COLON@13..15 ":" [] [Whitespace(" ")]
+                  2: CSS_BOGUS@15..21
+                    0: SCSS_EXPRESSION_ITEM_LIST@15..21
+                      0: SCSS_BINARY_EXPRESSION@15..21
+                        0: CSS_NUMBER@15..17
+                          0: CSS_NUMBER_LITERAL@15..17 "1" [] [Whitespace(" ")]
+                        1: PLUS@17..19 "+" [] [Whitespace(" ")]
+                        2: CSS_NUMBER@19..21
+                          0: CSS_NUMBER_LITERAL@19..21 "2" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@21..36
+          0: L_CURLY@21..23 "{" [] [Whitespace(" ")]
+          1: CSS_RULE_LIST@23..34
+            0: CSS_QUALIFIED_RULE@23..34
+              0: CSS_SELECTOR_LIST@23..31
+                0: CSS_COMPOUND_SELECTOR@23..31
+                  0: CSS_NESTED_SELECTOR_LIST@23..23
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@23..31
+                    0: CSS_CLASS_SELECTOR@23..31
+                      0: DOT@23..24 "." [] []
+                      1: CSS_CUSTOM_IDENTIFIER@24..31
+                        0: IDENT@24..31 "inside" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@31..34
+                0: L_CURLY@31..32 "{" [] []
+                1: CSS_DECLARATION_OR_RULE_LIST@32..32
+                2: R_CURLY@32..34 "}" [] [Whitespace(" ")]
+          2: R_CURLY@34..36 "}" [] [Whitespace(" ")]
+    1: CSS_QUALIFIED_RULE@36..59
+      0: CSS_SELECTOR_LIST@36..43
+        0: CSS_COMPOUND_SELECTOR@36..43
+          0: CSS_NESTED_SELECTOR_LIST@36..36
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@36..43
+            0: CSS_CLASS_SELECTOR@36..43
+              0: DOT@36..37 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@37..43
+                0: IDENT@37..43 "after" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@43..59
+        0: L_CURLY@43..45 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@45..58
+          0: CSS_DECLARATION_WITH_SEMICOLON@45..58
+            0: CSS_DECLARATION@45..56
+              0: CSS_GENERIC_PROPERTY@45..56
+                0: CSS_IDENTIFIER@45..50
+                  0: IDENT@45..50 "color" [] []
+                1: COLON@50..52 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@52..56
+                  0: CSS_IDENTIFIER@52..56
+                    0: IDENT@52..56 "blue" [] []
+              1: (empty)
+            1: SEMICOLON@56..58 ";" [] [Whitespace(" ")]
+        2: R_CURLY@58..59 "}" [] []
+  2: EOF@59..60 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+scss-exclusive-query-recovery.css:1:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS query expressions are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+  > 1 │ @media (width: 1 + 2 { .inside {} } .after { color: blue; }
+      │                ^^^^^
+    2 │ 
+  
+scss-exclusive-query-recovery.css:1:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `{`
+  
+  > 1 │ @media (width: 1 + 2 { .inside {} } .after { color: blue; }
+      │                      ^
+    2 │ 
+  
+  i Remove {
+  
+```

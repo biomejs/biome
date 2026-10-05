@@ -21,6 +21,8 @@ expression: valid.html
 	</div>
 	<button></button>
 	<div role="h1"></div>
+	<div role="separator"></div>
+	<div role="separator" tabindex="0"></div>
 </div>
 
 ```

@@ -62,6 +62,16 @@
       ]
     },
     {
+      // Needs to be updated manually, together with the generated Tailwind preset
+      "matchFileNames": [
+        "packages/tailwindcss-config-analyzer/**"
+      ],
+      "matchDepNames": [
+        "tailwindcss"
+      ],
+      "enabled": false
+    },
+    {
       "minimumReleaseAge": "3 days",
       "matchDepNames": [
         "rust"

@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/frontmatter/suppression_after_frontmatter.md
+---
+
+# Input
+
+```md
+---
+title: generated
+---
+<!-- biome-ignore-all format: preserve the generated Markdown body -->
+#    Preserved     heading
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "parser": {
+      "frontmatter": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+---
+title: generated
+---
+<!-- biome-ignore-all format: preserve the generated Markdown body -->
+#    Preserved     heading
+
+```

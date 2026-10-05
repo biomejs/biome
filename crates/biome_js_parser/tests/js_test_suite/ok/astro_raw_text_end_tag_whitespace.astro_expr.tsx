@@ -1,0 +1,1 @@
+x && <script>a</script >

@@ -1,3 +1,8 @@
+#![expect(
+    clippy::disallowed_methods,
+    reason = "This rule compares CSS values that can span multiple tokens."
+)]
+
 use crate::fonts::{
     CssFontValue, find_font_family, is_font_family_keyword, is_system_family_name_keyword,
 };
@@ -16,17 +21,18 @@ use biome_rule_options::use_generic_font_names::UseGenericFontNamesOptions;
 use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
-    /// Disallow a missing generic family keyword within font families.
+    /// Require a generic fallback in font-family lists.
     ///
-    /// The generic font family can be:
-    /// - placed anywhere in the font family list
-    /// - omitted if a keyword related to property inheritance or a system font is used
+    /// Generic families such as `serif`, `sans-serif`, and `monospace` let the browser choose an
+    /// available fallback when named fonts cannot be loaded. This rule checks the `font` and
+    /// `font-family` properties.
     ///
-    /// This rule checks the font and font-family properties.
-    /// The following special situations are ignored:
-    /// - Property with a keyword value such as `inherit`, `initial`.
-    /// - The last value being a CSS variable.
-    /// - `font-family` property in an `@font-face` rule.
+    /// A generic family may appear anywhere in the list. It is not required when:
+    ///
+    /// - the property uses a CSS-wide keyword such as `inherit` or `initial`;
+    /// - the `font` shorthand uses a system-font value such as `caption` or `menu`;
+    /// - the final family comes from a custom property through `var()`;
+    /// - `font-family` appears inside an `@font-face` rule.
     ///
     /// ## Examples
     ///
@@ -68,7 +74,7 @@ declare_lint_rule! {
         language: "css",
         recommended: true,
         severity: Severity::Error,
-        sources: &[RuleSource::Stylelint("font-family-no-missing-generic-family-keyword").same()],
+        sources: &[RuleSource::Stylelint("font-family-no-missing-generic-family-keyword").same(), RuleSource::EslintCss("font-family-fallbacks").inspired()],
     }
 }
 
@@ -105,6 +111,8 @@ impl Rule for UseGenericFontNames {
         // e.g: { font: caption }, { font: inherit }
         let properties = match node.value() {
             Ok(value) => match value {
+                AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(_) => return None,
+                AnyCssGenericPropertyValueOrExpression::CssLegacyFilterValue(_) => return None,
                 AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(list) => list,
                 AnyCssGenericPropertyValueOrExpression::ScssExpression(_) => return None,
             },
@@ -234,6 +242,6 @@ fn is_last_value_css_variable(properties: &CssGenericComponentValueList) -> bool
             AnyCssGenericComponentValue::AnyCssValue(_) => Some(v),
             AnyCssGenericComponentValue::CssGenericDelimiter(_) => None,
         })
-        .last()
+        .next_back()
         .is_some_and(|v| is_css_variable(&v.to_trimmed_text().text().to_ascii_lowercase_cow()))
 }

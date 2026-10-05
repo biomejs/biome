@@ -10,6 +10,7 @@ use crate::{
     TrailingNewline, TransformSourceMap,
 };
 use crate::{format, write};
+use biome_rowan::TextRange;
 use rustc_hash::FxHashMap;
 use std::ops::Deref;
 
@@ -26,8 +27,10 @@ impl Document {
 
     /// Sets [`expand`](tag::Group::expand) to [`GroupMode::Propagated`] if the group contains any of:
     /// * a group with [`expand`](tag::Group::expand) set to [GroupMode::Propagated] or [GroupMode::Expand].
-    /// * a non-soft [line break](FormatElement::Line) with mode [LineMode::Hard], [LineMode::Empty], or [LineMode::Literal].
+    /// * a [line break](FormatElement::Line) with mode [LineMode::Hard] or [LineMode::Empty].
     /// * a [FormatElement::ExpandParent]
+    ///
+    /// [LineMode::Literal] forces a break without propagating expansion.
     ///
     /// [`BestFitting`] elements act as expand boundaries, meaning that the fact that a
     /// [`BestFitting`]'s content expands is not propagated past the [`BestFitting`] element.
@@ -147,48 +150,55 @@ impl Document {
         &self.elements
     }
 
-    /// Transforms the document by visiting every element, optionally replacing
-    /// them.
+    /// Transforms the document by visiting every embedded element, optionally
+    /// replacing its content.
     ///
-    /// Accepts a `visitor` that will be called to visit each element, and which
-    /// may optionally return a replacement.
-    ///
-    /// Elements that contain nested elements, such as [FormatElement::Interned]
-    /// and [FormatElement::BestFitting], have the visitor called on their
-    /// nested elements, but not on the elements themselves.
-    pub(crate) fn transform(
+    /// Accepts a `format_embedded` function that will be called with the range of
+    /// each embedded element, and which may optionally return the [Document] that
+    /// replaces the element's content.
+    pub(crate) fn replace_embedded(
         &mut self,
-        mut visitor: impl FnMut(&FormatElement) -> Option<FormatElement>,
+        format_embedded: &mut impl FnMut(TextRange) -> Option<Self>,
     ) {
-        transform_elements(&mut self.elements, &mut visitor);
+        replace_embedded_elements(&mut self.elements, format_embedded);
     }
 }
 
-/// Iterates over each of the given `elements` and optionally replaces each
-/// element with a new one.
+/// Iterates over each of the given `elements` and optionally replaces the
+/// content of each embedded element with a new one.
+///
+/// An embedded element is written as [Tag::StartEmbedded], one [FormatElement::Interned]
+/// holding the content the host formatter prints for it, and [Tag::EndEmbedded].
 ///
 /// Nested data structures such as [FormatElement::Interned] and
-/// [FormatElement::BestFitting] use recursion and call [transform_elements()]
-/// again. The visitor is *not* invoked on these elements.
-fn transform_elements(
+/// [FormatElement::BestFitting] use recursion and call [replace_embedded_elements()]
+/// again.
+fn replace_embedded_elements(
     elements: &mut [FormatElement],
-    visitor: &mut impl FnMut(&FormatElement) -> Option<FormatElement>,
+    format_embedded: &mut impl FnMut(TextRange) -> Option<Document>,
 ) {
+    // The range of the embedded element whose host content is the next element.
+    let mut embedded_range = None;
     for element in elements {
+        let host_content_range = embedded_range.take();
         match element {
-            FormatElement::Interned(interned) => {
-                let mut nested_elements = interned.deref().to_vec();
-                transform_elements(&mut nested_elements, visitor);
-                *element = FormatElement::Interned(Interned::new(nested_elements));
-            }
-            FormatElement::BestFitting(best_fitting) => {
-                transform_elements(best_fitting.as_slice_mut(), visitor);
-            }
-            _ => {
-                if let Some(replacement) = visitor(element) {
-                    *element = replacement;
+            FormatElement::Tag(Tag::StartEmbedded(range)) => embedded_range = Some(*range),
+            FormatElement::Interned(interned) => match host_content_range {
+                Some(range) => {
+                    if let Some(document) = format_embedded(range) {
+                        *interned = Interned::new(document.into_elements());
+                    }
                 }
+                None => {
+                    let mut nested_elements = interned.deref().to_vec();
+                    replace_embedded_elements(&mut nested_elements, format_embedded);
+                    *interned = Interned::new(nested_elements);
+                }
+            },
+            FormatElement::BestFitting(best_fitting) => {
+                replace_embedded_elements(best_fitting.as_slice_mut(), format_embedded);
             }
+            _ => {}
         }
     }
 }
@@ -444,6 +454,9 @@ impl Format<IrFormatContext> for &[FormatElement] {
                     }
                     LineMode::Empty => {
                         write!(f, [token("empty_line")])?;
+                    }
+                    LineMode::Literal { .. } => {
+                        write!(f, [token("literal_line_break_without_parent")])?;
                     }
                 },
                 FormatElement::ExpandParent => {
@@ -866,9 +879,48 @@ mod tests {
     use biome_js_syntax::JsSyntaxToken;
 
     use crate::prelude::document::IrFormatOptions;
+    use crate::prelude::tag::GroupMode;
     use crate::prelude::*;
     use crate::{FormatOptions, SimpleFormatContext};
     use crate::{format, format_args, write};
+
+    #[test]
+    fn literal_line_break_is_forced_without_propagating_expand() {
+        use Tag::*;
+
+        let group = tag::Group::new();
+        let mut document = Document::from(vec![
+            FormatElement::Tag(StartGroup(group.clone())),
+            FormatElement::Line(LineMode::Literal {
+                source_position: None,
+            }),
+            FormatElement::Tag(EndGroup),
+        ]);
+
+        assert!(
+            !LineMode::Literal {
+                source_position: None
+            }
+            .is_hard()
+        );
+        assert!(document.as_elements().will_break());
+
+        document.propagate_expand();
+
+        assert_eq!(group.mode(), GroupMode::Flat);
+    }
+
+    #[test]
+    fn display_literal_line_break() {
+        let document = Document::from(vec![FormatElement::Line(LineMode::Literal {
+            source_position: None,
+        })]);
+
+        assert_eq!(
+            &std::format!("{document}"),
+            "[literal_line_break_without_parent]"
+        );
+    }
 
     #[test]
     fn display_elements() {

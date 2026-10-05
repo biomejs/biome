@@ -1,0 +1,25 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/document/suppression_global_bom.yaml
+---
+
+# Input
+
+```yaml
+﻿# biome-ignore-all format: preserve content after the BOM
+first:    [1,2]
+---
+second:    [3,4]
+
+```
+
+
+# Formatted
+
+```yaml
+﻿# biome-ignore-all format: preserve content after the BOM
+first:    [1,2]
+---
+second:    [3,4]
+
+```

@@ -1,0 +1,7 @@
+key: !tag # comment
+  |
+  content
+list:
+  - !tag # comment
+    >
+    folded

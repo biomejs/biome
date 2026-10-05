@@ -1,0 +1,582 @@
+//! Metadata about upstream lint rules that Biome deliberately doesn't implement.
+
+use biome_console::fmt::Display;
+use biome_console::markup;
+
+use crate::RuleSource;
+use crate::RuleSource::*;
+use UnsupportedRuleReason::*;
+
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
+pub struct UnsupportedRule(pub RuleSource<'static>, pub UnsupportedRuleReason);
+
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
+pub enum UnsupportedRuleReason {
+    /// The rule is stylistic and is fundamentally incompatible with the formatter, and there's no formatter option to adjust its behavior.
+    ///
+    /// This is for rules that enforce formatting that are at odds with Biome's formatting decisions.
+    Stylistic,
+    /// The formatter completely covers the functionality that the rule is meant to enforce (assuming default rule options).
+    ///
+    /// The rule is therefore redundant when using the formatter, and losing the rule does not reduce code quality.
+    FormatterCovers,
+    /// The functionality is covered by a Biome formatter option.
+    FormatterOption(&'static str),
+    /// The rule belongs to a known source, but it is not yet implemented in Biome.
+    KnownSourceNotImplemented,
+    /// The rule belongs to an unknown source, and is therefore not implemented in Biome.
+    UnknownSource,
+    /// The rule is covered by a different rule, and is therefore not implemented as its own rule in Biome.
+    CoveredByRule(&'static str),
+    /// The rule doesn't make sense to implement in Biome, e.g. because it relies on
+    /// infrastructure specific to the upstream tool, or it overwhelmingly applies to ESLint
+    /// itself (like `svelte/comment-directive`).
+    NotApplicable,
+    /// The rule has been deprecated upstream.
+    ///
+    /// This doesn't include rules that were deprecated because they moved to another package,
+    /// or because they were folded into or superseded by another rule.
+    Deprecated,
+    /// The rule enforces a legacy practice, such as accommodating obsolete runtimes or outdated
+    /// conventions, that goes against Biome's focus on modern code.
+    Legacy,
+    /// The rule requires integration with external tooling that Biome doesn't have, such as the
+    /// Vue or Svelte compiler.
+    RequiresExternalTool,
+    /// The rule reports syntax errors that Biome's parser already reports.
+    ///
+    /// The rule is therefore redundant, and losing the rule does not reduce code quality.
+    ParserCovers,
+}
+
+impl Display for UnsupportedRuleReason {
+    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
+        match self {
+            Self::Stylistic => {
+                fmt.write_markup(markup! { "Stylistic, incompatible with formatter." })
+            }
+            Self::FormatterCovers => {
+                fmt.write_markup(markup! { "Redundant, completely covered by Biome's formatter." })
+            }
+            Self::FormatterOption(option) => fmt.write_markup(
+                markup! { "Covered by Biome's "<Emphasis>{option}</Emphasis>" formatter option." },
+            ),
+            Self::KnownSourceNotImplemented => {
+                fmt.write_markup(markup! { "Known source, not yet implemented." })
+            }
+            Self::UnknownSource => fmt.write_markup(markup! {
+                "These rules originate from an eslint plugin or other tool that Biome doesn't know about."
+            }),
+            Self::CoveredByRule(rule) => fmt.write_markup(markup! {
+                "Covered by the "<Emphasis>{rule}</Emphasis>" rule."
+            }),
+            Self::NotApplicable => {
+                fmt.write_markup(markup! { "Not applicable to Biome." })
+            }
+            Self::Deprecated => fmt.write_markup(markup! { "Deprecated upstream." }),
+            Self::Legacy => {
+                fmt.write_markup(markup! { "Legacy, at odds with Biome's focus on modern code." })
+            }
+            Self::RequiresExternalTool => fmt.write_markup(markup! {
+                "Requires integration with an external tool, such as a compiler."
+            }),
+            Self::ParserCovers => {
+                fmt.write_markup(markup! { "Redundant, Biome's parser reports these errors." })
+            }
+        }
+    }
+}
+
+// Sorted ESLint unsupported rules.
+/// The array is sorted to allow binary search.
+pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
+    UnsupportedRule(Eslint("array-bracket-newline"), FormatterCovers),
+    UnsupportedRule(
+        Eslint("array-bracket-spacing"),
+        FormatterOption("delimiterSpacing"),
+    ),
+    UnsupportedRule(Eslint("array-element-newline"), FormatterCovers),
+    UnsupportedRule(Eslint("arrow-parens"), FormatterOption("arrowParentheses")),
+    UnsupportedRule(Eslint("arrow-spacing"), Stylistic),
+    UnsupportedRule(Eslint("block-scoped-var"), CoveredByRule("noVar")),
+    UnsupportedRule(Eslint("block-spacing"), FormatterCovers),
+    UnsupportedRule(Eslint("brace-style"), Stylistic),
+    UnsupportedRule(Eslint("capitalized-comments"), Stylistic),
+    UnsupportedRule(Eslint("comma-dangle"), Stylistic),
+    UnsupportedRule(Eslint("comma-spacing"), FormatterCovers),
+    UnsupportedRule(Eslint("comma-style"), Stylistic),
+    UnsupportedRule(
+        Eslint("computed-property-spacing"),
+        FormatterOption("delimiterSpacing"),
+    ),
+    UnsupportedRule(Eslint("dot-location"), Stylistic),
+    UnsupportedRule(Eslint("eol-last"), FormatterCovers),
+    UnsupportedRule(Eslint("func-call-spacing"), Stylistic),
+    UnsupportedRule(Eslint("function-call-argument-newline"), FormatterCovers),
+    UnsupportedRule(Eslint("function-paren-newline"), FormatterCovers),
+    UnsupportedRule(Eslint("generator-star"), FormatterCovers),
+    UnsupportedRule(Eslint("generator-star-spacing"), FormatterCovers),
+    UnsupportedRule(Eslint("implicit-arrow-linebreak"), Stylistic),
+    UnsupportedRule(Eslint("indent"), FormatterOption("indentWidth")),
+    UnsupportedRule(Eslint("indent-legacy"), FormatterOption("indentWidth")),
+    UnsupportedRule(Eslint("jsx-quotes"), FormatterOption("jsxQuoteStyle")),
+    UnsupportedRule(Eslint("key-spacing"), FormatterCovers),
+    UnsupportedRule(Eslint("keyword-spacing"), FormatterCovers),
+    UnsupportedRule(Eslint("line-comment-position"), Stylistic),
+    UnsupportedRule(Eslint("linebreak-style"), FormatterOption("lineEnding")),
+    UnsupportedRule(Eslint("lines-around-comment"), Stylistic),
+    UnsupportedRule(Eslint("lines-around-directive"), Stylistic),
+    UnsupportedRule(Eslint("lines-between-class-members"), Stylistic),
+    UnsupportedRule(Eslint("max-len"), FormatterOption("lineWidth")),
+    UnsupportedRule(Eslint("max-statements-per-line"), FormatterCovers),
+    UnsupportedRule(Eslint("multiline-comment-style"), Stylistic),
+    UnsupportedRule(Eslint("multiline-ternary"), Stylistic),
+    UnsupportedRule(Eslint("new-parens"), FormatterCovers),
+    UnsupportedRule(Eslint("newline-after-var"), Stylistic),
+    UnsupportedRule(Eslint("newline-before-return"), Stylistic),
+    UnsupportedRule(Eslint("newline-per-chained-call"), FormatterCovers),
+    UnsupportedRule(Eslint("no-confusing-arrow"), FormatterCovers),
+    UnsupportedRule(Eslint("no-extra-parens"), FormatterCovers),
+    UnsupportedRule(Eslint("no-extra-semi"), FormatterCovers),
+    UnsupportedRule(Eslint("no-floating-decimal"), FormatterCovers),
+    UnsupportedRule(Eslint("no-mixed-operators"), Stylistic),
+    UnsupportedRule(
+        Eslint("no-mixed-spaces-and-tabs"),
+        FormatterOption("indentStyle"),
+    ),
+    UnsupportedRule(Eslint("no-multi-spaces"), FormatterCovers),
+    UnsupportedRule(Eslint("no-multiple-empty-lines"), FormatterCovers),
+    UnsupportedRule(Eslint("no-return-await"), Deprecated),
+    UnsupportedRule(Eslint("no-space-before-semi"), FormatterCovers),
+    UnsupportedRule(Eslint("no-spaced-func"), Stylistic),
+    UnsupportedRule(Eslint("no-tabs"), FormatterOption("indentStyle")),
+    UnsupportedRule(Eslint("no-trailing-spaces"), FormatterCovers),
+    UnsupportedRule(Eslint("no-whitespace-before-property"), Stylistic),
+    UnsupportedRule(Eslint("nonblock-statement-body-position"), Stylistic),
+    UnsupportedRule(Eslint("object-curly-newline"), FormatterCovers),
+    UnsupportedRule(Eslint("object-curly-spacing"), FormatterCovers),
+    UnsupportedRule(Eslint("object-property-newline"), FormatterCovers),
+    UnsupportedRule(Eslint("one-var-declaration-per-line"), Stylistic),
+    UnsupportedRule(
+        Eslint("operator-linebreak"),
+        FormatterOption("operatorLinebreak"),
+    ),
+    UnsupportedRule(Eslint("padded-blocks"), Stylistic),
+    UnsupportedRule(Eslint("padding-line-between-statements"), Stylistic),
+    UnsupportedRule(Eslint("prefer-reflect"), Deprecated),
+    UnsupportedRule(Eslint("quote-props"), Stylistic),
+    UnsupportedRule(Eslint("quotes"), FormatterOption("quoteStyle")),
+    UnsupportedRule(Eslint("rest-spread-spacing"), FormatterCovers),
+    UnsupportedRule(Eslint("semi"), FormatterOption("semicolons")),
+    UnsupportedRule(Eslint("semi-spacing"), FormatterCovers),
+    UnsupportedRule(Eslint("semi-style"), FormatterCovers),
+    UnsupportedRule(Eslint("space-after-function-name"), Stylistic),
+    UnsupportedRule(Eslint("space-after-keywords"), FormatterCovers),
+    UnsupportedRule(Eslint("space-before-blocks"), FormatterCovers),
+    UnsupportedRule(Eslint("space-before-function-paren"), Stylistic),
+    UnsupportedRule(Eslint("space-before-function-parentheses"), Stylistic),
+    UnsupportedRule(Eslint("space-before-keywords"), FormatterCovers),
+    UnsupportedRule(
+        Eslint("space-in-brackets"),
+        FormatterOption("delimiterSpacing"),
+    ),
+    UnsupportedRule(
+        Eslint("space-in-parens"),
+        FormatterOption("delimiterSpacing"),
+    ),
+    UnsupportedRule(Eslint("space-infix-ops"), FormatterCovers),
+    UnsupportedRule(Eslint("space-return-throw-case"), FormatterCovers),
+    UnsupportedRule(Eslint("space-unary-ops"), FormatterCovers),
+    UnsupportedRule(Eslint("space-unary-word-ops"), FormatterCovers),
+    UnsupportedRule(Eslint("spaced-comment"), Stylistic),
+    UnsupportedRule(Eslint("switch-colon-spacing"), FormatterCovers),
+    UnsupportedRule(
+        Eslint("template-curly-spacing"),
+        FormatterOption("delimiterSpacing"),
+    ),
+    UnsupportedRule(Eslint("template-tag-spacing"), FormatterCovers),
+    UnsupportedRule(Eslint("wrap-iife"), Stylistic),
+    UnsupportedRule(Eslint("wrap-regex"), Stylistic),
+    UnsupportedRule(Eslint("yield-star-spacing"), FormatterCovers),
+    UnsupportedRule(EslintJest("padding-around-after-all-blocks"), Stylistic),
+    UnsupportedRule(EslintJest("padding-around-after-each-blocks"), Stylistic),
+    UnsupportedRule(EslintJest("padding-around-all"), Stylistic),
+    UnsupportedRule(EslintJest("padding-around-before-all-blocks"), Stylistic),
+    UnsupportedRule(EslintJest("padding-around-before-each-blocks"), Stylistic),
+    UnsupportedRule(EslintJest("padding-around-describe-blocks"), Stylistic),
+    UnsupportedRule(EslintJest("padding-around-expect-groups"), Stylistic),
+    UnsupportedRule(EslintJest("padding-around-test-blocks"), Stylistic),
+    UnsupportedRule(EslintJsxA11y("no-onchange"), Deprecated),
+    UnsupportedRule(EslintMysticatea("block-scoped-var"), CoveredByRule("noVar")),
+    UnsupportedRule(EslintN("no-hide-core-modules"), Deprecated),
+    UnsupportedRule(EslintQwik("no-async-prevent-default"), Deprecated),
+    UnsupportedRule(
+        EslintQwik("unused-server"),
+        CoveredByRule("noUnusedVariables"),
+    ),
+    UnsupportedRule(EslintReact("jsx-child-element-spacing"), FormatterCovers),
+    UnsupportedRule(EslintReact("jsx-closing-bracket-location"), FormatterCovers),
+    UnsupportedRule(EslintReact("jsx-closing-tag-location"), FormatterCovers),
+    UnsupportedRule(EslintReact("jsx-curly-newline"), FormatterCovers),
+    UnsupportedRule(
+        EslintReact("jsx-curly-spacing"),
+        FormatterOption("delimiterSpacing"),
+    ),
+    UnsupportedRule(EslintReact("jsx-equals-spacing"), FormatterCovers),
+    UnsupportedRule(EslintReact("jsx-first-prop-new-line"), Stylistic),
+    UnsupportedRule(EslintReact("jsx-indent"), FormatterOption("indentStyle")),
+    UnsupportedRule(EslintReact("jsx-indent-props"), Stylistic),
+    UnsupportedRule(EslintReact("jsx-max-props-per-line"), Stylistic),
+    UnsupportedRule(EslintReact("jsx-newline"), FormatterCovers),
+    UnsupportedRule(EslintReact("jsx-one-expression-per-line"), Stylistic),
+    UnsupportedRule(EslintReact("jsx-props-no-multi-spaces"), FormatterCovers),
+    UnsupportedRule(EslintReact("jsx-space-before-closing"), FormatterCovers),
+    UnsupportedRule(EslintReact("jsx-tag-spacing"), FormatterCovers),
+    UnsupportedRule(EslintReact("jsx-wrap-multilines"), Stylistic),
+    UnsupportedRule(EslintSvelte("comment-directive"), NotApplicable),
+    UnsupportedRule(EslintSvelte("first-attribute-linebreak"), Stylistic),
+    UnsupportedRule(EslintSvelte("html-closing-bracket-new-line"), Stylistic),
+    UnsupportedRule(EslintSvelte("html-closing-bracket-spacing"), Stylistic),
+    UnsupportedRule(EslintSvelte("html-quotes"), Stylistic),
+    UnsupportedRule(EslintSvelte("indent"), Stylistic),
+    UnsupportedRule(EslintSvelte("max-attributes-per-line"), Stylistic),
+    UnsupportedRule(EslintSvelte("mustache-spacing"), Stylistic),
+    UnsupportedRule(
+        EslintSvelte("no-spaces-around-equal-signs-in-attribute"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(EslintSvelte("no-trailing-spaces"), FormatterCovers),
+    UnsupportedRule(EslintSvelte("system"), NotApplicable),
+    UnsupportedRule(EslintSvelte("valid-compile"), NotApplicable),
+    UnsupportedRule(EslintSvelte("valid-style-parse"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("array-bracket-newline"), FormatterCovers),
+    UnsupportedRule(
+        EslintStylistic("array-bracket-spacing"),
+        FormatterOption("delimiterSpacing"),
+    ),
+    UnsupportedRule(EslintStylistic("array-element-newline"), FormatterCovers),
+    UnsupportedRule(
+        EslintStylistic("arrow-parens"),
+        FormatterOption("arrowParentheses"),
+    ),
+    UnsupportedRule(EslintStylistic("arrow-spacing"), Stylistic),
+    UnsupportedRule(EslintStylistic("block-spacing"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("brace-style"), Stylistic),
+    UnsupportedRule(EslintStylistic("comma-dangle"), Stylistic),
+    UnsupportedRule(EslintStylistic("comma-spacing"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("comma-style"), Stylistic),
+    UnsupportedRule(
+        EslintStylistic("computed-property-spacing"),
+        FormatterOption("delimiterSpacing"),
+    ),
+    UnsupportedRule(EslintStylistic("curly-newline"), Stylistic),
+    UnsupportedRule(EslintStylistic("dot-location"), Stylistic),
+    UnsupportedRule(EslintStylistic("eol-last"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("func-call-spacing"), Stylistic),
+    UnsupportedRule(
+        EslintStylistic("function-call-argument-newline"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(EslintStylistic("function-call-spacing"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("function-paren-newline"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("generator-star-spacing"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("implicit-arrow-linebreak"), Stylistic),
+    UnsupportedRule(EslintStylistic("indent"), FormatterOption("indentWidth")),
+    UnsupportedRule(
+        EslintStylistic("indent-binary-ops"),
+        FormatterOption("indentWidth"),
+    ),
+    UnsupportedRule(
+        EslintStylistic("jsx-child-element-spacing"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(
+        EslintStylistic("jsx-closing-bracket-location"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(EslintStylistic("jsx-closing-tag-location"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("jsx-curly-newline"), FormatterCovers),
+    UnsupportedRule(
+        EslintStylistic("jsx-curly-spacing"),
+        FormatterOption("delimiterSpacing"),
+    ),
+    UnsupportedRule(EslintStylistic("jsx-equals-spacing"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("jsx-first-prop-new-line"), Stylistic),
+    UnsupportedRule(EslintStylistic("jsx-function-call-newline"), Stylistic),
+    UnsupportedRule(EslintStylistic("jsx-indent"), Deprecated),
+    UnsupportedRule(EslintStylistic("jsx-indent-props"), Stylistic),
+    UnsupportedRule(EslintStylistic("jsx-max-props-per-line"), Stylistic),
+    UnsupportedRule(EslintStylistic("jsx-newline"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("jsx-one-expression-per-line"), Stylistic),
+    UnsupportedRule(EslintStylistic("jsx-props-no-multi-spaces"), Deprecated),
+    UnsupportedRule(EslintStylistic("jsx-props-style"), Stylistic),
+    UnsupportedRule(
+        EslintStylistic("jsx-quotes"),
+        FormatterOption("jsxQuoteStyle"),
+    ),
+    UnsupportedRule(EslintStylistic("jsx-sort-props"), Deprecated),
+    UnsupportedRule(EslintStylistic("jsx-tag-spacing"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("jsx-wrap-multilines"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("key-spacing"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("keyword-spacing"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("line-comment-position"), Stylistic),
+    UnsupportedRule(
+        EslintStylistic("linebreak-style"),
+        FormatterOption("lineEnding"),
+    ),
+    UnsupportedRule(EslintStylistic("lines-around-comment"), Stylistic),
+    UnsupportedRule(EslintStylistic("lines-between-class-members"), Stylistic),
+    UnsupportedRule(EslintStylistic("list-style"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("max-len"), FormatterOption("lineWidth")),
+    UnsupportedRule(EslintStylistic("max-statements-per-line"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("member-delimiter-style"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("multiline-comment-style"), Stylistic),
+    UnsupportedRule(EslintStylistic("multiline-ternary"), Stylistic),
+    UnsupportedRule(EslintStylistic("new-parens"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("newline-per-chained-call"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("no-confusing-arrow"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("no-extra-parens"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("no-extra-semi"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("no-floating-decimal"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("no-mixed-operators"), Stylistic),
+    UnsupportedRule(
+        EslintStylistic("no-mixed-spaces-and-tabs"),
+        FormatterOption("indentStyle"),
+    ),
+    UnsupportedRule(EslintStylistic("no-multi-spaces"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("no-multiple-empty-lines"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("no-spaced-func"), Stylistic),
+    UnsupportedRule(EslintStylistic("no-tabs"), FormatterOption("indentStyle")),
+    UnsupportedRule(EslintStylistic("no-trailing-spaces"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("no-whitespace-before-property"), Stylistic),
+    UnsupportedRule(
+        EslintStylistic("nonblock-statement-body-position"),
+        Stylistic,
+    ),
+    UnsupportedRule(EslintStylistic("object-curly-newline"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("object-curly-spacing"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("object-property-newline"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("one-var-declaration-per-line"), Stylistic),
+    UnsupportedRule(
+        EslintStylistic("operator-linebreak"),
+        FormatterOption("operatorLinebreak"),
+    ),
+    UnsupportedRule(EslintStylistic("padded-blocks"), Stylistic),
+    UnsupportedRule(
+        EslintStylistic("padding-line-between-statements"),
+        Stylistic,
+    ),
+    UnsupportedRule(EslintStylistic("quote-props"), Stylistic),
+    UnsupportedRule(EslintStylistic("quotes"), FormatterOption("quoteStyle")),
+    UnsupportedRule(EslintStylistic("rest-spread-spacing"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("semi"), FormatterOption("semicolons")),
+    UnsupportedRule(EslintStylistic("semi-spacing"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("semi-style"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("space-after-keywords"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("space-before-blocks"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("space-before-function-paren"), Stylistic),
+    UnsupportedRule(
+        EslintStylistic("space-before-function-parentheses"),
+        Stylistic,
+    ),
+    UnsupportedRule(EslintStylistic("space-before-keywords"), FormatterCovers),
+    UnsupportedRule(
+        EslintStylistic("space-in-brackets"),
+        FormatterOption("delimiterSpacing"),
+    ),
+    UnsupportedRule(
+        EslintStylistic("space-in-parens"),
+        FormatterOption("delimiterSpacing"),
+    ),
+    UnsupportedRule(EslintStylistic("space-infix-ops"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("space-return-throw-case"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("space-unary-ops"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("space-unary-word-ops"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("spaced-comment"), Stylistic),
+    UnsupportedRule(EslintStylistic("switch-colon-spacing"), FormatterCovers),
+    UnsupportedRule(
+        EslintStylistic("template-curly-spacing"),
+        FormatterOption("delimiterSpacing"),
+    ),
+    UnsupportedRule(EslintStylistic("template-tag-spacing"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("type-annotation-spacing"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("type-generic-spacing"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("type-named-tuple-spacing"), FormatterCovers),
+    UnsupportedRule(EslintStylistic("wrap-iife"), Stylistic),
+    UnsupportedRule(EslintStylistic("wrap-regex"), Stylistic),
+    UnsupportedRule(EslintStylistic("yield-star-spacing"), FormatterCovers),
+    UnsupportedRule(EslintTypeScript("brace-style"), Stylistic),
+    UnsupportedRule(EslintTypeScript("comma-dangle"), Stylistic),
+    UnsupportedRule(EslintTypeScript("comma-spacing"), FormatterCovers),
+    UnsupportedRule(EslintTypeScript("func-call-spacing"), FormatterCovers),
+    UnsupportedRule(EslintTypeScript("indent"), FormatterOption("indentWidth")),
+    UnsupportedRule(EslintTypeScript("keyword-spacing"), FormatterCovers),
+    UnsupportedRule(EslintTypeScript("no-extra-parens"), FormatterCovers),
+    UnsupportedRule(EslintTypeScript("no-extra-semi"), FormatterCovers),
+    UnsupportedRule(EslintTypeScript("object-curly-spacing"), FormatterCovers),
+    UnsupportedRule(EslintTypeScript("quotes"), FormatterOption("quoteStyle")),
+    UnsupportedRule(EslintTypeScript("semi"), FormatterOption("semicolons")),
+    UnsupportedRule(EslintTypeScript("space-before-blocks"), FormatterCovers),
+    UnsupportedRule(EslintTypeScript("space-before-function-paren"), Stylistic),
+    UnsupportedRule(EslintTypeScript("space-infix-ops"), FormatterCovers),
+    UnsupportedRule(EslintUnicorn("comma-spacing"), FormatterCovers),
+    UnsupportedRule(EslintUnicorn("empty-brace-spaces"), FormatterCovers),
+    UnsupportedRule(
+        EslintUnicorn("indent"),
+        FormatterOption("indentStyle, indentWidth"),
+    ),
+    UnsupportedRule(EslintVitest("padding-around-after-all-blocks"), Stylistic),
+    UnsupportedRule(EslintVitest("padding-around-after-each-blocks"), Stylistic),
+    UnsupportedRule(EslintVitest("padding-around-all"), Stylistic),
+    UnsupportedRule(EslintVitest("padding-around-before-all-blocks"), Stylistic),
+    UnsupportedRule(EslintVitest("padding-around-before-each-blocks"), Stylistic),
+    UnsupportedRule(EslintVitest("padding-around-describe-blocks"), Stylistic),
+    UnsupportedRule(EslintVitest("padding-around-expect-groups"), Stylistic),
+    UnsupportedRule(EslintVitest("padding-around-test-blocks"), Stylistic),
+    UnsupportedRule(EslintVueJs("array-bracket-newline"), FormatterCovers),
+    UnsupportedRule(
+        EslintVueJs("array-bracket-spacing"),
+        FormatterOption("delimiterSpacing"),
+    ),
+    UnsupportedRule(EslintVueJs("array-element-newline"), FormatterCovers),
+    UnsupportedRule(EslintVueJs("arrow-spacing"), Stylistic),
+    UnsupportedRule(EslintVueJs("block-spacing"), FormatterCovers),
+    UnsupportedRule(EslintVueJs("block-tag-newline"), Stylistic),
+    UnsupportedRule(EslintVueJs("brace-style"), FormatterCovers),
+    UnsupportedRule(EslintVueJs("comma-dangle"), FormatterCovers),
+    UnsupportedRule(EslintVueJs("comma-spacing"), FormatterCovers),
+    UnsupportedRule(EslintVueJs("comma-style"), Stylistic),
+    UnsupportedRule(EslintVueJs("dot-location"), Stylistic),
+    UnsupportedRule(EslintVueJs("first-attribute-linebreak"), Stylistic),
+    UnsupportedRule(EslintVueJs("func-call-spacing"), FormatterCovers),
+    UnsupportedRule(EslintVueJs("html-closing-bracket-newline"), Stylistic),
+    UnsupportedRule(EslintVueJs("html-closing-bracket-spacing"), Stylistic),
+    UnsupportedRule(EslintVueJs("html-comment-content-newline"), Stylistic),
+    UnsupportedRule(EslintVueJs("html-comment-content-spacing"), Stylistic),
+    UnsupportedRule(EslintVueJs("html-comment-indent"), Stylistic),
+    UnsupportedRule(EslintVueJs("html-indent"), FormatterCovers),
+    UnsupportedRule(EslintVueJs("html-quotes"), Stylistic),
+    UnsupportedRule(
+        EslintVueJs("html-self-closing"),
+        FormatterOption("selfCloseVoidElements"),
+    ),
+    UnsupportedRule(EslintVueJs("key-spacing"), FormatterCovers),
+    UnsupportedRule(EslintVueJs("keyword-spacing"), FormatterCovers),
+    UnsupportedRule(EslintVueJs("max-attributes-per-line"), Stylistic),
+    UnsupportedRule(EslintVueJs("max-len"), FormatterOption("lineWidth")),
+    UnsupportedRule(
+        EslintVueJs("multiline-html-element-content-newline"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(EslintVueJs("multiline-ternary"), Stylistic),
+    UnsupportedRule(
+        EslintVueJs("mustache-interpolation-spacing"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(
+        EslintVueJs("new-line-between-multi-line-property"),
+        Stylistic,
+    ),
+    UnsupportedRule(EslintVueJs("no-extra-parens"), FormatterCovers),
+    UnsupportedRule(EslintVueJs("no-multi-spaces"), FormatterCovers),
+    UnsupportedRule(EslintVueJs("no-parsing-error"), FormatterCovers),
+    UnsupportedRule(
+        EslintVueJs("no-spaces-around-equal-signs-in-attribute"),
+        FormatterCovers,
+    ),
+    UnsupportedRule(EslintVueJs("object-curly-newline"), FormatterCovers),
+    UnsupportedRule(EslintVueJs("object-curly-spacing"), FormatterCovers),
+    UnsupportedRule(EslintVueJs("object-property-newline"), FormatterCovers),
+    UnsupportedRule(
+        EslintVueJs("operator-linebreak"),
+        FormatterOption("operatorLinebreak"),
+    ),
+    UnsupportedRule(EslintVueJs("padding-line-between-blocks"), Stylistic),
+    UnsupportedRule(EslintVueJs("padding-line-between-tags"), Stylistic),
+    UnsupportedRule(
+        EslintVueJs("padding-lines-in-component-definition"),
+        Stylistic,
+    ),
+    UnsupportedRule(EslintVueJs("quote-props"), Stylistic),
+    UnsupportedRule(EslintVueJs("quotes"), FormatterOption("quoteStyle")),
+    UnsupportedRule(
+        EslintVueJs("script-indent"),
+        FormatterOption("indentScriptAndStyle"),
+    ),
+    UnsupportedRule(
+        EslintVueJs("singleline-html-element-content-newline"),
+        Stylistic,
+    ),
+    UnsupportedRule(
+        EslintVueJs("space-in-parens"),
+        FormatterOption("delimiterSpacing"),
+    ),
+    UnsupportedRule(EslintVueJs("space-infix-ops"), FormatterCovers),
+    UnsupportedRule(EslintVueJs("space-unary-ops"), FormatterCovers),
+    UnsupportedRule(
+        EslintVueJs("template-curly-spacing"),
+        FormatterOption("delimiterSpacing"),
+    ),
+    UnsupportedRule(HtmlEslint("attrs-newline"), FormatterCovers),
+    UnsupportedRule(HtmlEslint("element-newline"), FormatterCovers),
+    UnsupportedRule(HtmlEslint("indent"), FormatterOption("indentWidth")),
+    UnsupportedRule(HtmlEslint("lowercase"), FormatterCovers),
+    UnsupportedRule(HtmlEslint("no-extra-spacing-attrs"), FormatterCovers),
+    UnsupportedRule(HtmlEslint("no-extra-spacing-text"), FormatterCovers),
+    UnsupportedRule(HtmlEslint("no-multiple-empty-lines"), FormatterCovers),
+    UnsupportedRule(HtmlEslint("no-trailing-spaces"), FormatterCovers),
+    UnsupportedRule(HtmlEslint("quotes"), FormatterCovers),
+    UnsupportedRule(
+        EslintPlaywright("consistent-spacing-between-blocks"),
+        Stylistic,
+    ),
+    UnsupportedRule(EslintMarkdown("no-space-in-emphasis"), FormatterCovers),
+    UnsupportedRule(EslintYml("indent"), FormatterOption("indentWidth")),
+    UnsupportedRule(EslintYml("no-tab-indent"), FormatterCovers),
+    UnsupportedRule(EslintYml("no-trailing-spaces"), FormatterCovers),
+    UnsupportedRule(EslintYml("quotes"), FormatterOption("quoteStyle")),
+    UnsupportedRule(EslintAstro("no-omitted-end-tags"), Deprecated),
+    UnsupportedRule(EslintAstro("semi"), FormatterOption("semicolons")),
+    UnsupportedRule(EslintAstro("valid-compile"), NotApplicable),
+];
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_eslint_unsupported_rules_order() {
+        let is_sorted = UNSUPPORTED_RULES
+            .windows(2)
+            .all(|pair| pair[0].0 <= pair[1].0);
+
+        if !is_sorted {
+            let mut sorted_rules: Vec<_> = UNSUPPORTED_RULES.iter().collect();
+            sorted_rules.sort_by_key(|rule| rule.0);
+            panic!(
+                "UNSUPPORTED_RULES is not sorted. Expected order:\n{:?}",
+                sorted_rules
+            );
+        }
+    }
+
+    #[test]
+    fn test_eslint_unsupported_rules_no_duplicates() {
+        let mut seen = std::collections::HashSet::new();
+        let mut duplicates = Vec::new();
+
+        for rule in UNSUPPORTED_RULES {
+            let rule_source = &rule.0;
+            if !seen.insert(rule_source) {
+                duplicates.push(rule_source);
+            }
+        }
+
+        if !duplicates.is_empty() {
+            panic!(
+                "UNSUPPORTED_RULES contains duplicate rule sources:\n{:?}",
+                duplicates
+            );
+        }
+    }
+}

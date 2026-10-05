@@ -67,6 +67,95 @@ impl ScopeId {
     }
 }
 
+/// Index over the ranges of all the scopes of a [SemanticModel].
+///
+/// Scope ranges are properly nested: two scopes are either disjoint, or one
+/// contains the other. Entries are therefore stored in pre-order (by ascending
+/// start, then by descending end), together with the index of the entry of
+/// their closest enclosing scope. Looking up the innermost scope containing a
+/// range is then a binary search followed by a walk up the enclosing scopes,
+/// instead of a scan over every scope overlapping the range.
+#[derive(Debug, Default)]
+pub(crate) struct ScopeRangeIndex {
+    entries: Box<[ScopeRangeEntry]>,
+}
+
+#[derive(Clone, Copy, Debug)]
+struct ScopeRangeEntry {
+    start: u32,
+    end: u32,
+    scope_id: ScopeId,
+    /// Index of the entry of the closest enclosing scope,
+    /// or [ScopeRangeEntry::NO_ENCLOSING_SCOPE] if there is none.
+    enclosing: u32,
+}
+
+impl ScopeRangeEntry {
+    const NO_ENCLOSING_SCOPE: u32 = u32::MAX;
+}
+
+impl ScopeRangeIndex {
+    pub(crate) fn from_scopes(scopes: &[SemanticModelScopeData]) -> Self {
+        let mut entries: Vec<ScopeRangeEntry> = scopes
+            .iter()
+            .enumerate()
+            .map(|(index, scope)| ScopeRangeEntry {
+                start: scope.range.start().into(),
+                end: scope.range.end().into(),
+                scope_id: ScopeId::new(index),
+                enclosing: ScopeRangeEntry::NO_ENCLOSING_SCOPE,
+            })
+            .collect();
+        // Pre-order: an enclosing scope always comes before the scopes it contains.
+        entries.sort_unstable_by_key(|entry| {
+            (entry.start, std::cmp::Reverse(entry.end), entry.scope_id)
+        });
+        // Several scopes may share the same range. Only the outermost one
+        // (the one declared first) is indexed, like the previous interval tree did.
+        entries.dedup_by_key(|entry| (entry.start, entry.end));
+
+        // Link every entry to its closest enclosing scope.
+        let mut enclosing_scopes: Vec<u32> = Vec::new();
+        for index in 0..entries.len() {
+            let end = entries[index].end;
+            while let Some(&enclosing) = enclosing_scopes.last() {
+                if entries[enclosing as usize].end >= end {
+                    break;
+                }
+                enclosing_scopes.pop();
+            }
+            entries[index].enclosing = enclosing_scopes
+                .last()
+                .copied()
+                .unwrap_or(ScopeRangeEntry::NO_ENCLOSING_SCOPE);
+            enclosing_scopes.push(index as u32);
+        }
+
+        Self {
+            entries: entries.into_boxed_slice(),
+        }
+    }
+
+    /// Returns the [ScopeId] of the innermost scope containing `[start, end]`.
+    fn innermost_scope(&self, start: u32, end: u32) -> Option<ScopeId> {
+        // The last entry starting at or before `start` is either the searched
+        // scope, or one of its descendants: any scope starting after the
+        // innermost enclosing scope and at or before `start` is contained in it.
+        let mut index = self.entries.partition_point(|entry| entry.start <= start);
+        while index > 0 {
+            let entry = self.entries[index - 1];
+            if entry.end >= end {
+                return Some(entry.scope_id);
+            }
+            index = match entry.enclosing {
+                ScopeRangeEntry::NO_ENCLOSING_SCOPE => return None,
+                enclosing => enclosing as usize + 1,
+            };
+        }
+        None
+    }
+}
+
 /// Contains all the data of the [SemanticModel] and only lives behind an [Arc].
 ///
 /// That allows any returned struct (like [Scope], [Binding])
@@ -77,7 +166,7 @@ pub(crate) struct SemanticModelData {
     pub(crate) flavor: SemanticFlavor,
     // All scopes of this model
     pub(crate) scopes: Vec<SemanticModelScopeData>,
-    pub(crate) scope_by_range: rust_lapper::Lapper<u32, ScopeId>,
+    pub(crate) scope_by_range: ScopeRangeIndex,
     // Maps the start of a node range to its scope id
     pub(crate) scope_hoisted_to_by_range: FxHashMap<TextSize, ScopeId>,
     /// Binding and reference nodes indexed by their range start
@@ -93,8 +182,10 @@ pub(crate) struct SemanticModelData {
     pub(crate) exported: FxHashSet<BindingId>,
     /// All references that could not be resolved
     pub(crate) unresolved_references: Vec<SemanticModelUnresolvedReference>,
+    pub(crate) unresolved_references_by_start: FxHashSet<TextSize>,
     /// All globals references
     pub(crate) globals: Vec<SemanticModelGlobalBindingData>,
+    pub(crate) global_references_by_start: FxHashSet<TextSize>,
     /// JSDoc comments attached to export statements (keyed by the JsExport node's range).
     pub(crate) export_jsdoc_by_range: FxHashMap<TextRange, JsdocComment>,
 }
@@ -138,17 +229,12 @@ impl SemanticModelData {
     pub(crate) fn scope(&self, range: TextRange) -> ScopeId {
         // Seeking an interval in `self.scope_by_range` require a non-empty interval
         debug_assert!(range.len() > 0.into(), "the range must not be empty.");
-        let start = range.start().into();
-        let end = range.end().into();
-        let scopes = self
-            .scope_by_range
-            // Find overlapping intervals
-            .find(start, end)
-            // Only take intersecting intervals
-            .filter(|x| !(start < x.start || end > x.stop));
         // We always want the most tight scope
-        match scopes.map(|x| x.val).max() {
-            Some(val) => val,
+        match self
+            .scope_by_range
+            .innermost_scope(range.start().into(), range.end().into())
+        {
+            Some(scope_id) => scope_id,
             // We always have at least one scope, the global one.
             None => unreachable!("Expected global scope not present"),
         }
@@ -344,6 +430,13 @@ impl SemanticModel {
             })
     }
 
+    pub fn binding_by_id(&self, id: BindingId) -> Option<Binding> {
+        self.data.bindings.get(id.index()).map(|_| Binding {
+            data: self.data.clone(),
+            id,
+        })
+    }
+
     pub fn all_exported_bindings(&self) -> impl Iterator<Item = Binding> + '_ {
         self.data.exported.iter().map(|&id| Binding {
             data: self.data.clone(),
@@ -429,6 +522,13 @@ impl SemanticModel {
         std::iter::successors(first, succ)
     }
 
+    /// Returns whether `reference` resolves to a configured global.
+    pub fn is_global_reference(&self, reference: &impl HasDeclarationAstNode) -> bool {
+        self.data
+            .global_references_by_start
+            .contains(&reference.syntax().text_trimmed_range().start())
+    }
+
     /// Returns an iterator of all the unresolved references in the program
     pub fn all_unresolved_references(
         &self,
@@ -456,6 +556,13 @@ impl SemanticModel {
                 })
         }
         std::iter::successors(first, succ)
+    }
+
+    /// Returns whether `reference` could not be resolved to a binding or configured global.
+    pub fn is_unresolved_reference(&self, reference: &impl HasDeclarationAstNode) -> bool {
+        self.data
+            .unresolved_references_by_start
+            .contains(&reference.syntax().text_trimmed_range().start())
     }
 
     /// Returns if the node is exported or is a reference to a binding

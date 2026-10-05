@@ -1,0 +1,48 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: formatting/component-ignore-whitespace.svelte
+---
+
+# Input
+
+```svelte
+<p><ExternalLink href="https://www.buymeacoffee.com">buy</ExternalLink>!</p>
+
+<p><ExternalLink href="https://www.buymeacoffee.com">buy me a</ExternalLink>!</p>
+
+<p><ExternalLink href="https://www.buymeacoffee.com">buy me a coffee</ExternalLink>!</p>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -7,5 +7,6 @@
+ <p>
+     <ExternalLink href="https://www.buymeacoffee.com">
+         buy me a coffee
+-    </ExternalLink>!
++    </ExternalLink>
++    !
+ </p>
+```
+
+# Output
+
+```svelte
+<p><ExternalLink href="https://www.buymeacoffee.com">buy</ExternalLink>!</p>
+
+<p>
+    <ExternalLink href="https://www.buymeacoffee.com">buy me a</ExternalLink>!
+</p>
+
+<p>
+    <ExternalLink href="https://www.buymeacoffee.com">
+        buy me a coffee
+    </ExternalLink>
+    !
+</p>
+```

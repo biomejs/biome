@@ -1,3 +1,4 @@
+use biome_js_syntax::numbers::canonicalize_js_bigint_literal;
 use biome_rowan::Text;
 
 use crate::{
@@ -167,9 +168,10 @@ impl ConditionalType {
                 None
             }
             TypeData::Literal(literal) => Some(match literal.as_ref() {
-                Literal::BigInt(text) => match text.text() {
-                    "0n" | "-0n" => Self::FalsyButNotNullish,
-                    _ => Self::Truthy,
+                Literal::BigInt(text) => match canonicalize_js_bigint_literal(text.text()) {
+                    Some(text) if text == "0n" => Self::FalsyButNotNullish,
+                    Some(_) => Self::Truthy,
+                    None => Self::Anything,
                 },
                 Literal::Boolean(boolean) => match boolean.as_bool() {
                     true => Self::Truthy,

@@ -1,0 +1,184 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { computed } from "@vue/reactivity";
+import { createApp } from '@vue/runtime-dom';
+import * as Vue from "@vue/runtime-core";
+import Vue from "@vue/shared";
+import "@vue/runtime-dom";
+import { computed, unknown } from "@vue/reactivity";
+export { computed as renamed } from "@vue/reactivity";
+export * from "@vue/shared";
+
+```
+
+# Diagnostics
+```
+invalid.js:2:26 lint/nursery/useVueBaseImport  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't import the internal Vue package '@vue/reactivity'.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ import { computed } from "@vue/reactivity";
+      │                          ^^^^^^^^^^^^^^^^^
+    3 │ import { createApp } from '@vue/runtime-dom';
+    4 │ import * as Vue from "@vue/runtime-core";
+  
+  i The public 'vue' entry point re-exports Vue's supported runtime APIs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Import 'vue' instead.
+  
+    2 │ import·{·computed·}·from·"@vue/reactivity";
+      │                           -   -----------  
+
+```
+
+```
+invalid.js:3:27 lint/nursery/useVueBaseImport  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't import the internal Vue package '@vue/runtime-dom'.
+  
+    1 │ /* should generate diagnostics */
+    2 │ import { computed } from "@vue/reactivity";
+  > 3 │ import { createApp } from '@vue/runtime-dom';
+      │                           ^^^^^^^^^^^^^^^^^^
+    4 │ import * as Vue from "@vue/runtime-core";
+    5 │ import Vue from "@vue/shared";
+  
+  i The public 'vue' entry point re-exports Vue's supported runtime APIs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Import 'vue' instead.
+  
+    3 │ import·{·createApp·}·from·'@vue/runtime-dom';
+      │                            -   ------------  
+
+```
+
+```
+invalid.js:4:22 lint/nursery/useVueBaseImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't import the internal Vue package '@vue/runtime-core'.
+  
+    2 │ import { computed } from "@vue/reactivity";
+    3 │ import { createApp } from '@vue/runtime-dom';
+  > 4 │ import * as Vue from "@vue/runtime-core";
+      │                      ^^^^^^^^^^^^^^^^^^^
+    5 │ import Vue from "@vue/shared";
+    6 │ import "@vue/runtime-dom";
+  
+  i The public 'vue' entry point re-exports Vue's supported runtime APIs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:17 lint/nursery/useVueBaseImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't import the internal Vue package '@vue/shared'.
+  
+    3 │ import { createApp } from '@vue/runtime-dom';
+    4 │ import * as Vue from "@vue/runtime-core";
+  > 5 │ import Vue from "@vue/shared";
+      │                 ^^^^^^^^^^^^^
+    6 │ import "@vue/runtime-dom";
+    7 │ import { computed, unknown } from "@vue/reactivity";
+  
+  i The public 'vue' entry point re-exports Vue's supported runtime APIs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:8 lint/nursery/useVueBaseImport  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't import the internal Vue package '@vue/runtime-dom'.
+  
+    4 │ import * as Vue from "@vue/runtime-core";
+    5 │ import Vue from "@vue/shared";
+  > 6 │ import "@vue/runtime-dom";
+      │        ^^^^^^^^^^^^^^^^^^
+    7 │ import { computed, unknown } from "@vue/reactivity";
+    8 │ export { computed as renamed } from "@vue/reactivity";
+  
+  i The public 'vue' entry point re-exports Vue's supported runtime APIs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Import 'vue' instead.
+  
+    6 │ import·"@vue/runtime-dom";
+      │         -   ------------  
+
+```
+
+```
+invalid.js:7:35 lint/nursery/useVueBaseImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't import the internal Vue package '@vue/reactivity'.
+  
+    5 │ import Vue from "@vue/shared";
+    6 │ import "@vue/runtime-dom";
+  > 7 │ import { computed, unknown } from "@vue/reactivity";
+      │                                   ^^^^^^^^^^^^^^^^^
+    8 │ export { computed as renamed } from "@vue/reactivity";
+    9 │ export * from "@vue/shared";
+  
+  i The public 'vue' entry point re-exports Vue's supported runtime APIs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:37 lint/nursery/useVueBaseImport  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't import the internal Vue package '@vue/reactivity'.
+  
+     6 │ import "@vue/runtime-dom";
+     7 │ import { computed, unknown } from "@vue/reactivity";
+   > 8 │ export { computed as renamed } from "@vue/reactivity";
+       │                                     ^^^^^^^^^^^^^^^^^
+     9 │ export * from "@vue/shared";
+    10 │ 
+  
+  i The public 'vue' entry point re-exports Vue's supported runtime APIs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Import 'vue' instead.
+  
+    8 │ export·{·computed·as·renamed·}·from·"@vue/reactivity";
+      │                                      -   -----------  
+
+```
+
+```
+invalid.js:9:15 lint/nursery/useVueBaseImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Don't import the internal Vue package '@vue/shared'.
+  
+     7 │ import { computed, unknown } from "@vue/reactivity";
+     8 │ export { computed as renamed } from "@vue/reactivity";
+   > 9 │ export * from "@vue/shared";
+       │               ^^^^^^^^^^^^^
+    10 │ 
+  
+  i The public 'vue' entry point re-exports Vue's supported runtime APIs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

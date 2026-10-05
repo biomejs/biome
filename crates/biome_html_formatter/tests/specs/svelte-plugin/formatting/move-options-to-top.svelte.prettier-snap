@@ -1,0 +1,9 @@
+<svelte:options immutable={true} />
+
+<script></script>
+
+<p>hi</p>
+
+<p>some stuff</p>
+
+<style></style>

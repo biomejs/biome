@@ -1,5 +1,5 @@
 ---
-source: crates/biome_module_graph/tests/spec_tests_v2.rs
+source: crates/biome_module_graph/tests/spec_tests.rs
 expression: content
 ---
 
@@ -21,30 +21,32 @@ export function readPromiseObject(
 Binding readPromiseObject "readPromiseObject" => sync Function "readPromiseObject" {
   accepts: {
     params: [
-      required value: instanceof class {
-        extends: none
-        implements: []
-        type_args: []
+      required value: instanceof Promise<string>
+      & Object {
+        prototype: No prototype
+        members: ["value": number]
       }
     ]
     type_args: []
   }
-  returns: instanceof class {
-    extends: none
-    implements: []
-    type_args: []
+  returns: instanceof Promise<string>
+  & Object {
+    prototype: No prototype
+    members: ["value": number]
   }
 }
 
-Binding value "value" => instanceof class {
-  extends: none
-  implements: []
-  type_args: []
-}
+Binding value "value" =>
+  instanceof Promise<string>
+  & Object {
+    prototype: No prototype
+    members: ["value": number]
+  }
 
-Expression "value" => instanceof class {
-  extends: none
-  implements: []
-  type_args: []
-}
+Expression "value" =>
+  instanceof Promise<string>
+  & Object {
+    prototype: No prototype
+    members: ["value": number]
+  }
 ```

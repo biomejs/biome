@@ -4,7 +4,7 @@ use biome_diagnostics::{Diagnostic, Location, Severity};
 use biome_js_factory::make;
 use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
-    AnyJsIdentifierUsage, JsIdentifierAssignment, JsIdentifierBinding, JsLanguage,
+    AnyJsIdentifierReference, JsIdentifierAssignment, JsIdentifierBinding, JsLanguage,
     JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, T, TextRange, TsIdentifierBinding,
     binding_ext::AnyJsIdentifierBinding,
 };
@@ -253,10 +253,11 @@ impl RenameSymbolExtensions for BatchMutation<JsLanguage> {
             }
 
             let reference_syntax = reference.syntax();
-            let Some(id_usage) = AnyJsIdentifierUsage::cast_ref(&reference_syntax) else {
+            let Some(identifier_reference) = AnyJsIdentifierReference::cast_ref(&reference_syntax)
+            else {
                 continue;
             };
-            let Ok(prev_ref_token) = id_usage.value_token() else {
+            let Ok(prev_ref_token) = identifier_reference.value_token() else {
                 continue;
             };
 

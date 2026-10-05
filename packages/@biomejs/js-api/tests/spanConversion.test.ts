@@ -31,7 +31,7 @@ describe("spanInBytesToSpanInCodeUnits", () => {
 		);
 		expect(diagnostic).toBeDefined();
 
-		const [startBytes, endBytes] = diagnostic!.location.span;
+		const [startBytes, endBytes] = diagnostic.location.span;
 
 		// Using byte offsets directly would give wrong result
 		const incorrectSlice = content.slice(startBytes, endBytes);
@@ -39,7 +39,7 @@ describe("spanInBytesToSpanInCodeUnits", () => {
 
 		// Using the conversion function gives correct result
 		const [startCodeUnits, endCodeUnits] = spanInBytesToSpanInCodeUnits(
-			diagnostic!.location.span,
+			diagnostic.location.span,
 			content,
 		);
 		const correctSlice = content.slice(startCodeUnits, endCodeUnits);
@@ -58,7 +58,7 @@ describe("spanInBytesToSpanInCodeUnits", () => {
 		expect(diagnostic).toBeDefined();
 
 		const [startCodeUnits, endCodeUnits] = spanInBytesToSpanInCodeUnits(
-			diagnostic!.location.span,
+			diagnostic?.location.span,
 			content,
 		);
 		const slice = content.slice(startCodeUnits, endCodeUnits);
@@ -78,7 +78,7 @@ describe("spanInBytesToSpanInCodeUnits", () => {
 		expect(diagnostic).toBeDefined();
 
 		const [startCodeUnits, endCodeUnits] = spanInBytesToSpanInCodeUnits(
-			diagnostic!.location.span,
+			diagnostic?.location.span,
 			content,
 		);
 		const slice = content.slice(startCodeUnits, endCodeUnits);
@@ -98,7 +98,7 @@ describe("spanInBytesToSpanInCodeUnits", () => {
 		expect(diagnostic).toBeDefined();
 
 		const [startCodeUnits, endCodeUnits] = spanInBytesToSpanInCodeUnits(
-			diagnostic!.location.span,
+			diagnostic?.location.span,
 			content,
 		);
 		const slice = content.slice(startCodeUnits, endCodeUnits);

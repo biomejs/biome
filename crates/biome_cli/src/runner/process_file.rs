@@ -3,22 +3,32 @@ use crate::cli_options::CliOptions;
 use crate::runner::crawler::CrawlerContext;
 use crate::runner::diagnostics::{ResultExt, ResultIoExt, UnhandledDiagnostic};
 use crate::runner::execution::Execution;
-use biome_console::Console;
-use biome_diagnostics::{DiagnosticExt, DiagnosticTags, Error, Severity, category};
+use biome_console::{Console, ConsoleExt};
+use biome_diagnostics::{
+    DiagnosticExt, DiagnosticTags, Error, PrintDiagnostic, Severity, category,
+};
 use biome_fs::{BiomePath, File, OpenOptions};
 use biome_languages::DocumentFileSource;
 use biome_service::diagnostics::FileTooLarge;
 use biome_service::projects::ProjectKey;
+use biome_service::workspace::FileGuard;
 use biome_service::workspace::{
-    FeaturesSupported, FileExistsParams, FileFeaturesResult, SupportKind, SupportsFeatureParams,
+    FeaturesSupported, FileContent, FileExistsParams, FileFeaturesResult, OpenFileParams,
+    SupportKind, SupportsFeatureParams,
 };
-use biome_service::workspace::{FileContent, FileGuard, OpenFileParams};
 use biome_service::{Workspace, WorkspaceError};
+
+#[derive(Debug)]
+pub(crate) struct ChangedFile {
+    pub(crate) path: BiomePath,
+    pub(crate) content: String,
+    pub(crate) version: i32,
+}
 
 #[derive(Debug)]
 pub(crate) enum FileStatus {
     /// File changed and it was a success
-    Changed,
+    Changed(ChangedFile),
     /// File unchanged, and it was a success
     Unchanged,
     /// While handling the file, something happened
@@ -29,12 +39,6 @@ pub(crate) enum FileStatus {
     Ignored,
     /// Files that belong to other tools and shouldn't be touched
     Protected(String),
-}
-
-impl FileStatus {
-    pub const fn is_changed(&self) -> bool {
-        matches!(self, Self::Changed)
-    }
 }
 
 #[derive(Debug)]
@@ -68,24 +72,12 @@ pub(crate) enum Message {
         /// Total number of infos returned by the workspace.
         infos: usize,
     },
-    // DiagnosticsWithActions {
-    //     file_path: String,
-    //     content: String,
-    //     diagnostics_with_actions: Vec<(Diagnostic, Vec<CodeAction>)>,
-    //     skipped_diagnostics: u32,
-    // },
     Diff {
         file_name: String,
         old: String,
         new: String,
         diff_kind: DiffKind,
     },
-}
-
-impl Message {
-    pub(crate) const fn is_failure(&self) -> bool {
-        matches!(self, Self::Failure)
-    }
 }
 
 #[derive(Debug)]
@@ -123,6 +115,27 @@ pub(crate) struct ProcessStdinFilePayload<'a> {
     pub(crate) cli_options: &'a CliOptions,
     pub(crate) execution: &'a dyn Execution,
     pub(crate) skip_ignore_check: bool,
+}
+
+pub(crate) fn print_stdin_diagnostics(
+    console: &mut dyn Console,
+    cli_options: &CliOptions,
+    biome_path: &BiomePath,
+    source: &str,
+    diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
+) {
+    for diagnostic in diagnostics {
+        let diagnostic = Error::from(diagnostic)
+            .with_file_path(biome_path.to_string())
+            .with_file_source_code(source);
+        if diagnostic.tags().is_verbose() {
+            if cli_options.verbose {
+                console.error(biome_console::markup! {{PrintDiagnostic::verbose(&diagnostic)}});
+            }
+        } else {
+            console.error(biome_console::markup! {{PrintDiagnostic::simple(&diagnostic)}});
+        }
+    }
 }
 
 pub(crate) trait ProcessFile: Send + Sync + std::panic::RefUnwindSafe {
@@ -246,7 +259,7 @@ impl ProcessFile for () {
     }
 }
 
-/// Small wrapper that holds information and operations around the current processed file
+/// Holds the scanned workspace document and the filesystem handle for a processed file.
 pub(crate) struct WorkspaceFile<'ctx, 'app> {
     guard: FileGuard<'app, dyn Workspace + 'ctx>,
     file: Box<dyn File>,
@@ -254,8 +267,7 @@ pub(crate) struct WorkspaceFile<'ctx, 'app> {
 }
 
 impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
-    /// It attempts to read the file from disk, creating a [FileGuard] and
-    /// saving these information internally
+    /// Opens the filesystem file and borrows the document created by the scan.
     pub(crate) fn new<Ctx>(ctx: &'ctx Ctx, path: BiomePath) -> Result<Self, Error>
     where
         Ctx: CrawlerContext,
@@ -274,26 +286,22 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
         })? {
             let guard = FileGuard::borrowed(ctx.workspace(), ctx.project_key(), path.clone())
                 .with_file_path_and_code(path.to_string(), category!("internalError/fs"))?;
-
             Ok(Self { guard, path, file })
         } else {
             let guard = FileGuard::new(ctx.workspace(), ctx.project_key(), path.clone())
                 .with_file_path_and_code(path.to_string(), category!("internalError/fs"))?;
-
             let mut input = String::new();
             file.read_to_string(&mut input)
                 .with_file_path(path.to_string())?;
-
             ctx.workspace().open_file(OpenFileParams {
                 project_key: ctx.project_key(),
                 document_file_source: None,
                 path: path.clone(),
-                content: FileContent::from_client(&input),
+                content: FileContent::from_client(input),
                 persist_node_cache: false,
                 inline_config: None,
                 editor_features: None,
             })?;
-
             Ok(Self { guard, path, file })
         }
     }
@@ -306,38 +314,35 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
         self.guard().get_file_content()
     }
 
-    pub(crate) fn as_extension(&self) -> Option<&str> {
-        self.path.extension()
-    }
-
-    /// It updates the workspace file with `new_content`
-    pub(crate) fn update_file(&mut self, new_content: impl Into<String>) -> Result<(), Error> {
-        let new_content = new_content.into();
-
+    pub(crate) fn write_to_disk(&mut self, content: String) -> Result<ChangedFile, Error> {
         self.file
-            .set_content(new_content.as_bytes())
+            .set_content(content.as_bytes())
             .with_file_path(self.path.to_string())?;
-        self.guard
-            .change_file(self.file.file_version(), new_content)?;
-        Ok(())
+        Ok(ChangedFile {
+            path: self.path.clone(),
+            content,
+            version: self.file.file_version(),
+        })
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{FileStatus, ProcessFile, WorkspaceFile};
+    use super::{ChangedFile, FileStatus, ProcessFile, WorkspaceFile};
     use crate::runner::crawler::CrawlerContext;
     use crate::runner::execution::{AnalyzerSelectors, Execution};
     use crate::runner::process_file::Message;
     use biome_console::MarkupBuf;
     use biome_diagnostics::{Category, Error, Severity, category};
-    use biome_fs::{BiomePath, FileSystem, MemoryFileSystem, PathInterner, TraversalContext};
+    use biome_fs::{
+        BiomePath, FileSystem, FileSystemExt, MemoryFileSystem, PathInterner, TraversalContext,
+    };
+    use biome_service::Workspace;
     use biome_service::projects::ProjectKey;
     use biome_service::workspace::{
         FeatureName, FeaturesBuilder, FeaturesSupported, FileContent, GetFileContentParams,
         OpenFileParams, OpenProjectParams, OpenProjectResult, SupportKind, server,
     };
-    use biome_service::{Workspace, WorkspaceError};
     use camino::Utf8PathBuf;
     use papaya::{HashMap, HashSet, HashSetRef, LocalGuard};
     use std::hash::RandomState;
@@ -402,7 +407,7 @@ mod tests {
     }
 
     impl CrawlerContext for TestContext<'_> {
-        fn increment_changed(&self, _path: &BiomePath) {}
+        fn increment_changed(&self, _path: &BiomePath, _changed_file: ChangedFile) {}
 
         fn increment_unchanged(&self) {}
 
@@ -510,7 +515,7 @@ mod tests {
     }
 
     #[test]
-    fn workspace_file_opens_updates_and_closes_new_document() {
+    fn workspace_file_writes_without_updating_document() {
         const SOURCE: &str = "const value = 1;";
         const UPDATED: &str = "const value = 2;";
 
@@ -529,7 +534,7 @@ mod tests {
 
         let (interner, _path_receiver) = PathInterner::new();
         let ctx = TestContext {
-            fs,
+            fs: fs.clone(),
             workspace: workspace.as_ref(),
             project_key,
             execution: TestExecution { write: true },
@@ -538,26 +543,34 @@ mod tests {
             file_features: HashMap::default(),
         };
 
-        {
-            let mut workspace_file = WorkspaceFile::new(&ctx, path.clone()).unwrap();
-            assert_eq!(workspace_file.input().unwrap(), SOURCE);
+        workspace
+            .open_file(OpenFileParams {
+                project_key,
+                path: path.clone(),
+                content: FileContent::from_client(SOURCE),
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            })
+            .unwrap();
 
-            workspace_file.update_file(UPDATED).unwrap();
-            let content = workspace
-                .get_file_content(GetFileContentParams {
-                    project_key,
-                    path: path.clone(),
-                })
-                .unwrap();
+        let mut workspace_file = WorkspaceFile::new(&ctx, path.clone()).unwrap();
+        assert_eq!(workspace_file.input().unwrap(), SOURCE);
 
-            assert_eq!(content, UPDATED);
-        }
+        let changed = workspace_file.write_to_disk(UPDATED.into()).unwrap();
+        assert_eq!(changed.path, path);
+        assert_eq!(changed.content.as_str(), UPDATED);
+        assert_eq!(changed.version, 1);
+        assert_eq!(workspace_file.input().unwrap(), SOURCE);
+        drop(workspace_file);
 
-        let error = workspace
-            .get_file_content(GetFileContentParams { project_key, path })
-            .expect_err("new document should be closed on drop");
-
-        assert!(matches!(error, WorkspaceError::NotFound(_)));
+        let mut disk_content = String::new();
+        fs.open(&file_path)
+            .unwrap()
+            .read_to_string(&mut disk_content)
+            .unwrap();
+        assert_eq!(disk_content, UPDATED);
     }
 
     #[test]

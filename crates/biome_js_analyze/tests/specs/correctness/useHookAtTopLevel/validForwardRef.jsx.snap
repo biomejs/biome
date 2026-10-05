@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validForwardRef.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+
+function ForwardRefComponent(props, ref) {
+    const inputRef = useRef(null);
+    useEffect(() => {
+        ref.current = inputRef.current;
+    }, [ref]);
+
+    return <input ref={inputRef} {...props} />;
+}
+
+forwardRef(ForwardRefComponent);
+
+function ForwardedInput(props, forwardedRef) {
+    useImperativeHandle(forwardedRef, () => ({
+        focus() {},
+    }));
+
+    return <input {...props} />;
+}
+
+forwardRef(ForwardedInput);
+
+```

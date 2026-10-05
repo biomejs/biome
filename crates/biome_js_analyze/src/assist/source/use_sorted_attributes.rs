@@ -2,8 +2,8 @@ use std::{borrow::Cow, cmp::Ordering, iter::zip};
 
 use biome_analyze::shared::sort_attributes::{AttributeGroup, SortableAttribute};
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, context::RuleContext,
-    declare_source_rule,
+    Ast, FixKind, Rule, RuleAction, RuleDiagnostic, RuleSource, RuleSuppressions,
+    context::RuleContext, declare_source_rule,
 };
 use biome_console::markup;
 use biome_deserialize::TextRange;
@@ -18,16 +18,14 @@ use biome_rule_options::use_sorted_attributes::{SortOrder, UseSortedAttributesOp
 use crate::JsRuleAction;
 
 declare_source_rule! {
-    /// Enforce attribute sorting in JSX elements.
+    /// Sort JSX attributes by name.
     ///
-    /// This rule checks if the JSX props are sorted in a consistent way.
-    /// Props are sorted alphabetically using a [natural sort order](https://en.wikipedia.org/wiki/Natural_sort_order).
-    /// This rule will not consider spread props as sortable.
-    /// Instead, whenever it encounters a spread prop, it will sort all the
-    /// previous non spread props up until the nearest spread prop, if one
-    /// exist.
-    /// This prevents breaking the override of certain props using spread
-    /// props.
+    /// By default, the action uses [natural order](https://en.wikipedia.org/wiki/Natural_sort_order),
+    /// which compares numbers by value so that `prop9` comes before `prop10`.
+    ///
+    /// A spread attribute such as `{...properties}` can provide or replace any attribute. The
+    /// action therefore treats each spread as a boundary and sorts only the named attributes on
+    /// each side. It never moves an attribute across a spread.
     ///
     /// ## Examples
     ///
@@ -36,16 +34,17 @@ declare_source_rule! {
     /// ```
     ///
     /// ```jsx,expect_diff
-    /// <Hello lastName="Smith" firstName="John" {...this.props} tel="0000" address="111 Main Street"  {...another.props} lastName="Smith" />;
+    /// <Hello lastName="Smith" firstName="John" {...this.props} tel="0000" address="111 Main Street" {...another.props} />;
     /// ```
     ///
     /// ## Options
-    /// This actions accepts following options
     ///
     /// ### `sortOrder`
-    /// This options supports `natural` and `lexicographic` values. Where as `natural` is the default.
     ///
-    /// Following will apply the natural sort order.
+    /// Selects `natural` or `lexicographic` ordering. Natural ordering compares numbers by value
+    /// and is the default. Lexicographic ordering compares names character by character.
+    ///
+    /// The following configuration uses natural order:
     ///
     /// ```json,options
     /// {
@@ -54,11 +53,12 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
-    /// ```jsx,use_options,expect_diagnostic
-    /// <Hello tel={5555555} {...this.props} opt1="John" opt2="" opt12="" opt11="" />;
+    ///
+    /// ```jsx,use_options,expect_diff
+    /// <Hello {...this.props} opt1="" opt2="" opt12="" opt11="" />;
     /// ```
     ///
-    /// Following will apply the lexicographic sort order.
+    /// The following configuration uses lexicographic order:
     ///
     /// ```json,options
     /// {
@@ -67,8 +67,9 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
-    /// ```jsx,use_options,expect_diagnostic
-    /// <Hello tel={5555555} {...this.props} opt1="John" opt2="" opt12="" opt11="" />;
+    ///
+    /// ```jsx,use_options,expect_diff
+    /// <Hello {...this.props} opt1="" opt2="" opt12="" opt11="" />;
     /// ```
     ///
     pub UseSortedAttributes {
@@ -150,6 +151,22 @@ impl Rule for UseSortedAttributes {
                 .map(|element| element.range())
                 .or_else(|| JsxSelfClosingElement::cast_ref(&node).map(|element| element.range()))
         })
+    }
+
+    fn suppressed_nodes(
+        ctx: &RuleContext<Self>,
+        _state: &Self::State,
+        suppressions: &mut RuleSuppressions<JsLanguage>,
+    ) {
+        for list in ctx
+            .query()
+            .syntax()
+            .descendants()
+            .skip(1)
+            .filter_map(JsxAttributeList::cast)
+        {
+            suppressions.suppress_node(list.syntax().clone());
+        }
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {

@@ -79,7 +79,7 @@ impl AnyExpressionWithBitwise {
     fn exist_bitwise_op(&self) -> bool {
         match self {
             Self::JsBinaryExpression(binary_expr) => {
-                binary_expr.operator().ok().is_some_and(|op| {
+                binary_expr.operator().is_ok_and(|op| {
                     matches!(
                         op,
                         JsBinaryOperator::BitwiseAnd
@@ -92,11 +92,9 @@ impl AnyExpressionWithBitwise {
                 })
             }
             Self::JsUnaryExpression(unary_expr) => unary_expr
-                .operator()
-                .ok()
-                .is_some_and(|op| op == JsUnaryOperator::BitwiseNot),
+                .operator().is_ok_and(|op| op == JsUnaryOperator::BitwiseNot),
             Self::JsAssignmentExpression(assign_expr) => {
-                assign_expr.operator().ok().is_some_and(|op| {
+                assign_expr.operator().is_ok_and(|op| {
                     matches!(
                         op,
                         JsAssignmentOperator::BitwiseAndAssign

@@ -4,10 +4,10 @@ expression: valid-astro-template-usage.astro
 ---
 # Input
 ```astro
-<!-- should not generate diagnostics -->
 ---
 import Component from "./Component.vue"
 ---
+<!-- should not generate diagnostics -->
 
 <Component />
 

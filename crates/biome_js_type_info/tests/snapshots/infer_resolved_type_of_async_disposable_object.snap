@@ -18,7 +18,7 @@ const a = {
 ```
 a => Object {
   prototype: No prototype
-  members: [[Global TypeId(0)]: Disposable[Symbol.dispose]]
+  members: [computed [Symbol.asyncDispose]: Disposable[Symbol.dispose]]
 }
 
 ```
@@ -26,10 +26,8 @@ a => Object {
 ## Registered types
 
 ```
-Global TypeId(0) => Symbol.asyncDispose
-
-Global TypeId(1) => Object {
+Global TypeId(0) => Object {
   prototype: No prototype
-  members: [[Global TypeId(0)]: Disposable[Symbol.dispose]]
+  members: [computed [Symbol.asyncDispose]: Disposable[Symbol.dispose]]
 }
 ```

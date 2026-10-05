@@ -4,10 +4,10 @@ expression: invalid.astro
 ---
 # Input
 ```astro
-<!-- should generate diagnostics -->
 ---
 // Astro frontmatter
 ---
+<!-- should generate diagnostics -->
 <article role="article"></article>
 <button role="button"></button>
 <h1 role="heading" aria-level="1">title</h1>
@@ -21,8 +21,8 @@ invalid.astro:5:10 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━
 
   × Using the role attribute 'article' on the 'article' element is redundant, because it is implied by its semantics.
   
-    3 │ // Astro frontmatter
-    4 │ ---
+    3 │ ---
+    4 │ <!-- should generate diagnostics -->
   > 5 │ <article role="article"></article>
       │          ^^^^^^^^^^^^^^
     6 │ <button role="button"></button>
@@ -40,7 +40,7 @@ invalid.astro:6:9 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━�
 
   × Using the role attribute 'button' on the 'button' element is redundant, because it is implied by its semantics.
   
-    4 │ ---
+    4 │ <!-- should generate diagnostics -->
     5 │ <article role="article"></article>
   > 6 │ <button role="button"></button>
       │         ^^^^^^^^^^^^^

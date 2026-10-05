@@ -1,0 +1,32 @@
+.mismatched-paren {
+  --value: (foo];
+  color: red;
+}
+
+.mismatched-bracket {
+  --value: [foo);
+  color: red;
+}
+
+.mismatched-brace {
+  --value: {foo];
+  color: red;
+}
+
+.mismatched-before-raw-delimiter {
+  --value: (foo] `bar`;
+  color: red;
+}
+
+.unclosed-paren {
+  --value: (foo
+}
+
+.unclosed-interpolation {
+  --value: #{$gap;
+  color: red;
+}
+
+.after-recovery {
+  color: green;
+}

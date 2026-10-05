@@ -1,0 +1,15 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: library.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+
+export interface Schema<T> {
+	safeParse(input: unknown): { data?: T; success: boolean };
+}
+
+export declare const schema: Schema<string>;
+
+```

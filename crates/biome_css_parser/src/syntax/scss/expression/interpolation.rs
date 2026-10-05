@@ -15,12 +15,24 @@ const SCSS_INTERPOLATION_END_TOKEN_SET: TokenSet<CssSyntaxKind> = token_set![T![
 /// Parses one standalone SCSS interpolation value such as `#{$value}`.
 #[inline]
 pub(crate) fn parse_scss_regular_interpolation(p: &mut CssParser) -> ParsedSyntax {
+    parse_scss_interpolation_with_context(p, CssLexContext::Regular)
+}
+
+/// Parses an SCSS interpolation and resumes lexing in `closing_context` after `}`.
+///
+/// For example, the URL parser uses its URL-value context for `#{$name}` in
+/// `url(images/#{$name}.png)` so `.png` remains URL text.
+#[inline]
+pub(crate) fn parse_scss_interpolation_with_context(
+    p: &mut CssParser,
+    closing_context: CssLexContext,
+) -> ParsedSyntax {
     let Some(m) = parse_scss_interpolation_prefix(p) else {
         return Absent;
     };
 
     parse_scss_interpolation_inner_expression(p);
-    p.expect_with_context(T!['}'], CssLexContext::Regular);
+    p.expect_with_context(T!['}'], closing_context);
 
     Present(m.complete(p, SCSS_INTERPOLATION))
 }
@@ -35,7 +47,12 @@ pub(crate) fn parse_scss_selector_interpolation(p: &mut CssParser) -> ParsedSynt
         return Absent;
     };
 
-    parse_scss_interpolation_inner_expression(p);
+    // A missing interpolation close must leave the style-rule block to its caller.
+    parse_scss_inner_expression_until(
+        p,
+        SCSS_INTERPOLATION_END_TOKEN_SET.union(token_set![T!['{']]),
+    )
+    .or_add_diagnostic(p, expected_scss_expression);
     let closing_context = selector_lex_context(p);
     p.expect_with_context(T!['}'], closing_context);
 
@@ -43,7 +60,7 @@ pub(crate) fn parse_scss_selector_interpolation(p: &mut CssParser) -> ParsedSynt
 }
 
 #[inline]
-pub(crate) fn parse_scss_interpolation_inner_expression(p: &mut CssParser) {
+fn parse_scss_interpolation_inner_expression(p: &mut CssParser) {
     parse_scss_inner_expression_until(p, SCSS_INTERPOLATION_END_TOKEN_SET)
         .or_add_diagnostic(p, expected_scss_expression);
 }
@@ -70,5 +87,5 @@ pub(crate) fn is_at_scss_interpolation(p: &mut CssParser) -> bool {
 
 #[inline]
 pub(crate) fn is_nth_at_scss_interpolation(p: &mut CssParser, n: usize) -> bool {
-    p.nth_at(n, T![#]) && p.nth_at(n + 1, T!['{']) && !p.has_nth_preceding_whitespace(n + 1)
+    p.nth_at(n, T![#]) && p.nth_at(n + 1, T!['{']) && p.source_mut().is_nth_source_tight(n + 1)
 }

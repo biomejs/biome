@@ -33,6 +33,28 @@ function Foo() {
 	return createElement("div", { id: "foo" });
 }
 
+function HtmlInsideForeignObject() {
+	return (
+		<svg>
+			<foreignObject>
+				<div id="foo"></div>
+			</foreignObject>
+		</svg>
+	);
+}
+
+function CreateElementInsideSvgCallback() {
+	return (
+		<svg
+			onClick={() => React.createElement("div", { id: "foo" })}
+		></svg>
+	);
+}
+
+function JsxElementInsideSvgCallback() {
+	return <svg onClick={() => <div id="foo"></div>}></svg>;
+}
+
 ```
 
 # Diagnostics
@@ -113,6 +135,56 @@ invalid.jsx:27:9 lint/correctness/useUniqueElementIds ━━━━━━━━�
        │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     28 │ }
     29 │ 
+  
+  i In React, if you hardcode IDs and use the component multiple times, it can lead to duplicate IDs in the DOM. Instead, generate unique IDs using useId().
+  
+
+```
+
+```
+invalid.jsx:34:5 lint/correctness/useUniqueElementIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × id attribute should not be a static string literal. Generate unique IDs using useId().
+  
+    32 │ 		<svg>
+    33 │ 			<foreignObject>
+  > 34 │ 				<div id="foo"></div>
+       │ 				^^^^^^^^^^^^^^
+    35 │ 			</foreignObject>
+    36 │ 		</svg>
+  
+  i In React, if you hardcode IDs and use the component multiple times, it can lead to duplicate IDs in the DOM. Instead, generate unique IDs using useId().
+  
+
+```
+
+```
+invalid.jsx:43:19 lint/correctness/useUniqueElementIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × id attribute should not be a static string literal. Generate unique IDs using useId().
+  
+    41 │ 	return (
+    42 │ 		<svg
+  > 43 │ 			onClick={() => React.createElement("div", { id: "foo" })}
+       │ 			               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ 		></svg>
+    45 │ 	);
+  
+  i In React, if you hardcode IDs and use the component multiple times, it can lead to duplicate IDs in the DOM. Instead, generate unique IDs using useId().
+  
+
+```
+
+```
+invalid.jsx:49:29 lint/correctness/useUniqueElementIds ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × id attribute should not be a static string literal. Generate unique IDs using useId().
+  
+    48 │ function JsxElementInsideSvgCallback() {
+  > 49 │ 	return <svg onClick={() => <div id="foo"></div>}></svg>;
+       │ 	                           ^^^^^^^^^^^^^^
+    50 │ }
+    51 │ 
   
   i In React, if you hardcode IDs and use the component multiple times, it can lead to duplicate IDs in the DOM. Instead, generate unique IDs using useId().
   

@@ -16,6 +16,10 @@ macro_rules! map_syntax_node {
     ($ node : expr , $ pattern : pat => $ body : expr) => {
         match $node {
             node => match $crate::JsSyntaxNode::kind(&node) {
+                $crate::JsSyntaxKind::ASTRO_IMPLICIT_FRAGMENT => {
+                    let $pattern = unsafe { $crate::AstroImplicitFragment::new_unchecked(node) };
+                    $body
+                }
                 $crate::JsSyntaxKind::JS_ACCESSOR_MODIFIER => {
                     let $pattern = unsafe { $crate::JsAccessorModifier::new_unchecked(node) };
                     $body
@@ -597,6 +601,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::JsSuperExpression::new_unchecked(node) };
                     $body
                 }
+                $crate::JsSyntaxKind::JS_SVELTE_DECLARATION_ROOT => {
+                    let $pattern = unsafe { $crate::JsSvelteDeclarationRoot::new_unchecked(node) };
+                    $body
+                }
                 $crate::JsSyntaxKind::JS_SVELTE_SNIPPET_ROOT => {
                     let $pattern = unsafe { $crate::JsSvelteSnippetRoot::new_unchecked(node) };
                     $body
@@ -652,6 +660,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::JsSyntaxKind::JS_VARIABLE_STATEMENT => {
                     let $pattern = unsafe { $crate::JsVariableStatement::new_unchecked(node) };
+                    $body
+                }
+                $crate::JsSyntaxKind::JS_VUE_SLOT_PROPS_ROOT => {
+                    let $pattern = unsafe { $crate::JsVueSlotPropsRoot::new_unchecked(node) };
                     $body
                 }
                 $crate::JsSyntaxKind::JS_WHILE_STATEMENT => {
@@ -1301,6 +1313,11 @@ macro_rules! map_syntax_node {
                 }
                 $crate::JsSyntaxKind::JS_BOGUS_STATEMENT => {
                     let $pattern = unsafe { $crate::JsBogusStatement::new_unchecked(node) };
+                    $body
+                }
+                $crate::JsSyntaxKind::JS_BOGUS_VARIABLE_DECLARATION => {
+                    let $pattern =
+                        unsafe { $crate::JsBogusVariableDeclaration::new_unchecked(node) };
                     $body
                 }
                 $crate::JsSyntaxKind::TS_BOGUS_TYPE => {

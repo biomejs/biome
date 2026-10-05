@@ -1,6 +1,6 @@
-use crate::logging::LogOptions;
+use crate::logging::{LogOptions, LoggingFilter};
 use crate::{
-    CliDiagnostic, CliSession, open_transport,
+    CliDiagnostic, CliSession, LoggingLevel, open_transport,
     service::{self, ensure_daemon, open_socket, run_daemon},
 };
 use biome_console::{ConsoleExt, markup};
@@ -13,15 +13,9 @@ use camino::Utf8PathBuf;
 use std::{env, fs, process};
 use tokio::io;
 use tokio::runtime::Runtime;
-use tracing::subscriber::Interest;
-use tracing::{Instrument, Metadata, debug_span, metadata::LevelFilter};
+use tracing::{Instrument, debug_span};
 use tracing_appender::rolling::Rotation;
-use tracing_subscriber::{
-    Layer,
-    layer::{Context, Filter},
-    prelude::*,
-    registry,
-};
+use tracing_subscriber::{Layer, prelude::*, registry};
 use tracing_tree::HierarchicalLayer;
 
 pub(crate) fn start(
@@ -74,9 +68,10 @@ pub(crate) fn run_server(
     watcher_options: WatcherOptions,
     log_options: LogOptions,
 ) -> Result<(), CliDiagnostic> {
-    setup_tracing_subscriber(
+    setup_daemon_subscriber(
         log_options.log_path.clone(),
         log_options.log_prefix_name.clone(),
+        log_options.log_level,
     );
 
     let span = debug_span!(
@@ -127,56 +122,52 @@ pub(crate) fn lsp_proxy(
     log_options: LogOptions,
 ) -> Result<(), CliDiagnostic> {
     let rt = Runtime::new()?;
-    rt.block_on(start_lsp_proxy(&rt, watcher_options, log_options))?;
+    rt.block_on(start_lsp_proxy(watcher_options, log_options))?;
 
     Ok(())
+}
+
+async fn forward_lsp<I, O, R, W>(
+    mut input: I,
+    mut output: O,
+    mut socket_read: R,
+    mut socket_write: W,
+) where
+    I: io::AsyncRead + Unpin,
+    O: io::AsyncWrite + Unpin,
+    R: io::AsyncRead + Unpin,
+    W: io::AsyncWrite + Unpin,
+{
+    tokio::select! {
+        result = io::copy(&mut input, &mut socket_write) => {
+            if result.is_ok() {
+                let _ = io::AsyncWriteExt::flush(&mut socket_write).await;
+            }
+        }
+        result = io::copy(&mut socket_read, &mut output) => {
+            if result.is_ok() {
+                let _ = io::AsyncWriteExt::flush(&mut output).await;
+            }
+        }
+    }
 }
 
 /// Start a proxy process.
 /// Receives a process via `stdin` and then copy the content to the LSP socket.
 /// Copy to the process on `stdout` when the LSP responds to a message
 async fn start_lsp_proxy(
-    rt: &Runtime,
     watcher_options: WatcherOptions,
     log_options: LogOptions,
 ) -> Result<(), CliDiagnostic> {
     ensure_daemon(true, watcher_options, log_options).await?;
 
     match open_socket().await? {
-        Some((mut owned_read_half, mut owned_write_half)) => {
-            // forward stdin to socket
-            let mut stdin = io::stdin();
-            let input_handle = rt.spawn(async move {
-                loop {
-                    match io::copy(&mut stdin, &mut owned_write_half).await {
-                        Ok(b) => {
-                            if b == 0 {
-                                return Ok(());
-                            }
-                        }
-                        Err(err) => return Err(err),
-                    };
-                }
-            });
+        Some((owned_read_half, owned_write_half)) => {
+            forward_lsp(io::stdin(), io::stdout(), owned_read_half, owned_write_half).await;
 
-            // receive socket response to stdout
-            let mut stdout = io::stdout();
-            let out_put_handle = rt.spawn(async move {
-                loop {
-                    match io::copy(&mut owned_read_half, &mut stdout).await {
-                        Ok(b) => {
-                            if b == 0 {
-                                return Ok(());
-                            }
-                        }
-                        Err(err) => return Err(err),
-                    };
-                }
-            });
-
-            let _ = input_handle.await;
-            let _ = out_put_handle.await;
-            Ok(())
+            // Tokio standard I/O uses blocking reads that cannot be cancelled.
+            // Exit so a pending read cannot keep a disconnected proxy alive.
+            process::exit(0);
         }
         None => Ok(()),
     }
@@ -215,7 +206,11 @@ pub(crate) fn read_most_recent_log_file(
 /// is written to log files rotated on a hourly basis (in
 /// `biome-logs/server.log.yyyy-MM-dd-HH` files inside the system temporary
 /// directory)
-fn setup_tracing_subscriber(log_path: Utf8PathBuf, log_file_name_prefix: String) {
+fn setup_daemon_subscriber(
+    log_path: Utf8PathBuf,
+    log_file_name_prefix: String,
+    level: LoggingLevel,
+) {
     let appender_builder = tracing_appender::rolling::RollingFileAppender::builder();
     let file_appender = appender_builder
         .filename_prefix(log_file_name_prefix)
@@ -233,7 +228,7 @@ fn setup_tracing_subscriber(log_path: Utf8PathBuf, log_file_name_prefix: String)
                 .with_targets(true)
                 .with_ansi(false)
                 .with_writer(file_appender)
-                .with_filter(LoggingFilter),
+                .with_filter(LoggingFilter { level }),
         )
         .init();
 }
@@ -245,44 +240,38 @@ pub fn default_biome_log_path() -> Utf8PathBuf {
     }
 }
 
-/// Tracing filter enabling:
-/// - All spans and events at level info or higher
-/// - All spans and events at level debug in crates whose name starts with `biome`
-struct LoggingFilter;
+#[cfg(test)]
+mod tests {
+    use super::forward_lsp;
+    use std::time::Duration;
+    use tokio::io::{duplex, empty, sink, split};
+    use tokio::time::timeout;
 
-/// Tracing filter used for spans emitted by `biome*` crates
-const SELF_FILTER: LevelFilter = if cfg!(debug_assertions) {
-    LevelFilter::TRACE
-} else {
-    LevelFilter::DEBUG
-};
+    #[tokio::test]
+    async fn forwarding_stops_when_the_daemon_disconnects() {
+        let (input, _input_writer) = duplex(64);
+        let (socket, remote) = duplex(64);
+        let (socket_read, socket_write) = split(socket);
+        drop(remote);
 
-impl LoggingFilter {
-    fn is_enabled(&self, meta: &Metadata<'_>) -> bool {
-        let filter = if meta.target().starts_with("biome") {
-            SELF_FILTER
-        } else {
-            return false;
-        };
-
-        meta.level() <= &filter
-    }
-}
-
-impl<S> Filter<S> for LoggingFilter {
-    fn enabled(&self, meta: &Metadata<'_>, _cx: &Context<'_, S>) -> bool {
-        self.is_enabled(meta)
+        timeout(
+            Duration::from_secs(1),
+            forward_lsp(input, sink(), socket_read, socket_write),
+        )
+        .await
+        .expect("forwarding should stop after the daemon disconnects");
     }
 
-    fn callsite_enabled(&self, meta: &'static Metadata<'static>) -> Interest {
-        if self.is_enabled(meta) {
-            Interest::always()
-        } else {
-            Interest::never()
-        }
-    }
+    #[tokio::test]
+    async fn forwarding_stops_when_the_editor_disconnects() {
+        let (socket, _remote) = duplex(64);
+        let (socket_read, socket_write) = split(socket);
 
-    fn max_level_hint(&self) -> Option<LevelFilter> {
-        Some(SELF_FILTER)
+        timeout(
+            Duration::from_secs(1),
+            forward_lsp(empty(), sink(), socket_read, socket_write),
+        )
+        .await
+        .expect("forwarding should stop after the editor disconnects");
     }
 }

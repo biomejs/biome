@@ -15,5 +15,6 @@ pub use crate::token::number::{NumberFormatOptions, format_trimmed_number};
 
 pub use crate::{
     Buffer as _, BufferExtensions, Format, Format as _, FormatResult, FormatRule,
-    FormatWithRule as _, SimpleFormatContext, best_fitting, dbg_write, format, format_args, write,
+    FormatTextCaseExt as _, FormatWithRule as _, SimpleFormatContext, best_fitting, dbg_write,
+    format, format_args, write,
 };

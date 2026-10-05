@@ -1,0 +1,1 @@
+<input class:active={active} />

@@ -14,6 +14,6 @@ info: directive/uppercase.html
 # Formatted
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 
 ```

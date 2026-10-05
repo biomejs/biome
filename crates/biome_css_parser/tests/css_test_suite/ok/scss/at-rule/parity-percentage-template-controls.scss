@@ -1,0 +1,10 @@
+@mixin frames {
+@if true {0%{opacity:0}} @else {25%{opacity:0.25}}
+@for $i from 1 through 2 {#{$i * 50%} {opacity:$i * 0.5}}
+@each $i in 25,75 {#{$i}% {opacity:0.5}}
+$i: 0; @while $i < 1 {50%{opacity:0.5} $i:$i + 1;}
+0%, 50%, to {opacity:0.5}
+from, 75% {opacity:0.75}
+#{$i}%, 100% {opacity:1}
+}
+.after {color:red}

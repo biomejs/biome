@@ -4,30 +4,34 @@ expression: invalid.vue
 ---
 # Input
 ```vue
-<!-- should generate diagnostics -->
-<label>
-	<span>
-		<CustomInput />
-	</span>
-</label>
+<template>
+	<!-- should generate diagnostics -->
+	<label>
+		<span>
+			<CustomInput />
+		</span>
+	</label>
+</template>
 
 ```
 
 # Diagnostics
 ```
-invalid.vue:2:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:3:2 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × A form label must be associated with an input.
   
-    1 │ <!-- should generate diagnostics -->
-  > 2 │ <label>
-      │ ^^^^^^^
-  > 3 │ 	<span>
-  > 4 │ 		<CustomInput />
-  > 5 │ 	</span>
-  > 6 │ </label>
-      │ ^^^^^^^^
-    7 │ 
+    1 │ <template>
+    2 │ 	<!-- should generate diagnostics -->
+  > 3 │ 	<label>
+      │ 	^^^^^^^
+  > 4 │ 		<span>
+  > 5 │ 			<CustomInput />
+  > 6 │ 		</span>
+  > 7 │ 	</label>
+      │ 	^^^^^^^^
+    8 │ </template>
+    9 │ 
   
   i Consider adding an accessible text content to the label element.
   

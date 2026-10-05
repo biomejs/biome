@@ -8,8 +8,8 @@
 
 mod test_utils;
 
-use biome_markdown_parser::{document_to_html, parse_markdown};
-use biome_markdown_syntax::MdDocument;
+use biome_markdown_parser::{MarkdownParserOptions, document_to_html, parse_markdown};
+use biome_markdown_syntax::MdRoot;
 use biome_rowan::AstNode;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -57,8 +57,8 @@ fn run_corpus(path: &Path) -> (Vec<Failure>, usize) {
         let expected_html = &entry.html;
         total += 1;
 
-        let parsed = parse_markdown(markdown);
-        let Some(doc) = MdDocument::cast(parsed.syntax()) else {
+        let parsed = parse_markdown(markdown, MarkdownParserOptions::default());
+        let Some(doc) = MdRoot::cast(parsed.syntax()) else {
             failures.push(Failure {
                 hash: content_hash(markdown),
                 markdown: markdown.clone(),

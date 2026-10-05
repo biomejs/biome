@@ -15,7 +15,7 @@ impl FormatNodeRule<CssKeyframesAtRule> for FormatCssKeyframesAtRule {
         write!(
             f,
             [
-                keyframes_token.format(),
+                keyframes_token.format()?.with_text_case(CssCase::Lowercase),
                 space(),
                 name.format(),
                 space(),

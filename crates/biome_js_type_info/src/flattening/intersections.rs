@@ -286,6 +286,7 @@ impl MergedType {
             Self::Object(members) => TypeData::from(Object {
                 members: members.into_iter().collect(),
                 prototype: None,
+                has_unknown_members: false,
             }),
             Self::Primitive(primitive) => primitive,
             Self::Unknown => TypeData::unknown(),

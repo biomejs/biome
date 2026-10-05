@@ -20,26 +20,21 @@ use biome_string_case::comparable_token::ComparableToken;
 use crate::JsRuleAction;
 
 declare_source_rule! {
-    /// Sort properties of a JS object in natural order.
+    /// Sort the properties of a JavaScript object.
     ///
-    /// [Natural order](https://en.wikipedia.org/wiki/Natural_sort_order) means
-    /// that uppercase letters come before lowercase letters (e.g. `A` < `a` <
-    /// `B` < `b`) and numbers are compared in a human way (e.g. `9` < `10`).
+    /// By default, the action uses
+    /// [natural order](https://en.wikipedia.org/wiki/Natural_sort_order): uppercase letters come
+    /// before lowercase letters (`A` before `a`), and numbers are compared by value (`item9`
+    /// before `item10`).
     ///
-    /// This rule will consider spread/calculated keys e.g [k]: 1 as
-    /// non-sortable. Instead, whenever it encounters a non-sortable key, it
-    /// will sort all the previous sortable keys up until the nearest
-    /// non-sortable key, if one exist. This prevents breaking the override of
-    /// certain keys using spread keys.
+    /// Spread properties such as `...other` and computed property names such as `[key]` cannot be
+    /// safely reordered. Each one forms a boundary; the action sorts named properties on each side
+    /// independently. This preserves the order in which spread properties can replace earlier
+    /// values.
     ///
-    /// Sorting the keys of an object technically changes the semantics of the
-    /// program. It affects the result of operations like
-    /// `Object.getOwnPropertyNames`. Since ES2020, operations like `for-in`
-    /// loops, `Object.keys`, and `JSON.stringify` are guaranteed to process
-    /// string keys in insertion order.
-    ///
-    /// In cases where the order of such operations is important, you can
-    /// disable the assist action using a suppression comment:
+    /// Object property order is observable. Sorting can change the results of
+    /// `Object.getOwnPropertyNames`, `Object.keys`, `JSON.stringify`, and `for...in` loops. If code
+    /// relies on the original order, disable the action with a suppression comment:
     ///
     /// `// biome-ignore assist/source/useSortedKeys`
     ///
@@ -88,12 +83,13 @@ declare_source_rule! {
     /// ```
     ///
     /// ## Options
-    /// This actions accepts following options
     ///
     /// ### `sortOrder`
-    /// This options supports `natural` and `lexicographic` values. Where as `natural` is the default.
     ///
-    /// Following will apply the natural sort order.
+    /// Selects `natural` or `lexicographic` ordering. Natural ordering compares numbers by value
+    /// and is the default. Lexicographic ordering compares property names character by character.
+    ///
+    /// The following configuration uses natural order:
     ///
     /// ```json,options
     /// {
@@ -102,6 +98,7 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
+    ///
     /// ```js,use_options,expect_diff
     /// const obj = {
     ///     val13: 1,
@@ -112,7 +109,7 @@ declare_source_rule! {
     /// };
     /// ```
     ///
-    /// Following will apply the lexicographic sort order.
+    /// The following configuration uses lexicographic order.
     ///
     /// ```json,options
     /// {
@@ -121,6 +118,7 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
+    ///
     /// ```js,use_options,expect_diff
     /// const obj = {
     ///     val13: 1,
@@ -132,12 +130,11 @@ declare_source_rule! {
     /// ```
     ///
     /// ### `groupByNesting`
-    /// When enabled, groups object keys by their value's nesting depth before sorting alphabetically.
-    /// Simple values (primitives, single-line arrays, and single-line objects) are sorted first,
-    /// followed by nested values (multi-line arrays and multi-line objects).
     ///
-    /// > Default: `false`
-    ///
+    /// Groups properties by the shape of their values before sorting by name. Simple values, such
+    /// as strings, numbers, booleans, `null`, and single-line arrays or objects, come first.
+    /// Multi-line arrays and objects, functions, classes, and object methods come afterward.
+    /// Defaults to `false`.
     ///
     /// ```json,options
     /// {
@@ -146,7 +143,7 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
-    /// ```js,use_options,expect_diagnostic
+    /// ```js,use_options,expect_diff
     /// const obj = {
     ///     name: "Sample",
     ///     details: {
@@ -163,66 +160,6 @@ declare_source_rule! {
         recommended: false,
         sources: &[RuleSource::Eslint("sort-keys").inspired(), RuleSource::EslintPerfectionist("sort-objects").inspired()],
         fix_kind: FixKind::Safe,
-    }
-}
-
-/// Checks if an object/array spans multiple lines by examining CST trivia.
-/// For non-empty containers, checks the first token of the members/elements.
-/// For empty containers, checks the closing brace/bracket token.
-fn has_multiline_content(
-    members_first_token: Option<SyntaxToken<JsLanguage>>,
-    closing_token: SyntaxResult<SyntaxToken<JsLanguage>>,
-) -> bool {
-    members_first_token.map_or_else(
-        || {
-            closing_token
-                .is_ok_and(|token| token.has_leading_newline())
-        },
-        |token| token.has_leading_newline(),
-    )
-}
-
-/// Determines the nesting depth of a JavaScript expression for grouping purposes.
-fn get_nesting_depth(value: &AnyJsExpression) -> Ordering {
-    match value {
-        AnyJsExpression::JsObjectExpression(obj) => {
-            let members = obj.members();
-            if has_multiline_content(members.syntax().first_token(), obj.r_curly_token()) {
-                Ordering::Greater
-            } else {
-                Ordering::Equal
-            }
-        }
-        AnyJsExpression::JsArrayExpression(array) => {
-            let elements = array.elements();
-            if has_multiline_content(elements.syntax().first_token(), array.r_brack_token()) {
-                Ordering::Greater
-            } else {
-                Ordering::Equal
-            }
-        }
-        // Function and class expressions are treated as nested
-        AnyJsExpression::JsArrowFunctionExpression(_)
-        | AnyJsExpression::JsFunctionExpression(_)
-        | AnyJsExpression::JsClassExpression(_) => Ordering::Greater,
-        _ => Ordering::Equal,
-    }
-}
-
-/// Determines the nesting depth for an object member:
-/// - properties: based on value expression;
-/// - methods/getters/setters: treat as nested (1);
-/// - spreads/computed or unnamed: non-sortable (None).
-fn get_member_depth(node: &AnyJsObjectMember) -> Option<Ordering> {
-    match node {
-        AnyJsObjectMember::JsPropertyObjectMember(prop) => {
-            let value = prop.value().ok()?;
-            Some(get_nesting_depth(&value))
-        }
-        AnyJsObjectMember::JsMethodObjectMember(_)
-        | AnyJsObjectMember::JsGetterObjectMember(_)
-        | AnyJsObjectMember::JsSetterObjectMember(_) => Some(Ordering::Greater),
-        _ => None,
     }
 }
 
@@ -332,5 +269,65 @@ impl Rule for UseSortedKeys {
             markup! { "Sort the object properties by key." },
             mutation,
         ))
+    }
+}
+
+/// Checks if an object/array spans multiple lines by examining CST trivia.
+/// For non-empty containers, checks the first token of the members/elements.
+/// For empty containers, checks the closing brace/bracket token.
+fn has_multiline_content(
+    members_first_token: Option<SyntaxToken<JsLanguage>>,
+    closing_token: SyntaxResult<SyntaxToken<JsLanguage>>,
+) -> bool {
+    members_first_token.map_or_else(
+        || {
+            closing_token
+                .is_ok_and(|token| token.has_leading_newline())
+        },
+        |token| token.has_leading_newline(),
+    )
+}
+
+/// Determines the nesting depth of a JavaScript expression for grouping purposes.
+fn get_nesting_depth(value: &AnyJsExpression) -> Ordering {
+    match value {
+        AnyJsExpression::JsObjectExpression(obj) => {
+            let members = obj.members();
+            if has_multiline_content(members.syntax().first_token(), obj.r_curly_token()) {
+                Ordering::Greater
+            } else {
+                Ordering::Equal
+            }
+        }
+        AnyJsExpression::JsArrayExpression(array) => {
+            let elements = array.elements();
+            if has_multiline_content(elements.syntax().first_token(), array.r_brack_token()) {
+                Ordering::Greater
+            } else {
+                Ordering::Equal
+            }
+        }
+        // Function and class expressions are treated as nested
+        AnyJsExpression::JsArrowFunctionExpression(_)
+        | AnyJsExpression::JsFunctionExpression(_)
+        | AnyJsExpression::JsClassExpression(_) => Ordering::Greater,
+        _ => Ordering::Equal,
+    }
+}
+
+/// Determines the nesting depth for an object member:
+/// - properties: based on value expression;
+/// - methods/getters/setters: treat as nested (1);
+/// - spreads/computed or unnamed: non-sortable (None).
+fn get_member_depth(node: &AnyJsObjectMember) -> Option<Ordering> {
+    match node {
+        AnyJsObjectMember::JsPropertyObjectMember(prop) => {
+            let value = prop.value().ok()?;
+            Some(get_nesting_depth(&value))
+        }
+        AnyJsObjectMember::JsMethodObjectMember(_)
+        | AnyJsObjectMember::JsGetterObjectMember(_)
+        | AnyJsObjectMember::JsSetterObjectMember(_) => Some(Ordering::Greater),
+        _ => None,
     }
 }

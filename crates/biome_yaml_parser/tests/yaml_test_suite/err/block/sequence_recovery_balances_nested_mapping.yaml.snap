@@ -1,0 +1,137 @@
+---
+source: crates/biome_yaml_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```yaml
+- valid # terminate the plain scalar
+  @
+  nested: value
+- next
+
+```
+
+## AST
+
+```
+YamlRoot {
+    documents: YamlDocumentList [
+        YamlDocument {
+            bom_token: missing (optional),
+            directives: YamlDirectiveList [],
+            dashdashdash_token: missing (optional),
+            node: YamlBlockInBlockNode {
+                properties: YamlPropertyList [],
+                content: YamlBlockSequence {
+                    sequence_start_token: SEQUENCE_START@0..0 "" [] [],
+                    entries: YamlBlockSequenceEntryList [
+                        YamlBlockSequenceEntry {
+                            minus_token: DASH@0..2 "-" [] [Whitespace(" ")],
+                            value: YamlFlowInBlockNode {
+                                flow_start_token: FLOW_START@2..2 "" [] [],
+                                flow: YamlFlowYamlNode {
+                                    properties: YamlPropertyList [],
+                                    content: YamlPlainScalar {
+                                        value_token: PLAIN_LITERAL@2..36 "valid" [] [Whitespace(" "), Comments("# terminate the plain ...")],
+                                    },
+                                },
+                                flow_end_token: FLOW_END@36..36 "" [] [],
+                            },
+                        },
+                        YamlBogus {
+                            items: [
+                                ERROR_TOKEN@36..40 "@" [Newline("\n"), Whitespace("  ")] [],
+                                MAPPING_START@40..43 "" [Newline("\n"), Whitespace("  ")] [],
+                                PLAIN_LITERAL@43..49 "nested" [] [],
+                                COLON@49..51 ":" [] [Whitespace(" ")],
+                                FLOW_START@51..51 "" [] [],
+                                PLAIN_LITERAL@51..56 "value" [] [],
+                                FLOW_END@56..56 "" [] [],
+                                MAPPING_END@56..56 "" [] [],
+                            ],
+                        },
+                        YamlBlockSequenceEntry {
+                            minus_token: DASH@56..59 "-" [Newline("\n")] [Whitespace(" ")],
+                            value: YamlFlowInBlockNode {
+                                flow_start_token: FLOW_START@59..59 "" [] [],
+                                flow: YamlFlowYamlNode {
+                                    properties: YamlPropertyList [],
+                                    content: YamlPlainScalar {
+                                        value_token: PLAIN_LITERAL@59..63 "next" [] [],
+                                    },
+                                },
+                                flow_end_token: FLOW_END@63..63 "" [] [],
+                            },
+                        },
+                    ],
+                    sequence_end_token: SEQUENCE_END@63..63 "" [] [],
+                },
+            },
+            dotdotdot_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@63..64 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: YAML_ROOT@0..64
+  0: YAML_DOCUMENT_LIST@0..63
+    0: YAML_DOCUMENT@0..63
+      0: (empty)
+      1: YAML_DIRECTIVE_LIST@0..0
+      2: (empty)
+      3: YAML_BLOCK_IN_BLOCK_NODE@0..63
+        0: YAML_PROPERTY_LIST@0..0
+        1: YAML_BLOCK_SEQUENCE@0..63
+          0: SEQUENCE_START@0..0 "" [] []
+          1: YAML_BLOCK_SEQUENCE_ENTRY_LIST@0..63
+            0: YAML_BLOCK_SEQUENCE_ENTRY@0..36
+              0: DASH@0..2 "-" [] [Whitespace(" ")]
+              1: YAML_FLOW_IN_BLOCK_NODE@2..36
+                0: FLOW_START@2..2 "" [] []
+                1: YAML_FLOW_YAML_NODE@2..36
+                  0: YAML_PROPERTY_LIST@2..2
+                  1: YAML_PLAIN_SCALAR@2..36
+                    0: PLAIN_LITERAL@2..36 "valid" [] [Whitespace(" "), Comments("# terminate the plain ...")]
+                2: FLOW_END@36..36 "" [] []
+            1: YAML_BOGUS@36..56
+              0: ERROR_TOKEN@36..40 "@" [Newline("\n"), Whitespace("  ")] []
+              1: MAPPING_START@40..43 "" [Newline("\n"), Whitespace("  ")] []
+              2: PLAIN_LITERAL@43..49 "nested" [] []
+              3: COLON@49..51 ":" [] [Whitespace(" ")]
+              4: FLOW_START@51..51 "" [] []
+              5: PLAIN_LITERAL@51..56 "value" [] []
+              6: FLOW_END@56..56 "" [] []
+              7: MAPPING_END@56..56 "" [] []
+            2: YAML_BLOCK_SEQUENCE_ENTRY@56..63
+              0: DASH@56..59 "-" [Newline("\n")] [Whitespace(" ")]
+              1: YAML_FLOW_IN_BLOCK_NODE@59..63
+                0: FLOW_START@59..59 "" [] []
+                1: YAML_FLOW_YAML_NODE@59..63
+                  0: YAML_PROPERTY_LIST@59..59
+                  1: YAML_PLAIN_SCALAR@59..63
+                    0: PLAIN_LITERAL@59..63 "next" [] []
+                2: FLOW_END@63..63 "" [] []
+          2: SEQUENCE_END@63..63 "" [] []
+      4: (empty)
+  1: EOF@63..64 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+sequence_recovery_balances_nested_mapping.yaml:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `@`
+  
+    1 │ - valid # terminate the plain scalar
+  > 2 │   @
+      │   ^
+    3 │   nested: value
+    4 │ - next
+  
+```

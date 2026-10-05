@@ -5,74 +5,56 @@ expression: invalid.vue
 # Input
 ```vue
 <!-- should generate diagnostics -->
+<template>
 <input type="submit" accesskey="s" value="Submit" />
 <a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
 <button accesskey="n">Next</button>
 <button v-bind:accesskey="accesskeyValue">Next</button>
 <button :accesskey="accesskeyValue">Next</button>
+</template>
 
 ```
 
 # Diagnostics
 ```
-invalid.vue:2:22 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:3:22 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard commands.
   
     1 │ <!-- should generate diagnostics -->
-  > 2 │ <input type="submit" accesskey="s" value="Submit" />
+    2 │ <template>
+  > 3 │ <input type="submit" accesskey="s" value="Submit" />
       │                      ^^^^^^^^^^^^^
-    3 │ <a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
-    4 │ <button accesskey="n">Next</button>
+    4 │ <a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
+    5 │ <button accesskey="n">Next</button>
   
   i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications.
   
   i Unsafe fix: Remove the accesskey attribute.
   
-    2 │ <input·type="submit"·accesskey="s"·value="Submit"·/>
+    3 │ <input·type="submit"·accesskey="s"·value="Submit"·/>
       │                      --------------                 
 
 ```
 
 ```
-invalid.vue:3:31 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:4:31 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard commands.
   
-    1 │ <!-- should generate diagnostics -->
-    2 │ <input type="submit" accesskey="s" value="Submit" />
-  > 3 │ <a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
+    2 │ <template>
+    3 │ <input type="submit" accesskey="s" value="Submit" />
+  > 4 │ <a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
       │                               ^^^^^^^^^^^^^
-    4 │ <button accesskey="n">Next</button>
-    5 │ <button v-bind:accesskey="accesskeyValue">Next</button>
+    5 │ <button accesskey="n">Next</button>
+    6 │ <button v-bind:accesskey="accesskeyValue">Next</button>
   
   i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications.
   
   i Unsafe fix: Remove the accesskey attribute.
   
-    3 │ <a·href="https://webaim.org/"·accesskey="w">WebAIM.org</a>
+    4 │ <a·href="https://webaim.org/"·accesskey="w">WebAIM.org</a>
       │                               -------------               
-
-```
-
-```
-invalid.vue:4:9 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard commands.
-  
-    2 │ <input type="submit" accesskey="s" value="Submit" />
-    3 │ <a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
-  > 4 │ <button accesskey="n">Next</button>
-      │         ^^^^^^^^^^^^^
-    5 │ <button v-bind:accesskey="accesskeyValue">Next</button>
-    6 │ <button :accesskey="accesskeyValue">Next</button>
-  
-  i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications.
-  
-  i Unsafe fix: Remove the accesskey attribute.
-  
-    4 │ <button·accesskey="n">Next</button>
-      │         -------------              
 
 ```
 
@@ -81,19 +63,19 @@ invalid.vue:5:9 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━�
 
   × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard commands.
   
-    3 │ <a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
-    4 │ <button accesskey="n">Next</button>
-  > 5 │ <button v-bind:accesskey="accesskeyValue">Next</button>
-      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    6 │ <button :accesskey="accesskeyValue">Next</button>
-    7 │ 
+    3 │ <input type="submit" accesskey="s" value="Submit" />
+    4 │ <a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
+  > 5 │ <button accesskey="n">Next</button>
+      │         ^^^^^^^^^^^^^
+    6 │ <button v-bind:accesskey="accesskeyValue">Next</button>
+    7 │ <button :accesskey="accesskeyValue">Next</button>
   
   i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications.
   
   i Unsafe fix: Remove the accesskey attribute.
   
-    5 │ <button·v-bind:accesskey="accesskeyValue">Next</button>
-      │         ---------------------------------              
+    5 │ <button·accesskey="n">Next</button>
+      │         -------------              
 
 ```
 
@@ -102,17 +84,39 @@ invalid.vue:6:9 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━�
 
   × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard commands.
   
-    4 │ <button accesskey="n">Next</button>
-    5 │ <button v-bind:accesskey="accesskeyValue">Next</button>
-  > 6 │ <button :accesskey="accesskeyValue">Next</button>
-      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    7 │ 
+    4 │ <a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
+    5 │ <button accesskey="n">Next</button>
+  > 6 │ <button v-bind:accesskey="accesskeyValue">Next</button>
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ <button :accesskey="accesskeyValue">Next</button>
+    8 │ </template>
   
   i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications.
   
   i Unsafe fix: Remove the accesskey attribute.
   
-    6 │ <button·:accesskey="accesskeyValue">Next</button>
+    6 │ <button·v-bind:accesskey="accesskeyValue">Next</button>
+      │         ---------------------------------              
+
+```
+
+```
+invalid.vue:7:9 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard commands.
+  
+    5 │ <button accesskey="n">Next</button>
+    6 │ <button v-bind:accesskey="accesskeyValue">Next</button>
+  > 7 │ <button :accesskey="accesskeyValue">Next</button>
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ </template>
+    9 │ 
+  
+  i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications.
+  
+  i Unsafe fix: Remove the accesskey attribute.
+  
+    7 │ <button·:accesskey="accesskeyValue">Next</button>
       │         ---------------------------              
 
 ```

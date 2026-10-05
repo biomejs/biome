@@ -1,0 +1,14 @@
+@use "sass:math";
+$feature: "hover";
+
+.a {
+  nested-condition: if(not (style(--value: fn("),:;", nested(red, blue)))): red; else: blue);
+  sass-not: if(sass(not false): red; else: blue);
+  nested-if: if(sass(if(sass(true): true; else: false)): red; else: blue);
+  raw-url: if(sass(url(https://example.com/a{b:c,d)): red; else: blue);
+  legacy-condition: if(sass(if(not false, true, false)): red; else: blue);
+  comma-value: if(style(--enabled: true): Arial, sans-serif; else: serif);
+  interpolated-feature: if(media((#{$feature})): red; else: blue);
+  namespaced-bound: if(media(math.$pi < width): red; else: blue);
+  parent-suffix: if(supports(selector(&+100)): red; else: blue);
+}

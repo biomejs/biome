@@ -1,0 +1,747 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+/* should generate diagnostics */
+
+@property --angle {
+	syntax: "<angle>";
+	inherits: false;
+	initial-value: 10px;
+}
+
+@property --color {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: 10px;
+}
+
+@property --custom-ident {
+	syntax: "<custom-ident>";
+	inherits: false;
+	initial-value: 10px;
+}
+
+@property --image {
+	syntax: "<image>";
+	inherits: false;
+	initial-value: red;
+}
+
+@property --integer {
+	syntax: "<integer>";
+	inherits: false;
+	initial-value: 1.5;
+}
+
+@property --length {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: 10%;
+}
+
+@property --length-percentage {
+	syntax: "<length-percentage>";
+	inherits: false;
+	initial-value: red;
+}
+
+@property --number {
+	syntax: "<number>";
+	inherits: false;
+	initial-value: 1px;
+}
+
+@property --percentage {
+	syntax: "<percentage>";
+	inherits: false;
+	initial-value: 1px;
+}
+
+@property --resolution {
+	syntax: "<resolution>";
+	inherits: false;
+	initial-value: 2s;
+}
+
+@property --string {
+	syntax: "<string>";
+	inherits: false;
+	initial-value: unquoted;
+}
+
+@property --time {
+	syntax: "<time>";
+	inherits: false;
+	initial-value: 45deg;
+}
+
+@property --transform-function {
+	syntax: "<transform-function>";
+	inherits: false;
+	initial-value: translateX(10px) rotate(45deg);
+}
+
+@property --transform-list {
+	syntax: "<transform-list>";
+	inherits: false;
+	initial-value: 10px;
+}
+
+@property --url {
+	syntax: "<url>";
+	inherits: false;
+	initial-value: "image.png";
+}
+
+@property --keyword {
+	syntax: "compact | expanded";
+	inherits: false;
+	initial-value: other;
+}
+
+@property --alternative-type {
+	syntax: "<length> | auto";
+	inherits: false;
+	initial-value: red;
+}
+
+@property --space-separated {
+	syntax: "<length>+";
+	inherits: false;
+	initial-value: 10px, 20px;
+}
+
+@property --comma-separated {
+	syntax: "<color>#";
+	inherits: false;
+	initial-value: red blue;
+}
+
+@property --decimal-integer {
+	syntax: "<integer>";
+	inherits: false;
+	initial-value: 1.0;
+}
+
+@property --exponential-integer {
+	syntax: "<integer>";
+	inherits: false;
+	initial-value: 1e3;
+}
+
+@property --zero-resolution {
+	syntax: "<resolution>";
+	inherits: false;
+	initial-value: 0dpi;
+}
+
+@property --negative-resolution {
+	syntax: "<resolution>";
+	inherits: false;
+	initial-value: -1dppx;
+}
+
+@property --duplicate-descriptors {
+	syntax: "<color>";
+	syntax: "<length>";
+	inherits: false;
+	initial-value: 1px;
+	initial-value: red;
+}
+
+@property --duplicate-rule {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: red;
+}
+
+@property --duplicate-rule {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: red;
+}
+
+@property --sine-length {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: sin(1);
+}
+
+@property --safe-area-color {
+	syntax: "<color>";
+	inherits: false;
+	initial-value: env(safe-area-inset-top);
+}
+
+```
+
+# Diagnostics
+```
+invalid.css:6:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    4 │ 	syntax: "<angle>";
+    5 │ 	inherits: false;
+  > 6 │ 	initial-value: 10px;
+      │ 	               ^^^^
+    7 │ }
+    8 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:12:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    10 │ 	syntax: "<color>";
+    11 │ 	inherits: false;
+  > 12 │ 	initial-value: 10px;
+       │ 	               ^^^^
+    13 │ }
+    14 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:18:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    16 │ 	syntax: "<custom-ident>";
+    17 │ 	inherits: false;
+  > 18 │ 	initial-value: 10px;
+       │ 	               ^^^^
+    19 │ }
+    20 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:24:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    22 │ 	syntax: "<image>";
+    23 │ 	inherits: false;
+  > 24 │ 	initial-value: red;
+       │ 	               ^^^
+    25 │ }
+    26 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:30:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    28 │ 	syntax: "<integer>";
+    29 │ 	inherits: false;
+  > 30 │ 	initial-value: 1.5;
+       │ 	               ^^^
+    31 │ }
+    32 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:36:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    34 │ 	syntax: "<length>";
+    35 │ 	inherits: false;
+  > 36 │ 	initial-value: 10%;
+       │ 	               ^^^
+    37 │ }
+    38 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:42:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    40 │ 	syntax: "<length-percentage>";
+    41 │ 	inherits: false;
+  > 42 │ 	initial-value: red;
+       │ 	               ^^^
+    43 │ }
+    44 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:48:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    46 │ 	syntax: "<number>";
+    47 │ 	inherits: false;
+  > 48 │ 	initial-value: 1px;
+       │ 	               ^^^
+    49 │ }
+    50 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:54:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    52 │ 	syntax: "<percentage>";
+    53 │ 	inherits: false;
+  > 54 │ 	initial-value: 1px;
+       │ 	               ^^^
+    55 │ }
+    56 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:60:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    58 │ 	syntax: "<resolution>";
+    59 │ 	inherits: false;
+  > 60 │ 	initial-value: 2s;
+       │ 	               ^^
+    61 │ }
+    62 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:66:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    64 │ 	syntax: "<string>";
+    65 │ 	inherits: false;
+  > 66 │ 	initial-value: unquoted;
+       │ 	               ^^^^^^^^
+    67 │ }
+    68 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:72:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    70 │ 	syntax: "<time>";
+    71 │ 	inherits: false;
+  > 72 │ 	initial-value: 45deg;
+       │ 	               ^^^^^
+    73 │ }
+    74 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:78:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    76 │ 	syntax: "<transform-function>";
+    77 │ 	inherits: false;
+  > 78 │ 	initial-value: translateX(10px) rotate(45deg);
+       │ 	               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    79 │ }
+    80 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:84:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    82 │ 	syntax: "<transform-list>";
+    83 │ 	inherits: false;
+  > 84 │ 	initial-value: 10px;
+       │ 	               ^^^^
+    85 │ }
+    86 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:90:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    88 │ 	syntax: "<url>";
+    89 │ 	inherits: false;
+  > 90 │ 	initial-value: "image.png";
+       │ 	               ^^^^^^^^^^^
+    91 │ }
+    92 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:96:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    94 │ 	syntax: "compact | expanded";
+    95 │ 	inherits: false;
+  > 96 │ 	initial-value: other;
+       │ 	               ^^^^^
+    97 │ }
+    98 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:102:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    100 │ 	syntax: "<length> | auto";
+    101 │ 	inherits: false;
+  > 102 │ 	initial-value: red;
+        │ 	               ^^^
+    103 │ }
+    104 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:108:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    106 │ 	syntax: "<length>+";
+    107 │ 	inherits: false;
+  > 108 │ 	initial-value: 10px, 20px;
+        │ 	               ^^^^^^^^^^
+    109 │ }
+    110 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:114:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    112 │ 	syntax: "<color>#";
+    113 │ 	inherits: false;
+  > 114 │ 	initial-value: red blue;
+        │ 	               ^^^^^^^^
+    115 │ }
+    116 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:120:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    118 │ 	syntax: "<integer>";
+    119 │ 	inherits: false;
+  > 120 │ 	initial-value: 1.0;
+        │ 	               ^^^
+    121 │ }
+    122 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:126:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    124 │ 	syntax: "<integer>";
+    125 │ 	inherits: false;
+  > 126 │ 	initial-value: 1e3;
+        │ 	               ^^^
+    127 │ }
+    128 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:132:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    130 │ 	syntax: "<resolution>";
+    131 │ 	inherits: false;
+  > 132 │ 	initial-value: 0dpi;
+        │ 	               ^^^^
+    133 │ }
+    134 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:138:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    136 │ 	syntax: "<resolution>";
+    137 │ 	inherits: false;
+  > 138 │ 	initial-value: -1dppx;
+        │ 	               ^^^^^^
+    139 │ }
+    140 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:146:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    144 │ 	inherits: false;
+    145 │ 	initial-value: 1px;
+  > 146 │ 	initial-value: red;
+        │ 	               ^^^
+    147 │ }
+    148 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:152:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    150 │ 	syntax: "<length>";
+    151 │ 	inherits: false;
+  > 152 │ 	initial-value: red;
+        │ 	               ^^^
+    153 │ }
+    154 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:164:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    162 │ 	syntax: "<length>";
+    163 │ 	inherits: false;
+  > 164 │ 	initial-value: sin(1);
+        │ 	               ^^^^^^
+    165 │ }
+    166 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:170:17 lint/nursery/noInvalidPropertyInitValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The initial-value does not match the registered property syntax.
+  
+    168 │ 	syntax: "<color>";
+    169 │ 	inherits: false;
+  > 170 │ 	initial-value: env(safe-area-inset-top);
+        │ 	               ^^^^^^^^^^^^^^^^^^^^^^^^
+    171 │ }
+    172 │ 
+  
+  i A mismatched initial value prevents the custom property from being registered.
+  
+  i Use an initial value accepted by the syntax descriptor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

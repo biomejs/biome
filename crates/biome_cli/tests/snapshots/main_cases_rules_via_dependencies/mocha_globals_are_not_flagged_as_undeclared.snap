@@ -2,6 +2,12 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: redactor(content)
 ---
+## Command
+
+```shell
+biome lint '<TEMP_DIR>/mocha_globals_are_not_flagged_as_undeclared'
+```
+
 ## `package.json`
 
 ```json

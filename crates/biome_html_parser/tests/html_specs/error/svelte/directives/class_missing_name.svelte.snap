@@ -17,6 +17,7 @@ expression: snapshot
 HtmlRoot {
     bom_token: missing (optional),
     frontmatter: missing (optional),
+    processing_instruction: missing (optional),
     directive: missing (optional),
     html: HtmlElementList [
         HtmlBogusElement {
@@ -25,7 +26,7 @@ HtmlRoot {
                     items: [
                         L_ANGLE@0..1 "<" [] [],
                         HtmlTagName {
-                            value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                            value_token: DIV_KW@1..5 "div" [] [Whitespace(" ")],
                         },
                         HtmlBogus {
                             items: [
@@ -54,7 +55,7 @@ HtmlRoot {
                     l_angle_token: L_ANGLE@30..31 "<" [] [],
                     slash_token: SLASH@31..32 "/" [] [],
                     name: HtmlTagName {
-                        value_token: HTML_LITERAL@32..35 "div" [] [],
+                        value_token: DIV_KW@32..35 "div" [] [],
                     },
                     r_angle_token: R_ANGLE@35..36 ">" [] [],
                 },
@@ -72,12 +73,13 @@ HtmlRoot {
   0: (empty)
   1: (empty)
   2: (empty)
-  3: HTML_ELEMENT_LIST@0..36
+  3: (empty)
+  4: HTML_ELEMENT_LIST@0..36
     0: HTML_BOGUS_ELEMENT@0..36
       0: HTML_BOGUS@0..30
         0: L_ANGLE@0..1 "<" [] []
         1: HTML_TAG_NAME@1..5
-          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+          0: DIV_KW@1..5 "div" [] [Whitespace(" ")]
         2: HTML_BOGUS@5..30
           0: SVELTE_CLASS_DIRECTIVE@5..11
             0: CLASS_KW@5..10 "class" [] []
@@ -95,9 +97,9 @@ HtmlRoot {
         0: L_ANGLE@30..31 "<" [] []
         1: SLASH@31..32 "/" [] []
         2: HTML_TAG_NAME@32..35
-          0: HTML_LITERAL@32..35 "div" [] []
+          0: DIV_KW@32..35 "div" [] []
         3: R_ANGLE@35..36 ">" [] []
-  4: EOF@36..37 "" [Newline("\n")] []
+  5: EOF@36..37 "" [Newline("\n")] []
 
 ```
 

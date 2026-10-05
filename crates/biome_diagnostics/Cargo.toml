@@ -1,6 +1,6 @@
 [package]
 name                 = "biome_diagnostics"
-version              = "0.5.7"
+version.workspace    = true
 authors.workspace    = true
 edition.workspace    = true
 description          = "Biome's shared infrastructure to implement reporting pretty error and diagnostics"
@@ -9,6 +9,7 @@ repository.workspace = true
 license.workspace    = true
 keywords.workspace   = true
 categories.workspace = true
+include              = ["LICENSE", "README.md", "src/**/*"]
 publish              = true
 
 [[example]]

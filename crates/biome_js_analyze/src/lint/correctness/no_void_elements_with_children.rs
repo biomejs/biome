@@ -14,7 +14,11 @@ use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, declare_node_union};
 use biome_rule_options::no_void_elements_with_children::NoVoidElementsWithChildrenOptions;
 
 declare_lint_rule! {
-    /// This rules prevents void elements (AKA self-closing elements) from having children.
+    /// Disallow children on HTML void elements.
+    ///
+    /// HTML void elements, such as `<img>` and `<br>`, cannot contain child content or use the
+    /// `children` and `dangerouslySetInnerHTML` properties. Unlike ordinary JSX elements, a void
+    /// element cannot have a closing tag.
     ///
     /// ## Examples
     ///
@@ -29,7 +33,17 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// React.createElement('img', {}, 'child')
+    /// React.createElement("img", {}, "child");
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```jsx
+    /// <img alt="some text" />
+    /// ```
+    ///
+    /// ```js
+    /// React.createElement("img", { alt: "some text" });
     /// ```
     pub NoVoidElementsWithChildren {
         version: "1.0.0",
@@ -44,18 +58,6 @@ declare_lint_rule! {
 
 declare_node_union! {
     pub NoVoidElementsWithChildrenQuery = JsxElement | JsCallExpression | JsxSelfClosingElement
-}
-
-const VOID_ELEMENTS: [&str; 16] = [
-    "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "menuitem",
-    "meta", "param", "source", "track", "wbr",
-];
-
-fn void_dom_element_name(element_name: &str) -> Option<&'static str> {
-    VOID_ELEMENTS
-        .iter()
-        .copied()
-        .find(|candidate| *candidate == element_name)
 }
 
 pub enum NoVoidElementsWithChildrenCause {
@@ -97,92 +99,6 @@ pub struct NoVoidElementsWithChildrenState {
     cause: NoVoidElementsWithChildrenCause,
 }
 
-impl NoVoidElementsWithChildrenState {
-    fn new(element_name: &'static str, cause: NoVoidElementsWithChildrenCause) -> Self {
-        Self {
-            element_name,
-            cause,
-        }
-    }
-
-    fn has_children_cause(&self) -> bool {
-        match &self.cause {
-            NoVoidElementsWithChildrenCause::Jsx {
-                children_prop,
-                children_cause,
-                ..
-            } => *children_cause || children_prop.is_some(),
-            NoVoidElementsWithChildrenCause::ReactCreateElement {
-                children_prop,
-                children_cause,
-                ..
-            } => *children_cause || children_prop.is_some(),
-        }
-    }
-
-    fn has_dangerous_prop_cause(&self) -> bool {
-        match &self.cause {
-            NoVoidElementsWithChildrenCause::Jsx {
-                dangerous_prop_cause,
-                ..
-            } => dangerous_prop_cause.is_some(),
-            NoVoidElementsWithChildrenCause::ReactCreateElement {
-                dangerous_prop_cause,
-                ..
-            } => dangerous_prop_cause.is_some(),
-        }
-    }
-
-    fn diagnostic_message(&self) -> MarkupBuf {
-        let has_children_cause = self.has_children_cause();
-        let has_dangerous_cause = self.has_dangerous_prop_cause();
-        match (has_children_cause, has_dangerous_cause) {
-            (true, true) => {
-                (markup! {
-                    <Emphasis>{self.element_name}</Emphasis>" is a void element tag and must not have "<Emphasis>"children"</Emphasis>
-                    ", or the "<Emphasis>"dangerouslySetInnerHTML"</Emphasis>" prop."
-                }).to_owned()
-            }
-            (true, false) => {
-                (markup! {
-                    <Emphasis>{self.element_name}</Emphasis>" is a void element tag and must not have "<Emphasis>"children"</Emphasis>"."
-                }).to_owned()
-            }
-            (false, true) => {
-                (markup! {
-                    <Emphasis>{self.element_name}</Emphasis>" is a void element tag and must not have the "<Emphasis>"dangerouslySetInnerHTML"</Emphasis>" prop."
-                }).to_owned()
-            },
-            _ => unreachable!("At least a cause must be set")
-
-        }
-    }
-
-    fn action_message(&self) -> MarkupBuf {
-        let has_children_cause = self.has_children_cause();
-        let has_dangerous_cause = self.has_dangerous_prop_cause();
-        match (has_children_cause, has_dangerous_cause) {
-            (true, true) => {
-                (markup! {
-                    "Remove the "<Emphasis>"children"</Emphasis>" and the "<Emphasis>"dangerouslySetInnerHTML"</Emphasis>" prop."
-                }).to_owned()
-            }
-            (true, false) => {
-                (markup! {
-                   "Remove the "<Emphasis>"children"</Emphasis>"."
-                }).to_owned()
-            }
-            (false, true) => {
-                (markup! {
-                  "Remove the "<Emphasis>"dangerouslySetInnerHTML"</Emphasis>" prop."
-                }).to_owned()
-            },
-            _ => unreachable!("At least a cause must be set")
-
-        }
-    }
-}
-
 impl Rule for NoVoidElementsWithChildren {
     type Query = Semantic<NoVoidElementsWithChildrenQuery>;
     type State = NoVoidElementsWithChildrenState;
@@ -202,7 +118,7 @@ impl Rule for NoVoidElementsWithChildren {
                 if let Some(element_name) = void_dom_element_name(name) {
                     let dangerous_prop =
                         opening_element.find_attribute_by_name("dangerouslySetInnerHTML");
-                    let has_children = !element.children().is_empty();
+                    let has_children = !element.elements().is_empty();
                     let children_prop = opening_element.find_attribute_by_name("children");
                     if dangerous_prop.is_some() || has_children || children_prop.is_some() {
                         let cause = NoVoidElementsWithChildrenCause::Jsx {
@@ -331,9 +247,9 @@ impl Rule for NoVoidElementsWithChildren {
                         opening_element.l_angle_token().ok()?,
                         opening_element.name().ok()?,
                         new_attribute_list,
-                        closing_element.slash_token().ok()?,
                         opening_element.r_angle_token().ok()?,
                     )
+                    .with_slash_token(closing_element.slash_token().ok()?)
                     .build();
                     mutation.replace_element(
                         element.clone().into_syntax().into(),
@@ -387,5 +303,102 @@ impl Rule for NoVoidElementsWithChildren {
             state.action_message(),
             mutation,
         ))
+    }
+}
+const VOID_ELEMENTS: [&str; 16] = [
+    "area", "base", "br", "col", "embed", "hr", "img", "input", "keygen", "link", "menuitem",
+    "meta", "param", "source", "track", "wbr",
+];
+
+fn void_dom_element_name(element_name: &str) -> Option<&'static str> {
+    VOID_ELEMENTS
+        .iter()
+        .copied()
+        .find(|candidate| *candidate == element_name)
+}
+
+impl NoVoidElementsWithChildrenState {
+    fn new(element_name: &'static str, cause: NoVoidElementsWithChildrenCause) -> Self {
+        Self {
+            element_name,
+            cause,
+        }
+    }
+
+    fn has_children_cause(&self) -> bool {
+        match &self.cause {
+            NoVoidElementsWithChildrenCause::Jsx {
+                children_prop,
+                children_cause,
+                ..
+            } => *children_cause || children_prop.is_some(),
+            NoVoidElementsWithChildrenCause::ReactCreateElement {
+                children_prop,
+                children_cause,
+                ..
+            } => *children_cause || children_prop.is_some(),
+        }
+    }
+
+    fn has_dangerous_prop_cause(&self) -> bool {
+        match &self.cause {
+            NoVoidElementsWithChildrenCause::Jsx {
+                dangerous_prop_cause,
+                ..
+            } => dangerous_prop_cause.is_some(),
+            NoVoidElementsWithChildrenCause::ReactCreateElement {
+                dangerous_prop_cause,
+                ..
+            } => dangerous_prop_cause.is_some(),
+        }
+    }
+
+    fn diagnostic_message(&self) -> MarkupBuf {
+        let has_children_cause = self.has_children_cause();
+        let has_dangerous_cause = self.has_dangerous_prop_cause();
+        match (has_children_cause, has_dangerous_cause) {
+            (true, true) => {
+                (markup! {
+                    <Emphasis>{self.element_name}</Emphasis>" is a void element tag and must not have "<Emphasis>"children"</Emphasis>
+                    ", or the "<Emphasis>"dangerouslySetInnerHTML"</Emphasis>" prop."
+                }).to_owned()
+            }
+            (true, false) => {
+                (markup! {
+                    <Emphasis>{self.element_name}</Emphasis>" is a void element tag and must not have "<Emphasis>"children"</Emphasis>"."
+                }).to_owned()
+            }
+            (false, true) => {
+                (markup! {
+                    <Emphasis>{self.element_name}</Emphasis>" is a void element tag and must not have the "<Emphasis>"dangerouslySetInnerHTML"</Emphasis>" prop."
+                }).to_owned()
+            },
+            _ => unreachable!("At least a cause must be set")
+
+        }
+    }
+
+    fn action_message(&self) -> MarkupBuf {
+        let has_children_cause = self.has_children_cause();
+        let has_dangerous_cause = self.has_dangerous_prop_cause();
+        match (has_children_cause, has_dangerous_cause) {
+            (true, true) => {
+                (markup! {
+                    "Remove the "<Emphasis>"children"</Emphasis>" and the "<Emphasis>"dangerouslySetInnerHTML"</Emphasis>" prop."
+                }).to_owned()
+            }
+            (true, false) => {
+                (markup! {
+                   "Remove the "<Emphasis>"children"</Emphasis>"."
+                }).to_owned()
+            }
+            (false, true) => {
+                (markup! {
+                  "Remove the "<Emphasis>"dangerouslySetInnerHTML"</Emphasis>" prop."
+                }).to_owned()
+            },
+            _ => unreachable!("At least a cause must be set")
+
+        }
     }
 }

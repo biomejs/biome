@@ -8,9 +8,9 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::path::PathBuf;
 use std::{env, fs, io};
 
-const WAI_ARIA: &str = "../../packages/aria-data/wai-aria-1-3.json";
-const GRAPHICS_ARIA: &str = "../../packages/aria-data/graphics-aria-1-0.json";
-const DPUB_ARIA: &str = "../../packages/aria-data/dpub-aria-1-1.json";
+const WAI_ARIA: &str = "aria-data/wai-aria-1-3.json";
+const GRAPHICS_ARIA: &str = "aria-data/graphics-aria-1-0.json";
+const DPUB_ARIA: &str = "aria-data/dpub-aria-1-1.json";
 
 const ISO_COUNTRIES: &[&str] = &[
     "AF", "AL", "DZ", "AS", "AD", "AO", "AI", "AQ", "AG", "AR", "AM", "AW", "AU", "AT", "AZ", "BS",

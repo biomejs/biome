@@ -16,9 +16,11 @@ bg-primary/10
 ```
 TwRoot {
     bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
     candidates: TwCandidateList [
         TwFullCandidate {
             variants: TwVariantList [],
+            legacy_important_token: missing (optional),
             negative_token: missing (optional),
             candidate: TwFunctionalCandidate {
                 base_token: TW_BASE@0..2 "bg" [] [],
@@ -35,8 +37,9 @@ TwRoot {
             },
             excl_token: missing (optional),
         },
+        WHITESPACE@13..14 "\n" [] [],
     ],
-    eof_token: EOF@13..14 "" [Newline("\n")] [],
+    eof_token: EOF@14..14 "" [] [],
 }
 ```
 
@@ -45,11 +48,13 @@ TwRoot {
 ```
 0: TW_ROOT@0..14
   0: (empty)
-  1: TW_CANDIDATE_LIST@0..13
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..14
     0: TW_FULL_CANDIDATE@0..13
       0: TW_VARIANT_LIST@0..0
       1: (empty)
-      2: TW_FUNCTIONAL_CANDIDATE@0..13
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@0..13
         0: TW_BASE@0..2 "bg" [] []
         1: DASH@2..3 "-" [] []
         2: TW_NAMED_VALUE@3..10
@@ -58,7 +63,8 @@ TwRoot {
           0: SLASH@10..11 "/" [] []
           1: TW_NUMBER_VALUE@11..13
             0: TW_NUMBER@11..13 "10" [] []
-      3: (empty)
-  2: EOF@13..14 "" [Newline("\n")] []
+      4: (empty)
+    1: WHITESPACE@13..14 "\n" [] []
+  3: EOF@14..14 "" [] []
 
 ```

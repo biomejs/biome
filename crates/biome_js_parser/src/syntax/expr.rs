@@ -1558,7 +1558,7 @@ pub(crate) fn is_nth_at_identifier_or_keyword(p: &mut JsParser, n: usize) -> boo
 // test_err js template_literal
 // let a = `foo ${}`
 // let b = `${a a}`
-fn parse_template_literal(
+pub(crate) fn parse_template_literal(
     p: &mut JsParser,
     marker: Marker,
     in_optional_chain: bool,
@@ -1766,7 +1766,7 @@ fn parse_call_expression_rest(
         // Cloning here is necessary because parsing out the type arguments may rewind in which
         // case we want to return the `lhs`.
         let m = match lhs.kind(p) {
-            TS_INSTANTIATION_EXPRESSION if !p.at(T![?.]) => lhs.clone().undo_completion(p),
+            TS_INSTANTIATION_EXPRESSION if p.at(T!['(']) => lhs.clone().undo_completion(p),
             _ => lhs.clone().precede(p),
         };
 

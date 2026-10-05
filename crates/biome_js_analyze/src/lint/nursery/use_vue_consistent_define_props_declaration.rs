@@ -12,9 +12,11 @@ use biome_rule_options::use_vue_consistent_define_props_declaration::{
 };
 
 declare_lint_rule! {
-    /// Enforce consistent `defineProps` declaration style.
+    /// Enforce a consistent declaration style for Vue's `defineProps` macro.
     ///
-    /// This rule enforces `defineProps` typing style which you should use `type` or `runtime` declaration.
+    /// Vue accepts two ways to declare component properties: a TypeScript type passed between
+    /// angle brackets, or a runtime object passed as an argument. This rule enforces one style
+    /// throughout the project. The default style is `type`.
     ///
     /// ## Examples
     ///
@@ -35,6 +37,36 @@ declare_lint_rule! {
     /// const props = defineProps<{
     ///   kind: string;
     /// }>();
+    /// </script>
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// ### `style`
+    ///
+    /// Selects `type` or `runtime` declarations. Defaults to `type`.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "style": "runtime"
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// With `runtime`, a type-based declaration is invalid:
+    ///
+    /// ```vue,use_options,expect_diagnostic
+    /// <script setup lang="ts">
+    /// const props = defineProps<{ kind: string }>();
+    /// </script>
+    /// ```
+    ///
+    /// A runtime declaration is valid:
+    ///
+    /// ```vue,use_options
+    /// <script setup lang="ts">
+    /// const props = defineProps({ kind: { type: String } });
     /// </script>
     /// ```
     ///
@@ -135,7 +167,5 @@ fn is_type_declaration(node: &JsCallExpression) -> bool {
 }
 
 fn is_runtime_declaration(node: &JsCallExpression) -> bool {
-    node.arguments()
-        .ok()
-        .is_some_and(|args| args.args().into_iter().next().is_some())
+    node.arguments().is_ok_and(|args| args.args().into_iter().next().is_some())
 }

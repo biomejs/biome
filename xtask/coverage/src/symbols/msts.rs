@@ -5,12 +5,12 @@ use biome_rowan::TextSize;
 use super::utils::{parse_separated_list, parse_str, parse_until_chr, parse_whitespace0};
 use crate::check_file_encoding;
 use crate::runner::{TestCase, TestCaseFiles, TestRunOutcome, TestSuite};
+use crate::util::checkout_repository;
 use biome_js_parser::JsParserOptions;
 use std::collections::HashSet;
 use std::fmt::Write;
 use std::io;
 use std::path::{Path, PathBuf};
-use std::process::Command;
 use std::str::FromStr;
 use xtask_glue::project_root;
 
@@ -130,7 +130,7 @@ impl TestCase for SymbolsMicrosoftTestCase {
             debug_text.push_str("expected: ");
 
             if let Some(symbol) = expected {
-                write!(debug_text, "[{}]", &symbol.name).unwrap();
+                write!(debug_text, "[{}]", symbol.name).unwrap();
             }
 
             debug_text.push_str(" - actual: ");
@@ -195,23 +195,11 @@ impl TestSuite for SymbolsMicrosoftTestSuite {
     }
 
     fn checkout(&self) -> io::Result<()> {
-        let base_path = project_root().join(BASE_PATH);
-        let mut command = Command::new("git");
-        command
-            .arg("clone")
-            .arg("https://github.com/microsoft/Typescript.git")
-            .arg("--depth")
-            .arg("1")
-            .arg(base_path.display().to_string());
-        command.output()?;
-        let mut command = Command::new("git");
-        command
-            .arg("reset")
-            .arg("--hard")
-            .arg("61a96b1641abe24c4adc3633eb936df89eb991f2");
-        command.output()?;
-
-        Ok(())
+        checkout_repository(
+            "https://github.com/microsoft/Typescript.git",
+            "61a96b1641abe24c4adc3633eb936df89eb991f2",
+            &project_root().join(BASE_PATH),
+        )
     }
 
     fn load_test(&self, path: &Path) -> Option<Box<dyn TestCase>> {

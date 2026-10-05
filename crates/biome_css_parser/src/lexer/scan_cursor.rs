@@ -1,35 +1,9 @@
-use super::{
-    CssStringQuote,
-    source_cursor::{SourceCursor, is_newline_byte},
-};
-use biome_css_syntax::{TextRange, TextSize};
+mod url;
+
+use super::{CssStringQuote, source_cursor::SourceCursor};
+use biome_css_syntax::{TextRange, TextSize, is_css_newline_byte, is_css_whitespace_byte};
 use biome_unicode_table::{Dispatch::*, is_css_non_ascii, lookup_byte};
 use std::char::REPLACEMENT_CHARACTER;
-
-/// Classification result for the first non-trivia content inside `url(...)`.
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub(crate) enum UrlBodyStartScan {
-    /// Keep lexing in regular mode so the parser can build an SCSS function.
-    InterpolatedFunction,
-    /// Commit a raw URL literal starting at the recorded non-trivia position.
-    RawValue(PendingUrlRawValueScan),
-    /// Fall back to regular tokenization.
-    Other,
-}
-
-/// Byte range for a raw URL literal discovered by speculative scanning.
-///
-/// The lexer can cache this after consuming leading trivia so it does not need
-/// to rescan when it later reaches the actual raw-value start.
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub(crate) struct PendingUrlRawValueScan {
-    /// Absolute byte position where the non-trivia raw value starts.
-    pub(crate) start: usize,
-    /// Absolute byte position immediately before the closing `)` or EOF.
-    pub(crate) end: usize,
-    /// Whether the scan stopped on a closing `)` instead of EOF.
-    pub(crate) terminated: bool,
-}
 
 /// Result of scanning a string body from the current lexer position.
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -187,10 +161,7 @@ impl<'src> CssScanCursor<'src> {
             offset += 1;
         }
 
-        if self
-            .byte_at(offset)
-            .is_some_and(|byte| matches!(byte, b'\t' | b' ' | b'\n' | b'\r' | 0x0C))
-        {
+        if self.byte_at(offset).is_some_and(is_css_whitespace_byte) {
             offset += 1;
         }
 
@@ -364,7 +335,7 @@ impl<'src> CssScanCursor<'src> {
         self.advance(1);
 
         match self.current_byte() {
-            Some(byte) if is_newline_byte(byte) => {
+            Some(byte) if is_css_newline_byte(byte) => {
                 let len = if byte == b'\r' && self.peek_byte() == Some(b'\n') {
                     2
                 } else {
@@ -464,10 +435,7 @@ impl<'src> CssScanCursor<'src> {
         debug_assert!(self.current_byte() == Some(b'/') && self.peek_byte() == Some(b'/'));
         self.advance(2);
 
-        let starts_like_comment = matches!(
-            self.current_byte(),
-            Some(b'\t' | b' ' | b'\n' | b'\r' | 0x0C)
-        );
+        let starts_like_comment = self.current_byte().is_some_and(is_css_whitespace_byte);
 
         while let Some(current) = self.current_byte() {
             match current {
@@ -494,13 +462,7 @@ impl<'src> CssScanCursor<'src> {
         loop {
             let start = self.position();
 
-            while let Some(byte) = self.current_byte() {
-                if matches!(byte, b'\t' | b' ' | b'\n' | b'\r' | 0x0C) {
-                    self.advance(1);
-                } else {
-                    break;
-                }
-            }
+            self.skip_whitespace();
 
             if self.current_byte() == Some(b'/') && self.peek_byte() == Some(b'*') {
                 self.consume_block_comment();
@@ -509,6 +471,13 @@ impl<'src> CssScanCursor<'src> {
             if self.position() == start {
                 return;
             }
+        }
+    }
+
+    /// Skips CSS whitespace without consuming comments.
+    fn skip_whitespace(&mut self) {
+        while self.current_byte().is_some_and(is_css_whitespace_byte) {
+            self.advance(1);
         }
     }
 
@@ -530,6 +499,46 @@ impl<'src> CssScanCursor<'src> {
                 return;
             }
         }
+    }
+
+    /// Returns whether the current position starts a final custom-property
+    /// `!important`, using the caller's line-comment policy.
+    ///
+    /// Example: `!important;` is final, while declaration content such as
+    /// `!important// raw\n;` is not.
+    pub(crate) fn scan_final_custom_property_important(mut self, skip_line_comments: bool) -> bool {
+        if self.current_byte() != Some(b'!') {
+            return false;
+        }
+
+        self.advance(1);
+        if skip_line_comments {
+            self.skip_scss_expression_trivia();
+        } else {
+            self.skip_whitespace_and_block_comments();
+        }
+
+        if !self.is_ident_start() {
+            return false;
+        }
+
+        let mut name = [0; 9];
+        let scan = self.consume_ident_sequence(&mut name);
+        if scan.count != name.len()
+            || !scan.only_ascii_used
+            || !scan.last_was_buffered
+            || &name != b"important"
+        {
+            return false;
+        }
+
+        if skip_line_comments {
+            self.skip_scss_expression_trivia();
+        } else {
+            self.skip_whitespace_and_block_comments();
+        }
+
+        matches!(self.current_byte(), None | Some(b';' | b'}' | b')'))
     }
 
     /// Skips URL-leading trivia while preserving protocol-relative raw URLs
@@ -621,6 +630,12 @@ impl<'src> CssScanCursor<'src> {
 
         while let Some(current) = self.current_byte() {
             match current {
+                b'\\' => {
+                    self.advance(1);
+                    if let Some(escaped) = self.current_byte() {
+                        self.advance_byte_or_char(escaped);
+                    }
+                }
                 b'\'' => self.consume_string(CssStringQuote::Single),
                 b'"' => self.consume_string(CssStringQuote::Double),
                 b'/' if self.peek_byte() == Some(b'*') => self.consume_block_comment(),
@@ -721,21 +736,6 @@ impl<'src> CssScanCursor<'src> {
         self.skip_scss_expression_trivia();
         self.current_byte() == Some(b'+')
     }
-
-    /// Classifies the first non-trivia content in a URL body as raw URL text,
-    /// interpolated function syntax, or ordinary tokenization.
-    pub(crate) fn scan_url_body_start(
-        self,
-        scss_exclusive_syntax_allowed: bool,
-    ) -> UrlBodyStartScan {
-        UrlBodyScanner::new(self).scan_url_body_start(scss_exclusive_syntax_allowed)
-    }
-
-    /// Scans a raw URL literal starting at the current position, if one can
-    /// begin here.
-    pub(crate) fn scan_url_raw_value(self) -> Option<PendingUrlRawValueScan> {
-        UrlBodyScanner::new(self).scan_url_raw_value(false)
-    }
 }
 
 /// Scans the body of a quoted string without committing lexer state.
@@ -791,7 +791,7 @@ impl<'src> ScssStringScanner<'src> {
                         ));
                     }
                 }
-                WHS if is_newline_byte(byte) => {
+                WHS if is_css_newline_byte(byte) => {
                     let len = if byte == b'\r' && self.cursor.peek_byte() == Some(b'\n') {
                         2
                     } else {
@@ -908,249 +908,6 @@ impl<'src> ScssInterpolatedIdentifierScanner<'src> {
         // identifier fragment follows it. This keeps trailing `-` boundaries
         // available for surrounding syntax such as operators or line breaks.
         self.is_at_identifier_fragment_at(1)
-    }
-}
-
-/// Classifies the first non-trivia token in a URL body.
-///
-/// CSS `url(...)` bodies are normally raw literals, but SCSS can place
-/// interpolation-containing function calls there, such as
-/// `url(foo#{1 + 1}(bar))`. This scanner decides whether the real lexer should
-/// emit a raw URL literal or stay on regular tokens so the parser can build the
-/// function call.
-#[derive(Debug, Copy, Clone)]
-struct UrlBodyScanner<'src> {
-    cursor: CssScanCursor<'src>,
-}
-
-impl<'src> UrlBodyScanner<'src> {
-    /// Creates a speculative URL-body scanner over the shared scan cursor.
-    const fn new(cursor: CssScanCursor<'src>) -> Self {
-        Self { cursor }
-    }
-
-    /// Classifies the first non-trivia URL-body content for the real lexer.
-    ///
-    /// Examples:
-    /// ```scss
-    /// url(fudge#{$x}.css)
-    /// url(foo#{$name}(bar))
-    /// url($path + ".css")
-    /// ```
-    fn scan_url_body_start(&mut self, scss_exclusive_syntax_allowed: bool) -> UrlBodyStartScan {
-        self.cursor.skip_url_body_trivia();
-
-        if scss_exclusive_syntax_allowed
-            && (Self {
-                cursor: self.cursor,
-            })
-            .is_at_scss_url_variable_concatenation()
-        {
-            UrlBodyStartScan::Other
-        } else {
-            self.scan_url_body_value(scss_exclusive_syntax_allowed)
-        }
-    }
-
-    /// Detects `$name + ...` URL bodies before raw URL lexing can consume them.
-    ///
-    /// Examples:
-    /// ```scss
-    /// url($path + ".css")
-    /// url($path /* c */ + ".css")
-    /// ```
-    fn is_at_scss_url_variable_concatenation(mut self) -> bool {
-        if self.cursor.current_byte() != Some(b'$') {
-            return false;
-        }
-
-        self.cursor.advance(1);
-
-        if !self.cursor.is_ident_start() {
-            return false;
-        }
-
-        self.cursor.advance_ident_sequence();
-        self.cursor.skip_scss_expression_trivia();
-        self.cursor.current_byte() == Some(b'+')
-    }
-
-    /// Classifies a URL body as raw text or an interpolated SCSS function call.
-    ///
-    /// Examples:
-    /// ```scss
-    /// url(foo#{$name}(bar))
-    /// url(fudge#{$x}.css)
-    /// ```
-    fn scan_url_body_value(&mut self, scss_exclusive_syntax_allowed: bool) -> UrlBodyStartScan {
-        let Some(current) = self.cursor.current_byte() else {
-            return UrlBodyStartScan::Other;
-        };
-
-        if !Self::is_url_raw_value_start(current) {
-            return UrlBodyStartScan::Other;
-        }
-
-        let start = self.cursor.position();
-
-        if scss_exclusive_syntax_allowed {
-            // `url(fudge#{$x}.css)`: this advances the speculative cursor once,
-            // then raw scanning continues from that point if the head is not a
-            // function.
-            if self.scan_scss_interpolated_url_head() {
-                return UrlBodyStartScan::InterpolatedFunction;
-            }
-        }
-
-        UrlBodyStartScan::RawValue(
-            self.scan_url_raw_value_from_current(start, scss_exclusive_syntax_allowed),
-        )
-    }
-
-    /// Scans a raw URL literal from the current position until `)` or EOF.
-    ///
-    /// Examples:
-    /// ```scss
-    /// url(foo.css)
-    /// url(fudge#{$x}.css)
-    /// ```
-    fn scan_url_raw_value(
-        &mut self,
-        scss_exclusive_syntax_allowed: bool,
-    ) -> Option<PendingUrlRawValueScan> {
-        let current = self.cursor.current_byte()?;
-
-        // Reuse the lexer's "can a raw URL literal start here?" classification
-        // before switching into byte-oriented URL scanning.
-        if !Self::is_url_raw_value_start(current) {
-            return None;
-        }
-
-        let start = self.cursor.position();
-        Some(self.scan_url_raw_value_from_current(start, scss_exclusive_syntax_allowed))
-    }
-
-    /// Continues raw URL scanning after the caller has already fixed the token start.
-    ///
-    /// Example: `url(fudge#{$x}.css)` may resume at `.css`, but the raw token
-    /// still starts at `fudge`.
-    fn scan_url_raw_value_from_current(
-        &mut self,
-        start: usize,
-        scss_exclusive_syntax_allowed: bool,
-    ) -> PendingUrlRawValueScan {
-        while let Some(current) = self.cursor.current_byte() {
-            if scss_exclusive_syntax_allowed && self.cursor.is_at_scss_interpolation() {
-                let mut after_interpolation = self.cursor;
-                // `url(foo#{bar("x")}.css)`: an inner `)` belongs to the
-                // interpolation and must not terminate the raw URL token.
-                if after_interpolation.consume_scss_interpolation_in_raw_url() {
-                    self.cursor = after_interpolation;
-                    continue;
-                }
-            }
-
-            match lookup_byte(current) {
-                PNC => {
-                    return PendingUrlRawValueScan {
-                        start,
-                        end: self.cursor.position(),
-                        terminated: true,
-                    };
-                }
-                BSL if self.cursor.is_valid_escape_at(1) => self.consume_url_escape(),
-                _ => self.cursor.advance_byte_or_char(current),
-            }
-        }
-
-        PendingUrlRawValueScan {
-            start,
-            end: self.cursor.position(),
-            terminated: false,
-        }
-    }
-
-    /// Scans an identifier-shaped URL head that contains SCSS interpolation.
-    ///
-    /// Examples:
-    /// ```scss
-    /// url(foo#{$name}(bar)) // function
-    /// url(fudge#{$x}.css)  // raw URL
-    /// ```
-    fn scan_scss_interpolated_url_head(&mut self) -> bool {
-        if !self.is_at_scss_identifier_fragment() {
-            return false;
-        }
-
-        let mut saw_interpolation = false;
-
-        loop {
-            if self.is_at_scss_identifier_hyphen() {
-                self.cursor.advance(1);
-            } else if self.cursor.is_at_scss_interpolation() {
-                let mut after_interpolation = self.cursor;
-                if !after_interpolation.consume_scss_interpolation_in_raw_url() {
-                    return false;
-                }
-
-                self.cursor = after_interpolation;
-                saw_interpolation = true;
-            } else if self.cursor.is_ident_start() {
-                self.cursor.advance_ident_sequence();
-            } else {
-                break;
-            }
-        }
-
-        saw_interpolation && self.cursor.current_byte() == Some(b'(')
-    }
-
-    /// Consumes a raw-URL escape after `\`, preserving UTF-8 boundaries for
-    /// escaped non-ASCII characters.
-    fn consume_url_escape(&mut self) {
-        debug_assert!(self.cursor.current_byte() == Some(b'\\'));
-        self.cursor.advance(1);
-
-        match self.cursor.current_byte() {
-            Some(byte) if byte.is_ascii() => self.cursor.advance(1),
-            // URL raw values are otherwise byte-oriented, but escaped
-            // non-ASCII characters must still advance on a UTF-8 boundary so
-            // the next loop iteration does not slice in the middle of a code
-            // point.
-            Some(current) => self.cursor.advance_byte_or_char(current),
-            None => {}
-        }
-    }
-
-    /// Returns true for bytes that may begin raw URL body text.
-    ///
-    /// Example: `url(foo.css)`.
-    fn is_url_raw_value_start(byte: u8) -> bool {
-        matches!(
-            lookup_byte(byte),
-            IDT | DOL | UNI | PRD | SLH | ZER | DIG | TLD | HAS
-        )
-    }
-
-    /// Returns true when `position + offset` can continue an interpolated URL head.
-    ///
-    /// Examples: `foo#{$name}` or `#{$name}`.
-    fn is_at_scss_identifier_fragment_at(&self, offset: usize) -> bool {
-        self.cursor.is_at_scss_interpolation_at(offset) || self.cursor.is_ident_start_at(offset)
-    }
-
-    /// Returns true when the current byte can continue an interpolated URL head.
-    ///
-    /// Examples: `foo#{$name}` or `#{$name}`.
-    fn is_at_scss_identifier_fragment(&self) -> bool {
-        self.is_at_scss_identifier_fragment_at(0)
-    }
-
-    /// Returns true when `-` belongs to the interpolated URL head.
-    ///
-    /// Example: `url(foo-#{$name}(bar))`.
-    fn is_at_scss_identifier_hyphen(&self) -> bool {
-        self.cursor.current_byte() == Some(b'-') && self.is_at_scss_identifier_fragment_at(1)
     }
 }
 

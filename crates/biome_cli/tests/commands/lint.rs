@@ -1,3 +1,4 @@
+use crate::TestArgs as Args;
 use crate::configs::{
     CONFIG_FILE_SIZE_LIMIT, CONFIG_LINTER_DISABLED, CONFIG_LINTER_DISABLED_JSONC,
     CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC, CONFIG_LINTER_DOWNGRADE_DIAGNOSTIC_INFO,
@@ -13,7 +14,6 @@ use crate::{
 };
 use biome_console::{BufferConsole, LogLevel, MarkupBuf, markup};
 use biome_fs::{ErrorEntry, FileSystemExt, MemoryFileSystem, OsFileSystem, TemporaryFs};
-use bpaf::Args;
 use camino::{Utf8Path, Utf8PathBuf};
 use std::env::temp_dir;
 use std::fs::{File, create_dir, create_dir_all, remove_dir_all};
@@ -2713,6 +2713,38 @@ fn lint_syntax_rules() {
 }
 
 #[test]
+fn lint_invalid_property_syntax() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Utf8Path::new("check.css");
+    fs.insert(
+        file_path.into(),
+        r#"@property --value {
+    syntax: "<unknown>";
+    inherits: false;
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file_path.as_str()].as_slice()),
+    );
+
+    assert!(result.is_err(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_invalid_property_syntax",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn should_lint_error_without_file_paths() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -4550,6 +4582,35 @@ fn only_per_plugin_selector_is_rejected() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "only_per_plugin_selector_is_rejected",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn missing_plugins_report_their_paths() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    fs.insert(
+        Utf8PathBuf::from("biome.json"),
+        br#"{
+    "plugins": ["missingOne.grit", "missingTwo.grit"]
+}
+"#,
+    );
+
+    let file_path = "file.js";
+
+    fs.insert(file_path.into(), b"debugger\n");
+
+    let (fs, result) =
+        run_cli_with_server_workspace(fs, &mut console, Args::from(["lint", file_path].as_slice()));
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "missing_plugins_report_their_paths",
         fs,
         console,
         result,

@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```js
+let
+
+```
+
+
+## AST
+
+```
+JsSvelteDeclarationRoot {
+    declaration: JsBogusVariableDeclaration {
+        items: [
+            LET_KW@0..3 "let" [] [],
+            JsBogus {
+                items: [],
+            },
+        ],
+    },
+    semicolon_token: missing (optional),
+    eof_token: EOF@3..4 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SVELTE_DECLARATION_ROOT@0..4
+  0: JS_BOGUS_VARIABLE_DECLARATION@0..3
+    0: LET_KW@0..3 "let" [] []
+    1: JS_BOGUS@3..3
+  1: (empty)
+  2: EOF@3..4 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+incomplete_let.svelte_declaration.js:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, an array pattern, or an object pattern but instead found the end of the file.
+  
+    1 │ let
+  > 2 │ 
+      │ 
+  
+  i Expected an identifier, an array pattern, or an object pattern here.
+  
+    1 │ let
+  > 2 │ 
+      │ 
+  
+```

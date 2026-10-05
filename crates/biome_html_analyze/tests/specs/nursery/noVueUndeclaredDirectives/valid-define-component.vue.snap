@@ -1,0 +1,22 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid-define-component.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+const defineComponent = (options) => options;
+
+export default defineComponent({
+    directives: {
+        definedWithComponent: {},
+    },
+});
+</script>
+
+<template>
+    <div v-defined-with-component></div>
+</template>
+
+```

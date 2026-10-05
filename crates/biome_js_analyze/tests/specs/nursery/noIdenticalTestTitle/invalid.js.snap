@@ -32,6 +32,18 @@ describe('template titles', () => {
 describe(`suite alpha`, () => {});
 describe(`suite alpha`, () => {});
 
+// Duplicate test titles inside a suite
+suite('my suite', () => {
+  it('should do bar', () => {});
+  it('should do bar', () => {});
+});
+
+// Duplicate suite titles inside a suite
+suite('outer suite', () => {
+  suite('nested', () => {});
+  suite('nested', () => {});
+});
+
 ```
 
 # Diagnostics
@@ -129,6 +141,49 @@ invalid.js:27:1 lint/nursery/noIdenticalTestTitle ━━━━━━━━━━
   > 27 │ describe(`suite alpha`, () => {});
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     28 │ 
+    29 │ // Duplicate test titles inside a suite
+  
+  i A describe with this title already exists in the same scope.
+  
+  i Rename the describe to give it a unique, descriptive title.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:32:3 lint/nursery/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate test title found.
+  
+    30 │ suite('my suite', () => {
+    31 │   it('should do bar', () => {});
+  > 32 │   it('should do bar', () => {});
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ });
+    34 │ 
+  
+  i A test with this title already exists in the same scope.
+  
+  i Rename the test to give it a unique, descriptive title.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:38:3 lint/nursery/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate describe title found.
+  
+    36 │ suite('outer suite', () => {
+    37 │   suite('nested', () => {});
+  > 38 │   suite('nested', () => {});
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ });
+    40 │ 
   
   i A describe with this title already exists in the same scope.
   

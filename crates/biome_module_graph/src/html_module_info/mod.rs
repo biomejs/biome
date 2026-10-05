@@ -1,11 +1,11 @@
 mod visitor;
 
 use crate::css_module_info::{CssClassDefinition, CssClassReference};
-use biome_css_syntax::{AnyCssRoot, TextRange};
-use biome_js_syntax::AnyJsRoot;
-use biome_languages::CssFileSource;
-use biome_resolver::ResolvedPath;
-use biome_rowan::{Text, TextSize, TokenText};
+use crate::{ImportPathMap, ModuleDb, ModuleInfo, ResolutionMode, resolve_module_import};
+use biome_css_syntax::TextRange;
+use biome_languages::css::EmbeddingStyleApplicability;
+use biome_resolver::ResolvedSpecifier;
+use biome_rowan::{Text, TokenText};
 use indexmap::IndexMap;
 use indexmap::IndexSet;
 use std::collections::BTreeSet;
@@ -13,29 +13,7 @@ use std::ops::Deref;
 use std::sync::Arc;
 
 pub(crate) use visitor::HtmlModuleVisitor;
-
-/// A single embedded content block extracted from an HTML-like file
-/// (`*.html`, `*.vue`, `*.astro`, `*.svelte`).
-///
-/// This is passed to [`ModuleGraph::update_graph_for_html_paths`] so the
-/// module graph can track both CSS class definitions and JS static imports
-/// without the caller needing to know how they are processed internally.
-///
-/// The caller (workspace server or test helper) is responsible for:
-/// - Resolving `file_source_index → CssFileSource` for CSS blocks.
-/// - Providing already-parsed `AnyCssRoot` / `AnyJsRoot` syntax trees.
-///
-/// The module graph is responsible for all downstream logic (class collection,
-/// import resolution, upward traversal).
-pub enum HtmlEmbeddedContent {
-    /// A `<style>` block with its resolved CSS source and content offset
-    /// within the parent document.
-    ///
-    /// [`EmbeddingApplicability`]: biome_css_syntax::EmbeddingStyleApplicability
-    Css(AnyCssRoot, CssFileSource, TextSize),
-    /// A `<script>` block parsed as JS/TS.
-    Js(AnyJsRoot),
-}
+pub use visitor::{PreparedHtmlModule, prepare_html_module};
 
 /// Information restricted to a single HTML module in the [ModuleGraph].
 ///
@@ -58,16 +36,14 @@ impl HtmlModuleInfo {
     pub(crate) fn new(
         style_classes: IndexSet<CssClassDefinition>,
         referenced_classes: Vec<CssClassReference>,
-        imported_stylesheets: Vec<ResolvedPath>,
-        static_import_paths: IndexMap<Text, ResolvedPath>,
-        dynamic_import_paths: IndexMap<Text, ResolvedPath>,
+        imported_stylesheets: Vec<HtmlImport>,
+        import_paths: ImportPathMap<HtmlImport>,
     ) -> Self {
         let info = HtmlModuleInfoInner {
             style_classes,
             referenced_classes,
             imported_stylesheets,
-            static_import_paths,
-            dynamic_import_paths,
+            import_paths,
         };
         Self(Arc::new(info))
     }
@@ -95,6 +71,45 @@ impl HtmlModuleInfo {
     }
 }
 
+/// A stylesheet or script import at its position in an HTML-like document.
+#[derive(Clone, Debug)]
+pub struct HtmlImport {
+    /// Absolute range of the element or JavaScript import expression.
+    pub range: TextRange,
+    /// The module specifier as it appeared in source text.
+    pub specifier: Text,
+    /// Whether the import is visible outside the containing HTML-like component.
+    pub applicability: EmbeddingStyleApplicability,
+}
+
+impl HtmlImport {
+    /// Resolves this stylesheet import of the HTML-like `module`, such as a
+    /// `<link rel="stylesheet">` element or an `@import` in a `<style>` block.
+    ///
+    /// Use this for the imports in `imported_stylesheets`. See
+    /// [ResolutionMode::Css] for the resolution rules.
+    pub fn resolve_css<'db>(
+        &self,
+        db: &'db dyn ModuleDb,
+        module: ModuleInfo,
+    ) -> &'db ResolvedSpecifier {
+        resolve_module_import(db, module, &self.specifier, ResolutionMode::Css)
+    }
+
+    /// Resolves this import made by a `<script>` block of the HTML-like
+    /// `module`.
+    ///
+    /// Use this for the imports in `import_paths`. See
+    /// [ResolutionMode::HtmlScript] for the resolution rules.
+    pub fn resolve_html<'db>(
+        &self,
+        db: &'db dyn ModuleDb,
+        module: ModuleInfo,
+    ) -> &'db ResolvedSpecifier {
+        resolve_module_import(db, module, &self.specifier, ResolutionMode::HtmlScript)
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct HtmlModuleInfoInner {
     /// CSS class names defined in `<style>` blocks within this HTML file.
@@ -111,19 +126,11 @@ pub struct HtmlModuleInfoInner {
     /// which may contain multiple space-separated class names.
     pub referenced_classes: Vec<CssClassReference>,
 
-    /// Resolved paths of external stylesheets linked via
-    /// `<link rel="stylesheet" href="...">`.
-    pub imported_stylesheets: Vec<ResolvedPath>,
+    /// Stylesheet imports from `<link>` elements and embedded `<style>` blocks.
+    pub imported_stylesheets: Vec<HtmlImport>,
 
-    /// Resolved paths of JS/TS modules imported from embedded `<script>` blocks.
-    ///
-    /// Keys are the raw import specifiers (e.g. `"./Button.vue"`); values are
-    /// their resolved absolute paths. Only static imports (`import … from "…"`)
-    /// are tracked here — dynamic imports are ignored for upward-traversal.
-    pub static_import_paths: IndexMap<Text, ResolvedPath>,
-
-    /// Resolved paths of JS/TS modules imported from dynamic imports.
-    pub dynamic_import_paths: IndexMap<Text, ResolvedPath>,
+    /// Import specifiers from embedded `<script>` blocks in source order.
+    pub import_paths: ImportPathMap<HtmlImport>,
 }
 
 impl HtmlModuleInfoInner {

@@ -372,12 +372,9 @@ impl Iterator for SameIdentifiers {
                 // resume the previous one
                 AnyAssignmentLike::None => {
                     // we still have assignments-like to complete, so we continue the loop
-                    if let Some(pair) = self.assignment_queue.pop_front() {
+                    {
+                        let pair = self.assignment_queue.pop_front()?;
                         self.current_assignment_like = pair;
-                    }
-                    // the queue is empty
-                    else {
-                        return None;
                     }
                 }
                 AnyAssignmentLike::Identifiers(identifier_like) => {

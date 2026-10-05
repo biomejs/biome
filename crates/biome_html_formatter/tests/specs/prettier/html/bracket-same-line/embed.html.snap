@@ -23,27 +23,31 @@ alert(1)</script>
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,16 +1,12 @@
+@@ -1,16 +1,20 @@
  <script
    long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
  >
 -  alert(1)
--</script>
-+alert(1)</script>
++  alert(1);
+ </script>
  <style
    long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
  >
 -  .a{color: #f00}
--</style>
-+.a{color: #f00}</style>
++  .a {
++    color: #f00;
++  }
+ </style>
  <script>
 -  alert(1)
--</script>
-+alert(1)</script>
++  alert(1);
+ </script>
  <style>
 -  .a{color: #f00}
--</style>
-+.a{color: #f00}</style>
++  .a {
++    color: #f00;
++  }
+ </style>
 ```
 
 # Output
@@ -52,19 +56,27 @@ alert(1)</script>
 <script
   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
 >
-alert(1)</script>
+  alert(1);
+</script>
 <style
   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
 >
-.a{color: #f00}</style>
+  .a {
+    color: #f00;
+  }
+</style>
 <script>
-alert(1)</script>
+  alert(1);
+</script>
 <style>
-.a{color: #f00}</style>
+  .a {
+    color: #f00;
+  }
+</style>
 ```
 
 # Lines exceeding max width of 80 characters
 ```
     2:   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
-    6:   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+    7:   long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
 ```

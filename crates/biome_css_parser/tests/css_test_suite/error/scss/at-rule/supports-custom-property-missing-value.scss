@@ -1,0 +1,12 @@
+@supports (--empty:) {
+  .empty {
+    color: purple;
+  }
+}
+
+@supports (--line-comment-only: // silent
+) {
+  .line-comment-only {
+    color: orange;
+  }
+}

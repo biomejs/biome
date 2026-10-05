@@ -79,9 +79,9 @@ CssRoot {
                                     percent_token: missing (optional),
                                 },
                             ],
-                            block: CssDeclarationBlock {
+                            block: CssDeclarationOrAtRuleBlock {
                                 l_curly_token: L_CURLY@44..45 "{" [] [],
-                                declarations: CssDeclarationList [
+                                items: CssDeclarationOrAtRuleList [
                                     CssDeclarationWithSemicolon {
                                         declaration: CssDeclaration {
                                             property: CssGenericProperty {
@@ -111,9 +111,9 @@ CssRoot {
                                     selector: TO_KW@65..72 "to" [Newline("\n"), Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
                                 },
                             ],
-                            block: CssDeclarationBlock {
+                            block: CssDeclarationOrAtRuleBlock {
                                 l_curly_token: L_CURLY@72..73 "{" [] [],
-                                declarations: CssDeclarationList [
+                                items: CssDeclarationOrAtRuleList [
                                     CssDeclarationWithSemicolon {
                                         declaration: CssDeclaration {
                                             property: CssGenericProperty {
@@ -190,9 +190,9 @@ CssRoot {
                             0: IDENT@38..42 "stop" [] []
                     3: R_CURLY@42..44 "}" [] [Whitespace(" ")]
                   1: (empty)
-              1: CSS_DECLARATION_BLOCK@44..65
+              1: CSS_DECLARATION_OR_AT_RULE_BLOCK@44..65
                 0: L_CURLY@44..45 "{" [] []
-                1: CSS_DECLARATION_LIST@45..61
+                1: CSS_DECLARATION_OR_AT_RULE_LIST@45..61
                   0: CSS_DECLARATION_WITH_SEMICOLON@45..61
                     0: CSS_DECLARATION@45..60
                       0: CSS_GENERIC_PROPERTY@45..60
@@ -210,9 +210,9 @@ CssRoot {
               0: CSS_KEYFRAMES_SELECTOR_LIST@65..72
                 0: CSS_KEYFRAMES_IDENT_SELECTOR@65..72
                   0: TO_KW@65..72 "to" [Newline("\n"), Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
-              1: CSS_DECLARATION_BLOCK@72..93
+              1: CSS_DECLARATION_OR_AT_RULE_BLOCK@72..93
                 0: L_CURLY@72..73 "{" [] []
-                1: CSS_DECLARATION_LIST@73..89
+                1: CSS_DECLARATION_OR_AT_RULE_LIST@73..89
                   0: CSS_DECLARATION_WITH_SEMICOLON@73..89
                     0: CSS_DECLARATION@73..88
                       0: CSS_GENERIC_PROPERTY@73..88

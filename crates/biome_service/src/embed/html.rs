@@ -1,5 +1,5 @@
 use super::EmbedContent;
-use biome_html_syntax::{AnySvelteBlock, ScriptType};
+use biome_html_syntax::{AnySvelteBlock, ScriptType, element_ext::is_css_style_attribute_value};
 use biome_languages::javascript::Language;
 use biome_languages::{CssFileSource, DocumentFileSource, JsFileSource, JsonFileSource};
 use biome_rowan::TokenText;
@@ -72,6 +72,12 @@ pub(crate) enum EmbedCandidate {
         content: EmbedContent,
         is_event_handler: bool,
         is_class_attribute: bool,
+        /// Whether the value holds the props of a Vue slot (`v-slot="{ item }"`)
+        is_slot_props: bool,
+    },
+    Attribute {
+        name: TokenText,
+        content: EmbedContent,
     },
 }
 
@@ -87,6 +93,7 @@ pub(crate) enum SvelteBlockKind {
     Render,
     Snippet,
     Const,
+    Declaration,
 }
 
 impl From<&AnySvelteBlock> for EmbedBlockKind {
@@ -100,6 +107,7 @@ impl From<&AnySvelteBlock> for EmbedBlockKind {
             | AnySvelteBlock::SvelteIfBlock(_)
             | AnySvelteBlock::SvelteKeyBlock(_) => Self::Neutral,
             AnySvelteBlock::SvelteConstBlock(_) => Self::Svelte(SvelteBlockKind::Const),
+            AnySvelteBlock::SvelteDeclarationBlock(_) => Self::Svelte(SvelteBlockKind::Declaration),
             AnySvelteBlock::SvelteRenderBlock(_) => Self::Svelte(SvelteBlockKind::Render),
             AnySvelteBlock::SvelteSnippetBlock(_) => Self::Svelte(SvelteBlockKind::Snippet),
         }
@@ -112,7 +120,8 @@ impl EmbedCandidate {
             Self::Element { content, .. }
             | Self::Frontmatter { content }
             | Self::TextExpression { content, .. }
-            | Self::Directive { content, .. } => content.clone(),
+            | Self::Directive { content, .. }
+            | Self::Attribute { content, .. } => content.clone(),
         }
     }
 
@@ -190,6 +199,10 @@ enum EmbedDetector {
     Directive {
         target: EmbedTarget,
     },
+    Attribute {
+        name: &'static str,
+        target: EmbedTarget,
+    },
 }
 
 impl EmbedDetector {
@@ -214,6 +227,13 @@ impl EmbedDetector {
             }
             (Self::Directive { target }, EmbedCandidate::Directive { .. }) => {
                 target.resolve(candidate, file_source)
+            }
+            (Self::Attribute { name, target }, EmbedCandidate::Attribute { name: actual, .. }) => {
+                if actual.text().eq_ignore_ascii_case(name) {
+                    target.resolve(candidate, file_source)
+                } else {
+                    None
+                }
             }
             _ => None,
         }
@@ -241,7 +261,7 @@ impl EmbedTarget {
     }
 }
 
-static HTML_DETECTORS: [EmbedDetector; 5] = [
+static HTML_DETECTORS: [EmbedDetector; 6] = [
     EmbedDetector::Element {
         tag: "script",
         target: EmbedTarget::Dynamic {
@@ -268,6 +288,13 @@ static HTML_DETECTORS: [EmbedDetector; 5] = [
     EmbedDetector::Directive {
         target: EmbedTarget::Dynamic {
             resolver: resolve_directive_language,
+            fallback: None,
+        },
+    },
+    EmbedDetector::Attribute {
+        name: "style",
+        target: EmbedTarget::Dynamic {
+            resolver: resolve_style_attribute_language,
             fallback: None,
         },
     },
@@ -333,7 +360,25 @@ fn resolve_text_expression_language(
 
 fn resolve_directive_language(
     _candidate: &EmbedCandidate,
+    file_source: &DocumentFileSource,
+) -> Option<GuestLanguage> {
+    if file_source
+        .to_html_file_source()
+        .is_some_and(|source| source.is_astro())
+    {
+        // Astro compiles `.astro` as TSX throughout, attribute positions included.
+        Some(GuestLanguage::Tsx)
+    } else {
+        Some(GuestLanguage::JsModule)
+    }
+}
+
+fn resolve_style_attribute_language(
+    candidate: &EmbedCandidate,
     _file_source: &DocumentFileSource,
 ) -> Option<GuestLanguage> {
-    Some(GuestLanguage::JsModule)
+    let EmbedCandidate::Attribute { content, .. } = candidate else {
+        return None;
+    };
+    is_css_style_attribute_value(content.text.text()).then_some(GuestLanguage::Css)
 }

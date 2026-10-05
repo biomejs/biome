@@ -1,0 +1,146 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+## 
+#
+### ###
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdHeader {
+            indent: MdIndentTokenList [],
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@0..1 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@1..2 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [
+                    MdTextual {
+                        value_token: MD_TEXTUAL_LITERAL@2..3 " " [] [],
+                    },
+                ],
+            },
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@3..4 "\n" [] [],
+        },
+        MdHeader {
+            indent: MdIndentTokenList [],
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@4..5 "#" [] [],
+                },
+            ],
+            content: missing (optional),
+            after: MdHashList [],
+        },
+        MdNewline {
+            value_token: NEWLINE@5..6 "\n" [] [],
+        },
+        MdHeader {
+            indent: MdIndentTokenList [],
+            before: MdHashList [
+                MdHash {
+                    hash_token: HASH@6..7 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@7..8 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@8..9 "#" [] [],
+                },
+            ],
+            content: MdParagraph {
+                list: MdInlineItemList [],
+            },
+            after: MdHashList [
+                MdHash {
+                    hash_token: HASH@9..11 "#" [Whitespace(" ")] [],
+                },
+                MdHash {
+                    hash_token: HASH@11..12 "#" [] [],
+                },
+                MdHash {
+                    hash_token: HASH@12..13 "#" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@13..14 "\n" [] [],
+        },
+    ],
+    eof_token: EOF@14..14 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..14
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..14
+    0: MD_HEADER@0..3
+      0: MD_INDENT_TOKEN_LIST@0..0
+      1: MD_HASH_LIST@0..2
+        0: MD_HASH@0..1
+          0: HASH@0..1 "#" [] []
+        1: MD_HASH@1..2
+          0: HASH@1..2 "#" [] []
+      2: MD_PARAGRAPH@2..3
+        0: MD_INLINE_ITEM_LIST@2..3
+          0: MD_TEXTUAL@2..3
+            0: MD_TEXTUAL_LITERAL@2..3 " " [] []
+      3: MD_HASH_LIST@3..3
+    1: MD_NEWLINE@3..4
+      0: NEWLINE@3..4 "\n" [] []
+    2: MD_HEADER@4..5
+      0: MD_INDENT_TOKEN_LIST@4..4
+      1: MD_HASH_LIST@4..5
+        0: MD_HASH@4..5
+          0: HASH@4..5 "#" [] []
+      2: (empty)
+      3: MD_HASH_LIST@5..5
+    3: MD_NEWLINE@5..6
+      0: NEWLINE@5..6 "\n" [] []
+    4: MD_HEADER@6..13
+      0: MD_INDENT_TOKEN_LIST@6..6
+      1: MD_HASH_LIST@6..9
+        0: MD_HASH@6..7
+          0: HASH@6..7 "#" [] []
+        1: MD_HASH@7..8
+          0: HASH@7..8 "#" [] []
+        2: MD_HASH@8..9
+          0: HASH@8..9 "#" [] []
+      2: MD_PARAGRAPH@9..9
+        0: MD_INLINE_ITEM_LIST@9..9
+      3: MD_HASH_LIST@9..13
+        0: MD_HASH@9..11
+          0: HASH@9..11 "#" [Whitespace(" ")] []
+        1: MD_HASH@11..12
+          0: HASH@11..12 "#" [] []
+        2: MD_HASH@12..13
+          0: HASH@12..13 "#" [] []
+    5: MD_NEWLINE@13..14
+      0: NEWLINE@13..14 "\n" [] []
+  3: EOF@14..14 "" [] []
+
+```

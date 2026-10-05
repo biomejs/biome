@@ -167,7 +167,7 @@ fn extract_from_static_member(
     let env_member = parent_member.member().ok()?;
 
     // Must be accessing ".env"
-    if env_member.as_js_name()?.to_trimmed_text().text() != "env" {
+    if env_member.as_js_name()?.value_token().ok()?.text_trimmed() != "env" {
         return None;
     }
 
@@ -192,7 +192,7 @@ fn extract_from_computed_member(
     let env_member = parent_member.member().ok()?;
 
     // Must be accessing ".env"
-    if env_member.as_js_name()?.to_trimmed_text().text() != "env" {
+    if env_member.as_js_name()?.value_token().ok()?.text_trimmed() != "env" {
         return None;
     }
 
@@ -236,7 +236,7 @@ fn match_deno_env_get(
     };
 
     let get_member = static_expr.member().ok()?;
-    if get_member.as_js_name()?.to_trimmed_text().text() != "get" {
+    if get_member.as_js_name()?.value_token().ok()?.text_trimmed() != "get" {
         return None;
     }
 
@@ -246,8 +246,9 @@ fn match_deno_env_get(
         .member()
         .ok()?
         .as_js_name()?
-        .to_trimmed_text()
-        .text()
+        .value_token()
+        .ok()?
+        .text_trimmed()
         != "env"
     {
         return None;
