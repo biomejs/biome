@@ -15900,7 +15900,7 @@
 			"type": "object",
 			"properties": {
 				"attributes": {
-					"description": "Attributes whose values are Tailwind classes, such as `class` in\n`<div class=\"px-2 py-2\">`.\n\nDefaults to `class` and `className`. In HTML, attribute names match\nregardless of case.",
+					"description": "Attributes whose values are Tailwind classes, such as `class` in\n`<div class=\"px-2 py-2\">`.\n\nDefaults to `class` and `className`. In HTML, they are case-insensitive.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},

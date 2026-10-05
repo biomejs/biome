@@ -414,8 +414,7 @@ export interface TailwindConfiguration {
 	* Attributes whose values are Tailwind classes, such as `class` in
 `<div class="px-2 py-2">`.
 
-Defaults to `class` and `className`. In HTML, attribute names match
-regardless of case. 
+Defaults to `class` and `className`. In HTML, they are case-insensitive. 
 	 */
 	attributes?: string[];
 	/**
