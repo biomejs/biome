@@ -6,22 +6,22 @@
 //! without resolving every type collected for the module.
 
 use super::{
-    BindingTypeInput, BindingTypeWithImportBudgetInput, ExpressionTypeInput, FlowRootInput,
-    LocalTypeInput, LocalTypeWithImportBudgetInput,
+    BindingTypeInput, BindingTypeWithImportBudgetInput, ExpressionTypeInput, FlowBindingTypeInput,
+    FlowRootInput, LocalTypeInput, LocalTypeWithImportBudgetInput,
 };
 use crate::ModuleDb;
 use crate::db::type_inference::{
-    ImportResolution, ResolutionCtx, find_member_type_on_demand as find_member_type_impl,
-    find_value_member_type_on_demand as find_value_member_type_impl, flow_expression_type,
-    resolve_local_type_on_demand,
+    FlowCandidates, ImportResolution, ResolutionCtx,
+    find_member_type_on_demand as find_member_type_impl,
+    find_value_member_type_on_demand as find_value_member_type_impl, flow_binding_type,
+    flow_expression_type, resolve_local_type_on_demand,
 };
 use crate::module_graph::ModuleInfoKind;
 use crate::type_inference::profiling::{
     TypeInferenceProfileOrigin, TypeInferenceQueryKind, execute_query,
 };
 use biome_js_control_flow::{
-    AnyJsControlFlowRoot, ControlFlowModel, NarrowingFlowGraph, control_flow_model,
-    narrowing_flow_graph,
+    AnyJsControlFlowRoot, NarrowingFlowGraph, control_flow_graph, narrowing_flow_graph,
 };
 use biome_js_type_info::{InferredType, TypeId, interned_types::TypeData as InferredTypeData};
 use biome_rowan::AstNode;
@@ -69,12 +69,26 @@ pub fn infer_expression_type<'db>(
     )
 }
 
-/// Returns an occurrence-sensitive result when runtime flow affects an expression.
-///
-/// `None` preserves the raw lookup path when no supported refinement applies.
-/// Cycles or incomplete flow evaluation return `Unknown`, not a raw fallback.
+#[salsa::tracked]
+pub(in crate::db) fn flow_candidates_for_module(
+    db: &dyn ModuleDb,
+    module: crate::ModuleInfo,
+) -> Option<FlowCandidates> {
+    execute_query(
+        TypeInferenceQueryKind::Lookups,
+        TypeInferenceProfileOrigin::document(module),
+        "flow_candidates_for_module",
+        || {
+            let ModuleInfoKind::Js(info) = module.kind(db) else {
+                return None;
+            };
+            info.infer_types.then(|| FlowCandidates::collect(info))
+        },
+    )
+}
+
 #[salsa::tracked(returns(copy), cycle_result=infer_expression_type_cycle_result)]
-pub(crate) fn infer_flow_expression_type<'db>(
+fn infer_flow_expression_type_impl<'db>(
     db: &'db dyn ModuleDb,
     input: ExpressionTypeInput<'db>,
 ) -> Option<InferredTypeData<'db>> {
@@ -83,7 +97,7 @@ pub(crate) fn infer_flow_expression_type<'db>(
     execute_query(
         TypeInferenceQueryKind::Lookups,
         TypeInferenceProfileOrigin::exact(module, expression),
-        "infer_flow_expression_type",
+        "infer_flow_expression_type_impl",
         || {
             let ModuleInfoKind::Js(info) = module.kind(db) else {
                 return None;
@@ -96,12 +110,32 @@ pub(crate) fn infer_flow_expression_type<'db>(
     )
 }
 
-#[salsa::tracked]
-fn module_control_flow(db: &dyn ModuleDb, module: crate::ModuleInfo) -> Option<ControlFlowModel> {
-    let ModuleInfoKind::Js(info) = module.kind(db) else {
-        return None;
-    };
-    Some(control_flow_model(&info.semantic_model.root()))
+/// Refines one binding at a demanded incoming flow point, shared by its reads.
+///
+/// Returns `None` for unavailable or ineligible bindings, invalid roots or points,
+/// unsupported flow, or an unchanged type. Cycles and incomplete flow evaluation
+/// return an `Unknown` override rather than allowing the raw lookup to take over.
+#[salsa::tracked(returns(copy), cycle_result=infer_flow_binding_type_cycle_result)]
+pub(crate) fn infer_flow_binding_type<'db>(
+    db: &'db dyn ModuleDb,
+    input: FlowBindingTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let binding = input.binding(db);
+    let module = binding.module(db);
+    execute_query(
+        TypeInferenceQueryKind::Lookups,
+        TypeInferenceProfileOrigin::exact(module, binding.range(db)),
+        "infer_flow_binding_type",
+        || {
+            let ModuleInfoKind::Js(info) = module.kind(db) else {
+                return None;
+            };
+            if !info.infer_types || input.root(db).module(db) != module {
+                return None;
+            }
+            flow_binding_type(db, module, info, input)
+        },
+    )
 }
 
 #[salsa::tracked]
@@ -130,7 +164,7 @@ pub(crate) fn narrowing_flow_for_root<'db>(
     let mut nodes = root.syntax().descendants();
     for _ in 0..16_384 {
         let Some(node) = nodes.next() else {
-            let graph = module_control_flow(db, module).as_ref()?.graph(&root)?;
+            let graph = control_flow_graph(&root)?;
             return narrowing_flow_graph(&graph);
         };
         if let Some(reference) = biome_js_syntax::JsReferenceIdentifier::cast(node)
@@ -285,6 +319,14 @@ fn infer_expression_type_cycle_result<'db>(
     Some(InferredTypeData::Unknown)
 }
 
+fn infer_flow_binding_type_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: FlowBindingTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    Some(InferredTypeData::Unknown)
+}
+
 fn infer_binding_type_cycle_result<'db>(
     _db: &'db dyn ModuleDb,
     _id: salsa::Id,
@@ -320,6 +362,22 @@ fn infer_local_type_with_import_budget_cycle_result<'db>(
 // #endregion
 
 // #region TYPE HELPERS
+
+/// Returns an occurrence-sensitive result when runtime flow affects an expression.
+///
+/// Proven non-candidates avoid the occurrence query entirely. `None` preserves
+/// the raw lookup path when no supported refinement applies. Cycles or incomplete
+/// flow evaluation return `Unknown`, not a raw fallback.
+pub(crate) fn infer_flow_expression_type<'db>(
+    db: &'db dyn ModuleDb,
+    input: ExpressionTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let candidates = flow_candidates_for_module(db, input.module(db)).as_ref()?;
+    if !candidates.contains(input.expression(db)) {
+        return None;
+    }
+    infer_flow_expression_type_impl(db, input)
+}
 
 /// Finds a named member on either the class or instance side of `ty`.
 ///
