@@ -1,0 +1,95 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validNarrowing.ts
+---
+# Input
+```ts
+// should not generate diagnostics
+
+declare function readNullable(): string | null;
+
+function firstGuardAndJoin(value: { name: string } | null) {
+	if (value) {
+		value.name;
+	}
+	return value?.name;
+}
+
+function stringMayBeEmpty(value: string | number) {
+	if (typeof value === "string") {
+		if (value) {}
+	}
+}
+
+function shadowed(value: "ready" | null) {
+	if (value) {
+		const value = readNullable();
+		if (value) {}
+	}
+}
+
+function reassigned(value: string | null) {
+	if (value !== null) {
+		value = readNullable();
+		return value?.length;
+	}
+}
+
+function captured(value: string | null) {
+	if (value !== null) {
+		return () => value?.length;
+	}
+}
+
+function unsupportedRoot(value: string | null) {
+	try {
+		if (value !== null) {
+			return value?.length;
+		}
+	} finally {}
+}
+
+interface Value {}
+function structural(value: Value | null) {
+	if (!value) return value == null;
+}
+
+function anonymousStructure(value: {} | null) {
+	if (!value) return value == null;
+}
+
+function initializedAfterGuard(flag: boolean) {
+	if (typeof value !== "object") {
+		var value: string | null = flag ? "ready" : null;
+		return value?.length;
+	}
+}
+
+function escapedEval(value: string | null) {
+	if (value !== null) {
+		/u0065val("value = null");
+		return value?.length;
+	}
+}
+
+function nonNullStructure(value: {} | null) {
+	if (value == null) return;
+	if (value) {}
+}
+
+function nonNullInterface(value: Value | null) {
+	if (value == null) return;
+	if (value) {}
+}
+
+class ValueClass {}
+function nonNullClassShape(value: ValueClass | null) {
+	if (value == null) return;
+	if (value) {}
+}
+
+function discardedReturn(value: string | void) {
+	if (typeof value !== "string") return value == null;
+}
+
+```

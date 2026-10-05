@@ -1,0 +1,29 @@
+// should not generate diagnostics
+
+function nullBranch(value: Promise<void> | null) {
+	if (value === null) {
+		value;
+	}
+}
+
+function stringBranch(value: Promise<void> | string) {
+	if (typeof value === "string") {
+		value;
+	}
+}
+
+function earlyReturn(value: Promise<void> | string) {
+	if (typeof value !== "string") return;
+	value;
+}
+
+function falsyBranch(value: Promise<void> | false) {
+	if (value) return;
+	value;
+}
+
+async function handled(value: Promise<void> | null) {
+	if (value !== null) {
+		await value;
+	}
+}
