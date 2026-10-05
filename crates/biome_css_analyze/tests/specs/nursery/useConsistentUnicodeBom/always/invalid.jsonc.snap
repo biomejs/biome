@@ -1,0 +1,132 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.jsonc
+---
+# Input
+```css
+
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/useConsistentUnicodeBom  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file is missing a Unicode byte order mark (BOM).
+  
+  > 1 │ 
+      │ 
+  
+  i The configured BOM policy requires files to start with U+FEFF.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Insert a Unicode byte order mark.
+  
+    1 │ �
+      │ +
+
+```
+
+# Input
+```css
+p { color: red; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/useConsistentUnicodeBom  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file is missing a Unicode byte order mark (BOM).
+  
+  > 1 │ p { color: red; }
+      │ 
+  
+  i The configured BOM policy requires files to start with U+FEFF.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Insert a Unicode byte order mark.
+  
+    1 │ �p·{·color:·red;·}
+      │ +                 
+
+```
+
+# Input
+```css
+  p { color: red; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/useConsistentUnicodeBom  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file is missing a Unicode byte order mark (BOM).
+  
+  > 1 │   p { color: red; }
+      │ 
+  
+  i The configured BOM policy requires files to start with U+FEFF.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Insert a Unicode byte order mark.
+  
+    1 │ �··p·{·color:·red;·}
+      │ +                   
+
+```
+
+# Input
+```css
+
+p { color: red; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/useConsistentUnicodeBom  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file is missing a Unicode byte order mark (BOM).
+  
+  > 1 │ 
+      │ 
+    2 │ p { color: red; }
+  
+  i The configured BOM policy requires files to start with U+FEFF.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Insert a Unicode byte order mark.
+  
+    1 │ �
+      │ +
+
+```
+
+# Input
+```css
+/* header */
+p { color: red; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/useConsistentUnicodeBom  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file is missing a Unicode byte order mark (BOM).
+  
+  > 1 │ /* header */
+      │ 
+    2 │ p { color: red; }
+  
+  i The configured BOM policy requires files to start with U+FEFF.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Insert a Unicode byte order mark.
+  
+    1 │ �/*·header·*/
+      │ +            
+
+```

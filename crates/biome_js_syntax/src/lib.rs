@@ -50,7 +50,7 @@ pub use syntax_node::*;
 pub use unescape::*;
 
 use crate::JsSyntaxKind::*;
-use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind, SyntaxResult};
+use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind, SyntaxKindSet, SyntaxResult};
 
 impl From<u16> for JsSyntaxKind {
     fn from(d: u16) -> Self {
@@ -166,7 +166,11 @@ impl biome_rowan::SyntaxKind for JsSyntaxKind {
     }
 
     fn is_allowed_before_suppressions(&self) -> bool {
-        matches!(self, Self::JS_SHEBANG)
+        const ALLOWED: SyntaxKindSet<JsLanguage> =
+            SyntaxKindSet::from_raw(RawSyntaxKind(JsSyntaxKind::JS_SHEBANG as u16)).union(
+                SyntaxKindSet::from_raw(RawSyntaxKind(JsSyntaxKind::UNICODE_BOM as u16)),
+            );
+        ALLOWED.matches(*self)
     }
 }
 

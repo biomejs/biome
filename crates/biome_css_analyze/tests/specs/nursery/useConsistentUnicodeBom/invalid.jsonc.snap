@@ -1,0 +1,160 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.jsonc
+---
+# Input
+```css
+﻿p { color: red; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/useConsistentUnicodeBom  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file starts with a Unicode byte order mark (BOM).
+  
+  > 1 │ �p { color: red; }
+      │ ^
+  
+  i UTF-8 does not require a byte order mark.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the Unicode byte order mark.
+  
+    1 │ �p·{·color:·red;·}
+      │ -                 
+
+```
+
+# Input
+```css
+﻿
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/useConsistentUnicodeBom  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file starts with a Unicode byte order mark (BOM).
+  
+  > 1 │ �
+      │ ^
+  
+  i UTF-8 does not require a byte order mark.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the Unicode byte order mark.
+  
+    1 │ �
+      │ -
+
+```
+
+# Input
+```css
+﻿  p { color: red; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/useConsistentUnicodeBom  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file starts with a Unicode byte order mark (BOM).
+  
+  > 1 │ �  p { color: red; }
+      │ ^
+  
+  i UTF-8 does not require a byte order mark.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the Unicode byte order mark.
+  
+  - �··p·{·color:·red;·}
+  + ··p·{·color:·red;·}
+  
+
+```
+
+# Input
+```css
+﻿
+p { color: red; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/useConsistentUnicodeBom  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file starts with a Unicode byte order mark (BOM).
+  
+  > 1 │ �
+      │ ^
+    2 │ p { color: red; }
+  
+  i UTF-8 does not require a byte order mark.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the Unicode byte order mark.
+  
+    1 │ �
+      │ -
+
+```
+
+# Input
+```css
+﻿/* header */
+p { color: red; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/useConsistentUnicodeBom  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file starts with a Unicode byte order mark (BOM).
+  
+  > 1 │ �/* header */
+      │ ^
+    2 │ p { color: red; }
+  
+  i UTF-8 does not require a byte order mark.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the Unicode byte order mark.
+  
+    1   │ - �/*·header·*/
+      1 │ + /*·header·*/
+    2 2 │   p { color: red; }
+  
+
+```
+
+# Input
+```css
+﻿@charset "windows-1252"; p::before { content: "é"; }
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/useConsistentUnicodeBom  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This file starts with a Unicode byte order mark (BOM).
+  
+  > 1 │ �@charset "windows-1252"; p::before { content: "é"; }
+      │ ^
+  
+  i UTF-8 does not require a byte order mark.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the Unicode byte order mark.
+  
+    1 │ �@charset·"windows-1252";·p::before·{·content:·"é";·}
+      │ -                                                    
+
+```

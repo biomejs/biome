@@ -297,6 +297,7 @@ define_categories! {
     "lint/nursery/useConsistentObjectDefinition": "https://biomejs.dev/linter/rules/use-consistent-object-definition",
     "lint/nursery/useConsistentObjectKeys": "https://biomejs.dev/linter/rules/use-consistent-object-keys",
     "lint/nursery/useConsistentTestIt": "https://biomejs.dev/linter/rules/use-consistent-test-it",
+    "lint/nursery/useConsistentUnicodeBom": "https://biomejs.dev/linter/rules/use-consistent-unicode-bom",
     "lint/nursery/useControlLabel": "https://biomejs.dev/linter/rules/use-control-label",
     "lint/nursery/useDisposables": "https://biomejs.dev/linter/rules/use-disposables",
     "lint/nursery/useDomNodeTextContent": "https://biomejs.dev/linter/rules/use-dom-node-text-content",

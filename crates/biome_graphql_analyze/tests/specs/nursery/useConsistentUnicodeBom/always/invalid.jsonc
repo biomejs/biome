@@ -1,0 +1,8 @@
+// should generate diagnostics
+[
+  "",
+  "query { field }",
+  "  query { field }",
+  "\nquery { field }",
+  "# header\nquery { field }"
+]

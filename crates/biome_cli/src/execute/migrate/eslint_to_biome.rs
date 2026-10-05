@@ -770,6 +770,24 @@ fn migrate_eslint_rule(
                 }
             }
         }
+        eslint_eslint::Rule::UnicodeBom(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
+                && let eslint_eslint::RuleConf::Option(severity, bom) = conf
+            {
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.use_consistent_unicode_bom = Some(biome_config::RuleFixConfiguration::WithOptions(
+                        biome_config::RuleWithFixOptions {
+                            level: severity.into(),
+                            fix: None,
+                            options: biome_rule_options::use_consistent_unicode_bom::UseConsistentUnicodeBomOptions {
+                                bom: Some(bom),
+                            },
+                        },
+                    ));
+                }
+            }
+        }
         eslint_eslint::Rule::JestConsistentTestIt(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let severity = conf.severity();

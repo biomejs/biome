@@ -1,0 +1,8 @@
+// should not generate diagnostics
+[
+  "\ufeff<div>text</div>",
+  "\ufeff",
+  "\ufeff  <div>text</div>",
+  "\ufeff\n<div>text</div>",
+  "\ufeff<!-- header -->\n<div>text</div>"
+]

@@ -7,6 +7,7 @@ use biome_rowan::TextRange;
 use biome_rule_options::use_consistent_function_style::{
     FunctionStyle, UseConsistentFunctionStyleOptions,
 };
+use biome_rule_options::use_consistent_unicode_bom::UnicodeBom;
 use rustc_hash::FxHashMap;
 use std::borrow::Cow;
 use std::hash::{Hash, Hasher};
@@ -568,6 +569,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::NoRestrictedGlobals(conf));
                             }
                         }
+                        "unicode-bom" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::UnicodeBom(conf));
+                            }
+                        }
                         // Eslint plugin rules with options that we handle
                         "jest/consistent-test-it" | "vitest/consistent-test-it" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
@@ -874,6 +880,7 @@ pub(crate) enum Rule {
     NoConsole(RuleConf<Box<NoConsoleOptions>>),
     NoRestrictedProperties(RuleConf<Box<NoRestrictedPropertyOption>>),
     NoRestrictedGlobals(RuleConf<Box<NoRestrictedGlobal>>),
+    UnicodeBom(RuleConf<UnicodeBom>),
     // Eslint plugins
     JestConsistentTestIt(RuleConf<eslint_jest::ConsistentTestItOptions>),
     Jsxa11yArioaRoles(RuleConf<Box<eslint_jsxa11y::AriaRoleOptions>>),
@@ -904,6 +911,7 @@ impl Rule {
             Self::NoConsole(_) => Cow::Borrowed("no-console"),
             Self::NoRestrictedProperties(_) => Cow::Borrowed("no-restricted-properties"),
             Self::NoRestrictedGlobals(_) => Cow::Borrowed("no-restricted-globals"),
+            Self::UnicodeBom(_) => Cow::Borrowed("unicode-bom"),
             Self::JestConsistentTestIt(_) => Cow::Borrowed("jest/consistent-test-it"),
             Self::Jsxa11yArioaRoles(_) => Cow::Borrowed("jsx-a11y/aria-role"),
             Self::TypeScriptArrayType(_) => Cow::Borrowed("@typescript-eslint/array-type"),

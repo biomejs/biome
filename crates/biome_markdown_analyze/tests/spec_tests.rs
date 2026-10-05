@@ -70,6 +70,9 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 
     let input_file = Utf8Path::new(input);
     let file_name = input_file.file_name().unwrap();
+    if file_name.ends_with(".options.json") || file_name.ends_with(".options.jsonc") {
+        return;
+    }
 
     let (group, rule) = parse_test_path(input_file);
     if rule == "specs" || rule == "suppression" {
