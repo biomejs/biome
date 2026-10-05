@@ -28,6 +28,13 @@ pub(crate) struct HtmlLexer<'src> {
     /// consumed. Once set, the `Regular` context will no longer treat `---` as a
     /// `FENCE` token, allowing `---` to appear as plain text in HTML content.
     after_frontmatter: bool,
+    /// Where the latest processing instruction starts, just after its `<?`,
+    /// and where the `?>` or `>` that ends it starts, once lexed. While the
+    /// lexer is between the two, names stop before `?>`, so that the `?` of
+    /// `<?xml?>` or `<?foo bar?>` closes the instruction instead of joining
+    /// the name. These are positions rather than a flag because lookahead
+    /// rewinds the lexer, sometimes from past the end of the instruction.
+    processing_instruction: Option<(usize, Option<usize>)>,
     /// Parse options, not state. The lexer cannot read them from the lex
     /// context, because `bump()` passes [HtmlLexContext::default].
     options: HtmlLexerOptions,
@@ -100,6 +107,7 @@ impl<'src> HtmlLexer<'src> {
             current_flags: TokenFlags::empty(),
             unicode_bom_length: 0,
             after_frontmatter: false,
+            processing_instruction: None,
             options: HtmlLexerOptions::default(),
         }
     }
@@ -1065,6 +1073,10 @@ impl<'src> HtmlLexer<'src> {
         self.advance_byte_or_char(first);
 
         while let Some(byte) = self.current_byte() {
+            if self.inside_processing_instruction() && self.at_pi_end() {
+                break;
+            }
+
             match context {
                 IdentifierContext::Doctype | IdentifierContext::None => {
                     if is_attribute_name_byte(byte) {
@@ -1365,6 +1377,7 @@ impl<'src> HtmlLexer<'src> {
         self.assert_byte(b'<');
 
         self.advance(2);
+        self.processing_instruction = Some((self.position, None));
 
         T![<?]
     }
@@ -1490,6 +1503,12 @@ impl<'src> HtmlLexer<'src> {
     #[inline(always)]
     fn at_pi_end(&self) -> bool {
         self.current_byte() == Some(b'?') && self.byte_at(1) == Some(b'>')
+    }
+
+    fn inside_processing_instruction(&self) -> bool {
+        self.processing_instruction.is_some_and(|(start, end)| {
+            start <= self.position && end.is_none_or(|end| self.position <= end)
+        })
     }
 
     #[inline(always)]
@@ -1801,6 +1820,15 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
         self.current_flags
             .set(TokenFlags::PRECEDING_LINE_BREAK, self.after_newline);
         self.current_kind = kind;
+
+        if matches!(kind, T![?>] | T![>])
+            && let Some((start, end)) = &mut self.processing_instruction
+        {
+            let token_start = u32::from(self.current_start) as usize;
+            if token_start >= *start && end.is_none_or(|end| token_start <= end) {
+                *end = Some(token_start);
+            }
+        }
 
         if !kind.is_trivia() {
             self.after_newline = false;
