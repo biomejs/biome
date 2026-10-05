@@ -81,7 +81,7 @@ invalidRtl.css:3:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
      1  1 │   /* should generate diagnostics with rtl replacements */
      2  2 │   .position {
@@ -111,7 +111,7 @@ invalidRtl.css:4:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
      2  2 │   .position {
      3  3 │     right: 1rem;
@@ -140,7 +140,7 @@ invalidRtl.css:8:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
      6  6 │   
      7  7 │   .margin {
@@ -170,7 +170,7 @@ invalidRtl.css:9:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
      7  7 │   .margin {
      8  8 │     margin-right: 2rem;
@@ -199,7 +199,7 @@ invalidRtl.css:13:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     11 11 │   
     12 12 │   .padding {
@@ -229,7 +229,7 @@ invalidRtl.css:14:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     12 12 │   .padding {
     13 13 │     padding-right: 10px;
@@ -258,7 +258,7 @@ invalidRtl.css:18:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     16 16 │   
     17 17 │   .border {
@@ -288,7 +288,7 @@ invalidRtl.css:19:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     17 17 │   .border {
     18 18 │     border-left: 5px dotted green;
@@ -318,7 +318,7 @@ invalidRtl.css:20:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     18 18 │     border-left: 5px dotted green;
     19 19 │     border-left-color: green;
@@ -348,7 +348,7 @@ invalidRtl.css:21:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     19 19 │     border-left-color: green;
     20 20 │     border-left-style: dotted;
@@ -378,7 +378,7 @@ invalidRtl.css:22:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     20 20 │     border-left-style: dotted;
     21 21 │     border-left-width: 6px;
@@ -408,7 +408,7 @@ invalidRtl.css:23:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     21 21 │     border-left-width: 6px;
     22 22 │     border-right: 7px double yellow;
@@ -438,7 +438,7 @@ invalidRtl.css:24:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     22 22 │     border-right: 7px double yellow;
     23 23 │     border-right-color: yellow;
@@ -468,7 +468,7 @@ invalidRtl.css:25:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     23 23 │     border-right-color: yellow;
     24 24 │     border-right-style: double;
@@ -497,7 +497,7 @@ invalidRtl.css:29:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     27 27 │   
     28 28 │   .border-radius {
@@ -527,7 +527,7 @@ invalidRtl.css:30:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     28 28 │   .border-radius {
     29 29 │     border-top-left-radius: 4px;
@@ -557,7 +557,7 @@ invalidRtl.css:31:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     29 29 │     border-top-left-radius: 4px;
     30 30 │     border-top-right-radius: 8px;
@@ -587,7 +587,7 @@ invalidRtl.css:32:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     30 30 │     border-top-right-radius: 8px;
     31 31 │     border-bottom-left-radius: 12px;
@@ -616,7 +616,7 @@ invalidRtl.css:36:9 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     34 34 │   
     35 35 │   .values {
@@ -646,7 +646,7 @@ invalidRtl.css:37:9 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     35 35 │   .values {
     36 36 │     float: right;
@@ -676,7 +676,7 @@ invalidRtl.css:38:9 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     36 36 │     float: right;
     37 37 │     float: left;
@@ -706,7 +706,7 @@ invalidRtl.css:39:9 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     37 37 │     float: left;
     38 38 │     clear: right;
@@ -736,7 +736,7 @@ invalidRtl.css:40:14 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     38 38 │     clear: right;
     39 39 │     clear: left;
@@ -766,7 +766,7 @@ invalidRtl.css:41:14 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     39 39 │     clear: left;
     40 40 │     text-align: right;
@@ -838,7 +838,7 @@ invalidRtl.css:44:17 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     42 42 │     justify-content: right;
     43 43 │     justify-content: left;
@@ -868,7 +868,7 @@ invalidRtl.css:45:17 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     43 43 │     justify-content: left;
     44 44 │     justify-items: right;
@@ -940,7 +940,7 @@ invalidRtl.css:48:16 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     46 46 │     justify-items: legacy left;
     47 47 │     justify-items: right legacy;
@@ -970,7 +970,7 @@ invalidRtl.css:49:16 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     47 47 │     justify-items: right legacy;
     48 48 │     justify-self: right;
@@ -999,7 +999,7 @@ invalidRtl.css:53:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     51 51 │   
     52 52 │   .anchor-functions {
@@ -1028,7 +1028,7 @@ invalidRtl.css:53:16 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     51 51 │   
     52 52 │   .anchor-functions {
@@ -1058,7 +1058,7 @@ invalidRtl.css:54:2 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     52 52 │   .anchor-functions {
     53 53 │     right: anchor(left);
@@ -1088,7 +1088,7 @@ invalidRtl.css:54:15 lint/nursery/useLogicalProperties  FIXABLE  ━━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Safe fix: Use the logical CSS replacement.
+  i Unsafe fix: Use the logical CSS replacement.
   
     52 52 │   .anchor-functions {
     53 53 │     right: anchor(left);

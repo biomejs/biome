@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
-assertion_line: 148
 expression: valid.css
 ---
 # Input
@@ -81,9 +80,9 @@ expression: valid.css
 }
 
 .anchor-functions {
-	inline-size: anchor-size(inline);
-	block-size: anchor-size(block);
-	inline-size: var(--size, anchor-size(inline));
+	inline-size: anchor-size(self-inline);
+	block-size: anchor-size(self-block);
+	inline-size: var(--size, anchor-size(self-inline));
 	inset-block-start: anchor(end);
 	inset-inline-start: anchor(end);
 }

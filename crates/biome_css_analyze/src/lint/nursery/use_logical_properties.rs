@@ -90,7 +90,8 @@ declare_lint_rule! {
     ///   float: inline-start;
     ///   text-align: end;
     ///   justify-content: start;
-    ///   inline-size: anchor-size(inline);
+    ///   inline-size: anchor-size(self-inline);
+    ///   block-size: anchor-size(self-block);
     ///   inset-block-start: anchor(end);
     /// }
     /// ```
@@ -132,7 +133,7 @@ declare_lint_rule! {
         language: "css",
         recommended: false,
         severity: Severity::Warning,
-        fix_kind: FixKind::Safe,
+        fix_kind: FixKind::Unsafe,
     }
 }
 
@@ -511,8 +512,8 @@ fn physical_to_logical_value(
 
 fn physical_to_logical_anchor_size(value: &str) -> Option<&'static str> {
     match value {
-        "width" => Some("inline"),
-        "height" => Some("block"),
+        "width" => Some("self-inline"),
+        "height" => Some("self-block"),
         _ => None,
     }
 }
