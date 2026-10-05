@@ -6,9 +6,11 @@
 //! the occurrence query decides whether an operand actually changes their type.
 
 use super::flow_conditions::condition_subjects;
-use super::flow_guards::call_predicate_subject;
+use super::flow_guards::{call_assertion_condition, call_predicate_subject};
 use crate::JsModuleInfo;
-use crate::js_module_info::flow_sources::{FlowConditionSource, is_flow_construct};
+use crate::js_module_info::flow_sources::{
+    FlowConditionSource, MAX_FLOW_CONSTRUCTS, is_flow_construct,
+};
 use biome_js_control_flow::{AnyJsControlFlowRoot, FlowOutcome};
 use biome_js_semantic::{JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
@@ -19,11 +21,6 @@ use biome_rowan::{AstNode, SyntaxKind, TextRange, TextSize, WalkEvent};
 use rustc_hash::{FxHashMap, FxHashSet};
 
 const MAX_INDEX_STEPS: usize = 1_048_576;
-// A supported statement contributes at most seven predecessor edges, and a
-// logical or conditional expression contributes four. Stay below the 16,384
-// steps in `narrow_binding_at_flow`: that walk can return Unknown before checking
-// relevance. Larger roots must retain even reads absent from every condition.
-const MAX_FLOW_CONSTRUCTS: usize = 1_024;
 
 /// A conservative set of expressions that may have a flow override.
 ///
@@ -54,6 +51,7 @@ fn collect_candidates(info: &JsModuleInfo) -> Option<FxHashSet<TextRange>> {
         &info.semantic_model.root(),
         &info.semantic_model,
         &|call| call_predicate_subject(info, call),
+        &|call| call_assertion_condition(info, call),
         &mut remaining,
     )?;
     let mut candidates = FxHashSet::default();
@@ -155,6 +153,7 @@ fn condition_ranges(
     root: &AnyJsRoot,
     model: &SemanticModel,
     call_subject: &impl Fn(&JsCallExpression) -> Option<JsReferenceIdentifier>,
+    assertion_condition: &impl Fn(&JsCallExpression) -> Option<AnyJsExpression>,
     remaining: &mut usize,
 ) -> Option<ConditionRanges> {
     let mut ranges = Vec::new();
@@ -194,6 +193,7 @@ fn condition_ranges(
                             | FlowConditionSource::JsDoWhileStatement(_)
                             | FlowConditionSource::JsForStatement(_)
                     );
+                    let mut effective_after = None;
                     let (condition, outcome) = match source {
                         FlowConditionSource::JsIfStatement(statement) => {
                             (Some(statement.test().ok()?), FlowOutcome::Truthy)
@@ -218,6 +218,11 @@ fn condition_ranges(
                         FlowConditionSource::JsConditionalExpression(expression) => {
                             (Some(expression.test().ok()?), FlowOutcome::Truthy)
                         }
+                        FlowConditionSource::JsCallExpression(call) => {
+                            // An assertion cannot affect later arguments in its own call.
+                            effective_after = Some(call.range().end());
+                            (assertion_condition(&call), FlowOutcome::Truthy)
+                        }
                     };
                     if let Some(condition) = condition {
                         let range = condition.range();
@@ -240,8 +245,10 @@ fn condition_ranges(
                         };
                         if has_subjects {
                             let first = &mut root_conditions.last_mut()?.first;
-                            *first =
-                                Some(first.map_or(range.end(), |first| first.min(range.end())));
+                            let effective_after = effective_after.unwrap_or(range.end());
+                            *first = Some(
+                                first.map_or(effective_after, |first| first.min(effective_after)),
+                            );
                         }
                     }
                 }
@@ -296,7 +303,9 @@ mod tests {
         ] {
             let root = parse(source, JsFileSource::ts(), JsParserOptions::default()).tree();
             let model = semantic_model(&root, SemanticModelOptions::default());
-            assert!(condition_ranges(&root, &model, &|_| None, &mut remaining).is_none());
+            assert!(
+                condition_ranges(&root, &model, &|_| None, &|_| None, &mut remaining).is_none()
+            );
             let candidates = FlowCandidates { expressions: None };
             assert!(candidates.contains(root.range()));
         }
@@ -318,7 +327,7 @@ mod tests {
         let mut remaining = 100;
         let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
         assert!(
-            condition_ranges(&parsed.tree(), &model, &|_| None, &mut remaining)
+            condition_ranges(&parsed.tree(), &model, &|_| None, &|_| None, &mut remaining)
                 .unwrap()
                 .subjects
                 .is_empty()
@@ -334,7 +343,8 @@ mod tests {
             let mut remaining = MAX_INDEX_STEPS;
             let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
             let ranges =
-                condition_ranges(&parsed.tree(), &model, &|_| None, &mut remaining).unwrap();
+                condition_ranges(&parsed.tree(), &model, &|_| None, &|_| None, &mut remaining)
+                    .unwrap();
             assert_eq!(ranges.subjects.is_empty(), count == MAX_FLOW_CONSTRUCTS);
         }
     }

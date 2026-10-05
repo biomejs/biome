@@ -3,9 +3,9 @@
 use crate::{AnyJsControlFlowRoot, JsControlFlowGraph};
 use biome_control_flow::InstructionKind;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, AnyTsType, JsArrowFunctionExpression,
-    JsDoWhileStatement, JsForStatement, JsIfStatement, JsSyntaxKind, JsSyntaxNode,
-    JsWhileStatement, T,
+    AnyJsExpression, AnyJsFunctionBody, AnyJsOptionalChainExpression, AnyJsStatement, AnyTsType,
+    JsArrowFunctionExpression, JsDoWhileStatement, JsExpressionStatement, JsForStatement,
+    JsIfStatement, JsSyntaxKind, JsSyntaxNode, JsWhileStatement, T,
 };
 use biome_rowan::{AstNode, SyntaxKind, TextRange};
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -33,15 +33,21 @@ pub enum FlowNode {
         expression: TextRange,
         outcome: FlowOutcome,
     },
+    /// Normal completion of a standalone call, after evaluating its callee and arguments.
+    /// The range identifies the call itself, excluding surrounding parentheses.
+    CallContinuation {
+        antecedent: FlowNodeId,
+        expression: TextRange,
+    },
 }
 
 /// Syntax-only flow for one execution root and one source snapshot.
 ///
 /// Ranges are trimmed, source-local ranges from the input CFG. Each indexed
 /// expression points to its incoming flow, before evaluating its children or
-/// applying its own condition. Unreachable expressions and nested execution-root
-/// bodies are not indexed. Reference identifiers are also indexed, including
-/// object shorthand reads that have no expression wrapper.
+/// applying a condition or call continuation. Unreachable expressions and nested
+/// execution-root bodies are not indexed. Reference identifiers are also indexed,
+/// including object shorthand reads that have no expression wrapper.
 ///
 /// This graph does not invalidate facts on writes or calls. Consumers must limit
 /// narrowing to bindings proven unwritten and free of capture hazards.
@@ -61,7 +67,10 @@ const MAX_FLOW_NODES: usize = 65_536;
 ///
 /// Supports truthiness tests in `if`, `while`, `do` and ordinary `for` statements,
 /// and expression-level `&&`, `||`, `??` and `?:`, including expression-bodied
-/// arrows. Parameter initializers are not indexed.
+/// arrows. Non-optional calls that form an entire expression statement, allowing
+/// surrounding parentheses, add a normal-completion event. Calls with optional
+/// callee chains or nested in other expressions do not. Parameter initializers
+/// are not indexed.
 ///
 /// Returns `None` for unsupported control flow or evaluation order: exception
 /// handlers, switch, for-in/of, with, classes, destructuring and logical
@@ -159,6 +168,15 @@ pub fn narrowing_flow_graph(graph: &JsControlFlowGraph) -> Option<NarrowingFlowG
                         return None;
                     }
                     flow = builder.evaluate(node, flow, 0)?;
+                    if let Some(expression) = JsExpressionStatement::cast_ref(node)
+                        .as_ref()
+                        .and_then(standalone_call_range)
+                    {
+                        flow = builder.push(FlowNode::CallContinuation {
+                            antecedent: flow,
+                            expression,
+                        })?;
+                    }
                 }
                 InstructionKind::Jump {
                     conditional,
@@ -339,6 +357,25 @@ fn is_truthiness_test(expression: &AnyJsExpression) -> bool {
     test.as_ref() == Some(expression)
 }
 
+fn standalone_call_range(statement: &JsExpressionStatement) -> Option<TextRange> {
+    let AnyJsExpression::JsCallExpression(call) = statement.expression().ok()?.omit_parentheses()
+    else {
+        return None;
+    };
+    let range = call.range();
+    let mut callee = AnyJsOptionalChainExpression::from(call);
+    loop {
+        if callee.is_optional() {
+            return None;
+        }
+        let object = callee.object().ok()?.inner_expression()?;
+        let Some(expression) = AnyJsOptionalChainExpression::cast(object.into_syntax()) else {
+            return Some(range);
+        };
+        callee = expression;
+    }
+}
+
 struct FlowBuilder {
     graph: NarrowingFlowGraph,
     remaining_visits: usize,
@@ -494,10 +531,24 @@ mod tests {
                     facts.push((*expression, *outcome));
                     pending.push((*antecedent, facts));
                 }
+                FlowNode::CallContinuation { antecedent, .. } => {
+                    pending.push((*antecedent, facts));
+                }
             }
         }
         assert!(!result.is_empty());
         result
+    }
+
+    fn call_continuations(graph: &NarrowingFlowGraph) -> Vec<TextRange> {
+        graph
+            .nodes
+            .iter()
+            .filter_map(|node| match node {
+                FlowNode::CallContinuation { expression, .. } => Some(*expression),
+                _ => None,
+            })
+            .collect()
     }
 
     fn assert_fact(
@@ -538,14 +589,47 @@ mod tests {
                 .any(|path| path.contains(&(guard, FlowOutcome::Falsy)))
         );
         assert_eq!(paths(&graph, guard), vec![vec![]]);
+        let FlowNode::Join(predecessors) =
+            &graph.nodes[graph.expression_flows[&range(source, "after(x)", 0)]]
+        else {
+            panic!("expected a join after the branches");
+        };
+        assert_eq!(predecessors.len(), 2);
+        for call in ["yes(x)", "no(x)"] {
+            let expression = range(source, call, 0);
+            assert!(predecessors.iter().any(|predecessor| {
+                graph.nodes[*predecessor]
+                    == FlowNode::CallContinuation {
+                        antecedent: graph.expression_flows[&expression],
+                        expression,
+                    }
+            }));
+        }
     }
 
     #[test]
     fn early_return_discards_later_instructions_and_edges() {
-        let source = "function f(x) { if (x) { return x; dead(x); } after(x); }";
+        let source = "function f(x) { if (x) { check(x); return result(x); dead(x); } after(x); }";
         let graph = flows(source);
         let guard = range(source, "x", 1);
-        assert_fact(&graph, range(source, "x", 2), guard, FlowOutcome::Truthy);
+        assert_fact(
+            &graph,
+            range(source, "result(x)", 0),
+            guard,
+            FlowOutcome::Truthy,
+        );
+        let check = range(source, "check(x)", 0);
+        assert_eq!(
+            graph.nodes[graph.expression_flows[&range(source, "result(x)", 0)]],
+            FlowNode::CallContinuation {
+                antecedent: graph.expression_flows[&check],
+                expression: check,
+            }
+        );
+        assert_eq!(
+            call_continuations(&graph),
+            vec![check, range(source, "after(x)", 0)]
+        );
         assert_fact(
             &graph,
             range(source, "after(x)", 0),
@@ -558,6 +642,98 @@ mod tests {
                 .contains_key(&range(source, "dead(x)", 0))
         );
         assert_eq!(paths(&graph, range(source, "after(x)", 0)).len(), 1);
+    }
+
+    #[test]
+    fn standalone_calls_keep_incoming_facts_and_continue_after_the_statement() {
+        for (statement, call) in [
+            ("assert(x)", "assert(x)"),
+            ("(assert(x))", "assert(x)"),
+            ("((assert(x)))", "assert(x)"),
+            ("(assert)(x)", "(assert)(x)"),
+            ("ordinary(x?.value)", "ordinary(x?.value)"),
+        ] {
+            let source = format!("function f(x) {{ if (x) {{ {statement}; after; }} }}");
+            let graph = flows(&source);
+            let expression = range(&source, call, 0);
+            let incoming = graph.expression_flows[&expression];
+            assert_fact(
+                &graph,
+                expression,
+                range(&source, "x", 1),
+                FlowOutcome::Truthy,
+            );
+            assert_eq!(call_continuations(&graph), vec![expression]);
+            assert_eq!(
+                graph.nodes[graph.expression_flows[&range(&source, "after", 0)]],
+                FlowNode::CallContinuation {
+                    antecedent: incoming,
+                    expression,
+                }
+            );
+            let statement = range(&source, statement, 0);
+            for (occurrence, flow) in &graph.expression_flows {
+                if statement.contains_range(*occurrence) {
+                    assert_eq!(*flow, incoming);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn call_continuations_follow_the_callee_and_all_arguments() {
+        let call = "(flag ? left : right)(x || first(x), y ? second(y) : third(y), last(x))";
+        let source = format!("function f(flag, x, y) {{ (({call})); after; }}");
+        let graph = flows(&source);
+        let expression = range(&source, call, 0);
+        let continuation = graph.expression_flows[&range(&source, "after", 0)];
+        let last_argument = range(&source, "last(x)", 0);
+        assert_eq!(call_continuations(&graph), vec![expression]);
+        assert_eq!(paths(&graph, last_argument).len(), 8);
+        assert_eq!(
+            graph.nodes[continuation],
+            FlowNode::CallContinuation {
+                antecedent: graph.expression_flows[&last_argument],
+                expression,
+            }
+        );
+        for (occurrence, flow) in &graph.expression_flows {
+            if expression.contains_range(*occurrence) {
+                assert!(*flow < continuation);
+            }
+        }
+    }
+
+    #[test]
+    fn calls_in_other_expression_contexts_do_not_continue() {
+        for body in [
+            "const value = assert(x);",
+            "x = assert(x);",
+            "x && assert(x);",
+            "x || assert(x);",
+            "x ?? assert(x);",
+            "x ? assert(x) : other(x);",
+            "(assert(x), other(x));",
+            "void assert(x);",
+            "!assert(x);",
+            "assert(x).member;",
+            "new Factory(assert(x));",
+            "if (assert(x)) {}",
+            "while (assert(x)) {}",
+            "for (assert(x); x; assert(x)) {}",
+            "return assert(x);",
+            "throw assert(x);",
+        ] {
+            let source = format!("function f(x) {{ {body} }}");
+            let graph = flows(&source);
+            assert!(call_continuations(&graph).is_empty(), "{body}");
+            assert!(
+                graph
+                    .expression_flows
+                    .contains_key(&range(&source, "assert(x)", 0)),
+                "{body}"
+            );
+        }
     }
 
     #[test]
@@ -718,11 +894,31 @@ mod tests {
                 .contains_key(&range(source, "inner(x)", 0))
         );
         assert_eq!(paths(&inner, range(source, "inner(x)", 0)), vec![vec![]]);
+        assert!(call_continuations(&inner).is_empty());
+        assert_eq!(
+            call_continuations(&outer),
+            vec![range(source, "outer(x)", 0)]
+        );
         assert!(
             !inner
                 .expression_flows
                 .contains_key(&range(source, "outer(x)", 0))
         );
+
+        let source = "function f(x) { if (x) { outer(x); const g = () => { inner(x); after; }; } }";
+        let outer = flows(source);
+        let inner =
+            narrowing_flow_graph(&cfg(source, JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION)).unwrap();
+        assert_eq!(
+            call_continuations(&outer),
+            vec![range(source, "outer(x)", 0)]
+        );
+        assert_eq!(
+            call_continuations(&inner),
+            vec![range(source, "inner(x)", 0)]
+        );
+        assert_eq!(paths(&inner, range(source, "inner(x)", 0)), vec![vec![]]);
+        assert_eq!(paths(&inner, range(source, "after", 0)), vec![vec![]]);
     }
 
     #[test]
@@ -745,16 +941,39 @@ mod tests {
 
     #[test]
     fn optional_chains_preserve_outer_facts_without_assuming_a_receiver() {
-        let source = "function f(x, y) { if (y) x?.read(x); after(x); }";
-        let graph = flows(source);
-        assert_fact(
-            &graph,
-            range(source, "x", 2),
-            range(source, "y", 1),
-            FlowOutcome::Truthy,
-        );
-        assert_eq!(paths(&graph, range(source, "x", 2))[0].len(), 1);
-        assert_eq!(paths(&graph, range(source, "after(x)", 0)).len(), 2);
+        for call in [
+            "x?.(nested(x))",
+            "x?.read(nested(x))",
+            "x.read?.(nested(x))",
+            "x?.[nested(x)](last(x))",
+            "x?.read.call(nested(x))",
+            "x?.read()(nested(x))",
+            "((x?.read(nested(x))))",
+            "(x?.read)(nested(x))",
+            "x?.read!(nested(x))",
+            "(x?.read)!(nested(x))",
+        ] {
+            let source = format!("function f(x, y) {{ if (y) {call}; after(x); }}");
+            let graph = flows(&source);
+            let expression = range(&source, call, 0);
+            let guard = range(&source, "y", 1);
+            for occurrence in graph.expression_flows.keys() {
+                if expression.contains_range(*occurrence) {
+                    assert_fact(&graph, *occurrence, guard, FlowOutcome::Truthy);
+                    assert_eq!(paths(&graph, *occurrence)[0].len(), 1);
+                }
+            }
+            assert!(
+                graph
+                    .expression_flows
+                    .contains_key(&range(&source, "nested(x)", 0))
+            );
+            assert_eq!(
+                call_continuations(&graph),
+                vec![range(&source, "after(x)", 0)]
+            );
+            assert_eq!(paths(&graph, range(&source, "after(x)", 0)).len(), 2);
+        }
     }
 
     #[test]

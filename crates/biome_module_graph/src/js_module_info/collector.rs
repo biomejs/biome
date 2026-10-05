@@ -1,4 +1,4 @@
-use super::flow_sources::may_affect_flow_candidates;
+use super::flow_sources::{MAX_FLOW_CONSTRUCTS, may_affect_flow_candidates};
 use crate::css_module_info::CssClassReference;
 use std::{borrow::Cow, sync::Arc};
 
@@ -7,13 +7,13 @@ use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsDeclaration,
     AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause, JsArrowFunctionExpression,
     JsAssignmentExpression, JsForVariableDeclaration, JsFormalParameter, JsRestParameter,
-    JsSyntaxNode, JsVariableDeclaration, TsMappedType, TsModuleDeclaration, TsTypeParameter,
-    inner_string_text,
+    JsSyntaxKind, JsSyntaxNode, JsVariableDeclaration, TsMappedType, TsModuleDeclaration,
+    TsTypeParameter, inner_string_text,
 };
 use biome_js_type_info::{
     FunctionParameter, FunctionParameterBinding, GenericTypeParameter, RawTypeCollector,
-    RawTypeData, RawTypeId, TypeData, TypeId, TypeImportQualifier, TypeMember, TypeMemberKind,
-    TypeReference, TypeStore, UnionCollector, resolved::InferredLocalTypeId,
+    RawTypeData, RawTypeId, ReturnType, TypeData, TypeId, TypeImportQualifier, TypeMember,
+    TypeMemberKind, TypeReference, TypeStore, UnionCollector, resolved::InferredLocalTypeId,
 };
 use biome_rowan::{AstNode, Text, TextRange, TokenText};
 use indexmap::IndexMap;
@@ -85,6 +85,7 @@ pub(super) struct JsModuleInfoCollector {
     inference_mode: TypeInferenceMode,
 
     has_flow_candidate_sources: bool,
+    flow_calls: usize,
 
     /// CSS class references from JSX `className` or `class` attributes
     /// (static string literals only).
@@ -158,13 +159,18 @@ impl JsModuleInfoCollector {
             diagnostics: Vec::new(),
             inference_mode: TypeInferenceMode::Disabled,
             has_flow_candidate_sources: false,
+            flow_calls: 0,
             referenced_classes: Vec::new(),
         }
     }
 
     pub fn leave_node(&mut self, node: &JsSyntaxNode) {
         if !self.has_flow_candidate_sources {
-            self.has_flow_candidate_sources = may_affect_flow_candidates(node.kind());
+            if node.kind() == JsSyntaxKind::JS_CALL_EXPRESSION {
+                self.flow_calls += 1;
+            }
+            self.has_flow_candidate_sources =
+                may_affect_flow_candidates(node.kind()) || self.flow_calls > MAX_FLOW_CONSTRUCTS;
         }
         if let Some(expr) = AnyJsExpression::cast_ref(node) {
             let range = expr.range();
@@ -863,6 +869,12 @@ impl RawTypeCollector for JsModuleInfoCollector {
     }
 
     fn register_type(&mut self, type_data: Cow<TypeData>) -> TypeId {
+        // Raw signatures cover calls before their declarations without querying
+        // the database or making every ordinary call a flow candidate source.
+        self.has_flow_candidate_sources |= matches!(
+            type_data.as_ref(),
+            TypeData::Function(function) if matches!(function.return_type, ReturnType::Asserts(_))
+        );
         register_type_with_limit(
             &mut self.types,
             &mut self.diagnostics,
