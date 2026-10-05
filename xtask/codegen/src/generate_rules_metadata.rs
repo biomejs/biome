@@ -109,13 +109,16 @@ struct UnsupportedReason {
 }
 
 /// Every [UnsupportedRuleReason] variant, with placeholder arguments.
-const ALL_UNSUPPORTED_REASONS: [UnsupportedRuleReason; 8] = [
+const ALL_UNSUPPORTED_REASONS: [UnsupportedRuleReason; 11] = [
     UnsupportedRuleReason::Stylistic,
     UnsupportedRuleReason::FormatterCovers,
     UnsupportedRuleReason::FormatterOption(""),
     UnsupportedRuleReason::CoveredByRule(""),
     UnsupportedRuleReason::NotApplicable,
     UnsupportedRuleReason::Deprecated,
+    UnsupportedRuleReason::Legacy,
+    UnsupportedRuleReason::RequiresExternalTool,
+    UnsupportedRuleReason::ParserCovers,
     UnsupportedRuleReason::KnownSourceNotImplemented,
     UnsupportedRuleReason::UnknownSource,
 ];
@@ -148,6 +151,13 @@ fn unsupported_reason(reason: &UnsupportedRuleReason) -> Option<UnsupportedReaso
         ),
         UnsupportedRuleReason::NotApplicable => ("notApplicable", "Not applicable to Biome", None),
         UnsupportedRuleReason::Deprecated => ("deprecated", "Deprecated upstream", None),
+        UnsupportedRuleReason::Legacy => ("legacy", "Legacy, at odds with modern code", None),
+        UnsupportedRuleReason::RequiresExternalTool => {
+            ("requiresExternalTool", "Requires an external tool", None)
+        }
+        UnsupportedRuleReason::ParserCovers => {
+            ("parserCovers", "Redundant, the parser covers it", None)
+        }
         UnsupportedRuleReason::KnownSourceNotImplemented | UnsupportedRuleReason::UnknownSource => {
             return None;
         }

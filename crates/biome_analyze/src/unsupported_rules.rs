@@ -37,6 +37,16 @@ pub enum UnsupportedRuleReason {
     /// This doesn't include rules that were deprecated because they moved to another package,
     /// or because they were folded into or superseded by another rule.
     Deprecated,
+    /// The rule enforces a legacy practice, such as accommodating obsolete runtimes or outdated
+    /// conventions, that goes against Biome's focus on modern code.
+    Legacy,
+    /// The rule requires integration with external tooling that Biome doesn't have, such as the
+    /// Vue or Svelte compiler.
+    RequiresExternalTool,
+    /// The rule reports syntax errors that Biome's parser already reports.
+    ///
+    /// The rule is therefore redundant, and losing the rule does not reduce code quality.
+    ParserCovers,
 }
 
 impl Display for UnsupportedRuleReason {
@@ -64,6 +74,15 @@ impl Display for UnsupportedRuleReason {
                 fmt.write_markup(markup! { "Not applicable to Biome." })
             }
             Self::Deprecated => fmt.write_markup(markup! { "Deprecated upstream." }),
+            Self::Legacy => {
+                fmt.write_markup(markup! { "Legacy, at odds with Biome's focus on modern code." })
+            }
+            Self::RequiresExternalTool => fmt.write_markup(markup! {
+                "Requires integration with an external tool, such as a compiler."
+            }),
+            Self::ParserCovers => {
+                fmt.write_markup(markup! { "Redundant, Biome's parser reports these errors." })
+            }
         }
     }
 }
