@@ -6921,6 +6921,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueShadowNativeEventsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueShadowNativeEventsOptions" }
+			]
+		},
+		"NoVueShadowNativeEventsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueUndeclaredDirectivesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7576,6 +7586,13 @@
 					"description": "Disallow the use of value wrapped by ref()(Composition API) as operand.\nSee https://biomejs.dev/linter/rules/no-vue-ref-as-operand",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueRefAsOperandConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueShadowNativeEvents": {
+					"description": "Disallow Vue component events named after built-in browser events.\nSee https://biomejs.dev/linter/rules/no-vue-shadow-native-events",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueShadowNativeEventsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12300,6 +12317,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueSetupPropsReactivityLossOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueShadowNativeEventsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueShadowNativeEventsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

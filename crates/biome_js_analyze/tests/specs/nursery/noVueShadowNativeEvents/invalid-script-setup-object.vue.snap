@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-script-setup-object.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+defineEmits({
+  click: null,
+  submit(payload) {
+    return true;
+  },
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-script-setup-object.vue:4:3 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event has the same name as the browser event click.
+  
+    2 │ <script setup>
+    3 │ defineEmits({
+  > 4 │   click: null,
+      │   ^^^^^
+    5 │   submit(payload) {
+    6 │     return true;
+  
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
+  
+  i Rename the event to describe what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-script-setup-object.vue:5:3 lint/nursery/noVueShadowNativeEvents ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This component event has the same name as the browser event submit.
+  
+    3 │ defineEmits({
+    4 │   click: null,
+  > 5 │   submit(payload) {
+      │   ^^^^^^
+    6 │     return true;
+    7 │   },
+  
+  i It is easy to mistake for the browser event, but it works differently: listeners receive the value passed to emit instead of an Event object, the event doesn't reach the elements around the component, and modifiers such as .stop don't work on it.
+  
+  i Rename the event to describe what happened in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
