@@ -6,9 +6,10 @@
 use super::tailwind_preset_v4::{
     THEME_KEYS_ANIMATE, THEME_KEYS_ASPECT, THEME_KEYS_BACKGROUND_IMAGE, THEME_KEYS_BLUR,
     THEME_KEYS_BREAKPOINT, THEME_KEYS_COLOR, THEME_KEYS_CONTAINER, THEME_KEYS_DROP_SHADOW,
-    THEME_KEYS_EASE, THEME_KEYS_FONT, THEME_KEYS_FONT_WEIGHT, THEME_KEYS_INSET_SHADOW,
-    THEME_KEYS_LEADING, THEME_KEYS_PERSPECTIVE, THEME_KEYS_RADIUS, THEME_KEYS_SHADOW,
-    THEME_KEYS_SPACING, THEME_KEYS_TEXT, THEME_KEYS_TEXT_SHADOW, THEME_KEYS_TRACKING,
+    THEME_KEYS_EASE, THEME_KEYS_FONT, THEME_KEYS_FONT_WEIGHT, THEME_KEYS_GRID_TEMPLATE_COLUMNS,
+    THEME_KEYS_GRID_TEMPLATE_ROWS, THEME_KEYS_INSET_SHADOW, THEME_KEYS_LEADING,
+    THEME_KEYS_PERSPECTIVE, THEME_KEYS_RADIUS, THEME_KEYS_SHADOW, THEME_KEYS_SPACING,
+    THEME_KEYS_TEXT, THEME_KEYS_TEXT_SHADOW, THEME_KEYS_TRACKING,
 };
 
 // Named-path typed value categories. Matching is dispatched by the consumer
@@ -68,10 +69,12 @@ pub enum ThemeNamespace {
     Ease,
     Animate,
     BackgroundImage,
+    GridTemplateColumns,
+    GridTemplateRows,
 }
 
 impl ThemeNamespace {
-    pub const ALL: [Self; 20] = [
+    pub const ALL: [Self; 22] = [
         Self::Color,
         Self::Spacing,
         Self::Text,
@@ -92,6 +95,8 @@ impl ThemeNamespace {
         Self::Ease,
         Self::Animate,
         Self::BackgroundImage,
+        Self::GridTemplateColumns,
+        Self::GridTemplateRows,
     ];
 
     /// The name of the namespace in theme variables: `color` in
@@ -118,6 +123,8 @@ impl ThemeNamespace {
             Self::Ease => "ease",
             Self::Animate => "animate",
             Self::BackgroundImage => "background-image",
+            Self::GridTemplateColumns => "grid-template-columns",
+            Self::GridTemplateRows => "grid-template-rows",
         }
     }
 
@@ -149,6 +156,8 @@ impl ThemeNamespace {
             Self::Ease => &THEME_KEYS_EASE,
             Self::Animate => &THEME_KEYS_ANIMATE,
             Self::BackgroundImage => &THEME_KEYS_BACKGROUND_IMAGE,
+            Self::GridTemplateColumns => &THEME_KEYS_GRID_TEMPLATE_COLUMNS,
+            Self::GridTemplateRows => &THEME_KEYS_GRID_TEMPLATE_ROWS,
         }
     }
 }

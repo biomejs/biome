@@ -27,6 +27,8 @@ export const NAMESPACE_PROBE_VALUE: Record<ThemeNamespaceVariant, string> = {
 	Ease: "linear",
 	Animate: "spin 1s linear infinite",
 	BackgroundImage: "linear-gradient(#000, #fff)",
+	GridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+	GridTemplateRows: "repeat(2, minmax(0, 1fr))",
 };
 
 // Token used for the per-namespace probe class. Lowercase + variant

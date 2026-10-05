@@ -525,6 +525,8 @@ impl PendingSortKey {
                             modifier.as_ref(),
                             design,
                         )
+                    } else if let AnyTwValue::TwCssVariableValue(_) = &value {
+                        resolve_css_variable_branch(arbitrary_branches, modifier.as_ref(), design)
                     } else {
                         resolve_named_branch(named_branches, &value, modifier.as_ref(), design)
                     };
@@ -829,6 +831,27 @@ fn resolve_arbitrary_branch(
     None
 }
 
+/// Resolve a CSS variable value (`w-(--x)`), which Tailwind treats as the
+/// arbitrary value `w-[var(--x)]`. A `var()` value never matches a typed
+/// branch (see [value_matches_type]), so only the fallback branch places it.
+fn resolve_css_variable_branch(
+    branches: &[ArbitraryBranch],
+    modifier: Option<&AnyTwModifier>,
+    design: &TailwindDesignSystem,
+) -> Option<(u16, u8)> {
+    let (modifier_kind, property_idx, property_count) =
+        branches.iter().find_map(|&branch| match branch {
+            ArbitraryBranch::Fallback(m, p, c) => Some((m, p, c)),
+            ArbitraryBranch::Typed(..) => None,
+        })?;
+    if let Some(modifier) = modifier
+        && !modifier_accepted(modifier_kind, modifier, design)
+    {
+        return None;
+    }
+    Some((property_idx, property_count))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -913,6 +936,58 @@ mod tests {
             &parse_tailwind(input).tree(),
             &TailwindDesignSystem::default(),
         )
+    }
+
+    #[test]
+    fn css_variable_value_sorts_like_arbitrary_var() {
+        assert_eq!(
+            sort("w-(--sidebar-width) flex h-full flex-col"),
+            "flex h-full w-(--sidebar-width) flex-col"
+        );
+        assert_eq!(
+            sort("max-h-(--console-max-h) flex shrink-0 flex-col"),
+            "flex max-h-(--console-max-h) shrink-0 flex-col"
+        );
+        assert_eq!(
+            sort("min-w-(--anchor-width) w-max max-w-sm p-0"),
+            "w-max max-w-sm min-w-(--anchor-width) p-0"
+        );
+        assert_eq!(
+            sort("w-(--x) w-[var(--x)] flex"),
+            sort("w-[var(--x)] w-(--x) flex")
+        );
+        assert_eq!(sort("bg-(--brand)/50 flex"), "flex bg-(--brand)/50");
+    }
+
+    #[test]
+    fn dashed_bare_variant_value_is_known() {
+        assert_eq!(
+            sort("supports-backdrop-filter:backdrop-blur-xs fixed inset-0"),
+            "fixed inset-0 supports-backdrop-filter:backdrop-blur-xs"
+        );
+        assert_eq!(
+            sort("supports-backdrop-filter:flex supports-grid:flex"),
+            "supports-backdrop-filter:flex supports-grid:flex"
+        );
+    }
+
+    #[test]
+    fn stylesheet_grid_template_values_make_class_known() {
+        let mut design = TailwindDesignSystem::default();
+        design.add_theme_variable("--grid-template-columns-master-aside", "1fr 20rem");
+        design.add_theme_variable("--grid-template-rows-layout", "auto 1fr");
+        assert_eq!(
+            sort("lg:grid-cols-master-aside grid gap-6"),
+            "lg:grid-cols-master-aside grid gap-6"
+        );
+        assert_eq!(
+            sort_with("lg:grid-cols-master-aside grid gap-6", &design),
+            "grid gap-6 lg:grid-cols-master-aside"
+        );
+        assert_eq!(
+            sort_with("grid-rows-layout flex", &design),
+            "flex grid-rows-layout"
+        );
     }
 
     fn sort_with(input: &str, design: &TailwindDesignSystem) -> String {

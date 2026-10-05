@@ -3018,6 +3018,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "grid-cols" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Keyword(9, ModifierKind::None, 219, 1),
+            NamedBranch::Theme(ThemeNamespace::GridTemplateColumns, ModifierKind::None, 219, 1),
             NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 219, 1),
         ],
         arbitrary_branches: &[
@@ -3031,6 +3032,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "grid-rows" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Keyword(9, ModifierKind::None, 220, 1),
+            NamedBranch::Theme(ThemeNamespace::GridTemplateRows, ModifierKind::None, 220, 1),
             NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 220, 1),
         ],
         arbitrary_branches: &[
@@ -5504,3 +5506,5 @@ pub(super) static THEME_KEYS_ANIMATE: phf::Set<&'static str> = phf_set! {
     "spin",
 };
 pub(super) static THEME_KEYS_BACKGROUND_IMAGE: phf::Set<&'static str> = phf_set! {};
+pub(super) static THEME_KEYS_GRID_TEMPLATE_COLUMNS: phf::Set<&'static str> = phf_set! {};
+pub(super) static THEME_KEYS_GRID_TEMPLATE_ROWS: phf::Set<&'static str> = phf_set! {};

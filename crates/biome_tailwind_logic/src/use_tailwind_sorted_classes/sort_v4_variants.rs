@@ -157,7 +157,9 @@ impl Eq for VariantKey {}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(super) enum VariantValue {
-    Named(TokenText),
+    /// A bare value, such as `grid` in `supports-grid:` or `backdrop-filter`
+    /// in `supports-backdrop-filter:`.
+    Named(Text),
     Arbitrary(Text),
     /// A breakpoint or container size the user's stylesheet defines, resolved
     /// to its length (`3xl` → `120rem` for `--breakpoint-3xl: 120rem`).
@@ -490,7 +492,7 @@ fn glued_container_variant(name: &TokenText, design: &TailwindDesignSystem) -> O
         .slice(TextRange::new(TextSize::from(1), name.len()));
     Some(VariantKey::Functional {
         root: "@",
-        value: Some(VariantValue::Named(value)),
+        value: Some(VariantValue::Named(value.into())),
     })
 }
 
@@ -513,8 +515,25 @@ fn length_value_resolves(compare: VariantCompare, value: &VariantValue) -> bool 
 
 fn variant_value_from_segments(segments: &[VariantSegment]) -> Option<VariantValue> {
     match segments {
-        [VariantSegment::Named(value)] => Some(VariantValue::Named(value.clone())),
+        [VariantSegment::Named(value)] => Some(VariantValue::Named(value.clone().into())),
         [VariantSegment::Arbitrary(value)] => Some(VariantValue::Arbitrary(value.clone())),
+        // HACK: The grammar splits a dashed bare value on every `-`, so
+        // `supports-backdrop-filter:` arrives as `backdrop` and `filter`.
+        // We rebuild the string to work around it. A better fix would
+        // go in the parser.
+        [_, _, ..] => {
+            let mut value = String::new();
+            for segment in segments {
+                let VariantSegment::Named(segment) = segment else {
+                    return None;
+                };
+                if !value.is_empty() {
+                    value.push('-');
+                }
+                value.push_str(segment.text());
+            }
+            Some(VariantValue::Named(value.into()))
+        }
         _ => None,
     }
 }
