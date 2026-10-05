@@ -64,8 +64,8 @@ pub struct TailwindConfiguration {
     /// configuration file.
     ///
     /// Biome reads the `@theme`, `@utility`, and `@custom-variant` rules in
-    /// this file and in the files it imports with `@import`, so that
-    /// `useTailwindSortedClasses` knows your theme values, utilities, and variants.
+    /// this file and in the files it imports with `@import`, so that the
+    /// Tailwind rules know your theme values, utilities, and variants.
     ///
     /// To read the file, Biome scans your project when a Tailwind rule is
     /// enabled. Setting this option also turns on `css.parser.tailwindDirectives`,

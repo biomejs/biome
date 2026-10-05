@@ -16927,7 +16927,7 @@
 					"items": { "type": "string" }
 				},
 				"stylesheet": {
-					"description": "The CSS file that holds your Tailwind CSS configuration, such as\n`\"./src/app.css\"`. A relative path starts from the folder of the Biome\nconfiguration file.\n\nBiome reads the `@theme`, `@utility`, and `@custom-variant` rules in\nthis file and in the files it imports with `@import`, so that\n`useTailwindSortedClasses` knows your theme values, utilities, and variants.\n\nTo read the file, Biome scans your project when a Tailwind rule is\nenabled. Setting this option also turns on `css.parser.tailwindDirectives`,\nunless you set that option yourself.",
+					"description": "The CSS file that holds your Tailwind CSS configuration, such as\n`\"./src/app.css\"`. A relative path starts from the folder of the Biome\nconfiguration file.\n\nBiome reads the `@theme`, `@utility`, and `@custom-variant` rules in\nthis file and in the files it imports with `@import`, so that the\nTailwind rules know your theme values, utilities, and variants.\n\nTo read the file, Biome scans your project when a Tailwind rule is\nenabled. Setting this option also turns on `css.parser.tailwindDirectives`,\nunless you set that option yourself.",
 					"type": ["string", "null"]
 				},
 				"variantFunctions": {
