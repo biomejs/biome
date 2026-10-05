@@ -7,9 +7,11 @@ use biome_rowan::BatchMutationExt;
 use biome_rule_options::use_node_assert_strict::UseNodeAssertStrictOptions;
 
 declare_lint_rule! {
-    /// Promotes the usage of `node:assert/strict` over `node:assert`.
+    /// Prefer `node:assert/strict` over `node:assert`.
     ///
-    /// If you prefer stricter assertions when using the Node.js assertion module, the package `node:assert/strict` exposes a set of alias for stricter assertions.
+    /// The strict module exposes the same assertion API, but legacy methods such as `equal()` and
+    /// `deepEqual()` use strict comparison behavior. This avoids surprising results caused by
+    /// automatic type conversion.
     ///
     /// ## Examples
     ///

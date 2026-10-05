@@ -8,7 +8,11 @@ use biome_rowan::{AstNode, AstSeparatedList, declare_node_union};
 use biome_rule_options::no_empty_pattern::NoEmptyPatternOptions;
 
 declare_lint_rule! {
-    /// Disallows empty destructuring patterns.
+    /// Disallow empty object and array destructuring patterns.
+    ///
+    /// Destructuring extracts values into new variables. An empty pattern extracts nothing and
+    /// creates no variables, which is usually a mistake.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -26,7 +30,8 @@ declare_lint_rule! {
     /// ```
     ///
     /// ### Valid
-    /// The following cases are valid because they create new bindings.
+    ///
+    /// The following patterns are valid because they create at least one variable.
     ///
     /// ```js
     /// var {a = {}} = foo;

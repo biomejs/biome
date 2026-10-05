@@ -12,14 +12,11 @@ use biome_rule_options::no_invalid_grid_areas::NoInvalidGridAreasOptions;
 use rustc_hash::FxHashSet;
 
 declare_lint_rule! {
-    /// Disallows invalid named grid areas in CSS Grid Layouts.
+    /// Disallow invalid named areas in CSS grid templates.
     ///
-    /// For a named grid area to be valid, all strings must define:
-    ///
-    /// - the same number of cell tokens
-    /// - at least one cell token
-    ///
-    /// And all named grid areas that spans multiple grid cells must form a single filled-in rectangle.
+    /// Each quoted row in `grid-template-areas` contains space-separated cells. Every row must
+    /// contain the same number of cells and must not be empty. When an area name appears in more
+    /// than one cell, those cells must form one filled rectangle.
     ///
     /// ## Examples
     ///

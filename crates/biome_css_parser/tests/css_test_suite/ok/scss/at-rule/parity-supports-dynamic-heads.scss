@@ -1,0 +1,85 @@
+$property: display;
+$condition: "(display: grid)";
+$side: left;
+
+@supports ($property: grid) {
+  .by-name {
+    display: grid;
+  }
+}
+
+@supports (#{$condition}) {
+  .by-condition {
+    display: grid;
+  }
+}
+
+@supports (#{$condition} and (color: red)) {
+  .combined {
+    display: grid;
+  }
+}
+
+@supports (#{$property}: grid) {
+  .interpolated-name {
+    display: grid;
+  }
+}
+
+@supports #{$condition} {
+  .whole-interpolation {
+    display: grid;
+  }
+}
+
+@supports (display: grid) and (not (color: red)) {
+  .logical-and-not {
+    display: grid;
+  }
+}
+
+@supports (display: grid) or (display: flex) {
+  .logical-or {
+    display: grid;
+  }
+}
+
+@supports selector(.selector-control) {
+  .selector-control {
+    display: grid;
+  }
+}
+
+@supports func(10, 20, 40) {
+  .general-enclosed {
+    display: grid;
+  }
+}
+
+@supports (margin-#{$side}) {
+  .interpolated-general-enclosed {
+    display: grid;
+  }
+}
+
+@supports /* before parentheses */ (
+  /* before name */ $property /* before colon */: /* after colon */ grid
+) /* after parentheses */ {
+  .commented-name {
+    display: grid;
+  }
+}
+
+@supports /* before interpolation parentheses */ (
+  /* before interpolation */ #{$condition} /* after interpolation */
+) /* after interpolation parentheses */ {
+  .commented-condition {
+    display: grid;
+  }
+}
+
+.nested {
+  @supports ($property: flex) {
+    display: flex;
+  }
+}

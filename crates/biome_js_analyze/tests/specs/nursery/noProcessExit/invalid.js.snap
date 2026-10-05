@@ -1,0 +1,231 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+process.exit(0);
+process.exit(1);
+f(process.exit(1));
+process.exit();
+process["exit"](1);
+process.exit?.(1);
+process?.exit(1);
+(process.exit)(1);
+globalThis.process.exit(1);
+function foo() {
+	process.exit(1);
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:2:1 lint/nursery/noProcessExit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.exit().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ process.exit(0);
+      │ ^^^^^^^^^^^^^^^
+    3 │ process.exit(1);
+    4 │ f(process.exit(1));
+  
+  i It stops the program right away, before work in progress finishes and without saying why it stopped.
+  
+  i Throw an error instead, or set process.exitCode to choose the exit code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:1 lint/nursery/noProcessExit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.exit().
+  
+    1 │ /* should generate diagnostics */
+    2 │ process.exit(0);
+  > 3 │ process.exit(1);
+      │ ^^^^^^^^^^^^^^^
+    4 │ f(process.exit(1));
+    5 │ process.exit();
+  
+  i It stops the program right away, before work in progress finishes and without saying why it stopped.
+  
+  i Throw an error instead, or set process.exitCode to choose the exit code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:3 lint/nursery/noProcessExit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.exit().
+  
+    2 │ process.exit(0);
+    3 │ process.exit(1);
+  > 4 │ f(process.exit(1));
+      │   ^^^^^^^^^^^^^^^
+    5 │ process.exit();
+    6 │ process["exit"](1);
+  
+  i It stops the program right away, before work in progress finishes and without saying why it stopped.
+  
+  i Throw an error instead, or set process.exitCode to choose the exit code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/noProcessExit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.exit().
+  
+    3 │ process.exit(1);
+    4 │ f(process.exit(1));
+  > 5 │ process.exit();
+      │ ^^^^^^^^^^^^^^
+    6 │ process["exit"](1);
+    7 │ process.exit?.(1);
+  
+  i It stops the program right away, before work in progress finishes and without saying why it stopped.
+  
+  i Throw an error instead, or set process.exitCode to choose the exit code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:1 lint/nursery/noProcessExit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.exit().
+  
+    4 │ f(process.exit(1));
+    5 │ process.exit();
+  > 6 │ process["exit"](1);
+      │ ^^^^^^^^^^^^^^^^^^
+    7 │ process.exit?.(1);
+    8 │ process?.exit(1);
+  
+  i It stops the program right away, before work in progress finishes and without saying why it stopped.
+  
+  i Throw an error instead, or set process.exitCode to choose the exit code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/noProcessExit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.exit().
+  
+    5 │ process.exit();
+    6 │ process["exit"](1);
+  > 7 │ process.exit?.(1);
+      │ ^^^^^^^^^^^^^^^^^
+    8 │ process?.exit(1);
+    9 │ (process.exit)(1);
+  
+  i It stops the program right away, before work in progress finishes and without saying why it stopped.
+  
+  i Throw an error instead, or set process.exitCode to choose the exit code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:1 lint/nursery/noProcessExit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.exit().
+  
+     6 │ process["exit"](1);
+     7 │ process.exit?.(1);
+   > 8 │ process?.exit(1);
+       │ ^^^^^^^^^^^^^^^^
+     9 │ (process.exit)(1);
+    10 │ globalThis.process.exit(1);
+  
+  i It stops the program right away, before work in progress finishes and without saying why it stopped.
+  
+  i Throw an error instead, or set process.exitCode to choose the exit code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:1 lint/nursery/noProcessExit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.exit().
+  
+     7 │ process.exit?.(1);
+     8 │ process?.exit(1);
+   > 9 │ (process.exit)(1);
+       │ ^^^^^^^^^^^^^^^^^
+    10 │ globalThis.process.exit(1);
+    11 │ function foo() {
+  
+  i It stops the program right away, before work in progress finishes and without saying why it stopped.
+  
+  i Throw an error instead, or set process.exitCode to choose the exit code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:1 lint/nursery/noProcessExit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.exit().
+  
+     8 │ process?.exit(1);
+     9 │ (process.exit)(1);
+  > 10 │ globalThis.process.exit(1);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ function foo() {
+    12 │ 	process.exit(1);
+  
+  i It stops the program right away, before work in progress finishes and without saying why it stopped.
+  
+  i Throw an error instead, or set process.exitCode to choose the exit code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:2 lint/nursery/noProcessExit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use process.exit().
+  
+    10 │ globalThis.process.exit(1);
+    11 │ function foo() {
+  > 12 │ 	process.exit(1);
+       │ 	^^^^^^^^^^^^^^^
+    13 │ }
+    14 │ 
+  
+  i It stops the program right away, before work in progress finishes and without saying why it stopped.
+  
+  i Throw an error instead, or set process.exitCode to choose the exit code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

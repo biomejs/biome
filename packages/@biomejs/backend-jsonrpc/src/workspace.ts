@@ -1260,12 +1260,12 @@ export type PresetConfig = "recommended" | "all" | "none";
  */
 export interface Source {
 	/**
-	 * Remove duplicate CSS classes.
+	 * Remove repeated CSS class names from HTML class attributes.
 	 * See https://biomejs.dev/assist/actions/no-duplicate-classes
 	 */
 	noDuplicateClasses?: NoDuplicateClassesConfiguration;
 	/**
-	 * Sorts imports and exports in your JavaScript and TypeScript files.
+	 * Organize imports and exports in JavaScript and TypeScript files.
 	 * See https://biomejs.dev/assist/actions/organize-imports
 	 */
 	organizeImports?: OrganizeImportsConfiguration;
@@ -1282,22 +1282,22 @@ export interface Source {
 	 */
 	recommended?: boolean;
 	/**
-	 * Enforce attribute sorting in HTML elements.
+	 * Sort HTML attributes and framework directives into a consistent order.
 	 * See https://biomejs.dev/assist/actions/use-sorted-attributes
 	 */
 	useSortedAttributes?: UseSortedAttributesConfiguration;
 	/**
-	 * Sort the members of an enum in natural order.
+	 * Sort GraphQL enum values in natural order.
 	 * See https://biomejs.dev/assist/actions/use-sorted-enum-members
 	 */
 	useSortedEnumMembers?: UseSortedEnumMembersConfiguration;
 	/**
-	 * Sort interface members by key.
+	 * Sort named members of a TypeScript interface.
 	 * See https://biomejs.dev/assist/actions/use-sorted-interface-members
 	 */
 	useSortedInterfaceMembers?: UseSortedInterfaceMembersConfiguration;
 	/**
-	 * Sort the keys of a JSON object in natural order.
+	 * Sort keys in a JSON object.
 	 * See https://biomejs.dev/assist/actions/use-sorted-keys
 	 */
 	useSortedKeys?: UseSortedKeysConfiguration;
@@ -1307,17 +1307,17 @@ export interface Source {
 	 */
 	useSortedPackageJson?: UseSortedPackageJsonConfiguration;
 	/**
-	 * Enforce ordering of CSS properties and nested rules.
+	 * Sort CSS properties and nested rules into a consistent order.
 	 * See https://biomejs.dev/assist/actions/use-sorted-properties
 	 */
 	useSortedProperties?: UseSortedPropertiesConfiguration;
 	/**
-	 * Sort GraphQL selection sets.
+	 * Sort selections inside GraphQL operations and fragments.
 	 * See https://biomejs.dev/assist/actions/use-sorted-selection-set
 	 */
 	useSortedSelectionSet?: UseSortedSelectionSetConfiguration;
 	/**
-	 * Sort fields in GraphQL type definitions alphabetically.
+	 * Sort fields in GraphQL type definitions by name.
 	 * See https://biomejs.dev/assist/actions/use-sorted-type-fields
 	 */
 	useSortedTypeFields?: UseSortedTypeFieldsConfiguration;
@@ -1545,7 +1545,7 @@ export type GroupPlainConfiguration = "off" | "on" | "info" | "warn" | "error";
  */
 export interface A11y {
 	/**
-	 * Enforce that the accesskey attribute is not used on any HTML element.
+	 * Disallow the accesskey attribute.
 	 * See https://biomejs.dev/linter/rules/no-access-key
 	 */
 	noAccessKey?: NoAccessKeyConfiguration;
@@ -1560,7 +1560,7 @@ export interface A11y {
 	 */
 	noAriaHiddenOnFocusable?: NoAriaHiddenOnFocusableConfiguration;
 	/**
-	 * Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.
+	 * Disallow ARIA attributes on elements that cannot use them.
 	 * See https://biomejs.dev/linter/rules/no-aria-unsupported-elements
 	 */
 	noAriaUnsupportedElements?: NoAriaUnsupportedElementsConfiguration;
@@ -1600,12 +1600,12 @@ export interface A11y {
 	 */
 	noNoninteractiveElementToInteractiveRole?: NoNoninteractiveElementToInteractiveRoleConfiguration;
 	/**
-	 * Enforce that tabindex is not assigned to non-interactive HTML elements.
+	 * Require a negative integer tabindex on non-interactive elements.
 	 * See https://biomejs.dev/linter/rules/no-noninteractive-tabindex
 	 */
 	noNoninteractiveTabindex?: NoNoninteractiveTabindexConfiguration;
 	/**
-	 * Prevent the usage of positive integers on tabindex attribute.
+	 * Disallow positive values for the tabindex attribute.
 	 * See https://biomejs.dev/linter/rules/no-positive-tabindex
 	 */
 	noPositiveTabindex?: NoPositiveTabindexConfiguration;
@@ -1620,12 +1620,12 @@ export interface A11y {
 	 */
 	noRedundantRoles?: NoRedundantRolesConfiguration;
 	/**
-	 * Enforce that static, visible elements (such as \<div>) that have click handlers use the valid role attribute.
+	 * Require an appropriate role when a non-interactive element has event handlers.
 	 * See https://biomejs.dev/linter/rules/no-static-element-interactions
 	 */
 	noStaticElementInteractions?: NoStaticElementInteractionsConfiguration;
 	/**
-	 * Enforces the usage of the title element for the svg element.
+	 * Require a supported labeling pattern for non-decorative SVG elements.
 	 * See https://biomejs.dev/linter/rules/no-svg-without-title
 	 */
 	noSvgWithoutTitle?: NoSvgWithoutTitleConfiguration;
@@ -1667,7 +1667,7 @@ export interface A11y {
 	 */
 	useAriaPropsSupportedByRole?: UseAriaPropsSupportedByRoleConfiguration;
 	/**
-	 * Enforces the usage and validity of the attribute type for the element button.
+	 * Require an explicit, valid type on every \<button>.
 	 * See https://biomejs.dev/linter/rules/use-button-type
 	 */
 	useButtonType?: UseButtonTypeConfiguration;
@@ -1677,7 +1677,7 @@ export interface A11y {
 	 */
 	useFocusableInteractive?: UseFocusableInteractiveConfiguration;
 	/**
-	 * Disallow a missing generic family keyword within font families.
+	 * Require a generic fallback in font-family lists.
 	 * See https://biomejs.dev/linter/rules/use-generic-font-names
 	 */
 	useGenericFontNames?: UseGenericFontNamesConfiguration;
@@ -1687,12 +1687,12 @@ export interface A11y {
 	 */
 	useHeadingContent?: UseHeadingContentConfiguration;
 	/**
-	 * Enforce that html element has lang attribute.
+	 * Require a lang attribute on the \<html> element.
 	 * See https://biomejs.dev/linter/rules/use-html-lang
 	 */
 	useHtmlLang?: UseHtmlLangConfiguration;
 	/**
-	 * Enforces the usage of the attribute title for the element iframe.
+	 * Require a title on every \<iframe>.
 	 * See https://biomejs.dev/linter/rules/use-iframe-title
 	 */
 	useIframeTitle?: UseIframeTitleConfiguration;
@@ -1702,7 +1702,7 @@ export interface A11y {
 	 */
 	useKeyWithClickEvents?: UseKeyWithClickEventsConfiguration;
 	/**
-	 * Enforce that onmouseover is accompanied by onfocus and onmouseout by onblur.
+	 * Require keyboard equivalents for mouse hover events.
 	 * See https://biomejs.dev/linter/rules/use-key-with-mouse-events
 	 */
 	useKeyWithMouseEvents?: UseKeyWithMouseEventsConfiguration;
@@ -1717,12 +1717,12 @@ export interface A11y {
 	 */
 	useSemanticElements?: UseSemanticElementsConfiguration;
 	/**
-	 * Enforce that all anchors are valid, and they are navigable elements.
+	 * Require anchors to provide a real navigation destination.
 	 * See https://biomejs.dev/linter/rules/use-valid-anchor
 	 */
 	useValidAnchor?: UseValidAnchorConfiguration;
 	/**
-	 * Ensures that ARIA properties aria-* are all valid.
+	 * Disallow unknown aria-* attributes.
 	 * See https://biomejs.dev/linter/rules/use-valid-aria-props
 	 */
 	useValidAriaProps?: UseValidAriaPropsConfiguration;
@@ -1742,7 +1742,7 @@ export interface A11y {
 	 */
 	useValidAutocomplete?: UseValidAutocompleteConfiguration;
 	/**
-	 * Ensure that the attribute passed to the lang attribute is a correct ISO language and/or country.
+	 * Require a supported language tag on the \<html> element.
 	 * See https://biomejs.dev/linter/rules/use-valid-lang
 	 */
 	useValidLang?: UseValidLangConfiguration;
@@ -1817,7 +1817,7 @@ export interface Complexity {
 	 */
 	noImplicitCoercions?: NoImplicitCoercionsConfiguration;
 	/**
-	 * Disallow the use of the !important style.
+	 * Disallow !important declarations.
 	 * See https://biomejs.dev/linter/rules/no-important-styles
 	 */
 	noImportantStyles?: NoImportantStylesConfiguration;
@@ -1842,7 +1842,7 @@ export interface Complexity {
 	 */
 	noUselessCatch?: NoUselessCatchConfiguration;
 	/**
-	 * Disallow unused catch bindings.
+	 * Disallow unused error parameters in catch clauses.
 	 * See https://biomejs.dev/linter/rules/no-useless-catch-binding
 	 */
 	noUselessCatchBinding?: NoUselessCatchBindingConfiguration;
@@ -1867,7 +1867,7 @@ export interface Complexity {
 	 */
 	noUselessEscapeInRegex?: NoUselessEscapeInRegexConfiguration;
 	/**
-	 * Disallow unnecessary fragments.
+	 * Disallow unnecessary JSX fragments.
 	 * See https://biomejs.dev/linter/rules/no-useless-fragments
 	 */
 	noUselessFragments?: NoUselessFragmentsConfiguration;
@@ -1912,7 +1912,7 @@ export interface Complexity {
 	 */
 	noUselessTernary?: NoUselessTernaryConfiguration;
 	/**
-	 * Disallow useless this aliasing.
+	 * Disallow aliases for this when this can be used directly.
 	 * See https://biomejs.dev/linter/rules/no-useless-this-alias
 	 */
 	noUselessThisAlias?: NoUselessThisAliasConfiguration;
@@ -2049,7 +2049,7 @@ export interface Correctness {
 	 */
 	noConstructorReturn?: NoConstructorReturnConfiguration;
 	/**
-	 * Require all argument names for fields & directives to be unique.
+	 * Require unique argument names for fields and directives.
 	 * See https://biomejs.dev/linter/rules/no-duplicate-argument-names
 	 */
 	noDuplicateArgumentNames?: NoDuplicateArgumentNamesConfiguration;
@@ -2059,7 +2059,7 @@ export interface Correctness {
 	 */
 	noDuplicateAttributes?: NoDuplicateAttributesConfiguration;
 	/**
-	 * Require all enum value names to be unique.
+	 * Disallow duplicate names in GraphQL enums.
 	 * See https://biomejs.dev/linter/rules/no-duplicate-enum-value-names
 	 */
 	noDuplicateEnumValueNames?: NoDuplicateEnumValueNamesConfiguration;
@@ -2079,7 +2079,7 @@ export interface Correctness {
 	 */
 	noEmptyCharacterClassInRegex?: NoEmptyCharacterClassInRegexConfiguration;
 	/**
-	 * Disallows empty destructuring patterns.
+	 * Disallow empty object and array destructuring patterns.
 	 * See https://biomejs.dev/linter/rules/no-empty-pattern
 	 */
 	noEmptyPattern?: NoEmptyPatternConfiguration;
@@ -2109,17 +2109,17 @@ export interface Correctness {
 	 */
 	noInvalidConstructorSuper?: NoInvalidConstructorSuperConfiguration;
 	/**
-	 * Disallow non-standard direction values for linear gradient functions.
+	 * Disallow non-standard directions in linear gradients.
 	 * See https://biomejs.dev/linter/rules/no-invalid-direction-in-linear-gradient
 	 */
 	noInvalidDirectionInLinearGradient?: NoInvalidDirectionInLinearGradientConfiguration;
 	/**
-	 * Disallows invalid named grid areas in CSS Grid Layouts.
+	 * Disallow invalid named areas in CSS grid templates.
 	 * See https://biomejs.dev/linter/rules/no-invalid-grid-areas
 	 */
 	noInvalidGridAreas?: NoInvalidGridAreasConfiguration;
 	/**
-	 * Disallow the use of @import at-rules in invalid positions.
+	 * Disallow @import after other rules.
 	 * See https://biomejs.dev/linter/rules/no-invalid-position-at-import-rule
 	 */
 	noInvalidPositionAtImportRule?: NoInvalidPositionAtImportRuleConfiguration;
@@ -2129,7 +2129,7 @@ export interface Correctness {
 	 */
 	noInvalidUseBeforeDeclaration?: NoInvalidUseBeforeDeclarationConfiguration;
 	/**
-	 * Disallow missing var function for css variables.
+	 * Require var() when using a declared CSS custom property.
 	 * See https://biomejs.dev/linter/rules/no-missing-var-function
 	 */
 	noMissingVarFunction?: NoMissingVarFunctionConfiguration;
@@ -2209,7 +2209,7 @@ export interface Correctness {
 	 */
 	noStringCaseMismatch?: NoStringCaseMismatchConfiguration;
 	/**
-	 * Disallow lexical declarations in switch clauses.
+	 * Disallow declarations directly inside switch clauses.
 	 * See https://biomejs.dev/linter/rules/no-switch-declarations
 	 */
 	noSwitchDeclarations?: NoSwitchDeclarationsConfiguration;
@@ -2224,47 +2224,47 @@ export interface Correctness {
 	 */
 	noUndeclaredVariables?: NoUndeclaredVariablesConfiguration;
 	/**
-	 * Disallow unknown CSS value functions.
+	 * Disallow unrecognized CSS value functions.
 	 * See https://biomejs.dev/linter/rules/no-unknown-function
 	 */
 	noUnknownFunction?: NoUnknownFunctionConfiguration;
 	/**
-	 * Disallow unknown media feature names.
+	 * Disallow unrecognized feature names in media queries.
 	 * See https://biomejs.dev/linter/rules/no-unknown-media-feature-name
 	 */
 	noUnknownMediaFeatureName?: NoUnknownMediaFeatureNameConfiguration;
 	/**
-	 * Disallow unknown properties.
+	 * Disallow unrecognized CSS properties.
 	 * See https://biomejs.dev/linter/rules/no-unknown-property
 	 */
 	noUnknownProperty?: NoUnknownPropertyConfiguration;
 	/**
-	 * Disallow unknown pseudo-class selectors.
+	 * Disallow unrecognized pseudo-class selectors.
 	 * See https://biomejs.dev/linter/rules/no-unknown-pseudo-class
 	 */
 	noUnknownPseudoClass?: NoUnknownPseudoClassConfiguration;
 	/**
-	 * Disallow unknown pseudo-element selectors.
+	 * Disallow unrecognized pseudo-element selectors.
 	 * See https://biomejs.dev/linter/rules/no-unknown-pseudo-element
 	 */
 	noUnknownPseudoElement?: NoUnknownPseudoElementConfiguration;
 	/**
-	 * Disallow unknown type selectors.
+	 * Disallow unrecognized element names in type selectors.
 	 * See https://biomejs.dev/linter/rules/no-unknown-type-selector
 	 */
 	noUnknownTypeSelector?: NoUnknownTypeSelectorConfiguration;
 	/**
-	 * Disallow unknown CSS units.
+	 * Disallow unrecognized CSS units.
 	 * See https://biomejs.dev/linter/rules/no-unknown-unit
 	 */
 	noUnknownUnit?: NoUnknownUnitConfiguration;
 	/**
-	 * Disallow unmatchable An+B selectors.
+	 * Disallow An+B formulas that cannot select an element.
 	 * See https://biomejs.dev/linter/rules/no-unmatchable-anb-selector
 	 */
 	noUnmatchableAnbSelector?: NoUnmatchableAnbSelectorConfiguration;
 	/**
-	 * Disallow unreachable code.
+	 * Disallow code that can never run.
 	 * See https://biomejs.dev/linter/rules/no-unreachable
 	 */
 	noUnreachable?: NoUnreachableConfiguration;
@@ -2284,7 +2284,7 @@ export interface Correctness {
 	 */
 	noUnsafeFinally?: NoUnsafeFinallyConfiguration;
 	/**
-	 * Disallow the use of optional chaining in contexts where the undefined value is not allowed.
+	 * Disallow optional chaining where undefined is not a valid result.
 	 * See https://biomejs.dev/linter/rules/no-unsafe-optional-chaining
 	 */
 	noUnsafeOptionalChaining?: NoUnsafeOptionalChainingConfiguration;
@@ -2319,7 +2319,7 @@ export interface Correctness {
 	 */
 	noUnusedVariables?: NoUnusedVariablesConfiguration;
 	/**
-	 * This rules prevents void elements (AKA self-closing elements) from having children.
+	 * Disallow children on HTML void elements.
 	 * See https://biomejs.dev/linter/rules/no-void-elements-with-children
 	 */
 	noVoidElementsWithChildren?: NoVoidElementsWithChildrenConfiguration;
@@ -2376,7 +2376,7 @@ export interface Correctness {
 	 */
 	useExhaustiveDependencies?: UseExhaustiveDependenciesConfiguration;
 	/**
-	 * Enforce specifying the name of GraphQL operations.
+	 * Require a name for every explicit GraphQL operation definition.
 	 * See https://biomejs.dev/linter/rules/use-graphql-named-operations
 	 */
 	useGraphqlNamedOperations?: UseGraphqlNamedOperationsConfiguration;
@@ -2416,7 +2416,7 @@ export interface Correctness {
 	 */
 	useJsxKeyInIterable?: UseJsxKeyInIterableConfiguration;
 	/**
-	 * Disallow anonymous operations when more than one operation specified in document.
+	 * Disallow an anonymous operation in a document with other operations.
 	 * See https://biomejs.dev/linter/rules/use-lone-anonymous-operation
 	 */
 	useLoneAnonymousOperation?: UseLoneAnonymousOperationConfiguration;
@@ -2446,7 +2446,7 @@ export interface Correctness {
 	 */
 	useSingleJsDocAsterisk?: UseSingleJsDocAsteriskConfiguration;
 	/**
-	 * Prevent the usage of static string literal id attribute on elements outside SVG contexts.
+	 * Disallow static id values on elements outside SVG contexts.
 	 * See https://biomejs.dev/linter/rules/use-unique-element-ids
 	 */
 	useUniqueElementIds?: UseUniqueElementIdsConfiguration;
@@ -2631,6 +2631,11 @@ export interface Nursery {
 	 */
 	noInvalidPropertyInitValue?: NoInvalidPropertyInitValueConfiguration;
 	/**
+	 * Disallow the use of the __iterator__ property.
+	 * See https://biomejs.dev/linter/rules/no-iterator-property
+	 */
+	noIteratorProperty?: NoIteratorPropertyConfiguration;
+	/**
 	 * Disallow specific object properties.
 	 * See https://biomejs.dev/linter/rules/no-js-restricted-properties
 	 */
@@ -2651,7 +2656,7 @@ export interface Nursery {
 	 */
 	noJsxNamespace?: NoJsxNamespaceConfiguration;
 	/**
-	 * Disallow functions declared inside loops that capture unsafe outer variables.
+	 * Disallow functions created inside loops when they use variables that can change.
 	 * See https://biomejs.dev/linter/rules/no-loop-func
 	 */
 	noLoopFunc?: NoLoopFuncConfiguration;
@@ -2741,6 +2746,11 @@ export interface Nursery {
 	 */
 	noPlaywrightWaitForTimeout?: NoPlaywrightWaitForTimeoutConfiguration;
 	/**
+	 * Disallow the use of process.exit().
+	 * See https://biomejs.dev/linter/rules/no-process-exit
+	 */
+	noProcessExit?: NoProcessExitConfiguration;
+	/**
 	 * Disallow deep imports from the react-native package.
 	 * See https://biomejs.dev/linter/rules/no-react-native-deep-imports
 	 */
@@ -2796,6 +2806,11 @@ export interface Nursery {
 	 */
 	noSvelteExportLet?: NoSvelteExportLetConfiguration;
 	/**
+	 * Disallow the use of the $inspect rune.
+	 * See https://biomejs.dev/linter/rules/no-svelte-inspect
+	 */
+	noSvelteInspect?: NoSvelteInspectConfiguration;
+	/**
 	 * Disallow legacy Svelte {@const} tags.
 	 * See https://biomejs.dev/linter/rules/no-svelte-legacy-const
 	 */
@@ -2831,7 +2846,7 @@ export interface Nursery {
 	 */
 	noUndeclaredClasses?: NoUndeclaredClassesConfiguration;
 	/**
-	 * Reports custom properties used with var() that have no visible declaration.
+	 * Disallow undeclared CSS custom properties in inline styles.
 	 * See https://biomejs.dev/linter/rules/no-undeclared-custom-properties
 	 */
 	noUndeclaredCustomProperties?: NoUndeclaredCustomPropertiesConfiguration;
@@ -2846,7 +2861,7 @@ export interface Nursery {
 	 */
 	noUnnecessaryTemplateExpression?: NoUnnecessaryTemplateExpressionConfiguration;
 	/**
-	 * Disallow an unsafe combination of the sandbox attribute.
+	 * Disallow allow-scripts together with allow-same-origin in an iframe sandbox.
 	 * See https://biomejs.dev/linter/rules/no-unsafe-iframe-sandbox
 	 */
 	noUnsafeIframeSandbox?: NoUnsafeIframeSandboxConfiguration;
@@ -3006,7 +3021,7 @@ export interface Nursery {
 	 */
 	useFlatMathMinMax?: UseFlatMathMinMaxConfiguration;
 	/**
-	 * Enforce the 'sandbox' attribute for 'iframe' elements.
+	 * Require the sandbox attribute on \<iframe> elements.
 	 * See https://biomejs.dev/linter/rules/use-iframe-sandbox
 	 */
 	useIframeSandbox?: UseIframeSandboxConfiguration;
@@ -3026,7 +3041,7 @@ export interface Nursery {
 	 */
 	useLayeredStyles?: UseLayeredStylesConfiguration;
 	/**
-	 * Enforce logical properties over physical properties.
+	 * Prefer logical CSS properties over physical properties.
 	 * See https://biomejs.dev/linter/rules/use-logical-properties
 	 */
 	useLogicalProperties?: UseLogicalPropertiesConfiguration;
@@ -3111,7 +3126,7 @@ export interface Nursery {
 	 */
 	useRegexpTest?: UseRegexpTestConfiguration;
 	/**
-	 * Enforce that \<style> blocks in Vue SFCs have the scoped attribute and that \<style> blocks in Astro components do not have the is:global directive.
+	 * Keep component styles scoped in Vue and Astro files.
 	 * See https://biomejs.dev/linter/rules/use-scoped-styles
 	 */
 	useScopedStyles?: UseScopedStylesConfiguration;
@@ -3181,7 +3196,7 @@ export interface Nursery {
 	 */
 	useVueBaseImport?: UseVueBaseImportConfiguration;
 	/**
-	 * Enforce consistent defineProps declaration style.
+	 * Enforce a consistent declaration style for Vue's defineProps macro.
 	 * See https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration
 	 */
 	useVueConsistentDefinePropsDeclaration?: UseVueConsistentDefinePropsDeclarationConfiguration;
@@ -3246,7 +3261,7 @@ export interface Performance {
 	 */
 	noReExportAll?: NoReExportAllConfiguration;
 	/**
-	 * Prevent the usage of synchronous scripts.
+	 * Disallow external scripts that block HTML parsing.
 	 * See https://biomejs.dev/linter/rules/no-sync-scripts
 	 */
 	noSyncScripts?: NoSyncScriptsConfiguration;
@@ -3298,7 +3313,7 @@ export interface Security {
 	 */
 	noBlankTarget?: NoBlankTargetConfiguration;
 	/**
-	 * Prevent the usage of dangerous JSX props.
+	 * Disallow React's dangerouslySetInnerHTML property.
 	 * See https://biomejs.dev/linter/rules/no-dangerously-set-inner-html
 	 */
 	noDangerouslySetInnerHtml?: NoDangerouslySetInnerHtmlConfiguration;
@@ -3355,7 +3370,7 @@ export interface Style {
 	 */
 	noDefaultExport?: NoDefaultExportConfiguration;
 	/**
-	 * Disallow a lower specificity selector from coming after a higher specificity selector.
+	 * Disallow lower-specificity selectors after higher-specificity selectors.
 	 * See https://biomejs.dev/linter/rules/no-descending-specificity
 	 */
 	noDescendingSpecificity?: NoDescendingSpecificityConfiguration;
@@ -3480,12 +3495,12 @@ export interface Style {
 	 */
 	noRestrictedTypes?: NoRestrictedTypesConfiguration;
 	/**
-	 * Disallow the usage of specified root types.
+	 * Disallow configured GraphQL root operation types.
 	 * See https://biomejs.dev/linter/rules/no-root-type
 	 */
 	noRootType?: NoRootTypeConfiguration;
 	/**
-	 * Disallow the use of constants which its value is the upper-case version of its name.
+	 * Disallow constants whose string value is the same as their uppercase name.
 	 * See https://biomejs.dev/linter/rules/no-shouty-constants
 	 */
 	noShoutyConstants?: NoShoutyConstantsConfiguration;
@@ -3510,7 +3525,7 @@ export interface Style {
 	 */
 	noUselessElse?: NoUselessElseConfiguration;
 	/**
-	 * Disallow use of @value rule in CSS modules.
+	 * Disallow the @value rule in CSS Modules.
 	 * See https://biomejs.dev/linter/rules/no-value-at-rule
 	 */
 	noValueAtRule?: NoValueAtRuleConfiguration;
@@ -3597,7 +3612,7 @@ export interface Style {
 	 */
 	useConsistentEnumValueType?: UseConsistentEnumValueTypeConfiguration;
 	/**
-	 * Require all descriptions to follow the same style (either block or inline) to  maintain consistency and improve readability across the schema.
+	 * Require one description style throughout a GraphQL schema.
 	 * See https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions
 	 */
 	useConsistentGraphqlDescriptions?: UseConsistentGraphqlDescriptionsConfiguration;
@@ -3607,7 +3622,7 @@ export interface Style {
 	 */
 	useConsistentMemberAccessibility?: UseConsistentMemberAccessibilityConfiguration;
 	/**
-	 * Enforce consistent use of either method signatures or function properties within interfaces and type aliases.
+	 * Enforce one syntax for functions declared in interfaces and type aliases.
 	 * See https://biomejs.dev/linter/rules/use-consistent-method-signatures
 	 */
 	useConsistentMethodSignatures?: UseConsistentMethodSignaturesConfiguration;
@@ -3637,7 +3652,7 @@ export interface Style {
 	 */
 	useDefaultSwitchClause?: UseDefaultSwitchClauseConfiguration;
 	/**
-	 * Require specifying the reason argument when using @deprecated directive.
+	 * Require a reason when using the @deprecated directive.
 	 * See https://biomejs.dev/linter/rules/use-deprecated-reason
 	 */
 	useDeprecatedReason?: UseDeprecatedReasonConfiguration;
@@ -3697,7 +3712,7 @@ export interface Style {
 	 */
 	useGlobalThis?: UseGlobalThisConfiguration;
 	/**
-	 * Validates that all enum values are capitalized.
+	 * Require uppercase names for GraphQL enum values.
 	 * See https://biomejs.dev/linter/rules/use-graphql-naming-convention
 	 */
 	useGraphqlNamingConvention?: UseGraphqlNamingConventionConfiguration;
@@ -3712,7 +3727,7 @@ export interface Style {
 	 */
 	useImportType?: UseImportTypeConfiguration;
 	/**
-	 * Require mutation argument to be always called "input".
+	 * Require mutation arguments to be named input.
 	 * See https://biomejs.dev/linter/rules/use-input-name
 	 */
 	useInputName?: UseInputNameConfiguration;
@@ -3722,7 +3737,7 @@ export interface Style {
 	 */
 	useLiteralEnumMembers?: UseLiteralEnumMembersConfiguration;
 	/**
-	 * Require queries, mutations, subscriptions or fragments each to be located in separate files.
+	 * Require one executable GraphQL definition per file.
 	 * See https://biomejs.dev/linter/rules/use-lone-executable-definition
 	 */
 	useLoneExecutableDefinition?: UseLoneExecutableDefinitionConfiguration;
@@ -3732,7 +3747,7 @@ export interface Style {
 	 */
 	useNamingConvention?: UseNamingConventionConfiguration;
 	/**
-	 * Promotes the usage of node:assert/strict over node:assert.
+	 * Prefer node:assert/strict over node:assert.
 	 * See https://biomejs.dev/linter/rules/use-node-assert-strict
 	 */
 	useNodeAssertStrict?: UseNodeAssertStrictConfiguration;
@@ -3877,7 +3892,7 @@ export interface Suspicious {
 	 */
 	noAsyncPromiseExecutor?: NoAsyncPromiseExecutorConfiguration;
 	/**
-	 * Prevents the misuse of glob patterns inside the files.includes field.
+	 * Disallow ineffective ordering in files.includes patterns.
 	 * See https://biomejs.dev/linter/rules/no-biome-first-exception
 	 */
 	noBiomeFirstException?: NoBiomeFirstExceptionConfiguration;
@@ -3987,7 +4002,7 @@ export interface Suspicious {
 	 */
 	noDuplicateCustomProperties?: NoDuplicateCustomPropertiesConfiguration;
 	/**
-	 * Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: "bundledDependencies", "bundleDependencies", "dependencies", "devDependencies", "overrides", "optionalDependencies", and "peerDependencies".
+	 * Disallow duplicate dependencies in package.json.
 	 * See https://biomejs.dev/linter/rules/no-duplicate-dependencies
 	 */
 	noDuplicateDependencies?: NoDuplicateDependenciesConfiguration;
@@ -4002,27 +4017,27 @@ export interface Suspicious {
 	 */
 	noDuplicateEnumValues?: NoDuplicateEnumValuesConfiguration;
 	/**
-	 * No duplicated fields in GraphQL operations.
+	 * Disallow duplicate names inside GraphQL operations.
 	 * See https://biomejs.dev/linter/rules/no-duplicate-fields
 	 */
 	noDuplicateFields?: NoDuplicateFieldsConfiguration;
 	/**
-	 * Disallow duplicate names within font families.
+	 * Disallow duplicate names in font-family lists.
 	 * See https://biomejs.dev/linter/rules/no-duplicate-font-names
 	 */
 	noDuplicateFontNames?: NoDuplicateFontNamesConfiguration;
 	/**
-	 * Enforce unique operation names across a GraphQL document.
+	 * Require unique operation names within a GraphQL document.
 	 * See https://biomejs.dev/linter/rules/no-duplicate-graphql-operation-name
 	 */
 	noDuplicateGraphqlOperationName?: NoDuplicateGraphqlOperationNameConfiguration;
 	/**
-	 * Prevents JSX properties to be assigned multiple times.
+	 * Disallow duplicate JSX properties.
 	 * See https://biomejs.dev/linter/rules/no-duplicate-jsx-props
 	 */
 	noDuplicateJsxProps?: NoDuplicateJsxPropsConfiguration;
 	/**
-	 * Disallow two keys with the same name inside objects.
+	 * Disallow duplicate keys in JSON objects.
 	 * See https://biomejs.dev/linter/rules/no-duplicate-object-keys
 	 */
 	noDuplicateObjectKeys?: NoDuplicateObjectKeysConfiguration;
@@ -4052,7 +4067,7 @@ export interface Suspicious {
 	 */
 	noDuplicatedSpreadProps?: NoDuplicatedSpreadPropsConfiguration;
 	/**
-	 * Disallow CSS empty blocks.
+	 * Disallow empty CSS blocks.
 	 * See https://biomejs.dev/linter/rules/no-empty-block
 	 */
 	noEmptyBlock?: NoEmptyBlockConfiguration;
@@ -4142,7 +4157,7 @@ export interface Suspicious {
 	 */
 	noImplicitAnyLet?: NoImplicitAnyLetConfiguration;
 	/**
-	 * Disallow assigning to imported bindings.
+	 * Disallow assigning a new value to an imported variable.
 	 * See https://biomejs.dev/linter/rules/no-import-assign
 	 */
 	noImportAssign?: NoImportAssignConfiguration;
@@ -4152,12 +4167,12 @@ export interface Suspicious {
 	 */
 	noImportCycles?: NoImportCyclesConfiguration;
 	/**
-	 * Disallow invalid !important within keyframe declarations.
+	 * Disallow !important in @keyframes declarations.
 	 * See https://biomejs.dev/linter/rules/no-important-in-keyframe
 	 */
 	noImportantInKeyframe?: NoImportantInKeyframeConfiguration;
 	/**
-	 * Disallows the use of irregular whitespace characters.
+	 * Disallow whitespace characters that CSS does not treat as normal spaces.
 	 * See https://biomejs.dev/linter/rules/no-irregular-whitespace
 	 */
 	noIrregularWhitespace?: NoIrregularWhitespaceConfiguration;
@@ -4222,7 +4237,7 @@ export interface Suspicious {
 	 */
 	noPrototypeBuiltins?: NoPrototypeBuiltinsConfiguration;
 	/**
-	 * Disallow the use if quickfix.biome inside editor settings file.
+	 * Disallow quickfix.biome in supported editor settings.
 	 * See https://biomejs.dev/linter/rules/no-quickfix-biome
 	 */
 	noQuickfixBiome?: NoQuickfixBiomeConfiguration;
@@ -4267,7 +4282,7 @@ export interface Suspicious {
 	 */
 	noShadowRestrictedNames?: NoShadowRestrictedNamesConfiguration;
 	/**
-	 * Disallow shorthand properties that override related longhand properties.
+	 * Disallow shorthand properties that override earlier, more specific properties.
 	 * See https://biomejs.dev/linter/rules/no-shorthand-property-overrides
 	 */
 	noShorthandPropertyOverrides?: NoShorthandPropertyOverridesConfiguration;
@@ -4312,7 +4327,7 @@ export interface Suspicious {
 	 */
 	noUndeclaredEnvVars?: NoUndeclaredEnvVarsConfiguration;
 	/**
-	 * Disallow unknown at-rules.
+	 * Disallow unrecognized CSS at-rules.
 	 * See https://biomejs.dev/linter/rules/no-unknown-at-rules
 	 */
 	noUnknownAtRules?: NoUnknownAtRulesConfiguration;
@@ -4394,7 +4409,7 @@ export interface Suspicious {
 	 */
 	useAwait?: UseAwaitConfiguration;
 	/**
-	 * Promotes the correct usage for ignoring folders in the configuration file.
+	 * Prefer folder exclusions that prevent Biome from scanning the folder.
 	 * See https://biomejs.dev/linter/rules/use-biome-ignore-folder
 	 */
 	useBiomeIgnoreFolder?: UseBiomeIgnoreFolderConfiguration;
@@ -4404,7 +4419,7 @@ export interface Suspicious {
 	 */
 	useDefaultSwitchClauseLast?: UseDefaultSwitchClauseLastConfiguration;
 	/**
-	 * Require the @deprecated directive to specify a deletion date.
+	 * Require a valid deletion date on the @deprecated directive.
 	 * See https://biomejs.dev/linter/rules/use-deprecated-date
 	 */
 	useDeprecatedDate?: UseDeprecatedDateConfiguration;
@@ -4449,7 +4464,7 @@ export interface Suspicious {
 	 */
 	useNumberToFixedDigitsArgument?: UseNumberToFixedDigitsArgumentConfiguration;
 	/**
-	 * Enforce the presence of required scripts in package.json.
+	 * Require configured scripts in package.json.
 	 * See https://biomejs.dev/linter/rules/use-required-scripts
 	 */
 	useRequiredScripts?: UseRequiredScriptsConfiguration;
@@ -5133,6 +5148,9 @@ export type NoInvalidFileInputAcceptConfiguration =
 export type NoInvalidPropertyInitValueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInvalidPropertyInitValueOptions;
+export type NoIteratorPropertyConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoIteratorPropertyOptions;
 export type NoJsRestrictedPropertiesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsRestrictedPropertiesOptions;
@@ -5199,6 +5217,9 @@ export type NoPlaywrightWaitForSelectorConfiguration =
 export type NoPlaywrightWaitForTimeoutConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPlaywrightWaitForTimeoutOptions;
+export type NoProcessExitConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoProcessExitOptions;
 export type NoReactNativeDeepImportsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactNativeDeepImportsOptions;
@@ -5232,6 +5253,9 @@ export type NoSvelteAtHtmlTagsConfiguration =
 export type NoSvelteExportLetConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteExportLetOptions;
+export type NoSvelteInspectConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteInspectOptions;
 export type NoSvelteLegacyConstConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteLegacyConstOptions;
@@ -7387,6 +7411,10 @@ export interface RuleWithNoInvalidPropertyInitValueOptions {
 	level: RulePlainConfiguration;
 	options?: NoInvalidPropertyInitValueOptions;
 }
+export interface RuleWithNoIteratorPropertyOptions {
+	level: RulePlainConfiguration;
+	options?: NoIteratorPropertyOptions;
+}
 export interface RuleWithNoJsRestrictedPropertiesOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsRestrictedPropertiesOptions;
@@ -7507,6 +7535,10 @@ export interface RuleWithNoPlaywrightWaitForTimeoutOptions {
 	level: RulePlainConfiguration;
 	options?: NoPlaywrightWaitForTimeoutOptions;
 }
+export interface RuleWithNoProcessExitOptions {
+	level: RulePlainConfiguration;
+	options?: NoProcessExitOptions;
+}
 export interface RuleWithNoReactNativeDeepImportsOptions {
 	level: RulePlainConfiguration;
 	options?: NoReactNativeDeepImportsOptions;
@@ -7554,6 +7586,10 @@ export interface RuleWithNoSvelteAtHtmlTagsOptions {
 export interface RuleWithNoSvelteExportLetOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteExportLetOptions;
+}
+export interface RuleWithNoSvelteInspectOptions {
+	level: RulePlainConfiguration;
+	options?: NoSvelteInspectOptions;
 }
 export interface RuleWithNoSvelteLegacyConstOptions {
 	level: RulePlainConfiguration;
@@ -9754,6 +9790,7 @@ export type NoImpliedEvalOptions = {};
 export type NoInlineStylesOptions = {};
 export type NoInvalidFileInputAcceptOptions = {};
 export type NoInvalidPropertyInitValueOptions = {};
+export type NoIteratorPropertyOptions = {};
 export interface NoJsRestrictedPropertiesOptions {
 	/**
 	 * Restriction entries for object/property access.
@@ -9790,6 +9827,7 @@ export type NoPlaywrightUselessAwaitOptions = {};
 export type NoPlaywrightWaitForNavigationOptions = {};
 export type NoPlaywrightWaitForSelectorOptions = {};
 export type NoPlaywrightWaitForTimeoutOptions = {};
+export type NoProcessExitOptions = {};
 export type NoReactNativeDeepImportsOptions = {};
 export type NoReactNativeLiteralColorsOptions = {};
 export interface NoReactNativeRawTextOptions {
@@ -9806,6 +9844,7 @@ export type NoSelfImportOptions = {};
 export type NoSvelteAtDebugTagsOptions = {};
 export type NoSvelteAtHtmlTagsOptions = {};
 export type NoSvelteExportLetOptions = {};
+export type NoSvelteInspectOptions = {};
 export type NoSvelteLegacyConstOptions = {};
 export interface NoSvelteUnnecessaryStateWrapOptions {
 	/**
@@ -11323,6 +11362,7 @@ export type Category =
 	| "lint/nursery/noInlineStyles"
 	| "lint/nursery/noInvalidFileInputAccept"
 	| "lint/nursery/noInvalidPropertyInitValue"
+	| "lint/nursery/noIteratorProperty"
 	| "lint/nursery/noJsRestrictedProperties"
 	| "lint/nursery/noJsonUnsafeValues"
 	| "lint/nursery/noJsxLeakedDollar"
@@ -11346,6 +11386,7 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForNavigation"
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
+	| "lint/nursery/noProcessExit"
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
@@ -11357,6 +11398,7 @@ export type Category =
 	| "lint/nursery/noSvelteAtDebugTags"
 	| "lint/nursery/noSvelteAtHtmlTags"
 	| "lint/nursery/noSvelteExportLet"
+	| "lint/nursery/noSvelteInspect"
 	| "lint/nursery/noSvelteLegacyConst"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTailwindArbitraryValue"

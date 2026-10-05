@@ -16,7 +16,7 @@
 //! evaluator, which keeps the declaration graph intact across module
 //! boundaries without recursing through it on the Rust stack.
 
-use super::{BindingTypeData, InferredModuleTypes, globals::global_type};
+use super::{BindingTypeData, InferredModuleTypes, globals::global_type, lookup::MemberLookupMode};
 use crate::db::queries::{
     LocalTypeInput, infer_local_type, infer_module_types, infer_module_types_from_tables,
     inference_module_sccs,
@@ -27,9 +27,10 @@ use biome_js_type_info::{
     GlobalTypeId, RawTypeData, ResolvedTypeId, ScopeId, TypeId, TypeReference,
     TypeReferenceQualifier, TypeResolverLevel,
     interned_types::{
-        InternedModule as InferredModule, InternedNamespace as InferredNamespace,
-        InternedTypeofValue, LocalTypeHandle, LocalTypeId, ModuleKey, TypeData as InferredTypeData,
-        TypeMember as InferredTypeMember, TypeMemberKind as InferredTypeMemberKind,
+        InternedMappedType as InferredMappedType, InternedModule as InferredModule,
+        InternedNamespace as InferredNamespace, InternedTypeofValue, LocalTypeHandle, LocalTypeId,
+        ModuleKey, TypeData as InferredTypeData, TypeMember as InferredTypeMember,
+        TypeMemberKind as InferredTypeMemberKind, TypeSubstitution as InferredTypeSubstitution,
     },
 };
 use biome_rowan::{Text, TextRange};
@@ -216,6 +217,22 @@ pub(in crate::db) struct ResolutionCtx<'db, 'a> {
     pub(in crate::db::type_inference) resolution_depth: Cell<usize>,
     encountered_inference_cycle: Cell<bool>,
     on_demand_declarations: Option<SharedOnDemandDeclarationEvaluator<'db>>,
+    /// Mapped types evaluated during member lookup, keyed by the mapped type
+    /// and the substitutions applied to it. Repeated member reads on the same
+    /// instance reuse the evaluated object.
+    pub(in crate::db::type_inference) mapped_types: FxHashMap<
+        (InferredMappedType<'db>, Vec<InferredTypeSubstitution<'db>>),
+        Option<InferredTypeData<'db>>,
+    >,
+    /// Counts reads of types whose resolution is still in progress. A result
+    /// computed while this count grows may be less precise than a later one,
+    /// so it is not cached.
+    pub(in crate::db::type_inference) in_progress_reads: Cell<usize>,
+    /// Member lookups performed by this context, keyed by the resolved type,
+    /// the member name, and the lookup mode. Expressions such as `ctx.db`
+    /// often repeat the same lookup many times in one module.
+    pub(in crate::db::type_inference) member_lookups:
+        FxHashMap<(InferredTypeData<'db>, Text, MemberLookupMode), Option<InferredTypeData<'db>>>,
 }
 
 pub(in crate::db) fn resolve_raw_types<'db>(
@@ -286,6 +303,9 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
             resolution_depth: Cell::new(0),
             encountered_inference_cycle: Cell::new(false),
             on_demand_declarations,
+            mapped_types: FxHashMap::default(),
+            in_progress_reads: Cell::new(0),
+            member_lookups: FxHashMap::default(),
         }
     }
 
@@ -736,6 +756,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
             // A resolution cycle keeps the reference symbolic: lookups that
             // are aware of in-progress types can still read the raw
             // declaration behind the handle, which `Unknown` would rule out.
+            self.in_progress_reads.set(self.in_progress_reads.get() + 1);
             return self.local_type(type_id);
         }
 
@@ -887,6 +908,7 @@ impl<'db, 'a> ResolutionCtx<'db, 'a> {
                 | InferredTypeData::Union(_)
                 | InferredTypeData::TypeOperator(_)
                 | InferredTypeData::IndexedAccess(_)
+                | InferredTypeData::MappedType(_)
                 | InferredTypeData::Literal(_)
                 | InferredTypeData::MergedReference(_)
                 | InferredTypeData::TypeofType(_)

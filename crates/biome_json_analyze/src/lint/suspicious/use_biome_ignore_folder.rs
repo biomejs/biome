@@ -9,13 +9,11 @@ use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::use_biome_ignore_folder::UseBiomeIgnoreFolderOptions;
 
 declare_lint_rule! {
-    /// Promotes the correct usage for ignoring folders in the configuration file.
+    /// Prefer folder exclusions that prevent Biome from scanning the folder.
     ///
-    /// Starting Biome v2.2, ignoring folders doesn't require the use of the trailing `/**`.
-    /// When using the pattern `/**`, you tell Biome to ignore **all files** inside a folder, but the folder is still crawled. This pattern
-    /// can lead to poor performance, especially if the folder contains many files.
-    ///
-    /// If the intention is to ignore specific files inside a folder, the trailing pattern `/**` shouldn't be used.
+    /// A negated pattern such as `!dist/**` excludes files inside `dist`, but Biome still enters the
+    /// directory to discover them. Use `!dist` to exclude the folder itself and avoid unnecessary
+    /// filesystem traversal. The same applies to nested patterns such as `!**/dist`.
     ///
     /// ## Examples
     ///

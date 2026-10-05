@@ -17,38 +17,29 @@ use biome_rule_options::use_consistent_method_signatures::{
 // ```ts,ignore {2-3, 4,6}
 
 declare_lint_rule! {
-    /// Enforce consistent use of either method signatures or function properties within interfaces and type aliases.
+    /// Enforce one syntax for functions declared in interfaces and type aliases.
     ///
-    /// TypeScript provides 2 different ways to declare methods within interfaces and object types:
+    /// TypeScript supports method syntax and property syntax:
+    ///
     /// ```ts,ignore
     /// interface Example {
-    ///   // method shorthand syntax
-    ///   methodFunc(arg: string): void;
-    ///
-    ///   // regular property with function type
-    ///   prop: (arg: string) => void;
+    ///   method(arg: string): void;
+    ///   property: (arg: string) => void;
     /// }
-    ///
-    /// // These forms correspond to the analogous JS object literal patterns:
-    /// const obj = {
-    ///   methodFunc(arg) {},
-    ///   prop: (arg) => {},
-    /// } satisfies Example;
     /// ```
     ///
-    /// While mostly a matter of stylistic consistency, the two gain subtle differences in behavior when the
-    /// [`strictFunctionTypes`](https://www.typescriptlang.org/tsconfig/#strictFunctionTypes) compiler option is enabled. \
-    /// More specifically, its stricter contravariant checks will **only** apply to functions written in _property_ syntax —
-    /// ones written as methods will remain with the weaker bivariant type checks.
+    /// The two forms can behave differently when the
+    /// [`strictFunctionTypes`](https://www.typescriptlang.org/tsconfig/#strictFunctionTypes)
+    /// compiler option is enabled. Function properties receive stricter parameter checks, while
+    /// methods keep TypeScript's more permissive compatibility behavior.
     ///
-    /// <details>
-    /// <summary>What's the difference?</summary>
+    /// In this example, callers of `Emitter` may pass any `Event`. Narrowing the property parameter
+    /// to `SpecialEvent` is therefore rejected, while TypeScript still accepts the method form:
     ///
-    /// To illustrate the differences between method bivariance and contravariance, consider the following snippet of code:
     /// ```ts,ignore
     /// interface Emitter {
-    ///   methodFunc(arg: Event): void;
-    ///   propFunc: (arg: Event) => void;
+    ///   method(arg: Event): void;
+    ///   property: (arg: Event) => void;
     /// }
     ///
     /// interface SpecialEvent extends Event {
@@ -56,30 +47,28 @@ declare_lint_rule! {
     /// }
     ///
     /// interface SpecialEmitter extends Emitter {
-    ///   methodFunc(arg: SpecialEvent): void; // OK
-    ///   propFunc: (arg: SpecialEvent) => void; // Error under `strictFunctionTypes`
+    ///   method(arg: SpecialEvent): void;
+    ///   property: (arg: SpecialEvent) => void; // Error with `strictFunctionTypes`
     /// }
     /// ```
-    /// In the above example, `SpecialEmitter.methodFunc` is compatible with `Emitter.methodFunc` under _bivariant_[^1] checks,
-    /// as `SpecialEvent` is assignable to `Event` (i.e. all `SpecialEvent`s are guaranteed to be valid `Event`s). \
-    /// On the other hand, the strict _contravariant_ checks for function properties produce errors on `propFunc` as the reverse is not guaranteed —
-    /// `Event` is not assignable to `SpecialEvent` (i.e. not all `Event`s are guaranteed to be valid `SpecialEvent`s).
     ///
-    /// The full rationale for this behavior can be found in the [TypeScript handbook](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#function-parameter-bivariance).
+    /// <details>
+    /// <summary>Type-system terminology</summary>
     ///
-    /// [^1]: From a purely type-theoretical perspective, bivariance technically refers to a type being _both_ covariant _and_ contravariant at once
-    /// (`A` ⊆ `B` implies `T<A>` ≣ `T<B>`). \
-    /// In practice, this is only true for pathological types like `type T<A> = number`,
-    /// and so is often used to refer to a type being either covariant _or_ contravariant (which simply requires `T<A>` and `T<B>` to have some non-zero amount of overlap).
+    /// With `strictFunctionTypes`, function properties check parameters *contravariantly*: a
+    /// replacement function must accept every value accepted by the original function. Methods use
+    /// TypeScript's more permissive *bivariant* parameter checking, which allows the narrower
+    /// `SpecialEvent` parameter above. See the
+    /// [TypeScript handbook](https://www.typescriptlang.org/docs/handbook/type-compatibility.html#function-parameter-bivariance)
+    /// for the formal rationale.
     ///
     /// </details>
     ///
-    /// To avoid inconsistent type assignability issues and enforce stylistic consistency, this rule attempts to
-    /// ensure either method- or property-style declarations are used consistently across a given codebase.
+    /// Using one form consistently avoids unexpected differences in type checking.
     ///
     /// :::info
-    /// Without `strictFunctionTypes` enabled, method signatures and function properties become **functionally identical**.
-    /// In this case, which option to use simply becomes a matter of personal preference.
+    /// Without `strictFunctionTypes`, the two forms have the same parameter-checking behavior, so
+    /// the choice is only stylistic.
     /// :::
     ///
     /// ## Examples
@@ -150,7 +139,8 @@ declare_lint_rule! {
     /// The desired method signature style to enforce. \
     /// Possible values are either `"method"` or `"property"`.
     ///
-    /// Default: `"property"`[^2]
+    /// Default: `"property"`, which enables stricter parameter checking with
+    /// `strictFunctionTypes`.
     ///
     /// #### Examples for `"style": "method"`
     ///
@@ -179,8 +169,6 @@ declare_lint_rule! {
     ///   flubber(arg: number): number;
     /// }
     /// ```
-    ///
-    /// [^2]: Chosen to allow stricter type checks under the aforementioned `strictFunctionTypes`.
     pub UseConsistentMethodSignatures {
         version: "2.3.14",
         name: "useConsistentMethodSignatures",

@@ -16,6 +16,20 @@ fn migrate_scope_decisions() {
     for (name, args) in [
         ("default", vec!["migrate", "eslint", "--write"]),
         (
+            "include_inspired",
+            vec!["migrate", "eslint", "--include-inspired", "--write"],
+        ),
+        (
+            "include_inspired_and_nursery",
+            vec![
+                "migrate",
+                "eslint",
+                "--include-inspired",
+                "--include-nursery",
+                "--write",
+            ],
+        ),
+        (
             "include_nursery",
             vec!["migrate", "eslint", "--include-nursery", "--write"],
         ),

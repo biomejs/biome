@@ -726,6 +726,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noIteratorProperty",
+        TypeId::of::<biome_rule_options::no_iterator_property::NoIteratorPropertyOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noJsRestrictedProperties",
         TypeId::of::<
             biome_rule_options::no_js_restricted_properties::NoJsRestrictedPropertiesOptions,
@@ -984,6 +989,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_process_env::NoProcessEnvOptions>(),
     ));
     result.push((
+        "nursery",
+        "noProcessExit",
+        TypeId::of::<biome_rule_options::no_process_exit::NoProcessExitOptions>(),
+    ));
+    result.push((
         "correctness",
         "noProcessGlobal",
         TypeId::of::<biome_rule_options::no_process_global::NoProcessGlobalOptions>(),
@@ -1224,6 +1234,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "nursery",
         "noSvelteExportLet",
         TypeId::of::<biome_rule_options::no_svelte_export_let::NoSvelteExportLetOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noSvelteInspect",
+        TypeId::of::<biome_rule_options::no_svelte_inspect::NoSvelteInspectOptions>(),
     ));
     result.push((
         "nursery",

@@ -11,7 +11,7 @@ use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsImportLike, JsSyntaxToken, inner_string_text};
-use biome_module_graph::ModuleInfoKind;
+use biome_module_graph::{ModuleInfoKind, ResolutionMode, resolve_module_import};
 use biome_rowan::BatchMutationExt;
 use biome_rule_options::use_import_extensions::UseImportExtensionsOptions;
 
@@ -160,14 +160,27 @@ impl Rule for UseImportExtensions {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let owner = ctx.module_info_for_path(ctx.file_path())?;
-        let ModuleInfoKind::Js(module_info) = owner.kind(ctx.db()) else {
-            return None;
-        };
         let force_js_extensions = ctx.options().force_js_extensions();
 
         let node = ctx.query();
-        let import_path = module_info.get_import_path_by_js_node(node)?;
-        let resolved = import_path.resolve_js(ctx.db(), owner);
+        let resolved = match owner.kind(ctx.db()) {
+            ModuleInfoKind::Js(module_info) => module_info
+                .get_import_path_by_js_node(node)?
+                .resolve_js(ctx.db(), owner),
+            // With full HTML support, the `<script>` blocks of Vue, Svelte and
+            // Astro files belong to an HTML module. Its import paths omit
+            // type-only imports, so we resolve the specifier directly.
+            ModuleInfoKind::Html(_) => {
+                let specifier = node.inner_string_text()?;
+                resolve_module_import(
+                    ctx.db(),
+                    owner,
+                    specifier.text(),
+                    ResolutionMode::HtmlScript,
+                )
+            }
+            ModuleInfoKind::Css(_) => return None,
+        };
         let resolved_path = resolved.path().as_path()?;
 
         get_extensionless_import(

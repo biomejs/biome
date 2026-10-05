@@ -80,7 +80,7 @@
 			"type": "object",
 			"properties": {
 				"noAccessKey": {
-					"description": "Enforce that the accesskey attribute is not used on any HTML element.\nSee https://biomejs.dev/linter/rules/no-access-key",
+					"description": "Disallow the accesskey attribute.\nSee https://biomejs.dev/linter/rules/no-access-key",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoAccessKeyConfiguration" },
 						{ "type": "null" }
@@ -101,7 +101,7 @@
 					]
 				},
 				"noAriaUnsupportedElements": {
-					"description": "Enforce that elements that do not support ARIA roles, states, and properties do not have those attributes.\nSee https://biomejs.dev/linter/rules/no-aria-unsupported-elements",
+					"description": "Disallow ARIA attributes on elements that cannot use them.\nSee https://biomejs.dev/linter/rules/no-aria-unsupported-elements",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoAriaUnsupportedElementsConfiguration" },
 						{ "type": "null" }
@@ -163,14 +163,14 @@
 					]
 				},
 				"noNoninteractiveTabindex": {
-					"description": "Enforce that tabindex is not assigned to non-interactive HTML elements.\nSee https://biomejs.dev/linter/rules/no-noninteractive-tabindex",
+					"description": "Require a negative integer tabindex on non-interactive elements.\nSee https://biomejs.dev/linter/rules/no-noninteractive-tabindex",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoNoninteractiveTabindexConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"noPositiveTabindex": {
-					"description": "Prevent the usage of positive integers on tabindex attribute.\nSee https://biomejs.dev/linter/rules/no-positive-tabindex",
+					"description": "Disallow positive values for the tabindex attribute.\nSee https://biomejs.dev/linter/rules/no-positive-tabindex",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoPositiveTabindexConfiguration" },
 						{ "type": "null" }
@@ -191,14 +191,14 @@
 					]
 				},
 				"noStaticElementInteractions": {
-					"description": "Enforce that static, visible elements (such as \\<div>) that have click handlers use the valid role attribute.\nSee https://biomejs.dev/linter/rules/no-static-element-interactions",
+					"description": "Require an appropriate role when a non-interactive element has event handlers.\nSee https://biomejs.dev/linter/rules/no-static-element-interactions",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoStaticElementInteractionsConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"noSvgWithoutTitle": {
-					"description": "Enforces the usage of the title element for the svg element.\nSee https://biomejs.dev/linter/rules/no-svg-without-title",
+					"description": "Require a supported labeling pattern for non-decorative SVG elements.\nSee https://biomejs.dev/linter/rules/no-svg-without-title",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSvgWithoutTitleConfiguration" },
 						{ "type": "null" }
@@ -250,7 +250,7 @@
 					]
 				},
 				"useButtonType": {
-					"description": "Enforces the usage and validity of the attribute type for the element button.\nSee https://biomejs.dev/linter/rules/use-button-type",
+					"description": "Require an explicit, valid type on every \\<button>.\nSee https://biomejs.dev/linter/rules/use-button-type",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseButtonTypeConfiguration" },
 						{ "type": "null" }
@@ -264,7 +264,7 @@
 					]
 				},
 				"useGenericFontNames": {
-					"description": "Disallow a missing generic family keyword within font families.\nSee https://biomejs.dev/linter/rules/use-generic-font-names",
+					"description": "Require a generic fallback in font-family lists.\nSee https://biomejs.dev/linter/rules/use-generic-font-names",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseGenericFontNamesConfiguration" },
 						{ "type": "null" }
@@ -278,14 +278,14 @@
 					]
 				},
 				"useHtmlLang": {
-					"description": "Enforce that html element has lang attribute.\nSee https://biomejs.dev/linter/rules/use-html-lang",
+					"description": "Require a lang attribute on the \\<html> element.\nSee https://biomejs.dev/linter/rules/use-html-lang",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseHtmlLangConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"useIframeTitle": {
-					"description": "Enforces the usage of the attribute title for the element iframe.\nSee https://biomejs.dev/linter/rules/use-iframe-title",
+					"description": "Require a title on every \\<iframe>.\nSee https://biomejs.dev/linter/rules/use-iframe-title",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseIframeTitleConfiguration" },
 						{ "type": "null" }
@@ -299,7 +299,7 @@
 					]
 				},
 				"useKeyWithMouseEvents": {
-					"description": "Enforce that onmouseover is accompanied by onfocus and onmouseout by onblur.\nSee https://biomejs.dev/linter/rules/use-key-with-mouse-events",
+					"description": "Require keyboard equivalents for mouse hover events.\nSee https://biomejs.dev/linter/rules/use-key-with-mouse-events",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseKeyWithMouseEventsConfiguration" },
 						{ "type": "null" }
@@ -320,14 +320,14 @@
 					]
 				},
 				"useValidAnchor": {
-					"description": "Enforce that all anchors are valid, and they are navigable elements.\nSee https://biomejs.dev/linter/rules/use-valid-anchor",
+					"description": "Require anchors to provide a real navigation destination.\nSee https://biomejs.dev/linter/rules/use-valid-anchor",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseValidAnchorConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"useValidAriaProps": {
-					"description": "Ensures that ARIA properties aria-* are all valid.\nSee https://biomejs.dev/linter/rules/use-valid-aria-props",
+					"description": "Disallow unknown aria-* attributes.\nSee https://biomejs.dev/linter/rules/use-valid-aria-props",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseValidAriaPropsConfiguration" },
 						{ "type": "null" }
@@ -355,7 +355,7 @@
 					]
 				},
 				"useValidLang": {
-					"description": "Ensure that the attribute passed to the lang attribute is a correct ISO language and/or country.\nSee https://biomejs.dev/linter/rules/use-valid-lang",
+					"description": "Require a supported language tag on the \\<html> element.\nSee https://biomejs.dev/linter/rules/use-valid-lang",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseValidLangConfiguration" },
 						{ "type": "null" }
@@ -606,7 +606,7 @@
 					]
 				},
 				"noImportantStyles": {
-					"description": "Disallow the use of the !important style.\nSee https://biomejs.dev/linter/rules/no-important-styles",
+					"description": "Disallow !important declarations.\nSee https://biomejs.dev/linter/rules/no-important-styles",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoImportantStylesConfiguration" },
 						{ "type": "null" }
@@ -641,7 +641,7 @@
 					]
 				},
 				"noUselessCatchBinding": {
-					"description": "Disallow unused catch bindings.\nSee https://biomejs.dev/linter/rules/no-useless-catch-binding",
+					"description": "Disallow unused error parameters in catch clauses.\nSee https://biomejs.dev/linter/rules/no-useless-catch-binding",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUselessCatchBindingConfiguration" },
 						{ "type": "null" }
@@ -676,7 +676,7 @@
 					]
 				},
 				"noUselessFragments": {
-					"description": "Disallow unnecessary fragments.\nSee https://biomejs.dev/linter/rules/no-useless-fragments",
+					"description": "Disallow unnecessary JSX fragments.\nSee https://biomejs.dev/linter/rules/no-useless-fragments",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUselessFragmentsConfiguration" },
 						{ "type": "null" }
@@ -739,7 +739,7 @@
 					]
 				},
 				"noUselessThisAlias": {
-					"description": "Disallow useless this aliasing.\nSee https://biomejs.dev/linter/rules/no-useless-this-alias",
+					"description": "Disallow aliases for this when this can be used directly.\nSee https://biomejs.dev/linter/rules/no-useless-this-alias",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUselessThisAliasConfiguration" },
 						{ "type": "null" }
@@ -989,7 +989,7 @@
 					]
 				},
 				"noDuplicateArgumentNames": {
-					"description": "Require all argument names for fields & directives to be unique.\nSee https://biomejs.dev/linter/rules/no-duplicate-argument-names",
+					"description": "Require unique argument names for fields and directives.\nSee https://biomejs.dev/linter/rules/no-duplicate-argument-names",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoDuplicateArgumentNamesConfiguration" },
 						{ "type": "null" }
@@ -1003,7 +1003,7 @@
 					]
 				},
 				"noDuplicateEnumValueNames": {
-					"description": "Require all enum value names to be unique.\nSee https://biomejs.dev/linter/rules/no-duplicate-enum-value-names",
+					"description": "Disallow duplicate names in GraphQL enums.\nSee https://biomejs.dev/linter/rules/no-duplicate-enum-value-names",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoDuplicateEnumValueNamesConfiguration" },
 						{ "type": "null" }
@@ -1031,7 +1031,7 @@
 					]
 				},
 				"noEmptyPattern": {
-					"description": "Disallows empty destructuring patterns.\nSee https://biomejs.dev/linter/rules/no-empty-pattern",
+					"description": "Disallow empty object and array destructuring patterns.\nSee https://biomejs.dev/linter/rules/no-empty-pattern",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoEmptyPatternConfiguration" },
 						{ "type": "null" }
@@ -1073,7 +1073,7 @@
 					]
 				},
 				"noInvalidDirectionInLinearGradient": {
-					"description": "Disallow non-standard direction values for linear gradient functions.\nSee https://biomejs.dev/linter/rules/no-invalid-direction-in-linear-gradient",
+					"description": "Disallow non-standard directions in linear gradients.\nSee https://biomejs.dev/linter/rules/no-invalid-direction-in-linear-gradient",
 					"anyOf": [
 						{
 							"$ref": "#/$defs/NoInvalidDirectionInLinearGradientConfiguration"
@@ -1082,14 +1082,14 @@
 					]
 				},
 				"noInvalidGridAreas": {
-					"description": "Disallows invalid named grid areas in CSS Grid Layouts.\nSee https://biomejs.dev/linter/rules/no-invalid-grid-areas",
+					"description": "Disallow invalid named areas in CSS grid templates.\nSee https://biomejs.dev/linter/rules/no-invalid-grid-areas",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoInvalidGridAreasConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"noInvalidPositionAtImportRule": {
-					"description": "Disallow the use of @import at-rules in invalid positions.\nSee https://biomejs.dev/linter/rules/no-invalid-position-at-import-rule",
+					"description": "Disallow @import after other rules.\nSee https://biomejs.dev/linter/rules/no-invalid-position-at-import-rule",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoInvalidPositionAtImportRuleConfiguration" },
 						{ "type": "null" }
@@ -1103,7 +1103,7 @@
 					]
 				},
 				"noMissingVarFunction": {
-					"description": "Disallow missing var function for css variables.\nSee https://biomejs.dev/linter/rules/no-missing-var-function",
+					"description": "Require var() when using a declared CSS custom property.\nSee https://biomejs.dev/linter/rules/no-missing-var-function",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoMissingVarFunctionConfiguration" },
 						{ "type": "null" }
@@ -1215,7 +1215,7 @@
 					]
 				},
 				"noSwitchDeclarations": {
-					"description": "Disallow lexical declarations in switch clauses.\nSee https://biomejs.dev/linter/rules/no-switch-declarations",
+					"description": "Disallow declarations directly inside switch clauses.\nSee https://biomejs.dev/linter/rules/no-switch-declarations",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSwitchDeclarationsConfiguration" },
 						{ "type": "null" }
@@ -1236,63 +1236,63 @@
 					]
 				},
 				"noUnknownFunction": {
-					"description": "Disallow unknown CSS value functions.\nSee https://biomejs.dev/linter/rules/no-unknown-function",
+					"description": "Disallow unrecognized CSS value functions.\nSee https://biomejs.dev/linter/rules/no-unknown-function",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnknownFunctionConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"noUnknownMediaFeatureName": {
-					"description": "Disallow unknown media feature names.\nSee https://biomejs.dev/linter/rules/no-unknown-media-feature-name",
+					"description": "Disallow unrecognized feature names in media queries.\nSee https://biomejs.dev/linter/rules/no-unknown-media-feature-name",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnknownMediaFeatureNameConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"noUnknownProperty": {
-					"description": "Disallow unknown properties.\nSee https://biomejs.dev/linter/rules/no-unknown-property",
+					"description": "Disallow unrecognized CSS properties.\nSee https://biomejs.dev/linter/rules/no-unknown-property",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnknownPropertyConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"noUnknownPseudoClass": {
-					"description": "Disallow unknown pseudo-class selectors.\nSee https://biomejs.dev/linter/rules/no-unknown-pseudo-class",
+					"description": "Disallow unrecognized pseudo-class selectors.\nSee https://biomejs.dev/linter/rules/no-unknown-pseudo-class",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnknownPseudoClassConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"noUnknownPseudoElement": {
-					"description": "Disallow unknown pseudo-element selectors.\nSee https://biomejs.dev/linter/rules/no-unknown-pseudo-element",
+					"description": "Disallow unrecognized pseudo-element selectors.\nSee https://biomejs.dev/linter/rules/no-unknown-pseudo-element",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnknownPseudoElementConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"noUnknownTypeSelector": {
-					"description": "Disallow unknown type selectors.\nSee https://biomejs.dev/linter/rules/no-unknown-type-selector",
+					"description": "Disallow unrecognized element names in type selectors.\nSee https://biomejs.dev/linter/rules/no-unknown-type-selector",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnknownTypeSelectorConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"noUnknownUnit": {
-					"description": "Disallow unknown CSS units.\nSee https://biomejs.dev/linter/rules/no-unknown-unit",
+					"description": "Disallow unrecognized CSS units.\nSee https://biomejs.dev/linter/rules/no-unknown-unit",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnknownUnitConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"noUnmatchableAnbSelector": {
-					"description": "Disallow unmatchable An+B selectors.\nSee https://biomejs.dev/linter/rules/no-unmatchable-anb-selector",
+					"description": "Disallow An+B formulas that cannot select an element.\nSee https://biomejs.dev/linter/rules/no-unmatchable-anb-selector",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnmatchableAnbSelectorConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"noUnreachable": {
-					"description": "Disallow unreachable code.\nSee https://biomejs.dev/linter/rules/no-unreachable",
+					"description": "Disallow code that can never run.\nSee https://biomejs.dev/linter/rules/no-unreachable",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnreachableConfiguration" },
 						{ "type": "null" }
@@ -1320,7 +1320,7 @@
 					]
 				},
 				"noUnsafeOptionalChaining": {
-					"description": "Disallow the use of optional chaining in contexts where the undefined value is not allowed.\nSee https://biomejs.dev/linter/rules/no-unsafe-optional-chaining",
+					"description": "Disallow optional chaining where undefined is not a valid result.\nSee https://biomejs.dev/linter/rules/no-unsafe-optional-chaining",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnsafeOptionalChainingConfiguration" },
 						{ "type": "null" }
@@ -1369,7 +1369,7 @@
 					]
 				},
 				"noVoidElementsWithChildren": {
-					"description": "This rules prevents void elements (AKA self-closing elements) from having children.\nSee https://biomejs.dev/linter/rules/no-void-elements-with-children",
+					"description": "Disallow children on HTML void elements.\nSee https://biomejs.dev/linter/rules/no-void-elements-with-children",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVoidElementsWithChildrenConfiguration" },
 						{ "type": "null" }
@@ -1440,7 +1440,7 @@
 					]
 				},
 				"useGraphqlNamedOperations": {
-					"description": "Enforce specifying the name of GraphQL operations.\nSee https://biomejs.dev/linter/rules/use-graphql-named-operations",
+					"description": "Require a name for every explicit GraphQL operation definition.\nSee https://biomejs.dev/linter/rules/use-graphql-named-operations",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseGraphqlNamedOperationsConfiguration" },
 						{ "type": "null" }
@@ -1496,7 +1496,7 @@
 					]
 				},
 				"useLoneAnonymousOperation": {
-					"description": "Disallow anonymous operations when more than one operation specified in document.\nSee https://biomejs.dev/linter/rules/use-lone-anonymous-operation",
+					"description": "Disallow an anonymous operation in a document with other operations.\nSee https://biomejs.dev/linter/rules/use-lone-anonymous-operation",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseLoneAnonymousOperationConfiguration" },
 						{ "type": "null" }
@@ -1538,7 +1538,7 @@
 					]
 				},
 				"useUniqueElementIds": {
-					"description": "Prevent the usage of static string literal id attribute on elements outside SVG contexts.\nSee https://biomejs.dev/linter/rules/use-unique-element-ids",
+					"description": "Disallow static id values on elements outside SVG contexts.\nSee https://biomejs.dev/linter/rules/use-unique-element-ids",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseUniqueElementIdsConfiguration" },
 						{ "type": "null" }
@@ -4662,6 +4662,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoIteratorPropertyConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoIteratorPropertyOptions" }
+			]
+		},
+		"NoIteratorPropertyOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoJsRestrictedPropertiesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5267,6 +5277,13 @@
 			]
 		},
 		"NoProcessEnvOptions": { "type": "object", "additionalProperties": false },
+		"NoProcessExitConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoProcessExitOptions" }
+			]
+		},
+		"NoProcessExitOptions": { "type": "object", "additionalProperties": false },
 		"NoProcessGlobalConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5802,6 +5819,16 @@
 			]
 		},
 		"NoSvelteExportLetOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoSvelteInspectConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSvelteInspectOptions" }
+			]
+		},
+		"NoSvelteInspectOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -7160,6 +7187,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noIteratorProperty": {
+					"description": "Disallow the use of the __iterator__ property.\nSee https://biomejs.dev/linter/rules/no-iterator-property",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoIteratorPropertyConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noJsRestrictedProperties": {
 					"description": "Disallow specific object properties.\nSee https://biomejs.dev/linter/rules/no-js-restricted-properties",
 					"anyOf": [
@@ -7189,7 +7223,7 @@
 					]
 				},
 				"noLoopFunc": {
-					"description": "Disallow functions declared inside loops that capture unsafe outer variables.\nSee https://biomejs.dev/linter/rules/no-loop-func",
+					"description": "Disallow functions created inside loops when they use variables that can change.\nSee https://biomejs.dev/linter/rules/no-loop-func",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoLoopFuncConfiguration" },
 						{ "type": "null" }
@@ -7314,6 +7348,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noProcessExit": {
+					"description": "Disallow the use of process.exit().\nSee https://biomejs.dev/linter/rules/no-process-exit",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoProcessExitConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noReactNativeDeepImports": {
 					"description": "Disallow deep imports from the react-native package.\nSee https://biomejs.dev/linter/rules/no-react-native-deep-imports",
 					"anyOf": [
@@ -7391,6 +7432,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noSvelteInspect": {
+					"description": "Disallow the use of the $inspect rune.\nSee https://biomejs.dev/linter/rules/no-svelte-inspect",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSvelteInspectConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noSvelteLegacyConst": {
 					"description": "Disallow legacy Svelte {@const} tags.\nSee https://biomejs.dev/linter/rules/no-svelte-legacy-const",
 					"anyOf": [
@@ -7441,7 +7489,7 @@
 					]
 				},
 				"noUndeclaredCustomProperties": {
-					"description": "Reports custom properties used with var() that have no visible declaration.\nSee https://biomejs.dev/linter/rules/no-undeclared-custom-properties",
+					"description": "Disallow undeclared CSS custom properties in inline styles.\nSee https://biomejs.dev/linter/rules/no-undeclared-custom-properties",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUndeclaredCustomPropertiesConfiguration" },
 						{ "type": "null" }
@@ -7462,7 +7510,7 @@
 					]
 				},
 				"noUnsafeIframeSandbox": {
-					"description": "Disallow an unsafe combination of the sandbox attribute.\nSee https://biomejs.dev/linter/rules/no-unsafe-iframe-sandbox",
+					"description": "Disallow allow-scripts together with allow-same-origin in an iframe sandbox.\nSee https://biomejs.dev/linter/rules/no-unsafe-iframe-sandbox",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnsafeIframeSandboxConfiguration" },
 						{ "type": "null" }
@@ -7686,7 +7734,7 @@
 					]
 				},
 				"useIframeSandbox": {
-					"description": "Enforce the 'sandbox' attribute for 'iframe' elements.\nSee https://biomejs.dev/linter/rules/use-iframe-sandbox",
+					"description": "Require the sandbox attribute on \\<iframe> elements.\nSee https://biomejs.dev/linter/rules/use-iframe-sandbox",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseIframeSandboxConfiguration" },
 						{ "type": "null" }
@@ -7714,7 +7762,7 @@
 					]
 				},
 				"useLogicalProperties": {
-					"description": "Enforce logical properties over physical properties.\nSee https://biomejs.dev/linter/rules/use-logical-properties",
+					"description": "Prefer logical CSS properties over physical properties.\nSee https://biomejs.dev/linter/rules/use-logical-properties",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseLogicalPropertiesConfiguration" },
 						{ "type": "null" }
@@ -7837,7 +7885,7 @@
 					]
 				},
 				"useScopedStyles": {
-					"description": "Enforce that \\<style> blocks in Vue SFCs have the scoped attribute and that \\<style> blocks in Astro components do not have the is:global directive.\nSee https://biomejs.dev/linter/rules/use-scoped-styles",
+					"description": "Keep component styles scoped in Vue and Astro files.\nSee https://biomejs.dev/linter/rules/use-scoped-styles",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseScopedStylesConfiguration" },
 						{ "type": "null" }
@@ -7935,7 +7983,7 @@
 					]
 				},
 				"useVueConsistentDefinePropsDeclaration": {
-					"description": "Enforce consistent defineProps declaration style.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration",
+					"description": "Enforce a consistent declaration style for Vue's defineProps macro.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration",
 					"anyOf": [
 						{
 							"$ref": "#/$defs/UseVueConsistentDefinePropsDeclarationConfiguration"
@@ -8311,7 +8359,7 @@
 					]
 				},
 				"noSyncScripts": {
-					"description": "Prevent the usage of synchronous scripts.\nSee https://biomejs.dev/linter/rules/no-sync-scripts",
+					"description": "Disallow external scripts that block HTML parsing.\nSee https://biomejs.dev/linter/rules/no-sync-scripts",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSyncScriptsConfiguration" },
 						{ "type": "null" }
@@ -10158,6 +10206,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoIteratorPropertyOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoIteratorPropertyOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoJsRestrictedPropertiesOptions": {
 			"type": "object",
 			"properties": {
@@ -10747,6 +10804,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoProcessExitOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoProcessExitOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoProcessGlobalOptions": {
 			"type": "object",
 			"properties": {
@@ -11240,6 +11306,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSvelteExportLetOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSvelteInspectOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSvelteInspectOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -14617,7 +14692,7 @@
 					]
 				},
 				"noDangerouslySetInnerHtml": {
-					"description": "Prevent the usage of dangerous JSX props.\nSee https://biomejs.dev/linter/rules/no-dangerously-set-inner-html",
+					"description": "Disallow React's dangerouslySetInnerHTML property.\nSee https://biomejs.dev/linter/rules/no-dangerously-set-inner-html",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoDangerouslySetInnerHtmlConfiguration" },
 						{ "type": "null" }
@@ -14749,14 +14824,14 @@
 			"type": "object",
 			"properties": {
 				"noDuplicateClasses": {
-					"description": "Remove duplicate CSS classes.\nSee https://biomejs.dev/assist/actions/no-duplicate-classes",
+					"description": "Remove repeated CSS class names from HTML class attributes.\nSee https://biomejs.dev/assist/actions/no-duplicate-classes",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoDuplicateClassesConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"organizeImports": {
-					"description": "Sorts imports and exports in your JavaScript and TypeScript files.\nSee https://biomejs.dev/assist/actions/organize-imports",
+					"description": "Organize imports and exports in JavaScript and TypeScript files.\nSee https://biomejs.dev/assist/actions/organize-imports",
 					"anyOf": [
 						{ "$ref": "#/$defs/OrganizeImportsConfiguration" },
 						{ "type": "null" }
@@ -14771,28 +14846,28 @@
 					"type": ["boolean", "null"]
 				},
 				"useSortedAttributes": {
-					"description": "Enforce attribute sorting in HTML elements.\nSee https://biomejs.dev/assist/actions/use-sorted-attributes",
+					"description": "Sort HTML attributes and framework directives into a consistent order.\nSee https://biomejs.dev/assist/actions/use-sorted-attributes",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSortedAttributesConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"useSortedEnumMembers": {
-					"description": "Sort the members of an enum in natural order.\nSee https://biomejs.dev/assist/actions/use-sorted-enum-members",
+					"description": "Sort GraphQL enum values in natural order.\nSee https://biomejs.dev/assist/actions/use-sorted-enum-members",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSortedEnumMembersConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"useSortedInterfaceMembers": {
-					"description": "Sort interface members by key.\nSee https://biomejs.dev/assist/actions/use-sorted-interface-members",
+					"description": "Sort named members of a TypeScript interface.\nSee https://biomejs.dev/assist/actions/use-sorted-interface-members",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSortedInterfaceMembersConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"useSortedKeys": {
-					"description": "Sort the keys of a JSON object in natural order.\nSee https://biomejs.dev/assist/actions/use-sorted-keys",
+					"description": "Sort keys in a JSON object.\nSee https://biomejs.dev/assist/actions/use-sorted-keys",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSortedKeysConfiguration" },
 						{ "type": "null" }
@@ -14806,21 +14881,21 @@
 					]
 				},
 				"useSortedProperties": {
-					"description": "Enforce ordering of CSS properties and nested rules.\nSee https://biomejs.dev/assist/actions/use-sorted-properties",
+					"description": "Sort CSS properties and nested rules into a consistent order.\nSee https://biomejs.dev/assist/actions/use-sorted-properties",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSortedPropertiesConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"useSortedSelectionSet": {
-					"description": "Sort GraphQL selection sets.\nSee https://biomejs.dev/assist/actions/use-sorted-selection-set",
+					"description": "Sort selections inside GraphQL operations and fragments.\nSee https://biomejs.dev/assist/actions/use-sorted-selection-set",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSortedSelectionSetConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"useSortedTypeFields": {
-					"description": "Sort fields in GraphQL type definitions alphabetically.\nSee https://biomejs.dev/assist/actions/use-sorted-type-fields",
+					"description": "Sort fields in GraphQL type definitions by name.\nSee https://biomejs.dev/assist/actions/use-sorted-type-fields",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSortedTypeFieldsConfiguration" },
 						{ "type": "null" }
@@ -14892,7 +14967,7 @@
 					]
 				},
 				"noDescendingSpecificity": {
-					"description": "Disallow a lower specificity selector from coming after a higher specificity selector.\nSee https://biomejs.dev/linter/rules/no-descending-specificity",
+					"description": "Disallow lower-specificity selectors after higher-specificity selectors.\nSee https://biomejs.dev/linter/rules/no-descending-specificity",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoDescendingSpecificityConfiguration" },
 						{ "type": "null" }
@@ -15067,14 +15142,14 @@
 					]
 				},
 				"noRootType": {
-					"description": "Disallow the usage of specified root types.\nSee https://biomejs.dev/linter/rules/no-root-type",
+					"description": "Disallow configured GraphQL root operation types.\nSee https://biomejs.dev/linter/rules/no-root-type",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoRootTypeConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"noShoutyConstants": {
-					"description": "Disallow the use of constants which its value is the upper-case version of its name.\nSee https://biomejs.dev/linter/rules/no-shouty-constants",
+					"description": "Disallow constants whose string value is the same as their uppercase name.\nSee https://biomejs.dev/linter/rules/no-shouty-constants",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoShoutyConstantsConfiguration" },
 						{ "type": "null" }
@@ -15109,7 +15184,7 @@
 					]
 				},
 				"noValueAtRule": {
-					"description": "Disallow use of @value rule in CSS modules.\nSee https://biomejs.dev/linter/rules/no-value-at-rule",
+					"description": "Disallow the @value rule in CSS Modules.\nSee https://biomejs.dev/linter/rules/no-value-at-rule",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoValueAtRuleConfiguration" },
 						{ "type": "null" }
@@ -15224,7 +15299,7 @@
 					]
 				},
 				"useConsistentGraphqlDescriptions": {
-					"description": "Require all descriptions to follow the same style (either block or inline) to  maintain consistency and improve readability across the schema.\nSee https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions",
+					"description": "Require one description style throughout a GraphQL schema.\nSee https://biomejs.dev/linter/rules/use-consistent-graphql-descriptions",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseConsistentGraphqlDescriptionsConfiguration" },
 						{ "type": "null" }
@@ -15238,7 +15313,7 @@
 					]
 				},
 				"useConsistentMethodSignatures": {
-					"description": "Enforce consistent use of either method signatures or function properties within interfaces and type aliases.\nSee https://biomejs.dev/linter/rules/use-consistent-method-signatures",
+					"description": "Enforce one syntax for functions declared in interfaces and type aliases.\nSee https://biomejs.dev/linter/rules/use-consistent-method-signatures",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseConsistentMethodSignaturesConfiguration" },
 						{ "type": "null" }
@@ -15280,7 +15355,7 @@
 					]
 				},
 				"useDeprecatedReason": {
-					"description": "Require specifying the reason argument when using @deprecated directive.\nSee https://biomejs.dev/linter/rules/use-deprecated-reason",
+					"description": "Require a reason when using the @deprecated directive.\nSee https://biomejs.dev/linter/rules/use-deprecated-reason",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseDeprecatedReasonConfiguration" },
 						{ "type": "null" }
@@ -15364,7 +15439,7 @@
 					]
 				},
 				"useGraphqlNamingConvention": {
-					"description": "Validates that all enum values are capitalized.\nSee https://biomejs.dev/linter/rules/use-graphql-naming-convention",
+					"description": "Require uppercase names for GraphQL enum values.\nSee https://biomejs.dev/linter/rules/use-graphql-naming-convention",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseGraphqlNamingConventionConfiguration" },
 						{ "type": "null" }
@@ -15385,7 +15460,7 @@
 					]
 				},
 				"useInputName": {
-					"description": "Require mutation argument to be always called \"input\".\nSee https://biomejs.dev/linter/rules/use-input-name",
+					"description": "Require mutation arguments to be named input.\nSee https://biomejs.dev/linter/rules/use-input-name",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseInputNameConfiguration" },
 						{ "type": "null" }
@@ -15399,7 +15474,7 @@
 					]
 				},
 				"useLoneExecutableDefinition": {
-					"description": "Require queries, mutations, subscriptions or fragments each to be located in separate files.\nSee https://biomejs.dev/linter/rules/use-lone-executable-definition",
+					"description": "Require one executable GraphQL definition per file.\nSee https://biomejs.dev/linter/rules/use-lone-executable-definition",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseLoneExecutableDefinitionConfiguration" },
 						{ "type": "null" }
@@ -15413,7 +15488,7 @@
 					]
 				},
 				"useNodeAssertStrict": {
-					"description": "Promotes the usage of node:assert/strict over node:assert.\nSee https://biomejs.dev/linter/rules/use-node-assert-strict",
+					"description": "Prefer node:assert/strict over node:assert.\nSee https://biomejs.dev/linter/rules/use-node-assert-strict",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseNodeAssertStrictConfiguration" },
 						{ "type": "null" }
@@ -15616,7 +15691,7 @@
 					]
 				},
 				"noBiomeFirstException": {
-					"description": "Prevents the misuse of glob patterns inside the files.includes field.\nSee https://biomejs.dev/linter/rules/no-biome-first-exception",
+					"description": "Disallow ineffective ordering in files.includes patterns.\nSee https://biomejs.dev/linter/rules/no-biome-first-exception",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoBiomeFirstExceptionConfiguration" },
 						{ "type": "null" }
@@ -15770,7 +15845,7 @@
 					]
 				},
 				"noDuplicateDependencies": {
-					"description": "Prevent the listing of duplicate dependencies. The rule supports the following dependency groups: \"bundledDependencies\", \"bundleDependencies\", \"dependencies\", \"devDependencies\", \"overrides\", \"optionalDependencies\", and \"peerDependencies\".\nSee https://biomejs.dev/linter/rules/no-duplicate-dependencies",
+					"description": "Disallow duplicate dependencies in package.json.\nSee https://biomejs.dev/linter/rules/no-duplicate-dependencies",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoDuplicateDependenciesConfiguration" },
 						{ "type": "null" }
@@ -15791,35 +15866,35 @@
 					]
 				},
 				"noDuplicateFields": {
-					"description": "No duplicated fields in GraphQL operations.\nSee https://biomejs.dev/linter/rules/no-duplicate-fields",
+					"description": "Disallow duplicate names inside GraphQL operations.\nSee https://biomejs.dev/linter/rules/no-duplicate-fields",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoDuplicateFieldsConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"noDuplicateFontNames": {
-					"description": "Disallow duplicate names within font families.\nSee https://biomejs.dev/linter/rules/no-duplicate-font-names",
+					"description": "Disallow duplicate names in font-family lists.\nSee https://biomejs.dev/linter/rules/no-duplicate-font-names",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoDuplicateFontNamesConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"noDuplicateGraphqlOperationName": {
-					"description": "Enforce unique operation names across a GraphQL document.\nSee https://biomejs.dev/linter/rules/no-duplicate-graphql-operation-name",
+					"description": "Require unique operation names within a GraphQL document.\nSee https://biomejs.dev/linter/rules/no-duplicate-graphql-operation-name",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoDuplicateGraphqlOperationNameConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"noDuplicateJsxProps": {
-					"description": "Prevents JSX properties to be assigned multiple times.\nSee https://biomejs.dev/linter/rules/no-duplicate-jsx-props",
+					"description": "Disallow duplicate JSX properties.\nSee https://biomejs.dev/linter/rules/no-duplicate-jsx-props",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoDuplicateJsxPropsConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"noDuplicateObjectKeys": {
-					"description": "Disallow two keys with the same name inside objects.\nSee https://biomejs.dev/linter/rules/no-duplicate-object-keys",
+					"description": "Disallow duplicate keys in JSON objects.\nSee https://biomejs.dev/linter/rules/no-duplicate-object-keys",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoDuplicateObjectKeysConfiguration" },
 						{ "type": "null" }
@@ -15863,7 +15938,7 @@
 					]
 				},
 				"noEmptyBlock": {
-					"description": "Disallow CSS empty blocks.\nSee https://biomejs.dev/linter/rules/no-empty-block",
+					"description": "Disallow empty CSS blocks.\nSee https://biomejs.dev/linter/rules/no-empty-block",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoEmptyBlockConfiguration" },
 						{ "type": "null" }
@@ -15989,7 +16064,7 @@
 					]
 				},
 				"noImportAssign": {
-					"description": "Disallow assigning to imported bindings.\nSee https://biomejs.dev/linter/rules/no-import-assign",
+					"description": "Disallow assigning a new value to an imported variable.\nSee https://biomejs.dev/linter/rules/no-import-assign",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoImportAssignConfiguration" },
 						{ "type": "null" }
@@ -16003,14 +16078,14 @@
 					]
 				},
 				"noImportantInKeyframe": {
-					"description": "Disallow invalid !important within keyframe declarations.\nSee https://biomejs.dev/linter/rules/no-important-in-keyframe",
+					"description": "Disallow !important in @keyframes declarations.\nSee https://biomejs.dev/linter/rules/no-important-in-keyframe",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoImportantInKeyframeConfiguration" },
 						{ "type": "null" }
 					]
 				},
 				"noIrregularWhitespace": {
-					"description": "Disallows the use of irregular whitespace characters.\nSee https://biomejs.dev/linter/rules/no-irregular-whitespace",
+					"description": "Disallow whitespace characters that CSS does not treat as normal spaces.\nSee https://biomejs.dev/linter/rules/no-irregular-whitespace",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoIrregularWhitespaceConfiguration" },
 						{ "type": "null" }
@@ -16101,7 +16176,7 @@
 					]
 				},
 				"noQuickfixBiome": {
-					"description": "Disallow the use if quickfix.biome inside editor settings file.\nSee https://biomejs.dev/linter/rules/no-quickfix-biome",
+					"description": "Disallow quickfix.biome in supported editor settings.\nSee https://biomejs.dev/linter/rules/no-quickfix-biome",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoQuickfixBiomeConfiguration" },
 						{ "type": "null" }
@@ -16164,7 +16239,7 @@
 					]
 				},
 				"noShorthandPropertyOverrides": {
-					"description": "Disallow shorthand properties that override related longhand properties.\nSee https://biomejs.dev/linter/rules/no-shorthand-property-overrides",
+					"description": "Disallow shorthand properties that override earlier, more specific properties.\nSee https://biomejs.dev/linter/rules/no-shorthand-property-overrides",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoShorthandPropertyOverridesConfiguration" },
 						{ "type": "null" }
@@ -16227,7 +16302,7 @@
 					]
 				},
 				"noUnknownAtRules": {
-					"description": "Disallow unknown at-rules.\nSee https://biomejs.dev/linter/rules/no-unknown-at-rules",
+					"description": "Disallow unrecognized CSS at-rules.\nSee https://biomejs.dev/linter/rules/no-unknown-at-rules",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnknownAtRulesConfiguration" },
 						{ "type": "null" }
@@ -16333,7 +16408,7 @@
 					]
 				},
 				"useBiomeIgnoreFolder": {
-					"description": "Promotes the correct usage for ignoring folders in the configuration file.\nSee https://biomejs.dev/linter/rules/use-biome-ignore-folder",
+					"description": "Prefer folder exclusions that prevent Biome from scanning the folder.\nSee https://biomejs.dev/linter/rules/use-biome-ignore-folder",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseBiomeIgnoreFolderConfiguration" },
 						{ "type": "null" }
@@ -16347,7 +16422,7 @@
 					]
 				},
 				"useDeprecatedDate": {
-					"description": "Require the @deprecated directive to specify a deletion date.\nSee https://biomejs.dev/linter/rules/use-deprecated-date",
+					"description": "Require a valid deletion date on the @deprecated directive.\nSee https://biomejs.dev/linter/rules/use-deprecated-date",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseDeprecatedDateConfiguration" },
 						{ "type": "null" }
@@ -16410,7 +16485,7 @@
 					]
 				},
 				"useRequiredScripts": {
-					"description": "Enforce the presence of required scripts in package.json.\nSee https://biomejs.dev/linter/rules/use-required-scripts",
+					"description": "Require configured scripts in package.json.\nSee https://biomejs.dev/linter/rules/use-required-scripts",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseRequiredScriptsConfiguration" },
 						{ "type": "null" }

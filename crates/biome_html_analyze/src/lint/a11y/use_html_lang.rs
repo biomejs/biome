@@ -11,7 +11,11 @@ use biome_rule_options::use_html_lang::UseHtmlLangOptions;
 use crate::a11y::has_non_empty_attribute;
 
 declare_lint_rule! {
-    /// Enforce that `html` element has `lang` attribute.
+    /// Require a `lang` attribute on the `<html>` element.
+    ///
+    /// The language tag helps screen readers choose the correct pronunciation rules when the user
+    /// has not selected a default language. A static HTML value must be non-empty. Vue bindings are
+    /// accepted without evaluating the value they produce at runtime.
     ///
     /// ## Examples
     ///

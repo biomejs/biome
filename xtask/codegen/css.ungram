@@ -1915,6 +1915,7 @@ AnyCssSupportsInParens =
 	CssSupportsConditionInParens
 	| CssSupportsFeatureDeclaration
 	| CssSupportsFeatureSelector
+	| ScssSupportsFeatureDeclaration
 	| ScssSupportsInterpolatedCondition
 	| AnyCssValue // general-enclosed
 
@@ -1935,6 +1936,16 @@ CssSupportsConditionInParens =
 CssSupportsFeatureDeclaration =
 	'('
 	declaration: CssDeclaration
+	')'
+
+// @supports ($property: grid) {}
+//           ^^^^^^^^^^^^^^^
+ScssSupportsFeatureDeclaration =
+	'('
+	name: ScssVariable
+	':'
+	value: AnyCssGenericPropertyValueOrExpression
+	important: CssDeclarationImportant?
 	')'
 
 // @supports selector(:focus-visible) { }
