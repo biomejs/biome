@@ -104,10 +104,12 @@ impl<'src> TailwindLexer<'src> {
         match dispatched {
             PNO => self.consume_byte(T!['(']),
             PNC => self.consume_byte(T![')']),
-            BTO => self.consume_byte(T!['[']),
             BTC => self.consume_byte(T![']']),
             WHS => self.consume_whitespace_token(),
+            // A selector can itself start with `[` (`[[data-state=open]_&]`),
+            // so check for the selector before lexing `[` as a bracket.
             _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_SELECTOR, BTC),
+            BTO => self.consume_byte(T!['[']),
             _ => self.consume_named_value(),
         }
     }
