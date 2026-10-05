@@ -5,16 +5,17 @@
 //! ancestors remain candidates even when their own evaluation is unsupported;
 //! the occurrence query decides whether an operand actually changes their type.
 
+use super::flow_conditions::condition_subjects;
 use crate::JsModuleInfo;
-use biome_js_control_flow::AnyJsControlFlowRoot;
-use biome_js_semantic::JsDeclarationKind;
+use crate::js_module_info::flow_sources::{FlowConditionSource, is_flow_construct};
+use biome_js_control_flow::{AnyJsControlFlowRoot, FlowOutcome};
+use biome_js_semantic::{JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsRoot, AnyTsType, JsConditionalExpression, JsDoWhileStatement,
-    JsForStatement, JsIdentifierExpression, JsIfStatement, JsLogicalExpression, JsSyntaxKind,
-    JsWhileStatement,
+    AnyJsExpression, AnyJsRoot, AnyTsType, JsIdentifierExpression, JsLogicalOperator, JsSyntaxKind,
+    JsSyntaxNodePtr,
 };
-use biome_rowan::{AstNode, SyntaxKind, TextRange, WalkEvent, declare_node_union};
-use rustc_hash::FxHashSet;
+use biome_rowan::{AstNode, SyntaxKind, TextRange, TextSize, WalkEvent};
+use rustc_hash::{FxHashMap, FxHashSet};
 
 const MAX_INDEX_STEPS: usize = 1_048_576;
 // A supported statement contributes at most seven predecessor edges, and a
@@ -46,20 +47,15 @@ impl FlowCandidates {
     }
 }
 
-declare_node_union! {
-    FlowConditionSource = JsIfStatement
-        | JsWhileStatement
-        | JsDoWhileStatement
-        | JsForStatement
-        | JsLogicalExpression
-        | JsConditionalExpression
-}
-
 fn collect_candidates(info: &JsModuleInfo) -> Option<FxHashSet<TextRange>> {
     let mut remaining = MAX_INDEX_STEPS;
-    let conditions = condition_ranges(&info.semantic_model.root(), &mut remaining)?;
+    let conditions = condition_ranges(
+        &info.semantic_model.root(),
+        &info.semantic_model,
+        &mut remaining,
+    )?;
     let mut candidates = FxHashSet::default();
-    if conditions.is_empty() {
+    if conditions.subjects.is_empty() {
         return Some(candidates);
     }
 
@@ -79,8 +75,11 @@ fn collect_candidates(info: &JsModuleInfo) -> Option<FxHashSet<TextRange>> {
                 break;
             }
             let start = reference.range_start();
-            let index = conditions.partition_point(|range| range.end() <= start);
+            let index = conditions
+                .subjects
+                .partition_point(|range| range.end() <= start);
             mentioned |= conditions
+                .subjects
                 .get(index)
                 .is_some_and(|range| range.contains(start));
         }
@@ -100,8 +99,14 @@ fn collect_candidates(info: &JsModuleInfo) -> Option<FxHashSet<TextRange>> {
             continue;
         };
 
+        let first_condition = conditions
+            .first_by_root
+            .get(&JsSyntaxNodePtr::new(declaration_root.syntax()));
         for reference in binding.all_reads() {
             remaining = remaining.checked_sub(1)?;
+            if first_condition.is_some_and(|first| reference.range_start() < *first) {
+                continue;
+            }
             let Some(identifier) = reference
                 .syntax()
                 .parent()
@@ -127,14 +132,31 @@ fn collect_candidates(info: &JsModuleInfo) -> Option<FxHashSet<TextRange>> {
     Some(candidates)
 }
 
-/// Collects condition subtrees and roots whose flow walk may exceed its budget.
+struct ConditionRanges {
+    subjects: Vec<TextRange>,
+    first_by_root: FxHashMap<JsSyntaxNodePtr, TextSize>,
+}
+
+#[derive(Default)]
+struct RootConditions {
+    constructs: usize,
+    contains_loop: bool,
+    first: Option<TextSize>,
+}
+
+/// Collects supported condition subjects and roots whose flow walk may exceed its budget.
 ///
-/// Source order does not restrict candidates: a later loop condition can affect
-/// an earlier read through a backedge. Overlapping ranges are merged only for
-/// reference membership checks, not to represent control-flow relationships.
-fn condition_ranges(root: &AnyJsRoot, remaining: &mut usize) -> Option<Vec<TextRange>> {
+/// Loops retain earlier reads because later conditions can reach them through
+/// backedges. Other roots can skip reads before their first supported test.
+/// Overlapping ranges are merged only for reference membership checks.
+fn condition_ranges(
+    root: &AnyJsRoot,
+    model: &SemanticModel,
+    remaining: &mut usize,
+) -> Option<ConditionRanges> {
     let mut ranges = Vec::new();
-    let mut root_constructs = Vec::<usize>::new();
+    let mut root_conditions = Vec::<RootConditions>::new();
+    let mut first_by_root = FxHashMap::default();
     let mut traversal = root.syntax().preorder();
     while let Some(event) = traversal.next() {
         *remaining = remaining.checked_sub(1)?;
@@ -157,49 +179,80 @@ fn condition_ranges(root: &AnyJsRoot, remaining: &mut usize) -> Option<Vec<TextR
                     return None;
                 }
                 if AnyJsControlFlowRoot::can_cast(node.kind()) {
-                    root_constructs.push(0);
+                    root_conditions.push(RootConditions::default());
                 }
-                // Blocks and jumps also contribute to the flow-work budget, even
-                // though they do not supply conditions for narrowing.
-                if FlowConditionSource::can_cast(node.kind())
-                    || matches!(
-                        node.kind(),
-                        JsSyntaxKind::JS_BLOCK_STATEMENT
-                            | JsSyntaxKind::JS_BREAK_STATEMENT
-                            | JsSyntaxKind::JS_CONTINUE_STATEMENT
-                    )
-                {
-                    *root_constructs.last_mut()? += 1;
+                if is_flow_construct(node.kind()) {
+                    root_conditions.last_mut()?.constructs += 1;
                 }
                 if let Some(source) = FlowConditionSource::cast(node) {
-                    let condition = match source {
+                    root_conditions.last_mut()?.contains_loop |= matches!(
+                        &source,
+                        FlowConditionSource::JsWhileStatement(_)
+                            | FlowConditionSource::JsDoWhileStatement(_)
+                            | FlowConditionSource::JsForStatement(_)
+                    );
+                    let (condition, outcome) = match source {
                         FlowConditionSource::JsIfStatement(statement) => {
-                            Some(statement.test().ok()?)
+                            (Some(statement.test().ok()?), FlowOutcome::Truthy)
                         }
                         FlowConditionSource::JsWhileStatement(statement) => {
-                            Some(statement.test().ok()?)
+                            (Some(statement.test().ok()?), FlowOutcome::Truthy)
                         }
                         FlowConditionSource::JsDoWhileStatement(statement) => {
-                            Some(statement.test().ok()?)
+                            (Some(statement.test().ok()?), FlowOutcome::Truthy)
                         }
-                        FlowConditionSource::JsForStatement(statement) => statement.test(),
+                        FlowConditionSource::JsForStatement(statement) => {
+                            (statement.test(), FlowOutcome::Truthy)
+                        }
                         FlowConditionSource::JsLogicalExpression(expression) => {
-                            Some(expression.left().ok()?)
+                            let outcome = match expression.operator().ok()? {
+                                JsLogicalOperator::LogicalAnd => FlowOutcome::Truthy,
+                                JsLogicalOperator::LogicalOr => FlowOutcome::Falsy,
+                                JsLogicalOperator::NullishCoalescing => FlowOutcome::Nullish,
+                            };
+                            (Some(expression.left().ok()?), outcome)
                         }
                         FlowConditionSource::JsConditionalExpression(expression) => {
-                            Some(expression.test().ok()?)
+                            (Some(expression.test().ok()?), FlowOutcome::Truthy)
                         }
                     };
                     if let Some(condition) = condition {
-                        ranges.push(condition.range());
+                        let range = condition.range();
+                        let has_subjects =
+                            match condition_subjects(condition, outcome, model, remaining) {
+                                Some(subjects) => {
+                                    let has_subjects = !subjects.is_empty();
+                                    ranges.extend(
+                                        subjects.into_iter().map(|subject| subject.range()),
+                                    );
+                                    has_subjects
+                                }
+                                None => {
+                                    ranges.push(range);
+                                    true
+                                }
+                            };
+                        if has_subjects {
+                            let first = &mut root_conditions.last_mut()?.first;
+                            *first =
+                                Some(first.map_or(range.end(), |first| first.min(range.end())));
+                        }
                     }
                 }
             }
             WalkEvent::Leave(node) => {
-                if AnyJsControlFlowRoot::can_cast(node.kind())
-                    && root_constructs.pop()? > MAX_FLOW_CONSTRUCTS
-                {
-                    ranges.push(node.text_trimmed_range());
+                if AnyJsControlFlowRoot::can_cast(node.kind()) {
+                    let conditions = root_conditions.pop()?;
+                    let range = node.text_trimmed_range();
+                    if conditions.constructs > MAX_FLOW_CONSTRUCTS {
+                        ranges.push(range);
+                    } else if !conditions.contains_loop {
+                        // A later test cannot affect an earlier read without a backedge.
+                        first_by_root.insert(
+                            JsSyntaxNodePtr::new(&node),
+                            conditions.first.unwrap_or(range.end()),
+                        );
+                    }
                 }
             }
         }
@@ -216,13 +269,17 @@ fn condition_ranges(root: &AnyJsRoot, remaining: &mut usize) -> Option<Vec<TextR
             disjoint.push(range);
         }
     }
-    Some(disjoint)
+    Some(ConditionRanges {
+        subjects: disjoint,
+        first_by_root,
+    })
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use biome_js_parser::{JsParserOptions, parse};
+    use biome_js_semantic::{SemanticModelOptions, semantic_model};
     use biome_languages::JsFileSource;
 
     #[test]
@@ -232,7 +289,8 @@ mod tests {
             ("function f(x) { if () x; }", MAX_INDEX_STEPS),
         ] {
             let root = parse(source, JsFileSource::ts(), JsParserOptions::default()).tree();
-            assert!(condition_ranges(&root, &mut remaining).is_none());
+            let model = semantic_model(&root, SemanticModelOptions::default());
+            assert!(condition_ranges(&root, &model, &mut remaining).is_none());
             let candidates = FlowCandidates { expressions: None };
             assert!(candidates.contains(root.range()));
         }
@@ -252,9 +310,12 @@ mod tests {
         let parsed = parse(&source, JsFileSource::ts(), JsParserOptions::default());
         assert!(!parsed.has_errors());
         let mut remaining = 100;
-        assert_eq!(
-            condition_ranges(&parsed.tree(), &mut remaining),
-            Some(Vec::new())
+        let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
+        assert!(
+            condition_ranges(&parsed.tree(), &model, &mut remaining)
+                .unwrap()
+                .subjects
+                .is_empty()
         );
     }
 
@@ -265,8 +326,9 @@ mod tests {
             let parsed = parse(&source, JsFileSource::ts(), JsParserOptions::default());
             assert!(!parsed.has_errors());
             let mut remaining = MAX_INDEX_STEPS;
-            let ranges = condition_ranges(&parsed.tree(), &mut remaining).unwrap();
-            assert_eq!(ranges.is_empty(), count == MAX_FLOW_CONSTRUCTS);
+            let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
+            let ranges = condition_ranges(&parsed.tree(), &model, &mut remaining).unwrap();
+            assert_eq!(ranges.subjects.is_empty(), count == MAX_FLOW_CONSTRUCTS);
         }
     }
 }

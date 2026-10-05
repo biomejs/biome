@@ -4,6 +4,9 @@
 //! incoming state of each occurrence. Only unwritten bindings declared in the
 //! same execution root participate, so refinements cannot cross closure boundaries.
 
+use super::flow_conditions::{
+    ConditionStep, MAX_CONDITION_DEPTH, SyntaxGuard, condition_step, condition_subjects,
+};
 use super::{ImportResolution, ResolutionCtx, resolve_local_type_on_demand};
 use crate::db::queries::{
     BindingTypeInput, FlowBindingTypeInput, FlowRootInput, infer_flow_binding_type,
@@ -14,17 +17,13 @@ use biome_js_control_flow::{
     AnyJsControlFlowRoot, FlowNode, FlowNodeId, FlowOutcome, NarrowingFlowGraph,
 };
 use biome_js_semantic::{Binding, JsDeclarationKind};
-use biome_js_syntax::{
-    AnyJsExpression, AnyJsLiteralExpression, JsBinaryOperator, JsLogicalOperator, JsSyntaxNode,
-    JsUnaryOperator,
-};
+use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression, JsSyntaxNode};
 use biome_js_type_info::interned_types::TypeData;
-use biome_js_type_info::{NarrowingPredicate, TypeofKind, narrow_type};
+use biome_js_type_info::{NarrowingPredicate, narrow_type};
 use biome_rowan::{AstNode, TextRange};
 use std::collections::VecDeque;
 
 const MAX_FLOW_STEPS: usize = 16_384;
-const MAX_CONDITION_DEPTH: usize = 32;
 const MAX_FLOW_TYPE_STEPS: usize = 1024;
 
 fn expression_at(root: &JsSyntaxNode, range: TextRange) -> Option<AnyJsExpression> {
@@ -147,27 +146,44 @@ impl<'db> ResolutionCtx<'db, '_> {
                 FlowNode::Condition {
                     antecedent,
                     expression,
-                    ..
+                    outcome,
                 } => {
                     pending.push(*antecedent);
-                    if !relevant && let Some(condition) = expression_at(root.syntax(), *expression)
-                    {
-                        relevant = condition
-                            .syntax()
-                            .descendants()
-                            .take(MAX_FLOW_TYPE_STEPS)
-                            .any(|node| {
-                                let Some(AnyJsExpression::JsIdentifierExpression(identifier)) =
-                                    AnyJsExpression::cast(node)
-                                else {
-                                    return false;
-                                };
-                                identifier
-                                    .name()
-                                    .ok()
-                                    .and_then(|name| self.js_info.semantic_model.binding(&name))
+                    if !relevant {
+                        let mut condition_remaining = MAX_FLOW_TYPE_STEPS;
+                        let subjects = expression_at(root.syntax(), *expression).map(|condition| {
+                            condition_subjects(
+                                condition.clone(),
+                                *outcome,
+                                &self.js_info.semantic_model,
+                                &mut condition_remaining,
+                            )
+                            .unwrap_or_else(|| {
+                                // A matching limit does not make unrelated variables flow-dependent.
+                                condition
+                                    .syntax()
+                                    .descendants()
+                                    .take(MAX_FLOW_TYPE_STEPS)
+                                    .filter_map(AnyJsExpression::cast)
+                                    .filter_map(|expression| {
+                                        let AnyJsExpression::JsIdentifierExpression(identifier) =
+                                            expression
+                                        else {
+                                            return None;
+                                        };
+                                        identifier.name().ok()
+                                    })
+                                    .collect()
+                            })
+                        });
+                        relevant = subjects.is_some_and(|subjects| {
+                            subjects.iter().any(|subject| {
+                                self.js_info
+                                    .semantic_model
+                                    .binding(subject)
                                     .is_some_and(|candidate| candidate == *binding)
-                            });
+                            })
+                        });
                     }
                 }
             }
@@ -309,10 +325,6 @@ impl<'db> ResolutionCtx<'db, '_> {
         states[point]
     }
 
-    #[expect(
-        clippy::wildcard_enum_match_arm,
-        reason = "Unsupported conditions do not refine types."
-    )]
     fn narrow_condition(
         &mut self,
         binding: &Binding,
@@ -322,46 +334,41 @@ impl<'db> ResolutionCtx<'db, '_> {
         depth: usize,
         remaining: &mut usize,
     ) -> TypeData<'db> {
-        if *remaining == 0 || depth >= MAX_CONDITION_DEPTH {
+        if depth >= MAX_CONDITION_DEPTH {
             return ty;
         }
-        *remaining -= 1;
-        let expression = expression.omit_parentheses();
-        let positive = matches!(outcome, FlowOutcome::Truthy | FlowOutcome::Nullish);
-        if self.is_binding_read(&expression, binding) {
-            let predicate = match outcome {
-                FlowOutcome::Truthy | FlowOutcome::Falsy => NarrowingPredicate::Truthy,
-                FlowOutcome::Nullish | FlowOutcome::NonNullish => NarrowingPredicate::Nullish,
-            };
-            return narrow_type(self.db, ty, predicate, positive);
-        }
-        if matches!(outcome, FlowOutcome::Nullish | FlowOutcome::NonNullish) {
-            return ty;
-        }
-        match expression {
-            AnyJsExpression::JsUnaryExpression(unary)
-                if unary.operator().ok() == Some(JsUnaryOperator::LogicalNot) =>
-            {
-                let Ok(argument) = unary.argument() else {
-                    return ty;
-                };
-                let outcome = if positive {
-                    FlowOutcome::Falsy
-                } else {
-                    FlowOutcome::Truthy
-                };
-                self.narrow_condition(binding, ty, argument, outcome, depth + 1, remaining)
-            }
-            AnyJsExpression::JsLogicalExpression(logical) => {
-                let (Ok(left), Ok(right), Ok(operator)) =
-                    (logical.left(), logical.right(), logical.operator())
-                else {
-                    return ty;
-                };
-                if operator == JsLogicalOperator::NullishCoalescing {
+        let Some(step) = condition_step(expression, outcome, remaining) else {
+            return TypeData::Unknown;
+        };
+        match step {
+            ConditionStep::Unsupported => ty,
+            ConditionStep::Guard {
+                subject,
+                guard,
+                positive,
+            } => {
+                if !self
+                    .js_info
+                    .semantic_model
+                    .binding(&subject)
+                    .is_some_and(|candidate| candidate == *binding)
+                {
                     return ty;
                 }
-                let sequential = (operator == JsLogicalOperator::LogicalAnd) == positive;
+                let Some(predicate) = self.guard_predicate(guard) else {
+                    return ty;
+                };
+                narrow_type(self.db, ty, predicate, positive)
+            }
+            ConditionStep::Negated { argument, outcome } => {
+                self.narrow_condition(binding, ty, argument, outcome, depth + 1, remaining)
+            }
+            ConditionStep::Logical {
+                left,
+                right,
+                outcome,
+                sequential,
+            } => {
                 let left = self.narrow_condition(binding, ty, left, outcome, depth + 1, remaining);
                 let right = self.narrow_condition(
                     binding,
@@ -377,121 +384,33 @@ impl<'db> ResolutionCtx<'db, '_> {
                     TypeData::union_from_types(self.db, vec![left, right])
                 }
             }
-            AnyJsExpression::JsBinaryExpression(binary) => {
-                let (Ok(left), Ok(right), Ok(operator)) =
-                    (binary.left(), binary.right(), binary.operator())
-                else {
-                    return ty;
+        }
+    }
+
+    fn guard_predicate(&mut self, guard: SyntaxGuard) -> Option<NarrowingPredicate<'db>> {
+        if !guard.is_applicable(&self.js_info.semantic_model) {
+            return None;
+        }
+        Some(match guard {
+            SyntaxGuard::Truthy => NarrowingPredicate::Truthy,
+            SyntaxGuard::Nullish => NarrowingPredicate::Nullish,
+            SyntaxGuard::Typeof(kind) => NarrowingPredicate::Typeof(kind),
+            SyntaxGuard::Literal(literal) => {
+                let ty = if matches!(literal, AnyJsLiteralExpression::JsNullLiteralExpression(_)) {
+                    TypeData::Null
+                } else {
+                    let reference = self.js_info.raw_expressions.get(&literal.range())?.clone();
+                    self.resolve(&reference)
                 };
-                let equal = match operator {
-                    JsBinaryOperator::Equality | JsBinaryOperator::StrictEquality => positive,
-                    JsBinaryOperator::Inequality | JsBinaryOperator::StrictInequality => !positive,
-                    _ => return ty,
-                };
-                let strict = matches!(
-                    operator,
-                    JsBinaryOperator::StrictEquality | JsBinaryOperator::StrictInequality
-                );
-                for (subject, value) in [(left.clone(), right.clone()), (right, left)] {
-                    if let Some(kind) = self.typeof_test(&subject, &value, binding) {
-                        return narrow_type(self.db, ty, NarrowingPredicate::Typeof(kind), equal);
-                    }
-                    if self.is_binding_read(&subject, binding)
-                        && let Some(literal) = self.guard_literal(&value)
-                    {
-                        let predicate = if strict {
-                            NarrowingPredicate::Literal(literal)
-                        } else if matches!(literal, TypeData::Null | TypeData::Undefined) {
-                            NarrowingPredicate::Nullish
-                        } else {
-                            return ty;
-                        };
-                        return narrow_type(self.db, ty, predicate, equal);
-                    }
+                NarrowingPredicate::Literal(ty)
+            }
+            SyntaxGuard::Undefined { strict, .. } => {
+                if strict {
+                    NarrowingPredicate::Literal(TypeData::Undefined)
+                } else {
+                    NarrowingPredicate::Nullish
                 }
-                ty
             }
-            _ => ty,
-        }
-    }
-
-    fn is_binding_read(&self, expression: &AnyJsExpression, binding: &Binding) -> bool {
-        let AnyJsExpression::JsIdentifierExpression(identifier) =
-            expression.clone().omit_parentheses()
-        else {
-            return false;
-        };
-        identifier
-            .name()
-            .ok()
-            .and_then(|name| self.js_info.semantic_model.binding(&name))
-            .is_some_and(|candidate| candidate == *binding)
-    }
-
-    fn typeof_test(
-        &self,
-        subject: &AnyJsExpression,
-        value: &AnyJsExpression,
-        binding: &Binding,
-    ) -> Option<TypeofKind> {
-        let AnyJsExpression::JsUnaryExpression(unary) = subject.clone().omit_parentheses() else {
-            return None;
-        };
-        if unary.operator().ok()? != JsUnaryOperator::Typeof
-            || !self.is_binding_read(&unary.argument().ok()?, binding)
-        {
-            return None;
-        }
-        let AnyJsExpression::AnyJsLiteralExpression(
-            AnyJsLiteralExpression::JsStringLiteralExpression(literal),
-        ) = value.clone().omit_parentheses()
-        else {
-            return None;
-        };
-        let value = literal.inner_string_text().ok()?;
-        Some(match value.text() {
-            "undefined" => TypeofKind::Undefined,
-            "object" => TypeofKind::Object,
-            "boolean" => TypeofKind::Boolean,
-            "number" => TypeofKind::Number,
-            "bigint" => TypeofKind::BigInt,
-            "string" => TypeofKind::String,
-            "symbol" => TypeofKind::Symbol,
-            "function" => TypeofKind::Function,
-            _ => return None,
         })
-    }
-
-    #[expect(
-        clippy::wildcard_enum_match_arm,
-        reason = "Only primitive literal guards are supported."
-    )]
-    fn guard_literal(&mut self, expression: &AnyJsExpression) -> Option<TypeData<'db>> {
-        let expression = expression.clone().omit_parentheses();
-        match &expression {
-            AnyJsExpression::AnyJsLiteralExpression(
-                AnyJsLiteralExpression::JsNullLiteralExpression(_),
-            ) => Some(TypeData::Null),
-            AnyJsExpression::AnyJsLiteralExpression(
-                AnyJsLiteralExpression::JsBooleanLiteralExpression(_)
-                | AnyJsLiteralExpression::JsStringLiteralExpression(_)
-                | AnyJsLiteralExpression::JsNumberLiteralExpression(_)
-                | AnyJsLiteralExpression::JsBigintLiteralExpression(_),
-            ) => {
-                let reference = self
-                    .js_info
-                    .raw_expressions
-                    .get(&expression.range())?
-                    .clone();
-                Some(self.resolve(&reference))
-            }
-            AnyJsExpression::JsIdentifierExpression(identifier) => {
-                let name = identifier.name().ok()?;
-                (name.value_token().ok()?.text_trimmed() == "undefined"
-                    && self.js_info.semantic_model.binding(&name).is_none())
-                .then_some(TypeData::Undefined)
-            }
-            _ => None,
-        }
     }
 }

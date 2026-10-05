@@ -247,7 +247,7 @@ pub(in crate::db) fn resolve_raw_types<'db>(
         .map(|index| ctx.resolve_raw_type_id(TypeId::new(index)))
         .collect();
 
-    let candidates = if js_info.raw_expressions.is_empty() {
+    let candidates = if !js_info.has_flow_candidate_sources || js_info.raw_expressions.is_empty() {
         None
     } else {
         flow_candidates_for_module(db, module).as_ref()

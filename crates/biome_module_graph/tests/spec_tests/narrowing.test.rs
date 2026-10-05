@@ -144,13 +144,216 @@ fn branchless_promise_batches_skip_flow_queries() {
         assert_no_flow_queries(&db, &events);
         assert_eq!(
             function_query_will_execute_count_by_name(&db, "flow_candidates_for_module", &events),
-            usize::from(cold)
+            0,
+            "collection already rules out flow in this module"
         );
         assert_eq!(
             function_query_will_execute_count_by_name(&db, "infer_expression_is_promise", &events),
             if cold { 16 } else { 0 }
         );
         assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+    }
+}
+
+#[test]
+fn reads_before_the_first_condition_do_not_build_flow_graphs() {
+    const SOURCE: &str = r#"
+        function f(value: string | null) {
+            /*before*/value;
+            if (/*test*/value !== null) { /*body*/value; }
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    db.clear_salsa_events();
+    for marker in ["before", "test"] {
+        let ty = normalized_type_at(&db, module, SOURCE, marker, "value");
+        assert_variants(
+            &db,
+            ty,
+            &[InferredTypeData::String, InferredTypeData::Null],
+            marker,
+        );
+    }
+    assert_no_flow_queries(&db, &db.take_salsa_events());
+    assert_eq!(
+        normalized_type_at(&db, module, SOURCE, "body", "value"),
+        InferredTypeData::String
+    );
+}
+
+#[test]
+fn loop_updates_keep_conditions_that_occur_later_in_the_source() {
+    const SOURCE: &str = r#"
+        function f(value: string | null) {
+            for (;; /*update*/value) {
+                if (value === null) break;
+            }
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    assert_eq!(
+        normalized_type_at(&db, module, SOURCE, "update", "value"),
+        InferredTypeData::String
+    );
+}
+
+#[test]
+fn unsupported_condition_subjects_skip_flow_queries() {
+    for condition in [
+        "value.length",
+        "check(value)",
+        "value.method()",
+        "value === other",
+        "typeof value === other",
+        "value == 1",
+    ] {
+        let source = format!(
+            "function f(value: string | number, other: unknown) {{ if ({condition}) {{ /*read*/value; }} }}"
+        );
+        let (db, module) = narrowing_db(&source);
+        db.clear_salsa_events();
+        let ty = normalized_type_at(&db, module, &source, "read", "value");
+        assert_variants(
+            &db,
+            ty,
+            &[InferredTypeData::String, InferredTypeData::Number],
+            condition,
+        );
+        assert_no_flow_queries(&db, &db.take_salsa_events());
+    }
+}
+
+#[test]
+fn nested_supported_tests_still_narrow_inside_an_unsupported_condition() {
+    const SOURCE: &str = r#"
+        function f(value: string | null) {
+            if (check(value !== null && /*argument*/value)) {
+                /*body*/value;
+            }
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    assert_eq!(
+        normalized_type_at(&db, module, SOURCE, "argument", "value"),
+        InferredTypeData::String
+    );
+    let ty = normalized_type_at(&db, module, SOURCE, "body", "value");
+    assert_variants(
+        &db,
+        ty,
+        &[InferredTypeData::String, InferredTypeData::Null],
+        "body",
+    );
+}
+
+#[test]
+fn unsupported_conditions_do_not_spend_the_baseline_expansion_budget() {
+    let variants = (0..1100)
+        .map(|index| format!("\"value{index}\""))
+        .collect::<Vec<_>>()
+        .join(" | ");
+    let source = format!(
+        "function f(/*binding*/value: {variants}) {{ if (value.length) {{ /*read*/value; }} }}"
+    );
+    let (db, module) = narrowing_db(&source);
+    let binding = BindingTypeInput::new(&db, module, marked_range(&source, "binding", "value"));
+    let baseline = infer_binding_type(&db, binding).unwrap();
+    let baseline = normalize_type(&db, module, baseline);
+    db.clear_salsa_events();
+    assert_eq!(
+        normalized_type_at(&db, module, &source, "read", "value"),
+        baseline
+    );
+    assert_no_flow_queries(&db, &db.take_salsa_events());
+}
+
+#[test]
+fn incomplete_conditions_do_not_expand_unrelated_binding_types() {
+    let variants = (0..1100)
+        .map(|index| format!("\"value{index}\""))
+        .collect::<Vec<_>>()
+        .join(" | ");
+    for subject in ["flag", "value"] {
+        let source = format!(
+            "function f(value: {variants}, flag: boolean) {{ /*before*/value; if ({}{subject}) {{ /*after*/value; }} if (typeof value === 'string') {{}} }}",
+            "!".repeat(32)
+        );
+        let (db, module) = narrowing_db(&source);
+        let read = |marker| {
+            infer_expression_type(
+                &db,
+                ExpressionTypeInput::new(&db, module, marked_range(&source, marker, "value")),
+            )
+            .unwrap()
+        };
+        let ordinary = read("before");
+        assert_ne!(ordinary, InferredTypeData::Unknown);
+        let expected = if subject == "flag" {
+            ordinary
+        } else {
+            InferredTypeData::Unknown
+        };
+        assert_eq!(read("after"), expected, "{subject}");
+    }
+}
+
+#[test]
+fn shadowed_undefined_does_not_expand_the_compared_binding() {
+    let variants = (0..1100)
+        .map(|index| format!("\"value{index}\""))
+        .collect::<Vec<_>>()
+        .join(" | ");
+    let source = format!(
+        "function f(value: {variants}, undefined: number) {{ /*before*/value; if (value === undefined) {{ /*after*/value; }} }}"
+    );
+    let (db, module) = narrowing_db(&source);
+    db.clear_salsa_events();
+    let read = |marker| {
+        infer_expression_type(
+            &db,
+            ExpressionTypeInput::new(&db, module, marked_range(&source, marker, "value")),
+        )
+        .unwrap()
+    };
+    let ordinary = read("before");
+    assert_ne!(ordinary, InferredTypeData::Unknown);
+    assert_eq!(read("after"), ordinary);
+    assert_no_flow_queries(&db, &db.take_salsa_events());
+}
+
+#[test]
+fn condition_discovery_preserves_shadowing_and_depth_limits() {
+    const SOURCE: &str = r#"
+        function f(value: string | number | undefined, undefined: number) {
+            if (value === undefined) { /*read*/value; }
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    let ty = normalized_type_at(&db, module, SOURCE, "read", "value");
+    assert_variants(
+        &db,
+        ty,
+        &[
+            InferredTypeData::String,
+            InferredTypeData::Number,
+            InferredTypeData::Undefined,
+        ],
+        "shadowed undefined",
+    );
+    for depth in [31, 32] {
+        let source = format!(
+            "function f(value: 'ready' | null) {{ if ({}value) {{ /*read*/value; }} }}",
+            "!".repeat(depth)
+        );
+        let (db, module) = narrowing_db(&source);
+        let ty = normalized_type_at(&db, module, &source, "read", "value");
+        if depth == 31 {
+            assert_eq!(ty, InferredTypeData::Null);
+        } else {
+            assert!(contains_inferred_null(&db, ty));
+            assert_ne!(ty, InferredTypeData::Null);
+            assert_ne!(ty, InferredTypeData::Unknown);
+        }
     }
 }
 
