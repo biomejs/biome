@@ -6,6 +6,11 @@ on:
     branches:
       - main
     paths:
+      - '.github/workflows/parser_conformance.yml'
+      - 'Cargo.lock'
+      - 'crates/biome_css_factory/**'
+      - 'crates/biome_css_parser/**'
+      - 'crates/biome_css_syntax/**'
       - 'crates/biome_js_syntax/**'
       - 'crates/biome_js_factory/**'
       - 'crates/biome_js_semantic/**'
@@ -13,22 +18,112 @@ on:
       - 'crates/biome_markdown_factory/**'
       - 'crates/biome_markdown_parser/**'
       - 'crates/biome_markdown_syntax/**'
+      - 'crates/biome_parser/**'
+      - 'crates/biome_rowan/**'
       - 'crates/biome_yaml_factory/**'
       - 'crates/biome_yaml_parser/**'
       - 'crates/biome_yaml_syntax/**'
-      - 'crates/biome_rowan/**'
-      - 'xtask/**'
+      - 'xtask/coverage/**'
 
 env:
   RUST_LOG: info
   RUST_BACKTRACE: 1
 
 jobs:
+  changes:
+    runs-on: depot-ubuntu-24.04-arm
+    permissions:
+      pull-requests: read
+    outputs:
+      suites: ${{ steps.outputs.outputs.suites }}
+    steps:
+      - name: Detect parser changes
+        if: github.event_name == 'pull_request'
+        id: filter
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          filters: |
+            javascript:
+              - '.github/workflows/parser_conformance.yml'
+              - 'Cargo.lock'
+              - 'crates/biome_js_factory/**'
+              - 'crates/biome_js_parser/**'
+              - 'crates/biome_js_semantic/**'
+              - 'crates/biome_js_syntax/**'
+              - 'crates/biome_parser/**'
+              - 'crates/biome_rowan/**'
+              - 'xtask/coverage/**'
+            scss:
+              - '.github/workflows/parser_conformance.yml'
+              - 'Cargo.lock'
+              - 'crates/biome_css_factory/**'
+              - 'crates/biome_css_parser/**'
+              - 'crates/biome_css_syntax/**'
+              - 'crates/biome_parser/**'
+              - 'crates/biome_rowan/**'
+              - 'xtask/coverage/**'
+            markdown:
+              - '.github/workflows/parser_conformance.yml'
+              - 'Cargo.lock'
+              - 'crates/biome_markdown_factory/**'
+              - 'crates/biome_markdown_parser/**'
+              - 'crates/biome_markdown_syntax/**'
+              - 'crates/biome_parser/**'
+              - 'crates/biome_rowan/**'
+              - 'xtask/coverage/**'
+            yaml:
+              - '.github/workflows/parser_conformance.yml'
+              - 'Cargo.lock'
+              - 'crates/biome_parser/**'
+              - 'crates/biome_rowan/**'
+              - 'crates/biome_yaml_factory/**'
+              - 'crates/biome_yaml_parser/**'
+              - 'crates/biome_yaml_syntax/**'
+              - 'xtask/coverage/**'
+
+      - name: Set coverage suites
+        id: outputs
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          JAVASCRIPT: ${{ steps.filter.outputs.javascript }}
+          SCSS: ${{ steps.filter.outputs.scss }}
+          MARKDOWN: ${{ steps.filter.outputs.markdown }}
+          YAML: ${{ steps.filter.outputs.yaml }}
+        run: |
+          if [ "$EVENT_NAME" = 'merge_group' ]; then
+            JAVASCRIPT=true
+            SCSS=true
+            MARKDOWN=true
+            YAML=true
+          fi
+
+          SUITES=()
+          if [ "$JAVASCRIPT" = 'true' ]; then
+            SUITES+=(js ts jsx symbols)
+          fi
+          if [ "$SCSS" = 'true' ]; then
+            SUITES+=(scss)
+          fi
+          if [ "$MARKDOWN" = 'true' ]; then
+            SUITES+=(markdown)
+          fi
+          if [ "$YAML" = 'true' ]; then
+            SUITES+=(yaml)
+          fi
+
+          SUITES_CSV=$(IFS=,; echo "${SUITES[*]}")
+          echo "suites=$SUITES_CSV" >> "$GITHUB_OUTPUT"
+
   coverage:
+    needs: changes
+    if: needs.changes.outputs.suites != ''
     permissions:
       pull-requests: write
     name: Parser conformance
     runs-on: depot-ubuntu-24.04-arm-16
+    env:
+      COVERAGE_SUITES: ${{ needs.changes.outputs.suites }}
 
     steps:
       - name: Checkout PR Branch
@@ -55,7 +150,7 @@ jobs:
 
       - name: Run Test suites
         continue-on-error: true
-        run: cargo coverage --json > new_results.json
+        run: cargo coverage --suites="$COVERAGE_SUITES" --json > new_results.json
 
       - name: Checkout main Branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -66,14 +161,14 @@ jobs:
 
       - name: Run Test suites on main branch
         continue-on-error: true
-        run: cargo coverage --json > base_results.json
+        run: cargo coverage --suites="$COVERAGE_SUITES" --json > base_results.json
 
-      - name: Compare results on ${{ matrix.os }}
+      - name: Compare results
         if: github.event_name == 'pull_request'
         id: comparison
         shell: bash
         run: |
-          echo "## Parser conformance results on ${{ matrix.os }}" > output
+          echo "## Parser conformance results" > output
           cargo coverage compare ./base_results.json ./new_results.json --markdown >> output
           cat output
           echo "comment<<EOF" >> $GITHUB_OUTPUT
@@ -91,7 +186,7 @@ jobs:
         id: previous-comment
         with:
           issue-number: ${{ steps.pr-number.outputs.pr }}
-          body-includes: Parser conformance results on ${{ matrix.os }}
+          body-includes: Parser conformance results
 
       - name: Update existing comment
         if: github.event_name == 'pull_request' && steps.previous-comment.outputs.comment-id

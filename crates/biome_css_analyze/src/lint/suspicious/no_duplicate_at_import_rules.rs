@@ -20,9 +20,10 @@ use biome_string_case::StrOnlyExtension;
 declare_lint_rule! {
     /// Disallow duplicate `@import` rules.
     ///
-    /// This rule checks if the file urls of the @import rules are duplicates.
-    ///
-    /// This rule also checks the imported media queries and alerts of duplicates.
+    /// Different quote styles and the `url()` form are treated as the same URL. Imports of that URL
+    /// are duplicates when either import is unconditional or when their media lists share a
+    /// condition. Two imports of the same URL remain valid only when both are conditional and their
+    /// media conditions do not overlap.
     ///
     /// ## Examples
     ///

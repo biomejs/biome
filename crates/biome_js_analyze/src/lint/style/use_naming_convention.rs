@@ -736,7 +736,11 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useNamingConvention",
         language: "ts",
-        sources: &[RuleSource::EslintTypeScript("naming-convention").inspired()],
+        sources: &[
+            RuleSource::EslintTypeScript("naming-convention").inspired(),
+            RuleSource::Eslint("camelcase").inspired(),
+            RuleSource::EslintVueJs("camelcase").inspired(),
+        ],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,

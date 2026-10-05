@@ -1,0 +1,27 @@
+$query: "without: rule";
+$rules: media supports;
+$mode: without;
+
+@function root-query($mode) {
+  @return $mode + ": rule";
+}
+
+.namespace {
+  @at-root ($query) {
+    .overlay { position: fixed; }
+  }
+  @at-root ("without: rule") {
+    .quoted-query { display: inline; }
+  }
+  @at-root (#{$query}) {
+    .interpolated-query { display: flex; }
+  }
+  @at-root (root-query("without")) {
+    .generated { display: block; }
+  }
+}
+
+@at-root (without: $rules) { .rules { color: red; } }
+@at-root (#{$mode}: media) { .modifier { color: blue; } }
+@at-root ("with" + "out": "media") { .quoted { color: green; } }
+@at-root (without: media supports) { .static { color: purple; } }

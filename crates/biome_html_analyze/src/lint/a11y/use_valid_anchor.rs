@@ -10,32 +10,18 @@ use biome_rule_options::use_valid_anchor::UseValidAnchorOptions;
 use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
-    /// Enforce that all anchors are valid, and they are navigable elements.
+    /// Require anchors to provide a real navigation destination.
     ///
-    /// The anchor element (`<a></a>`) - also called **hyperlink** - is an important element
-    /// that allows users to navigate pages, in the same page, same website or on another website.
+    /// An `<a>` element is a hyperlink. It should navigate to another page or to a real location in
+    /// the current page through a usable `href`. Missing values, empty values, `#`, and
+    /// `javascript:` URLs do not provide a meaningful destination.
     ///
-    /// While before it was possible to attach logic to an anchor element, with the advent of JSX libraries,
-    /// it's now easier to attach logic to any HTML element, anchors included.
+    /// Use `<button>` for actions such as opening a dialog or submitting data. Using a link for an
+    /// action can break standard link behavior, including opening in a new tab, copying the link,
+    /// keyboard navigation, and discovery by search crawlers.
     ///
-    /// This rule is designed to prevent invalid anchor usage when the `href` is missing or not navigable,
-    /// including the empty fragment `#` both with and without attached logic. With logic attached, an anchor
-    /// with an invalid `href` usually behaves like an action and should be a `button`, because that's likely
-    /// what the user wants. Without logic, `href="#"` still points to no real target and can cause scroll
-    /// position and keyboard focus to fall out of sync. Prefer linking to an actual destination, such as
-    /// `href="#top"`.
-    ///
-    /// Anchor `<a></a>` elements should be used for navigation, while `<button></button>` should be
-    /// used for user interaction.
-    ///
-    /// There are **many reasons** why an anchor should not have a logic with an incorrect `href` attribute:
-    /// - it can disrupt the correct flow of the user navigation e.g. a user that wants to open the link
-    /// in another tab, but the default "click" behavior is prevented
-    /// - it can be a source of invalid links, and crawlers can't navigate the website, risking to penalize
-    /// SEO ranking
-    ///
-    ///
-    /// For a detailed explanation, check out [this article by Marcy Sutton](https://marcysutton.com/links-vs-buttons-in-modern-web-applications)
+    /// See [Links vs. Buttons in Modern Web Applications](https://marcysutton.com/links-vs-buttons-in-modern-web-applications)
+    /// for a detailed explanation.
     ///
     /// ## Examples
     ///

@@ -1,3 +1,4 @@
+/* should generate diagnostics */
 <>
 	<div allowTransparency="true" />
 	<div hasOwnProperty="should not be allowed property"></div>

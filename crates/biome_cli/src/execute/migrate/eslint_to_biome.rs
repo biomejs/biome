@@ -371,6 +371,8 @@ impl<'a> TryFrom<&'a EslintRuleName> for RuleSource<'a> {
         } = value;
         let constructor: fn(&'a str) -> RuleSource<'a> = match plugin_name.as_deref() {
             None => RuleSource::Eslint,
+            Some("astro") => RuleSource::EslintAstro,
+            Some("markdown") => RuleSource::EslintMarkdown,
             Some("barrel-files") => RuleSource::EslintBarrelFiles,
             Some("@graphql-eslint") => RuleSource::EslintGraphql,
             Some("import") => RuleSource::EslintImport,
@@ -385,6 +387,7 @@ impl<'a> TryFrom<&'a EslintRuleName> for RuleSource<'a> {
             Some("package-json") => RuleSource::EslintPackageJson,
             Some("package-json-dependencies") => RuleSource::EslintPackageJsonDependencies,
             Some("perfectionist") => RuleSource::EslintPerfectionist,
+            Some("playwright") => RuleSource::EslintPlaywright,
             Some("qwik") => RuleSource::EslintQwik,
             Some("react") => RuleSource::EslintReact,
             Some("react-hooks") => RuleSource::EslintReactHooks,
@@ -406,6 +409,7 @@ impl<'a> TryFrom<&'a EslintRuleName> for RuleSource<'a> {
             Some("unused-imports") => RuleSource::EslintUnusedImports,
             Some("vitest" | "@vitest") => RuleSource::EslintVitest,
             Some("vue") => RuleSource::EslintVueJs,
+            Some("yml") => RuleSource::EslintYml,
             Some("turbo") => RuleSource::EslintTurbo,
             Some("@html-eslint") => RuleSource::HtmlEslint,
             Some("typescript-sort-keys") => RuleSource::EslintTypescriptSortKeys,
@@ -1261,6 +1265,58 @@ mod tests {
                 biome_config::RulePlainConfiguration::Off
             ))
         );
+    }
+
+    #[test]
+    fn astro_and_markdown_unsupported_rule_lookup() {
+        for (name, reason) in [
+            (
+                "astro/no-omitted-end-tags",
+                UnsupportedRuleReason::Deprecated,
+            ),
+            (
+                "astro/semi",
+                UnsupportedRuleReason::FormatterOption("semicolons"),
+            ),
+            ("astro/valid-compile", UnsupportedRuleReason::NotApplicable),
+            (
+                "markdown/no-space-in-emphasis",
+                UnsupportedRuleReason::FormatterCovers,
+            ),
+        ] {
+            assert_eq!(
+                unsupported_rule_reason(&EslintRuleName::from_str(name)),
+                reason
+            );
+        }
+    }
+
+    #[test]
+    fn playwright_and_yml_unsupported_rule_lookup() {
+        for (name, reason) in [
+            (
+                "playwright/consistent-spacing-between-blocks",
+                UnsupportedRuleReason::Stylistic,
+            ),
+            (
+                "yml/indent",
+                UnsupportedRuleReason::FormatterOption("indentWidth"),
+            ),
+            ("yml/no-tab-indent", UnsupportedRuleReason::FormatterCovers),
+            (
+                "yml/no-trailing-spaces",
+                UnsupportedRuleReason::FormatterCovers,
+            ),
+            (
+                "yml/quotes",
+                UnsupportedRuleReason::FormatterOption("quoteStyle"),
+            ),
+        ] {
+            assert_eq!(
+                unsupported_rule_reason(&EslintRuleName::from_str(name)),
+                reason
+            );
+        }
     }
 
     #[test]

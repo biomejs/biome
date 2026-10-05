@@ -16,7 +16,12 @@ use biome_rule_options::no_undeclared_custom_properties::NoUndeclaredCustomPrope
 use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
-    /// Reports custom properties used with `var()` that have no visible declaration.
+    /// Disallow undeclared CSS custom properties in inline styles.
+    ///
+    /// A custom property has a name beginning with `--` and is read with `var(--name)`. The rule
+    /// checks static `style` attributes and looks for a matching declaration on the same element, an
+    /// ancestor element, or a stylesheet available to the file. An unresolved name usually means
+    /// the declaration is missing or misspelled.
     ///
     /// ## Examples
     ///

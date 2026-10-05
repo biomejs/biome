@@ -9,6 +9,7 @@ use biome_rowan::AstNode;
 use biome_rule_options::no_process_env::NoProcessEnvOptions;
 
 use crate::services::semantic::Semantic;
+use crate::shared::node_process::{PROCESS_MODULE_NAMES, is_process_module_import};
 
 declare_lint_rule! {
     /// Disallow the use of `process.env`.
@@ -44,7 +45,10 @@ declare_lint_rule! {
         version: "1.9.1",
         name: "noProcessEnv",
         language: "js",
-        sources: &[RuleSource::EslintN("no-process-env").same()],
+        sources: &[
+            RuleSource::EslintN("no-process-env").same(),
+            RuleSource::Eslint("no-process-env").same(),
+        ],
         recommended: false,
         severity: Severity::Information,
     }
@@ -97,18 +101,6 @@ impl Rule for NoProcessEnv {
             }),
         )
     }
-}
-
-const PROCESS_MODULE_NAMES: [&str; 2] = ["process", "node:process"];
-
-/// Whether the `process` `binding` is imported from the `process`/`node:process`
-/// module through an `import` statement.
-fn is_process_module_import(binding: &biome_js_semantic::Binding) -> bool {
-    binding
-        .syntax()
-        .ancestors()
-        .find_map(|ancestor| JsImport::cast(ancestor)?.source_text().ok())
-        .is_some_and(|source| PROCESS_MODULE_NAMES.contains(&source.text()))
 }
 
 /// Returns `true` when `binding` is the `env` binding of the `process` (or

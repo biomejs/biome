@@ -1,0 +1,132 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<div
+	onTransitionCancel={handleTransition}
+	onTransitionCancelCapture={handleTransition}
+	onTransitionRun={handleTransition}
+	onTransitionRunCapture={handleTransition}
+	onTransitionStart={handleTransition}
+	onTransitionStartCapture={handleTransition}
+/>;
+
+```
+
+# Diagnostics
+```
+invalid.jsx:3:2 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property 'onTransitionCancel' is not a valid DOM attribute.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <div
+  > 3 │ 	onTransitionCancel={handleTransition}
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 	onTransitionCancelCapture={handleTransition}
+    5 │ 	onTransitionRun={handleTransition}
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
+
+```
+invalid.jsx:4:2 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property 'onTransitionCancelCapture' is not a valid DOM attribute.
+  
+    2 │ <div
+    3 │ 	onTransitionCancel={handleTransition}
+  > 4 │ 	onTransitionCancelCapture={handleTransition}
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 	onTransitionRun={handleTransition}
+    6 │ 	onTransitionRunCapture={handleTransition}
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
+
+```
+invalid.jsx:5:2 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property 'onTransitionRun' is not a valid DOM attribute.
+  
+    3 │ 	onTransitionCancel={handleTransition}
+    4 │ 	onTransitionCancelCapture={handleTransition}
+  > 5 │ 	onTransitionRun={handleTransition}
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 	onTransitionRunCapture={handleTransition}
+    7 │ 	onTransitionStart={handleTransition}
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
+
+```
+invalid.jsx:6:2 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property 'onTransitionRunCapture' is not a valid DOM attribute.
+  
+    4 │ 	onTransitionCancelCapture={handleTransition}
+    5 │ 	onTransitionRun={handleTransition}
+  > 6 │ 	onTransitionRunCapture={handleTransition}
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 	onTransitionStart={handleTransition}
+    8 │ 	onTransitionStartCapture={handleTransition}
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
+
+```
+invalid.jsx:7:2 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property 'onTransitionStart' is not a valid DOM attribute.
+  
+    5 │ 	onTransitionRun={handleTransition}
+    6 │ 	onTransitionRunCapture={handleTransition}
+  > 7 │ 	onTransitionStart={handleTransition}
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 	onTransitionStartCapture={handleTransition}
+    9 │ />;
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```
+
+```
+invalid.jsx:8:2 lint/suspicious/noUnknownAttribute ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The property 'onTransitionStartCapture' is not a valid DOM attribute.
+  
+     6 │ 	onTransitionRunCapture={handleTransition}
+     7 │ 	onTransitionStart={handleTransition}
+   > 8 │ 	onTransitionStartCapture={handleTransition}
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ />;
+    10 │ 
+  
+  i This property is not recognized as a valid HTML/DOM attribute or React prop.
+  
+  i Check the spelling or consider using a valid data-* attribute for custom properties.
+  
+
+```

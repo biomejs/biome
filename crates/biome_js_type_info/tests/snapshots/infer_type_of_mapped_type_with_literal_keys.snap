@@ -1,0 +1,48 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+type Flags = { readonly [K in "A" | "B"]-?: boolean };
+
+```
+
+## Result
+
+```
+MappedType {
+    type_parameter: Resolved(
+        Local TypeId(0),
+    ),
+    keys: Type(
+        Resolved(
+            Local TypeId(3),
+        ),
+    ),
+    ty: Resolved(
+        Local TypeId(4),
+    ),
+    readonly_modifier: Some(
+        Add,
+    ),
+    optional_modifier: Some(
+        Remove,
+    ),
+}
+```
+
+## Registered types
+
+```
+Module TypeId(0) => K
+
+Module TypeId(1) => string: A
+
+Module TypeId(2) => string: B
+
+Module TypeId(3) => Local TypeId(1) | Local TypeId(2)
+
+Module TypeId(4) => boolean
+```

@@ -46,7 +46,11 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noRedundantRoles",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("no-redundant-roles").same(), RuleSource::HtmlEslint("no-redundant-role").inspired()],
+        sources: &[
+            RuleSource::EslintJsxA11y("no-redundant-roles").same(),
+            RuleSource::HtmlEslint("no-redundant-role").inspired(),
+            RuleSource::EslintAstro("jsx-a11y/no-redundant-roles").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

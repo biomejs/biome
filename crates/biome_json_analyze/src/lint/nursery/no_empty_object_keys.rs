@@ -10,9 +10,9 @@ use biome_rule_options::no_empty_object_keys::NoEmptyObjectKeysOptions;
 declare_lint_rule! {
     /// Disallow empty keys in JSON objects.
     ///
-    /// In JSON, using empty keys (keys that are empty strings or contain only whitespace) can lead to accessibility and maintenance issues.
-    /// While technically valid in JSON, empty keys make objects harder to read, can cause confusion when debugging, and may create problems with some JSON parsers or processors.
-    /// Additionally, empty keys often indicate mistakes or oversights in the processes.
+    /// JSON allows empty strings as object keys, but they are difficult to identify in logs, error
+    /// messages, and source code. This rule reports keys that are empty or contain only whitespace,
+    /// because they are usually accidental. Use a short, meaningful name instead.
     ///
     /// ## Examples
     ///

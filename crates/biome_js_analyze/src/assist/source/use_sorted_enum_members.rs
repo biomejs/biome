@@ -18,16 +18,14 @@ use biome_string_case::comparable_token::ComparableToken;
 use crate::JsRuleAction;
 
 declare_source_rule! {
-    /// Sort the members of an enum in natural order.
+    /// Sort the members of a string-valued TypeScript enum.
     ///
-    /// Enforce a consistent natural sort order for TypeScript enum members with string initializers.
+    /// The action uses [natural order](https://en.wikipedia.org/wiki/Natural_sort_order): uppercase
+    /// letters come before lowercase letters (`A` before `a`), and numbers are compared by value
+    /// (`item9` before `item10`). This keeps enum declarations predictable and easy to scan.
     ///
-    /// This rule sorts members in string enums so declarations stay predictable and easier to scan.
-    /// Members that cannot be compared, such as computed names, are left in place and split the enum into sortable groups.
-    ///
-    /// Members are sorted in a [Natural order](https://en.wikipedia.org/wiki/Natural_sort_order),
-    /// meaning that uppercase letters come before lowercase letters (e.g. `A` < `a` < `B` < `b`)
-    /// and numbers are compared to their numerical value (e.g. `9` < `10`).
+    /// A member with a computed name cannot be compared reliably. The action leaves that member in
+    /// place and sorts the comparable members on each side independently.
     ///
     /// ## Examples
     ///

@@ -18,16 +18,17 @@ use biome_rule_options::use_sorted_package_json::UseSortedPackageJsonOptions;
 use std::collections::HashMap;
 
 declare_source_rule! {
-    /// Organize package.json fields according to established conventions.
+    /// Organize `package.json` fields according to established conventions.
     ///
-    /// Sorts fields following the same conventions as the popular
+    /// The action follows the conventions of the
     /// [sort-package-json](https://github.com/keithamus/sort-package-json) tool.
     ///
-    /// ## Sorting Rules
+    /// ## Sorting rules
     ///
-    /// `package.json` fields are sorted by the order they are listed below. The default key sort order is alphabetical.
-    ///
-    /// _Note: when a specific key order is used, any other keys will be sorted in the end of the object_
+    /// Known fields follow the order in the table below. Unlisted fields are sorted alphabetically
+    /// after known fields, while fields beginning with `_` are placed last. “Key sort” means sorting
+    /// the keys of a nested object. “Unique items” removes repeated array entries while preserving
+    /// their order; “sort unique items” also sorts the remaining entries.
     ///
     /// | Key                   | Rules                                                                          |
     /// | --------------------- | ------------------------------------------------------------------------------ |
@@ -35,6 +36,7 @@ declare_source_rule! {
     /// | name                  |                                                                                |
     /// | displayName           |                                                                                |
     /// | version               |                                                                                |
+    /// | stableVersion         |                                                                                |
     /// | private               |                                                                                |
     /// | description           |                                                                                |
     /// | categories            | Unique items                                                                   |
@@ -75,9 +77,10 @@ declare_source_rule! {
     /// | directories           | Key order: `lib`, `bin`, `man`, `doc`, `example`, `test`                       |
     /// | files                 | Unique items                                                                   |
     /// | workspaces            | Key order (when object): `packages`, `catalog`                                 |
-    /// | binary,               | Key order: `module_name`, `module_path`, `remote_path`, `package_name`, `host` |
+    /// | binary                | Key order: `module_name`, `module_path`, `remote_path`, `package_name`, `host` |
     /// | scripts               | [Script sort](#scripts)                                                        |
     /// | betterScripts         | [Script sort](#scripts)                                                        |
+    /// | l10n                  |                                                                                |
     /// | contributes           | Key sort                                                                       |
     /// | activationEvents      | Unique items                                                                   |
     /// | husky                 | Sorts the `hooks` field using [git hook sort](#git-hooks)                      |
@@ -101,8 +104,11 @@ declare_source_rule! {
     /// | stylelint             |                                                                                |
     /// | ava                   | Key sort                                                                       |
     /// | jest                  | Key sort                                                                       |
+    /// | jest-junit            | Key sort                                                                       |
+    /// | jest-stare            | Key sort                                                                       |
     /// | mocha                 | Key sort                                                                       |
     /// | nyc                   | Key sort                                                                       |
+    /// | c8                    | Key sort                                                                       |
     /// | tap                   | Key sort                                                                       |
     /// | oclif                 | Key sort (deep)                                                                |
     /// | resolutions           | Key sort                                                                       |
@@ -134,7 +140,7 @@ declare_source_rule! {
     /// | markdown              |                                                                                |
     /// | pnpm                  | Base property order: `neverBuiltDependencies`, `onlyBuiltDependencies`, `onlyBuiltDependenciesFile`, `overrides`, `packageExtensions`, `patchedDependencies`, `peerDependencyRules`, `allowedDeprecatedVersions`, `allowNonAppliedPatches`, `auditConfig`, `ignoredOptionalDependencies`, `updateConfig`. Other properties sorted alphabetically. Deep sorting applied. |
     ///
-    /// ### Special Rules
+    /// ### Special rules
     ///
     /// #### ESLint
     ///
@@ -190,13 +196,16 @@ declare_source_rule! {
     ///
     /// #### Prettier
     ///
-    /// Keys are sorted alphabetically except for `overrides`, which is placed last. Keys are also sorted in `overrides` and `overrides.options` items.
+    /// Keys are sorted alphabetically except for `overrides`, which is placed last. Keys inside
+    /// `overrides` entries and their `options` objects are also sorted.
     ///
     /// #### Scripts
     ///
-    /// Keys are sorted alphabetically except for [pre/post scripts](https://docs.npmjs.com/cli/v6/using-npm/scripts#pre--post-scripts). Those are placed before and after their corresponding base npm script.
+    /// Keys are sorted alphabetically except for
+    /// [pre- and post-scripts](https://docs.npmjs.com/cli/v6/using-npm/scripts#pre--post-scripts),
+    /// which are placed immediately before and after their base script.
     ///
-    /// An example - notice how `preinstall` and `postinstall` are placed before and after `install`:
+    /// For example, `preinstall` and `postinstall` stay next to `install`:
     ///
     /// ```json
     /// {
@@ -228,7 +237,7 @@ declare_source_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```json,expect_diagnostic,file=package.json
+    /// ```json,expect_diff,file=package.json
     /// {
     ///   "dependencies": {
     ///     "lodash": "^4.0.0"

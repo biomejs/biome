@@ -24,7 +24,9 @@ pub(crate) use list::{
     parse_scss_expression_until, parse_scss_inner_expression_in_string_until,
     parse_scss_optional_value_until,
 };
-pub(crate) use precedence::{SCSS_UNARY_OPERATOR_TOKEN_SET, is_at_scss_binary_operator};
+pub(crate) use precedence::{
+    SCSS_UNARY_OPERATOR_TOKEN_SET, is_at_scss_binary_operator, is_at_scss_unary_operator,
+};
 
 /// Carries the caller-specific rules for parsing ambiguous SCSS expressions.
 ///

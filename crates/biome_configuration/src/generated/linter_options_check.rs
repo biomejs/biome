@@ -984,6 +984,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_process_env::NoProcessEnvOptions>(),
     ));
     result.push((
+        "nursery",
+        "noProcessExit",
+        TypeId::of::<biome_rule_options::no_process_exit::NoProcessExitOptions>(),
+    ));
+    result.push((
         "correctness",
         "noProcessGlobal",
         TypeId::of::<biome_rule_options::no_process_global::NoProcessGlobalOptions>(),
@@ -1224,6 +1229,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "nursery",
         "noSvelteExportLet",
         TypeId::of::<biome_rule_options::no_svelte_export_let::NoSvelteExportLetOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noSvelteInspect",
+        TypeId::of::<biome_rule_options::no_svelte_inspect::NoSvelteInspectOptions>(),
     ));
     result.push((
         "nursery",
@@ -1620,6 +1630,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         ),
     ));
     result.push((
+        "nursery",
+        "noVueBooleanDefault",
+        TypeId::of::<biome_rule_options::no_vue_boolean_default::NoVueBooleanDefaultOptions>(),
+    ));
+    result.push((
         "correctness",
         "noVueDataObjectDeclaration",
         TypeId::of::<
@@ -1698,6 +1713,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noYodaExpression",
         TypeId::of::<biome_rule_options::no_yoda_expression::NoYodaExpressionOptions>(),
     ));
+    result.push((
+        "nursery",
+        "noZeroFractions",
+        TypeId::of::<biome_rule_options::no_zero_fractions::NoZeroFractionsOptions>(),
+    ));
     result.push(("suspicious", "useAdjacentOverloadSignatures", TypeId::of::<biome_rule_options::use_adjacent_overload_signatures::UseAdjacentOverloadSignaturesOptions>()));
     result.push((
         "a11y",
@@ -1772,6 +1792,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "useBetterDomTraversing",
         TypeId::of::<biome_rule_options::use_better_dom_traversing::UseBetterDomTraversingOptions>(
         ),
+    ));
+    result.push((
+        "nursery",
+        "useBigintLiterals",
+        TypeId::of::<biome_rule_options::use_bigint_literals::UseBigintLiteralsOptions>(),
     ));
     result.push((
         "suspicious",

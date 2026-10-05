@@ -59,7 +59,11 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useAltText",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("alt-text").same(), RuleSource::HtmlEslint("require-img-alt").inspired()],
+        sources: &[
+            RuleSource::EslintJsxA11y("alt-text").same(),
+            RuleSource::HtmlEslint("require-img-alt").inspired(),
+            RuleSource::EslintAstro("jsx-a11y/alt-text").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
     }

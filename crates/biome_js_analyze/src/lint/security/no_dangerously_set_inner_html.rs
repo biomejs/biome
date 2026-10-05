@@ -9,7 +9,11 @@ use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_dangerously_set_inner_html::NoDangerouslySetInnerHtmlOptions;
 
 declare_lint_rule! {
-    /// Prevent the usage of dangerous JSX props
+    /// Disallow React's `dangerouslySetInnerHTML` property.
+    ///
+    /// This property inserts HTML directly and bypasses React's normal escaping. If the HTML
+    /// contains untrusted data, attackers can inject code through a cross-site scripting (XSS)
+    /// vulnerability. Prefer rendering content as JSX children.
     ///
     /// ## Examples
     ///
@@ -17,15 +21,23 @@ declare_lint_rule! {
     ///
     /// ```jsx,expect_diagnostic
     /// function createMarkup() {
-    ///     return { __html: 'child' }
+    ///     return { __html: "child" };
     /// }
-    /// <div dangerouslySetInnerHTML={createMarkup()}></div>
+    /// <div dangerouslySetInnerHTML={createMarkup()} />;
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// React.createElement('div', {
-    ///     dangerouslySetInnerHTML: { __html: 'child' }
+    /// React.createElement("div", {
+    ///     dangerouslySetInnerHTML: { __html: "child" },
     /// });
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```jsx
+    /// function Message({ text }) {
+    ///     return <div>{text}</div>;
+    /// }
     /// ```
     pub NoDangerouslySetInnerHtml {
         version: "1.0.0",

@@ -9,13 +9,13 @@ use biome_rule_options::no_duplicate_graphql_operation_name::NoDuplicateGraphqlO
 use rustc_hash::FxHashMap;
 
 declare_lint_rule! {
-    /// Enforce unique operation names across a GraphQL document.
+    /// Require unique operation names within a GraphQL document.
     ///
-    /// This rule ensures that all GraphQL operations (queries, mutations, subscriptions) have unique names.
-    /// Using unique operation names is essential for proper identification and reducing confusion.
+    /// Distinct names let clients, logs, and debugging tools identify each query, mutation, or
+    /// subscription without ambiguity.
     ///
     /// :::note
-    /// This rule currently does not work across multiple files.
+    /// The rule compares operations only within the same file.
     /// :::
     ///
     /// ## Examples
