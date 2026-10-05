@@ -64,11 +64,17 @@ uses narrowed operands when inferring member accesses, calls, logical and
 conditional expressions, and `await`. Complete module inference uses the same
 read-specific results as individual expression queries.
 
-Before analyzing flow, Biome checks whether an expression reads a variable
-mentioned in a runtime condition. It caches this check for the module. If the
-check cannot finish within its work limit, Biome continues with normal flow
-analysis rather than assuming the expression is unaffected. The variable's
-ordinary type stays separate from these read-specific results.
+Collection records whether a file contains syntax that could affect flow. If it
+does not, lookups skip the flow-candidate index too. Otherwise, the index selects
+variables that a supported condition actually tests. For example,
+`typeof value === "string"` can narrow `value`; `check(value)` and `value.length`
+cannot. Those unsupported tests keep ordinary inference without resolving the
+variable's type again for flow.
+
+Candidate collection and flow evaluation share the same condition matching. If
+checking a condition cannot finish within its work limit, Biome continues with
+normal flow analysis rather than assuming the expression is unaffected. The
+variable's ordinary type stays separate from the result at each read.
 
 An object shape such as `{}` can also describe `0` or `""`. Removing `null`
 therefore does not prove that the value is truthy. A `void` return annotation
@@ -87,8 +93,8 @@ A control-flow graph records the possible paths through one execution root.
 Biome builds it only when needed, without building graphs for nested or sibling
 roots. Reads within that root share the graph. Reads of the same variable at the
 same graph point also share their narrowing calculation. These caches depend on
-the current syntax tree: changing a condition must invalidate them even if variable declarations
-and references stay the same. An edit elsewhere in the module can also rebuild
+the current syntax tree: changing a condition must invalidate them even if
+variable declarations and references stay the same. An edit elsewhere in the module can also rebuild
 the graph; the cache does not track edits separately for each function.
 
 ### Analyzer-facing requests
