@@ -1,0 +1,79 @@
+// should not generate diagnostics
+
+declare function isString(input: unknown): input is string;
+declare function read(): string | null;
+declare function generic<T>(input: unknown): input is string;
+declare function overloaded(input: string): input is string;
+declare function overloaded(input: unknown): input is string;
+declare function structural(input: unknown): input is { name: string };
+declare function union(input: unknown): input is string | number;
+declare function assertString(input: unknown): asserts input is string;
+
+const alias = isString;
+const variableHeld = (input: unknown): input is string => typeof input === "string";
+
+function beforeAndAfterJoin(value: string | null) {
+	value?.length;
+	if (isString(value)) {
+		value.length;
+	}
+	return value?.length;
+}
+
+function callArgument(value: string | null) {
+	if (isString(value?.trim())) {
+		return value?.length;
+	}
+}
+
+function stringMayBeEmpty(value: string | number) {
+	if (isString(value)) {
+		if (value) {}
+	}
+}
+
+function shadowedSubject(value: string | null) {
+	if (isString(value)) {
+		const value = read();
+		return value?.length;
+	}
+}
+
+function shadowedCallee(value: string | null, isString: (input: unknown) => input is string) {
+	if (isString(value)) {
+		return value?.length;
+	}
+}
+
+function written(value: string | null) {
+	if (isString(value)) {
+		value = read();
+		return value?.length;
+	}
+}
+
+function captured(value: string | null) {
+	if (isString(value)) {
+		return () => value?.length;
+	}
+}
+
+function unsupportedCallees(value: string | null) {
+	if (alias(value)) value?.length;
+	if (variableHeld(value)) value?.length;
+	if (generic(value)) value?.length;
+	if (overloaded(value)) value?.length;
+	assertString(value);
+	return value?.length;
+}
+
+function optionalCallee(value: string | null, guard: ((input: unknown) => input is string) | undefined) {
+	if (guard?.(value)) {
+		return value?.length;
+	}
+}
+
+function unsupportedTargets(value: unknown) {
+	if (structural(value)) value?.name;
+	if (union(value)) value ?? "fallback";
+}

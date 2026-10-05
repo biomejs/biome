@@ -3,7 +3,7 @@
 use biome_js_control_flow::FlowOutcome;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsLiteralExpression, JsBinaryOperator, JsLogicalOperator,
+    AnyJsExpression, AnyJsLiteralExpression, JsBinaryOperator, JsCallExpression, JsLogicalOperator,
     JsReferenceIdentifier, JsUnaryOperator,
 };
 use biome_js_type_info::TypeofKind;
@@ -39,6 +39,10 @@ pub(in crate::db) enum ConditionStep {
         guard: SyntaxGuard,
         positive: bool,
     },
+    Call {
+        call: JsCallExpression,
+        positive: bool,
+    },
     Negated {
         argument: AnyJsExpression,
         outcome: FlowOutcome,
@@ -56,15 +60,25 @@ pub(in crate::db) enum ConditionStep {
 /// Subjects may repeat. An empty result proves there is no supported target.
 /// `None` means required syntax is missing or the work/depth limit was reached;
 /// callers must not use it to exclude candidates. The semantic model rules out
-/// comparisons against a variable that shadows `undefined`.
+/// comparisons against a variable that shadows `undefined`. The call callback
+/// selects predicate arguments from raw signatures without resolving types.
 pub(in crate::db) fn condition_subjects(
     expression: AnyJsExpression,
     outcome: FlowOutcome,
     model: &SemanticModel,
+    call_subject: &impl Fn(&JsCallExpression) -> Option<JsReferenceIdentifier>,
     remaining: &mut usize,
 ) -> Option<Vec<JsReferenceIdentifier>> {
     let mut subjects = Vec::new();
-    collect_subjects(expression, outcome, model, 0, remaining, &mut subjects)?;
+    collect_subjects(
+        expression,
+        outcome,
+        model,
+        call_subject,
+        0,
+        remaining,
+        &mut subjects,
+    )?;
     Some(subjects)
 }
 
@@ -72,6 +86,7 @@ fn collect_subjects(
     expression: AnyJsExpression,
     outcome: FlowOutcome,
     model: &SemanticModel,
+    call_subject: &impl Fn(&JsCallExpression) -> Option<JsReferenceIdentifier>,
     depth: usize,
     remaining: &mut usize,
     subjects: &mut Vec<JsReferenceIdentifier>,
@@ -86,8 +101,21 @@ fn collect_subjects(
                 subjects.push(subject);
             }
         }
+        ConditionStep::Call { call, .. } => {
+            if let Some(subject) = call_subject(&call) {
+                subjects.push(subject);
+            }
+        }
         ConditionStep::Negated { argument, outcome } => {
-            collect_subjects(argument, outcome, model, depth + 1, remaining, subjects)?;
+            collect_subjects(
+                argument,
+                outcome,
+                model,
+                call_subject,
+                depth + 1,
+                remaining,
+                subjects,
+            )?;
         }
         ConditionStep::Logical {
             left,
@@ -95,8 +123,24 @@ fn collect_subjects(
             outcome,
             ..
         } => {
-            collect_subjects(left, outcome, model, depth + 1, remaining, subjects)?;
-            collect_subjects(right, outcome, model, depth + 1, remaining, subjects)?;
+            collect_subjects(
+                left,
+                outcome,
+                model,
+                call_subject,
+                depth + 1,
+                remaining,
+                subjects,
+            )?;
+            collect_subjects(
+                right,
+                outcome,
+                model,
+                call_subject,
+                depth + 1,
+                remaining,
+                subjects,
+            )?;
         }
     }
     Some(())
@@ -133,6 +177,7 @@ pub(in crate::db) fn condition_step(
         return Some(ConditionStep::Unsupported);
     }
     match expression {
+        AnyJsExpression::JsCallExpression(call) => Some(ConditionStep::Call { call, positive }),
         AnyJsExpression::JsUnaryExpression(unary) => {
             let operator = unary.operator().ok()?;
             let argument = unary.argument().ok()?;
@@ -346,7 +391,8 @@ mod tests {
             ("value && other", FlowOutcome::Nullish, vec![]),
         ] {
             let (expression, model) = condition(source);
-            let subjects = condition_subjects(expression, outcome, &model, &mut 1024).unwrap();
+            let subjects =
+                condition_subjects(expression, outcome, &model, &|_| None, &mut 1024).unwrap();
             let names = subjects
                 .iter()
                 .map(|subject| subject.value_token().unwrap().text_trimmed().to_owned())
@@ -360,12 +406,27 @@ mod tests {
         for (source, mut remaining) in [("value", 0), ("((value))", 1), ("value ===", 1024)] {
             let (expression, model) = condition(source);
             assert!(
-                condition_subjects(expression, FlowOutcome::Truthy, &model, &mut remaining)
-                    .is_none()
+                condition_subjects(
+                    expression,
+                    FlowOutcome::Truthy,
+                    &model,
+                    &|_| None,
+                    &mut remaining
+                )
+                .is_none()
             );
         }
         let source = format!("{}value", "!".repeat(MAX_CONDITION_DEPTH));
         let (expression, model) = condition(&source);
-        assert!(condition_subjects(expression, FlowOutcome::Truthy, &model, &mut 1024).is_none());
+        assert!(
+            condition_subjects(
+                expression,
+                FlowOutcome::Truthy,
+                &model,
+                &|_| None,
+                &mut 1024
+            )
+            .is_none()
+        );
     }
 }

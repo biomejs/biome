@@ -50,6 +50,8 @@ mod database;
 mod expected_argument_inference;
 #[path = "spec_tests/expressions.test.rs"]
 mod expressions;
+#[path = "spec_tests/function_guards.test.rs"]
+mod function_guards;
 #[path = "spec_tests/globals.test.rs"]
 mod globals;
 #[path = "spec_tests/html_classes.test.rs"]

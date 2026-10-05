@@ -6,13 +6,14 @@
 //! the occurrence query decides whether an operand actually changes their type.
 
 use super::flow_conditions::condition_subjects;
+use super::flow_guards::call_predicate_subject;
 use crate::JsModuleInfo;
 use crate::js_module_info::flow_sources::{FlowConditionSource, is_flow_construct};
 use biome_js_control_flow::{AnyJsControlFlowRoot, FlowOutcome};
 use biome_js_semantic::{JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsRoot, AnyTsType, JsIdentifierExpression, JsLogicalOperator, JsSyntaxKind,
-    JsSyntaxNodePtr,
+    AnyJsExpression, AnyJsRoot, AnyTsType, JsCallExpression, JsIdentifierExpression,
+    JsLogicalOperator, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNodePtr,
 };
 use biome_rowan::{AstNode, SyntaxKind, TextRange, TextSize, WalkEvent};
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -52,6 +53,7 @@ fn collect_candidates(info: &JsModuleInfo) -> Option<FxHashSet<TextRange>> {
     let conditions = condition_ranges(
         &info.semantic_model.root(),
         &info.semantic_model,
+        &|call| call_predicate_subject(info, call),
         &mut remaining,
     )?;
     let mut candidates = FxHashSet::default();
@@ -152,6 +154,7 @@ struct RootConditions {
 fn condition_ranges(
     root: &AnyJsRoot,
     model: &SemanticModel,
+    call_subject: &impl Fn(&JsCallExpression) -> Option<JsReferenceIdentifier>,
     remaining: &mut usize,
 ) -> Option<ConditionRanges> {
     let mut ranges = Vec::new();
@@ -218,20 +221,23 @@ fn condition_ranges(
                     };
                     if let Some(condition) = condition {
                         let range = condition.range();
-                        let has_subjects =
-                            match condition_subjects(condition, outcome, model, remaining) {
-                                Some(subjects) => {
-                                    let has_subjects = !subjects.is_empty();
-                                    ranges.extend(
-                                        subjects.into_iter().map(|subject| subject.range()),
-                                    );
-                                    has_subjects
-                                }
-                                None => {
-                                    ranges.push(range);
-                                    true
-                                }
-                            };
+                        let has_subjects = match condition_subjects(
+                            condition,
+                            outcome,
+                            model,
+                            call_subject,
+                            remaining,
+                        ) {
+                            Some(subjects) => {
+                                let has_subjects = !subjects.is_empty();
+                                ranges.extend(subjects.into_iter().map(|subject| subject.range()));
+                                has_subjects
+                            }
+                            None => {
+                                ranges.push(range);
+                                true
+                            }
+                        };
                         if has_subjects {
                             let first = &mut root_conditions.last_mut()?.first;
                             *first =
@@ -290,7 +296,7 @@ mod tests {
         ] {
             let root = parse(source, JsFileSource::ts(), JsParserOptions::default()).tree();
             let model = semantic_model(&root, SemanticModelOptions::default());
-            assert!(condition_ranges(&root, &model, &mut remaining).is_none());
+            assert!(condition_ranges(&root, &model, &|_| None, &mut remaining).is_none());
             let candidates = FlowCandidates { expressions: None };
             assert!(candidates.contains(root.range()));
         }
@@ -312,7 +318,7 @@ mod tests {
         let mut remaining = 100;
         let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
         assert!(
-            condition_ranges(&parsed.tree(), &model, &mut remaining)
+            condition_ranges(&parsed.tree(), &model, &|_| None, &mut remaining)
                 .unwrap()
                 .subjects
                 .is_empty()
@@ -327,7 +333,8 @@ mod tests {
             assert!(!parsed.has_errors());
             let mut remaining = MAX_INDEX_STEPS;
             let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
-            let ranges = condition_ranges(&parsed.tree(), &model, &mut remaining).unwrap();
+            let ranges =
+                condition_ranges(&parsed.tree(), &model, &|_| None, &mut remaining).unwrap();
             assert_eq!(ranges.subjects.is_empty(), count == MAX_FLOW_CONSTRUCTS);
         }
     }

@@ -1,0 +1,206 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: functionGuards.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+declare function isString(input: unknown): input is string;
+declare function isNull(input: unknown): input is null;
+declare function identity<T>(input: T): T;
+
+function falseBranch(value: Promise<void> | string) {
+	if (isString(value)) {
+		return;
+	} else {
+		value;
+	}
+}
+
+function negated(value: Promise<void> | string) {
+	if (!isString(value)) {
+		value;
+	}
+}
+
+function earlyReturn(value: Promise<void> | null) {
+	if (isNull(value)) return;
+	value;
+}
+
+function logical(value: Promise<void> | string) {
+	isString(value) || value;
+}
+
+function conditional(value: Promise<void> | string) {
+	isString(value) ? undefined : value;
+}
+
+function nestedCall(value: Promise<void> | string) {
+	if (isString(value)) return;
+	identity(value);
+}
+
+function array(value: Promise<void>[] | null) {
+	if (isNull(value)) return;
+	value;
+}
+
+function callback(value: (() => Promise<void>) | null) {
+	if (isNull(value)) return;
+	value();
+}
+
+```
+
+# Diagnostics
+```
+functionGuards.ts:11:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+     9 │ 		return;
+    10 │ 	} else {
+  > 11 │ 		value;
+       │ 		^^^^^^
+    12 │ 	}
+    13 │ }
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+functionGuards.ts:17:3 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    15 │ function negated(value: Promise<void> | string) {
+    16 │ 	if (!isString(value)) {
+  > 17 │ 		value;
+       │ 		^^^^^^
+    18 │ 	}
+    19 │ }
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+functionGuards.ts:23:2 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    21 │ function earlyReturn(value: Promise<void> | null) {
+    22 │ 	if (isNull(value)) return;
+  > 23 │ 	value;
+       │ 	^^^^^^
+    24 │ }
+    25 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+functionGuards.ts:27:2 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    26 │ function logical(value: Promise<void> | string) {
+  > 27 │ 	isString(value) || value;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ }
+    29 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+functionGuards.ts:31:2 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    30 │ function conditional(value: Promise<void> | string) {
+  > 31 │ 	isString(value) ? undefined : value;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ }
+    33 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+functionGuards.ts:36:2 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    34 │ function nestedCall(value: Promise<void> | string) {
+    35 │ 	if (isString(value)) return;
+  > 36 │ 	identity(value);
+       │ 	^^^^^^^^^^^^^^^^
+    37 │ }
+    38 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+functionGuards.ts:41:2 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i An array of Promises was found, meaning they are not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    39 │ function array(value: Promise<void>[] | null) {
+    40 │ 	if (isNull(value)) return;
+  > 41 │ 	value;
+       │ 	^^^^^^
+    42 │ }
+    43 │ 
+  
+  i This happens when an array of Promises is not wrapped with Promise.all() or a similar method, and is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+functionGuards.ts:46:2 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    44 │ function callback(value: (() => Promise<void>) | null) {
+    45 │ 	if (isNull(value)) return;
+  > 46 │ 	value();
+       │ 	^^^^^^^^
+    47 │ }
+    48 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

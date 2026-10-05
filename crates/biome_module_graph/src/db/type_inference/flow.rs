@@ -7,6 +7,7 @@
 use super::flow_conditions::{
     ConditionStep, MAX_CONDITION_DEPTH, SyntaxGuard, condition_step, condition_subjects,
 };
+use super::flow_guards::call_predicate_subject;
 use super::{ImportResolution, ResolutionCtx, resolve_local_type_on_demand};
 use crate::db::queries::{
     BindingTypeInput, FlowBindingTypeInput, FlowRootInput, infer_flow_binding_type,
@@ -156,6 +157,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                                 condition.clone(),
                                 *outcome,
                                 &self.js_info.semantic_model,
+                                &|call| call_predicate_subject(self.js_info, call),
                                 &mut condition_remaining,
                             )
                             .unwrap_or_else(|| {
@@ -360,6 +362,11 @@ impl<'db> ResolutionCtx<'db, '_> {
                 };
                 narrow_type(self.db, ty, predicate, positive)
             }
+            ConditionStep::Call { call, positive } => {
+                self.call_predicate(&call, binding).map_or(ty, |predicate| {
+                    narrow_type(self.db, ty, predicate, positive)
+                })
+            }
             ConditionStep::Negated { argument, outcome } => {
                 self.narrow_condition(binding, ty, argument, outcome, depth + 1, remaining)
             }
@@ -412,5 +419,18 @@ impl<'db> ResolutionCtx<'db, '_> {
                 }
             }
         })
+    }
+
+    pub(super) fn is_binding_read(&self, expression: &AnyJsExpression, binding: &Binding) -> bool {
+        let AnyJsExpression::JsIdentifierExpression(identifier) =
+            expression.clone().omit_parentheses()
+        else {
+            return false;
+        };
+        identifier
+            .name()
+            .ok()
+            .and_then(|name| self.js_info.semantic_model.binding(&name))
+            .is_some_and(|candidate| candidate == *binding)
     }
 }
