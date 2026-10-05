@@ -2,11 +2,13 @@ use crate::css_module_info::CssClassReference;
 use std::{borrow::Cow, sync::Arc};
 
 use biome_js_semantic::{Reference, ScopeId, SemanticModel, TsBindingReference};
+use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use biome_js_syntax::{
     AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier, AnyJsDeclaration,
     AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsImportClause, JsArrowFunctionExpression,
-    JsAssignmentExpression, JsForVariableDeclaration, JsFormalParameter, JsRestParameter,
-    JsSyntaxNode, JsVariableDeclaration, TsMappedType, TsModuleDeclaration, TsTypeParameter,
+    JsAssignmentExpression, JsExport as JsExportSyntax, JsForVariableDeclaration,
+    JsFormalParameter, JsRestParameter, JsSyntaxNode, JsVariableDeclaration, TsDeclareStatement,
+    TsImportEqualsDeclaration, TsMappedType, TsModuleDeclaration, TsTypeParameter,
     inner_string_text,
 };
 use biome_js_type_info::{
@@ -635,8 +637,7 @@ impl JsModuleInfoCollector {
     }
 
     /// Given a binding name and scope, looks up the binding and, if it is a
-    /// namespace or module declaration, inserts all direct child-scope bindings
-    /// into `exports`.
+    /// namespace declaration, inserts its visible direct members into `exports`.
     fn collect_namespace_exports_for_binding(
         &self,
         name: &str,
@@ -654,17 +655,83 @@ impl JsModuleInfoCollector {
             return;
         }
 
-        // Collect bindings from immediate child scopes of the namespace
-        // binding's scope.
         for child_binding in &self.bindings {
             if child_binding.name.is_empty() {
                 continue;
             }
-
-            let child_scope = &self.semantic_model.scope_from_id(child_binding.scope_id);
-            if child_scope
+            let Some(node) = self.semantic_model.as_binding_by_range(child_binding.range) else {
+                continue;
+            };
+            let Some(declaration) = node.tree().declaration() else {
+                continue;
+            };
+            let declaration = declaration
+                .parent_binding_pattern_declaration()
+                .unwrap_or(declaration);
+            if !matches!(
+                declaration,
+                AnyJsBindingDeclaration::JsVariableDeclarator(_)
+                    | AnyJsBindingDeclaration::JsFunctionDeclaration(_)
+                    | AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
+                    | AnyJsBindingDeclaration::JsClassDeclaration(_)
+                    | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
+                    | AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
+                    | AnyJsBindingDeclaration::TsEnumDeclaration(_)
+                    | AnyJsBindingDeclaration::TsModuleDeclaration(_)
+                    | AnyJsBindingDeclaration::TsImportEqualsDeclaration(_)
+            ) {
+                continue;
+            }
+            let owner = node
+                .syntax()
+                .ancestors()
+                .filter_map(TsModuleDeclaration::cast)
+                .find(|namespace| {
+                    namespace
+                        .name()
+                        .is_ok_and(|name| name.range() != child_binding.range)
+                });
+            let Some(owner) = owner else {
+                continue;
+            };
+            let Ok(owner_name) = owner.name() else {
+                continue;
+            };
+            let owner_name = owner_name.syntax().text_trimmed().to_string();
+            let owner_scope = self.semantic_model.scope(owner.syntax());
+            let parent_scope = owner_scope
                 .parent()
-                .is_some_and(|parent| parent.id() == binding.scope_id)
+                .map_or(owner_scope.id(), |parent| parent.id());
+            if self
+                .find_binding_in_scope(&owner_name, parent_scope)
+                .map(TsBindingReference::value_ty_or_ty)
+                != Some(binding_id)
+            {
+                continue;
+            }
+            let ambient = owner
+                .syntax()
+                .ancestors()
+                .any(|node| TsDeclareStatement::can_cast(node.kind()));
+            let import_alias = node
+                .syntax()
+                .ancestors()
+                .take_while(|ancestor| !TsModuleDeclaration::can_cast(ancestor.kind()))
+                .find_map(TsImportEqualsDeclaration::cast);
+            let exported = node.is_exported()
+                || node
+                    .syntax()
+                    .ancestors()
+                    .take_while(|ancestor| !TsModuleDeclaration::can_cast(ancestor.kind()))
+                    .any(|ancestor| JsExportSyntax::can_cast(ancestor.kind()));
+            if !exported && (!ambient || import_alias.is_some()) {
+                continue;
+            }
+            let child_scope = self.semantic_model.scope_from_id(child_binding.scope_id);
+            if child_binding.scope_id == owner_scope.id()
+                || child_scope
+                    .parent()
+                    .is_some_and(|parent| parent.id() == owner_scope.id())
             {
                 exports
                     .entry(child_binding.name.clone())

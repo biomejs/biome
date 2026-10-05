@@ -408,6 +408,112 @@ fn test_export_equals_namespace_without_type_inference() {
 }
 
 #[test]
+fn test_export_equals_namespace_variable_members() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/namespace.d.ts".into(),
+        r#"
+        declare const outside: number;
+        declare namespace API {
+            const constant: number;
+            let mutable: number;
+            var legacy: number;
+            function read(parameter: number): number;
+            interface Options {}
+            enum State { Ready }
+            const values: { [K in string]: number };
+            namespace Nested { const nested: number; }
+        }
+        declare namespace API.Qualified { const dotted: number; }
+        export = API;
+    "#,
+    );
+    for infer_types in [false, true] {
+        let db = build_js_db(&fs, &[BiomePath::new("/namespace.d.ts")], infer_types);
+        let module = db
+            .module_for_path(Utf8Path::new("/namespace.d.ts"))
+            .unwrap();
+        for name in [
+            "constant", "mutable", "legacy", "read", "Options", "Nested", "State", "values",
+        ] {
+            assert!(
+                matches!(
+                    find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, name, module)),
+                    JsExportedSymbolLookup::Found(_)
+                ),
+                "{name}, inference={infer_types}"
+            );
+        }
+        for name in ["outside", "parameter", "nested", "dotted", "Ready", "K"] {
+            assert_eq!(
+                find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, name, module)),
+                &JsExportedSymbolLookup::Missing,
+                "{name}, inference={infer_types}"
+            );
+        }
+    }
+}
+
+#[test]
+fn test_export_equals_namespace_visibility_and_merging() {
+    for source in [
+        "namespace API { const hidden = 1; export function first() { const local = 1; function nested() {} class Internal {} } } namespace API { export const second = 3; } export = API;",
+        "declare namespace API { const first: number; } declare namespace API { const second: number; } declare const hidden: number; export = API;",
+        r"declare namespace \u0041PI { function first(): void; } declare namespace API { const second: number; } declare const hidden: number; export = API;",
+        r"declare namespace API { function first(): void; } declare namespace \u0041PI { const second: number; } declare const hidden: number; export = \u0041PI;",
+    ] {
+        for infer_types in [false, true] {
+            let fs = MemoryFileSystem::default();
+            fs.insert("/namespace.ts".into(), source);
+            let db = build_js_db(&fs, &[BiomePath::new("/namespace.ts")], infer_types);
+            let module = db.module_for_path(Utf8Path::new("/namespace.ts")).unwrap();
+            for name in ["first", "second"] {
+                assert!(
+                    matches!(
+                        find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, name, module)),
+                        JsExportedSymbolLookup::Found(_)
+                    ),
+                    "{name}, inference={infer_types}: {source}"
+                );
+            }
+            for name in ["hidden", "local", "nested", "Internal"] {
+                assert_eq!(
+                    find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, name, module)),
+                    &JsExportedSymbolLookup::Missing,
+                    "{name}, inference={infer_types}: {source}"
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn test_export_equals_namespace_import_alias_visibility() {
+    let fs = MemoryFileSystem::default();
+    fs.insert("/namespace.d.ts".into(), "declare namespace Other { class Item {} } declare namespace API { import Internal = Other.Item; export import Public = Other.Item; const visible: number; } export = API;");
+    for infer_types in [false, true] {
+        let db = build_js_db(&fs, &[BiomePath::new("/namespace.d.ts")], infer_types);
+        let module = db
+            .module_for_path(Utf8Path::new("/namespace.d.ts"))
+            .unwrap();
+        for name in ["visible", "Public"] {
+            assert!(
+                matches!(
+                    find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, name, module)),
+                    JsExportedSymbolLookup::Found(_)
+                ),
+                "{name}, inference={infer_types}"
+            );
+        }
+        assert_eq!(
+            find_js_exported_symbol(&db, SymbolFromModuleInfo::new(&db, "Internal", module)),
+            &JsExportedSymbolLookup::Missing,
+            "inference={infer_types}"
+        );
+    }
+}
+
+#[test]
 fn test_namespace_import_preserves_members_above_export_step_limit() {
     let fs = MemoryFileSystem::default();
     let exports = (0..1025)
