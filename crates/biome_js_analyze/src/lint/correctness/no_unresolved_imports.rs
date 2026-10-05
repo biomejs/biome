@@ -197,7 +197,7 @@ impl Rule for NoUnresolvedImports {
             let ModuleInfoKind::Js(info) = target_info.kind(ctx.db()) else {
                 return Vec::new();
             };
-            let esm = has_runtime_module_syntax(&info)
+            let esm = has_runtime_module_syntax(info)
                 || resolved_path.extension() == Some("mjs")
                 || (resolved_path.extension() == Some("js")
                     && ctx
