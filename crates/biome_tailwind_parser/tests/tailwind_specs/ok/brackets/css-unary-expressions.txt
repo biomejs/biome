@@ -1,0 +1,3 @@
+w-[+1px] w-[-_1px] w-[-(1px)] translate-x-[-_50%]
+w-[calc(+1px)] w-[calc(-(2px))] w-[calc(-(-(2px)))] w-[calc(+(1px+2px))] w-[calc(-_var(--a))] w-[calc(1px*-(2px))] w-[calc(1px*-_2)] w-[calc(1px_-_+2px)] w-[calc(-(1px)+2px)]
+w-[calc(-_1px_2px)] [color:rgb(+1_2_3)] w-[calc(-(1px)_2px+3px)] w-[min(-_1px_2px,_3px)]
