@@ -349,8 +349,8 @@ impl CssParenthesizedExpression {
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn expression(&self) -> CssComponentValueList {
-        support::list(&self.syntax, 1usize)
+    pub fn expression(&self) -> Option<AnyCssExpression> {
+        support::node(&self.syntax, 1usize)
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
@@ -367,7 +367,7 @@ impl Serialize for CssParenthesizedExpression {
 #[derive(Serialize)]
 pub struct CssParenthesizedExpressionFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub expression: CssComponentValueList,
+    pub expression: Option<AnyCssExpression>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -553,7 +553,7 @@ impl CssUnaryExpression {
     pub fn operator(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn argument(&self) -> SyntaxResult<AnyCssValue> {
+    pub fn argument(&self) -> SyntaxResult<AnyCssExpression> {
         support::required_node(&self.syntax, 1usize)
     }
 }
@@ -568,7 +568,7 @@ impl Serialize for CssUnaryExpression {
 #[derive(Serialize)]
 pub struct CssUnaryExpressionFields {
     pub operator: SyntaxResult<SyntaxToken>,
-    pub argument: SyntaxResult<AnyCssValue>,
+    pub argument: SyntaxResult<AnyCssExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssUnknownDimension {
@@ -1427,7 +1427,6 @@ impl AnyCssDimension {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssExpression {
     CssBinaryExpression(CssBinaryExpression),
-    CssComponentValueList(CssComponentValueList),
     CssListOfComponentValuesExpression(CssListOfComponentValuesExpression),
     CssParenthesizedExpression(CssParenthesizedExpression),
     CssUnaryExpression(CssUnaryExpression),
@@ -1436,12 +1435,6 @@ impl AnyCssExpression {
     pub fn as_css_binary_expression(&self) -> Option<&CssBinaryExpression> {
         match &self {
             Self::CssBinaryExpression(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_component_value_list(&self) -> Option<&CssComponentValueList> {
-        match &self {
-            Self::CssComponentValueList(item) => Some(item),
             _ => None,
         }
     }
@@ -2229,7 +2222,10 @@ impl std::fmt::Debug for CssParenthesizedExpression {
                     "l_paren_token",
                     &support::DebugSyntaxResult(self.l_paren_token()),
                 )
-                .field("expression", &self.expression())
+                .field(
+                    "expression",
+                    &support::DebugOptionalElement(self.expression()),
+                )
                 .field(
                     "r_paren_token",
                     &support::DebugSyntaxResult(self.r_paren_token()),
@@ -3604,11 +3600,6 @@ impl From<CssBinaryExpression> for AnyCssExpression {
         Self::CssBinaryExpression(node)
     }
 }
-impl From<CssComponentValueList> for AnyCssExpression {
-    fn from(node: CssComponentValueList) -> Self {
-        Self::CssComponentValueList(node)
-    }
-}
 impl From<CssListOfComponentValuesExpression> for AnyCssExpression {
     fn from(node: CssListOfComponentValuesExpression) -> Self {
         Self::CssListOfComponentValuesExpression(node)
@@ -3627,7 +3618,6 @@ impl From<CssUnaryExpression> for AnyCssExpression {
 impl AstNode for AnyCssExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBinaryExpression::KIND_SET
-        .union(CssComponentValueList::KIND_SET)
         .union(CssListOfComponentValuesExpression::KIND_SET)
         .union(CssParenthesizedExpression::KIND_SET)
         .union(CssUnaryExpression::KIND_SET);
@@ -3635,7 +3625,6 @@ impl AstNode for AnyCssExpression {
         matches!(
             kind,
             CSS_BINARY_EXPRESSION
-                | CSS_COMPONENT_VALUE_LIST
                 | CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION
                 | CSS_PARENTHESIZED_EXPRESSION
                 | CSS_UNARY_EXPRESSION
@@ -3644,9 +3633,6 @@ impl AstNode for AnyCssExpression {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_BINARY_EXPRESSION => Self::CssBinaryExpression(CssBinaryExpression { syntax }),
-            CSS_COMPONENT_VALUE_LIST => {
-                Self::CssComponentValueList(CssComponentValueList::cast(syntax)?)
-            }
             CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION => {
                 Self::CssListOfComponentValuesExpression(CssListOfComponentValuesExpression {
                     syntax,
@@ -3663,7 +3649,6 @@ impl AstNode for AnyCssExpression {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssBinaryExpression(it) => it.syntax(),
-            Self::CssComponentValueList(it) => it.syntax(),
             Self::CssListOfComponentValuesExpression(it) => it.syntax(),
             Self::CssParenthesizedExpression(it) => it.syntax(),
             Self::CssUnaryExpression(it) => it.syntax(),
@@ -3672,7 +3657,6 @@ impl AstNode for AnyCssExpression {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssBinaryExpression(it) => it.into_syntax(),
-            Self::CssComponentValueList(it) => it.into_syntax(),
             Self::CssListOfComponentValuesExpression(it) => it.into_syntax(),
             Self::CssParenthesizedExpression(it) => it.into_syntax(),
             Self::CssUnaryExpression(it) => it.into_syntax(),
@@ -3683,7 +3667,6 @@ impl std::fmt::Debug for AnyCssExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CssBinaryExpression(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssComponentValueList(it) => std::fmt::Debug::fmt(it, f),
             Self::CssListOfComponentValuesExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::CssParenthesizedExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUnaryExpression(it) => std::fmt::Debug::fmt(it, f),
@@ -3694,7 +3677,6 @@ impl From<AnyCssExpression> for SyntaxNode {
     fn from(n: AnyCssExpression) -> Self {
         match n {
             AnyCssExpression::CssBinaryExpression(it) => it.into_syntax(),
-            AnyCssExpression::CssComponentValueList(it) => it.into_syntax(),
             AnyCssExpression::CssListOfComponentValuesExpression(it) => it.into_syntax(),
             AnyCssExpression::CssParenthesizedExpression(it) => it.into_syntax(),
             AnyCssExpression::CssUnaryExpression(it) => it.into_syntax(),

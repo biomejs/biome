@@ -223,7 +223,7 @@ impl SyntaxFactory for TailwindSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssComponentValueList::can_cast(element.kind())
+                    && AnyCssExpression::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -360,7 +360,7 @@ impl SyntaxFactory for TailwindSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && AnyCssValue::can_cast(element.kind())
+                    && AnyCssExpression::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();

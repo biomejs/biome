@@ -56,6 +56,18 @@ fn parse_css_generic_component_value(p: &mut TailwindParser) -> ParsedSyntax {
 }
 
 fn parse_css_value(p: &mut TailwindParser) -> ParsedSyntax {
+    if p.at_ts(token_set![T![+], T![-]]) {
+        parse_css_unary_expression(p)
+    } else if p.at(T!['(']) {
+        parse_css_parenthesized_expression(p)
+    } else {
+        parse_any_value(p)
+    }
+}
+
+/// Parses a single value that is not an expression: math operators and
+/// parentheses are left to the caller.
+fn parse_any_value(p: &mut TailwindParser) -> ParsedSyntax {
     if is_at_any_function(p) {
         parse_any_function(p)
     } else if is_at_identifier(p) {
@@ -74,10 +86,6 @@ fn parse_css_value(p: &mut TailwindParser) -> ParsedSyntax {
         parse_css_number_or_ratio(p)
     } else if p.at(CSS_COLOR_LITERAL) {
         parse_css_color(p)
-    } else if p.at_ts(token_set![T![+], T![-]]) {
-        parse_css_unary_expression(p)
-    } else if p.at(T!['(']) {
-        parse_css_parenthesized_expression(p)
     } else {
         Absent
     }
@@ -400,7 +408,7 @@ impl ParseNodeList for ComponentValueExpressionList {
     const LIST_KIND: Self::Kind = CSS_COMPONENT_VALUE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_css_value(p)
+        parse_any_value(p)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -438,8 +446,7 @@ fn is_at_any_value(p: &mut TailwindParser) -> bool {
             CSS_DIMENSION_VALUE,
             CSS_PERCENTAGE_VALUE,
             CSS_NUMBER_LITERAL,
-            CSS_COLOR_LITERAL,
-            T!['(']
+            CSS_COLOR_LITERAL
         ])
 }
 

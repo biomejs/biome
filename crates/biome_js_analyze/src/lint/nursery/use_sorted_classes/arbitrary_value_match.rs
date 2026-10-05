@@ -8,7 +8,7 @@
 
 use biome_rowan::{AstNode, AstNodeList};
 use biome_tailwind_syntax::{
-    AnyCssDimension, AnyCssFunction, AnyCssGenericComponentValue, AnyCssValue,
+    AnyCssDimension, AnyCssExpression, AnyCssFunction, AnyCssGenericComponentValue, AnyCssValue,
     CssFunction, CssGenericComponentValueList,
 };
 
@@ -373,7 +373,13 @@ fn unary_argument(value: &AnyCssValue) -> Option<AnyCssValue> {
         return None;
     }
 
-    unary.argument().ok()
+    let AnyCssExpression::CssListOfComponentValuesExpression(argument) = unary.argument().ok()?
+    else {
+        return None;
+    };
+    let mut values = argument.css_component_value_list().iter();
+    let value = values.next()?;
+    values.next().is_none().then_some(value)
 }
 
 fn is_dimension_with_unit(value: &AnyCssValue, units: &[&str]) -> bool {
