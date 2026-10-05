@@ -1,0 +1,407 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: assertionFlow.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+function assertString(input: unknown, ignored?: unknown): asserts input is string {
+	if (typeof input !== "string") throw new Error();
+}
+
+declare function assert(condition: unknown): asserts condition;
+declare function assertFalse(input: unknown): asserts input is false;
+declare function assertZero(input: unknown): asserts input is 0;
+declare function assertEmpty(input: unknown): asserts input is "";
+declare function assertNull(input: unknown): asserts input is null;
+declare function second(this: void, ignored: unknown, input: unknown): asserts input is string;
+declare function escaped(/u0076alue: unknown): asserts /u{76}alue is string;
+declare function isString(input: unknown): input is string;
+declare function identity<T>(input: T): T;
+
+function standalone(value: string | null) {
+	assertString(value);
+	return value?.length;
+}
+
+function parenthesized(value: string | null) {
+	(((assertString)((value))));
+	return value ?? "fallback";
+}
+
+function truthy(value: "ready" | "" | false | 0 | null) {
+	assert(value);
+	if (value) {}
+}
+
+function falsyTargets(flag: boolean, number: 0 | 1, text: "" | "ready", nullable: string | null) {
+	assertFalse(flag);
+	if (flag) {}
+	assertZero(number);
+	if (number) {}
+	assertEmpty(text);
+	if (text) {}
+	assertNull(nullable);
+	if (nullable) {}
+}
+
+function conditions(value: string | number | null) {
+	assert(value != null);
+	assert(!(typeof value === "number"));
+	return identity(value)?.length;
+}
+
+function predicate(value: string | number) {
+	assert(isString(value));
+	return value?.length;
+}
+
+function logical(value: string | number | null) {
+	assert(value !== null && typeof value === "string");
+	return value?.length;
+}
+
+function selectedArgument(value: string | null, other: unknown) {
+	second(other, value);
+	return value?.length;
+}
+
+function escapedParameter(value: string | null) {
+	escaped(value);
+	return value?.length;
+}
+
+function bothBranches(value: string | null, flag: boolean) {
+	if (flag) assertString(value); else assertString(value);
+	return value?.length;
+}
+
+function loop(value: string | null, flag: boolean) {
+	do {
+		assertString(value);
+	} while (flag);
+	return value?.length;
+}
+
+```
+
+# Diagnostics
+```
+assertionFlow.ts:19:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    17 │ function standalone(value: string | null) {
+    18 │ 	assertString(value);
+  > 19 │ 	return value?.length;
+       │ 	       ^^^^^
+    20 │ }
+    21 │ 
+  
+  i Replace ?. with ..
+  
+    17 │ function standalone(value: string | null) {
+    18 │ 	assertString(value);
+  > 19 │ 	return value?.length;
+       │ 	            ^^
+    20 │ }
+    21 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+assertionFlow.ts:24:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+    22 │ function parenthesized(value: string | null) {
+    23 │ 	(((assertString)((value))));
+  > 24 │ 	return value ?? "fallback";
+       │ 	       ^^^^^
+    25 │ }
+    26 │ 
+  
+  i Drop ?? and the fallback expression.
+  
+    22 │ function parenthesized(value: string | null) {
+    23 │ 	(((assertString)((value))));
+  > 24 │ 	return value ?? "fallback";
+       │ 	             ^^
+    25 │ }
+    26 │ 
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+assertionFlow.ts:29:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    27 │ function truthy(value: "ready" | "" | false | 0 | null) {
+    28 │ 	assert(value);
+  > 29 │ 	if (value) {}
+       │ 	    ^^^^^
+    30 │ }
+    31 │ 
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+
+```
+
+```
+assertionFlow.ts:34:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    32 │ function falsyTargets(flag: boolean, number: 0 | 1, text: "" | "ready", nullable: string | null) {
+    33 │ 	assertFalse(flag);
+  > 34 │ 	if (flag) {}
+       │ 	    ^^^^
+    35 │ 	assertZero(number);
+    36 │ 	if (number) {}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+
+```
+
+```
+assertionFlow.ts:36:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    34 │ 	if (flag) {}
+    35 │ 	assertZero(number);
+  > 36 │ 	if (number) {}
+       │ 	    ^^^^^^
+    37 │ 	assertEmpty(text);
+    38 │ 	if (text) {}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+
+```
+
+```
+assertionFlow.ts:38:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    36 │ 	if (number) {}
+    37 │ 	assertEmpty(text);
+  > 38 │ 	if (text) {}
+       │ 	    ^^^^
+    39 │ 	assertNull(nullable);
+    40 │ 	if (nullable) {}
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+
+```
+
+```
+assertionFlow.ts:40:6 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    38 │ 	if (text) {}
+    39 │ 	assertNull(nullable);
+  > 40 │ 	if (nullable) {}
+       │ 	    ^^^^^^^^
+    41 │ }
+    42 │ 
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+
+```
+
+```
+assertionFlow.ts:46:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    44 │ 	assert(value != null);
+    45 │ 	assert(!(typeof value === "number"));
+  > 46 │ 	return identity(value)?.length;
+       │ 	       ^^^^^^^^^^^^^^^
+    47 │ }
+    48 │ 
+  
+  i Replace ?. with ..
+  
+    44 │ 	assert(value != null);
+    45 │ 	assert(!(typeof value === "number"));
+  > 46 │ 	return identity(value)?.length;
+       │ 	                      ^^
+    47 │ }
+    48 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+assertionFlow.ts:51:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    49 │ function predicate(value: string | number) {
+    50 │ 	assert(isString(value));
+  > 51 │ 	return value?.length;
+       │ 	       ^^^^^
+    52 │ }
+    53 │ 
+  
+  i Replace ?. with ..
+  
+    49 │ function predicate(value: string | number) {
+    50 │ 	assert(isString(value));
+  > 51 │ 	return value?.length;
+       │ 	            ^^
+    52 │ }
+    53 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+assertionFlow.ts:56:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    54 │ function logical(value: string | number | null) {
+    55 │ 	assert(value !== null && typeof value === "string");
+  > 56 │ 	return value?.length;
+       │ 	       ^^^^^
+    57 │ }
+    58 │ 
+  
+  i Replace ?. with ..
+  
+    54 │ function logical(value: string | number | null) {
+    55 │ 	assert(value !== null && typeof value === "string");
+  > 56 │ 	return value?.length;
+       │ 	            ^^
+    57 │ }
+    58 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+assertionFlow.ts:61:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    59 │ function selectedArgument(value: string | null, other: unknown) {
+    60 │ 	second(other, value);
+  > 61 │ 	return value?.length;
+       │ 	       ^^^^^
+    62 │ }
+    63 │ 
+  
+  i Replace ?. with ..
+  
+    59 │ function selectedArgument(value: string | null, other: unknown) {
+    60 │ 	second(other, value);
+  > 61 │ 	return value?.length;
+       │ 	            ^^
+    62 │ }
+    63 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+assertionFlow.ts:66:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    64 │ function escapedParameter(value: string | null) {
+    65 │ 	escaped(value);
+  > 66 │ 	return value?.length;
+       │ 	       ^^^^^
+    67 │ }
+    68 │ 
+  
+  i Replace ?. with ..
+  
+    64 │ function escapedParameter(value: string | null) {
+    65 │ 	escaped(value);
+  > 66 │ 	return value?.length;
+       │ 	            ^^
+    67 │ }
+    68 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+assertionFlow.ts:71:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    69 │ function bothBranches(value: string | null, flag: boolean) {
+    70 │ 	if (flag) assertString(value); else assertString(value);
+  > 71 │ 	return value?.length;
+       │ 	       ^^^^^
+    72 │ }
+    73 │ 
+  
+  i Replace ?. with ..
+  
+    69 │ function bothBranches(value: string | null, flag: boolean) {
+    70 │ 	if (flag) assertString(value); else assertString(value);
+  > 71 │ 	return value?.length;
+       │ 	            ^^
+    72 │ }
+    73 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+assertionFlow.ts:78:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    76 │ 		assertString(value);
+    77 │ 	} while (flag);
+  > 78 │ 	return value?.length;
+       │ 	       ^^^^^
+    79 │ }
+    80 │ 
+  
+  i Replace ?. with ..
+  
+    76 │ 		assertString(value);
+    77 │ 	} while (flag);
+  > 78 │ 	return value?.length;
+       │ 	            ^^
+    79 │ }
+    80 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
