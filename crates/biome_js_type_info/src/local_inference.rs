@@ -711,8 +711,8 @@ impl TypeData {
                     .unwrap_or_default(),
             ),
             AnyTsType::TsBigintLiteralType(ty) => match (ty.minus_token(), ty.literal_token()) {
-                (Some(minus_token), Ok(literal_token)) => Self::Literal(Box::new(Literal::BigInt(
-                    format!("{minus_token}{literal_token}").into(),
+                (Some(_), Ok(literal_token)) => Self::Literal(Box::new(Literal::BigInt(
+                    format!("-{}", literal_token.text_trimmed()).into(),
                 ))),
                 (None, Ok(literal_token)) => Self::Literal(Box::new(Literal::BigInt(
                     literal_token.token_text_trimmed().into(),

@@ -14,6 +14,7 @@ mod flow;
 mod flow_candidates;
 pub(in crate::db) mod flow_conditions;
 mod flow_expressions;
+mod flow_guards;
 mod globals;
 mod imports;
 mod lookup;
