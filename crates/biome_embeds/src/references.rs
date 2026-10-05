@@ -1,3 +1,4 @@
+use crate::svelte_elements::svelte_element_references_from_source;
 use crate::visitor::{embedded_references_from_source, embedded_type_references_from_source};
 use biome_languages::LanguageDb;
 use biome_rowan::{TextRange, TokenText};
@@ -95,6 +96,20 @@ pub fn is_svelte_store_reference_used(
                 )
             })
         })
+}
+
+/// Returns whether a Svelte `bind:this={name}` directive in the host document
+/// binds the variable `name` to a DOM element.
+#[salsa::tracked(returns(copy))]
+pub fn is_svelte_element_reference(db: &dyn LanguageDb, reference: InternedReference<'_>) -> bool {
+    let Some(parsed_source) = db.parsed_source_for_path(reference.path(db)) else {
+        return false;
+    };
+
+    let name = reference.name(db);
+    svelte_element_references_from_source(db, parsed_source)
+        .iter()
+        .any(|element_reference| element_reference.text() == name.text())
 }
 
 pub(crate) fn svelte_store_reference_name(reference_name: &str) -> Option<&str> {

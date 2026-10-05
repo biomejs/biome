@@ -129,6 +129,8 @@ pub struct EmbeddedData {
     type_references: Vec<EmbeddedTypeReference>,
     /// Vue custom-directive declarations available to the host template.
     vue_directive_declarations: VueDirectiveDeclarations,
+    /// Names that Svelte `bind:this` directives bind to DOM elements
+    svelte_element_references: Vec<TokenText>,
 }
 
 impl EmbeddedData {
@@ -137,12 +139,14 @@ impl EmbeddedData {
         value_references: Vec<EmbeddedValueReference>,
         type_references: Vec<EmbeddedTypeReference>,
         vue_directive_declarations: VueDirectiveDeclarations,
+        svelte_element_references: Vec<TokenText>,
     ) -> Self {
         Self {
             bindings,
             value_references,
             type_references,
             vue_directive_declarations,
+            svelte_element_references,
         }
     }
 
@@ -191,6 +195,14 @@ impl EmbeddedData {
             && self.value_references.iter().any(|reference| {
                 vue_directive_name_matches_reference_name(reference.text.text(), name)
             })
+    }
+
+    /// Returns whether a Svelte `bind:this={name}` directive binds the variable
+    /// `name` to a DOM element.
+    pub fn is_svelte_element_reference(&self, name: &str) -> bool {
+        self.svelte_element_references
+            .iter()
+            .any(|reference| reference.text() == name)
     }
 
     /// Resolves a Vue custom directive against declarations in the host component.
@@ -309,6 +321,7 @@ mod tests {
             }],
             Vec::new(),
             VueDirectiveDeclarations::default(),
+            Vec::new(),
         );
 
         assert!(data.is_vue_directive_used("vClickOutside"));
