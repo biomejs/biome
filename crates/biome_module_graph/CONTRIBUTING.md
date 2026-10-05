@@ -46,34 +46,50 @@ Start at `src/module_graph.rs`, `src/js_module_info/collector.rs`, and
 
 ### Flow-sensitive expression reads
 
-Expression lookups refine unwritten local `let`/`const` variables and parameters
-at their runtime read locations. The semantic model supplies binding identity; a syntax-only layer
-on the JavaScript CFG supplies incoming conditions. Source locations remain separate
-from the raw type table, which can still share equivalent types.
+An expression lookup can give a variable a more specific type at a particular
+read. For example, after `if (value === null) return`, a variable typed
+`string | null` can be read as `string`. The type stored for the variable's
+declaration does not change.
 
-`src/db/type_inference/flow.rs` evaluates bounded per-binding flow states for
-`typeof`, literal equality, nullishness, and truthiness. Branch joins and loop
-backedges retain all reachable alternatives. `flow_expressions.rs` evaluates
-supported member, call, logical, conditional, and await operands at their own
-source locations. Structural type caches remain independent of these locations.
-Expression tables from complete inference use the same occurrence query. Binding
-and declaration queries retain their existing contracts.
+An execution root is a body analyzed independently, such as a module, function,
+or method. Narrowing applies to `let`/`const` variables and parameters declared
+in the same execution root as the read, provided they are never reassigned.
+Reads inside a nested function do not inherit facts from the outer function.
+Biome uses its semantic model to distinguish variables with the same name.
 
-An object shape such as `{}` can also describe numbers and strings. Removing
-`null` from such a type does not prove that the remaining value is truthy.
-Similarly, a `void` return annotation does not guarantee runtime `undefined`;
-filtering a `void` result preserves uncertainty instead of asserting nullishness.
+`src/db/type_inference/flow.rs` applies `typeof`, literal equality, nullish, and
+truthiness tests. Where branches meet, or a loop returns to an earlier point,
+it keeps every type still possible on a reachable path. `flow_expressions.rs`
+uses narrowed operands when inferring member accesses, calls, logical and
+conditional expressions, and `await`. Complete module inference uses the same
+read-specific results as individual expression queries.
 
-Flow inference is conservative for writes, captured bindings, variables declared
-with `var`, exception handlers, switch, for-in/of, destructuring, and dynamic scope. Predicate/assertion functions
-and property-path refinements are not modeled. Unsupported flow preserves the raw
-lookup; a cycle or exhausted flow evaluation returns an unknown override. A raw
-classifier must not ignore such an override and report a conclusive raw result.
+Before analyzing flow, Biome checks whether an expression reads a variable
+mentioned in a runtime condition. It caches this check for the module. If the
+check cannot finish within its work limit, Biome continues with normal flow
+analysis rather than assuming the expression is unaffected. The variable's
+ordinary type stays separate from these read-specific results.
 
-The tracked flow graph is keyed by module and execution-root range. It depends
-on the current module syntax snapshot, not semantic-model equality alone. This
-shares graph construction across reads without promising fine-grained reuse
-across edits to the module's coarse `kind` input.
+An object shape such as `{}` can also describe `0` or `""`. Removing `null`
+therefore does not prove that the value is truthy. A `void` return annotation
+does not guarantee runtime `undefined` either. These cases must retain
+uncertainty.
+
+Narrowing does not support `var`, imported variables, predicate/assertion
+functions, or facts about individual object properties. Unsupported control flow
+includes exception handlers, `switch`, `for-in`/`for-of`, destructuring, classes,
+and logical assignments. Roots using `eval` or `arguments` also keep ordinary
+inference. If flow solving exhausts its work limit or a query cycle occurs, the
+result is unknown. Callers must respect that result rather than replace it with
+a more confident answer from raw type information.
+
+A control-flow graph records the possible paths through one execution root.
+Biome builds it only when needed, without building graphs for nested or sibling
+roots. Reads within that root share the graph. Reads of the same variable at the
+same graph point also share their narrowing calculation. These caches depend on
+the current syntax tree: changing a condition must invalidate them even if variable declarations
+and references stay the same. An edit elsewhere in the module can also rebuild
+the graph; the cache does not track edits separately for each function.
 
 ### Analyzer-facing requests
 

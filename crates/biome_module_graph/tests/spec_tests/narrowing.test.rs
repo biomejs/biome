@@ -63,6 +63,119 @@ fn assert_variants<'db>(
     );
 }
 
+fn assert_no_flow_queries(db: &TestModuleDb, events: &[salsa::Event]) {
+    for query in [
+        "infer_flow_expression_type",
+        "infer_flow_expression_type_impl",
+        "infer_flow_binding_type",
+        "narrowing_flow_for_root",
+        "module_control_flow",
+    ] {
+        assert_eq!(
+            function_query_will_execute_count_by_name(db, query, events),
+            0,
+            "{query} must not execute without flow candidates"
+        );
+    }
+}
+
+#[test]
+fn declaration_only_modules_do_not_build_flow_candidates() {
+    let (db, module) = narrowing_db("type Alias = string; interface Shape { value: Alias; }");
+    let ModuleInfoKind::Js(info) = module.kind(&db) else {
+        panic!("module must contain JavaScript information");
+    };
+    assert!(info.raw_expressions.is_empty());
+    db.clear_salsa_events();
+    assert!(infer_module_types(&db, module).is_some());
+    let events = db.take_salsa_events();
+    assert_no_flow_queries(&db, &events);
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, "flow_candidates_for_module", &events),
+        0
+    );
+}
+
+#[test]
+fn cyclic_bindings_keep_unknown_overrides_for_impossible_branches() {
+    const SOURCE: &str = r#"
+        import { b as importedB } from "./index.ts";
+        export const a = { b: importedB, stable: 1 };
+        export const b = a;
+        if (a == null) {
+            /*first*/a;
+            /*second*/a;
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    for marker in ["first", "second"] {
+        assert_eq!(
+            normalized_type_at(&db, module, SOURCE, marker, "a"),
+            InferredTypeData::Unknown
+        );
+    }
+}
+
+#[test]
+fn branchless_promise_batches_skip_flow_queries() {
+    let mut source = String::from("function batch(value: number) {\n");
+    for index in 0..16 {
+        source.push_str(&format!("/*call{index}*/Promise.resolve(value);\n"));
+    }
+    source.push_str("}\n");
+    let (db, module) = narrowing_db(&source);
+    for cold in [true, false] {
+        db.clear_salsa_events();
+        for index in 0..16 {
+            let marker = format!("call{index}");
+            let range = marked_range(&source, &marker, "Promise.resolve(value)");
+            assert_eq!(
+                execute_type_inference_request(
+                    &db,
+                    TypeInferenceCaller::new("test", "branchlessPromise"),
+                    PromiseClassificationRequest::new(module, range),
+                ),
+                TypeInferenceClassification::Match
+            );
+            let ty = normalized_type_at(&db, module, &source, &marker, "Promise.resolve(value)");
+            assert!(ty.is_promise_instance(&db));
+        }
+        let events = db.take_salsa_events();
+        assert_no_flow_queries(&db, &events);
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, "flow_candidates_for_module", &events),
+            usize::from(cold)
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, "infer_expression_is_promise", &events),
+            if cold { 16 } else { 0 }
+        );
+        assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+    }
+}
+
+#[test]
+fn unrelated_conditions_writes_and_captures_skip_flow_queries() {
+    for source in [
+        "function f(value: string | number, other: boolean) { if (other) return; /*read*/value; }",
+        "function f(value: string | number) { if (typeof value === 'string') { value = 1; /*read*/value; } }",
+        "function f(value: string | number) { if (typeof value === 'string') return () => /*read*/value; }",
+    ] {
+        let (db, module) = narrowing_db(source);
+        db.clear_salsa_events();
+        let ty = normalized_type_at(&db, module, source, "read", "value");
+        assert_variants(
+            &db,
+            ty,
+            &[InferredTypeData::String, InferredTypeData::Number],
+            source,
+        );
+        let events = db.take_salsa_events();
+        assert_no_flow_queries(&db, &events);
+        assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+    }
+}
+
 #[test]
 fn typeof_narrows_occurrences_without_changing_the_binding_or_join() {
     use InferredTypeData::{Number, String};
@@ -194,20 +307,125 @@ fn narrowed_callable_shapes_preserve_classification_uncertainty() {
 }
 
 #[test]
-fn complete_expression_tables_agree_with_occurrence_queries() {
+fn repeated_narrowed_reads_share_flow_states_and_agree_with_complete_tables() {
+    use InferredTypeData::{Number, String};
     const SOURCE: &str = r#"
-        function inspect(value: string | null) {
+        function inspect(/*binding*/value: string | number | null) {
             if (value === null) return;
-            /*read*/value;
+            if (typeof value === "string") {
+                /*string0*/value;
+                /*string1*/value;
+            } else {
+                /*number0*/value;
+                /*number1*/value;
+            }
         }
     "#;
     let (db, module) = narrowing_db(SOURCE);
-    let range = marked_range(SOURCE, "read", "value");
-    let targeted =
-        infer_expression_type(&db, ExpressionTypeInput::new(&db, module, range)).unwrap();
+    db.clear_salsa_events();
+    let targeted = [
+        ("string0", String),
+        ("string1", String),
+        ("number0", Number),
+        ("number1", Number),
+    ]
+    .map(|(marker, expected)| {
+        let range = marked_range(SOURCE, marker, "value");
+        let ty = infer_expression_type(&db, ExpressionTypeInput::new(&db, module, range)).unwrap();
+        assert_eq!(ty, expected, "{marker}");
+        (range, ty)
+    });
+    let events = db.take_salsa_events();
+    let binding = BindingTypeInput::new(&db, module, marked_range(SOURCE, "binding", "value"));
+    assert_function_query_was_not_run(&db, infer_binding_type, binding, &events);
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, "infer_flow_binding_type", &events),
+        2,
+        "reads in each branch must share its incoming flow state"
+    );
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, "narrowing_flow_for_root", &events),
+        1
+    );
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, "module_control_flow", &events),
+        0,
+        "narrowing must construct only the selected root's CFG"
+    );
+    assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+
+    db.clear_salsa_events();
+    for (range, ty) in targeted {
+        assert_eq!(
+            infer_expression_type(&db, ExpressionTypeInput::new(&db, module, range)),
+            Some(ty)
+        );
+    }
+    let events = db.take_salsa_events();
+    assert_no_flow_queries(&db, &events);
+    assert_function_query_was_not_run(&db, infer_binding_type, binding, &events);
+
     let complete = infer_module_types(&db, module).unwrap();
-    assert_eq!(targeted, InferredTypeData::String);
-    assert_eq!(complete.expressions[&range], targeted);
+    for (range, ty) in targeted {
+        assert_eq!(complete.expressions[&range], ty);
+    }
+}
+
+#[test]
+fn shared_flow_points_keep_different_bindings_separate() {
+    const SOURCE: &str = r#"
+        function inspect(left: string | number, right: string | number) {
+            if (typeof left === "string" && typeof right === "number") {
+                /*left*/left;
+                /*right*/right;
+            }
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    db.clear_salsa_events();
+    assert_eq!(
+        normalized_type_at(&db, module, SOURCE, "left", "left"),
+        InferredTypeData::String
+    );
+    assert_eq!(
+        normalized_type_at(&db, module, SOURCE, "right", "right"),
+        InferredTypeData::Number
+    );
+    let events = db.take_salsa_events();
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, "infer_flow_binding_type", &events),
+        2
+    );
+}
+
+#[test]
+fn cached_unreachable_reads_keep_unknown_overrides() {
+    const SOURCE: &str = r#"
+        function inspect(value: string | number) {
+            if (typeof value === "boolean") {
+                /*first*/value;
+                /*second*/value;
+            }
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    db.clear_salsa_events();
+    for marker in ["first", "second"] {
+        assert_eq!(
+            normalized_type_at(&db, module, SOURCE, marker, "value"),
+            InferredTypeData::Unknown
+        );
+        let input = ExpressionTypeInput::new(&db, module, marked_range(SOURCE, marker, "value"));
+        assert_eq!(
+            infer_expression_is_promise(&db, input),
+            TypeInferenceClassification::Indeterminate
+        );
+    }
+    let events = db.take_salsa_events();
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, "infer_flow_binding_type", &events),
+        1
+    );
 }
 
 #[test]
@@ -707,6 +925,10 @@ fn narrowing_requests_reuse_warm_and_unrelated_inputs_and_invalidate_changed_gua
         } else {
             assert_function_query_was_not_run(&db, infer_expression_type, input, &events);
         }
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, "infer_flow_binding_type", &events),
+            usize::from(cold)
+        );
         assert_function_query_was_not_run(&db, infer_module_types, module, &events);
     }
 
@@ -719,6 +941,7 @@ fn narrowing_requests_reuse_warm_and_unrelated_inputs_and_invalidate_changed_gua
     let events = db.take_salsa_events();
     let input = ExpressionTypeInput::new(&db, module, expression);
     assert_function_query_was_not_run(&db, infer_expression_type, input, &events);
+    assert_no_flow_queries(&db, &events);
     for module in [module, unrelated] {
         assert_function_query_was_not_run(&db, infer_module_types, module, &events);
     }
@@ -732,7 +955,103 @@ fn narrowing_requests_reuse_warm_and_unrelated_inputs_and_invalidate_changed_gua
     let events = db.take_salsa_events();
     let input = ExpressionTypeInput::new(&db, module, expression);
     assert_function_query_was_run(&db, infer_expression_type, input, &events);
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, "infer_flow_binding_type", &events),
+        1
+    );
     for module in [module, unrelated] {
+        assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+    }
+}
+
+#[test]
+fn flow_candidates_include_nested_expression_and_loop_conditions() {
+    use InferredTypeData::{Null, Number, String};
+    for (body, expected) in [
+        (
+            r#"return true && (value !== null && (typeof value === "string" && /*read*/value));"#,
+            String,
+        ),
+        (
+            r#"return true ? (typeof value === "number" ? /*read*/value : null) : null;"#,
+            Number,
+        ),
+        (
+            r#"while (value !== null && typeof value === "string") { /*read*/value; }"#,
+            String,
+        ),
+        (
+            r#"for (; value !== null && typeof value === "string";) { /*read*/value; }"#,
+            String,
+        ),
+        ("do {} while (value !== null); /*read*/value;", Null),
+    ] {
+        let source = format!("function inspect(value: string | number | null) {{ {body} }}");
+        let (db, module) = narrowing_db(&source);
+        db.clear_salsa_events();
+        assert_eq!(
+            normalized_type_at(&db, module, &source, "read", "value"),
+            expected,
+            "{body}"
+        );
+        let events = db.take_salsa_events();
+        assert_function_query_was_not_run(&db, infer_module_types, module, &events);
+    }
+}
+
+#[test]
+fn adding_and_removing_conditions_invalidates_flow_candidates_with_equal_semantics() {
+    use InferredTypeData::{Null, String};
+    const SOURCE: &str =
+        "function inspect(value: string | null) {    (value !== null);{ /*read*/value; } }";
+    let guarded_source = SOURCE.replace("   (value !== null);", "if (value !== null) ");
+    let expression = marked_range(SOURCE, "read", "value");
+    assert_eq!(expression, marked_range(&guarded_source, "read", "value"));
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), SOURCE);
+    let mut db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let ModuleInfoKind::Js(info) = module.kind(&db) else {
+        panic!("module must contain JavaScript information");
+    };
+    let semantic_model = info.semantic_model.clone();
+
+    for (source, guarded) in [
+        (SOURCE, false),
+        (guarded_source.as_str(), true),
+        (SOURCE, false),
+    ] {
+        fs.insert("/src/index.ts".into(), source);
+        let kind = resolve_js_module_kind_for_test(&fs, "/src/index.ts", true);
+        let ModuleInfoKind::Js(info) = &kind else {
+            panic!("module must contain JavaScript information");
+        };
+        assert_eq!(info.semantic_model, semantic_model);
+        salsa::Setter::to(module.set_kind(&mut db), kind);
+        db.clear_salsa_events();
+        let ty = normalized_type_at(&db, module, source, "read", "value");
+        let expected = if guarded {
+            &[String][..]
+        } else {
+            &[String, Null]
+        };
+        assert_variants(&db, ty, expected, source);
+        let events = db.take_salsa_events();
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, "flow_candidates_for_module", &events),
+            1,
+            "condition edits must invalidate the syntax-derived candidate index"
+        );
+        if guarded {
+            assert_eq!(
+                function_query_will_execute_count_by_name(&db, "narrowing_flow_for_root", &events),
+                1
+            );
+        } else {
+            assert_no_flow_queries(&db, &events);
+        }
+        let input = ExpressionTypeInput::new(&db, module, expression);
+        assert_function_query_was_run(&db, infer_expression_type, input, &events);
         assert_function_query_was_not_run(&db, infer_module_types, module, &events);
     }
 }
