@@ -119,6 +119,17 @@ impl Rule for UseSortedProperties {
             .into_iter()
             .collect::<Vec<AnyCssDeclarationOrRule>>();
 
+        // Template steps can depend on declarations before enclosing controls or content blocks.
+        // Native keyframe lists do not use the declaration-or-rule list alternative.
+        if node.syntax().descendants().any(|descendant| {
+            descendant.kind() == CssSyntaxKind::CSS_KEYFRAMES_ITEM
+                && descendant.parent().is_some_and(|parent| {
+                    parent.kind() == CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST
+                })
+        }) {
+            return None;
+        }
+
         if contains_shorthand_after_longhand(&original_properties) {
             // This would be unsafe to sort
             return Some(UseSortedPropertiesState {
@@ -243,6 +254,7 @@ impl RecessOrderMember {
     pub fn kind(&self) -> NodeKindOrder {
         match &self.0 {
             AnyCssDeclarationOrRule::CssBogus(_) => NodeKindOrder::UnknownKind,
+            AnyCssDeclarationOrRule::CssKeyframesItem(_) => NodeKindOrder::UnknownKind,
             AnyCssDeclarationOrRule::CssMetavariable(_) => NodeKindOrder::UnknownKind,
             AnyCssDeclarationOrRule::ScssVariableDeclaration(_) => NodeKindOrder::UnknownKind,
             AnyCssDeclarationOrRule::ScssNestingDeclaration(_) => NodeKindOrder::UnknownKind,

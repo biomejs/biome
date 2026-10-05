@@ -1,0 +1,85 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/parity-percentage-template-bodies.scss
+---
+
+# Input
+
+```scss
+@mixin frames { @if true { 0% { opacity: 0; } } .child { 25% { opacity: 0.25; } } 100% { opacity: 1; } }
+.after { 0% { opacity: 0; } }
+.sentinel { color: red; }
+@if true { 50% { opacity: 0.5; } }
+@font-face { @if true { 50% { opacity: 0.5; } } }
+@keyframes fade { 0% { @if true { 50% { opacity: 0.5; } } } }
+@page { @top-left { @if true { 50% { opacity: 0.5; } } } }
+@function --value() { @if true { 50% { opacity: 0.5; } } }
+
+```
+
+
+# Formatted
+
+```scss
+@mixin frames {
+	@if true {
+		0% {
+			opacity: 0;
+		}
+	}
+	.child {
+		25% {
+			opacity: 0.25;
+		}
+	}
+	100% {
+		opacity: 1;
+	}
+}
+.after {
+	0% {
+		opacity: 0;
+	}
+}
+.sentinel {
+	color: red;
+}
+@if true {
+	50% {
+		opacity: 0.5;
+	}
+}
+@font-face {
+	@if true {
+		50% {
+			opacity: 0.5;
+		}
+	}
+}
+@keyframes fade {
+	0% {
+		@if true {
+			50% {
+				opacity: 0.5;
+			}
+		}
+	}
+}
+@page {
+	@top-left {
+		@if true {
+			50% {
+				opacity: 0.5;
+			}
+		}
+	}
+}
+@function --value() {
+	@if true {
+		50% {
+			opacity: 0.5;
+		}
+	}
+}
+
+```
