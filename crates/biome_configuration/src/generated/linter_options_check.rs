@@ -896,6 +896,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("correctness", "noNonoctalDecimalEscape", TypeId::of::<biome_rule_options::no_nonoctal_decimal_escape::NoNonoctalDecimalEscapeOptions>()));
     result.push((
         "nursery",
+        "noObjectConstructor",
+        TypeId::of::<biome_rule_options::no_object_constructor::NoObjectConstructorOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noObsoleteTags",
         TypeId::of::<biome_rule_options::no_obsolete_tags::NoObsoleteTagsOptions>(),
     ));
