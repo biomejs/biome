@@ -1,0 +1,85 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+<?xml version="1.0"
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: HtmlProcessingInstruction {
+        start_token: PI_START@0..2 "<?" [] [],
+        target: HtmlTagName {
+            value_token: HTML_LITERAL@2..6 "xml" [] [Whitespace(" ")],
+        },
+        attributes: HtmlAttributeList [
+            HtmlAttribute {
+                name: HtmlAttributeName {
+                    value_token: HTML_LITERAL@6..13 "version" [] [],
+                },
+                initializer: HtmlAttributeInitializerClause {
+                    eq_token: EQ@13..14 "=" [] [],
+                    value: HtmlString {
+                        value_token: HTML_STRING_LITERAL@14..19 "\"1.0\"" [] [],
+                    },
+                },
+            },
+        ],
+        end_token: missing (required),
+    },
+    directive: missing (optional),
+    html: HtmlElementList [],
+    eof_token: EOF@19..19 "" [] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..19
+  0: (empty)
+  1: (empty)
+  2: HTML_PROCESSING_INSTRUCTION@0..19
+    0: PI_START@0..2 "<?" [] []
+    1: HTML_TAG_NAME@2..6
+      0: HTML_LITERAL@2..6 "xml" [] [Whitespace(" ")]
+    2: HTML_ATTRIBUTE_LIST@6..19
+      0: HTML_ATTRIBUTE@6..19
+        0: HTML_ATTRIBUTE_NAME@6..13
+          0: HTML_LITERAL@6..13 "version" [] []
+        1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@13..19
+          0: EQ@13..14 "=" [] []
+          1: HTML_STRING@14..19
+            0: HTML_STRING_LITERAL@14..19 "\"1.0\"" [] []
+    3: (empty)
+  3: (empty)
+  4: HTML_ELEMENT_LIST@19..19
+  5: EOF@19..19 "" [] []
+
+```
+
+## Diagnostics
+
+```
+processing_instruction_unclosed.astro:1:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `?>` but instead the file ends
+  
+  > 1 │ <?xml version="1.0"
+      │                    
+  
+  i the file ends here
+  
+  > 1 │ <?xml version="1.0"
+      │                    
+  
+```

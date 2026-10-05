@@ -1,0 +1,125 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```astro
+<?foo>
+<div a?>x</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: HtmlProcessingInstruction {
+        start_token: PI_START@0..2 "<?" [] [],
+        target: HtmlTagName {
+            value_token: HTML_LITERAL@2..5 "foo" [] [],
+        },
+        attributes: HtmlAttributeList [],
+        end_token: missing (required),
+    },
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlBogusElement {
+            items: [
+                R_ANGLE@5..6 ">" [] [],
+            ],
+        },
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@6..8 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@8..12 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlAttributeName {
+                            value_token: HTML_LITERAL@12..14 "a?" [] [],
+                        },
+                        initializer: missing (optional),
+                    },
+                ],
+                r_angle_token: R_ANGLE@14..15 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@15..16 "x" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@16..17 "<" [] [],
+                slash_token: SLASH@17..18 "/" [] [],
+                name: HtmlTagName {
+                    value_token: DIV_KW@18..21 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@21..22 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@22..23 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..23
+  0: (empty)
+  1: (empty)
+  2: HTML_PROCESSING_INSTRUCTION@0..5
+    0: PI_START@0..2 "<?" [] []
+    1: HTML_TAG_NAME@2..5
+      0: HTML_LITERAL@2..5 "foo" [] []
+    2: HTML_ATTRIBUTE_LIST@5..5
+    3: (empty)
+  3: (empty)
+  4: HTML_ELEMENT_LIST@5..22
+    0: HTML_BOGUS_ELEMENT@5..6
+      0: R_ANGLE@5..6 ">" [] []
+    1: HTML_ELEMENT@6..22
+      0: HTML_OPENING_ELEMENT@6..15
+        0: L_ANGLE@6..8 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@8..12
+          0: DIV_KW@8..12 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@12..14
+          0: HTML_ATTRIBUTE@12..14
+            0: HTML_ATTRIBUTE_NAME@12..14
+              0: HTML_LITERAL@12..14 "a?" [] []
+            1: (empty)
+        3: R_ANGLE@14..15 ">" [] []
+      1: HTML_ELEMENT_LIST@15..16
+        0: HTML_CONTENT@15..16
+          0: HTML_LITERAL@15..16 "x" [] []
+      2: HTML_CLOSING_ELEMENT@16..22
+        0: L_ANGLE@16..17 "<" [] []
+        1: SLASH@17..18 "/" [] []
+        2: HTML_TAG_NAME@18..21
+          0: DIV_KW@18..21 "div" [] []
+        3: R_ANGLE@21..22 ">" [] []
+  5: EOF@22..23 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+processing_instruction_closed_by_angle.astro:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `?>` but instead found `>`
+  
+  > 1 │ <?foo>
+      │      ^
+    2 │ <div a?>x</div>
+    3 │ 
+  
+  i Remove >
+  
+```
