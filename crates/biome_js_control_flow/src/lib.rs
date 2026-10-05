@@ -24,7 +24,7 @@ pub use narrowing::{FlowNode, FlowNodeId, FlowOutcome, NarrowingFlowGraph, narro
 pub use visitor::AnyJsControlFlowRoot;
 
 use biome_js_syntax::{AnyJsRoot, JsLanguage};
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, WalkEvent};
 
 pub type JsControlFlowGraph = biome_control_flow::ControlFlowGraph<JsLanguage>;
 pub(crate) type FunctionBuilder = biome_control_flow::builder::FunctionBuilder<JsLanguage>;
@@ -40,4 +40,27 @@ pub fn control_flow_model(root: &AnyJsRoot) -> ControlFlowModel {
         visitor.visit(event, &mut graphs);
     }
     ControlFlowModel::new(root, graphs)
+}
+
+/// Builds only the selected execution root's graph, retaining source coordinates.
+///
+/// Nested execution roots are not traversed. Malformed statements in the selected
+/// root return `None`; malformed nested roots do not discard its graph.
+pub fn control_flow_graph(root: &AnyJsControlFlowRoot) -> Option<JsControlFlowGraph> {
+    let mut visitor = visitor::ControlFlowVisitor::new();
+    let mut graphs = Vec::new();
+    let mut traversal = root.syntax().preorder();
+    while let Some(event) = traversal.next() {
+        if let WalkEvent::Enter(node) = &event
+            && node != root.syntax()
+            && AnyJsControlFlowRoot::can_cast(node.kind())
+        {
+            traversal.skip_subtree();
+            // Skipping still emits Leave, which must not pop the selected root's visitor.
+            traversal.next()?;
+            continue;
+        }
+        visitor.visit(event, &mut graphs);
+    }
+    graphs.pop()
 }

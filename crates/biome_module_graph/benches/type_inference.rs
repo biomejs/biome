@@ -441,6 +441,38 @@ fn bench_distinct_selective_promise_queries(bencher: Bencher) {
         });
 }
 
+#[divan::bench(name = "bench_repeated_binding_narrowing")]
+fn bench_repeated_binding_narrowing(bencher: Bencher) {
+    bencher
+        .with_inputs(|| {
+            let variants = (0..32)
+                .map(|index| format!("\"value{index}\""))
+                .collect::<Vec<_>>()
+                .join(" | ");
+            let mut source = format!(
+                "function inspect(value: {variants} | number | null) {{\n\
+                 if (typeof value === \"string\") {{\n"
+            );
+            let ranges = (0..128)
+                .map(|_| {
+                    let start = source.len();
+                    source.push_str("value;\n");
+                    TextRange::at(start.try_into().unwrap(), 5.into())
+                })
+                .collect::<Vec<_>>();
+            source.push_str("}\n}\n");
+            let (db, module) = build_source_db("narrowing.ts", &source);
+            (db, module, ranges)
+        })
+        .bench_local_values(|(db, module, ranges)| {
+            for range in ranges {
+                let input = ExpressionTypeInput::new(&db, module, range);
+                divan::black_box(infer_expression_type(&db, input).expect("read must have a type"));
+            }
+            db
+        });
+}
+
 #[divan::bench(name = "bench_index_d_ts_salsa_invalidated", args = index_d_ts_cases())]
 fn bench_index_d_ts_salsa_invalidated(bencher: Bencher, name: &str) {
     bencher

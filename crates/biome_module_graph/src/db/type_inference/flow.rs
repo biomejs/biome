@@ -5,9 +5,14 @@
 //! same execution root participate, so refinements cannot cross closure boundaries.
 
 use super::{ImportResolution, ResolutionCtx, resolve_local_type_on_demand};
-use crate::db::queries::{FlowRootInput, narrowing_flow_for_root};
+use crate::db::queries::{
+    BindingTypeInput, FlowBindingTypeInput, FlowRootInput, infer_flow_binding_type,
+    narrowing_flow_for_root,
+};
 use crate::{JsModuleInfo, ModuleDb, ModuleInfo};
-use biome_js_control_flow::{AnyJsControlFlowRoot, FlowNode, FlowOutcome, NarrowingFlowGraph};
+use biome_js_control_flow::{
+    AnyJsControlFlowRoot, FlowNode, FlowNodeId, FlowOutcome, NarrowingFlowGraph,
+};
 use biome_js_semantic::{Binding, JsDeclarationKind};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsBinaryOperator, JsLogicalOperator, JsSyntaxNode,
@@ -45,6 +50,43 @@ pub(in crate::db) fn flow_expression_type<'db>(
     ctx.resolve_flow_expression(&expression)
 }
 
+pub(in crate::db) fn flow_binding_type<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    info: &JsModuleInfo,
+    input: FlowBindingTypeInput<'db>,
+) -> Option<TypeData<'db>> {
+    let range = input.binding(db).range(db);
+    let binding = info.semantic_model.as_binding_by_range(range)?;
+    // The semantic index matches the start offset, not the entire range.
+    if binding.range() != range {
+        return None;
+    }
+    let root = binding_flow_root(&binding)?;
+    let root_input = input.root(db);
+    if root.range() != root_input.root(db) {
+        return None;
+    }
+    let graph = narrowing_flow_for_root(db, root_input).as_ref()?;
+    let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
+    ctx.narrow_binding_at_flow(graph, input.point(db), &root, &binding)
+}
+
+fn binding_flow_root(binding: &Binding) -> Option<AnyJsControlFlowRoot> {
+    // A `var` initializer is not a semantic write and may follow an earlier guard.
+    if binding.is_imported()
+        || binding.declaration_kind() == JsDeclarationKind::HoistedValue
+        || binding.all_writes().next().is_some()
+    {
+        return None;
+    }
+    binding
+        .syntax()
+        .ancestors()
+        .skip(1)
+        .find_map(AnyJsControlFlowRoot::cast)
+}
+
 impl<'db> ResolutionCtx<'db, '_> {
     pub(super) fn narrow_reference(
         &mut self,
@@ -57,21 +99,10 @@ impl<'db> ResolutionCtx<'db, '_> {
             .js_info
             .semantic_model
             .binding(&identifier.name().ok()?)?;
-        // A `var` initializer is not a semantic write and may follow an earlier guard.
-        if binding.is_imported()
-            || binding.declaration_kind() == JsDeclarationKind::HoistedValue
-            || binding.all_writes().next().is_some()
-        {
-            return None;
-        }
+        let declaration_root = binding_flow_root(&binding)?;
         let root = expression
             .syntax()
             .ancestors()
-            .find_map(AnyJsControlFlowRoot::cast)?;
-        let declaration_root = binding
-            .syntax()
-            .ancestors()
-            .skip(1)
             .find_map(AnyJsControlFlowRoot::cast)?;
         if root.syntax() != declaration_root.syntax() {
             return None;
@@ -79,6 +110,24 @@ impl<'db> ResolutionCtx<'db, '_> {
         let input = FlowRootInput::new(self.db, self.module, root.range());
         let graph = narrowing_flow_for_root(self.db, input).as_ref()?;
         let point = *graph.expression_flows.get(&expression.range())?;
+        infer_flow_binding_type(
+            self.db,
+            FlowBindingTypeInput::new(
+                self.db,
+                BindingTypeInput::new(self.db, self.module, binding.range()),
+                input,
+                point,
+            ),
+        )
+    }
+
+    fn narrow_binding_at_flow(
+        &mut self,
+        graph: &NarrowingFlowGraph,
+        point: FlowNodeId,
+        root: &AnyJsControlFlowRoot,
+        binding: &Binding,
+    ) -> Option<TypeData<'db>> {
         let mut pending = vec![point];
         let mut seen = vec![false; graph.nodes.len()];
         let mut relevant = false;
@@ -101,8 +150,9 @@ impl<'db> ResolutionCtx<'db, '_> {
                     ..
                 } => {
                     pending.push(*antecedent);
-                    if let Some(condition) = expression_at(root.syntax(), *expression) {
-                        relevant |= condition
+                    if !relevant && let Some(condition) = expression_at(root.syntax(), *expression)
+                    {
+                        relevant = condition
                             .syntax()
                             .descendants()
                             .take(MAX_FLOW_TYPE_STEPS)
@@ -116,7 +166,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                                     .name()
                                     .ok()
                                     .and_then(|name| self.js_info.semantic_model.binding(&name))
-                                    .is_some_and(|candidate| candidate == binding)
+                                    .is_some_and(|candidate| candidate == *binding)
                             });
                     }
                 }
@@ -125,6 +175,8 @@ impl<'db> ResolutionCtx<'db, '_> {
         if !relevant {
             return None;
         }
+        // Declaration queries can erase a cyclic object's shape. The raw baseline
+        // still lets flow detect an impossible branch and return an unknown override.
         let reference = self
             .js_info
             .raw_binding_types
@@ -134,7 +186,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         let Some(baseline) = self.flow_baseline(baseline) else {
             return Some(TypeData::Unknown);
         };
-        let narrowed = self.solve_flow(graph, &seen, point, root.syntax(), &binding, baseline);
+        let narrowed = self.solve_flow(graph, &seen, point, root.syntax(), binding, baseline);
         if narrowed == TypeData::NeverKeyword {
             return Some(TypeData::Unknown);
         }
@@ -183,7 +235,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         &mut self,
         graph: &NarrowingFlowGraph,
         relevant: &[bool],
-        point: usize,
+        point: FlowNodeId,
         root: &JsSyntaxNode,
         binding: &Binding,
         baseline: TypeData<'db>,
