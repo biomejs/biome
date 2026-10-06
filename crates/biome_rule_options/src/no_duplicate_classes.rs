@@ -1,6 +1,6 @@
 use std::ops::Deref;
 
-use biome_deserialize::{Deserializable, DeserializableValue, DeserializationContext};
+use biome_deserialize::{Deserializable, DeserializableValue};
 use serde::{Deserialize, Serialize};
 
 use crate::use_sorted_classes::UseSortedClassesOptions;
@@ -60,9 +60,9 @@ impl schemars::JsonSchema for NoDuplicateClassesOptions {
 }
 
 impl Deserializable for NoDuplicateClassesOptions {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut V::Context,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         <UseSortedClassesOptions as Deserializable>::deserialize(ctx, value, name).map(Self)

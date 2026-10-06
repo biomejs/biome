@@ -339,9 +339,9 @@ impl Default for IndentWidth {
 }
 
 impl Deserializable for IndentWidth {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut V::Context,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         let value_text = TextNumber::deserialize(ctx, value, name)?;
@@ -458,9 +458,9 @@ impl Default for LineWidth {
 }
 
 impl Deserializable for LineWidth {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut V::Context,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         let value_text = TextNumber::deserialize(ctx, value, name)?;

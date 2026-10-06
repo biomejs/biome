@@ -552,19 +552,19 @@ static SCHEMA_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"https://biomejs.dev/schemas/([\d.]+)/schema.json").unwrap());
 
 impl Deserializable for Schema {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut V::Context,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor;
-        impl DeserializationVisitor for Visitor {
+        impl<C: DeserializationContext> DeserializationVisitor<C> for Visitor {
             type Output = Schema;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::STR;
 
             fn visit_str(
                 self,
-                ctx: &mut dyn DeserializationContext,
+                ctx: &mut C,
                 value: Text,
                 range: TextRange,
                 _name: &str,
@@ -695,11 +695,11 @@ pub struct FilesConfiguration {
 }
 
 impl FilesConfiguration {
-    fn deserialize_field(
+    fn deserialize_field<V: DeserializableValue>(
         &mut self,
-        ctx: &mut dyn DeserializationContext,
+        ctx: &mut V::Context,
         name: &str,
-        value: &impl DeserializableValue,
+        value: &V,
         range: TextRange,
     ) {
         match name {
@@ -764,19 +764,19 @@ impl FilesConfiguration {
 }
 
 impl biome_deserialize::Deserializable for FilesConfiguration {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut V::Context,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         struct Visitor;
-        impl DeserializationVisitor for Visitor {
+        impl<C: DeserializationContext> DeserializationVisitor<C> for Visitor {
             type Output = FilesConfiguration;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
             fn visit_map(
                 self,
-                ctx: &mut dyn DeserializationContext,
-                members: &mut MapMembers<'_>,
+                ctx: &mut C,
+                members: &mut MapMembers<'_, C>,
                 _range: TextRange,
                 _name: &str,
             ) -> Option<Self::Output> {

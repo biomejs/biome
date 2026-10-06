@@ -1,6 +1,4 @@
-use biome_deserialize::{
-    Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
-};
+use biome_deserialize::{Deserializable, DeserializableType, DeserializableValue};
 use biome_deserialize_macros::{Deserializable, Merge};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -34,12 +32,12 @@ impl biome_deserialize::Merge for AvailabilityTarget {
 }
 
 impl Deserializable for AvailabilityTarget {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut V::Context,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        Some(if value.visitable_type()? == DeserializableType::Str {
+        Some(if value.visitable_type(ctx)? == DeserializableType::Str {
             Self::Named(<AvailabilityNamed as Deserializable>::deserialize(
                 ctx, value, name,
             )?)

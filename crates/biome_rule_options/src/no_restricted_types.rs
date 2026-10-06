@@ -1,6 +1,4 @@
-use biome_deserialize::{
-    Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
-};
+use biome_deserialize::{Deserializable, DeserializableType, DeserializableValue};
 use biome_deserialize_macros::Deserializable;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
@@ -42,12 +40,12 @@ impl From<CustomRestrictedType> for CustomRestrictedTypeOptions {
 }
 
 impl Deserializable for CustomRestrictedType {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut V::Context,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Str {
+        if value.visitable_type(ctx)? == DeserializableType::Str {
             biome_deserialize::Deserializable::deserialize(ctx, value, name).map(Self::Plain)
         } else {
             biome_deserialize::Deserializable::deserialize(ctx, value, name).map(Self::WithOptions)

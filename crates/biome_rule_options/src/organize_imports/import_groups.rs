@@ -103,12 +103,12 @@ impl ImportGroup {
     }
 }
 impl Deserializable for ImportGroup {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl biome_deserialize::DeserializableValue,
+    fn deserialize<V: biome_deserialize::DeserializableValue>(
+        ctx: &mut V::Context,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        match value.visitable_type() {
+        match value.visitable_type(ctx) {
             Some(biome_deserialize::DeserializableType::Array) => {
                 Deserializable::deserialize(ctx, value, name).map(Self::MatcherList)
             }
@@ -176,12 +176,12 @@ impl GroupMatcher {
     }
 }
 impl Deserializable for GroupMatcher {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl biome_deserialize::DeserializableValue,
+    fn deserialize<V: biome_deserialize::DeserializableValue>(
+        ctx: &mut V::Context,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type() == Some(biome_deserialize::DeserializableType::Map) {
+        if value.visitable_type(ctx) == Some(biome_deserialize::DeserializableType::Map) {
             Deserializable::deserialize(ctx, value, name).map(Self::Import)
         } else {
             Deserializable::deserialize(ctx, value, name).map(Self::Source)
@@ -233,9 +233,9 @@ impl NegatableImportKindMatcher {
     }
 }
 impl biome_deserialize::Deserializable for NegatableImportKindMatcher {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl biome_deserialize::DeserializableValue,
+    fn deserialize<V: biome_deserialize::DeserializableValue>(
+        ctx: &mut V::Context,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         let text = Text::deserialize(ctx, value, name)?;
@@ -355,12 +355,12 @@ pub enum SourcesMatcher {
     MatcherList(Box<[SourceMatcher]>),
 }
 impl Deserializable for SourcesMatcher {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl biome_deserialize::DeserializableValue,
+    fn deserialize<V: biome_deserialize::DeserializableValue>(
+        ctx: &mut V::Context,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        if value.visitable_type() == Some(biome_deserialize::DeserializableType::Array) {
+        if value.visitable_type(ctx) == Some(biome_deserialize::DeserializableType::Array) {
             Deserializable::deserialize(ctx, value, name).map(Self::MatcherList)
         } else {
             Deserializable::deserialize(ctx, value, name).map(Self::Matcher)
@@ -409,9 +409,9 @@ impl SourceMatcher {
     }
 }
 impl biome_deserialize::Deserializable for SourceMatcher {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl biome_deserialize::DeserializableValue,
+    fn deserialize<V: biome_deserialize::DeserializableValue>(
+        ctx: &mut V::Context,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
         let text = biome_deserialize::Text::deserialize(ctx, value, name)?;

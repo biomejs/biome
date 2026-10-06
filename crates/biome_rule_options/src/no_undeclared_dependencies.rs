@@ -1,6 +1,4 @@
-use biome_deserialize::{
-    Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
-};
+use biome_deserialize::{Deserializable, DeserializableType, DeserializableValue};
 use biome_deserialize_macros::{Deserializable, Merge};
 use camino::Utf8Path;
 use serde::{Deserialize, Serialize};
@@ -49,12 +47,12 @@ impl Default for DependencyAvailability {
 }
 
 impl Deserializable for DependencyAvailability {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut V::Context,
+        value: &V,
         name: &str,
     ) -> Option<Self> {
-        Some(if value.visitable_type()? == DeserializableType::Bool {
+        Some(if value.visitable_type(ctx)? == DeserializableType::Bool {
             Self::Bool(<bool as Deserializable>::deserialize(ctx, value, name)?)
         } else {
             Self::Patterns(Deserializable::deserialize(ctx, value, name)?)

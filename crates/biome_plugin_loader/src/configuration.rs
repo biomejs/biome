@@ -1,6 +1,4 @@
-use biome_deserialize::{
-    Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
-};
+use biome_deserialize::{Deserializable, DeserializableType, DeserializableValue};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_fs::normalize_path;
 use biome_glob::NormalizedGlob;
@@ -105,12 +103,12 @@ impl PluginConfiguration {
 }
 
 impl Deserializable for PluginConfiguration {
-    fn deserialize(
-        ctx: &mut dyn DeserializationContext,
-        value: &impl DeserializableValue,
+    fn deserialize<V: DeserializableValue>(
+        ctx: &mut V::Context,
+        value: &V,
         rule_name: &str,
     ) -> Option<Self> {
-        if value.visitable_type()? == DeserializableType::Str {
+        if value.visitable_type(ctx)? == DeserializableType::Str {
             Deserializable::deserialize(ctx, value, rule_name).map(Self::Path)
         } else {
             Deserializable::deserialize(ctx, value, rule_name).map(Self::PathWithOptions)

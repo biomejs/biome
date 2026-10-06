@@ -266,16 +266,16 @@ fn generate_deserializable_enum(
 
     quote! {
         impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds{
-            fn deserialize(
-                ctx: &mut dyn biome_deserialize::DeserializationContext,
-                value: &impl biome_deserialize::DeserializableValue,
+            fn deserialize<__V: biome_deserialize::DeserializableValue>(
+                ctx: &mut __V::Context,
+                value: &__V,
                 name: &str,
             ) -> Option<Self> {
                 let mut result = match biome_deserialize::Text::deserialize(ctx, value, name)?.text() {
                     #(#deserialize_variants),*,
                     unknown_variant => {
                         const ALLOWED_VARIANTS: &[&str] = &[#(#allowed_variants),*];
-                        ctx.report(biome_deserialize::DeserializationDiagnostic::new_unknown_value(
+                        biome_deserialize::DeserializationContext::report(ctx, biome_deserialize::DeserializationDiagnostic::new_unknown_value(
                             unknown_variant,
                             value.range(),
                             ALLOWED_VARIANTS,
@@ -310,9 +310,9 @@ fn generate_deserializable_newtype(
 
     quote! {
         impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds {
-            fn deserialize(
-                ctx: &mut dyn biome_deserialize::DeserializationContext,
-                value: &impl biome_deserialize::DeserializableValue,
+            fn deserialize<__V: biome_deserialize::DeserializableValue>(
+                ctx: &mut __V::Context,
+                value: &__V,
                 name: &str,
             ) -> Option<Self> {
                 let result = biome_deserialize::Deserializable::deserialize(ctx, value, name).map(Self)?;
@@ -361,13 +361,13 @@ fn generate_deserializable_struct(
             };
             let deprecation_notice = field_data.deprecated.map(|deprecated| match deprecated {
                 DeprecatedField::Message(message) => quote! {
-                    ctx.report(DeserializationDiagnostic::new_deprecated(
+                    biome_deserialize::DeserializationContext::report(ctx, DeserializationDiagnostic::new_deprecated(
                         key_text.text(),
                         value.range()
                     ).with_note(#message));
                 },
                 DeprecatedField::UseInstead(path) => quote! {
-                    ctx.report(DeserializationDiagnostic::new_deprecated_use_instead(
+                    biome_deserialize::DeserializationContext::report(ctx, DeserializationDiagnostic::new_deprecated_use_instead(
                         &key_text,
                         key.range(),
                         #path,
@@ -421,7 +421,7 @@ fn generate_deserializable_struct(
             let seen_ident = format_ident!("seen_{}", ident);
             quote! {
                 if !#seen_ident {
-                    ctx.report(DeserializationDiagnostic::new_missing_key(
+                    biome_deserialize::DeserializationContext::report(ctx, DeserializationDiagnostic::new_missing_key(
                         #key,
                         range,
                         REQUIRED_KEYS,
@@ -464,7 +464,7 @@ fn generate_deserializable_struct(
                 quote! {
                     unknown_key => {
                         const ALLOWED_KEYS: &[&str] = &[#(#allowed_keys),*];
-                        ctx.report(DeserializationDiagnostic::new_unknown_key(
+                        biome_deserialize::DeserializationContext::report(ctx, DeserializationDiagnostic::new_unknown_key(
                             unknown_key,
                             key.range(),
                             ALLOWED_KEYS,
@@ -478,26 +478,27 @@ fn generate_deserializable_struct(
 
     let tuple_type = generate_generics_tuple(&generics);
     let trait_bounds = generate_trait_bounds(&generics);
+    let visitor_generics = generate_visitor_generics(&generics);
     let generics = generate_generics_without_trait_bounds(&generics);
 
     quote! {
         impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds {
-            fn deserialize(
-                ctx: &mut dyn biome_deserialize::DeserializationContext,
-                value: &impl biome_deserialize::DeserializableValue,
+            fn deserialize<__V: biome_deserialize::DeserializableValue>(
+                ctx: &mut __V::Context,
+                value: &__V,
                 name: &str,
             ) -> Option<Self> {
                 use std::marker::PhantomData;
                 struct Visitor #generics (PhantomData< #tuple_type >);
-                impl #generics biome_deserialize::DeserializationVisitor for Visitor #generics #trait_bounds {
+                impl #visitor_generics biome_deserialize::DeserializationVisitor<__C> for Visitor #generics #trait_bounds {
                     type Output = #ident #generics;
 
                     const EXPECTED_TYPE: biome_deserialize::DeserializableTypes = biome_deserialize::DeserializableTypes::MAP;
 
                     fn visit_map(
                         self,
-                        ctx: &mut dyn biome_deserialize::DeserializationContext,
-                        members: &mut biome_deserialize::MapMembers<'_>,
+                        ctx: &mut __C,
+                        members: &mut biome_deserialize::MapMembers<'_, __C>,
                         range: biome_deserialize::TextRange,
                         name: &str,
                     ) -> Option<Self::Output> {
@@ -543,9 +544,9 @@ fn generate_deserializable_from(
     };
     quote! {
         impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds {
-            fn deserialize(
-                ctx: &mut dyn biome_deserialize::DeserializationContext,
-                value: &impl biome_deserialize::DeserializableValue,
+            fn deserialize<__V: biome_deserialize::DeserializableValue>(
+                ctx: &mut __V::Context,
+                value: &__V,
                 name: &str,
             ) -> Option<Self> {
                 let result: #from = biome_deserialize::Deserializable::deserialize(ctx, value, name)?;
@@ -576,9 +577,9 @@ fn generate_deserializable_try_from(
     };
     quote! {
         impl #generics biome_deserialize::Deserializable for #ident #generics #trait_bounds {
-            fn deserialize(
-                ctx: &mut dyn biome_deserialize::DeserializationContext,
-                value: &impl biome_deserialize::DeserializableValue,
+            fn deserialize<__V: biome_deserialize::DeserializableValue>(
+                ctx: &mut __V::Context,
+                value: &__V,
                 name: &str,
             ) -> Option<Self> {
                 let mut result: #try_from = biome_deserialize::Deserializable::deserialize(ctx, value, name)?;
@@ -588,7 +589,7 @@ fn generate_deserializable_try_from(
                         Some(result)
                     }
                     Err(err) => {
-                        ctx.report(biome_deserialize::DeserializationDiagnostic::new(
+                        biome_deserialize::DeserializationContext::report(ctx, biome_deserialize::DeserializationDiagnostic::new(
                             format_args!("{}", err)
                         ).with_range(value.range()));
                         None
@@ -617,6 +618,21 @@ fn generate_generics_without_trait_bounds(generics: &Generics) -> TokenStream {
         quote! {
             < #(#params),* >
         }
+    }
+}
+
+/// Returns the generics of the visitor's implementation: the deserialization
+/// context, followed by `generics` without their trait bounds.
+fn generate_visitor_generics(generics: &Generics) -> TokenStream {
+    let params = generics.params.iter().map(|param| match param {
+        GenericParam::Type(ty) => {
+            let ident = &ty.ident;
+            quote! { #ident }
+        }
+        _ => abort!(generics, "Unsupported generic parameter"),
+    });
+    quote! {
+        < __C: biome_deserialize::DeserializationContext, #(#params),* >
     }
 }
 
