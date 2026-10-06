@@ -56,6 +56,14 @@ declare_lint_rule! {
     /// };
     /// ```
     ///
+    /// A function expression with its own name isn't reported, because turning it into a method could change the function's `name` or how its name can be used inside its body.
+    ///
+    /// ```js,use_options
+    /// let valid = {
+    ///     baz: function qux() { return "qux"; },
+    /// };
+    /// ```
+    ///
     /// ### Invalid
     ///
     /// ```json,options
@@ -151,8 +159,14 @@ impl Rule for UseConsistentObjectDefinitions {
                         let variable_token = identifier_token.name().ok()?.value_token().ok()?;
                         inner_string_text(&variable_token)
                     }
-                    AnyJsExpression::JsFunctionExpression(_function_token) => {
-                        // Functions are always shorthandable
+                    AnyJsExpression::JsFunctionExpression(function_token) => {
+                        // A named function expression can't be shorthanded: its own name sets the
+                        // function's `name` property and is bound inside its body, while a method
+                        // gets its `name` from the property key and binds no name inside its body
+                        if function_token.id().is_some() {
+                            return None;
+                        }
+                        // Anonymous functions are always shorthandable
                         match syntax {
                             ObjectPropertySyntax::Shorthand => return Some(()),
                             ObjectPropertySyntax::Explicit => return None,
@@ -179,7 +193,7 @@ impl Rule for UseConsistentObjectDefinitions {
                     }
                     AnyJsObjectMemberName::JsComputedMemberName(_computed_token) => {
                         let reference_token = source.value().ok()?;
-                        // Computed is always shorthandable if the value is a function, else never
+                        // Computed is always shorthandable if the value is an anonymous function, else never
                         match reference_token {
                             AnyJsExpression::JsFunctionExpression(_function_token) => {
                                 match syntax {
