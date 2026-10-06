@@ -12,7 +12,7 @@ expression: issue_3394.jsx
 
 # Diagnostics
 ```
-issue_3394.jsx:3:31 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+issue_3394.jsx:3:31 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   

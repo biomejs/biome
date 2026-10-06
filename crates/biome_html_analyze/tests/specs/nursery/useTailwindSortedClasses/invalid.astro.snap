@@ -14,7 +14,7 @@ expression: invalid.astro
 
 # Diagnostics
 ```
-invalid.astro:3:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:3:12 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -42,7 +42,7 @@ invalid.astro:3:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.astro:5:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:5:12 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   

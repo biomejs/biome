@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Default, Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct UseSortedClassesOptions {
+pub struct UseTailwindSortedClassesOptions {
     /// Additional attributes that will be sorted.
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub attributes: Option<Box<[Box<str>]>>,
@@ -16,7 +16,7 @@ pub struct UseSortedClassesOptions {
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub functions: Option<Box<[Box<str>]>>,
 }
-impl biome_deserialize::Merge for UseSortedClassesOptions {
+impl biome_deserialize::Merge for UseTailwindSortedClassesOptions {
     fn merge_with(&mut self, other: Self) {
         if let Some(attributes) = other.attributes {
             self.attributes = Some(attributes);
@@ -27,7 +27,7 @@ impl biome_deserialize::Merge for UseSortedClassesOptions {
     }
 }
 
-impl UseSortedClassesOptions {
+impl UseTailwindSortedClassesOptions {
     pub fn has_function(&self, name: &str) -> bool {
         let iter = self.functions.iter().flatten();
         for v in iter {
@@ -63,7 +63,7 @@ const CLASS_ATTRIBUTES: [&str; 2] = ["class", "className"];
 
 const ALLOWED_OPTIONS: &[&str] = &["attributes", "functions"];
 
-impl Deserializable for UseSortedClassesOptions {
+impl Deserializable for UseTailwindSortedClassesOptions {
     fn deserialize(
         ctx: &mut dyn DeserializationContext,
         value: &impl DeserializableValue,
@@ -75,7 +75,7 @@ impl Deserializable for UseSortedClassesOptions {
 
 struct UtilityClassSortingOptionsVisitor;
 impl DeserializationVisitor for UtilityClassSortingOptionsVisitor {
-    type Output = UseSortedClassesOptions;
+    type Output = UseTailwindSortedClassesOptions;
 
     const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
 
@@ -86,7 +86,7 @@ impl DeserializationVisitor for UtilityClassSortingOptionsVisitor {
         _range: TextRange,
         _name: &str,
     ) -> Option<Self::Output> {
-        let mut result = UseSortedClassesOptions::default();
+        let mut result = UseTailwindSortedClassesOptions::default();
 
         let mut attributes = Vec::new();
         for (key, value) in members.flatten() {

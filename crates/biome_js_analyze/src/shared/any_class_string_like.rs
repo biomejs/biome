@@ -12,7 +12,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, TokenText, declare_node_union};
 use biome_rule_options::no_duplicate_classes::NoDuplicateClassesOptions;
-use biome_rule_options::use_sorted_classes::UseSortedClassesOptions;
+use biome_rule_options::use_tailwind_sorted_classes::UseTailwindSortedClassesOptions;
 use biome_tailwind_logic::syntax_service::{TailwindClassString, TailwindClassStringHost};
 
 /// Trait for option types that specify which class attributes and functions to check.
@@ -22,7 +22,7 @@ pub trait ClassStringOptions {
     fn match_function(&self, name: &str) -> bool;
 }
 
-impl ClassStringOptions for UseSortedClassesOptions {
+impl ClassStringOptions for UseTailwindSortedClassesOptions {
     fn has_attribute(&self, name: &str) -> bool {
         self.has_attribute(name)
     }

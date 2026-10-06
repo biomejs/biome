@@ -3,16 +3,16 @@ use std::ops::Deref;
 use biome_deserialize::{Deserializable, DeserializableValue, DeserializationContext};
 use serde::{Deserialize, Serialize};
 
-use crate::use_sorted_classes::UseSortedClassesOptions;
+use crate::use_tailwind_sorted_classes::UseTailwindSortedClassesOptions;
 
 /// Options for the `noDuplicateClasses` assist action.
 ///
 /// Controls which JSX attributes and utility functions are checked for duplicate classes.
 #[derive(Default, Clone, Debug, Eq, PartialEq)]
-pub struct NoDuplicateClassesOptions(UseSortedClassesOptions);
+pub struct NoDuplicateClassesOptions(UseTailwindSortedClassesOptions);
 
 impl Deref for NoDuplicateClassesOptions {
-    type Target = UseSortedClassesOptions;
+    type Target = UseTailwindSortedClassesOptions;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -25,7 +25,7 @@ impl biome_deserialize::Merge for NoDuplicateClassesOptions {
     }
 }
 
-// Custom Serialize to match UseSortedClassesOptions format
+// Custom Serialize to match UseTailwindSortedClassesOptions format
 impl Serialize for NoDuplicateClassesOptions {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -35,13 +35,13 @@ impl Serialize for NoDuplicateClassesOptions {
     }
 }
 
-// Custom Deserialize to match UseSortedClassesOptions format
+// Custom Deserialize to match UseTailwindSortedClassesOptions format
 impl<'de> Deserialize<'de> for NoDuplicateClassesOptions {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
-        <UseSortedClassesOptions as serde::Deserialize>::deserialize(deserializer).map(Self)
+        <UseTailwindSortedClassesOptions as serde::Deserialize>::deserialize(deserializer).map(Self)
     }
 }
 
@@ -53,9 +53,9 @@ impl schemars::JsonSchema for NoDuplicateClassesOptions {
     }
 
     fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
-        // Generate schema based on the inner UseSortedClassesOptions but with our type name
+        // Generate schema based on the inner UseTailwindSortedClassesOptions but with our type name
         // The schema is already correct, we just need the distinct type name (handled by schema_name)
-        UseSortedClassesOptions::json_schema(generator)
+        UseTailwindSortedClassesOptions::json_schema(generator)
     }
 }
 
@@ -65,6 +65,6 @@ impl Deserializable for NoDuplicateClassesOptions {
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
-        <UseSortedClassesOptions as Deserializable>::deserialize(ctx, value, name).map(Self)
+        <UseTailwindSortedClassesOptions as Deserializable>::deserialize(ctx, value, name).map(Self)
     }
 }

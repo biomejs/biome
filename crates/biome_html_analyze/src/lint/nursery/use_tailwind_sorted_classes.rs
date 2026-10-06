@@ -12,7 +12,7 @@ use biome_html_syntax::{
 };
 use biome_languages::HtmlFileSource;
 use biome_rowan::{AstNode, BatchMutationExt};
-use biome_rule_options::use_sorted_classes::UseSortedClassesOptions;
+use biome_rule_options::use_tailwind_sorted_classes::UseTailwindSortedClassesOptions;
 
 use crate::HtmlRuleAction;
 
@@ -41,9 +41,9 @@ declare_lint_rule! {
     /// <div class="bar foo p-4 px-2"></div>
     /// ```
     ///
-    pub UseSortedClasses {
+    pub UseTailwindSortedClasses {
         version: "2.5.0",
-        name: "useSortedClasses",
+        name: "useTailwindSortedClasses",
         language: "html",
         recommended: false,
         fix_kind: FixKind::Unsafe,
@@ -51,11 +51,11 @@ declare_lint_rule! {
     }
 }
 
-impl Rule for UseSortedClasses {
+impl Rule for UseTailwindSortedClasses {
     type Query = Ast<HtmlAttribute>;
     type State = HtmlSortedClassesState;
     type Signals = Option<Self::State>;
-    type Options = UseSortedClassesOptions;
+    type Options = UseTailwindSortedClassesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let attribute = ctx.query();

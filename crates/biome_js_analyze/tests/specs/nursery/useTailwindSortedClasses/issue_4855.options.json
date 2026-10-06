@@ -9,7 +9,7 @@
   "linter": {
     "rules": {
       "nursery": {
-        "useSortedClasses": {
+        "useTailwindSortedClasses": {
           "level": "error",
           "options": {
             "attributes": ["customClassAttribute"],

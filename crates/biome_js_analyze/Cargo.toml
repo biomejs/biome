@@ -18,11 +18,11 @@ name    = "js_analyzer"
 
 [[bench]]
 harness = false
-name    = "use_sorted_classes_parser"
+name    = "use_tailwind_sorted_classes_parser"
 
 [[bench]]
 harness = false
-name    = "use_sorted_classes_v4"
+name    = "use_tailwind_sorted_classes_v4"
 
 [dependencies]
 biome_analyze             = { workspace = true }

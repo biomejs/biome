@@ -16,7 +16,7 @@ use biome_js_factory::make::{
     js_string_literal_single_quotes, js_template_chunk, js_template_chunk_element, jsx_string,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
-use biome_rule_options::use_sorted_classes::UseSortedClassesOptions;
+use biome_rule_options::use_tailwind_sorted_classes::UseTailwindSortedClassesOptions;
 
 declare_lint_rule! {
     /// Enforce the sorting of CSS utility classes.
@@ -145,9 +145,9 @@ declare_lint_rule! {
     ///
     /// This is a deliberate decision. We're unsure about this behavior, and would appreciate feedback on it. If this is a problem for you, please share a detailed explanation of your use case in [the GitHub issue](https://github.com/biomejs/biome/issues/1274).
     ///
-    pub UseSortedClasses {
+    pub UseTailwindSortedClasses {
         version: "1.6.0",
-        name: "useSortedClasses",
+        name: "useTailwindSortedClasses",
         language: "js",
         recommended: false,
         fix_kind: FixKind::Unsafe,
@@ -155,11 +155,11 @@ declare_lint_rule! {
     }
 }
 
-impl Rule for UseSortedClasses {
+impl Rule for UseTailwindSortedClasses {
     type Query = Ast<AnyClassStringLike>;
     type State = Box<str>;
     type Signals = Option<Self::State>;
-    type Options = UseSortedClassesOptions;
+    type Options = UseTailwindSortedClassesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let options = ctx.options();

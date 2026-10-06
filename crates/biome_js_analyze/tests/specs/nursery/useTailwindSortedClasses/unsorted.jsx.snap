@@ -83,7 +83,7 @@ clsx({
 
 # Diagnostics
 ```
-unsorted.jsx:4:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:4:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -111,7 +111,7 @@ unsorted.jsx:4:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━�
 ```
 
 ```
-unsorted.jsx:5:17 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:5:17 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -139,7 +139,7 @@ unsorted.jsx:5:17 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━�
 ```
 
 ```
-unsorted.jsx:11:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:11:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -167,7 +167,7 @@ unsorted.jsx:11:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:12:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:12:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -195,7 +195,7 @@ unsorted.jsx:12:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:13:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:13:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -223,7 +223,7 @@ unsorted.jsx:13:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:14:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:14:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -251,7 +251,7 @@ unsorted.jsx:14:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:15:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:15:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -279,7 +279,7 @@ unsorted.jsx:15:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:16:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:16:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -307,7 +307,7 @@ unsorted.jsx:16:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:17:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:17:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -335,7 +335,7 @@ unsorted.jsx:17:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:18:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:18:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -363,7 +363,7 @@ unsorted.jsx:18:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:19:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:19:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -391,7 +391,7 @@ unsorted.jsx:19:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:20:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:20:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -419,7 +419,7 @@ unsorted.jsx:20:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:23:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:23:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -447,7 +447,7 @@ unsorted.jsx:23:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:24:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:24:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -475,7 +475,7 @@ unsorted.jsx:24:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:25:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:25:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -503,7 +503,7 @@ unsorted.jsx:25:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:26:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:26:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -531,7 +531,7 @@ unsorted.jsx:26:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:27:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:27:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -559,7 +559,7 @@ unsorted.jsx:27:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:29:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:29:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -587,7 +587,7 @@ unsorted.jsx:29:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:30:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:30:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -615,7 +615,7 @@ unsorted.jsx:30:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:31:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:31:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -643,7 +643,7 @@ unsorted.jsx:31:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:32:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:32:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -671,7 +671,7 @@ unsorted.jsx:32:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:35:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:35:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -699,7 +699,7 @@ unsorted.jsx:35:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:36:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:36:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -727,7 +727,7 @@ unsorted.jsx:36:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:37:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:37:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -755,7 +755,7 @@ unsorted.jsx:37:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:38:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:38:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -783,7 +783,7 @@ unsorted.jsx:38:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:39:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:39:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -811,7 +811,7 @@ unsorted.jsx:39:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:40:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:40:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -839,7 +839,7 @@ unsorted.jsx:40:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:41:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:41:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -867,7 +867,7 @@ unsorted.jsx:41:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:55:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:55:13 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -895,7 +895,7 @@ unsorted.jsx:55:13 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:56:14 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:56:14 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -923,7 +923,7 @@ unsorted.jsx:56:14 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:57:14 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:57:14 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -951,7 +951,7 @@ unsorted.jsx:57:14 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:58:15 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:58:15 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -979,7 +979,7 @@ unsorted.jsx:58:15 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:61:3 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:61:3 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -1007,7 +1007,7 @@ unsorted.jsx:61:3 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━�
 ```
 
 ```
-unsorted.jsx:62:4 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:62:4 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -1035,7 +1035,7 @@ unsorted.jsx:62:4 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━�
 ```
 
 ```
-unsorted.jsx:63:6 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:63:6 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -1063,7 +1063,7 @@ unsorted.jsx:63:6 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━�
 ```
 
 ```
-unsorted.jsx:63:26 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:63:26 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -1091,7 +1091,7 @@ unsorted.jsx:63:26 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━
 ```
 
 ```
-unsorted.jsx:63:55 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+unsorted.jsx:63:55 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   

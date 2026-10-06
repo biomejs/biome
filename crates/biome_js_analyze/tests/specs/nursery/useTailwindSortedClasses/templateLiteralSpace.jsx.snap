@@ -16,7 +16,7 @@ expression: templateLiteralSpace.jsx
 
 # Diagnostics
 ```
-templateLiteralSpace.jsx:2:26 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+templateLiteralSpace.jsx:2:26 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -42,7 +42,7 @@ templateLiteralSpace.jsx:2:26 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 
 ```
-templateLiteralSpace.jsx:3:15 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+templateLiteralSpace.jsx:3:15 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -70,7 +70,7 @@ templateLiteralSpace.jsx:3:15 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 
 ```
-templateLiteralSpace.jsx:4:30 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+templateLiteralSpace.jsx:4:30 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -98,7 +98,7 @@ templateLiteralSpace.jsx:4:30 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 
 ```
-templateLiteralSpace.jsx:5:15 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+templateLiteralSpace.jsx:5:15 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -126,7 +126,7 @@ templateLiteralSpace.jsx:5:15 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 
 ```
-templateLiteralSpace.jsx:6:30 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+templateLiteralSpace.jsx:6:30 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -154,7 +154,7 @@ templateLiteralSpace.jsx:6:30 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 
 ```
-templateLiteralSpace.jsx:6:55 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+templateLiteralSpace.jsx:6:55 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
