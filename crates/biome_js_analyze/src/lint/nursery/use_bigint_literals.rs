@@ -14,8 +14,7 @@ use biome_js_syntax::{
 };
 use biome_parser::{TokenSet, token_set};
 use biome_rowan::{
-    AstNode, AstSeparatedList, BatchMutationExt, Direction, SyntaxKindSet, TextRange, TextSize,
-    TokenText,
+    AstNode, AstSeparatedList, BatchMutationExt, SyntaxKindSet, TextRange, TextSize, TokenText,
 };
 use biome_rule_options::use_bigint_literals::UseBigintLiteralsOptions;
 use biome_unicode_table::{Dispatch, lookup_byte};
@@ -143,7 +142,7 @@ impl Rule for UseBigintLiterals {
         if state
             .number_value
             .is_some_and(|value| !is_exact_number_literal(state.magnitude.text(), value))
-            || has_comments_inside(call)
+            || call.syntax().has_inner_comments()
         {
             return None;
         }
@@ -488,17 +487,6 @@ fn terminates_statement(token: &JsSyntaxToken) -> bool {
         }
         _ => false,
     }
-}
-
-/// Returns `true` if the call contains comments that would be lost by replacing it.
-fn has_comments_inside(call: &JsCallExpression) -> bool {
-    let syntax = call.syntax();
-    let first = syntax.first_token();
-    let last = syntax.last_token();
-    syntax.descendants_tokens(Direction::Next).any(|token| {
-        (token.has_leading_comments() && first.as_ref() != Some(&token))
-            || (token.has_trailing_comments() && last.as_ref() != Some(&token))
-    })
 }
 
 #[cfg(test)]

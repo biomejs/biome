@@ -14,7 +14,7 @@ use biome_js_syntax::{
 };
 use biome_js_type_info::{IgnoredPrimitiveTypes, InferredType};
 use biome_rowan::{
-    AstNode, AstNodeList, BatchMutationExt, Direction, SyntaxResult, TextRange, declare_node_union,
+    AstNode, AstNodeList, BatchMutationExt, SyntaxResult, TextRange, declare_node_union,
     trim_leading_trivia_pieces,
 };
 use biome_rule_options::use_nullish_coalescing::UseNullishCoalescingOptions;
@@ -701,7 +701,7 @@ fn run_if_statement(
     // Inner comments would be discarded by the rewrite, so skip the fix in that case too.
     let can_fix = type_allows_fix
         && is_stable_reference(&subject)
-        && !if_statement_has_inner_comments(if_stmt);
+        && !if_stmt.syntax().has_inner_comments();
 
     Some(UseNullishCoalescingState::IfStatement {
         if_range: if_stmt.syntax().text_trimmed_range(),
@@ -919,29 +919,6 @@ fn is_stable_reference(expr: &AnyJsExpression) -> bool {
 /// so `obj['a']` and `obj[key]` are fixable but `arr[i++]` is not.
 fn is_stable_index(expr: &AnyJsExpression) -> bool {
     matches!(expr, AnyJsExpression::AnyJsLiteralExpression(_)) || is_stable_reference(expr)
-}
-
-/// Whether the `if` statement carries comments that the `??=` rewrite would discard.
-/// The rewrite preserves the statement's leading trivia (comments above the `if`) and
-/// its trailing trivia, but drops everything in between, so those are ignored here.
-fn if_statement_has_inner_comments(if_stmt: &JsIfStatement) -> bool {
-    let mut tokens = if_stmt.syntax().descendants_tokens(Direction::Next).peekable();
-    let Some(first) = tokens.next() else {
-        return false;
-    };
-    if first.has_trailing_comments() {
-        return true;
-    }
-    while let Some(token) = tokens.next() {
-        if token.has_leading_comments() {
-            return true;
-        }
-        let is_last = tokens.peek().is_none();
-        if !is_last && token.has_trailing_comments() {
-            return true;
-        }
-    }
-    false
 }
 
 /// Returns `true` when every non-nullish variant of `ty` is a primitive that the
