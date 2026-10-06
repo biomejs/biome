@@ -14,8 +14,9 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsObjectMember, JsLanguage, JsObjectExpression, JsObjectMemberList, T,
 };
 use biome_rowan::{
-    AstNode, BatchMutationExt, SyntaxNode, SyntaxResult, SyntaxToken, SyntaxTriviaPiece,
-    TriviaPieceKind,
+    AstNode, AstSeparatedElement, AstSeparatedList, BatchMutationExt, SyntaxElement, SyntaxNode,
+    SyntaxResult, SyntaxToken, SyntaxTriviaPiece, TriviaPieceKind, chain_trivia_pieces,
+    trim_leading_trivia_pieces,
 };
 use biome_rule_options::use_sorted_keys::{SortOrder, UseSortedKeysOptions};
 use biome_string_case::comparable_token::ComparableToken;
@@ -273,23 +274,7 @@ impl Rule for UseSortedKeys {
         // comment instead of giving up the fix, keeping the comment attached
         // to its member.
         // See https://github.com/biomejs/biome/issues/12057
-        //
-        // The closing `}` keeps its own leading trivia, so a comment trailing
-        // the last token is only dangerous when `}` doesn't start on a new line.
-        let closing_brace_on_new_line = list
-            .syntax()
-            .parent()
-            .and_then(JsObjectExpression::cast)
-            .and_then(|object| object.r_curly_token().ok())
-            .is_some_and(|token| {
-                token
-                    .leading_trivia()
-                    .pieces()
-                    .any(|piece| piece.is_newline())
-            });
-
-        let new_list =
-            break_line_after_trailing_line_comments(list, &new_list, closing_brace_on_new_line)?;
+        let new_list = break_line_after_trailing_line_comments(list, &new_list)?;
 
         let mut mutation = ctx.root().begin();
         mutation.replace_node_discard_trivia(list.clone(), new_list);
@@ -303,39 +288,218 @@ impl Rule for UseSortedKeys {
     }
 }
 
-/// Breaks the line after a trailing `//` comment when the sorted order would
-/// otherwise place the following token on the same line, where the comment
-/// would swallow it.
+/// Breaks the line after a trailing `//` comment when sorting would otherwise
+/// place the following token on the same line, where the comment would swallow
+/// it.
 ///
-/// A `//` comment swallows the rest of its line. Sorting reorders members
-/// together with their trailing separators (and the separators' trivia), which
-/// can place a token right after such a comment on the same line, turning it
-/// into part of the comment. Instead of giving up the fix, break the line
-/// after the comment so the following token starts on a new line, keeping the
-/// comment attached to its member.
+/// Sorting moves each member together with its trailing separator (and the
+/// separator's trivia). When that trivia ends with a `//` comment, the token
+/// that ends up right after it on the same line would become part of the
+/// comment. Breaking the line after the comment keeps the comment attached to
+/// its member and the fix safe.
 /// See https://github.com/biomejs/biome/issues/12057
 fn break_line_after_trailing_line_comments(
     original_list: &JsObjectMemberList,
     sorted_list: &JsObjectMemberList,
-    closing_brace_on_new_line: bool,
 ) -> Option<JsObjectMemberList> {
-    use biome_rowan::{AstSeparatedElement, AstSeparatedList};
+    let indent = broken_line_indent(original_list);
+    // The closing `}` keeps its own leading trivia, so a comment trailing the
+    // last token is only dangerous when `}` doesn't start on a new line.
+    let closing_brace_on_new_line = original_list
+        .syntax()
+        .parent()
+        .and_then(JsObjectExpression::cast)
+        .and_then(|object| object.r_curly_token().ok())
+        .is_some_and(|token| {
+            token
+                .leading_trivia()
+                .pieces()
+                .any(|piece| piece.is_newline())
+        });
 
-    // Collect the (member, separator) pairs in order.
-    let mut pairs: Vec<(AnyJsObjectMember, Option<SyntaxToken<JsLanguage>>)> =
-        Vec::with_capacity(sorted_list.len());
-    for AstSeparatedElement {
-        node,
-        trailing_separator,
-    } in sorted_list.elements()
-    {
-        pairs.push((node.ok()?, trailing_separator.ok()?));
+    // Rebuilding the list allocates, so first check (without allocating)
+    // whether any line break is needed at all.
+    if !needs_any_break(sorted_list, closing_brace_on_new_line)? {
+        return Some(sorted_list.clone());
     }
 
-    // Indent the new line like the original list: the whitespace after
-    // the last newline in the leading trivia of its first token.
+    // Rebuild the list, breaking the line after `//` comments that would
+    // otherwise swallow the following token. Members keep traveling with
+    // their own trivia; only separators that need a break, and members that
+    // then start on a new line, are touched.
+    let mut break_before_next = false;
+    let mut new_children: Vec<Option<SyntaxElement<JsLanguage>>> = Vec::new();
+    let mut elements = sorted_list.elements().peekable();
+
+    while let Some(element) = elements.next() {
+        let node_syntax = element.node.ok()?.into_syntax();
+
+        // The previous separator ended with a `//` comment: the member now
+        // starts on a new line, so drop the whitespace that used to separate
+        // it from the comment. Leading comments are kept.
+        if break_before_next {
+            break_before_next = false;
+            if let Some(stripped) = without_leading_whitespace(&node_syntax) {
+                new_children.push(Some(stripped.into()));
+            } else {
+                new_children.push(Some(node_syntax.into()));
+            }
+        } else {
+            new_children.push(Some(node_syntax.into()));
+        }
+
+        if let Some(separator) = element.trailing_separator.ok()? {
+            if separator_needs_break(&separator, elements.peek(), closing_brace_on_new_line)? {
+                new_children.push(Some(append_line_break(&separator, &indent).into()));
+                break_before_next = true;
+            } else {
+                new_children.push(Some(separator.into()));
+            }
+        }
+    }
+
+    let syntax = JsObjectMemberList::unwrap_cast(SyntaxNode::new_detached(
+        sorted_list.syntax().kind(),
+        new_children,
+    ))
+    .into_syntax();
+
+    let syntax = restore_boundary_layout(original_list, &syntax)?;
+
+    // A `//` comment trailing the last member itself (no separator to break
+    // after) would swallow the closing `}` when `}` stays on the same line.
+    if closing_brace_on_new_line {
+        return Some(JsObjectMemberList::unwrap_cast(syntax));
+    }
+    let last_token = syntax.last_token()?;
+    let mut syntax = syntax;
+    if let Some(new_token) = terminate_line_comment(&last_token, &indent) {
+        syntax = syntax.replace_child(last_token.into(), new_token.into())?;
+    }
+
+    Some(JsObjectMemberList::unwrap_cast(syntax))
+}
+
+/// Whether any line break is needed: a separator ends with a `//` comment
+/// that would swallow the following token, or the last token ends with such
+/// a comment that would swallow the closing `}`.
+fn needs_any_break(
+    sorted_list: &JsObjectMemberList,
+    closing_brace_on_new_line: bool,
+) -> Option<bool> {
+    let mut elements = sorted_list.elements().peekable();
+    while let Some(element) = elements.next() {
+        if let Some(separator) = element.trailing_separator.ok()?
+            && separator_needs_break(&separator, elements.peek(), closing_brace_on_new_line)?
+        {
+            return Some(true);
+        }
+    }
+    Some(
+        !closing_brace_on_new_line
+            && sorted_list
+                .syntax()
+                .last_token()
+                .is_some_and(|token| has_unterminated_line_comment(&token)),
+    )
+}
+
+/// Whether a line break must be inserted after `separator`: it ends with a
+/// `//` line comment and the following token doesn't start on a new line.
+fn separator_needs_break(
+    separator: &SyntaxToken<JsLanguage>,
+    next: Option<&AstSeparatedElement<JsLanguage, AnyJsObjectMember>>,
+    closing_brace_on_new_line: bool,
+) -> Option<bool> {
+    if !has_line_comment(separator.trailing_trivia().pieces()) {
+        return Some(false);
+    }
+    Some(!next_starts_on_new_line(next, closing_brace_on_new_line)?)
+}
+
+/// Whether the token following a separator starts on a new line. The last
+/// separator is followed by `}`, which keeps its own leading trivia.
+fn next_starts_on_new_line(
+    next: Option<&AstSeparatedElement<JsLanguage, AnyJsObjectMember>>,
+    closing_brace_on_new_line: bool,
+) -> Option<bool> {
+    match next {
+        Some(next) => Some(
+            next.node
+                .as_ref()
+                .ok()?
+                .syntax()
+                .first_token()
+                .is_some_and(|token| {
+                    token
+                        .leading_trivia()
+                        .pieces()
+                        .any(|piece| piece.is_newline())
+                }),
+        ),
+        None => Some(closing_brace_on_new_line),
+    }
+}
+
+/// Whether the pieces contain a `//` line comment.
+fn has_line_comment(mut pieces: impl Iterator<Item = SyntaxTriviaPiece<JsLanguage>>) -> bool {
+    pieces.any(|piece| piece.kind().is_single_line_comment())
+}
+
+/// Whether the token's trailing trivia ends with a `//` line comment that
+/// isn't terminated by a newline.
+fn has_unterminated_line_comment(token: &SyntaxToken<JsLanguage>) -> bool {
+    let pieces = token.trailing_trivia().pieces();
+    pieces
+        .clone()
+        .rposition(|piece| piece.kind().is_single_line_comment())
+        .is_some_and(|index| !pieces.skip(index + 1).any(|piece| piece.is_newline()))
+}
+
+/// Appends a line break (plus `indent`) to the token's trailing trivia when it
+/// ends with a `//` comment that isn't terminated by a newline. Returns `None`
+/// when there's nothing to terminate.
+fn terminate_line_comment(
+    token: &SyntaxToken<JsLanguage>,
+    indent: &str,
+) -> Option<SyntaxToken<JsLanguage>> {
+    has_unterminated_line_comment(token).then(|| append_line_break(token, indent))
+}
+
+/// Returns the node with leading whitespace and newlines dropped from its
+/// first token, keeping any comments. Returns `None` when there's nothing to
+/// drop.
+fn without_leading_whitespace(node: &SyntaxNode<JsLanguage>) -> Option<SyntaxNode<JsLanguage>> {
+    let first_token = node.first_token()?;
+    let pieces = first_token.leading_trivia().pieces();
+    let trimmed = trim_leading_trivia_pieces(pieces.clone());
+    if trimmed.len() == pieces.len() {
+        return None;
+    }
+    let new_token = first_token.with_leading_trivia_pieces(trimmed);
+    node.clone()
+        .replace_child(first_token.into(), new_token.into())
+}
+
+/// Appends a line break (plus `indent`) to the trailing trivia of `token`,
+/// terminating any `//` comment it may end with.
+fn append_line_break(token: &SyntaxToken<JsLanguage>, indent: &str) -> SyntaxToken<JsLanguage> {
+    let old_pieces: Vec<SyntaxTriviaPiece<JsLanguage>> = token.trailing_trivia().pieces().collect();
+    let mut new_trailing: Vec<(TriviaPieceKind, &str)> = Vec::with_capacity(old_pieces.len() + 2);
+    new_trailing.extend(old_pieces.iter().map(|piece| (piece.kind(), piece.text())));
+    new_trailing.push((TriviaPieceKind::Newline, "\n"));
+    if !indent.is_empty() {
+        new_trailing.push((TriviaPieceKind::Whitespace, indent));
+    }
+    token.with_trailing_trivia(new_trailing)
+}
+
+/// Indentation for lines broken after a `//` comment: the indentation of the
+/// original members, falling back to the indentation of the line where the
+/// object starts when the object fits on a single line.
+fn broken_line_indent(list: &JsObjectMemberList) -> String {
     let mut indent = String::new();
-    if let Some(first_token) = original_list.syntax().first_token() {
+    if let Some(first_token) = list.syntax().first_token() {
         for piece in first_token.leading_trivia().pieces() {
             if piece.is_newline() {
                 indent.clear();
@@ -348,181 +512,126 @@ fn break_line_after_trailing_line_comments(
             }
         }
     }
+    if indent.is_empty() {
+        // Single-line object: the whitespace after `{` belongs to the brace,
+        // so align the broken lines with the line where the object starts.
+        indent = object_line_indent(list);
+    }
+    indent
+}
 
-    let mut changed = false;
-    for i in 0..pairs.len() {
-        let separator_has_line_comment = pairs[i].1.as_ref().is_some_and(|separator| {
-            separator
-                .trailing_trivia()
-                .pieces()
-                .any(|piece| piece.kind().is_single_line_comment())
-        });
-        if !separator_has_line_comment {
-            continue;
-        }
-        // The token following the comment is the next member, or the closing
-        // `}` for the last pair. The `}` keeps its own leading trivia, so the
-        // comment is only dangerous when `}` doesn't start on a new line.
-        let next_starts_on_new_line = if let Some((next_node, _)) = pairs.get(i + 1) {
-            next_node.syntax().first_token().is_some_and(|token| {
-                token
-                    .leading_trivia()
-                    .pieces()
-                    .any(|piece| piece.is_newline())
-            })
-        } else {
-            closing_brace_on_new_line
-        };
-        if next_starts_on_new_line {
-            continue;
-        }
-        changed = true;
-
-        if pairs.get(i + 1).is_some() {
-            // Disjoint mutable borrows of `pairs[i]` and `pairs[i + 1]`.
-            let (head, tail) = pairs.split_at_mut(i + 1);
-            let (_, separator) = &mut head[i];
-            let (next_node, _) = &mut tail[0];
-
-            let separator_token = separator.take()?;
-            *separator = Some(append_line_break(&separator_token, &indent));
-
-            // The next member now starts on a new line; drop its leading whitespace.
-            if let Some(first_token) = next_node.syntax().first_token() {
-                let new_leading: Vec<SyntaxTriviaPiece<JsLanguage>> = first_token
-                    .leading_trivia()
-                    .pieces()
-                    .skip_while(|piece| piece.kind() == TriviaPieceKind::Whitespace)
-                    .collect();
-                if let Some(new_node) = next_node.clone().with_leading_trivia_pieces(new_leading) {
-                    *next_node = new_node;
-                }
+/// Whitespace after the last newline preceding the object's `{`, or empty when
+/// `{` isn't preceded by a newline on its line.
+fn object_line_indent(list: &JsObjectMemberList) -> String {
+    let mut indent = String::new();
+    let l_curly = list
+        .syntax()
+        .parent()
+        .and_then(JsObjectExpression::cast)
+        .and_then(|object| object.l_curly_token().ok());
+    if let Some(l_curly) = l_curly {
+        let mut seen_newline = false;
+        for piece in l_curly.leading_trivia().pieces() {
+            if piece.is_newline() {
+                seen_newline = true;
+                indent.clear();
+            } else if seen_newline && piece.kind() == TriviaPieceKind::Whitespace {
+                indent.push_str(piece.text());
             }
-        } else {
-            // Last pair: the closing `}` follows the comment on the same line.
-            // The `}` is outside the replaced list, so only the break is added here.
-            let (_, separator) = &mut pairs[i];
-            let separator_token = separator.take()?;
-            *separator = Some(append_line_break(&separator_token, &indent));
         }
     }
+    indent
+}
 
-    // A `//` comment trailing the last member itself (no separator) would
-    // swallow the closing `}` when `}` stays on the same line.
-    let last_token_needs_break = !closing_brace_on_new_line
-        && sorted_list.syntax().last_token().is_some_and(|token| {
-            token
-                .trailing_trivia()
-                .pieces()
-                .any(|piece| piece.kind().is_single_line_comment())
-        });
+/// Restores the boundary layout of the original list onto the sorted list.
+///
+/// Sorting carries each member (with its trivia) to a new position, so the
+/// first and last tokens of the sorted list don't start and end the way the
+/// original list did. Only the layout — whitespace and newlines preceding any
+/// comment — is restored: comments stay attached to the member they were
+/// written for and travel with it.
+fn restore_boundary_layout(
+    original_list: &JsObjectMemberList,
+    new_syntax: &SyntaxNode<JsLanguage>,
+) -> Option<SyntaxNode<JsLanguage>> {
+    let mut new_syntax = new_syntax.clone();
 
-    if !changed && !last_token_needs_break {
-        return Some(sorted_list.clone());
-    }
-
-    // Rebuild the list from the modified pairs.
-    let node_count = sorted_list.len();
-    let separators: Vec<SyntaxToken<JsLanguage>> = pairs
-        .iter_mut()
-        .filter_map(|(_, separator)| separator.take())
-        .collect();
-    let separator_count = separators.len();
-    let mut separators = separators.into_iter();
-    let mut items = pairs.into_iter().map(|(node, _)| node);
-    let mut result = JsObjectMemberList::unwrap_cast(SyntaxNode::new_detached(
-        sorted_list.syntax().kind(),
-        (0..node_count + separator_count).map(|index| {
-            if index % 2 == 0 {
-                Some(items.next()?.into_syntax().into())
-            } else {
-                Some(separators.next()?.into())
-            }
-        }),
-    ));
-
-    // The sorted list carries each member's original trivia, so the first and
-    // last tokens may not have the boundary trivia of the original list.
-    // Restore it from the original list so the replacement keeps the
-    // surrounding layout.
-    if let (Some(original_first), Some(_)) = (
+    if let (Some(original_first), Some(new_first)) = (
         original_list.syntax().first_token(),
-        result.syntax().first_token(),
+        new_syntax.first_token(),
     ) {
-        let leading: Vec<SyntaxTriviaPiece<JsLanguage>> =
-            original_first.leading_trivia().pieces().collect();
-        result = JsObjectMemberList::unwrap_cast(
-            result.into_syntax().with_leading_trivia_pieces(leading)?,
+        // Keep the member's own leading comments; only the indentation comes
+        // from the original boundary.
+        let merged = chain_trivia_pieces(
+            LayoutTrivia::new(original_first.leading_trivia().pieces()),
+            trim_leading_trivia_pieces(new_first.leading_trivia().pieces()),
         );
+        let new_token = new_first.with_leading_trivia_pieces(merged);
+        new_syntax = new_syntax.replace_child(new_first.into(), new_token.into())?;
     }
-    if let (Some(original_last), Some(result_last)) = (
-        original_list.syntax().last_token(),
-        result.syntax().last_token(),
-    ) {
-        // A `//` comment in the original trailing trivia always still exists
-        // on its own token in the sorted list: separators with comments are
-        // kept, and member trivia travels with the member. Copying it here
-        // would duplicate it onto the wrong member, so only the comment-free
-        // pieces (usually just whitespace) are restored.
-        // Conversely, a `//` comment already trailing the result's last token
-        // traveled with that token and must be kept, not overwritten.
-        let result_has_line_comment = result_last
-            .trailing_trivia()
-            .pieces()
-            .any(|piece| piece.kind().is_single_line_comment());
-        if !result_has_line_comment {
-            let trailing: Vec<SyntaxTriviaPiece<JsLanguage>> = original_last
-                .trailing_trivia()
-                .pieces()
-                .filter(|piece| !piece.kind().is_single_line_comment())
-                .collect();
-            result = JsObjectMemberList::unwrap_cast(
-                result.into_syntax().with_trailing_trivia_pieces(trailing)?,
-            );
+
+    if let (Some(original_last), Some(new_last)) =
+        (original_list.syntax().last_token(), new_syntax.last_token())
+    {
+        let merged = chain_trivia_pieces(
+            LayoutTrivia::new(original_last.trailing_trivia().pieces()),
+            trim_leading_trivia_pieces(new_last.trailing_trivia().pieces()),
+        );
+        let new_token = new_last.with_trailing_trivia_pieces(merged);
+        new_syntax = new_syntax.replace_child(new_last.into(), new_token.into())?;
+    }
+
+    Some(new_syntax)
+}
+
+/// Iterator over the whitespace and newline pieces that precede the first
+/// comment of a trivia.
+///
+/// Unlike [`Iterator::filter`], this implements [`ExactSizeIterator`], so the
+/// pieces can be attached to a token with the `*_pieces` APIs.
+struct LayoutTrivia<I> {
+    inner: I,
+    len: usize,
+}
+
+impl<I> LayoutTrivia<I>
+where
+    I: Iterator<Item = SyntaxTriviaPiece<JsLanguage>> + Clone,
+{
+    fn new(pieces: I) -> Self {
+        let len = pieces
+            .clone()
+            .take_while(|piece| piece.is_whitespace() || piece.is_newline())
+            .count();
+        Self { inner: pieces, len }
+    }
+}
+
+impl<I> Iterator for LayoutTrivia<I>
+where
+    I: Iterator<Item = SyntaxTriviaPiece<JsLanguage>>,
+{
+    type Item = SyntaxTriviaPiece<JsLanguage>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let piece = self.inner.next()?;
+        if piece.is_whitespace() || piece.is_newline() {
+            self.len -= 1;
+            Some(piece)
+        } else {
+            // The layout ends where the first comment starts.
+            self.len = 0;
+            None
         }
     }
 
-    // Terminate a `//` comment trailing the last token so the closing `}`
-    // isn't swallowed. This covers the last member carrying the comment
-    // itself (no separator to break after in the loop above). When the
-    // closing `}` already starts on a new line, the comment is harmless.
-    let token_needing_break = (!closing_brace_on_new_line)
-        .then(|| result.syntax().last_token())
-        .flatten()
-        .filter(|token| {
-            let pieces: Vec<SyntaxTriviaPiece<JsLanguage>> =
-                token.trailing_trivia().pieces().collect();
-            pieces
-                .iter()
-                .rposition(|piece| piece.kind().is_single_line_comment())
-                .is_some_and(|index| !pieces[index + 1..].iter().any(|piece| piece.is_newline()))
-        });
-    if let Some(last_token) = token_needing_break {
-        let new_token = append_line_break(&last_token, &indent);
-        result = JsObjectMemberList::unwrap_cast(
-            result
-                .into_syntax()
-                .replace_child(last_token.into(), new_token.into())?,
-        );
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.len, Some(self.len))
     }
-
-    Some(result)
 }
 
-/// Appends a line break (plus `indent`) to the trailing trivia of `token`,
-/// terminating any `//` comment it may end with.
-fn append_line_break(token: &SyntaxToken<JsLanguage>, indent: &str) -> SyntaxToken<JsLanguage> {
-    let old_pieces: Vec<SyntaxTriviaPiece<JsLanguage>> = token.trailing_trivia().pieces().collect();
-    let mut new_trailing: Vec<(TriviaPieceKind, &str)> = old_pieces
-        .iter()
-        .map(|piece| (piece.kind(), piece.text()))
-        .collect();
-    new_trailing.push((TriviaPieceKind::Newline, "\n"));
-    if !indent.is_empty() {
-        new_trailing.push((TriviaPieceKind::Whitespace, indent));
-    }
-    token.with_trailing_trivia(new_trailing)
-}
+impl<I> ExactSizeIterator for LayoutTrivia<I> where I: Iterator<Item = SyntaxTriviaPiece<JsLanguage>>
+{}
 
 /// Checks if an object/array spans multiple lines by examining CST trivia.
 /// For non-empty containers, checks the first token of the members/elements.

@@ -6,3 +6,10 @@ const b = {
 };
 const c = { b: 1, a: 2 // c
 };
+const d = { b: 1, // c
+  // d
+  a: 2 };
+const e = {
+  // about b
+  b: 1, // c
+  a: 2 };
