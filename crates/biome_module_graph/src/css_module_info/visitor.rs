@@ -20,6 +20,7 @@ impl CssModuleVisitor {
         let mut imports = CssImports::default();
         let mut classes: IndexMap<TextRange, TokenText> = IndexMap::default();
         let mut tailwind = TailwindStylesheet::default();
+        let mut tailwind_import_positions = Vec::new();
         // Tracks nesting depth inside `:global(...)` pseudo-class selectors.
         // Class selectors inside `:global()` are globally scoped and cannot be
         // statically traced to specific `class="..."` references, so we skip them.
@@ -30,7 +31,9 @@ impl CssModuleVisitor {
             match event {
                 WalkEvent::Enter(node) => {
                     if let Some(node) = AnyCssImportUrl::cast(node.clone()) {
-                        self.visit_any_css_import_url(node, &mut imports);
+                        if self.visit_any_css_import_url(node, &mut imports) {
+                            tailwind_import_positions.push(tailwind.end());
+                        }
                     } else if let Some(theme) = TwThemeAtRule::cast_ref(&node) {
                         tailwind.visit_theme(&theme);
                     } else if let Some(utility) = TwUtilityAtRule::cast_ref(&node) {
@@ -59,7 +62,12 @@ impl CssModuleVisitor {
             }
         }
 
-        CssModuleInfo::new(imports, classes, tailwind)
+        CssModuleInfo::new(
+            imports,
+            classes,
+            tailwind,
+            tailwind_import_positions.into_boxed_slice(),
+        )
     }
 
     /// Extracts the class name from a `CssClassSelector` and inserts the
@@ -78,9 +86,14 @@ impl CssModuleVisitor {
         }
     }
 
-    fn visit_any_css_import_url(&mut self, node: AnyCssImportUrl, imports: &mut CssImports) {
+    /// Records the import of `node` and returns whether there was one.
+    fn visit_any_css_import_url(
+        &mut self,
+        node: AnyCssImportUrl,
+        imports: &mut CssImports,
+    ) -> bool {
         let Some(specifier) = node.inner_string_text() else {
-            return;
+            return false;
         };
 
         let text: Text = specifier.into();
@@ -91,5 +104,6 @@ impl CssModuleVisitor {
                 specifier: text,
             },
         );
+        true
     }
 }

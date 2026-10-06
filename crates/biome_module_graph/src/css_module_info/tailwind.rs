@@ -44,16 +44,42 @@ pub struct TailwindUtility {
     pub declaration_count: usize,
 }
 
+/// A point in the source of a [TailwindStylesheet], as the number of theme
+/// entries, utilities, and custom variants declared before it.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub(crate) struct TailwindPosition {
+    theme: usize,
+    utilities: usize,
+    custom_variants: usize,
+}
+
 impl TailwindStylesheet {
     pub fn is_empty(&self) -> bool {
         self.theme.is_empty() && self.utilities.is_empty() && self.custom_variants.is_empty()
     }
 
-    pub(crate) fn extend(&mut self, other: &Self) {
-        self.theme.extend(other.theme.iter().cloned());
-        self.utilities.extend(other.utilities.iter().cloned());
+    /// The position after everything declared so far.
+    pub(crate) fn end(&self) -> TailwindPosition {
+        TailwindPosition {
+            theme: self.theme.len(),
+            utilities: self.utilities.len(),
+            custom_variants: self.custom_variants.len(),
+        }
+    }
+
+    /// Appends what `other` declares between `start` and `end`.
+    pub(crate) fn extend_between(
+        &mut self,
+        other: &Self,
+        start: TailwindPosition,
+        end: TailwindPosition,
+    ) {
+        self.theme
+            .extend_from_slice(&other.theme[start.theme..end.theme]);
+        self.utilities
+            .extend_from_slice(&other.utilities[start.utilities..end.utilities]);
         self.custom_variants
-            .extend(other.custom_variants.iter().cloned());
+            .extend_from_slice(&other.custom_variants[start.custom_variants..end.custom_variants]);
     }
 
     pub(crate) fn visit_theme(&mut self, theme: &TwThemeAtRule) {

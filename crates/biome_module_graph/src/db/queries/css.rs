@@ -1,10 +1,12 @@
 use super::SymbolFromModuleInfo;
+use crate::css_module_info::TailwindPosition;
 use crate::css_module_info::traverse::{
     CssClassStep, CssClassTraversal, CssPropertyBranch, CssPropertyTraversal,
 };
 use crate::traverse::UpwardTraversalVisitor;
 use crate::{
-    CssPropertyDefinition, ImportTreeNode, ModuleDb, ModuleInfo, ModuleInfoKind, TailwindStylesheet,
+    CssModuleInfo, CssPropertyDefinition, ImportTreeNode, ModuleDb, ModuleInfo, ModuleInfoKind,
+    TailwindStylesheet,
 };
 use biome_css_syntax::{TextRange, TextSize};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -15,49 +17,73 @@ use std::collections::VecDeque;
 // #region EXPORTED TRACKED QUERIES
 
 /// Returns the Tailwind CSS configuration of a stylesheet, including the CSS
-/// files it imports. Imported configuration comes first, in import order, the
-/// way Tailwind CSS inlines imports.
+/// files it imports. Each import is inlined where it appears, the way Tailwind
+/// CSS inlines imports, so a file imported twice is inlined twice. An import
+/// of a file that is already being inlined is a cycle and is skipped.
 ///
 /// Tracked: depends on the CSS module info of the stylesheet and of every file
 /// it reaches through `@import`.
 #[salsa::tracked(returns(ref))]
 pub fn tailwind_stylesheet(db: &dyn ModuleDb, module: ModuleInfo) -> TailwindStylesheet {
     let mut stylesheet = TailwindStylesheet::default();
-    let mut visited = FxHashSet::default();
-    visited.insert(module.path(db).to_path_buf());
-    // Each frame is a module and the imports it has left to visit. A module's
-    // own configuration is added once all of its imports are done.
-    let mut stack = vec![(module, imported_css_modules(db, module).into_iter())];
-    while let Some((current, imports)) = stack.last_mut() {
-        if let Some(imported) =
-            imports.find(|imported| visited.insert(imported.path(db).to_path_buf()))
-        {
-            stack.push((imported, imported_css_modules(db, imported).into_iter()));
-        } else {
-            if let ModuleInfoKind::Css(css_info) = current.kind(db) {
-                stylesheet.extend(&css_info.tailwind);
-            }
+    let Some(frame) = TailwindImportFrame::new(db, module) else {
+        return stylesheet;
+    };
+    // The stack holds the files being inlined, from the stylesheet to the
+    // innermost import.
+    let mut stack = vec![frame];
+    while let Some(frame) = stack.last_mut() {
+        let tailwind = &frame.css_info.tailwind;
+        let Some((position, imported)) = frame.imports.next() else {
+            stylesheet.extend_between(tailwind, frame.inlined, tailwind.end());
             stack.pop();
+            continue;
+        };
+        stylesheet.extend_between(tailwind, frame.inlined, position);
+        frame.inlined = position;
+        if stack.iter().all(|frame| frame.module != imported)
+            && let Some(frame) = TailwindImportFrame::new(db, imported)
+        {
+            stack.push(frame);
         }
     }
     stylesheet
 }
 
-/// Returns the CSS modules `module` imports, in import order. `@import
-/// "tailwindcss"` doesn't resolve to a local file: its configuration is the
-/// default one.
-fn imported_css_modules(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<ModuleInfo> {
-    let ModuleInfoKind::Css(css_info) = module.kind(db) else {
-        return Vec::new();
-    };
-    css_info
-        .imports
-        .iter()
-        .filter_map(|import| {
-            let path = import.resolve_css(db, module).path().as_path()?;
-            db.module_for_path(path)
+/// A CSS file that [tailwind_stylesheet] is inlining.
+struct TailwindImportFrame {
+    module: ModuleInfo,
+    css_info: CssModuleInfo,
+    /// The CSS modules the file imports, in import order, with where each
+    /// import appears. `@import "tailwindcss"` doesn't resolve to a local file:
+    /// its configuration is the default one.
+    imports: std::vec::IntoIter<(TailwindPosition, ModuleInfo)>,
+    /// How much of the file's own configuration has been added.
+    inlined: TailwindPosition,
+}
+
+impl TailwindImportFrame {
+    fn new(db: &dyn ModuleDb, module: ModuleInfo) -> Option<Self> {
+        let ModuleInfoKind::Css(css_info) = module.kind(db) else {
+            return None;
+        };
+        let imports = css_info
+            .imports
+            .iter()
+            .zip(&css_info.tailwind_import_positions)
+            .filter_map(|(import, position)| {
+                let path = import.resolve_css(db, module).path().as_path()?;
+                Some((*position, db.module_for_path(path)?))
+            })
+            .collect::<Vec<_>>()
+            .into_iter();
+        Some(Self {
+            module,
+            css_info: css_info.clone(),
+            imports,
+            inlined: TailwindPosition::default(),
         })
-        .collect()
+    }
 }
 
 /// Returns CSS class steps for a JS module by traversing its direct CSS imports.

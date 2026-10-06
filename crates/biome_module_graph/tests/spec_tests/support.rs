@@ -102,6 +102,31 @@ pub fn build_css_db(files: &[(&str, &str)]) -> (MemoryFileSystem, WorkspaceDb) {
     (fs, db)
 }
 
+/// Builds a database of CSS files that may use Tailwind CSS directives.
+pub fn build_tailwind_css_db(files: &[(&str, &str)]) -> WorkspaceDb {
+    let fs = MemoryFileSystem::default();
+    for (path, source) in files {
+        fs.insert((*path).into(), *source);
+    }
+    let mut db = WorkspaceDb::new(fs.share());
+    for (path, source) in files {
+        let parse = parse_css(
+            source,
+            CssFileSource::css(),
+            CssParserOptions::default().allow_tailwind_directives(),
+        );
+        assert!(
+            parse.diagnostics().is_empty(),
+            "Unexpected diagnostics: {:?}",
+            parse.diagnostics()
+        );
+        let path = BiomePath::new(*path);
+        let (info, _, _) = resolve_css_module(&db, parse.tree(), &path);
+        db.update_or_insert_module(path.as_path().to_path_buf(), ModuleInfoKind::Css(info));
+    }
+    db
+}
+
 pub fn parse_embedded_css(src: &str, file_source: CssFileSource) -> (AnyParse, CssFileSource) {
     let css_modules = match file_source.as_embedding_kind() {
         CssEmbeddingKind::Html(EmbeddingHtmlKind::Vue { .. }) => CssModulesKind::Vue,

@@ -76,6 +76,8 @@ mod queries;
 mod requests;
 #[path = "spec_tests/substitutions.test.rs"]
 mod substitutions;
+#[path = "spec_tests/tailwind_stylesheet.test.rs"]
+mod tailwind_stylesheet;
 #[path = "spec_tests/types.test.rs"]
 mod types;
 
