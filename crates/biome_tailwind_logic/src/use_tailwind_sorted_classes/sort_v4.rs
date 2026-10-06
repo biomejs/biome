@@ -4,7 +4,7 @@ use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeText, TextRange, TextSize
 use biome_string_case::Collator;
 use biome_tailwind_syntax::{
     AnyTwCandidate, AnyTwFullCandidate, AnyTwModifier, AnyTwValue, CssGenericComponentValueList,
-    TailwindSyntaxNode, TailwindSyntaxToken, TwRoot,
+    TailwindSyntaxNode, TailwindSyntaxToken, TwNumberValue, TwRoot,
 };
 
 use super::arbitrary_value_match::value_matches_type;
@@ -619,8 +619,8 @@ fn entry_has_ratio_branch(branches: &[NamedBranch]) -> bool {
         .any(|b| matches!(b, NamedBranch::Typed(NamedValueType::Ratio, ..)))
 }
 
-/// `n/m` Tailwind fraction shorthand: the value is a bare number, the
-/// modifier is a bare number, and the utility actually accepts fractions.
+/// `n/m` Tailwind fraction shorthand: the value and the modifier are bare
+/// integers, and the utility actually accepts fractions.
 fn is_fraction_modifier(
     value: &AnyTwValue,
     modifier: &AnyTwModifier,
@@ -629,9 +629,38 @@ fn is_fraction_modifier(
     let AnyTwModifier::TwModifier(m) = modifier else {
         return false;
     };
-    matches!(value, AnyTwValue::TwNumberValue(_))
-        && matches!(m.value(), Ok(AnyTwValue::TwNumberValue(_)))
+    is_bare_integer(value)
+        && m.value()
+            .is_ok_and(|denominator| is_bare_integer(&denominator))
         && entry_has_ratio_branch(branches)
+}
+
+/// The value of a bare number written the way Tailwind accepts it: the text
+/// JavaScript's `String(Number(text))` gives back, so `7` and `0.5` but not
+/// `07`, `1.50`, or `.5`.
+fn bare_number(number: &TwNumberValue) -> Option<f64> {
+    let token = number.value_token().ok()?;
+    let text = token.text_trimmed();
+    let (whole, fraction) = match text.split_once('.') {
+        Some((whole, fraction)) => (whole, Some(fraction)),
+        None => (text, None),
+    };
+    let digits = |s: &str| !s.is_empty() && s.bytes().all(|b| b.is_ascii_digit());
+    let canonical = digits(whole)
+        && (whole == "0" || !whole.starts_with('0'))
+        && fraction.is_none_or(|fraction| digits(fraction) && !fraction.ends_with('0'));
+    if canonical { text.parse().ok() } else { None }
+}
+
+fn is_bare_integer(value: &AnyTwValue) -> bool {
+    matches!(value, AnyTwValue::TwNumberValue(number)
+        if bare_number(number).is_some_and(|n| n.fract() == 0.0))
+}
+
+/// Whether `n` is a multiple of 0.25, the step Tailwind's spacing scale,
+/// opacity, and line-height take.
+fn is_quarter_step(n: f64) -> bool {
+    (n * 4.0).fract() == 0.0
 }
 
 fn named_text(value: &AnyTwValue) -> Option<TokenText> {
@@ -663,16 +692,15 @@ fn named_value_type_matches(
     value: &AnyTwValue,
     has_fraction_modifier: bool,
 ) -> bool {
-    matches!(
-        (value_type, value, has_fraction_modifier),
-        (NamedValueType::Number, AnyTwValue::TwNumberValue(_), false)
-            | (
-                NamedValueType::Percentage,
-                AnyTwValue::TwPercentageValue(_),
-                false
-            )
-            | (NamedValueType::Ratio, AnyTwValue::TwNumberValue(_), true)
-    )
+    match (value_type, value, has_fraction_modifier) {
+        (NamedValueType::Integer, AnyTwValue::TwNumberValue(_), false) => is_bare_integer(value),
+        (NamedValueType::Multiplier, AnyTwValue::TwNumberValue(number), false) => {
+            bare_number(number).is_some_and(is_quarter_step)
+        }
+        (NamedValueType::Percentage, AnyTwValue::TwPercentageValue(_), false)
+        | (NamedValueType::Ratio, AnyTwValue::TwNumberValue(_), true) => true,
+        _ => false,
+    }
 }
 
 /// Look up `base-value` in `STATIC_UTILITIES` without allocating,
@@ -789,14 +817,13 @@ fn modifier_accepted(
 
 /// A number (`/50`), an arbitrary value (`/[0.5]`), or a CSS variable
 /// (`/(--x)`) — the modifier value kinds every modifier-accepting branch
-/// allows.
+/// allows. A bare number must be a multiple of 0.25 (`/2.5`, not `/1.3`).
 fn is_numeric_modifier(value: &AnyTwValue) -> bool {
-    matches!(
-        value,
-        AnyTwValue::TwNumberValue(_)
-            | AnyTwValue::TwArbitraryValue(_)
-            | AnyTwValue::TwCssVariableValue(_)
-    )
+    match value {
+        AnyTwValue::TwNumberValue(number) => bare_number(number).is_some_and(is_quarter_step),
+        AnyTwValue::TwArbitraryValue(_) | AnyTwValue::TwCssVariableValue(_) => true,
+        _ => false,
+    }
 }
 
 /// Walk a basename's arbitrary branch list and return the first matching
@@ -1250,12 +1277,12 @@ mod tests {
 
     #[test]
     fn resolve_named_branch_returns_first_matching_branch() {
-        // Two NamedBranch::Typed(Number) branches with different property_idx;
+        // Two NamedBranch::Typed(Multiplier) branches with different property_idx;
         // first one to match wins.
         let (value, modifier) = functional_parts("p-5");
         let branches = &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 10, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 20, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 10, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 20, 1),
         ];
         assert_eq!(
             resolve_named_branch(
@@ -1272,7 +1299,7 @@ mod tests {
     fn resolve_named_branch_classifies_value_internally() {
         let (value, modifier) = functional_parts("p-5");
         let branches = &[NamedBranch::Typed(
-            NamedValueType::Number,
+            NamedValueType::Multiplier,
             ModifierKind::None,
             10,
             1,
@@ -1396,11 +1423,11 @@ mod tests {
 
     #[test]
     fn resolve_named_branch_returns_none_when_kind_does_not_match_value_type() {
-        // A named value like "abc" never satisfies NamedBranch::Typed(Number)
+        // A named value like "abc" never satisfies NamedBranch::Typed(Multiplier)
         // because dispatch is by parser node kind, not text scanning.
         let (value, modifier) = functional_parts("p-abc");
         let branches = &[NamedBranch::Typed(
-            NamedValueType::Number,
+            NamedValueType::Multiplier,
             ModifierKind::None,
             1,
             1,
@@ -1440,7 +1467,7 @@ mod tests {
     fn resolve_named_branch_percentage_only_matches_percentage_typed_branch() {
         let (value, modifier) = functional_parts("from-25%");
         let branches = &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 1, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 1, 1),
             NamedBranch::Typed(NamedValueType::Percentage, ModifierKind::None, 2, 1),
         ];
         assert_eq!(
@@ -1452,6 +1479,43 @@ mod tests {
             ),
             Some((2, 1))
         );
+    }
+
+    #[test]
+    fn resolve_named_branch_takes_only_numbers_tailwind_accepts() {
+        let spacing = &[NamedBranch::Typed(
+            NamedValueType::Multiplier,
+            ModifierKind::None,
+            10,
+            1,
+        )];
+        let index = &[NamedBranch::Typed(
+            NamedValueType::Integer,
+            ModifierKind::None,
+            20,
+            1,
+        )];
+        for (class, branches, expected) in [
+            ("p-0.5", spacing, Some((10, 1))),
+            ("p-1.25", spacing, Some((10, 1))),
+            ("p-1.3", spacing, None),
+            ("p-01", spacing, None),
+            ("p-1.50", spacing, None),
+            ("z-10", index, Some((20, 1))),
+            ("z-1.5", index, None),
+        ] {
+            let (value, modifier) = functional_parts(class);
+            assert_eq!(
+                resolve_named_branch(
+                    branches,
+                    &value,
+                    modifier.as_ref(),
+                    &TailwindDesignSystem::default()
+                ),
+                expected,
+                "{class}"
+            );
+        }
     }
 
     #[test]
@@ -1481,7 +1545,7 @@ mod tests {
         // modifier makes the candidate invalid rather than sorting as `w-1`.
         let (value, modifier) = functional_parts("w-1/foo");
         let branches = &[NamedBranch::Typed(
-            NamedValueType::Number,
+            NamedValueType::Multiplier,
             ModifierKind::None,
             10,
             1,

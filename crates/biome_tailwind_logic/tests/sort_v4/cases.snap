@@ -243,6 +243,24 @@ sorted: from-50% via-25% to-100%
 input:  flex w-1/2 w-1/3
 sorted: flex w-1/2 w-1/3
 ---
+input:  flex z-1.5 z-10
+sorted: z-1.5 z-10 flex
+---
+input:  flex tab-1.5 tab-4 border-1.5
+sorted: tab-1.5 border-1.5 flex tab-4
+---
+input:  flex p-1.3 p-1.25
+sorted: p-1.3 flex p-1.25
+---
+input:  flex p-01 p-1.50 p-.5 p-0.5
+sorted: p-01 p-1.50 p-.5 flex p-0.5
+---
+input:  flex w-1.5/2 w-01/2 w-1/2
+sorted: w-1.5/2 w-01/2 flex w-1/2
+---
+input:  flex font-stretch-50%
+sorted: flex font-stretch-50%
+---
 input:  flex bg-red-500/50
 sorted: flex bg-red-500/50
 ---
@@ -257,6 +275,12 @@ sorted: flex text-lg/8
 ---
 input:  flex text-lg/loose
 sorted: flex text-lg/loose
+---
+input:  flex bg-red-500/2.5 bg-red-500/1.3 bg-red-500/01
+sorted: bg-red-500/1.3 bg-red-500/01 flex bg-red-500/2.5
+---
+input:  flex text-lg/1.25 text-lg/1.3
+sorted: text-lg/1.3 flex text-lg/1.25
 ---
 input:  flex w-1/foo
 sorted: w-1/foo flex

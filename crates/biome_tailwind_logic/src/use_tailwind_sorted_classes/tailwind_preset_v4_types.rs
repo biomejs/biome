@@ -14,11 +14,15 @@ use super::tailwind_preset_v4::{
 
 // Named-path typed value categories. Matching is dispatched by the consumer
 // on parser node kind (TwNumberValue / TwPercentageValue / TwModifier+number),
-// not by CSS data-type predicates.
+// not by CSS data-type predicates. A bare number must also be one the utility
+// takes: `Integer` takes whole numbers (`z-10`) and `Multiplier` takes
+// multiples of 0.25 (`p-1.5`). No utility takes any number, so the codegen's
+// `Number` has no variant here.
 #[derive(Copy, Clone, PartialEq, Eq)]
 #[repr(u8)]
 pub enum NamedValueType {
-    Number,
+    Integer,
+    Multiplier,
     Percentage,
     Ratio,
 }
