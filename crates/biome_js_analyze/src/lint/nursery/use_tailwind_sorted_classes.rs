@@ -26,6 +26,8 @@ declare_lint_rule! {
     /// Class sorting is **not part of the formatter**. It's a lint rule with a fix that is classified as unsafe, which means that **it won't be applied automatically** as part of IDE actions such as "fix on save".
     ///
     /// To make the rule aware of your own theme values, utilities, and variants, point the [`tailwind.stylesheet`](https://biomejs.dev/reference/configuration/#tailwindstylesheet) option at the CSS file that holds your Tailwind CSS configuration. Without it, the rule only knows the default configuration, and treats classes that use your own theme values, utilities, or variants like classes that Tailwind CSS doesn't know.
+    ///
+    /// Biome scans your project when this rule is enabled, so that it can read the stylesheet and the files it imports. The scan happens even if `tailwind.stylesheet` isn't set, although the rule then only uses the default configuration.
     /// :::
     ///
     /// ## Examples
@@ -64,7 +66,7 @@ declare_lint_rule! {
         name: "useTailwindSortedClasses",
         language: "js",
         recommended: false,
-        domains: &[RuleDomain::Tailwind],
+        domains: &[RuleDomain::Tailwind, RuleDomain::Project],
         fix_kind: FixKind::Unsafe,
         issue_number: Some("1274"),
     }

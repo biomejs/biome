@@ -24,32 +24,40 @@ use std::collections::VecDeque;
 pub fn tailwind_stylesheet(db: &dyn ModuleDb, module: ModuleInfo) -> TailwindStylesheet {
     let mut stylesheet = TailwindStylesheet::default();
     let mut visited = FxHashSet::default();
-    collect_tailwind_stylesheet(db, module, &mut visited, &mut stylesheet);
+    visited.insert(module.path(db).to_path_buf());
+    // Each frame is a module and the imports it has left to visit. A module's
+    // own configuration is added once all of its imports are done.
+    let mut stack = vec![(module, imported_css_modules(db, module).into_iter())];
+    while let Some((current, imports)) = stack.last_mut() {
+        if let Some(imported) =
+            imports.find(|imported| visited.insert(imported.path(db).to_path_buf()))
+        {
+            stack.push((imported, imported_css_modules(db, imported).into_iter()));
+        } else {
+            if let ModuleInfoKind::Css(css_info) = current.kind(db) {
+                stylesheet.extend(&css_info.tailwind);
+            }
+            stack.pop();
+        }
+    }
     stylesheet
 }
 
-fn collect_tailwind_stylesheet(
-    db: &dyn ModuleDb,
-    module: ModuleInfo,
-    visited: &mut FxHashSet<Utf8PathBuf>,
-    stylesheet: &mut TailwindStylesheet,
-) {
-    if !visited.insert(module.path(db).to_path_buf()) {
-        return;
-    }
+/// Returns the CSS modules `module` imports, in import order. `@import
+/// "tailwindcss"` doesn't resolve to a local file: its configuration is the
+/// default one.
+fn imported_css_modules(db: &dyn ModuleDb, module: ModuleInfo) -> Vec<ModuleInfo> {
     let ModuleInfoKind::Css(css_info) = module.kind(db) else {
-        return;
+        return Vec::new();
     };
-    for import in css_info.imports.iter() {
-        // `@import "tailwindcss"` doesn't resolve to a local file. Its
-        // configuration is the default one the sorter already knows.
-        if let Some(path) = import.resolve_css(db, module).path().as_path()
-            && let Some(imported) = db.module_for_path(path)
-        {
-            collect_tailwind_stylesheet(db, imported, visited, stylesheet);
-        }
-    }
-    stylesheet.extend(&css_info.tailwind);
+    css_info
+        .imports
+        .iter()
+        .filter_map(|import| {
+            let path = import.resolve_css(db, module).path().as_path()?;
+            db.module_for_path(path)
+        })
+        .collect()
 }
 
 /// Returns CSS class steps for a JS module by traversing its direct CSS imports.

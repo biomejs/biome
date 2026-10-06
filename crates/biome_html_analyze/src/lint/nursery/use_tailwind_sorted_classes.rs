@@ -23,6 +23,10 @@ declare_lint_rule! {
     /// only knows the default configuration, and treats classes that use your own theme values,
     /// utilities, or variants like classes that Tailwind CSS doesn't know.
     ///
+    /// Biome scans your project when this rule is enabled, so that it can read the stylesheet
+    /// and the files it imports. The scan happens even if `tailwind.stylesheet` isn't set,
+    /// although the rule then only uses the default configuration.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -51,7 +55,7 @@ declare_lint_rule! {
         name: "useTailwindSortedClasses",
         language: "html",
         recommended: false,
-        domains: &[RuleDomain::Tailwind],
+        domains: &[RuleDomain::Tailwind, RuleDomain::Project],
         fix_kind: FixKind::Unsafe,
         issue_number: Some("9181"),
     }
