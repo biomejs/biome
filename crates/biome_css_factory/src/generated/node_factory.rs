@@ -29,7 +29,7 @@ pub fn css_at_rule_declarator(
 }
 pub fn css_attr_fallback_value(
     comma_token: SyntaxToken,
-    value: CssGenericComponentValueList,
+    value: AnyCssAttrFallbackValue,
 ) -> CssAttrFallbackValue {
     CssAttrFallbackValue::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_ATTR_FALLBACK_VALUE,
