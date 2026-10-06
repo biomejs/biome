@@ -2481,6 +2481,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("nursery", "useSvelteKitRuneImports", TypeId::of::<biome_rule_options::use_svelte_kit_rune_imports::UseSvelteKitRuneImportsOptions>()));
     result.push(("nursery", "useSvelteRequireEachKey", TypeId::of::<biome_rule_options::use_svelte_require_each_key::UseSvelteRequireEachKeyOptions>()));
     result.push((
+        "nursery",
+        "useSvelteShorthandDirective",
+        TypeId::of::<
+            biome_rule_options::use_svelte_shorthand_directive::UseSvelteShorthandDirectiveOptions,
+        >(),
+    ));
+    result.push((
         "style",
         "useSymbolDescription",
         TypeId::of::<biome_rule_options::use_symbol_description::UseSymbolDescriptionOptions>(),
