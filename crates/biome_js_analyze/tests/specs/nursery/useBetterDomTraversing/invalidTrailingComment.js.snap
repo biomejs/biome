@@ -1,0 +1,93 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidTrailingComment.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const first = element.childNodes[0] /* trailing */;
+const firstElement = element.children[0] /* trailing */;
+const merged = document.querySelector("a").querySelector("b") /* trailing */;
+
+```
+
+# Diagnostics
+```
+invalidTrailingComment.js:2:15 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This indexes .childNodes to get the first child.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const first = element.childNodes[0] /* trailing */;
+      │               ^^^^^^^^^^^^^^^^^^^^^
+    3 │ const firstElement = element.children[0] /* trailing */;
+    4 │ const merged = document.querySelector("a").querySelector("b") /* trailing */;
+  
+  i A positional index is harder to read than a named first-child accessor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .firstChild instead.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - const·first·=·element.childNodes[0]·/*·trailing·*/;
+      2 │ + const·first·=·element.firstChild·/*·trailing·*/;
+    3 3 │   const firstElement = element.children[0] /* trailing */;
+    4 4 │   const merged = document.querySelector("a").querySelector("b") /* trailing */;
+  
+
+```
+
+```
+invalidTrailingComment.js:3:22 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This indexes .children to get the first element child.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const first = element.childNodes[0] /* trailing */;
+  > 3 │ const firstElement = element.children[0] /* trailing */;
+      │                      ^^^^^^^^^^^^^^^^^^^
+    4 │ const merged = document.querySelector("a").querySelector("b") /* trailing */;
+    5 │ 
+  
+  i A positional index is harder to read than a named first-child accessor.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use .firstElementChild instead.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   const first = element.childNodes[0] /* trailing */;
+    3   │ - const·firstElement·=·element.children[0]·/*·trailing·*/;
+      3 │ + const·firstElement·=·element.firstElementChild·/*·trailing·*/;
+    4 4 │   const merged = document.querySelector("a").querySelector("b") /* trailing */;
+    5 5 │   
+  
+
+```
+
+```
+invalidTrailingComment.js:4:16 lint/nursery/useBetterDomTraversing  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i These .querySelector() calls are chained.
+  
+    2 │ const first = element.childNodes[0] /* trailing */;
+    3 │ const firstElement = element.children[0] /* trailing */;
+  > 4 │ const merged = document.querySelector("a").querySelector("b") /* trailing */;
+      │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+  
+  i One .querySelector() call with a combined selector is easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Merge the .querySelector() calls.
+  
+    2 2 │   const first = element.childNodes[0] /* trailing */;
+    3 3 │   const firstElement = element.children[0] /* trailing */;
+    4   │ - const·merged·=·document.querySelector("a").querySelector("b")·/*·trailing·*/;
+      4 │ + const·merged·=·document.querySelector("a·b")·/*·trailing·*/;
+    5 5 │   
+  
+
+```
