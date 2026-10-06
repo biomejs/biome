@@ -22,7 +22,7 @@ use biome_js_syntax::{
 use biome_languages::JsFileSource;
 use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, SyntaxElement, SyntaxResult,
-    TriviaPieceKind, chain_trivia_pieces, trim_leading_trivia_pieces, trim_trailing_trivia_pieces,
+    chain_trivia_pieces, trim_leading_trivia_pieces, trim_trailing_trivia_pieces,
 };
 use biome_rule_options::use_import_type::{Style, UseImportTypeOptions};
 use rustc_hash::FxHashSet;
@@ -465,10 +465,7 @@ impl Rule for UseImportType {
                     return None;
                 }
                 AnyJsImportClause::JsImportCombinedClause(import_combined_clause) => {
-                    let type_token = Some(
-                        make::token(T![type])
-                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                    );
+                    let type_token = Some(make::token(T![type]).with_trailing_space());
                     let default_clause = extract_into_default_import_clause(
                         &import_combined_clause,
                         type_token.clone(),
@@ -494,10 +491,7 @@ impl Rule for UseImportType {
                     let new_import_clause = import_clause
                         .clone()
                         .with_default_specifier(specifier)
-                        .with_type_token(Some(
-                            make::token(T![type])
-                                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                        ));
+                        .with_type_token(Some(make::token(T![type]).with_trailing_space()));
                     mutation.replace_node(import_clause, new_import_clause);
                 }
                 AnyJsImportClause::JsImportNamedClause(import_clause) => {
@@ -532,10 +526,7 @@ impl Rule for UseImportType {
                     let new_import_clause = import_clause
                         .clone()
                         .with_named_specifiers(named_specifiers)
-                        .with_type_token(Some(
-                            make::token(T![type])
-                                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                        ));
+                        .with_type_token(Some(make::token(T![type]).with_trailing_space()));
                     mutation.replace_node(import_clause, new_import_clause);
                 }
                 AnyJsImportClause::JsImportNamespaceClause(import_clause) => {
@@ -543,20 +534,14 @@ impl Rule for UseImportType {
                     let new_import_clause = import_clause
                         .clone()
                         .with_namespace_specifier(specifier)
-                        .with_type_token(Some(
-                            make::token(T![type])
-                                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                        ));
+                        .with_type_token(Some(make::token(T![type]).with_trailing_space()));
                     mutation.replace_node(import_clause, new_import_clause);
                 }
             },
             ImportTypeFix::UseSplitImportType(specifiers_requiring_type_marker) => {
                 match import_clause {
                     AnyJsImportClause::JsImportCombinedClause(import_combined_clause) => {
-                        let type_token = Some(
-                            make::token(T![type])
-                                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                        );
+                        let type_token = Some(make::token(T![type]).with_trailing_space());
                         let Ok(AnyJsCombinedSpecifier::JsNamedImportSpecifiers(named)) =
                             import_combined_clause.specifier()
                         else {
@@ -618,10 +603,7 @@ impl Rule for UseImportType {
                 let import_combined_clause = import_clause.as_js_import_combined_clause()?;
                 let default_import_clause = extract_into_default_import_clause(
                     import_combined_clause,
-                    Some(
-                        make::token(T![type])
-                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                    ),
+                    Some(make::token(T![type]).with_trailing_space()),
                 )
                 .ok()?;
                 let new_import = import
@@ -650,10 +632,8 @@ impl Rule for UseImportType {
                         let specifier = specifier_element.node().ok()?.clone();
                         let trailing_sep = specifier_element.into_trailing_separator().ok()?;
                         if specifiers_requiring_type_marker.contains(&specifier.range().start()) {
-                            let new_specifier = specifier.with_type_token(Some(
-                                make::token(T![type])
-                                    .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                            ));
+                            let new_specifier = specifier
+                                .with_type_token(Some(make::token(T![type]).with_trailing_space()));
                             new_specifiers.push(new_specifier);
                         } else {
                             new_specifiers.push(specifier);
@@ -668,16 +648,15 @@ impl Rule for UseImportType {
                     let import_clause = AnyJsImportClause::from(
                         make::js_import_named_clause(
                             named_specifiers,
-                            make::token(T![from])
-                                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                            make::token(T![from]).with_trailing_space(),
                             source,
                         )
                         .build(),
                     );
                     make::js_import(
                         make::token(T![import])
-                            .with_leading_trivia([(TriviaPieceKind::Newline, "\n")])
-                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                            .with_leading_newline()
+                            .with_trailing_space(),
                         import_clause,
                     )
                     .build()
@@ -736,10 +715,7 @@ impl Rule for UseImportType {
                 } else {
                     let extra_import = extract_combined_specifier_in_new_import(
                         &import_combined_clause,
-                        Some(
-                            make::token(T![type])
-                                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                        ),
+                        Some(make::token(T![type]).with_trailing_space()),
                         import
                             .semicolon_token()
                             .is_some()
@@ -766,7 +742,7 @@ impl Rule for UseImportType {
                                 .with_leading_trivia_pieces(
                                     specifier.syntax().first_leading_trivia()?.pieces(),
                                 )
-                                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                                .with_trailing_space(),
                         ));
                     mutation.replace_node(specifier.clone(), new_specifier);
                 }
@@ -824,7 +800,10 @@ fn is_only_used_as_type(
     binding: &JsIdentifierBinding,
     references: &EmbeddedService,
 ) -> bool {
-    let name = binding.name_token().ok().map(|token| token.token_text_trimmed());
+    let name = binding
+        .name_token()
+        .ok()
+        .map(|token| token.token_text_trimmed());
 
     // Used as a value in the template → not type-only.
     if name
@@ -959,9 +938,7 @@ fn extract_into_default_import_clause(
     import_clause: &JsImportCombinedClause,
     type_token: Option<JsSyntaxToken>,
 ) -> SyntaxResult<JsImportDefaultClause> {
-    let from_token = import_clause
-        .from_token()?
-        .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")]);
+    let from_token = import_clause.from_token()?.with_leading_space();
     let result = make::js_import_default_clause(
         import_clause.default_specifier()?,
         from_token,
@@ -981,8 +958,7 @@ fn extract_combined_specifier_in_new_import(
         trim_leading_trivia_pieces(import_clause.comma_token().ok()?.trailing_trivia().pieces());
     let comma_leading_trivia =
         trim_trailing_trivia_pieces(import_clause.comma_token().ok()?.leading_trivia().pieces());
-    let from_token =
-        make::token(T![from]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+    let from_token = make::token(T![from]).with_trailing_space();
     let source = import_clause
         .source()
         .ok()?
@@ -1033,8 +1009,8 @@ fn extract_combined_specifier_in_new_import(
     };
     make::js_import(
         make::token(T![import])
-            .with_leading_trivia([(TriviaPieceKind::Newline, "\n")])
-            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            .with_leading_newline()
+            .with_trailing_space(),
         import_clause,
     )
     .build()
@@ -1051,13 +1027,11 @@ fn new_named_imports(
     semicolon_token: Option<JsSyntaxToken>,
 ) -> (JsImport, JsImport) {
     let new_import_token = make::token(T![import])
-        .with_leading_trivia([(TriviaPieceKind::Newline, "\n")])
-        .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+        .with_leading_newline()
+        .with_trailing_space();
     let type_import_clause =
         make::js_import_named_clause(named_type_specifiers, from_token.clone(), source.clone())
-            .with_type_token(
-                make::token(T![type]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-            )
+            .with_type_token(make::token(T![type]).with_trailing_space())
             .build();
     let import_type = make::js_import(
         import_token.unwrap_or_else(|| new_import_token.clone()),

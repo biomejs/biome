@@ -24,8 +24,7 @@ use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration,
 };
 use biome_rowan::{
-    AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeCast, TriviaPieceKind,
-    declare_node_union,
+    AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeCast, declare_node_union,
 };
 use biome_rule_options::use_exhaustive_dependencies::{
     StableHookResult, UseExhaustiveDependenciesOptions,
@@ -893,7 +892,6 @@ impl Rule for UseExhaustiveDependencies {
     }
 }
 
-
 declare_node_union! {
     pub AnyExpressionCandidate = AnyJsExpression | JsReferenceIdentifier | JsxReferenceIdentifier
 }
@@ -1705,7 +1703,7 @@ where
 {
     let elements = elements.into_iter();
     let separators = (0..elements.len().saturating_sub(1))
-        .map(|_| make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]))
+        .map(|_| make::token(T![,]).with_trailing_space())
         .collect::<Vec<_>>();
 
     current

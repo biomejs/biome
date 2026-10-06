@@ -180,13 +180,10 @@ impl Rule for UseConsistentArrowReturn {
                 };
 
                 let return_statement =
-                    make::js_return_statement(make::token(T![return]).with_trailing_trivia([(
-                        biome_js_syntax::TriviaPieceKind::Whitespace,
-                        " ",
-                    )]))
-                    .with_argument(expr_to_return.trim_leading_trivia()?)
-                    .with_semicolon_token(make::token(T![;]))
-                    .build();
+                    make::js_return_statement(make::token(T![return]).with_trailing_space())
+                        .with_argument(expr_to_return.trim_leading_trivia()?)
+                        .with_semicolon_token(make::token(T![;]))
+                        .build();
 
                 let statement = arrow.syntax().ancestors().find_map(AnyJsStatement::cast)?;
                 let mut base_indent = String::new();

@@ -7,7 +7,7 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, T, jsx_ext::AnyJsxElement,
 };
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TextRange, TriviaPieceKind};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TextRange};
 use biome_rule_options::use_google_font_preconnect::UseGoogleFontPreconnectOptions;
 
 use crate::JsRuleAction;
@@ -118,7 +118,7 @@ impl Rule for UseGoogleFontPreconnect {
             let pieces = last_attr_token.leading_trivia().pieces();
             make::jsx_ident("rel").with_leading_trivia_pieces(pieces)
         } else {
-            make::jsx_ident("rel").with_leading_trivia([(TriviaPieceKind::Whitespace, " ")])
+            make::jsx_ident("rel").with_leading_space()
         };
 
         let new_attribute = AnyJsxAttribute::from(

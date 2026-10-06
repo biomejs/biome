@@ -7,7 +7,7 @@ use biome_console::markup;
 use biome_diagnostics::{Applicability, category};
 use biome_json_factory::make;
 use biome_json_syntax::{AnyJsonValue, JsonArrayValue, JsonMember, JsonObjectValue, JsonRoot, T};
-use biome_rowan::{AstNode, BatchMutationExt, TextRange, TextSize, TriviaPieceKind};
+use biome_rowan::{AstNode, BatchMutationExt, TextRange, TextSize};
 
 declare_migration! {
     pub(crate) Includes {
@@ -194,8 +194,7 @@ impl State {
             }
         }
         let separator_count = globs.len().saturating_sub(1);
-        let separators = (0..separator_count)
-            .map(|_| make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]));
+        let separators = (0..separator_count).map(|_| make::token(T![,]).with_trailing_space());
         make::json_array_value(
             make::token(T!['[']),
             make::json_array_element_list(globs, separators),

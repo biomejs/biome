@@ -13,7 +13,7 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsObjectMember, JsLanguage, JsObjectExpression, JsObjectMemberList, T,
 };
-use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult, SyntaxToken, TriviaPieceKind};
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult, SyntaxToken};
 use biome_rule_options::use_sorted_keys::{SortOrder, UseSortedKeysOptions};
 use biome_string_case::comparable_token::ComparableToken;
 
@@ -246,7 +246,7 @@ impl Rule for UseSortedKeys {
                     let name = node.name().map(ComparableToken::new)?;
                     Some((depth, name))
                 },
-                || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                || make::token(T![,]).with_trailing_space(),
                 |(d1, n1), (d2, n2)| d1.cmp(d2).then_with(|| comparator(n1, n2)),
             )
             .ok()?
@@ -254,7 +254,7 @@ impl Rule for UseSortedKeys {
             sorted_separated_list_by(
                 list,
                 |node| node.name().map(ComparableToken::new),
-                || make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                || make::token(T![,]).with_trailing_space(),
                 comparator,
             )
             .ok()?
@@ -280,10 +280,7 @@ fn has_multiline_content(
     closing_token: SyntaxResult<SyntaxToken<JsLanguage>>,
 ) -> bool {
     members_first_token.map_or_else(
-        || {
-            closing_token
-                .is_ok_and(|token| token.has_leading_newline())
-        },
+        || closing_token.is_ok_and(|token| token.has_leading_newline()),
         |token| token.has_leading_newline(),
     )
 }

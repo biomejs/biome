@@ -11,7 +11,7 @@ use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{
     AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, JsxAttribute, JsxAttributeList, T,
 };
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 use biome_rule_options::no_blank_target::NoBlankTargetOptions;
 
 // Elements to check, in the form of (node name, attribute name) tuples.
@@ -236,7 +236,7 @@ impl Rule for NoBlankTarget {
                 .find_map(JsxAttributeList::cast)?;
             let mut new_attribute_list: Vec<_> = old_attribute_list.iter().collect();
             let new_attribute = jsx_attribute(AnyJsxAttributeName::JsxName(jsx_name(
-                jsx_ident("rel").with_leading_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                jsx_ident("rel").with_leading_space(),
             )))
             .with_initializer(jsx_attribute_initializer_clause(
                 token(T![=]),

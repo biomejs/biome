@@ -216,10 +216,9 @@ fn convert_interface_to_type_alias(
     );
 
     let mut type_alias_builder = make::ts_type_alias_declaration(
-        make::token(JsSyntaxKind::TYPE_KW)
-            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        make::token(JsSyntaxKind::TYPE_KW).with_trailing_space(),
         id,
-        make::token(JsSyntaxKind::EQ).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        make::token(JsSyntaxKind::EQ).with_trailing_space(),
         AnyTsType::TsObjectType(object_type),
     )
     .with_semicolon_token(make::token(JsSyntaxKind::SEMICOLON));
@@ -318,8 +317,7 @@ fn convert_type_alias_to_interface(
             (
                 new_members,
                 make::token(JsSyntaxKind::L_CURLY),
-                make::token(JsSyntaxKind::R_CURLY)
-                    .with_leading_trivia([(TriviaPieceKind::Newline, "\n")]),
+                make::token(JsSyntaxKind::R_CURLY).with_leading_newline(),
             )
         } else {
             // For already multiline types, preserve the formatting
@@ -333,16 +331,14 @@ fn convert_type_alias_to_interface(
                 make::token(JsSyntaxKind::R_CURLY)
                     .with_leading_trivia_pieces(r_curly.leading_trivia().pieces())
             } else {
-                make::token(JsSyntaxKind::R_CURLY)
-                    .with_leading_trivia([(TriviaPieceKind::Newline, "\n")])
+                make::token(JsSyntaxKind::R_CURLY).with_leading_newline()
             };
 
             (members, make::token(JsSyntaxKind::L_CURLY), r_curly_token)
         };
 
         let mut interface_builder = make::ts_interface_declaration(
-            make::token(JsSyntaxKind::INTERFACE_KW)
-                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            make::token(JsSyntaxKind::INTERFACE_KW).with_trailing_space(),
             id,
             l_curly_token,
             members,

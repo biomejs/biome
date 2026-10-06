@@ -11,7 +11,7 @@ use biome_console::markup;
 use biome_diagnostics::category;
 use biome_json_factory::make;
 use biome_json_syntax::{AnyJsonValue, JsonMember, JsonMemberList, JsonObjectValue, T};
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 
 use crate::{MigrationAction, declare_migration};
 
@@ -317,19 +317,18 @@ impl Rule for RuleMover {
                     make::json_string_literal(new_group_name).prepend_trivia_pieces(indent.clone()),
                 )
                 .into(),
-                make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                make::token(T![:]).with_trailing_space(),
                 make::json_object_value(
-                    make::token(T!['{']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                    make::token(T!['{']).with_trailing_space(),
                     if last_has_separator {
                         make::json_member_list(
                             [new_rule_node],
-                            [make::token(T![,])
-                                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])],
+                            [make::token(T![,]).with_trailing_space()],
                         )
                     } else {
                         make::json_member_list([new_rule_node], [])
                     },
-                    make::token(T!['}']).with_leading_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                    make::token(T!['}']).with_leading_space(),
                 )
                 .into(),
             );
@@ -474,10 +473,10 @@ fn transform_value(value: AnyJsonValue, old_rule_name: &'static str) -> Option<A
             return Some(value);
         }
     };
-    let colon = make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+    let colon = make::token(T![:]).with_trailing_space();
     Some(
         make::json_object_value(
-            make::token(T!['{']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            make::token(T!['{']).with_trailing_space(),
             make::json_member_list(
                 [
                     make::json_member(
@@ -491,7 +490,7 @@ fn transform_value(value: AnyJsonValue, old_rule_name: &'static str) -> Option<A
                         options,
                     ),
                 ],
-                [make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])],
+                [make::token(T![,]).with_trailing_space()],
             ),
             make::token(T!['}']),
         )
@@ -515,7 +514,7 @@ fn get_rule_level(value: AnyJsonValue) -> AnyJsonValue {
 fn create_console_log_options() -> AnyJsonValue {
     let allow_option = make::json_member(
         make::json_member_name(make::json_string_literal("allow")).into(),
-        make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        make::token(T![:]).with_trailing_space(),
         make::json_array_value(
             make::token(T!['[']),
             make::json_array_element_list(
@@ -524,14 +523,14 @@ fn create_console_log_options() -> AnyJsonValue {
                 ))],
                 [],
             ),
-            make::token(T![']']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            make::token(T![']']).with_trailing_space(),
         )
         .into(),
     );
     make::json_object_value(
-        make::token(T!['{']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        make::token(T!['{']).with_trailing_space(),
         make::json_member_list([allow_option], []),
-        make::token(T!['}']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        make::token(T!['}']).with_trailing_space(),
     )
     .into()
 }
@@ -539,17 +538,14 @@ fn create_console_log_options() -> AnyJsonValue {
 fn create_shorthand_array_type_options() -> AnyJsonValue {
     let syntax_option = make::json_member(
         make::json_member_name(make::json_string_literal("syntax")).into(),
-        make::token(T![:]).with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
-        make::json_string_value(
-            make::json_string_literal("shorthand")
-                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-        )
-        .into(),
+        make::token(T![:]).with_trailing_space(),
+        make::json_string_value(make::json_string_literal("shorthand").with_trailing_space())
+            .into(),
     );
     make::json_object_value(
-        make::token(T!['{']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        make::token(T!['{']).with_trailing_space(),
         make::json_member_list([syntax_option], []),
-        make::token(T!['}']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        make::token(T!['}']).with_trailing_space(),
     )
     .into()
 }

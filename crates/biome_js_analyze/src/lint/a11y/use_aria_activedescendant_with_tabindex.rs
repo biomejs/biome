@@ -12,7 +12,7 @@ use biome_js_syntax::{
     AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, JsxAttributeList, T,
     jsx_ext::AnyJsxElement,
 };
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 use biome_rule_options::use_aria_activedescendant_with_tabindex::UseAriaActivedescendantWithTabindexOptions;
 
 declare_lint_rule! {
@@ -113,7 +113,7 @@ impl Rule for UseAriaActivedescendantWithTabindex {
             .find_map(JsxAttributeList::cast)?;
 
         let new_attribute = jsx_attribute(AnyJsxAttributeName::JsxName(jsx_name(
-            jsx_ident("tabIndex").with_leading_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            jsx_ident("tabIndex").with_leading_space(),
         )))
         .with_initializer(jsx_attribute_initializer_clause(
             token(T![=]),

@@ -1,4 +1,4 @@
-use biome_rowan::{AstNode, Language, SyntaxToken, TriviaPieceKind};
+use biome_rowan::{AstNode, Language, SyntaxToken};
 use biome_string_case::StrLikeExtension;
 use std::cmp::Ordering;
 
@@ -117,8 +117,7 @@ impl<T: SortableAttribute + Clone> AttributeGroup<T> {
 
                 if !ends_in_whitespace && !next_starts_with_whitespace {
                     let old_last_token = sorted_attr.node().syntax().last_token().unwrap();
-                    let new_last_token =
-                        old_last_token.with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+                    let new_last_token = old_last_token.with_trailing_space();
 
                     *sorted_attr = sorted_attr
                         .clone()

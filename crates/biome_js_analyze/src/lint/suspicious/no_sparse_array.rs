@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsArrayElement, AnyJsExpression, JsArrayExpression, TriviaPieceKind};
+use biome_js_syntax::{AnyJsArrayElement, AnyJsExpression, JsArrayExpression};
 use biome_rowan::{AstNode, AstNodeExt, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::no_sparse_array::NoSparseArrayOptions;
 
@@ -89,8 +89,7 @@ markup! {
                 let undefine_indent = if i == 0 {
                     make::ident("undefined")
                 } else {
-                    make::ident("undefined")
-                        .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")])
+                    make::ident("undefined").with_leading_space()
                 };
                 let ident_expr =
                     make::js_identifier_expression(make::js_reference_identifier(undefine_indent));

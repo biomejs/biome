@@ -128,13 +128,13 @@ impl Rule for UseSingleVarDeclarator {
                                 kind.prepend_trivia_pieces(trim_leading_trivia_pieces(
                                     kind.trailing_trivia().pieces(),
                                 ))
-                                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
+                                .with_trailing_space()
                             } else {
                                 kind
                             }
                         } else {
                             // Add a trailing space if the kind has no trailing trivia.
-                            kind.with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
+                            kind.with_trailing_space()
                         }
                     } else {
                         // For the remaining statements, clone the kind token

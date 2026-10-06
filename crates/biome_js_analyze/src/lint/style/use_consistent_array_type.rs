@@ -6,8 +6,7 @@ use biome_console::{Markup, MarkupBuf, markup};
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyTsName, AnyTsType, JsSyntaxKind, JsSyntaxToken, T, TriviaPieceKind, TsReferenceType,
-    TsTypeArguments,
+    AnyTsName, AnyTsType, JsSyntaxKind, JsSyntaxToken, T, TsReferenceType, TsTypeArguments,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt, TriviaPiece};
 use biome_rule_options::use_consistent_array_type::{
@@ -290,11 +289,7 @@ fn get_array_type(array_types: Vec<AnyTsType>) -> Option<AnyTsType> {
         length => {
             let ts_union_type_builder = make::ts_union_type(make::ts_union_type_variant_list(
                 array_types,
-                (0..length - 1).map(|_| {
-                    make::token(T![|])
-                        .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")])
-                        .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
-                }),
+                (0..length - 1).map(|_| make::token(T![|]).with_surrounding_spaces()),
             ));
             Some(AnyTsType::TsUnionType(ts_union_type_builder.build()))
         }
