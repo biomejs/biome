@@ -287,6 +287,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_done_callback::NoDoneCallbackOptions>(),
     ));
     result.push((
+        "nursery",
+        "noDoubleComparison",
+        TypeId::of::<biome_rule_options::no_double_comparison::NoDoubleComparisonOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noDoubleEquals",
         TypeId::of::<biome_rule_options::no_double_equals::NoDoubleEqualsOptions>(),
