@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_ts_with_export.ts
+---
+# Input
+```ts
+export type A = 1;
+export {};
+
+```
+
+# Diagnostics
+```
+invalid_ts_with_export.ts:2:1 lint/complexity/noUselessEmptyExport  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This empty export is useless because there's another export or import.
+  
+    1 │ export type A = 1;
+  > 2 │ export {};
+      │ ^^^^^^^^^^
+    3 │ 
+  
+  i This export makes useless the empty export.
+  
+  > 1 │ export type A = 1;
+      │ ^^^^^^
+    2 │ export {};
+    3 │ 
+  
+  i Safe fix: Remove this useless empty export.
+  
+    1 1 │   export type A = 1;
+    2   │ - export·{};
+    3 2 │   
+  
+
+```

@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_definition_file_import.d.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+import type { A } from "module";
+export {};
+
+```
