@@ -510,6 +510,7 @@ pub mod use_semantic_elements;
 pub mod use_shorthand_assign;
 pub mod use_shorthand_function_type;
 pub mod use_simple_number_keys;
+pub mod use_simplified_boolean_return;
 pub mod use_simplified_logic_expression;
 pub mod use_single_js_doc_asterisk;
 pub mod use_single_top_level_heading;

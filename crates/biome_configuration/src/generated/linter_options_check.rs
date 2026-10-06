@@ -2419,6 +2419,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "useSimpleNumberKeys",
         TypeId::of::<biome_rule_options::use_simple_number_keys::UseSimpleNumberKeysOptions>(),
     ));
+    result.push((
+        "nursery",
+        "useSimplifiedBooleanReturn",
+        TypeId::of::<
+            biome_rule_options::use_simplified_boolean_return::UseSimplifiedBooleanReturnOptions,
+        >(),
+    ));
     result.push(("complexity", "useSimplifiedLogicExpression", TypeId::of::<biome_rule_options::use_simplified_logic_expression::UseSimplifiedLogicExpressionOptions>()));
     result.push((
         "correctness",

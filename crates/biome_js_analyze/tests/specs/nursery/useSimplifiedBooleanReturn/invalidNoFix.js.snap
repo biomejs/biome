@@ -1,0 +1,199 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNoFix.js
+---
+# Input
+```js
+/* should generate diagnostics */
+function shadowedBoolean(Boolean) { if (test) { return true; } else { return false; } }
+
+function shadowedBooleanFlat(Boolean) { if (test) { return true; } return false; }
+
+function commentInElse() { if (test) { return true; } else { return false; /* comment */ } }
+
+function commentInIf() { if (test) { return true; /* comment */ } else { return false; } }
+
+function commentInTest() { if (/* comment */ test) { return true; } return false; }
+
+function commentBetween() {
+	if (test) {
+		return true;
+	}
+
+	// comment
+	return false;
+}
+
+function commentAfterIf() {
+	if (test) {
+		return true;
+	} // comment
+	return false;
+}
+
+function outerShadowedBoolean() {
+	const Boolean = 1;
+	return function () { if (test) { return true; } return false; };
+}
+
+```
+
+# Diagnostics
+```
+invalidNoFix.js:2:37 lint/nursery/useSimplifiedBooleanReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ function shadowedBoolean(Boolean) { if (test) { return true; } else { return false; } }
+      │                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ function shadowedBooleanFlat(Boolean) { if (test) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:4:41 lint/nursery/useSimplifiedBooleanReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    2 │ function shadowedBoolean(Boolean) { if (test) { return true; } else { return false; } }
+    3 │ 
+  > 4 │ function shadowedBooleanFlat(Boolean) { if (test) { return true; } return false; }
+      │                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ function commentInElse() { if (test) { return true; } else { return false; /* comment */ } }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:6:28 lint/nursery/useSimplifiedBooleanReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    4 │ function shadowedBooleanFlat(Boolean) { if (test) { return true; } return false; }
+    5 │ 
+  > 6 │ function commentInElse() { if (test) { return true; } else { return false; /* comment */ } }
+      │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ function commentInIf() { if (test) { return true; /* comment */ } else { return false; } }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:8:26 lint/nursery/useSimplifiedBooleanReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+     6 │ function commentInElse() { if (test) { return true; } else { return false; /* comment */ } }
+     7 │ 
+   > 8 │ function commentInIf() { if (test) { return true; /* comment */ } else { return false; } }
+       │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ function commentInTest() { if (/* comment */ test) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:10:28 lint/nursery/useSimplifiedBooleanReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+     8 │ function commentInIf() { if (test) { return true; /* comment */ } else { return false; } }
+     9 │ 
+  > 10 │ function commentInTest() { if (/* comment */ test) { return true; } return false; }
+       │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ function commentBetween() {
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:13:2 lint/nursery/useSimplifiedBooleanReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    12 │ function commentBetween() {
+  > 13 │ 	if (test) {
+       │ 	^^^^^^^^^^^
+  > 14 │ 		return true;
+  > 15 │ 	}
+  > 16 │ 
+  > 17 │ 	// comment
+  > 18 │ 	return false;
+       │ 	^^^^^^^^^^^^^
+    19 │ }
+    20 │ 
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:22:2 lint/nursery/useSimplifiedBooleanReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    21 │ function commentAfterIf() {
+  > 22 │ 	if (test) {
+       │ 	^^^^^^^^^^^
+  > 23 │ 		return true;
+  > 24 │ 	} // comment
+  > 25 │ 	return false;
+       │ 	^^^^^^^^^^^^^
+    26 │ }
+    27 │ 
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:30:23 lint/nursery/useSimplifiedBooleanReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    28 │ function outerShadowedBoolean() {
+    29 │ 	const Boolean = 1;
+  > 30 │ 	return function () { if (test) { return true; } return false; };
+       │ 	                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ }
+    32 │ 
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

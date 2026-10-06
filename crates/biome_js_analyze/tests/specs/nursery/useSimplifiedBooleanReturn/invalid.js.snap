@@ -1,0 +1,1304 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+function ifElseBlocks() { if (test) { return true; } else { return false; } }
+
+function ifElseStatements() { if (test) return true; else return false; }
+
+function ifElseComparison() { if (value > 0) { return true; } else { return false; } }
+
+function ifElseNegated() { if (items.length) { return false; } else { return true; } }
+
+function flat() { if (test) { return true; } return false; }
+
+function flatNegated() { if (test) { return false; } return true; }
+
+function flatComparison() { if (value > 0) { return true; } return false; }
+
+function flatNegatedComparison() { if (value > 0) { return false; } return true; }
+
+function flatStatement() { if (test) return true; return false; }
+
+function booleanCall() { if (Boolean(value)) { return true; } return false; }
+
+function globalThisBooleanCall() { if (globalThis.Boolean(value)) { return true; } return false; }
+
+function logicalOfComparisons() { if (a === b && c === d) { return true; } return false; }
+
+function logicalOfValues() { if (a && b) { return true; } return false; }
+
+function longLogical() { if (a === b && c !== d || e in f && g instanceof h) { return true; } return false; }
+
+function partialLogical() { if (a === b && c || d === e) { return true; } return false; }
+
+function arrayIsArray() { if (Array.isArray(value)) { return true; } return false; }
+
+function shadowedArray(Array) { if (Array.isArray(value)) { return true; } return false; }
+
+function optionalChain() { if (object?.property) { return true; } return false; }
+
+function sequence() { if (a, b) { return true; } return false; }
+
+function negation() { if (!test) { return true; } return false; }
+
+function deletion() { if (delete object.key) { return true; } return false; }
+
+function typeofValue() { if (typeof value) { return true; } return false; }
+
+function logicalWithLiteral() { if (a === b || false) { return true; } return false; }
+
+function assignment() { if (a = b) { return false; } return true; }
+
+function parenthesizedReturn() { if (test) { return (true); } return (false); }
+
+function nestedBlocks() { if (test) { { return true; } } return false; }
+
+function emptyStatements() { if (test) { ; return true; ; } return false; }
+
+function shadowedBooleanNegated(Boolean) { if (test) { return false; } return true; }
+
+function shadowedBooleanComparison(Boolean) { if (value > 0) { return true; } return false; }
+
+function differentEarlyReturn() { if (a) { return false; } if (b) { return true; } return false; }
+
+function elseIf() {
+	if (a) {
+		return 1;
+	} else if (b) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function multiline() {
+	if (test({
+		multiline: true,
+	})) {
+		return true;
+	}
+
+	return false;
+}
+
+function leadingComment() {
+	// leading comment
+	if (test) {
+		return true;
+	}
+	return false; // trailing comment
+}
+
+function noSemicolon() {
+	if (test) {
+		return true
+	}
+	return false
+}
+
+function inSwitch(value) {
+	switch (value) {
+		case 1:
+			if (test) return true;
+			return false;
+	}
+}
+
+const arrow = () => { if (test) { return true; } return false; };
+
+function globalThisArrayIsArray() { if (globalThis.Array.isArray(value)) { return true; } return false; }
+
+function optionalArrayIsArray() { if (Array?.isArray(value)) { return true; } return false; }
+
+function parenthesizedSequence() { if ((a, b)) { return true; } return false; }
+
+function negatedArrow() { if (() => {}) { return false; } return true; }
+
+function negatedAsyncArrow() { if (async () => {}) { return false; } return true; }
+
+```
+
+# Diagnostics
+```
+invalid.js:2:27 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ function ifElseBlocks() { if (test) { return true; } else { return false; } }
+      │                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ function ifElseStatements() { if (test) return true; else return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+      1   1 │   /* should generate diagnostics */
+      2     │ - function·ifElseBlocks()·{·if·(test)·{·return·true;·}·else·{·return·false;·}·}
+          2 │ + function·ifElseBlocks()·{·return·Boolean(test);·}
+      3   3 │   
+      4   4 │   function ifElseStatements() { if (test) return true; else return false; }
+  
+
+```
+
+```
+invalid.js:4:31 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    2 │ function ifElseBlocks() { if (test) { return true; } else { return false; } }
+    3 │ 
+  > 4 │ function ifElseStatements() { if (test) return true; else return false; }
+      │                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ function ifElseComparison() { if (value > 0) { return true; } else { return false; } }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+      2   2 │   function ifElseBlocks() { if (test) { return true; } else { return false; } }
+      3   3 │   
+      4     │ - function·ifElseStatements()·{·if·(test)·return·true;·else·return·false;·}
+          4 │ + function·ifElseStatements()·{·return·Boolean(test);·}
+      5   5 │   
+      6   6 │   function ifElseComparison() { if (value > 0) { return true; } else { return false; } }
+  
+
+```
+
+```
+invalid.js:6:31 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    4 │ function ifElseStatements() { if (test) return true; else return false; }
+    5 │ 
+  > 6 │ function ifElseComparison() { if (value > 0) { return true; } else { return false; } }
+      │                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ function ifElseNegated() { if (items.length) { return false; } else { return true; } }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+      4   4 │   function ifElseStatements() { if (test) return true; else return false; }
+      5   5 │   
+      6     │ - function·ifElseComparison()·{·if·(value·>·0)·{·return·true;·}·else·{·return·false;·}·}
+          6 │ + function·ifElseComparison()·{·return·value·>·0;·}
+      7   7 │   
+      8   8 │   function ifElseNegated() { if (items.length) { return false; } else { return true; } }
+  
+
+```
+
+```
+invalid.js:8:28 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+     6 │ function ifElseComparison() { if (value > 0) { return true; } else { return false; } }
+     7 │ 
+   > 8 │ function ifElseNegated() { if (items.length) { return false; } else { return true; } }
+       │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ function flat() { if (test) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+      6   6 │   function ifElseComparison() { if (value > 0) { return true; } else { return false; } }
+      7   7 │   
+      8     │ - function·ifElseNegated()·{·if·(items.length)·{·return·false;·}·else·{·return·true;·}·}
+          8 │ + function·ifElseNegated()·{·return·!items.length;·}
+      9   9 │   
+     10  10 │   function flat() { if (test) { return true; } return false; }
+  
+
+```
+
+```
+invalid.js:10:19 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+     8 │ function ifElseNegated() { if (items.length) { return false; } else { return true; } }
+     9 │ 
+  > 10 │ function flat() { if (test) { return true; } return false; }
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ function flatNegated() { if (test) { return false; } return true; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+      8   8 │   function ifElseNegated() { if (items.length) { return false; } else { return true; } }
+      9   9 │   
+     10     │ - function·flat()·{·if·(test)·{·return·true;·}·return·false;·}
+         10 │ + function·flat()·{·return·Boolean(test);·}
+     11  11 │   
+     12  12 │   function flatNegated() { if (test) { return false; } return true; }
+  
+
+```
+
+```
+invalid.js:12:26 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    10 │ function flat() { if (test) { return true; } return false; }
+    11 │ 
+  > 12 │ function flatNegated() { if (test) { return false; } return true; }
+       │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ function flatComparison() { if (value > 0) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     10  10 │   function flat() { if (test) { return true; } return false; }
+     11  11 │   
+     12     │ - function·flatNegated()·{·if·(test)·{·return·false;·}·return·true;·}
+         12 │ + function·flatNegated()·{·return·!test;·}
+     13  13 │   
+     14  14 │   function flatComparison() { if (value > 0) { return true; } return false; }
+  
+
+```
+
+```
+invalid.js:14:29 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    12 │ function flatNegated() { if (test) { return false; } return true; }
+    13 │ 
+  > 14 │ function flatComparison() { if (value > 0) { return true; } return false; }
+       │                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ function flatNegatedComparison() { if (value > 0) { return false; } return true; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     12  12 │   function flatNegated() { if (test) { return false; } return true; }
+     13  13 │   
+     14     │ - function·flatComparison()·{·if·(value·>·0)·{·return·true;·}·return·false;·}
+         14 │ + function·flatComparison()·{·return·value·>·0;·}
+     15  15 │   
+     16  16 │   function flatNegatedComparison() { if (value > 0) { return false; } return true; }
+  
+
+```
+
+```
+invalid.js:16:36 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    14 │ function flatComparison() { if (value > 0) { return true; } return false; }
+    15 │ 
+  > 16 │ function flatNegatedComparison() { if (value > 0) { return false; } return true; }
+       │                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 
+    18 │ function flatStatement() { if (test) return true; return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     14  14 │   function flatComparison() { if (value > 0) { return true; } return false; }
+     15  15 │   
+     16     │ - function·flatNegatedComparison()·{·if·(value·>·0)·{·return·false;·}·return·true;·}
+         16 │ + function·flatNegatedComparison()·{·return·!(value·>·0);·}
+     17  17 │   
+     18  18 │   function flatStatement() { if (test) return true; return false; }
+  
+
+```
+
+```
+invalid.js:18:28 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    16 │ function flatNegatedComparison() { if (value > 0) { return false; } return true; }
+    17 │ 
+  > 18 │ function flatStatement() { if (test) return true; return false; }
+       │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 
+    20 │ function booleanCall() { if (Boolean(value)) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     16  16 │   function flatNegatedComparison() { if (value > 0) { return false; } return true; }
+     17  17 │   
+     18     │ - function·flatStatement()·{·if·(test)·return·true;·return·false;·}
+         18 │ + function·flatStatement()·{·return·Boolean(test);·}
+     19  19 │   
+     20  20 │   function booleanCall() { if (Boolean(value)) { return true; } return false; }
+  
+
+```
+
+```
+invalid.js:20:26 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    18 │ function flatStatement() { if (test) return true; return false; }
+    19 │ 
+  > 20 │ function booleanCall() { if (Boolean(value)) { return true; } return false; }
+       │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ function globalThisBooleanCall() { if (globalThis.Boolean(value)) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     18  18 │   function flatStatement() { if (test) return true; return false; }
+     19  19 │   
+     20     │ - function·booleanCall()·{·if·(Boolean(value))·{·return·true;·}·return·false;·}
+         20 │ + function·booleanCall()·{·return·Boolean(value);·}
+     21  21 │   
+     22  22 │   function globalThisBooleanCall() { if (globalThis.Boolean(value)) { return true; } return false; }
+  
+
+```
+
+```
+invalid.js:22:36 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    20 │ function booleanCall() { if (Boolean(value)) { return true; } return false; }
+    21 │ 
+  > 22 │ function globalThisBooleanCall() { if (globalThis.Boolean(value)) { return true; } return false; }
+       │                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ 
+    24 │ function logicalOfComparisons() { if (a === b && c === d) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     20  20 │   function booleanCall() { if (Boolean(value)) { return true; } return false; }
+     21  21 │   
+     22     │ - function·globalThisBooleanCall()·{·if·(globalThis.Boolean(value))·{·return·true;·}·return·false;·}
+         22 │ + function·globalThisBooleanCall()·{·return·globalThis.Boolean(value);·}
+     23  23 │   
+     24  24 │   function logicalOfComparisons() { if (a === b && c === d) { return true; } return false; }
+  
+
+```
+
+```
+invalid.js:24:35 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    22 │ function globalThisBooleanCall() { if (globalThis.Boolean(value)) { return true; } return false; }
+    23 │ 
+  > 24 │ function logicalOfComparisons() { if (a === b && c === d) { return true; } return false; }
+       │                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ 
+    26 │ function logicalOfValues() { if (a && b) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     22  22 │   function globalThisBooleanCall() { if (globalThis.Boolean(value)) { return true; } return false; }
+     23  23 │   
+     24     │ - function·logicalOfComparisons()·{·if·(a·===·b·&&·c·===·d)·{·return·true;·}·return·false;·}
+         24 │ + function·logicalOfComparisons()·{·return·a·===·b·&&·c·===·d;·}
+     25  25 │   
+     26  26 │   function logicalOfValues() { if (a && b) { return true; } return false; }
+  
+
+```
+
+```
+invalid.js:26:30 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    24 │ function logicalOfComparisons() { if (a === b && c === d) { return true; } return false; }
+    25 │ 
+  > 26 │ function logicalOfValues() { if (a && b) { return true; } return false; }
+       │                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 
+    28 │ function longLogical() { if (a === b && c !== d || e in f && g instanceof h) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     24  24 │   function logicalOfComparisons() { if (a === b && c === d) { return true; } return false; }
+     25  25 │   
+     26     │ - function·logicalOfValues()·{·if·(a·&&·b)·{·return·true;·}·return·false;·}
+         26 │ + function·logicalOfValues()·{·return·Boolean(a·&&·b);·}
+     27  27 │   
+     28  28 │   function longLogical() { if (a === b && c !== d || e in f && g instanceof h) { return true; } return false; }
+  
+
+```
+
+```
+invalid.js:28:26 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    26 │ function logicalOfValues() { if (a && b) { return true; } return false; }
+    27 │ 
+  > 28 │ function longLogical() { if (a === b && c !== d || e in f && g instanceof h) { return true; } return false; }
+       │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ 
+    30 │ function partialLogical() { if (a === b && c || d === e) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     26  26 │   function logicalOfValues() { if (a && b) { return true; } return false; }
+     27  27 │   
+     28     │ - function·longLogical()·{·if·(a·===·b·&&·c·!==·d·||·e·in·f·&&·g·instanceof·h)·{·return·true;·}·return·false;·}
+         28 │ + function·longLogical()·{·return·a·===·b·&&·c·!==·d·||·e·in·f·&&·g·instanceof·h;·}
+     29  29 │   
+     30  30 │   function partialLogical() { if (a === b && c || d === e) { return true; } return false; }
+  
+
+```
+
+```
+invalid.js:30:29 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    28 │ function longLogical() { if (a === b && c !== d || e in f && g instanceof h) { return true; } return false; }
+    29 │ 
+  > 30 │ function partialLogical() { if (a === b && c || d === e) { return true; } return false; }
+       │                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ 
+    32 │ function arrayIsArray() { if (Array.isArray(value)) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     28  28 │   function longLogical() { if (a === b && c !== d || e in f && g instanceof h) { return true; } return false; }
+     29  29 │   
+     30     │ - function·partialLogical()·{·if·(a·===·b·&&·c·||·d·===·e)·{·return·true;·}·return·false;·}
+         30 │ + function·partialLogical()·{·return·Boolean(a·===·b·&&·c·||·d·===·e);·}
+     31  31 │   
+     32  32 │   function arrayIsArray() { if (Array.isArray(value)) { return true; } return false; }
+  
+
+```
+
+```
+invalid.js:32:27 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    30 │ function partialLogical() { if (a === b && c || d === e) { return true; } return false; }
+    31 │ 
+  > 32 │ function arrayIsArray() { if (Array.isArray(value)) { return true; } return false; }
+       │                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ 
+    34 │ function shadowedArray(Array) { if (Array.isArray(value)) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     30  30 │   function partialLogical() { if (a === b && c || d === e) { return true; } return false; }
+     31  31 │   
+     32     │ - function·arrayIsArray()·{·if·(Array.isArray(value))·{·return·true;·}·return·false;·}
+         32 │ + function·arrayIsArray()·{·return·Array.isArray(value);·}
+     33  33 │   
+     34  34 │   function shadowedArray(Array) { if (Array.isArray(value)) { return true; } return false; }
+  
+
+```
+
+```
+invalid.js:34:33 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    32 │ function arrayIsArray() { if (Array.isArray(value)) { return true; } return false; }
+    33 │ 
+  > 34 │ function shadowedArray(Array) { if (Array.isArray(value)) { return true; } return false; }
+       │                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ 
+    36 │ function optionalChain() { if (object?.property) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     32  32 │   function arrayIsArray() { if (Array.isArray(value)) { return true; } return false; }
+     33  33 │   
+     34     │ - function·shadowedArray(Array)·{·if·(Array.isArray(value))·{·return·true;·}·return·false;·}
+         34 │ + function·shadowedArray(Array)·{·return·Boolean(Array.isArray(value));·}
+     35  35 │   
+     36  36 │   function optionalChain() { if (object?.property) { return true; } return false; }
+  
+
+```
+
+```
+invalid.js:36:28 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    34 │ function shadowedArray(Array) { if (Array.isArray(value)) { return true; } return false; }
+    35 │ 
+  > 36 │ function optionalChain() { if (object?.property) { return true; } return false; }
+       │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ 
+    38 │ function sequence() { if (a, b) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     34  34 │   function shadowedArray(Array) { if (Array.isArray(value)) { return true; } return false; }
+     35  35 │   
+     36     │ - function·optionalChain()·{·if·(object?.property)·{·return·true;·}·return·false;·}
+         36 │ + function·optionalChain()·{·return·Boolean(object?.property);·}
+     37  37 │   
+     38  38 │   function sequence() { if (a, b) { return true; } return false; }
+  
+
+```
+
+```
+invalid.js:38:23 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    36 │ function optionalChain() { if (object?.property) { return true; } return false; }
+    37 │ 
+  > 38 │ function sequence() { if (a, b) { return true; } return false; }
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ 
+    40 │ function negation() { if (!test) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     36  36 │   function optionalChain() { if (object?.property) { return true; } return false; }
+     37  37 │   
+     38     │ - function·sequence()·{·if·(a,·b)·{·return·true;·}·return·false;·}
+         38 │ + function·sequence()·{·return·Boolean((a,·b));·}
+     39  39 │   
+     40  40 │   function negation() { if (!test) { return true; } return false; }
+  
+
+```
+
+```
+invalid.js:40:23 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    38 │ function sequence() { if (a, b) { return true; } return false; }
+    39 │ 
+  > 40 │ function negation() { if (!test) { return true; } return false; }
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ 
+    42 │ function deletion() { if (delete object.key) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     38  38 │   function sequence() { if (a, b) { return true; } return false; }
+     39  39 │   
+     40     │ - function·negation()·{·if·(!test)·{·return·true;·}·return·false;·}
+         40 │ + function·negation()·{·return·!test;·}
+     41  41 │   
+     42  42 │   function deletion() { if (delete object.key) { return true; } return false; }
+  
+
+```
+
+```
+invalid.js:42:23 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    40 │ function negation() { if (!test) { return true; } return false; }
+    41 │ 
+  > 42 │ function deletion() { if (delete object.key) { return true; } return false; }
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ 
+    44 │ function typeofValue() { if (typeof value) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     40  40 │   function negation() { if (!test) { return true; } return false; }
+     41  41 │   
+     42     │ - function·deletion()·{·if·(delete·object.key)·{·return·true;·}·return·false;·}
+         42 │ + function·deletion()·{·return·delete·object.key;·}
+     43  43 │   
+     44  44 │   function typeofValue() { if (typeof value) { return true; } return false; }
+  
+
+```
+
+```
+invalid.js:44:26 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    42 │ function deletion() { if (delete object.key) { return true; } return false; }
+    43 │ 
+  > 44 │ function typeofValue() { if (typeof value) { return true; } return false; }
+       │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    45 │ 
+    46 │ function logicalWithLiteral() { if (a === b || false) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     42  42 │   function deletion() { if (delete object.key) { return true; } return false; }
+     43  43 │   
+     44     │ - function·typeofValue()·{·if·(typeof·value)·{·return·true;·}·return·false;·}
+         44 │ + function·typeofValue()·{·return·Boolean(typeof·value);·}
+     45  45 │   
+     46  46 │   function logicalWithLiteral() { if (a === b || false) { return true; } return false; }
+  
+
+```
+
+```
+invalid.js:46:33 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    44 │ function typeofValue() { if (typeof value) { return true; } return false; }
+    45 │ 
+  > 46 │ function logicalWithLiteral() { if (a === b || false) { return true; } return false; }
+       │                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    47 │ 
+    48 │ function assignment() { if (a = b) { return false; } return true; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     44  44 │   function typeofValue() { if (typeof value) { return true; } return false; }
+     45  45 │   
+     46     │ - function·logicalWithLiteral()·{·if·(a·===·b·||·false)·{·return·true;·}·return·false;·}
+         46 │ + function·logicalWithLiteral()·{·return·a·===·b·||·false;·}
+     47  47 │   
+     48  48 │   function assignment() { if (a = b) { return false; } return true; }
+  
+
+```
+
+```
+invalid.js:48:25 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    46 │ function logicalWithLiteral() { if (a === b || false) { return true; } return false; }
+    47 │ 
+  > 48 │ function assignment() { if (a = b) { return false; } return true; }
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    49 │ 
+    50 │ function parenthesizedReturn() { if (test) { return (true); } return (false); }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     46  46 │   function logicalWithLiteral() { if (a === b || false) { return true; } return false; }
+     47  47 │   
+     48     │ - function·assignment()·{·if·(a·=·b)·{·return·false;·}·return·true;·}
+         48 │ + function·assignment()·{·return·!(a·=·b);·}
+     49  49 │   
+     50  50 │   function parenthesizedReturn() { if (test) { return (true); } return (false); }
+  
+
+```
+
+```
+invalid.js:50:34 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    48 │ function assignment() { if (a = b) { return false; } return true; }
+    49 │ 
+  > 50 │ function parenthesizedReturn() { if (test) { return (true); } return (false); }
+       │                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    51 │ 
+    52 │ function nestedBlocks() { if (test) { { return true; } } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     48  48 │   function assignment() { if (a = b) { return false; } return true; }
+     49  49 │   
+     50     │ - function·parenthesizedReturn()·{·if·(test)·{·return·(true);·}·return·(false);·}
+         50 │ + function·parenthesizedReturn()·{·return·Boolean(test);·}
+     51  51 │   
+     52  52 │   function nestedBlocks() { if (test) { { return true; } } return false; }
+  
+
+```
+
+```
+invalid.js:52:27 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    50 │ function parenthesizedReturn() { if (test) { return (true); } return (false); }
+    51 │ 
+  > 52 │ function nestedBlocks() { if (test) { { return true; } } return false; }
+       │                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ 
+    54 │ function emptyStatements() { if (test) { ; return true; ; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     50  50 │   function parenthesizedReturn() { if (test) { return (true); } return (false); }
+     51  51 │   
+     52     │ - function·nestedBlocks()·{·if·(test)·{·{·return·true;·}·}·return·false;·}
+         52 │ + function·nestedBlocks()·{·return·Boolean(test);·}
+     53  53 │   
+     54  54 │   function emptyStatements() { if (test) { ; return true; ; } return false; }
+  
+
+```
+
+```
+invalid.js:54:30 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    52 │ function nestedBlocks() { if (test) { { return true; } } return false; }
+    53 │ 
+  > 54 │ function emptyStatements() { if (test) { ; return true; ; } return false; }
+       │                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    55 │ 
+    56 │ function shadowedBooleanNegated(Boolean) { if (test) { return false; } return true; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     52  52 │   function nestedBlocks() { if (test) { { return true; } } return false; }
+     53  53 │   
+     54     │ - function·emptyStatements()·{·if·(test)·{·;·return·true;·;·}·return·false;·}
+         54 │ + function·emptyStatements()·{·return·Boolean(test);·}
+     55  55 │   
+     56  56 │   function shadowedBooleanNegated(Boolean) { if (test) { return false; } return true; }
+  
+
+```
+
+```
+invalid.js:56:44 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    54 │ function emptyStatements() { if (test) { ; return true; ; } return false; }
+    55 │ 
+  > 56 │ function shadowedBooleanNegated(Boolean) { if (test) { return false; } return true; }
+       │                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ 
+    58 │ function shadowedBooleanComparison(Boolean) { if (value > 0) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     54  54 │   function emptyStatements() { if (test) { ; return true; ; } return false; }
+     55  55 │   
+     56     │ - function·shadowedBooleanNegated(Boolean)·{·if·(test)·{·return·false;·}·return·true;·}
+         56 │ + function·shadowedBooleanNegated(Boolean)·{·return·!test;·}
+     57  57 │   
+     58  58 │   function shadowedBooleanComparison(Boolean) { if (value > 0) { return true; } return false; }
+  
+
+```
+
+```
+invalid.js:58:47 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    56 │ function shadowedBooleanNegated(Boolean) { if (test) { return false; } return true; }
+    57 │ 
+  > 58 │ function shadowedBooleanComparison(Boolean) { if (value > 0) { return true; } return false; }
+       │                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    59 │ 
+    60 │ function differentEarlyReturn() { if (a) { return false; } if (b) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     56  56 │   function shadowedBooleanNegated(Boolean) { if (test) { return false; } return true; }
+     57  57 │   
+     58     │ - function·shadowedBooleanComparison(Boolean)·{·if·(value·>·0)·{·return·true;·}·return·false;·}
+         58 │ + function·shadowedBooleanComparison(Boolean)·{·return·value·>·0;·}
+     59  59 │   
+     60  60 │   function differentEarlyReturn() { if (a) { return false; } if (b) { return true; } return false; }
+  
+
+```
+
+```
+invalid.js:60:60 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    58 │ function shadowedBooleanComparison(Boolean) { if (value > 0) { return true; } return false; }
+    59 │ 
+  > 60 │ function differentEarlyReturn() { if (a) { return false; } if (b) { return true; } return false; }
+       │                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    61 │ 
+    62 │ function elseIf() {
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     58  58 │   function shadowedBooleanComparison(Boolean) { if (value > 0) { return true; } return false; }
+     59  59 │   
+     60     │ - function·differentEarlyReturn()·{·if·(a)·{·return·false;·}·if·(b)·{·return·true;·}·return·false;·}
+         60 │ + function·differentEarlyReturn()·{·if·(a)·{·return·false;·}·return·Boolean(b);·}
+     61  61 │   
+     62  62 │   function elseIf() {
+  
+
+```
+
+```
+invalid.js:65:9 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    63 │ 	if (a) {
+    64 │ 		return 1;
+  > 65 │ 	} else if (b) {
+       │ 	       ^^^^^^^^
+  > 66 │ 		return true;
+  > 67 │ 	} else {
+  > 68 │ 		return false;
+  > 69 │ 	}
+       │ 	^
+    70 │ }
+    71 │ 
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     63  63 │     if (a) {
+     64  64 │       return 1;
+     65     │ - → }·else·if·(b)·{
+     66     │ - → → return·true;
+     67     │ - → }·else·{
+     68     │ - → → return·false;
+     69     │ - → }
+         65 │ + → }·else·return·Boolean(b);
+     70  66 │   }
+     71  67 │   
+  
+
+```
+
+```
+invalid.js:73:2 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    72 │ function multiline() {
+  > 73 │ 	if (test({
+       │ 	^^^^^^^^^^
+  > 74 │ 		multiline: true,
+        ...
+  > 78 │ 
+  > 79 │ 	return false;
+       │ 	^^^^^^^^^^^^^
+    80 │ }
+    81 │ 
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     71  71 │   
+     72  72 │   function multiline() {
+     73     │ - → if·(test({
+         73 │ + → return·Boolean(test({
+     74  74 │       multiline: true,
+     75     │ - → }))·{
+     76     │ - → → return·true;
+     77     │ - → }
+     78     │ - 
+     79     │ - → return·false;
+         75 │ + → }));
+     80  76 │   }
+     81  77 │   
+  
+
+```
+
+```
+invalid.js:84:2 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    82 │ function leadingComment() {
+    83 │ 	// leading comment
+  > 84 │ 	if (test) {
+       │ 	^^^^^^^^^^^
+  > 85 │ 		return true;
+  > 86 │ 	}
+  > 87 │ 	return false; // trailing comment
+       │ 	^^^^^^^^^^^^^
+    88 │ }
+    89 │ 
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     82  82 │   function leadingComment() {
+     83  83 │     // leading comment
+     84     │ - → if·(test)·{
+     85     │ - → → return·true;
+     86     │ - → }
+     87     │ - → return·false;·//·trailing·comment
+         84 │ + → return·Boolean(test);·//·trailing·comment
+     88  85 │   }
+     89  86 │   
+  
+
+```
+
+```
+invalid.js:91:2 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    90 │ function noSemicolon() {
+  > 91 │ 	if (test) {
+       │ 	^^^^^^^^^^^
+  > 92 │ 		return true
+  > 93 │ 	}
+  > 94 │ 	return false
+       │ 	^^^^^^^^^^^^
+    95 │ }
+    96 │ 
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     89  89 │   
+     90  90 │   function noSemicolon() {
+     91     │ - → if·(test)·{
+     92     │ - → → return·true
+     93     │ - → }
+     94     │ - → return·false
+         91 │ + → return·Boolean(test);
+     95  92 │   }
+     96  93 │   
+  
+
+```
+
+```
+invalid.js:100:4 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+     98 │ 	switch (value) {
+     99 │ 		case 1:
+  > 100 │ 			if (test) return true;
+        │ 			^^^^^^^^^^^^^^^^^^^^^^
+  > 101 │ 			return false;
+        │ 			^^^^^^^^^^^^^
+    102 │ 	}
+    103 │ }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     98  98 │     switch (value) {
+     99  99 │       case 1:
+    100     │ - → → → if·(test)·return·true;
+    101     │ - → → → return·false;
+        100 │ + → → → return·Boolean(test);
+    102 101 │     }
+    103 102 │   }
+  
+
+```
+
+```
+invalid.js:105:23 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    103 │ }
+    104 │ 
+  > 105 │ const arrow = () => { if (test) { return true; } return false; };
+        │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    106 │ 
+    107 │ function globalThisArrayIsArray() { if (globalThis.Array.isArray(value)) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+    103 103 │   }
+    104 104 │   
+    105     │ - const·arrow·=·()·=>·{·if·(test)·{·return·true;·}·return·false;·};
+        105 │ + const·arrow·=·()·=>·{·return·Boolean(test);·};
+    106 106 │   
+    107 107 │   function globalThisArrayIsArray() { if (globalThis.Array.isArray(value)) { return true; } return false; }
+  
+
+```
+
+```
+invalid.js:107:37 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    105 │ const arrow = () => { if (test) { return true; } return false; };
+    106 │ 
+  > 107 │ function globalThisArrayIsArray() { if (globalThis.Array.isArray(value)) { return true; } return false; }
+        │                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    108 │ 
+    109 │ function optionalArrayIsArray() { if (Array?.isArray(value)) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+    105 105 │   const arrow = () => { if (test) { return true; } return false; };
+    106 106 │   
+    107     │ - function·globalThisArrayIsArray()·{·if·(globalThis.Array.isArray(value))·{·return·true;·}·return·false;·}
+        107 │ + function·globalThisArrayIsArray()·{·return·globalThis.Array.isArray(value);·}
+    108 108 │   
+    109 109 │   function optionalArrayIsArray() { if (Array?.isArray(value)) { return true; } return false; }
+  
+
+```
+
+```
+invalid.js:109:35 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    107 │ function globalThisArrayIsArray() { if (globalThis.Array.isArray(value)) { return true; } return false; }
+    108 │ 
+  > 109 │ function optionalArrayIsArray() { if (Array?.isArray(value)) { return true; } return false; }
+        │                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    110 │ 
+    111 │ function parenthesizedSequence() { if ((a, b)) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+    107 107 │   function globalThisArrayIsArray() { if (globalThis.Array.isArray(value)) { return true; } return false; }
+    108 108 │   
+    109     │ - function·optionalArrayIsArray()·{·if·(Array?.isArray(value))·{·return·true;·}·return·false;·}
+        109 │ + function·optionalArrayIsArray()·{·return·Boolean(Array?.isArray(value));·}
+    110 110 │   
+    111 111 │   function parenthesizedSequence() { if ((a, b)) { return true; } return false; }
+  
+
+```
+
+```
+invalid.js:111:36 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    109 │ function optionalArrayIsArray() { if (Array?.isArray(value)) { return true; } return false; }
+    110 │ 
+  > 111 │ function parenthesizedSequence() { if ((a, b)) { return true; } return false; }
+        │                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    112 │ 
+    113 │ function negatedArrow() { if (() => {}) { return false; } return true; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+    109 109 │   function optionalArrayIsArray() { if (Array?.isArray(value)) { return true; } return false; }
+    110 110 │   
+    111     │ - function·parenthesizedSequence()·{·if·((a,·b))·{·return·true;·}·return·false;·}
+        111 │ + function·parenthesizedSequence()·{·return·Boolean((a,·b));·}
+    112 112 │   
+    113 113 │   function negatedArrow() { if (() => {}) { return false; } return true; }
+  
+
+```
+
+```
+invalid.js:113:27 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    111 │ function parenthesizedSequence() { if ((a, b)) { return true; } return false; }
+    112 │ 
+  > 113 │ function negatedArrow() { if (() => {}) { return false; } return true; }
+        │                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    114 │ 
+    115 │ function negatedAsyncArrow() { if (async () => {}) { return false; } return true; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+    111 111 │   function parenthesizedSequence() { if ((a, b)) { return true; } return false; }
+    112 112 │   
+    113     │ - function·negatedArrow()·{·if·(()·=>·{})·{·return·false;·}·return·true;·}
+        113 │ + function·negatedArrow()·{·return·!(()·=>·{});·}
+    114 114 │   
+    115 115 │   function negatedAsyncArrow() { if (async () => {}) { return false; } return true; }
+  
+
+```
+
+```
+invalid.js:115:32 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    113 │ function negatedArrow() { if (() => {}) { return false; } return true; }
+    114 │ 
+  > 115 │ function negatedAsyncArrow() { if (async () => {}) { return false; } return true; }
+        │                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    116 │ 
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+    113 113 │   function negatedArrow() { if (() => {}) { return false; } return true; }
+    114 114 │   
+    115     │ - function·negatedAsyncArrow()·{·if·(async·()·=>·{})·{·return·false;·}·return·true;·}
+        115 │ + function·negatedAsyncArrow()·{·return·!(async·()·=>·{});·}
+    116 116 │   
+  
+
+```

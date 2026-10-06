@@ -1,0 +1,407 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+function asBoolean() { if (value as boolean) { return true; } return false; }
+
+function typedParameter(value: boolean) { if (value) { return true; } return false; }
+
+function satisfiesBoolean() { if (value satisfies boolean) { return true; } return false; }
+
+function nonNull() { if (value!) { return true; } return false; }
+
+function typeAssertion() { if (<boolean>value) { return true; } return false; }
+
+function satisfiesNegated() { if (value satisfies boolean) { return false; } return true; }
+
+function asConstReturn() {
+	if (a) {
+		return true as const;
+	}
+
+	return false;
+}
+
+function asBooleanReturn() {
+	if (a) {
+		return true as boolean;
+	}
+
+	return false;
+}
+
+function satisfiesReturn() {
+	if (a) {
+		return true satisfies boolean;
+	}
+
+	return false;
+}
+
+function asConstNegated() {
+	if (a) {
+		return false as const;
+	}
+
+	return true;
+}
+
+function nonNullNegated() {
+	if (a) {
+		return false!;
+	}
+
+	return true;
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:24 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ function asBoolean() { if (value as boolean) { return true; } return false; }
+      │                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ function typedParameter(value: boolean) { if (value) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - function·asBoolean()·{·if·(value·as·boolean)·{·return·true;·}·return·false;·}
+        2 │ + function·asBoolean()·{·return·Boolean(value·as·boolean);·}
+     3  3 │   
+     4  4 │   function typedParameter(value: boolean) { if (value) { return true; } return false; }
+  
+
+```
+
+```
+invalid.ts:4:43 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    2 │ function asBoolean() { if (value as boolean) { return true; } return false; }
+    3 │ 
+  > 4 │ function typedParameter(value: boolean) { if (value) { return true; } return false; }
+      │                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ function satisfiesBoolean() { if (value satisfies boolean) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     2  2 │   function asBoolean() { if (value as boolean) { return true; } return false; }
+     3  3 │   
+     4    │ - function·typedParameter(value:·boolean)·{·if·(value)·{·return·true;·}·return·false;·}
+        4 │ + function·typedParameter(value:·boolean)·{·return·Boolean(value);·}
+     5  5 │   
+     6  6 │   function satisfiesBoolean() { if (value satisfies boolean) { return true; } return false; }
+  
+
+```
+
+```
+invalid.ts:6:31 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    4 │ function typedParameter(value: boolean) { if (value) { return true; } return false; }
+    5 │ 
+  > 6 │ function satisfiesBoolean() { if (value satisfies boolean) { return true; } return false; }
+      │                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ function nonNull() { if (value!) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     4  4 │   function typedParameter(value: boolean) { if (value) { return true; } return false; }
+     5  5 │   
+     6    │ - function·satisfiesBoolean()·{·if·(value·satisfies·boolean)·{·return·true;·}·return·false;·}
+        6 │ + function·satisfiesBoolean()·{·return·Boolean(value·satisfies·boolean);·}
+     7  7 │   
+     8  8 │   function nonNull() { if (value!) { return true; } return false; }
+  
+
+```
+
+```
+invalid.ts:8:22 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+     6 │ function satisfiesBoolean() { if (value satisfies boolean) { return true; } return false; }
+     7 │ 
+   > 8 │ function nonNull() { if (value!) { return true; } return false; }
+       │                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ function typeAssertion() { if (<boolean>value) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     6  6 │   function satisfiesBoolean() { if (value satisfies boolean) { return true; } return false; }
+     7  7 │   
+     8    │ - function·nonNull()·{·if·(value!)·{·return·true;·}·return·false;·}
+        8 │ + function·nonNull()·{·return·Boolean(value!);·}
+     9  9 │   
+    10 10 │   function typeAssertion() { if (<boolean>value) { return true; } return false; }
+  
+
+```
+
+```
+invalid.ts:10:28 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+     8 │ function nonNull() { if (value!) { return true; } return false; }
+     9 │ 
+  > 10 │ function typeAssertion() { if (<boolean>value) { return true; } return false; }
+       │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ function satisfiesNegated() { if (value satisfies boolean) { return false; } return true; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+     8  8 │   function nonNull() { if (value!) { return true; } return false; }
+     9  9 │   
+    10    │ - function·typeAssertion()·{·if·(<boolean>value)·{·return·true;·}·return·false;·}
+       10 │ + function·typeAssertion()·{·return·Boolean(<boolean>value);·}
+    11 11 │   
+    12 12 │   function satisfiesNegated() { if (value satisfies boolean) { return false; } return true; }
+  
+
+```
+
+```
+invalid.ts:12:31 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    10 │ function typeAssertion() { if (<boolean>value) { return true; } return false; }
+    11 │ 
+  > 12 │ function satisfiesNegated() { if (value satisfies boolean) { return false; } return true; }
+       │                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ function asConstReturn() {
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+    10 10 │   function typeAssertion() { if (<boolean>value) { return true; } return false; }
+    11 11 │   
+    12    │ - function·satisfiesNegated()·{·if·(value·satisfies·boolean)·{·return·false;·}·return·true;·}
+       12 │ + function·satisfiesNegated()·{·return·!(value·satisfies·boolean);·}
+    13 13 │   
+    14 14 │   function asConstReturn() {
+  
+
+```
+
+```
+invalid.ts:15:2 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    14 │ function asConstReturn() {
+  > 15 │ 	if (a) {
+       │ 	^^^^^^^^
+  > 16 │ 		return true as const;
+  > 17 │ 	}
+  > 18 │ 
+  > 19 │ 	return false;
+       │ 	^^^^^^^^^^^^^
+    20 │ }
+    21 │ 
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+    13 13 │   
+    14 14 │   function asConstReturn() {
+    15    │ - → if·(a)·{
+    16    │ - → → return·true·as·const;
+    17    │ - → }
+    18    │ - 
+    19    │ - → return·false;
+       15 │ + → return·Boolean(a);
+    20 16 │   }
+    21 17 │   
+  
+
+```
+
+```
+invalid.ts:23:2 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    22 │ function asBooleanReturn() {
+  > 23 │ 	if (a) {
+       │ 	^^^^^^^^
+  > 24 │ 		return true as boolean;
+  > 25 │ 	}
+  > 26 │ 
+  > 27 │ 	return false;
+       │ 	^^^^^^^^^^^^^
+    28 │ }
+    29 │ 
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+    21 21 │   
+    22 22 │   function asBooleanReturn() {
+    23    │ - → if·(a)·{
+    24    │ - → → return·true·as·boolean;
+    25    │ - → }
+    26    │ - 
+    27    │ - → return·false;
+       23 │ + → return·Boolean(a);
+    28 24 │   }
+    29 25 │   
+  
+
+```
+
+```
+invalid.ts:31:2 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    30 │ function satisfiesReturn() {
+  > 31 │ 	if (a) {
+       │ 	^^^^^^^^
+  > 32 │ 		return true satisfies boolean;
+  > 33 │ 	}
+  > 34 │ 
+  > 35 │ 	return false;
+       │ 	^^^^^^^^^^^^^
+    36 │ }
+    37 │ 
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+    29 29 │   
+    30 30 │   function satisfiesReturn() {
+    31    │ - → if·(a)·{
+    32    │ - → → return·true·satisfies·boolean;
+    33    │ - → }
+    34    │ - 
+    35    │ - → return·false;
+       31 │ + → return·Boolean(a);
+    36 32 │   }
+    37 33 │   
+  
+
+```
+
+```
+invalid.ts:39:2 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    38 │ function asConstNegated() {
+  > 39 │ 	if (a) {
+       │ 	^^^^^^^^
+  > 40 │ 		return false as const;
+  > 41 │ 	}
+  > 42 │ 
+  > 43 │ 	return true;
+       │ 	^^^^^^^^^^^^
+    44 │ }
+    45 │ 
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+    37 37 │   
+    38 38 │   function asConstNegated() {
+    39    │ - → if·(a)·{
+    40    │ - → → return·false·as·const;
+    41    │ - → }
+    42    │ - 
+    43    │ - → return·true;
+       39 │ + → return·!a;
+    44 40 │   }
+    45 41 │   
+  
+
+```
+
+```
+invalid.ts:47:2 lint/nursery/useSimplifiedBooleanReturn  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    46 │ function nonNullNegated() {
+  > 47 │ 	if (a) {
+       │ 	^^^^^^^^
+  > 48 │ 		return false!;
+  > 49 │ 	}
+  > 50 │ 
+  > 51 │ 	return true;
+       │ 	^^^^^^^^^^^^
+    52 │ }
+    53 │ 
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Return the condition directly.
+  
+    45 45 │   
+    46 46 │   function nonNullNegated() {
+    47    │ - → if·(a)·{
+    48    │ - → → return·false!;
+    49    │ - → }
+    50    │ - 
+    51    │ - → return·true;
+       47 │ + → return·!a;
+    52 48 │   }
+    53 49 │   
+  
+
+```

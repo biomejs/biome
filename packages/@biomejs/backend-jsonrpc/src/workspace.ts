@@ -3131,6 +3131,11 @@ export interface Nursery {
 	 */
 	useScopedStyles?: UseScopedStylesConfiguration;
 	/**
+	 * Return conditions directly instead of using if statements that only return true or false.
+	 * See https://biomejs.dev/linter/rules/use-simplified-boolean-return
+	 */
+	useSimplifiedBooleanReturn?: UseSimplifiedBooleanReturnConfiguration;
+	/**
 	 * Enforce the sorting of CSS utility classes.
 	 * See https://biomejs.dev/linter/rules/use-sorted-classes
 	 */
@@ -5448,6 +5453,9 @@ export type UseRegexpTestConfiguration =
 export type UseScopedStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseScopedStylesOptions;
+export type UseSimplifiedBooleanReturnConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseSimplifiedBooleanReturnOptions;
 export type UseSortedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSortedClassesOptions;
@@ -7947,6 +7955,14 @@ export interface RuleWithUseScopedStylesOptions {
 	level: RulePlainConfiguration;
 	options?: UseScopedStylesOptions;
 }
+export interface RuleWithUseSimplifiedBooleanReturnOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseSimplifiedBooleanReturnOptions;
+}
 export interface RuleWithUseSortedClassesOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -10133,6 +10149,7 @@ export type UseReduceTypeParameterOptions = {};
 export type UseRegexpExecOptions = {};
 export type UseRegexpTestOptions = {};
 export type UseScopedStylesOptions = {};
+export type UseSimplifiedBooleanReturnOptions = {};
 export interface UseSortedClassesOptions {
 	/**
 	 * Additional attributes that will be sorted.
@@ -11508,6 +11525,7 @@ export type Category =
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useRegexpTest"
 	| "lint/nursery/useScopedStyles"
+	| "lint/nursery/useSimplifiedBooleanReturn"
 	| "lint/nursery/useSingleTopLevelHeading"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useStrictBooleanExpressions"
