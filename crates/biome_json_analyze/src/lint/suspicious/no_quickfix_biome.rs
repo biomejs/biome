@@ -8,7 +8,7 @@ use biome_json_factory::make::{
 use biome_json_syntax::{
     AnyJsonMemberName, AnyJsonValue, JsonMember, JsonObjectValue, T, inner_string_text,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TextRange, TriviaPieceKind};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TextRange};
 use biome_rule_options::no_quickfix_biome::NoQuickfixBiomeOptions;
 
 declare_lint_rule! {
@@ -168,7 +168,7 @@ impl Rule for NoQuickfixBiome {
                 AnyJsonMemberName::JsonMemberName(json_member_name(json_string_literal(
                     "source.fixAll.biome",
                 ))),
-                token(T![:]).with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]),
+                token(T![:]).with_trailing_space(),
                 if path.as_str().contains("zed") || path.as_str().contains(".zed") {
                     AnyJsonValue::JsonBooleanValue(json_boolean_value(token(T![true])))
                 } else {

@@ -1,16 +1,13 @@
 use biome_diagnostics::Severity;
 use biome_analyze::{
-    FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext,
-    declare_lint_rule,
+    FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
-use biome_js_syntax::{
-    AnyJsExpression, JsArrowFunctionExpression, JsCallExpression, JsSyntaxKind,
-};
-use biome_rowan::{AstNode, BatchMutationExt, TokenText, TriviaPieceKind};
+use biome_js_syntax::{AnyJsExpression, JsArrowFunctionExpression, JsCallExpression, JsSyntaxKind};
+use biome_rowan::{AstNode, BatchMutationExt, TokenText};
 
 use biome_rule_options::no_playwright_missing_await::NoPlaywrightMissingAwaitOptions;
 
@@ -171,8 +168,7 @@ impl Rule for NoPlaywrightMissingAwait {
             let expression: AnyJsExpression = promise_combinator.clone().into();
             let trimmed_expression = expression.clone().trim_comments_and_trivia()?;
             let await_expr = AnyJsExpression::JsAwaitExpression(make::js_await_expression(
-                make::token(JsSyntaxKind::AWAIT_KW)
-                    .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                make::token(JsSyntaxKind::AWAIT_KW).with_trailing_space(),
                 trimmed_expression,
             ));
 
@@ -192,8 +188,7 @@ impl Rule for NoPlaywrightMissingAwait {
         let expression: AnyJsExpression = call_expr.clone().into();
         let trimmed_expression = expression.clone().trim_comments_and_trivia()?;
         let await_expr = AnyJsExpression::JsAwaitExpression(make::js_await_expression(
-            make::token(JsSyntaxKind::AWAIT_KW)
-                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            make::token(JsSyntaxKind::AWAIT_KW).with_trailing_space(),
             trimmed_expression,
         ));
 
@@ -319,7 +314,9 @@ fn get_async_expect_matcher(
     }
 
     let matcher_text = matcher_name.text();
-    let is_playwright_only = PLAYWRIGHT_ONLY_MATCHERS.binary_search(&matcher_text).is_ok();
+    let is_playwright_only = PLAYWRIGHT_ONLY_MATCHERS
+        .binary_search(&matcher_text)
+        .is_ok();
     let is_overlapping = OVERLAPPING_MATCHERS.binary_search(&matcher_text).is_ok();
 
     if !is_playwright_only && !is_overlapping {

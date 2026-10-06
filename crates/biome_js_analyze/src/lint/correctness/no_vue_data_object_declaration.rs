@@ -173,20 +173,17 @@ impl Rule for NoVueDataObjectDeclaration {
             make::js_parameters(
                 make::token(T!['(']),
                 make::js_parameter_list(None, None),
-                make::token(T![')']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                make::token(T![')']).with_trailing_space(),
             ),
             make::js_function_body(
                 make::token(T!['{']).with_trailing_trivia([(TriviaPieceKind::Newline, "\n")]),
                 make::js_directive_list(None),
                 make::js_statement_list([AnyJsStatement::JsReturnStatement(
-                    make::js_return_statement(
-                        make::token(T![return])
-                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                    )
-                    .with_argument(data_expr.clone())
-                    .build(),
+                    make::js_return_statement(make::token(T![return]).with_trailing_space())
+                        .with_argument(data_expr.clone())
+                        .build(),
                 )]),
-                make::token(T!['}']).with_leading_trivia([(TriviaPieceKind::Newline, "\n")]),
+                make::token(T!['}']).with_leading_newline(),
             ),
         )
         .build();

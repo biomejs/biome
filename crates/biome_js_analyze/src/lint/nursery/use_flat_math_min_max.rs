@@ -11,9 +11,7 @@ use biome_js_syntax::{
     AnyJsCallArgument, JsCallArgumentList, JsCallArguments, JsCallExpression, JsLanguage,
     JsParenthesizedExpression, JsSyntaxElement, T, global_identifier,
 };
-use biome_rowan::{
-    AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind, WalkEvent, syntax::Preorder,
-};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, WalkEvent, syntax::Preorder};
 use biome_rule_options::use_flat_math_min_max::UseFlatMathMinMaxOptions;
 
 use crate::{JsRuleAction, services::semantic::Semantic};
@@ -98,25 +96,20 @@ impl Rule for UseFlatMathMinMax {
         let mut failed = false;
         let new_argument_list = {
             let flattened_arguments = FlattenedArguments::new(call, *method, ctx.model())?;
-            let flattened_arguments =
-                flattened_arguments.map_while(|argument| match argument {
-                    Ok(argument) => Some(argument),
-                    Err(()) => {
-                        failed = true;
-                        None
-                    }
-                });
+            let flattened_arguments = flattened_arguments.map_while(|argument| match argument {
+                Ok(argument) => Some(argument),
+                Err(()) => {
+                    failed = true;
+                    None
+                }
+            });
             let mut first = true;
             let slots = flattened_arguments.flat_map(move |argument| {
                 let separator: Option<JsSyntaxElement> = if first {
                     first = false;
                     None
                 } else {
-                    Some(
-                        make::token(T![,])
-                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
-                            .into(),
-                    )
+                    Some(make::token(T![,]).with_trailing_space().into())
                 };
                 separator
                     .into_iter()
@@ -124,10 +117,7 @@ impl Rule for UseFlatMathMinMax {
                     .map(Some)
             });
             JsCallArgumentList::unwrap_cast(
-                old_arguments
-                    .args()
-                    .into_syntax()
-                    .splice_slots(.., slots),
+                old_arguments.args().into_syntax().splice_slots(.., slots),
             )
         };
         if failed {
@@ -232,8 +222,7 @@ fn is_nested_in_same_call(
     method: MathMethod,
     model: &SemanticModel,
 ) -> bool {
-    call
-        .syntax()
+    call.syntax()
         .ancestors()
         .skip(1)
         .find(|parent| !JsParenthesizedExpression::can_cast(parent.kind()))
@@ -251,11 +240,7 @@ struct FlattenedArguments<'a> {
 }
 
 impl<'a> FlattenedArguments<'a> {
-    fn new(
-        call: &JsCallExpression,
-        method: MathMethod,
-        model: &'a SemanticModel,
-    ) -> Option<Self> {
+    fn new(call: &JsCallExpression, method: MathMethod, model: &'a SemanticModel) -> Option<Self> {
         let arguments = call.arguments().ok()?.args();
         Some(Self {
             preorder: arguments.syntax().preorder(),

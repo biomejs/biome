@@ -5,7 +5,7 @@ use biome_console::markup;
 use biome_diagnostics::{Applicability, category};
 use biome_json_factory::make;
 use biome_json_syntax::{AnyJsonValue, JsonMember, JsonRoot, T};
-use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{AstNode, BatchMutationExt};
 
 declare_migration! {
     pub(crate) OrganizeImports {
@@ -79,30 +79,27 @@ impl Rule for OrganizeImports {
 
         let action_member = make::json_member(
             make::json_member_name(make::json_string_literal("organizeImports")).into(),
-            make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-            make::json_string_value(
-                make::json_string_literal(on_or_off)
-                    .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-            )
-            .into(),
+            make::token(T![:]).with_trailing_space(),
+            make::json_string_value(make::json_string_literal(on_or_off).with_trailing_space())
+                .into(),
         );
         let source_member = make::json_member(
             make::json_member_name(make::json_string_literal("source")).into(),
-            make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            make::token(T![:]).with_trailing_space(),
             make::json_object_value(
-                make::token(T!['{']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                make::token(T!['{']).with_trailing_space(),
                 make::json_member_list([action_member], []),
-                make::token(T!['}']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                make::token(T!['}']).with_trailing_space(),
             )
             .into(),
         );
         let actions_member = make::json_member(
             make::json_member_name(make::json_string_literal("actions")).into(),
-            make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            make::token(T![:]).with_trailing_space(),
             make::json_object_value(
-                make::token(T!['{']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                make::token(T!['{']).with_trailing_space(),
                 make::json_member_list([source_member], []),
-                make::token(T!['}']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                make::token(T!['}']).with_trailing_space(),
             )
             .into(),
         );
@@ -111,9 +108,9 @@ impl Rule for OrganizeImports {
                 make::json_string_literal("assist").prepend_trivia_pieces(indent.clone()),
             )
             .into(),
-            make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            make::token(T![:]).with_trailing_space(),
             AnyJsonValue::JsonObjectValue(make::json_object_value(
-                make::token(T!['{']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                make::token(T!['{']).with_trailing_space(),
                 make::json_member_list([actions_member], []),
                 make::token(T!['}']),
             )),

@@ -15,8 +15,8 @@ use biome_js_syntax::{
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{
-    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, TextRange, TriviaPieceKind,
-    WalkEvent, declare_node_union,
+    AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, TextRange, WalkEvent,
+    declare_node_union,
 };
 use biome_rule_options::use_arrow_function::UseArrowFunctionOptions;
 
@@ -209,7 +209,7 @@ impl Rule for UseArrowFunction {
         };
         let mut arrow_function_builder = make::js_arrow_function_expression(
             function_expression.parameters().ok()?.into(),
-            make::token(T![=>]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            make::token(T![=>]).with_trailing_space(),
             to_arrow_body(function_expression.body().ok()?),
         );
         if let Some(async_token) = function_expression.async_token() {
