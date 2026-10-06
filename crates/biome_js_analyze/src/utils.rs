@@ -4,6 +4,7 @@ use std::iter;
 
 pub mod batch;
 pub mod rename;
+pub mod same_reference;
 #[cfg(test)]
 pub mod tests;
 

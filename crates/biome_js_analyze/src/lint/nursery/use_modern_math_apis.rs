@@ -1,4 +1,4 @@
-use crate::{JsRuleAction, services::semantic::Semantic};
+use crate::{JsRuleAction, services::semantic::Semantic, utils::same_reference::is_same_reference};
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
@@ -7,9 +7,8 @@ use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, AnyJsName,
-    JsBinaryExpression, JsBinaryOperator, JsCallExpression, T, global_identifier,
-    numbers::canonicalize_js_bigint_literal, unescape_js_string,
+    AnyJsCallArgument, AnyJsExpression, AnyJsName, JsBinaryExpression, JsBinaryOperator,
+    JsCallExpression, T, global_identifier,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, Direction};
 use biome_rule_options::use_modern_math_apis::UseModernMathApisOptions;
@@ -330,126 +329,6 @@ fn square_base(expression: &AnyJsExpression) -> Option<AnyJsExpression> {
             Some(left)
         }
         _ => None,
-    }
-}
-
-fn is_same_reference(left: AnyJsExpression, right: AnyJsExpression) -> Option<bool> {
-    let mut expressions = vec![(left, right)];
-
-    while let Some((left, right)) = expressions.pop() {
-        let left = unwrap_reference(left)?;
-        let right = unwrap_reference(right)?;
-
-        match (&left, &right) {
-            (
-                AnyJsExpression::JsIdentifierExpression(left),
-                AnyJsExpression::JsIdentifierExpression(right),
-            ) => {
-                if left.name().ok()?.to_trimmed_text() != right.name().ok()?.to_trimmed_text() {
-                    return Some(false);
-                }
-            }
-            (AnyJsExpression::JsThisExpression(_), AnyJsExpression::JsThisExpression(_))
-            | (AnyJsExpression::JsSuperExpression(_), AnyJsExpression::JsSuperExpression(_)) => {}
-            (
-                AnyJsExpression::AnyJsLiteralExpression(left),
-                AnyJsExpression::AnyJsLiteralExpression(right),
-            ) => {
-                if !is_same_literal(left, right)? {
-                    return Some(false);
-                }
-            }
-            _ => {
-                let left_member = AnyJsMemberExpression::cast(left.into_syntax())?;
-                let right_member = AnyJsMemberExpression::cast(right.into_syntax())?;
-                expressions.push((left_member.object().ok()?, right_member.object().ok()?));
-
-                match (left_member, right_member) {
-                    (
-                        AnyJsMemberExpression::JsStaticMemberExpression(left),
-                        AnyJsMemberExpression::JsStaticMemberExpression(right),
-                    ) => {
-                        if left.operator_token().ok()?.kind()
-                            != right.operator_token().ok()?.kind()
-                            || left.member().ok()?.value_token().ok()?.text_trimmed()
-                                != right.member().ok()?.value_token().ok()?.text_trimmed()
-                        {
-                            return Some(false);
-                        }
-                    }
-                    (
-                        AnyJsMemberExpression::JsComputedMemberExpression(left),
-                        AnyJsMemberExpression::JsComputedMemberExpression(right),
-                    ) => {
-                        if left.optional_chain_token().is_some()
-                            != right.optional_chain_token().is_some()
-                        {
-                            return Some(false);
-                        }
-                        expressions.push((left.member().ok()?, right.member().ok()?));
-                    }
-                    _ => return Some(false),
-                }
-            }
-        }
-    }
-
-    Some(true)
-}
-
-fn is_same_literal(left: &AnyJsLiteralExpression, right: &AnyJsLiteralExpression) -> Option<bool> {
-    match (left, right) {
-        (
-            AnyJsLiteralExpression::JsBigintLiteralExpression(left),
-            AnyJsLiteralExpression::JsBigintLiteralExpression(right),
-        ) => Some(
-            canonicalize_js_bigint_literal(left.value_token().ok()?.text_trimmed())?
-                == canonicalize_js_bigint_literal(right.value_token().ok()?.text_trimmed())?,
-        ),
-        (
-            AnyJsLiteralExpression::JsBooleanLiteralExpression(left),
-            AnyJsLiteralExpression::JsBooleanLiteralExpression(right),
-        ) => Some(
-            left.value_token().ok()?.text_trimmed() == right.value_token().ok()?.text_trimmed(),
-        ),
-        (
-            AnyJsLiteralExpression::JsNullLiteralExpression(_),
-            AnyJsLiteralExpression::JsNullLiteralExpression(_),
-        ) => Some(true),
-        (
-            AnyJsLiteralExpression::JsNumberLiteralExpression(left),
-            AnyJsLiteralExpression::JsNumberLiteralExpression(right),
-        ) => Some(left.as_number()? == right.as_number()?),
-        (
-            AnyJsLiteralExpression::JsRegexLiteralExpression(left),
-            AnyJsLiteralExpression::JsRegexLiteralExpression(right),
-        ) => Some(left.to_trimmed_text() == right.to_trimmed_text()),
-        (
-            AnyJsLiteralExpression::JsStringLiteralExpression(left),
-            AnyJsLiteralExpression::JsStringLiteralExpression(right),
-        ) => Some(
-            unescape_js_string(left.inner_string_text().ok()?)
-                == unescape_js_string(right.inner_string_text().ok()?),
-        ),
-        _ => Some(false),
-    }
-}
-
-fn unwrap_reference(expression: AnyJsExpression) -> Option<AnyJsExpression> {
-    let mut expression = expression;
-
-    loop {
-        expression = match expression.omit_parentheses() {
-            AnyJsExpression::TsAsExpression(expression) => expression.expression().ok()?,
-            AnyJsExpression::TsSatisfiesExpression(expression) => expression.expression().ok()?,
-            AnyJsExpression::TsTypeAssertionExpression(expression) => {
-                expression.expression().ok()?
-            }
-            AnyJsExpression::TsNonNullAssertionExpression(expression) => {
-                expression.expression().ok()?
-            }
-            expression => return Some(expression),
-        };
     }
 }
 

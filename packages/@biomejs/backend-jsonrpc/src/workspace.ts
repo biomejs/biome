@@ -2561,6 +2561,11 @@ export interface Nursery {
 	 */
 	noConditionalExpect?: NoConditionalExpectConfiguration;
 	/**
+	 * Disallow two comparisons of the same values that can be combined into one.
+	 * See https://biomejs.dev/linter/rules/no-double-comparison
+	 */
+	noDoubleComparison?: NoDoubleComparisonConfiguration;
+	/**
 	 * Require .where() to be called when using .delete() with Drizzle ORM.
 	 * See https://biomejs.dev/linter/rules/no-drizzle-delete-without-where
 	 */
@@ -5106,6 +5111,9 @@ export type NoComponentHookFactoriesConfiguration =
 export type NoConditionalExpectConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoConditionalExpectOptions;
+export type NoDoubleComparisonConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDoubleComparisonOptions;
 export type NoDrizzleDeleteWithoutWhereConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDrizzleDeleteWithoutWhereOptions;
@@ -7342,6 +7350,14 @@ export interface RuleWithNoComponentHookFactoriesOptions {
 export interface RuleWithNoConditionalExpectOptions {
 	level: RulePlainConfiguration;
 	options?: NoConditionalExpectOptions;
+}
+export interface RuleWithNoDoubleComparisonOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoDoubleComparisonOptions;
 }
 export interface RuleWithNoDrizzleDeleteWithoutWhereOptions {
 	level: RulePlainConfiguration;
@@ -9748,6 +9764,7 @@ export interface NoBaseToStringOptions {
 export type NoBunModulesOptions = {};
 export type NoComponentHookFactoriesOptions = {};
 export type NoConditionalExpectOptions = {};
+export type NoDoubleComparisonOptions = {};
 export interface NoDrizzleDeleteWithoutWhereOptions {
 	/**
 	 * List of variable names to consider as Drizzle ORM instances.
@@ -11378,6 +11395,7 @@ export type Category =
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"

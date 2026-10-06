@@ -30,6 +30,7 @@ Math.sqrt(a ** 2 + b ** 2,);
 Math.sqrt(((a ** 2)) + ((b ** 2 + c ** 2)) + ((d)) * ((d)) + ((e)) ** ((2)));
 Math.sqrt(0x2 * 2);
 Math.sqrt("x" * 'x');
+Math.sqrt(a.b * a["b"] + c[0] * c[`0`]);
 
 class Vector {
     #x;

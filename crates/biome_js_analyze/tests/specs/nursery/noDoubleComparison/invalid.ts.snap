@@ -1,0 +1,180 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+(x as number) === y || (x as number) < y;
+x! === y || x! < y;
+(x satisfies number) === y || (x satisfies number) < y;
+(<number>x) === y || x < y;
+x === y as number || x < y;
+x === "a" satisfies string || x < "a";
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into (x as number) <= y.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ (x as number) === y || (x as number) < y;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ x! === y || x! < y;
+    4 │ (x satisfies number) === y || (x satisfies number) < y;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    1 1 │   /* should generate diagnostics */
+    2   │ - (x·as·number)·===·y·||·(x·as·number)·<·y;
+      2 │ + (x·as·number)·<=·y;
+    3 3 │   x! === y || x! < y;
+    4 4 │   (x satisfies number) === y || (x satisfies number) < y;
+  
+
+```
+
+```
+invalid.ts:3:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x! <= y.
+  
+    1 │ /* should generate diagnostics */
+    2 │ (x as number) === y || (x as number) < y;
+  > 3 │ x! === y || x! < y;
+      │ ^^^^^^^^^^^^^^^^^^
+    4 │ (x satisfies number) === y || (x satisfies number) < y;
+    5 │ (<number>x) === y || x < y;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    1 1 │   /* should generate diagnostics */
+    2 2 │   (x as number) === y || (x as number) < y;
+    3   │ - x!·===·y·||·x!·<·y;
+      3 │ + x!·<=·y;
+    4 4 │   (x satisfies number) === y || (x satisfies number) < y;
+    5 5 │   (<number>x) === y || x < y;
+  
+
+```
+
+```
+invalid.ts:4:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into (x satisfies number) <= y.
+  
+    2 │ (x as number) === y || (x as number) < y;
+    3 │ x! === y || x! < y;
+  > 4 │ (x satisfies number) === y || (x satisfies number) < y;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ (<number>x) === y || x < y;
+    6 │ x === y as number || x < y;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    2 2 │   (x as number) === y || (x as number) < y;
+    3 3 │   x! === y || x! < y;
+    4   │ - (x·satisfies·number)·===·y·||·(x·satisfies·number)·<·y;
+      4 │ + (x·satisfies·number)·<=·y;
+    5 5 │   (<number>x) === y || x < y;
+    6 6 │   x === y as number || x < y;
+  
+
+```
+
+```
+invalid.ts:5:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into (<number>x) <= y.
+  
+    3 │ x! === y || x! < y;
+    4 │ (x satisfies number) === y || (x satisfies number) < y;
+  > 5 │ (<number>x) === y || x < y;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ x === y as number || x < y;
+    7 │ x === "a" satisfies string || x < "a";
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    3 3 │   x! === y || x! < y;
+    4 4 │   (x satisfies number) === y || (x satisfies number) < y;
+    5   │ - (<number>x)·===·y·||·x·<·y;
+      5 │ + (<number>x)·<=·y;
+    6 6 │   x === y as number || x < y;
+    7 7 │   x === "a" satisfies string || x < "a";
+  
+
+```
+
+```
+invalid.ts:6:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x <= y as number.
+  
+    4 │ (x satisfies number) === y || (x satisfies number) < y;
+    5 │ (<number>x) === y || x < y;
+  > 6 │ x === y as number || x < y;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ x === "a" satisfies string || x < "a";
+    8 │ 
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    4 4 │   (x satisfies number) === y || (x satisfies number) < y;
+    5 5 │   (<number>x) === y || x < y;
+    6   │ - x·===·y·as·number·||·x·<·y;
+      6 │ + x·<=·(y·as·number);
+    7 7 │   x === "a" satisfies string || x < "a";
+    8 8 │   
+  
+
+```
+
+```
+invalid.ts:7:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into x <= "a" satisfies string.
+  
+    5 │ (<number>x) === y || x < y;
+    6 │ x === y as number || x < y;
+  > 7 │ x === "a" satisfies string || x < "a";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+    5 5 │   (<number>x) === y || x < y;
+    6 6 │   x === y as number || x < y;
+    7   │ - x·===·"a"·satisfies·string·||·x·<·"a";
+      7 │ + x·<=·("a"·satisfies·string);
+    8 8 │   
+  
+
+```
