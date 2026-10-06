@@ -1,0 +1,369 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalid.graphql
+---
+# Input
+```graphql
+# should generate diagnostics
+query InlineCommas($c: Int, $b: Int, $a: Int) { x }
+
+query InlineNoCommas($c: Int $b: Int $a: Int) { x }
+
+query InlinePadded( $c: Int, $a: Int ) { x }
+
+query MultilineCommas(
+  $c: Int,
+  $b: Int,
+  $a: Int
+) { x }
+
+query MultilineTrailingComma(
+  $b: Int,
+  $a: Int,
+) { x }
+
+query MixedLayout($c: Int,
+  $a: Int) { x }
+
+query DefaultsAndDirectives($c: Int = 1 @dir, $b: [String!]! = ["x"], $a: Boolean) { x }
+
+query NaturalOrder($b: Int, $B: Int, $a10: Int, $a9: Int, $_z: Int, $A: Int) { x }
+
+query Duplicates($b: Int, $a: Int, $b: String) { x }
+
+query ($b: Int, $a: Int) { x }
+
+mutation Mutation($b: Int, $a: Int) { x }
+
+subscription Subscription($b: Int, $a: Int) { x }
+
+query DirectiveArguments($c: Int @dir(x: 1), $a: Int @dir(y: [1, 2]), $b: Int) { x }
+
+```
+
+# Diagnostics
+```
+invalid.graphql:2:19 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variables of this operation are not sorted.
+  
+    1 │ # should generate diagnostics
+  > 2 │ query InlineCommas($c: Int, $b: Int, $a: Int) { x }
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ query InlineNoCommas($c: Int $b: Int $a: Int) { x }
+  
+  i Safe fix: Sort the variables.
+  
+     1  1 │   # should generate diagnostics
+     2    │ - query·InlineCommas($c:·Int,·$b:·Int,·$a:·Int)·{·x·}
+        2 │ + query·InlineCommas($a:·Int,·$b:·Int,·$c:·Int)·{·x·}
+     3  3 │   
+     4  4 │   query InlineNoCommas($c: Int $b: Int $a: Int) { x }
+  
+
+```
+
+```
+invalid.graphql:4:21 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variables of this operation are not sorted.
+  
+    2 │ query InlineCommas($c: Int, $b: Int, $a: Int) { x }
+    3 │ 
+  > 4 │ query InlineNoCommas($c: Int $b: Int $a: Int) { x }
+      │                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ query InlinePadded( $c: Int, $a: Int ) { x }
+  
+  i Safe fix: Sort the variables.
+  
+     2  2 │   query InlineCommas($c: Int, $b: Int, $a: Int) { x }
+     3  3 │   
+     4    │ - query·InlineNoCommas($c:·Int·$b:·Int·$a:·Int)·{·x·}
+        4 │ + query·InlineNoCommas($a:·Int·$b:·Int·$c:·Int)·{·x·}
+     5  5 │   
+     6  6 │   query InlinePadded( $c: Int, $a: Int ) { x }
+  
+
+```
+
+```
+invalid.graphql:6:19 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variables of this operation are not sorted.
+  
+    4 │ query InlineNoCommas($c: Int $b: Int $a: Int) { x }
+    5 │ 
+  > 6 │ query InlinePadded( $c: Int, $a: Int ) { x }
+      │                   ^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ query MultilineCommas(
+  
+  i Safe fix: Sort the variables.
+  
+     4  4 │   query InlineNoCommas($c: Int $b: Int $a: Int) { x }
+     5  5 │   
+     6    │ - query·InlinePadded(·$c:·Int,·$a:·Int·)·{·x·}
+        6 │ + query·InlinePadded(·$a:·Int,·$c:·Int·)·{·x·}
+     7  7 │   
+     8  8 │   query MultilineCommas(
+  
+
+```
+
+```
+invalid.graphql:8:22 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variables of this operation are not sorted.
+  
+     6 │ query InlinePadded( $c: Int, $a: Int ) { x }
+     7 │ 
+   > 8 │ query MultilineCommas(
+       │                      ^
+   > 9 │   $c: Int,
+  > 10 │   $b: Int,
+  > 11 │   $a: Int
+  > 12 │ ) { x }
+       │ ^
+    13 │ 
+    14 │ query MultilineTrailingComma(
+  
+  i Safe fix: Sort the variables.
+  
+     7  7 │   
+     8  8 │   query MultilineCommas(
+     9    │ - ··$c:·Int,
+        9 │ + ··$a:·Int,
+    10 10 │     $b: Int,
+    11    │ - ··$a:·Int
+       11 │ + ··$c:·Int
+    12 12 │   ) { x }
+    13 13 │   
+  
+
+```
+
+```
+invalid.graphql:14:29 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variables of this operation are not sorted.
+  
+    12 │ ) { x }
+    13 │ 
+  > 14 │ query MultilineTrailingComma(
+       │                             ^
+  > 15 │   $b: Int,
+  > 16 │   $a: Int,
+  > 17 │ ) { x }
+       │ ^
+    18 │ 
+    19 │ query MixedLayout($c: Int,
+  
+  i Safe fix: Sort the variables.
+  
+    13 13 │   
+    14 14 │   query MultilineTrailingComma(
+    15    │ - ··$b:·Int,
+    16    │ - ··$a:·Int,
+       15 │ + ··$a:·Int,
+       16 │ + ··$b:·Int,
+    17 17 │   ) { x }
+    18 18 │   
+  
+
+```
+
+```
+invalid.graphql:19:18 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variables of this operation are not sorted.
+  
+    17 │ ) { x }
+    18 │ 
+  > 19 │ query MixedLayout($c: Int,
+       │                  ^^^^^^^^^
+  > 20 │   $a: Int) { x }
+       │   ^^^^^^^^
+    21 │ 
+    22 │ query DefaultsAndDirectives($c: Int = 1 @dir, $b: [String!]! = ["x"], $a: Boolean) { x }
+  
+  i Safe fix: Sort the variables.
+  
+    17 17 │   ) { x }
+    18 18 │   
+    19    │ - query·MixedLayout($c:·Int,
+    20    │ - ··$a:·Int)·{·x·}
+       19 │ + query·MixedLayout($a:·Int,
+       20 │ + ··$c:·Int)·{·x·}
+    21 21 │   
+    22 22 │   query DefaultsAndDirectives($c: Int = 1 @dir, $b: [String!]! = ["x"], $a: Boolean) { x }
+  
+
+```
+
+```
+invalid.graphql:22:28 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variables of this operation are not sorted.
+  
+    20 │   $a: Int) { x }
+    21 │ 
+  > 22 │ query DefaultsAndDirectives($c: Int = 1 @dir, $b: [String!]! = ["x"], $a: Boolean) { x }
+       │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ 
+    24 │ query NaturalOrder($b: Int, $B: Int, $a10: Int, $a9: Int, $_z: Int, $A: Int) { x }
+  
+  i Safe fix: Sort the variables.
+  
+    20 20 │     $a: Int) { x }
+    21 21 │   
+    22    │ - query·DefaultsAndDirectives($c:·Int·=·1·@dir,·$b:·[String!]!·=·["x"],·$a:·Boolean)·{·x·}
+       22 │ + query·DefaultsAndDirectives($a:·Boolean,·$b:·[String!]!·=·["x"],·$c:·Int·=·1·@dir)·{·x·}
+    23 23 │   
+    24 24 │   query NaturalOrder($b: Int, $B: Int, $a10: Int, $a9: Int, $_z: Int, $A: Int) { x }
+  
+
+```
+
+```
+invalid.graphql:24:19 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variables of this operation are not sorted.
+  
+    22 │ query DefaultsAndDirectives($c: Int = 1 @dir, $b: [String!]! = ["x"], $a: Boolean) { x }
+    23 │ 
+  > 24 │ query NaturalOrder($b: Int, $B: Int, $a10: Int, $a9: Int, $_z: Int, $A: Int) { x }
+       │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ 
+    26 │ query Duplicates($b: Int, $a: Int, $b: String) { x }
+  
+  i Safe fix: Sort the variables.
+  
+    22 22 │   query DefaultsAndDirectives($c: Int = 1 @dir, $b: [String!]! = ["x"], $a: Boolean) { x }
+    23 23 │   
+    24    │ - query·NaturalOrder($b:·Int,·$B:·Int,·$a10:·Int,·$a9:·Int,·$_z:·Int,·$A:·Int)·{·x·}
+       24 │ + query·NaturalOrder($_z:·Int,·$A:·Int,·$a9:·Int,·$a10:·Int,·$B:·Int,·$b:·Int)·{·x·}
+    25 25 │   
+    26 26 │   query Duplicates($b: Int, $a: Int, $b: String) { x }
+  
+
+```
+
+```
+invalid.graphql:26:17 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variables of this operation are not sorted.
+  
+    24 │ query NaturalOrder($b: Int, $B: Int, $a10: Int, $a9: Int, $_z: Int, $A: Int) { x }
+    25 │ 
+  > 26 │ query Duplicates($b: Int, $a: Int, $b: String) { x }
+       │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 
+    28 │ query ($b: Int, $a: Int) { x }
+  
+  i Safe fix: Sort the variables.
+  
+    24 24 │   query NaturalOrder($b: Int, $B: Int, $a10: Int, $a9: Int, $_z: Int, $A: Int) { x }
+    25 25 │   
+    26    │ - query·Duplicates($b:·Int,·$a:·Int,·$b:·String)·{·x·}
+       26 │ + query·Duplicates($a:·Int,·$b:·Int,·$b:·String)·{·x·}
+    27 27 │   
+    28 28 │   query ($b: Int, $a: Int) { x }
+  
+
+```
+
+```
+invalid.graphql:28:7 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variables of this operation are not sorted.
+  
+    26 │ query Duplicates($b: Int, $a: Int, $b: String) { x }
+    27 │ 
+  > 28 │ query ($b: Int, $a: Int) { x }
+       │       ^^^^^^^^^^^^^^^^^^
+    29 │ 
+    30 │ mutation Mutation($b: Int, $a: Int) { x }
+  
+  i Safe fix: Sort the variables.
+  
+    26 26 │   query Duplicates($b: Int, $a: Int, $b: String) { x }
+    27 27 │   
+    28    │ - query·($b:·Int,·$a:·Int)·{·x·}
+       28 │ + query·($a:·Int,·$b:·Int)·{·x·}
+    29 29 │   
+    30 30 │   mutation Mutation($b: Int, $a: Int) { x }
+  
+
+```
+
+```
+invalid.graphql:30:18 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variables of this operation are not sorted.
+  
+    28 │ query ($b: Int, $a: Int) { x }
+    29 │ 
+  > 30 │ mutation Mutation($b: Int, $a: Int) { x }
+       │                  ^^^^^^^^^^^^^^^^^^
+    31 │ 
+    32 │ subscription Subscription($b: Int, $a: Int) { x }
+  
+  i Safe fix: Sort the variables.
+  
+    28 28 │   query ($b: Int, $a: Int) { x }
+    29 29 │   
+    30    │ - mutation·Mutation($b:·Int,·$a:·Int)·{·x·}
+       30 │ + mutation·Mutation($a:·Int,·$b:·Int)·{·x·}
+    31 31 │   
+    32 32 │   subscription Subscription($b: Int, $a: Int) { x }
+  
+
+```
+
+```
+invalid.graphql:32:26 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variables of this operation are not sorted.
+  
+    30 │ mutation Mutation($b: Int, $a: Int) { x }
+    31 │ 
+  > 32 │ subscription Subscription($b: Int, $a: Int) { x }
+       │                          ^^^^^^^^^^^^^^^^^^
+    33 │ 
+    34 │ query DirectiveArguments($c: Int @dir(x: 1), $a: Int @dir(y: [1, 2]), $b: Int) { x }
+  
+  i Safe fix: Sort the variables.
+  
+    30 30 │   mutation Mutation($b: Int, $a: Int) { x }
+    31 31 │   
+    32    │ - subscription·Subscription($b:·Int,·$a:·Int)·{·x·}
+       32 │ + subscription·Subscription($a:·Int,·$b:·Int)·{·x·}
+    33 33 │   
+    34 34 │   query DirectiveArguments($c: Int @dir(x: 1), $a: Int @dir(y: [1, 2]), $b: Int) { x }
+  
+
+```
+
+```
+invalid.graphql:34:25 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The variables of this operation are not sorted.
+  
+    32 │ subscription Subscription($b: Int, $a: Int) { x }
+    33 │ 
+  > 34 │ query DirectiveArguments($c: Int @dir(x: 1), $a: Int @dir(y: [1, 2]), $b: Int) { x }
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ 
+  
+  i Safe fix: Sort the variables.
+  
+    32 32 │   subscription Subscription($b: Int, $a: Int) { x }
+    33 33 │   
+    34    │ - query·DirectiveArguments($c:·Int·@dir(x:·1),·$a:·Int·@dir(y:·[1,·2]),·$b:·Int)·{·x·}
+       34 │ + query·DirectiveArguments($a:·Int·@dir(y:·[1,·2]),·$b:·Int,·$c:·Int·@dir(x:·1))·{·x·}
+    35 35 │   
+  
+
+```

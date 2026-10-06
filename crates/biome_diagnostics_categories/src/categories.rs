@@ -610,6 +610,7 @@ define_categories! {
     "assist/source/useSortedProperties": "https://biomejs.dev/assist/actions/use-sorted-properties",
     "assist/source/useSortedSelectionSet": "https://biomejs.dev/assist/actions/use-sorted-selection-set",
     "assist/source/useSortedTypeFields": "https://biomejs.dev/assist/actions/use-sorted-type-fields",
+    "assist/source/useSortedVariables": "https://biomejs.dev/assist/actions/use-sorted-variables",
     // end assist actions
     ; // start syntax rules
     "syntax/correctness/noInvalidPropertySyntax",

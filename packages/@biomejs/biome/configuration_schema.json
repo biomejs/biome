@@ -8558,6 +8558,14 @@
 			"additionalProperties": false,
 			"required": ["level", "options"]
 		},
+		"RuleAssistWithUseSortedVariablesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSortedVariablesOptions" }
+			},
+			"required": ["level", "options"]
+		},
 		"RuleDomainValue": {
 			"oneOf": [
 				{
@@ -14897,6 +14905,13 @@
 						{ "$ref": "#/$defs/UseSortedTypeFieldsConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useSortedVariables": {
+					"description": "Sort the variable definitions of GraphQL operations in natural order.\nSee https://biomejs.dev/assist/actions/use-sorted-variables",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSortedVariablesConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -18902,6 +18917,16 @@
 			]
 		},
 		"UseSortedTypeFieldsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseSortedVariablesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithUseSortedVariablesOptions" }
+			]
+		},
+		"UseSortedVariablesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

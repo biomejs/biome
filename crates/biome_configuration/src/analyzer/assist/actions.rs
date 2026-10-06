@@ -77,6 +77,7 @@ pub enum ActionName {
     UseSortedProperties,
     UseSortedSelectionSet,
     UseSortedTypeFields,
+    UseSortedVariables,
 }
 impl ActionName {
     pub const fn as_str(self) -> &'static str {
@@ -91,6 +92,7 @@ impl ActionName {
             Self::UseSortedProperties => "useSortedProperties",
             Self::UseSortedSelectionSet => "useSortedSelectionSet",
             Self::UseSortedTypeFields => "useSortedTypeFields",
+            Self::UseSortedVariables => "useSortedVariables",
         }
     }
     pub const fn group(self) -> RuleGroup {
@@ -105,6 +107,7 @@ impl ActionName {
             Self::UseSortedProperties => RuleGroup::Source,
             Self::UseSortedSelectionSet => RuleGroup::Source,
             Self::UseSortedTypeFields => RuleGroup::Source,
+            Self::UseSortedVariables => RuleGroup::Source,
         }
     }
 }
@@ -122,6 +125,7 @@ impl std::str::FromStr for ActionName {
             "useSortedProperties" => Ok(Self::UseSortedProperties),
             "useSortedSelectionSet" => Ok(Self::UseSortedSelectionSet),
             "useSortedTypeFields" => Ok(Self::UseSortedTypeFields),
+            "useSortedVariables" => Ok(Self::UseSortedVariables),
             _ => Err("This rule name doesn't exist."),
         }
     }
