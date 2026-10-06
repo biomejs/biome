@@ -5219,6 +5219,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoNestedSwitchConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoNestedSwitchOptions" }
+			]
+		},
+		"NoNestedSwitchOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoNestedTernaryConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7430,6 +7440,13 @@
 					"description": "Disallow negated expressions on the left side of an equality check.\nSee https://biomejs.dev/linter/rules/no-negation-in-equality-check",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoNegationInEqualityCheckConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noNestedSwitch": {
+					"description": "Disallow switch statements inside other switch statements.\nSee https://biomejs.dev/linter/rules/no-nested-switch",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoNestedSwitchConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10432,6 +10449,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoNestedPromisesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoNestedSwitchOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoNestedSwitchOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

@@ -2959,6 +2959,11 @@ export interface Nursery {
 	 */
 	noNegationInEqualityCheck?: NoNegationInEqualityCheckConfiguration;
 	/**
+	 * Disallow switch statements inside other switch statements.
+	 * See https://biomejs.dev/linter/rules/no-nested-switch
+	 */
+	noNestedSwitch?: NoNestedSwitchConfiguration;
+	/**
 	 * Disallow disabling zoom with user-scalable=no in the \<meta name="viewport"> element.
 	 * See https://biomejs.dev/linter/rules/no-non-scalable-viewport
 	 */
@@ -5468,6 +5473,9 @@ export type NoMisusedPromisesConfiguration =
 export type NoNegationInEqualityCheckConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNegationInEqualityCheckOptions;
+export type NoNestedSwitchConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoNestedSwitchOptions;
 export type NoNonScalableViewportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNonScalableViewportOptions;
@@ -7814,6 +7822,10 @@ export interface RuleWithNoNegationInEqualityCheckOptions {
 	level: RulePlainConfiguration;
 	options?: NoNegationInEqualityCheckOptions;
 }
+export interface RuleWithNoNestedSwitchOptions {
+	level: RulePlainConfiguration;
+	options?: NoNestedSwitchOptions;
+}
 export interface RuleWithNoNonScalableViewportOptions {
 	level: RulePlainConfiguration;
 	options?: NoNonScalableViewportOptions;
@@ -10155,6 +10167,7 @@ export type NoMisleadingReturnTypeOptions = {};
 export type NoMisplacedListElementsOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoNegationInEqualityCheckOptions = {};
+export type NoNestedSwitchOptions = {};
 export type NoNonScalableViewportOptions = {};
 export type NoObsoleteTagsOptions = {};
 export type NoProcessExitOptions = {};
@@ -11759,6 +11772,7 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNegationInEqualityCheck"
+	| "lint/nursery/noNestedSwitch"
 	| "lint/nursery/noNonScalableViewport"
 	| "lint/nursery/noObsoleteTags"
 	| "lint/nursery/noProcessExit"
