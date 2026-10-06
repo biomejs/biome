@@ -1053,8 +1053,7 @@ fn migrate_eslint_rule(
 }
 
 /// Elements restricted by an ESLint rule, mapped to their optional messages.
-pub(crate) type RestrictedElements =
-    IndexMap<Box<str>, Option<Box<str>>, FxBuildHasher>;
+pub(crate) type RestrictedElements = IndexMap<Box<str>, Option<Box<str>>, FxBuildHasher>;
 
 /// The message of a migrated entry that ESLint configured without one, because Biome requires one.
 const MISSING_MESSAGE_PLACEHOLDER: &str = "TODO: Add a custom message here.";
