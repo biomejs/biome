@@ -614,6 +614,11 @@ where
     type Item = SyntaxTriviaPiece<JsLanguage>;
 
     fn next(&mut self) -> Option<Self::Item> {
+        if self.len == 0 {
+            // Fused: once the layout ends, stay ended even if the caller
+            // keeps polling.
+            return None;
+        }
         let piece = self.inner.next()?;
         if piece.is_whitespace() || piece.is_newline() {
             self.len -= 1;
