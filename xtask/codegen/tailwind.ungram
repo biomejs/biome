@@ -286,7 +286,6 @@ CssParameterList = AnyCssExpression (',' AnyCssExpression)* ','?
 
 AnyCssExpression =
 	CssListOfComponentValuesExpression
-	| CssComponentValueList
 	| CssBinaryExpression
 	| CssUnaryExpression
 	| CssParenthesizedExpression
@@ -300,11 +299,11 @@ CssBinaryExpression =
 
 CssUnaryExpression =
 	operator: ('+' | '-' | '*')
-	argument: AnyCssValue
+	argument: AnyCssExpression
 
 CssParenthesizedExpression =
 	'('
-	expression: CssComponentValueList
+	expression: AnyCssExpression?
 	')'
 
 CssColor = value: 'CSS_COLOR_LITERAL'
