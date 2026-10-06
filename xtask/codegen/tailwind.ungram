@@ -300,11 +300,11 @@ CssBinaryExpression =
 
 CssUnaryExpression =
 	operator: ('+' | '-' | '*')
-	argument: AnyCssExpression
+	argument: AnyCssValue
 
 CssParenthesizedExpression =
 	'('
-	expression: AnyCssExpression?
+	expression: CssComponentValueList
 	')'
 
 CssColor = value: 'CSS_COLOR_LITERAL'

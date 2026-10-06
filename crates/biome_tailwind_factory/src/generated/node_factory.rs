@@ -78,35 +78,17 @@ pub fn css_number(value_token: SyntaxToken) -> CssNumber {
 }
 pub fn css_parenthesized_expression(
     l_paren_token: SyntaxToken,
+    expression: CssComponentValueList,
     r_paren_token: SyntaxToken,
-) -> CssParenthesizedExpressionBuilder {
-    CssParenthesizedExpressionBuilder {
-        l_paren_token,
-        r_paren_token,
-        expression: None,
-    }
-}
-pub struct CssParenthesizedExpressionBuilder {
-    l_paren_token: SyntaxToken,
-    r_paren_token: SyntaxToken,
-    expression: Option<AnyCssExpression>,
-}
-impl CssParenthesizedExpressionBuilder {
-    pub fn with_expression(mut self, expression: AnyCssExpression) -> Self {
-        self.expression = Some(expression);
-        self
-    }
-    pub fn build(self) -> CssParenthesizedExpression {
-        CssParenthesizedExpression::unwrap_cast(SyntaxNode::new_detached(
-            TailwindSyntaxKind::CSS_PARENTHESIZED_EXPRESSION,
-            [
-                Some(SyntaxElement::Token(self.l_paren_token)),
-                self.expression
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.r_paren_token)),
-            ],
-        ))
-    }
+) -> CssParenthesizedExpression {
+    CssParenthesizedExpression::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::CSS_PARENTHESIZED_EXPRESSION,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(expression.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
 }
 pub fn css_percentage(value_token: SyntaxToken, remainder_token: SyntaxToken) -> CssPercentage {
     CssPercentage::unwrap_cast(SyntaxNode::new_detached(
@@ -147,7 +129,7 @@ pub fn css_string(value_token: SyntaxToken) -> CssString {
 }
 pub fn css_unary_expression(
     operator_token: SyntaxToken,
-    argument: AnyCssExpression,
+    argument: AnyCssValue,
 ) -> CssUnaryExpression {
     CssUnaryExpression::unwrap_cast(SyntaxNode::new_detached(
         TailwindSyntaxKind::CSS_UNARY_EXPRESSION,

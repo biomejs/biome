@@ -349,8 +349,8 @@ impl CssParenthesizedExpression {
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn expression(&self) -> Option<AnyCssExpression> {
-        support::node(&self.syntax, 1usize)
+    pub fn expression(&self) -> CssComponentValueList {
+        support::list(&self.syntax, 1usize)
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
@@ -367,7 +367,7 @@ impl Serialize for CssParenthesizedExpression {
 #[derive(Serialize)]
 pub struct CssParenthesizedExpressionFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub expression: Option<AnyCssExpression>,
+    pub expression: CssComponentValueList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -553,7 +553,7 @@ impl CssUnaryExpression {
     pub fn operator(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn argument(&self) -> SyntaxResult<AnyCssExpression> {
+    pub fn argument(&self) -> SyntaxResult<AnyCssValue> {
         support::required_node(&self.syntax, 1usize)
     }
 }
@@ -568,7 +568,7 @@ impl Serialize for CssUnaryExpression {
 #[derive(Serialize)]
 pub struct CssUnaryExpressionFields {
     pub operator: SyntaxResult<SyntaxToken>,
-    pub argument: SyntaxResult<AnyCssExpression>,
+    pub argument: SyntaxResult<AnyCssValue>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssUnknownDimension {
@@ -2229,10 +2229,7 @@ impl std::fmt::Debug for CssParenthesizedExpression {
                     "l_paren_token",
                     &support::DebugSyntaxResult(self.l_paren_token()),
                 )
-                .field(
-                    "expression",
-                    &support::DebugOptionalElement(self.expression()),
-                )
+                .field("expression", &self.expression())
                 .field(
                     "r_paren_token",
                     &support::DebugSyntaxResult(self.r_paren_token()),
