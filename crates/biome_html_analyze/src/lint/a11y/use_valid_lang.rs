@@ -9,7 +9,12 @@ use biome_rowan::TextRange;
 use biome_rule_options::use_valid_lang::UseValidLangOptions;
 
 declare_lint_rule! {
-    /// Ensure that the attribute passed to the `lang` attribute is a correct ISO language and/or country.
+    /// Require a supported language tag on the `<html>` element.
+    ///
+    /// For static values, the rule accepts a language code such as `en`, optionally followed by a
+    /// script or region (`zh-Hant` or `en-GB`), or by both (`zh-Hant-TW`). Tags with additional
+    /// variants or extensions are outside the supported subset and are reported. Dynamic values are
+    /// not evaluated.
     ///
     /// ## Examples
     ///

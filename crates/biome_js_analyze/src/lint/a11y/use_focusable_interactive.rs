@@ -43,7 +43,10 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "useFocusableInteractive",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("interactive-supports-focus").same()],
+        sources: &[
+            RuleSource::EslintJsxA11y("interactive-supports-focus").same(),
+            RuleSource::EslintAstro("jsx-a11y/interactive-supports-focus").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
     }

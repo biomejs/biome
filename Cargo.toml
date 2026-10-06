@@ -137,7 +137,7 @@ ignore                       = "0.4.25"
 indexmap                     = { version = "2.14.2" }
 insta                        = "1.48.0"
 jiff                         = "0.2.37"
-libc                         = "0.2.189"
+libc                         = "0.2.190"
 # mimalloc is pinned because of bug that causes access violation crashes on windows arm 64
 # See: https://github.com/biomejs/biome/issues/10270
 # See: https://github.com/biomejs/biome/issues/11242

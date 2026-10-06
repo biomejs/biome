@@ -58,4 +58,5 @@ const VUE_COMPILER_MACROS: &[&str] = &[
     "defineOptions",
     "defineProps",
     "defineSlots",
+    "withDefaults",
 ];

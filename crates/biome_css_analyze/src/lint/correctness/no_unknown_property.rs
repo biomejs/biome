@@ -15,16 +15,12 @@ use biome_string_case::StrLikeExtension;
 use crate::utils::{is_known_properties, vendor_prefixed};
 
 declare_lint_rule! {
-    /// Disallow unknown properties.
+    /// Disallow unrecognized CSS properties.
     ///
-    /// This rule considers properties defined in the CSS Specifications and browser specific properties to be known.
-    /// https://github.com/known-css/known-css-properties#source
-    ///
-    ///
-    /// This rule ignores:
-    ///
-    /// - custom variables e.g. `--custom-property`
-    /// - vendor-prefixed properties (e.g., `-moz-align-self,` `-webkit-align-self`)
+    /// The known-property list includes standard and browser-specific properties from
+    /// [known-css-properties](https://github.com/known-css/known-css-properties#source).
+    /// Custom properties such as `--custom-property` and vendor-prefixed properties such as
+    /// `-moz-align-self` or `-webkit-align-self` are allowed.
     ///
     /// ## Examples
     ///
@@ -66,7 +62,8 @@ declare_lint_rule! {
     ///
     /// ### `ignore`
     ///
-    /// A list of unknown property names to ignore (case-insensitive).
+    /// Lists additional property names to allow, without regard to letter case. Defaults to an
+    /// empty list.
     ///
     /// ```json,options
     /// {

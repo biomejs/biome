@@ -71,6 +71,7 @@ declare_lint_rule! {
         sources: &[
             RuleSource::EslintTypeScript("prefer-for-of").same(),
             RuleSource::EslintUnicorn("no-for-loop").same(),
+            RuleSource::EslintMysticatea("prefer-for-of").same(),
         ],
         recommended: false,
         severity: Severity::Information,

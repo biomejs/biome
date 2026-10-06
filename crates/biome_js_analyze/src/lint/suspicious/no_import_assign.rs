@@ -9,7 +9,11 @@ use biome_rowan::AstNode;
 use biome_rule_options::no_import_assign::NoImportAssignOptions;
 
 declare_lint_rule! {
-    ///  Disallow assigning to imported bindings
+    /// Disallow assigning a new value to an imported variable.
+    ///
+    /// An import is a read-only reference to a value exported by another module. Reassigning the
+    /// imported name does not update that module and causes an error. Copy the value to a local
+    /// variable when it needs to change.
     ///
     /// ## Examples
     ///
@@ -47,6 +51,14 @@ declare_lint_rule! {
     /// ```js,expect_diagnostic
     /// import * as e from "y";
     /// e = 1;
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```js
+    /// import value from "y";
+    /// let localValue = value;
+    /// localValue = 1;
     /// ```
     pub NoImportAssign {
         version: "1.0.0",

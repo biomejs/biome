@@ -1,0 +1,137 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid_categories.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<my-button class="leading-6 tracking-wide ring-offset-2 outline-offset-4 text-wrap bg-fixed"></my-button>
+
+```
+
+# Diagnostics
+```
+invalid_categories.html:2:19 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <my-button class="leading-6 tracking-wide ring-offset-2 outline-offset-4 text-wrap bg-fixed"></my-button>
+      │                   ^^^^^^^^^
+    3 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_categories.html:2:29 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <my-button class="leading-6 tracking-wide ring-offset-2 outline-offset-4 text-wrap bg-fixed"></my-button>
+      │                             ^^^^^^^^^^^^^
+    3 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_categories.html:2:43 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <my-button class="leading-6 tracking-wide ring-offset-2 outline-offset-4 text-wrap bg-fixed"></my-button>
+      │                                           ^^^^^^^^^^^^^
+    3 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_categories.html:2:57 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <my-button class="leading-6 tracking-wide ring-offset-2 outline-offset-4 text-wrap bg-fixed"></my-button>
+      │                                                         ^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_categories.html:2:74 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <my-button class="leading-6 tracking-wide ring-offset-2 outline-offset-4 text-wrap bg-fixed"></my-button>
+      │                                                                          ^^^^^^^^^
+    3 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_categories.html:2:84 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <my-button class="leading-6 tracking-wide ring-offset-2 outline-offset-4 text-wrap bg-fixed"></my-button>
+      │                                                                                    ^^^^^^^^
+    3 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

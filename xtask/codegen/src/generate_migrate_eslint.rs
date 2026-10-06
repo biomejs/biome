@@ -24,7 +24,7 @@ fn generate_multi_mapping(eslint_name: Box<str>, mapped_rules: Vec<RuleMapping>)
         let check_inspired = if source_kind.is_inspired() {
             quote! {
                 if !options.include_inspired {
-                    results.add(eslint_name, migration::RuleMigrationResult::Inspired);
+                    results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                     blocked = true;
                 }
             }
@@ -34,7 +34,7 @@ fn generate_multi_mapping(eslint_name: Box<str>, mapped_rules: Vec<RuleMapping>)
         let check_nursery = if *group_name == "nursery" {
             quote! {
                 if !options.include_nursery {
-                    results.add(eslint_name, migration::RuleMigrationResult::Nursery);
+                    results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                     blocked = true;
                 }
             }
@@ -95,7 +95,7 @@ fn generate_single_mapping(eslint_name: Box<str>, mapped_rules: Vec<RuleMapping>
     let check_inspired = if source_kind.is_inspired() {
         quote! {
             if !options.include_inspired {
-                results.add(eslint_name, migration::RuleMigrationResult::Inspired);
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
         }
@@ -105,7 +105,7 @@ fn generate_single_mapping(eslint_name: Box<str>, mapped_rules: Vec<RuleMapping>
     let check_nursery = if *group_name == "nursery" {
         quote! {
             if !options.include_nursery {
-                results.add(eslint_name, migration::RuleMigrationResult::Nursery);
+                results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
         }
@@ -144,22 +144,22 @@ pub(crate) fn generate_migrate_eslint(mode: Mode) -> Result<()> {
         });
     }
     let tokens = xtask_glue::reformat(quote! {
-        use super::{eslint_eslint, eslint_to_biome, migration};
+        use super::{eslint_eslint, eslint_to_biome};
         pub(crate) fn migrate_eslint_any_rule(
             rules: &mut biome_configuration::Rules,
             eslint_name: &str,
             rule_severity: eslint_eslint::Severity,
-            options: &migration::MigrationOptions,
-            results: &mut eslint_to_biome::EslintMigrationResults,
+            options: &eslint_to_biome::MigrationOptions,
+            results: &mut eslint_to_biome::MigrationResults,
         ) -> bool {
             match eslint_name {
                 #( #lines )*
                 _ => {
-                    results.add(eslint_name, migration::RuleMigrationResult::Unsupported);
+                    results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Unsupported);
                     return false;
                 }
             }
-            results.add(eslint_name, migration::RuleMigrationResult::Migrated);
+            results.add(eslint_name, eslint_to_biome::RuleMigrationResult::Migrated);
             true
         }
     });

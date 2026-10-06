@@ -1,0 +1,33 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalidSlash.css
+---
+# Input
+```css
+/* should generate diagnostics */
+a { font-family: monospace / monospace; }
+
+```
+
+# Diagnostics
+```
+invalidSlash.css:2:30 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate font names are redundant and unnecessary: monospace
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ a { font-family: monospace / monospace; }
+      │                              ^^^^^^^^^
+    3 │ 
+  
+  i This is where the duplicate font name is found:
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ a { font-family: monospace / monospace; }
+      │                  ^^^^^^^^^
+    3 │ 
+  
+  i Remove duplicate font names within the property.
+  
+
+```

@@ -14,8 +14,8 @@ use biome_rule_options::no_unused_function_parameters::NoUnusedFunctionParameter
 declare_lint_rule! {
     /// Disallow unused function parameters.
     ///
-    /// There is an exception to this rule:
-    /// parameters that starts with underscore, e.g. `function foo(_a, _b) {}`.
+    /// Parameters whose names start with an underscore are ignored. The underscore communicates
+    /// that the parameter is intentionally unused, for example `function foo(_a, _b) {}`.
     ///
     /// ## Examples
     ///
@@ -47,6 +47,10 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js
+    /// function foo(_myVar) {}
+    /// ```
+    ///
+    /// ```js
     /// function withObjectSpread({ a, ...rest }) {
     ///	    return rest;
     /// }
@@ -54,15 +58,16 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// The rule has the following options
+    /// The rule has the following option.
     ///
     /// ### `ignoreRestSiblings`
     /// **Since `v2.1.0`**
     ///
-    /// Whether to ignore unused variables from an object destructuring with a spread.
-    /// Example: `a` and `b` in `function({ a, b, ...rest }) { return rest;}` should be ignored by this rule when set to false.
-    ///
+    /// Ignores unused names taken from an object parameter when the same parameter also collects
+    /// the remaining properties, as in `function({ a, ...rest }) { return rest; }`.
     /// Defaults to `true`.
+    ///
+    /// Set this option to `false` to report those unused properties.
     ///
     /// ```json,options
     /// {

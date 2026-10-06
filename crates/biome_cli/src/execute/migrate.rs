@@ -1,5 +1,6 @@
 use crate::commands::MigrateSubCommand;
 use crate::diagnostics::MigrationDiagnostic;
+use crate::execute::migrate::eslint_to_biome::MigrationOptions;
 use crate::runner::diagnostics::{ContentDiffAdvice, MigrateDiffDiagnostic};
 use crate::{CliDiagnostic, CliSession};
 use biome_analyze::{ActionFilter, AnalysisFilter};
@@ -37,10 +38,8 @@ mod eslint_svelte;
 mod eslint_to_biome;
 mod eslint_typescript;
 mod eslint_unicorn;
-mod eslint_unsupported_rules;
 mod eslint_vue;
 mod ignorefile;
-mod migration;
 mod node;
 mod prettier;
 mod stylelint;
@@ -310,7 +309,7 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
                 eslint_to_biome::merge_biome_config_with_eslint(
                     biome_config,
                     eslint_config,
-                    &migration::MigrationOptions {
+                    &MigrationOptions {
                         include_inspired: *include_inspired,
                         include_nursery: *include_nursery,
                     },
@@ -395,7 +394,7 @@ fn migrate_file(payload: MigrateFile) -> Result<MigrationFileResult, CliDiagnost
                 stylelint_to_biome::merge_biome_config_with_stylelint(
                     biome_config,
                     stylelint_config,
-                    &migration::MigrationOptions {
+                    &MigrationOptions {
                         include_inspired: *include_inspired,
                         include_nursery: *include_nursery,
                     },

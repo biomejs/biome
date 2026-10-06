@@ -1,0 +1,8 @@
+@mixin button($selector: ".dynamic") {
+$color:red; color:$color;
+/* typography */ font: {size:12px; weight:bold;}
+.child {display:block} &:hover {color:blue}
+#{$selector} { .nested {color:red} }
+from {opacity:0} to {opacity:1}
+}
+.after {color:red}

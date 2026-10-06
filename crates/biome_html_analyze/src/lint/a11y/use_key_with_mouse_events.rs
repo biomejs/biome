@@ -9,10 +9,11 @@ use biome_rowan::AstNode;
 use biome_rule_options::use_key_with_mouse_events::UseKeyWithMouseEventsOptions;
 
 declare_lint_rule! {
-    /// Enforce that `onmouseover` is accompanied by `onfocus` and `onmouseout` by `onblur`.
+    /// Require keyboard equivalents for mouse hover events.
     ///
-    /// Coding for the keyboard is important for users with physical disabilities who cannot use a mouse,
-    /// AT compatibility, and screen reader users.
+    /// Keyboard users cannot trigger `onmouseover` or `onmouseout`. Pair `onmouseover` with
+    /// `onfocus`, and pair `onmouseout` with `onblur`, so the same behavior is available when focus
+    /// moves with the keyboard or other assistive technology.
     ///
     /// :::note
     /// In `.html` files, attribute names are matched case-insensitively.

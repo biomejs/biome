@@ -76,6 +76,10 @@ gen-migrate:
   cargo run -p xtask_codegen --features configuration -- migrate-eslint
   cargo run -p xtask_codegen --features configuration -- migrate-stylelint
 
+# Exports every lint rule and assist action as JSON, with the upstream rules they implement and the ones Biome deliberately doesn't support. Prints to stdout unless given `--out <path>`.
+export-rule-metadata *args='':
+  cargo run -p xtask_codegen --features rules_metadata -- rules-metadata {{args}}
+
 # Generates the initial files for all formatter crates
 gen-formatter *args='':
   cargo run -p xtask_codegen -- formatter {{args}}

@@ -28,25 +28,27 @@ use specifiers_attributes::{
 use util::{attached_trivia, detached_trivia, has_detached_leading_comment, leading_newlines};
 
 declare_source_rule! {
-    /// Sorts imports and exports in your JavaScript and TypeScript files.
+    /// Organize imports and exports in JavaScript and TypeScript files.
     ///
-    /// By default, imports and exports are sorted by "distance" from the current file:
+    /// By default, the action sorts module sources in this order:
     ///
-    /// 1. URLs such as `https://example.org`.
-    /// 2. Packages with a protocol such as `node:path`, `bun:test`, `jsr:@my?lib`, or `npm:lib`.
-    /// 3. Packages such as `mylib` or `@my/lib`.
-    /// 4. Aliases: sources starting with `@/`, `#`, `~`, `$`, or `%`.
-    ///    They usually are [Node.js subpath imports](https://nodejs.org/api/packages.html#subpath-imports) or [TypeScript path aliases](https://www.typescriptlang.org/tsconfig/#paths).
-    /// 5. Absolute and relative paths.
+    /// 1. URLs, such as `https://example.org`.
+    /// 2. Module sources with a protocol, such as `node:path`, `bun:test`, `jsr:@my/lib`, or
+    ///    `npm:lib`.
+    /// 3. Packages, such as `mylib` or `@my/lib`.
+    /// 4. Aliases starting with `@/`, `#`, `~`, `$`, or `%`. These are commonly
+    ///    [Node.js subpath imports](https://nodejs.org/api/packages.html#subpath-imports) or
+    ///    [TypeScript path aliases](https://www.typescriptlang.org/tsconfig/#paths).
+    /// 5. Absolute and relative file paths.
     ///
-    /// Imports and exports with the same distance are sorted using a
-    /// [natural sort order](https://en.wikipedia.org/wiki/Natural_sort_order)
-    /// such that `A < a < a9 < a10 < B < b`
+    /// Sources in the same category use
+    /// [natural order](https://en.wikipedia.org/wiki/Natural_sort_order), which compares numbers
+    /// by value: `A < a < a9 < a10 < B < b`.
     ///
-    /// The action also merges imports and exports from the same source,
-    /// sorts named specifiers and attributes using a natural sort order.
+    /// The action also merges compatible statements from the same source. It sorts imported and
+    /// exported names inside braces, along with import attributes, using natural order.
     ///
-    /// For example, the following code...
+    /// For example, the following code:
     ///
     /// ```js,ignore
     /// import sibling from "./file.js";
@@ -85,26 +87,21 @@ declare_source_rule! {
     ///
     /// ## Options
     ///
-    /// The action provides several options to customize how imports and exports are ordered:
-    ///
-    /// - `groups` allows to group imports and exports before sorting them;
-    ///   It allows expressing custom order between imports or exports.
-    /// - `sortBareImports` allows sorting bare imports (also called side-effect imports);
-    ///   By default the action doesn't sort them.
-    /// - `identifierOrder` allows changing how named specifiers and attributes are sorted
+    /// - `groups` defines custom source groups and their order. Without this option, the action uses
+    ///   the default source categories listed above.
+    /// - `sortBareImports` includes imports that load a module without introducing a local name.
+    ///   Defaults to `false` because reordering these imports can change program behavior.
+    /// - `identifierOrder` selects how imported names, exported names, and attributes are sorted.
+    ///   Defaults to `natural`.
     ///
     /// ### `groups`
     ///
-    /// You can customize how imports and exports are grouped using the `groups` option.
-    /// The option accepts an array of group matchers,
-    /// which in their simplest form are glob patterns or predefined group matchers.
-    /// Imports and exports that don't match any group are automatically moved after all the groups.
+    /// The `groups` option accepts an ordered array of matchers. A matcher can be a predefined
+    /// group, a glob pattern, or an object that selects a kind of import. The first matching group
+    /// wins, and unmatched sources move after all configured groups.
     ///
-    /// Groups are always matched in order, so earlier matchers take priority.
-    /// To exclude some imports of a group, you can use an array of group matchers
-    /// with negated matchers, prefixed with `!`.
-    /// In the following example, we use the negated glob matcher `!@myown/**`,
-    /// to exclude `@myown/package` from the `:PACKAGE:` group.
+    /// Prefix a matcher with `!` to exclude matching sources. In the following example,
+    /// `!@myown/**` excludes `@myown/package` from the `:PACKAGE:` group.
     ///
     /// With this configuration...
     ///
@@ -153,18 +150,18 @@ declare_source_rule! {
     ///
     /// Each entry in the `groups` array is a group matcher that can be:
     ///
-    /// - A predefined group like `:NODE:`, `:BUN:`, or `:PACKAGE:`
-    /// - A glob pattern like `@my/lib/**`;
-    ///   the action supports a [limited set of globs](#supported-glob-patterns).
-    /// - Type-only imports like `{ "type": true }`
-    /// - A combination of the above, e.g. `[":BUN:", ":NODE:"]`
-    /// - `:BLANK_LINE:` to insert a blank line between groups
+    /// - A predefined group such as `:NODE:`, `:BUN:`, or `:PACKAGE:`.
+    /// - A glob pattern such as `@my/lib/**`. The action supports a
+    ///   [limited set of globs](#supported-glob-patterns).
+    /// - Type-only imports, selected with `{ "type": true }`.
+    /// - A combination of matchers, such as `[":BUN:", ":NODE:"]`.
+    /// - `:BLANK_LINE:`, which inserts a blank line between groups.
     ///
     /// #### Predefined groups
     ///
     /// - `:URL:`: sources starting with `https://` or `http://`
-    /// - `:NODE:`: Node.js built-in modules (`node:path`, `fs`, `path`, etc.)
-    /// - `:BUN:`: Bun built-in modules (`bun:test`, `bun`, etc.)
+    /// - `:NODE:`: Node.js built-in modules, including `node:path`, `fs`, and `path`.
+    /// - `:BUN:`: Bun built-in modules, including `bun:test` and `bun`.
     /// - `:PACKAGE_WITH_PROTOCOL:`: packages with a protocol (`jsr:@my/lib`, `npm:lib`)
     /// - `:PACKAGE:`: bare and scoped packages (`lib`, `@scoped/lib`)
     /// - `:ALIAS:`: path aliases starting with `#`, `@/`, `~`, `$`, or `%`
@@ -248,12 +245,13 @@ declare_source_rule! {
     ///
     /// ### `sortBareImports`
     ///
-    /// By default, _bare imports_, also called _side-effect imports_, aren't sorted with other imports.
-    /// Setting `sortBareImports` to `true`, allow sorting them with other imports.
+    /// A bare import loads a module without importing a name, as in `import "polyfill"`. Loading the
+    /// module may run setup code as a side effect. The action does not reorder bare imports by
+    /// default. Set `sortBareImports` to `true` to sort them with other imports.
     ///
     /// :::caution
-    /// This can lead to issues because bare imports often signal the presence of side-effects.
-    /// Thus changing their order can change the behavior of your code.
+    /// Changing the order of bare imports can change program behavior because their setup code runs
+    /// in import order.
     /// :::
     ///
     /// ```json,options
@@ -271,9 +269,8 @@ declare_source_rule! {
     ///
     /// ### `identifierOrder`
     ///
-    /// By default, attributes, imported and exported names are sorted with a `natural` sort order.
-    /// Opt for a `lexicographic` sort, also referred as _binary_ sort,
-    /// by setting the `identifierOrder` option to `lexicographic`:
+    /// By default, attributes and imported or exported names use natural order. Set
+    /// `identifierOrder` to `lexicographic` to compare them character by character instead:
     ///
     /// ```json,options
     /// {
@@ -294,10 +291,10 @@ declare_source_rule! {
     ///
     /// ## Common configurations
     ///
-    /// ### Group Node.js and bun built-in
+    /// ### Group Node.js and Bun built-ins
     ///
-    /// The following example moves the Node.js and `bun` built-ins at the top of the file,
-    /// and adds a blank line just after them.
+    /// The following example moves Node.js and Bun built-ins to the top of the file and adds a
+    /// blank line after them.
     /// Other imports are placed after this blank line.
     ///
     /// ```json,options
@@ -324,9 +321,9 @@ declare_source_rule! {
     /// Let's assume that all your monorepo packages are scoped by `@mycompany`.
     /// The following example groups all monorepo imports after imports of external dependencies.
     ///
-    /// Because groups are matched in order, the first group has to exclude monorepo imports.
-    /// Indeed, `:PACKAGE:` matches imports like `@mycompany/db`, and thus must be excluded
-    /// thanks to the exception `!@mycompany/**`.
+    /// Because the first matching group wins, the package group must explicitly exclude monorepo
+    /// imports. The `:PACKAGE:` matcher also matches `@mycompany/db`, while `!@mycompany/**`
+    /// excludes it from that group.
     ///
     /// ```json,options
     /// {
@@ -354,7 +351,7 @@ declare_source_rule! {
     /// In the following example, `react` and libraries like `react-dom` are grouped together.
     /// A blank line separates them from the other imports placed directly below.
     ///
-    ///```json,options
+    /// ```json,options
     /// {
     ///     "options": {
     ///         "groups": [
@@ -375,8 +372,8 @@ declare_source_rule! {
     ///
     /// Combine [`sortBareImports`](#sortbareimports) with the `{ "kind": "bare" }` matcher to
     /// gather all bare (side-effect) imports at the bottom of the import list. This is useful,
-    /// for example, to enforce that web-component or polyfill registrations run after all
-    /// binding imports:
+    /// for example, to ensure that web-component or polyfill registrations run after imports that
+    /// introduce local names:
     ///
     /// ```json,options
     /// {
@@ -400,7 +397,7 @@ declare_source_rule! {
     ///
     /// ### Place style imports last
     ///
-    /// The following example groups style imports together and place them after other imports.
+    /// The following example groups style imports and places them after other imports.
     /// Because groups are matched in order, the first group has to exclude style imports.
     /// `**` matches everything and is followed by the two exceptions that exclude style imports.
     ///
@@ -569,9 +566,10 @@ declare_source_rule! {
     /// ```
     ///
     ///
-    /// ## How it works
+    /// ## Detailed behavior
     ///
-    /// This section provides an in-depth explanation of the internal mechanics of the action.
+    /// This section explains which statements may move together and which boundaries the action
+    /// preserves.
     ///
     /// ### Import anatomy
     ///
@@ -594,16 +592,15 @@ declare_source_rule! {
     /// The action never moves imports or exports across chunk boundaries.
     ///
     /// Chunks are separated by:
-    /// - Switching between imports and exports
-    /// - Any statement that is not an import or an export
-    /// - Bare imports also called side-effect imports (`import "polyfill"`);
-    ///   Each forms its own chunk.
-    ///   Set [`sortBareImports`](#sortbareimports) to `true` to disable this rule and sort
-    ///   bare imports together with their neighbors. Combined with the `{ "kind": "bare" }`
-    ///   group matcher, this lets you express conventions such as "place all side-effect
-    ///   imports at the end of the import list".
-    /// - A comment followed by a blank line that we call a **detached comment**;
-    ///   See the [comment handling section](#comment-handling) for more details.
+    ///
+    /// - a change from imports to exports or from exports to imports;
+    /// - any statement that is not an import or export;
+    /// - a bare import such as `import "polyfill"`, unless `sortBareImports` is `true`;
+    /// - a comment followed by a blank line, called a **detached comment**.
+    ///
+    /// With `sortBareImports` enabled, the `{ "kind": "bare" }` group matcher can place all bare
+    /// imports at a chosen position, such as the end of the import list. See
+    /// [Comment handling](#comment-handling) for detached comments.
     ///
     /// :::note
     /// Blank lines alone do **not** create new chunks.
@@ -639,8 +636,8 @@ declare_source_rule! {
     ///
     /// ### Sorting within a chunk
     ///
-    /// As described in the preliminary section,
-    /// Imports and exports of a chunk are sorted by "distance" from the current file.
+    /// Within each chunk, imports and exports are sorted by the source categories described at the
+    /// beginning of this page.
     ///
     /// When two imports share the same source, they are ordered by kind:
     ///
@@ -683,17 +680,17 @@ declare_source_rule! {
     ///
     /// This kind order cannot be changed.
     ///
-    /// ### Named specifier and attribute sorting
+    /// ### Imported name, exported name, and attribute sorting
     ///
-    /// Named imports, named exports, and import attributes are also sorted,
-    /// as shown in the following example.
+    /// Names inside braces, such as `A` and `B` in `import { A, B }`, are sorted along with import
+    /// attributes:
     ///
     /// ```js,expect_diagnostic
     /// import { a, b, A, B, c10, c9 } from "a";
     ///
     /// export { a, b, A, B, c10, c9 } from "a";
     ///
-    /// import special from  "special" with { "type": "ty", "metadata": "data" };
+    /// import special from "special" with { "type": "ty", "metadata": "data" };
     /// ```
     ///
     /// ### Import and export merging
@@ -735,8 +732,8 @@ declare_source_rule! {
     /// Comments directly above an import (attached comments) move with that import when it is sorted.
     /// Comments followed by a blank line (detached comments) stay in place and create a new chunk.
     ///
-    /// File-header comments, i.e. comments at the very top of the file,
-    /// are always treated as detached, even without a blank line.
+    /// File-header comments at the very top of the file are always treated as detached, even
+    /// without a blank line.
     /// This preserves copyright notices and license headers.
     ///
     /// The following code...

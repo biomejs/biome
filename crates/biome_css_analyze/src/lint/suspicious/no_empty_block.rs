@@ -8,9 +8,10 @@ use biome_rowan::AstNode;
 use biome_rule_options::no_empty_block::NoEmptyBlockOptions;
 
 declare_lint_rule! {
-    /// Disallow CSS empty blocks.
+    /// Disallow empty CSS blocks.
     ///
-    /// By default, it will allow empty blocks with comments inside.
+    /// An empty block has no effect and is often left behind after a refactor. A block containing a
+    /// comment is allowed because the comment may document an intentional placeholder.
     ///
     /// ## Examples
     ///

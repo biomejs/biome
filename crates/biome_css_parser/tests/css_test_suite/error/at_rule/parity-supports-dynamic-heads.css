@@ -1,0 +1,29 @@
+@supports ($property: grid) {
+  .scss-variable {
+    display: grid;
+  }
+}
+
+.after-variable {
+  display: block;
+}
+
+@supports (#{$condition}) {
+  .scss-interpolation {
+    display: grid;
+  }
+}
+
+.after-interpolation {
+  display: block;
+}
+
+@supports (#{$property}: grid) {
+  .scss-interpolated-name {
+    display: grid;
+  }
+}
+
+.after-interpolated-name {
+  display: block;
+}

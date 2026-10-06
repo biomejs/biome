@@ -7,7 +7,10 @@ use biome_rule_options::no_duplicate_object_keys::NoDuplicateObjectKeysOptions;
 use rustc_hash::FxHashMap;
 
 declare_lint_rule! {
-    /// Disallow two keys with the same name inside objects.
+    /// Disallow duplicate keys in JSON objects.
+    ///
+    /// When a key appears more than once, many parsers keep only the last value and silently discard
+    /// the earlier ones. Unique keys prevent ambiguous or lost data.
     ///
     /// ## Examples
     ///

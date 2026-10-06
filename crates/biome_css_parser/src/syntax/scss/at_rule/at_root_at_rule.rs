@@ -1,19 +1,20 @@
-use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
-use crate::syntax::block::parse_declaration_or_rule_list_block;
-use crate::syntax::parse_error::expected_identifier;
+use crate::syntax::block::{expected_block, parse_declaration_or_rule_list_block};
+use crate::syntax::scss::{expected_scss_expression, parse_scss_expression_until};
 use crate::syntax::selector::SelectorList;
-use crate::syntax::{is_at_identifier, parse_custom_identifier, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::{
-    CSS_BOGUS_CUSTOM_IDENTIFIER, SCSS_AT_ROOT_AT_RULE, SCSS_AT_ROOT_QUERY, SCSS_AT_ROOT_QUERY_LIST,
-    SCSS_AT_ROOT_SELECTOR,
+    SCSS_AT_ROOT_AT_RULE, SCSS_AT_ROOT_QUERY, SCSS_AT_ROOT_QUERY_CLAUSE, SCSS_AT_ROOT_SELECTOR,
 };
 use biome_css_syntax::{CssSyntaxKind, T};
-use biome_parser::diagnostic::expected_any;
-use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
-use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
+use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
+use biome_parser::{TokenSet, token_set};
+
+const SCSS_AT_ROOT_QUERY_MODIFIER_END_SET: TokenSet<CssSyntaxKind> =
+    token_set![T![:], T![')'], T!['{'], T!['}'], T![;]];
+const SCSS_AT_ROOT_QUERY_RULES_END_SET: TokenSet<CssSyntaxKind> =
+    token_set![T![')'], T!['{'], T!['}'], T![;]];
 
 /// Parses the SCSS `@at-root` at-rule.
 ///
@@ -39,6 +40,11 @@ pub(crate) fn parse_scss_at_root_at_rule(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T![at_root]);
     let query = parse_scss_at_root_query(p);
 
+    if query.is_present() && (p.at(T!['}']) || p.at(CssSyntaxKind::EOF)) {
+        p.error(expected_block(p, p.cur_range()));
+        return Present(m.complete(p, SCSS_AT_ROOT_AT_RULE));
+    }
+
     if query.is_present() || p.at(T!['{']) {
         parse_declaration_or_rule_list_block(p);
     } else {
@@ -54,17 +60,14 @@ fn is_at_scss_at_root_at_rule(p: &mut CssParser) -> bool {
     p.at(T![at_root])
 }
 
-/// Parses the optional `@at-root` query clause.
+/// Parses a whole-query expression or a modifier/rules clause.
 ///
 /// # Example
 ///
 /// ```scss
-/// @at-root (without: media supports) {
-///           ^^^^^^^^^^^^^^^^^^^^^^^^^
-///   .root-only {
-///     color: red;
-///   }
-/// }
+/// $query: "without: rule";
+/// @at-root ($query) {}
+/// @at-root (without: media supports) {}
 /// ```
 ///
 /// Docs: https://sass-lang.com/documentation/at-rules/at-root/#beyond-style-rules
@@ -74,38 +77,31 @@ fn parse_scss_at_root_query(p: &mut CssParser) -> ParsedSyntax {
         return Absent;
     }
 
-    let m = p.start();
-
+    let query = p.start();
     p.bump(T!['(']);
-    parse_scss_at_root_query_modifier(p);
-    p.expect(T![:]);
+    let body = p.start();
+    parse_scss_expression_until(p, SCSS_AT_ROOT_QUERY_MODIFIER_END_SET)
+        .or_add_diagnostic(p, expected_scss_expression);
 
-    if p.at(T![')']) {
-        p.error(expected_identifier(p, p.cur_range()));
+    if p.eat(T![:]) {
+        parse_scss_expression_until(p, SCSS_AT_ROOT_QUERY_RULES_END_SET)
+            .or_add_diagnostic(p, expected_scss_expression);
+        body.complete(p, SCSS_AT_ROOT_QUERY_CLAUSE);
+    } else {
+        body.abandon(p);
     }
-    ScssAtRootQueryList.parse_list(p);
 
     p.expect(T![')']);
-
-    Present(m.complete(p, SCSS_AT_ROOT_QUERY))
+    Present(query.complete(p, SCSS_AT_ROOT_QUERY))
 }
 
+/// Checks for the opening parenthesis that distinguishes a query from selector shorthand.
+///
+/// For example, `@at-root (without: media) {}` has a query, while
+/// `@at-root .root-only {}` uses selector shorthand.
 #[inline]
 fn is_at_scss_at_root_query(p: &mut CssParser) -> bool {
     p.at(T!['('])
-}
-
-#[inline]
-fn parse_scss_at_root_query_modifier(p: &mut CssParser) {
-    if p.at(T![with]) {
-        p.bump(T![with]);
-    } else if p.at(T![without]) {
-        p.bump(T![without]);
-    } else {
-        p.error(expected_any(&["with", "without"], p.cur_range(), p));
-        // Consume a stray identifier so recovery can continue at the `:` token.
-        parse_regular_identifier(p).ok();
-    }
 }
 
 /// Parses the selector shorthand used by `@at-root <selector> { ... }`.
@@ -127,40 +123,4 @@ fn parse_scss_at_root_selector(p: &mut CssParser) -> CompletedMarker {
     SelectorList::default().parse_list(p);
 
     m.complete(p, SCSS_AT_ROOT_SELECTOR)
-}
-
-struct ScssAtRootQueryList;
-
-impl ParseNodeList for ScssAtRootQueryList {
-    type Kind = CssSyntaxKind;
-    type Parser<'source> = CssParser<'source>;
-    const LIST_KIND: Self::Kind = SCSS_AT_ROOT_QUERY_LIST;
-
-    fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_custom_identifier(p, CssLexContext::Regular)
-    }
-
-    fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![')'])
-    }
-
-    fn recover(
-        &mut self,
-        p: &mut Self::Parser<'_>,
-        parsed_element: ParsedSyntax,
-    ) -> RecoveryResult {
-        parsed_element.or_recover(p, &ScssAtRootQueryListParseRecovery, expected_identifier)
-    }
-}
-
-struct ScssAtRootQueryListParseRecovery;
-
-impl ParseRecovery for ScssAtRootQueryListParseRecovery {
-    type Kind = CssSyntaxKind;
-    type Parser<'source> = CssParser<'source>;
-    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_CUSTOM_IDENTIFIER;
-
-    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![')']) || is_at_identifier(p)
-    }
 }

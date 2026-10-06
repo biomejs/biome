@@ -24,7 +24,7 @@ fn generate_multi_mapping(stylelint_name: Box<str>, mapped_rules: Vec<RuleMappin
         let check_inspired = if source_kind.is_inspired() {
             quote! {
                 if !options.include_inspired {
-                    results.add(stylelint_name, migration::RuleMigrationResult::Inspired);
+                    results.add(stylelint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                     blocked = true;
                 }
             }
@@ -34,7 +34,7 @@ fn generate_multi_mapping(stylelint_name: Box<str>, mapped_rules: Vec<RuleMappin
         let check_nursery = if *group_name == "nursery" {
             quote! {
                 if !options.include_nursery {
-                    results.add(stylelint_name, migration::RuleMigrationResult::Nursery);
+                    results.add(stylelint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                     blocked = true;
                 }
             }
@@ -98,7 +98,7 @@ fn generate_single_mapping(
     let check_inspired = if source_kind.is_inspired() {
         quote! {
             if !options.include_inspired {
-                results.add(stylelint_name, migration::RuleMigrationResult::Inspired);
+                results.add(stylelint_name, eslint_to_biome::RuleMigrationResult::Inspired);
                 return false;
             }
         }
@@ -108,7 +108,7 @@ fn generate_single_mapping(
     let check_nursery = if *group_name == "nursery" {
         quote! {
             if !options.include_nursery {
-                results.add(stylelint_name, migration::RuleMigrationResult::Nursery);
+                results.add(stylelint_name, eslint_to_biome::RuleMigrationResult::Nursery);
                 return false;
             }
         }
@@ -153,22 +153,22 @@ pub(crate) fn generate_migrate_stylelint(mode: Mode) -> Result<()> {
         });
     }
     let tokens = xtask_glue::reformat(quote! {
-        use super::{stylelint_to_biome, migration};
+        use super::{eslint_to_biome, stylelint_to_biome};
         pub(crate) fn migrate_stylelint_any_rule(
             rules: &mut biome_configuration::Rules,
             stylelint_name: &str,
             rule_level: biome_configuration::RulePlainConfiguration,
-            #options_ident: &migration::MigrationOptions,
+            #options_ident: &eslint_to_biome::MigrationOptions,
             results: &mut stylelint_to_biome::StylelintMigrationResults,
         ) -> bool {
             match stylelint_name {
                 #( #lines )*
                 _ => {
-                    results.add(stylelint_name, migration::RuleMigrationResult::Unsupported);
+                    results.add(stylelint_name, eslint_to_biome::RuleMigrationResult::Unsupported);
                     return false;
                 }
             }
-            results.add(stylelint_name, migration::RuleMigrationResult::Migrated);
+            results.add(stylelint_name, eslint_to_biome::RuleMigrationResult::Migrated);
             true
         }
     });

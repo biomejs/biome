@@ -1,0 +1,14 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+.a {
+  color: if(true, red, blue);
+  color: \69 f(true, red, blue);
+  background: url(if(false, "dark.png", "light.png"));
+}
+
+```

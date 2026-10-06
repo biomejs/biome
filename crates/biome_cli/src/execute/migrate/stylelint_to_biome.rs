@@ -6,13 +6,11 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use super::migration::{
-    MigrationOptions, RuleMigrationResult, UnsupportedRuleReason, to_biome_includes,
-};
+use super::eslint_to_biome::{MigrationOptions, RuleMigrationResult, to_biome_includes};
 use super::stylelint_any_rule_to_biome::migrate_stylelint_any_rule;
 use super::stylelint_stylelint::{self, Severity};
 use super::stylelint_unsupported_rules::STYLELINT_UNSUPPORTED_RULES;
-use biome_analyze::RuleSource;
+use biome_analyze::{RuleSource, UnsupportedRuleReason};
 use biome_configuration::analyzer::presets::PresetConfig;
 use biome_configuration::{self as biome_config};
 use biome_console::markup;

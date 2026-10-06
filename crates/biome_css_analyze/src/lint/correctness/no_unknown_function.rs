@@ -10,14 +10,13 @@ use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_unknown_function::NoUnknownFunctionOptions;
 
 declare_lint_rule! {
-    /// Disallow unknown CSS value functions.
+    /// Disallow unrecognized CSS value functions.
     ///
-    /// This rule ignores double-dashed custom functions, e.g. `--custom-function()`.
-    ///
-    /// Data sources of known CSS value functions are:
-    /// - MDN reference on [CSS value functions](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Functions)
-    /// - MDN reference on [CSS reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference)
-    /// - MDN [browser compatibility data for CSS value functions](https://github.com/mdn/browser-compat-data/tree/main/css/types)
+    /// CSS value functions use a name followed by parentheses, such as `scale()` or `calc()`.
+    /// Custom functions whose names begin with `--`, such as `--custom-function()`, are allowed.
+    /// Known functions come from the
+    /// [MDN CSS reference](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Functions) and
+    /// [browser compatibility data](https://github.com/mdn/browser-compat-data/tree/main/css/types).
     ///
     /// ## Examples
     ///
@@ -37,7 +36,8 @@ declare_lint_rule! {
     ///
     /// ### `ignore`
     ///
-    /// A list of unknown function names to ignore (case-insensitive).
+    /// Lists additional function names to allow, without regard to letter case. Defaults to an
+    /// empty list.
     ///
     /// ```json,options
     /// {

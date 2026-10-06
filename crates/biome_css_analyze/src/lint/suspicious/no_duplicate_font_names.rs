@@ -1,24 +1,28 @@
 #![expect(clippy::disallowed_methods, reason = "This rule compares CSS values that can span multiple tokens.")]
 
-use crate::fonts::{CssFontValue, find_font_family, is_font_family_keyword};
+use crate::fonts::{AnyCssFontValue, CssFontValue, find_font_family, is_font_family_keyword};
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{AnyCssGenericPropertyValueOrExpression, CssGenericProperty};
+use biome_css_syntax::{
+    AnyCssGenericPropertyValueOrExpression, CssGenericProperty, T, decode_css_identifier,
+};
 use biome_diagnostics::Severity;
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, AstNodeList};
 use biome_rule_options::no_duplicate_font_names::NoDuplicateFontNamesOptions;
 use biome_string_case::StrLikeExtension;
 use std::collections::HashSet;
 
 declare_lint_rule! {
-    /// Disallow duplicate names within font families.
+    /// Disallow duplicate names in font-family lists.
     ///
-    /// This rule checks the `font` and `font-family` properties for duplicate font names.
+    /// The rule checks the `font` and `font-family` properties. It skips values supplied through
+    /// `var()` because their contents are not known during analysis.
     ///
-    /// This rule ignores var(--custom-property) variable syntaxes now.
-    ///
+    /// The unquoted pair `font-family: monospace, monospace` is allowed. This pattern preserves an
+    /// inherited font size instead of using the browser's preferred monospace size. See
+    /// [MDN's explanation](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/font-family#monospace_font_size).
     ///
     /// ## Examples
     ///
@@ -43,6 +47,7 @@ declare_lint_rule! {
     /// b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif; }
     /// c { font-family: SF Mono, Liberation Mono, sans-serif; }
     /// d { font: 1em SF Mono, Liberation Mono, sans-serif; }
+    /// e { font-family: monospace, monospace; }
     /// ```
     pub NoDuplicateFontNames {
         version: "1.8.0",
@@ -82,7 +87,22 @@ impl Rule for NoDuplicateFontNames {
             },
             Err(_) => return None,
         };
+        let is_comma_separated_pair = value_list.len() == 3
+            && value_list
+                .iter()
+                .nth(1)
+                .and_then(|value| value.as_css_generic_delimiter()?.value().ok())
+                .is_some_and(|token| token.kind() == T![,]);
         let font_families = find_font_family(value_list);
+
+        if is_font_family
+            && is_comma_separated_pair
+            && let [first, second] = font_families.as_slice()
+            && is_monospace_keyword(first)
+            && is_monospace_keyword(second)
+        {
+            return None;
+        }
 
         for css_value in font_families {
             let value = css_value.to_string()?;
@@ -123,4 +143,15 @@ impl Rule for NoDuplicateFontNames {
             }),
         )
     }
+}
+
+fn is_monospace_keyword(value: &CssFontValue) -> bool {
+    let CssFontValue::SingleValue(AnyCssFontValue::CssIdentifier(identifier)) = value else {
+        return false;
+    };
+    identifier
+        .value_token()
+        .is_ok_and(|token| {
+            decode_css_identifier(token.text_trimmed()).eq_ignore_ascii_case("monospace")
+        })
 }

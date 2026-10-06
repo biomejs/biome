@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_allow.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<Button class={"rounded-none"} />
+<Card.Root class={"shadow-lg"} />
+<Dialog.Card class={"hover:rounded-none"} />
+<UI.Button.Icon class={"shadow-lg"} />
+<my-button class={"shadow-lg"}></my-button>
+
+```

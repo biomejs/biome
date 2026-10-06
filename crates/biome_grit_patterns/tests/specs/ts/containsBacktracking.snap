@@ -1,0 +1,14 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+assertion_line: 94
+expression: containsBacktracking
+---
+SnapshotResult {
+    messages: [],
+    matched_ranges: [
+        "3:22-3:50",
+        "4:27-4:55",
+    ],
+    rewritten_files: [],
+    created_files: [],
+}
