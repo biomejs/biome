@@ -56,7 +56,7 @@ const ASTRO_SUPPRESSION_CONFIG: &str = r#"{
   "html": { "experimentalFullSupportEnabled": true },
   "linter": {
     "rules": {
-      "recommended": false,
+      "preset": "none",
       "a11y": { "noAccessKey": "error" },
       "suspicious": { "noDebugger": "error" },
       "nursery": { "noAstroSetHtmlDirective": "error" }

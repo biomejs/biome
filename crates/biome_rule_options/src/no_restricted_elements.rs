@@ -1,7 +1,8 @@
 use biome_deserialize_macros::Deserializable;
-use rustc_hash::FxHashMap;
+use indexmap::IndexMap;
+use rustc_hash::FxBuildHasher;
 use serde::{Deserialize, Serialize};
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 
 #[derive(Default, Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -41,6 +42,12 @@ impl Deref for CustomRestrictedElements {
     }
 }
 
+impl DerefMut for CustomRestrictedElements {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
 #[cfg(feature = "schema")]
 impl schemars::JsonSchema for CustomRestrictedElements {
     fn schema_name() -> std::borrow::Cow<'static, str> {
@@ -48,7 +55,7 @@ impl schemars::JsonSchema for CustomRestrictedElements {
     }
 
     fn json_schema(_generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
-        // Generate schema for FxHashMap<Box<str>, Box<str>> inline
+        // Generate schema for IndexMap<Box<str>, Box<str>> inline
         schemars::json_schema!({
             "type": "object",
             "additionalProperties": {
@@ -60,4 +67,4 @@ impl schemars::JsonSchema for CustomRestrictedElements {
     }
 }
 
-type CustomRestrictedElementsBaseType = FxHashMap<Box<str>, Box<str>>;
+type CustomRestrictedElementsBaseType = IndexMap<Box<str>, Box<str>, FxBuildHasher>;

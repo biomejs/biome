@@ -10,7 +10,7 @@ fn should_print_a_diagnostic_unknown_file() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path1 = Utf8Path::new("format.yml");
+    let file_path1 = Utf8Path::new("format.unknown");
     fs.insert(file_path1.into(), "".as_bytes());
 
     let file_path2 = Utf8Path::new("format.js");
@@ -44,7 +44,7 @@ fn should_not_print_a_diagnostic_unknown_file_because_ignored() {
         r#"{ "files": { "ignoreUnknown": true } }"#.as_bytes(),
     );
 
-    let file_path1 = Utf8Path::new("format.yml");
+    let file_path1 = Utf8Path::new("format.unknown");
     fs.insert(file_path1.into(), "".as_bytes());
 
     let file_path2 = Utf8Path::new("format.js");

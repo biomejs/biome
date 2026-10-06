@@ -1,0 +1,68 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.zero.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+.foo { margin: { left: 0; top: 0; }; }
+@include test { .foo {} }
+.partial > {}
+
+```
+
+# Diagnostics
+```
+invalid.zero.scss:2:1 lint/complexity/noExcessiveSelectorClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this selector to have no more than 0 class selectors, but found 1.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ .foo { margin: { left: 0; top: 0; }; }
+      │ ^^^^
+    3 │ @include test { .foo {} }
+    4 │ .partial > {}
+  
+  i Selectors with too many chained classes are harder to read, override, and reuse.
+  
+  i Reduce the number of class selectors in this selector, or split it into simpler selectors.
+  
+
+```
+
+```
+invalid.zero.scss:3:17 lint/complexity/noExcessiveSelectorClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this selector to have no more than 0 class selectors, but found 1.
+  
+    1 │ /* should generate diagnostics */
+    2 │ .foo { margin: { left: 0; top: 0; }; }
+  > 3 │ @include test { .foo {} }
+      │                 ^^^^
+    4 │ .partial > {}
+    5 │ 
+  
+  i Selectors with too many chained classes are harder to read, override, and reuse.
+  
+  i Reduce the number of class selectors in this selector, or split it into simpler selectors.
+  
+
+```
+
+```
+invalid.zero.scss:4:1 lint/complexity/noExcessiveSelectorClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Expected this selector to have no more than 0 class selectors, but found 1.
+  
+    2 │ .foo { margin: { left: 0; top: 0; }; }
+    3 │ @include test { .foo {} }
+  > 4 │ .partial > {}
+      │ ^^^^^^^^^^
+    5 │ 
+  
+  i Selectors with too many chained classes are harder to read, override, and reuse.
+  
+  i Reduce the number of class selectors in this selector, or split it into simpler selectors.
+  
+
+```

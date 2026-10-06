@@ -75,6 +75,7 @@
 /crates/biome_grit_patterns/src/grit_target_language/css_target_language/generated_mappings.rs linguist-generated=true text=auto eol=lf
 /crates/biome_grit_patterns/src/grit_target_language/js_target_language/generated_mappings.rs linguist-generated=true text=auto eol=lf
 /crates/biome_grit_patterns/src/grit_target_language/json_target_language/generated_mappings.rs linguist-generated=true text=auto eol=lf
+/crates/biome_grit_patterns/tests/specs/js/rangeUnicodeCrlf.js -text
 # HTML
 /crates/biome_html_analyze/build.rs linguist-generated=true text=auto eol=lf
 /crates/biome_html_analyze/src/assist.rs linguist-generated=true text=auto eol=lf

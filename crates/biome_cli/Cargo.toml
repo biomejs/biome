@@ -24,7 +24,7 @@ biome_configuration      = { workspace = true, features = ["cli"] }
 biome_console            = { workspace = true }
 biome_css_analyze        = { workspace = true }
 biome_css_syntax         = { workspace = true }
-biome_deserialize        = { workspace = true }
+biome_deserialize        = { workspace = true, features = ["serde"] }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true, features = ["bpaf", "notify", "std"] }
 biome_flags              = { workspace = true }
@@ -51,14 +51,18 @@ biome_markdown_syntax    = { workspace = true }
 biome_migrate            = { workspace = true }
 biome_module_graph       = { workspace = true }
 biome_package            = { workspace = true }
+biome_plugin_loader      = { workspace = true }
 biome_resolver           = { workspace = true }
 biome_rowan              = { workspace = true }
 biome_rule_options       = { workspace = true }
 biome_service            = { workspace = true, features = ["stable"] }
 biome_text_edit          = { workspace = true }
+biome_yaml_analyze       = { workspace = true }
+biome_yaml_syntax        = { workspace = true }
 bpaf                     = { workspace = true, features = ["bright-color", "docgen"] }
 camino                   = { workspace = true }
 crossbeam                = { workspace = true }
+indexmap                 = { workspace = true }
 notify                   = { workspace = true }
 papaya                   = { workspace = true }
 path-absolutize          = { workspace = true }
@@ -72,10 +76,16 @@ serde                    = { workspace = true, features = ["derive"] }
 serde_json               = { workspace = true }
 smallvec                 = { workspace = true }
 terminal_size            = { workspace = true }
-tokio                    = {
-  workspace = true,
-  features  = ["io-std", "io-util", "macros", "net", "rt", "rt-multi-thread", "sync", "time"]
-}
+tokio                    = { workspace = true, features = [
+  "io-std",
+  "io-util",
+  "macros",
+  "net",
+  "rt",
+  "rt-multi-thread",
+  "sync",
+  "time"
+] }
 tracing                  = { workspace = true }
 tracing-appender         = "0.2.4"
 tracing-subscriber       = { workspace = true, features = ["env-filter", "json"] }

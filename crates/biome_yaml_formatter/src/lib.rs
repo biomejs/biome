@@ -388,4 +388,23 @@ mod tests {
 
         assert_eq!(formatted.print().unwrap().as_code(), "foo: bar\n");
     }
+
+    #[test]
+    fn bracket_spacing() {
+        let parse = parse_yaml("{items: [1, {}, []]}");
+        for (options, expected) in [
+            (YamlFormatOptions::default(), "{ items: [1, {}, []] }\n"),
+            (
+                YamlFormatOptions::default().with_bracket_spacing(true.into()),
+                "{ items: [ 1, {}, [] ] }\n",
+            ),
+            (
+                YamlFormatOptions::default().with_bracket_spacing(false.into()),
+                "{items: [1, {}, []]}\n",
+            ),
+        ] {
+            let formatted = format_node(options, &parse.syntax()).unwrap();
+            assert_eq!(formatted.print().unwrap().as_code(), expected);
+        }
+    }
 }

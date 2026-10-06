@@ -1,0 +1,161 @@
+#![deny(clippy::use_self)]
+
+mod assist;
+mod lint;
+mod registry;
+mod suppression;
+mod suppression_action;
+
+pub use crate::registry::visit_registry;
+pub use crate::suppression::YamlSuppression;
+use crate::suppression_action::YamlSuppressionAction;
+use biome_analyze::{
+    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams,
+    MetadataRegistry, RuleAction, RuleRegistry,
+};
+use biome_diagnostics::Error;
+use biome_yaml_syntax::YamlLanguage;
+use std::ops::Deref;
+use std::sync::LazyLock;
+
+#[expect(dead_code)]
+pub(crate) type YamlRuleAction = RuleAction<YamlLanguage>;
+
+pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
+    let mut metadata = MetadataRegistry::default();
+    visit_registry(&mut metadata);
+    metadata
+});
+
+/// Run the analyzer on the provided `root`: this process will use the given `filter`
+/// to selectively restrict analysis to specific rules / a specific source range,
+/// then call `emit_signal` when an analysis rule emits a diagnostic or action
+pub fn analyze<'a, F, B>(
+    root: &LanguageRoot<YamlLanguage>,
+    filter: AnalysisFilter,
+    options: &'a AnalyzerOptions,
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    F: FnMut(&dyn AnalyzerSignal<YamlLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_inspect_matcher(root, filter, |_| {}, options, emit_signal)
+}
+
+/// Run the analyzer on the provided `root`: this process will use the given `filter`
+/// to selectively restrict analysis to specific rules / a specific source range,
+/// then call `emit_signal` when an analysis rule emits a diagnostic or action.
+/// Additionally, this function takes a `inspect_matcher` function that can be
+/// used to inspect the "query matches" emitted by the analyzer before they are
+/// processed by the lint rules registry
+pub fn analyze_with_inspect_matcher<'a, V, F, B>(
+    root: &LanguageRoot<YamlLanguage>,
+    filter: AnalysisFilter,
+    inspect_matcher: V,
+    options: &'a AnalyzerOptions,
+    mut emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    V: FnMut(&MatchQueryParams<YamlLanguage>) + 'a,
+    F: FnMut(&dyn AnalyzerSignal<YamlLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    let mut registry = RuleRegistry::builder(&filter, root);
+    visit_registry(&mut registry);
+
+    let (registry, services, diagnostics, visitors) = registry.build();
+
+    // Bail if we can't parse a rule option
+    if !diagnostics.is_empty() {
+        return (None, diagnostics);
+    }
+
+    let mut analyzer = biome_analyze::Analyzer::new(
+        METADATA.deref(),
+        biome_analyze::InspectMatcher::new(registry, inspect_matcher),
+        Box::new(YamlSuppression),
+        Box::new(YamlSuppressionAction),
+        &mut emit_signal,
+    );
+
+    for ((phase, _), visitor) in visitors {
+        analyzer.add_visitor(phase, visitor);
+    }
+
+    (
+        analyzer.run(biome_analyze::AnalyzerContext {
+            root: root.clone(),
+            range: filter.range,
+            services,
+            options,
+        }),
+        diagnostics,
+    )
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::analyze;
+    use biome_analyze::{
+        ActionFilter, AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleFilter,
+    };
+    use biome_console::fmt::{Formatter, Termcolor};
+    use biome_console::{Markup, markup};
+    use biome_diagnostics::termcolor::NoColor;
+    use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
+    use biome_rowan::TextRange;
+    use biome_yaml_parser::parse_yaml;
+    use std::slice;
+
+    #[ignore]
+    #[test]
+    fn quick_test() {
+        fn markup_to_string(markup: Markup) -> String {
+            let mut buffer = Vec::new();
+            let mut write = Termcolor(NoColor::new(&mut buffer));
+            let mut fmt = Formatter::new(&mut write);
+            fmt.write_markup(markup).unwrap();
+
+            String::from_utf8(buffer).unwrap()
+        }
+
+        const SOURCE: &str = r#" "#;
+
+        let parsed = parse_yaml(SOURCE);
+
+        let mut error_ranges: Vec<TextRange> = Vec::new();
+        let rule_filter = RuleFilter::Rule("nursery", "noUnknownPseudoClass");
+        let options = AnalyzerOptions::default();
+        analyze(
+            &parsed.tree(),
+            AnalysisFilter {
+                enabled_rules: Some(slice::from_ref(&rule_filter)),
+                ..AnalysisFilter::default()
+            },
+            &options,
+            |signal| {
+                if let Some(diag) = signal.diagnostic() {
+                    error_ranges.push(diag.location().span.unwrap());
+                    let error = diag
+                        .with_severity(Severity::Warning)
+                        .with_file_path("ahahah")
+                        .with_file_source_code(SOURCE);
+                    let text = markup_to_string(markup! {
+                        {PrintDiagnostic::verbose(&error)}
+                    });
+                    eprintln!("{text}");
+                }
+
+                for action in signal.actions(ActionFilter::all()) {
+                    let new_code = action.mutation.commit();
+                    eprintln!("{new_code}");
+                }
+
+                ControlFlow::<Never>::Continue(())
+            },
+        );
+
+        assert_eq!(error_ranges.as_slice(), &[]);
+    }
+}

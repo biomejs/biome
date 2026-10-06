@@ -59,16 +59,14 @@ biome migrate eslint --include-inspired --include-nursery --write
         "noUnusedVariables": "error"
       },
       "nursery": {
-        "noIdenticalTestTitle": "error",
-        "noInlineStyles": "error",
         "noSvelteLegacyConst": "error",
         "useControlLabel": "error",
-        "useIframeSandbox": "error",
         "usePromiseRejectErrors": "error"
       },
       "performance": { "noDelete": "error" },
-      "security": { "noBlankTarget": "error" },
+      "security": { "noBlankTarget": "error", "useIframeSandbox": "error" },
       "style": {
+        "noInlineStyles": "error",
         "noProcessEnv": "error",
         "noVueOptionsApi": "error",
         "useConsistentCurlyBraces": "error",
@@ -84,6 +82,7 @@ biome migrate eslint --include-inspired --include-nursery --write
         "noDoubleEquals": "error",
         "noFocusedTests": "error",
         "noGlobalAssign": "error",
+        "noIdenticalTestTitle": "error",
         "noIrregularWhitespace": "error",
         "noShadow": "error",
         "noUnassignedVariables": "error",

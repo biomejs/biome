@@ -1,0 +1,66 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: react_vue_and_svelte.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"rules": {
+		"react/forbid-elements": [
+			"warn",
+			{
+				"forbid": [{ "element": "a", "message": "Use Link instead." }, "button"]
+			}
+		],
+		"svelte/no-restricted-html-elements": [
+			"error",
+			{ "elements": ["a"], "message": "Use the Svelte link instead." },
+			{
+				"elements": ["button"],
+				"message": "Use the Button component instead."
+			},
+			"blink"
+		],
+		"vue/no-restricted-html-elements": [
+			"warn",
+			{ "element": "a", "message": "Use NuxtLink instead." },
+			"marquee"
+		]
+	}
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"preset": "none",
+			"correctness": {
+				"noRestrictedElements": {
+					"level": "error",
+					"options": {
+						"elements": {
+							"a": "Use Link instead. Use NuxtLink instead. Use the Svelte link instead.",
+							"marquee": "TODO: Add a custom message here.",
+							"button": "Use the Button component instead.",
+							"blink": "TODO: Add a custom message here."
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+```

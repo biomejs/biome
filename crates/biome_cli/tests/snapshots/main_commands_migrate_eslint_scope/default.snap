@@ -58,8 +58,9 @@ biome migrate eslint --write
         "noUnusedVariables": "error"
       },
       "performance": { "noDelete": "error" },
-      "security": { "noBlankTarget": "error" },
+      "security": { "noBlankTarget": "error", "useIframeSandbox": "error" },
       "style": {
+        "noInlineStyles": "error",
         "noProcessEnv": "error",
         "useConsistentObjectDefinitions": "error",
         "useConst": "error",
@@ -72,6 +73,7 @@ biome migrate eslint --write
         "noDoubleEquals": "error",
         "noFocusedTests": "error",
         "noGlobalAssign": "error",
+        "noIdenticalTestTitle": "error",
         "noIrregularWhitespace": "error",
         "noShadow": "error"
       }
@@ -93,9 +95,9 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
 
   i 120 ESLint rules found
     - 16 are obsolete because of Biome's formatter
-    - 53 have been migrated to Biome's rules
+    - 58 have been migrated to Biome's rules
     - 71% (86) of your ESLint rules are fully covered by Biome
-      - 44% (53) via direct migration to Biome rules
+      - 48% (58) via direct migration to Biome rules
   
   
   i Migrated rules:
@@ -142,8 +144,13 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
   - astro/jsx-a11y/tabindex-no-positive
   - n/prefer-node-protocol
   - playwright/no-focused-test
+  - playwright/no-identical-title
+  - react/iframe-missing-sandbox
+  - react-native/no-inline-styles
   - react-prefer-function-component/prefer-function-component
+  - shadcn/no-inline-styles
   - svelte/button-has-type
+  - svelte/no-inline-styles
   - svelte/no-target-blank
   - svelte/prefer-const
   - vue/eqeqeq
@@ -170,12 +177,7 @@ migrate ━━━━━━━━━━━━━━━━━━━━━━━━
   i Rules that can be migrated to a nursery rule using --include-nursery:
   
   - @typescript-eslint/prefer-promise-reject-errors
-  - playwright/no-identical-title
-  - react/iframe-missing-sandbox
-  - react-native/no-inline-styles
-  - shadcn/no-inline-styles
   - svelte/no-at-const-tags
-  - svelte/no-inline-styles
   
   i Unsupported rules (21 incompatible with formatter, 10 made obsolete by the formatter, 6 covered by a formatter option, 1 not yet implemented, 0 unknown source):
   

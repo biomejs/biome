@@ -497,7 +497,7 @@ impl DocumentFileSource {
             #[cfg(feature = "lang_grit")]
             Self::Grit(_) => true,
             #[cfg(feature = "lang_md")]
-            Self::Markdown(_) => false, // it will, but not yet
+            Self::Markdown(_) => true,
             #[cfg(feature = "lang_yaml")]
             Self::Yaml(_) => false,
             #[cfg(feature = "lang_graphql")]

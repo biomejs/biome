@@ -190,16 +190,14 @@ expression: basic.jsonc
 				"noUnusedVariables": "error"
 			},
 			"nursery": {
-				"noIdenticalTestTitle": "error",
-				"noInlineStyles": "error",
 				"noSvelteLegacyConst": "error",
 				"useControlLabel": "error",
-				"useIframeSandbox": "error",
 				"usePromiseRejectErrors": "error"
 			},
 			"performance": { "noDelete": "error" },
-			"security": { "noBlankTarget": "error" },
+			"security": { "noBlankTarget": "error", "useIframeSandbox": "error" },
 			"style": {
+				"noInlineStyles": "error",
 				"noProcessEnv": "error",
 				"noVueOptionsApi": "error",
 				"useConsistentCurlyBraces": "error",
@@ -215,6 +213,7 @@ expression: basic.jsonc
 				"noDoubleEquals": "error",
 				"noFocusedTests": "error",
 				"noGlobalAssign": "error",
+				"noIdenticalTestTitle": "error",
 				"noIrregularWhitespace": "error",
 				"noShadow": "error",
 				"noUnassignedVariables": "error",

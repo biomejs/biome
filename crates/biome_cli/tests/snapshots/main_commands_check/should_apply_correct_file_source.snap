@@ -14,7 +14,7 @@ biome check file.ts
 {
   "linter": {
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "correctness": {
         "noUndeclaredVariables": "error"
       }

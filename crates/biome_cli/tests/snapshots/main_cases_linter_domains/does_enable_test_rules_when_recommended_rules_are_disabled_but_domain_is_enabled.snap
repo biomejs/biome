@@ -60,6 +60,56 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
+biome.json:2:15 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.
+  
+     1 │ {
+   > 2 │     "linter": {
+       │               ^
+   > 3 │         "rules": {
+   > 4 │             "recommended": false
+        ...
+   > 8 │         }
+   > 9 │     }
+       │     ^
+    10 │ }
+    11 │ 
+  
+  i Migrate the configuration with the proper command
+  
+  $ biome migrate
+  
+
+```
+
+```block
+test2.js:5:5 lint/style/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test function test is inconsistent with the configured preferred function it.
+  
+    3 │ 	beforeEach(() => {});
+    4 │     beforeEach(() => {});
+  > 5 │     test("bar", () => {
+      │     ^^^^
+    6 │         someFn();
+    7 │     });
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+  i Safe fix: Use it instead.
+  
+    3 3 │   	beforeEach(() => {});
+    4 4 │       beforeEach(() => {});
+    5   │ - ····test("bar",·()·=>·{
+      5 │ + ····it("bar",·()·=>·{
+    6 6 │           someFn();
+    7 7 │       });
+  
+
+```
+
+```block
 test1.js:3:18 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't focus the test.
@@ -77,6 +127,28 @@ test1.js:3:18 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━�
   
     3 │ ········describe.only("bar",·()·=>·{});
       │                 -----                  
+
+```
+
+```block
+test2.js:5:5 lint/suspicious/useExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Test callback is missing an expect() assertion.
+  
+    3 │ 	beforeEach(() => {});
+    4 │     beforeEach(() => {});
+  > 5 │     test("bar", () => {
+      │     ^^^^^^^^^^^^^^^^^^^
+  > 6 │         someFn();
+  > 7 │     });
+      │     ^^
+    8 │ });
+    9 │     
+  
+  i Tests without assertions may pass even when the behavior is broken.
+  
+  i Add an assertion using expect() to verify the expected behavior.
+  
 
 ```
 
@@ -100,5 +172,6 @@ test2.js:4:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━
 ```block
 Checked 2 files in <TIME>. No fixes applied.
 Found 1 error.
-Found 1 warning.
+Found 2 warnings.
+Found 1 info.
 ```

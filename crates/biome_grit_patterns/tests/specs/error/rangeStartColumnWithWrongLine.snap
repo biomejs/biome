@@ -1,0 +1,11 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: rangeStartColumnWithWrongLine
+---
+ErrorSnapshotResult {
+    diagnostics: [
+        InvalidRange(
+            "start_column requires start_line",
+        ),
+    ],
+}

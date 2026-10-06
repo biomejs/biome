@@ -1,0 +1,11 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: rangeBoolean
+---
+ErrorSnapshotResult {
+    diagnostics: [
+        InvalidRange(
+            "start_column must be an unsigned integer literal",
+        ),
+    ],
+}

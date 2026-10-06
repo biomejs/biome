@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: importShadow.ts
+---
+# Input
+```ts
+import { test } from "vitest";
+function suite(it) { test("first", () => {}); }
+
+```
+
+# Diagnostics
+```
+importShadow.ts:2:22 lint/style/useConsistentTestIt ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test function test is inconsistent with the configured preferred function it.
+  
+    1 │ import { test } from "vitest";
+  > 2 │ function suite(it) { test("first", () => {}); }
+      │                      ^^^^
+    3 │ 
+  
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  
+
+```

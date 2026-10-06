@@ -1,0 +1,16 @@
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "a11y": {
+        "noRedundantRoles": {
+          "level": "on",
+          "options": {
+            "ignoreElements": ["button", "NAV"]
+          }
+        }
+      }
+    }
+  }
+}

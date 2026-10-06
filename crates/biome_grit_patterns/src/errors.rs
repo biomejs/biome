@@ -39,6 +39,9 @@ pub enum CompileError {
     /// Regular expressions are not allowed on the right-hand side of a rule.
     InvalidRegexPosition,
 
+    /// A range bound is not an unsigned integer literal or a column has no line.
+    InvalidRange(String),
+
     /// Incorrect reference to a metavariable.
     MetavariableNotFound(String),
 
@@ -128,6 +131,9 @@ impl Diagnostic for CompileError {
             ),
             Self::MetavariableNotFound(var) => {
                 fmt.write_markup(markup! { "Metavariable not found: "{{var}} })
+            }
+            Self::InvalidRange(message) => {
+                fmt.write_markup(markup! { "Invalid range pattern: "{{message}} })
             }
             Self::ReservedMetavariable(var) => {
                 fmt.write_markup(markup! { "Reserved metavariable: "{{var}} })

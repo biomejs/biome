@@ -42,10 +42,10 @@ declare_lint_rule! {
     /// <div className="[&:nth-child(3)]:px-2" />;
     /// ```
     ///
-    /// The rule checks `class` and `className` JSX attributes, and strings passed to
-    /// `clsx`, `tw`, `twMerge`, `twJoin`, `cva`, `tv`, `cn`, `cc`, `cnb`, and `ctl`.
-    /// Tagged templates using these helpers, including members such as `tw.div`,
-    /// are also checked.
+    /// ## Recognized class strings
+    ///
+    /// This rule checks the attributes and functions recognized by the top-level
+    /// [`tailwind` configuration](https://biomejs.dev/reference/configuration/#tailwind).
     ///
     pub NoTailwindArbitraryValue {
         version: "2.5.7",

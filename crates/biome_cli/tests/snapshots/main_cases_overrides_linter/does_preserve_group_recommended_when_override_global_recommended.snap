@@ -15,7 +15,7 @@ biome lint --write --unsafe .
   "linter": {
     "rules": {
       "suspicious": {
-        "recommended": false
+        "preset": "none"
       }
     }
   },
@@ -24,7 +24,7 @@ biome lint --write --unsafe .
       "includes": ["test.js"],
       "linter": {
         "rules": {
-          "recommended": true
+          "preset": "recommended"
         }
       }
     }

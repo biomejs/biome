@@ -1,0 +1,23 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "react/forbid-elements": ["warn", {
+        "forbid": [
+          "button",
+          { "element": "input", "message": "Use TextField instead." },
+          { "element": "a", "message": "Use Link instead." },
+          { "element": "marquee", "message": "Use CSS animations instead." }
+        ]
+      }],
+      "vue/no-restricted-html-elements": [
+        "error",
+        "input",
+        { "element": "button", "message": "Use BaseButton instead." },
+        { "element": "a", "message": "Use NuxtLink instead." },
+        { "element": "marquee", "message": "Use CSS animations instead." },
+        "blink"
+      ]
+    }
+  }
+}

@@ -16,6 +16,8 @@ use biome_json_syntax::JsonLanguage;
 #[cfg(feature = "lang_md")]
 use biome_markdown_syntax::MarkdownLanguage;
 use biome_rowan::Language;
+#[cfg(feature = "lang_yaml")]
+use biome_yaml_syntax::YamlLanguage;
 use std::{collections::BTreeMap, str::FromStr};
 
 #[derive(Debug, Clone)]
@@ -70,6 +72,8 @@ impl RulesVisitor {
         biome_js_analyze::visit_registry(&mut visitor);
         #[cfg(feature = "lang_md")]
         biome_markdown_analyze::visit_registry(&mut visitor);
+        #[cfg(feature = "lang_yaml")]
+        biome_yaml_analyze::visit_registry(&mut visitor);
 
         visitor
     }
@@ -157,6 +161,17 @@ impl RegistryVisitor<MarkdownLanguage> for RulesVisitor {
             + 'static,
     {
         self.store_rule::<R, MarkdownLanguage>();
+    }
+}
+
+#[cfg(feature = "lang_yaml")]
+impl RegistryVisitor<YamlLanguage> for RulesVisitor {
+    fn record_rule<R>(&mut self)
+    where
+        R: Rule<Options: Default, Query: Queryable<Language = YamlLanguage, Output: Clone>>
+            + 'static,
+    {
+        self.store_rule::<R, YamlLanguage>();
     }
 }
 

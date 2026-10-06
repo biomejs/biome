@@ -13,6 +13,9 @@ Profile-*.json
 !e2e-tests/**/test.*
 # Ignore third-party files
 **/node_modules
+# Keep dependency manifests used by noUntrustedLicenses fixtures.
+!crates/biome_json_analyze/tests/specs/**/noUntrustedLicenses/**/node_modules/
+!crates/biome_json_analyze/tests/specs/**/noUntrustedLicenses/**/node_modules/**
 **/dist
 **/build
 .pnpm-debug.log

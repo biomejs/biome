@@ -1,0 +1,52 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidIgnoreElements.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<>
+	<article role="article"></article>
+	<ul role="list"></ul>
+</>;
+
+```
+
+# Diagnostics
+```
+invalidIgnoreElements.jsx:3:16 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'article' on the 'article' element is redundant, because it is implied by its semantic.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <>
+  > 3 │ 	<article role="article"></article>
+      │ 	              ^^^^^^^^^
+    4 │ 	<ul role="list"></ul>
+    5 │ </>;
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    3 │ → <article·role="article"></article>
+      │            --------------           
+
+```
+
+```
+invalidIgnoreElements.jsx:4:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using the role attribute 'list' on the 'ul' element is redundant, because it is implied by its semantic.
+  
+    2 │ <>
+    3 │ 	<article role="article"></article>
+  > 4 │ 	<ul role="list"></ul>
+      │ 	         ^^^^^^
+    5 │ </>;
+    6 │ 
+  
+  i Unsafe fix: Remove the role attribute.
+  
+    4 │ → <ul·role="list"></ul>
+      │       -----------      
+
+```
