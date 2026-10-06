@@ -106,7 +106,7 @@ pub enum CssLexContext {
     /// Currently, only applicable to when we encounter a `@apply` rule.
     TailwindUtility,
     /// Applied when lexing Tailwind CSS utility and variant names in
-    /// `@utility` and `@variant`.
+    /// `@utility`, `@variant`, and `@custom-variant`.
     TailwindUtilityName,
 }
 
