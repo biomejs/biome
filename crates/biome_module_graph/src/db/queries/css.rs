@@ -19,7 +19,8 @@ use std::collections::VecDeque;
 /// Returns the Tailwind CSS configuration of a stylesheet, including the CSS
 /// files it imports. Each import is inlined where it appears, the way Tailwind
 /// CSS inlines imports, so a file imported twice is inlined twice. An import
-/// of a file that is already being inlined is a cycle and is skipped.
+/// of a file that is already being inlined is a cycle and is skipped. Like
+/// Tailwind CSS, `@import url(...)` isn't inlined.
 ///
 /// Tracked: depends on the CSS module info of the stylesheet and of every file
 /// it reaches through `@import`.
@@ -68,12 +69,15 @@ impl TailwindImportFrame {
             return None;
         };
         let imports = css_info
-            .imports
+            .tailwind_imports
             .iter()
-            .zip(&css_info.tailwind_import_positions)
-            .filter_map(|(import, position)| {
-                let path = import.resolve_css(db, module).path().as_path()?;
-                Some((*position, db.module_for_path(path)?))
+            .filter_map(|tailwind_import| {
+                let path = tailwind_import
+                    .import
+                    .resolve_css(db, module)
+                    .path()
+                    .as_path()?;
+                Some((tailwind_import.position, db.module_for_path(path)?))
             })
             .collect::<Vec<_>>()
             .into_iter();

@@ -12,6 +12,8 @@ use biome_css_syntax::{
 };
 use biome_rowan::{AstNode, Text};
 
+use super::CssImport;
+
 /// The Tailwind CSS configuration a stylesheet declares, in source order.
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct TailwindStylesheet {
@@ -51,6 +53,15 @@ pub(crate) struct TailwindPosition {
     theme: usize,
     utilities: usize,
     custom_variants: usize,
+}
+
+/// An `@import` that Tailwind CSS inlines, such as `@import "./theme.css"`.
+/// Tailwind CSS leaves `@import url("./theme.css")` to the browser.
+#[derive(Clone, Debug)]
+pub(crate) struct TailwindImport {
+    pub(crate) import: CssImport,
+    /// Where the import appears among the configuration of its file.
+    pub(crate) position: TailwindPosition,
 }
 
 impl TailwindStylesheet {

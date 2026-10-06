@@ -12,7 +12,7 @@ use std::collections::BTreeSet;
 use std::hash::{Hash, Hasher};
 use std::ops::Deref;
 use std::sync::Arc;
-pub(crate) use tailwind::TailwindPosition;
+pub(crate) use tailwind::{TailwindImport, TailwindPosition};
 pub use tailwind::{TailwindStylesheet, TailwindThemeEntry, TailwindUtility};
 pub use traverse::{CssClassStep, CssTraversalStep, ImportTreeDisplay, ImportTreeNode};
 pub(crate) use visitor::CssModuleVisitor;
@@ -132,13 +132,13 @@ impl CssModuleInfo {
         imports: CssImports,
         classes: IndexMap<TextRange, TokenText>,
         tailwind: TailwindStylesheet,
-        tailwind_import_positions: Box<[TailwindPosition]>,
+        tailwind_imports: Box<[TailwindImport]>,
     ) -> Self {
         let info = CssModuleInfoInner {
             imports,
             classes,
             tailwind,
-            tailwind_import_positions,
+            tailwind_imports,
         };
         Self(Arc::new(info))
     }
@@ -182,10 +182,10 @@ pub struct CssModuleInfoInner {
     /// imports.
     pub tailwind: TailwindStylesheet,
 
-    /// Where each entry of `imports` appears in `tailwind`, in the same order.
-    /// Tailwind CSS inlines an import where it appears, so the configuration
-    /// of an imported file goes at that position.
-    pub(crate) tailwind_import_positions: Box<[TailwindPosition]>,
+    /// The imports Tailwind CSS inlines, in source order. Tailwind CSS inlines
+    /// an import where it appears, so the configuration of an imported file
+    /// goes at its position in `tailwind`.
+    pub(crate) tailwind_imports: Box<[TailwindImport]>,
 }
 
 pub type CssImports = ImportPathMap<CssImport>;

@@ -69,3 +69,38 @@ fn import_cycles_are_inlined_once_per_branch() {
         ["--color-b", "--color-a"]
     );
 }
+
+#[test]
+fn url_imports_are_not_inlined() {
+    assert_eq!(
+        theme(
+            &[
+                (
+                    "/main.css",
+                    "@import url('./colors.css');\n@import url(./colors.css);\n@import './accent.css';"
+                ),
+                ("/colors.css", "@theme { --color-brand: blue; }"),
+                ("/accent.css", "@theme { --color-accent: red; }"),
+            ],
+            "/main.css"
+        ),
+        ["--color-accent"]
+    );
+}
+
+#[test]
+fn strings_outside_imports_are_not_inlined() {
+    assert_eq!(
+        theme(
+            &[
+                (
+                    "/main.css",
+                    "@theme { --font-display: './colors.css'; }\n.logo { background: url(./colors.css); }"
+                ),
+                ("/colors.css", "@theme { --color-brand: blue; }"),
+            ],
+            "/main.css"
+        ),
+        ["--font-display"]
+    );
+}
