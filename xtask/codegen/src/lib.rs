@@ -112,6 +112,13 @@ pub enum TaskCommand {
     MigrateEslint,
     #[bpaf(command)]
     MigrateStylelint,
+    /// Prints the metadata of every rule, and the upstream rules they reference, as JSON
+    #[bpaf(command, long("rules-metadata"))]
+    RulesMetadata {
+        /// Write the JSON to this file instead of stdout. Relative paths are resolved against the repository root.
+        #[bpaf(long("out"), argument("PATH"))]
+        out: Option<std::path::PathBuf>,
+    },
     /// Generate the JSON schema for the Biome configuration file format
     #[bpaf(command)]
     Schema,

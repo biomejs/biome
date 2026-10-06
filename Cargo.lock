@@ -602,6 +602,7 @@ dependencies = [
  "camino",
  "papaya",
  "salsa",
+ "smallvec",
 ]
 
 [[package]]
@@ -2094,6 +2095,7 @@ dependencies = [
  "biome_parser",
  "biome_rowan",
  "biome_rule_options",
+ "biome_string_case",
  "biome_tailwind_factory",
  "biome_tailwind_parser",
  "biome_tailwind_syntax",
@@ -4384,9 +4386,9 @@ checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 
 [[package]]
 name = "libc"
-version = "0.2.189"
+version = "0.2.190"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2"
+checksum = "ce5d3ddc6d3fa000eb1536d85e147bfe31aacaba692ed6a876f95cb7c855be78"
 
 [[package]]
 name = "libgit2-sys"
@@ -7589,6 +7591,7 @@ dependencies = [
  "ascii_table",
  "backtrace",
  "biome_console",
+ "biome_css_parser",
  "biome_diagnostics",
  "biome_js_parser",
  "biome_js_semantic",

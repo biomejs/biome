@@ -15,11 +15,11 @@ use biome_css_syntax::{
     CssDeclaration, CssDeclarationImportant, CssDeclarationOrRuleBlock, CssFunction,
     CssGenericComponentValueList, CssGenericProperty, CssIdentifier, CssLanguage,
     CssMediaQueryList, CssNestedQualifiedRule, CssPseudoElementFunction, CssQualifiedRule,
-    CssSyntaxKind, CssSyntaxNode, CssSyntaxToken, ScssAtRootAtRule, ScssAtRootSelector,
-    ScssEachHeader, ScssEachValueList, ScssExpression, ScssExpressionItemList, ScssIfAtRule,
-    ScssInterpolatedPseudoClassFunction, ScssInterpolatedPseudoElementFunction, ScssListExpression,
-    ScssListExpressionElement, ScssMapExpression, ScssMapExpressionPair, ScssVariableDeclaration,
-    T, TextLen, TextSize, is_in_scss_include_arguments,
+    CssSyntaxKind, CssSyntaxNode, CssSyntaxToken, ScssAtRootAtRule, ScssAtRootQueryClause,
+    ScssAtRootSelector, ScssEachHeader, ScssEachValueList, ScssExpression, ScssExpressionItemList,
+    ScssIfAtRule, ScssInterpolatedPseudoClassFunction, ScssInterpolatedPseudoElementFunction,
+    ScssListExpression, ScssListExpressionElement, ScssMapExpression, ScssMapExpressionPair,
+    ScssVariableDeclaration, T, TextLen, TextSize, is_in_scss_include_arguments,
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
@@ -118,6 +118,7 @@ impl CommentStyle for CssCommentStyle {
             .or_else(handle_scss_list_trailing_separator_comment)
             .or_else(handle_scss_each_value_list_comment)
             .or_else(handle_scss_expression_item_trailing_line_comment)
+            .or_else(handle_scss_at_root_query_comment)
             .or_else(handle_scss_at_root_selector_comment)
             .or_else(handle_scss_else_clause_comment)
             .or_else(handle_empty_custom_property_container_comment)
@@ -294,6 +295,32 @@ fn handle_scss_expression_item_trailing_line_comment(
 
     if following_node.parent().as_ref() == Some(&list) {
         CommentPlacement::trailing(preceding_node.clone(), comment)
+    } else {
+        CommentPlacement::Default(comment)
+    }
+}
+
+/// Keeps `(without: // comment\n media)` comments at the colon boundary.
+fn handle_scss_at_root_query_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(clause) = comment
+        .enclosing_node()
+        .ancestors()
+        .find_map(ScssAtRootQueryClause::cast)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+    let (Ok(colon), Ok(rules)) = (clause.colon_token(), clause.rules()) else {
+        return CommentPlacement::Default(comment);
+    };
+    let boundary = TextRange::new(
+        colon.text_trimmed_range().end(),
+        rules.syntax().text_trimmed_range().start(),
+    );
+
+    if boundary.contains_range(comment.piece().text_range()) {
+        CommentPlacement::dangling(clause.into_syntax(), comment)
     } else {
         CommentPlacement::Default(comment)
     }

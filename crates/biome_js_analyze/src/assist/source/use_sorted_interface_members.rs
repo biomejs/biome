@@ -15,30 +15,29 @@ use crate::JsRuleAction;
 use biome_rowan::{AstNode, AstNodeExt, AstNodeList, BatchMutationExt, SyntaxTriviaPiece, TextRange};
 use biome_string_case::comparable_token::ComparableToken;
 declare_source_rule! {
-    /// Sort interface members by key.
+    /// Sort named members of a TypeScript interface.
     ///
-    /// Interface members are sorted according to their names. The rule distinguishes between
-    /// two types of members:
+    /// The action uses natural order, which compares numbers by value so that `item9` comes before
+    /// `item10`. It can sort members with fixed names:
     ///
-    /// **Sortable members** - Members with explicit, fixed names that can be alphabetically sorted:
-    /// - Property signatures: `property: type`
-    /// - Method signatures: `method(): type`
-    /// - Getter signatures: `get property(): type`
-    /// - Setter signatures: `set property(value: type): void`
+    /// - properties: `property: type`;
+    /// - methods: `method(): type`;
+    /// - getters: `get property(): type`;
+    /// - setters: `set property(value: type): void`.
     ///
-    /// **Non-sortable members** - Members without fixed names or with dynamic/computed names:
-    /// - Call signatures: `(): type` (represents the interface as a callable function)
-    /// - Construct signatures: `new (): type` (represents the interface as a constructor)
-    /// - Index signatures: `[key: string]: type` (represents dynamic property access)
+    /// Members without a fixed name cannot be sorted by name:
     ///
-    /// The rule sorts all sortable members alphabetically and places them first,
-    /// followed by non-sortable members in their original order. Non-sortable members
-    /// cannot be meaningfully sorted by name since they represent different interface
-    /// contracts rather than named properties or methods.
+    /// - call signatures such as `(): type` make the interface callable;
+    /// - construct signatures such as `new (): type` make it constructible;
+    /// - index signatures such as `[key: string]: type` describe dynamically named properties;
+    /// - computed names such as `[Symbol.iterator]()` are calculated from an expression.
     ///
-    /// # Examples
+    /// The action places sorted, named members first. It keeps members without fixed names in their
+    /// original relative order after them.
     ///
-    /// ## Invalid
+    /// ## Examples
+    ///
+    /// ### Invalid
     ///
     /// ```ts,expect_diagnostic
     /// interface MixedMembers {
@@ -52,7 +51,7 @@ declare_source_rule! {
     /// }
     /// ```
     ///
-    /// ## Valid
+    /// ### Valid
     ///
     /// ```ts
     /// interface MixedMembers {

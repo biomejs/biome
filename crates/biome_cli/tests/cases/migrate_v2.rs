@@ -637,3 +637,52 @@ fn should_migrate_nested_config() {
         result,
     ));
 }
+
+#[test]
+fn should_migrate_empty_nested_config() {
+    let mut fs = TemporaryFs::new("should_migrate_nested_empty_config");
+    let mut console = BufferConsole::default();
+    fs.create_file("biome.json", "{}");
+
+    let nested_path = fs.create_file("pkg/biome.json", "{}");
+
+    let dry_result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["migrate"].as_slice()),
+    );
+    assert!(dry_result.is_ok(), "run_cli returned {dry_result:?}");
+
+    assert_eq!(std::fs::read_to_string(&nested_path).unwrap(), "{}");
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["migrate", "--write"].as_slice()),
+    );
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let content = std::fs::read_to_string(&nested_path).unwrap();
+    let value: serde_json::Value = serde_json::from_str(&content).unwrap();
+
+    assert_eq!(value, serde_json::json!({"root": false}));
+
+    let second_result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["migrate", "--write"].as_slice()),
+    );
+    assert!(second_result.is_ok(), "run_cli returned {second_result:?}");
+
+    assert_eq!(std::fs::read_to_string(&nested_path).unwrap(), content,);
+
+    let result = dry_result.followed_by(result).followed_by(second_result);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_migrate_nested_empty_config",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}

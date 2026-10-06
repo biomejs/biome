@@ -2,6 +2,7 @@
 
 pub(crate) mod arbitrary_argument;
 pub(crate) mod at_root_query;
+pub(crate) mod at_root_query_clause;
 pub(crate) mod binary_expression;
 pub(crate) mod container_interpolated_query;
 pub(crate) mod each_header;
@@ -21,6 +22,7 @@ pub(crate) mod interpolation;
 pub(crate) mod keyframes_name;
 pub(crate) mod keyframes_variable_declaration;
 pub(crate) mod keyword_argument;
+pub(crate) mod legacy_if_function;
 pub(crate) mod list_expression;
 pub(crate) mod list_expression_element;
 pub(crate) mod map_expression;
@@ -41,6 +43,7 @@ pub(crate) mod parenthesized_expression;
 pub(crate) mod plain_import;
 pub(crate) mod show_clause;
 pub(crate) mod string_text;
+pub(crate) mod supports_feature_declaration;
 pub(crate) mod supports_interpolated_condition;
 pub(crate) mod unary_expression;
 pub(crate) mod url_text;

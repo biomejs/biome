@@ -17,11 +17,11 @@ use biome_rule_options::use_sorted_type_fields::UseSortedTypeFieldsOptions;
 use std::cmp::Ordering;
 
 declare_source_rule! {
-    /// Sort fields in GraphQL type definitions alphabetically.
+    /// Sort fields in GraphQL type definitions by name.
     ///
-    /// This rule ensures that fields within `type`, `interface`, and `input`
-    /// definitions are sorted alphabetically. For GraphQL identifiers (`[A-Za-z0-9_]`),
-    /// the sort order matches JavaScript's `localeCompare()`, including case handling.
+    /// The action sorts fields inside `type`, `interface`, and `input` definitions. Underscores
+    /// come first, followed by digits and then letters. Letter case is ignored first; when names
+    /// otherwise match, lowercase letters come before uppercase letters.
     ///
     /// ## Examples
     ///

@@ -1,9 +1,3 @@
-@at-root (without media) {
-  .root-only {
-    color: red;
-  }
-}
-
 @at-root (without:) {
   .root-only {
     color: blue;

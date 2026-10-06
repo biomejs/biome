@@ -14,7 +14,11 @@ use biome_string_case::StrLikeExtension;
 use crate::HtmlRuleAction;
 
 declare_lint_rule! {
-    /// Ensures that ARIA properties `aria-*` are all valid.
+    /// Disallow unknown `aria-*` attributes.
+    ///
+    /// ARIA (Accessible Rich Internet Applications) attributes describe an element to assistive
+    /// technologies. Browsers ignore misspelled or unknown ARIA attributes, so users may not
+    /// receive the intended name, state, or other accessibility information.
     ///
     /// ## Examples
     ///

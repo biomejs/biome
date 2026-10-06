@@ -656,6 +656,7 @@ CssDeclarationOrRuleList = AnyCssDeclarationOrRule*
 
 AnyCssDeclarationOrRule =
 	AnyCssRule
+	| CssKeyframesItem
 	| CssDeclarationWithSemicolon
 	| ScssVariableDeclaration
 	| ScssNestingDeclaration
@@ -1914,6 +1915,7 @@ AnyCssSupportsInParens =
 	CssSupportsConditionInParens
 	| CssSupportsFeatureDeclaration
 	| CssSupportsFeatureSelector
+	| ScssSupportsFeatureDeclaration
 	| ScssSupportsInterpolatedCondition
 	| AnyCssValue // general-enclosed
 
@@ -1934,6 +1936,16 @@ CssSupportsConditionInParens =
 CssSupportsFeatureDeclaration =
 	'('
 	declaration: CssDeclaration
+	')'
+
+// @supports ($property: grid) {}
+//           ^^^^^^^^^^^^^^^
+ScssSupportsFeatureDeclaration =
+	'('
+	name: ScssVariable
+	':'
+	value: AnyCssGenericPropertyValueOrExpression
+	important: CssDeclarationImportant?
 	')'
 
 // @supports selector(:focus-visible) { }
@@ -2342,6 +2354,7 @@ AnyCssFunction =
 	| CssUrlFunction
 	| CssIfFunction
 	| CssAttrFunction
+	| ScssLegacyIfFunction
 
 // content: counter(section);
 // 					^^^^^^^^^^^^^^^^
@@ -2378,6 +2391,7 @@ CssUrlModifierList = AnyCssUrlModifier*
 AnyCssUrlModifier =
 	CssIdentifier
 	| CssFunction
+	| ScssLegacyIfFunction
 	| CssBogusUrlModifier
 
 AnyCssUrlValue =
@@ -2426,6 +2440,13 @@ CssIfFunction =
 	'if'
 	'('
 	CssIfBranchList
+	')'
+
+// if($condition, $if-true, $if-false)
+ScssLegacyIfFunction =
+	'if'
+	'('
+	items: CssParameterList
 	')'
 
 // if(style(--theme: dark): red; else: blue)
@@ -3113,16 +3134,27 @@ ScssAtRootAtRule =
 	selector: ScssAtRootSelector?
 	block: CssDeclarationOrRuleBlock
 
-// (without: media supports)
-// ^^^^^^^^^^^^^^^^^^^^^^^^^
+// @at-root ($query) {}
+//          ^^^^^^^^
 ScssAtRootQuery =
 	'('
-	modifier: ('with' | 'without')
-	':'
-	queries: ScssAtRootQueryList
+	query: AnyScssAtRootQuery
 	')'
 
-ScssAtRootQueryList = AnyCssCustomIdentifier*
+// @at-root ($query) {}
+//           ^^^^^^
+// @at-root (without: media) {}
+//           ^^^^^^^^^^^^^^
+AnyScssAtRootQuery =
+	ScssExpression
+	| ScssAtRootQueryClause
+
+// @at-root (without: $rules) {}
+//           ^^^^^^^^^^^^^^^
+ScssAtRootQueryClause =
+	modifier: ScssExpression
+	':'
+	rules: ScssExpression
 
 // .root-only, .another-root
 // ^^^^^^^^^^^^^^^^^^^^^^^^^

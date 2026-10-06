@@ -9624,26 +9624,18 @@ impl ScssAtRootQuery {
     pub fn as_fields(&self) -> ScssAtRootQueryFields {
         ScssAtRootQueryFields {
             l_paren_token: self.l_paren_token(),
-            modifier: self.modifier(),
-            colon_token: self.colon_token(),
-            queries: self.queries(),
+            query: self.query(),
             r_paren_token: self.r_paren_token(),
         }
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn modifier(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
-    }
-    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-    pub fn queries(&self) -> ScssAtRootQueryList {
-        support::list(&self.syntax, 3usize)
+    pub fn query(&self) -> SyntaxResult<AnyScssAtRootQuery> {
+        support::required_node(&self.syntax, 1usize)
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
+        support::required_token(&self.syntax, 2usize)
     }
 }
 impl Serialize for ScssAtRootQuery {
@@ -9657,10 +9649,53 @@ impl Serialize for ScssAtRootQuery {
 #[derive(Serialize)]
 pub struct ScssAtRootQueryFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub modifier: SyntaxResult<SyntaxToken>,
-    pub colon_token: SyntaxResult<SyntaxToken>,
-    pub queries: ScssAtRootQueryList,
+    pub query: SyntaxResult<AnyScssAtRootQuery>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssAtRootQueryClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssAtRootQueryClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssAtRootQueryClauseFields {
+        ScssAtRootQueryClauseFields {
+            modifier: self.modifier(),
+            colon_token: self.colon_token(),
+            rules: self.rules(),
+        }
+    }
+    pub fn modifier(&self) -> SyntaxResult<ScssExpression> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn rules(&self) -> SyntaxResult<ScssExpression> {
+        support::required_node(&self.syntax, 2usize)
+    }
+}
+impl Serialize for ScssAtRootQueryClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssAtRootQueryClauseFields {
+    pub modifier: SyntaxResult<ScssExpression>,
+    pub colon_token: SyntaxResult<SyntaxToken>,
+    pub rules: SyntaxResult<ScssExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssAtRootSelector {
@@ -11474,6 +11509,56 @@ pub struct ScssKeywordArgumentFields {
     pub value: SyntaxResult<AnyScssExpression>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssLegacyIfFunction {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssLegacyIfFunction {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssLegacyIfFunctionFields {
+        ScssLegacyIfFunctionFields {
+            if_token: self.if_token(),
+            l_paren_token: self.l_paren_token(),
+            items: self.items(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn if_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn items(&self) -> CssParameterList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for ScssLegacyIfFunction {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssLegacyIfFunctionFields {
+    pub if_token: SyntaxResult<SyntaxToken>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub items: CssParameterList,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssListExpression {
     pub(crate) syntax: SyntaxNode,
 }
@@ -12527,6 +12612,66 @@ impl Serialize for ScssStringText {
 #[derive(Serialize)]
 pub struct ScssStringTextFields {
     pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssSupportsFeatureDeclaration {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssSupportsFeatureDeclaration {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssSupportsFeatureDeclarationFields {
+        ScssSupportsFeatureDeclarationFields {
+            l_paren_token: self.l_paren_token(),
+            name: self.name(),
+            colon_token: self.colon_token(),
+            value: self.value(),
+            important: self.important(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn name(&self) -> SyntaxResult<ScssVariable> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+    pub fn value(&self) -> SyntaxResult<AnyCssGenericPropertyValueOrExpression> {
+        support::required_node(&self.syntax, 3usize)
+    }
+    pub fn important(&self) -> Option<CssDeclarationImportant> {
+        support::node(&self.syntax, 4usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 5usize)
+    }
+}
+impl Serialize for ScssSupportsFeatureDeclaration {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssSupportsFeatureDeclarationFields {
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<ScssVariable>,
+    pub colon_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<AnyCssGenericPropertyValueOrExpression>,
+    pub important: Option<CssDeclarationImportant>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssSupportsInterpolatedCondition {
@@ -15058,6 +15203,7 @@ pub enum AnyCssDeclarationOrRule {
     CssBogus(CssBogus),
     CssDeclarationWithSemicolon(CssDeclarationWithSemicolon),
     CssEmptyDeclaration(CssEmptyDeclaration),
+    CssKeyframesItem(CssKeyframesItem),
     CssMetavariable(CssMetavariable),
     ScssNestingDeclaration(ScssNestingDeclaration),
     ScssVariableDeclaration(ScssVariableDeclaration),
@@ -15084,6 +15230,12 @@ impl AnyCssDeclarationOrRule {
     pub fn as_css_empty_declaration(&self) -> Option<&CssEmptyDeclaration> {
         match &self {
             Self::CssEmptyDeclaration(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_keyframes_item(&self) -> Option<&CssKeyframesItem> {
+        match &self {
+            Self::CssKeyframesItem(item) => Some(item),
             _ => None,
         }
     }
@@ -15322,6 +15474,7 @@ pub enum AnyCssFunction {
     CssFunction(CssFunction),
     CssIfFunction(CssIfFunction),
     CssUrlFunction(CssUrlFunction),
+    ScssLegacyIfFunction(ScssLegacyIfFunction),
 }
 impl AnyCssFunction {
     pub fn as_css_attr_function(&self) -> Option<&CssAttrFunction> {
@@ -15345,6 +15498,12 @@ impl AnyCssFunction {
     pub fn as_css_url_function(&self) -> Option<&CssUrlFunction> {
         match &self {
             Self::CssUrlFunction(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_legacy_if_function(&self) -> Option<&ScssLegacyIfFunction> {
+        match &self {
+            Self::ScssLegacyIfFunction(item) => Some(item),
             _ => None,
         }
     }
@@ -17168,6 +17327,7 @@ pub enum AnyCssSupportsInParens {
     CssSupportsConditionInParens(CssSupportsConditionInParens),
     CssSupportsFeatureDeclaration(CssSupportsFeatureDeclaration),
     CssSupportsFeatureSelector(CssSupportsFeatureSelector),
+    ScssSupportsFeatureDeclaration(ScssSupportsFeatureDeclaration),
     ScssSupportsInterpolatedCondition(ScssSupportsInterpolatedCondition),
 }
 impl AnyCssSupportsInParens {
@@ -17192,6 +17352,12 @@ impl AnyCssSupportsInParens {
     pub fn as_css_supports_feature_selector(&self) -> Option<&CssSupportsFeatureSelector> {
         match &self {
             Self::CssSupportsFeatureSelector(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_supports_feature_declaration(&self) -> Option<&ScssSupportsFeatureDeclaration> {
+        match &self {
+            Self::ScssSupportsFeatureDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -17412,6 +17578,7 @@ pub enum AnyCssUrlModifier {
     CssBogusUrlModifier(CssBogusUrlModifier),
     CssFunction(CssFunction),
     CssIdentifier(CssIdentifier),
+    ScssLegacyIfFunction(ScssLegacyIfFunction),
 }
 impl AnyCssUrlModifier {
     pub fn as_css_bogus_url_modifier(&self) -> Option<&CssBogusUrlModifier> {
@@ -17429,6 +17596,12 @@ impl AnyCssUrlModifier {
     pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
         match &self {
             Self::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_legacy_if_function(&self) -> Option<&ScssLegacyIfFunction> {
+        match &self {
+            Self::ScssLegacyIfFunction(item) => Some(item),
             _ => None,
         }
     }
@@ -17687,6 +17860,25 @@ impl AnyCssValueAtRuleProperty {
     pub fn as_css_value_at_rule_generic_property(&self) -> Option<&CssValueAtRuleGenericProperty> {
         match &self {
             Self::CssValueAtRuleGenericProperty(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyScssAtRootQuery {
+    ScssAtRootQueryClause(ScssAtRootQueryClause),
+    ScssExpression(ScssExpression),
+}
+impl AnyScssAtRootQuery {
+    pub fn as_scss_at_root_query_clause(&self) -> Option<&ScssAtRootQueryClause> {
+        match &self {
+            Self::ScssAtRootQueryClause(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_expression(&self) -> Option<&ScssExpression> {
+        match &self {
+            Self::ScssExpression(item) => Some(item),
             _ => None,
         }
     }
@@ -30040,12 +30232,7 @@ impl std::fmt::Debug for ScssAtRootQuery {
                     "l_paren_token",
                     &support::DebugSyntaxResult(self.l_paren_token()),
                 )
-                .field("modifier", &support::DebugSyntaxResult(self.modifier()))
-                .field(
-                    "colon_token",
-                    &support::DebugSyntaxResult(self.colon_token()),
-                )
-                .field("queries", &self.queries())
+                .field("query", &support::DebugSyntaxResult(self.query()))
                 .field(
                     "r_paren_token",
                     &support::DebugSyntaxResult(self.r_paren_token()),
@@ -30065,6 +30252,58 @@ impl From<ScssAtRootQuery> for SyntaxNode {
 }
 impl From<ScssAtRootQuery> for SyntaxElement {
     fn from(n: ScssAtRootQuery) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for ScssAtRootQueryClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_AT_ROOT_QUERY_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_AT_ROOT_QUERY_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssAtRootQueryClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssAtRootQueryClause")
+                .field("modifier", &support::DebugSyntaxResult(self.modifier()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("rules", &support::DebugSyntaxResult(self.rules()))
+                .finish()
+        } else {
+            f.debug_struct("ScssAtRootQueryClause").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssAtRootQueryClause> for SyntaxNode {
+    fn from(n: ScssAtRootQueryClause) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssAtRootQueryClause> for SyntaxElement {
+    fn from(n: ScssAtRootQueryClause) -> Self {
         n.syntax.into()
     }
 }
@@ -32299,6 +32538,62 @@ impl From<ScssKeywordArgument> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for ScssLegacyIfFunction {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_LEGACY_IF_FUNCTION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_LEGACY_IF_FUNCTION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssLegacyIfFunction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssLegacyIfFunction")
+                .field("if_token", &support::DebugSyntaxResult(self.if_token()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("items", &self.items())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("ScssLegacyIfFunction").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssLegacyIfFunction> for SyntaxNode {
+    fn from(n: ScssLegacyIfFunction) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssLegacyIfFunction> for SyntaxElement {
+    fn from(n: ScssLegacyIfFunction) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for ScssListExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -33570,6 +33865,70 @@ impl From<ScssStringText> for SyntaxNode {
 }
 impl From<ScssStringText> for SyntaxElement {
     fn from(n: ScssStringText) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for ScssSupportsFeatureDeclaration {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_SUPPORTS_FEATURE_DECLARATION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_SUPPORTS_FEATURE_DECLARATION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssSupportsFeatureDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssSupportsFeatureDeclaration")
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .field(
+                    "important",
+                    &support::DebugOptionalElement(self.important()),
+                )
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("ScssSupportsFeatureDeclaration").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssSupportsFeatureDeclaration> for SyntaxNode {
+    fn from(n: ScssSupportsFeatureDeclaration) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssSupportsFeatureDeclaration> for SyntaxElement {
+    fn from(n: ScssSupportsFeatureDeclaration) -> Self {
         n.syntax.into()
     }
 }
@@ -38424,6 +38783,11 @@ impl From<CssEmptyDeclaration> for AnyCssDeclarationOrRule {
         Self::CssEmptyDeclaration(node)
     }
 }
+impl From<CssKeyframesItem> for AnyCssDeclarationOrRule {
+    fn from(node: CssKeyframesItem) -> Self {
+        Self::CssKeyframesItem(node)
+    }
+}
 impl From<CssMetavariable> for AnyCssDeclarationOrRule {
     fn from(node: CssMetavariable) -> Self {
         Self::CssMetavariable(node)
@@ -38445,6 +38809,7 @@ impl AstNode for AnyCssDeclarationOrRule {
         .union(CssBogus::KIND_SET)
         .union(CssDeclarationWithSemicolon::KIND_SET)
         .union(CssEmptyDeclaration::KIND_SET)
+        .union(CssKeyframesItem::KIND_SET)
         .union(CssMetavariable::KIND_SET)
         .union(ScssNestingDeclaration::KIND_SET)
         .union(ScssVariableDeclaration::KIND_SET);
@@ -38453,6 +38818,7 @@ impl AstNode for AnyCssDeclarationOrRule {
             CSS_BOGUS
             | CSS_DECLARATION_WITH_SEMICOLON
             | CSS_EMPTY_DECLARATION
+            | CSS_KEYFRAMES_ITEM
             | CSS_METAVARIABLE
             | SCSS_NESTING_DECLARATION
             | SCSS_VARIABLE_DECLARATION => true,
@@ -38467,6 +38833,7 @@ impl AstNode for AnyCssDeclarationOrRule {
                 Self::CssDeclarationWithSemicolon(CssDeclarationWithSemicolon { syntax })
             }
             CSS_EMPTY_DECLARATION => Self::CssEmptyDeclaration(CssEmptyDeclaration { syntax }),
+            CSS_KEYFRAMES_ITEM => Self::CssKeyframesItem(CssKeyframesItem { syntax }),
             CSS_METAVARIABLE => Self::CssMetavariable(CssMetavariable { syntax }),
             SCSS_NESTING_DECLARATION => {
                 Self::ScssNestingDeclaration(ScssNestingDeclaration { syntax })
@@ -38488,6 +38855,7 @@ impl AstNode for AnyCssDeclarationOrRule {
             Self::CssBogus(it) => it.syntax(),
             Self::CssDeclarationWithSemicolon(it) => it.syntax(),
             Self::CssEmptyDeclaration(it) => it.syntax(),
+            Self::CssKeyframesItem(it) => it.syntax(),
             Self::CssMetavariable(it) => it.syntax(),
             Self::ScssNestingDeclaration(it) => it.syntax(),
             Self::ScssVariableDeclaration(it) => it.syntax(),
@@ -38499,6 +38867,7 @@ impl AstNode for AnyCssDeclarationOrRule {
             Self::CssBogus(it) => it.into_syntax(),
             Self::CssDeclarationWithSemicolon(it) => it.into_syntax(),
             Self::CssEmptyDeclaration(it) => it.into_syntax(),
+            Self::CssKeyframesItem(it) => it.into_syntax(),
             Self::CssMetavariable(it) => it.into_syntax(),
             Self::ScssNestingDeclaration(it) => it.into_syntax(),
             Self::ScssVariableDeclaration(it) => it.into_syntax(),
@@ -38513,6 +38882,7 @@ impl std::fmt::Debug for AnyCssDeclarationOrRule {
             Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDeclarationWithSemicolon(it) => std::fmt::Debug::fmt(it, f),
             Self::CssEmptyDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssKeyframesItem(it) => std::fmt::Debug::fmt(it, f),
             Self::CssMetavariable(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssNestingDeclaration(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssVariableDeclaration(it) => std::fmt::Debug::fmt(it, f),
@@ -38526,6 +38896,7 @@ impl From<AnyCssDeclarationOrRule> for SyntaxNode {
             AnyCssDeclarationOrRule::CssBogus(it) => it.into_syntax(),
             AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(it) => it.into_syntax(),
             AnyCssDeclarationOrRule::CssEmptyDeclaration(it) => it.into_syntax(),
+            AnyCssDeclarationOrRule::CssKeyframesItem(it) => it.into_syntax(),
             AnyCssDeclarationOrRule::CssMetavariable(it) => it.into_syntax(),
             AnyCssDeclarationOrRule::ScssNestingDeclaration(it) => it.into_syntax(),
             AnyCssDeclarationOrRule::ScssVariableDeclaration(it) => it.into_syntax(),
@@ -39173,16 +39544,26 @@ impl From<CssUrlFunction> for AnyCssFunction {
         Self::CssUrlFunction(node)
     }
 }
+impl From<ScssLegacyIfFunction> for AnyCssFunction {
+    fn from(node: ScssLegacyIfFunction) -> Self {
+        Self::ScssLegacyIfFunction(node)
+    }
+}
 impl AstNode for AnyCssFunction {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssAttrFunction::KIND_SET
         .union(CssFunction::KIND_SET)
         .union(CssIfFunction::KIND_SET)
-        .union(CssUrlFunction::KIND_SET);
+        .union(CssUrlFunction::KIND_SET)
+        .union(ScssLegacyIfFunction::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_ATTR_FUNCTION | CSS_FUNCTION | CSS_IF_FUNCTION | CSS_URL_FUNCTION
+            CSS_ATTR_FUNCTION
+                | CSS_FUNCTION
+                | CSS_IF_FUNCTION
+                | CSS_URL_FUNCTION
+                | SCSS_LEGACY_IF_FUNCTION
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -39191,6 +39572,7 @@ impl AstNode for AnyCssFunction {
             CSS_FUNCTION => Self::CssFunction(CssFunction { syntax }),
             CSS_IF_FUNCTION => Self::CssIfFunction(CssIfFunction { syntax }),
             CSS_URL_FUNCTION => Self::CssUrlFunction(CssUrlFunction { syntax }),
+            SCSS_LEGACY_IF_FUNCTION => Self::ScssLegacyIfFunction(ScssLegacyIfFunction { syntax }),
             _ => return None,
         };
         Some(res)
@@ -39201,6 +39583,7 @@ impl AstNode for AnyCssFunction {
             Self::CssFunction(it) => it.syntax(),
             Self::CssIfFunction(it) => it.syntax(),
             Self::CssUrlFunction(it) => it.syntax(),
+            Self::ScssLegacyIfFunction(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -39209,6 +39592,7 @@ impl AstNode for AnyCssFunction {
             Self::CssFunction(it) => it.into_syntax(),
             Self::CssIfFunction(it) => it.into_syntax(),
             Self::CssUrlFunction(it) => it.into_syntax(),
+            Self::ScssLegacyIfFunction(it) => it.into_syntax(),
         }
     }
 }
@@ -39219,6 +39603,7 @@ impl std::fmt::Debug for AnyCssFunction {
             Self::CssFunction(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIfFunction(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUrlFunction(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssLegacyIfFunction(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -39229,6 +39614,7 @@ impl From<AnyCssFunction> for SyntaxNode {
             AnyCssFunction::CssFunction(it) => it.into_syntax(),
             AnyCssFunction::CssIfFunction(it) => it.into_syntax(),
             AnyCssFunction::CssUrlFunction(it) => it.into_syntax(),
+            AnyCssFunction::ScssLegacyIfFunction(it) => it.into_syntax(),
         }
     }
 }
@@ -44416,6 +44802,11 @@ impl From<CssSupportsFeatureSelector> for AnyCssSupportsInParens {
         Self::CssSupportsFeatureSelector(node)
     }
 }
+impl From<ScssSupportsFeatureDeclaration> for AnyCssSupportsInParens {
+    fn from(node: ScssSupportsFeatureDeclaration) -> Self {
+        Self::ScssSupportsFeatureDeclaration(node)
+    }
+}
 impl From<ScssSupportsInterpolatedCondition> for AnyCssSupportsInParens {
     fn from(node: ScssSupportsInterpolatedCondition) -> Self {
         Self::ScssSupportsInterpolatedCondition(node)
@@ -44427,12 +44818,14 @@ impl AstNode for AnyCssSupportsInParens {
         .union(CssSupportsConditionInParens::KIND_SET)
         .union(CssSupportsFeatureDeclaration::KIND_SET)
         .union(CssSupportsFeatureSelector::KIND_SET)
+        .union(ScssSupportsFeatureDeclaration::KIND_SET)
         .union(ScssSupportsInterpolatedCondition::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
             CSS_SUPPORTS_CONDITION_IN_PARENS
             | CSS_SUPPORTS_FEATURE_DECLARATION
             | CSS_SUPPORTS_FEATURE_SELECTOR
+            | SCSS_SUPPORTS_FEATURE_DECLARATION
             | SCSS_SUPPORTS_INTERPOLATED_CONDITION => true,
             k if AnyCssValue::can_cast(k) => true,
             _ => false,
@@ -44448,6 +44841,9 @@ impl AstNode for AnyCssSupportsInParens {
             }
             CSS_SUPPORTS_FEATURE_SELECTOR => {
                 Self::CssSupportsFeatureSelector(CssSupportsFeatureSelector { syntax })
+            }
+            SCSS_SUPPORTS_FEATURE_DECLARATION => {
+                Self::ScssSupportsFeatureDeclaration(ScssSupportsFeatureDeclaration { syntax })
             }
             SCSS_SUPPORTS_INTERPOLATED_CONDITION => {
                 Self::ScssSupportsInterpolatedCondition(ScssSupportsInterpolatedCondition {
@@ -44468,6 +44864,7 @@ impl AstNode for AnyCssSupportsInParens {
             Self::CssSupportsConditionInParens(it) => it.syntax(),
             Self::CssSupportsFeatureDeclaration(it) => it.syntax(),
             Self::CssSupportsFeatureSelector(it) => it.syntax(),
+            Self::ScssSupportsFeatureDeclaration(it) => it.syntax(),
             Self::ScssSupportsInterpolatedCondition(it) => it.syntax(),
             Self::AnyCssValue(it) => it.syntax(),
         }
@@ -44477,6 +44874,7 @@ impl AstNode for AnyCssSupportsInParens {
             Self::CssSupportsConditionInParens(it) => it.into_syntax(),
             Self::CssSupportsFeatureDeclaration(it) => it.into_syntax(),
             Self::CssSupportsFeatureSelector(it) => it.into_syntax(),
+            Self::ScssSupportsFeatureDeclaration(it) => it.into_syntax(),
             Self::ScssSupportsInterpolatedCondition(it) => it.into_syntax(),
             Self::AnyCssValue(it) => it.into_syntax(),
         }
@@ -44489,6 +44887,7 @@ impl std::fmt::Debug for AnyCssSupportsInParens {
             Self::CssSupportsConditionInParens(it) => std::fmt::Debug::fmt(it, f),
             Self::CssSupportsFeatureDeclaration(it) => std::fmt::Debug::fmt(it, f),
             Self::CssSupportsFeatureSelector(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssSupportsFeatureDeclaration(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssSupportsInterpolatedCondition(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -44500,6 +44899,7 @@ impl From<AnyCssSupportsInParens> for SyntaxNode {
             AnyCssSupportsInParens::CssSupportsConditionInParens(it) => it.into_syntax(),
             AnyCssSupportsInParens::CssSupportsFeatureDeclaration(it) => it.into_syntax(),
             AnyCssSupportsInParens::CssSupportsFeatureSelector(it) => it.into_syntax(),
+            AnyCssSupportsInParens::ScssSupportsFeatureDeclaration(it) => it.into_syntax(),
             AnyCssSupportsInParens::ScssSupportsInterpolatedCondition(it) => it.into_syntax(),
         }
     }
@@ -45133,19 +45533,29 @@ impl From<CssIdentifier> for AnyCssUrlModifier {
         Self::CssIdentifier(node)
     }
 }
+impl From<ScssLegacyIfFunction> for AnyCssUrlModifier {
+    fn from(node: ScssLegacyIfFunction) -> Self {
+        Self::ScssLegacyIfFunction(node)
+    }
+}
 impl AstNode for AnyCssUrlModifier {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusUrlModifier::KIND_SET
         .union(CssFunction::KIND_SET)
-        .union(CssIdentifier::KIND_SET);
+        .union(CssIdentifier::KIND_SET)
+        .union(ScssLegacyIfFunction::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_URL_MODIFIER | CSS_FUNCTION | CSS_IDENTIFIER)
+        matches!(
+            kind,
+            CSS_BOGUS_URL_MODIFIER | CSS_FUNCTION | CSS_IDENTIFIER | SCSS_LEGACY_IF_FUNCTION
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_BOGUS_URL_MODIFIER => Self::CssBogusUrlModifier(CssBogusUrlModifier { syntax }),
             CSS_FUNCTION => Self::CssFunction(CssFunction { syntax }),
             CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
+            SCSS_LEGACY_IF_FUNCTION => Self::ScssLegacyIfFunction(ScssLegacyIfFunction { syntax }),
             _ => return None,
         };
         Some(res)
@@ -45155,6 +45565,7 @@ impl AstNode for AnyCssUrlModifier {
             Self::CssBogusUrlModifier(it) => it.syntax(),
             Self::CssFunction(it) => it.syntax(),
             Self::CssIdentifier(it) => it.syntax(),
+            Self::ScssLegacyIfFunction(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -45162,6 +45573,7 @@ impl AstNode for AnyCssUrlModifier {
             Self::CssBogusUrlModifier(it) => it.into_syntax(),
             Self::CssFunction(it) => it.into_syntax(),
             Self::CssIdentifier(it) => it.into_syntax(),
+            Self::ScssLegacyIfFunction(it) => it.into_syntax(),
         }
     }
 }
@@ -45171,6 +45583,7 @@ impl std::fmt::Debug for AnyCssUrlModifier {
             Self::CssBogusUrlModifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssFunction(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssLegacyIfFunction(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -45180,6 +45593,7 @@ impl From<AnyCssUrlModifier> for SyntaxNode {
             AnyCssUrlModifier::CssBogusUrlModifier(it) => it.into_syntax(),
             AnyCssUrlModifier::CssFunction(it) => it.into_syntax(),
             AnyCssUrlModifier::CssIdentifier(it) => it.into_syntax(),
+            AnyCssUrlModifier::ScssLegacyIfFunction(it) => it.into_syntax(),
         }
     }
 }
@@ -45830,6 +46244,68 @@ impl From<AnyCssValueAtRuleProperty> for SyntaxNode {
 }
 impl From<AnyCssValueAtRuleProperty> for SyntaxElement {
     fn from(n: AnyCssValueAtRuleProperty) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<ScssAtRootQueryClause> for AnyScssAtRootQuery {
+    fn from(node: ScssAtRootQueryClause) -> Self {
+        Self::ScssAtRootQueryClause(node)
+    }
+}
+impl From<ScssExpression> for AnyScssAtRootQuery {
+    fn from(node: ScssExpression) -> Self {
+        Self::ScssExpression(node)
+    }
+}
+impl AstNode for AnyScssAtRootQuery {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        ScssAtRootQueryClause::KIND_SET.union(ScssExpression::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, SCSS_AT_ROOT_QUERY_CLAUSE | SCSS_EXPRESSION)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            SCSS_AT_ROOT_QUERY_CLAUSE => {
+                Self::ScssAtRootQueryClause(ScssAtRootQueryClause { syntax })
+            }
+            SCSS_EXPRESSION => Self::ScssExpression(ScssExpression { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::ScssAtRootQueryClause(it) => it.syntax(),
+            Self::ScssExpression(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::ScssAtRootQueryClause(it) => it.into_syntax(),
+            Self::ScssExpression(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyScssAtRootQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::ScssAtRootQueryClause(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssExpression(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyScssAtRootQuery> for SyntaxNode {
+    fn from(n: AnyScssAtRootQuery) -> Self {
+        match n {
+            AnyScssAtRootQuery::ScssAtRootQueryClause(it) => it.into_syntax(),
+            AnyScssAtRootQuery::ScssExpression(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyScssAtRootQuery> for SyntaxElement {
+    fn from(n: AnyScssAtRootQuery) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -48306,6 +48782,11 @@ impl std::fmt::Display for AnyCssValueAtRuleProperty {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyScssAtRootQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyScssElseClauseBody {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -49566,6 +50047,11 @@ impl std::fmt::Display for ScssAtRootQuery {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for ScssAtRootQueryClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for ScssAtRootSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -49781,6 +50267,11 @@ impl std::fmt::Display for ScssKeywordArgument {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for ScssLegacyIfFunction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for ScssListExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -49902,6 +50393,11 @@ impl std::fmt::Display for ScssShowClause {
     }
 }
 impl std::fmt::Display for ScssStringText {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssSupportsFeatureDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -55139,88 +55635,6 @@ impl IntoIterator for CssValueAtRulePropertyList {
 impl IntoIterator for &CssValueAtRulePropertyList {
     type Item = SyntaxResult<AnyCssValueAtRuleProperty>;
     type IntoIter = AstSeparatedListNodesIterator<Language, AnyCssValueAtRuleProperty>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-#[derive(Clone, Eq, PartialEq, Hash)]
-pub struct ScssAtRootQueryList {
-    syntax_list: SyntaxList,
-}
-impl ScssAtRootQueryList {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self {
-            syntax_list: syntax.into_list(),
-        }
-    }
-}
-impl AstNode for ScssAtRootQueryList {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_AT_ROOT_QUERY_LIST as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == SCSS_AT_ROOT_QUERY_LIST
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self {
-                syntax_list: syntax.into_list(),
-            })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        self.syntax_list.node()
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax_list.into_node()
-    }
-}
-impl Serialize for ScssAtRootQueryList {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut seq = serializer.serialize_seq(Some(self.len()))?;
-        for e in self.iter() {
-            seq.serialize_element(&e)?;
-        }
-        seq.end()
-    }
-}
-impl AstNodeList for ScssAtRootQueryList {
-    type Language = Language;
-    type Node = AnyCssCustomIdentifier;
-    fn syntax_list(&self) -> &SyntaxList {
-        &self.syntax_list
-    }
-    fn into_syntax_list(self) -> SyntaxList {
-        self.syntax_list
-    }
-}
-impl Debug for ScssAtRootQueryList {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("ScssAtRootQueryList ")?;
-        f.debug_list().entries(self.iter()).finish()
-    }
-}
-impl IntoIterator for &ScssAtRootQueryList {
-    type Item = AnyCssCustomIdentifier;
-    type IntoIter = AstNodeListIterator<Language, AnyCssCustomIdentifier>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-impl IntoIterator for ScssAtRootQueryList {
-    type Item = AnyCssCustomIdentifier;
-    type IntoIter = AstNodeListIterator<Language, AnyCssCustomIdentifier>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

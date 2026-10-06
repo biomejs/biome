@@ -171,6 +171,10 @@ pub enum TypeData {
     /// A type such as `T[K]`, kept unevaluated until `T` and `K` can be resolved.
     IndexedAccess(Box<IndexedAccessType>),
 
+    /// A type such as `{ [K in keyof T]: T[K] }`, kept unevaluated until its
+    /// keys can be resolved.
+    MappedType(Box<MappedType>),
+
     /// Literal value used as a type.
     Literal(Box<Literal>),
 
@@ -466,6 +470,7 @@ impl TypeData {
             | Self::InstanceOf(_)
             | Self::Interface(_)
             | Self::Intersection(_)
+            | Self::MappedType(_)
             | Self::Object(_)
             | Self::Tuple(_)
             | Self::Union(_) => instance.type_parameters.is_empty(),
@@ -1557,6 +1562,77 @@ pub struct TypeOperatorType {
 pub struct IndexedAccessType {
     pub object: TypeReference,
     pub index: TypeReference,
+}
+
+/// Stores the parts of a TypeScript mapped type.
+///
+/// In this example, `type_parameter` refers to `K`, `keys` refers to the
+/// operand of `keyof T`, `ty` refers to `T[K]`, and the optional modifier
+/// records the `?`:
+///
+/// ```ts
+/// type Optional<T> = { [K in keyof T]?: T[K] };
+/// ```
+///
+/// Mapped types with an `as` clause are collected as unknown.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct MappedType {
+    /// The type parameter declared between the brackets.
+    pub type_parameter: TypeReference,
+
+    /// The keys the type parameter iterates over.
+    pub keys: MappedTypeKeys,
+
+    /// The type of every property. Unknown if the annotation is missing.
+    pub ty: TypeReference,
+
+    pub readonly_modifier: Option<MappedTypeModifier>,
+
+    pub optional_modifier: Option<MappedTypeModifier>,
+}
+
+/// The keys iterated by a [`MappedType`].
+///
+/// For `{ [K in keyof T]: ... }`, [`Self::Keyof`] stores `T`, not the keys of
+/// `T`. Evaluation computes the keys from the members of `T` and also needs
+/// those members for two other reasons:
+///
+/// - `T[K]` evaluates to the type of the member named by each key.
+/// - A property is optional when the member of `T` is optional.
+///
+/// In this example, `Copy` evaluates to `{ a: number; b?: string | undefined }`.
+/// The keys `"a" | "b"` alone wouldn't tell evaluation that `b` is optional or
+/// what type `Source[K]` has for each key:
+///
+/// ```ts
+/// type Source = { a: number; b?: string };
+/// type Copy = { [K in keyof Source]: Source[K] };
+/// ```
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub enum MappedTypeKeys {
+    /// The keys of `T` in `{ [K in keyof T]: ... }`. Stores `T`.
+    Keyof(TypeReference),
+
+    /// Any other key type, as in `{ [K in "a" | "b"]: ... }`. Stores the key
+    /// type itself.
+    Type(TypeReference),
+}
+
+impl MappedTypeKeys {
+    /// Returns the stored type: the operand `T` for `keyof T`, or the key type
+    /// itself otherwise.
+    pub fn operand(&self) -> &TypeReference {
+        match self {
+            Self::Keyof(ty) | Self::Type(ty) => ty,
+        }
+    }
+}
+
+/// Whether a mapped type adds (`+?`, `?`) or removes (`-?`) a modifier.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum MappedTypeModifier {
+    Add,
+    Remove,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]

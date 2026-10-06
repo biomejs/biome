@@ -61,7 +61,11 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useHeadingContent",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("heading-has-content").same(), RuleSource::HtmlEslint("no-empty-headings").inspired()],
+        sources: &[
+            RuleSource::EslintJsxA11y("heading-has-content").same(),
+            RuleSource::HtmlEslint("no-empty-headings").inspired(),
+            RuleSource::EslintAstro("jsx-a11y/heading-has-content").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
     }

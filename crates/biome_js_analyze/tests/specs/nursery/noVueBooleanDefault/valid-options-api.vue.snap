@@ -1,0 +1,27 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-options-api.vue
+---
+# Input
+```vue
+<script>
+/* should not generate diagnostics */
+export default {
+  props: {
+    foo: Boolean,
+    bar: {
+      type: Boolean,
+    },
+    baz: {
+      type: Number,
+      default: 1,
+    },
+    qux: {
+      type: [Boolean, String],
+      default: true,
+    },
+  },
+};
+</script>
+
+```

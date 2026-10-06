@@ -17,25 +17,19 @@ use biome_rule_options::use_sorted_attributes::{SortOrder, UseSortedAttributesOp
 use std::{borrow::Cow, cmp::Ordering, iter::zip};
 
 declare_source_rule! {
-    /// Enforce attribute sorting in HTML elements.
+    /// Sort HTML attributes and framework directives into a consistent order.
     ///
-    /// This rule checks if HTML attributes, along with Astro, Svelte, and Vue directives,
-    /// are sorted in a consistent way.
-    /// The sort order is:
-    /// - Regular HTML attributes, sorted alphabetically according to the `sortOrder` option
-    /// - Astro directives, sorted alphabetically according to `sortOrder`
-    /// - Svelte directives, sorted according to eslint-plugin-svelte's [`sort-attributes` rule](https://sveltejs.github.io/eslint-plugin-svelte/rules/sort-attributes/)
-    /// - Vue directives, sorted according to the [Vue.js Style Guide](https://eslint.vuejs.org/rules/attributes-order)
+    /// Regular HTML attributes and Astro directives are sorted by name. Svelte directives follow
+    /// the order from eslint-plugin-svelte's
+    /// [`sort-attributes` rule](https://sveltejs.github.io/eslint-plugin-svelte/rules/sort-attributes/),
+    /// and Vue directives follow the
+    /// [Vue attribute-order convention](https://eslint.vuejs.org/rules/attributes-order).
+    /// Attributes within the same category use the configured `sortOrder`.
     ///
-    /// If two attributes belong to the same category, they will be sorted alphabetically
-    /// according to `sortOrder`.
-    ///
-    /// This rule will not consider spread props or the [Vue `v-bind="object"` syntax](https://vuejs.org/guide/essentials/template-syntax.html#dynamically-binding-multiple-attributes)
-    /// as sortable.
-    /// Instead, it will sort each group of consecutive sortable attributes within the element,
-    /// leaving any spread props or `v-bind="object"` attributes in place.
-    /// This prevents breaking the override of certain props using spread
-    /// props or `v-bind="object"`.
+    /// A spread attribute or Vue's
+    /// [`v-bind="object"`](https://vuejs.org/guide/essentials/template-syntax.html#dynamically-binding-multiple-attributes)
+    /// can provide or replace several attributes. The action leaves each spread in place and sorts
+    /// only the consecutive attributes on either side, preserving override behavior.
     ///
     /// ## Examples
     ///
@@ -93,18 +87,13 @@ declare_source_rule! {
     ///
     /// ## Options
     ///
-    /// The following options are available
-    ///
     /// ### `sortOrder`
-    /// The sort ordering to enforce.
-    /// Values:
     ///
-    /// - `"[natural](https://en.wikipedia.org/wiki/Natural_sort_order)"`
-    /// - `"[lexicographic](https://en.wikipedia.org/wiki/Lexicographic_order)"`
+    /// Selects `natural` or `lexicographic` ordering. Natural ordering compares numbers by value,
+    /// so `data-2` comes before `data-11`, and is the default. Lexicographic ordering compares names
+    /// character by character.
     ///
-    /// Default: `"natural"`
-    ///
-    /// #### Examples for `"sortOrder": "lexicographic"`
+    /// The following configuration uses lexicographic order:
     ///
     /// ```json,options
     /// {
@@ -113,7 +102,7 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
-    /// ```html,use_options,expect_diagnostic
+    /// ```html,use_options,expect_diff
     /// <textarea id="mytextarea" name="textarea" rows="5" cols="20" data-1="" data-2="" data-11="" data-12="">Hello, world!</textarea>
     /// ```
     ///

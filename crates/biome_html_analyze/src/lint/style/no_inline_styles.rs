@@ -52,6 +52,7 @@ declare_lint_rule! {
         recommended: false,
         sources: &[
             RuleSource::HtmlEslint("no-inline-styles").same(),
+            RuleSource::EslintSvelte("no-inline-styles").same(),
         ],
         fix_kind: FixKind::Unsafe,
     }

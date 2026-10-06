@@ -17,11 +17,14 @@ use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_unsafe_optional_chaining::NoUnsafeOptionalChainingOptions;
 
 declare_lint_rule! {
-    /// Disallow the use of optional chaining in contexts where the undefined value is not allowed.
+    /// Disallow optional chaining where `undefined` is not a valid result.
     ///
-    /// The optional chaining (?.) expression can short-circuit with a return value of undefined.
-    /// Therefore, treating an evaluated optional chaining expression as a function, object, number, etc., can cause TypeError or unexpected results.
-    /// Also, parentheses limit the scope of short-circuiting in chains.
+    /// When the value before `?.` is `null` or `undefined`, JavaScript stops evaluating that chain
+    /// and returns `undefined`. Calling that result, reading another property from it, or using it
+    /// where an object is required can then throw a `TypeError`.
+    ///
+    /// Parentheses end the protection of an optional chain. For example, `(object?.property).name`
+    /// still tries to read `name` when `object?.property` produces `undefined`.
     ///
     /// ## Examples
     ///

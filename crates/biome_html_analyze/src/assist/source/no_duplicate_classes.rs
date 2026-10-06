@@ -15,13 +15,10 @@ use biome_rule_options::no_duplicate_classes::NoDuplicateClassesOptions;
 use crate::HtmlRuleAction;
 
 declare_source_rule! {
-    /// Remove duplicate CSS classes.
+    /// Remove repeated CSS class names from HTML `class` attributes.
     ///
-    /// Detects and removes duplicate CSS classes in HTML `class` attributes.
-    ///
-    /// This action helps keep your class strings clean by detecting and removing duplicates.
-    ///
-    /// Duplicate classes are redundant and can indicate copy-paste errors or merge conflicts.
+    /// Duplicate class names do not change the rendered style and often indicate a copy-and-paste
+    /// mistake or merge conflict. The action keeps the first occurrence and removes later repeats.
     ///
     /// ## Examples
     ///

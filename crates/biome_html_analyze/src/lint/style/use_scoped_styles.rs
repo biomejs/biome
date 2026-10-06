@@ -13,14 +13,15 @@ use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxNodeCast};
 use biome_rule_options::use_scoped_styles::UseScopedStylesOptions;
 
 declare_lint_rule! {
-    /// Enforce that `<style>` blocks in Vue SFCs have the `scoped` attribute and that `<style>` blocks in Astro components do not have the `is:global` directive.
+    /// Keep component styles scoped in Vue and Astro files.
     ///
-    /// Vue's `scoped` attribute automatically scopes CSS to the component,
-    /// preventing style leakage and conflicts. Astro's `is:global` attribute
-    /// allows for global styles, but without it, styles are scoped to the component by default.
+    /// A Vue single-file component contains its template, script, and styles in one `.vue` file.
+    /// Its `<style>` blocks need the `scoped` attribute so their selectors apply only to that
+    /// component. A `<style module>` block is also accepted because CSS Modules provide their own
+    /// scoping.
     ///
-    /// Style blocks with the `module` attribute are exempt, as CSS Modules
-    /// is an alternative scoping mechanism.
+    /// Astro scopes component styles by default. The rule reports `is:global` because that
+    /// directive makes the entire style block affect the page globally.
     ///
     /// ## Examples
     ///

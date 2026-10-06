@@ -172,16 +172,26 @@ CssRoot {
                 at_root_token: AT_ROOT_KW@105..113 "at-root" [] [Whitespace(" ")],
                 query: ScssAtRootQuery {
                     l_paren_token: L_PAREN@113..114 "(" [] [],
-                    modifier: WITHOUT_KW@114..121 "without" [] [],
-                    colon_token: COLON@121..123 ":" [] [Whitespace(" ")],
-                    queries: ScssAtRootQueryList [
-                        CssCustomIdentifier {
-                            value_token: IDENT@123..129 "media" [] [Whitespace(" ")],
+                    query: ScssAtRootQueryClause {
+                        modifier: ScssExpression {
+                            items: ScssExpressionItemList [
+                                CssIdentifier {
+                                    value_token: IDENT@114..121 "without" [] [],
+                                },
+                            ],
                         },
-                        CssCustomIdentifier {
-                            value_token: IDENT@129..137 "supports" [] [],
+                        colon_token: COLON@121..123 ":" [] [Whitespace(" ")],
+                        rules: ScssExpression {
+                            items: ScssExpressionItemList [
+                                CssIdentifier {
+                                    value_token: IDENT@123..129 "media" [] [Whitespace(" ")],
+                                },
+                                CssIdentifier {
+                                    value_token: IDENT@129..137 "supports" [] [],
+                                },
+                            ],
                         },
-                    ],
+                    },
                     r_paren_token: R_PAREN@137..139 ")" [] [Whitespace(" ")],
                 },
                 selector: missing (optional),
@@ -254,13 +264,23 @@ CssRoot {
                                 at_root_token: AT_ROOT_KW@198..206 "at-root" [] [Whitespace(" ")],
                                 query: ScssAtRootQuery {
                                     l_paren_token: L_PAREN@206..207 "(" [] [],
-                                    modifier: WITH_KW@207..211 "with" [] [],
-                                    colon_token: COLON@211..213 ":" [] [Whitespace(" ")],
-                                    queries: ScssAtRootQueryList [
-                                        CssCustomIdentifier {
-                                            value_token: IDENT@213..217 "rule" [] [],
+                                    query: ScssAtRootQueryClause {
+                                        modifier: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@207..211 "with" [] [],
+                                                },
+                                            ],
                                         },
-                                    ],
+                                        colon_token: COLON@211..213 ":" [] [Whitespace(" ")],
+                                        rules: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@213..217 "rule" [] [],
+                                                },
+                                            ],
+                                        },
+                                    },
                                     r_paren_token: R_PAREN@217..219 ")" [] [Whitespace(" ")],
                                 },
                                 selector: missing (optional),
@@ -341,13 +361,23 @@ CssRoot {
                                 at_root_token: AT_ROOT_KW@282..290 "at-root" [] [Whitespace(" ")],
                                 query: ScssAtRootQuery {
                                     l_paren_token: L_PAREN@290..291 "(" [] [],
-                                    modifier: WITHOUT_KW@291..298 "without" [] [],
-                                    colon_token: COLON@298..300 ":" [] [Whitespace(" ")],
-                                    queries: ScssAtRootQueryList [
-                                        CssCustomIdentifier {
-                                            value_token: IDENT@300..303 "all" [] [],
+                                    query: ScssAtRootQueryClause {
+                                        modifier: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@291..298 "without" [] [],
+                                                },
+                                            ],
                                         },
-                                    ],
+                                        colon_token: COLON@298..300 ":" [] [Whitespace(" ")],
+                                        rules: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@300..303 "all" [] [],
+                                                },
+                                            ],
+                                        },
+                                    },
                                     r_paren_token: R_PAREN@303..305 ")" [] [Whitespace(" ")],
                                 },
                                 selector: missing (optional),
@@ -504,14 +534,19 @@ CssRoot {
         0: AT_ROOT_KW@105..113 "at-root" [] [Whitespace(" ")]
         1: SCSS_AT_ROOT_QUERY@113..139
           0: L_PAREN@113..114 "(" [] []
-          1: WITHOUT_KW@114..121 "without" [] []
-          2: COLON@121..123 ":" [] [Whitespace(" ")]
-          3: SCSS_AT_ROOT_QUERY_LIST@123..137
-            0: CSS_CUSTOM_IDENTIFIER@123..129
-              0: IDENT@123..129 "media" [] [Whitespace(" ")]
-            1: CSS_CUSTOM_IDENTIFIER@129..137
-              0: IDENT@129..137 "supports" [] []
-          4: R_PAREN@137..139 ")" [] [Whitespace(" ")]
+          1: SCSS_AT_ROOT_QUERY_CLAUSE@114..137
+            0: SCSS_EXPRESSION@114..121
+              0: SCSS_EXPRESSION_ITEM_LIST@114..121
+                0: CSS_IDENTIFIER@114..121
+                  0: IDENT@114..121 "without" [] []
+            1: COLON@121..123 ":" [] [Whitespace(" ")]
+            2: SCSS_EXPRESSION@123..137
+              0: SCSS_EXPRESSION_ITEM_LIST@123..137
+                0: CSS_IDENTIFIER@123..129
+                  0: IDENT@123..129 "media" [] [Whitespace(" ")]
+                1: CSS_IDENTIFIER@129..137
+                  0: IDENT@129..137 "supports" [] []
+          2: R_PAREN@137..139 ")" [] [Whitespace(" ")]
         2: (empty)
         3: CSS_DECLARATION_OR_RULE_BLOCK@139..179
           0: L_CURLY@139..140 "{" [] []
@@ -561,12 +596,17 @@ CssRoot {
                 0: AT_ROOT_KW@198..206 "at-root" [] [Whitespace(" ")]
                 1: SCSS_AT_ROOT_QUERY@206..219
                   0: L_PAREN@206..207 "(" [] []
-                  1: WITH_KW@207..211 "with" [] []
-                  2: COLON@211..213 ":" [] [Whitespace(" ")]
-                  3: SCSS_AT_ROOT_QUERY_LIST@213..217
-                    0: CSS_CUSTOM_IDENTIFIER@213..217
-                      0: IDENT@213..217 "rule" [] []
-                  4: R_PAREN@217..219 ")" [] [Whitespace(" ")]
+                  1: SCSS_AT_ROOT_QUERY_CLAUSE@207..217
+                    0: SCSS_EXPRESSION@207..211
+                      0: SCSS_EXPRESSION_ITEM_LIST@207..211
+                        0: CSS_IDENTIFIER@207..211
+                          0: IDENT@207..211 "with" [] []
+                    1: COLON@211..213 ":" [] [Whitespace(" ")]
+                    2: SCSS_EXPRESSION@213..217
+                      0: SCSS_EXPRESSION_ITEM_LIST@213..217
+                        0: CSS_IDENTIFIER@213..217
+                          0: IDENT@213..217 "rule" [] []
+                  2: R_PAREN@217..219 ")" [] [Whitespace(" ")]
                 2: (empty)
                 3: CSS_DECLARATION_OR_RULE_BLOCK@219..264
                   0: L_CURLY@219..220 "{" [] []
@@ -618,12 +658,17 @@ CssRoot {
                 0: AT_ROOT_KW@282..290 "at-root" [] [Whitespace(" ")]
                 1: SCSS_AT_ROOT_QUERY@290..305
                   0: L_PAREN@290..291 "(" [] []
-                  1: WITHOUT_KW@291..298 "without" [] []
-                  2: COLON@298..300 ":" [] [Whitespace(" ")]
-                  3: SCSS_AT_ROOT_QUERY_LIST@300..303
-                    0: CSS_CUSTOM_IDENTIFIER@300..303
-                      0: IDENT@300..303 "all" [] []
-                  4: R_PAREN@303..305 ")" [] [Whitespace(" ")]
+                  1: SCSS_AT_ROOT_QUERY_CLAUSE@291..303
+                    0: SCSS_EXPRESSION@291..298
+                      0: SCSS_EXPRESSION_ITEM_LIST@291..298
+                        0: CSS_IDENTIFIER@291..298
+                          0: IDENT@291..298 "without" [] []
+                    1: COLON@298..300 ":" [] [Whitespace(" ")]
+                    2: SCSS_EXPRESSION@300..303
+                      0: SCSS_EXPRESSION_ITEM_LIST@300..303
+                        0: CSS_IDENTIFIER@300..303
+                          0: IDENT@300..303 "all" [] []
+                  2: R_PAREN@303..305 ")" [] [Whitespace(" ")]
                 2: (empty)
                 3: CSS_DECLARATION_OR_RULE_BLOCK@305..351
                   0: L_CURLY@305..306 "{" [] []

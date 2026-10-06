@@ -544,6 +544,18 @@ impl JsObjectExpression {
     pub fn is_empty(&self) -> bool {
         self.members().is_empty()
     }
+
+    /// Returns the first member with the given name.
+    ///
+    /// Names are resolved by [`AnyJsObjectMember::name`], so computed members only match when
+    /// their name is a literal.
+    pub fn find_member(&self, name: &str) -> Option<AnyJsObjectMember> {
+        self.members().iter().flatten().find(|member| {
+            member
+                .name()
+                .is_some_and(|member_name| member_name.text() == name)
+        })
+    }
 }
 
 impl JsNumberLiteralExpression {

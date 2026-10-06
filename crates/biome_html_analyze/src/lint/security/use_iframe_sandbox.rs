@@ -7,12 +7,13 @@ use biome_rowan::AstNode;
 use biome_rule_options::use_iframe_sandbox::UseIframeSandboxOptions;
 
 declare_lint_rule! {
-    /// Enforce the 'sandbox' attribute for 'iframe' elements.
+    /// Require the `sandbox` attribute on `<iframe>` elements.
     ///
-    /// The sandbox attribute enables an extra set of restrictions for the content in the iframe.
-    /// Using the sandbox attribute is considered a good security practice.
+    /// An iframe can run content from another document. The `sandbox` attribute restricts
+    /// capabilities such as scripts, forms, navigation, and popups. An empty `sandbox` applies all
+    /// restrictions; individual `allow-*` tokens restore only the capabilities the frame needs.
     ///
-    /// See [the Mozilla docs](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/iframe#sandbox) for details.
+    /// See [MDN's iframe sandbox reference](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/iframe#sandbox).
     ///
     /// ## Examples
     ///

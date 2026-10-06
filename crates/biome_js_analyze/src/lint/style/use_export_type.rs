@@ -69,8 +69,8 @@ declare_lint_rule! {
     /// export { C, f };
     /// ```
     ///
-    /// This rules checks only the identifiers that are defined in a file.
-    /// It doesn't warn against a type exported as a value in a re-export clause such as:
+    /// This rule checks only names declared in the current file. It does not report a type exported
+    /// as a value in a re-export clause such as:
     ///
     /// ```ts,ignore
     /// export { TypeA } from "./mod.ts"

@@ -12,12 +12,13 @@ use biome_rule_options::no_switch_declarations::NoSwitchDeclarationsOptions;
 use crate::JsRuleAction;
 
 declare_lint_rule! {
-    /// Disallow lexical declarations in `switch` clauses.
+    /// Disallow declarations directly inside `switch` clauses.
     ///
-    /// Lexical declarations in `switch` clauses are accessible in the entire `switch`.
-    /// However, it only gets initialized when it is assigned, which will only happen if the `switch` clause where it is defined is reached.
+    /// A `let`, `const`, function, or class declared in one clause is visible throughout the
+    /// entire `switch`, but it is initialized only when the clause containing it runs. Another
+    /// clause can therefore access the declaration before initialization and cause a runtime error.
     ///
-    /// To ensure that the lexical declarations only apply to the current `switch` clause wrap your declarations in a block.
+    /// Wrap each clause in a block to limit the declaration to that clause.
     ///
     /// ## Examples
     ///

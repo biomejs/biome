@@ -1,0 +1,296 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: colors_spacing.jsx
+---
+# Input
+```jsx
+<Button className="bg-red-500 text-white border-blue-500 p-4 px-0 space-x-2" />;
+<Button className="hover:!bg-red-500/50 text-[color:var(--brand)]" />;
+<Button className="shadow-red-500 ring-blue-500 outline-red-500" />;
+<Button className={`${active ? "bg-red-500" : "p-4"}`} />;
+
+```
+
+# Diagnostics
+```
+colors_spacing.jsx:1:20 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+  > 1 │ <Button className="bg-red-500 text-white border-blue-500 p-4 px-0 space-x-2" />;
+      │                    ^^^^^^^^^^
+    2 │ <Button className="hover:!bg-red-500/50 text-[color:var(--brand)]" />;
+    3 │ <Button className="shadow-red-500 ring-blue-500 outline-red-500" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+colors_spacing.jsx:1:31 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+  > 1 │ <Button className="bg-red-500 text-white border-blue-500 p-4 px-0 space-x-2" />;
+      │                               ^^^^^^^^^^
+    2 │ <Button className="hover:!bg-red-500/50 text-[color:var(--brand)]" />;
+    3 │ <Button className="shadow-red-500 ring-blue-500 outline-red-500" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+colors_spacing.jsx:1:42 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+  > 1 │ <Button className="bg-red-500 text-white border-blue-500 p-4 px-0 space-x-2" />;
+      │                                          ^^^^^^^^^^^^^^^
+    2 │ <Button className="hover:!bg-red-500/50 text-[color:var(--brand)]" />;
+    3 │ <Button className="shadow-red-500 ring-blue-500 outline-red-500" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+colors_spacing.jsx:1:58 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+  > 1 │ <Button className="bg-red-500 text-white border-blue-500 p-4 px-0 space-x-2" />;
+      │                                                          ^^^
+    2 │ <Button className="hover:!bg-red-500/50 text-[color:var(--brand)]" />;
+    3 │ <Button className="shadow-red-500 ring-blue-500 outline-red-500" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+colors_spacing.jsx:1:62 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+  > 1 │ <Button className="bg-red-500 text-white border-blue-500 p-4 px-0 space-x-2" />;
+      │                                                              ^^^^
+    2 │ <Button className="hover:!bg-red-500/50 text-[color:var(--brand)]" />;
+    3 │ <Button className="shadow-red-500 ring-blue-500 outline-red-500" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+colors_spacing.jsx:1:67 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+  > 1 │ <Button className="bg-red-500 text-white border-blue-500 p-4 px-0 space-x-2" />;
+      │                                                                   ^^^^^^^^^
+    2 │ <Button className="hover:!bg-red-500/50 text-[color:var(--brand)]" />;
+    3 │ <Button className="shadow-red-500 ring-blue-500 outline-red-500" />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+colors_spacing.jsx:2:20 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ <Button className="bg-red-500 text-white border-blue-500 p-4 px-0 space-x-2" />;
+  > 2 │ <Button className="hover:!bg-red-500/50 text-[color:var(--brand)]" />;
+      │                    ^^^^^^^^^^^^^^^^^^^^
+    3 │ <Button className="shadow-red-500 ring-blue-500 outline-red-500" />;
+    4 │ <Button className={`${active ? "bg-red-500" : "p-4"}`} />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+colors_spacing.jsx:2:41 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ <Button className="bg-red-500 text-white border-blue-500 p-4 px-0 space-x-2" />;
+  > 2 │ <Button className="hover:!bg-red-500/50 text-[color:var(--brand)]" />;
+      │                                         ^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ <Button className="shadow-red-500 ring-blue-500 outline-red-500" />;
+    4 │ <Button className={`${active ? "bg-red-500" : "p-4"}`} />;
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+colors_spacing.jsx:3:20 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ <Button className="bg-red-500 text-white border-blue-500 p-4 px-0 space-x-2" />;
+    2 │ <Button className="hover:!bg-red-500/50 text-[color:var(--brand)]" />;
+  > 3 │ <Button className="shadow-red-500 ring-blue-500 outline-red-500" />;
+      │                    ^^^^^^^^^^^^^^
+    4 │ <Button className={`${active ? "bg-red-500" : "p-4"}`} />;
+    5 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+colors_spacing.jsx:3:35 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ <Button className="bg-red-500 text-white border-blue-500 p-4 px-0 space-x-2" />;
+    2 │ <Button className="hover:!bg-red-500/50 text-[color:var(--brand)]" />;
+  > 3 │ <Button className="shadow-red-500 ring-blue-500 outline-red-500" />;
+      │                                   ^^^^^^^^^^^^^
+    4 │ <Button className={`${active ? "bg-red-500" : "p-4"}`} />;
+    5 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+colors_spacing.jsx:3:49 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    1 │ <Button className="bg-red-500 text-white border-blue-500 p-4 px-0 space-x-2" />;
+    2 │ <Button className="hover:!bg-red-500/50 text-[color:var(--brand)]" />;
+  > 3 │ <Button className="shadow-red-500 ring-blue-500 outline-red-500" />;
+      │                                                 ^^^^^^^^^^^^^^^
+    4 │ <Button className={`${active ? "bg-red-500" : "p-4"}`} />;
+    5 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+colors_spacing.jsx:4:33 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    2 │ <Button className="hover:!bg-red-500/50 text-[color:var(--brand)]" />;
+    3 │ <Button className="shadow-red-500 ring-blue-500 outline-red-500" />;
+  > 4 │ <Button className={`${active ? "bg-red-500" : "p-4"}`} />;
+      │                                 ^^^^^^^^^^
+    5 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+colors_spacing.jsx:4:48 lint/nursery/noTailwindRestyledComponents ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind utility restyles a component.
+  
+    2 │ <Button className="hover:!bg-red-500/50 text-[color:var(--brand)]" />;
+    3 │ <Button className="shadow-red-500 ring-blue-500 outline-red-500" />;
+  > 4 │ <Button className={`${active ? "bg-red-500" : "p-4"}`} />;
+      │                                                ^^^
+    5 │ 
+  
+  i The design system should manage the component's appearance.
+  
+  i Use a supported component variant or move this style into the component's definition.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/11342 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

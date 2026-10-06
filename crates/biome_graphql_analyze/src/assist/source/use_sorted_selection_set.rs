@@ -16,13 +16,14 @@ use biome_string_case::comparable_token::ComparableToken;
 use std::cmp::Ordering;
 
 declare_source_rule! {
-    /// Sort GraphQL selection sets.
+    /// Sort selections inside GraphQL operations and fragments.
     ///
-    /// This rule orders fields first, fragment spreads next, and inline fragments last.
-    /// Within each category, identifiers are sorted alphabetically.
+    /// The action places fields first, named fragment spreads such as `...UserFields` next, and
+    /// inline fragments such as `... on User` last. Within each group, names use natural order,
+    /// which compares numbers by value.
     ///
-    /// For fields, aliases are used as the sort key when present.
-    /// This keeps selections deterministic and easier to scan in reviews.
+    /// An aliased field is sorted by its alias. For example, `firstName: name` is sorted under
+    /// `firstName`, which is the name returned in the response.
     ///
     /// ## Examples
     ///

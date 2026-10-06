@@ -270,10 +270,8 @@ CssRoot {
                                             l_paren_token: L_PAREN@223..224 "(" [] [],
                                             value: missing (optional),
                                             modifiers: CssUrlModifierList [
-                                                CssFunction {
-                                                    name: CssIdentifier {
-                                                        value_token: IDENT@224..226 "if" [] [],
-                                                    },
+                                                ScssLegacyIfFunction {
+                                                    if_token: IF_KW@224..226 "if" [] [],
                                                     l_paren_token: L_PAREN@226..227 "(" [] [],
                                                     items: CssParameterList [
                                                         ScssExpression {
@@ -498,9 +496,8 @@ CssRoot {
                       1: L_PAREN@223..224 "(" [] []
                       2: (empty)
                       3: CSS_URL_MODIFIER_LIST@224..258
-                        0: CSS_FUNCTION@224..258
-                          0: CSS_IDENTIFIER@224..226
-                            0: IDENT@224..226 "if" [] []
+                        0: SCSS_LEGACY_IF_FUNCTION@224..258
+                          0: IF_KW@224..226 "if" [] []
                           1: L_PAREN@226..227 "(" [] []
                           2: CSS_PARAMETER_LIST@227..257
                             0: SCSS_EXPRESSION@227..232

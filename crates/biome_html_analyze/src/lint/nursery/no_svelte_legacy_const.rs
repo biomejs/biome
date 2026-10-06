@@ -1,5 +1,5 @@
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule,
+    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_html_syntax::SvelteConstBlock;
@@ -38,6 +38,7 @@ declare_lint_rule! {
         version: "2.5.8",
         name: "noSvelteLegacyConst",
         language: "html",
+        sources: &[RuleSource::EslintSvelte("no-at-const-tags").same()],
         domains: &[RuleDomain::Svelte],
         recommended: false,
     }

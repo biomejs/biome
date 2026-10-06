@@ -43,10 +43,11 @@ const IF_BRANCH_VALUE_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     END_OF_PROPERTY_VALUE_TOKEN_SET.union(token_set!(T![')'], T![else]));
 
 pub(crate) fn is_at_if_function(p: &mut CssParser) -> bool {
-    p.at(T![if])
+    p.at(T![if]) && p.nth_at(1, T!['('])
 }
 
-/// Parses an if function from the current position of the CSS parser.
+/// Parses a modern `if()` function with colon-separated conditions and values
+/// and semicolon-separated branches.
 ///
 /// For more detailed information on the CSS if function syntax, refer to the
 /// [CSS Values and Units Module](https://drafts.csswg.org/css-values-5/#if-notation).

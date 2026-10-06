@@ -8,9 +8,10 @@ use biome_rowan::{AstNode, TextRange, declare_node_union};
 use biome_rule_options::no_unknown_at_rules::NoUnknownAtRulesOptions;
 
 declare_lint_rule! {
-    /// Disallow unknown at-rules.
+    /// Disallow unrecognized CSS at-rules.
     ///
-    /// For details on known at-rules, see the [MDN web docs](https://developer.mozilla.org/en-US/docs/Web/CSS/At-rule).
+    /// An at-rule begins with `@` and controls CSS behavior, as in `@media` or `@font-face`. See
+    /// [MDN's at-rule reference](https://developer.mozilla.org/en-US/docs/Web/CSS/At-rule).
     ///
     /// ## Examples
     ///
@@ -44,7 +45,8 @@ declare_lint_rule! {
      ///
      /// ### `ignore`
      ///
-     /// A list of unknown at-rule names to ignore (case-insensitive).
+     /// Lists additional at-rule names to allow, without regard to letter case. Defaults to an
+     /// empty list.
      ///
      /// ```json,options
      /// {

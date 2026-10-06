@@ -49,7 +49,7 @@ declare_lint_rule! {
     ///
     /// ## Known limitations
     ///
-    /// This rule currently doesn't check bare strings inside framework-specific class collections,
+    /// This rule doesn't check bare strings inside framework-specific class collections,
     /// such as array or object entries in Vue, Svelte, or Astro class bindings:
     ///
     /// ```svelte
@@ -63,8 +63,8 @@ declare_lint_rule! {
     /// <div class={`border-x border-y ${extra}`}></div>
     /// ```
     ///
-    /// In Astro, bare strings inside `class:list` arrays are currently not checked unless they are passed
-    /// to a recognized helper function such as `clsx`.
+    /// In Astro, bare strings inside `class:list` arrays are not checked unless they are passed to a
+    /// recognized helper function such as `clsx`.
     pub UseTailwindShorthandClasses {
         version: "2.5.9",
         name: "useTailwindShorthandClasses",

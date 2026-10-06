@@ -1,0 +1,15 @@
+$name: "icon";
+@function style($value){@return true;}
+.a{
+ legacy-map:if(style((--x: 1+2)), red, blue);
+ modern-raw:if(style((--x: 1+2)): red; else: blue);
+ legacy-url:if(style((--x: url(http://example.com/a.svg))), red, blue);
+ modern-url:if(style((--x: url(http://example.com/a.svg))): red; else: blue);
+ legacy-string:if(style((--x: "#{if(true, $name, ')')}:,;")), red, blue);
+ modern-string:if(style((--x: "#{if(true, $name, ')')}:,;")): red; else: blue);
+ legacy-comment:if(/* before */ style((--x: 1 // comment
+    + 2)) /* after */, red, blue);
+ modern-comment:if(/* before */ style((--x: 1 // comment
+    + 2)) /* after */: red; else: blue);
+ width: 1px;
+}

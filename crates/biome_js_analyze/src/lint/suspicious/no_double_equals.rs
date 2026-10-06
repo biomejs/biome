@@ -75,7 +75,10 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noDoubleEquals",
         language: "js",
-        sources: &[RuleSource::Eslint("eqeqeq").same()],
+        sources: &[
+            RuleSource::Eslint("eqeqeq").same(),
+            RuleSource::EslintVueJs("eqeqeq").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
         fix_kind: FixKind::Unsafe,

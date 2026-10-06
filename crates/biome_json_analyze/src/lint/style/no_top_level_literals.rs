@@ -9,11 +9,10 @@ use biome_rule_options::no_top_level_literals::NoTopLevelLiteralsOptions;
 declare_lint_rule! {
     /// Require the JSON top-level value to be an array or object.
     ///
-    /// The JSON specification technically allows any JSON value (object, array, string, number, boolean, or null) to be used as the top-level element of a JSON document.
-    /// However, some older JSON parsers, especially those created before [RFC 7158](https://datatracker.ietf.org/doc/html/rfc7158)/[4627](https://datatracker.ietf.org/doc/html/rfc4627) was fully adopted, only support objects or arrays as the root element.
-    ///
-    /// Additionally, some security practices (such as those preventing JSON hijacking attacks) rely on the assumption that the top-level value is an object or array.
-    /// Using an object or array at the top level also provides better extensibility for your data structures over time.
+    /// Modern JSON allows an object, array, string, number, boolean, or `null` at the top level.
+    /// Older parsers based on [RFC 4627](https://datatracker.ietf.org/doc/html/rfc4627) accept only
+    /// an object or array. Restricting the top level to those two forms improves compatibility and
+    /// leaves room to add more fields or items later.
     ///
     /// ## Examples
     ///

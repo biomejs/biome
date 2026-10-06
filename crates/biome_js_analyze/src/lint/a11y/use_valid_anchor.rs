@@ -79,7 +79,11 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "useValidAnchor",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("anchor-is-valid").same(), RuleSource::EslintQwik("jsx-a").same()],
+        sources: &[
+            RuleSource::EslintJsxA11y("anchor-is-valid").same(),
+            RuleSource::EslintQwik("jsx-a").same(),
+            RuleSource::EslintAstro("jsx-a11y/anchor-is-valid").same(),
+        ],
         recommended: true,
         severity: Severity::Error,
     }

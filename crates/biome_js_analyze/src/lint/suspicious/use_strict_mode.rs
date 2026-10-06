@@ -1,6 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
     options::PreferredQuote,
 };
 use biome_console::markup;
@@ -41,6 +41,7 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "useStrictMode",
         language: "js",
+        sources: &[RuleSource::Eslint("strict").inspired()],
         recommended: false,
         severity: Severity::Warning,
         fix_kind: FixKind::Safe,

@@ -1,0 +1,96 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-options-api.vue
+---
+# Input
+```vue
+<script lang="ts">
+/* should generate diagnostics */
+export default {
+  props: {
+    foo: {
+      type: Boolean,
+      default: true,
+    },
+    bar: {
+      type: Boolean,
+      default: false,
+    },
+    baz: {
+      type: Boolean as PropType<boolean>,
+      default() {
+        return true;
+      },
+    },
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-options-api.vue:7:16 lint/nursery/noVueBooleanDefault ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Boolean prop has a default value.
+  
+    5 │     foo: {
+    6 │       type: Boolean,
+  > 7 │       default: true,
+      │                ^^^^
+    8 │     },
+    9 │     bar: {
+  
+  i Vue already defaults an absent Boolean prop to false. A default of true means the prop can only be turned off by explicitly passing false.
+  
+  i Remove the default value. If the prop should be enabled by default, invert its name and meaning instead, for example disabled instead of enabled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:11:16 lint/nursery/noVueBooleanDefault ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Boolean prop has a default value.
+  
+     9 │     bar: {
+    10 │       type: Boolean,
+  > 11 │       default: false,
+       │                ^^^^^
+    12 │     },
+    13 │     baz: {
+  
+  i Vue already defaults an absent Boolean prop to false. A default of true means the prop can only be turned off by explicitly passing false.
+  
+  i Remove the default value. If the prop should be enabled by default, invert its name and meaning instead, for example disabled instead of enabled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api.vue:15:7 lint/nursery/noVueBooleanDefault ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Boolean prop has a default value.
+  
+    13 │     baz: {
+    14 │       type: Boolean as PropType<boolean>,
+  > 15 │       default() {
+       │       ^^^^^^^^^^^
+  > 16 │         return true;
+  > 17 │       },
+       │       ^
+    18 │     },
+    19 │   },
+  
+  i Vue already defaults an absent Boolean prop to false. A default of true means the prop can only be turned off by explicitly passing false.
+  
+  i Remove the default value. If the prop should be enabled by default, invert its name and meaning instead, for example disabled instead of enabled.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

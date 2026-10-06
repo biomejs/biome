@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-not-vue.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+export default {
+  props: {
+    foo: {
+      type: Boolean,
+      default: true,
+    },
+  },
+};
+
+```

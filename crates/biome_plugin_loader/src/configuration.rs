@@ -219,7 +219,7 @@ impl DerefMut for Plugins {
     }
 }
 
-/// Configuration for a single plugin entry.
+/// Configuration for one GritQL plugin.
 ///
 /// Can be either a path or package name string, or an object with options:
 ///
@@ -240,7 +240,7 @@ pub enum PluginConfiguration {
     /// A path or installed package name.
     Path(String),
 
-    /// A path with additional options.
+    /// A plugin path with optional file filters.
     PathWithOptions(PluginWithOptions),
 }
 
@@ -325,8 +325,9 @@ pub struct PluginWithOptions {
     #[deserializable(required)]
     pub path: String,
 
-    /// A list of glob patterns. The plugin will only run on files matching
-    /// these patterns. Use negated globs (e.g., `!**/*.test.ts`) for exclusions.
+    /// A list of glob patterns selecting files on which the plugin can run. Include a positive
+    /// pattern before exclusions such as `!**/*.test.ts`. If omitted, the plugin runs on every
+    /// supported file processed by the linter. An empty list matches no files.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub includes: Option<Vec<NormalizedGlob>>,
 

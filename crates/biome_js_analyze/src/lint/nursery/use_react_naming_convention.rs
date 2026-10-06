@@ -18,8 +18,8 @@ use crate::services::semantic::Semantic;
 declare_lint_rule! {
     /// Enforces naming conventions for React `createContext`, `useId`, and `useRef`.
     ///
-    /// This rules checks the variable a React API hook is assigned to
-    /// and enforces a name convention to make the intent of a value obvious at a glance:
+    /// This rule checks the name that receives the result of each React API call. Consistent names
+    /// make the purpose of the value clear at a glance:
     ///
     /// - A value assigned from `createContext` must be a valid component name (PascalCase) with
     ///   the suffix `Context`, for example `ThemeContext`.

@@ -79,6 +79,7 @@ declare_lint_rule! {
         sources: &[
             RuleSource::EslintUnicorn("new-for-builtins").same(),
             RuleSource::Eslint("no-new-native-nonconstructor").same(),
+            RuleSource::Eslint("no-new-symbol").inspired(),
         ],
         recommended: true,
         severity: Severity::Error,

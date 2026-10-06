@@ -1,0 +1,7 @@
+/* should not generate diagnostics */
+const integer = 1;
+const negative = -1.1;
+const decimal = 123.456;
+const exponent = 1e3;
+const computedMember = 1[0];
+const staticMember = (1).toString();

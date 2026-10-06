@@ -11,10 +11,10 @@ use biome_rule_options::no_duplicate_enum_value_names::NoDuplicateEnumValueNames
 use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
-    /// Require all enum value names to be unique.
+    /// Disallow duplicate names in GraphQL enums.
     ///
-    /// A GraphQL enum type is only valid if all its values are uniquely named.
-    /// The enum value names are case insensitive, meaning `TEST` & `Test` are seen as the same enum value name.
+    /// This rule compares enum values without regard to letter case, so `TEST` and `Test` are
+    /// treated as the same name.
     ///
     /// ## Examples
     ///

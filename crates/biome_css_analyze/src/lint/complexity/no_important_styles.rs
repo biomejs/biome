@@ -9,33 +9,12 @@ use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_important_styles::NoImportantStylesOptions;
 
 declare_lint_rule! {
-    /// Disallow the use of the `!important` style.
+    /// Disallow `!important` declarations.
     ///
-    /// The `!important` CSS style is a declaration used to give a specific rule
-    /// higher precedence over other conflicting rules. When it is applied to a CSS
-    /// property, that property's value is prioritized over any other declarations,
-    /// regardless of specificity or order of appearance in the stylesheet.
-    ///
-    /// ### How `!important` Works
-    /// - Normally, CSS rules follow a cascade order, where the browser decides
-    ///   which rules apply based on specificity, inheritance, and proximity to the
-    ///   targeted element.
-    /// - Adding `!important` to a rule overrides this cascade logic, forcing the
-    ///   rule to apply even if other rules have higher specificity or are defined later.
-    ///
-    /// ### Why `!important` Should Be Avoided
-    /// While `!important` can solve specific and immediate styling issues, its effects
-    /// can result in long-term problems within a codebase:
-    ///
-    /// - **Breaks the Cascade Logic**: It overrides the natural flow of cascading rules,
-    ///   making it harder to predict which styles will apply.
-    /// - **Increases Complexity**: Once `!important` is used in a stylesheet, other developers
-    ///   may respond by using it even more aggressively, creating a cycle of overrides and
-    ///   increasing maintenance difficulty.
-    /// - **Reduces Reusability**: Overriding styles often makes components less flexible,
-    ///   as future adjustments require more effort.
-    /// - **Hinders Debugging**: Debugging styles becomes more challenging, as developers
-    ///   must account for the `!important` rule overriding expected behavior.
+    /// The CSS cascade normally chooses between conflicting declarations by considering factors
+    /// such as cascade layers, selector specificity, and source order. `!important` raises a
+    /// declaration's priority and can make those conflicts harder to predict, override, and debug.
+    /// Prefer adjusting the cascade, selectors, or declaration order.
     ///
     /// ## Examples
     ///
@@ -44,6 +23,14 @@ declare_lint_rule! {
     /// ```css,expect_diagnostic
     /// .style {
     ///     color: red !important;
+    /// }
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```css
+    /// .style {
+    ///     color: red;
     /// }
     /// ```
     ///

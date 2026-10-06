@@ -1,0 +1,7 @@
+@function style($value){@return true;}
+.a{
+ legacy:if(style((--x:if(sass(true):if(true, if(sass(false): red; else: blue), black); else: white))), green, black);
+ modern:if(style((--x:if(sass(true):if(true, if(sass(false): red; else: blue), black); else: white))): green; else: black);
+ nested-condition:if(sass(if(true, if(sass(true): true; else: false), false)): red; else: blue);
+ width: 1px;
+}
