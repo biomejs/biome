@@ -183,6 +183,7 @@ pub mod no_negation_in_equality_check;
 pub mod no_nested_component_definitions;
 pub mod no_nested_promises;
 pub mod no_nested_switch;
+pub mod no_nested_template_literals;
 pub mod no_nested_ternary;
 pub mod no_next_async_client_component;
 pub mod no_nodejs_modules;
