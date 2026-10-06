@@ -2,7 +2,9 @@ use super::{document::Document, *};
 use crate::Watcher;
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::db::{DbReadGuard, DbState, WorkspaceDb};
-use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
+use crate::diagnostics::{
+    FileTooLarge, NoIgnoreFileFound, TailwindStylesheetNotFound, VcsDiagnostic,
+};
 use crate::embed::EmbedContent;
 #[cfg(feature = "lang_js")]
 use crate::file_handlers::AstroFileHandler;
@@ -2860,6 +2862,21 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             configuration
         };
 
+        // Resolve the stylesheet from the configuration that declares it. Nested
+        // configurations that extend this one then inherit the absolute path.
+        let mut configuration = configuration;
+        if let Some(stylesheet) = configuration
+            .tailwind
+            .as_mut()
+            .and_then(|tailwind| tailwind.stylesheet.as_mut())
+        {
+            let base = workspace_directory
+                .clone()
+                .or_else(|| self.project_get_path(project_key))
+                .unwrap_or_default();
+            *stylesheet = normalize_path(&base.join(stylesheet.as_str())).into_string();
+        }
+
         settings.merge_with_configuration(
             configuration,
             workspace_directory.clone(),
@@ -2868,6 +2885,16 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 .map(|(path, config)| (path.into(), config))
                 .collect(),
         )?;
+
+        if let Some(stylesheet) = settings.tailwind.stylesheet()
+            && !self.fs.path_is_file(stylesheet)
+        {
+            diagnostics.push(biome_diagnostics::serde::Diagnostic::new(
+                TailwindStylesheetNotFound {
+                    path: stylesheet.to_string(),
+                },
+            ));
+        }
 
         #[cfg(feature = "plugins")]
         {

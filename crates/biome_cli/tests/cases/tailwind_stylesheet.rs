@@ -70,3 +70,106 @@ export const breakpoint = <div className="3xl:flex 2xl:flex" />;
         result,
     ));
 }
+
+#[test]
+fn nested_configs_resolve_tailwind_stylesheet() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("nested_configs_resolve_tailwind_stylesheet");
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "root": true,
+    "tailwind": { "stylesheet": "./web/app.css" },
+    "linter": { "rules": { "nursery": { "useTailwindSortedClasses": "error" } } }
+}"#,
+    );
+    fs.create_file(
+        "web/app.css",
+        "@import \"tailwindcss\";\n@theme { --color-brand: #00f; }\n",
+    );
+    // Inherits the root stylesheet, which must still resolve from the root.
+    fs.create_file("web/biome.json", r#"{ "root": false, "extends": "//" }"#);
+    fs.create_file(
+        "web/App.jsx",
+        "export const a = <div className=\"bg-brand flex\" />;\n",
+    );
+    // Replaces the root stylesheet with its own.
+    fs.create_file(
+        "admin/biome.json",
+        r#"{ "root": false, "extends": "//", "tailwind": { "stylesheet": "./admin.css" } }"#,
+    );
+    fs.create_file(
+        "admin/admin.css",
+        "@import \"tailwindcss\";\n@theme { --color-admin: #f00; }\n",
+    );
+    fs.create_file(
+        "admin/App.jsx",
+        "export const a = <div className=\"bg-admin flex\" />;\nexport const b = <div className=\"bg-brand flex\" />;\n",
+    );
+    // Has no nested configuration, so it uses the root stylesheet.
+    fs.create_file(
+        "plain/App.jsx",
+        "export const a = <div className=\"bg-brand flex\" />;\n",
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--only=nursery/useTailwindSortedClasses",
+                fs.cli_path(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "nested_configs_resolve_tailwind_stylesheet",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn missing_tailwind_stylesheet_warns() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("missing_tailwind_stylesheet_warns");
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "tailwind": { "stylesheet": "./src/missing.css" },
+    "linter": { "rules": { "nursery": { "useTailwindSortedClasses": "error" } } }
+}"#,
+    );
+    fs.create_file(
+        "src/App.jsx",
+        "export const a = <div className=\"flex p-4\" />;\n",
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--only=nursery/useTailwindSortedClasses",
+                fs.cli_path(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "missing_tailwind_stylesheet_warns",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}

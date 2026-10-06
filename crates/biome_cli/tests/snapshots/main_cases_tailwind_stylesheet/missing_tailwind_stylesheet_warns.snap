@@ -1,0 +1,39 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --only=nursery/useTailwindSortedClasses '<TEMP_DIR>/missing_tailwind_stylesheet_warns'
+```
+
+## `biome.json`
+
+```json
+{
+  "tailwind": { "stylesheet": "./src/missing.css" },
+  "linter": { "rules": { "nursery": { "useTailwindSortedClasses": "error" } } }
+}
+```
+
+## `src/App.jsx`
+
+```jsx
+export const a = <div className="flex p-4" />;
+
+```
+
+# Emitted Messages
+
+```block
+<TEMP_DIR>/missing_tailwind_stylesheet_warns/src/missing.css configuration ━━━━━━━━━━━━━━━━━━━━
+
+  ! Biome couldn't find the Tailwind CSS stylesheet <TEMP_DIR>/missing_tailwind_stylesheet_warns/src/missing.css. The Tailwind rules use the default configuration instead.
+  
+
+```
+
+```block
+Checked 2 files in <TIME>. No fixes applied.
+```

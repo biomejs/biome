@@ -937,7 +937,7 @@ pub(crate) fn print_diagnostics_from_workspace_result(
     for diagnostic in diagnostics {
         has_errors = has_errors || diagnostic.severity() >= Severity::Error;
         has_internal = has_internal || diagnostic.tags().is_internal();
-        if has_internal || has_errors {
+        if has_internal || has_errors || diagnostic.severity() >= Severity::Warning {
             if diagnostic.tags().is_verbose() && verbose {
                 console.error(markup! {{PrintDiagnostic::verbose(diagnostic)}})
             } else {
