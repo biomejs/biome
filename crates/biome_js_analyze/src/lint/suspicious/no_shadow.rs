@@ -114,6 +114,7 @@ declare_lint_rule! {
         recommended: false,
         severity: Severity::Warning,
         sources: &[
+            RuleSource::Eslint("no-catch-shadow").same(),
             RuleSource::Eslint("no-shadow").same(),
             RuleSource::EslintTypeScript("no-shadow").same(),
         ],

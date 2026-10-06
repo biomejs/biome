@@ -14,7 +14,11 @@ use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, declare_node_union};
 use biome_rule_options::no_void_elements_with_children::NoVoidElementsWithChildrenOptions;
 
 declare_lint_rule! {
-    /// This rules prevents void elements (AKA self-closing elements) from having children.
+    /// Disallow children on HTML void elements.
+    ///
+    /// HTML void elements, such as `<img>` and `<br>`, cannot contain child content or use the
+    /// `children` and `dangerouslySetInnerHTML` properties. Unlike ordinary JSX elements, a void
+    /// element cannot have a closing tag.
     ///
     /// ## Examples
     ///
@@ -29,7 +33,17 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// React.createElement('img', {}, 'child')
+    /// React.createElement("img", {}, "child");
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```jsx
+    /// <img alt="some text" />
+    /// ```
+    ///
+    /// ```js
+    /// React.createElement("img", { alt: "some text" });
     /// ```
     pub NoVoidElementsWithChildren {
         version: "1.0.0",

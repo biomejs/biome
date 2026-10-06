@@ -10,9 +10,13 @@ use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, TokenText, WalkEvent
 use biome_rule_options::no_shorthand_property_overrides::NoShorthandPropertyOverridesOptions;
 
 declare_lint_rule! {
-    /// Disallow shorthand properties that override related longhand properties.
+    /// Disallow shorthand properties that override earlier, more specific properties.
     ///
-    /// For details on shorthand properties, see the [MDN web docs](https://developer.mozilla.org/en-US/docs/Web/CSS/Shorthand_properties).
+    /// A shorthand property sets several related properties at once. For example, `padding` sets
+    /// all four sides, including `padding-left`. Writing `padding` after `padding-left` resets the
+    /// earlier left-side value. Put the shorthand first or use only the specific properties.
+    ///
+    /// See [MDN's shorthand property guide](https://developer.mozilla.org/en-US/docs/Web/CSS/Shorthand_properties).
     ///
     /// ## Examples
     ///

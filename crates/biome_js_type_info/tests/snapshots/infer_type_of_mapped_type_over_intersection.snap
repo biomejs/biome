@@ -1,0 +1,68 @@
+---
+source: crates/biome_js_type_info/tests/utils.rs
+expression: content
+---
+## Input
+
+```ts
+type Merged<A, B> = { [K in keyof (A & B)]: (A & B)[K] };
+
+```
+
+## Result
+
+```
+instanceof Local TypeId(6)<Local TypeId(7), Local TypeId(8)>
+```
+
+## Registered types
+
+```
+Module TypeId(0) => K
+
+Module TypeId(1) => instanceof unresolved reference "A" (scope ID: 0)
+
+Module TypeId(2) => instanceof unresolved reference "B" (scope ID: 0)
+
+Module TypeId(3) => Intersection(
+    [
+        Resolved(
+            Local TypeId(1),
+        ),
+        Resolved(
+            Local TypeId(2),
+        ),
+    ],
+)
+
+Module TypeId(4) => instanceof unresolved reference "K" (scope ID: 0)
+
+Module TypeId(5) => IndexedAccessType {
+    object: Resolved(
+        Local TypeId(3),
+    ),
+    index: Resolved(
+        Local TypeId(4),
+    ),
+}
+
+Module TypeId(6) => MappedType {
+    type_parameter: Resolved(
+        Local TypeId(0),
+    ),
+    keys: Keyof(
+        Resolved(
+            Local TypeId(3),
+        ),
+    ),
+    ty: Resolved(
+        Local TypeId(5),
+    ),
+    readonly_modifier: None,
+    optional_modifier: None,
+}
+
+Module TypeId(7) => A
+
+Module TypeId(8) => B
+```

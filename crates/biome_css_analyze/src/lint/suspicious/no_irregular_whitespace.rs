@@ -8,9 +8,11 @@ use biome_rowan::{AstNode, Direction, TextRange};
 use biome_rule_options::no_irregular_whitespace::NoIrregularWhitespaceOptions;
 
 declare_lint_rule! {
-    /// Disallows the use of irregular whitespace characters.
+    /// Disallow whitespace characters that CSS does not treat as normal spaces.
     ///
-    /// Using irregular whitespace would lead to the failure of selecting the correct target.
+    /// Some Unicode and control characters look like spaces but can change how a selector is
+    /// parsed. The invalid example contains a vertical tab between the class selectors, so it does
+    /// not behave like a normal descendant separator.
     ///
     /// ## Examples
     ///

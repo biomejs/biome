@@ -50,7 +50,10 @@ declare_lint_rule! {
         language: "jsx",
         recommended: false,
         domains: &[RuleDomain::React],
-        sources: &[RuleSource::EslintReactPreferFunctionComponent("react-prefer-function-component").same()],
+        sources: &[
+            RuleSource::EslintReactPreferFunctionComponent("react-prefer-function-component").same(),
+            RuleSource::EslintReactPreferFunctionComponent("prefer-function-component").same(),
+        ],
     }
 }
 

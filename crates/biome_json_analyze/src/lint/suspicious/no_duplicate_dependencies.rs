@@ -11,16 +11,17 @@ use rustc_hash::FxHashMap;
 use crate::utils::is_package_json;
 
 declare_lint_rule! {
-    /// Prevent the listing of duplicate dependencies.
-    /// The rule supports the following dependency groups: "bundledDependencies", "bundleDependencies", "dependencies", "devDependencies", "overrides", "optionalDependencies", and "peerDependencies".
+    /// Disallow duplicate dependencies in `package.json`.
     ///
-    /// Dependencies are not allowed to be listed twice under the same dependency group.
+    /// A package must not appear twice in the same dependency group. The rule checks
+    /// `dependencies`, `devDependencies`, `optionalDependencies`, `peerDependencies`, `overrides`,
+    /// `bundledDependencies`, and `bundleDependencies`.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```json
+    /// ```json,file=package.json,expect_diagnostic
     /// {
     ///     "dependencies": {
     ///         "foo": "1.0.0",
@@ -29,7 +30,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```json
+    /// ```json,file=package.json,expect_diagnostic
     /// {
     ///     "bundleDependencies": ["foo", "foo"]
     /// }
@@ -37,7 +38,7 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```json
+    /// ```json,file=package.json
     /// {
     ///     "dependencies": {
     ///         "foo": "2.0.0"
@@ -45,24 +46,27 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```json
+    /// ```json,file=package.json
     /// {
     ///     "bundleDependencies": ["foo"]
     /// }
     /// ```
     ///
-    /// Some dependency group dependencies are checked against other dependency groups;
-    ///  - Dependencies listed in "dependencies" cannot be listed under "devDependencies", "optionalDependencies" or "peerDependencies".
-    ///  - Dependencies listed in "optionalDependencies" cannot be listed under "peerDependencies" (and vice versa).
+    /// The rule also prevents these conflicts between groups:
     ///
-    /// Dependencies listed in "devDependencies" are allowed to be listed in "optionalDependencies" or "peerDependencies".
-    /// And dependencies listed in "overrides" & "bundleDependencies" are not checked against other dependency groups.
+    /// - a package in `dependencies` cannot also appear in `devDependencies`,
+    ///   `optionalDependencies`, or `peerDependencies`;
+    /// - a package cannot appear in both `optionalDependencies` and `peerDependencies`.
     ///
-    /// ## Examples
+    /// A package in `devDependencies` may also appear in `optionalDependencies` or
+    /// `peerDependencies`. The `overrides`, `bundledDependencies`, and `bundleDependencies` groups
+    /// are not compared with other groups.
+    ///
+    /// ## Cross-group examples
     ///
     /// ### Invalid
     ///
-    /// ```json
+    /// ```json,file=package.json,expect_diagnostic
     /// {
     ///     "dependencies": {
     ///         "foo": "1.0.0"
@@ -75,7 +79,7 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```json
+    /// ```json,file=package.json
     /// {
     ///     "dependencies": {
     ///         "foo": "1.0.0"

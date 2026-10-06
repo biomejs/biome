@@ -52,7 +52,10 @@ declare_lint_rule! {
         language: "jsx",
         recommended: false,
         severity: Severity::Information,
-        sources: &[RuleSource::EslintReact("jsx-curly-brace-presence").inspired()],
+        sources: &[
+            RuleSource::EslintReact("jsx-curly-brace-presence").inspired(),
+            RuleSource::EslintStylistic("jsx-curly-brace-presence").inspired(),
+        ],
         fix_kind: FixKind::Unsafe,
     }
 }

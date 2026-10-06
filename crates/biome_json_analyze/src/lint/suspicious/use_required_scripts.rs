@@ -16,12 +16,11 @@ pub struct UseRequiredScriptsState {
 }
 
 declare_lint_rule! {
-    /// Enforce the presence of required scripts in package.json.
+    /// Require configured scripts in `package.json`.
     ///
-    /// This rule ensures that specified scripts are defined in the `scripts` section of a `package.json` file.
-    /// It's particularly useful in monorepo environments where consistency across workspaces is important.
-    ///
-    /// Without required scripts configured, this rule doesn't do anything.
+    /// A repository can contain several packages that share commands such as `test` or `build`.
+    /// Tools run from the repository's top-level directory may expect every package to provide the
+    /// same script names. The rule does nothing when `requiredScripts` is empty.
     ///
     /// ## Examples
     ///
@@ -35,7 +34,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```json,use_options
+    /// ```json,use_options,expect_diagnostic,file=package.json
     /// {
     ///     "scripts": {
     ///         "test": "vitest"
@@ -45,7 +44,7 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```json,use_options
+    /// ```json,use_options,file=package.json
     /// {
     ///     "scripts": {
     ///         "test": "vitest",
@@ -58,8 +57,8 @@ declare_lint_rule! {
     ///
     /// ### `requiredScripts`
     ///
-    /// An array of script names that must be present in the `scripts` section of `package.json`.
-    /// Default: `[]` (no scripts required)
+    /// Lists script names that must appear in the `scripts` object. Defaults to an empty list, which
+    /// disables the rule.
     ///
     pub UseRequiredScripts {
         version: "2.3.9",

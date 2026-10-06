@@ -14,6 +14,8 @@ mod generate_migrate_eslint;
 mod generate_migrate_stylelint;
 #[cfg(feature = "external_data")]
 mod generate_module_replacements;
+#[cfg(feature = "rules_metadata")]
+mod generate_rules_metadata;
 use xtask_glue::{Result, project_root, pushd};
 
 #[cfg(feature = "schema")]
@@ -34,6 +36,8 @@ use crate::generate_migrate_eslint::generate_migrate_eslint;
 use crate::generate_migrate_stylelint::generate_migrate_stylelint;
 #[cfg(feature = "external_data")]
 use crate::generate_module_replacements::generate_module_replacements;
+#[cfg(feature = "rules_metadata")]
+use crate::generate_rules_metadata::generate_rules_metadata;
 
 #[cfg(feature = "global_types")]
 use xtask_codegen::generate_global_types;
@@ -71,6 +75,12 @@ fn main() -> Result<()> {
         TaskCommand::MigrateStylelint => {
             #[cfg(feature = "configuration")]
             generate_migrate_stylelint(Overwrite)?;
+        }
+        TaskCommand::RulesMetadata { out } => {
+            #[cfg(feature = "rules_metadata")]
+            generate_rules_metadata(out)?;
+            #[cfg(not(feature = "rules_metadata"))]
+            let _ = out;
         }
         TaskCommand::Schema => {
             #[cfg(feature = "schema")]

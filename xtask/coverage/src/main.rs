@@ -49,12 +49,14 @@ OPTIONS
                             ts: will run all typescript suites; Same as \"ts/microsoft,ts/babel\";
                             jsx: will run all jsx suites; Same as \"jsx/babel\";
                             markdown: will run all markdown suites; Same as \"markdown/commonmark\";
+                            scss: will run all SCSS suites; Same as \"scss/sass-spec\";
                             yaml: will run all YAML suites; Same as \"yaml/yaml-test-suite\";
                             js/262: will run https://github.com/tc39/test262/tree/main/test;
                             ts/microsoft: will run https://github.com/microsoft/Typescript/tree/main/tests/cases
                             ts/babel: will run https://github.com/babel/babel/tree/main/packages/babel-parser/test/fixtures/typescript
                             jsx/babel: will run https://github.com/babel/babel/tree/main/packages/babel-parser/test/fixtures/jsx/basic
                             markdown/commonmark: will run CommonMark spec tests (https://spec.commonmark.org/)
+                            scss/sass-spec: will run Sass spec SCSS parser acceptance tests (https://github.com/sass/sass-spec)
                             yaml/yaml-test-suite: will run YAML Test Suite parser acceptance tests (https://github.com/yaml/yaml-test-suite)
                         Default is \"*\".
     --filter=<file>     Filters out tests that don't match the query.

@@ -1,4 +1,4 @@
-use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
@@ -67,6 +67,7 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noDelete",
         language: "js",
+        sources: &[RuleSource::Eslint("no-delete-var").same()],
         severity: Severity::Warning,
         fix_kind: FixKind::Unsafe,
     }

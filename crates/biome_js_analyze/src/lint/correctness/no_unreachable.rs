@@ -19,7 +19,10 @@ use roaring::bitmap::RoaringBitmap;
 use rustc_hash::FxHashMap;
 
 declare_lint_rule! {
-    /// Disallow unreachable code
+    /// Disallow code that can never run.
+    ///
+    /// Statements after `return`, `throw`, `break`, or `continue` cannot execute. Unreachable code
+    /// is often left by mistake after a refactor and can hide intended behavior.
     ///
     /// ## Examples
     ///
@@ -33,19 +36,31 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// function example() {
-    ///     for(let i = 0; i < 10; ++i) {
+    /// function example(condition) {
+    ///     while (condition) {
     ///         break;
+    ///         neverCalled();
     ///     }
     /// }
     /// ```
     ///
     /// ```js,expect_diagnostic
     /// function example() {
-    ///     for(const key in value) {
+    ///     for (const key in value) {
     ///         continue;
     ///         neverCalled();
     ///     }
+    /// }
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```js
+    /// function example(condition) {
+    ///     if (condition) {
+    ///         return;
+    ///     }
+    ///     alwaysCalled();
     /// }
     /// ```
     pub NoUnreachable {

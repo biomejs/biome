@@ -68,6 +68,42 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ## Caveats
+    ///
+    /// Removing a trailing `return;` can make TypeScript report error TS7030 ("Not all code paths return a value").
+    /// This happens when the same function returns a value on another path and the
+    /// [`noImplicitReturns`](https://www.typescriptlang.org/tsconfig/#noImplicitReturns) compiler option is enabled.
+    /// In the following example, the rule reports the `return;`, but removing it breaks the type check when that option is enabled:
+    ///
+    /// ```ts,expect_diagnostic
+    /// function foo(flag: boolean) {
+    ///     if (flag) {
+    ///         return 1;
+    ///     }
+    ///     return;
+    /// }
+    /// ```
+    ///
+    /// The same applies to JavaScript files that are checked with `checkJs`.
+    /// Biome doesn't read the `noImplicitReturns` option from `tsconfig.json`, so the rule can't tell whether it is enabled.
+    ///
+    /// If the `return;` is intentional, you can suppress this specific diagnostic with an
+    /// [inline suppression](https://biomejs.dev/analyzer/suppressions/#inline-suppressions):
+    ///
+    /// ```ts
+    /// function foo(flag: boolean) {
+    ///     if (flag) {
+    ///         return 1;
+    ///     }
+    ///     // biome-ignore lint/complexity/noUselessReturn: required by noImplicitReturns
+    ///     return;
+    /// }
+    /// ```
+    ///
+    /// Alternatively, you can [disable this rule's fix](https://biomejs.dev/linter/#configure-the-code-fix)
+    /// by setting its `fix` option to `"none"`.
+    /// This disables the fix for every `return;` reported by the rule, not only those affected by `noImplicitReturns`.
+    ///
     pub NoUselessReturn {
         version: "2.3.15",
         name: "noUselessReturn",

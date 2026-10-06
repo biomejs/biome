@@ -1,11 +1,11 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use super::{migration, stylelint_to_biome};
+use super::{eslint_to_biome, stylelint_to_biome};
 pub(crate) fn migrate_stylelint_any_rule(
     rules: &mut biome_configuration::Rules,
     stylelint_name: &str,
     rule_level: biome_configuration::RulePlainConfiguration,
-    _options: &migration::MigrationOptions,
+    _options: &eslint_to_biome::MigrationOptions,
     results: &mut stylelint_to_biome::StylelintMigrationResults,
 ) -> bool {
     match stylelint_name {
@@ -250,10 +250,16 @@ pub(crate) fn migrate_stylelint_any_rule(
             rule.set_level(rule.level().max(rule_level));
         }
         _ => {
-            results.add(stylelint_name, migration::RuleMigrationResult::Unsupported);
+            results.add(
+                stylelint_name,
+                eslint_to_biome::RuleMigrationResult::Unsupported,
+            );
             return false;
         }
     }
-    results.add(stylelint_name, migration::RuleMigrationResult::Migrated);
+    results.add(
+        stylelint_name,
+        eslint_to_biome::RuleMigrationResult::Migrated,
+    );
     true
 }

@@ -8,6 +8,7 @@ mod inspect_plugins;
 mod lint;
 mod migrate;
 mod migrate_eslint;
+mod migrate_eslint_scope;
 mod migrate_prettier;
 mod migrate_stylelint;
 mod rage;

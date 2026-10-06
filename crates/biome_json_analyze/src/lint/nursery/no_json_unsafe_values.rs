@@ -12,19 +12,20 @@ use biome_unicode_table::{Dispatch, lookup_byte};
 declare_lint_rule! {
     /// Disallow unsafe JSON values that may cause interoperability issues.
     ///
-    /// Some JSON values can break when parsed by different tools or languages as parser implementations & data types could differ.
-    /// For example, a very large number might become `Infinity` in JavaScript,
-    /// or a string with an incomplete Unicode pair might fail to decode properly.
+    /// JSON parsers in different languages can use different number and Unicode representations.
+    /// A value accepted by one parser may lose information or fail in another.
     ///
-    /// The common unsafe values are:
+    /// The rule reports:
     ///
-    /// - *Lone surrogates in strings*: Incomplete Unicode character pairs that can cause encoding/decoding failures
-    /// - *Numbers that evaluate to Infinity*: Values like `1e400` that exceed JavaScript's number range
-    /// - *Unintentional zeros*: Very small numbers (e.g., `1e-400`) that silently evaluate to zero due to precision limitations
-    /// - *Unsafe integers*: Numbers outside JavaScript's safe integer range (`±2^53-1`) that lose precision
-    /// - *Subnormal numbers*: Very small floating point values that may be handled differently across systems
+    /// - **lone UTF-16 surrogates**, which are incomplete halves of an encoded Unicode character;
+    /// - numbers outside JavaScript's finite range, such as `1e400`;
+    /// - tiny nonzero numbers, such as `1e-400`, that become zero because of limited precision;
+    /// - integers outside JavaScript's safe range (`-(2^53 - 1)` through `2^53 - 1`), which lose
+    ///   precision;
+    /// - subnormal numbers, which are extremely small floating-point values that systems may
+    ///   handle differently.
     ///
-    /// These issues can lead to data corruption, silent failures, or inconsistent behavior across different platforms and languages.
+    /// These values can cause data loss or inconsistent behavior when JSON moves between systems.
     ///
     /// ## Examples
     ///

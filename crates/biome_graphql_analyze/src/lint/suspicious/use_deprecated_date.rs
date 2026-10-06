@@ -9,9 +9,10 @@ use biome_rule_options::use_deprecated_date::UseDeprecatedDateOptions;
 use jiff::{Timestamp, tz::TimeZone};
 
 declare_lint_rule! {
-    /// Require the `@deprecated` directive to specify a deletion date.
+    /// Require a valid deletion date on the `@deprecated` directive.
     ///
-    /// Suggests removing deprecated code when the due date has been passed.
+    /// A deletion date communicates when deprecated schema elements should be removed. The date
+    /// must use the `YYYY-MM-DD` format. The rule also reports dates that have already passed.
     ///
     /// ## Examples
     ///
@@ -30,6 +31,28 @@ declare_lint_rule! {
     /// ```graphql
     /// query {
     ///   member @deprecated(reason: "Use `members` instead", deletionDate: "2099-12-25") {
+    ///     id
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ## Options
+    ///
+    /// ### `argumentName`
+    ///
+    /// Sets the directive argument that stores the deletion date. Defaults to `deletionDate`.
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "argumentName": "removeAfter"
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```graphql,use_options
+    /// query {
+    ///   member @deprecated(reason: "Use `members` instead", removeAfter: "2099-12-25") {
     ///     id
     ///   }
     /// }

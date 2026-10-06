@@ -1,0 +1,49 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: legacy-if.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+.a {
+  --inner: red;
+  color: if(true, --inner, blue);
+  background: var(--outer, if(true, --inner, blue));
+}
+
+```
+
+# Diagnostics
+```
+legacy-if.scss:4:19 lint/correctness/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × CSS variables '--inner' is used without the 'var()' function
+  
+    2 │ .a {
+    3 │   --inner: red;
+  > 4 │   color: if(true, --inner, blue);
+      │                   ^^^^^^^
+    5 │   background: var(--outer, if(true, --inner, blue));
+    6 │ }
+  
+  i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
+  
+
+```
+
+```
+legacy-if.scss:5:37 lint/correctness/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × CSS variables '--inner' is used without the 'var()' function
+  
+    3 │   --inner: red;
+    4 │   color: if(true, --inner, blue);
+  > 5 │   background: var(--outer, if(true, --inner, blue));
+      │                                     ^^^^^^^
+    6 │ }
+    7 │ 
+  
+  i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
+  
+
+```

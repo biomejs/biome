@@ -1,0 +1,248 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+[[data-variant=legend]+&]:-mt-1.5 [[data-side=left][data-state=collapsed]_&]:cursor-e-resize group-has-[[data-slot=item-description]]/item:self-start group-has-[[data-slot=command-shortcut]]/command-item:hidden
+
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwArbitraryVariant {
+                    l_brack_token: L_BRACKET@0..1 "[" [] [],
+                    selector_token: TW_SELECTOR@1..24 "[data-variant=legend]+&" [] [],
+                    r_brack_token: R_BRACKET@24..25 "]" [] [],
+                },
+                COLON@25..26 ":" [] [],
+            ],
+            legacy_important_token: missing (optional),
+            negative_token: DASH@26..27 "-" [] [],
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@27..29 "mt" [] [],
+                minus_token: DASH@29..30 "-" [] [],
+                value: TwNumberValue {
+                    value_token: TW_NUMBER@30..33 "1.5" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@33..34 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwArbitraryVariant {
+                    l_brack_token: L_BRACKET@34..35 "[" [] [],
+                    selector_token: TW_SELECTOR@35..75 "[data-side=left][data-state=collapsed]_&" [] [],
+                    r_brack_token: R_BRACKET@75..76 "]" [] [],
+                },
+                COLON@76..77 ":" [] [],
+            ],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@77..83 "cursor" [] [],
+                minus_token: DASH@83..84 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@84..92 "e-resize" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@92..93 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@93..98 "group" [] [],
+                        },
+                        DASH@98..99 "-" [] [],
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@99..102 "has" [] [],
+                        },
+                        DASH@102..103 "-" [] [],
+                        TwArbitraryVariantSegment {
+                            l_brack_token: L_BRACKET@103..104 "[" [] [],
+                            value_token: TW_SELECTOR@104..132 "[data-slot=item-description]" [] [],
+                            r_brack_token: R_BRACKET@132..133 "]" [] [],
+                        },
+                    ],
+                    glued_value: missing (optional),
+                    modifier: TwModifier {
+                        slash_token: SLASH@133..134 "/" [] [],
+                        value: TwNamedValue {
+                            value_token: TW_VALUE@134..138 "item" [] [],
+                        },
+                    },
+                },
+                COLON@138..139 ":" [] [],
+            ],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@139..143 "self" [] [],
+                minus_token: DASH@143..144 "-" [] [],
+                value: TwNamedValue {
+                    value_token: TW_VALUE@144..149 "start" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@149..150 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@150..155 "group" [] [],
+                        },
+                        DASH@155..156 "-" [] [],
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@156..159 "has" [] [],
+                        },
+                        DASH@159..160 "-" [] [],
+                        TwArbitraryVariantSegment {
+                            l_brack_token: L_BRACKET@160..161 "[" [] [],
+                            value_token: TW_SELECTOR@161..189 "[data-slot=command-shortcut]" [] [],
+                            r_brack_token: R_BRACKET@189..190 "]" [] [],
+                        },
+                    ],
+                    glued_value: missing (optional),
+                    modifier: TwModifier {
+                        slash_token: SLASH@190..191 "/" [] [],
+                        value: TwNamedValue {
+                            value_token: TW_VALUE@191..203 "command-item" [] [],
+                        },
+                    },
+                },
+                COLON@203..204 ":" [] [],
+            ],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@204..210 "hidden" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@210..211 "\n" [] [],
+    ],
+    eof_token: EOF@211..211 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..211
+  0: (empty)
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..211
+    0: TW_FULL_CANDIDATE@0..33
+      0: TW_VARIANT_LIST@0..26
+        0: TW_ARBITRARY_VARIANT@0..25
+          0: L_BRACKET@0..1 "[" [] []
+          1: TW_SELECTOR@1..24 "[data-variant=legend]+&" [] []
+          2: R_BRACKET@24..25 "]" [] []
+        1: COLON@25..26 ":" [] []
+      1: (empty)
+      2: DASH@26..27 "-" [] []
+      3: TW_FUNCTIONAL_CANDIDATE@27..33
+        0: TW_BASE@27..29 "mt" [] []
+        1: DASH@29..30 "-" [] []
+        2: TW_NUMBER_VALUE@30..33
+          0: TW_NUMBER@30..33 "1.5" [] []
+        3: (empty)
+      4: (empty)
+    1: WHITESPACE@33..34 " " [] []
+    2: TW_FULL_CANDIDATE@34..92
+      0: TW_VARIANT_LIST@34..77
+        0: TW_ARBITRARY_VARIANT@34..76
+          0: L_BRACKET@34..35 "[" [] []
+          1: TW_SELECTOR@35..75 "[data-side=left][data-state=collapsed]_&" [] []
+          2: R_BRACKET@75..76 "]" [] []
+        1: COLON@76..77 ":" [] []
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@77..92
+        0: TW_BASE@77..83 "cursor" [] []
+        1: DASH@83..84 "-" [] []
+        2: TW_NAMED_VALUE@84..92
+          0: TW_VALUE@84..92 "e-resize" [] []
+        3: (empty)
+      4: (empty)
+    3: WHITESPACE@92..93 " " [] []
+    4: TW_FULL_CANDIDATE@93..149
+      0: TW_VARIANT_LIST@93..139
+        0: TW_VARIANT_EXPRESSION@93..138
+          0: TW_VARIANT_SEGMENT_LIST@93..133
+            0: TW_NAMED_VARIANT_SEGMENT@93..98
+              0: TW_VARIANT_SEGMENT@93..98 "group" [] []
+            1: DASH@98..99 "-" [] []
+            2: TW_NAMED_VARIANT_SEGMENT@99..102
+              0: TW_VARIANT_SEGMENT@99..102 "has" [] []
+            3: DASH@102..103 "-" [] []
+            4: TW_ARBITRARY_VARIANT_SEGMENT@103..133
+              0: L_BRACKET@103..104 "[" [] []
+              1: TW_SELECTOR@104..132 "[data-slot=item-description]" [] []
+              2: R_BRACKET@132..133 "]" [] []
+          1: (empty)
+          2: TW_MODIFIER@133..138
+            0: SLASH@133..134 "/" [] []
+            1: TW_NAMED_VALUE@134..138
+              0: TW_VALUE@134..138 "item" [] []
+        1: COLON@138..139 ":" [] []
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@139..149
+        0: TW_BASE@139..143 "self" [] []
+        1: DASH@143..144 "-" [] []
+        2: TW_NAMED_VALUE@144..149
+          0: TW_VALUE@144..149 "start" [] []
+        3: (empty)
+      4: (empty)
+    5: WHITESPACE@149..150 " " [] []
+    6: TW_FULL_CANDIDATE@150..210
+      0: TW_VARIANT_LIST@150..204
+        0: TW_VARIANT_EXPRESSION@150..203
+          0: TW_VARIANT_SEGMENT_LIST@150..190
+            0: TW_NAMED_VARIANT_SEGMENT@150..155
+              0: TW_VARIANT_SEGMENT@150..155 "group" [] []
+            1: DASH@155..156 "-" [] []
+            2: TW_NAMED_VARIANT_SEGMENT@156..159
+              0: TW_VARIANT_SEGMENT@156..159 "has" [] []
+            3: DASH@159..160 "-" [] []
+            4: TW_ARBITRARY_VARIANT_SEGMENT@160..190
+              0: L_BRACKET@160..161 "[" [] []
+              1: TW_SELECTOR@161..189 "[data-slot=command-shortcut]" [] []
+              2: R_BRACKET@189..190 "]" [] []
+          1: (empty)
+          2: TW_MODIFIER@190..203
+            0: SLASH@190..191 "/" [] []
+            1: TW_NAMED_VALUE@191..203
+              0: TW_VALUE@191..203 "command-item" [] []
+        1: COLON@203..204 ":" [] []
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@204..210
+        0: TW_BASE@204..210 "hidden" [] []
+        1: (empty)
+      4: (empty)
+    7: WHITESPACE@210..211 "\n" [] []
+  3: EOF@211..211 "" [] []
+
+```

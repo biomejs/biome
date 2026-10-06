@@ -52,6 +52,7 @@ declare_lint_rule! {
             RuleSource::Eslint("no-loss-of-precision").same(),
             RuleSource::EslintTypeScript("no-loss-of-precision").same(),
             RuleSource::Clippy("lossy_float_literal").same(),
+            RuleSource::EslintVueJs("no-loss-of-precision").same(),
         ],
         recommended: true,
         severity: Severity::Error,

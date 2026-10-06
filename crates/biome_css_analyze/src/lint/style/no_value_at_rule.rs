@@ -7,9 +7,10 @@ use biome_rowan::AstNode;
 use biome_rule_options::no_value_at_rule::NoValueAtRuleOptions;
 
 declare_lint_rule! {
-    /// Disallow use of `@value` rule in CSS modules.
+    /// Disallow the `@value` rule in CSS Modules.
     ///
-    /// Use of CSS variables is recommended instead of `@value` rule.
+    /// `@value` is a CSS Modules extension rather than standard CSS. Prefer native custom
+    /// properties, which use a `--name` declaration and are read with `var(--name)`.
     ///
     /// ## Examples
     ///
@@ -23,7 +24,7 @@ declare_lint_rule! {
     ///
     /// ```css,file=example.module.css
     /// :root {
-    ///   --red: #FF0000
+    ///   --red: #FF0000;
     /// }
     ///
     /// p {

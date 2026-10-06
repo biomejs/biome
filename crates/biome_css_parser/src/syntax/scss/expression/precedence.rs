@@ -108,7 +108,7 @@ fn parse_scss_unary_expression(p: &mut CssParser, options: ScssExpressionOptions
 }
 
 #[inline]
-fn is_at_scss_unary_operator(p: &mut CssParser) -> bool {
+pub(crate) fn is_at_scss_unary_operator(p: &mut CssParser) -> bool {
     match p.cur() {
         T![+] | T![not] => true,
         // `var(--#{$name})` starts with `-`, but the pair belongs to one

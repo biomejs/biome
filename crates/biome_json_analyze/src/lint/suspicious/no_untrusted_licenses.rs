@@ -29,8 +29,9 @@ declare_lint_rule! {
     /// - Have a license **deprecated** in the SPDX standard.
     ///
     /// :::note
-    /// This rule catches only dependencies that are actually used in your project (i.e., imported by some code).
-    /// Currently, the `WITH` specifier is currently not supported.
+    /// The rule checks only dependencies imported by project code. In SPDX, `WITH` combines a
+    /// license with a named exception, as in `Apache-2.0 WITH LLVM-exception`. The rule parses this
+    /// form but checks only the base license and ignores the exception.
     /// :::
     ///
     /// ## Examples

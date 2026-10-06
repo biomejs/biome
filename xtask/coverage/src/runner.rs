@@ -6,9 +6,9 @@ use biome_diagnostics::console::fmt::{Formatter, Termcolor};
 use biome_diagnostics::console::markup;
 use biome_diagnostics::termcolor::Buffer;
 use biome_js_parser::{JsParserOptions, Parse, parse};
-use biome_js_syntax::{AnyJsRoot, JsSyntaxNode};
+use biome_js_syntax::AnyJsRoot;
 use biome_languages::JsFileSource;
-use biome_rowan::SyntaxKind;
+use biome_rowan::{Language, SyntaxKind, SyntaxNode};
 use std::fmt::Debug;
 use std::io;
 use std::panic::RefUnwindSafe;
@@ -98,7 +98,9 @@ impl TestCaseFile {
     }
 }
 
-pub(crate) fn create_bogus_node_in_tree_diagnostic(node: JsSyntaxNode) -> ParseDiagnostic {
+pub(crate) fn create_bogus_node_in_tree_diagnostic<L: Language>(
+    node: SyntaxNode<L>,
+) -> ParseDiagnostic {
     assert!(node.kind().is_bogus());
     ParseDiagnostic::new(
         "There are no parse errors but the parsed tree contains bogus nodes.",

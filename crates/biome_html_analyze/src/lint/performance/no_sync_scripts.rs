@@ -8,9 +8,12 @@ use biome_rowan::AstNode;
 use biome_rule_options::no_sync_scripts::NoSyncScriptsOptions;
 
 declare_lint_rule! {
-    /// Prevent the usage of synchronous scripts.
+    /// Disallow external scripts that block HTML parsing.
     ///
-    /// A synchronous script can impact your webpage performance, read more on how to [Efficiently load third-party JavaScript](https://web.dev/articles/efficiently-load-third-party-javascript).
+    /// A `<script src>` without `async`, `defer`, or `type="module"` pauses page parsing while the
+    /// script downloads and runs. This can delay rendering. See
+    /// [Efficiently load third-party JavaScript](https://web.dev/articles/efficiently-load-third-party-javascript)
+    /// for loading strategies.
     ///
     /// ## Examples
     ///

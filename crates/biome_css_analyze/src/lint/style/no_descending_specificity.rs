@@ -13,19 +13,19 @@ use biome_rule_options::no_descending_specificity::NoDescendingSpecificityOption
 use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
-    /// Disallow a lower specificity selector from coming after a higher specificity selector.
+    /// Disallow lower-specificity selectors after higher-specificity selectors.
     ///
-    /// Source order is important in CSS, and when two selectors have the same specificity, the one that occurs last will take priority.
-    /// However, the situation is different when one of the selectors has a higher specificity.
-    /// In that case, source order does not matter: the selector with higher specificity will win out even if it comes first.
+    /// Specificity is the priority score CSS calculates from a selector. When two selectors have
+    /// the same specificity, the later declaration wins. A selector with higher specificity wins
+    /// regardless of source order.
     ///
-    /// The clashes of these two mechanisms for prioritization, source order and specificity, can cause some confusion when reading stylesheets.
-    /// If a selector with higher specificity comes before the selector it overrides, we have to think harder to understand it, because it violates the source order expectation.
-    /// **Stylesheets are most legible when overriding selectors always come after the selectors they override.**
-    /// That way both mechanisms, source order and specificity, work together nicely.
+    /// A lower-specificity selector placed later can therefore look like an override even though it
+    /// cannot replace the earlier style. Ordering selectors from lower to higher specificity makes
+    /// the cascade easier to read.
     ///
-    /// This rule enforces that practice as best it can, reporting fewer errors than it should.
-    /// It cannot catch every actual overriding selector, but it can catch certain common mistakes.
+    /// The rule reports likely conflicts between selectors that end with the same target under the
+    /// same surrounding rules, such as `@media` or `@layer`. It cannot determine every case where
+    /// two selectors match the same element.
     ///
     /// ## Examples
     ///
@@ -90,7 +90,7 @@ declare_lint_rule! {
     /// a b {
     ///     color: red;
     /// }
-    /// /* This selector is overwritten by the one above it, but this is not an error because the rule only evaluates it as a compound selector */
+    /// /* The rule cannot determine that these selectors target the same elements. */
     /// :where(a) :is(b) {
     ///     color: blue;
     /// }

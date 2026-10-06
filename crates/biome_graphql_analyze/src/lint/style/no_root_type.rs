@@ -10,9 +10,11 @@ use biome_rule_options::no_root_type::NoRootTypeOptions;
 use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
-    /// Disallow the usage of specified root types
+    /// Disallow configured GraphQL root operation types.
     ///
-    /// Prevent the usage of certain root types (e.g. `mutation` and/or `subscription`)
+    /// A schema uses the `Query`, `Mutation`, and `Subscription` root types as entry points. This
+    /// rule can forbid root types that a project does not support. It does nothing until at least
+    /// one type is listed in the `disallow` option.
     ///
     /// ## Examples
     ///
@@ -44,10 +46,7 @@ declare_lint_rule! {
     ///
     /// ### `disallow`
     ///
-    /// This required option lists all disallowed root types (e.g. `mutation` and/or `subscription`).
-    /// The values of the list are case-insensitive.
-    ///
-    /// Default `[]`
+    /// Lists root types to disallow, without regard to letter case. Defaults to an empty list.
     ///
     /// ```json,options
     /// {

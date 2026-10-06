@@ -12,7 +12,7 @@ use biome_deserialize::{
 use biome_deserialize_macros::Deserializable;
 use std::ops::Deref;
 
-use super::migration::{IgnorePattern, ShorthandVec};
+use super::eslint_eslint::{IgnorePattern, ShorthandVec};
 
 /// A Stylelint configuration object.
 ///
