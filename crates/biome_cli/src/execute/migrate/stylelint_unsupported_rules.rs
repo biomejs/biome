@@ -9,8 +9,8 @@
 //! instead of normalizing it.
 
 use biome_analyze::RuleSource::*;
-use biome_analyze::UnsupportedRuleReason::*;
 use biome_analyze::UnsupportedRule;
+use biome_analyze::UnsupportedRuleReason::*;
 
 /// The array is sorted to allow binary search.
 pub const STYLELINT_UNSUPPORTED_RULES: &[UnsupportedRule] = &[
