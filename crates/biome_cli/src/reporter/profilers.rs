@@ -6,8 +6,9 @@
 use std::io;
 
 use biome_analyze::profiling::DisplayProfiles;
-use biome_console::markup;
-use biome_module_graph::type_inference::profiling::DisplayTypeInferenceProfile;
+use biome_console::{HARD_LINE, markup};
+use biome_diagnostics::PrintDiagnostic;
+use biome_module_graph::type_inference::profiling::TypeInferenceProfileDiagnostic;
 use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::VERSION;
@@ -73,13 +74,13 @@ impl ReporterVisitor for ProfilersReporterVisitor {
         if self.type_profiler
             && let Some(profile) = execution.take_type_inference_profile()
         {
-            let display = DisplayTypeInferenceProfile::new(
+            let diagnostic = TypeInferenceProfileDiagnostic::new(
                 &profile,
                 self.working_directory.as_deref(),
                 VERSION,
             )
             .with_verbose(verbose);
-            writer.log(markup! {{ display }});
+            writer.log(markup! {{ HARD_LINE }{ PrintDiagnostic::simple(&diagnostic) }});
         }
 
         Ok(())

@@ -21,15 +21,18 @@ You need to install one of the `@biomejs/wasm-*` package as a **peer dependency*
 
 ```js
 import { Biome } from "@biomejs/js-api/nodejs";
+
 // Or:
-// import { Biome, Distribution } from "@biomejs/js-api/bundler";
-// import { Biome, Distribution } from "@biomejs/js-api/web";
+// import { Biome } from "@biomejs/js-api/bundler";
+// import { Biome } from "@biomejs/js-api/web";
 
 const biome = new Biome();
 const { projectKey } = biome.openProject("path/to/project/dir");
 
 // Optionally apply a Biome configuration (instead of biome.json)
-biome.applyConfiguration(projectKey, {...});
+biome.applyConfiguration(projectKey, {
+  // options
+});
 
 const formatted = biome.formatContent(
   projectKey,
@@ -51,6 +54,21 @@ const html = biome.printDiagnostics(result.diagnostics, {
 });
 
 console.log("Lint diagnostics: ", html);
+```
+
+If you want to work with diagnostics in your program, you can use the `spanInBytesToSpanInCodeUnits` helper function to convert byte-based segments from Biome diagnostics into UTF-16 code unit segments (used in JavaScript).
+
+```js
+import { Biome, spanInBytesToSpanInCodeUnits } from "@biomejs/js-api/nodejs";
+
+for (const diagnostic of result.diagnostics) {
+  const [start, end] = spanInBytesToSpanInCodeUnits(
+    diagnostic.location.span,
+    formatted.content,
+  );
+  // Correctly extracts the text
+  const _text = formatted.content.slice(start, end);
+}
 ```
 
 ## Philosophy

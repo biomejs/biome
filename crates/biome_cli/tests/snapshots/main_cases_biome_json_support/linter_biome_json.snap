@@ -14,7 +14,7 @@ biome lint --write fix.js
 {
   "linter": {
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "suspicious": {
         "noDebugger": "off"
       }

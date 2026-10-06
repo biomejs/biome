@@ -1,0 +1,11 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: rangeEndColumnWithWrongLine
+---
+ErrorSnapshotResult {
+    diagnostics: [
+        InvalidRange(
+            "end_column requires end_line",
+        ),
+    ],
+}

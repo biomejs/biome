@@ -55,6 +55,10 @@
 			"description": "The linter configuration.",
 			"anyOf": [{ "$ref": "#/$defs/LinterConfiguration" }, { "type": "null" }]
 		},
+		"markdown": {
+			"description": "Configuration specific to Markdown.",
+			"anyOf": [{ "$ref": "#/$defs/MarkdownConfiguration" }, { "type": "null" }]
+		},
 		"overrides": {
 			"description": "Configures settings for files selected by each override. When multiple overrides configure\nthe same single-value setting, the last matching override takes precedence.",
 			"anyOf": [{ "$ref": "#/$defs/Overrides" }, { "type": "null" }]
@@ -67,9 +71,17 @@
 			"description": "Marks whether this file is the root configuration for a Biome project. The root configuration\nestablishes the project's base settings, while `false` marks a configuration found inside the\nproject as nested rather than a second project root.\n\nDefaults to `true`. Biome implicitly treats `root` as `false` when a nested configuration uses\n`\"extends\": \"//\"`. All other nested configurations must explicitly set `root` to `false`.",
 			"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 		},
+		"tailwind": {
+			"description": "Configures how Biome recognizes Tailwind class strings.",
+			"anyOf": [{ "$ref": "#/$defs/TailwindConfiguration" }, { "type": "null" }]
+		},
 		"vcs": {
 			"description": "The version control integration configuration.",
 			"anyOf": [{ "$ref": "#/$defs/VcsConfiguration" }, { "type": "null" }]
+		},
+		"yaml": {
+			"description": "Configuration specific to YAML.",
+			"anyOf": [{ "$ref": "#/$defs/YamlConfiguration" }, { "type": "null" }]
 		}
 	},
 	"additionalProperties": false,
@@ -570,10 +582,24 @@
 						{ "type": "null" }
 					]
 				},
+				"noExcessiveNestedCallbacks": {
+					"description": "Enforce a maximum depth that callbacks can be nested.\nSee https://biomejs.dev/linter/rules/no-excessive-nested-callbacks",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoExcessiveNestedCallbacksConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noExcessiveNestedTestSuites": {
 					"description": "This rule enforces a maximum depth to nested describe() in test files.\nSee https://biomejs.dev/linter/rules/no-excessive-nested-test-suites",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoExcessiveNestedTestSuitesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noExcessiveSelectorClasses": {
+					"description": "Limit the number of classes in a selector.\nSee https://biomejs.dev/linter/rules/no-excessive-selector-classes",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoExcessiveSelectorClassesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -612,6 +638,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noPlaywrightUselessAwait": {
+					"description": "Disallow unnecessary await for Playwright methods that don't return promises.\nSee https://biomejs.dev/linter/rules/no-playwright-useless-await",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoPlaywrightUselessAwaitConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noRedundantDefaultExport": {
 					"description": "Checks if a default export exports the same symbol as a named export.\nSee https://biomejs.dev/linter/rules/no-redundant-default-export",
 					"anyOf": [
@@ -630,6 +663,13 @@
 					"description": "Disallow this and super in static contexts.\nSee https://biomejs.dev/linter/rules/no-this-in-static",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoThisInStaticConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnnecessaryTemplateExpression": {
+					"description": "Disallow unnecessary template expressions.\nSee https://biomejs.dev/linter/rules/no-unnecessary-template-expression",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnnecessaryTemplateExpressionConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -788,6 +828,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useArraySome": {
+					"description": "Prefer Array.prototype.some() over verbose existence checks.\nSee https://biomejs.dev/linter/rules/use-array-some",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseArraySomeConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useArrowFunction": {
 					"description": "Use arrow functions over function expressions.\nSee https://biomejs.dev/linter/rules/use-arrow-function",
 					"anyOf": [
@@ -823,6 +870,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useMathMinMax": {
+					"description": "Prefer Math.min() and Math.max() over ternaries for simple comparisons.\nSee https://biomejs.dev/linter/rules/use-math-min-max",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseMathMinMaxConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useMaxParams": {
 					"description": "Enforce a maximum number of parameters in function definitions.\nSee https://biomejs.dev/linter/rules/use-max-params",
 					"anyOf": [
@@ -848,6 +902,13 @@
 					"description": "Enforce the use of the regular expression literals instead of the RegExp constructor if possible.\nSee https://biomejs.dev/linter/rules/use-regex-literals",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseRegexLiteralsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useRegexpTest": {
+					"description": "Enforce the use of RegExp.prototype.test() over String.prototype.match() and RegExp.prototype.exec() in boolean contexts.\nSee https://biomejs.dev/linter/rules/use-regexp-test",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseRegexpTestConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -960,6 +1021,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noComponentHookFactories": {
+					"description": "Disallows defining React components or custom hooks inside other functions.\nSee https://biomejs.dev/linter/rules/no-component-hook-factories",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoComponentHookFactoriesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noConstAssign": {
 					"description": "Prevents from having const variables being re-assigned.\nSee https://biomejs.dev/linter/rules/no-const-assign",
 					"anyOf": [
@@ -1006,6 +1074,13 @@
 					"description": "Disallow duplicate names in GraphQL enums.\nSee https://biomejs.dev/linter/rules/no-duplicate-enum-value-names",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoDuplicateEnumValueNamesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDuplicateFieldDefinitionNames": {
+					"description": "Require all fields of a type to be unique.\nSee https://biomejs.dev/linter/rules/no-duplicate-field-definition-names",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDuplicateFieldDefinitionNamesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1102,6 +1177,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noJsxNamespace": {
+					"description": "Disallow JSX namespace syntax.\nSee https://biomejs.dev/linter/rules/no-jsx-namespace",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoJsxNamespaceConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noMissingVarFunction": {
 					"description": "Require var() when using a declared CSS custom property.\nSee https://biomejs.dev/linter/rules/no-missing-var-function",
 					"anyOf": [
@@ -1137,6 +1219,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noPlaywrightMissingAwait": {
+					"description": "Enforce Playwright async APIs to be awaited or returned.\nSee https://biomejs.dev/linter/rules/no-playwright-missing-await",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoPlaywrightMissingAwaitConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noPrecisionLoss": {
 					"description": "Disallow literal numbers that lose precision.\nSee https://biomejs.dev/linter/rules/no-precision-loss",
 					"anyOf": [
@@ -1162,6 +1251,13 @@
 					"description": "Disallow useVisibleTask$() functions in Qwik components.\nSee https://biomejs.dev/linter/rules/no-qwik-use-visible-task",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoQwikUseVisibleTaskConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReactNativeRawText": {
+					"description": "Disallow raw text outside \\<Text> components in React Native.\nSee https://biomejs.dev/linter/rules/no-react-native-raw-text",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactNativeRawTextConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1396,6 +1492,20 @@
 						{ "type": "null" }
 					]
 				},
+				"noVueImportCompilerMacros": {
+					"description": "Disallow importing Vue compiler macros.\nSee https://biomejs.dev/linter/rules/no-vue-import-compiler-macros",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueImportCompilerMacrosConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueRefAsOperand": {
+					"description": "Disallow the use of value wrapped by ref()(Composition API) as operand.\nSee https://biomejs.dev/linter/rules/no-vue-ref-as-operand",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueRefAsOperandConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noVueReservedKeys": {
 					"description": "Disallow reserved keys in Vue component data and computed properties.\nSee https://biomejs.dev/linter/rules/no-vue-reserved-keys",
 					"anyOf": [
@@ -1421,6 +1531,13 @@
 					"description": "Disallow using v-if and v-for directives on the same element.\nSee https://biomejs.dev/linter/rules/no-vue-v-if-with-v-for",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueVIfWithVForConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueVOnNumberValues": {
+					"description": "Disallow deprecated number modifiers on Vue v-on directives.\nSee https://biomejs.dev/linter/rules/no-vue-v-on-number-values",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueVOnNumberValuesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1509,10 +1626,26 @@
 						{ "type": "null" }
 					]
 				},
+				"usePlaywrightValidDescribeCallback": {
+					"description": "Enforce valid describe() callback.\nSee https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback",
+					"anyOf": [
+						{
+							"$ref": "#/$defs/UsePlaywrightValidDescribeCallbackConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"useQwikClasslist": {
 					"description": "Prefer using the class prop as a classlist over the classnames helper.\nSee https://biomejs.dev/linter/rules/use-qwik-classlist",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseQwikClasslistConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useQwikLoaderLocation": {
+					"description": "Enforce that Qwik loader functions are declared in the correct location.\nSee https://biomejs.dev/linter/rules/use-qwik-loader-location",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseQwikLoaderLocationConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1527,6 +1660,20 @@
 					"description": "Disallow unserializable expressions in Qwik dollar ($) scopes.\nSee https://biomejs.dev/linter/rules/use-qwik-valid-lexical-scope",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseQwikValidLexicalScopeConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useReactAsyncServerFunction": {
+					"description": "Require functions with the \"use server\" directive to be async.\nSee https://biomejs.dev/linter/rules/use-react-async-server-function",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseReactAsyncServerFunctionConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useReactNativePlatformComponents": {
+					"description": "Ensure that platform-specific React Native components are only imported in files named for that platform.\nSee https://biomejs.dev/linter/rules/use-react-native-platform-components",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseReactNativePlatformComponentsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1597,6 +1744,13 @@
 					"description": "Enforce valid v-else-if directives.\nSee https://biomejs.dev/linter/rules/use-vue-valid-v-else-if",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueValidVElseIfConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueValidVFor": {
+					"description": "Enforces valid v-for directives in Vue templates.\nSee https://biomejs.dev/linter/rules/use-vue-valid-v-for",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueValidVForConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2995,6 +3149,95 @@
 			},
 			"additionalProperties": false
 		},
+		"MarkdownConfiguration": {
+			"description": "Options applied to Markdown files",
+			"type": "object",
+			"properties": {
+				"formatter": {
+					"description": "Formatter options",
+					"anyOf": [
+						{ "$ref": "#/$defs/MarkdownFormatterConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"linter": {
+					"description": "Linter options",
+					"anyOf": [
+						{ "$ref": "#/$defs/MarkdownLinterConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"parser": {
+					"description": "Parsing options",
+					"anyOf": [
+						{ "$ref": "#/$defs/MarkdownParserConfiguration" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"MarkdownFormatterConfiguration": {
+			"description": "Options that change how the Markdown formatter behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the formatter for Markdown (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				},
+				"indentStyle": {
+					"description": "The indent style applied to Markdown files.",
+					"anyOf": [{ "$ref": "#/$defs/IndentStyle" }, { "type": "null" }]
+				},
+				"indentWidth": {
+					"description": "The size of the indentation applied to Markdown files. Defaults to 2.",
+					"anyOf": [{ "$ref": "#/$defs/IndentWidth" }, { "type": "null" }]
+				},
+				"lineEnding": {
+					"description": "The type of line ending applied to Markdown (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.",
+					"anyOf": [{ "$ref": "#/$defs/LineEnding" }, { "type": "null" }]
+				},
+				"lineWidth": {
+					"description": "What's the max width of a line applied to Markdown files. Defaults to 80.",
+					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
+				},
+				"proseWrap": {
+					"description": "Controls whether Biome keeps, adds, or removes line breaks in Markdown paragraphs.\n\nManual line breaks are always kept. In Markdown, a manual line break is created by ending a\nline with two spaces or a backslash.",
+					"anyOf": [{ "$ref": "#/$defs/ProseWrap" }, { "type": "null" }]
+				},
+				"trailingNewline": {
+					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- https://thoughtbot.com/blog/no-newline-at-end-of-file\n- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804\n- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"MarkdownLinterConfiguration": {
+			"description": "Options that change how the Markdown linter behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the linter for Markdown files.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"MarkdownParserConfiguration": {
+			"description": "Options that change how the Markdown parser behaves",
+			"type": "object",
+			"properties": {
+				"frontmatter": {
+					"description": "Enables parsing frontmatter at the start of the file. Defaults to `false`.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				},
+				"gfm": {
+					"description": "Enables GitHub Flavored Markdown extensions. Defaults to `true`.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"MaxSize": { "type": "integer", "format": "uint64", "minimum": 1 },
 		"MethodSignatureStyle": {
 			"oneOf": [
@@ -3845,6 +4088,16 @@
 			]
 		},
 		"NoDuplicateJsxPropsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoDuplicateMapKeysConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDuplicateMapKeysOptions" }
+			]
+		},
+		"NoDuplicateMapKeysOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -5458,6 +5711,13 @@
 		},
 		"NoRedundantRolesOptions": {
 			"type": "object",
+			"properties": {
+				"ignoreElements": {
+					"description": "Array of element names that the rule should ignore.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoRedundantUseStrictConfiguration": {
@@ -7082,66 +7342,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noComponentHookFactories": {
-					"description": "Disallows defining React components or custom hooks inside other functions.\nSee https://biomejs.dev/linter/rules/no-component-hook-factories",
+				"noDuplicateMapKeys": {
+					"description": "Disallow two keys with the same name inside YAML maps.\nSee https://biomejs.dev/linter/rules/no-duplicate-map-keys",
 					"anyOf": [
-						{ "$ref": "#/$defs/NoComponentHookFactoriesConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noConditionalExpect": {
-					"description": "Disallow conditional expect() calls inside tests.\nSee https://biomejs.dev/linter/rules/no-conditional-expect",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoConditionalExpectConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noDrizzleDeleteWithoutWhere": {
-					"description": "Require .where() to be called when using .delete() with Drizzle ORM.\nSee https://biomejs.dev/linter/rules/no-drizzle-delete-without-where",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoDrizzleDeleteWithoutWhereConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noDrizzleUpdateWithoutWhere": {
-					"description": "Require .where() to be called when using .update() with Drizzle ORM.\nSee https://biomejs.dev/linter/rules/no-drizzle-update-without-where",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoDrizzleUpdateWithoutWhereConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noDuplicateFieldDefinitionNames": {
-					"description": "Require all fields of a type to be unique.\nSee https://biomejs.dev/linter/rules/no-duplicate-field-definition-names",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoDuplicateFieldDefinitionNamesConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noDuplicateSelectors": {
-					"description": "Disallow duplicate selectors.\nSee https://biomejs.dev/linter/rules/no-duplicate-selectors",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoDuplicateSelectorsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noEmptyObjectKeys": {
-					"description": "Disallow empty keys in JSON objects.\nSee https://biomejs.dev/linter/rules/no-empty-object-keys",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoEmptyObjectKeysConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noExcessiveNestedCallbacks": {
-					"description": "Enforce a maximum depth that callbacks can be nested.\nSee https://biomejs.dev/linter/rules/no-excessive-nested-callbacks",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoExcessiveNestedCallbacksConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noExcessiveSelectorClasses": {
-					"description": "Limit the number of classes in a selector.\nSee https://biomejs.dev/linter/rules/no-excessive-selector-classes",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoExcessiveSelectorClassesConfiguration" },
+						{ "$ref": "#/$defs/NoDuplicateMapKeysConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7159,24 +7363,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noIdenticalTestTitle": {
-					"description": "Disallow identical titles in test suites and test cases.\nSee https://biomejs.dev/linter/rules/no-identical-test-title",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoIdenticalTestTitleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noImpliedEval": {
 					"description": "Disallow the use of eval()-like methods.\nSee https://biomejs.dev/linter/rules/no-implied-eval",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoImpliedEvalConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noInlineStyles": {
-					"description": "Disallow the use of inline styles.\nSee https://biomejs.dev/linter/rules/no-inline-styles",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoInlineStylesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7205,27 +7395,6 @@
 					"description": "Disallow unsafe JSON values that may cause interoperability issues.\nSee https://biomejs.dev/linter/rules/no-json-unsafe-values",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoJsonUnsafeValuesConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noJsxLeakedDollar": {
-					"description": "Flags text nodes with a trailing $ before a JSX expression.\nSee https://biomejs.dev/linter/rules/no-jsx-leaked-dollar",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoJsxLeakedDollarConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noJsxNamespace": {
-					"description": "Disallow JSX namespace syntax.\nSee https://biomejs.dev/linter/rules/no-jsx-namespace",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoJsxNamespaceConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noLoopFunc": {
-					"description": "Disallow functions created inside loops when they use variables that can change.\nSee https://biomejs.dev/linter/rules/no-loop-func",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoLoopFuncConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7278,76 +7447,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noPlaywrightElementHandle": {
-					"description": "Disallow usage of element handles (page.$() and page.$$()).\nSee https://biomejs.dev/linter/rules/no-playwright-element-handle",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoPlaywrightElementHandleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noPlaywrightEval": {
-					"description": "Disallow usage of page.$eval() and page.$$eval().\nSee https://biomejs.dev/linter/rules/no-playwright-eval",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoPlaywrightEvalConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noPlaywrightForceOption": {
-					"description": "Disallow usage of the { force: true } option.\nSee https://biomejs.dev/linter/rules/no-playwright-force-option",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoPlaywrightForceOptionConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noPlaywrightMissingAwait": {
-					"description": "Enforce Playwright async APIs to be awaited or returned.\nSee https://biomejs.dev/linter/rules/no-playwright-missing-await",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoPlaywrightMissingAwaitConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noPlaywrightNetworkidle": {
-					"description": "Disallow usage of the networkidle option.\nSee https://biomejs.dev/linter/rules/no-playwright-networkidle",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoPlaywrightNetworkidleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noPlaywrightPagePause": {
-					"description": "Disallow using page.pause().\nSee https://biomejs.dev/linter/rules/no-playwright-page-pause",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoPlaywrightPagePauseConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noPlaywrightUselessAwait": {
-					"description": "Disallow unnecessary await for Playwright methods that don't return promises.\nSee https://biomejs.dev/linter/rules/no-playwright-useless-await",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoPlaywrightUselessAwaitConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noPlaywrightWaitForNavigation": {
-					"description": "Disallow using page.waitForNavigation().\nSee https://biomejs.dev/linter/rules/no-playwright-wait-for-navigation",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoPlaywrightWaitForNavigationConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noPlaywrightWaitForSelector": {
-					"description": "Disallow using page.waitForSelector().\nSee https://biomejs.dev/linter/rules/no-playwright-wait-for-selector",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoPlaywrightWaitForSelectorConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noPlaywrightWaitForTimeout": {
-					"description": "Disallow using page.waitForTimeout().\nSee https://biomejs.dev/linter/rules/no-playwright-wait-for-timeout",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoPlaywrightWaitForTimeoutConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noProcessExit": {
 					"description": "Disallow the use of process.exit().\nSee https://biomejs.dev/linter/rules/no-process-exit",
 					"anyOf": [
@@ -7355,38 +7454,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noReactNativeDeepImports": {
-					"description": "Disallow deep imports from the react-native package.\nSee https://biomejs.dev/linter/rules/no-react-native-deep-imports",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoReactNativeDeepImportsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noReactNativeLiteralColors": {
-					"description": "Disallow color literals in React Native styles.\nSee https://biomejs.dev/linter/rules/no-react-native-literal-colors",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoReactNativeLiteralColorsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noReactNativeRawText": {
-					"description": "Disallow raw text outside \\<Text> components in React Native.\nSee https://biomejs.dev/linter/rules/no-react-native-raw-text",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoReactNativeRawTextConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noReactObjectTypeAsDefaultProp": {
 					"description": "Disallow array, object, and function values as default props in React components.\nSee https://biomejs.dev/linter/rules/no-react-object-type-as-default-prop",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoReactObjectTypeAsDefaultPropConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noReactStringRefs": {
-					"description": "Disallow string refs in React components.\nSee https://biomejs.dev/linter/rules/no-react-string-refs",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoReactStringRefsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7481,13 +7552,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noTopLevelLiterals": {
-					"description": "Require the JSON top-level value to be an array or object.\nSee https://biomejs.dev/linter/rules/no-top-level-literals",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoTopLevelLiteralsConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noUndeclaredClasses": {
 					"description": "Reports CSS class names in HTML class attributes that are not defined in any \\<style> block or linked stylesheet available to the file.\nSee https://biomejs.dev/linter/rules/no-undeclared-classes",
 					"anyOf": [
@@ -7509,13 +7573,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noUnnecessaryTemplateExpression": {
-					"description": "Disallow unnecessary template expressions.\nSee https://biomejs.dev/linter/rules/no-unnecessary-template-expression",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoUnnecessaryTemplateExpressionConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noUnsafeIframeSandbox": {
 					"description": "Disallow allow-scripts together with allow-same-origin in an iframe sandbox.\nSee https://biomejs.dev/linter/rules/no-unsafe-iframe-sandbox",
 					"anyOf": [
@@ -7534,13 +7591,6 @@
 					"description": "Disallow TypeScript type assertions other than const assertions.\nSee https://biomejs.dev/linter/rules/no-unsafe-type-assertion",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnsafeTypeAssertionConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUntrustedLicenses": {
-					"description": "Disallow dependencies with untrusted licenses.\nSee https://biomejs.dev/linter/rules/no-untrusted-licenses",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoUntrustedLicensesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7572,31 +7622,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noVueImportCompilerMacros": {
-					"description": "Disallow importing Vue compiler macros.\nSee https://biomejs.dev/linter/rules/no-vue-import-compiler-macros",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoVueImportCompilerMacrosConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noVueRefAsOperand": {
-					"description": "Disallow the use of value wrapped by ref()(Composition API) as operand.\nSee https://biomejs.dev/linter/rules/no-vue-ref-as-operand",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoVueRefAsOperandConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noVueUndeclaredDirectives": {
 					"description": "Disallow custom Vue directives that are not declared.\nSee https://biomejs.dev/linter/rules/no-vue-undeclared-directives",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueUndeclaredDirectivesConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noVueVOnNumberValues": {
-					"description": "Disallow deprecated number modifiers on Vue v-on directives.\nSee https://biomejs.dev/linter/rules/no-vue-v-on-number-values",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoVueVOnNumberValuesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7614,13 +7643,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useArraySome": {
-					"description": "Prefer Array.prototype.some() over verbose existence checks.\nSee https://biomejs.dev/linter/rules/use-array-some",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseArraySomeConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useAstroClientOnlyDirectiveValue": {
 					"description": "Require a value for Astro's client:only directive.\nSee https://biomejs.dev/linter/rules/use-astro-client-only-directive-value",
 					"anyOf": [
@@ -7632,13 +7654,6 @@
 					"description": "Enforce that await is only used on Promise values.\nSee https://biomejs.dev/linter/rules/use-await-thenable",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseAwaitThenableConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useBaseline": {
-					"description": "Disallow CSS properties, values, at-rules, functions, and selectors that are not part of the configured Baseline.\nSee https://biomejs.dev/linter/rules/use-baseline",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseBaselineConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7663,17 +7678,17 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentHeadingLevel": {
+					"description": "Enforce that all heading levels are consistent and ordered.\nSee https://biomejs.dev/linter/rules/use-consistent-heading-level",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentHeadingLevelConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentObjectKeys": {
 					"description": "Enforce JSON keys with consistent Unicode representation.\nSee https://biomejs.dev/linter/rules/use-consistent-object-keys",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseConsistentObjectKeysConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useConsistentTestIt": {
-					"description": "Enforce consistent use of it or test for test functions.\nSee https://biomejs.dev/linter/rules/use-consistent-test-it",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseConsistentTestItConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7691,31 +7706,10 @@
 						{ "type": "null" }
 					]
 				},
-				"useDomNodeTextContent": {
-					"description": "Prefer .textContent over .innerText for DOM node text.\nSee https://biomejs.dev/linter/rules/use-dom-node-text-content",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseDomNodeTextContentConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useDomQuerySelector": {
-					"description": "Prefer querySelector() and querySelectorAll() over older DOM query APIs.\nSee https://biomejs.dev/linter/rules/use-dom-query-selector",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseDomQuerySelectorConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useExhaustiveSwitchCases": {
 					"description": "Require switch-case statements to be exhaustive.\nSee https://biomejs.dev/linter/rules/use-exhaustive-switch-cases",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseExhaustiveSwitchCasesConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useExpect": {
-					"description": "Ensure that test functions contain at least one expect() or similar assertion.\nSee https://biomejs.dev/linter/rules/use-expect",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseExpectConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7733,24 +7727,17 @@
 						{ "type": "null" }
 					]
 				},
+				"useFencedCodeLanguage": {
+					"description": "Enforce that fenced code blocks specify a code tag (language).\nSee https://biomejs.dev/linter/rules/use-fenced-code-language",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseFencedCodeLanguageConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useFlatMathMinMax": {
 					"description": "Prefer flat Math.min() and Math.max() calls over nested calls of the same method.\nSee https://biomejs.dev/linter/rules/use-flat-math-min-max",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseFlatMathMinMaxConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useIframeSandbox": {
-					"description": "Require the sandbox attribute on \\<iframe> elements.\nSee https://biomejs.dev/linter/rules/use-iframe-sandbox",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseIframeSandboxConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useImportsFirst": {
-					"description": "Enforce that all imports appear at the top of the module.\nSee https://biomejs.dev/linter/rules/use-imports-first",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseImportsFirstConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7775,24 +7762,10 @@
 						{ "type": "null" }
 					]
 				},
-				"useMathMinMax": {
-					"description": "Prefer Math.min() and Math.max() over ternaries for simple comparisons.\nSee https://biomejs.dev/linter/rules/use-math-min-max",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseMathMinMaxConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useModernMathApis": {
 					"description": "Use modern Math APIs for common mathematical operations.\nSee https://biomejs.dev/linter/rules/use-modern-math-apis",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseModernMathApisConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useNamedCaptureGroup": {
-					"description": "Enforce using named capture groups in regular expression.\nSee https://biomejs.dev/linter/rules/use-named-capture-group",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseNamedCaptureGroupConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7810,33 +7783,10 @@
 						{ "type": "null" }
 					]
 				},
-				"usePlaywrightValidDescribeCallback": {
-					"description": "Enforce valid describe() callback.\nSee https://biomejs.dev/linter/rules/use-playwright-valid-describe-callback",
-					"anyOf": [
-						{
-							"$ref": "#/$defs/UsePlaywrightValidDescribeCallbackConfiguration"
-						},
-						{ "type": "null" }
-					]
-				},
 				"usePromiseRejectErrors": {
 					"description": "Require Error objects as Promise rejection reasons.\nSee https://biomejs.dev/linter/rules/use-promise-reject-errors",
 					"anyOf": [
 						{ "$ref": "#/$defs/UsePromiseRejectErrorsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useQwikLoaderLocation": {
-					"description": "Enforce that Qwik loader functions are declared in the correct location.\nSee https://biomejs.dev/linter/rules/use-qwik-loader-location",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseQwikLoaderLocationConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useReactAsyncServerFunction": {
-					"description": "Require functions with the \"use server\" directive to be async.\nSee https://biomejs.dev/linter/rules/use-react-async-server-function",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseReactAsyncServerFunctionConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7863,20 +7813,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useReactNativePlatformComponents": {
-					"description": "Ensure that platform-specific React Native components are only imported in files named for that platform.\nSee https://biomejs.dev/linter/rules/use-react-native-platform-components",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseReactNativePlatformComponentsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useReduceTypeParameter": {
-					"description": "Enforce using a type parameter on Array#reduce instead of casting the initial value.\nSee https://biomejs.dev/linter/rules/use-reduce-type-parameter",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseReduceTypeParameterConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useRegexpExec": {
 					"description": "Enforce RegExp#exec over String#match if no global flag is provided.\nSee https://biomejs.dev/linter/rules/use-regexp-exec",
 					"anyOf": [
@@ -7884,17 +7820,10 @@
 						{ "type": "null" }
 					]
 				},
-				"useRegexpTest": {
-					"description": "Enforce the use of RegExp.prototype.test() over String.prototype.match() and RegExp.prototype.exec() in boolean contexts.\nSee https://biomejs.dev/linter/rules/use-regexp-test",
+				"useSingleTopLevelHeading": {
+					"description": "Enforce that a Markdown document has a single top-level heading.\nSee https://biomejs.dev/linter/rules/use-single-top-level-heading",
 					"anyOf": [
-						{ "$ref": "#/$defs/UseRegexpTestConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useScopedStyles": {
-					"description": "Keep component styles scoped in Vue and Astro files.\nSee https://biomejs.dev/linter/rules/use-scoped-styles",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseScopedStylesConfiguration" },
+						{ "$ref": "#/$defs/UseSingleTopLevelHeadingConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7940,31 +7869,10 @@
 						{ "type": "null" }
 					]
 				},
-				"useTestHooksInOrder": {
-					"description": "Enforce that test lifecycle hooks are declared in the order they execute.\nSee https://biomejs.dev/linter/rules/use-test-hooks-in-order",
+				"useTopLevelHeading": {
+					"description": "Require Markdown documents to start with a top-level heading.\nSee https://biomejs.dev/linter/rules/use-top-level-heading",
 					"anyOf": [
-						{ "$ref": "#/$defs/UseTestHooksInOrderConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useTestHooksOnTop": {
-					"description": "Enforce that lifecycle hooks appear before any test cases in the same block.\nSee https://biomejs.dev/linter/rules/use-test-hooks-on-top",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseTestHooksOnTopConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useThisInClassMethods": {
-					"description": "Enforce that class methods utilize this.\nSee https://biomejs.dev/linter/rules/use-this-in-class-methods",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseThisInClassMethodsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useUnicodeRegex": {
-					"description": "Enforce the use of the u or v flag for regular expressions.\nSee https://biomejs.dev/linter/rules/use-unicode-regex",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseUnicodeRegexConfiguration" },
+						{ "$ref": "#/$defs/UseTopLevelHeadingConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7975,40 +7883,10 @@
 						{ "type": "null" }
 					]
 				},
-				"useVarsOnTop": {
-					"description": "Require var declarations to appear at the top of their containing scope.\nSee https://biomejs.dev/linter/rules/use-vars-on-top",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseVarsOnTopConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useVueBaseImport": {
 					"description": "Enforce importing Vue's public entry point instead of internal Vue packages.\nSee https://biomejs.dev/linter/rules/use-vue-base-import",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueBaseImportConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useVueConsistentDefinePropsDeclaration": {
-					"description": "Enforce a consistent declaration style for Vue's defineProps macro.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration",
-					"anyOf": [
-						{
-							"$ref": "#/$defs/UseVueConsistentDefinePropsDeclarationConfiguration"
-						},
-						{ "type": "null" }
-					]
-				},
-				"useVueNextTickPromise": {
-					"description": "Enforces Promise syntax when using Vue nextTick.\nSee https://biomejs.dev/linter/rules/use-vue-next-tick-promise",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseVueNextTickPromiseConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useVueValidVFor": {
-					"description": "Enforces valid v-for directives in Vue templates.\nSee https://biomejs.dev/linter/rules/use-vue-valid-v-for",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseVueValidVForConfiguration" },
 						{ "type": "null" }
 					]
 				}
@@ -8230,9 +8108,20 @@
 						{ "type": "null" }
 					]
 				},
+				"markdown": {
+					"description": "Specific configuration for the Markdown language",
+					"anyOf": [
+						{ "$ref": "#/$defs/MarkdownConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"plugins": {
 					"description": "Additional plugins for matched files.",
 					"anyOf": [{ "$ref": "#/$defs/Plugins" }, { "type": "null" }]
+				},
+				"yaml": {
+					"description": "Specific configuration for the YAML language",
+					"anyOf": [{ "$ref": "#/$defs/YamlConfiguration" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
@@ -8387,6 +8276,13 @@
 					"description": "Enables or disables the recommended rules in a non-nursery group. The group's\n`preset` setting takes precedence when both options are set.",
 					"type": ["boolean", "null"]
 				},
+				"useDomNodeTextContent": {
+					"description": "Prefer .textContent over .innerText for DOM node text.\nSee https://biomejs.dev/linter/rules/use-dom-node-text-content",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseDomNodeTextContentConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGoogleFontPreconnect": {
 					"description": "Ensure the preconnect attribute is used when using Google Fonts.\nSee https://biomejs.dev/linter/rules/use-google-font-preconnect",
 					"anyOf": [
@@ -8419,10 +8315,10 @@
 			"additionalProperties": false
 		},
 		"PluginConfiguration": {
-			"description": "Configuration for one GritQL plugin.\n\nUse either a path string or an object with a path and optional file filters:\n\n```json\n{\n  \"plugins\": [\n    \"simple-plugin.grit\",\n    { \"path\": \"scoped-plugin.grit\", \"includes\": [\"src/**/*.ts\"] }\n  ]\n}\n```",
+			"description": "Configuration for one GritQL plugin.\n\nCan be either a path or package name string, or an object with options:\n\n```json\n{\n  \"plugins\": [\n    \"simple-plugin.grit\",\n    \"@scope/biome-plugin\",\n    { \"path\": \"scoped-plugin.grit\", \"includes\": [\"src/**/*.ts\"] },\n    { \"path\": \"./local-plugin.grit\", \"includes\": [\"src/**/*.ts\"], \"resolutionKind\": \"config\" }\n  ]\n}\n```",
 			"anyOf": [
 				{
-					"description": "A path to the plugin's `.grit` file or a directory containing `biome-manifest.jsonc`.",
+					"description": "A path or installed package name.",
 					"type": "string"
 				},
 				{
@@ -8431,8 +8327,22 @@
 				}
 			]
 		},
+		"PluginResolvePath": {
+			"oneOf": [
+				{
+					"description": "Resolve relative paths and package names from the consuming project.",
+					"type": "string",
+					"const": "project"
+				},
+				{
+					"description": "Resolve relative paths and package names from the configuration file\nthat declared the plugin.",
+					"type": "string",
+					"const": "config"
+				}
+			]
+		},
 		"PluginWithOptions": {
-			"description": "Plugin path with additional options.",
+			"description": "Plugin reference with additional options.",
 			"type": "object",
 			"properties": {
 				"includes": {
@@ -8441,8 +8351,12 @@
 					"items": { "$ref": "#/$defs/NormalizedGlob" }
 				},
 				"path": {
-					"description": "The path to the plugin's `.grit` file or a directory containing `biome-manifest.jsonc`.\nRelative paths are resolved from the configuration file that declares the plugin.",
+					"description": "The path or installed package name.",
 					"type": "string"
+				},
+				"resolutionKind": {
+					"description": "Controls how the plugin is resolved.\n\nThis only affects plugin resolution. It does not change how `includes`\nare interpreted.\n\nWhen omitted, relative paths and package names are resolved from the\nconsuming project.",
+					"anyOf": [{ "$ref": "#/$defs/PluginResolvePath" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false,
@@ -8469,6 +8383,26 @@
 					"description": "Disallows property assignments on function parameters.\nEnforces stricter immutability to prevent unintended side effects.",
 					"type": "string",
 					"const": "deny"
+				}
+			]
+		},
+		"ProseWrap": {
+			"description": "Controls whether Biome keeps, adds, or removes line breaks in Markdown paragraphs.\n\nManual line breaks are always kept. In Markdown, a manual line break is created by ending a\nline with two spaces or a backslash.",
+			"oneOf": [
+				{
+					"description": "Keep line breaks as written in the source file. This is the default.",
+					"type": "string",
+					"const": "preserve"
+				},
+				{
+					"description": "Wrap paragraphs to fit the configured `lineWidth`.",
+					"type": "string",
+					"const": "always"
+				},
+				{
+					"description": "Remove line breaks from paragraphs so that each paragraph is on one line.",
+					"type": "string",
+					"const": "never"
 				}
 			]
 		},
@@ -9461,6 +9395,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoDuplicateJsxPropsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoDuplicateMapKeysOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDuplicateMapKeysOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12742,6 +12685,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConsistentHeadingLevelOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentHeadingLevelOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseConsistentMemberAccessibilityOptions": {
 			"type": "object",
 			"properties": {
@@ -13076,6 +13028,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseExportsLastOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseFencedCodeLanguageOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseFencedCodeLanguageOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -14013,6 +13974,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseSingleTopLevelHeadingOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSingleTopLevelHeadingOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseSingleVarDeclaratorOptions": {
 			"type": "object",
 			"properties": {
@@ -14207,6 +14177,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseThrowOnlyErrorOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseTopLevelHeadingOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseTopLevelHeadingOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -14746,6 +14725,13 @@
 				"recommended": {
 					"description": "Enables or disables the recommended rules in a non-nursery group. The group's\n`preset` setting takes precedence when both options are set.",
 					"type": ["boolean", "null"]
+				},
+				"useIframeSandbox": {
+					"description": "Require the sandbox attribute on \\<iframe> elements.\nSee https://biomejs.dev/linter/rules/use-iframe-sandbox",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseIframeSandboxConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -15054,6 +15040,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noInlineStyles": {
+					"description": "Disallow the use of inline styles.\nSee https://biomejs.dev/linter/rules/no-inline-styles",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoInlineStylesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noJsxLiterals": {
 					"description": "Disallow string literals inside JSX elements.\nSee https://biomejs.dev/linter/rules/no-jsx-literals",
 					"anyOf": [
@@ -15124,10 +15117,38 @@
 						{ "type": "null" }
 					]
 				},
+				"noPlaywrightElementHandle": {
+					"description": "Disallow usage of element handles (page.$() and page.$$()).\nSee https://biomejs.dev/linter/rules/no-playwright-element-handle",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoPlaywrightElementHandleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noPlaywrightEval": {
+					"description": "Disallow usage of page.$eval() and page.$$eval().\nSee https://biomejs.dev/linter/rules/no-playwright-eval",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoPlaywrightEvalConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noPlaywrightWaitForSelector": {
+					"description": "Disallow using page.waitForSelector().\nSee https://biomejs.dev/linter/rules/no-playwright-wait-for-selector",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoPlaywrightWaitForSelectorConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noProcessEnv": {
 					"description": "Disallow the use of process.env.\nSee https://biomejs.dev/linter/rules/no-process-env",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoProcessEnvConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReactNativeLiteralColors": {
+					"description": "Disallow color literals in React Native styles.\nSee https://biomejs.dev/linter/rules/no-react-native-literal-colors",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactNativeLiteralColorsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -15177,6 +15198,13 @@
 					"description": "Disallow ternary operators.\nSee https://biomejs.dev/linter/rules/no-ternary",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoTernaryConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noTopLevelLiterals": {
+					"description": "Require the JSON top-level value to be an array or object.\nSee https://biomejs.dev/linter/rules/no-top-level-literals",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTopLevelLiteralsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -15337,6 +15365,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentTestIt": {
+					"description": "Enforce consistent use of it or test for test functions.\nSee https://biomejs.dev/linter/rules/use-consistent-test-it",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentTestItConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentTypeDefinitions": {
 					"description": "Enforce type definitions to consistently use either interface or type.\nSee https://biomejs.dev/linter/rules/use-consistent-type-definitions",
 					"anyOf": [
@@ -15376,6 +15411,13 @@
 					"description": "Require destructuring from arrays and/or objects.\nSee https://biomejs.dev/linter/rules/use-destructuring",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseDestructuringConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useDomQuerySelector": {
+					"description": "Prefer querySelector() and querySelectorAll() over older DOM query APIs.\nSee https://biomejs.dev/linter/rules/use-dom-query-selector",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseDomQuerySelectorConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -15470,6 +15512,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useImportsFirst": {
+					"description": "Enforce that all imports appear at the top of the module.\nSee https://biomejs.dev/linter/rules/use-imports-first",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseImportsFirstConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useInputName": {
 					"description": "Require mutation arguments to be named input.\nSee https://biomejs.dev/linter/rules/use-input-name",
 					"anyOf": [
@@ -15488,6 +15537,13 @@
 					"description": "Require one executable GraphQL definition per file.\nSee https://biomejs.dev/linter/rules/use-lone-executable-definition",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseLoneExecutableDefinitionConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNamedCaptureGroup": {
+					"description": "Enforce using named capture groups in regular expression.\nSee https://biomejs.dev/linter/rules/use-named-capture-group",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseNamedCaptureGroupConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -15547,6 +15603,20 @@
 						{ "type": "null" }
 					]
 				},
+				"useReduceTypeParameter": {
+					"description": "Enforce using a type parameter on Array#reduce instead of casting the initial value.\nSee https://biomejs.dev/linter/rules/use-reduce-type-parameter",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseReduceTypeParameterConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useScopedStyles": {
+					"description": "Keep component styles scoped in Vue and Astro files.\nSee https://biomejs.dev/linter/rules/use-scoped-styles",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseScopedStylesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSelfClosingElements": {
 					"description": "Prevent extra closing tags for components without children.\nSee https://biomejs.dev/linter/rules/use-self-closing-elements",
 					"anyOf": [
@@ -15596,6 +15666,27 @@
 						{ "type": "null" }
 					]
 				},
+				"useTestHooksInOrder": {
+					"description": "Enforce that test lifecycle hooks are declared in the order they execute.\nSee https://biomejs.dev/linter/rules/use-test-hooks-in-order",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseTestHooksInOrderConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useTestHooksOnTop": {
+					"description": "Enforce that lifecycle hooks appear before any test cases in the same block.\nSee https://biomejs.dev/linter/rules/use-test-hooks-on-top",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseTestHooksOnTopConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useThisInClassMethods": {
+					"description": "Enforce that class methods utilize this.\nSee https://biomejs.dev/linter/rules/use-this-in-class-methods",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseThisInClassMethodsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useThrowNewError": {
 					"description": "Require new when throwing an error.\nSee https://biomejs.dev/linter/rules/use-throw-new-error",
 					"anyOf": [
@@ -15617,10 +15708,33 @@
 						{ "type": "null" }
 					]
 				},
+				"useUnicodeRegex": {
+					"description": "Enforce the use of the u or v flag for regular expressions.\nSee https://biomejs.dev/linter/rules/use-unicode-regex",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseUnicodeRegexConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useUnifiedTypeSignatures": {
 					"description": "Disallow overload signatures that can be unified into a single signature.\nSee https://biomejs.dev/linter/rules/use-unified-type-signatures",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseUnifiedTypeSignaturesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVarsOnTop": {
+					"description": "Require var declarations to appear at the top of their containing scope.\nSee https://biomejs.dev/linter/rules/use-vars-on-top",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVarsOnTopConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueConsistentDefinePropsDeclaration": {
+					"description": "Enforce a consistent declaration style for Vue's defineProps macro.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration",
+					"anyOf": [
+						{
+							"$ref": "#/$defs/UseVueConsistentDefinePropsDeclarationConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -15656,6 +15770,13 @@
 					"description": "Enforce multi-word component names in Vue components.\nSee https://biomejs.dev/linter/rules/use-vue-multi-word-component-names",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueMultiWordComponentNamesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueNextTickPromise": {
+					"description": "Enforces Promise syntax when using Vue nextTick.\nSee https://biomejs.dev/linter/rules/use-vue-next-tick-promise",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueNextTickPromiseConfiguration" },
 						{ "type": "null" }
 					]
 				}
@@ -15743,6 +15864,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noConditionalExpect": {
+					"description": "Disallow conditional expect() calls inside tests.\nSee https://biomejs.dev/linter/rules/no-conditional-expect",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoConditionalExpectConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noConfusingLabels": {
 					"description": "Disallow labeled statements that are not loops.\nSee https://biomejs.dev/linter/rules/no-confusing-labels",
 					"anyOf": [
@@ -15824,6 +15952,20 @@
 					"description": "Require the use of === and !==.\nSee https://biomejs.dev/linter/rules/no-double-equals",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoDoubleEqualsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDrizzleDeleteWithoutWhere": {
+					"description": "Require .where() to be called when using .delete() with Drizzle ORM.\nSee https://biomejs.dev/linter/rules/no-drizzle-delete-without-where",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDrizzleDeleteWithoutWhereConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDrizzleUpdateWithoutWhere": {
+					"description": "Require .where() to be called when using .update() with Drizzle ORM.\nSee https://biomejs.dev/linter/rules/no-drizzle-update-without-where",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDrizzleUpdateWithoutWhereConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -15925,6 +16067,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateSelectors": {
+					"description": "Disallow duplicate selectors.\nSee https://biomejs.dev/linter/rules/no-duplicate-selectors",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDuplicateSelectorsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateSelectorsKeyframeBlock": {
 					"description": "Disallow duplicate selectors within keyframe blocks.\nSee https://biomejs.dev/linter/rules/no-duplicate-selectors-keyframe-block",
 					"anyOf": [
@@ -15966,6 +16115,13 @@
 					"description": "Disallow the declaration of empty interfaces.\nSee https://biomejs.dev/linter/rules/no-empty-interface",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoEmptyInterfaceConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEmptyObjectKeys": {
+					"description": "Disallow empty keys in JSON objects.\nSee https://biomejs.dev/linter/rules/no-empty-object-keys",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoEmptyObjectKeysConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -16067,6 +16223,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noIdenticalTestTitle": {
+					"description": "Disallow identical titles in test suites and test cases.\nSee https://biomejs.dev/linter/rules/no-identical-test-title",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoIdenticalTestTitleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noImplicitAnyLet": {
 					"description": "Disallow use of implicit any type on variable declarations.\nSee https://biomejs.dev/linter/rules/no-implicit-any-let",
 					"anyOf": [
@@ -16102,6 +16265,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noJsxLeakedDollar": {
+					"description": "Flags text nodes with a trailing $ before a JSX expression.\nSee https://biomejs.dev/linter/rules/no-jsx-leaked-dollar",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoJsxLeakedDollarConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noLabelVar": {
 					"description": "Disallow labels that share a name with a variable.\nSee https://biomejs.dev/linter/rules/no-label-var",
 					"anyOf": [
@@ -16113,6 +16283,13 @@
 					"description": "Prevent problematic leaked values from being rendered.\nSee https://biomejs.dev/linter/rules/no-leaked-render",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoLeakedRenderConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noLoopFunc": {
+					"description": "Disallow functions created inside loops when they use variables that can change.\nSee https://biomejs.dev/linter/rules/no-loop-func",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoLoopFuncConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -16172,6 +16349,41 @@
 						{ "type": "null" }
 					]
 				},
+				"noPlaywrightForceOption": {
+					"description": "Disallow usage of the { force: true } option.\nSee https://biomejs.dev/linter/rules/no-playwright-force-option",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoPlaywrightForceOptionConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noPlaywrightNetworkidle": {
+					"description": "Disallow usage of the networkidle option.\nSee https://biomejs.dev/linter/rules/no-playwright-networkidle",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoPlaywrightNetworkidleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noPlaywrightPagePause": {
+					"description": "Disallow using page.pause().\nSee https://biomejs.dev/linter/rules/no-playwright-page-pause",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoPlaywrightPagePauseConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noPlaywrightWaitForNavigation": {
+					"description": "Disallow using page.waitForNavigation().\nSee https://biomejs.dev/linter/rules/no-playwright-wait-for-navigation",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoPlaywrightWaitForNavigationConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noPlaywrightWaitForTimeout": {
+					"description": "Disallow using page.waitForTimeout().\nSee https://biomejs.dev/linter/rules/no-playwright-wait-for-timeout",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoPlaywrightWaitForTimeoutConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noProto": {
 					"description": "Disallow the use of the deprecated __proto__ object property.\nSee https://biomejs.dev/linter/rules/no-proto",
 					"anyOf": [
@@ -16200,10 +16412,24 @@
 						{ "type": "null" }
 					]
 				},
+				"noReactNativeDeepImports": {
+					"description": "Disallow deep imports from the react-native package.\nSee https://biomejs.dev/linter/rules/no-react-native-deep-imports",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactNativeDeepImportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noReactSpecificProps": {
 					"description": "Prevents React-specific JSX properties from being used.\nSee https://biomejs.dev/linter/rules/no-react-specific-props",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoReactSpecificPropsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReactStringRefs": {
+					"description": "Disallow string refs in React components.\nSee https://biomejs.dev/linter/rules/no-react-string-refs",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoReactStringRefsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -16347,6 +16573,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUntrustedLicenses": {
+					"description": "Disallow dependencies with untrusted licenses.\nSee https://biomejs.dev/linter/rules/no-untrusted-licenses",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUntrustedLicensesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnusedExpressions": {
 					"description": "Disallow expression statements that are neither a function call nor an assignment.\nSee https://biomejs.dev/linter/rules/no-unused-expressions",
 					"anyOf": [
@@ -16418,6 +16651,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useBaseline": {
+					"description": "Disallow CSS properties, values, at-rules, functions, and selectors that are not part of the configured Baseline.\nSee https://biomejs.dev/linter/rules/use-baseline",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseBaselineConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useBiomeIgnoreFolder": {
 					"description": "Prefer folder exclusions that prevent Biome from scanning the folder.\nSee https://biomejs.dev/linter/rules/use-biome-ignore-folder",
 					"anyOf": [
@@ -16443,6 +16683,13 @@
 					"description": "Enforce passing a message value when creating a built-in error.\nSee https://biomejs.dev/linter/rules/use-error-message",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseErrorMessageConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useExpect": {
+					"description": "Ensure that test functions contain at least one expect() or similar assertion.\nSee https://biomejs.dev/linter/rules/use-expect",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseExpectConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -16549,6 +16796,28 @@
 			},
 			"additionalProperties": false,
 			"required": ["components"]
+		},
+		"TailwindConfiguration": {
+			"description": "Tells Biome where your code lists Tailwind CSS classes, so the Tailwind\nlint rules know which strings to check.",
+			"type": "object",
+			"properties": {
+				"attributes": {
+					"description": "Attributes whose values are Tailwind classes, such as `class` in\n`<div class=\"px-2 py-2\">`.\n\nDefaults to `class` and `className`. In HTML, they are case-insensitive.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"mergeFunctions": {
+					"description": "Functions that combine Tailwind classes, such as `clsx` and `cn`.\n\nBiome checks every string passed to these functions, like both strings\nin `cn(\"px-2\", \"py-2\")`. When an object is passed, Biome checks its\nkeys: in `cn({ \"px-2\": isActive })`, it checks `\"px-2\"`.\n\nProperties of these functions are checked too, so listing `tw` also\ncovers `` tw.div`px-2` `` and `tw.div(\"px-2\")`.\n\nDefaults to `clsx`, `tw`, `twMerge`, `twJoin`, `cn`, `cc`, `cnb`, and\n`ctl`.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"variantFunctions": {
+					"description": "Functions that describe a component's styles with an object, such as\n`cva` and `tv`.\n\nBiome checks every string passed directly to these functions. In an\nobject passed to them, Biome checks the classes under these properties:\n\n- `base`, `class`, and `className`: classes that always apply.\n- `variants`: classes for each version of the component, such as each\n  button size.\n- `slots`: classes for each part of the component, such as its icon.\n- `compoundVariants` and `compoundSlots`: only the `class` and\n  `className` of each entry.\n\nOther properties, such as `defaultVariants`, hold names rather than\nclasses, so Biome skips them. For example, Biome checks `\"rounded\"`,\n`\"px-2\"`, and `\"px-4\"` here, but not `\"small\"`:\n\n```js\ncva(\"rounded\", {\n    variants: {\n        size: { small: \"px-2\", large: \"px-4\" },\n    },\n    defaultVariants: { size: \"small\" },\n});\n```\n\nDefaults to `cva` and `tv`.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
 		},
 		"TestFunctionKind": {
 			"description": "The function to use for tests",
@@ -16987,6 +17256,16 @@
 			"type": "string",
 			"enum": ["block", "inline"]
 		},
+		"UseConsistentHeadingLevelConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentHeadingLevelOptions" }
+			]
+		},
+		"UseConsistentHeadingLevelOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseConsistentMemberAccessibilityConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -17408,6 +17687,28 @@
 		},
 		"UseExportsLastOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseFencedCodeLanguageConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseFencedCodeLanguageOptions" }
+			]
+		},
+		"UseFencedCodeLanguageOptions": {
+			"description": "Configures the language tags and info-string content accepted by fenced code blocks.",
+			"type": "object",
+			"properties": {
+				"allowedLanguages": {
+					"description": "The language tags a fenced code block is allowed to declare.\nAn empty list accepts every language tag.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"languageOnly": {
+					"description": "Requires the info string to contain only a language tag, without metadata or other\nnon-whitespace content.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseFilenamingConventionConfiguration": {
@@ -18438,6 +18739,25 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseSingleTopLevelHeadingConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseSingleTopLevelHeadingOptions" }
+			]
+		},
+		"UseSingleTopLevelHeadingOptions": {
+			"type": "object",
+			"properties": {
+				"level": {
+					"description": "The heading level that is treated as the document's top-level heading.",
+					"type": ["integer", "null"],
+					"format": "uint8",
+					"maximum": 255,
+					"minimum": 1
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseSingleVarDeclaratorConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -18467,6 +18787,11 @@
 		"UseSortedAttributesOptions": {
 			"type": "object",
 			"properties": {
+				"sortFirst": {
+					"description": "A list of attribute names that should be sorted before all other\nattributes, in the order they appear in this list. The remaining\nattributes are sorted after the listed ones.\n\nThis is useful to keep attributes such as `key` first.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
 				"sortOrder": {
 					"anyOf": [{ "$ref": "#/$defs/SortOrder" }, { "type": "null" }]
 				}
@@ -18513,6 +18838,12 @@
 		},
 		"UseSortedInterfaceMembersOptions": {
 			"type": "object",
+			"properties": {
+				"partitionByNewLine": {
+					"description": "When enabled, members separated by a blank line are kept in their own\nsection and sorted only within that section. This preserves logical\ngroupings the author intentionally introduced with empty lines.",
+					"type": ["boolean", "null"]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseSortedKeysConfiguration": {
@@ -18734,6 +19065,16 @@
 			]
 		},
 		"UseThrowOnlyErrorOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseTopLevelHeadingConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseTopLevelHeadingOptions" }
+			]
+		},
+		"UseTopLevelHeadingOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -19279,6 +19620,73 @@
 					"const": "ignore"
 				}
 			]
+		},
+		"YamlConfiguration": {
+			"description": "Options applied to Yaml files",
+			"type": "object",
+			"properties": {
+				"formatter": {
+					"description": "Formatter options",
+					"anyOf": [
+						{ "$ref": "#/$defs/YamlFormatterConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"linter": {
+					"anyOf": [
+						{ "$ref": "#/$defs/YamlLinterConfiguration" },
+						{ "type": "null" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"YamlFormatterConfiguration": {
+			"description": "Options that change how the Yaml formatter behaves",
+			"type": "object",
+			"properties": {
+				"bracketSpacing": {
+					"description": "Whether to insert spaces inside non-empty flow mappings (`{ key: value }`)\nand sequences (`[ item ]`) that fit on one line. If unset, inherits the\nglobal bracket spacing setting. When neither is set, mappings have spaces\nand sequences do not.",
+					"anyOf": [{ "$ref": "#/$defs/BracketSpacing" }, { "type": "null" }]
+				},
+				"enabled": {
+					"description": "Control the formatter for Yaml (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				},
+				"indentWidth": {
+					"description": "The size of the indentation applied to Yaml files. Defaults to 2.",
+					"anyOf": [{ "$ref": "#/$defs/IndentWidth" }, { "type": "null" }]
+				},
+				"lineEnding": {
+					"description": "The type of line ending applied to Yaml (and its super languages) files. `auto` uses CRLF on Windows and LF on other platforms.",
+					"anyOf": [{ "$ref": "#/$defs/LineEnding" }, { "type": "null" }]
+				},
+				"lineWidth": {
+					"description": "What's the max width of a line applied to Yaml files. Defaults to 80.",
+					"anyOf": [{ "$ref": "#/$defs/LineWidth" }, { "type": "null" }]
+				},
+				"quoteStyle": {
+					"description": "The type of quotes used in YAML code. Defaults to `double`.",
+					"anyOf": [{ "$ref": "#/$defs/QuoteStyle" }, { "type": "null" }],
+					"default": null
+				},
+				"trailingNewline": {
+					"description": "Whether to add a trailing newline at the end of the file.\n\nSetting this option to `false` is **highly discouraged** because it could cause many problems with other tools:\n- https://thoughtbot.com/blog/no-newline-at-end-of-file\n- https://callmeryan.medium.com/no-newline-at-end-of-file-navigating-gits-warning-for-android-developers-af14e73dd804\n- https://unix.stackexchange.com/questions/345548/how-to-cat-files-together-adding-missing-newlines-at-end-of-some-files\n\nDisable the option at your own risk.\n\nDefaults to true.",
+					"anyOf": [{ "$ref": "#/$defs/TrailingNewline" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"YamlLinterConfiguration": {
+			"description": "Options that change how the Yaml linter behaves",
+			"type": "object",
+			"properties": {
+				"enabled": {
+					"description": "Control the linter for Yaml files.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
 		}
 	}
 }

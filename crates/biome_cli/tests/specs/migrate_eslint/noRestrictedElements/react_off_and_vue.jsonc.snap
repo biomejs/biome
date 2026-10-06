@@ -1,0 +1,43 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: react_off_and_vue.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"rules": {
+		"react/forbid-elements": ["off", { "forbid": ["button"] }],
+		"vue/no-restricted-html-elements": ["warn", "marquee"]
+	}
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"preset": "none",
+			"correctness": {
+				"noRestrictedElements": {
+					"level": "warn",
+					"options": {
+						"elements": { "marquee": "TODO: Add a custom message here." }
+					}
+				}
+			}
+		}
+	}
+}
+
+```

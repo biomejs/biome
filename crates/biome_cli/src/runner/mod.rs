@@ -153,9 +153,7 @@ use biome_console::{Console, ConsoleExt, markup};
 use biome_diagnostics::PrintDiagnostic;
 use biome_fs::{BiomePath, FileSystem};
 use biome_resolver::FsWithResolverProxy;
-use biome_service::configuration::{
-    LoadedConfiguration, LoadedLocation, ProjectScanComputer, load_configuration,
-};
+use biome_service::configuration::{LoadedLocation, ProjectScanComputer, load_configuration};
 use biome_service::diagnostics::ConfigurationOutsideProject;
 use biome_service::projects::ProjectKey;
 use biome_service::settings::ModuleGraphResolutionKind;
@@ -433,17 +431,16 @@ pub(crate) trait CommandRunner {
         }
         info!(
             "Configuration file loaded: {:?}, diagnostics detected {}",
-            loaded_configuration.file_path,
+            loaded_configuration.file_path(),
             loaded_configuration.diagnostics.len(),
         );
-        let LoadedConfiguration {
-            extended_configurations,
-            configuration,
-            diagnostics: _,
-            directory_path,
-            file_path,
-            mut loaded_location,
-        } = loaded_configuration;
+        let extended_configurations = loaded_configuration.extended_configurations();
+        let configuration = loaded_configuration.resolved_configuration();
+        let directory_path = loaded_configuration
+            .directory_path()
+            .map(Utf8Path::to_path_buf);
+        let file_path = loaded_configuration.file_path().map(Utf8Path::to_path_buf);
+        let mut loaded_location = loaded_configuration.loaded_location;
 
         // Save the config file path for diagnostics before merge_configuration consumes it
         let config_file_path = file_path.clone();

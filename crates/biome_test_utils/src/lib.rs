@@ -95,7 +95,10 @@ pub fn create_analyzer_options<L: ServiceLanguage>(
         return options.with_configuration(analyzer_configuration);
     };
     if loaded_configuration.has_errors() {
-        let configuration_path = loaded_configuration.file_path.unwrap().clone();
+        let Some(configuration_path) = loaded_configuration.file_path().map(Utf8Path::to_path_buf)
+        else {
+            return options.with_configuration(analyzer_configuration);
+        };
         diagnostics.extend(
             loaded_configuration
                 .diagnostics
@@ -114,11 +117,7 @@ pub fn create_analyzer_options<L: ServiceLanguage>(
     } else {
         let mut settings = Settings::default();
         settings
-            .merge_with_configuration(
-                loaded_configuration.configuration,
-                None,
-                loaded_configuration.extended_configurations,
-            )
+            .merge_with_configuration_source(loaded_configuration.source)
             .unwrap();
 
         settings
@@ -144,13 +143,10 @@ pub fn load_configuration_source(
         .map(|configuration| (source, configuration))
         .ok()?;
 
-    let LoadedConfiguration {
-        configuration,
-        extended_configurations,
-        ..
-    } = loaded_configuration;
-
-    Some((configuration, extended_configurations))
+    Some((
+        loaded_configuration.resolved_configuration(),
+        loaded_configuration.extended_configurations(),
+    ))
 }
 
 /// It loads `<input_file>.options.json`
@@ -178,7 +174,7 @@ pub fn create_parser_options<L: ServiceLanguage>(
     };
 
     if loaded_configuration.has_errors() {
-        let configuration_path = loaded_configuration.file_path.unwrap().clone();
+        let configuration_path = loaded_configuration.file_path()?.to_path_buf();
         diagnostics.extend(
             loaded_configuration
                 .diagnostics
@@ -195,14 +191,9 @@ pub fn create_parser_options<L: ServiceLanguage>(
 
         Default::default()
     } else {
-        let configuration = loaded_configuration.configuration;
         let mut settings = Settings::default();
         settings
-            .merge_with_configuration(
-                configuration,
-                None,
-                loaded_configuration.extended_configurations,
-            )
+            .merge_with_configuration_source(loaded_configuration.source)
             .unwrap();
 
         let document_file_source = DocumentFileSource::from_path(
@@ -230,7 +221,10 @@ where
         return Default::default();
     };
     if loaded_configuration.has_errors() {
-        let configuration_path = loaded_configuration.file_path.unwrap().clone();
+        let Some(configuration_path) = loaded_configuration.file_path().map(Utf8Path::to_path_buf)
+        else {
+            return Default::default();
+        };
         diagnostics.extend(
             loaded_configuration
                 .diagnostics
@@ -247,14 +241,9 @@ where
 
         Default::default()
     } else {
-        let configuration = loaded_configuration.configuration;
         let mut settings = Settings::default();
         settings
-            .merge_with_configuration(
-                configuration,
-                None,
-                loaded_configuration.extended_configurations,
-            )
+            .merge_with_configuration_source(loaded_configuration.source)
             .unwrap();
 
         let document_file_source = DocumentFileSource::from_path(

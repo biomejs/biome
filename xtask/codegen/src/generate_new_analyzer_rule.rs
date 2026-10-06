@@ -1,3 +1,4 @@
+use crate::diagnostic_categories::insert_category_line;
 use biome_string_case::Case;
 use bpaf::Bpaf;
 use std::str::FromStr;
@@ -12,6 +13,7 @@ pub enum LanguageKind {
     Html,
     HtmlVue,
     Markdown,
+    Yaml,
 }
 
 impl LanguageKind {
@@ -24,6 +26,7 @@ impl LanguageKind {
             Self::Html => "html",
             Self::HtmlVue => "html",
             Self::Markdown => "markdown",
+            Self::Yaml => "yaml",
         }
     }
 }
@@ -39,6 +42,7 @@ impl FromStr for LanguageKind {
             "html" => Ok(Self::Html),
             "html-vue" => Ok(Self::HtmlVue),
             "markdown" => Ok(Self::Markdown),
+            "yaml" => Ok(Self::Yaml),
             _ => Err("Unsupported value"),
         }
     }
@@ -638,6 +642,86 @@ impl Rule for {rule_name_upper_camel} {{
 "#
             )
         }
+        LanguageKind::Yaml => {
+            format!(
+                r#"use biome_analyze::{{context::RuleContext, {macro_name}, Ast, Rule, RuleDiagnostic}};
+use biome_console::markup;
+use biome_yaml_syntax::YamlRoot;
+use biome_rowan::AstNode;
+use biome_rule_options::{rule_name_snake_case}::{rule_name_upper_camel}Options;
+
+{macro_name}! {{
+    /// Succinct description of the rule.
+    ///
+    /// Put context and details about the rule.
+    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
+    ///
+    /// Try to stay consistent with the descriptions of implemented rules.
+    ///
+    /// You can use asides to highlight important information:
+    /// :::note
+    /// Important information for users.
+    /// :::
+    ///
+    /// ## Examples
+    ///
+    /// ### Invalid
+    ///
+    /// ```yaml,expect_diagnostic
+    /// person:
+    ///   name: john doe
+    ///   name: jane doe
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```yaml
+    /// person:
+    ///   name: john doe
+    /// ```
+    ///
+    pub {rule_name_upper_camel} {{
+        version: "next",
+        name: "{rule_name_lower_camel}",
+        language: "yaml",
+        recommended: false,
+    }}
+}}
+
+impl Rule for {rule_name_upper_camel} {{
+    type Query = Ast<YamlRoot>;
+    type State = ();
+    type Signals = Option<Self::State>;
+    type Options = {rule_name_upper_camel}Options;
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {{
+        let _node = ctx.query();
+        None
+    }}
+
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {{
+        //
+        // Read our guidelines to write great diagnostics:
+        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
+        //
+        let span = ctx.query().range();
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                span,
+                markup! {{
+                    "Unexpected empty block is not allowed"
+                }},
+            )
+            .note(markup! {{
+                "This note will give you more information."
+            }}),
+        )
+    }}
+}}
+"#
+            )
+        }
     }
 }
 
@@ -659,6 +743,7 @@ pub fn generate_new_analyzer_rule(kind: LanguageKind, category: Category, rule_n
         LanguageKind::Html | LanguageKind::HtmlVue => {
             "<!-- should not generate diagnostics -->\n<div>ok</div>"
         }
+        LanguageKind::Yaml => "# should not generate diagnostics\nperson:\n  name: john doe",
         _ => "/* should not generate diagnostics */\n// var a = 1;",
     };
     let invalid_contents = match kind {
@@ -668,6 +753,9 @@ pub fn generate_new_analyzer_rule(kind: LanguageKind, category: Category, rule_n
         LanguageKind::Markdown => "<!-- should generate diagnostics -->\n# Heading-1\n# Heading-1",
         LanguageKind::Html | LanguageKind::HtmlVue => {
             "<!-- should generate diagnostics -->\n<div></div>"
+        }
+        LanguageKind::Yaml => {
+            "# should not generate diagnostics\nperson:\n  name: john doe\n  name: jane doe"
         }
         _ => "/* should generate diagnostics */\nvar a = 1;\na = 2;\na = 3;",
     };
@@ -705,35 +793,25 @@ pub fn generate_new_analyzer_rule(kind: LanguageKind, category: Category, rule_n
 
     if !categories.contains(&rule_name_camel) {
         let kebab_case_rule = Case::Kebab.convert(&rule_name_camel);
-        // We sort rules to reduce conflicts between contributions made in parallel.
-        let rule_line = match category {
-            Category::Lint => format!(
-                r#"    "lint/nursery/{rule_name_camel}": "https://biomejs.dev/linter/rules/{kebab_case_rule}","#
+        let (category_name, rule_line) = match category {
+            Category::Lint => (
+                "lint",
+                format!(
+                    r#"    "lint/nursery/{rule_name_camel}": "https://biomejs.dev/linter/rules/{kebab_case_rule}","#
+                ),
             ),
-            Category::Assist => format!(
-                r#"    "assist/source/{rule_name_camel}": "https://biomejs.dev/assist/actions/{kebab_case_rule}","#
+            Category::Assist => (
+                "assist",
+                format!(
+                    r#"    "assist/source/{rule_name_camel}": "https://biomejs.dev/assist/actions/{kebab_case_rule}","#
+                ),
             ),
-            Category::Syntax => format!(r#"    "syntax/nursery/{rule_name_camel}","#),
+            Category::Syntax => (
+                "syntax",
+                format!(r#"    "syntax/nursery/{rule_name_camel}","#),
+            ),
         };
-        let lint_start = match category {
-            Category::Lint => "define_categories! {\n",
-            Category::Assist => "    // start assist actions\n",
-            Category::Syntax => "    // start syntax rules\n",
-        };
-        let lint_end = match category {
-            Category::Lint => "\n    // end lint rules\n",
-            Category::Assist => "\n    // end assist actions\n",
-            Category::Syntax => "\n  ;  // end syntax rules\n",
-        };
-        debug_assert!(categories.contains(lint_start), "{}", lint_start);
-        debug_assert!(categories.contains(lint_end), "{}", lint_end);
-        let lint_start_index = categories.find(lint_start).unwrap() + lint_start.len();
-        let lint_end_index = categories.find(lint_end).unwrap();
-        let lint_rule_text = &categories[lint_start_index..lint_end_index];
-        let mut lint_rules: Vec<_> = lint_rule_text.lines().chain(Some(&rule_line[..])).collect();
-        lint_rules.sort_unstable();
-        let new_lint_rule_text = lint_rules.join("\n");
-        categories.replace_range(lint_start_index..lint_end_index, &new_lint_rule_text);
+        insert_category_line(&mut categories, category_name, &rule_line).unwrap();
         std::fs::write(categories_path, categories).unwrap();
     }
 

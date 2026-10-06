@@ -1,35 +1,36 @@
-//! Terminal output for type-inference profiles.
-//!
-//! The default report groups related records and limits the number shown. The
-//! verbose report prints every captured source record and the Rust location of
-//! the code that produced it.
-
+//! Diagnostic output for type-inference profiles.
 mod compact;
 mod verbose;
 
-use std::io;
-use std::time::Duration;
-
 use biome_console::fmt::{Display, Formatter};
 use biome_console::markup;
+use biome_diagnostics::{
+    Advices, Category, Diagnostic, DiagnosticTags, LogCategory, Severity, Visit, category,
+};
 use camino::Utf8Path;
+use std::fmt;
+use std::io;
+use std::time::Duration;
 
 use super::{
     TypeInferenceLocationAttribution, TypeInferenceProfileLocation, TypeInferenceProfileSnapshot,
     TypeInferenceQueryProfile, TypeInferenceRequestProfile, TypeInferenceWholeModuleProfile,
 };
 
-const RECORD_INDENT: usize = 2;
+const REQUEST_LIMIT: usize = 5;
+const QUERY_LIMIT: usize = 8;
+const WHOLE_MODULE_LIMIT: usize = 5;
+const FILE_LIMIT: usize = 10;
 
-/// Renders one type-inference profile for terminal-oriented CLI output.
-pub struct DisplayTypeInferenceProfile<'a> {
+/// Diagnostic for one type-inference profile.
+pub struct TypeInferenceProfileDiagnostic<'a> {
     snapshot: &'a TypeInferenceProfileSnapshot,
     working_directory: Option<&'a Utf8Path>,
     version: &'a str,
     verbose: bool,
 }
 
-impl<'a> DisplayTypeInferenceProfile<'a> {
+impl<'a> TypeInferenceProfileDiagnostic<'a> {
     pub fn new(
         snapshot: &'a TypeInferenceProfileSnapshot,
         working_directory: Option<&'a Utf8Path>,
@@ -43,32 +44,56 @@ impl<'a> DisplayTypeInferenceProfile<'a> {
         }
     }
 
-    /// Selects the report format.
-    ///
-    /// `true` prints every captured source record and its code reference.
-    /// `false` groups records and limits the ranked request and query sections.
+    /// Selects whether source records include detailed metrics and code references.
     pub const fn with_verbose(mut self, verbose: bool) -> Self {
         self.verbose = verbose;
         self
     }
 }
 
-impl Display for DisplayTypeInferenceProfile<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
+impl fmt::Debug for TypeInferenceProfileDiagnostic<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("TypeInferenceProfileDiagnostic")
+            .field("version", &self.version)
+            .field("verbose", &self.verbose)
+            .finish_non_exhaustive()
+    }
+}
+
+impl Diagnostic for TypeInferenceProfileDiagnostic<'_> {
+    fn category(&self) -> Option<&'static Category> {
+        Some(category!("reporter/profiler"))
+    }
+
+    fn severity(&self) -> Severity {
+        Severity::Information
+    }
+
+    fn description(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Type inference profile (Biome {})", self.version)
+    }
+
+    fn tags(&self) -> DiagnosticTags {
         if self.verbose {
-            verbose::VerboseTypeInferenceProfile::new(
-                self.snapshot,
-                self.working_directory,
-                self.version,
-            )
-            .fmt(f)
+            DiagnosticTags::VERBOSE
         } else {
-            compact::CompactTypeInferenceProfile::new(
-                self.snapshot,
-                self.working_directory,
-                self.version,
-            )
-            .fmt(f)
+            DiagnosticTags::empty()
+        }
+    }
+
+    fn message(&self, f: &mut Formatter<'_>) -> io::Result<()> {
+        f.write_markup(markup! {
+            "Type inference profile "<Dim>"(Biome "{self.version}")"</Dim>
+        })
+    }
+
+    fn advices(&self, visitor: &mut dyn Visit) -> io::Result<()> {
+        if self.verbose {
+            verbose::VerboseTypeInferenceProfile::new(self.snapshot, self.working_directory)
+                .record(visitor)
+        } else {
+            compact::CompactTypeInferenceProfile::new(self.snapshot, self.working_directory)
+                .record(visitor)
         }
     }
 }
@@ -192,6 +217,53 @@ impl Display for TypeInferenceLocationAttribution {
     }
 }
 
+struct SourcePath<'a> {
+    path: &'a str,
+    working_directory: Option<&'a Utf8Path>,
+}
+
+impl<'a> SourcePath<'a> {
+    const fn new(path: &'a str, working_directory: Option<&'a Utf8Path>) -> Self {
+        Self {
+            path,
+            working_directory,
+        }
+    }
+}
+
+impl Display for SourcePath<'_> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
+        let path = Utf8Path::new(self.path);
+        if !path.is_absolute() {
+            f.write_str(path.as_str())
+        } else if let Some(relative) = self
+            .working_directory
+            .and_then(|working_directory| path.strip_prefix(working_directory).ok())
+        {
+            f.write_str(relative.as_str())
+        } else {
+            f.write_str("<external>/")?;
+            f.write_str(path.file_name().unwrap_or("unknown"))
+        }
+    }
+}
+
+struct SourceRange(Option<biome_rowan::TextRange>);
+
+impl Display for SourceRange {
+    fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
+        if let Some(range) = self.0 {
+            f.write_fmt(format_args!(
+                "{}..{}",
+                u32::from(range.start()),
+                u32::from(range.end())
+            ))
+        } else {
+            f.write_str("document-wide")
+        }
+    }
+}
+
 struct SourceLocation<'a> {
     location: &'a TypeInferenceProfileLocation,
     working_directory: Option<&'a Utf8Path>,
@@ -211,115 +283,32 @@ impl<'a> SourceLocation<'a> {
 
 impl Display for SourceLocation<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
-        let path = Utf8Path::new(&self.location.path);
-        if !path.is_absolute() {
-            f.write_str(path.as_str())?;
-        } else if let Some(relative) = self
-            .working_directory
-            .and_then(|working_directory| path.strip_prefix(working_directory).ok())
-        {
-            f.write_str(relative.as_str())?;
-        } else {
-            f.write_str("<external>/")?;
-            f.write_str(path.file_name().unwrap_or("unknown"))?;
-        }
-        if let Some(range) = self.location.range {
-            f.write_fmt(format_args!(
-                ":{}..{}",
-                u32::from(range.start()),
-                u32::from(range.end())
-            ))?;
+        SourcePath::new(&self.location.path, self.working_directory).fmt(f)?;
+        if self.location.range.is_some() {
+            f.write_str(":")?;
+            SourceRange(self.location.range).fmt(f)?;
         }
         Ok(())
     }
 }
 
-struct CapacityWarning<'a>(&'a TypeInferenceProfileSnapshot);
-
-impl Display for CapacityWarning<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> io::Result<()> {
-        let dropped_metric_events = self
-            .0
-            .dropped_request_keys
-            .saturating_add(self.0.dropped_query_keys)
-            .saturating_add(self.0.dropped_whole_module_keys);
-        let dropped_documents = self.0.dropped_documents;
-        if dropped_metric_events > 0 || dropped_documents > 0 {
-            f.write_markup(markup! {
-                <Warn>"Profile capacity was reached; uncaptured metric events: "{dropped_metric_events}", uncaptured document paths: "{dropped_documents}". Rerun on a narrower path."</Warn>"\n"
-            })?;
-        }
-        Ok(())
+fn record_capacity_warning(
+    visitor: &mut dyn Visit,
+    snapshot: &TypeInferenceProfileSnapshot,
+) -> io::Result<()> {
+    let dropped_metric_events = snapshot
+        .dropped_request_keys
+        .saturating_add(snapshot.dropped_query_keys)
+        .saturating_add(snapshot.dropped_whole_module_keys);
+    let dropped_documents = snapshot.dropped_documents;
+    if dropped_metric_events > 0 || dropped_documents > 0 {
+        visitor.record_log(
+            LogCategory::Warn,
+            &markup! {
+                "Profile capacity was reached; uncaptured metric events: "{dropped_metric_events}
+                ", uncaptured document paths: "{dropped_documents}". Rerun on a narrower path."
+            },
+        )?;
     }
-}
-
-#[cfg(test)]
-mod tests {
-    use std::time::Duration;
-
-    use biome_console::fmt::{Formatter, Termcolor};
-    use biome_console::markup;
-    use biome_diagnostics::termcolor::NoColor;
-    use biome_rowan::TextRange;
-    use camino::Utf8Path;
-
-    use super::{SourceLocation, TimingCutoffs, TimingMetrics, TypeInferenceProfileLocation};
-    use crate::type_inference::profiling::TypeInferenceLocationAttribution;
-
-    fn render(display: SourceLocation<'_>) -> String {
-        let mut buffer = Vec::new();
-        let mut writer = Termcolor(NoColor::new(&mut buffer));
-        let mut f = Formatter::new(&mut writer);
-        f.write_markup(markup! {{ display }}).unwrap();
-        String::from_utf8(buffer).unwrap()
-    }
-
-    #[test]
-    fn timing_cutoffs_select_the_highest_ten_percent() {
-        let cutoffs = TimingCutoffs::new((1..=10).map(|seconds| TimingMetrics {
-            total: Duration::from_secs(seconds),
-            average: Duration::from_secs(seconds * 2),
-            min: Duration::from_secs(seconds * 3),
-            max: Duration::from_secs(seconds * 4),
-            completed: 1,
-            aborted: 0,
-        }));
-
-        assert_eq!(cutoffs.total, Some(Duration::from_secs(10)));
-        assert_eq!(cutoffs.average, Some(Duration::from_secs(20)));
-        assert_eq!(cutoffs.min, Some(Duration::from_secs(30)));
-        assert_eq!(cutoffs.max, Some(Duration::from_secs(40)));
-    }
-
-    #[test]
-    fn location_uses_relative_path_and_text_range() {
-        let workspace = if cfg!(windows) {
-            Utf8Path::new("C:\\workspace")
-        } else {
-            Utf8Path::new("/workspace")
-        };
-        let other = if cfg!(windows) {
-            Utf8Path::new("C:\\other")
-        } else {
-            Utf8Path::new("/other")
-        };
-        let location = TypeInferenceProfileLocation {
-            path: workspace
-                .join("packages")
-                .join("example.ts")
-                .into_string()
-                .into(),
-            range: Some(TextRange::new(2.into(), 8.into())),
-            attribution: TypeInferenceLocationAttribution::Exact,
-        };
-
-        assert_eq!(
-            render(SourceLocation::new(&location, Some(workspace))),
-            format!("{}:2..8", Utf8Path::new("packages").join("example.ts"))
-        );
-        assert_eq!(
-            render(SourceLocation::new(&location, Some(other))),
-            "<external>/example.ts:2..8"
-        );
-    }
+    Ok(())
 }

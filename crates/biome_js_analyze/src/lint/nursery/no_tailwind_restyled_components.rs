@@ -57,6 +57,11 @@ declare_lint_rule! {
     /// <button className="rounded-none" />;
     /// ```
     ///
+    /// ## Recognized class strings
+    ///
+    /// This rule checks the attributes and functions recognized by the top-level
+    /// [`tailwind` configuration](https://biomejs.dev/reference/configuration/#tailwind).
+    ///
     /// ## Options
     ///
     /// ### allow

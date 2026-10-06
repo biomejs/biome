@@ -29,8 +29,8 @@ debugger
 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Error(s) during loading of plugins:
-    missingOne.grit: Cannot read file.
-    missingTwo.grit: Cannot read file.
+    Failed to read plugin file missingOne.grit
+    Failed to read plugin file missingTwo.grit
   
 
 

@@ -42,6 +42,26 @@ declare_lint_rule! {
     /// <span></span>
     /// ```
     ///
+    /// ## Options
+    ///
+    /// ### `ignoreElements`
+    ///
+    /// An array of element names that the rule ignores. The comparison is case-insensitive.
+    ///
+    /// Default: `[]`
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "ignoreElements": ["button"]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```jsx,use_options
+    /// <button role='button'></button>
+    /// ```
+    ///
     pub NoRedundantRoles {
         version: "1.0.0",
         name: "noRedundantRoles",
@@ -70,6 +90,17 @@ impl Rule for NoRedundantRoles {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+
+        let element_name = node.name_value_token().ok()?;
+        let element_name = element_name.text_trimmed();
+        if ctx
+            .options()
+            .ignore_elements()
+            .iter()
+            .any(|ignored| ignored.eq_ignore_ascii_case(element_name))
+        {
+            return None;
+        }
 
         let role_attribute = node.find_attribute_by_name("role")?;
         let role_attribute_value = role_attribute.initializer()?.value().ok()?;

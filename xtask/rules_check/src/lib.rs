@@ -24,6 +24,7 @@ use biome_ruledoc_utils::{
     AnalyzerServicesBuilder, CodeBlock, DiagnosticConsoleWriter, DiagnosticWriter,
     OptionsParsingMode, RuleCodeAnalyzer, parse_rule_options,
 };
+use biome_yaml_syntax::YamlLanguage;
 use pulldown_cmark::{CodeBlockKind, Event, HeadingLevel, Parser, Tag, TagEnd};
 
 #[derive(Debug)]
@@ -75,6 +76,17 @@ pub fn check_rules() -> anyhow::Result<()> {
             {
                 self.errors.push(Errors::new(format!(
                     "The rule '{rule_name}' has an issue number set to '{issue_number}'. The presence of an issue number indicates that the rule is not yet completed. Rules that have an issue number must belong to the 'nursery' group. Change the group of the rule to 'nursery' or remove the issue number."
+                )));
+            }
+
+            if R::METADATA.domains.contains(&RuleDomain::Tailwind)
+                && !R::METADATA
+                    .docs
+                    .lines()
+                    .any(|line| line.trim() == "## Recognized class strings")
+            {
+                self.errors.push(Errors::new(format!(
+                    "The rule '{rule_name}' belongs to the Tailwind domain but its documentation has no '## Recognized class strings' section. Add the section used by the other Tailwind rules, which links to the top-level `tailwind` configuration."
                 )));
             }
 
@@ -235,6 +247,16 @@ pub fn check_rules() -> anyhow::Result<()> {
         }
     }
 
+    impl RegistryVisitor<YamlLanguage> for LintRulesVisitor {
+        fn record_rule<R>(&mut self)
+        where
+            R: Rule<Options: Default, Query: Queryable<Language = YamlLanguage, Output: Clone>>
+                + 'static,
+        {
+            self.push_rule::<R, <R::Query as Queryable>::Language>()
+        }
+    }
+
     let mut visitor = LintRulesVisitor::default();
     biome_js_analyze::visit_registry(&mut visitor);
     biome_json_analyze::visit_registry(&mut visitor);
@@ -242,6 +264,7 @@ pub fn check_rules() -> anyhow::Result<()> {
     biome_graphql_analyze::visit_registry(&mut visitor);
     biome_html_analyze::visit_registry(&mut visitor);
     biome_markdown_analyze::visit_registry(&mut visitor);
+    biome_yaml_analyze::visit_registry(&mut visitor);
 
     let LintRulesVisitor { groups, errors } = visitor;
     if !errors.is_empty() {

@@ -17,7 +17,7 @@ biome lint '<TEMP_DIR>/plugins_from_root_config_work_in_child_config_extends_roo
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "preset": "recommended"
     }
   }
 }
@@ -31,7 +31,7 @@ biome lint '<TEMP_DIR>/plugins_from_root_config_work_in_child_config_extends_roo
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "preset": "recommended"
     }
   }
 }
