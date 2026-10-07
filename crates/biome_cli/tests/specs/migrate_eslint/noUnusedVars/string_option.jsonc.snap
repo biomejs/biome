@@ -1,0 +1,39 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: string_option.jsonc
+---
+## ESLint Config
+
+```json
+{ "rules": { "no-unused-vars": ["error", "local"] } }
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"preset": "none",
+			"correctness": {
+				"noUnusedVariables": {
+					"level": "error",
+					"options": {
+						"ignoreRestSiblings": false,
+						"ignoreUsingDeclarations": false
+					}
+				}
+			}
+		}
+	}
+}
+
+```
