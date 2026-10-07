@@ -1,0 +1,91 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+<div class="flex-grow"></div>
+<div :class="['order-none', { 'start-4': active }]"></div>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:13 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class flex-grow is a legacy name.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │ <div class="flex-grow"></div>
+      │             ^^^^^^^^^
+    4 │ <div :class="['order-none', { 'start-4': active }]"></div>
+    5 │ </template>
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use grow instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+    3 │ <div·class="flex-grow"></div>
+      │             -----            
+
+```
+
+```
+invalid.vue:4:16 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class order-none is a legacy name.
+  
+    2 │ <template>
+    3 │ <div class="flex-grow"></div>
+  > 4 │ <div :class="['order-none', { 'start-4': active }]"></div>
+      │                ^^^^^^^^^^
+    5 │ </template>
+    6 │ 
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use order-0 instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+  - ['order-none',·{·'start-4':·active·}]
+  + ['order-0',·{·'start-4':·active·}]
+  
+
+```
+
+```
+invalid.vue:4:32 lint/nursery/noTailwindLegacyUtilities  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Tailwind CSS class start-4 is a legacy name.
+  
+    2 │ <template>
+    3 │ <div class="flex-grow"></div>
+  > 4 │ <div :class="['order-none', { 'start-4': active }]"></div>
+      │                                ^^^^^^^
+    5 │ </template>
+    6 │ 
+  
+  i Tailwind CSS renamed this utility and only keeps the old name for backward compatibility.
+  
+  i Use inset-s-4 instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the current class name.
+  
+  - ['order-none',·{·'start-4':·active·}]
+  + ['order-none',·{·'inset-s-4':·active·}]
+  
+
+```

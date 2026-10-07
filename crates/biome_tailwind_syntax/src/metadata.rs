@@ -46,6 +46,8 @@ pub static BASENAMES_WITH_DASHES: &[&str] = &[
     "divide-y",
     "drop-shadow",
     "field-sizing",
+    "flex-grow",   // legacy
+    "flex-shrink", // legacy
     "font-features",
     "font-stretch",
     "forced-color-adjust",
@@ -98,6 +100,7 @@ pub static BASENAMES_WITH_DASHES: &[&str] = &[
     "max-h",
     "max-inline",
     "max-w",
+    "max-w-screen", // legacy
     "min-block",
     "min-h",
     "min-inline",
@@ -199,6 +202,17 @@ pub static KNOWN_STATIC_UTILITIES: &[&str] = &[
     "absolute",
     "relative",
     "sticky",
+    // Inset
+    "start-auto",  // legacy
+    "start-full",  // legacy
+    "-start-full", // legacy
+    "start-px",    // legacy
+    "-start-px",   // legacy
+    "end-auto",    // legacy
+    "end-full",    // legacy
+    "-end-full",   // legacy
+    "end-px",      // legacy
+    "-end-px",     // legacy
     // Isolation
     "isolate",
     "isolation-auto",
@@ -207,6 +221,7 @@ pub static KNOWN_STATIC_UTILITIES: &[&str] = &[
     // Order
     "order-first",
     "order-last",
+    "order-none", // legacy
     // Grid column
     "col-auto",
     "col-span-full",
@@ -677,6 +692,7 @@ pub static KNOWN_STATIC_UTILITIES: &[&str] = &[
     "truncate",
     "text-ellipsis",
     "text-clip",
+    "overflow-ellipsis", // legacy
     // Hyphens
     "hyphens-none",
     "hyphens-manual",
@@ -766,6 +782,10 @@ pub static KNOWN_STATIC_UTILITIES: &[&str] = &[
     "bg-left",
     "bg-right",
     "bg-center",
+    "bg-left-top",     // legacy
+    "bg-right-top",    // legacy
+    "bg-left-bottom",  // legacy
+    "bg-right-bottom", // legacy
     // Background repeat
     "bg-repeat",
     "bg-no-repeat",
@@ -775,6 +795,14 @@ pub static KNOWN_STATIC_UTILITIES: &[&str] = &[
     "bg-repeat-space",
     // Background image
     "bg-none",
+    "bg-gradient-to-t",  // legacy
+    "bg-gradient-to-tr", // legacy
+    "bg-gradient-to-r",  // legacy
+    "bg-gradient-to-br", // legacy
+    "bg-gradient-to-b",  // legacy
+    "bg-gradient-to-bl", // legacy
+    "bg-gradient-to-l",  // legacy
+    "bg-gradient-to-tl", // legacy
     // Background blend mode
     "bg-blend-normal",
     "bg-blend-multiply",
@@ -833,6 +861,10 @@ pub static KNOWN_STATIC_UTILITIES: &[&str] = &[
     "object-left",
     "object-right",
     "object-center",
+    "object-left-top",     // legacy
+    "object-right-top",    // legacy
+    "object-left-bottom",  // legacy
+    "object-right-bottom", // legacy
     // Text align
     "text-left",
     "text-center",
@@ -889,6 +921,8 @@ pub static KNOWN_STATIC_UTILITIES: &[&str] = &[
     // Box decoration break
     "box-decoration-slice",
     "box-decoration-clone",
+    "decoration-slice", // legacy
+    "decoration-clone", // legacy
     // Background clip
     "bg-clip-text",
     "bg-clip-border",
@@ -1073,6 +1107,7 @@ pub static KNOWN_FUNCTIONAL_UTILITIES: &[&str] = &[
     "w",
     "min-w",
     "max-w",
+    "max-w-screen", // legacy
     "h",
     "min-h",
     "max-h",
@@ -1080,6 +1115,8 @@ pub static KNOWN_FUNCTIONAL_UTILITIES: &[&str] = &[
     "flex",
     "shrink",
     "grow",
+    "flex-grow",   // legacy
+    "flex-shrink", // legacy
     "basis",
     // Border spacing
     "border-spacing",

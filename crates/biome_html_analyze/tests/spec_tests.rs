@@ -66,8 +66,8 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let input_file = Utf8Path::new(input);
     let file_name = input_file.file_name().unwrap();
 
-    // Skip options files — they are configuration, not test inputs
-    if file_name.ends_with(".options.json") {
+    // Skip options and manifest files — they are configuration, not test inputs
+    if file_name.ends_with(".options.json") || file_name.ends_with(".package.json") {
         return;
     }
 

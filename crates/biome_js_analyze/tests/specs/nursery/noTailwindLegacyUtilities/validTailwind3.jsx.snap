@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validTailwind3.jsx
+---
+# Input
+```jsx
+/* should not generate diagnostics */
+<div className="bg-gradient-to-r bg-left-top object-left-top max-w-screen-lg order-none break-words start-4 end-px" />;
+
+```
