@@ -1,0 +1,61 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+import { goto } from "$app/navigation";
+import type { Pathname } from "$app/types";
+
+type ResolvedPathname = string;
+
+function navigate(path: Pathname) {
+	goto(path);
+}
+
+function navigateLocal(path: ResolvedPathname) {
+	goto(path);
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:7:7 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path passed to goto() isn't built with resolve().
+  
+    6 │ function navigate(path: Pathname) {
+  > 7 │ 	goto(path);
+      │ 	     ^^^^
+    8 │ }
+    9 │ 
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. To navigate to an external URL, use window.location instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:11:7 lint/nursery/useSvelteKitResolve ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The path passed to goto() isn't built with resolve().
+  
+    10 │ function navigateLocal(path: ResolvedPathname) {
+  > 11 │ 	goto(path);
+       │ 	     ^^^^
+    12 │ }
+    13 │ 
+  
+  i Paths that aren't built with resolve() lack the app's base path, and SvelteKit can't check them against the app's routes.
+  
+  i Wrap the path in resolve() from $app/paths. To navigate to an external URL, use window.location instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

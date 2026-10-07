@@ -3264,6 +3264,11 @@ export interface Nursery {
 	 */
 	useStringStartsEndsWith?: UseStringStartsEndsWithConfiguration;
 	/**
+	 * Require internal navigation in SvelteKit apps to use paths built with resolve().
+	 * See https://biomejs.dev/linter/rules/use-svelte-kit-resolve
+	 */
+	useSvelteKitResolve?: UseSvelteKitResolveConfiguration;
+	/**
 	 * Require importing SvelteKit's app state from $app/state instead of $app/stores.
 	 * See https://biomejs.dev/linter/rules/use-svelte-kit-rune-imports
 	 */
@@ -5661,6 +5666,9 @@ export type UseStrictBooleanExpressionsConfiguration =
 export type UseStringStartsEndsWithConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStringStartsEndsWithOptions;
+export type UseSvelteKitResolveConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseSvelteKitResolveOptions;
 export type UseSvelteKitRuneImportsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSvelteKitRuneImportsOptions;
@@ -8150,6 +8158,10 @@ export interface RuleWithUseStringStartsEndsWithOptions {
 	level: RulePlainConfiguration;
 	options?: UseStringStartsEndsWithOptions;
 }
+export interface RuleWithUseSvelteKitResolveOptions {
+	level: RulePlainConfiguration;
+	options?: UseSvelteKitResolveOptions;
+}
 export interface RuleWithUseSvelteKitRuneImportsOptions {
 	level: RulePlainConfiguration;
 	options?: UseSvelteKitRuneImportsOptions;
@@ -10395,6 +10407,24 @@ export interface UseSortedClassesOptions {
 }
 export type UseStrictBooleanExpressionsOptions = {};
 export type UseStringStartsEndsWithOptions = {};
+export interface UseSvelteKitResolveOptions {
+	/**
+	 * Whether to ignore all `goto()` calls. Default: `false`.
+	 */
+	ignoreGoto?: boolean;
+	/**
+	 * Whether to ignore all `<a>` elements. Default: `false`.
+	 */
+	ignoreLinks?: boolean;
+	/**
+	 * Whether to ignore all `pushState()` calls. Default: `false`.
+	 */
+	ignorePushState?: boolean;
+	/**
+	 * Whether to ignore all `replaceState()` calls. Default: `false`.
+	 */
+	ignoreReplaceState?: boolean;
+}
 export type UseSvelteKitRuneImportsOptions = {};
 export type UseSvelteRequireEachKeyOptions = {};
 export type UseTailwindShorthandClassesOptions = {};
@@ -11857,6 +11887,7 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useStrictBooleanExpressions"
 	| "lint/nursery/useStringStartsEndsWith"
+	| "lint/nursery/useSvelteKitResolve"
 	| "lint/nursery/useSvelteKitRuneImports"
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useTailwindShorthandClasses"
