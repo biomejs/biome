@@ -2820,10 +2820,6 @@
 			"description": "Options that change how the JavaScript parser behaves.",
 			"type": "object",
 			"properties": {
-				"gritMetavariables": {
-					"description": "Enables parsing Grit metavariables in JavaScript and TypeScript syntax. Defaults to `false`.",
-					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
-				},
 				"jsxEverywhere": {
 					"description": "Controls whether `.js`, `.mjs`, and `.cjs` files may contain JSX syntax. Disabling this\noption causes JSX in those files to raise a diagnostic. Defaults to `true`.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]

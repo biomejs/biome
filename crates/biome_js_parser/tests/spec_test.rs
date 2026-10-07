@@ -41,6 +41,9 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         .expect("Expected test path to be a readable file in UTF8 encoding");
 
     let mut options = JsParserOptions::default();
+    if test_case.contains("grit_metavariable") {
+        options = options.with_metavariables();
+    }
 
     let options_path = Utf8Path::new(test_case_path).with_extension("options.json");
 
@@ -65,10 +68,6 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             .into()
         {
             options = options.with_parse_class_parameter_decorators();
-        }
-
-        if settings.grit_metavariables.unwrap_or_default().into() {
-            options = options.with_metavariables();
         }
 
         if !diagnostics.is_empty() {

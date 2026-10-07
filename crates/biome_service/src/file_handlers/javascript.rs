@@ -41,8 +41,8 @@ use biome_analyze::{
 };
 use biome_configuration::javascript::{
     JsAssistConfiguration, JsAssistEnabled, JsFormatterConfiguration, JsFormatterEnabled,
-    JsGritMetavariable, JsLinterConfiguration, JsLinterEnabled, JsParserConfiguration,
-    JsxEverywhere, JsxRuntime, UnsafeParameterDecoratorsEnabled,
+    JsLinterConfiguration, JsLinterEnabled, JsParserConfiguration, JsxEverywhere, JsxRuntime,
+    UnsafeParameterDecoratorsEnabled,
 };
 #[cfg(feature = "js_embeds")]
 use biome_css_parser::parse_css_with_offset_and_cache;
@@ -172,7 +172,6 @@ impl From<JsFormatterConfiguration> for JsFormatterSettings {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct JsParserSettings {
     pub parse_class_parameter_decorators: Option<UnsafeParameterDecoratorsEnabled>,
-    pub grit_metavariables: Option<JsGritMetavariable>,
     pub jsx_everywhere: Option<JsxEverywhere>,
 }
 
@@ -180,7 +179,6 @@ impl From<JsParserConfiguration> for JsParserSettings {
     fn from(value: JsParserConfiguration) -> Self {
         Self {
             parse_class_parameter_decorators: value.unsafe_parameter_decorators_enabled,
-            grit_metavariables: value.grit_metavariables,
             jsx_everywhere: value.jsx_everywhere,
         }
     }

@@ -1101,10 +1101,6 @@ export interface JsLinterConfiguration {
  */
 export interface JsParserConfiguration {
 	/**
-	 * Enables parsing Grit metavariables in JavaScript and TypeScript syntax. Defaults to `false`.
-	 */
-	gritMetavariables?: Bool;
-	/**
 	 * Controls whether `.js`, `.mjs`, and `.cjs` files may contain JSX syntax. Disabling this
 	 * option causes JSX in those files to raise a diagnostic. Defaults to `true`.
 	 */
