@@ -2,11 +2,11 @@ use biome_analyze::RuleSource;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsClassMemberName, JsClassMemberList, JsGetterClassMember, JsMethodClassMember,
-    JsPropertyClassMember, JsSetterClassMember, JsStaticModifier, JsSyntaxList, TextRange,
+    AnyJsClassMemberName, CanonicalClassMemberName, JsClassMemberList, JsGetterClassMember,
+    JsMethodClassMember, JsPropertyClassMember, JsSetterClassMember, JsStaticModifier,
+    JsSyntaxList, TextRange,
 };
-use biome_rowan::{AstNode, declare_node_union};
-use biome_rowan::{AstNodeList, TokenText};
+use biome_rowan::{AstNode, AstNodeList, declare_node_union};
 use biome_rule_options::no_duplicate_class_members::NoDuplicateClassMembersOptions;
 use rustc_hash::{FxHashMap, FxHashSet};
 
@@ -118,8 +118,12 @@ impl Rule for NoDuplicateClassMembers {
             .filter_map(|member| {
                 let member = AnyClassMemberDefinition::cast(member.into_syntax())?;
                 let member_name_node = member.name()?;
+                let canonical_name = member_name_node.canonical_name()?;
                 let member_state = MemberState {
-                    name: get_member_name(&member_name_node)?.text().into(),
+                    name: match canonical_name {
+                        CanonicalClassMemberName::Public(name) => MemberName::Public(name.into()),
+                        CanonicalClassMemberName::Private(name) => MemberName::Private(name.into()),
+                    },
                     is_static: is_static_member(member.modifiers_list()),
                 };
 
@@ -147,22 +151,17 @@ impl Rule for NoDuplicateClassMembers {
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let name = state.name()?.canonical_name()?;
         let diagnostic = RuleDiagnostic::new(
             rule_category!(),
             state.range(),
             format!(
                 "Duplicate class member name {:?}",
-                get_member_name(&state.name()?)?.text()
+                name.text()
             ),
         );
 
         Some(diagnostic)
-    }
-}
-fn get_member_name(node: &AnyJsClassMemberName) -> Option<TokenText> {
-    match node {
-        AnyJsClassMemberName::JsLiteralMemberName(node) => node.name().ok(),
-        _ => None,
     }
 }
 
@@ -222,7 +221,13 @@ impl AnyClassMemberDefinition {
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
+enum MemberName {
+    Public(Box<str>),
+    Private(Box<str>),
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 struct MemberState {
-    name: Box<str>,
+    name: MemberName,
     is_static: bool,
 }
