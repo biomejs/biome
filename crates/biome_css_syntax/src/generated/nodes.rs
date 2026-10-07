@@ -122,8 +122,8 @@ impl CssAttrFallbackValue {
     pub fn comma_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn value(&self) -> CssGenericComponentValueList {
-        support::list(&self.syntax, 1usize)
+    pub fn value(&self) -> SyntaxResult<AnyCssAttrFallbackValue> {
+        support::required_node(&self.syntax, 1usize)
     }
 }
 impl Serialize for CssAttrFallbackValue {
@@ -137,7 +137,7 @@ impl Serialize for CssAttrFallbackValue {
 #[derive(Serialize)]
 pub struct CssAttrFallbackValueFields {
     pub comma_token: SyntaxResult<SyntaxToken>,
-    pub value: CssGenericComponentValueList,
+    pub value: SyntaxResult<AnyCssAttrFallbackValue>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssAttrFunction {
@@ -14308,10 +14308,30 @@ impl AnyCssAtRuleDeclarator {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssAttrFallbackValue {
+    CssGenericComponentValueList(CssGenericComponentValueList),
+    ScssExpression(ScssExpression),
+}
+impl AnyCssAttrFallbackValue {
+    pub fn as_css_generic_component_value_list(&self) -> Option<&CssGenericComponentValueList> {
+        match &self {
+            Self::CssGenericComponentValueList(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_expression(&self) -> Option<&ScssExpression> {
+        match &self {
+            Self::ScssExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssAttrName {
     CssBogusAttrName(CssBogusAttrName),
     CssIdentifier(CssIdentifier),
     ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
+    ScssVariable(ScssVariable),
 }
 impl AnyCssAttrName {
     pub fn as_css_bogus_attr_name(&self) -> Option<&CssBogusAttrName> {
@@ -14329,6 +14349,12 @@ impl AnyCssAttrName {
     pub fn as_scss_interpolated_identifier(&self) -> Option<&ScssInterpolatedIdentifier> {
         match &self {
             Self::ScssInterpolatedIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_variable(&self) -> Option<&ScssVariable> {
+        match &self {
+            Self::ScssVariable(item) => Some(item),
             _ => None,
         }
     }
@@ -18672,7 +18698,7 @@ impl std::fmt::Debug for CssAttrFallbackValue {
                     "comma_token",
                     &support::DebugSyntaxResult(self.comma_token()),
                 )
-                .field("value", &self.value())
+                .field("value", &support::DebugSyntaxResult(self.value()))
                 .finish()
         } else {
             f.debug_struct("CssAttrFallbackValue").finish()
@@ -36224,6 +36250,68 @@ impl From<AnyCssAtRuleDeclarator> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssGenericComponentValueList> for AnyCssAttrFallbackValue {
+    fn from(node: CssGenericComponentValueList) -> Self {
+        Self::CssGenericComponentValueList(node)
+    }
+}
+impl From<ScssExpression> for AnyCssAttrFallbackValue {
+    fn from(node: ScssExpression) -> Self {
+        Self::ScssExpression(node)
+    }
+}
+impl AstNode for AnyCssAttrFallbackValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssGenericComponentValueList::KIND_SET.union(ScssExpression::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_GENERIC_COMPONENT_VALUE_LIST | SCSS_EXPRESSION)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_GENERIC_COMPONENT_VALUE_LIST => {
+                Self::CssGenericComponentValueList(CssGenericComponentValueList::cast(syntax)?)
+            }
+            SCSS_EXPRESSION => Self::ScssExpression(ScssExpression { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssGenericComponentValueList(it) => it.syntax(),
+            Self::ScssExpression(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssGenericComponentValueList(it) => it.into_syntax(),
+            Self::ScssExpression(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssAttrFallbackValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssGenericComponentValueList(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssExpression(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssAttrFallbackValue> for SyntaxNode {
+    fn from(n: AnyCssAttrFallbackValue) -> Self {
+        match n {
+            AnyCssAttrFallbackValue::CssGenericComponentValueList(it) => it.into_syntax(),
+            AnyCssAttrFallbackValue::ScssExpression(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssAttrFallbackValue> for SyntaxElement {
+    fn from(n: AnyCssAttrFallbackValue) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssBogusAttrName> for AnyCssAttrName {
     fn from(node: CssBogusAttrName) -> Self {
         Self::CssBogusAttrName(node)
@@ -36239,15 +36327,21 @@ impl From<ScssInterpolatedIdentifier> for AnyCssAttrName {
         Self::ScssInterpolatedIdentifier(node)
     }
 }
+impl From<ScssVariable> for AnyCssAttrName {
+    fn from(node: ScssVariable) -> Self {
+        Self::ScssVariable(node)
+    }
+}
 impl AstNode for AnyCssAttrName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusAttrName::KIND_SET
         .union(CssIdentifier::KIND_SET)
-        .union(ScssInterpolatedIdentifier::KIND_SET);
+        .union(ScssInterpolatedIdentifier::KIND_SET)
+        .union(ScssVariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_ATTR_NAME | CSS_IDENTIFIER | SCSS_INTERPOLATED_IDENTIFIER
+            CSS_BOGUS_ATTR_NAME | CSS_IDENTIFIER | SCSS_INTERPOLATED_IDENTIFIER | SCSS_VARIABLE
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -36257,6 +36351,7 @@ impl AstNode for AnyCssAttrName {
             SCSS_INTERPOLATED_IDENTIFIER => {
                 Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
             }
+            SCSS_VARIABLE => Self::ScssVariable(ScssVariable { syntax }),
             _ => return None,
         };
         Some(res)
@@ -36266,6 +36361,7 @@ impl AstNode for AnyCssAttrName {
             Self::CssBogusAttrName(it) => it.syntax(),
             Self::CssIdentifier(it) => it.syntax(),
             Self::ScssInterpolatedIdentifier(it) => it.syntax(),
+            Self::ScssVariable(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -36273,6 +36369,7 @@ impl AstNode for AnyCssAttrName {
             Self::CssBogusAttrName(it) => it.into_syntax(),
             Self::CssIdentifier(it) => it.into_syntax(),
             Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+            Self::ScssVariable(it) => it.into_syntax(),
         }
     }
 }
@@ -36282,6 +36379,7 @@ impl std::fmt::Debug for AnyCssAttrName {
             Self::CssBogusAttrName(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssVariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -36291,6 +36389,7 @@ impl From<AnyCssAttrName> for SyntaxNode {
             AnyCssAttrName::CssBogusAttrName(it) => it.into_syntax(),
             AnyCssAttrName::CssIdentifier(it) => it.into_syntax(),
             AnyCssAttrName::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+            AnyCssAttrName::ScssVariable(it) => it.into_syntax(),
         }
     }
 }
@@ -48168,6 +48267,11 @@ impl std::fmt::Display for AnyCssAtRule {
     }
 }
 impl std::fmt::Display for AnyCssAtRuleDeclarator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssAttrFallbackValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
