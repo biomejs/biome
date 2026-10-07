@@ -673,6 +673,39 @@ fn resolved_deepest_scss_selector(source: &str, depth: usize) -> String {
 }
 
 #[test]
+fn test_at_root_query_style_rule_semantics() {
+    for (source, expected) in [
+        (".outer { @at-root { .inner {} } }", ".inner"),
+        (
+            ".outer { @at-root (with: rule) { .inner {} } }",
+            ".outer .inner",
+        ),
+        (
+            ".outer { @at-root (without: rule) { .inner {} } }",
+            ".inner",
+        ),
+        (
+            ".outer { @at-root (with: media) { .inner {} } }",
+            ".inner",
+        ),
+        (
+            ".outer { @at-root (without: media) { .inner {} } }",
+            ".outer .inner",
+        ),
+        (
+            ".outer { @at-root (WITH: ALL) { .inner {} } }",
+            ".outer .inner",
+        ),
+        (
+            ".outer { @at-root (WITHOUT: ALL) { .inner {} } }",
+            ".inner",
+        ),
+    ] {
+        assert_eq!(resolved_deepest_scss_selector(source, 2), expected);
+    }
+}
+
+#[test]
 fn test_resolve_scss_partial_combinator_with_left_selector() {
     let resolved = resolved_deepest_scss_selector(".sidebar > { .error {} }", 1);
     assert_eq!(resolved, ".sidebar > .error");

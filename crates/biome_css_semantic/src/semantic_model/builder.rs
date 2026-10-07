@@ -1,6 +1,6 @@
 use biome_css_syntax::{
     AnyCssRoot, CssLanguage, CssMediaAtRule, CssScopeAtRule, CssSupportsAtRule, CssSyntaxKind,
-    CssSyntaxToken, ScssAtRootAtRule, T,
+    CssSyntaxToken, ScssAtRootAtRule, T, single_expression_item,
 };
 use biome_rowan::{AstNode, AstPtr, SyntaxKindSet, TextRange, TokenText};
 use rustc_hash::FxHashMap;
@@ -293,13 +293,38 @@ fn at_root_excludes_style_rules(at_root: &ScssAtRootAtRule) -> bool {
     let Some(query) = at_root.query() else {
         return true;
     };
-    let Ok(modifier) = query.modifier() else {
+    let Ok(query) = query.query() else {
         return true;
     };
-    let includes_rules = modifier.text_trimmed().eq_ignore_ascii_case("with");
-    let names_rules = query.queries().into_iter().any(|query| {
-        let query = query.to_trimmed_string();
-        query.eq_ignore_ascii_case("all") || query.eq_ignore_ascii_case("rule")
+    let Some(clause) = query.as_scss_at_root_query_clause() else {
+        return true;
+    };
+    let Ok(modifier) = clause.modifier() else {
+        return true;
+    };
+    let Some(modifier) = single_expression_item(&modifier).and_then(|item| {
+        item.as_any_css_value()
+            .and_then(|value| value.identifier_text())
+    }) else {
+        return true;
+    };
+    let includes_rules = if modifier.text().eq_ignore_ascii_case("with") {
+        true
+    } else if modifier.text().eq_ignore_ascii_case("without") {
+        false
+    } else {
+        return true;
+    };
+    let names_rules = clause.rules().is_ok_and(|rules| {
+        rules.items().into_iter().any(|query| {
+            query
+                .as_any_css_value()
+                .and_then(|value| value.identifier_text())
+                .is_some_and(|query| {
+                    query.text().eq_ignore_ascii_case("all")
+                        || query.text().eq_ignore_ascii_case("rule")
+                })
+        })
     });
     names_rules != includes_rules
 }

@@ -3,16 +3,17 @@
     reason = "This rule compares CSS values that can span multiple tokens."
 )]
 
-use crate::fonts::{AnyCssFontValue, CssFontValue, find_font_family, font_components, is_font_family_keyword};
+use crate::fonts::{
+    AnyCssFontValue, CssFontComponent, CssFontValue, find_font_family, font_components,
+    is_font_family_keyword,
+};
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{
-    AnyCssGenericPropertyValueOrExpression, CssGenericProperty, T, decode_css_identifier,
-};
+use biome_css_syntax::{CssGenericProperty, decode_css_identifier};
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, AstNodeList};
+use biome_rowan::AstNode;
 use biome_rule_options::no_duplicate_font_names::NoDuplicateFontNamesOptions;
 use biome_string_case::StrLikeExtension;
 use std::collections::HashSet;
@@ -89,12 +90,10 @@ impl Rule for NoDuplicateFontNames {
 
         let mut family_names: HashSet<CssFontValue> = HashSet::new();
         let components = font_components(node.value().ok()?)?;
-        let is_comma_separated_pair = value_list.len() == 3
-            && value_list
-                .iter()
-                .nth(1)
-                .and_then(|value| value.as_css_generic_delimiter()?.value().ok())
-                .is_some_and(|token| token.kind() == T![,]);
+        let is_comma_separated_pair = matches!(
+            components.as_slice(),
+            [_, CssFontComponent::Comma, _]
+        );
         let font_families = find_font_family(&components);
 
         if is_font_family
@@ -151,9 +150,7 @@ fn is_monospace_keyword(value: &CssFontValue) -> bool {
     let CssFontValue::SingleValue(AnyCssFontValue::CssIdentifier(identifier)) = value else {
         return false;
     };
-    identifier
-        .value_token()
-        .is_ok_and(|token| {
-            decode_css_identifier(token.text_trimmed()).eq_ignore_ascii_case("monospace")
-        })
+    identifier.value_token().is_ok_and(|token| {
+        decode_css_identifier(token.text_trimmed()).eq_ignore_ascii_case("monospace")
+    })
 }
