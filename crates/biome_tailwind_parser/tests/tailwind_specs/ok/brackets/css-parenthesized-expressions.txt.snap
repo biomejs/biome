@@ -704,17 +704,24 @@ TwRoot {
                                                 CssBinaryExpression {
                                                     left: CssParenthesizedExpression {
                                                         l_paren_token: L_PAREN@291..292 "(" [] [],
-                                                        expression: CssListOfComponentValuesExpression {
-                                                            css_component_value_list: CssComponentValueList [
-                                                                CssPercentage {
-                                                                    value_token: CSS_NUMBER_LITERAL@292..295 "100" [] [],
-                                                                    remainder_token: PERCENT@295..296 "%" [] [],
-                                                                },
-                                                                CssRegularDimension {
-                                                                    value_token: CSS_NUMBER_LITERAL@296..299 "-20" [] [],
-                                                                    unit_token: IDENT@299..301 "px" [] [],
-                                                                },
-                                                            ],
+                                                        expression: CssBinaryExpression {
+                                                            left: CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssPercentage {
+                                                                        value_token: CSS_NUMBER_LITERAL@292..295 "100" [] [],
+                                                                        remainder_token: PERCENT@295..296 "%" [] [],
+                                                                    },
+                                                                ],
+                                                            },
+                                                            operator: DASH@296..297 "-" [] [],
+                                                            right: CssListOfComponentValuesExpression {
+                                                                css_component_value_list: CssComponentValueList [
+                                                                    CssRegularDimension {
+                                                                        value_token: CSS_NUMBER_LITERAL@297..299 "20" [] [],
+                                                                        unit_token: IDENT@299..301 "px" [] [],
+                                                                    },
+                                                                ],
+                                                            },
                                                         },
                                                         r_paren_token: R_PAREN@301..302 ")" [] [],
                                                     },
@@ -1555,14 +1562,18 @@ TwRoot {
                         0: CSS_BINARY_EXPRESSION@291..304
                           0: CSS_PARENTHESIZED_EXPRESSION@291..302
                             0: L_PAREN@291..292 "(" [] []
-                            1: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@292..301
-                              0: CSS_COMPONENT_VALUE_LIST@292..301
-                                0: CSS_PERCENTAGE@292..296
-                                  0: CSS_NUMBER_LITERAL@292..295 "100" [] []
-                                  1: PERCENT@295..296 "%" [] []
-                                1: CSS_REGULAR_DIMENSION@296..301
-                                  0: CSS_NUMBER_LITERAL@296..299 "-20" [] []
-                                  1: IDENT@299..301 "px" [] []
+                            1: CSS_BINARY_EXPRESSION@292..301
+                              0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@292..296
+                                0: CSS_COMPONENT_VALUE_LIST@292..296
+                                  0: CSS_PERCENTAGE@292..296
+                                    0: CSS_NUMBER_LITERAL@292..295 "100" [] []
+                                    1: PERCENT@295..296 "%" [] []
+                              1: DASH@296..297 "-" [] []
+                              2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@297..301
+                                0: CSS_COMPONENT_VALUE_LIST@297..301
+                                  0: CSS_REGULAR_DIMENSION@297..301
+                                    0: CSS_NUMBER_LITERAL@297..299 "20" [] []
+                                    1: IDENT@299..301 "px" [] []
                             2: R_PAREN@301..302 ")" [] []
                           1: SLASH@302..303 "/" [] []
                           2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@303..304
