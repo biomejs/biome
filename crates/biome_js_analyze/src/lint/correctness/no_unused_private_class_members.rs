@@ -1,7 +1,7 @@
 use crate::{
     JsRuleAction,
     services::semantic::Semantic,
-    utils::{is_node_equal, rename::RenameSymbolExtensions},
+    utils::{batch::JsBatchMutation, is_node_equal, rename::RenameSymbolExtensions},
 };
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
@@ -12,8 +12,9 @@ use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
     AnyJsClassMember, AnyJsClassMemberName, AnyJsComputedMember, AnyJsExpression,
     AnyJsFormalParameter, AnyJsName, AnyJsObjectBindingPatternMember, JsAssignmentExpression,
-    JsAssignmentOperator, JsClassDeclaration, JsObjectBindingPattern, JsSyntaxKind, JsSyntaxNode,
-    JsVariableDeclarator, TsAccessibilityModifier, TsPropertyParameter,
+    JsAssignmentOperator, JsClassDeclaration, JsExpressionStatement, JsObjectBindingPattern,
+    JsStaticMemberAssignment, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator,
+    TsAccessibilityModifier, TsPropertyParameter,
 };
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt, TextRange,
@@ -203,6 +204,9 @@ impl Rule for NoUnusedPrivateClassMembers {
         match state {
             UnusedMemberAction::RemoveMember(member) => {
                 mutation.remove_node(member.clone());
+                for statement in write_only_statements(ctx.query(), member) {
+                    mutation.remove_statement(statement.into());
+                }
                 Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
@@ -246,6 +250,9 @@ impl Rule for NoUnusedPrivateClassMembers {
                         }
                     }
                 }
+                for statement in write_only_statements(ctx.query(), member) {
+                    mutation.remove_statement(statement.into());
+                }
                 Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
@@ -280,11 +287,7 @@ fn traverse_members_usage(
                         return true;
                     }
 
-                    let is_write_only =
-                        is_write_only(&js_name) == Some(true) && !private_member.is_accessor();
-                    let is_in_update_expression = is_in_update_expression(&js_name);
-
-                    if is_in_update_expression || is_write_only {
+                    if is_write_only_usage(private_member, &js_name) {
                         return true;
                     }
 
@@ -357,6 +360,83 @@ fn traverse_members_usage(
     }
 
     private_members
+}
+
+/// Returns `true` if `js_name`, already matched to `member` by the caller, is a write
+/// that does not count as a usage: a discarded plain assignment (`this.member = value;`,
+/// unless `member` is an accessor) or a discarded update (`this.member++;`).
+fn is_write_only_usage(member: &AnyMember, js_name: &AnyJsName) -> bool {
+    (is_write_only(js_name) == Some(true) && !member.is_accessor())
+        || is_in_update_expression(js_name)
+}
+
+/// Returns `true` if `js_name` is written through the class itself, that is
+/// `this.member` or `ClassName.member`.
+///
+/// `#member` names always refer to the class, while a TypeScript `private` member
+/// shares its name with unrelated properties, such as `element.member`.
+fn is_written_on_own_class(js_name: &AnyJsName, class: &JsClassDeclaration) -> bool {
+    let Some(target) = js_name
+        .syntax()
+        .parent()
+        .and_then(JsStaticMemberAssignment::cast)
+    else {
+        return false;
+    };
+    match target.object() {
+        Ok(AnyJsExpression::JsThisExpression(_)) => true,
+        Ok(AnyJsExpression::JsIdentifierExpression(identifier)) => class
+            .id()
+            .ok()
+            .and_then(|id| id.as_js_identifier_binding()?.name_token().ok())
+            .zip(identifier.name().ok())
+            .is_some_and(|(class_name, name)| name.has_name(class_name.text_trimmed())),
+        _ => false,
+    }
+}
+
+/// Expression statements of `class` that only write to `member`, such as
+/// `this.member = value;` and `this.member++;`.
+///
+/// These are the references that `traverse_members_usage` ignores, so they must be
+/// removed together with the member to avoid leaving references to a member that
+/// no longer exists.
+fn write_only_statements(
+    class: &JsClassDeclaration,
+    member: &AnyMember,
+) -> Vec<JsExpressionStatement> {
+    let statements: Vec<JsExpressionStatement> = class
+        .syntax()
+        .descendants()
+        .filter_map(AnyJsName::cast)
+        .filter(|js_name| {
+            member.match_js_name(js_name) == Some(true)
+                && is_write_only_usage(member, js_name)
+                && (member.is_private_sharp() || is_written_on_own_class(js_name, class))
+        })
+        .filter_map(|js_name| {
+            js_name
+                .syntax()
+                .grand_parent()?
+                .parent()
+                .and_then(JsExpressionStatement::cast)
+        })
+        .collect();
+    // Only the outermost statements are removed. A statement nested inside the member
+    // (e.g. `#a = () => { this.#a = 1; };`) or inside another removed statement
+    // (e.g. `this.#a = f(() => { this.#a = 1; });`) is removed along with it. Mutating
+    // both would register two changes for the same slot in `BatchMutation::commit`,
+    // where the last one wins.
+    statements
+        .iter()
+        .filter(|statement| {
+            !statement.syntax().ancestors().skip(1).any(|ancestor| {
+                &ancestor == member.syntax()
+                    || statements.iter().any(|other| other.syntax() == &ancestor)
+            })
+        })
+        .cloned()
+        .collect()
 }
 
 /// Check if a TsPropertyParameter is also unused as a function parameter

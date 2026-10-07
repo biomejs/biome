@@ -40,6 +40,9 @@ invalid_dynamic_access.ts:3:3 lint/correctness/noUnusedPrivateClassMembers  FIXA
      3    │ - ··#prop;
      4  3 │   
      5  4 │     constructor() {
+     6    │ - ····this.#prop·=·0;
+     7  5 │       this.member = 0;
+     8  6 │     }
   
 
 ```

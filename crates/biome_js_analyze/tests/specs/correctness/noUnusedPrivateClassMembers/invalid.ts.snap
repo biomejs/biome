@@ -143,6 +143,9 @@ invalid.ts:17:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
     17    │ - → private·usedOnlyInWrite·=·5;
     18 17 │   
     19 18 │     method() {
+    20    │ - → → this.usedOnlyInWrite·=·21;
+    21 19 │     }
+    22 20 │   }
   
 
 ```
@@ -165,6 +168,9 @@ invalid.ts:25:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━�
     25    │ - → private·usedOnlyToUpdateItself·=·5;
     26 25 │   
     27 26 │     method() {
+    28    │ - → → this.usedOnlyToUpdateItself++;
+    29 27 │     }
+    30 28 │   }
   
 
 ```

@@ -128,6 +128,9 @@ invalid.js:10:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
     10    │ - → #usedOnlyInWrite·=·5;
     11 10 │   
     12 11 │     method() {
+    13    │ - → → → this.#usedOnlyInWrite·=·212;
+    14 12 │     }
+    15 13 │   }
   
 
 ```
@@ -150,6 +153,9 @@ invalid.js:18:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
     18    │ - → #usedOnlyToUpdateItself·=·5;
     19 18 │   
     20 19 │     method() {
+    21    │ - → → → this.#usedOnlyToUpdateItself++;
+    22 20 │     }
+    23 21 │   }
   
 
 ```
@@ -238,7 +244,9 @@ invalid.js:35:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
     34 34 │   class Foo {
     35    │ - → #usedOnlyInWrite·=·5;
     36 35 │     method() {
-    37 36 │         this.#usedOnlyInWrite = 42;
+    37    │ - → → → this.#usedOnlyInWrite·=·42;
+    38 36 │     }
+    39 37 │   }
   
 
 ```
@@ -260,7 +268,9 @@ invalid.js:42:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
     41 41 │   class Foo {
     42    │ - → #usedOnlyInWriteStatement·=·5;
     43 42 │     method() {
-    44 43 │         this.#usedOnlyInWriteStatement = 42;
+    44    │ - → → → this.#usedOnlyInWriteStatement·=·42;
+    45 43 │     }
+    46 44 │   }
   
 
 ```
@@ -283,6 +293,9 @@ invalid.js:49:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━
     49    │ - → #usedOnlyInIncrement;
     50 49 │   
     51 50 │     foo() {
+    52    │ - → → → this.#usedOnlyInIncrement++;
+    53 51 │     }
+    54 52 │   }
   
 
 ```
