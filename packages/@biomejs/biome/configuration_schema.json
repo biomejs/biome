@@ -3966,12 +3966,12 @@
 			"type": "object",
 			"properties": {
 				"attributes": {
-					"description": "Additional attributes that will be sorted.",
+					"description": "Additional attributes whose classes are checked for duplicates.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
 				"functions": {
-					"description": "Names of the functions or tagged templates that will be sorted.",
+					"description": "Names of the functions or tagged templates whose classes are checked for\nduplicates.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				}

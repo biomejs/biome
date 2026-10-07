@@ -6555,11 +6555,12 @@ export type UseStrictModeConfiguration =
  */
 export interface NoDuplicateClassesOptions {
 	/**
-	 * Additional attributes that will be sorted.
+	 * Additional attributes whose classes are checked for duplicates.
 	 */
 	attributes?: string[];
 	/**
-	 * Names of the functions or tagged templates that will be sorted.
+	 * Names of the functions or tagged templates whose classes are checked for
+	 * duplicates.
 	 */
 	functions?: string[];
 }
