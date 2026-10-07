@@ -1,0 +1,118 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_allowed_classes.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<div className="p-[15px]" />;
+<div className="px-[13px]" />;
+<div className="-p-[13px]" />;
+<div className="m-[2px]" />;
+<div className="[color:blue]" />;
+
+```
+
+# Diagnostics
+```
+invalid_allowed_classes.jsx:2:19 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found an arbitrary value in a Tailwind CSS class.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ <div className="p-[15px]" />;
+      │                   ^^^^^^
+    3 │ <div className="px-[13px]" />;
+    4 │ <div className="-p-[13px]" />;
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
+  i Use a named utility from your Tailwind configuration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allowed_classes.jsx:3:20 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found an arbitrary value in a Tailwind CSS class.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <div className="p-[15px]" />;
+  > 3 │ <div className="px-[13px]" />;
+      │                    ^^^^^^
+    4 │ <div className="-p-[13px]" />;
+    5 │ <div className="m-[2px]" />;
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
+  i Use a named utility from your Tailwind configuration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allowed_classes.jsx:4:20 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found an arbitrary value in a Tailwind CSS class.
+  
+    2 │ <div className="p-[15px]" />;
+    3 │ <div className="px-[13px]" />;
+  > 4 │ <div className="-p-[13px]" />;
+      │                    ^^^^^^
+    5 │ <div className="m-[2px]" />;
+    6 │ <div className="[color:blue]" />;
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
+  i Use a named utility from your Tailwind configuration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allowed_classes.jsx:5:19 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found an arbitrary value in a Tailwind CSS class.
+  
+    3 │ <div className="px-[13px]" />;
+    4 │ <div className="-p-[13px]" />;
+  > 5 │ <div className="m-[2px]" />;
+      │                   ^^^^^
+    6 │ <div className="[color:blue]" />;
+    7 │ 
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
+  i Use a named utility from your Tailwind configuration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allowed_classes.jsx:6:17 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found an arbitrary value in a Tailwind CSS class.
+  
+    4 │ <div className="-p-[13px]" />;
+    5 │ <div className="m-[2px]" />;
+  > 6 │ <div className="[color:blue]" />;
+      │                 ^^^^^^^^^^^^
+    7 │ 
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
+  i Use a named utility from your Tailwind configuration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

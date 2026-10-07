@@ -6161,6 +6161,18 @@
 		},
 		"NoTailwindArbitraryValueOptions": {
 			"type": "object",
+			"properties": {
+				"allowedCategories": {
+					"description": "Categories of utilities that may use arbitrary values. Defaults to an empty list.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/TailwindUtilityCategory" }
+				},
+				"allowedClasses": {
+					"description": "Classes that may use arbitrary values, such as `w-[320px]`. Defaults to an empty list.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoTailwindLegacyUtilitiesConfiguration": {
@@ -16886,17 +16898,13 @@
 				{ "type": "array", "items": { "type": "string" } }
 			]
 		},
-		"TailwindAppearanceCategory": {
-			"type": "string",
-			"enum": ["color", "typography", "spacing", "shape", "effects", "motion"]
-		},
 		"TailwindComponentAllowance": {
 			"type": "object",
 			"properties": {
 				"categories": {
 					"description": "Categories allowed on the matching components. Defaults to an empty list.",
 					"type": "array",
-					"items": { "$ref": "#/$defs/TailwindAppearanceCategory" }
+					"items": { "$ref": "#/$defs/TailwindUtilityCategory" }
 				},
 				"classes": {
 					"description": "Exact classes, including variants and modifiers. Defaults to an empty list.",
@@ -16932,6 +16940,26 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"TailwindUtilityCategory": {
+			"oneOf": [
+				{
+					"type": "string",
+					"enum": [
+						"color",
+						"typography",
+						"spacing",
+						"shape",
+						"effects",
+						"motion"
+					]
+				},
+				{
+					"description": "Sizing, positioning, margins, and other utilities that don't set appearance.",
+					"type": "string",
+					"const": "layout"
+				}
+			]
 		},
 		"TestFunctionKind": {
 			"description": "The function to use for tests",

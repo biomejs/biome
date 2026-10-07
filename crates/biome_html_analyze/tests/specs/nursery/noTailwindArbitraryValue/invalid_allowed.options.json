@@ -1,0 +1,1 @@
+{"linter":{"rules":{"nursery":{"noTailwindArbitraryValue":{"level":"error","options":{"allowedCategories":["layout"],"allowedClasses":["p-[13px]"]}}}}}}

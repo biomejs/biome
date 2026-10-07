@@ -10239,7 +10239,16 @@ export interface NoSvelteUnnecessaryStateWrapOptions {
 	 */
 	allowReassign?: boolean;
 }
-export type NoTailwindArbitraryValueOptions = {};
+export interface NoTailwindArbitraryValueOptions {
+	/**
+	 * Categories of utilities that may use arbitrary values. Defaults to an empty list.
+	 */
+	allowedCategories?: TailwindUtilityCategory[];
+	/**
+	 * Classes that may use arbitrary values, such as `w-[320px]`. Defaults to an empty list.
+	 */
+	allowedClasses?: string[];
+}
 export type NoTailwindLegacyUtilitiesOptions = {};
 export interface NoTailwindRawColorsOptions {
 	/**
@@ -11306,11 +11315,19 @@ export interface RestrictedPropertyEntry {
 	 */
 	property?: string;
 }
+export type TailwindUtilityCategory =
+	| "color"
+	| "typography"
+	| "spacing"
+	| "shape"
+	| "effects"
+	| "motion"
+	| "layout";
 export interface TailwindComponentAllowance {
 	/**
 	 * Categories allowed on the matching components. Defaults to an empty list.
 	 */
-	categories?: TailwindAppearanceCategory[];
+	categories?: TailwindUtilityCategory[];
 	/**
 	 * Exact classes, including variants and modifiers. Defaults to an empty list.
 	 */
@@ -11415,13 +11432,6 @@ export type VueDirectiveStyle2 = "shorthand" | "longhand";
 export type AvailabilityTarget = AvailabilityNamed | number;
 export type GroupMatcher = ImportMatcher | SourceMatcher;
 export type StableHookResult = boolean | number[] | string[];
-export type TailwindAppearanceCategory =
-	| "color"
-	| "typography"
-	| "spacing"
-	| "shape"
-	| "effects"
-	| "motion";
 export type TailwindAllowedComponents = string | string[];
 export interface PathOptions {
 	/**
