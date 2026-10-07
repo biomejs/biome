@@ -8,8 +8,9 @@
 use std::collections::BTreeMap;
 
 use biome_js_syntax::{
-    AnyJsObjectMemberName, AnyTsTupleTypeElement, JsComputedMemberName,
-    TsDeclareFunctionDeclaration, TsReferenceType, TsTypeAliasDeclaration, TsTypeofType,
+    AnyJsObjectMemberName, AnyTsTupleTypeElement, JsComputedMemberName, TsConditionalType,
+    TsDeclareFunctionDeclaration, TsInferType, TsReferenceType, TsTypeAliasDeclaration,
+    TsTypeofType,
 };
 
 use super::ids::{GlobalIds, GlobalSlot, GlobalSlotKind, join_path, scope_for};
@@ -891,22 +892,14 @@ impl<'l, 'a> GlobalBuilder<'l, 'a> {
             AnyTsType::TsReferenceType(reference) => self.lower_reference_type(reference, true)?,
             AnyTsType::TsTypeofType(typeof_type) => self.lower_typeof_type(typeof_type)?,
             AnyTsType::TsConditionalType(conditional) => {
-                // Match local inference's conservative union of both conditional branches.
-                // Names bound by `infer` in the extends clause are unknown in both branches.
-                let mut scope = BTreeMap::new();
-                for node in conditional.extends_type()?.syntax().descendants() {
-                    if let Some(infer) = biome_js_syntax::TsInferType::cast(node) {
-                        scope.insert(
-                            Text::from(infer.name()?.ident_token()?.token_text_trimmed()),
-                            LoweredTypeReference::Predefined("GLOBAL_UNKNOWN_ID"),
-                        );
-                    }
+                self.lower_conditional_type(conditional)?
+            }
+            AnyTsType::TsInferType(infer) => {
+                let name = infer.name()?.ident_token()?;
+                match self.type_parameter(name.text_trimmed()) {
+                    Some(parameter) => parameter,
+                    None => self.unknown(format!("unbound infer type {}", name.text_trimmed())),
                 }
-                self.parameters.push(scope);
-                let yes = self.lower_type(&conditional.true_type()?);
-                let no = self.lower_type(&conditional.false_type()?);
-                self.parameters.pop();
-                self.register(LoweredTypeData::Union(Box::new([yes, no])))
             }
             AnyTsType::TsIndexedAccessType(access) => {
                 let object = self.lower_type(&access.object_type()?);
@@ -1020,6 +1013,59 @@ impl<'l, 'a> GlobalBuilder<'l, 'a> {
             }
             _ => self.unknown(format!("unsupported type syntax {:?}", ty.syntax().kind())),
         })
+    }
+
+    /// Lowers `T extends U ? X : Y`.
+    ///
+    /// Names declared by `infer` in the extends clause are bound in the extends
+    /// clause and the true branch.
+    fn lower_conditional_type(
+        &mut self,
+        conditional: &TsConditionalType,
+    ) -> Result<LoweredTypeReference> {
+        let check_type = conditional.check_type()?;
+        let distributive = match &check_type {
+            AnyTsType::TsReferenceType(reference) if reference.type_arguments().is_none() => {
+                type_name_path(&reference.name()?).is_ok_and(|path| match path.as_slice() {
+                    [name] => self.type_parameter(name.text()).is_some(),
+                    _ => false,
+                })
+            }
+            _ => false,
+        };
+        let check_type = self.lower_type(&check_type);
+
+        let extends_type = conditional.extends_type()?;
+        self.parameters.push(BTreeMap::new());
+        let mut infer_types = Vec::new();
+        for infer in infer_types_declared_by(&extends_type) {
+            let name = Text::from(infer.name()?.ident_token()?.token_text_trimmed());
+            let constraint = infer
+                .constraint()
+                .and_then(|constraint| constraint.ty().ok())
+                .map(|ty| self.lower_type(&ty));
+            let reference = self.register(LoweredTypeData::GenericParameter {
+                is_const: false,
+                name: name.clone(),
+                constraint,
+                default: None,
+            });
+            self.bind_parameter(name, reference.clone());
+            infer_types.push(reference);
+        }
+        let extends = self.lower_type(&extends_type);
+        let true_type = self.lower_type(&conditional.true_type()?);
+        self.parameters.pop();
+        let false_type = self.lower_type(&conditional.false_type()?);
+
+        Ok(self.register(LoweredTypeData::Extends {
+            check_type,
+            extends_type: extends,
+            true_type,
+            false_type,
+            infer_types: infer_types.into_boxed_slice(),
+            distributive,
+        }))
     }
 
     fn array_reference(&self) -> LoweredTypeReference {
@@ -1329,4 +1375,31 @@ fn signed_literal_text(negative: bool, token: biome_js_syntax::JsSyntaxToken) ->
     } else {
         Text::from(token.token_text_trimmed())
     }
+}
+
+/// Returns the `infer` types declared by the `extends` clause of a conditional.
+///
+/// An `infer` inside a nested conditional's `extends` clause belongs to the
+/// nested conditional instead.
+fn infer_types_declared_by(extends_type: &AnyTsType) -> Vec<TsInferType> {
+    extends_type
+        .syntax()
+        .descendants()
+        .filter_map(TsInferType::cast)
+        .filter(|infer| {
+            infer
+                .syntax()
+                .ancestors()
+                .take_while(|ancestor| ancestor != extends_type.syntax())
+                .filter_map(TsConditionalType::cast)
+                .all(|conditional| {
+                    conditional.extends_type().is_ok_and(|nested| {
+                        !nested
+                            .syntax()
+                            .text_trimmed_range()
+                            .contains_range(infer.syntax().text_trimmed_range())
+                    })
+                })
+        })
+        .collect()
 }

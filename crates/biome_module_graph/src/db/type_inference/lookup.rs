@@ -1,13 +1,14 @@
 use super::{InferredModuleTypes, collected_type_result, normalize_structural_type};
 use crate::db::queries::{
     LocalTypeInput, TypeSubstitutionInput, infer_local_type, infer_module_types, substitute_types,
+    substitute_types_in_root_body,
 };
 use crate::{ModuleDb, module_for_key};
 use biome_js_type_info::interned_types::{
-    InternedMappedType as InferredMappedType, Literal as InferredLiteral, LocalTypeHandle,
-    ReturnType as InferredReturnType, TypeData as InferredTypeData,
-    TypeMember as InferredTypeMember, TypeMemberKind as InferredTypeMemberKind,
-    TypeSubstitution as InferredTypeSubstitution, TypeTransformResult,
+    InternedExtendsType as InferredExtendsType, InternedMappedType as InferredMappedType,
+    Literal as InferredLiteral, LocalTypeHandle, ReturnType as InferredReturnType,
+    TypeData as InferredTypeData, TypeMember as InferredTypeMember,
+    TypeMemberKind as InferredTypeMemberKind, TypeSubstitution as InferredTypeSubstitution,
 };
 use rustc_hash::{FxHashSet, FxHasher};
 use std::hash::{Hash, Hasher};
@@ -566,6 +567,14 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
                         .map(|ty| state.child(ty, true)),
                 );
             }
+            InferredTypeData::Extends(extends) => {
+                match conditional_lookup_states(db, resolver, extends, &state) {
+                    Some(states) => pending.extend(states),
+                    // The member's type depends on a branch that can't be selected.
+                    None if state.collect_result => found.push(InferredTypeData::Unknown),
+                    None => return Some(InferredTypeData::Unknown),
+                }
+            }
             InferredTypeData::Unknown
             | InferredTypeData::Global
             | InferredTypeData::GlobalType(_)
@@ -602,6 +611,89 @@ pub(in crate::db::type_inference) fn find_member_key_type_with_resolver<'db>(
     }
 
     collected_type_result(db, found)
+}
+
+/// Maximum number of union members a distributive conditional is split into
+/// while looking up a member.
+const MAX_DISTRIBUTED_LOOKUP_MEMBERS: usize = 64;
+
+/// Returns the states that continue a member lookup through a conditional type.
+///
+/// Type arguments collected by the lookup are applied lazily. Only the declared
+/// check and extends types are substituted, which is cheap because substitution
+/// doesn't descend into the replacements, and the relation resolves handles as
+/// it reaches them. The selected branch is then looked up with the lookup's own
+/// substitutions, so neither branch is substituted or normalized up front.
+///
+/// A distributive conditional whose check type becomes a union is looked up
+/// once for each member, with the member substituted for the check type.
+///
+/// Returns `None` when no branch can be selected, for example because the check
+/// type still refers to a generic. The member's type is then unknown. Looking
+/// in both branches instead would claim the member could have either type, and
+/// chained lookups on such a union multiply the work at every step.
+fn conditional_lookup_states<'db>(
+    db: &'db dyn ModuleDb,
+    resolver: &mut impl MemberLookupResolver<'db>,
+    extends: InferredExtendsType<'db>,
+    state: &MemberLookupState<'db>,
+) -> Option<Vec<MemberLookupState<'db>>> {
+    let check_type = apply_substitutions(db, extends.check_type(db), &state.substitutions);
+    if check_type.may_refer_to_free_generic(db) {
+        return None;
+    }
+
+    if extends.distributive(db)
+        && let Some(generic) = extends.check_type(db).as_generic_reference(db)
+    {
+        let members = if let InferredTypeData::Union(union) = check_type {
+            Some(union.types(db).to_vec())
+        } else if check_type == InferredTypeData::NeverKeyword {
+            Some(Vec::new())
+        } else {
+            None
+        };
+        if let Some(members) = members {
+            if members.len() > MAX_DISTRIBUTED_LOOKUP_MEMBERS
+                || !state.substitutions.iter().any(|substitution| {
+                    substitution.generic.as_generic_reference(db) == Some(generic)
+                })
+            {
+                return None;
+            }
+            return Some(
+                members
+                    .into_iter()
+                    .map(|member| {
+                        let substitutions = state
+                            .substitutions
+                            .iter()
+                            .map(|substitution| {
+                                if substitution.generic.as_generic_reference(db) == Some(generic) {
+                                    InferredTypeSubstitution {
+                                        replacement: member,
+                                        ..*substitution
+                                    }
+                                } else {
+                                    *substitution
+                                }
+                            })
+                            .collect::<Vec<_>>();
+                        MemberLookupState {
+                            substitutions: substitutions.into(),
+                            ..state.child(InferredTypeData::Extends(extends), true)
+                        }
+                    })
+                    .collect(),
+            );
+        }
+    }
+
+    let extends_type = apply_substitutions(db, extends.extends_type(db), &state.substitutions);
+    let branch = extends.select_branch(db, check_type, extends_type, |ty| {
+        resolver.resolve_type(db, ty).expand_structural_global(db)
+    })?;
+    Some(Vec::from([state.child(branch, state.collect_result)]))
 }
 
 /// Collects replacements for an instance's generic parameters.
@@ -681,6 +773,7 @@ fn declared_type_parameters<'db>(
         | InferredTypeData::TypeOperator(_)
         | InferredTypeData::IndexedAccess(_)
         | InferredTypeData::MappedType(_)
+        | InferredTypeData::Extends(_)
         | InferredTypeData::Literal(_)
         | InferredTypeData::MergedReference(_)
         | InferredTypeData::TypeofExpression(_)
@@ -709,18 +802,13 @@ pub(in crate::db::type_inference) fn apply_substitutions<'db>(
 
 pub(in crate::db) fn apply_substitutions_to_root_body<'db>(
     db: &'db dyn ModuleDb,
-    mut ty: InferredTypeData<'db>,
+    ty: InferredTypeData<'db>,
     substitutions: &[InferredTypeSubstitution<'db>],
 ) -> InferredTypeData<'db> {
-    for substitution in substitutions {
-        let TypeTransformResult::Transformed(substituted) =
-            ty.substitute_type_in_root_body(db, *substitution)
-        else {
-            return InferredTypeData::Unknown;
-        };
-        ty = substituted;
+    if substitutions.is_empty() {
+        return ty;
     }
-    ty
+    substitute_types_in_root_body(db, TypeSubstitutionInput::new(db, ty, substitutions))
 }
 
 fn class_side_type<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> InferredTypeData<'db> {
@@ -753,6 +841,7 @@ fn class_side_type<'db>(db: &'db dyn ModuleDb, ty: InferredTypeData<'db>) -> Inf
         | InferredTypeData::TypeOperator(_)
         | InferredTypeData::IndexedAccess(_)
         | InferredTypeData::MappedType(_)
+        | InferredTypeData::Extends(_)
         | InferredTypeData::Literal(_)
         | InferredTypeData::MergedReference(_)
         | InferredTypeData::TypeofExpression(_)
@@ -860,6 +949,7 @@ fn find_own_member_type<'db>(
         | InferredTypeData::TypeOperator(_)
         | InferredTypeData::IndexedAccess(_)
         | InferredTypeData::MappedType(_)
+        | InferredTypeData::Extends(_)
         | InferredTypeData::InstanceOf(_)
         | InferredTypeData::MergedReference(_)
         | InferredTypeData::TypeofExpression(_)

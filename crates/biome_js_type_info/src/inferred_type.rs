@@ -316,6 +316,7 @@ impl<'db> InferredType<'db> {
                 | TypeData::Local(_)
                 | TypeData::IndexedAccess(_)
                 | TypeData::MappedType(_)
+                | TypeData::Extends(_)
                 | TypeData::TypeofExpression(_)
                 | TypeData::AnyKeyword
                 | TypeData::UnknownKeyword => return None,
@@ -581,7 +582,9 @@ impl<'db> InferredType<'db> {
                 | TypeData::UnknownKeyword => {
                     indeterminate = true;
                 }
-                TypeData::IndexedAccess(_) | TypeData::MappedType(_) => indeterminate = true,
+                TypeData::IndexedAccess(_) | TypeData::MappedType(_) | TypeData::Extends(_) => {
+                    indeterminate = true
+                }
             }
         }
 
@@ -1423,6 +1426,10 @@ impl<'db> InferredType<'db> {
                         };
                         pending.extend(types);
                     }
+                    // Either branch of an unevaluated conditional may apply.
+                    TypeData::Extends(extends) => {
+                        pending.extend([extends.true_type(self.db), extends.false_type(self.db)])
+                    }
                     TypeData::MergedReference(reference) => pending.extend(
                         [
                             reference.ty(self.db),
@@ -1637,6 +1644,7 @@ impl<'db> DepthFirstVisitor<TypeData<'db>> for CallableVisitor<'db> {
             | TypeData::Local(_)
             | TypeData::IndexedAccess(_)
             | TypeData::MappedType(_)
+            | TypeData::Extends(_)
             | TypeData::TypeofExpression(_)
             | TypeData::AnyKeyword
             | TypeData::UnknownKeyword => self.indeterminate = true,

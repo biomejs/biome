@@ -872,3 +872,109 @@ fn test_mapped_types_exceeding_projection_budget_stay_unevaluated() {
         );
     }
 }
+
+#[test]
+fn test_normalize_conditional_types() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        type IsString<T> = T extends string ? "yes" : "no";
+        type Unwrap<T> = T extends Promise<infer U> ? U : T;
+        type MyExclude<T, U> = T extends U ? never : T;
+        type MyReturnType<F> = F extends (...args: any) => infer R ? R : never;
+        type MyParameters<F> = F extends (...args: infer P) => any ? P : never;
+        type First<T> = T extends [infer H, ...unknown[]] ? H : never;
+        type Tail<T> = T extends [unknown, ...infer R] ? R : never;
+        type NonDistributive<T> = [T] extends [string] ? "yes" : "no";
+        type Deep<T> = T extends Promise<infer U> ? Deep<U> : T;
+        type HasThen<T> = T extends { then: unknown } ? true : false;
+        type ElementOf<T> = T extends (infer E)[] ? E : never;
+        type Literal = IsString<"x">;
+        declare function callback(input: string, count?: number): boolean;
+        declare function pending<T>(value: IsString<T>): void;
+        declare const literal: IsString<"x">;
+        declare const aliased: Literal;
+        declare const unwrapped: Unwrap<Promise<number>>;
+        declare const inline: string extends string ? 1 : 2;
+        declare const distributed: Unwrap<Promise<number> | string>;
+        declare const excluded: MyExclude<"a" | "b" | "c", "a">;
+        declare const returned: MyReturnType<typeof callback>;
+        declare const parameters: MyParameters<typeof callback>;
+        declare const first: First<[1, 2, 3]>;
+        declare const tail: Tail<[1, 2, 3]>;
+        declare const nonDistributive: NonDistributive<"a" | "b">;
+        declare const nonDistributiveMixed: NonDistributive<"a" | 1>;
+        declare const deep: Deep<Promise<Promise<string>>>;
+        declare const hasThen: HasThen<{ then: number }>;
+        declare const hasNoThen: HasThen<{ other: number }>;
+        declare const element: ElementOf<string[]>;
+        declare const union: IsString<number | "x">;
+        declare const never: IsString<never>;
+        declare const any: IsString<any>;
+        declare const boolean: IsString<boolean>;
+        declare const arrayIsPromise: number[] extends Promise<any> ? 1 : 2;
+        declare const arrayIsThenable: number[] extends { then: any } ? 1 : 2;
+        declare const promiseIsThenable: Promise<string> extends { then: any } ? 1 : 2;
+        declare const nested: IsString<"x"> | 5;
+        declare const libExclude: Exclude<"a" | "b" | "c", "a" | "b">;
+        declare const libExtract: Extract<"a" | 1 | true, string | number>;
+        declare const libReturnType: ReturnType<typeof callback>;
+        declare const libParameters: Parameters<typeof callback>;
+        declare const libAwaited: Awaited<Promise<Promise<number>>>;
+        declare const libAwaitedPlain: Awaited<string>;
+        declare const libAwaitedUnion: Awaited<Promise<number> | string>;
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    db.clear_salsa_events();
+    for (name, expected) in [
+        ("literal", "string: yes"),
+        ("aliased", "string: yes"),
+        ("unwrapped", "number"),
+        ("inline", "number: 1"),
+        ("distributed", "number | string"),
+        ("excluded", "string: b | string: c"),
+        ("returned", "boolean"),
+        ("parameters", "[input: string,\ncount: number | undefined?]"),
+        ("first", "number: 1"),
+        ("tail", "[number: 2,\nnumber: 3]"),
+        ("nonDistributive", "string: yes"),
+        ("nonDistributiveMixed", "string: no"),
+        ("deep", "string"),
+        ("hasThen", "bool: true"),
+        ("hasNoThen", "bool: false"),
+        ("element", "string"),
+        ("union", "string: no | string: yes"),
+        ("never", "never"),
+        ("any", "string: yes | string: no"),
+        ("boolean", "string: no"),
+        ("arrayIsPromise", "number: 2"),
+        ("arrayIsThenable", "number: 2"),
+        ("promiseIsThenable", "number: 1"),
+        ("nested", "string: yes | number: 5"),
+        ("libExclude", "string: c"),
+        ("libExtract", "string: a | number: 1"),
+        ("libReturnType", "boolean"),
+        (
+            "libParameters",
+            "[input: string,\ncount: number | undefined?]",
+        ),
+        ("libAwaited", "number"),
+        ("libAwaitedPlain", "string"),
+        ("libAwaitedUnion", "number | string"),
+    ] {
+        let ty = projected_binding(&db, module, name);
+        assert_eq!(format_inferred_type(&db, ty), expected, "{name}");
+    }
+
+    // The check type is generic, so neither branch can be selected yet.
+    let ty = projected_binding(&db, module, "value");
+    assert!(
+        format_inferred_type(&db, ty).contains("extends"),
+        "{}",
+        format_inferred_type(&db, ty)
+    );
+    assert_function_query_was_not_run(&db, infer_module_types, module, &db.take_salsa_events());
+}
