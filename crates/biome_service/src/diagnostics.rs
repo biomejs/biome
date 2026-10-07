@@ -733,10 +733,10 @@ pub struct DisabledVcs {}
 #[derive(Debug, Diagnostic, Serialize, Deserialize)]
 #[diagnostic(
     category = "configuration",
-    severity = Warning,
+    severity = Error,
     message(
-        description = "Biome couldn't find the Tailwind CSS stylesheet {path}. The Tailwind rules use the default configuration instead.",
-        message("Biome couldn't find the Tailwind CSS stylesheet "<Emphasis>{self.path}</Emphasis>". The Tailwind rules use the default configuration instead."),
+        description = "Biome couldn't find the Tailwind CSS stylesheet {path} set in `tailwind.stylesheet`.",
+        message("Biome couldn't find the Tailwind CSS stylesheet "<Emphasis>{self.path}</Emphasis>" set in "<Emphasis>"tailwind.stylesheet"</Emphasis>"."),
     )
 )]
 pub struct TailwindStylesheetNotFound {

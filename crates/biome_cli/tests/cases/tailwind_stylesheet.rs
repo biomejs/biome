@@ -136,9 +136,9 @@ fn nested_configs_resolve_tailwind_stylesheet() {
 }
 
 #[test]
-fn missing_tailwind_stylesheet_warns() {
+fn missing_tailwind_stylesheet_errors() {
     let mut console = BufferConsole::default();
-    let mut fs = TemporaryFs::new("missing_tailwind_stylesheet_warns");
+    let mut fs = TemporaryFs::new("missing_tailwind_stylesheet_errors");
 
     fs.create_file(
         "biome.json",
@@ -167,7 +167,7 @@ fn missing_tailwind_stylesheet_warns() {
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
-        "missing_tailwind_stylesheet_warns",
+        "missing_tailwind_stylesheet_errors",
         fs.create_mem(),
         console,
         result,
