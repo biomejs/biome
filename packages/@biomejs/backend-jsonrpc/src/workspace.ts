@@ -3104,6 +3104,11 @@ export interface Nursery {
 	 */
 	noVueDeprecatedScopedSlots?: NoVueDeprecatedScopedSlotsConfiguration;
 	/**
+	 * Disallow v-if on the root element of a Vue component template.
+	 * See https://biomejs.dev/linter/rules/no-vue-root-v-if
+	 */
+	noVueRootVIf?: NoVueRootVIfConfiguration;
+	/**
 	 * Disallow custom Vue directives that are not declared.
 	 * See https://biomejs.dev/linter/rules/no-vue-undeclared-directives
 	 */
@@ -5570,6 +5575,9 @@ export type NoVueBooleanDefaultConfiguration =
 export type NoVueDeprecatedScopedSlotsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedScopedSlotsOptions;
+export type NoVueRootVIfConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueRootVIfOptions;
 export type NoVueUndeclaredDirectivesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUndeclaredDirectivesOptions;
@@ -7970,6 +7978,10 @@ export interface RuleWithNoVueDeprecatedScopedSlotsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedScopedSlotsOptions;
 }
+export interface RuleWithNoVueRootVIfOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueRootVIfOptions;
+}
 export interface RuleWithNoVueUndeclaredDirectivesOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUndeclaredDirectivesOptions;
@@ -10246,6 +10258,7 @@ export type NoUnusedClassesOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueBooleanDefaultOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
+export type NoVueRootVIfOptions = {};
 export interface NoVueUndeclaredDirectivesOptions {
 	/**
 	 * Names of directives registered globally with `app.directive(...)`,
@@ -11849,6 +11862,7 @@ export type Category =
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
+	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noXorAsExponentiation"
 	| "lint/nursery/noZeroFractions"

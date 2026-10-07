@@ -7198,6 +7198,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueRootVIfConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueRootVIfOptions" }
+			]
+		},
+		"NoVueRootVIfOptions": { "type": "object", "additionalProperties": false },
 		"NoVueSetupPropsReactivityLossConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7653,6 +7660,13 @@
 					"description": "Disallow the deprecated Vue $scopedSlots API.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-scoped-slots",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueDeprecatedScopedSlotsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueRootVIf": {
+					"description": "Disallow v-if on the root element of a Vue component template.\nSee https://biomejs.dev/linter/rules/no-vue-root-v-if",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueRootVIfConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12304,6 +12318,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueReservedPropsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueRootVIfOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueRootVIfOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

@@ -357,6 +357,7 @@ pub mod no_vue_options_api;
 pub mod no_vue_ref_as_operand;
 pub mod no_vue_reserved_keys;
 pub mod no_vue_reserved_props;
+pub mod no_vue_root_v_if;
 pub mod no_vue_setup_props_reactivity_loss;
 pub mod no_vue_undeclared_directives;
 pub mod no_vue_v_if_with_v_for;

@@ -1698,6 +1698,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noVueReservedProps",
         TypeId::of::<biome_rule_options::no_vue_reserved_props::NoVueReservedPropsOptions>(),
     ));
+    result.push((
+        "nursery",
+        "noVueRootVIf",
+        TypeId::of::<biome_rule_options::no_vue_root_v_if::NoVueRootVIfOptions>(),
+    ));
     result.push(("correctness", "noVueSetupPropsReactivityLoss", TypeId::of::<biome_rule_options::no_vue_setup_props_reactivity_loss::NoVueSetupPropsReactivityLossOptions>()));
     result.push((
         "nursery",
