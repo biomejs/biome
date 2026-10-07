@@ -1,0 +1,33 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: c04-if-branch.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+.card {
+  --outer: red;
+  --inner: blue;
+  color: var(--outer, if(style(--enabled: true): --inner; else: blue));
+  background: var(--outer, if(style(--enabled: true): var(--inner); else: blue));
+}
+
+```
+
+# Diagnostics
+```
+c04-if-branch.scss:5:50 lint/correctness/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × CSS variables '--inner' is used without the 'var()' function
+  
+    3 │   --outer: red;
+    4 │   --inner: blue;
+  > 5 │   color: var(--outer, if(style(--enabled: true): --inner; else: blue));
+      │                                                  ^^^^^^^
+    6 │   background: var(--outer, if(style(--enabled: true): var(--inner); else: blue));
+    7 │ }
+  
+  i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
+  
+
+```

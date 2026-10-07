@@ -74,12 +74,14 @@ CssRoot {
                                                         r_paren_token: R_PAREN@40..41 ")" [] [],
                                                     },
                                                     colon_token: COLON@41..43 ":" [] [Whitespace(" ")],
-                                                    value: CssGenericComponentValueList [
-                                                        CssColor {
-                                                            hash_token: HASH@43..44 "#" [] [],
-                                                            value_token: CSS_COLOR_LITERAL@44..50 "eeeeee" [] [],
-                                                        },
-                                                    ],
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            CssColor {
+                                                                hash_token: HASH@43..44 "#" [] [],
+                                                                value_token: CSS_COLOR_LITERAL@44..50 "eeeeee" [] [],
+                                                            },
+                                                        ],
+                                                    },
                                                 },
                                                 SEMICOLON@50..51 ";" [] [],
                                             ],
@@ -117,11 +119,13 @@ CssRoot {
                                                         r_paren_token: R_PAREN@82..83 ")" [] [],
                                                     },
                                                     colon_token: COLON@83..85 ":" [] [Whitespace(" ")],
-                                                    value: CssGenericComponentValueList [
-                                                        CssIdentifier {
-                                                            value_token: IDENT@85..90 "white" [] [],
-                                                        },
-                                                    ],
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@85..90 "white" [] [],
+                                                            },
+                                                        ],
+                                                    },
                                                 },
                                                 SEMICOLON@90..92 ";" [] [Whitespace(" ")],
                                                 CssIfBranch {
@@ -129,11 +133,13 @@ CssRoot {
                                                         else_token: ELSE_KW@92..96 "else" [] [],
                                                     },
                                                     colon_token: COLON@96..98 ":" [] [Whitespace(" ")],
-                                                    value: CssGenericComponentValueList [
-                                                        CssIdentifier {
-                                                            value_token: IDENT@98..103 "black" [] [],
-                                                        },
-                                                    ],
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@98..103 "black" [] [],
+                                                            },
+                                                        ],
+                                                    },
                                                 },
                                                 SEMICOLON@103..104 ";" [] [],
                                             ],
@@ -202,10 +208,11 @@ CssRoot {
                               1: (empty)
                             3: R_PAREN@40..41 ")" [] []
                           1: COLON@41..43 ":" [] [Whitespace(" ")]
-                          2: CSS_GENERIC_COMPONENT_VALUE_LIST@43..50
-                            0: CSS_COLOR@43..50
-                              0: HASH@43..44 "#" [] []
-                              1: CSS_COLOR_LITERAL@44..50 "eeeeee" [] []
+                          2: SCSS_EXPRESSION@43..50
+                            0: SCSS_EXPRESSION_ITEM_LIST@43..50
+                              0: CSS_COLOR@43..50
+                                0: HASH@43..44 "#" [] []
+                                1: CSS_COLOR_LITERAL@44..50 "eeeeee" [] []
                         1: SEMICOLON@50..51 ";" [] []
                       3: R_PAREN@51..52 ")" [] []
               1: (empty)
@@ -231,17 +238,19 @@ CssRoot {
                                 0: IDENT@77..82 "print" [] []
                             3: R_PAREN@82..83 ")" [] []
                           1: COLON@83..85 ":" [] [Whitespace(" ")]
-                          2: CSS_GENERIC_COMPONENT_VALUE_LIST@85..90
-                            0: CSS_IDENTIFIER@85..90
-                              0: IDENT@85..90 "white" [] []
+                          2: SCSS_EXPRESSION@85..90
+                            0: SCSS_EXPRESSION_ITEM_LIST@85..90
+                              0: CSS_IDENTIFIER@85..90
+                                0: IDENT@85..90 "white" [] []
                         1: SEMICOLON@90..92 ";" [] [Whitespace(" ")]
                         2: CSS_IF_BRANCH@92..103
                           0: CSS_ELSE_KEYWORD@92..96
                             0: ELSE_KW@92..96 "else" [] []
                           1: COLON@96..98 ":" [] [Whitespace(" ")]
-                          2: CSS_GENERIC_COMPONENT_VALUE_LIST@98..103
-                            0: CSS_IDENTIFIER@98..103
-                              0: IDENT@98..103 "black" [] []
+                          2: SCSS_EXPRESSION@98..103
+                            0: SCSS_EXPRESSION_ITEM_LIST@98..103
+                              0: CSS_IDENTIFIER@98..103
+                                0: IDENT@98..103 "black" [] []
                         3: SEMICOLON@103..104 ";" [] []
                       3: R_PAREN@104..105 ")" [] []
               1: (empty)

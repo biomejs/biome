@@ -1,0 +1,7 @@
+/* should generate diagnostics */
+.card {
+  --outer: red;
+  --inner: blue;
+  color: var(--outer, if(style(--enabled: true): --inner; else: blue));
+  background: var(--outer, if(style(--enabled: true): var(--inner); else: blue));
+}

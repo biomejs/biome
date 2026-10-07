@@ -58,7 +58,7 @@ pub(crate) fn parse_any_function_with_context(
         if context.is_full_scss_parsing_allowed() {
             parse_scss_if_function(p, context)
         } else {
-            parse_if_function(p)
+            parse_if_function(p, context)
         }
     } else if is_at_attr_function(p) {
         parse_attr_function(p, context)
@@ -117,10 +117,10 @@ fn parse_scss_if_function(p: &mut CssParser, context: ValueParsingContext) -> Pa
         .copied();
 
     let function = match cached {
-        Some(IfFunctionKind::Modern) => parse_if_function(p),
+        Some(IfFunctionKind::Modern) => parse_if_function(p, context),
         Some(IfFunctionKind::Legacy) => parse_function_with_context(p, context),
         None => {
-            let (function, kind) = match try_parse_function(p, parse_if_function) {
+            let (function, kind) = match try_parse_function(p, |p| parse_if_function(p, context)) {
                 Ok(function) => (function, IfFunctionKind::Modern),
                 Err(modern_error) => {
                     match try_parse_function(p, |p| parse_function_with_context(p, context)) {
@@ -130,7 +130,7 @@ fn parse_scss_if_function(p: &mut CssParser, context: ValueParsingContext) -> Pa
                             parse_function_with_context(p, context),
                             IfFunctionKind::Legacy,
                         ),
-                        Err(_) => (parse_if_function(p), IfFunctionKind::Modern),
+                        Err(_) => (parse_if_function(p, context), IfFunctionKind::Modern),
                     }
                 }
             };

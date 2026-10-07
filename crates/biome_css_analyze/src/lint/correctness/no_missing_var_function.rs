@@ -252,7 +252,7 @@ fn is_wrapped_in_var(node: &CssDashedIdentifier) -> bool {
             //             ^^^^^^^^^^^^^^^^ CSS_GENERIC_COMPONENT_VALUE_LIST
             CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST => return false,
             CssSyntaxKind::CSS_FUNCTION => return parent.text_trimmed().starts_with("var"),
-            CssSyntaxKind::SCSS_LEGACY_IF_FUNCTION => return false,
+            CssSyntaxKind::CSS_IF_BRANCH | CssSyntaxKind::SCSS_LEGACY_IF_FUNCTION => return false,
             _ => {}
         }
         current_node = parent.parent();
