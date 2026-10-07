@@ -9929,7 +9929,7 @@ impl ScssEachAtRule {
     pub fn header(&self) -> SyntaxResult<ScssEachHeader> {
         support::required_node(&self.syntax, 1usize)
     }
-    pub fn block(&self) -> SyntaxResult<AnyScssControlBlock> {
+    pub fn block(&self) -> SyntaxResult<AnyCssControlBlock> {
         support::required_node(&self.syntax, 2usize)
     }
 }
@@ -9945,7 +9945,7 @@ impl Serialize for ScssEachAtRule {
 pub struct ScssEachAtRuleFields {
     pub each_token: SyntaxResult<SyntaxToken>,
     pub header: SyntaxResult<ScssEachHeader>,
-    pub block: SyntaxResult<AnyScssControlBlock>,
+    pub block: SyntaxResult<AnyCssControlBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssEachHeader {
@@ -10250,7 +10250,7 @@ impl ScssForAtRule {
     pub fn upper_bound(&self) -> SyntaxResult<ScssExpression> {
         support::required_node(&self.syntax, 5usize)
     }
-    pub fn block(&self) -> SyntaxResult<AnyScssControlBlock> {
+    pub fn block(&self) -> SyntaxResult<AnyCssControlBlock> {
         support::required_node(&self.syntax, 6usize)
     }
 }
@@ -10270,7 +10270,7 @@ pub struct ScssForAtRuleFields {
     pub lower_bound: SyntaxResult<ScssExpression>,
     pub operator: SyntaxResult<SyntaxToken>,
     pub upper_bound: SyntaxResult<ScssExpression>,
-    pub block: SyntaxResult<AnyScssControlBlock>,
+    pub block: SyntaxResult<AnyCssControlBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssForwardAsClause {
@@ -10495,7 +10495,7 @@ impl ScssIfAtRule {
     pub fn condition(&self) -> SyntaxResult<ScssExpression> {
         support::required_node(&self.syntax, 1usize)
     }
-    pub fn block(&self) -> SyntaxResult<AnyScssControlBlock> {
+    pub fn block(&self) -> SyntaxResult<AnyCssControlBlock> {
         support::required_node(&self.syntax, 2usize)
     }
     pub fn else_clause(&self) -> Option<ScssElseClause> {
@@ -10514,7 +10514,7 @@ impl Serialize for ScssIfAtRule {
 pub struct ScssIfAtRuleFields {
     pub if_token: SyntaxResult<SyntaxToken>,
     pub condition: SyntaxResult<ScssExpression>,
-    pub block: SyntaxResult<AnyScssControlBlock>,
+    pub block: SyntaxResult<AnyCssControlBlock>,
     pub else_clause: Option<ScssElseClause>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -13120,7 +13120,7 @@ impl ScssWhileAtRule {
     pub fn condition(&self) -> SyntaxResult<ScssExpression> {
         support::required_node(&self.syntax, 1usize)
     }
-    pub fn block(&self) -> SyntaxResult<AnyScssControlBlock> {
+    pub fn block(&self) -> SyntaxResult<AnyCssControlBlock> {
         support::required_node(&self.syntax, 2usize)
     }
 }
@@ -13136,7 +13136,7 @@ impl Serialize for ScssWhileAtRule {
 pub struct ScssWhileAtRuleFields {
     pub while_token: SyntaxResult<SyntaxToken>,
     pub condition: SyntaxResult<ScssExpression>,
-    pub block: SyntaxResult<AnyScssControlBlock>,
+    pub block: SyntaxResult<AnyCssControlBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssWithClause {
@@ -14897,6 +14897,25 @@ impl AnyCssContainerStyleQuery {
     pub fn as_css_declaration(&self) -> Option<&CssDeclaration> {
         match &self {
             Self::CssDeclaration(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssControlBlock {
+    CssDeclarationOrRuleBlock(CssDeclarationOrRuleBlock),
+    CssKeyframesBlock(CssKeyframesBlock),
+}
+impl AnyCssControlBlock {
+    pub fn as_css_declaration_or_rule_block(&self) -> Option<&CssDeclarationOrRuleBlock> {
+        match &self {
+            Self::CssDeclarationOrRuleBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_keyframes_block(&self) -> Option<&CssKeyframesBlock> {
+        match &self {
+            Self::CssKeyframesBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -17886,25 +17905,6 @@ impl AnyScssAtRootQuery {
     pub fn as_scss_expression(&self) -> Option<&ScssExpression> {
         match &self {
             Self::ScssExpression(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub enum AnyScssControlBlock {
-    CssDeclarationOrRuleBlock(CssDeclarationOrRuleBlock),
-    CssKeyframesBlock(CssKeyframesBlock),
-}
-impl AnyScssControlBlock {
-    pub fn as_css_declaration_or_rule_block(&self) -> Option<&CssDeclarationOrRuleBlock> {
-        match &self {
-            Self::CssDeclarationOrRuleBlock(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_css_keyframes_block(&self) -> Option<&CssKeyframesBlock> {
-        match &self {
-            Self::CssKeyframesBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -38004,6 +38004,68 @@ impl From<AnyCssContainerStyleQuery> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssDeclarationOrRuleBlock> for AnyCssControlBlock {
+    fn from(node: CssDeclarationOrRuleBlock) -> Self {
+        Self::CssDeclarationOrRuleBlock(node)
+    }
+}
+impl From<CssKeyframesBlock> for AnyCssControlBlock {
+    fn from(node: CssKeyframesBlock) -> Self {
+        Self::CssKeyframesBlock(node)
+    }
+}
+impl AstNode for AnyCssControlBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssDeclarationOrRuleBlock::KIND_SET.union(CssKeyframesBlock::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_DECLARATION_OR_RULE_BLOCK | CSS_KEYFRAMES_BLOCK)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_DECLARATION_OR_RULE_BLOCK => {
+                Self::CssDeclarationOrRuleBlock(CssDeclarationOrRuleBlock { syntax })
+            }
+            CSS_KEYFRAMES_BLOCK => Self::CssKeyframesBlock(CssKeyframesBlock { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssDeclarationOrRuleBlock(it) => it.syntax(),
+            Self::CssKeyframesBlock(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssDeclarationOrRuleBlock(it) => it.into_syntax(),
+            Self::CssKeyframesBlock(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssControlBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssDeclarationOrRuleBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssKeyframesBlock(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssControlBlock> for SyntaxNode {
+    fn from(n: AnyCssControlBlock) -> Self {
+        match n {
+            AnyCssControlBlock::CssDeclarationOrRuleBlock(it) => it.into_syntax(),
+            AnyCssControlBlock::CssKeyframesBlock(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssControlBlock> for SyntaxElement {
+    fn from(n: AnyCssControlBlock) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssBogusCustomIdentifier> for AnyCssCustomIdentifier {
     fn from(node: CssBogusCustomIdentifier) -> Self {
         Self::CssBogusCustomIdentifier(node)
@@ -46357,68 +46419,6 @@ impl From<AnyScssAtRootQuery> for SyntaxElement {
         node.into()
     }
 }
-impl From<CssDeclarationOrRuleBlock> for AnyScssControlBlock {
-    fn from(node: CssDeclarationOrRuleBlock) -> Self {
-        Self::CssDeclarationOrRuleBlock(node)
-    }
-}
-impl From<CssKeyframesBlock> for AnyScssControlBlock {
-    fn from(node: CssKeyframesBlock) -> Self {
-        Self::CssKeyframesBlock(node)
-    }
-}
-impl AstNode for AnyScssControlBlock {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssDeclarationOrRuleBlock::KIND_SET.union(CssKeyframesBlock::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_DECLARATION_OR_RULE_BLOCK | CSS_KEYFRAMES_BLOCK)
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            CSS_DECLARATION_OR_RULE_BLOCK => {
-                Self::CssDeclarationOrRuleBlock(CssDeclarationOrRuleBlock { syntax })
-            }
-            CSS_KEYFRAMES_BLOCK => Self::CssKeyframesBlock(CssKeyframesBlock { syntax }),
-            _ => return None,
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            Self::CssDeclarationOrRuleBlock(it) => it.syntax(),
-            Self::CssKeyframesBlock(it) => it.syntax(),
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            Self::CssDeclarationOrRuleBlock(it) => it.into_syntax(),
-            Self::CssKeyframesBlock(it) => it.into_syntax(),
-        }
-    }
-}
-impl std::fmt::Debug for AnyScssControlBlock {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::CssDeclarationOrRuleBlock(it) => std::fmt::Debug::fmt(it, f),
-            Self::CssKeyframesBlock(it) => std::fmt::Debug::fmt(it, f),
-        }
-    }
-}
-impl From<AnyScssControlBlock> for SyntaxNode {
-    fn from(n: AnyScssControlBlock) -> Self {
-        match n {
-            AnyScssControlBlock::CssDeclarationOrRuleBlock(it) => it.into_syntax(),
-            AnyScssControlBlock::CssKeyframesBlock(it) => it.into_syntax(),
-        }
-    }
-}
-impl From<AnyScssControlBlock> for SyntaxElement {
-    fn from(n: AnyScssControlBlock) -> Self {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
 impl From<CssDeclarationOrRuleBlock> for AnyScssElseClauseBody {
     fn from(node: CssDeclarationOrRuleBlock) -> Self {
         Self::CssDeclarationOrRuleBlock(node)
@@ -48410,6 +48410,11 @@ impl std::fmt::Display for AnyCssContainerStyleQuery {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssControlBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssCustomIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -48906,11 +48911,6 @@ impl std::fmt::Display for AnyCssValueAtRuleProperty {
     }
 }
 impl std::fmt::Display for AnyScssAtRootQuery {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for AnyScssControlBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

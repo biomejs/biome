@@ -25,6 +25,7 @@ pub(crate) mod container_style_and_combinable_query;
 pub(crate) mod container_style_in_parens;
 pub(crate) mod container_style_or_combinable_query;
 pub(crate) mod container_style_query;
+pub(crate) mod control_block;
 pub(crate) mod custom_identifier;
 pub(crate) mod custom_media_query;
 pub(crate) mod custom_property_component;

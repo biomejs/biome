@@ -2985,9 +2985,14 @@ TwSlotAtRule =
 ScssEachAtRule =
 	'each'
 	header: ScssEachHeader
-	block: AnyScssControlBlock
+	block: AnyCssControlBlock
 
-AnyScssControlBlock =
+// SCSS control bodies reuse the enclosing declaration/rule or keyframes grammar.
+// .box { @if $enabled { color: red; } }
+//                     ^^^^^^^^^^^^^^^
+// @keyframes fade { @if $enabled { from { opacity: 0; } } }
+//                                ^^^^^^^^^^^^^^^^^^^^^^^^
+AnyCssControlBlock =
 	CssDeclarationOrRuleBlock
 	| CssKeyframesBlock
 
@@ -3015,7 +3020,7 @@ ScssForAtRule =
 	lower_bound: ScssExpression
 	operator: ('to' | 'through')
 	upper_bound: ScssExpression
-	block: AnyScssControlBlock
+	block: AnyCssControlBlock
 
 // @mixin button($radius: 4px, $args...) { border-radius: $radius; }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -3310,7 +3315,7 @@ AnyScssInterpolatedValuePart =
 ScssIfAtRule =
 	'if'
 	condition: ScssExpression
-	block: AnyScssControlBlock
+	block: AnyCssControlBlock
 	else_clause: ScssElseClause?
 
 // @else if $theme == light { color: black; }
@@ -3332,7 +3337,7 @@ AnyScssElseClauseBody =
 ScssWhileAtRule =
 	'while'
 	condition: ScssExpression
-	block: AnyScssControlBlock
+	block: AnyCssControlBlock
 
 // @content;
 // ^^^^^^^^^

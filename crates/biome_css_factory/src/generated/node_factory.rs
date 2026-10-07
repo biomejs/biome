@@ -3400,7 +3400,7 @@ impl ScssDebugAtRuleBuilder {
 pub fn scss_each_at_rule(
     each_token: SyntaxToken,
     header: ScssEachHeader,
-    block: AnyScssControlBlock,
+    block: AnyCssControlBlock,
 ) -> ScssEachAtRule {
     ScssEachAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_EACH_AT_RULE,
@@ -3536,7 +3536,7 @@ pub fn scss_for_at_rule(
     lower_bound: ScssExpression,
     operator_token: SyntaxToken,
     upper_bound: ScssExpression,
-    block: AnyScssControlBlock,
+    block: AnyCssControlBlock,
 ) -> ScssForAtRule {
     ScssForAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_FOR_AT_RULE,
@@ -3672,7 +3672,7 @@ pub fn scss_hide_clause(hide_token: SyntaxToken, members: ScssModuleMemberList) 
 pub fn scss_if_at_rule(
     if_token: SyntaxToken,
     condition: ScssExpression,
-    block: AnyScssControlBlock,
+    block: AnyCssControlBlock,
 ) -> ScssIfAtRuleBuilder {
     ScssIfAtRuleBuilder {
         if_token,
@@ -3684,7 +3684,7 @@ pub fn scss_if_at_rule(
 pub struct ScssIfAtRuleBuilder {
     if_token: SyntaxToken,
     condition: ScssExpression,
-    block: AnyScssControlBlock,
+    block: AnyCssControlBlock,
     else_clause: Option<ScssElseClause>,
 }
 impl ScssIfAtRuleBuilder {
@@ -4748,7 +4748,7 @@ impl ScssWarnAtRuleBuilder {
 pub fn scss_while_at_rule(
     while_token: SyntaxToken,
     condition: ScssExpression,
-    block: AnyScssControlBlock,
+    block: AnyCssControlBlock,
 ) -> ScssWhileAtRule {
     ScssWhileAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_WHILE_AT_RULE,

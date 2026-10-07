@@ -10,8 +10,8 @@ use crate::utils::scss_include_comments::{
     place_separated_list_comment,
 };
 use biome_css_syntax::{
-    AnyCssAtRule, AnyCssDeclarationName, AnyCssMediaQuery, AnyCssProperty, AnyCssPseudoClass,
-    AnyCssPseudoElement, AnyCssSelector, AnyCssSelectorIdentifier, AnyScssControlBlock,
+    AnyCssAtRule, AnyCssControlBlock, AnyCssDeclarationName, AnyCssMediaQuery, AnyCssProperty,
+    AnyCssPseudoClass, AnyCssPseudoElement, AnyCssSelector, AnyCssSelectorIdentifier,
     CssComplexSelector, CssDeclaration, CssDeclarationImportant, CssDeclarationOrRuleBlock,
     CssFunction, CssGenericComponentValueList, CssGenericProperty, CssIdentifier, CssLanguage,
     CssMediaQueryList, CssNestedQualifiedRule, CssPseudoElementFunction, CssQualifiedRule,
@@ -373,7 +373,7 @@ fn handle_scss_else_clause_comment(
 
     let Some(block) = comment
         .preceding_node()
-        .and_then(AnyScssControlBlock::cast_ref)
+        .and_then(AnyCssControlBlock::cast_ref)
     else {
         return CommentPlacement::Default(comment);
     };

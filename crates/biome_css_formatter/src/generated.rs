@@ -13967,6 +13967,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssContainerStyleQuer
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssControlBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssControlBlock,
+        crate::css::any::control_block::FormatAnyCssControlBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::control_block::FormatAnyCssControlBlock::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssControlBlock {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssControlBlock,
+        crate::css::any::control_block::FormatAnyCssControlBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::control_block::FormatAnyCssControlBlock::default(),
+        )
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssCustomIdentifier {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -16299,31 +16324,6 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyScssAtRootQuery {
         FormatOwnedWithRule::new(
             self,
             crate::scss::any::at_root_query::FormatAnyScssAtRootQuery::default(),
-        )
-    }
-}
-impl AsFormat<CssFormatContext> for biome_css_syntax::AnyScssControlBlock {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_css_syntax::AnyScssControlBlock,
-        crate::scss::any::control_block::FormatAnyScssControlBlock,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(
-            self,
-            crate::scss::any::control_block::FormatAnyScssControlBlock::default(),
-        )
-    }
-}
-impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyScssControlBlock {
-    type Format = FormatOwnedWithRule<
-        biome_css_syntax::AnyScssControlBlock,
-        crate::scss::any::control_block::FormatAnyScssControlBlock,
-    >;
-    fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(
-            self,
-            crate::scss::any::control_block::FormatAnyScssControlBlock::default(),
         )
     }
 }
