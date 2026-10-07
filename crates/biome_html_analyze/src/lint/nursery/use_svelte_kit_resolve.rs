@@ -78,7 +78,7 @@ declare_lint_rule! {
         version: "next",
         name: "useSvelteKitResolve",
         language: "html",
-        recommended: false,
+        recommended: true,
         domains: &[RuleDomain::Svelte],
         sources: &[RuleSource::EslintSvelte("no-navigation-without-resolve").same()],
     }
