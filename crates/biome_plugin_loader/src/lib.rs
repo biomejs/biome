@@ -142,9 +142,25 @@ impl BiomePlugin {
             ResolvedPluginKind::Manifest { rules, .. } => rules
                 .into_iter()
                 .map(|rule| {
-                    let plugin = AnalyzerGritPlugin::load(fs.as_ref(), &rule.path, includes)?
-                        .with_name(rule.name);
-                    Ok(Arc::new(Box::new(plugin) as Box<dyn AnalyzerPlugin>))
+                    let plugin: Box<dyn AnalyzerPlugin> = match rule.path.extension() {
+                        Some("grit") => Box::new(
+                            AnalyzerGritPlugin::load(fs.as_ref(), &rule.path, includes)?
+                                .with_name(rule.name),
+                        ),
+                        #[cfg(feature = "js_plugin")]
+                        Some(extension) if is_javascript_plugin_extension(extension) => Box::new(
+                            AnalyzerJsPlugin::load(fs.clone(), &rule.path, includes)?
+                                .with_name(rule.name),
+                        ),
+                        #[cfg(not(feature = "js_plugin"))]
+                        Some(extension) if is_javascript_plugin_extension(extension) => {
+                            return Err(PluginDiagnostic::unsupported_rule_format(markup!(
+                                "Unsupported rule format for plugin rule "<Emphasis>{rule.path.as_str()}</Emphasis>"."
+                            )));
+                        }
+                        _ => unreachable!("manifest rule extensions are validated during resolution"),
+                    };
+                    Ok(Arc::new(plugin))
                 })
                 .collect::<Result<_, PluginDiagnostic>>()?,
         };
@@ -183,7 +199,7 @@ pub fn resolve_plugin(
 
     if plugin_path
         .extension()
-        .is_some_and(|extension| matches!(extension, "js" | "mjs" | "ts" | "mts"))
+        .is_some_and(is_javascript_plugin_extension)
         && !fs.path_is_dir(&plugin_path)
     {
         validate_plugin_file(fs, &plugin_path)?;
@@ -295,6 +311,10 @@ pub fn resolve_plugin(
             rules,
         },
     })
+}
+
+fn is_javascript_plugin_extension(extension: &str) -> bool {
+    matches!(extension, "js" | "mjs" | "ts" | "mts")
 }
 
 fn validate_plugin_file(
@@ -689,7 +709,10 @@ fn resolve_manifest_rule_path(
         rule.to_string()
     };
     let rule_path = Utf8Path::new(&rule);
-    if rule_path.extension() != Some("grit") {
+    if !rule_path
+        .extension()
+        .is_some_and(|extension| extension == "grit" || is_javascript_plugin_extension(extension))
+    {
         return Err(PluginDiagnostic::unsupported_rule_format(markup!(
             "Unsupported rule format for plugin rule "<Emphasis>{rule}</Emphasis>"."
         )));
@@ -1746,7 +1769,7 @@ mod test {
         let manifest = r#"{
     "version": 1,
     "plugins": {
-        "rules": [{ "one": "rules/1.js" }],
+        "rules": [{ "one": "rules/1.txt" }],
         "presets": { "recommended": ["one"] }
     }
 }"#;

@@ -109,6 +109,54 @@ fn local_manifest_export_name_can_be_suppressed() {
 }
 
 #[test]
+fn package_manifest_loads_javascript_plugin() {
+    let mut fs = TemporaryFs::new("package_manifest_loads_javascript_plugin");
+
+    fs.create_file("biome.json", r#"{ "plugins": ["@scope/plugin/noAssign"] }"#);
+    fs.create_file(
+        "node_modules/@scope/plugin/package.json",
+        r#"{ "name": "@scope/plugin" }"#,
+    );
+    fs.create_file(
+        "node_modules/@scope/plugin/biome-manifest.json",
+        r#"{
+    "version": 1,
+    "plugins": { "rules": [{ "noAssign": "rules/noAssign.js" }] }
+}"#,
+    );
+    fs.create_file(
+        "node_modules/@scope/plugin/rules/noAssign.js",
+        r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
+
+export const noAssign = defineRule({
+    query: ast("JS_CALL_EXPRESSION"),
+    run(node) {
+        registerDiagnostic(node, "error", "Do not use Object.assign");
+    },
+});"#,
+    );
+    fs.create_file(
+        "test.js",
+        "// biome-ignore lint/plugin/@scope/plugin/noAssign: compatibility\nObject.assign({});\nObject.assign({});\n",
+    );
+
+    let mut console = BufferConsole::default();
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", &format!("{}/test.js", fs.cli_path())].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "package_manifest_loads_javascript_plugin",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn package_manifest_preset_is_loaded_once() {
     let mut fs = TemporaryFs::new("package_manifest_preset_is_loaded_once");
 

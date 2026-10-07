@@ -240,6 +240,7 @@ schema                       = [
 stable                       = [
   "html_embeds",
   "js_embeds",
+  "js_plugin",
   "lang_css",
   "lang_graphql",
   "lang_js",
