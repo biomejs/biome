@@ -156,9 +156,13 @@ TwArbitraryVariantSegment =
 	value: 'tw_selector'
 	']'
 
+// The parentheses hold the arguments of a CSS `var()` call.
+//
+// min-(--breakpoint-tablet):flex
+//     ^^^^^^^^^^^^^^^^^^^^^
 TwCssVariableVariantSegment =
 	'('
-	value: 'tw_value'
+	value: CssParameterList
 	')'
 
 
@@ -192,12 +196,29 @@ TwArbitraryValue =
 	value: CssGenericComponentValueList
 	']'
 
+// The parentheses hold the arguments of a CSS `var()` call, optionally
+// preceded by a type hint.
+//
 // bg-(--brand-primary)
 //    ^^^^^^^^^^^^^^^^^
+// bg-(--brand,var(--fallback))
+//    ^^^^^^^^^^^^^^^^^^^^^^^^^
+// bg-(color:--brand)
+//    ^^^^^^^^^^^^^^^
 TwCssVariableValue =
 	'('
-	value: 'tw_value'
+	type_hint: TwTypeHint?
+	value: CssParameterList
 	')'
+
+// The data type a CSS variable value resolves to. Tailwind uses it to
+// pick a utility when the base accepts more than one type.
+//
+// bg-(color:--brand)
+//     ^^^^^^
+TwTypeHint =
+	name: 'tw_value'
+	':'
 
 AnyTwModifier = TwModifier | TwBogusModifier
 

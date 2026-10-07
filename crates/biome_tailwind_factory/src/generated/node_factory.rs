@@ -299,28 +299,50 @@ pub fn tw_arbitrary_variant_segment(
 }
 pub fn tw_css_variable_value(
     l_paren_token: SyntaxToken,
-    value_token: SyntaxToken,
+    value: CssParameterList,
     r_paren_token: SyntaxToken,
-) -> TwCssVariableValue {
-    TwCssVariableValue::unwrap_cast(SyntaxNode::new_detached(
-        TailwindSyntaxKind::TW_CSS_VARIABLE_VALUE,
-        [
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Token(value_token)),
-            Some(SyntaxElement::Token(r_paren_token)),
-        ],
-    ))
+) -> TwCssVariableValueBuilder {
+    TwCssVariableValueBuilder {
+        l_paren_token,
+        value,
+        r_paren_token,
+        type_hint: None,
+    }
+}
+pub struct TwCssVariableValueBuilder {
+    l_paren_token: SyntaxToken,
+    value: CssParameterList,
+    r_paren_token: SyntaxToken,
+    type_hint: Option<TwTypeHint>,
+}
+impl TwCssVariableValueBuilder {
+    pub fn with_type_hint(mut self, type_hint: TwTypeHint) -> Self {
+        self.type_hint = Some(type_hint);
+        self
+    }
+    pub fn build(self) -> TwCssVariableValue {
+        TwCssVariableValue::unwrap_cast(SyntaxNode::new_detached(
+            TailwindSyntaxKind::TW_CSS_VARIABLE_VALUE,
+            [
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                self.type_hint
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.value.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+            ],
+        ))
+    }
 }
 pub fn tw_css_variable_variant_segment(
     l_paren_token: SyntaxToken,
-    value_token: SyntaxToken,
+    value: CssParameterList,
     r_paren_token: SyntaxToken,
 ) -> TwCssVariableVariantSegment {
     TwCssVariableVariantSegment::unwrap_cast(SyntaxNode::new_detached(
         TailwindSyntaxKind::TW_CSS_VARIABLE_VARIANT_SEGMENT,
         [
             Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Token(value_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
         ],
     ))
@@ -507,6 +529,15 @@ impl TwStaticCandidateBuilder {
             ],
         ))
     }
+}
+pub fn tw_type_hint(name_token: SyntaxToken, colon_token: SyntaxToken) -> TwTypeHint {
+    TwTypeHint::unwrap_cast(SyntaxNode::new_detached(
+        TailwindSyntaxKind::TW_TYPE_HINT,
+        [
+            Some(SyntaxElement::Token(name_token)),
+            Some(SyntaxElement::Token(colon_token)),
+        ],
+    ))
 }
 pub fn tw_variant_expression(segments: TwVariantSegmentList) -> TwVariantExpressionBuilder {
     TwVariantExpressionBuilder {

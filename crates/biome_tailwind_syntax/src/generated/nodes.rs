@@ -907,18 +907,22 @@ impl TwCssVariableValue {
     pub fn as_fields(&self) -> TwCssVariableValueFields {
         TwCssVariableValueFields {
             l_paren_token: self.l_paren_token(),
-            value_token: self.value_token(),
+            type_hint: self.type_hint(),
+            value: self.value(),
             r_paren_token: self.r_paren_token(),
         }
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+    pub fn type_hint(&self) -> Option<TwTypeHint> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn value(&self) -> CssParameterList {
+        support::list(&self.syntax, 2usize)
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+        support::required_token(&self.syntax, 3usize)
     }
 }
 impl Serialize for TwCssVariableValue {
@@ -932,7 +936,8 @@ impl Serialize for TwCssVariableValue {
 #[derive(Serialize)]
 pub struct TwCssVariableValueFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub value_token: SyntaxResult<SyntaxToken>,
+    pub type_hint: Option<TwTypeHint>,
+    pub value: CssParameterList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -952,15 +957,15 @@ impl TwCssVariableVariantSegment {
     pub fn as_fields(&self) -> TwCssVariableVariantSegmentFields {
         TwCssVariableVariantSegmentFields {
             l_paren_token: self.l_paren_token(),
-            value_token: self.value_token(),
+            value: self.value(),
             r_paren_token: self.r_paren_token(),
         }
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 1usize)
+    pub fn value(&self) -> CssParameterList {
+        support::list(&self.syntax, 1usize)
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
@@ -977,7 +982,7 @@ impl Serialize for TwCssVariableVariantSegment {
 #[derive(Serialize)]
 pub struct TwCssVariableVariantSegmentFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub value_token: SyntaxResult<SyntaxToken>,
+    pub value: CssParameterList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -1359,6 +1364,46 @@ impl Serialize for TwStaticCandidate {
 pub struct TwStaticCandidateFields {
     pub base_token: SyntaxResult<SyntaxToken>,
     pub modifier: Option<AnyTwModifier>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct TwTypeHint {
+    pub(crate) syntax: SyntaxNode,
+}
+impl TwTypeHint {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> TwTypeHintFields {
+        TwTypeHintFields {
+            name_token: self.name_token(),
+            colon_token: self.colon_token(),
+        }
+    }
+    pub fn name_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+}
+impl Serialize for TwTypeHint {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct TwTypeHintFields {
+    pub name_token: SyntaxResult<SyntaxToken>,
+    pub colon_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwVariantExpression {
@@ -2928,9 +2973,10 @@ impl std::fmt::Debug for TwCssVariableValue {
                     &support::DebugSyntaxResult(self.l_paren_token()),
                 )
                 .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
+                    "type_hint",
+                    &support::DebugOptionalElement(self.type_hint()),
                 )
+                .field("value", &self.value())
                 .field(
                     "r_paren_token",
                     &support::DebugSyntaxResult(self.r_paren_token()),
@@ -2985,10 +3031,7 @@ impl std::fmt::Debug for TwCssVariableVariantSegment {
                     "l_paren_token",
                     &support::DebugSyntaxResult(self.l_paren_token()),
                 )
-                .field(
-                    "value_token",
-                    &support::DebugSyntaxResult(self.value_token()),
-                )
+                .field("value", &self.value())
                 .field(
                     "r_paren_token",
                     &support::DebugSyntaxResult(self.r_paren_token()),
@@ -3480,6 +3523,57 @@ impl From<TwStaticCandidate> for SyntaxNode {
 }
 impl From<TwStaticCandidate> for SyntaxElement {
     fn from(n: TwStaticCandidate) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for TwTypeHint {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(TW_TYPE_HINT as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == TW_TYPE_HINT
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for TwTypeHint {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TwTypeHint")
+                .field("name_token", &support::DebugSyntaxResult(self.name_token()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TwTypeHint").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<TwTypeHint> for SyntaxNode {
+    fn from(n: TwTypeHint) -> Self {
+        n.syntax
+    }
+}
+impl From<TwTypeHint> for SyntaxElement {
+    fn from(n: TwTypeHint) -> Self {
         n.syntax.into()
     }
 }
@@ -4774,6 +4868,11 @@ impl std::fmt::Display for TwRoot {
     }
 }
 impl std::fmt::Display for TwStaticCandidate {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for TwTypeHint {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

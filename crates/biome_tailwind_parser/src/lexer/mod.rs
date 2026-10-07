@@ -291,8 +291,19 @@ impl<'src> TailwindLexer<'src> {
 
     fn consume_css_identifier(&mut self) -> TailwindSyntaxKind {
         let start = self.position;
-        while self.current_byte().is_some_and(is_css_identifier_continue) {
-            self.advance(1);
+        // Tailwind keeps underscores in custom property names instead of
+        // decoding them to spaces (`bg-(--a_b)` is `var(--a_b)`), and CSS
+        // allows non-ASCII characters in them.
+        let is_custom_property = self.source.as_bytes()[start..].starts_with(b"--");
+        while let Some(byte) = self.current_byte() {
+            if is_css_identifier_continue(byte) {
+                self.advance(1);
+            } else if is_custom_property && (byte == b'_' || !byte.is_ascii()) {
+                let char = self.current_char_unchecked();
+                self.advance(char.len_utf8());
+            } else {
+                break;
+            }
         }
 
         css_identifier_kind(&self.source.as_bytes()[start..self.position])
