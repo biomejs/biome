@@ -2,6 +2,7 @@ use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::panic::AssertUnwindSafe;
 use std::rc::Rc;
+use std::sync::Arc;
 
 use biome_analyze::{
     AddVisitor, DiagnosticSignal, FromServices, Phase, Phases, QueryMatch, Queryable, RuleCategory,
@@ -28,9 +29,11 @@ use biome_rowan::{
     AstNode, Language, NodeCache, SyntaxKindSet, SyntaxNode, TextLen, TextRange, TextSize,
     TokenText, WalkEvent,
 };
-use biome_tailwind_parser::{TailwindParse, parse_tailwind_with_cache};
+use biome_tailwind_parser::{TailwindParse, TailwindParserOptions, parse_tailwind_with_options};
 use biome_tailwind_syntax::{TailwindLanguage, TwRoot};
 use rustc_hash::FxHashMap;
+
+use crate::use_tailwind_sorted_classes::TailwindDesignSystem;
 
 #[derive(Clone, Debug)]
 pub struct SyntaxService<L> {
@@ -149,15 +152,20 @@ impl TwSyntaxService {
             .clone()
     }
 
-    pub fn parse_for_visitor(&self, class_string: &TailwindClassString) -> ParsedTailwindSyntax {
+    pub fn parse_for_visitor(
+        &self,
+        class_string: &TailwindClassString,
+        options: TailwindParserOptions,
+    ) -> ParsedTailwindSyntax {
         let mut inner = self.inner.borrow_mut();
-        parse_with_inner(&mut inner, class_string)
+        parse_with_inner(&mut inner, class_string, options)
     }
 }
 
 fn parse_with_inner(
     inner: &mut SyntaxServiceInner<TailwindLanguage>,
     class_string: &TailwindClassString,
+    options: TailwindParserOptions,
 ) -> ParsedTailwindSyntax {
     if let Some(parse) = inner.parsed.get(&class_string.key) {
         return ParsedTailwindSyntax {
@@ -170,7 +178,7 @@ fn parse_with_inner(
     let mut panic_diagnostic = None;
     // Convert parser panics into diagnostics tied to the host class string.
     let parse = match catch_unwind(AssertUnwindSafe(|| {
-        parse_tailwind_with_cache(class_string.text.text(), &mut inner.node_cache)
+        parse_tailwind_with_options(class_string.text.text(), &mut inner.node_cache, options)
     })) {
         Ok(parse) => Rc::new(parse),
         Err(error) => {
@@ -179,7 +187,11 @@ fn parse_with_inner(
                 class_string.inner_range,
                 message,
             ));
-            Rc::new(parse_tailwind_with_cache("", &mut inner.node_cache))
+            Rc::new(parse_tailwind_with_options(
+                "",
+                &mut inner.node_cache,
+                options,
+            ))
         }
     };
     inner.parsed.insert(class_string.key, parse.clone());
@@ -360,7 +372,12 @@ where
         let Some(service) = ctx.services.get_service::<TwSyntaxService>() else {
             return;
         };
-        let parsed = service.parse_for_visitor(&class_string);
+        let design = ctx.services.get_service::<Arc<TailwindDesignSystem>>();
+        let options = design.map_or_else(
+            || TailwindDesignSystem::default_ref().parser_options(),
+            |design| design.parser_options(),
+        );
+        let parsed = service.parse_for_visitor(&class_string, options);
         if let Some(diagnostic) = parsed.panic_diagnostic {
             let text_range = diagnostic.span;
             ctx.push_signal(SignalEntry {

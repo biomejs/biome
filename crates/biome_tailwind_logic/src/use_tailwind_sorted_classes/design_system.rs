@@ -4,12 +4,18 @@
 //! The sorter consults a [TailwindDesignSystem] before its generated defaults:
 //! theme values make classes like `bg-brand` known, `@utility` rules add
 //! static utilities, `@custom-variant` rules add variants, and breakpoint and
-//! container values change how size variants compare.
+//! container values change how size variants compare. The roots of `@utility`
+//! rules that take a value, such as `slide-in-from-top-*`, tell the parser how
+//! to split classes like `slide-in-from-top-4`.
 
-use std::sync::LazyLock;
+use std::sync::{Arc, LazyLock};
 
 use biome_analyze::options::TailwindOptions;
-use biome_module_graph::{ModuleDb, TailwindStylesheet, TailwindThemeEntry, tailwind_stylesheet};
+use biome_module_graph::{
+    ModuleDb, ModuleInfo, TailwindStylesheet, TailwindThemeEntry, tailwind_stylesheet,
+};
+use biome_tailwind_parser::{BaseNameStore, TailwindParserOptions};
+use biome_tailwind_syntax::metadata::BASENAMES_WITH_DASHES;
 use rustc_hash::{FxHashMap, FxHashSet};
 
 use super::tailwind_preset_v4::PROPERTY_INDEX;
@@ -17,16 +23,19 @@ use super::tailwind_preset_v4_types::ThemeNamespace;
 
 /// The parts of a user's Tailwind CSS configuration that change how classes
 /// sort. The default value describes the default configuration.
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Eq, PartialEq)]
 pub struct TailwindDesignSystem {
     theme: FxHashMap<ThemeNamespace, ThemeValues>,
     utilities: FxHashMap<Box<str>, CustomUtility>,
     /// Custom variant names, mapped to their declaration index. Tailwind
     /// registers them after its own variants, in declaration order.
     variants: FxHashMap<Box<str>, u16>,
+    /// The built-in dashed basenames and the roots of the stylesheet's
+    /// functional utilities, when it declares any with a dash.
+    base_names: Option<BaseNameStore>,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Eq, PartialEq)]
 struct ThemeValues {
     /// Whether `--<namespace>-*: initial` removed the default values.
     reset: bool,
@@ -37,7 +46,7 @@ struct ThemeValues {
 }
 
 /// A static utility declared with `@utility`.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub(super) struct CustomUtility {
     /// Ascending indices into Tailwind's property order of the properties the
     /// utility sets.
@@ -68,11 +77,11 @@ impl TailwindDesignSystem {
     /// Reads the stylesheet configured in `options` from the module graph. The
     /// result describes the default configuration when no stylesheet is
     /// configured or the module graph doesn't know it.
-    pub fn from_module_graph(module_db: &dyn ModuleDb, options: &TailwindOptions) -> Self {
+    pub fn from_module_graph(module_db: &dyn ModuleDb, options: &TailwindOptions) -> Arc<Self> {
         options
             .stylesheet()
             .and_then(|path| module_db.module_for_path(path))
-            .map(|module| Self::from(tailwind_stylesheet(module_db, module)))
+            .map(|module| tailwind_design_system(module_db, module))
             .unwrap_or_default()
     }
 
@@ -182,6 +191,15 @@ impl TailwindDesignSystem {
     pub(super) fn variant(&self, name: &str) -> Option<u16> {
         self.variants.get(name).copied()
     }
+
+    /// Options for parsing class strings, aware of the stylesheet's utility
+    /// roots.
+    pub fn parser_options(&self) -> TailwindParserOptions<'_> {
+        match &self.base_names {
+            Some(base_names) => TailwindParserOptions::with_base_names(base_names),
+            None => TailwindParserOptions::default(),
+        }
+    }
 }
 
 impl From<&TailwindStylesheet> for TailwindDesignSystem {
@@ -205,8 +223,31 @@ impl From<&TailwindStylesheet> for TailwindDesignSystem {
         for variant in &stylesheet.custom_variants {
             design.add_variant(variant.text());
         }
+        // The sign of a negative root such as `-zoom-in` is parsed separately,
+        // and roots without a dash already parse as a whole.
+        let mut base_names: Vec<&str> = stylesheet
+            .functional_utilities
+            .iter()
+            .map(|utility| {
+                let name = utility.name.text();
+                name.strip_prefix('-').unwrap_or(name)
+            })
+            .filter(|name| name.contains('-'))
+            .collect();
+        if !base_names.is_empty() {
+            base_names.extend_from_slice(BASENAMES_WITH_DASHES);
+            design.base_names = Some(BaseNameStore::new(&base_names));
+        }
         design
     }
+}
+
+/// Returns the design system of the stylesheet `module`.
+///
+/// Tracked: depends on [tailwind_stylesheet] of `module`.
+#[salsa::tracked(returns(clone))]
+fn tailwind_design_system(db: &dyn ModuleDb, module: ModuleInfo) -> Arc<TailwindDesignSystem> {
+    Arc::new(TailwindDesignSystem::from(tailwind_stylesheet(db, module)))
 }
 
 /// Splits a theme variable name into its namespace and key:
@@ -229,6 +270,11 @@ fn theme_key(name: &str) -> Option<(ThemeNamespace, &str)> {
 
 #[cfg(test)]
 mod tests {
+    use biome_module_graph::TailwindUtility;
+    use biome_rowan::{Direction, NodeCache};
+    use biome_tailwind_parser::parse_tailwind_with_options;
+    use biome_tailwind_syntax::TailwindSyntaxKind;
+
     use super::*;
 
     #[test]
@@ -272,6 +318,40 @@ mod tests {
         assert!(design.has_theme_key(ThemeNamespace::Color, "red-600"));
         design.add_theme_variable("--color-red-500", "#f00");
         assert!(design.has_theme_key(ThemeNamespace::Color, "red-500"));
+    }
+
+    #[test]
+    fn functional_utility_roots_split_classes() {
+        let functional_utilities = ["slide-in-from-top", "-zoom-in", "delay"]
+            .map(|name| TailwindUtility {
+                name: name.into(),
+                properties: Box::default(),
+                declaration_count: 0,
+            })
+            .into();
+        let design = TailwindDesignSystem::from(&TailwindStylesheet {
+            functional_utilities,
+            ..TailwindStylesheet::default()
+        });
+        for (class, expected_base) in [
+            ("slide-in-from-top-[48%]", "slide-in-from-top"),
+            ("-zoom-in-50", "zoom-in"),
+            ("delay-150", "delay"),
+            ("border-t-2", "border-t"),
+        ] {
+            let parsed = parse_tailwind_with_options(
+                class,
+                &mut NodeCache::default(),
+                design.parser_options(),
+            );
+            assert!(!parsed.has_errors(), "{class}");
+            let base = parsed
+                .syntax()
+                .descendants_tokens(Direction::Next)
+                .find(|token| token.kind() == TailwindSyntaxKind::TW_BASE)
+                .map(|token| token.text_trimmed().to_string());
+            assert_eq!(base.as_deref(), Some(expected_base), "{class}");
+        }
     }
 
     #[test]

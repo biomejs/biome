@@ -257,3 +257,53 @@ export const theme = <div className="bg-brand flex" />;
         result,
     ));
 }
+
+#[test]
+fn tailwind_stylesheet_functional_utilities_parse() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("tailwind_stylesheet_functional_utilities_parse");
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "tailwind": { "stylesheet": "./src/app.css" },
+    "linter": { "rules": { "nursery": { "useTailwindSortedClasses": "error" } } }
+}"#,
+    );
+    fs.create_file(
+        "src/app.css",
+        r#"@utility slide-in-from-top-* {
+    --tw-enter-translate-y: calc(--value(integer) * var(--spacing));
+    --tw-enter-translate-y: --value(--percentage-*, [*]);
+}
+@utility -zoom-in-* {
+    --tw-enter-scale: calc(--value(number) * -1%);
+}
+"#,
+    );
+    fs.create_file(
+        "src/App.jsx",
+        r#"export const arbitrary = <div className="slide-in-from-top-[48%] flex" />;
+export const negative = <div className="-zoom-in-50 flex" />;
+export const template = <div className={`${a}x p-4 flex slide-in-from-top-[48%]`} />;
+"#,
+    );
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--only=nursery/useTailwindSortedClasses",
+                fs.cli_path(),
+            ]
+            .as_slice(),
+        ),
+    );
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "tailwind_stylesheet_functional_utilities_parse",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}

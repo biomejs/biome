@@ -1,8 +1,8 @@
 use biome_js_syntax::{JsTemplateChunkElement, JsTemplateElement};
-use biome_rowan::{AstNode, TextRange, TextSize, TokenText};
+use biome_rowan::{AstNode, NodeCache, TextRange, TextSize, TokenText};
 use biome_tailwind_logic::syntax_service::TailwindSyntax;
 use biome_tailwind_logic::use_tailwind_sorted_classes::{TailwindDesignSystem, sort_class_list};
-use biome_tailwind_parser::parse_tailwind;
+use biome_tailwind_parser::parse_tailwind_with_options;
 
 use crate::tailwind::AnyTailwindClassString;
 
@@ -29,7 +29,11 @@ pub(crate) fn sort_classes(
             None
         };
         let middle = classes.collect::<Vec<_>>().join(" ");
-        let parse = parse_tailwind(&middle);
+        let parse = parse_tailwind_with_options(
+            &middle,
+            &mut NodeCache::default(),
+            design.parser_options(),
+        );
         if parse.has_errors() {
             return None;
         }

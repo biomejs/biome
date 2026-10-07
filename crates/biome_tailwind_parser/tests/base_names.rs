@@ -1,5 +1,9 @@
-use biome_tailwind_parser::parse_tailwind;
+use biome_rowan::NodeCache;
+use biome_tailwind_parser::{
+    BaseNameStore, TailwindParserOptions, parse_tailwind, parse_tailwind_with_options,
+};
 use biome_tailwind_syntax::TailwindSyntaxKind;
+use biome_tailwind_syntax::metadata::BASENAMES_WITH_DASHES;
 
 #[test]
 fn appearance_category_bases() {
@@ -53,6 +57,38 @@ fn appearance_category_bases() {
         ("touch-pan-x", "touch-pan"),
     ] {
         let parsed = parse_tailwind(class);
+        assert!(
+            parsed.diagnostics().is_empty(),
+            "{class}: {:?}",
+            parsed.diagnostics()
+        );
+        let bases: Vec<_> = parsed
+            .syntax()
+            .descendants_tokens(biome_rowan::Direction::Next)
+            .filter(|token| token.kind() == TailwindSyntaxKind::TW_BASE)
+            .map(|token| token.text_trimmed().to_string())
+            .collect();
+        assert_eq!(bases, [expected_base], "{class}");
+    }
+}
+
+#[test]
+fn custom_base_names_split_functional_roots() {
+    let mut names = vec!["slide-in-from-top", "zoom-in", "fill-mode"];
+    names.extend_from_slice(BASENAMES_WITH_DASHES);
+    let store = BaseNameStore::new(&names);
+    let options = TailwindParserOptions::with_base_names(&store);
+    for (class, expected_base) in [
+        ("slide-in-from-top-[48%]", "slide-in-from-top"),
+        ("slide-in-from-top-2", "slide-in-from-top"),
+        ("slide-in-from-top", "slide-in-from-top"),
+        ("-zoom-in-50", "zoom-in"),
+        ("fill-mode-both", "fill-mode"),
+        ("data-[open]:slide-in-from-top-[48%]", "slide-in-from-top"),
+        ("bg-red-500", "bg"),
+        ("border-t-2", "border-t"),
+    ] {
+        let parsed = parse_tailwind_with_options(class, &mut NodeCache::default(), options);
         assert!(
             parsed.diagnostics().is_empty(),
             "{class}: {:?}",

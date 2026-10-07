@@ -8,7 +8,8 @@
 
 use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssDeclarationOrRule, AnyCssDeclarationOrRuleBlock, AnyCssProperty,
-    AnyTwUtilityName, CssDeclaration, TwCustomVariantAtRule, TwThemeAtRule, TwUtilityAtRule,
+    AnyTwUtilityName, CssDeclaration, CssIdentifier, TwCustomVariantAtRule, TwThemeAtRule,
+    TwUtilityAtRule,
 };
 use biome_rowan::{AstNode, Text};
 
@@ -22,6 +23,9 @@ pub struct TailwindStylesheet {
     pub theme: Vec<TailwindThemeEntry>,
     /// Utilities with a fixed name from `@utility` rules.
     pub utilities: Vec<TailwindUtility>,
+    /// Utilities that take a value from `@utility` rules ending in `-*`, such
+    /// as `@utility tab-* { ... }`. Their name is the part before `-*`.
+    pub functional_utilities: Vec<TailwindUtility>,
     /// Variant names from `@custom-variant` rules.
     pub custom_variants: Vec<Text>,
 }
@@ -52,6 +56,7 @@ pub struct TailwindUtility {
 pub(crate) struct TailwindPosition {
     theme: usize,
     utilities: usize,
+    functional_utilities: usize,
     custom_variants: usize,
 }
 
@@ -66,7 +71,10 @@ pub(crate) struct TailwindImport {
 
 impl TailwindStylesheet {
     pub fn is_empty(&self) -> bool {
-        self.theme.is_empty() && self.utilities.is_empty() && self.custom_variants.is_empty()
+        self.theme.is_empty()
+            && self.utilities.is_empty()
+            && self.functional_utilities.is_empty()
+            && self.custom_variants.is_empty()
     }
 
     /// The position after everything declared so far.
@@ -74,6 +82,7 @@ impl TailwindStylesheet {
         TailwindPosition {
             theme: self.theme.len(),
             utilities: self.utilities.len(),
+            functional_utilities: self.functional_utilities.len(),
             custom_variants: self.custom_variants.len(),
         }
     }
@@ -89,6 +98,9 @@ impl TailwindStylesheet {
             .extend_from_slice(&other.theme[start.theme..end.theme]);
         self.utilities
             .extend_from_slice(&other.utilities[start.utilities..end.utilities]);
+        self.functional_utilities.extend_from_slice(
+            &other.functional_utilities[start.functional_utilities..end.functional_utilities],
+        );
         self.custom_variants
             .extend_from_slice(&other.custom_variants[start.custom_variants..end.custom_variants]);
     }
@@ -133,13 +145,33 @@ impl TailwindStylesheet {
     }
 
     pub(crate) fn visit_utility(&mut self, utility: &TwUtilityAtRule) {
-        // Utilities ending in `-*` take values, which aren't supported yet.
-        let Ok(AnyTwUtilityName::CssIdentifier(name)) = utility.name() else {
-            return;
-        };
         let Ok(block) = utility.block() else {
             return;
         };
+        match utility.name() {
+            Ok(AnyTwUtilityName::CssIdentifier(name)) => {
+                self.utilities.push(TailwindUtility::new(&name, &block));
+            }
+            Ok(AnyTwUtilityName::TwFunctionalUtilityName(name)) => {
+                if let Ok(name) = name.identifier() {
+                    self.functional_utilities
+                        .push(TailwindUtility::new(&name, &block));
+                }
+            }
+            Err(_) => {}
+        }
+    }
+
+    pub(crate) fn visit_custom_variant(&mut self, variant: &TwCustomVariantAtRule) {
+        if let Ok(name) = variant.name() {
+            self.custom_variants
+                .push(name.syntax().text_trimmed().to_string().into());
+        }
+    }
+}
+
+impl TailwindUtility {
+    fn new(name: &CssIdentifier, block: &AnyCssDeclarationOrRuleBlock) -> Self {
         let mut properties = Vec::new();
         let mut declaration_count = 0;
         for declaration in block
@@ -154,17 +186,10 @@ impl TailwindStylesheet {
                 properties.push(property_name.syntax().text_trimmed().to_string().into());
             }
         }
-        self.utilities.push(TailwindUtility {
+        Self {
             name: name.syntax().text_trimmed().to_string().into(),
             properties: properties.into_boxed_slice(),
             declaration_count,
-        });
-    }
-
-    pub(crate) fn visit_custom_variant(&mut self, variant: &TwCustomVariantAtRule) {
-        if let Ok(name) = variant.name() {
-            self.custom_variants
-                .push(name.syntax().text_trimmed().to_string().into());
         }
     }
 }

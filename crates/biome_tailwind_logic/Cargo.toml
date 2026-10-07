@@ -33,6 +33,7 @@ biome_tailwind_syntax  = { workspace = true }
 biome_unicode_table    = { workspace = true }
 phf                    = { workspace = true }
 rustc-hash             = { workspace = true }
+salsa                  = { workspace = true }
 smallvec               = { workspace = true }
 
 [dev-dependencies]

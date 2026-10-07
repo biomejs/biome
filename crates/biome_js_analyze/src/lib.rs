@@ -282,12 +282,9 @@ where
 
     services.insert_service(Arc::new(AriaRoles));
     services.insert_service(TwSyntaxService::default());
-    services.insert_service(Arc::new(
-        module_db
-            .as_deref()
-            .map_or_else(TailwindDesignSystem::default, |module_db| {
-                TailwindDesignSystem::from_module_graph(module_db, options.tailwind())
-            }),
+    services.insert_service(module_db.as_deref().map_or_else(
+        || Arc::new(TailwindDesignSystem::default()),
+        |module_db| TailwindDesignSystem::from_module_graph(module_db, options.tailwind()),
     ));
     services.insert_service(source_type);
     if let Some(module_db) = module_db {

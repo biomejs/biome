@@ -1,4 +1,4 @@
-use biome_module_graph::{ModuleDb, TailwindThemeEntry, tailwind_stylesheet};
+use biome_module_graph::{ModuleDb, TailwindThemeEntry, TailwindUtility, tailwind_stylesheet};
 use camino::Utf8Path;
 
 use super::support::build_tailwind_css_db;
@@ -102,5 +102,32 @@ fn strings_outside_imports_are_not_inlined() {
             "/main.css"
         ),
         ["--font-display"]
+    );
+}
+
+#[test]
+fn functional_utilities_are_recorded_by_root() {
+    let db = build_tailwind_css_db(&[
+        (
+            "/main.css",
+            "@utility tab-4 { tab-size: 4; }\n@import './animate.css';\n@utility tab-* { tab-size: --value(integer); }",
+        ),
+        (
+            "/animate.css",
+            "@utility slide-in-from-top-* { --tw-enter-translate-y: --value([*]); }\n@utility -zoom-in-* { --tw-enter-scale: --value([*]); }",
+        ),
+    ]);
+    let module = db.module_for_path(Utf8Path::new("/main.css")).unwrap();
+    let stylesheet = tailwind_stylesheet(&db, module);
+    let names = |utilities: &[TailwindUtility]| -> Vec<String> {
+        utilities
+            .iter()
+            .map(|utility| utility.name.to_string())
+            .collect()
+    };
+    assert_eq!(names(&stylesheet.utilities), ["tab-4"]);
+    assert_eq!(
+        names(&stylesheet.functional_utilities),
+        ["slide-in-from-top", "-zoom-in", "tab"]
     );
 }
