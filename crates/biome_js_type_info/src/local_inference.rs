@@ -12,8 +12,8 @@ use biome_js_syntax::{
     AnyJsConstructorParameter, AnyJsDeclaration, AnyJsDeclarationClause,
     AnyJsExportDefaultDeclaration, AnyJsExpression, AnyJsFormalParameter, AnyJsFunction,
     AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectBindingPatternMember,
-    AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyTsModuleName, AnyTsName,
-    AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
+    AnyJsObjectMember, AnyJsObjectMemberName, AnyJsParameter, AnyJsTemplateElement,
+    AnyTsModuleName, AnyTsName, AnyTsReturnType, AnyTsTupleTypeElement, AnyTsType, AnyTsTypeMember,
     AnyTsTypePredicateParameterName, ClassMemberName, JsArrayBindingPattern,
     JsArrowFunctionExpression, JsBinaryExpression, JsBinaryOperator, JsCallArgumentList,
     JsCallArguments, JsCallExpression, JsClassDeclaration, JsClassExportDefaultDeclaration,
@@ -24,10 +24,10 @@ use biome_js_syntax::{
     JsNewExpression, JsObjectBindingPattern, JsObjectExpression, JsParameterList, JsParameters,
     JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember,
     JsReferenceIdentifier, JsRestParameter, JsReturnStatement, JsSetterObjectMember, JsSyntaxKind,
-    JsSyntaxNode, JsSyntaxToken, JsUnaryExpression, JsUnaryOperator, JsVariableDeclaration,
-    JsVariableDeclarator, TsDeclareFunctionDeclaration, TsExternalModuleDeclaration,
-    TsInstantiationExpression, TsInterfaceDeclaration, TsMappedType, TsModuleDeclaration,
-    TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
+    JsSyntaxNode, JsSyntaxToken, JsTemplateExpression, JsUnaryExpression, JsUnaryOperator,
+    JsVariableDeclaration, JsVariableDeclarator, TsDeclareFunctionDeclaration,
+    TsExternalModuleDeclaration, TsInstantiationExpression, TsInterfaceDeclaration, TsMappedType,
+    TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
     TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter,
     TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
@@ -616,6 +616,7 @@ impl TypeData {
             AnyJsExpression::JsSuperExpression(_) => Self::from(TypeofExpression::Super(
                 TypeofThisOrSuperExpression::from_any_js_expression(scope_id, expr),
             )),
+            AnyJsExpression::JsTemplateExpression(expr) => Self::from_js_template_expression(expr),
             AnyJsExpression::JsThisExpression(_) => Self::from(TypeofExpression::This(
                 TypeofThisOrSuperExpression::from_any_js_expression(scope_id, expr),
             )),
@@ -1354,6 +1355,28 @@ impl TypeData {
             "undefined" => Self::Undefined,
             _ => Self::reference(TypeReference::from_name(scope_id, name)),
         })
+    }
+
+    pub fn from_js_template_expression(expr: &JsTemplateExpression) -> Self {
+        // A tag function may return any type.
+        if expr.tag().is_some() {
+            return Self::unknown();
+        }
+
+        // Only templates without substitutions have a literal value.
+        let mut elements = expr.elements().into_iter();
+        let text = match (elements.next(), elements.next()) {
+            (None, _) => Some(Text::default()),
+            (Some(AnyJsTemplateElement::JsTemplateChunkElement(chunk)), None) => {
+                text_from_token(chunk.template_chunk_token())
+            }
+            _ => None,
+        };
+
+        match text {
+            Some(text) => Self::Literal(Box::new(Literal::String(StringLiteral::from(text)))),
+            None => Self::string(),
+        }
     }
 
     pub fn from_js_unary_expression(
