@@ -192,6 +192,12 @@ impl TailwindDesignSystem {
         self.variants.get(name).copied()
     }
 
+    /// Whether the stylesheet adds dashed utility roots, which can split a
+    /// class where the built-in roots wouldn't.
+    pub(super) fn has_custom_base_names(&self) -> bool {
+        self.base_names.is_some()
+    }
+
     /// Options for parsing class strings, aware of the stylesheet's utility
     /// roots.
     pub fn parser_options(&self) -> TailwindParserOptions<'_> {

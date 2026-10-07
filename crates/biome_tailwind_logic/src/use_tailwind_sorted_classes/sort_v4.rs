@@ -2,6 +2,7 @@ use std::cmp::Ordering;
 
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeText, TextRange, TextSize, TokenText};
 use biome_string_case::Collator;
+use biome_tailwind_parser::parse_tailwind;
 use biome_tailwind_syntax::{
     AnyTwCandidate, AnyTwFullCandidate, AnyTwModifier, AnyTwValue, CssGenericComponentValueList,
     TailwindSyntaxNode, TailwindSyntaxToken, TwNumberValue, TwRoot,
@@ -34,7 +35,7 @@ pub fn sort_class_list(root: &TwRoot, design: &TailwindDesignSystem) -> String {
     let mut pending: Vec<(PendingSortKey, SyntaxNodeText)> = Vec::with_capacity(candidates.len());
     for candidate in candidates.iter().flatten() {
         let text = candidate.syntax().text_trimmed();
-        let key = PendingSortKey::from_candidate(&candidate, design);
+        let key = PendingSortKey::classify(&candidate, design);
         pending.push((key, text));
     }
 
@@ -362,6 +363,25 @@ impl Collator for TwNameCollator {
 }
 
 impl PendingSortKey {
+    /// Classify a candidate like [Self::from_candidate]. A stylesheet root
+    /// such as `bg-red` makes the parser split `bg-red-500` at that root, but
+    /// Tailwind also tries its built-in roots, so a candidate left unplaced is
+    /// classified again as split at the built-in roots.
+    fn classify(candidate: &AnyTwFullCandidate, design: &TailwindDesignSystem) -> Self {
+        let key = Self::from_candidate(candidate, design);
+        if !matches!(key, Self::Unknown) || !design.has_custom_base_names() {
+            return key;
+        }
+        let parse = parse_tailwind(&candidate.syntax().text_trimmed().to_string());
+        if parse.has_errors() {
+            return key;
+        }
+        match parse.tree().candidates().iter().flatten().next() {
+            Some(candidate) => Self::from_candidate(&candidate, design),
+            None => key,
+        }
+    }
+
     /// Classify a candidate into its utility placement and variants, or
     /// `Unknown` for a shape we can't place.
     fn from_candidate(candidate: &AnyTwFullCandidate, design: &TailwindDesignSystem) -> Self {
@@ -882,7 +902,9 @@ fn resolve_css_variable_branch(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use biome_tailwind_parser::parse_tailwind;
+    use biome_module_graph::{TailwindStylesheet, TailwindUtility};
+    use biome_rowan::NodeCache;
+    use biome_tailwind_parser::parse_tailwind_with_options;
 
     /// A known key with the given placement whose text is the placeholder
     /// candidate `x`, for tests that only exercise the placement.
@@ -1048,6 +1070,31 @@ mod tests {
             sort_with("text-red-500 btn-primary bg-blue-500", &design),
             "btn-primary bg-blue-500 text-red-500"
         );
+    }
+
+    #[test]
+    fn stylesheet_functional_roots_keep_built_in_splits() {
+        let functional_utilities = ["bg-red", "bg-white"]
+            .map(|name| TailwindUtility {
+                name: name.into(),
+                properties: Box::default(),
+                declaration_count: 0,
+            })
+            .into();
+        let design = TailwindDesignSystem::from(&TailwindStylesheet {
+            functional_utilities,
+            ..TailwindStylesheet::default()
+        });
+        let sort_with_roots = |input: &str| {
+            let parse = parse_tailwind_with_options(
+                input,
+                &mut NodeCache::default(),
+                design.parser_options(),
+            );
+            sort_class_list(&parse.tree(), &design)
+        };
+        assert_eq!(sort_with_roots("bg-red-500 flex"), "flex bg-red-500");
+        assert_eq!(sort_with_roots("bg-white flex"), "flex bg-white");
     }
 
     #[test]
