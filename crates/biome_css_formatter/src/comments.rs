@@ -12,14 +12,15 @@ use crate::utils::scss_include_comments::{
 use biome_css_syntax::{
     AnyCssAtRule, AnyCssControlBlock, AnyCssDeclarationName, AnyCssMediaQuery, AnyCssProperty,
     AnyCssPseudoClass, AnyCssPseudoElement, AnyCssSelector, AnyCssSelectorIdentifier,
-    CssComplexSelector, CssDeclaration, CssDeclarationImportant, CssDeclarationOrRuleBlock,
-    CssFunction, CssGenericComponentValueList, CssGenericProperty, CssIdentifier, CssLanguage,
-    CssMediaQueryList, CssNestedQualifiedRule, CssPseudoElementFunction, CssQualifiedRule,
-    CssSyntaxKind, CssSyntaxNode, CssSyntaxToken, ScssAtRootAtRule, ScssAtRootQueryClause,
-    ScssAtRootSelector, ScssEachHeader, ScssEachValueList, ScssExpression, ScssExpressionItemList,
-    ScssIfAtRule, ScssInterpolatedPseudoClassFunction, ScssInterpolatedPseudoElementFunction,
-    ScssListExpression, ScssListExpressionElement, ScssMapExpression, ScssMapExpressionPair,
-    ScssVariableDeclaration, T, TextLen, TextSize, is_in_scss_include_arguments,
+    AnyCssUnknownAtRuleName, CssComplexSelector, CssDeclaration, CssDeclarationImportant,
+    CssDeclarationOrRuleBlock, CssFunction, CssGenericComponentValueList, CssGenericProperty,
+    CssIdentifier, CssLanguage, CssMediaQueryList, CssNestedQualifiedRule,
+    CssPseudoElementFunction, CssQualifiedRule, CssSyntaxKind, CssSyntaxNode, CssSyntaxToken,
+    ScssAtRootAtRule, ScssAtRootQueryClause, ScssAtRootSelector, ScssEachHeader, ScssEachValueList,
+    ScssExpression, ScssExpressionItemList, ScssIfAtRule, ScssInterpolatedPseudoClassFunction,
+    ScssInterpolatedPseudoElementFunction, ScssListExpression, ScssListExpressionElement,
+    ScssMapExpression, ScssMapExpressionPair, ScssVariableDeclaration, T, TextLen, TextSize,
+    is_in_scss_include_arguments,
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
@@ -130,6 +131,7 @@ impl CommentStyle for CssCommentStyle {
             .or_else(handle_declaration_important_comment)
             .or_else(handle_component_value_boundary_comment)
             .or_else(handle_generic_property_comment)
+            .or_else(handle_scss_at_rule_name_comment)
             .or_else(handle_declaration_name_comment)
             .or_else(handle_selector_block_comment)
             .or_else(handle_complex_selector_comment)
@@ -768,6 +770,45 @@ fn is_between_property_colon_and_value(
     };
 
     comment_start >= colon.text_trimmed_range().end() && comment_start < value_start
+}
+
+/// Keeps `@custom-#{$name} /* note */ token;` comments in the prelude.
+fn handle_scss_at_rule_name_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(name) = comment
+        .preceding_node()
+        .and_then(AnyCssUnknownAtRuleName::cast_ref)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let components = match name.parent::<AnyCssAtRule>() {
+        Some(AnyCssAtRule::CssUnknownValueAtRule(rule)) => rule.components(),
+        Some(AnyCssAtRule::CssUnknownBlockAtRule(rule)) => rule.components(),
+        _ => return CommentPlacement::Default(comment),
+    };
+
+    let Ok(components) = components else {
+        return CommentPlacement::Default(comment);
+    };
+    if name.as_css_identifier().is_some()
+        && components
+            .items()
+            .next()
+            .is_none_or(|part| part.kind() != CssSyntaxKind::SCSS_INTERPOLATION)
+    {
+        return CommentPlacement::Default(comment);
+    }
+
+    let range = comment.piece().text_range();
+    if range.start() >= name.syntax().text_trimmed_range().end()
+        && range.end() <= components.syntax().text_trimmed_range().start()
+    {
+        CommentPlacement::leading(components.into_syntax(), comment)
+    } else {
+        CommentPlacement::Default(comment)
+    }
 }
 
 fn handle_declaration_name_comment(
