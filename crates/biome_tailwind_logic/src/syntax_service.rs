@@ -91,10 +91,21 @@ pub struct TailwindClassString {
     pub text: TokenText,
     /// The range of `text` in the host source file.
     pub inner_range: TextRange,
-    /// Whether `text` starts or ends with part of a class, such as `bar-` in
-    /// `` `bar-${color}` ``. Parse errors are expected then, so they aren't
-    /// reported.
-    pub has_partial_class: bool,
+    /// The ranges of `text`, relative to its start, that hold only part of a
+    /// class, such as `bar-` in `` `bar-${color}` ``. Parse errors are
+    /// expected there, so they aren't reported.
+    pub partial_classes: [Option<TextRange>; 2],
+}
+
+impl TailwindClassString {
+    /// Whether `range`, relative to the start of `text`, touches part of a
+    /// class.
+    fn touches_partial_class(&self, range: TextRange) -> bool {
+        self.partial_classes
+            .iter()
+            .flatten()
+            .any(|partial| partial.intersect(range).is_some())
+    }
 }
 
 pub struct ParsedTailwindSyntax {
@@ -360,7 +371,7 @@ where
                 category: RuleCategory::Syntax,
             });
         }
-        if parsed.should_emit_diagnostics && !class_string.has_partial_class {
+        if parsed.should_emit_diagnostics {
             emit_parse_diagnostics(&mut ctx, &class_string, parsed.parse.diagnostics());
         }
         ctx.match_query(TailwindSyntaxMatch {
@@ -376,12 +387,17 @@ fn emit_parse_diagnostics<L: Language>(
     diagnostics: &[ParseDiagnostic],
 ) {
     for diagnostic in diagnostics {
-        let text_range = diagnostic
-            .location()
-            .span
-            .map_or(class_string.inner_range, |span| {
-                span + class_string.inner_range.start()
-            });
+        let span = diagnostic.location().span;
+        let touches_partial_class = span.map_or_else(
+            || class_string.partial_classes.iter().any(Option::is_some),
+            |span| class_string.touches_partial_class(span),
+        );
+        if touches_partial_class {
+            continue;
+        }
+        let text_range = span.map_or(class_string.inner_range, |span| {
+            span + class_string.inner_range.start()
+        });
         let mut diagnostic = diagnostic.clone();
         diagnostic.set_location_offset(class_string.inner_range.start());
         ctx.push_signal(SignalEntry {
@@ -720,7 +736,7 @@ fn tailwind_class_string(
         key: TailwindSyntaxCacheKey::new(inner_range, kind),
         text,
         inner_range,
-        has_partial_class: false,
+        partial_classes: [None, None],
     }
 }
 
@@ -798,15 +814,25 @@ impl TailwindClassStringHost for JsTemplateChunkElement {
         // A class touching an interpolation, as in `` `bar-${color}` ``, continues
         // past this chunk.
         let syntax = self.syntax();
-        let has_partial_class = syntax.prev_sibling().is_some_and(|sibling| {
-            JsTemplateElement::can_cast(sibling.kind())
-                && !text.starts_with(|c: char| c.is_ascii_whitespace())
-        }) || syntax.next_sibling().is_some_and(|sibling| {
-            JsTemplateElement::can_cast(sibling.kind())
-                && !text.ends_with(|c: char| c.is_ascii_whitespace())
-        });
+        let is_whitespace = |c: char| c.is_ascii_whitespace();
+        let leading = syntax
+            .prev_sibling()
+            .is_some_and(|sibling| JsTemplateElement::can_cast(sibling.kind()))
+            .then(|| {
+                let end = text.find(is_whitespace).unwrap_or(text.len());
+                TextRange::up_to(TextSize::of(&text[..end]))
+            })
+            .filter(|range| !range.is_empty());
+        let trailing = syntax
+            .next_sibling()
+            .is_some_and(|sibling| JsTemplateElement::can_cast(sibling.kind()))
+            .then(|| {
+                let start = text.rfind(is_whitespace).map_or(0, |index| index + 1);
+                TextRange::new(TextSize::of(&text[..start]), TextSize::of(text))
+            })
+            .filter(|range| !range.is_empty());
         Some(TailwindClassString {
-            has_partial_class,
+            partial_classes: [leading, trailing],
             ..tailwind_class_string(
                 token.token_text(),
                 token.text_trimmed_range().start(),

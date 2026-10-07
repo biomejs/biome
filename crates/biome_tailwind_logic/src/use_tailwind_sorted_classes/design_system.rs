@@ -10,7 +10,7 @@ use std::sync::LazyLock;
 
 use biome_analyze::options::TailwindOptions;
 use biome_module_graph::{ModuleDb, TailwindStylesheet, TailwindThemeEntry, tailwind_stylesheet};
-use rustc_hash::FxHashMap;
+use rustc_hash::{FxHashMap, FxHashSet};
 
 use super::tailwind_preset_v4::PROPERTY_INDEX;
 use super::tailwind_preset_v4_types::ThemeNamespace;
@@ -32,6 +32,8 @@ struct ThemeValues {
     reset: bool,
     /// Keys defined by the stylesheet, mapped to their values.
     values: FxHashMap<Box<str>, Box<str>>,
+    /// Keys removed one at a time, as in `--color-red-500: initial`.
+    removed: FxHashSet<Box<str>>,
 }
 
 /// A static utility declared with `@utility`.
@@ -48,8 +50,8 @@ pub(super) struct CustomUtility {
 pub(super) enum ThemeLookup<'a> {
     /// The stylesheet defines the key with this value.
     Defined(&'a str),
-    /// The stylesheet removed the namespace's default values and didn't
-    /// define the key again.
+    /// The stylesheet removed the key, or the namespace's default values, and
+    /// didn't define the key again.
     Removed,
     /// The default configuration decides.
     Default,
@@ -79,16 +81,21 @@ impl TailwindDesignSystem {
         self.theme.is_empty() && self.utilities.is_empty() && self.variants.is_empty()
     }
 
-    /// Records a theme variable such as `--color-brand: #00f`.
+    /// Records a theme variable such as `--color-brand: #00f`. The value
+    /// `initial` removes the key, as in `--color-red-500: initial`.
     pub fn add_theme_variable(&mut self, name: &str, value: &str) {
         let Some((namespace, key)) = theme_key(name) else {
             return;
         };
-        self.theme
-            .entry(namespace)
-            .or_default()
-            .values
-            .insert(key.into(), value.trim().into());
+        let values = self.theme.entry(namespace).or_default();
+        let value = value.trim();
+        if value == "initial" {
+            values.values.remove(key);
+            values.removed.insert(key.into());
+        } else {
+            values.removed.remove(key);
+            values.values.insert(key.into(), value.into());
+        }
     }
 
     /// Records a reset such as `--color-*: initial`, where `reference` is the
@@ -111,6 +118,7 @@ impl TailwindDesignSystem {
         let values = self.theme.entry(namespace).or_default();
         values.reset = true;
         values.values.clear();
+        values.removed.clear();
     }
 
     /// Records a static utility declared with `@utility`, given the property
@@ -157,7 +165,7 @@ impl TailwindDesignSystem {
         };
         match values.values.get(key) {
             Some(value) => ThemeLookup::Defined(value),
-            None if values.reset => ThemeLookup::Removed,
+            None if values.reset || values.removed.contains(key) => ThemeLookup::Removed,
             None => ThemeLookup::Default,
         }
     }
@@ -254,6 +262,16 @@ mod tests {
         design.reset_theme("--");
         assert!(!design.has_theme_key(ThemeNamespace::Color, "brand"));
         assert!(!design.has_theme_key(ThemeNamespace::Radius, "lg"));
+    }
+
+    #[test]
+    fn initial_removes_a_single_key() {
+        let mut design = TailwindDesignSystem::default();
+        design.add_theme_variable("--color-red-500", " initial ");
+        assert!(!design.has_theme_key(ThemeNamespace::Color, "red-500"));
+        assert!(design.has_theme_key(ThemeNamespace::Color, "red-600"));
+        design.add_theme_variable("--color-red-500", "#f00");
+        assert!(design.has_theme_key(ThemeNamespace::Color, "red-500"));
     }
 
     #[test]

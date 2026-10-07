@@ -1,0 +1,47 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: templateLiteralParseErrors.jsx
+---
+# Input
+```jsx
+<>
+	<div class={`p-2] flex bar-${variable}`}/>
+	<div class={`${variable}-500 flex p-2]`}/>
+	<div class={`bar-${variable}-500`}/>
+</>
+
+```
+
+# Diagnostics
+```
+templateLiteralParseErrors.jsx:2:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected ` ` but instead found `]`
+  
+    1 │ <>
+  > 2 │ 	<div class={`p-2] flex bar-${variable}`}/>
+      │ 	                ^
+    3 │ 	<div class={`${variable}-500 flex p-2]`}/>
+    4 │ 	<div class={`bar-${variable}-500`}/>
+  
+  i Remove ]
+  
+
+```
+
+```
+templateLiteralParseErrors.jsx:3:39 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected ` ` but instead found `]`
+  
+    1 │ <>
+    2 │ 	<div class={`p-2] flex bar-${variable}`}/>
+  > 3 │ 	<div class={`${variable}-500 flex p-2]`}/>
+      │ 	                                     ^
+    4 │ 	<div class={`bar-${variable}-500`}/>
+    5 │ </>
+  
+  i Remove ]
+  
+
+```

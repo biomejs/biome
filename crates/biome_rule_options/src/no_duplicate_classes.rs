@@ -12,10 +12,11 @@ use serde::{Deserialize, Serialize};
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoDuplicateClassesOptions {
-    /// Additional attributes that will be sorted.
+    /// Additional attributes whose classes are checked for duplicates.
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub attributes: Option<Box<[Box<str>]>>,
-    /// Names of the functions or tagged templates that will be sorted.
+    /// Names of the functions or tagged templates whose classes are checked for
+    /// duplicates.
     #[serde(skip_serializing_if = "Option::<_>::is_none")]
     pub functions: Option<Box<[Box<str>]>>,
 }
