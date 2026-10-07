@@ -34,7 +34,7 @@ pub fn parse_json_with_cache(
     cache: &mut NodeCache,
     config: JsonParserOptions,
 ) -> JsonParse {
-    parse_json_with_metavariables_and_cache(source, cache, config, Vec::new())
+    parse_json_with_metavariables_and_cache(source, cache, config, &[])
 }
 
 /// Parses the provided string as JSON program, lexing the given source ranges
@@ -42,7 +42,7 @@ pub fn parse_json_with_cache(
 pub fn parse_json_with_metavariables(
     source: &str,
     config: JsonParserOptions,
-    metavariables: Vec<TextRange>,
+    metavariables: &[TextRange],
 ) -> JsonParse {
     let mut cache = NodeCache::default();
     parse_json_with_metavariables_and_cache(source, &mut cache, config, metavariables)
@@ -52,7 +52,7 @@ fn parse_json_with_metavariables_and_cache(
     source: &str,
     cache: &mut NodeCache,
     config: JsonParserOptions,
-    metavariables: Vec<TextRange>,
+    metavariables: &[TextRange],
 ) -> JsonParse {
     let mut parser = JsonParser::new_with_metavariables(source, config, metavariables);
 

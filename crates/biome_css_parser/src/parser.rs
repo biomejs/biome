@@ -112,7 +112,7 @@ impl<'source> CssParser<'source> {
         source_type: CssFileSource,
         options: CssParserOptions,
     ) -> Self {
-        Self::new_with_metavariables(source, source_type, options, Vec::new())
+        Self::new_with_metavariables(source, source_type, options, &[])
     }
 
     /// Creates a parser that lexes the given source ranges as Grit
@@ -121,7 +121,7 @@ impl<'source> CssParser<'source> {
         source: &'source str,
         source_type: CssFileSource,
         options: CssParserOptions,
-        metavariables: Vec<TextRange>,
+        metavariables: &'source [TextRange],
     ) -> Self {
         Self {
             context: ParserContext::default(),

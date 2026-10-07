@@ -37,7 +37,7 @@ pub fn parse_css_with_cache(
     cache: &mut NodeCache,
     options: CssParserOptions,
 ) -> CssParse {
-    parse_css_with_metavariables_and_cache(source, source_type, cache, options, Vec::new())
+    parse_css_with_metavariables_and_cache(source, source_type, cache, options, &[])
 }
 
 /// Parses the provided string as CSS program, lexing the given source ranges
@@ -46,7 +46,7 @@ pub fn parse_css_with_metavariables(
     source: &str,
     source_type: CssFileSource,
     options: CssParserOptions,
-    metavariables: Vec<TextRange>,
+    metavariables: &[TextRange],
 ) -> CssParse {
     let mut cache = NodeCache::default();
     parse_css_with_metavariables_and_cache(source, source_type, &mut cache, options, metavariables)
@@ -57,7 +57,7 @@ fn parse_css_with_metavariables_and_cache(
     source_type: CssFileSource,
     cache: &mut NodeCache,
     options: CssParserOptions,
-    metavariables: Vec<TextRange>,
+    metavariables: &[TextRange],
 ) -> CssParse {
     let mut parser = CssParser::new_with_metavariables(source, source_type, options, metavariables);
 

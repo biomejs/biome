@@ -69,7 +69,7 @@ impl Parser for GritCssParser {
             &context,
             CssFileSource::css(),
             CssParserOptions::default(),
-            metavariable_ranges(&context),
+            &metavariable_ranges(&context),
         );
 
         SnippetTree {

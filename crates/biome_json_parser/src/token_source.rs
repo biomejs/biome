@@ -20,7 +20,7 @@ impl<'source> JsonTokenSource<'source> {
     pub fn from_str(
         source: &'source str,
         options: JsonParserOptions,
-        metavariables: Vec<TextRange>,
+        metavariables: &'source [TextRange],
     ) -> Self {
         let lexer = Lexer::from_str(source)
             .with_options(options)

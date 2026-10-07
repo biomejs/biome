@@ -53,7 +53,7 @@ impl<'src> CssTokenSource<'src> {
         source: &'src str,
         options: CssParserOptions,
         source_type: CssFileSource,
-        metavariables: Vec<TextRange>,
+        metavariables: &'src [TextRange],
     ) -> Self {
         let lexer = CssLexer::from_str(source)
             .with_options(options)

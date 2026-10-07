@@ -782,7 +782,7 @@ mod tests {
             src,
             CssFileSource::css(),
             CssParserOptions::default(),
-            biome_test_utils::grit_metavariable_ranges(src),
+            &biome_test_utils::grit_metavariable_ranges(src),
         );
         assert!(parse.diagnostics().is_empty(), "{:?}", parse.diagnostics());
 

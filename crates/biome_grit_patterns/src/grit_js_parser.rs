@@ -71,7 +71,7 @@ impl Parser for GritJsParser {
             &context,
             JsFileSource::tsx(),
             JsParserOptions::default(),
-            metavariable_ranges(&context),
+            &metavariable_ranges(&context),
         );
 
         SnippetTree {

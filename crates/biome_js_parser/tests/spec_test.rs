@@ -127,7 +127,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     } else {
         Vec::new()
     };
-    let parsed = parse_with_metavariables(&content, file_source, options, metavariables);
+    let parsed = parse_with_metavariables(&content, file_source, options, &metavariables);
     validate_eof_token(parsed.syntax());
 
     let formatted_ast = format!("{:#?}", parsed.tree());

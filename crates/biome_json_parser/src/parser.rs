@@ -48,7 +48,7 @@ impl From<&JsonFileSource> for JsonParserOptions {
 
 impl<'source> JsonParser<'source> {
     pub fn new(source: &'source str, options: JsonParserOptions) -> Self {
-        Self::new_with_metavariables(source, options, Vec::new())
+        Self::new_with_metavariables(source, options, &[])
     }
 
     /// Creates a parser that lexes the given source ranges as GritQL
@@ -56,7 +56,7 @@ impl<'source> JsonParser<'source> {
     pub fn new_with_metavariables(
         source: &'source str,
         options: JsonParserOptions,
-        metavariables: Vec<TextRange>,
+        metavariables: &'source [TextRange],
     ) -> Self {
         Self {
             context: ParserContext::default(),

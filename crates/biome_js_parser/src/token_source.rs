@@ -28,7 +28,7 @@ impl<'l> JsTokenSource<'l> {
     /// Creates a new token source for the given string
     /// Creates a new token source for the given string, lexing the given source
     /// ranges as Grit metavariables.
-    pub fn from_str(source: &'l str, metavariables: Vec<TextRange>) -> Self {
+    pub fn from_str(source: &'l str, metavariables: &'l [TextRange]) -> Self {
         let lexer = JsLexer::from_str(source).with_metavariables(metavariables);
         let buffered = BufferedLexer::new(lexer);
         let mut source = JsTokenSource::new(buffered);

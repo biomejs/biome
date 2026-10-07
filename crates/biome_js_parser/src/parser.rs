@@ -40,7 +40,7 @@ pub struct JsParser<'source> {
 impl<'source> JsParser<'source> {
     /// Creates a new parser that parses the `source`.
     pub fn new(source: &'source str, source_type: JsFileSource, options: JsParserOptions) -> Self {
-        Self::new_with_metavariables(source, source_type, options, Vec::new())
+        Self::new_with_metavariables(source, source_type, options, &[])
     }
 
     /// Creates a new parser that parses the `source`, lexing the given source
@@ -49,7 +49,7 @@ impl<'source> JsParser<'source> {
         source: &'source str,
         source_type: JsFileSource,
         options: JsParserOptions,
-        metavariables: Vec<TextRange>,
+        metavariables: &'source [TextRange],
     ) -> Self {
         let source = JsTokenSource::from_str(source, metavariables);
 

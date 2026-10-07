@@ -67,7 +67,7 @@ impl Parser for GritJsonParser {
         let parse_result = parse_json_with_metavariables(
             &context,
             JsonParserOptions::default(),
-            metavariable_ranges(&context),
+            &metavariable_ranges(&context),
         );
 
         SnippetTree {

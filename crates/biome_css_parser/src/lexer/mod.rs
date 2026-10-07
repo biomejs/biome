@@ -188,7 +188,7 @@ pub(crate) struct CssLexer<'src> {
     pending_scss_string_start: Option<PendingScssInterpolatedStringStart>,
 
     /// Ranges of the Grit metavariables in the source.
-    metavariables: Vec<TextRange>,
+    metavariables: &'src [TextRange],
 }
 
 impl<'src> Lexer<'src> for CssLexer<'src> {
@@ -204,7 +204,7 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
     }
 
     fn metavariable_ranges(&self) -> &[TextRange] {
-        &self.metavariables
+        self.metavariables
     }
 
     fn current(&self) -> Self::Kind {
@@ -367,7 +367,7 @@ impl<'src> CssLexer<'src> {
             options: CssParserOptions::default(),
             source_type: CssFileSource::default(),
             pending_scss_string_start: None,
-            metavariables: Vec::new(),
+            metavariables: &[],
         }
     }
 
@@ -376,7 +376,7 @@ impl<'src> CssLexer<'src> {
     }
 
     /// Lexes the given source ranges as Grit metavariables.
-    pub(crate) fn with_metavariables(self, metavariables: Vec<TextRange>) -> Self {
+    pub(crate) fn with_metavariables(self, metavariables: &'src [TextRange]) -> Self {
         Self {
             metavariables,
             ..self

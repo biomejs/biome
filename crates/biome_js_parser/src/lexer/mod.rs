@@ -170,7 +170,7 @@ pub(crate) struct JsLexer<'src> {
     diagnostics: Vec<ParseDiagnostic>,
 
     /// Ranges of the Grit metavariables in the source.
-    metavariables: Vec<TextRange>,
+    metavariables: &'src [TextRange],
 }
 
 impl<'src> Lexer<'src> for JsLexer<'src> {
@@ -186,7 +186,7 @@ impl<'src> Lexer<'src> for JsLexer<'src> {
     }
 
     fn metavariable_ranges(&self) -> &[TextRange] {
-        &self.metavariables
+        self.metavariables
     }
 
     fn current(&self) -> Self::Kind {
@@ -360,12 +360,12 @@ impl<'src> JsLexer<'src> {
             current_flags: TokenFlags::empty(),
             position: 0,
             diagnostics: vec![],
-            metavariables: Vec::new(),
+            metavariables: &[],
         }
     }
 
     /// Lexes the given source ranges as Grit metavariables.
-    pub(crate) fn with_metavariables(self, metavariables: Vec<TextRange>) -> Self {
+    pub(crate) fn with_metavariables(self, metavariables: &'src [TextRange]) -> Self {
         Self {
             metavariables,
             ..self

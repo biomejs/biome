@@ -143,7 +143,7 @@ fn parse_common(
     text: &str,
     source_type: JsFileSource,
     options: JsParserOptions,
-    metavariables: Vec<TextRange>,
+    metavariables: &[TextRange],
 ) -> (Vec<Event<JsSyntaxKind>>, Vec<ParseDiagnostic>, Vec<Trivia>) {
     let mut parser = JsParser::new_with_metavariables(text, source_type, options, metavariables);
     syntax::program::parse(&mut parser);
@@ -291,7 +291,7 @@ pub fn parse_js_with_cache(
     options: JsParserOptions,
     cache: &mut NodeCache,
 ) -> Parse<AnyJsRoot> {
-    parse_js_with_metavariables_and_cache(text, source_type, options, Vec::new(), cache)
+    parse_js_with_metavariables_and_cache(text, source_type, options, &[], cache)
 }
 
 /// Parses the provided string as an EcmaScript program, lexing the given source
@@ -300,7 +300,7 @@ pub fn parse_with_metavariables(
     text: &str,
     source_type: JsFileSource,
     options: JsParserOptions,
-    metavariables: Vec<TextRange>,
+    metavariables: &[TextRange],
 ) -> Parse<AnyJsRoot> {
     let mut cache = NodeCache::default();
     parse_js_with_metavariables_and_cache(text, source_type, options, metavariables, &mut cache)
@@ -310,7 +310,7 @@ fn parse_js_with_metavariables_and_cache(
     text: &str,
     source_type: JsFileSource,
     options: JsParserOptions,
-    metavariables: Vec<TextRange>,
+    metavariables: &[TextRange],
     cache: &mut NodeCache,
 ) -> Parse<AnyJsRoot> {
     let (events, errors, tokens) = parse_common(text, source_type, options, metavariables);
@@ -424,7 +424,7 @@ pub fn parse_js_with_offset_and_cache(
     options: JsParserOptions,
     cache: &mut NodeCache,
 ) -> JsOffsetParse {
-    let (events, errors, tokens) = parse_common(text, source_type, options, Vec::new());
+    let (events, errors, tokens) = parse_common(text, source_type, options, &[]);
     let mut tree_sink =
         crate::JsOffsetLosslessTreeSink::with_cache(text, &tokens, cache, base_offset);
     biome_parser::event::process(&mut tree_sink, events, errors);

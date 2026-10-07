@@ -40,7 +40,7 @@ pub(crate) struct Lexer<'src> {
     options: JsonParserOptions,
 
     /// Ranges of the Grit metavariables in the source.
-    metavariables: Vec<TextRange>,
+    metavariables: &'src [TextRange],
 }
 
 impl<'src> Lexer<'src> {
@@ -51,7 +51,7 @@ impl<'src> Lexer<'src> {
             position: 0,
             diagnostics: vec![],
             options: JsonParserOptions::default(),
-            metavariables: Vec::new(),
+            metavariables: &[],
         }
     }
 
@@ -828,7 +828,7 @@ impl<'src> Lexer<'src> {
     }
 
     /// Lexes the given source ranges as GritQL metavariables.
-    pub(crate) fn with_metavariables(mut self, metavariables: Vec<TextRange>) -> Self {
+    pub(crate) fn with_metavariables(mut self, metavariables: &'src [TextRange]) -> Self {
         self.metavariables = metavariables;
         self
     }
