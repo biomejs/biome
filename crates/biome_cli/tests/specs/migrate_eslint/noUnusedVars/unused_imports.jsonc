@@ -1,0 +1,13 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "unused-imports/no-unused-vars": [
+        "warn",
+        {
+          "ignoreUsingDeclarations": true
+        }
+      ]
+    }
+  }
+}
