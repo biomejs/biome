@@ -1,0 +1,41 @@
+$suffix: frames;
+@key#{$suffix} fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+$name: theme;
+@custom-#{$name} token;
+
+@custom-#{$name}-end token;
+@custom-#{$name}-end token { .item { color: red; } }
+@media#{$name} token;
+@include#{$name} token;
+@-#{$name} token;
+@--#{$name} token;
+@custom-#{$name}2-end token;
+@custom-#{$name}01 token;
+@custom-#{$name}2.5 token;
+@custom-#{$name}+2 token;
+@custom-#{$name}2% token;
+@custom-#{$name}- token;
+@#{$name} token;
+@#{$name} /* fully interpolated */ token;
+@#{$name}-end token { .item { color: red; } }
+@custom-#{$name} /* boundary */ token;
+@custom-#{$name} /* block boundary */ token { .item { color: red; } }
+@custom-#{$name} /* no prelude */ { .item { color: red; } }
+@custom-#{$name}/**/token;
+@custom-/**/#{$name} token;
+@custom- #{$name} token;
+@custom-#{$name} // boundary
+token;
+
+@custom-#{$name}--> token;
+@#{$name}--> token { .item { color: red; } }
+@custom-#{$name} --> token;
+
+.host {
+  @custom-#{$name} final
+}
+@custom-#{$name} final
