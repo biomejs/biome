@@ -49,6 +49,7 @@ type ConditionalType<T> = {
 type ManyVoid = readonly void[];
 function foo(arr: readonly void[]) {}
 type invalidVoidUnion = void | Map<string, number>;
+type voidNeverStringUnion = void | never | string;
 
 ```
 
@@ -656,7 +657,7 @@ invalid.ts:44:28 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
   > 44 │ function foo(arr: readonly void[]) {}
        │                            ^^^^
     45 │ type invalidVoidUnion = void | Map<string, number>;
-    46 │ 
+    46 │ type voidNeverStringUnion = void | never | string;
   
   i Unsafe fix: Use undefined instead.
   
@@ -665,7 +666,7 @@ invalid.ts:44:28 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
     44    │ - function·foo(arr:·readonly·void[])·{}
        44 │ + function·foo(arr:·readonly·undefined[])·{}
     45 45 │   type invalidVoidUnion = void | Map<string, number>;
-    46 46 │   
+    46 46 │   type voidNeverStringUnion = void | never | string;
   
 
 ```
@@ -679,7 +680,8 @@ invalid.ts:45:25 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
     44 │ function foo(arr: readonly void[]) {}
   > 45 │ type invalidVoidUnion = void | Map<string, number>;
        │                         ^^^^
-    46 │ 
+    46 │ type voidNeverStringUnion = void | never | string;
+    47 │ 
   
   i Unsafe fix: Use undefined instead.
   
@@ -687,7 +689,30 @@ invalid.ts:45:25 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━�
     44 44 │   function foo(arr: readonly void[]) {}
     45    │ - type·invalidVoidUnion·=·void·|·Map<string,·number>;
        45 │ + type·invalidVoidUnion·=·undefined·|·Map<string,·number>;
-    46 46 │   
+    46 46 │   type voidNeverStringUnion = void | never | string;
+    47 47 │   
+  
+
+```
+
+```
+invalid.ts:46:29 lint/suspicious/noConfusingVoidType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! void is confusing inside a union type.
+  
+    44 │ function foo(arr: readonly void[]) {}
+    45 │ type invalidVoidUnion = void | Map<string, number>;
+  > 46 │ type voidNeverStringUnion = void | never | string;
+       │                             ^^^^
+    47 │ 
+  
+  i Unsafe fix: Use undefined instead.
+  
+    44 44 │   function foo(arr: readonly void[]) {}
+    45 45 │   type invalidVoidUnion = void | Map<string, number>;
+    46    │ - type·voidNeverStringUnion·=·void·|·never·|·string;
+       46 │ + type·voidNeverStringUnion·=·undefined·|·never·|·string;
+    47 47 │   
   
 
 ```
