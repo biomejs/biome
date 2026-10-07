@@ -19,50 +19,76 @@ Usage: check [--write] [--unsafe] [--assist-enabled=<true|false>] [--enforce-ass
 ]...
 
 Options that change how the JSON parser behaves.
-        --json-parse-allow-comments=<true|false>  Allows parsing comments in `.json` files.
-        --json-parse-allow-trailing-commas=<true|false>  Allows parsing trailing commas in `.json`
-                              files.
+        --json-parse-allow-comments=<true|false>  Controls whether comments are allowed in files
+                              parsed as JSON. When unset, Biome follows the file type's default
+                              behavior. An explicit value overrides that behavior, except that
+                              `biome.jsonc` always allows comments.
+        --json-parse-allow-trailing-commas=<true|false>  Controls whether trailing commas are
+                              allowed in files parsed as JSON. When unset, Biome follows the file
+                              type's default behavior. An explicit value overrides that behavior,
+                              except that `biome.jsonc` always allows trailing commas.
 
 Options that change how the CSS parser behaves.
-        --css-parse-css-modules=<true|false>  Enables parsing of CSS Modules-specific features.
-                              Enable this feature only when your files don't end in `.module.css` or
-                              `.module.scss`.
-        --css-parse-tailwind-directives=<true|false>  Enables parsing of Tailwind CSS 4.0 directives
-                              and functions.
+        --css-parse-css-modules=<true|false>  Enables CSS Modules-specific syntax such as `:local`,
+                              `:global`, `composes`, and `@value`. When unset, Biome enables this
+                              syntax automatically for files whose names end in `.module.css` or
+                              `.module.scss; otherwise, it defaults to `false`. Enable it explicitly
+                              when CSS Module files use another naming convention.
+        --css-parse-tailwind-directives=<true|false>  Enables parsing Tailwind CSS 4.0 directives
+                              and functions, including `@theme`, `@utility`, `@variant`, `@source`,
+                              and `@apply`. Defaults to `false`.
 
 Options that change how the Markdown parser behaves
         --md-parse-frontmatter=<true|false>  Enables parsing frontmatter at the start of the file.
                               Defaults to `false`.
 
-The configuration contained in `biome.json`.
-        --vcs-enabled=<true|false>  Whether Biome should integrate with the version control client.
-        --vcs-client-kind=<git>  The version control client.
-        --vcs-use-ignore-file=<true|false>  When `true`, Biome ignores files listed in `.gitignore`,
-                              `.ignore`, and Git's local exclude file.
-        --vcs-root=PATH       Sets the directory where Biome checks for version control files.
+The configuration contained in `biome.json` or `biome.jsonc`.
+        --vcs-enabled=<true|false>  Enables or disables version-control integration. Defaults to
+                              `false`. Enabling integration requires `vcs.clientKind` to be set.
+        --vcs-client-kind=<git>  Selects the version-control client. Currently, only `git` is
+                              supported.
+        --vcs-use-ignore-file=<true|false>  Controls whether Biome applies patterns from
+                              `.gitignore`, Git's local `.git/info/exclude`, and supported `.ignore`
+                              files, including nested ignore files. Patterns in the root ignore file
+                              are resolved from `vcs.root`. Patterns in nested ignore files are
+                              resolved from the directory containing that file. Defaults to `false`.
+        --vcs-root=PATH       Sets the directory where Biome looks for version-control files. A
+                              relative value is resolved from the directory containing the current
+                              configuration file, while an absolute path is used directly.
                               Defaults to the directory containing `biome.json` or `biome.jsonc`. If
                               no configuration is found, Biome uses the current working directory.
                               If neither directory is available, Biome disables version control
                               integration and emits a diagnostic.
-        --vcs-default-branch=BRANCH  The project's default branch.
-        --files-max-size=NUMBER  The maximum source file size in bytes. Biome ignores larger files.
-                              Defaults to `1 MiB`.
+        --vcs-default-branch=BRANCH  Sets the base branch used by `--changed` when `--since` is not
+                              provided. If neither this option nor `--since` is set, commands using
+                              `--changed` fail because Biome cannot determine the comparison base.
+        --files-max-size=NUMBER  The maximum source-file size in bytes. Biome skips larger files and
+                              emits a warning diagnostic. Defaults to `1 MiB`.
         --files-ignore-unknown=<true|false>  Prevents Biome from emitting diagnostics for
-                              unrecognized file types.
+                              unrecognized file types. Defaults to `false`.
         --format-with-errors=<true|false>  Allows formatting files that contain syntax errors when
                               set to `true`. Defaults to `false`.
         --indent-style=<tab|space>  Uses tabs or spaces for indentation. Defaults to `tab`.
-        --indent-width=NUMBER  The indentation width. Defaults to `2`.
+        --indent-width=NUMBER  Sets the indentation width. With space indentation, this is the
+                              number of spaces emitted per indentation level. With tab indentation,
+                              Biome emits one tab per level and uses this value as the tab's display
+                              width when calculating line length. Accepted values are `0` through
+                              `24`. Defaults to `2`.
         --line-ending=<lf|crlf|cr|auto>  Selects the line ending. `auto` uses the platform
                               convention. Defaults to `lf`.
-        --line-width=NUMBER   The maximum line width. Defaults to `80`.
+        --line-width=NUMBER   Sets the preferred maximum line width used when deciding where to wrap
+                              code. Some content, such as long unbreakable strings, may still exceed
+                              this width. Accepted values are `1` through `320`. Defaults to `80`.
         --attribute-position=<multiline|auto>  The attribute position style in HTML-like languages.
                               Defaults to `auto`.
-        --bracket-same-line=<true|false>  Places the `>` of a multiline HTML or JSX element at the
-                              end of the last line instead of on the next line. Self-closing
-                              elements are unaffected. Defaults to `false`.
-        --bracket-spacing=<true|false>  Whether to insert spaces inside braces in object literals.
-                              Defaults to `true`.
+        --bracket-same-line=<true|false>  Controls the placement of the closing bracket for
+                              multiline HTML and JSX opening tags. Biome places the bracket at the
+                              end of the last attribute line when enabled and on its own line when
+                              disabled. This also affects self-closing HTML elements, but
+                              self-closing JSX elements are unaffected. Defaults to `false`.
+        --bracket-spacing=<true|false>  Controls spaces inside braces in supported single-line
+                              structures. The affected structures vary by language. Defaults to
+                              `true`.
         --delimiter-spacing=<true|false>  Controls spaces immediately inside supported delimiters
                               when their content fits on one line. It doesn't add spaces before
                               opening delimiters or inside empty delimiters.
@@ -77,29 +103,44 @@ The configuration contained in `biome.json`.
                               When formatting `package.json`, Biome uses `always` unless configured
                               otherwise.
         --trailing-newline=<true|false>  Whether to add a trailing newline at the end of the file.
-                              Defaults to `true`; disabling this option can cause compatibility
+                              Defaults to `true`. Disabling this option can cause compatibility
                               problems with other tools.
-        --use-editorconfig=<true|false>  Uses `.editorconfig` files to configure the formatter.
-                              Settings in `biome.json` or `biome.jsonc` override `.editorconfig`
-                              settings. Defaults to `false`.
-        --jsx-everywhere=<true|false>  When enabled, files such as `.js`, `.mjs`, and `.cjs` may
-                              contain JSX syntax. Defaults to `true`.
-        --javascript-formatter-enabled=<true|false>  Controls the formatter for JavaScript and
-                              languages that extend it.
-        --jsx-quote-style=<double|single>  The type of quotes used in JSX. Defaults to `double`.
-        --quote-properties=<preserve|as-needed>  Controls when object properties are quoted.
-                              Defaults to `asNeeded` in configuration (`as-needed` on the CLI).
-        --trailing-commas=<all|es5|none>  Prints trailing commas wherever possible in multiline
-                              comma-separated structures. Defaults to `all`.
+        --use-editorconfig=<true|false>  Controls whether Biome loads formatter settings from an
+                              `.editorconfig` file. Biome reads `indent_style`, `indent_size`,
+                              `end_of_line`, and `insert_final_newline`. Settings in `biome.json` or
+                              `biome.jsonc` take precedence. Biome loads only one `.editorconfig`.
+                              Nested cascading configurations and the EditorConfig `root` property
+                              are not supported. Defaults to `false`.
+        --jsx-everywhere=<true|false>  Controls whether `.js`, `.mjs`, and `.cjs` files may contain
+                              JSX syntax. Disabling this option causes JSX in those files to raise a
+                              diagnostic. Defaults to `true`.
+        --javascript-formatter-enabled=<true|false>  Enables or disables the formatter for
+                              JavaScript and languages that extend it.
+        --jsx-quote-style=<double|single>  Selects the preferred quote style for JSX attribute
+                              values. Defaults to `double`.
+        --quote-properties=<preserve|as-needed>  Controls whether quotes around object property
+                              names are preserved. `asNeeded` removes quotes when the property name
+                              is valid without them, while `preserve` keeps quotes around property
+                              names that were quoted in the input. Defaults to `asNeeded` in
+                              configuration (`as-needed` on the CLI).
+        --trailing-commas=<all|es5|none>  Controls trailing commas in multiline comma-separated
+                              structures. `all` adds trailing commas wherever syntax permits,
+                              including function parameters and calls. `es5` adds them only in
+                              constructs supported by ES5, such as array and object literals, and
+                              excludes function parameters, function calls, and TypeScript type
+                              parameters. `none` removes trailing commas. Defaults to `all`.
         --semicolons=<always|as-needed>  Prints semicolons after every statement or only where
                               needed to avoid automatic semicolon insertion hazards. Defaults to
                               `always`.
-        --arrow-parentheses=<always|as-needed>  Whether to add parentheses around arrow function
-                              parameters. Defaults to `always`.
-        --bracket-same-line=<true|false>  Whether to hug the closing bracket of multiline HTML/JSX
-                              tags to the end of the last line, rather than being alone on the
-                              following line. If unset, inherits the global bracket placement
-                              setting.
+        --arrow-parentheses=<always|as-needed>  Controls parentheses around arrow-function
+                              parameters. `always` always prints parentheses, while `asNeeded` omits
+                              them when an arrow function has one parameter and the syntax permits
+                              it. Defaults to `always`.
+        --bracket-same-line=<true|false>  Controls the placement of the closing bracket for
+                              multiline JSX opening tags. Biome places the bracket at the end of the
+                              last attribute line when enabled and on its own line after the last
+                              attribute when disabled. Self-closing JSX elements are unaffected. If
+                              unset, inherits the global bracket placement setting.
         --javascript-formatter-indent-style=<tab|space>  The indent style applied to JavaScript and
                               languages that extend it. If unset, inherits the global indentation
                               style.
@@ -109,23 +150,27 @@ The configuration contained in `biome.json`.
         --javascript-formatter-line-ending=<lf|crlf|cr|auto>  The line ending applied to JavaScript
                               and languages that extend it. If unset, inherits the global line
                               ending.
-        --javascript-formatter-line-width=NUMBER  The maximum line width applied to JavaScript and
-                              languages that extend it. If unset, inherits the global line width.
-        --javascript-formatter-quote-style=<double|single>  The type of quotes used in JavaScript
-                              code. Defaults to `double`.
+        --javascript-formatter-line-width=NUMBER  The preferred maximum line width applied to
+                              JavaScript and languages that extend it. If unset, inherits the global
+                              line width.
+        --javascript-formatter-quote-style=<double|single>  Selects the preferred quote style for
+                              JavaScript and TypeScript string literals. Biome may use the alternate
+                              quote when that avoids additional escaping. Defaults to `double`.
         --javascript-formatter-attribute-position=<multiline|auto>  The attribute position style in
                               JSX elements. If unset, inherits the global attribute position
                               setting.
-        --javascript-formatter-bracket-spacing=<true|false>  Whether to insert spaces inside braces
-                              in object literals. If unset, inherits the global bracket spacing
-                              setting.
+        --javascript-formatter-bracket-spacing=<true|false>  Controls spaces inside the braces of
+                              single-line object literals. Biome formats `{value: 1}` when disabled
+                              and `{ value: 1 }` when enabled. If unset, inherits the global bracket
+                              spacing setting.
         --javascript-formatter-delimiter-spacing=<true|false>  Controls spaces immediately inside
                               supported JavaScript and TypeScript delimiters when their content fits
-                              on one line. It doesn't add spaces before opening delimiters or inside
-                              empty delimiters.
-                              It affects parentheses, square brackets, template interpolations,
-                              TypeScript angle brackets, JSX expression braces, and logical NOT. In
-                              operator chains, only the final operator receives a following space.
+                              on one line. This affects parentheses, square brackets, template
+                              interpolations, TypeScript angle brackets, and JSX expression braces.
+                              Empty delimiters are unchanged.
+                              It also controls spacing after logical NOT operators. In a chain of
+                              logical NOT operators, only the final operator receives a following
+                              space. Biome doesn't add spaces before opening delimiters.
                               If unset, inherits the global delimiter spacing setting.
         --javascript-formatter-expand=<auto|always|never>  Uses the same `auto`, `always`, and
                               `never` behavior as the global expansion setting.
@@ -136,25 +181,34 @@ The configuration contained in `biome.json`.
         --javascript-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at
                               the end of the file. If unset, inherits the global trailing newline
                               setting.
-        --javascript-linter-enabled=<true|false>  Controls the linter for JavaScript and languages
-                              that extend it.
-        --javascript-assist-enabled=<true|false>  Controls assist actions for JavaScript and
+        --javascript-linter-enabled=<true|false>  Enables or disables the linter for JavaScript and
                               languages that extend it.
-        --json-parse-allow-comments=<true|false>  Allows parsing comments in `.json` files.
-        --json-parse-allow-trailing-commas=<true|false>  Allows parsing trailing commas in `.json`
-                              files.
-        --json-formatter-enabled=<true|false>  Controls the formatter for JSON and languages that
-                              extend it.
+        --javascript-assist-enabled=<true|false>  Enables or disables assist actions for JavaScript
+                              and languages that extend it.
+        --json-parse-allow-comments=<true|false>  Controls whether comments are allowed in files
+                              parsed as JSON. When unset, Biome follows the file type's default
+                              behavior. An explicit value overrides that behavior, except that
+                              `biome.jsonc` always allows comments.
+        --json-parse-allow-trailing-commas=<true|false>  Controls whether trailing commas are
+                              allowed in files parsed as JSON. When unset, Biome follows the file
+                              type's default behavior. An explicit value overrides that behavior,
+                              except that `biome.jsonc` always allows trailing commas.
+        --json-formatter-enabled=<true|false>  Enables or disables the formatter for JSON and
+                              languages that extend it.
         --json-formatter-indent-style=<tab|space>  The indent style applied to JSON and languages
                               that extend it. If unset, inherits the global indentation style.
         --json-formatter-indent-width=NUMBER  The indentation width applied to JSON and languages
                               that extend it. If unset, inherits the global indentation width.
         --json-formatter-line-ending=<lf|crlf|cr|auto>  The line ending applied to JSON and
                               languages that extend it. If unset, inherits the global line ending.
-        --json-formatter-line-width=NUMBER  The maximum line width applied to JSON and languages
-                              that extend it. If unset, inherits the global line width.
-        --json-formatter-trailing-commas=<none|all>  Prints trailing commas wherever possible in
-                              multiline comma-separated structures. Defaults to `none`.
+        --json-formatter-line-width=NUMBER  The preferred maximum line width applied to JSON and
+                              languages that extend it. If unset, inherits the global line width.
+        --json-formatter-trailing-commas=<none|all>  Controls trailing commas in multiline JSON
+                              arrays and objects. `none` removes trailing commas, while `all` adds
+                              them wherever the JSON formatter supports them. Use `all` only for
+                              JSON variants that allow trailing commas, and ensure
+                              `json.parser.allowTrailingCommas` is enabled or automatically detected
+                              for those files. Defaults to `none`.
         --json-formatter-expand=<auto|always|never>  Uses the same `auto`, `always`, and `never`
                               behavior as the global expansion setting.
                               If unset, inherits the global expansion setting.
@@ -169,26 +223,31 @@ The configuration contained in `biome.json`.
                               If unset, inherits the global delimiter spacing setting.
         --json-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
                               of the file. If unset, inherits the global trailing newline setting.
-        --json-linter-enabled=<true|false>  Controls the linter for JSON and languages that extend
-                              it.
-        --json-assist-enabled=<true|false>  Controls assist actions for JSON and languages that
-                              extend it.
-        --css-parse-css-modules=<true|false>  Enables parsing of CSS Modules-specific features.
-                              Enable this feature only when your files don't end in `.module.css` or
-                              `.module.scss`.
-        --css-parse-tailwind-directives=<true|false>  Enables parsing of Tailwind CSS 4.0 directives
-                              and functions.
-        --css-formatter-enabled=<true|false>  Controls the formatter for CSS and languages that
-                              extend it.
+        --json-linter-enabled=<true|false>  Enables or disables the linter for JSON and languages
+                              that extend it.
+        --json-assist-enabled=<true|false>  Enables or disables assist actions for JSON and
+                              languages that extend it.
+        --css-parse-css-modules=<true|false>  Enables CSS Modules-specific syntax such as `:local`,
+                              `:global`, `composes`, and `@value`. When unset, Biome enables this
+                              syntax automatically for files whose names end in `.module.css` or
+                              `.module.scss; otherwise, it defaults to `false`. Enable it explicitly
+                              when CSS Module files use another naming convention.
+        --css-parse-tailwind-directives=<true|false>  Enables parsing Tailwind CSS 4.0 directives
+                              and functions, including `@theme`, `@utility`, `@variant`, `@source`,
+                              and `@apply`. Defaults to `false`.
+        --css-formatter-enabled=<true|false>  Enables or disables the formatter for CSS and
+                              languages that extend it.
         --css-formatter-indent-style=<tab|space>  The indent style applied to CSS and languages that
                               extend it. If unset, inherits the global indentation style.
         --css-formatter-indent-width=NUMBER  The indentation width applied to CSS and languages that
                               extend it. If unset, inherits the global indentation width.
         --css-formatter-line-ending=<lf|crlf|cr|auto>  The line ending applied to CSS and languages
                               that extend it. If unset, inherits the global line ending.
-        --css-formatter-line-width=NUMBER  The maximum line width for CSS and languages that extend
-                              it. If unset, inherits the global line width.
-        --css-formatter-quote-style=<double|single>  The type of quotes used in CSS code. Defaults
+        --css-formatter-line-width=NUMBER  The preferred maximum line width for CSS and languages
+                              that extend it. If unset, inherits the global line width.
+        --css-formatter-quote-style=<double|single>  Selects the preferred quote style for CSS
+                              strings. Biome may use the alternate quote when that avoids additional
+                              escaping. Quotes in `@charset` rules are currently preserved. Defaults
                               to `double`.
         --css-formatter-delimiter-spacing=<true|false>  Controls spaces inside CSS parentheses and
                               square brackets when their content fits on one line. When enabled,
@@ -197,8 +256,8 @@ The configuration contained in `biome.json`.
                               If unset, inherits the global delimiter spacing setting.
         --css-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
                               of the file. If unset, inherits the global trailing newline setting.
-        --css-linter-enabled=<true|false>  Controls the linter for CSS files.
-        --css-assist-enabled=<true|false>  Controls assist actions for CSS files.
+        --css-linter-enabled=<true|false>  Enables or disables the linter for CSS.
+        --css-assist-enabled=<true|false>  Enables or disables assist actions for CSS.
         --md-parse-frontmatter=<true|false>  Enables parsing frontmatter at the start of the file.
                               Defaults to `false`.
         --md-formatter-enabled=<true|false>  Control the formatter for Markdown (and its super
@@ -252,69 +311,80 @@ The configuration contained in `biome.json`.
                               its super languages) files. `auto` uses CRLF on Windows and LF on
                               other platforms.
         --yaml-linter-enabled=<true|false>  Control the linter for Yaml files.
-        --graphql-formatter-enabled=<true|false>  Controls the formatter for GraphQL files.
+        --graphql-formatter-enabled=<true|false>  Enables or disables the formatter for GraphQL.
         --graphql-formatter-indent-style=<tab|space>  The indent style applied to GraphQL files. If
                               unset, inherits the global indentation style.
         --graphql-formatter-indent-width=NUMBER  The indentation width applied to GraphQL files. If
                               unset, inherits the global indentation width.
         --graphql-formatter-line-ending=<lf|crlf|cr|auto>  The line ending applied to GraphQL files.
                               If unset, inherits the global line ending.
-        --graphql-formatter-line-width=NUMBER  The maximum line width for GraphQL files. If unset,
-                              inherits the global line width.
-        --graphql-formatter-quote-style=<double|single>  The type of quotes used in GraphQL code.
-                              Defaults to `double`.
-        --bracket-spacing=<true|false>  Whether to insert spaces inside braces in object literals.
-                              If unset, inherits the global bracket spacing setting.
+        --graphql-formatter-line-width=NUMBER  The preferred maximum line width for GraphQL files.
+                              If unset, inherits the global line width.
+        --graphql-formatter-quote-style=<double|single>  Reserved for future formatter support. The
+                              current formatter preserves standard double-quoted GraphQL strings and
+                              does not use this setting.
+        --bracket-spacing=<true|false>  Controls spaces inside the braces of single-line GraphQL
+                              object values. Biome formats `{name: "Biome"}` when disabled and `{
+                              name: "Biome" }` when enabled. If unset, inherits the global bracket
+                              spacing setting.
         --graphql-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the
                               end of the file. If unset, inherits the global trailing newline
                               setting.
-        --graphql-linter-enabled=<true|false>  Controls the linter for GraphQL files.
-        --graphql-assist-enabled=<true|false>  Controls assist actions for GraphQL files.
-        --grit-formatter-enabled=<true|false>  Controls the formatter for GritQL files.
+        --graphql-linter-enabled=<true|false>  Enables or disables the linter for GraphQL.
+        --graphql-assist-enabled=<true|false>  Enables or disables assist actions for GraphQL.
+                              Defaults to `false`.
+        --grit-formatter-enabled=<true|false>  Enables or disables the formatter for GritQL.
         --grit-formatter-indent-style=<tab|space>  The indent style applied to GritQL files. If
                               unset, inherits the global indentation style.
         --grit-formatter-indent-width=NUMBER  The indentation width applied to GritQL files. If
                               unset, inherits the global indentation width.
         --grit-formatter-line-ending=<lf|crlf|cr|auto>  The line ending applied to GritQL files. If
                               unset, inherits the global line ending.
-        --grit-formatter-line-width=NUMBER  The maximum line width for GritQL files. If unset,
-                              inherits the global line width.
+        --grit-formatter-line-width=NUMBER  The preferred maximum line width for GritQL files. If
+                              unset, inherits the global line width.
         --grit-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
                               of the file. If unset, inherits the global trailing newline setting.
-        --grit-linter-enabled=<true|false>  Controls the linter for GritQL files.
-        --grit-assist-enabled=<true|false>  Controls assist actions for GritQL files.
-        --html-formatter-enabled=<true|false>  Controls the formatter for HTML and languages that
-                              extend it.
+        --grit-linter-enabled=<true|false>  Enables or disables the linter for GritQL.
+        --grit-assist-enabled=<true|false>  Enables or disables assist actions for GritQL.
+        --html-formatter-enabled=<true|false>  Enables or disables the formatter for HTML and
+                              languages that extend it. The formatter is experimental and disabled
+                              by default. Formatting complete HTML, Vue, Svelte, and Astro files
+                              requires `html.experimentalFullSupportEnabled` to be `true`.
         --html-formatter-indent-style=<tab|space>  The indent style applied to HTML and languages
                               that extend it. If unset, inherits the global indentation style.
         --html-formatter-indent-width=NUMBER  The indentation width applied to HTML and languages
                               that extend it. If unset, inherits the global indentation width.
         --html-formatter-line-ending=<lf|crlf|cr|auto>  The line ending applied to HTML and
                               languages that extend it. If unset, inherits the global line ending.
-        --html-formatter-line-width=NUMBER  The maximum line width for HTML and languages that
-                              extend it. If unset, inherits the global line width.
+        --html-formatter-line-width=NUMBER  The preferred maximum line width for HTML and languages
+                              that extend it. If unset, inherits the global line width.
         --html-formatter-attribute-position=<multiline|auto>  The attribute position style in HTML
                               elements. If unset, inherits the global attribute position setting.
-        --html-formatter-bracket-same-line=<true|false>  Whether to place the closing bracket of a
-                              multiline HTML tag at the end of the last line instead of on its own
-                              line. If unset, inherits the global `bracketSameLine` setting.
-        --html-formatter-whitespace-sensitivity=<css|strict|ignore>  Whether to account for
-                              whitespace sensitivity when formatting HTML and languages that extend
-                              it. Defaults to `css`.
-        --html-formatter-indent-script-and-style=<true|false>  Whether to indent `<script>` and
-                              `<style>` tags in HTML and languages that extend it. Defaults to
-                              `false`.
+        --html-formatter-bracket-same-line=<true|false>  Controls the placement of the closing
+                              bracket for multiline HTML opening tags. Biome places the bracket at
+                              the end of the last attribute line when enabled and on its own line
+                              after the last attribute when disabled. This option also affects
+                              self-closing HTML elements. If unset, inherits the global
+                              `bracketSameLine` setting.
+        --html-formatter-whitespace-sensitivity=<css|strict|ignore>  Controls how the formatter
+                              treats whitespace around text and child elements in HTML, Vue, Svelte,
+                              and Astro markup. The `ignore` setting should be used only when
+                              whitespace cannot affect rendered output. Defaults to `css`.
+        --html-formatter-indent-script-and-style=<true|false>  Controls whether the content of
+                              `<script>` and `<style>` tags is indented by one level in HTML, Vue,
+                              Svelte, and Astro files. Defaults to `false`.
         --html-formatter-self-close-void-elements=<always|never>  Controls whether void elements are
                               self-closed. Defaults to `never`.
         --html-formatter-trailing-newline=<true|false>  Whether to add a trailing newline at the end
                               of the file. Unlike other language-specific trailing newline settings,
                               this option defaults to `true` instead of inheriting the global
                               setting.
-        --html-linter-enabled=<true|false>  Controls the linter for HTML and languages that extend
-                              it.
-        --html-assist-enabled=<true|false>  Controls assist actions for HTML and languages that
-                              extend it.
-        --assist-enabled=<true|false>  Whether Biome should enable assist via LSP and CLI.
+        --html-linter-enabled=<true|false>  Enables or disables the linter for HTML and languages
+                              that extend it.
+        --html-assist-enabled=<true|false>  Enables or disables assist actions for HTML and
+                              languages that extend it.
+        --assist-enabled=<true|false>  Enables configured assist actions in the CLI and editor
+                              integrations. Defaults to `true`.
 
 These options are available to many commands and control general CLI behavior, diagnostics, and
 output.
