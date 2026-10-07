@@ -16,7 +16,7 @@ info: svelte/compat_binding.svelte
 # Formatted
 
 ```svelte
-<div bind:yy></div>
+<div bind:y></div>
 <div {x}></div>
 <div class="class"></div>
 

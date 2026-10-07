@@ -1,0 +1,33 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/issue_11304_source.svelte
+---
+
+# Input
+
+```svelte
+<p>éclair</p>
+<Component aria-label={"café"} title={`first
+second`} data={  { label: "naïve", count: 1 } } onsubmit={(évent)=>{notify("résumé"); return évent}} />
+<p>after</p>
+
+```
+
+
+# Formatted
+
+```svelte
+<p>éclair</p>
+<Component
+	aria-label={"café"}
+	title={`first
+second`}
+	data={{ label: "naïve", count: 1 }}
+	onsubmit={(évent) => {
+		notify("résumé");
+		return évent;
+	}}
+/>
+<p>after</p>
+
+```

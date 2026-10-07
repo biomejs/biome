@@ -5655,3 +5655,94 @@ export const reportArguments = defineRule({
         assert_eq!(diagnostic.location().span, Some(range));
     }
 }
+
+#[cfg(feature = "html_embeds")]
+fn assert_issue_11304_svelte_attribute_formatting_is_idempotent(source: &str) {
+    const PATH: &str = "/project/issue_11304.svelte";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), source);
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                html: Some(HtmlConfiguration {
+                    experimental_full_support_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let first = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            inline_config: None,
+        })
+        .unwrap();
+    assert_eq!(
+        first.as_code(),
+        "<form\n\tonsubmit={(e) => {\n\t\te.preventDefault();\n\t\tsave();\n\t}}\n></form>\n"
+    );
+    let parsed = biome_html_parser::parse_html(
+        first.as_code(),
+        biome_html_parser::HtmlParserOptions::from(&biome_languages::HtmlFileSource::svelte()),
+    );
+    assert!(
+        parsed.diagnostics().is_empty(),
+        "{:#?}",
+        parsed.diagnostics()
+    );
+
+    workspace
+        .change_file(ChangeFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: first.as_code().to_string(),
+            version: 1,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+    let second = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            inline_config: None,
+        })
+        .unwrap();
+    assert_eq!(first.as_code(), second.as_code());
+}
+
+#[cfg(feature = "html_embeds")]
+#[test]
+fn issue_11304_svelte_attribute_formatting_is_idempotent() {
+    assert_issue_11304_svelte_attribute_formatting_is_idempotent(
+        "<form onsubmit={(e)=>{e.preventDefault(); save()}}></form>",
+    );
+}
+
+#[cfg(feature = "html_embeds")]
+#[test]
+fn issue_11304_svelte_attribute_formatting_with_crlf_is_idempotent() {
+    assert_issue_11304_svelte_attribute_formatting_is_idempotent(
+        "<form\r\n onsubmit={(e)=>{\r\n e.preventDefault(); save()\r\n}}\r\n></form>\r\n",
+    );
+}
