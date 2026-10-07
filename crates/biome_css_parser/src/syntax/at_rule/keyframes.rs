@@ -5,8 +5,7 @@ use crate::syntax::at_rule::parse_error::{
     expected_percentage_after_timeline_range_name,
 };
 use crate::syntax::block::{
-    ParseBlockBody, expected_block, is_at_declaration_or_rule_item,
-    parse_declaration_or_statement_block,
+    ParseBlockBody, is_at_declaration_or_rule_item, parse_declaration_or_statement_block,
 };
 use crate::syntax::css_modules::{
     CSS_MODULES_SCOPE_SET, expected_any_css_module_scope, local_or_global_not_allowed,
@@ -215,18 +214,6 @@ fn parse_keyframes_block(p: &mut CssParser) -> CompletedMarker {
     KeyframesBlock.parse_block_body(p)
 }
 
-#[inline]
-fn parse_keyframes_control_block(p: &mut CssParser) -> CompletedMarker {
-    if !p.at(T!['{']) {
-        let m = p.start();
-        p.error(expected_block(p, p.cur_range()));
-        p.eat(T![;]);
-        m.complete(p, CSS_BOGUS_BLOCK)
-    } else {
-        parse_keyframes_block(p)
-    }
-}
-
 impl ParseBlockBody for KeyframesBlock {
     const BLOCK_KIND: CssSyntaxKind = CSS_KEYFRAMES_BLOCK;
 
@@ -321,7 +308,7 @@ fn parse_scss_keyframes_statement(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
     p.bump(T![@]);
-    let parse_block = ScssBlockParser::new(parse_keyframes_control_block)
+    let parse_block = ScssBlockParser::new(parse_keyframes_block)
         .with_additional_header_end_ts(SCSS_KEYFRAMES_CONTROL_HEADER_END_SET);
 
     match p.cur() {
@@ -331,7 +318,10 @@ fn parse_scss_keyframes_statement(p: &mut CssParser) -> ParsedSyntax {
         T![for] => parse_scss_for_at_rule_with_block(p, parse_block),
         T![each] => parse_scss_each_at_rule_with_block(p, parse_block),
         T![while] => parse_scss_while_at_rule_with_block(p, parse_block),
-        _ => unreachable!(),
+        _ => {
+            p.error(expected_keyframes_item(p, p.cur_range()));
+            return Present(m.complete(p, CSS_BOGUS_KEYFRAMES_ITEM));
+        }
     }
     .ok();
 
