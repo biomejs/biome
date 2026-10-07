@@ -3169,6 +3169,11 @@ export interface Nursery {
 	 */
 	noUselessAssignment?: NoUselessAssignmentConfiguration;
 	/**
+	 * Disallow calling .getTime() on a date before passing it to the Date constructor.
+	 * See https://biomejs.dev/linter/rules/no-useless-date-get-time
+	 */
+	noUselessDateGetTime?: NoUselessDateGetTimeConfiguration;
+	/**
 	 * Disallow type conversions that do not change the type of an expression.
 	 * See https://biomejs.dev/linter/rules/no-useless-type-conversion
 	 */
@@ -5723,6 +5728,9 @@ export type NoUnusedClassesConfiguration =
 export type NoUselessAssignmentConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessAssignmentOptions;
+export type NoUselessDateGetTimeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessDateGetTimeOptions;
 export type NoUselessTypeConversionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessTypeConversionOptions;
@@ -8203,6 +8211,14 @@ export interface RuleWithNoUselessAssignmentOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessAssignmentOptions;
 }
+export interface RuleWithNoUselessDateGetTimeOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoUselessDateGetTimeOptions;
+}
 export interface RuleWithNoUselessTypeConversionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessTypeConversionOptions;
@@ -10584,6 +10600,7 @@ export type NoUnsafeTypeAssertionOptions = {};
 export type NoUnsafeUnaryMinusOptions = {};
 export type NoUnusedClassesOptions = {};
 export type NoUselessAssignmentOptions = {};
+export type NoUselessDateGetTimeOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueBooleanDefaultOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
@@ -12286,6 +12303,7 @@ export type Category =
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessAssignment"
 	| "lint/nursery/noUselessBackrefInRegex"
+	| "lint/nursery/noUselessDateGetTime"
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
