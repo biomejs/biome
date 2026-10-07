@@ -1,0 +1,8 @@
+/* should generate diagnostics */
+$condition: true;
+.selector {
+  @if $condition {
+    color: red;
+    color: blue;
+  }
+}

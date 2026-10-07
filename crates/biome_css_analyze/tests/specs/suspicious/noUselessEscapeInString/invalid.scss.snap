@@ -1,0 +1,30 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+$content: "useless \z";
+
+```
+
+# Diagnostics
+```
+invalid.scss:2:21 lint/suspicious/noUselessEscapeInString  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The character doesn't need to be escaped.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ $content: "useless \z";
+      │                     ^
+    3 │ 
+  
+  i Only quotes that enclose the string and special characters need to be escaped.
+  
+  i Safe fix: Unescape the character.
+  
+    2 │ $content:·"useless·\z";
+      │                    -   
+
+```

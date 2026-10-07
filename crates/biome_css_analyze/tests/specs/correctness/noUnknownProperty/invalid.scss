@@ -1,0 +1,57 @@
+/* should generate diagnostics */
+.typo {
+  colr: blue;
+}
+
+@mixin declarations {
+  .mixin-branch {
+    colr: blue;
+  }
+}
+@include declarations;
+
+@mixin with-content {
+  @content;
+}
+@include with-content {
+  .include-branch {
+    colr: blue;
+  }
+}
+
+@at-root {
+  .at-root-branch {
+    colr: blue;
+  }
+}
+
+$condition: true;
+@if $condition {
+  .if-branch {
+    colr: blue;
+  }
+} @else {
+  .else-branch {
+    colr: blue;
+  }
+}
+
+@for $index from 1 through 2 {
+  .for-#{$index} {
+    colr: blue;
+  }
+}
+
+@each $name in first, second {
+  .each-#{$name} {
+    colr: blue;
+  }
+}
+
+$count: 0;
+@while $count < 1 {
+  .while-#{$count} {
+    colr: blue;
+  }
+  $count: $count + 1;
+}

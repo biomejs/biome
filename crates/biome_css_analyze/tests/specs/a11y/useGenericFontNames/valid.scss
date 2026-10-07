@@ -1,0 +1,13 @@
+/* should not generate diagnostics */
+$family: Arial;
+.element {
+  font-family: $family, sans-serif;
+}
+
+@function font-stack() {
+  @return Arial;
+}
+
+.dynamic-function {
+  font-family: Arial, font-stack();
+}

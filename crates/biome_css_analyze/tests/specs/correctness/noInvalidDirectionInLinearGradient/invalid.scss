@@ -1,0 +1,4 @@
+/* should generate diagnostics */
+@mixin gradient {
+  background: linear-gradient(bottom, #fff, #000);
+}

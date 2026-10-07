@@ -1,0 +1,34 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@mixin size {
+  width: 100%;
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:3:3 lint/nursery/useLogicalProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use logical CSS properties over physical ones.
+  
+    1 │ /* should generate diagnostics */
+    2 │ @mixin size {
+  > 3 │   width: 100%;
+      │   ^^^^^
+    4 │ }
+    5 │ 
+  
+  i Logical properties adapt better to different writing modes and layout directions.
+  
+  i Replace width with inline-size.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

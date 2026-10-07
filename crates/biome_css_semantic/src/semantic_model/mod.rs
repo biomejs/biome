@@ -901,10 +901,10 @@ mod specificity_tests {
         assert_eq!(specificity.next().unwrap(), Specificity(1, 1, 0), ".div");
         assert_eq!(specificity.next().unwrap(), Specificity(1, 1, 1), "div");
         assert_eq!(specificity.next().unwrap(), Specificity(1, 1, 2), "& > p");
-        assert_eq!(specificity.next().unwrap(), Specificity(1, 1, 1), "& & > p");
+        assert_eq!(specificity.next().unwrap(), Specificity(2, 2, 3), "& & > p");
         assert_eq!(
             specificity.next().unwrap(),
-            Specificity(1, 0, 1),
+            Specificity(3, 3, 4),
             "& & & > p"
         );
     }

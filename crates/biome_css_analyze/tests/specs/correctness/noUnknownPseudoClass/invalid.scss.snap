@@ -1,0 +1,30 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+a {
+  &:unknown {}
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:3:5 lint/correctness/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected unknown pseudo-class unknown 
+  
+    1 │ /* should generate diagnostics */
+    2 │ a {
+  > 3 │   &:unknown {}
+      │     ^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i See MDN web docs for more details.
+  
+
+```
