@@ -8,7 +8,7 @@ use biome_json_factory::JsonSyntaxFactory;
 use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 pub use biome_parser::prelude::*;
 use biome_parser::{AnyParse, EmbeddedNodeParse, NodeParse};
-use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset, TextSize};
+use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset, TextRange, TextSize};
 pub use parser::JsonParserOptions;
 
 mod lexer;
@@ -34,7 +34,27 @@ pub fn parse_json_with_cache(
     cache: &mut NodeCache,
     config: JsonParserOptions,
 ) -> JsonParse {
-    let mut parser = JsonParser::new(source, config);
+    parse_json_with_metavariables_and_cache(source, cache, config, Vec::new())
+}
+
+/// Parses the provided string as JSON program, lexing the given source ranges
+/// as GritQL metavariables.
+pub fn parse_json_with_metavariables(
+    source: &str,
+    config: JsonParserOptions,
+    metavariables: Vec<TextRange>,
+) -> JsonParse {
+    let mut cache = NodeCache::default();
+    parse_json_with_metavariables_and_cache(source, &mut cache, config, metavariables)
+}
+
+fn parse_json_with_metavariables_and_cache(
+    source: &str,
+    cache: &mut NodeCache,
+    config: JsonParserOptions,
+    metavariables: Vec<TextRange>,
+) -> JsonParse {
+    let mut parser = JsonParser::new_with_metavariables(source, config, metavariables);
 
     parse_root(&mut parser);
 

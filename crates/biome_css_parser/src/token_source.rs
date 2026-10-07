@@ -53,10 +53,12 @@ impl<'src> CssTokenSource<'src> {
         source: &'src str,
         options: CssParserOptions,
         source_type: CssFileSource,
+        metavariables: Vec<TextRange>,
     ) -> Self {
         let lexer = CssLexer::from_str(source)
             .with_options(options)
-            .with_source_type(source_type);
+            .with_source_type(source_type)
+            .with_metavariables(metavariables);
 
         let buffered = BufferedLexer::new(lexer);
         let mut source = CssTokenSource::new(buffered);

@@ -1,8 +1,9 @@
 use crate::{
-    grit_analysis_ext::GritAnalysisExt, grit_target_language::GritTargetParser,
+    grit_analysis_ext::GritAnalysisExt,
+    grit_target_language::{GritTargetParser, metavariable_ranges},
     grit_tree::GritTargetTree,
 };
-use biome_json_parser::{JsonParserOptions, parse_json};
+use biome_json_parser::{JsonParserOptions, parse_json, parse_json_with_metavariables};
 use biome_json_syntax::JsonLanguage;
 use biome_parser::AnyParse;
 use camino::Utf8Path;
@@ -40,7 +41,7 @@ impl Parser for GritJsonParser {
         logs: &mut AnalysisLogs,
         _old_tree: FileOrigin<'_, GritTargetTree>,
     ) -> Option<GritTargetTree> {
-        let parse_result = parse_json(body, JsonParserOptions::default().allow_metavariables());
+        let parse_result = parse_json(body, JsonParserOptions::default());
 
         for diagnostic in parse_result.diagnostics() {
             logs.push(diagnostic.to_log(path));
@@ -63,7 +64,11 @@ impl Parser for GritJsonParser {
             |src: &str| src.len() as u32
         };
 
-        let parse_result = parse_json(&context, JsonParserOptions::default().allow_metavariables());
+        let parse_result = parse_json_with_metavariables(
+            &context,
+            JsonParserOptions::default(),
+            metavariable_ranges(&context),
+        );
 
         SnippetTree {
             tree: GritTargetTree::new(parse_result.syntax().into()),

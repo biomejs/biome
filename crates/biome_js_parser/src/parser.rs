@@ -22,6 +22,7 @@ use biome_parser::diagnostic::merge_diagnostics;
 use biome_parser::event::Event;
 use biome_parser::token_source::Trivia;
 use biome_parser::{ParserContext, ParserContextCheckpoint};
+use biome_rowan::TextRange;
 pub(crate) use parsed_syntax::ParsedSyntax;
 
 /// An extremely fast, error tolerant, completely lossless JavaScript parser
@@ -39,7 +40,18 @@ pub struct JsParser<'source> {
 impl<'source> JsParser<'source> {
     /// Creates a new parser that parses the `source`.
     pub fn new(source: &'source str, source_type: JsFileSource, options: JsParserOptions) -> Self {
-        let source = JsTokenSource::from_str(source, options);
+        Self::new_with_metavariables(source, source_type, options, Vec::new())
+    }
+
+    /// Creates a new parser that parses the `source`, lexing the given source
+    /// ranges as Grit metavariables.
+    pub fn new_with_metavariables(
+        source: &'source str,
+        source_type: JsFileSource,
+        options: JsParserOptions,
+        metavariables: Vec<TextRange>,
+    ) -> Self {
+        let source = JsTokenSource::from_str(source, metavariables);
 
         JsParser {
             state: JsParserState::new(&source_type),

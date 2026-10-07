@@ -1,25 +1,25 @@
-import µdefaultImport from µsource;
-import { µnamedImport, type µnamedType } from µsource;
+import $defaultImport from $source;
+import { $namedImport, type $namedType } from $source;
 
-µstatement;
+$statement;
 
 function foo() {
-    µstatement;
-    const bar = µexpression;
+    $statement;
+    const bar = $expression;
 }
 
 class Foo {
-    µclassMember;
+    $classMember;
 }
 
-const { µkey: key } = { µkey: µvalue };
+const { $key: key } = { $key: $value };
 
-function µfunctionName() {}
+function $functionName() {}
 
-type µType = µOtherType;
+type $Type = $OtherType;
 
-interface µInterface {
-    µbody
+interface $Interface {
+    $body
 }
 
-<µtag µ_>µ_</µtag>
+<$tag $_>$_</$tag>

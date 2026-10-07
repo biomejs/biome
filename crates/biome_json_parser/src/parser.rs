@@ -1,5 +1,5 @@
 use crate::token_source::JsonTokenSource;
-use biome_json_syntax::JsonSyntaxKind;
+use biome_json_syntax::{JsonSyntaxKind, TextRange};
 use biome_languages::JsonFileSource;
 use biome_parser::ParserContext;
 use biome_parser::diagnostic::merge_diagnostics;
@@ -17,7 +17,6 @@ pub(crate) struct JsonParser<'source> {
 pub struct JsonParserOptions {
     pub allow_comments: bool,
     pub allow_trailing_commas: bool,
-    pub allow_metavariables: bool,
 }
 
 impl JsonParserOptions {
@@ -31,16 +30,6 @@ impl JsonParserOptions {
     pub fn with_allow_trailing_commas(mut self) -> Self {
         self.allow_trailing_commas = true;
         self
-    }
-
-    #[must_use]
-    pub fn allow_metavariables(mut self) -> Self {
-        self.allow_metavariables = true;
-        self
-    }
-
-    pub fn is_metavariable_enabled(&self) -> bool {
-        self.allow_metavariables
     }
 }
 
@@ -59,9 +48,19 @@ impl From<&JsonFileSource> for JsonParserOptions {
 
 impl<'source> JsonParser<'source> {
     pub fn new(source: &'source str, options: JsonParserOptions) -> Self {
+        Self::new_with_metavariables(source, options, Vec::new())
+    }
+
+    /// Creates a parser that lexes the given source ranges as GritQL
+    /// metavariables.
+    pub fn new_with_metavariables(
+        source: &'source str,
+        options: JsonParserOptions,
+        metavariables: Vec<TextRange>,
+    ) -> Self {
         Self {
             context: ParserContext::default(),
-            source: JsonTokenSource::from_str(source, options),
+            source: JsonTokenSource::from_str(source, options, metavariables),
             options,
         }
     }

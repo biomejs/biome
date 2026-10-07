@@ -22,7 +22,6 @@ pub use biome_js_syntax::*;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
-    grit_metavariable_ranges,
 };
 use biome_rowan::SyntaxKind;
 use biome_unicode_table::{
@@ -31,8 +30,6 @@ use biome_unicode_table::{
 };
 
 use enumflags2::{BitFlags, bitflags, make_bitflags};
-
-use crate::JsParserOptions;
 
 // The first utf8 byte of every valid unicode whitespace char, used for short circuiting whitespace checks
 const UNICODE_WHITESPACE_STARTS: [u8; 5] = [
@@ -367,13 +364,8 @@ impl<'src> JsLexer<'src> {
         }
     }
 
-    pub(crate) fn with_options(self, options: JsParserOptions) -> Self {
-        let metavariables = if options.should_parse_metavariables() {
-            grit_metavariable_ranges(self.source)
-        } else {
-            Vec::new()
-        };
-
+    /// Lexes the given source ranges as Grit metavariables.
+    pub(crate) fn with_metavariables(self, metavariables: Vec<TextRange>) -> Self {
         Self {
             metavariables,
             ..self
@@ -2081,6 +2073,10 @@ impl<'src> JsLexer<'src> {
         // to do more aggressive optimizations on the match regarding how to map it to instructions
         let dispatched = lookup_byte(byte);
 
+        if self.is_metavariable_start() {
+            return self.consume_metavariable(GRIT_METAVARIABLE);
+        }
+
         match dispatched {
             WHS => {
                 let kind = self.consume_newline_or_whitespaces();
@@ -2178,10 +2174,6 @@ impl<'src> JsLexer<'src> {
                 {
                     self.unicode_bom_length = bom_size;
                     return bom;
-                }
-
-                if self.is_metavariable_start() {
-                    return self.consume_metavariable(GRIT_METAVARIABLE);
                 }
 
                 let chr = self.current_char_unchecked();

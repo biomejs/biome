@@ -5,7 +5,6 @@ mod tests;
 
 use biome_json_syntax::{JsonSyntaxKind, JsonSyntaxKind::*, T, TextLen, TextRange, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_parser::lexer::grit_metavariable_ranges;
 use biome_unicode_table::{Dispatch::*, is_js_id_continue, is_js_id_start, lookup_byte};
 use std::iter::FusedIterator;
 use std::ops::Add;
@@ -333,6 +332,10 @@ impl<'src> Lexer<'src> {
         // to do more aggressive optimizations on the match regarding how to map it to instructions
         let dispatched = lookup_byte(current);
 
+        if self.is_metavariable_start() {
+            return self.consume_metavariable(GRIT_METAVARIABLE);
+        }
+
         match dispatched {
             WHS => self.consume_newline_or_whitespaces(),
             QOT => self.lex_string_literal(current),
@@ -350,10 +353,7 @@ impl<'src> Lexer<'src> {
             UNI => {
                 let chr = self.current_char_unchecked();
 
-                // Check for GritQL metavariables
-                if self.is_metavariable_start() {
-                    self.consume_metavariable(GRIT_METAVARIABLE)
-                } else if is_js_id_start(chr) {
+                if is_js_id_start(chr) {
                     self.lex_identifier(current)
                 } else if self.position == 0 && self.consume_potential_bom().is_some() {
                     // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
@@ -823,10 +823,13 @@ impl<'src> Lexer<'src> {
     }
 
     pub(crate) fn with_options(mut self, options: JsonParserOptions) -> Self {
-        if options.is_metavariable_enabled() {
-            self.metavariables = grit_metavariable_ranges(self.source);
-        }
         self.options = options;
+        self
+    }
+
+    /// Lexes the given source ranges as GritQL metavariables.
+    pub(crate) fn with_metavariables(mut self, metavariables: Vec<TextRange>) -> Self {
+        self.metavariables = metavariables;
         self
     }
 }

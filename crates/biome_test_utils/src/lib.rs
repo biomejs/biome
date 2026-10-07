@@ -43,7 +43,7 @@ use biome_module_graph::resolve_js_module;
 use biome_package::{Catalogs, Manifest, PackageJson, TsConfigJson, TurboJson};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
+use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot, TextRange, TextSize};
 #[cfg(feature = "html_embeds")]
 use biome_service::Workspace;
 use biome_service::WorkspaceError;
@@ -866,6 +866,31 @@ pub fn parse_test_path(file: &Utf8Path) -> (&str, &str) {
     }
 
     (group_name, rule_name)
+}
+
+/// Returns the ranges of the Grit metavariables in a test fixture, such as
+/// `$name` and `$...`.
+pub fn grit_metavariable_ranges(source: &str) -> Vec<TextRange> {
+    let mut ranges = Vec::new();
+    for (start, _) in source.match_indices('$') {
+        let name_len = match &source.as_bytes()[start + 1..] {
+            [b'a'..=b'z' | b'A'..=b'Z' | b'_', rest @ ..] => {
+                1 + rest
+                    .iter()
+                    .take_while(|byte| byte.is_ascii_alphanumeric() || **byte == b'_')
+                    .count()
+            }
+            [b'.', b'.', b'.', ..] => 3,
+            _ => continue,
+        };
+
+        ranges.push(TextRange::at(
+            TextSize::from(start as u32),
+            TextSize::from(1 + name_len as u32),
+        ));
+    }
+
+    ranges
 }
 
 /// This check is used in the parser test to ensure it doesn't emit

@@ -6,7 +6,7 @@ use biome_languages::JsFileSource;
 use biome_languages::javascript::ModuleKind;
 use biome_parser::token_source::Trivia;
 use biome_parser::{AnyParse, EmbeddedNodeParse, NodeParse, event::Event};
-use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset};
+use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset, TextRange};
 use std::marker::PhantomData;
 
 /// A utility struct for managing the result of a parser job
@@ -143,8 +143,9 @@ fn parse_common(
     text: &str,
     source_type: JsFileSource,
     options: JsParserOptions,
+    metavariables: Vec<TextRange>,
 ) -> (Vec<Event<JsSyntaxKind>>, Vec<ParseDiagnostic>, Vec<Trivia>) {
-    let mut parser = JsParser::new(text, source_type, options);
+    let mut parser = JsParser::new_with_metavariables(text, source_type, options, metavariables);
     syntax::program::parse(&mut parser);
 
     let (events, trivia, errors) = parser.finish();
@@ -290,7 +291,29 @@ pub fn parse_js_with_cache(
     options: JsParserOptions,
     cache: &mut NodeCache,
 ) -> Parse<AnyJsRoot> {
-    let (events, errors, tokens) = parse_common(text, source_type, options);
+    parse_js_with_metavariables_and_cache(text, source_type, options, Vec::new(), cache)
+}
+
+/// Parses the provided string as an EcmaScript program, lexing the given source
+/// ranges as Grit metavariables.
+pub fn parse_with_metavariables(
+    text: &str,
+    source_type: JsFileSource,
+    options: JsParserOptions,
+    metavariables: Vec<TextRange>,
+) -> Parse<AnyJsRoot> {
+    let mut cache = NodeCache::default();
+    parse_js_with_metavariables_and_cache(text, source_type, options, metavariables, &mut cache)
+}
+
+fn parse_js_with_metavariables_and_cache(
+    text: &str,
+    source_type: JsFileSource,
+    options: JsParserOptions,
+    metavariables: Vec<TextRange>,
+    cache: &mut NodeCache,
+) -> Parse<AnyJsRoot> {
+    let (events, errors, tokens) = parse_common(text, source_type, options, metavariables);
     let mut tree_sink = JsLosslessTreeSink::with_cache(text, &tokens, cache);
     biome_parser::event::process(&mut tree_sink, events, errors);
     let (green, parse_errors) = tree_sink.finish();
@@ -401,7 +424,7 @@ pub fn parse_js_with_offset_and_cache(
     options: JsParserOptions,
     cache: &mut NodeCache,
 ) -> JsOffsetParse {
-    let (events, errors, tokens) = parse_common(text, source_type, options);
+    let (events, errors, tokens) = parse_common(text, source_type, options, Vec::new());
     let mut tree_sink =
         crate::JsOffsetLosslessTreeSink::with_cache(text, &tokens, cache, base_offset);
     biome_parser::event::process(&mut tree_sink, events, errors);

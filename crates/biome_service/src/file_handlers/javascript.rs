@@ -278,7 +278,6 @@ impl ServiceLanguage for JsLanguage {
         _file_source: &DocumentFileSource,
     ) -> Self::ParserOptions {
         let mut options = JsParserOptions {
-            grit_metavariables: false,
             parse_class_parameter_decorators: language
                 .parse_class_parameter_decorators
                 .unwrap_or_default()

@@ -15,7 +15,6 @@ use biome_languages::CssFileSource;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
-    grit_metavariable_ranges,
 };
 use biome_rowan::SyntaxKind;
 use biome_unicode_table::{
@@ -373,14 +372,12 @@ impl<'src> CssLexer<'src> {
     }
 
     pub(crate) fn with_options(self, options: CssParserOptions) -> Self {
-        let metavariables = if options.is_metavariable_enabled() {
-            grit_metavariable_ranges(self.source())
-        } else {
-            Vec::new()
-        };
+        Self { options, ..self }
+    }
 
+    /// Lexes the given source ranges as Grit metavariables.
+    pub(crate) fn with_metavariables(self, metavariables: Vec<TextRange>) -> Self {
         Self {
-            options,
             metavariables,
             ..self
         }
@@ -489,6 +486,10 @@ impl<'src> CssLexer<'src> {
         // to do more aggressive optimizations on the match regarding how to map it to instructions
         let dispatched = lookup_byte(current);
 
+        if self.is_metavariable_start() {
+            return self.consume_metavariable(GRIT_METAVARIABLE);
+        }
+
         match dispatched {
             WHS => {
                 let kind = self.consume_newline_or_whitespaces();
@@ -527,15 +528,12 @@ impl<'src> CssLexer<'src> {
                     return bom;
                 }
                 // Not a BOM, check other UNI cases below
-                if self.is_metavariable_start() {
-                    self.consume_metavariable(GRIT_METAVARIABLE)
-                } else if self.is_ident_start() {
+                if self.is_ident_start() {
                     self.consume_identifier()
                 } else {
                     self.consume_fallback(fallback)
                 }
             }
-            UNI if self.is_metavariable_start() => self.consume_metavariable(GRIT_METAVARIABLE),
             IDT | UNI | BSL if self.is_ident_start() => self.consume_identifier(),
 
             MUL => self.consume_mul(),
