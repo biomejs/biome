@@ -22,6 +22,7 @@ pub use biome_js_syntax::*;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
+    grit_metavariable_ranges,
 };
 use biome_rowan::SyntaxKind;
 use biome_unicode_table::{
@@ -171,7 +172,8 @@ pub(crate) struct JsLexer<'src> {
 
     diagnostics: Vec<ParseDiagnostic>,
 
-    options: JsParserOptions,
+    /// Ranges of the Grit metavariables in the source.
+    metavariables: Vec<TextRange>,
 }
 
 impl<'src> Lexer<'src> for JsLexer<'src> {
@@ -184,6 +186,10 @@ impl<'src> Lexer<'src> for JsLexer<'src> {
 
     fn source(&self) -> &'src str {
         self.source
+    }
+
+    fn metavariable_ranges(&self) -> &[TextRange] {
+        &self.metavariables
     }
 
     fn current(&self) -> Self::Kind {
@@ -357,12 +363,21 @@ impl<'src> JsLexer<'src> {
             current_flags: TokenFlags::empty(),
             position: 0,
             diagnostics: vec![],
-            options: JsParserOptions::default(),
+            metavariables: Vec::new(),
         }
     }
 
     pub(crate) fn with_options(self, options: JsParserOptions) -> Self {
-        Self { options, ..self }
+        let metavariables = if options.should_parse_metavariables() {
+            grit_metavariable_ranges(self.source)
+        } else {
+            Vec::new()
+        };
+
+        Self {
+            metavariables,
+            ..self
+        }
     }
 
     fn re_lex_binary_operator(&mut self) -> JsSyntaxKind {
@@ -569,9 +584,7 @@ impl<'src> JsLexer<'src> {
             b'<' => self.eat_byte(T![<]),
             // `{`: empty jsx text, directly followed by an expression
             b'{' => self.eat_byte(T!['{']),
-            _ if self.options.should_parse_metavariables() && self.is_metavariable_start() => {
-                self.consume_metavariable(GRIT_METAVARIABLE)
-            }
+            _ if self.is_metavariable_start() => self.consume_metavariable(GRIT_METAVARIABLE),
             _ => {
                 while let Some(chr) = self.current_byte() {
                     // but not one of: { or < or > or }
@@ -2167,7 +2180,7 @@ impl<'src> JsLexer<'src> {
                     return bom;
                 }
 
-                if self.options.should_parse_metavariables() && self.is_metavariable_start() {
+                if self.is_metavariable_start() {
                     return self.consume_metavariable(GRIT_METAVARIABLE);
                 }
 

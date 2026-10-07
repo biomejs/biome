@@ -15,6 +15,7 @@ use biome_languages::CssFileSource;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
+    grit_metavariable_ranges,
 };
 use biome_rowan::SyntaxKind;
 use biome_unicode_table::{
@@ -186,6 +187,9 @@ pub(crate) struct CssLexer<'src> {
     options: CssParserOptions,
     source_type: CssFileSource,
     pending_scss_string_start: Option<PendingScssInterpolatedStringStart>,
+
+    /// Ranges of the Grit metavariables in the source.
+    metavariables: Vec<TextRange>,
 }
 
 impl<'src> Lexer<'src> for CssLexer<'src> {
@@ -198,6 +202,10 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
 
     fn source(&self) -> &'src str {
         self.cursor.source()
+    }
+
+    fn metavariable_ranges(&self) -> &[TextRange] {
+        &self.metavariables
     }
 
     fn current(&self) -> Self::Kind {
@@ -360,11 +368,22 @@ impl<'src> CssLexer<'src> {
             options: CssParserOptions::default(),
             source_type: CssFileSource::default(),
             pending_scss_string_start: None,
+            metavariables: Vec::new(),
         }
     }
 
     pub(crate) fn with_options(self, options: CssParserOptions) -> Self {
-        Self { options, ..self }
+        let metavariables = if options.is_metavariable_enabled() {
+            grit_metavariable_ranges(self.source())
+        } else {
+            Vec::new()
+        };
+
+        Self {
+            options,
+            metavariables,
+            ..self
+        }
     }
 
     pub(crate) fn with_source_type(self, source_type: CssFileSource) -> Self {
@@ -508,7 +527,7 @@ impl<'src> CssLexer<'src> {
                     return bom;
                 }
                 // Not a BOM, check other UNI cases below
-                if self.options.is_metavariable_enabled() && self.is_metavariable_start() {
+                if self.is_metavariable_start() {
                     self.consume_metavariable(GRIT_METAVARIABLE)
                 } else if self.is_ident_start() {
                     self.consume_identifier()
@@ -516,9 +535,7 @@ impl<'src> CssLexer<'src> {
                     self.consume_fallback(fallback)
                 }
             }
-            UNI if self.options.is_metavariable_enabled() && self.is_metavariable_start() => {
-                self.consume_metavariable(GRIT_METAVARIABLE)
-            }
+            UNI if self.is_metavariable_start() => self.consume_metavariable(GRIT_METAVARIABLE),
             IDT | UNI | BSL if self.is_ident_start() => self.consume_identifier(),
 
             MUL => self.consume_mul(),

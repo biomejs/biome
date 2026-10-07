@@ -293,57 +293,66 @@ pub trait Lexer<'src> {
         }
     }
 
-    /// Check if the lexer starts a grit metavariable
-    fn is_metavariable_start(&mut self) -> bool {
-        let current_char = self.current_char_unchecked();
-        if current_char == 'µ' {
-            let current_char_length = current_char.len_utf8();
-            // µ[a-zA-Z_][a-zA-Z0-9_]*
-            if matches!(
-                self.byte_at(current_char_length),
-                Some(b'a'..=b'z' | b'A'..=b'Z' | b'_')
-            ) {
-                return true;
-            }
-
-            // µ...
-            if self.byte_at(current_char_length) == Some(b'.')
-                && self.byte_at(current_char_length + 1) == Some(b'.')
-                && self.byte_at(current_char_length + 2) == Some(b'.')
-            {
-                return true;
-            }
-        }
-        false
+    /// Returns the ranges of the Grit metavariables in the source, sorted by
+    /// their start.
+    fn metavariable_ranges(&self) -> &[TextRange] {
+        &[]
     }
 
-    /// Consume a grit metavariable(µ\[a-zA-Z_]\[a-zA-Z0-9_]*|µ...)
-    /// <https://github.com/getgrit/gritql/blob/8f3f077d078ccaf0618510bba904a06309c2435e/resources/language-metavariables/tree-sitter-css/grammar.js#L388>
+    /// Check if a Grit metavariable starts at the current position.
+    fn is_metavariable_start(&self) -> bool {
+        metavariable_end(self.metavariable_ranges(), self.position()).is_some()
+    }
+
+    /// Consume the Grit metavariable that starts at the current position.
     fn consume_metavariable<T>(&mut self, kind: T) -> T {
         debug_assert!(self.is_metavariable_start());
 
-        // SAFETY: We know the current character is µ.
-        let current_char = self.current_char_unchecked();
-        self.advance(current_char.len_utf8());
-
-        if self.current_byte() == Some(b'.') {
-            // SAFETY: We know that the current token is µ...
-            self.advance(3);
-        } else {
-            // µ[a-zA-Z_][a-zA-Z0-9_]*
-            self.advance(1);
-            while let Some(chr) = self.current_byte() {
-                match chr {
-                    b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' => {
-                        self.advance(1);
-                    }
-                    _ => break,
-                }
-            }
+        if let Some(end) = metavariable_end(self.metavariable_ranges(), self.position()) {
+            self.advance(end - self.position());
         }
 
         kind
     }
+}
+
+/// Returns the ranges of the Grit metavariables written with the `µ` prefix in
+/// `source`, such as `µname` and `µ...`.
+///
+/// <https://github.com/getgrit/gritql/blob/8f3f077d078ccaf0618510bba904a06309c2435e/resources/language-metavariables/tree-sitter-css/grammar.js#L388>
+pub fn grit_metavariable_ranges(source: &str) -> Vec<TextRange> {
+    let mut ranges = Vec::new();
+    for (start, prefix) in source.match_indices('µ') {
+        let name_start = start + prefix.len();
+        let name = &source.as_bytes()[name_start..];
+        let name_len = match name {
+            [b'a'..=b'z' | b'A'..=b'Z' | b'_', rest @ ..] => {
+                1 + rest
+                    .iter()
+                    .take_while(|byte| byte.is_ascii_alphanumeric() || **byte == b'_')
+                    .count()
+            }
+            [b'.', b'.', b'.', ..] => 3,
+            _ => continue,
+        };
+
+        ranges.push(TextRange::new(
+            TextSize::from(start as u32),
+            TextSize::from((name_start + name_len) as u32),
+        ));
+    }
+
+    ranges
+}
+
+/// Returns the end offset of the metavariable in `ranges` that starts at
+/// `position`.
+fn metavariable_end(ranges: &[TextRange], position: usize) -> Option<usize> {
+    let position = TextSize::from(position as u32);
+    ranges
+        .binary_search_by_key(&position, |range| range.start())
+        .ok()
+        .map(|index| ranges[index].end().into())
 }
 
 pub trait ReLexer<'src>: Lexer<'src> + LexerWithCheckpoint<'src> {
@@ -956,5 +965,22 @@ impl BitOr for TokenFlags {
 impl BitOrAssign for TokenFlags {
     fn bitor_assign(&mut self, rhs: Self) {
         self.0 |= rhs.0;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::grit_metavariable_ranges;
+    use biome_rowan::{TextRange, TextSize};
+
+    #[test]
+    fn finds_grit_metavariables() {
+        let range =
+            |start: u32, end: u32| TextRange::new(TextSize::from(start), TextSize::from(end));
+
+        assert_eq!(
+            grit_metavariable_ranges("µa_1 µ... µ1 µ.. µµb"),
+            vec![range(0, 5), range(6, 11), range(23, 26)]
+        );
     }
 }

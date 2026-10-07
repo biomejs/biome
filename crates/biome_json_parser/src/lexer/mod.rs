@@ -5,6 +5,7 @@ mod tests;
 
 use biome_json_syntax::{JsonSyntaxKind, JsonSyntaxKind::*, T, TextLen, TextRange, TextSize};
 use biome_parser::diagnostic::ParseDiagnostic;
+use biome_parser::lexer::grit_metavariable_ranges;
 use biome_unicode_table::{Dispatch::*, is_js_id_continue, is_js_id_start, lookup_byte};
 use std::iter::FusedIterator;
 use std::ops::Add;
@@ -38,6 +39,9 @@ pub(crate) struct Lexer<'src> {
 
     diagnostics: Vec<ParseDiagnostic>,
     options: JsonParserOptions,
+
+    /// Ranges of the Grit metavariables in the source.
+    metavariables: Vec<TextRange>,
 }
 
 impl<'src> Lexer<'src> {
@@ -48,6 +52,7 @@ impl<'src> Lexer<'src> {
             position: 0,
             diagnostics: vec![],
             options: JsonParserOptions::default(),
+            metavariables: Vec::new(),
         }
     }
 
@@ -292,53 +297,27 @@ impl<'src> Lexer<'src> {
         self.position >= self.source.len()
     }
 
-    /// Check if the current position is at the start of a GritQL metavariable (µ prefix).
-    fn is_metavariable_start(&mut self) -> bool {
-        let current_char = self.current_char_unchecked();
-        if current_char == 'µ' {
-            let current_char_length = current_char.len_utf8();
-            // µ[a-zA-Z_][a-zA-Z0-9_]*
-            if matches!(
-                self.byte_at(current_char_length),
-                Some(b'a'..=b'z' | b'A'..=b'Z' | b'_')
-            ) {
-                return true;
-            }
-
-            // µ... (spread operator)
-            if self.byte_at(current_char_length) == Some(b'.')
-                && self.byte_at(current_char_length + 1) == Some(b'.')
-                && self.byte_at(current_char_length + 2) == Some(b'.')
-            {
-                return true;
-            }
-        }
-        false
+    /// Returns the end of the GritQL metavariable that starts at the current
+    /// position.
+    fn metavariable_end(&self) -> Option<usize> {
+        let position = TextSize::from(self.position as u32);
+        self.metavariables
+            .binary_search_by_key(&position, |range| range.start())
+            .ok()
+            .map(|index| self.metavariables[index].end().into())
     }
 
-    /// Consume a GritQL metavariable (µ[a-zA-Z_][a-zA-Z0-9_]*|µ...)
-    /// <https://github.com/getgrit/gritql/blob/8f3f077d078ccaf0618510bba904a06309c2435e/resources/language-metavariables/tree-sitter-css/grammar.js#L388>
+    /// Check if a GritQL metavariable starts at the current position.
+    fn is_metavariable_start(&self) -> bool {
+        self.metavariable_end().is_some()
+    }
+
+    /// Consume the GritQL metavariable that starts at the current position.
     fn consume_metavariable<T>(&mut self, kind: T) -> T {
         debug_assert!(self.is_metavariable_start());
 
-        // SAFETY: We know the current character is µ.
-        let current_char = self.current_char_unchecked();
-        self.advance(current_char.len_utf8());
-
-        if self.current_byte() == Some(b'.') {
-            // SAFETY: We know that the current token is µ...
-            self.advance(3);
-        } else {
-            // µ[a-zA-Z_][a-zA-Z0-9_]*
-            self.advance(1);
-            while let Some(chr) = self.current_byte() {
-                match chr {
-                    b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' => {
-                        self.advance(1);
-                    }
-                    _ => break,
-                }
-            }
+        if let Some(end) = self.metavariable_end() {
+            self.position = end;
         }
 
         kind
@@ -371,8 +350,8 @@ impl<'src> Lexer<'src> {
             UNI => {
                 let chr = self.current_char_unchecked();
 
-                // Check for GritQL metavariables (µ prefix) when enabled
-                if self.options.is_metavariable_enabled() && self.is_metavariable_start() {
+                // Check for GritQL metavariables
+                if self.is_metavariable_start() {
                     self.consume_metavariable(GRIT_METAVARIABLE)
                 } else if is_js_id_start(chr) {
                     self.lex_identifier(current)
@@ -844,6 +823,9 @@ impl<'src> Lexer<'src> {
     }
 
     pub(crate) fn with_options(mut self, options: JsonParserOptions) -> Self {
+        if options.is_metavariable_enabled() {
+            self.metavariables = grit_metavariable_ranges(self.source);
+        }
         self.options = options;
         self
     }
