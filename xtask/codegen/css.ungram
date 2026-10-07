@@ -2706,6 +2706,7 @@ CssAttrNameList = (AnyCssAttrName  ('|' AnyCssAttrName)*)
 AnyCssAttrName =
 	CssIdentifier
 	| ScssInterpolatedIdentifier
+	| ScssVariable
 	| CssBogusAttrName
 
 // Literal value that can be used as a type in the attr() function.
@@ -2744,7 +2745,15 @@ AnyCssAttrType =
 //                       ^^^^^
 CssAttrFallbackValue =
 	','
-	value: CssGenericComponentValueList
+	value: AnyCssAttrFallbackValue
+
+// attr(data-size px, 4px)
+//                    ^^^
+// attr(data-size px, $gap * 2)
+//                    ^^^^^^^^
+AnyCssAttrFallbackValue =
+	CssGenericComponentValueList
+	| ScssExpression
 
 // type( <syntax> )
 CssTypeFunction =

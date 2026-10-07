@@ -1173,12 +1173,14 @@ CssRoot {
                                                             },
                                                             fallback_value: CssAttrFallbackValue {
                                                                 comma_token: COMMA@886..888 "," [] [Whitespace(" ")],
-                                                                value: CssGenericComponentValueList [
-                                                                    CssRegularDimension {
-                                                                        value_token: CSS_NUMBER_LITERAL@888..889 "1" [] [],
-                                                                        unit_token: IDENT@889..891 "px" [] [],
-                                                                    },
-                                                                ],
+                                                                value: ScssExpression {
+                                                                    items: ScssExpressionItemList [
+                                                                        CssRegularDimension {
+                                                                            value_token: CSS_NUMBER_LITERAL@888..889 "1" [] [],
+                                                                            unit_token: IDENT@889..891 "px" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
                                                             },
                                                             r_paren_token: R_PAREN@891..892 ")" [] [],
                                                         },
@@ -2064,10 +2066,11 @@ CssRoot {
                                 3: R_PAREN@885..886 ")" [] []
                               4: CSS_ATTR_FALLBACK_VALUE@886..891
                                 0: COMMA@886..888 "," [] [Whitespace(" ")]
-                                1: CSS_GENERIC_COMPONENT_VALUE_LIST@888..891
-                                  0: CSS_REGULAR_DIMENSION@888..891
-                                    0: CSS_NUMBER_LITERAL@888..889 "1" [] []
-                                    1: IDENT@889..891 "px" [] []
+                                1: SCSS_EXPRESSION@888..891
+                                  0: SCSS_EXPRESSION_ITEM_LIST@888..891
+                                    0: CSS_REGULAR_DIMENSION@888..891
+                                      0: CSS_NUMBER_LITERAL@888..889 "1" [] []
+                                      1: IDENT@889..891 "px" [] []
                               5: R_PAREN@891..892 ")" [] []
                         2: R_PAREN@892..893 ")" [] []
                 2: R_PAREN@893..895 ")" [] [Whitespace(" ")]

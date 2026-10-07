@@ -13460,6 +13460,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssAtRuleDeclarator {
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssAttrFallbackValue {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssAttrFallbackValue,
+        crate::css::any::attr_fallback_value::FormatAnyCssAttrFallbackValue,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::attr_fallback_value::FormatAnyCssAttrFallbackValue::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssAttrFallbackValue {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssAttrFallbackValue,
+        crate::css::any::attr_fallback_value::FormatAnyCssAttrFallbackValue,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::attr_fallback_value::FormatAnyCssAttrFallbackValue::default(),
+        )
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssAttrName {
     type Format<'a> = FormatRefWithRule<
         'a,

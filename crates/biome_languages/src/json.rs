@@ -428,9 +428,13 @@ fn vscode_global_directory() -> Option<ProjectDirs> {
 
 fn zed_global_directory() -> Option<PathBuf> {
     cfg_select! {
-        target_os = "macos" => directories::BaseDirs::new().map(|dirs| dirs.home_dir().join(".config").join("zed")) ,
-        target_os = "windows" => directories::BaseDirs::new().map(|dirs| dirs.config_dir().join("Zed")),
-        _ =>  directories::ProjectDirs::from("", "", "zed").map(|dirs| dirs.config_dir().to_path_buf())
+        target_os = "macos" => {
+            directories::BaseDirs::new().map(|dirs| dirs.home_dir().join(".config").join("zed"))
+        }
+        target_os = "windows" => {
+            directories::BaseDirs::new().map(|dirs| dirs.config_dir().join("Zed"))
+        }
+        _ => directories::ProjectDirs::from("", "", "zed").map(|dirs| dirs.config_dir().to_path_buf()),
     }
 }
 

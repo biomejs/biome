@@ -1,0 +1,489 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.b{content:attr( data-label );width:attr(data-size px ,2px);height:attr(data-height type(<length>),2px);padding:attr(data-gap px,var(--fallback,2px));}
+.empty{content:attr(data-label,);width:attr(data-size px,/* empty */);}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..2 "b" [] [],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@2..3 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@3..10 "content" [] [],
+                                },
+                                colon_token: COLON@10..11 ":" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@11..15 "attr" [] [],
+                                        l_paren_token: L_PAREN@15..17 "(" [] [Whitespace(" ")],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@17..28 "data-label" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: missing (optional),
+                                        fallback_value: missing (optional),
+                                        r_paren_token: R_PAREN@28..29 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@29..30 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@30..35 "width" [] [],
+                                },
+                                colon_token: COLON@35..36 ":" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@36..40 "attr" [] [],
+                                        l_paren_token: L_PAREN@40..41 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@41..51 "data-size" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssRegularAttrUnit {
+                                            unit_token: IDENT@51..54 "px" [] [Whitespace(" ")],
+                                        },
+                                        fallback_value: CssAttrFallbackValue {
+                                            comma_token: COMMA@54..55 "," [] [],
+                                            value: CssGenericComponentValueList [
+                                                CssRegularDimension {
+                                                    value_token: CSS_NUMBER_LITERAL@55..56 "2" [] [],
+                                                    unit_token: IDENT@56..58 "px" [] [],
+                                                },
+                                            ],
+                                        },
+                                        r_paren_token: R_PAREN@58..59 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@59..60 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@60..66 "height" [] [],
+                                },
+                                colon_token: COLON@66..67 ":" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@67..71 "attr" [] [],
+                                        l_paren_token: L_PAREN@71..72 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@72..84 "data-height" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssTypeFunction {
+                                            name_token: TYPE_KW@84..88 "type" [] [],
+                                            l_paren_token: L_PAREN@88..89 "(" [] [],
+                                            ty: CssSyntaxComponentList [
+                                                CssSyntaxComponent {
+                                                    component: CssSyntaxType {
+                                                        l_angle_token: L_ANGLE@89..90 "<" [] [],
+                                                        type_name: CssRegularSyntaxTypeName {
+                                                            name_token: IDENT@90..96 "length" [] [],
+                                                        },
+                                                        r_angle_token: R_ANGLE@96..97 ">" [] [],
+                                                    },
+                                                    multiplier: missing (optional),
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@97..98 ")" [] [],
+                                        },
+                                        fallback_value: CssAttrFallbackValue {
+                                            comma_token: COMMA@98..99 "," [] [],
+                                            value: CssGenericComponentValueList [
+                                                CssRegularDimension {
+                                                    value_token: CSS_NUMBER_LITERAL@99..100 "2" [] [],
+                                                    unit_token: IDENT@100..102 "px" [] [],
+                                                },
+                                            ],
+                                        },
+                                        r_paren_token: R_PAREN@102..103 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@103..104 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@104..111 "padding" [] [],
+                                },
+                                colon_token: COLON@111..112 ":" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@112..116 "attr" [] [],
+                                        l_paren_token: L_PAREN@116..117 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@117..126 "data-gap" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssRegularAttrUnit {
+                                            unit_token: IDENT@126..128 "px" [] [],
+                                        },
+                                        fallback_value: CssAttrFallbackValue {
+                                            comma_token: COMMA@128..129 "," [] [],
+                                            value: CssGenericComponentValueList [
+                                                CssFunction {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@129..132 "var" [] [],
+                                                    },
+                                                    l_paren_token: L_PAREN@132..133 "(" [] [],
+                                                    items: CssParameterList [
+                                                        CssListOfComponentValuesExpression {
+                                                            css_component_value_list: CssComponentValueList [
+                                                                CssDashedIdentifier {
+                                                                    value_token: IDENT@133..143 "--fallback" [] [],
+                                                                },
+                                                            ],
+                                                        },
+                                                        COMMA@143..144 "," [] [],
+                                                        CssListOfComponentValuesExpression {
+                                                            css_component_value_list: CssComponentValueList [
+                                                                CssRegularDimension {
+                                                                    value_token: CSS_NUMBER_LITERAL@144..145 "2" [] [],
+                                                                    unit_token: IDENT@145..147 "px" [] [],
+                                                                },
+                                                            ],
+                                                        },
+                                                    ],
+                                                    r_paren_token: R_PAREN@147..148 ")" [] [],
+                                                },
+                                            ],
+                                        },
+                                        r_paren_token: R_PAREN@148..149 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@149..150 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@150..151 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@151..153 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@153..158 "empty" [] [],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@158..159 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@159..166 "content" [] [],
+                                },
+                                colon_token: COLON@166..167 ":" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@167..171 "attr" [] [],
+                                        l_paren_token: L_PAREN@171..172 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@172..182 "data-label" [] [],
+                                            },
+                                        ],
+                                        attr_type: missing (optional),
+                                        fallback_value: CssAttrFallbackValue {
+                                            comma_token: COMMA@182..183 "," [] [],
+                                            value: CssGenericComponentValueList [],
+                                        },
+                                        r_paren_token: R_PAREN@183..184 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@184..185 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@185..190 "width" [] [],
+                                },
+                                colon_token: COLON@190..191 ":" [] [],
+                                value: CssGenericComponentValueList [
+                                    CssAttrFunction {
+                                        name_token: ATTR_KW@191..195 "attr" [] [],
+                                        l_paren_token: L_PAREN@195..196 "(" [] [],
+                                        attr_name: CssAttrNameList [
+                                            CssIdentifier {
+                                                value_token: IDENT@196..206 "data-size" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        attr_type: CssRegularAttrUnit {
+                                            unit_token: IDENT@206..208 "px" [] [],
+                                        },
+                                        fallback_value: CssAttrFallbackValue {
+                                            comma_token: COMMA@208..220 "," [] [Comments("/* empty */")],
+                                            value: CssGenericComponentValueList [],
+                                        },
+                                        r_paren_token: R_PAREN@220..221 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@221..222 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@222..223 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@223..224 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..224
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..223
+    0: CSS_QUALIFIED_RULE@0..151
+      0: CSS_SELECTOR_LIST@0..2
+        0: CSS_COMPOUND_SELECTOR@0..2
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..2
+            0: CSS_CLASS_SELECTOR@0..2
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..2
+                0: IDENT@1..2 "b" [] []
+      1: CSS_DECLARATION_OR_RULE_BLOCK@2..151
+        0: L_CURLY@2..3 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@3..150
+          0: CSS_DECLARATION_WITH_SEMICOLON@3..30
+            0: CSS_DECLARATION@3..29
+              0: CSS_GENERIC_PROPERTY@3..29
+                0: CSS_IDENTIFIER@3..10
+                  0: IDENT@3..10 "content" [] []
+                1: COLON@10..11 ":" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@11..29
+                  0: CSS_ATTR_FUNCTION@11..29
+                    0: ATTR_KW@11..15 "attr" [] []
+                    1: L_PAREN@15..17 "(" [] [Whitespace(" ")]
+                    2: CSS_ATTR_NAME_LIST@17..28
+                      0: CSS_IDENTIFIER@17..28
+                        0: IDENT@17..28 "data-label" [] [Whitespace(" ")]
+                    3: (empty)
+                    4: (empty)
+                    5: R_PAREN@28..29 ")" [] []
+              1: (empty)
+            1: SEMICOLON@29..30 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@30..60
+            0: CSS_DECLARATION@30..59
+              0: CSS_GENERIC_PROPERTY@30..59
+                0: CSS_IDENTIFIER@30..35
+                  0: IDENT@30..35 "width" [] []
+                1: COLON@35..36 ":" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@36..59
+                  0: CSS_ATTR_FUNCTION@36..59
+                    0: ATTR_KW@36..40 "attr" [] []
+                    1: L_PAREN@40..41 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@41..51
+                      0: CSS_IDENTIFIER@41..51
+                        0: IDENT@41..51 "data-size" [] [Whitespace(" ")]
+                    3: CSS_REGULAR_ATTR_UNIT@51..54
+                      0: IDENT@51..54 "px" [] [Whitespace(" ")]
+                    4: CSS_ATTR_FALLBACK_VALUE@54..58
+                      0: COMMA@54..55 "," [] []
+                      1: CSS_GENERIC_COMPONENT_VALUE_LIST@55..58
+                        0: CSS_REGULAR_DIMENSION@55..58
+                          0: CSS_NUMBER_LITERAL@55..56 "2" [] []
+                          1: IDENT@56..58 "px" [] []
+                    5: R_PAREN@58..59 ")" [] []
+              1: (empty)
+            1: SEMICOLON@59..60 ";" [] []
+          2: CSS_DECLARATION_WITH_SEMICOLON@60..104
+            0: CSS_DECLARATION@60..103
+              0: CSS_GENERIC_PROPERTY@60..103
+                0: CSS_IDENTIFIER@60..66
+                  0: IDENT@60..66 "height" [] []
+                1: COLON@66..67 ":" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@67..103
+                  0: CSS_ATTR_FUNCTION@67..103
+                    0: ATTR_KW@67..71 "attr" [] []
+                    1: L_PAREN@71..72 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@72..84
+                      0: CSS_IDENTIFIER@72..84
+                        0: IDENT@72..84 "data-height" [] [Whitespace(" ")]
+                    3: CSS_TYPE_FUNCTION@84..98
+                      0: TYPE_KW@84..88 "type" [] []
+                      1: L_PAREN@88..89 "(" [] []
+                      2: CSS_SYNTAX_COMPONENT_LIST@89..97
+                        0: CSS_SYNTAX_COMPONENT@89..97
+                          0: CSS_SYNTAX_TYPE@89..97
+                            0: L_ANGLE@89..90 "<" [] []
+                            1: CSS_REGULAR_SYNTAX_TYPE_NAME@90..96
+                              0: IDENT@90..96 "length" [] []
+                            2: R_ANGLE@96..97 ">" [] []
+                          1: (empty)
+                      3: R_PAREN@97..98 ")" [] []
+                    4: CSS_ATTR_FALLBACK_VALUE@98..102
+                      0: COMMA@98..99 "," [] []
+                      1: CSS_GENERIC_COMPONENT_VALUE_LIST@99..102
+                        0: CSS_REGULAR_DIMENSION@99..102
+                          0: CSS_NUMBER_LITERAL@99..100 "2" [] []
+                          1: IDENT@100..102 "px" [] []
+                    5: R_PAREN@102..103 ")" [] []
+              1: (empty)
+            1: SEMICOLON@103..104 ";" [] []
+          3: CSS_DECLARATION_WITH_SEMICOLON@104..150
+            0: CSS_DECLARATION@104..149
+              0: CSS_GENERIC_PROPERTY@104..149
+                0: CSS_IDENTIFIER@104..111
+                  0: IDENT@104..111 "padding" [] []
+                1: COLON@111..112 ":" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@112..149
+                  0: CSS_ATTR_FUNCTION@112..149
+                    0: ATTR_KW@112..116 "attr" [] []
+                    1: L_PAREN@116..117 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@117..126
+                      0: CSS_IDENTIFIER@117..126
+                        0: IDENT@117..126 "data-gap" [] [Whitespace(" ")]
+                    3: CSS_REGULAR_ATTR_UNIT@126..128
+                      0: IDENT@126..128 "px" [] []
+                    4: CSS_ATTR_FALLBACK_VALUE@128..148
+                      0: COMMA@128..129 "," [] []
+                      1: CSS_GENERIC_COMPONENT_VALUE_LIST@129..148
+                        0: CSS_FUNCTION@129..148
+                          0: CSS_IDENTIFIER@129..132
+                            0: IDENT@129..132 "var" [] []
+                          1: L_PAREN@132..133 "(" [] []
+                          2: CSS_PARAMETER_LIST@133..147
+                            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@133..143
+                              0: CSS_COMPONENT_VALUE_LIST@133..143
+                                0: CSS_DASHED_IDENTIFIER@133..143
+                                  0: IDENT@133..143 "--fallback" [] []
+                            1: COMMA@143..144 "," [] []
+                            2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@144..147
+                              0: CSS_COMPONENT_VALUE_LIST@144..147
+                                0: CSS_REGULAR_DIMENSION@144..147
+                                  0: CSS_NUMBER_LITERAL@144..145 "2" [] []
+                                  1: IDENT@145..147 "px" [] []
+                          3: R_PAREN@147..148 ")" [] []
+                    5: R_PAREN@148..149 ")" [] []
+              1: (empty)
+            1: SEMICOLON@149..150 ";" [] []
+        2: R_CURLY@150..151 "}" [] []
+    1: CSS_QUALIFIED_RULE@151..223
+      0: CSS_SELECTOR_LIST@151..158
+        0: CSS_COMPOUND_SELECTOR@151..158
+          0: CSS_NESTED_SELECTOR_LIST@151..151
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@151..158
+            0: CSS_CLASS_SELECTOR@151..158
+              0: DOT@151..153 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@153..158
+                0: IDENT@153..158 "empty" [] []
+      1: CSS_DECLARATION_OR_RULE_BLOCK@158..223
+        0: L_CURLY@158..159 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@159..222
+          0: CSS_DECLARATION_WITH_SEMICOLON@159..185
+            0: CSS_DECLARATION@159..184
+              0: CSS_GENERIC_PROPERTY@159..184
+                0: CSS_IDENTIFIER@159..166
+                  0: IDENT@159..166 "content" [] []
+                1: COLON@166..167 ":" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@167..184
+                  0: CSS_ATTR_FUNCTION@167..184
+                    0: ATTR_KW@167..171 "attr" [] []
+                    1: L_PAREN@171..172 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@172..182
+                      0: CSS_IDENTIFIER@172..182
+                        0: IDENT@172..182 "data-label" [] []
+                    3: (empty)
+                    4: CSS_ATTR_FALLBACK_VALUE@182..183
+                      0: COMMA@182..183 "," [] []
+                      1: CSS_GENERIC_COMPONENT_VALUE_LIST@183..183
+                    5: R_PAREN@183..184 ")" [] []
+              1: (empty)
+            1: SEMICOLON@184..185 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@185..222
+            0: CSS_DECLARATION@185..221
+              0: CSS_GENERIC_PROPERTY@185..221
+                0: CSS_IDENTIFIER@185..190
+                  0: IDENT@185..190 "width" [] []
+                1: COLON@190..191 ":" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@191..221
+                  0: CSS_ATTR_FUNCTION@191..221
+                    0: ATTR_KW@191..195 "attr" [] []
+                    1: L_PAREN@195..196 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@196..206
+                      0: CSS_IDENTIFIER@196..206
+                        0: IDENT@196..206 "data-size" [] [Whitespace(" ")]
+                    3: CSS_REGULAR_ATTR_UNIT@206..208
+                      0: IDENT@206..208 "px" [] []
+                    4: CSS_ATTR_FALLBACK_VALUE@208..220
+                      0: COMMA@208..220 "," [] [Comments("/* empty */")]
+                      1: CSS_GENERIC_COMPONENT_VALUE_LIST@220..220
+                    5: R_PAREN@220..221 ")" [] []
+              1: (empty)
+            1: SEMICOLON@221..222 ";" [] []
+        2: R_CURLY@222..223 "}" [] []
+  2: EOF@223..224 "" [Newline("\n")] []
+
+```

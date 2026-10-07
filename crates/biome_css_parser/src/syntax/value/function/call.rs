@@ -61,7 +61,7 @@ pub(crate) fn parse_any_function_with_context(
             parse_if_function(p)
         }
     } else if is_at_attr_function(p) {
-        parse_attr_function(p)
+        parse_attr_function(p, context)
     } else if is_at_vue_v_bind_function(p) {
         CssSyntaxFeatures::CssModulesWithVue.parse_exclusive_syntax(
             p,

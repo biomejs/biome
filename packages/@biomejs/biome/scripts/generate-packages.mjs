@@ -126,7 +126,7 @@ function updateWasmPackage(target) {
 const PLATFORMS = ["win32-%s", "darwin-%s", "linux-%s", "linux-%s-musl"];
 const ARCHITECTURES = ["x64", "arm64"];
 const WASM_TARGETS = ["bundler", "nodejs", "web"];
-const JS_PACKAGES = ["backend-jsonrpc", "biome", "js-api"];
+const JS_PACKAGES = ["backend-jsonrpc", "biome", "js-api", "runtime"];
 
 for (const target of WASM_TARGETS) {
 	updateWasmPackage(target);

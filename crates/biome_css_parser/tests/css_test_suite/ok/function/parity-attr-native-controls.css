@@ -1,0 +1,2 @@
+.b{content:attr( data-label );width:attr(data-size px ,2px);height:attr(data-height type(<length>),2px);padding:attr(data-gap px,var(--fallback,2px));}
+.empty{content:attr(data-label,);width:attr(data-size px,/* empty */);}

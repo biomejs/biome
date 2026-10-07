@@ -1,0 +1,513 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.a{content:attr($);color:red;}
+$gap:2px;.b{width:attr(data-size px,$gap *);height:1px;}
+.c{content:attr(#{});color:red;}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..2 "a" [] [],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@2..3 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@3..10 "content" [] [],
+                                },
+                                colon_token: COLON@10..11 ":" [] [],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssAttrFunction {
+                                            name_token: ATTR_KW@11..15 "attr" [] [],
+                                            l_paren_token: L_PAREN@15..16 "(" [] [],
+                                            attr_name: CssAttrNameList [
+                                                CssBogusAttrName {
+                                                    items: [
+                                                        DOLLAR@16..17 "$" [] [],
+                                                    ],
+                                                },
+                                            ],
+                                            attr_type: missing (optional),
+                                            fallback_value: missing (optional),
+                                            r_paren_token: R_PAREN@17..18 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@18..19 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@19..24 "color" [] [],
+                                },
+                                colon_token: COLON@24..25 ":" [] [],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@25..28 "red" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@28..29 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@29..30 "}" [] [],
+            },
+        },
+        ScssVariableDeclaration {
+            name: ScssVariable {
+                dollar_token: DOLLAR@30..32 "$" [Newline("\n")] [],
+                name: CssIdentifier {
+                    value_token: IDENT@32..35 "gap" [] [],
+                },
+            },
+            colon_token: COLON@35..36 ":" [] [],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    CssRegularDimension {
+                        value_token: CSS_NUMBER_LITERAL@36..37 "2" [] [],
+                        unit_token: IDENT@37..39 "px" [] [],
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@39..40 ";" [] [],
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@40..41 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@41..42 "b" [] [],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@42..43 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@43..48 "width" [] [],
+                                },
+                                colon_token: COLON@48..49 ":" [] [],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssAttrFunction {
+                                            name_token: ATTR_KW@49..53 "attr" [] [],
+                                            l_paren_token: L_PAREN@53..54 "(" [] [],
+                                            attr_name: CssAttrNameList [
+                                                CssIdentifier {
+                                                    value_token: IDENT@54..64 "data-size" [] [Whitespace(" ")],
+                                                },
+                                            ],
+                                            attr_type: CssRegularAttrUnit {
+                                                unit_token: IDENT@64..66 "px" [] [],
+                                            },
+                                            fallback_value: CssAttrFallbackValue {
+                                                comma_token: COMMA@66..67 "," [] [],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        ScssBinaryExpression {
+                                                            left: ScssVariable {
+                                                                dollar_token: DOLLAR@67..68 "$" [] [],
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@68..72 "gap" [] [Whitespace(" ")],
+                                                                },
+                                                            },
+                                                            operator: STAR@72..73 "*" [] [],
+                                                            right: missing (required),
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            r_paren_token: R_PAREN@73..74 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@74..75 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@75..81 "height" [] [],
+                                },
+                                colon_token: COLON@81..82 ":" [] [],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssRegularDimension {
+                                            value_token: CSS_NUMBER_LITERAL@82..83 "1" [] [],
+                                            unit_token: IDENT@83..85 "px" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@85..86 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@86..87 "}" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@87..89 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@89..90 "c" [] [],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@90..91 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@91..98 "content" [] [],
+                                },
+                                colon_token: COLON@98..99 ":" [] [],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssAttrFunction {
+                                            name_token: ATTR_KW@99..103 "attr" [] [],
+                                            l_paren_token: L_PAREN@103..104 "(" [] [],
+                                            attr_name: CssAttrNameList [
+                                                ScssInterpolatedIdentifier {
+                                                    items: ScssInterpolatedIdentifierPartList [
+                                                        ScssInterpolation {
+                                                            hash_token: HASH@104..105 "#" [] [],
+                                                            l_curly_token: L_CURLY@105..106 "{" [] [],
+                                                            value: missing (required),
+                                                            r_curly_token: R_CURLY@106..107 "}" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                            attr_type: missing (optional),
+                                            fallback_value: missing (optional),
+                                            r_paren_token: R_PAREN@107..108 ")" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@108..109 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@109..114 "color" [] [],
+                                },
+                                colon_token: COLON@114..115 ":" [] [],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@115..118 "red" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@118..119 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@119..120 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@120..121 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..121
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..120
+    0: CSS_QUALIFIED_RULE@0..30
+      0: CSS_SELECTOR_LIST@0..2
+        0: CSS_COMPOUND_SELECTOR@0..2
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..2
+            0: CSS_CLASS_SELECTOR@0..2
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..2
+                0: IDENT@1..2 "a" [] []
+      1: CSS_DECLARATION_OR_RULE_BLOCK@2..30
+        0: L_CURLY@2..3 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@3..29
+          0: CSS_DECLARATION_WITH_SEMICOLON@3..19
+            0: CSS_DECLARATION@3..18
+              0: CSS_GENERIC_PROPERTY@3..18
+                0: CSS_IDENTIFIER@3..10
+                  0: IDENT@3..10 "content" [] []
+                1: COLON@10..11 ":" [] []
+                2: SCSS_EXPRESSION@11..18
+                  0: SCSS_EXPRESSION_ITEM_LIST@11..18
+                    0: CSS_ATTR_FUNCTION@11..18
+                      0: ATTR_KW@11..15 "attr" [] []
+                      1: L_PAREN@15..16 "(" [] []
+                      2: CSS_ATTR_NAME_LIST@16..17
+                        0: CSS_BOGUS_ATTR_NAME@16..17
+                          0: DOLLAR@16..17 "$" [] []
+                      3: (empty)
+                      4: (empty)
+                      5: R_PAREN@17..18 ")" [] []
+              1: (empty)
+            1: SEMICOLON@18..19 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@19..29
+            0: CSS_DECLARATION@19..28
+              0: CSS_GENERIC_PROPERTY@19..28
+                0: CSS_IDENTIFIER@19..24
+                  0: IDENT@19..24 "color" [] []
+                1: COLON@24..25 ":" [] []
+                2: SCSS_EXPRESSION@25..28
+                  0: SCSS_EXPRESSION_ITEM_LIST@25..28
+                    0: CSS_IDENTIFIER@25..28
+                      0: IDENT@25..28 "red" [] []
+              1: (empty)
+            1: SEMICOLON@28..29 ";" [] []
+        2: R_CURLY@29..30 "}" [] []
+    1: SCSS_VARIABLE_DECLARATION@30..40
+      0: SCSS_VARIABLE@30..35
+        0: DOLLAR@30..32 "$" [Newline("\n")] []
+        1: CSS_IDENTIFIER@32..35
+          0: IDENT@32..35 "gap" [] []
+      1: COLON@35..36 ":" [] []
+      2: SCSS_EXPRESSION@36..39
+        0: SCSS_EXPRESSION_ITEM_LIST@36..39
+          0: CSS_REGULAR_DIMENSION@36..39
+            0: CSS_NUMBER_LITERAL@36..37 "2" [] []
+            1: IDENT@37..39 "px" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@39..39
+      4: SEMICOLON@39..40 ";" [] []
+    2: CSS_QUALIFIED_RULE@40..87
+      0: CSS_SELECTOR_LIST@40..42
+        0: CSS_COMPOUND_SELECTOR@40..42
+          0: CSS_NESTED_SELECTOR_LIST@40..40
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@40..42
+            0: CSS_CLASS_SELECTOR@40..42
+              0: DOT@40..41 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@41..42
+                0: IDENT@41..42 "b" [] []
+      1: CSS_DECLARATION_OR_RULE_BLOCK@42..87
+        0: L_CURLY@42..43 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@43..86
+          0: CSS_DECLARATION_WITH_SEMICOLON@43..75
+            0: CSS_DECLARATION@43..74
+              0: CSS_GENERIC_PROPERTY@43..74
+                0: CSS_IDENTIFIER@43..48
+                  0: IDENT@43..48 "width" [] []
+                1: COLON@48..49 ":" [] []
+                2: SCSS_EXPRESSION@49..74
+                  0: SCSS_EXPRESSION_ITEM_LIST@49..74
+                    0: CSS_ATTR_FUNCTION@49..74
+                      0: ATTR_KW@49..53 "attr" [] []
+                      1: L_PAREN@53..54 "(" [] []
+                      2: CSS_ATTR_NAME_LIST@54..64
+                        0: CSS_IDENTIFIER@54..64
+                          0: IDENT@54..64 "data-size" [] [Whitespace(" ")]
+                      3: CSS_REGULAR_ATTR_UNIT@64..66
+                        0: IDENT@64..66 "px" [] []
+                      4: CSS_ATTR_FALLBACK_VALUE@66..73
+                        0: COMMA@66..67 "," [] []
+                        1: SCSS_EXPRESSION@67..73
+                          0: SCSS_EXPRESSION_ITEM_LIST@67..73
+                            0: SCSS_BINARY_EXPRESSION@67..73
+                              0: SCSS_VARIABLE@67..72
+                                0: DOLLAR@67..68 "$" [] []
+                                1: CSS_IDENTIFIER@68..72
+                                  0: IDENT@68..72 "gap" [] [Whitespace(" ")]
+                              1: STAR@72..73 "*" [] []
+                              2: (empty)
+                      5: R_PAREN@73..74 ")" [] []
+              1: (empty)
+            1: SEMICOLON@74..75 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@75..86
+            0: CSS_DECLARATION@75..85
+              0: CSS_GENERIC_PROPERTY@75..85
+                0: CSS_IDENTIFIER@75..81
+                  0: IDENT@75..81 "height" [] []
+                1: COLON@81..82 ":" [] []
+                2: SCSS_EXPRESSION@82..85
+                  0: SCSS_EXPRESSION_ITEM_LIST@82..85
+                    0: CSS_REGULAR_DIMENSION@82..85
+                      0: CSS_NUMBER_LITERAL@82..83 "1" [] []
+                      1: IDENT@83..85 "px" [] []
+              1: (empty)
+            1: SEMICOLON@85..86 ";" [] []
+        2: R_CURLY@86..87 "}" [] []
+    3: CSS_QUALIFIED_RULE@87..120
+      0: CSS_SELECTOR_LIST@87..90
+        0: CSS_COMPOUND_SELECTOR@87..90
+          0: CSS_NESTED_SELECTOR_LIST@87..87
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@87..90
+            0: CSS_CLASS_SELECTOR@87..90
+              0: DOT@87..89 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@89..90
+                0: IDENT@89..90 "c" [] []
+      1: CSS_DECLARATION_OR_RULE_BLOCK@90..120
+        0: L_CURLY@90..91 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@91..119
+          0: CSS_DECLARATION_WITH_SEMICOLON@91..109
+            0: CSS_DECLARATION@91..108
+              0: CSS_GENERIC_PROPERTY@91..108
+                0: CSS_IDENTIFIER@91..98
+                  0: IDENT@91..98 "content" [] []
+                1: COLON@98..99 ":" [] []
+                2: SCSS_EXPRESSION@99..108
+                  0: SCSS_EXPRESSION_ITEM_LIST@99..108
+                    0: CSS_ATTR_FUNCTION@99..108
+                      0: ATTR_KW@99..103 "attr" [] []
+                      1: L_PAREN@103..104 "(" [] []
+                      2: CSS_ATTR_NAME_LIST@104..107
+                        0: SCSS_INTERPOLATED_IDENTIFIER@104..107
+                          0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@104..107
+                            0: SCSS_INTERPOLATION@104..107
+                              0: HASH@104..105 "#" [] []
+                              1: L_CURLY@105..106 "{" [] []
+                              2: (empty)
+                              3: R_CURLY@106..107 "}" [] []
+                      3: (empty)
+                      4: (empty)
+                      5: R_PAREN@107..108 ")" [] []
+              1: (empty)
+            1: SEMICOLON@108..109 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@109..119
+            0: CSS_DECLARATION@109..118
+              0: CSS_GENERIC_PROPERTY@109..118
+                0: CSS_IDENTIFIER@109..114
+                  0: IDENT@109..114 "color" [] []
+                1: COLON@114..115 ":" [] []
+                2: SCSS_EXPRESSION@115..118
+                  0: SCSS_EXPRESSION_ITEM_LIST@115..118
+                    0: CSS_IDENTIFIER@115..118
+                      0: IDENT@115..118 "red" [] []
+              1: (empty)
+            1: SEMICOLON@118..119 ";" [] []
+        2: R_CURLY@119..120 "}" [] []
+  2: EOF@120..121 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+parity-attr-values-recovery.scss:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier but instead found '$'.
+  
+  > 1 │ .a{content:attr($);color:red;}
+      │                 ^
+    2 │ $gap:2px;.b{width:attr(data-size px,$gap *);height:1px;}
+    3 │ .c{content:attr(#{});color:red;}
+  
+  i Expected an identifier here.
+  
+  > 1 │ .a{content:attr($);color:red;}
+      │                 ^
+    2 │ $gap:2px;.b{width:attr(data-size px,$gap *);height:1px;}
+    3 │ .c{content:attr(#{});color:red;}
+  
+parity-attr-values-recovery.scss:2:43 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    1 │ .a{content:attr($);color:red;}
+  > 2 │ $gap:2px;.b{width:attr(data-size px,$gap *);height:1px;}
+      │                                           ^
+    3 │ .c{content:attr(#{});color:red;}
+    4 │ 
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parity-attr-values-recovery.scss:3:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a SCSS expression but instead found '}'.
+  
+    1 │ .a{content:attr($);color:red;}
+    2 │ $gap:2px;.b{width:attr(data-size px,$gap *);height:1px;}
+  > 3 │ .c{content:attr(#{});color:red;}
+      │                   ^
+    4 │ 
+  
+  i Expected a SCSS expression here.
+  
+    1 │ .a{content:attr($);color:red;}
+    2 │ $gap:2px;.b{width:attr(data-size px,$gap *);height:1px;}
+  > 3 │ .c{content:attr(#{});color:red;}
+      │                   ^
+    4 │ 
+  
+```
