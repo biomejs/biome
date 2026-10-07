@@ -20,6 +20,27 @@ class A { set foo (value) {} accessor foo; }
 class A { foo() {} foo() {} bar() {} bar() {} }
 class A { get foo() {} get foo() {} }
 class A { foo() {} "foo"() {} }
+class A { 10() {} 1e1() {} }
+class A { ['foo']() {} ['foo']() {} }
+class A { static ['foo']() {} static foo() {} }
+class A { set 'foo'(value) {} set ['foo'](val) {} }
+class A { ''() {} ['']() {} }
+class A { [`foo`]() {} [`foo`]() {} }
+class A { static get [`foo`]() {} static get ['foo']() {} }
+class A { foo() {} [`foo`]() {} }
+class A { get [`foo`]() {} 'foo'() {} }
+class A { static 'foo'() {} static [`foo`]() {} }
+class A { ['constructor']() {} ['constructor']() {} }
+class A { static [`constructor`]() {} static constructor() {} }
+class A { [123]() {} [123]() {} }
+class A { [0x10]() {} 16() {} }
+class A { [100]() {} [1e2]() {} }
+class A { [123.00]() {} [`123`]() {} }
+class A { static '65'() {} static [0o101]() {} }
+class A { [123n]() {} 123() {} }
+class A { [null]() {} 'null'() {} }
+class A { 'constructor'() {} [`constructor`]() {} }
+class A { 'constructor'() {} set ['constructor'](value) {} }
 
 // class A { #foo; #foo; } This is invalid syntax, parser should throw an error
 
@@ -273,7 +294,7 @@ invalid.js:15:24 lint/suspicious/noDuplicateClassMembers ━━━━━━━�
   > 15 │ class A { get foo() {} get foo() {} }
        │                        ^^^^^^^^^^^^
     16 │ class A { foo() {} "foo"() {} }
-    17 │ 
+    17 │ class A { 10() {} 1e1() {} }
   
 
 ```
@@ -287,8 +308,293 @@ invalid.js:16:20 lint/suspicious/noDuplicateClassMembers ━━━━━━━�
     15 │ class A { get foo() {} get foo() {} }
   > 16 │ class A { foo() {} "foo"() {} }
        │                    ^^^^^^^^^^
-    17 │ 
-    18 │ // class A { #foo; #foo; } This is invalid syntax, parser should throw an error
+    17 │ class A { 10() {} 1e1() {} }
+    18 │ class A { ['foo']() {} ['foo']() {} }
+  
+
+```
+
+```
+invalid.js:17:19 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name "10"
+  
+    15 │ class A { get foo() {} get foo() {} }
+    16 │ class A { foo() {} "foo"() {} }
+  > 17 │ class A { 10() {} 1e1() {} }
+       │                   ^^^^^^^^
+    18 │ class A { ['foo']() {} ['foo']() {} }
+    19 │ class A { static ['foo']() {} static foo() {} }
+  
+
+```
+
+```
+invalid.js:18:24 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name "foo"
+  
+    16 │ class A { foo() {} "foo"() {} }
+    17 │ class A { 10() {} 1e1() {} }
+  > 18 │ class A { ['foo']() {} ['foo']() {} }
+       │                        ^^^^^^^^^^^^
+    19 │ class A { static ['foo']() {} static foo() {} }
+    20 │ class A { set 'foo'(value) {} set ['foo'](val) {} }
+  
+
+```
+
+```
+invalid.js:19:31 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name "foo"
+  
+    17 │ class A { 10() {} 1e1() {} }
+    18 │ class A { ['foo']() {} ['foo']() {} }
+  > 19 │ class A { static ['foo']() {} static foo() {} }
+       │                               ^^^^^^^^^^^^^^^
+    20 │ class A { set 'foo'(value) {} set ['foo'](val) {} }
+    21 │ class A { ''() {} ['']() {} }
+  
+
+```
+
+```
+invalid.js:20:31 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name "foo"
+  
+    18 │ class A { ['foo']() {} ['foo']() {} }
+    19 │ class A { static ['foo']() {} static foo() {} }
+  > 20 │ class A { set 'foo'(value) {} set ['foo'](val) {} }
+       │                               ^^^^^^^^^^^^^^^^^^^
+    21 │ class A { ''() {} ['']() {} }
+    22 │ class A { [`foo`]() {} [`foo`]() {} }
+  
+
+```
+
+```
+invalid.js:21:19 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name ""
+  
+    19 │ class A { static ['foo']() {} static foo() {} }
+    20 │ class A { set 'foo'(value) {} set ['foo'](val) {} }
+  > 21 │ class A { ''() {} ['']() {} }
+       │                   ^^^^^^^^^
+    22 │ class A { [`foo`]() {} [`foo`]() {} }
+    23 │ class A { static get [`foo`]() {} static get ['foo']() {} }
+  
+
+```
+
+```
+invalid.js:22:24 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name "foo"
+  
+    20 │ class A { set 'foo'(value) {} set ['foo'](val) {} }
+    21 │ class A { ''() {} ['']() {} }
+  > 22 │ class A { [`foo`]() {} [`foo`]() {} }
+       │                        ^^^^^^^^^^^^
+    23 │ class A { static get [`foo`]() {} static get ['foo']() {} }
+    24 │ class A { foo() {} [`foo`]() {} }
+  
+
+```
+
+```
+invalid.js:23:35 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name "foo"
+  
+    21 │ class A { ''() {} ['']() {} }
+    22 │ class A { [`foo`]() {} [`foo`]() {} }
+  > 23 │ class A { static get [`foo`]() {} static get ['foo']() {} }
+       │                                   ^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ class A { foo() {} [`foo`]() {} }
+    25 │ class A { get [`foo`]() {} 'foo'() {} }
+  
+
+```
+
+```
+invalid.js:24:20 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name "foo"
+  
+    22 │ class A { [`foo`]() {} [`foo`]() {} }
+    23 │ class A { static get [`foo`]() {} static get ['foo']() {} }
+  > 24 │ class A { foo() {} [`foo`]() {} }
+       │                    ^^^^^^^^^^^^
+    25 │ class A { get [`foo`]() {} 'foo'() {} }
+    26 │ class A { static 'foo'() {} static [`foo`]() {} }
+  
+
+```
+
+```
+invalid.js:25:28 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name "foo"
+  
+    23 │ class A { static get [`foo`]() {} static get ['foo']() {} }
+    24 │ class A { foo() {} [`foo`]() {} }
+  > 25 │ class A { get [`foo`]() {} 'foo'() {} }
+       │                            ^^^^^^^^^^
+    26 │ class A { static 'foo'() {} static [`foo`]() {} }
+    27 │ class A { ['constructor']() {} ['constructor']() {} }
+  
+
+```
+
+```
+invalid.js:26:29 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name "foo"
+  
+    24 │ class A { foo() {} [`foo`]() {} }
+    25 │ class A { get [`foo`]() {} 'foo'() {} }
+  > 26 │ class A { static 'foo'() {} static [`foo`]() {} }
+       │                             ^^^^^^^^^^^^^^^^^^^
+    27 │ class A { ['constructor']() {} ['constructor']() {} }
+    28 │ class A { static [`constructor`]() {} static constructor() {} }
+  
+
+```
+
+```
+invalid.js:27:32 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name "constructor"
+  
+    25 │ class A { get [`foo`]() {} 'foo'() {} }
+    26 │ class A { static 'foo'() {} static [`foo`]() {} }
+  > 27 │ class A { ['constructor']() {} ['constructor']() {} }
+       │                                ^^^^^^^^^^^^^^^^^^^^
+    28 │ class A { static [`constructor`]() {} static constructor() {} }
+    29 │ class A { [123]() {} [123]() {} }
+  
+
+```
+
+```
+invalid.js:28:39 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name "constructor"
+  
+    26 │ class A { static 'foo'() {} static [`foo`]() {} }
+    27 │ class A { ['constructor']() {} ['constructor']() {} }
+  > 28 │ class A { static [`constructor`]() {} static constructor() {} }
+       │                                       ^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ class A { [123]() {} [123]() {} }
+    30 │ class A { [0x10]() {} 16() {} }
+  
+
+```
+
+```
+invalid.js:29:22 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name "123"
+  
+    27 │ class A { ['constructor']() {} ['constructor']() {} }
+    28 │ class A { static [`constructor`]() {} static constructor() {} }
+  > 29 │ class A { [123]() {} [123]() {} }
+       │                      ^^^^^^^^^^
+    30 │ class A { [0x10]() {} 16() {} }
+    31 │ class A { [100]() {} [1e2]() {} }
+  
+
+```
+
+```
+invalid.js:30:23 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name "16"
+  
+    28 │ class A { static [`constructor`]() {} static constructor() {} }
+    29 │ class A { [123]() {} [123]() {} }
+  > 30 │ class A { [0x10]() {} 16() {} }
+       │                       ^^^^^^^
+    31 │ class A { [100]() {} [1e2]() {} }
+    32 │ class A { [123.00]() {} [`123`]() {} }
+  
+
+```
+
+```
+invalid.js:31:22 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name "100"
+  
+    29 │ class A { [123]() {} [123]() {} }
+    30 │ class A { [0x10]() {} 16() {} }
+  > 31 │ class A { [100]() {} [1e2]() {} }
+       │                      ^^^^^^^^^^
+    32 │ class A { [123.00]() {} [`123`]() {} }
+    33 │ class A { static '65'() {} static [0o101]() {} }
+  
+
+```
+
+```
+invalid.js:32:25 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name "123"
+  
+    30 │ class A { [0x10]() {} 16() {} }
+    31 │ class A { [100]() {} [1e2]() {} }
+  > 32 │ class A { [123.00]() {} [`123`]() {} }
+       │                         ^^^^^^^^^^^^
+    33 │ class A { static '65'() {} static [0o101]() {} }
+    34 │ class A { [123n]() {} 123() {} }
+  
+
+```
+
+```
+invalid.js:33:28 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name "65"
+  
+    31 │ class A { [100]() {} [1e2]() {} }
+    32 │ class A { [123.00]() {} [`123`]() {} }
+  > 33 │ class A { static '65'() {} static [0o101]() {} }
+       │                            ^^^^^^^^^^^^^^^^^^^
+    34 │ class A { [123n]() {} 123() {} }
+    35 │ class A { [null]() {} 'null'() {} }
+  
+
+```
+
+```
+invalid.js:34:23 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name "123"
+  
+    32 │ class A { [123.00]() {} [`123`]() {} }
+    33 │ class A { static '65'() {} static [0o101]() {} }
+  > 34 │ class A { [123n]() {} 123() {} }
+       │                       ^^^^^^^^
+    35 │ class A { [null]() {} 'null'() {} }
+    36 │ class A { 'constructor'() {} [`constructor`]() {} }
+  
+
+```
+
+```
+invalid.js:35:23 lint/suspicious/noDuplicateClassMembers ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate class member name "null"
+  
+    33 │ class A { static '65'() {} static [0o101]() {} }
+    34 │ class A { [123n]() {} 123() {} }
+  > 35 │ class A { [null]() {} 'null'() {} }
+       │                       ^^^^^^^^^^^
+    36 │ class A { 'constructor'() {} [`constructor`]() {} }
+    37 │ class A { 'constructor'() {} set ['constructor'](value) {} }
   
 
 ```

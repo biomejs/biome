@@ -224,12 +224,78 @@ pub fn canonicalize_js_bigint_literal(input: &str) -> Option<Cow<'_, str>> {
     Some(Cow::Owned(canonical))
 }
 
+/// Converts a JavaScript BigInt literal to its canonical property key (decimal representation without trailing 'n').
+///
+/// Returns `None` if `input` is not a valid BigInt literal.
+pub fn canonicalize_js_bigint_property_key(input: &str) -> Option<Cow<'_, str>> {
+    let canonical = canonicalize_js_bigint_literal(input)?;
+    match canonical {
+        Cow::Borrowed(s) => {
+            let key = s.strip_suffix('n')?;
+            Some(Cow::Borrowed(key))
+        }
+        Cow::Owned(mut s) => {
+            if s.ends_with('n') {
+                s.pop();
+            }
+            Some(Cow::Owned(s))
+        }
+    }
+}
+
+const MAX_SAFE_INTEGER: u64 = 9_007_199_254_740_991;
+
+/// Checks whether the string is already a canonical, simple decimal literal within
+/// JavaScript's safe integer range (0 to 2^53 - 1) without decimal points, exponents,
+/// separators, alternate radixes, or leading zeroes.
+fn is_simple_decimal_literal(input: &str) -> bool {
+    if input == "0" {
+        return true;
+    }
+    let bytes = input.as_bytes();
+    if bytes.is_empty() || bytes[0] == b'0' {
+        return false;
+    }
+    if !bytes.iter().all(|b| b.is_ascii_digit()) {
+        return false;
+    }
+    if bytes.len() <= 15 {
+        return true;
+    }
+    if bytes.len() == 16 {
+        return input
+            .parse::<u64>()
+            .is_ok_and(|val| val <= MAX_SAFE_INTEGER);
+    }
+    false
+}
+
+/// Converts a JavaScript numeric literal to its ECMAScript ToString canonical property name.
+///
+/// Converts hexadecimal (`0x10`), octal (`0o20`), binary (`0b10`), scientific notation (`1e1`),
+/// separators (`1_000`), decimals (`1.0`, `123.00`), and BigInts (`123n`) to their standard
+/// decimal property keys.
+pub fn canonicalize_js_number_literal(input: &str) -> Option<Cow<'_, str>> {
+    if input.ends_with(['n', 'N']) {
+        return canonicalize_js_bigint_property_key(input);
+    }
+
+    if is_simple_decimal_literal(input) {
+        return Some(Cow::Borrowed(input));
+    }
+
+    let val = parse_js_number_with_single_rounding(input)?;
+    let mut buffer = ryu_js::Buffer::new();
+    Some(Cow::Owned(buffer.format(val).to_string()))
+}
+
 #[cfg(test)]
 mod tests {
     use std::borrow::Cow;
 
     use super::{
-        canonicalize_js_bigint_literal, parse_js_number_with_single_rounding,
+        canonicalize_js_bigint_literal, canonicalize_js_bigint_property_key,
+        canonicalize_js_number_literal, parse_js_number_with_single_rounding,
         split_into_radix_and_number,
     };
     use biome_js_factory::JsSyntaxTreeBuilder;
@@ -440,5 +506,76 @@ mod tests {
         assert_split("1234", 10, "1234");
         assert_split("12_34", 10, "1234");
         assert_split("12_34", 10, "1234");
+    }
+
+    #[test]
+    fn canonicalizes_number_literals() {
+        let cases = [
+            ("0", "0"),
+            ("1", "1"),
+            ("42", "42"),
+            ("0x1", "1"),
+            ("0x10", "16"),
+            ("0XFF", "255"),
+            ("0b101", "5"),
+            ("0B10", "2"),
+            ("0o101", "65"),
+            ("0O77", "63"),
+            ("077", "63"),
+            ("1.0", "1"),
+            ("1.", "1"),
+            ("100.00", "100"),
+            ("123.00", "123"),
+            ("1e1", "10"),
+            ("1e0", "1"),
+            ("1e2", "100"),
+            ("1_000", "1000"),
+            ("0x1_0", "16"),
+            ("0.5", "0.5"),
+            (".5", "0.5"),
+            ("123.45", "123.45"),
+            ("1e21", "1e+21"),
+            ("0.0000123456789", "0.0000123456789"),
+            ("0.00009999999", "0.00009999999"),
+            ("0.0001", "0.0001"),
+            ("9007199254740992", "9007199254740992"),
+            ("9007199254740993", "9007199254740992"),
+            ("123n", "123"),
+            ("0x10n", "16"),
+            ("0b101n", "5"),
+            ("0o101n", "65"),
+            ("1_000n", "1000"),
+            ("0n", "0"),
+            ("-0n", "0"),
+        ];
+
+        for (input, expected) in cases {
+            assert_eq!(
+                canonicalize_js_number_literal(input).as_deref(),
+                Some(expected),
+                "failed for input: {input}"
+            );
+        }
+    }
+
+    #[test]
+    fn canonicalizes_bigint_property_keys() {
+        let cases = [
+            ("0n", "0"),
+            ("-0n", "0"),
+            ("123n", "123"),
+            ("0x10n", "16"),
+            ("0b101n", "5"),
+            ("0o101n", "65"),
+            ("1_000n", "1000"),
+        ];
+
+        for (input, expected) in cases {
+            assert_eq!(
+                canonicalize_js_bigint_property_key(input).as_deref(),
+                Some(expected),
+                "failed for input: {input}"
+            );
+        }
     }
 }

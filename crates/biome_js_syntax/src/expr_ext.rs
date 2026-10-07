@@ -1,5 +1,6 @@
 //! Extensions for things which are not easily generated in ast expr nodes
-use crate::numbers::parse_js_number;
+
+use crate::numbers::{canonicalize_js_number_literal, parse_js_number};
 use crate::static_value::StaticValue;
 use crate::{
     AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsClassMemberName,
@@ -1840,6 +1841,35 @@ impl AnyJsObjectMember {
         };
         name.ok()?.name()
     }
+
+    /// Returns the canonical member name if it is statically known.
+    ///
+    /// Numeric and BigInt literals are canonicalized to their ECMAScript ToString
+    /// representations (e.g., `0x10` -> `"16"`, `1.0` -> `"1"`, `1e1` -> `"10"`, `1n` -> `"1"`).
+    pub fn canonical_name(&self) -> Option<Box<str>> {
+        let name = match self {
+            Self::JsGetterObjectMember(member) => member.name(),
+            Self::JsMethodObjectMember(member) => member.name(),
+            Self::JsPropertyObjectMember(member) => member.name(),
+            Self::JsSetterObjectMember(member) => member.name(),
+            Self::JsShorthandPropertyObjectMember(member) => {
+                return Some(
+                    member
+                        .name()
+                        .ok()?
+                        .value_token()
+                        .ok()?
+                        .token_text_trimmed()
+                        .text()
+                        .into(),
+                );
+            }
+            Self::JsBogusMember(_) | Self::JsSpread(_) | Self::JsMetavariable(_) => {
+                return None;
+            }
+        };
+        name.ok()?.canonical_name()
+    }
 }
 
 impl AnyJsObjectMemberName {
@@ -1891,6 +1921,33 @@ impl AnyJsObjectMemberName {
             Self::JsMetavariable(_) => return None,
         };
         Some(inner_string_text(&token))
+    }
+
+    /// Returns the canonical member name of the current node
+    /// if it is a literal member name or a computed member with a statically known value.
+    ///
+    /// Numeric and BigInt literals are canonicalized to their ECMAScript ToString
+    /// representations (e.g., `0x10`, `1.0`, `1e1`, `1n` all canonicalize to their standard decimal forms).
+    pub fn canonical_name(&self) -> Option<Box<str>> {
+        match self {
+            Self::JsComputedMemberName(expr) => {
+                let expr = expr.expression().ok()?;
+                expr.omit_parentheses()
+                    .as_static_value()?
+                    .canonical_property_name()
+            }
+            Self::JsLiteralMemberName(expr) => {
+                let token = expr.value().ok()?;
+                match token.kind() {
+                    JsSyntaxKind::JS_NUMBER_LITERAL => {
+                        canonicalize_js_number_literal(token.text_trimmed())
+                            .map(|s| s.as_ref().into())
+                    }
+                    _ => Some(inner_string_text(&token).text().into()),
+                }
+            }
+            Self::JsMetavariable(_) => None,
+        }
     }
 }
 
@@ -2025,6 +2082,58 @@ impl AnyJsClassMemberName {
             Self::JsMetavariable(_) => return None,
         };
         Some(ClassMemberName::Public(inner_string_text(&token)))
+    }
+
+    /// Returns the canonical member name of the current node
+    /// if it is a literal, computed, or private class member with a statically known value.
+    ///
+    /// Numeric and BigInt literals are canonicalized to their ECMAScript ToString
+    /// representations (e.g., `0x10`, `1.0`, `1e1`, `1n` all canonicalize to their standard decimal forms).
+    pub fn canonical_name(&self) -> Option<CanonicalClassMemberName> {
+        match self {
+            Self::JsComputedMemberName(expr) => {
+                let expr = expr.expression().ok()?;
+                let name = expr
+                    .omit_parentheses()
+                    .as_static_value()?
+                    .canonical_property_name()?;
+                Some(CanonicalClassMemberName::Public(name))
+            }
+            Self::JsLiteralMemberName(expr) => {
+                let token = expr.value().ok()?;
+                let name = match token.kind() {
+                    JsSyntaxKind::JS_NUMBER_LITERAL => {
+                        canonicalize_js_number_literal(token.text_trimmed())?
+                            .as_ref()
+                            .into()
+                    }
+                    _ => inner_string_text(&token).text().into(),
+                };
+                Some(CanonicalClassMemberName::Public(name))
+            }
+            Self::JsPrivateClassMemberName(expr) => {
+                let token = expr.id_token().ok()?;
+                Some(CanonicalClassMemberName::Private(
+                    inner_string_text(&token).text().into(),
+                ))
+            }
+            Self::JsMetavariable(_) => None,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub enum CanonicalClassMemberName {
+    Private(Box<str>),
+    Public(Box<str>),
+}
+
+impl CanonicalClassMemberName {
+    pub fn text(&self) -> &str {
+        match self {
+            Self::Private(name) => name.as_ref(),
+            Self::Public(name) => name.as_ref(),
+        }
     }
 }
 

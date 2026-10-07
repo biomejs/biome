@@ -34,3 +34,11 @@ const O6 = {
     // Comment 2
     set prop(prop) {},
 };
+const O7 = { 0x1: 1, 1: 2 };
+const O8 = { 1.0: 1, 1: 2 };
+const O9 = { 1e1: 1, 10: 2 };
+const O10 = { 1_000: 1, 1000: 2 };
+const O11 = { [1n]: 1, 1: 2 };
+const O12 = { [0x10n]: 1, 16: 2 };
+const O13 = { [0o101]: 1, 65: 2 };
+
