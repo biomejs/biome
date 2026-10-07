@@ -3934,7 +3934,7 @@ impl ScssEachAtRule {
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_block(self, element: CssDeclarationOrRuleBlock) -> Self {
+    pub fn with_block(self, element: AnyCssControlBlock) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
@@ -4086,7 +4086,7 @@ impl ScssForAtRule {
                 .splice_slots(5usize..=5usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_block(self, element: CssDeclarationOrRuleBlock) -> Self {
+    pub fn with_block(self, element: AnyCssControlBlock) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(6usize..=6usize, once(Some(element.into_syntax().into()))),
@@ -4204,7 +4204,7 @@ impl ScssIfAtRule {
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_block(self, element: CssDeclarationOrRuleBlock) -> Self {
+    pub fn with_block(self, element: AnyCssControlBlock) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
@@ -5224,7 +5224,7 @@ impl ScssWhileAtRule {
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_block(self, element: CssDeclarationOrRuleBlock) -> Self {
+    pub fn with_block(self, element: AnyCssControlBlock) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),

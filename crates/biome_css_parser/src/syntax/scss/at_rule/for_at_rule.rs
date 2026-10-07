@@ -1,3 +1,4 @@
+use super::ScssBlockParser;
 use crate::parser::CssParser;
 use crate::syntax::block::parse_declaration_or_rule_list_block;
 use crate::syntax::scss::{
@@ -26,6 +27,17 @@ const SCSS_FOR_UPPER_BOUND_END_SET: TokenSet<CssSyntaxKind> = token_set![T!['{']
 /// Docs: https://sass-lang.com/documentation/at-rules/control/for/
 #[inline]
 pub(crate) fn parse_scss_for_at_rule(p: &mut CssParser) -> ParsedSyntax {
+    parse_scss_for_at_rule_with_block(
+        p,
+        ScssBlockParser::new(parse_declaration_or_rule_list_block),
+    )
+}
+
+#[inline]
+pub(crate) fn parse_scss_for_at_rule_with_block(
+    p: &mut CssParser,
+    parse_block: ScssBlockParser,
+) -> ParsedSyntax {
     if !is_at_scss_for_at_rule(p) {
         return Absent;
     }
@@ -35,12 +47,12 @@ pub(crate) fn parse_scss_for_at_rule(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T![for]);
     parse_scss_variable(p).or_add_diagnostic(p, expected_scss_for_binding);
     p.expect(T![from]);
-    parse_scss_expression_until(p, SCSS_FOR_LOWER_BOUND_END_SET)
+    parse_scss_expression_until(p, parse_block.header_end_ts(SCSS_FOR_LOWER_BOUND_END_SET))
         .or_add_diagnostic(p, expected_scss_expression);
     parse_scss_for_range_operator(p);
-    parse_scss_expression_until(p, SCSS_FOR_UPPER_BOUND_END_SET)
+    parse_scss_expression_until(p, parse_block.header_end_ts(SCSS_FOR_UPPER_BOUND_END_SET))
         .or_add_diagnostic(p, expected_scss_expression);
-    parse_declaration_or_rule_list_block(p);
+    parse_block.parse(p);
 
     Present(m.complete(p, SCSS_FOR_AT_RULE))
 }

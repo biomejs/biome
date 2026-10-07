@@ -1,3 +1,4 @@
+use super::ScssBlockParser;
 use crate::parser::CssParser;
 use crate::syntax::block::parse_declaration_or_rule_list_block;
 use crate::syntax::scss::{expected_scss_expression, parse_scss_expression_until};
@@ -22,6 +23,17 @@ const SCSS_WHILE_CONDITION_END_SET: TokenSet<biome_css_syntax::CssSyntaxKind> = 
 /// Docs: https://sass-lang.com/documentation/at-rules/control/while/
 #[inline]
 pub(crate) fn parse_scss_while_at_rule(p: &mut CssParser) -> ParsedSyntax {
+    parse_scss_while_at_rule_with_block(
+        p,
+        ScssBlockParser::new(parse_declaration_or_rule_list_block),
+    )
+}
+
+#[inline]
+pub(crate) fn parse_scss_while_at_rule_with_block(
+    p: &mut CssParser,
+    parse_block: ScssBlockParser,
+) -> ParsedSyntax {
     if !is_at_scss_while_at_rule(p) {
         return Absent;
     }
@@ -29,10 +41,10 @@ pub(crate) fn parse_scss_while_at_rule(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![while]);
-    parse_scss_expression_until(p, SCSS_WHILE_CONDITION_END_SET)
+    parse_scss_expression_until(p, parse_block.header_end_ts(SCSS_WHILE_CONDITION_END_SET))
         .or_add_diagnostic(p, expected_scss_expression);
 
-    parse_scss_while_block(p);
+    parse_block.parse(p);
 
     Present(m.complete(p, SCSS_WHILE_AT_RULE))
 }
@@ -40,9 +52,4 @@ pub(crate) fn parse_scss_while_at_rule(p: &mut CssParser) -> ParsedSyntax {
 #[inline]
 fn is_at_scss_while_at_rule(p: &mut CssParser) -> bool {
     p.at(T![while])
-}
-
-#[inline]
-fn parse_scss_while_block(p: &mut CssParser) {
-    parse_declaration_or_rule_list_block(p);
 }
