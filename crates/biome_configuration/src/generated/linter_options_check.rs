@@ -1275,6 +1275,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noTailwindLegacyUtilities",
+        TypeId::of::<
+            biome_rule_options::no_tailwind_legacy_utilities::NoTailwindLegacyUtilitiesOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "noTailwindRawColors",
         TypeId::of::<biome_rule_options::no_tailwind_raw_colors::NoTailwindRawColorsOptions>(),
     ));

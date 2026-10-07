@@ -3034,6 +3034,11 @@ export interface Nursery {
 	 */
 	noTailwindArbitraryValue?: NoTailwindArbitraryValueConfiguration;
 	/**
+	 * Disallow Tailwind CSS utility classes that Tailwind CSS only keeps for backward compatibility.
+	 * See https://biomejs.dev/linter/rules/no-tailwind-legacy-utilities
+	 */
+	noTailwindLegacyUtilities?: NoTailwindLegacyUtilitiesConfiguration;
+	/**
 	 * Disallow Tailwind CSS utility classes that use raw palette colors.
 	 * See https://biomejs.dev/linter/rules/no-tailwind-raw-colors
 	 */
@@ -5518,6 +5523,9 @@ export type NoSvelteUnnecessaryStateWrapConfiguration =
 export type NoTailwindArbitraryValueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTailwindArbitraryValueOptions;
+export type NoTailwindLegacyUtilitiesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTailwindLegacyUtilitiesOptions;
 export type NoTailwindRawColorsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTailwindRawColorsOptions;
@@ -7890,6 +7898,14 @@ export interface RuleWithNoTailwindArbitraryValueOptions {
 	level: RulePlainConfiguration;
 	options?: NoTailwindArbitraryValueOptions;
 }
+export interface RuleWithNoTailwindLegacyUtilitiesOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoTailwindLegacyUtilitiesOptions;
+}
 export interface RuleWithNoTailwindRawColorsOptions {
 	level: RulePlainConfiguration;
 	options?: NoTailwindRawColorsOptions;
@@ -10191,6 +10207,7 @@ export interface NoSvelteUnnecessaryStateWrapOptions {
 	allowReassign?: boolean;
 }
 export type NoTailwindArbitraryValueOptions = {};
+export type NoTailwindLegacyUtilitiesOptions = {};
 export interface NoTailwindRawColorsOptions {
 	/**
 	 * Exact palette colors to allow, such as `slate-950` or `pink-500`. Defaults to none.
@@ -11787,6 +11804,7 @@ export type Category =
 	| "lint/nursery/noSvelteLegacyConst"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTailwindArbitraryValue"
+	| "lint/nursery/noTailwindLegacyUtilities"
 	| "lint/nursery/noTailwindRawColors"
 	| "lint/nursery/noTailwindRestyledComponents"
 	| "lint/nursery/noThisOutsideOfClass"

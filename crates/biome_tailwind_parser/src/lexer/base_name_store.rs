@@ -170,8 +170,9 @@ const fn is_boundary_byte(b: Dispatch) -> bool {
     // - '-' indicates a value follows
     // - ':' indicates a variant boundary
     // - '/' indicates a modifier follows (`drop-shadow/50`)
+    // - '!' indicates the important flag follows (`drop-shadow!`)
     // - whitespace
-    matches!(b, WHS | MIN | COL | SLH)
+    matches!(b, WHS | MIN | COL | SLH | EXL)
 }
 
 #[cfg(test)]
