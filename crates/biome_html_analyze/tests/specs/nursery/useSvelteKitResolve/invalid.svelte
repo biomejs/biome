@@ -1,5 +1,7 @@
 <a href="/foo">Click me!</a>
 <a href="foo">Click me!</a>
+<a href=":foo">Click me!</a>
+<a href="1foo:bar">Click me!</a>
 <a href="">Click me!</a>
 <a href={"/foo"}>Click me!</a>
 <a href={'/foo'}>Click me!</a>

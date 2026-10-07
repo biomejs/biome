@@ -202,10 +202,19 @@ fn is_internal_link(href: &str) -> bool {
 }
 
 /// Returns `true` if `href` starts with a URL scheme, such as `https:` or `mailto:`.
+///
+/// A scheme starts with a letter, followed by letters, digits, `+`, `-`, or `.`.
 fn has_url_scheme(href: &str) -> bool {
-    let is_scheme_byte =
-        |byte: u8| byte == b'+' || (byte != b'_' && lookup_byte(byte) == Dispatch::IDT);
-    href.bytes()
-        .find(|byte| !is_scheme_byte(*byte))
-        .is_some_and(|byte| byte == b':')
+    let is_letter = |byte: u8| byte != b'_' && lookup_byte(byte) == Dispatch::IDT;
+    let is_scheme_byte = |byte: u8| {
+        is_letter(byte)
+            || matches!(lookup_byte(byte), Dispatch::ZER | Dispatch::DIG)
+            || matches!(byte, b'+' | b'-' | b'.')
+    };
+
+    let mut bytes = href.bytes();
+    bytes.next().is_some_and(is_letter)
+        && bytes
+            .find(|byte| !is_scheme_byte(*byte))
+            .is_some_and(|byte| byte == b':')
 }
