@@ -2521,7 +2521,13 @@ AnyCssIfCondition = AnyCssIfTestBooleanExpr | CssElseKeyword
 CssIfBranch =
 	condition: AnyCssIfCondition
 	':'
-	value: CssGenericComponentValueList
+	value: AnyCssIfBranchValue
+
+// if(sass(true): 1px + 2px; else: 0)
+//                ^^^^^^^^^
+AnyCssIfBranchValue =
+	CssGenericComponentValueList
+	| ScssExpression
 
 AnyCssIfBranch =
 	CssIfBranch

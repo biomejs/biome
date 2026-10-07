@@ -1219,7 +1219,7 @@ pub fn css_identifier(value_token: SyntaxToken) -> CssIdentifier {
 pub fn css_if_branch(
     condition: AnyCssIfCondition,
     colon_token: SyntaxToken,
-    value: CssGenericComponentValueList,
+    value: AnyCssIfBranchValue,
 ) -> CssIfBranch {
     CssIfBranch::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_IF_BRANCH,

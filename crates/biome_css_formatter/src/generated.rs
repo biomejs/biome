@@ -14590,6 +14590,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssIfBranch {
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssIfBranchValue {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyCssIfBranchValue,
+        crate::css::any::if_branch_value::FormatAnyCssIfBranchValue,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::any::if_branch_value::FormatAnyCssIfBranchValue::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyCssIfBranchValue {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyCssIfBranchValue,
+        crate::css::any::if_branch_value::FormatAnyCssIfBranchValue,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::any::if_branch_value::FormatAnyCssIfBranchValue::default(),
+        )
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyCssIfCondition {
     type Format<'a> = FormatRefWithRule<
         'a,
