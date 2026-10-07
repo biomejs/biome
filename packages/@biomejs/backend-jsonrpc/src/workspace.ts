@@ -702,7 +702,7 @@ export interface CssParserConfiguration {
 	/**
 	 * Enables CSS Modules-specific syntax such as `:local`, `:global`, `composes`, and `@value`.
 	 * When unset, Biome enables this syntax automatically for files whose names end in
-	 * `.module.css`; otherwise, it defaults to `false`. Enable it explicitly when CSS Module files
+	 * `.module.css` or `.module.scss; otherwise, it defaults to `false`. Enable it explicitly when CSS Module files
 	 * use another naming convention.
 	 */
 	cssModules?: Bool;

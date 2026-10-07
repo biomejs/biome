@@ -1921,7 +1921,7 @@
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"cssModules": {
-					"description": "Enables CSS Modules-specific syntax such as `:local`, `:global`, `composes`, and `@value`.\nWhen unset, Biome enables this syntax automatically for files whose names end in\n`.module.css`; otherwise, it defaults to `false`. Enable it explicitly when CSS Module files\nuse another naming convention.",
+					"description": "Enables CSS Modules-specific syntax such as `:local`, `:global`, `composes`, and `@value`.\nWhen unset, Biome enables this syntax automatically for files whose names end in\n`.module.css` or `.module.scss; otherwise, it defaults to `false`. Enable it explicitly when CSS Module files\nuse another naming convention.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"tailwindDirectives": {

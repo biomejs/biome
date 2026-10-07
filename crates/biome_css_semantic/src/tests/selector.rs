@@ -684,10 +684,7 @@ fn test_at_root_query_style_rule_semantics() {
             ".outer { @at-root (without: rule) { .inner {} } }",
             ".inner",
         ),
-        (
-            ".outer { @at-root (with: media) { .inner {} } }",
-            ".inner",
-        ),
+        (".outer { @at-root (with: media) { .inner {} } }", ".inner"),
         (
             ".outer { @at-root (without: media) { .inner {} } }",
             ".outer .inner",
@@ -696,10 +693,7 @@ fn test_at_root_query_style_rule_semantics() {
             ".outer { @at-root (WITH: ALL) { .inner {} } }",
             ".outer .inner",
         ),
-        (
-            ".outer { @at-root (WITHOUT: ALL) { .inner {} } }",
-            ".inner",
-        ),
+        (".outer { @at-root (WITHOUT: ALL) { .inner {} } }", ".inner"),
     ] {
         assert_eq!(resolved_deepest_scss_selector(source, 2), expected);
     }
