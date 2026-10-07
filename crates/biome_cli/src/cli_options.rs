@@ -51,6 +51,10 @@ pub struct CliOptions {
     #[bpaf(long("error-on-warnings"), switch)]
     pub error_on_warnings: bool,
 
+    /// Exits with an error status if any information diagnostics are emitted.
+    #[bpaf(long("error-on-infos"), switch)]
+    pub error_on_infos: bool,
+
     /// Changes how diagnostics and the run summary are written.
     #[bpaf(external, many)]
     pub cli_reporter: Vec<CliReporter>,
