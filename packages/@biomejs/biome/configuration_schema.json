@@ -6774,6 +6774,10 @@
 				"ignoreRestSiblings": {
 					"description": "Whether to ignore unused variables from an object destructuring with a spread.",
 					"type": ["boolean", "null"]
+				},
+				"ignoreUsingDeclarations": {
+					"description": "Whether to ignore unused variables declared with `using` or `await using`.",
+					"type": ["boolean", "null"]
 				}
 			},
 			"additionalProperties": false
