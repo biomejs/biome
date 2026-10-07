@@ -1521,6 +1521,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_useless_continue::NoUselessContinueOptions>(),
     ));
     result.push((
+        "nursery",
+        "noUselessDateGetTime",
+        TypeId::of::<biome_rule_options::no_useless_date_get_time::NoUselessDateGetTimeOptions>(),
+    ));
+    result.push((
         "style",
         "noUselessElse",
         TypeId::of::<biome_rule_options::no_useless_else::NoUselessElseOptions>(),
