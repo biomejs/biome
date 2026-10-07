@@ -1855,12 +1855,16 @@ impl WorkspaceServerWithDb<'_> {
             // If the path is a dependency of an indexed file, we accept them
             // under the following conditions:
             // - If the path is inside `node_modules`, we only care about
-            //   `package.json` and type declarations, to avoid accidentally
-            //   indexing minified files.
+            //   `package.json`, type declarations, and imported stylesheets.
+            //   Runtime JavaScript may be minified and isn't indexed.
             // - The path shouldn't be indexed yet, to avoid double indexing.
             IndexRequestKind::Dependency(_) => {
                 let path = BiomePath::new(path);
-                if path.is_dependency() && !path.is_package_json() && !path.is_type_declaration() {
+                if path.is_dependency()
+                    && !path.is_package_json()
+                    && !path.is_type_declaration()
+                    && path.extension() != Some("css")
+                {
                     return Ok(true);
                 }
 

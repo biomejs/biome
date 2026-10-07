@@ -173,3 +173,87 @@ fn missing_tailwind_stylesheet_errors() {
         result,
     ));
 }
+
+#[test]
+fn use_tailwind_sorted_classes_reads_package_imports() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("use_tailwind_sorted_classes_reads_package_imports");
+    fs.create_file("package.json", r#"{ "name": "app" }"#);
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "tailwind": { "stylesheet": "./src/app.css" },
+    "linter": { "rules": { "nursery": { "useTailwindSortedClasses": "error" } } }
+}"#,
+    );
+    fs.create_file(
+        "src/app.css",
+        r#"@import "tw-animate-css";
+@import "tw-animate-css/prefix";
+@import "@example/theme";
+"#,
+    );
+    fs.create_file(
+        "node_modules/tw-animate-css/package.json",
+        r#"{
+    "name": "tw-animate-css",
+    "exports": {
+        ".": { "style": "./dist/tw-animate.css" },
+        "./prefix": { "style": "./dist/tw-animate-prefix.css" }
+    }
+}"#,
+    );
+    fs.create_file(
+        "node_modules/tw-animate-css/dist/tw-animate.css",
+        "@import './utilities.css';\n",
+    );
+    fs.create_file(
+        "node_modules/tw-animate-css/dist/utilities.css",
+        "@utility animate-in { animation-name: enter; }\n",
+    );
+    fs.create_file(
+        "node_modules/tw-animate-css/dist/tw-animate-prefix.css",
+        "@utility tw-animate-in { animation-name: enter; }\n",
+    );
+    fs.create_file(
+        "node_modules/@example/theme/package.json",
+        r#"{ "name": "@example/theme", "exports": { ".": { "style": "./theme.css" } } }"#,
+    );
+    fs.create_file(
+        "node_modules/@example/theme/theme.css",
+        "@theme { --color-brand: blue; }\n",
+    );
+    fs.create_file(
+        "src/App.jsx",
+        r#"export const utility = <div className="animate-in flex" />;
+export const prefix = <div className="tw-animate-in flex" />;
+export const theme = <div className="bg-brand flex" />;
+"#,
+    );
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--write",
+                "--unsafe",
+                "--only=nursery/useTailwindSortedClasses",
+                fs.cli_path(),
+            ]
+            .as_slice(),
+        ),
+    );
+    let output = std::fs::read_to_string(fs.working_directory.join("src/App.jsx")).unwrap();
+    assert!(output.contains("className=\"flex animate-in\""));
+    assert!(output.contains("className=\"flex tw-animate-in\""));
+    assert!(output.contains("className=\"flex bg-brand\""));
+    assert!(result.is_ok());
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "use_tailwind_sorted_classes_reads_package_imports",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
