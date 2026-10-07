@@ -2748,9 +2748,11 @@ CssRoot {
             at_token: AT@2420..2423 "@" [Newline("\n"), Newline("\n")] [],
             rule: TwThemeAtRule {
                 theme_token: THEME_KW@2423..2429 "theme" [] [Whitespace(" ")],
-                name: CssIdentifier {
-                    value_token: IDENT@2429..2436 "inline" [] [Whitespace(" ")],
-                },
+                options: TwThemeOptionList [
+                    CssIdentifier {
+                        value_token: IDENT@2429..2436 "inline" [] [Whitespace(" ")],
+                    },
+                ],
                 block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@2436..2437 "{" [] [],
                     items: CssDeclarationOrRuleList [
@@ -5939,8 +5941,9 @@ CssRoot {
       0: AT@2420..2423 "@" [Newline("\n"), Newline("\n")] []
       1: TW_THEME_AT_RULE@2423..4346
         0: THEME_KW@2423..2429 "theme" [] [Whitespace(" ")]
-        1: CSS_IDENTIFIER@2429..2436
-          0: IDENT@2429..2436 "inline" [] [Whitespace(" ")]
+        1: TW_THEME_OPTION_LIST@2429..2436
+          0: CSS_IDENTIFIER@2429..2436
+            0: IDENT@2429..2436 "inline" [] [Whitespace(" ")]
         2: CSS_DECLARATION_OR_RULE_BLOCK@2436..4346
           0: L_CURLY@2436..2437 "{" [] []
           1: CSS_DECLARATION_OR_RULE_LIST@2437..4344

@@ -10809,6 +10809,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::TwThemeAtRule {
         )
     }
 }
+impl FormatRule<biome_css_syntax::TwThemePrefixOption>
+    for crate::tailwind::auxiliary::theme_prefix_option::FormatTwThemePrefixOption
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::TwThemePrefixOption,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::TwThemePrefixOption>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::TwThemePrefixOption {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::TwThemePrefixOption,
+        crate::tailwind::auxiliary::theme_prefix_option::FormatTwThemePrefixOption,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::tailwind::auxiliary::theme_prefix_option::FormatTwThemePrefixOption::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::TwThemePrefixOption {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::TwThemePrefixOption,
+        crate::tailwind::auxiliary::theme_prefix_option::FormatTwThemePrefixOption,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::tailwind::auxiliary::theme_prefix_option::FormatTwThemePrefixOption::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::TwUtilityAtRule>
     for crate::tailwind::statements::utility_at_rule::FormatTwUtilityAtRule
 {
@@ -12162,6 +12200,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::TwApplyClassList {
         FormatOwnedWithRule::new(
             self,
             crate::tailwind::lists::apply_class_list::FormatTwApplyClassList::default(),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::TwThemeOptionList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::TwThemeOptionList,
+        crate::tailwind::lists::theme_option_list::FormatTwThemeOptionList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::tailwind::lists::theme_option_list::FormatTwThemeOptionList::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::TwThemeOptionList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::TwThemeOptionList,
+        crate::tailwind::lists::theme_option_list::FormatTwThemeOptionList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::tailwind::lists::theme_option_list::FormatTwThemeOptionList::default(),
         )
     }
 }
@@ -16854,6 +16917,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyTwSource {
         FormatOwnedWithRule::new(
             self,
             crate::tailwind::any::source::FormatAnyTwSource::default(),
+        )
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyTwThemeOption {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyTwThemeOption,
+        crate::tailwind::any::theme_option::FormatAnyTwThemeOption,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::tailwind::any::theme_option::FormatAnyTwThemeOption::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyTwThemeOption {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyTwThemeOption,
+        crate::tailwind::any::theme_option::FormatAnyTwThemeOption,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::tailwind::any::theme_option::FormatAnyTwThemeOption::default(),
         )
     }
 }

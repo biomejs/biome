@@ -13660,15 +13660,15 @@ impl TwThemeAtRule {
     pub fn as_fields(&self) -> TwThemeAtRuleFields {
         TwThemeAtRuleFields {
             theme_token: self.theme_token(),
-            name: self.name(),
+            options: self.options(),
             block: self.block(),
         }
     }
     pub fn theme_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> Option<CssIdentifier> {
-        support::node(&self.syntax, 1usize)
+    pub fn options(&self) -> TwThemeOptionList {
+        support::list(&self.syntax, 1usize)
     }
     pub fn block(&self) -> SyntaxResult<AnyCssDeclarationOrRuleBlock> {
         support::required_node(&self.syntax, 2usize)
@@ -13685,8 +13685,58 @@ impl Serialize for TwThemeAtRule {
 #[derive(Serialize)]
 pub struct TwThemeAtRuleFields {
     pub theme_token: SyntaxResult<SyntaxToken>,
-    pub name: Option<CssIdentifier>,
+    pub options: TwThemeOptionList,
     pub block: SyntaxResult<AnyCssDeclarationOrRuleBlock>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct TwThemePrefixOption {
+    pub(crate) syntax: SyntaxNode,
+}
+impl TwThemePrefixOption {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> TwThemePrefixOptionFields {
+        TwThemePrefixOptionFields {
+            prefix_token: self.prefix_token(),
+            l_paren_token: self.l_paren_token(),
+            name: self.name(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn prefix_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for TwThemePrefixOption {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct TwThemePrefixOptionFields {
+    pub prefix_token: SyntaxResult<SyntaxToken>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub name: SyntaxResult<CssIdentifier>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TwUtilityAtRule {
@@ -18580,6 +18630,32 @@ impl AnyTwSource {
     pub fn as_tw_source_inline(&self) -> Option<&TwSourceInline> {
         match &self {
             Self::TwSourceInline(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyTwThemeOption {
+    CssBogus(CssBogus),
+    CssIdentifier(CssIdentifier),
+    TwThemePrefixOption(TwThemePrefixOption),
+}
+impl AnyTwThemeOption {
+    pub fn as_css_bogus(&self) -> Option<&CssBogus> {
+        match &self {
+            Self::CssBogus(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
+        match &self {
+            Self::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_tw_theme_prefix_option(&self) -> Option<&TwThemePrefixOption> {
+        match &self {
+            Self::TwThemePrefixOption(item) => Some(item),
             _ => None,
         }
     }
@@ -35187,7 +35263,7 @@ impl std::fmt::Debug for TwThemeAtRule {
                     "theme_token",
                     &support::DebugSyntaxResult(self.theme_token()),
                 )
-                .field("name", &support::DebugOptionalElement(self.name()))
+                .field("options", &self.options())
                 .field("block", &support::DebugSyntaxResult(self.block()))
                 .finish()
         } else {
@@ -35204,6 +35280,65 @@ impl From<TwThemeAtRule> for SyntaxNode {
 }
 impl From<TwThemeAtRule> for SyntaxElement {
     fn from(n: TwThemeAtRule) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for TwThemePrefixOption {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(TW_THEME_PREFIX_OPTION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == TW_THEME_PREFIX_OPTION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for TwThemePrefixOption {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("TwThemePrefixOption")
+                .field(
+                    "prefix_token",
+                    &support::DebugSyntaxResult(self.prefix_token()),
+                )
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("TwThemePrefixOption").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<TwThemePrefixOption> for SyntaxNode {
+    fn from(n: TwThemePrefixOption) -> Self {
+        n.syntax
+    }
+}
+impl From<TwThemePrefixOption> for SyntaxElement {
+    fn from(n: TwThemePrefixOption) -> Self {
         n.syntax.into()
     }
 }
@@ -48322,6 +48457,77 @@ impl From<AnyTwSource> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssBogus> for AnyTwThemeOption {
+    fn from(node: CssBogus) -> Self {
+        Self::CssBogus(node)
+    }
+}
+impl From<CssIdentifier> for AnyTwThemeOption {
+    fn from(node: CssIdentifier) -> Self {
+        Self::CssIdentifier(node)
+    }
+}
+impl From<TwThemePrefixOption> for AnyTwThemeOption {
+    fn from(node: TwThemePrefixOption) -> Self {
+        Self::TwThemePrefixOption(node)
+    }
+}
+impl AstNode for AnyTwThemeOption {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssBogus::KIND_SET
+        .union(CssIdentifier::KIND_SET)
+        .union(TwThemePrefixOption::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_BOGUS | CSS_IDENTIFIER | TW_THEME_PREFIX_OPTION)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
+            CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
+            TW_THEME_PREFIX_OPTION => Self::TwThemePrefixOption(TwThemePrefixOption { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssBogus(it) => it.syntax(),
+            Self::CssIdentifier(it) => it.syntax(),
+            Self::TwThemePrefixOption(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssBogus(it) => it.into_syntax(),
+            Self::CssIdentifier(it) => it.into_syntax(),
+            Self::TwThemePrefixOption(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyTwThemeOption {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::TwThemePrefixOption(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyTwThemeOption> for SyntaxNode {
+    fn from(n: AnyTwThemeOption) -> Self {
+        match n {
+            AnyTwThemeOption::CssBogus(it) => it.into_syntax(),
+            AnyTwThemeOption::CssIdentifier(it) => it.into_syntax(),
+            AnyTwThemeOption::TwThemePrefixOption(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyTwThemeOption> for SyntaxElement {
+    fn from(n: AnyTwThemeOption) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssIdentifier> for AnyTwUtilityName {
     fn from(node: CssIdentifier) -> Self {
         Self::CssIdentifier(node)
@@ -49130,6 +49336,11 @@ impl std::fmt::Display for AnyTwCustomVariantShorthand {
     }
 }
 impl std::fmt::Display for AnyTwSource {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyTwThemeOption {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -50745,6 +50956,11 @@ impl std::fmt::Display for TwSourceInline {
     }
 }
 impl std::fmt::Display for TwThemeAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for TwThemePrefixOption {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -57261,6 +57477,88 @@ impl IntoIterator for &TwApplyClassList {
 impl IntoIterator for TwApplyClassList {
     type Item = CssIdentifier;
     type IntoIter = AstNodeListIterator<Language, CssIdentifier>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct TwThemeOptionList {
+    syntax_list: SyntaxList,
+}
+impl TwThemeOptionList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for TwThemeOptionList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(TW_THEME_OPTION_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == TW_THEME_OPTION_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for TwThemeOptionList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for TwThemeOptionList {
+    type Language = Language;
+    type Node = AnyTwThemeOption;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for TwThemeOptionList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("TwThemeOptionList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &TwThemeOptionList {
+    type Item = AnyTwThemeOption;
+    type IntoIter = AstNodeListIterator<Language, AnyTwThemeOption>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for TwThemeOptionList {
+    type Item = AnyTwThemeOption;
+    type IntoIter = AstNodeListIterator<Language, AnyTwThemeOption>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
