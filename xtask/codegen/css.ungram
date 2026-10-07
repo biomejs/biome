@@ -201,6 +201,7 @@ CssSubSelectorList = AnyCssSubSelector*
 AnyCssSimpleSelector =
 	CssUniversalSelector
 	| CssTypeSelector
+	| CssMetavariable
 	| ScssPlaceholderSelector
 
 AnyCssSubSelector =
@@ -888,7 +889,7 @@ AnyCssDashedIdentifier =
 	CssDashedIdentifier
 	| ScssInterpolatedDashedIdentifier
 
-AnyCssDeclarationName = CssIdentifier | AnyCssDashedIdentifier | ScssInterpolatedIdentifier | TwValueThemeReference
+AnyCssDeclarationName = CssIdentifier | AnyCssDashedIdentifier | CssMetavariable | ScssInterpolatedIdentifier | TwValueThemeReference
 
 CssDeclarationImportant =
 	'!'

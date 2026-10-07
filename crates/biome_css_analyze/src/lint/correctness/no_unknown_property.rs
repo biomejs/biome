@@ -202,6 +202,7 @@ fn declaration_name_value_token(
         AnyCssDeclarationName::TwValueThemeReference(name) => {
             name.reference().ok()?.value_token().ok()
         }
-        AnyCssDeclarationName::ScssInterpolatedIdentifier(_) => None,
+        AnyCssDeclarationName::ScssInterpolatedIdentifier(_)
+        | AnyCssDeclarationName::CssMetavariable(_) => None,
     }
 }

@@ -172,7 +172,8 @@ impl SemanticEventExtractor {
                                 AnyCssDeclarationName::AnyCssDashedIdentifier(
                                     AnyCssDashedIdentifier::ScssInterpolatedDashedIdentifier(_),
                                 )
-                                | AnyCssDeclarationName::ScssInterpolatedIdentifier(_) => {
+                                | AnyCssDeclarationName::ScssInterpolatedIdentifier(_)
+                                | AnyCssDeclarationName::CssMetavariable(_) => {
                                     return;
                                 }
                                 AnyCssDeclarationName::CssIdentifier(name) => {

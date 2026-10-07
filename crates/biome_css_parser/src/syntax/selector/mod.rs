@@ -4,7 +4,7 @@ mod pseudo_class;
 mod pseudo_element;
 pub(crate) mod relative_selector;
 
-use super::{is_nth_at_metavariable, parse_metavariable};
+use super::is_nth_at_metavariable;
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::parse_error::{
@@ -14,7 +14,7 @@ use crate::syntax::parse_error::{
 use crate::syntax::scss::{
     is_at_scss_interpolated_selector_identifier, is_at_scss_interpolation,
     is_nth_at_scss_interpolated_selector_identifier, is_nth_at_scss_placeholder_selector,
-    parse_scss_interpolated_sub_selector, parse_scss_placeholder_selector,
+    is_nth_source_tight, parse_scss_interpolated_sub_selector, parse_scss_placeholder_selector,
     parse_scss_selector_custom_identifier, parse_scss_selector_identifier,
 };
 use crate::syntax::selector::attribute::parse_attribute_selector;
@@ -232,7 +232,7 @@ impl ParseRecovery for SelectorListParseRecovery {
 /// the elements to which a set of CSS rules apply.
 #[inline]
 pub(crate) fn is_nth_at_selector(p: &mut CssParser, n: usize) -> bool {
-    is_nth_at_compound_selector(p, n) || is_nth_at_metavariable(p, n)
+    is_nth_at_compound_selector(p, n)
 }
 
 /// Parses a CSS selector.
@@ -280,15 +280,12 @@ fn parse_selector_with_partial_combinator_nesting(
     if !is_nth_at_selector(p, 0) {
         return Absent;
     }
-    if is_nth_at_metavariable(p, 0) {
-        parse_metavariable(p)
-    } else {
-        // Compound selectors are unseparated chains of simple selectors. A
-        // following combinator turns the result into a complex selector.
-        parse_compound_selector(p).and_then(|selector| {
-            parse_complex_selector(p, selector, is_partial_combinator_nesting_allowed)
-        })
-    }
+
+    // Compound selectors are unseparated chains of simple selectors. A
+    // following combinator turns the result into a complex selector.
+    parse_compound_selector_or_metavariable(p).and_then(|selector| {
+        parse_complex_selector(p, selector, is_partial_combinator_nesting_allowed)
+    })
 }
 
 const COMPLEX_SELECTOR_COMBINATOR_SET: TokenSet<CssSyntaxKind> =
@@ -370,13 +367,55 @@ fn parse_complex_selector(
                 );
             } else {
                 p.bump_ts(COMPLEX_SELECTOR_COMBINATOR_SET);
-                parse_compound_selector(p).or_add_diagnostic(p, expected_compound_selector);
+                parse_compound_selector_or_metavariable(p)
+                    .or_add_diagnostic(p, expected_compound_selector);
             }
             left = complex_selector.complete(p, CSS_COMPLEX_SELECTOR)
         } else {
             return Present(left);
         }
     }
+}
+
+/// Parses a compound selector, or a Grit metavariable that stands for a whole
+/// compound selector.
+///
+/// A metavariable directly followed by a sub-selector is the simple selector
+/// of a compound selector instead:
+///
+/// ```css
+/// µselector > .child {}
+/// µtag:hover {}
+/// ```
+#[inline]
+fn parse_compound_selector_or_metavariable(p: &mut CssParser) -> ParsedSyntax {
+    let is_whole_selector = is_nth_at_metavariable(p, 0)
+        && !(p.nth_at_ts(1, SubSelectorList::START_SET) && is_nth_source_tight(p, 1));
+    if is_whole_selector {
+        parse_selector_metavariable(p)
+    } else {
+        parse_compound_selector(p)
+    }
+}
+
+/// Parses a Grit metavariable in a selector.
+///
+/// The selector lexing context keeps the whitespace after the metavariable as
+/// a descendant combinator:
+///
+/// ```css
+/// µparent .child {}
+/// ```
+#[inline]
+fn parse_selector_metavariable(p: &mut CssParser) -> ParsedSyntax {
+    if !is_nth_at_metavariable(p, 0) {
+        return Absent;
+    }
+
+    let m = p.start();
+    let context = selector_lex_context(p);
+    p.bump_with_context(GRIT_METAVARIABLE, context);
+    Present(m.complete(p, CSS_METAVARIABLE))
 }
 
 /// Determines if the current or nth token in the parser is at the start of a compound selector.
@@ -423,6 +462,7 @@ fn is_nth_at_simple_selector(p: &mut CssParser, n: usize) -> bool {
         || is_nth_at_identifier(p, n)
         || is_nth_at_scss_interpolated_selector_identifier(p, n)
         || is_nth_at_scss_placeholder_selector(p, n)
+        || is_nth_at_metavariable(p, n)
 }
 
 /// Parses a simple selector in CSS.
@@ -434,6 +474,10 @@ fn is_nth_at_simple_selector(p: &mut CssParser, n: usize) -> bool {
 fn parse_simple_selector(p: &mut CssParser) -> ParsedSyntax {
     if !is_nth_at_simple_selector(p, 0) {
         return Absent;
+    }
+
+    if is_nth_at_metavariable(p, 0) {
+        return parse_selector_metavariable(p);
     }
 
     if is_nth_at_scss_placeholder_selector(p, 0) {
