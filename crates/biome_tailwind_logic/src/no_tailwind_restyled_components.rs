@@ -6,7 +6,7 @@ use biome_string_case::StrLikeExtension;
 use biome_tailwind_syntax::{
     AnyTwCandidate, AnyTwValue, CssFunction, CssGenericComponentValueList, CssIdentifier,
     CssNumber, CssPercentage, CssRegularDimension, CssUnknownDimension, CssUrlFunction,
-    TailwindLanguage, TwCandidateList,
+    TailwindLanguage, TwCandidateList, TwCssVariableValue,
 };
 
 /// Values of `text-*` that set alignment, which is layout.
@@ -563,11 +563,17 @@ fn is_length_value(value: &AnyTwValue) -> bool {
     match value {
         AnyTwValue::TwNumberValue(_) | AnyTwValue::TwPercentageValue(_) => true,
         AnyTwValue::TwArbitraryValue(value) => contains_length(&value.value()),
-        AnyTwValue::TwCssVariableValue(value) => value
-            .value_token()
-            .is_ok_and(|token| token.text_trimmed().starts_with("length:")),
+        AnyTwValue::TwCssVariableValue(value) => has_type_hint(value, "length"),
         _ => false,
     }
+}
+
+/// Whether `value` declares the type hint `hint` (`bg-(image:--a)`).
+fn has_type_hint(value: &TwCssVariableValue, hint: &str) -> bool {
+    value
+        .type_hint()
+        .and_then(|type_hint| type_hint.name_token().ok())
+        .is_some_and(|name| name.text_trimmed() == hint)
 }
 
 fn contains_length(values: &CssGenericComponentValueList) -> bool {
@@ -583,9 +589,7 @@ fn contains_length(values: &CssGenericComponentValueList) -> bool {
 fn is_image_value(value: &AnyTwValue) -> bool {
     match value {
         AnyTwValue::TwArbitraryValue(value) => is_image(&value.value()),
-        AnyTwValue::TwCssVariableValue(value) => value
-            .value_token()
-            .is_ok_and(|token| token.text_trimmed().starts_with("image:")),
+        AnyTwValue::TwCssVariableValue(value) => has_type_hint(value, "image"),
         _ => false,
     }
 }

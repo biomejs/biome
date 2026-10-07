@@ -148,6 +148,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::TwStaticCandidate::new_unchecked(node) };
                     $body
                 }
+                $crate::TailwindSyntaxKind::TW_TYPE_HINT => {
+                    let $pattern = unsafe { $crate::TwTypeHint::new_unchecked(node) };
+                    $body
+                }
                 $crate::TailwindSyntaxKind::TW_VARIANT_EXPRESSION => {
                     let $pattern = unsafe { $crate::TwVariantExpression::new_unchecked(node) };
                     $body

@@ -14,6 +14,13 @@ pub(crate) fn parse_css_generic_component_value_list(p: &mut TailwindParser) -> 
     p.source().position() != start
 }
 
+/// Parses the comma-separated arguments of a CSS function call. The list is
+/// always created, so a required list slot is never missing; an empty list
+/// has an empty range.
+pub(crate) fn parse_css_parameter_list(p: &mut TailwindParser) -> CompletedMarker {
+    ParameterList.parse_list(p)
+}
+
 struct CssGenericComponentValueList;
 
 impl ParseNodeList for CssGenericComponentValueList {
@@ -455,7 +462,7 @@ fn is_at_class_separator(p: &mut TailwindParser) -> bool {
 }
 
 #[inline]
-fn is_at_identifier(p: &mut TailwindParser) -> bool {
+pub(crate) fn is_at_identifier(p: &mut TailwindParser) -> bool {
     is_nth_at_identifier(p, 0)
 }
 
@@ -465,7 +472,7 @@ fn is_nth_at_identifier(p: &mut TailwindParser, n: usize) -> bool {
 }
 
 #[inline]
-fn is_at_dashed_identifier(p: &mut TailwindParser) -> bool {
+pub(crate) fn is_at_dashed_identifier(p: &mut TailwindParser) -> bool {
     p.at(IDENT) && p.cur_text().starts_with("--")
 }
 
