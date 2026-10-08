@@ -1,4 +1,4 @@
-use biome_js_analyze::lint::nursery::use_sorted_classes::sort_v4::sort_class_list;
+use biome_js_analyze::lint::nursery::use_tailwind_sorted_classes::sort_v4::sort_class_list;
 use biome_tailwind_parser::parse_tailwind;
 use biome_test_utils::scripts_from_json;
 

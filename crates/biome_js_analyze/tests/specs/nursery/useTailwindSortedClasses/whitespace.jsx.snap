@@ -23,7 +23,7 @@ expression: whitespace.jsx
 
 # Diagnostics
 ```
-whitespace.jsx:3:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+whitespace.jsx:3:16 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -51,7 +51,7 @@ whitespace.jsx:3:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
 ```
 
 ```
-whitespace.jsx:4:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+whitespace.jsx:4:16 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -79,7 +79,7 @@ whitespace.jsx:4:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
 ```
 
 ```
-whitespace.jsx:5:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+whitespace.jsx:5:16 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -107,7 +107,7 @@ whitespace.jsx:5:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
 ```
 
 ```
-whitespace.jsx:8:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+whitespace.jsx:8:16 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -135,7 +135,7 @@ whitespace.jsx:8:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
 ```
 
 ```
-whitespace.jsx:9:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+whitespace.jsx:9:16 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -163,7 +163,7 @@ whitespace.jsx:9:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
 ```
 
 ```
-whitespace.jsx:12:18 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+whitespace.jsx:12:18 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -190,7 +190,7 @@ whitespace.jsx:12:18 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
 ```
 
 ```
-whitespace.jsx:13:18 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+whitespace.jsx:13:18 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -218,7 +218,7 @@ whitespace.jsx:13:18 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
 ```
 
 ```
-whitespace.jsx:14:18 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+whitespace.jsx:14:18 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   

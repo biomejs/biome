@@ -3255,11 +3255,6 @@ export interface Nursery {
 	 */
 	useSingleTopLevelHeading?: UseSingleTopLevelHeadingConfiguration;
 	/**
-	 * Enforce the sorting of CSS utility classes.
-	 * See https://biomejs.dev/linter/rules/use-sorted-classes
-	 */
-	useSortedClasses?: UseSortedClassesConfiguration;
-	/**
 	 * Require unambiguous boolean expressions in conditions.
 	 * See https://biomejs.dev/linter/rules/use-strict-boolean-expressions
 	 */
@@ -3289,6 +3284,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/use-tailwind-shorthand-classes
 	 */
 	useTailwindShorthandClasses?: UseTailwindShorthandClassesConfiguration;
+	/**
+	 * Enforce the sorting of CSS utility classes.
+	 * See https://biomejs.dev/linter/rules/use-tailwind-sorted-classes
+	 */
+	useTailwindSortedClasses?: UseTailwindSortedClassesConfiguration;
 	/**
 	 * Require Markdown documents to start with a top-level heading.
 	 * See https://biomejs.dev/linter/rules/use-top-level-heading
@@ -5669,9 +5669,6 @@ export type UseRegexpExecConfiguration =
 export type UseSingleTopLevelHeadingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSingleTopLevelHeadingOptions;
-export type UseSortedClassesConfiguration =
-	| RulePlainConfiguration
-	| RuleWithUseSortedClassesOptions;
 export type UseStrictBooleanExpressionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStrictBooleanExpressionsOptions;
@@ -5690,6 +5687,9 @@ export type UseSvelteRequireEachKeyConfiguration =
 export type UseTailwindShorthandClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTailwindShorthandClassesOptions;
+export type UseTailwindSortedClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTailwindSortedClassesOptions;
 export type UseTopLevelHeadingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTopLevelHeadingOptions;
@@ -8158,14 +8158,6 @@ export interface RuleWithUseSingleTopLevelHeadingOptions {
 	level: RulePlainConfiguration;
 	options?: UseSingleTopLevelHeadingOptions;
 }
-export interface RuleWithUseSortedClassesOptions {
-	/**
-	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
-	 */
-	fix?: FixKind;
-	level: RulePlainConfiguration;
-	options?: UseSortedClassesOptions;
-}
 export interface RuleWithUseStrictBooleanExpressionsOptions {
 	level: RulePlainConfiguration;
 	options?: UseStrictBooleanExpressionsOptions;
@@ -8197,6 +8189,14 @@ export interface RuleWithUseTailwindShorthandClassesOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseTailwindShorthandClassesOptions;
+}
+export interface RuleWithUseTailwindSortedClassesOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseTailwindSortedClassesOptions;
 }
 export interface RuleWithUseTopLevelHeadingOptions {
 	level: RulePlainConfiguration;
@@ -10417,16 +10417,6 @@ export interface UseSingleTopLevelHeadingOptions {
 	 */
 	level?: number;
 }
-export interface UseSortedClassesOptions {
-	/**
-	 * Additional attributes that will be sorted.
-	 */
-	attributes?: string[];
-	/**
-	 * Names of the functions or tagged templates that will be sorted.
-	 */
-	functions?: string[];
-}
 export type UseStrictBooleanExpressionsOptions = {};
 export type UseStringStartsEndsWithOptions = {};
 export interface UseSvelteKitResolveOptions {
@@ -10450,6 +10440,16 @@ export interface UseSvelteKitResolveOptions {
 export type UseSvelteKitRuneImportsOptions = {};
 export type UseSvelteRequireEachKeyOptions = {};
 export type UseTailwindShorthandClassesOptions = {};
+export interface UseTailwindSortedClassesOptions {
+	/**
+	 * Additional attributes that will be sorted.
+	 */
+	attributes?: string[];
+	/**
+	 * Names of the functions or tagged templates that will be sorted.
+	 */
+	functions?: string[];
+}
 export type UseTopLevelHeadingOptions = {};
 export interface UseValidTestTitleOptions {
 	/**
@@ -11921,7 +11921,7 @@ export type Category =
 	| "lint/nursery/useReactNamingConvention"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useSingleTopLevelHeading"
-	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useTailwindSortedClasses"
 	| "lint/nursery/useStrictBooleanExpressions"
 	| "lint/nursery/useStringStartsEndsWith"
 	| "lint/nursery/useSvelteKitResolve"

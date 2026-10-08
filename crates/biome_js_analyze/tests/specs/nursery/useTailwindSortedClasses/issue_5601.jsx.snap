@@ -26,7 +26,7 @@ expression: issue_5601.jsx
 
 # Diagnostics
 ```
-issue_5601.jsx:11:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+issue_5601.jsx:11:12 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -54,7 +54,7 @@ issue_5601.jsx:11:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━�
 ```
 
 ```
-issue_5601.jsx:17:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+issue_5601.jsx:17:12 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   

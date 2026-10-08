@@ -10,7 +10,7 @@ use std::sync::LazyLock;
 
 use bitvec::{order::Lsb0, vec::BitVec};
 
-use super::presets::{ConfigPreset, UseSortedClassesPreset, get_config_preset};
+use super::presets::{ConfigPreset, UseTailwindSortedClassesPreset, get_config_preset};
 
 /// A utility layer, containing its name and an ordered list of classes.
 pub struct UtilityLayer {
@@ -60,5 +60,8 @@ impl SortConfig {
 }
 
 /// The default sort config, using the Tailwind CSS preset.
-pub static DEFAULT_SORT_CONFIG: LazyLock<SortConfig> =
-    LazyLock::new(|| SortConfig::new(&get_config_preset(&UseSortedClassesPreset::default())));
+pub static DEFAULT_SORT_CONFIG: LazyLock<SortConfig> = LazyLock::new(|| {
+    SortConfig::new(&get_config_preset(
+        &UseTailwindSortedClassesPreset::default(),
+    ))
+});

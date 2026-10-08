@@ -20,7 +20,7 @@ tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center');
 
 # Diagnostics
 ```
-quoteStyleInFunction.jsx:2:4 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+quoteStyleInFunction.jsx:2:4 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -46,7 +46,7 @@ quoteStyleInFunction.jsx:2:4 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 
 ```
-quoteStyleInFunction.jsx:3:12 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+quoteStyleInFunction.jsx:3:12 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -74,7 +74,7 @@ quoteStyleInFunction.jsx:3:12 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 
 ```
-quoteStyleInFunction.jsx:4:23 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+quoteStyleInFunction.jsx:4:23 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -102,7 +102,7 @@ quoteStyleInFunction.jsx:4:23 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 
 ```
-quoteStyleInFunction.jsx:4:55 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+quoteStyleInFunction.jsx:4:55 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -130,7 +130,7 @@ quoteStyleInFunction.jsx:4:55 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 
 ```
-quoteStyleInFunction.jsx:5:4 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+quoteStyleInFunction.jsx:5:4 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -158,7 +158,7 @@ quoteStyleInFunction.jsx:5:4 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 
 ```
-quoteStyleInFunction.jsx:8:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+quoteStyleInFunction.jsx:8:16 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -185,7 +185,7 @@ quoteStyleInFunction.jsx:8:16 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 
 ```
-quoteStyleInFunction.jsx:9:24 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+quoteStyleInFunction.jsx:9:24 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -213,7 +213,7 @@ quoteStyleInFunction.jsx:9:24 lint/nursery/useSortedClasses  FIXABLE  ━━━�
 ```
 
 ```
-quoteStyleInFunction.jsx:10:35 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+quoteStyleInFunction.jsx:10:35 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -241,7 +241,7 @@ quoteStyleInFunction.jsx:10:35 lint/nursery/useSortedClasses  FIXABLE  ━━━
 ```
 
 ```
-quoteStyleInFunction.jsx:10:67 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+quoteStyleInFunction.jsx:10:67 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   
@@ -269,7 +269,7 @@ quoteStyleInFunction.jsx:10:67 lint/nursery/useSortedClasses  FIXABLE  ━━━
 ```
 
 ```
-quoteStyleInFunction.jsx:11:16 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+quoteStyleInFunction.jsx:11:16 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   i These CSS classes should be sorted.
   

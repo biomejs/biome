@@ -7,7 +7,7 @@ use super::{
 };
 
 #[derive(Default)]
-pub enum UseSortedClassesPreset {
+pub enum UseTailwindSortedClassesPreset {
     #[default]
     TailwindCSS,
 }
@@ -17,9 +17,9 @@ pub struct ConfigPreset {
     pub variants: VariantsConfig,
 }
 
-pub fn get_config_preset(preset: &UseSortedClassesPreset) -> ConfigPreset {
+pub fn get_config_preset(preset: &UseTailwindSortedClassesPreset) -> ConfigPreset {
     match preset {
-        UseSortedClassesPreset::TailwindCSS => get_tailwind_css_preset(),
+        UseTailwindSortedClassesPreset::TailwindCSS => get_tailwind_css_preset(),
     }
 }
 
