@@ -1578,6 +1578,7 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "biome_suppression",
+ "biome_unicode_table",
  "camino",
  "codspeed-criterion-compat",
  "countme",

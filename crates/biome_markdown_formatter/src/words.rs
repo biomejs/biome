@@ -5,6 +5,9 @@ use biome_markdown_syntax::{
     emphasis_ext::{MdEmphasisFence, MdItalicFence},
 };
 use biome_rowan::{AstNode, AstNodeList, SyntaxResult, TextRange, TextSize, TokenText};
+use biome_unicode_table::{
+    is_cjk_punctuation, is_cjk_segment_break_character, is_default_ignorable_code_point,
+};
 use smallvec::SmallVec;
 
 use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
@@ -79,6 +82,161 @@ pub(crate) struct WordGroup {
     escape: WordGroupEscape,
 }
 
+/// Result of inspecting prose content for a character that controls soft-break handling.
+enum BoundaryCharacter {
+    /// The nearest rendered character at the inspected boundary.
+    Significant(char),
+    /// The content contributes no relevant character, so inspection can continue past it.
+    Transparent,
+    /// The rendered boundary cannot be determined reliably, so inspection must stop.
+    Unknown,
+}
+
+fn first_significant_character_in_text(text: &str) -> BoundaryCharacter {
+    text.chars()
+        .find(|character| !is_default_ignorable_code_point(*character))
+        .map_or(
+            BoundaryCharacter::Transparent,
+            BoundaryCharacter::Significant,
+        )
+}
+
+fn last_significant_character_in_text(text: &str) -> BoundaryCharacter {
+    text.chars()
+        .rev()
+        .find(|character| !is_default_ignorable_code_point(*character))
+        .map_or(
+            BoundaryCharacter::Transparent,
+            BoundaryCharacter::Significant,
+        )
+}
+
+fn first_significant_character_in_inline_list(list: &MdInlineItemList) -> BoundaryCharacter {
+    for item in list.iter() {
+        let character = match &item {
+            AnyMdInline::MdTextual(textual) => match textual.value_token() {
+                Ok(token) => first_significant_character_in_text(token.text()),
+                Err(_) => BoundaryCharacter::Unknown,
+            },
+            AnyMdInline::MdIndentToken(_) | AnyMdInline::MdQuotePrefix(_) => {
+                BoundaryCharacter::Transparent
+            }
+            _ => first_significant_character_in_inline(&item),
+        };
+        match character {
+            BoundaryCharacter::Transparent => {}
+            _ => return character,
+        }
+    }
+    BoundaryCharacter::Transparent
+}
+
+fn last_significant_character_in_inline_list(list: &MdInlineItemList) -> BoundaryCharacter {
+    for item in list.iter().rev() {
+        let character = match &item {
+            AnyMdInline::MdTextual(textual) => match textual.value_token() {
+                Ok(token) => last_significant_character_in_text(token.text()),
+                Err(_) => BoundaryCharacter::Unknown,
+            },
+            AnyMdInline::MdIndentToken(_) | AnyMdInline::MdQuotePrefix(_) => {
+                BoundaryCharacter::Transparent
+            }
+            _ => last_significant_character_in_inline(&item),
+        };
+        match character {
+            BoundaryCharacter::Transparent => {}
+            _ => return character,
+        }
+    }
+    BoundaryCharacter::Transparent
+}
+
+fn numeric_entity_character(text: &str) -> Option<char> {
+    let digits = text.strip_prefix("&#")?.strip_suffix(';')?;
+    let (digits, radix) = digits
+        .strip_prefix(['x', 'X'])
+        .map_or((digits, 10), |digits| (digits, 16));
+    u32::from_str_radix(digits, radix)
+        .ok()
+        .and_then(char::from_u32)
+}
+
+fn first_significant_character_in_inline(item: &AnyMdInline) -> BoundaryCharacter {
+    match item {
+        AnyMdInline::MdInlineItalic(italic) => {
+            first_significant_character_in_inline_list(&italic.content())
+        }
+        AnyMdInline::MdInlineEmphasis(emphasis) => {
+            first_significant_character_in_inline_list(&emphasis.content())
+        }
+        AnyMdInline::MdInlineCode(code) => {
+            first_significant_character_in_inline_list(&code.content())
+        }
+        AnyMdInline::MdInlineLink(link) => first_significant_character_in_inline_list(&link.text()),
+        AnyMdInline::MdAutolink(autolink) => {
+            first_significant_character_in_inline_list(&autolink.value())
+        }
+        AnyMdInline::MdReferenceLink(link) => {
+            first_significant_character_in_inline_list(&link.text())
+        }
+        AnyMdInline::MdEntityReference(entity) => match entity.value_token() {
+            Ok(token) => numeric_entity_character(token.text()).map_or_else(
+                || first_significant_character_in_text(token.text()),
+                |character| {
+                    if is_default_ignorable_code_point(character) {
+                        BoundaryCharacter::Transparent
+                    } else {
+                        BoundaryCharacter::Significant(character)
+                    }
+                },
+            ),
+            Err(_) => BoundaryCharacter::Unknown,
+        },
+        AnyMdInline::GfmStrikethrough(strikethrough) => {
+            first_significant_character_in_inline_list(&strikethrough.content())
+        }
+        _ => BoundaryCharacter::Unknown,
+    }
+}
+
+fn last_significant_character_in_inline(item: &AnyMdInline) -> BoundaryCharacter {
+    match item {
+        AnyMdInline::MdInlineItalic(italic) => {
+            last_significant_character_in_inline_list(&italic.content())
+        }
+        AnyMdInline::MdInlineEmphasis(emphasis) => {
+            last_significant_character_in_inline_list(&emphasis.content())
+        }
+        AnyMdInline::MdInlineCode(code) => {
+            last_significant_character_in_inline_list(&code.content())
+        }
+        AnyMdInline::MdInlineLink(link) => last_significant_character_in_inline_list(&link.text()),
+        AnyMdInline::MdAutolink(autolink) => {
+            last_significant_character_in_inline_list(&autolink.value())
+        }
+        AnyMdInline::MdReferenceLink(link) => {
+            last_significant_character_in_inline_list(&link.text())
+        }
+        AnyMdInline::MdEntityReference(entity) => match entity.value_token() {
+            Ok(token) => numeric_entity_character(token.text()).map_or_else(
+                || last_significant_character_in_text(token.text()),
+                |character| {
+                    if is_default_ignorable_code_point(character) {
+                        BoundaryCharacter::Transparent
+                    } else {
+                        BoundaryCharacter::Significant(character)
+                    }
+                },
+            ),
+            Err(_) => BoundaryCharacter::Unknown,
+        },
+        AnyMdInline::GfmStrikethrough(strikethrough) => {
+            last_significant_character_in_inline_list(&strikethrough.content())
+        }
+        _ => BoundaryCharacter::Unknown,
+    }
+}
+
 impl WordGroup {
     fn push(&mut self, atom: ProseAtom) {
         self.atoms.push(atom);
@@ -105,6 +263,55 @@ impl WordGroup {
             !number.is_empty() && number.bytes().all(|byte| byte.is_ascii_digit())
         })
     }
+
+    fn first_significant_character(&self) -> Option<char> {
+        for atom in &self.atoms {
+            let character = match atom {
+                ProseAtom::Word(word) => first_significant_character_in_text(word.text.text()),
+                ProseAtom::InlineElement(item) => first_significant_character_in_inline(item),
+            };
+            match character {
+                BoundaryCharacter::Significant(character) => return Some(character),
+                BoundaryCharacter::Transparent => {}
+                BoundaryCharacter::Unknown => return None,
+            }
+        }
+        None
+    }
+
+    fn last_significant_character(&self) -> Option<char> {
+        for atom in self.atoms.iter().rev() {
+            let character = match atom {
+                ProseAtom::Word(word) => last_significant_character_in_text(word.text.text()),
+                ProseAtom::InlineElement(item) => last_significant_character_in_inline(item),
+            };
+            match character {
+                BoundaryCharacter::Significant(character) => return Some(character),
+                BoundaryCharacter::Transparent => {}
+                BoundaryCharacter::Unknown => return None,
+            }
+        }
+        None
+    }
+
+    /// Returns whether a soft break between this group and `next` must remain a line break.
+    ///
+    /// The boundary uses the nearest rendered characters and skips default-ignorable code points.
+    /// A soft break is preserved when both characters use Chinese or Japanese no-space line
+    /// joining, or when either character is CJK punctuation. This returns `false` when either
+    /// boundary character cannot be determined.
+    pub(crate) fn should_preserve_soft_break_before(&self, next: &Self) -> bool {
+        let (Some(before), Some(after)) = (
+            self.last_significant_character(),
+            next.first_significant_character(),
+        ) else {
+            return false;
+        };
+
+        (is_cjk_segment_break_character(before) && is_cjk_segment_break_character(after))
+            || is_cjk_punctuation(before)
+            || is_cjk_punctuation(after)
+    }
 }
 
 /// An item in a flattened prose list.
@@ -121,6 +328,22 @@ pub(crate) enum ProseItem {
     HardBreak(MdHardLine),
     /// Marks a source-line indent removed by structural prose formatting.
     OutdentedLineStart,
+}
+
+impl ProseItem {
+    pub(crate) const fn as_word_group(&self) -> Option<&WordGroup> {
+        match self {
+            Self::WordGroup(group) => Some(group),
+            _ => None,
+        }
+    }
+
+    pub(crate) const fn is_prose_separator(&self) -> bool {
+        matches!(
+            self,
+            Self::Space | Self::SoftBreak | Self::OutdentedLineStart
+        )
+    }
 }
 
 /// Prose items collected from an inline item list.

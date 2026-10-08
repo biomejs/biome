@@ -25,6 +25,7 @@ biome_markdown_factory       = { workspace = true }
 biome_markdown_syntax        = { workspace = true }
 biome_rowan                  = { workspace = true }
 biome_suppression            = { workspace = true }
+biome_unicode_table          = { workspace = true }
 schemars                     = { workspace = true, optional = true }
 serde                        = { workspace = true, features = ["derive"], optional = true }
 smallvec                     = { workspace = true }
