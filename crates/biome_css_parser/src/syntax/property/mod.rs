@@ -465,6 +465,7 @@ pub(crate) struct GenericComponentValueList {
     end_set: TokenSet<CssSyntaxKind>,
     recovery_set: TokenSet<CssSyntaxKind>,
     boundary: Option<fn(&mut CssParser) -> bool>,
+    context: Option<ValueParsingContext>,
 }
 
 impl GenericComponentValueList {
@@ -476,11 +477,18 @@ impl GenericComponentValueList {
             end_set,
             recovery_set,
             boundary: None,
+            context: None,
         }
     }
 
     pub(crate) fn with_boundary(mut self, boundary: fn(&mut CssParser) -> bool) -> Self {
         self.boundary = Some(boundary);
+        self
+    }
+
+    /// Preserves the caller's value policy for every component in the list.
+    pub(crate) fn with_context(mut self, context: ValueParsingContext) -> Self {
+        self.context = Some(context);
         self
     }
 
@@ -505,7 +513,10 @@ impl ParseNodeList for GenericComponentValueList {
     const LIST_KIND: Self::Kind = CSS_GENERIC_COMPONENT_VALUE_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_generic_component_value(p)
+        let context = self
+            .context
+            .unwrap_or_else(|| ValueParsingContext::new(p, ValueParsingMode::ScssAware));
+        parse_generic_component_value_with_context(p, context)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {

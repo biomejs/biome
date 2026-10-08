@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::utils::comment_trivia::{
-    is_leading_comment_on_node, is_token_boundary_suppressed, is_trailing_comment_on_node,
+    has_line_comment, is_leading_comment_on_node, is_token_boundary_suppressed,
+    is_trailing_comment_on_node,
 };
 use crate::utils::component_value_list::is_comma_separated_declaration_value_list;
 use crate::utils::custom_property::CustomPropertyContainer;
@@ -14,7 +15,7 @@ use biome_css_syntax::{
     AnyCssPseudoClass, AnyCssPseudoElement, AnyCssSelector, AnyCssSelectorIdentifier,
     AnyCssUnknownAtRuleName, CssComplexSelector, CssDeclaration, CssDeclarationImportant,
     CssDeclarationOrRuleBlock, CssFunction, CssGenericComponentValueList, CssGenericProperty,
-    CssIdentifier, CssLanguage, CssMediaQueryList, CssNestedQualifiedRule,
+    CssIdentifier, CssIfBranch, CssLanguage, CssMediaQueryList, CssNestedQualifiedRule,
     CssPseudoElementFunction, CssQualifiedRule, CssSyntaxKind, CssSyntaxNode, CssSyntaxToken,
     ScssAtRootAtRule, ScssAtRootQueryClause, ScssAtRootSelector, ScssEachHeader, ScssEachValueList,
     ScssExpression, ScssExpressionItemList, ScssIfAtRule, ScssInterpolatedPseudoClassFunction,
@@ -114,6 +115,7 @@ impl CommentStyle for CssCommentStyle {
         comment: DecoratedComment<Self::Language>,
     ) -> CommentPlacement<Self::Language> {
         handle_statement_at_rule_terminator_comment(comment)
+            .or_else(handle_scss_if_branch_value_comment)
             .or_else(handle_scss_map_trailing_separator_comment)
             .or_else(place_separated_list_comment)
             .or_else(handle_scss_list_trailing_separator_comment)
@@ -392,6 +394,43 @@ fn handle_scss_else_clause_comment(
             CommentPlacement::leading(else_clause.into_syntax(), comment)
         }
         _ => CommentPlacement::Default(comment),
+    }
+}
+
+/// Keeps comments after an `if()` branch colon with its Sass value when the gap
+/// contains a line comment. Mixed block/line groups retain one owner so their
+/// order and suppression target survive formatting.
+///
+/// ```scss
+/// width: if(sass(true): // value
+///   1px; else: 0);
+/// ```
+fn handle_scss_if_branch_value_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(value) = comment.following_node().and_then(ScssExpression::cast_ref) else {
+        return CommentPlacement::Default(comment);
+    };
+    let Some(branch) = value.parent::<CssIfBranch>() else {
+        return CommentPlacement::Default(comment);
+    };
+    let (Ok(colon), Some(first_value_token)) = (branch.colon_token(), value.syntax().first_token())
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let range = comment.piece().text_range();
+    let is_value_boundary = range.start() >= colon.text_trimmed_range().end()
+        && range.end() <= first_value_token.text_trimmed_range().start();
+
+    if is_value_boundary
+        && (comment.kind().is_line()
+            || has_line_comment(colon.trailing_trivia())
+            || has_line_comment(first_value_token.leading_trivia()))
+    {
+        CommentPlacement::leading(value.into_syntax(), comment)
+    } else {
+        CommentPlacement::Default(comment)
     }
 }
 

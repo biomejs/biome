@@ -14,7 +14,7 @@ use biome_css_syntax::CssSyntaxKind::{
     SCSS_LIST_EXPRESSION_ELEMENT, SCSS_LIST_EXPRESSION_ELEMENT_LIST, SCSS_STRING_QUOTE,
 };
 use biome_css_syntax::{CssSyntaxKind, T};
-use biome_parser::parse_recovery::ParseRecoveryTokenSet;
+use biome_parser::parse_recovery::ParseRecovery;
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{CompletedMarker, Parser, ParserProgress, TokenSet, token_set};
@@ -45,8 +45,27 @@ pub(crate) fn parse_scss_optional_value_until(
     p: &mut CssParser,
     end_ts: TokenSet<CssSyntaxKind>,
 ) -> ParsedSyntax {
-    let options = ScssExpressionOptions::optional_value(end_ts);
+    parse_scss_optional_value_with_options(p, ScssExpressionOptions::optional_value(end_ts))
+}
 
+/// Parses an optional Sass value with a boundary that applies only outside nested expressions.
+#[inline]
+pub(crate) fn parse_scss_optional_value_until_with_boundary(
+    p: &mut CssParser,
+    end_ts: TokenSet<CssSyntaxKind>,
+    boundary: fn(&mut CssParser) -> bool,
+) -> ParsedSyntax {
+    parse_scss_optional_value_with_options(
+        p,
+        ScssExpressionOptions::optional_value(end_ts).with_boundary(boundary),
+    )
+}
+
+#[inline]
+fn parse_scss_optional_value_with_options(
+    p: &mut CssParser,
+    options: ScssExpressionOptions,
+) -> ParsedSyntax {
     if is_at_scss_expression_sequence_end(p, options) {
         return Absent;
     }
@@ -254,10 +273,9 @@ fn parse_scss_expression_sequence_item(
     options: ScssExpressionOptions,
 ) -> Option<CompletedMarker> {
     parse_scss_expression_item(p, options)
-        .or_recover_with_token_set(
+        .or_recover(
             p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, options.recovery_end_ts())
-                .enable_recovery_on_line_break(),
+            &ScssExpressionParseRecovery { options },
             expected_scss_expression,
         )
         .ok()
@@ -390,10 +408,9 @@ pub(super) fn parse_scss_list_expression(
         progress.assert_progressing(p);
 
         if parse_scss_list_expression_element(p, options)
-            .or_recover_with_token_set(
+            .or_recover(
                 p,
-                &ParseRecoveryTokenSet::new(CSS_BOGUS_PROPERTY_VALUE, options.recovery_end_ts())
-                    .enable_recovery_on_line_break(),
+                &ScssExpressionParseRecovery { options },
                 expected_scss_expression,
             )
             .is_err()
@@ -439,4 +456,20 @@ pub(super) fn complete_scss_list_expression_element(
     expression
         .precede(p)
         .complete(p, SCSS_LIST_EXPRESSION_ELEMENT)
+}
+
+struct ScssExpressionParseRecovery {
+    options: ScssExpressionOptions,
+}
+
+impl ParseRecovery for ScssExpressionParseRecovery {
+    type Kind = CssSyntaxKind;
+    type Parser<'source> = CssParser<'source>;
+    const RECOVERED_KIND: Self::Kind = CSS_BOGUS_PROPERTY_VALUE;
+
+    fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
+        p.at_ts(self.options.recovery_end_ts())
+            || p.has_preceding_line_break()
+            || self.options.boundary.is_some_and(|boundary| boundary(p))
+    }
 }
