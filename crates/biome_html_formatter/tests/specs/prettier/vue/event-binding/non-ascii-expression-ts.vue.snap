@@ -38,12 +38,10 @@ type Foo = () => void
 ```diff
 --- Prettier
 +++ Biome
-@@ -6,18 +6,18 @@
- </script>
- 
+@@ -8,16 +8,16 @@
  <template>
--  <div @click="我" />
--  <div @click="me" />
+   <div @click="我" />
+   <div @click="me" />
 -  <div @click="我 as Foo" />
 -  <div @click="me as Foo" />
 -  <div @click="我 satisfies Foo" />
@@ -56,8 +54,6 @@ type Foo = () => void
 -  <div @click="me<string>" />
 -  <div @click="我! as unknown satisfies Foo" />
 -  <div @click="me! as unknown satisfies Foo" />
-+  <div @click="   我   " />
-+  <div @click="   me   " />
 +  <div @click="我   as Foo" />
 +  <div @click="me   as Foo" />
 +  <div @click="我   satisfies Foo" />
@@ -84,8 +80,8 @@ type Foo = () => void;
 </script>
 
 <template>
-  <div @click="   我   " />
-  <div @click="   me   " />
+  <div @click="我" />
+  <div @click="me" />
   <div @click="我   as Foo" />
   <div @click="me   as Foo" />
   <div @click="我   satisfies Foo" />
