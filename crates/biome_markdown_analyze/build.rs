@@ -14,6 +14,7 @@ use std::path::PathBuf;
 use std::time::SystemTime;
 fn main() -> io::Result<()> {
     watch_group("lint", "nursery")?;
+    watch_group("lint", "suspicious")?;
     Ok(())
 }
 #[doc = r" Watch a specific group directory and touch its group file when changes occur"]
