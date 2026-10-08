@@ -1,0 +1,73 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue12176.ts
+---
+# Input
+```ts
+interface ListenOptions {
+	port?: number;
+}
+
+interface Instance {
+	listen(opts: ListenOptions, callback: (err: Error | null, address: string) => void): void;
+	listen(opts?: ListenOptions): Promise<string>;
+}
+
+declare const app: Instance;
+
+// The no-callback overload returns a Promise.
+await app.listen({ port: 0 });
+await app.listen();
+
+// The callback overload returns void.
+await app.listen({ port: 0 }, () => {});
+
+declare const literal: {
+	listen(opts: ListenOptions, callback: () => void): void;
+	listen(opts?: ListenOptions): Promise<string>;
+};
+
+await literal.listen({ port: 0 });
+await literal.listen({ port: 0 }, () => {});
+
+```
+
+# Diagnostics
+```
+issue12176.ts:17:1 lint/nursery/useAwaitThenable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i `await` used on a non-Promise value.
+  
+    16 │ // The callback overload returns void.
+  > 17 │ await app.listen({ port: 0 }, () => {});
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 
+    19 │ declare const literal: {
+  
+  i This may happen if you accidentally used `await` on a synchronous value.
+  
+  i Please ensure the value is not a custom "thenable" implementation before removing the `await`: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#thenables
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+issue12176.ts:25:1 lint/nursery/useAwaitThenable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i `await` used on a non-Promise value.
+  
+    24 │ await literal.listen({ port: 0 });
+  > 25 │ await literal.listen({ port: 0 }, () => {});
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+  
+  i This may happen if you accidentally used `await` on a synchronous value.
+  
+  i Please ensure the value is not a custom "thenable" implementation before removing the `await`: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#thenables
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
