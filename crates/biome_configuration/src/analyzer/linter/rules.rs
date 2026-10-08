@@ -137,6 +137,7 @@ pub enum RuleName {
     NoControlCharactersInRegex,
     NoDangerouslySetInnerHtml,
     NoDangerouslySetInnerHtmlWithChildren,
+    NoDanglingUnderscore,
     NoDebugger,
     NoDefaultExport,
     NoDelete,
@@ -715,6 +716,7 @@ impl RuleName {
             Self::NoControlCharactersInRegex => "noControlCharactersInRegex",
             Self::NoDangerouslySetInnerHtml => "noDangerouslySetInnerHtml",
             Self::NoDangerouslySetInnerHtmlWithChildren => "noDangerouslySetInnerHtmlWithChildren",
+            Self::NoDanglingUnderscore => "noDanglingUnderscore",
             Self::NoDebugger => "noDebugger",
             Self::NoDefaultExport => "noDefaultExport",
             Self::NoDelete => "noDelete",
@@ -1297,6 +1299,7 @@ impl RuleName {
             Self::NoControlCharactersInRegex => RuleGroup::Suspicious,
             Self::NoDangerouslySetInnerHtml => RuleGroup::Security,
             Self::NoDangerouslySetInnerHtmlWithChildren => RuleGroup::Security,
+            Self::NoDanglingUnderscore => RuleGroup::Nursery,
             Self::NoDebugger => RuleGroup::Suspicious,
             Self::NoDefaultExport => RuleGroup::Style,
             Self::NoDelete => RuleGroup::Performance,
@@ -1880,6 +1883,7 @@ impl std::str::FromStr for RuleName {
             "noDangerouslySetInnerHtmlWithChildren" => {
                 Ok(Self::NoDangerouslySetInnerHtmlWithChildren)
             }
+            "noDanglingUnderscore" => Ok(Self::NoDanglingUnderscore),
             "noDebugger" => Ok(Self::NoDebugger),
             "noDefaultExport" => Ok(Self::NoDefaultExport),
             "noDelete" => Ok(Self::NoDelete),

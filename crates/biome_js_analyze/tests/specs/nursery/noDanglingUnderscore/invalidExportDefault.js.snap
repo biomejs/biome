@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidExportDefault.js
+---
+# Input
+```js
+/* should generate diagnostics */
+export default function _main() {}
+
+```
+
+# Diagnostics
+```
+invalidExportDefault.js:2:25 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name _main starts with an underscore.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ export default function _main() {}
+      │                         ^^^^^
+    3 │ 
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

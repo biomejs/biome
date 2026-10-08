@@ -48,6 +48,7 @@ pub mod no_continue;
 pub mod no_control_characters_in_regex;
 pub mod no_dangerously_set_inner_html;
 pub mod no_dangerously_set_inner_html_with_children;
+pub mod no_dangling_underscore;
 pub mod no_debugger;
 pub mod no_default_export;
 pub mod no_delete;

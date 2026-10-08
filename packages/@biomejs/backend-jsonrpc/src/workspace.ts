@@ -2890,6 +2890,11 @@ export interface Nursery {
 	 */
 	noBunModules?: NoBunModulesConfiguration;
 	/**
+	 * Disallow names that start or end with an underscore.
+	 * See https://biomejs.dev/linter/rules/no-dangling-underscore
+	 */
+	noDanglingUnderscore?: NoDanglingUnderscoreConfiguration;
+	/**
 	 * Disallow two keys with the same name inside YAML maps.
 	 * See https://biomejs.dev/linter/rules/no-duplicate-map-keys
 	 */
@@ -5445,6 +5450,9 @@ export type NoBaseToStringConfiguration =
 export type NoBunModulesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBunModulesOptions;
+export type NoDanglingUnderscoreConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDanglingUnderscoreOptions;
 export type NoDuplicateMapKeysConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateMapKeysOptions;
@@ -7769,6 +7777,10 @@ export interface RuleWithNoBaseToStringOptions {
 export interface RuleWithNoBunModulesOptions {
 	level: RulePlainConfiguration;
 	options?: NoBunModulesOptions;
+}
+export interface RuleWithNoDanglingUnderscoreOptions {
+	level: RulePlainConfiguration;
+	options?: NoDanglingUnderscoreOptions;
 }
 export interface RuleWithNoDuplicateMapKeysOptions {
 	level: RulePlainConfiguration;
@@ -10167,6 +10179,7 @@ export interface NoBaseToStringOptions {
 	ignoredTypeNames?: string[];
 }
 export type NoBunModulesOptions = {};
+export type NoDanglingUnderscoreOptions = {};
 export type NoDuplicateMapKeysOptions = {};
 /**
  * Options for the `noExtendNative` rule.
@@ -11813,6 +11826,7 @@ export type Category =
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
+	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noExtendNative"
 	| "lint/nursery/noFloatingPromises"

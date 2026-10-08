@@ -3747,6 +3747,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoDanglingUnderscoreConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoDanglingUnderscoreOptions" }
+			]
+		},
+		"NoDanglingUnderscoreOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoDebuggerConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7365,6 +7375,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDanglingUnderscore": {
+					"description": "Disallow names that start or end with an underscore.\nSee https://biomejs.dev/linter/rules/no-dangling-underscore",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoDanglingUnderscoreConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateMapKeys": {
 					"description": "Disallow two keys with the same name inside YAML maps.\nSee https://biomejs.dev/linter/rules/no-duplicate-map-keys",
 					"anyOf": [
@@ -9156,6 +9173,15 @@
 				"options": {
 					"$ref": "#/$defs/NoDangerouslySetInnerHtmlWithChildrenOptions"
 				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoDanglingUnderscoreOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoDanglingUnderscoreOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
