@@ -7,6 +7,7 @@ expression: basic.jsonc
 ```json
 {
 	"rules": {
+		"@html-eslint/no-target-blank": "warn",
 		"@mysticatea/block-scoped-var": "error",
 		"@mysticatea/prefer-for-of": "error",
 		"@stylistic/curly-newline": "error",
@@ -21,6 +22,7 @@ expression: basic.jsonc
 		"@stylistic/semi-spacing": "error",
 		"@stylistic/semi-style": "error",
 		"@typescript-eslint/prefer-promise-reject-errors": "error",
+		"@typescript-eslint/typedef": "error",
 		"astro/jsx-a11y/alt-text": "error",
 		"astro/jsx-a11y/anchor-ambiguous-text": "error",
 		"astro/jsx-a11y/anchor-has-content": "error",
@@ -70,6 +72,7 @@ expression: basic.jsonc
 		"n/prefer-node-protocol": "error",
 		"no-catch-shadow": "error",
 		"no-delete-var": "error",
+		"no-iterator": "error",
 		"no-native-reassign": "error",
 		"no-negated-in-lhs": "error",
 		"no-new-symbol": "error",
@@ -98,8 +101,12 @@ expression: basic.jsonc
 		"svelte/no-spaces-around-equal-signs-in-attribute": "error",
 		"svelte/no-target-blank": "error",
 		"svelte/no-trailing-spaces": "error",
+		"svelte/no-unused-svelte-ignore": "error",
 		"svelte/prefer-const": "error",
+		"svelte/valid-compile": "error",
 		"svelte/valid-style-parse": "error",
+		"tailwindcss/enforces-shorthand": "warn",
+		"tailwindcss/important-modifier-suffix": "error",
 		"unicorn/comma-spacing": "error",
 		"unicorn/indent": "error",
 		"vitest/padding-around-after-all-blocks": "error",
@@ -123,6 +130,7 @@ expression: basic.jsonc
 		"vue/padding-line-between-blocks": "error",
 		"vue/padding-line-between-tags": "error",
 		"vue/padding-lines-in-component-definition": "error",
+		"yml/flow-mapping-curly-newline": "error",
 		"yml/indent": "error",
 		"yml/no-tab-indent": "error",
 		"yml/no-trailing-spaces": "error",
@@ -192,7 +200,8 @@ expression: basic.jsonc
 			"nursery": {
 				"noSvelteLegacyConst": "error",
 				"useControlLabel": "error",
-				"usePromiseRejectErrors": "error"
+				"usePromiseRejectErrors": "error",
+				"useTailwindShorthandClasses": "warn"
 			},
 			"performance": { "noDelete": "error" },
 			"security": { "noBlankTarget": "error", "useIframeSandbox": "error" },

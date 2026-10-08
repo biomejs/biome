@@ -138,6 +138,7 @@ declare_lint_rule! {
         sources: &[
             RuleSource::EslintReact("jsx-no-target-blank").inspired(), RuleSource::EslintReactDom("no-unsafe-target-blank").inspired(), RuleSource::EslintReactXyz("dom-no-unsafe-target-blank").inspired(),
             RuleSource::EslintSvelte("no-target-blank").same(),
+            RuleSource::HtmlEslint("no-target-blank").same(),
         ],
         recommended: true,
         severity: Severity::Error,
