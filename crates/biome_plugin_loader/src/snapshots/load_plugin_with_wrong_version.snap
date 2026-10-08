@@ -25,8 +25,8 @@ No input was analyzed.
 ```block
 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Cannot load Biome manifest /my-plugin/biome-manifest.jsonc.
+  × The Biome manifest /my-plugin/biome-manifest.jsonc is invalid.
     
     Caused by:
-      version must be 1.
+      Unsupported version 2.
 ```

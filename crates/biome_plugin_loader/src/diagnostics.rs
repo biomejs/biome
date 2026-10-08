@@ -1,4 +1,5 @@
 use std::fmt::{Debug, Formatter};
+use std::io;
 
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::{Deserialize, Serialize};
@@ -6,8 +7,8 @@ use serde::{Deserialize, Serialize};
 use biome_console::fmt::Display;
 use biome_console::markup;
 use biome_deserialize::DeserializationDiagnostic;
-use biome_diagnostics::{Diagnostic, Error, MessageAndDescription};
-use biome_fs::FileSystemDiagnostic;
+use biome_diagnostics::{Advices, Diagnostic, Error, LogCategory, MessageAndDescription, Visit};
+use biome_fs::{FileSystemDiagnostic, ManifestName};
 use biome_grit_patterns::CompileError;
 use biome_resolver::{ResolveError, ResolveErrorDiagnostic};
 use biome_rowan::SyntaxError;
@@ -86,8 +87,8 @@ impl PluginDiagnostic {
         Self::InvalidManifest(InvalidManifest {
             message: MessageAndDescription::from(
                 markup! {
-                    "Failed to read plugin file "
-                    <Emphasis>{path.to_string()}</Emphasis>
+                    "Biome couldn't read the plugin file "
+                    <Emphasis>{path.to_string()}</Emphasis>"."
                 }
                 .to_owned(),
             ),
@@ -95,31 +96,66 @@ impl PluginDiagnostic {
         })
     }
 
-    pub fn cant_resolve(path: Utf8PathBuf, kind: Option<ResolveError>) -> Self {
+    /// Reports a plugin or manifest rule path that doesn't point to a file.
+    pub fn plugin_file_not_found(path: &Utf8Path) -> Self {
         Self::CantResolve(CantResolve {
             message: MessageAndDescription::from(
                 markup! {
-                   "Failed to resolve the Biome manifest from "
-                   <Emphasis>{path.to_string()}</Emphasis>
+                    "Biome couldn't find the plugin file "<Emphasis>{path.as_str()}</Emphasis>"."
                 }
                 .to_owned(),
             ),
-            source: kind.map(|kind| ResolveErrorDiagnostic::new(kind, path).into()),
+            advice: PackageLookupAdvice::default(),
+            source: None,
         })
     }
 
-    pub fn cant_resolve_package(package: &str, base_path: &Utf8Path, kind: ResolveError) -> Self {
-        let package_path = Utf8PathBuf::from(package);
+    /// Reports a plugin path that doesn't contain a Biome manifest.
+    pub fn missing_manifest(path: &Utf8Path) -> Self {
         Self::CantResolve(CantResolve {
             message: MessageAndDescription::from(
                 markup! {
-                   "Failed to resolve plugin package "
-                   <Emphasis>{package}</Emphasis>
-                   " from "<Emphasis>{base_path.to_string()}</Emphasis>
+                    "Biome couldn't find a "<Emphasis>{ManifestName::biome_manifest_json()}</Emphasis>
+                    " or "<Emphasis>{ManifestName::biome_manifest_jsonc()}</Emphasis>
+                    " file in "<Emphasis>{path.as_str()}</Emphasis>"."
                 }
                 .to_owned(),
             ),
-            source: Some(ResolveErrorDiagnostic::new(kind, package_path).into()),
+            advice: PackageLookupAdvice::default(),
+            source: None,
+        })
+    }
+
+    /// Reports a plugin package that can't be resolved from `base_path`.
+    ///
+    /// When the package isn't installed, the diagnostic names the directory where the
+    /// `node_modules` lookup starts. Other resolution failures keep the resolver error as
+    /// their source.
+    pub fn cant_resolve_package(package: &str, base_path: &Utf8Path, kind: ResolveError) -> Self {
+        if kind == ResolveError::NotFound {
+            return Self::CantResolve(CantResolve {
+                message: MessageAndDescription::from(
+                    markup! {
+                        "Biome couldn't find the plugin package "<Emphasis>{package}</Emphasis>"."
+                    }
+                    .to_owned(),
+                ),
+                advice: PackageLookupAdvice {
+                    base_path: Some(base_path.to_string()),
+                },
+                source: None,
+            });
+        }
+
+        Self::CantResolve(CantResolve {
+            message: MessageAndDescription::from(
+                markup! {
+                    "Biome couldn't resolve the plugin package "<Emphasis>{package}</Emphasis>"."
+                }
+                .to_owned(),
+            ),
+            advice: PackageLookupAdvice::default(),
+            source: Some(ResolveErrorDiagnostic::new(kind, Utf8PathBuf::from(package)).into()),
         })
     }
 
@@ -207,9 +243,41 @@ pub struct CantResolve {
     #[description]
     message: MessageAndDescription,
 
+    #[advice]
+    advice: PackageLookupAdvice,
+
     #[serde(skip)]
     #[source]
     source: Option<Error>,
+}
+
+/// Tells the user where Biome looked for a plugin package that isn't installed.
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct PackageLookupAdvice {
+    /// The directory where the `node_modules` lookup starts. `None` records no advice.
+    base_path: Option<String>,
+}
+
+impl Advices for PackageLookupAdvice {
+    fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
+        let Some(base_path) = &self.base_path else {
+            return Ok(());
+        };
+        // An empty base path is relative, so the lookup starts in the working directory.
+        let directory = if base_path.is_empty() {
+            markup! { "the working directory" }
+        } else {
+            markup! { <Emphasis>{base_path}</Emphasis> }
+        };
+        visitor.record_log(
+            LogCategory::Info,
+            &markup! {
+                "Make sure the package is installed. Biome looks for it in the "
+                <Emphasis>"node_modules"</Emphasis>" directory of "{directory}
+                " and of each parent directory."
+            },
+        )
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
