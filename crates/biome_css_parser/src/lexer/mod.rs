@@ -459,6 +459,7 @@ impl<'src> CssLexer<'src> {
             self.is_scss(),
             self.is_line_comment_enabled(),
         )
+        .with_metavariables(self.metavariables)
     }
 
     fn byte_before(&self, position: usize, offset: usize) -> Option<u8> {
@@ -1411,6 +1412,12 @@ impl<'src> CssLexer<'src> {
                             has_newline = true;
                             self.advance(1)
                         }
+                        b'$' if self.is_metavariable_start() => {
+                            let start = self.position();
+                            self.consume_metavariable(());
+                            has_newline |=
+                                self.source()[start..self.position()].contains(['\n', '\r']);
+                        }
                         chr => self.advance_byte_or_char(chr),
                     }
                 }
@@ -1436,6 +1443,7 @@ impl<'src> CssLexer<'src> {
                 while let Some(chr) = self.current_byte() {
                     match chr {
                         b'\n' | b'\r' => return COMMENT,
+                        b'$' if self.is_metavariable_start() => self.consume_metavariable(()),
                         chr => self.advance_byte_or_char(chr),
                     }
                 }
