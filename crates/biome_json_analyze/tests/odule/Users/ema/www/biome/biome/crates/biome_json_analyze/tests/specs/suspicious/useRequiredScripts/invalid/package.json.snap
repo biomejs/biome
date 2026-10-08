@@ -1,0 +1,14 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: package.json
+---
+# Input
+```json
+{
+    "dependencies": {
+        "trusted-pkg": "^1.0.0",
+        "spdx-expression-pkg": "^1.0.0"
+    }
+}
+
+```
