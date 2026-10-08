@@ -7,10 +7,11 @@ use grit_pattern_matcher::binding::Binding;
 use grit_pattern_matcher::context::{ExecContext, StaticDefinitions};
 use grit_pattern_matcher::pattern::{
     AstLeafNodePattern, AstNodePattern, Matcher, Pattern, PatternName, PatternOrPredicate,
-    ResolvedPattern, State,
+    ResolvedPattern, State, Variable,
 };
 use grit_util::error::GritResult;
-use grit_util::{AnalysisLogs, Language};
+use grit_util::{AnalysisLogs, ByteRange, Language};
+use regex::Regex;
 
 /// Check if two syntax kinds are compatible for import pattern matching
 fn are_import_kinds_compatible(
@@ -286,5 +287,124 @@ impl Matcher<GritQueryContext> for GritLeafNodePattern {
 impl PatternName for GritLeafNodePattern {
     fn name(&self) -> &'static str {
         "GritLeafNode"
+    }
+}
+
+/// Matches a leaf node whose snippet text embeds metavariables, such as the
+/// string literal in `` `console.log("Hello, $name")` ``.
+///
+/// The whole node text must match `regex`. Each capture group binds the
+/// variable at the same position in `variables`, and a variable that is
+/// already bound must have the same text as its capture.
+#[derive(Clone, Debug)]
+pub struct GritRegexLeafNodePattern {
+    regex: Regex,
+    variables: Vec<Variable>,
+}
+
+impl GritRegexLeafNodePattern {
+    /// Returns `None` if `regex` is not a valid regular expression.
+    pub(crate) fn new(regex: &str, variables: Vec<Variable>) -> Option<Self> {
+        // Compiled once here because the pattern runs for every candidate node.
+        let regex = Regex::new(&format!("^{regex}$")).ok()?;
+        Some(Self { regex, variables })
+    }
+}
+
+impl Matcher<GritQueryContext> for GritRegexLeafNodePattern {
+    fn execute<'a>(
+        &'a self,
+        binding: &GritResolvedPattern<'a>,
+        state: &mut State<'a, GritQueryContext>,
+        context: &'a GritExecContext,
+        logs: &mut AnalysisLogs,
+    ) -> GritResult<bool> {
+        let language = context.language();
+        let text = binding.text(&state.files, language)?;
+        let Some(captures) = self.regex.captures(&text) else {
+            return Ok(false);
+        };
+
+        let last_binding = binding.get_last_binding();
+        for (variable, capture) in self.variables.iter().zip(captures.iter().skip(1)) {
+            let Some(capture) = capture else {
+                return Ok(false);
+            };
+            let scope = variable.try_scope()? as usize;
+            let index = variable.try_index()? as usize;
+
+            let content = &state.bindings[scope].last().unwrap()[index];
+            if let Some(value) = &content.value {
+                if value.text(&state.files, language)? != capture.as_str() {
+                    return Ok(false);
+                }
+                continue;
+            }
+            let pattern = content.pattern;
+
+            let value = match last_binding
+                .and_then(|binding| Some((binding.range(language)?, binding.source()?)))
+            {
+                Some((range, source)) => GritResolvedPattern::from_range_binding(
+                    ByteRange::new(range.start + capture.start(), range.start + capture.end()),
+                    source,
+                ),
+                None => GritResolvedPattern::from_string(capture.as_str().to_owned()),
+            };
+            if let Some(pattern) = pattern
+                && !pattern.execute(&value, state, context, logs)?
+            {
+                return Ok(false);
+            }
+            state.bindings[scope].last_mut().unwrap()[index].value = Some(value);
+        }
+
+        Ok(true)
+    }
+}
+
+impl PatternName for GritRegexLeafNodePattern {
+    fn name(&self) -> &'static str {
+        "GritRegexLeafNode"
+    }
+}
+
+/// Pattern for a leaf node inside a code snippet.
+#[derive(Clone, Debug)]
+pub enum GritLeafPattern {
+    Text(GritLeafNodePattern),
+    Regex(GritRegexLeafNodePattern),
+}
+
+impl AstLeafNodePattern<GritQueryContext> for GritLeafPattern {
+    fn text(&self) -> Option<&str> {
+        match self {
+            Self::Text(pattern) => pattern.text(),
+            Self::Regex(_) => None,
+        }
+    }
+}
+
+impl Matcher<GritQueryContext> for GritLeafPattern {
+    fn execute<'a>(
+        &'a self,
+        binding: &GritResolvedPattern<'a>,
+        state: &mut State<'a, GritQueryContext>,
+        context: &'a GritExecContext,
+        logs: &mut AnalysisLogs,
+    ) -> GritResult<bool> {
+        match self {
+            Self::Text(pattern) => pattern.execute(binding, state, context, logs),
+            Self::Regex(pattern) => pattern.execute(binding, state, context, logs),
+        }
+    }
+}
+
+impl PatternName for GritLeafPattern {
+    fn name(&self) -> &'static str {
+        match self {
+            Self::Text(pattern) => pattern.name(),
+            Self::Regex(pattern) => pattern.name(),
+        }
     }
 }
