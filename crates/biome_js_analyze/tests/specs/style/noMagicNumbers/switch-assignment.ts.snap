@@ -1,0 +1,1099 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: switch-assignment.ts
+---
+# Input
+```ts
+type Mode = "first" | "second" | "arithmetic" | "indexing";
+
+function example(mode: Mode) {
+	switch (mode) {
+		case "first":
+			firstValue = 23;
+			firstValue = 25;
+			secondValue = 145;
+			ratioValue = 4.5;
+			break;
+		case "second":
+			firstValue = 23;
+			secondValue = 125;
+			ratioValue = 4;
+			break;
+		case "arithmetic":
+			result = 31 + 32;
+			result = 33 - 34;
+			result = 35 * 36;
+			result = 37 / 38;
+			result = 39 ** 40;
+			result = 41 % 42;
+			result += 49;
+			result -= 50;
+			result *= 51;
+			result /= 52;
+			result **= 53;
+			result %= 54;
+			result = Math.sqrt(43);
+			result = Math.cbrt(44);
+			result = log(45, 46);
+			result = root(47, 48);
+			break;
+		case "indexing":
+			result = values.at(5);
+			result = values.get(6);
+			result = values[7 + 8];
+			break;
+	}
+}
+
+```
+
+# Diagnostics
+```
+switch-assignment.ts:6:17 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    4 │ 	switch (mode) {
+    5 │ 		case "first":
+  > 6 │ 			firstValue = 23;
+      │ 			             ^^
+    7 │ 			firstValue = 25;
+    8 │ 			secondValue = 145;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into FIRST_FIRST_VALUE_23.
+
+        1 │ + const·FIRST_FIRST_VALUE_23·=·23;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+     4  5 │     switch (mode) {
+     5  6 │       case "first":
+     6    │ - → → → firstValue·=·23;
+        7 │ + → → → firstValue·=·FIRST_FIRST_VALUE_23;
+     7  8 │         firstValue = 25;
+     8  9 │         secondValue = 145;
+
+
+```
+
+```
+switch-assignment.ts:7:17 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    5 │ 		case "first":
+    6 │ 			firstValue = 23;
+  > 7 │ 			firstValue = 25;
+      │ 			             ^^
+    8 │ 			secondValue = 145;
+    9 │ 			ratioValue = 4.5;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into FIRST_FIRST_VALUE_25.
+
+        1 │ + const·FIRST_FIRST_VALUE_25·=·25;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+     5  6 │       case "first":
+     6  7 │         firstValue = 23;
+     7    │ - → → → firstValue·=·25;
+        8 │ + → → → firstValue·=·FIRST_FIRST_VALUE_25;
+     8  9 │         secondValue = 145;
+     9 10 │         ratioValue = 4.5;
+
+
+```
+
+```
+switch-assignment.ts:8:18 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+     6 │ 			firstValue = 23;
+     7 │ 			firstValue = 25;
+   > 8 │ 			secondValue = 145;
+       │ 			              ^^^
+     9 │ 			ratioValue = 4.5;
+    10 │ 			break;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into FIRST_SECOND_VALUE.
+
+        1 │ + const·FIRST_SECOND_VALUE·=·145;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+     6  7 │         firstValue = 23;
+     7  8 │         firstValue = 25;
+     8    │ - → → → secondValue·=·145;
+        9 │ + → → → secondValue·=·FIRST_SECOND_VALUE;
+     9 10 │         ratioValue = 4.5;
+    10 11 │         break;
+
+
+```
+
+```
+switch-assignment.ts:9:17 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+     7 │ 			firstValue = 25;
+     8 │ 			secondValue = 145;
+   > 9 │ 			ratioValue = 4.5;
+       │ 			             ^^^
+    10 │ 			break;
+    11 │ 		case "second":
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into FIRST_RATIO_VALUE.
+
+        1 │ + const·FIRST_RATIO_VALUE·=·4.5;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+     7  8 │         firstValue = 25;
+     8  9 │         secondValue = 145;
+     9    │ - → → → ratioValue·=·4.5;
+       10 │ + → → → ratioValue·=·FIRST_RATIO_VALUE;
+    10 11 │         break;
+    11 12 │       case "second":
+
+
+```
+
+```
+switch-assignment.ts:12:17 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    10 │ 			break;
+    11 │ 		case "second":
+  > 12 │ 			firstValue = 23;
+       │ 			             ^^
+    13 │ 			secondValue = 125;
+    14 │ 			ratioValue = 4;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into SECOND_FIRST_VALUE.
+
+        1 │ + const·SECOND_FIRST_VALUE·=·23;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    10 11 │         break;
+    11 12 │       case "second":
+    12    │ - → → → firstValue·=·23;
+       13 │ + → → → firstValue·=·SECOND_FIRST_VALUE;
+    13 14 │         secondValue = 125;
+    14 15 │         ratioValue = 4;
+
+
+```
+
+```
+switch-assignment.ts:13:18 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    11 │ 		case "second":
+    12 │ 			firstValue = 23;
+  > 13 │ 			secondValue = 125;
+       │ 			              ^^^
+    14 │ 			ratioValue = 4;
+    15 │ 			break;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into SECOND_SECOND_VALUE.
+
+        1 │ + const·SECOND_SECOND_VALUE·=·125;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    11 12 │       case "second":
+    12 13 │         firstValue = 23;
+    13    │ - → → → secondValue·=·125;
+       14 │ + → → → secondValue·=·SECOND_SECOND_VALUE;
+    14 15 │         ratioValue = 4;
+    15 16 │         break;
+
+
+```
+
+```
+switch-assignment.ts:14:17 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    12 │ 			firstValue = 23;
+    13 │ 			secondValue = 125;
+  > 14 │ 			ratioValue = 4;
+       │ 			             ^
+    15 │ 			break;
+    16 │ 		case "arithmetic":
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into SECOND_RATIO_VALUE.
+
+        1 │ + const·SECOND_RATIO_VALUE·=·4;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    12 13 │         firstValue = 23;
+    13 14 │         secondValue = 125;
+    14    │ - → → → ratioValue·=·4;
+       15 │ + → → → ratioValue·=·SECOND_RATIO_VALUE;
+    15 16 │         break;
+    16 17 │       case "arithmetic":
+
+
+```
+
+```
+switch-assignment.ts:17:13 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    15 │ 			break;
+    16 │ 		case "arithmetic":
+  > 17 │ 			result = 31 + 32;
+       │ 			         ^^
+    18 │ 			result = 33 - 34;
+    19 │ 			result = 35 * 36;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_AUGEND.
+
+        1 │ + const·ARITHMETIC_RESULT_AUGEND·=·31;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    15 16 │         break;
+    16 17 │       case "arithmetic":
+    17    │ - → → → result·=·31·+·32;
+       18 │ + → → → result·=·ARITHMETIC_RESULT_AUGEND·+·32;
+    18 19 │         result = 33 - 34;
+    19 20 │         result = 35 * 36;
+
+
+```
+
+```
+switch-assignment.ts:17:18 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    15 │ 			break;
+    16 │ 		case "arithmetic":
+  > 17 │ 			result = 31 + 32;
+       │ 			              ^^
+    18 │ 			result = 33 - 34;
+    19 │ 			result = 35 * 36;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_ADDEND_32.
+
+        1 │ + const·ARITHMETIC_RESULT_ADDEND_32·=·32;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    15 16 │         break;
+    16 17 │       case "arithmetic":
+    17    │ - → → → result·=·31·+·32;
+       18 │ + → → → result·=·31·+·ARITHMETIC_RESULT_ADDEND_32;
+    18 19 │         result = 33 - 34;
+    19 20 │         result = 35 * 36;
+
+
+```
+
+```
+switch-assignment.ts:18:13 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    16 │ 		case "arithmetic":
+    17 │ 			result = 31 + 32;
+  > 18 │ 			result = 33 - 34;
+       │ 			         ^^
+    19 │ 			result = 35 * 36;
+    20 │ 			result = 37 / 38;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_MINUEND.
+
+        1 │ + const·ARITHMETIC_RESULT_MINUEND·=·33;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    16 17 │       case "arithmetic":
+    17 18 │         result = 31 + 32;
+    18    │ - → → → result·=·33·-·34;
+       19 │ + → → → result·=·ARITHMETIC_RESULT_MINUEND·-·34;
+    19 20 │         result = 35 * 36;
+    20 21 │         result = 37 / 38;
+
+
+```
+
+```
+switch-assignment.ts:18:18 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    16 │ 		case "arithmetic":
+    17 │ 			result = 31 + 32;
+  > 18 │ 			result = 33 - 34;
+       │ 			              ^^
+    19 │ 			result = 35 * 36;
+    20 │ 			result = 37 / 38;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_SUBTRAHEND_34.
+
+        1 │ + const·ARITHMETIC_RESULT_SUBTRAHEND_34·=·34;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    16 17 │       case "arithmetic":
+    17 18 │         result = 31 + 32;
+    18    │ - → → → result·=·33·-·34;
+       19 │ + → → → result·=·33·-·ARITHMETIC_RESULT_SUBTRAHEND_34;
+    19 20 │         result = 35 * 36;
+    20 21 │         result = 37 / 38;
+
+
+```
+
+```
+switch-assignment.ts:19:13 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    17 │ 			result = 31 + 32;
+    18 │ 			result = 33 - 34;
+  > 19 │ 			result = 35 * 36;
+       │ 			         ^^
+    20 │ 			result = 37 / 38;
+    21 │ 			result = 39 ** 40;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_MULTIPLICAND.
+
+        1 │ + const·ARITHMETIC_RESULT_MULTIPLICAND·=·35;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    17 18 │         result = 31 + 32;
+    18 19 │         result = 33 - 34;
+    19    │ - → → → result·=·35·*·36;
+       20 │ + → → → result·=·ARITHMETIC_RESULT_MULTIPLICAND·*·36;
+    20 21 │         result = 37 / 38;
+    21 22 │         result = 39 ** 40;
+
+
+```
+
+```
+switch-assignment.ts:19:18 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    17 │ 			result = 31 + 32;
+    18 │ 			result = 33 - 34;
+  > 19 │ 			result = 35 * 36;
+       │ 			              ^^
+    20 │ 			result = 37 / 38;
+    21 │ 			result = 39 ** 40;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_MULTIPLIER_36.
+
+        1 │ + const·ARITHMETIC_RESULT_MULTIPLIER_36·=·36;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    17 18 │         result = 31 + 32;
+    18 19 │         result = 33 - 34;
+    19    │ - → → → result·=·35·*·36;
+       20 │ + → → → result·=·35·*·ARITHMETIC_RESULT_MULTIPLIER_36;
+    20 21 │         result = 37 / 38;
+    21 22 │         result = 39 ** 40;
+
+
+```
+
+```
+switch-assignment.ts:20:13 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    18 │ 			result = 33 - 34;
+    19 │ 			result = 35 * 36;
+  > 20 │ 			result = 37 / 38;
+       │ 			         ^^
+    21 │ 			result = 39 ** 40;
+    22 │ 			result = 41 % 42;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_DIVIDEND_37.
+
+        1 │ + const·ARITHMETIC_RESULT_DIVIDEND_37·=·37;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    18 19 │         result = 33 - 34;
+    19 20 │         result = 35 * 36;
+    20    │ - → → → result·=·37·/·38;
+       21 │ + → → → result·=·ARITHMETIC_RESULT_DIVIDEND_37·/·38;
+    21 22 │         result = 39 ** 40;
+    22 23 │         result = 41 % 42;
+
+
+```
+
+```
+switch-assignment.ts:20:18 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    18 │ 			result = 33 - 34;
+    19 │ 			result = 35 * 36;
+  > 20 │ 			result = 37 / 38;
+       │ 			              ^^
+    21 │ 			result = 39 ** 40;
+    22 │ 			result = 41 % 42;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_DIVISOR_38.
+
+        1 │ + const·ARITHMETIC_RESULT_DIVISOR_38·=·38;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    18 19 │         result = 33 - 34;
+    19 20 │         result = 35 * 36;
+    20    │ - → → → result·=·37·/·38;
+       21 │ + → → → result·=·37·/·ARITHMETIC_RESULT_DIVISOR_38;
+    21 22 │         result = 39 ** 40;
+    22 23 │         result = 41 % 42;
+
+
+```
+
+```
+switch-assignment.ts:21:13 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    19 │ 			result = 35 * 36;
+    20 │ 			result = 37 / 38;
+  > 21 │ 			result = 39 ** 40;
+       │ 			         ^^
+    22 │ 			result = 41 % 42;
+    23 │ 			result += 49;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_BASE_39.
+
+        1 │ + const·ARITHMETIC_RESULT_BASE_39·=·39;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    19 20 │         result = 35 * 36;
+    20 21 │         result = 37 / 38;
+    21    │ - → → → result·=·39·**·40;
+       22 │ + → → → result·=·ARITHMETIC_RESULT_BASE_39·**·40;
+    22 23 │         result = 41 % 42;
+    23 24 │         result += 49;
+
+
+```
+
+```
+switch-assignment.ts:21:19 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    19 │ 			result = 35 * 36;
+    20 │ 			result = 37 / 38;
+  > 21 │ 			result = 39 ** 40;
+       │ 			               ^^
+    22 │ 			result = 41 % 42;
+    23 │ 			result += 49;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_EXPONENT_40.
+
+        1 │ + const·ARITHMETIC_RESULT_EXPONENT_40·=·40;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    19 20 │         result = 35 * 36;
+    20 21 │         result = 37 / 38;
+    21    │ - → → → result·=·39·**·40;
+       22 │ + → → → result·=·39·**·ARITHMETIC_RESULT_EXPONENT_40;
+    22 23 │         result = 41 % 42;
+    23 24 │         result += 49;
+
+
+```
+
+```
+switch-assignment.ts:22:13 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    20 │ 			result = 37 / 38;
+    21 │ 			result = 39 ** 40;
+  > 22 │ 			result = 41 % 42;
+       │ 			         ^^
+    23 │ 			result += 49;
+    24 │ 			result -= 50;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_DIVIDEND_41.
+
+        1 │ + const·ARITHMETIC_RESULT_DIVIDEND_41·=·41;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    20 21 │         result = 37 / 38;
+    21 22 │         result = 39 ** 40;
+    22    │ - → → → result·=·41·%·42;
+       23 │ + → → → result·=·ARITHMETIC_RESULT_DIVIDEND_41·%·42;
+    23 24 │         result += 49;
+    24 25 │         result -= 50;
+
+
+```
+
+```
+switch-assignment.ts:22:18 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    20 │ 			result = 37 / 38;
+    21 │ 			result = 39 ** 40;
+  > 22 │ 			result = 41 % 42;
+       │ 			              ^^
+    23 │ 			result += 49;
+    24 │ 			result -= 50;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_MODULUS_42.
+
+        1 │ + const·ARITHMETIC_RESULT_MODULUS_42·=·42;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    20 21 │         result = 37 / 38;
+    21 22 │         result = 39 ** 40;
+    22    │ - → → → result·=·41·%·42;
+       23 │ + → → → result·=·41·%·ARITHMETIC_RESULT_MODULUS_42;
+    23 24 │         result += 49;
+    24 25 │         result -= 50;
+
+
+```
+
+```
+switch-assignment.ts:23:14 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    21 │ 			result = 39 ** 40;
+    22 │ 			result = 41 % 42;
+  > 23 │ 			result += 49;
+       │ 			          ^^
+    24 │ 			result -= 50;
+    25 │ 			result *= 51;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_ADDEND_49.
+
+        1 │ + const·ARITHMETIC_RESULT_ADDEND_49·=·49;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    21 22 │         result = 39 ** 40;
+    22 23 │         result = 41 % 42;
+    23    │ - → → → result·+=·49;
+       24 │ + → → → result·+=·ARITHMETIC_RESULT_ADDEND_49;
+    24 25 │         result -= 50;
+    25 26 │         result *= 51;
+
+
+```
+
+```
+switch-assignment.ts:24:14 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    22 │ 			result = 41 % 42;
+    23 │ 			result += 49;
+  > 24 │ 			result -= 50;
+       │ 			          ^^
+    25 │ 			result *= 51;
+    26 │ 			result /= 52;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_SUBTRAHEND_50.
+
+        1 │ + const·ARITHMETIC_RESULT_SUBTRAHEND_50·=·50;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    22 23 │         result = 41 % 42;
+    23 24 │         result += 49;
+    24    │ - → → → result·-=·50;
+       25 │ + → → → result·-=·ARITHMETIC_RESULT_SUBTRAHEND_50;
+    25 26 │         result *= 51;
+    26 27 │         result /= 52;
+
+
+```
+
+```
+switch-assignment.ts:25:14 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    23 │ 			result += 49;
+    24 │ 			result -= 50;
+  > 25 │ 			result *= 51;
+       │ 			          ^^
+    26 │ 			result /= 52;
+    27 │ 			result **= 53;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_MULTIPLIER_51.
+
+        1 │ + const·ARITHMETIC_RESULT_MULTIPLIER_51·=·51;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    23 24 │         result += 49;
+    24 25 │         result -= 50;
+    25    │ - → → → result·*=·51;
+       26 │ + → → → result·*=·ARITHMETIC_RESULT_MULTIPLIER_51;
+    26 27 │         result /= 52;
+    27 28 │         result **= 53;
+
+
+```
+
+```
+switch-assignment.ts:26:14 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    24 │ 			result -= 50;
+    25 │ 			result *= 51;
+  > 26 │ 			result /= 52;
+       │ 			          ^^
+    27 │ 			result **= 53;
+    28 │ 			result %= 54;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_DIVISOR_52.
+
+        1 │ + const·ARITHMETIC_RESULT_DIVISOR_52·=·52;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    24 25 │         result -= 50;
+    25 26 │         result *= 51;
+    26    │ - → → → result·/=·52;
+       27 │ + → → → result·/=·ARITHMETIC_RESULT_DIVISOR_52;
+    27 28 │         result **= 53;
+    28 29 │         result %= 54;
+
+
+```
+
+```
+switch-assignment.ts:27:15 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    25 │ 			result *= 51;
+    26 │ 			result /= 52;
+  > 27 │ 			result **= 53;
+       │ 			           ^^
+    28 │ 			result %= 54;
+    29 │ 			result = Math.sqrt(43);
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_EXPONENT_53.
+
+        1 │ + const·ARITHMETIC_RESULT_EXPONENT_53·=·53;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    25 26 │         result *= 51;
+    26 27 │         result /= 52;
+    27    │ - → → → result·**=·53;
+       28 │ + → → → result·**=·ARITHMETIC_RESULT_EXPONENT_53;
+    28 29 │         result %= 54;
+    29 30 │         result = Math.sqrt(43);
+
+
+```
+
+```
+switch-assignment.ts:28:14 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    26 │ 			result /= 52;
+    27 │ 			result **= 53;
+  > 28 │ 			result %= 54;
+       │ 			          ^^
+    29 │ 			result = Math.sqrt(43);
+    30 │ 			result = Math.cbrt(44);
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_MODULUS_54.
+
+        1 │ + const·ARITHMETIC_RESULT_MODULUS_54·=·54;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    26 27 │         result /= 52;
+    27 28 │         result **= 53;
+    28    │ - → → → result·%=·54;
+       29 │ + → → → result·%=·ARITHMETIC_RESULT_MODULUS_54;
+    29 30 │         result = Math.sqrt(43);
+    30 31 │         result = Math.cbrt(44);
+
+
+```
+
+```
+switch-assignment.ts:29:23 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    27 │ 			result **= 53;
+    28 │ 			result %= 54;
+  > 29 │ 			result = Math.sqrt(43);
+       │ 			                   ^^
+    30 │ 			result = Math.cbrt(44);
+    31 │ 			result = log(45, 46);
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_RADICAND_43.
+
+        1 │ + const·ARITHMETIC_RESULT_RADICAND_43·=·43;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    27 28 │         result **= 53;
+    28 29 │         result %= 54;
+    29    │ - → → → result·=·Math.sqrt(43);
+       30 │ + → → → result·=·Math.sqrt(ARITHMETIC_RESULT_RADICAND_43);
+    30 31 │         result = Math.cbrt(44);
+    31 32 │         result = log(45, 46);
+
+
+```
+
+```
+switch-assignment.ts:30:23 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    28 │ 			result %= 54;
+    29 │ 			result = Math.sqrt(43);
+  > 30 │ 			result = Math.cbrt(44);
+       │ 			                   ^^
+    31 │ 			result = log(45, 46);
+    32 │ 			result = root(47, 48);
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_RADICAND_44.
+
+        1 │ + const·ARITHMETIC_RESULT_RADICAND_44·=·44;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    28 29 │         result %= 54;
+    29 30 │         result = Math.sqrt(43);
+    30    │ - → → → result·=·Math.cbrt(44);
+       31 │ + → → → result·=·Math.cbrt(ARITHMETIC_RESULT_RADICAND_44);
+    31 32 │         result = log(45, 46);
+    32 33 │         result = root(47, 48);
+
+
+```
+
+```
+switch-assignment.ts:31:17 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    29 │ 			result = Math.sqrt(43);
+    30 │ 			result = Math.cbrt(44);
+  > 31 │ 			result = log(45, 46);
+       │ 			             ^^
+    32 │ 			result = root(47, 48);
+    33 │ 			break;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_BASE_45.
+
+        1 │ + const·ARITHMETIC_RESULT_BASE_45·=·45;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    29 30 │         result = Math.sqrt(43);
+    30 31 │         result = Math.cbrt(44);
+    31    │ - → → → result·=·log(45,·46);
+       32 │ + → → → result·=·log(ARITHMETIC_RESULT_BASE_45,·46);
+    32 33 │         result = root(47, 48);
+    33 34 │         break;
+
+
+```
+
+```
+switch-assignment.ts:31:21 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    29 │ 			result = Math.sqrt(43);
+    30 │ 			result = Math.cbrt(44);
+  > 31 │ 			result = log(45, 46);
+       │ 			                 ^^
+    32 │ 			result = root(47, 48);
+    33 │ 			break;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_ARGUMENT.
+
+        1 │ + const·ARITHMETIC_RESULT_ARGUMENT·=·46;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    29 30 │         result = Math.sqrt(43);
+    30 31 │         result = Math.cbrt(44);
+    31    │ - → → → result·=·log(45,·46);
+       32 │ + → → → result·=·log(45,·ARITHMETIC_RESULT_ARGUMENT);
+    32 33 │         result = root(47, 48);
+    33 34 │         break;
+
+
+```
+
+```
+switch-assignment.ts:32:18 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    30 │ 			result = Math.cbrt(44);
+    31 │ 			result = log(45, 46);
+  > 32 │ 			result = root(47, 48);
+       │ 			              ^^
+    33 │ 			break;
+    34 │ 		case "indexing":
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_RADICAND_47.
+
+        1 │ + const·ARITHMETIC_RESULT_RADICAND_47·=·47;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    30 31 │         result = Math.cbrt(44);
+    31 32 │         result = log(45, 46);
+    32    │ - → → → result·=·root(47,·48);
+       33 │ + → → → result·=·root(ARITHMETIC_RESULT_RADICAND_47,·48);
+    33 34 │         break;
+    34 35 │       case "indexing":
+
+
+```
+
+```
+switch-assignment.ts:32:22 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    30 │ 			result = Math.cbrt(44);
+    31 │ 			result = log(45, 46);
+  > 32 │ 			result = root(47, 48);
+       │ 			                  ^^
+    33 │ 			break;
+    34 │ 		case "indexing":
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into ARITHMETIC_RESULT_INDEX.
+
+        1 │ + const·ARITHMETIC_RESULT_INDEX·=·48;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    30 31 │         result = Math.cbrt(44);
+    31 32 │         result = log(45, 46);
+    32    │ - → → → result·=·root(47,·48);
+       33 │ + → → → result·=·root(47,·ARITHMETIC_RESULT_INDEX);
+    33 34 │         break;
+    34 35 │       case "indexing":
+
+
+```
+
+```
+switch-assignment.ts:35:23 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    33 │ 			break;
+    34 │ 		case "indexing":
+  > 35 │ 			result = values.at(5);
+       │ 			                   ^
+    36 │ 			result = values.get(6);
+    37 │ 			result = values[7 + 8];
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into INDEXING_RESULT_INDEX_5.
+
+        1 │ + const·INDEXING_RESULT_INDEX_5·=·5;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    33 34 │         break;
+    34 35 │       case "indexing":
+    35    │ - → → → result·=·values.at(5);
+       36 │ + → → → result·=·values.at(INDEXING_RESULT_INDEX_5);
+    36 37 │         result = values.get(6);
+    37 38 │         result = values[7 + 8];
+
+
+```
+
+```
+switch-assignment.ts:36:24 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    34 │ 		case "indexing":
+    35 │ 			result = values.at(5);
+  > 36 │ 			result = values.get(6);
+       │ 			                    ^
+    37 │ 			result = values[7 + 8];
+    38 │ 			break;
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into INDEXING_RESULT_INDEX_6.
+
+        1 │ + const·INDEXING_RESULT_INDEX_6·=·6;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    34 35 │       case "indexing":
+    35 36 │         result = values.at(5);
+    36    │ - → → → result·=·values.get(6);
+       37 │ + → → → result·=·values.get(INDEXING_RESULT_INDEX_6);
+    37 38 │         result = values[7 + 8];
+    38 39 │         break;
+
+
+```
+
+```
+switch-assignment.ts:37:20 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    35 │ 			result = values.at(5);
+    36 │ 			result = values.get(6);
+  > 37 │ 			result = values[7 + 8];
+       │ 			                ^
+    38 │ 			break;
+    39 │ 	}
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into INDEXING_RESULT_INDEX_AUGEND.
+
+        1 │ + const·INDEXING_RESULT_INDEX_AUGEND·=·7;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    35 36 │         result = values.at(5);
+    36 37 │         result = values.get(6);
+    37    │ - → → → result·=·values[7·+·8];
+       38 │ + → → → result·=·values[INDEXING_RESULT_INDEX_AUGEND·+·8];
+    38 39 │         break;
+    39 40 │     }
+
+
+```
+
+```
+switch-assignment.ts:37:24 lint/style/noMagicNumbers  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Magic number detected. Extract it to a constant with a meaningful name.
+
+    35 │ 			result = values.at(5);
+    36 │ 			result = values.get(6);
+  > 37 │ 			result = values[7 + 8];
+       │ 			                    ^
+    38 │ 			break;
+    39 │ 	}
+
+  i Code is more readable and refactoring easier when special numbers are declared as constants as it makes their meaning explicit.
+
+  i Unsafe fix: Extract the magic number into INDEXING_RESULT_INDEX_ADDEND.
+
+        1 │ + const·INDEXING_RESULT_INDEX_ADDEND·=·8;
+     1  2 │   type Mode = "first" | "second" | "arithmetic" | "indexing";
+     2  3 │
+    ····· │
+    35 36 │         result = values.at(5);
+    36 37 │         result = values.get(6);
+    37    │ - → → → result·=·values[7·+·8];
+       38 │ + → → → result·=·values[7·+·INDEXING_RESULT_INDEX_ADDEND];
+    38 39 │         break;
+    39 40 │     }
+
+
+```

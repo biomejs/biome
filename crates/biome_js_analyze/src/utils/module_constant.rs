@@ -2,14 +2,17 @@ use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsBinding, AnyJsBindingPattern, AnyJsExpression, AnyJsFunction, AnyJsMemberExpression,
-    AnyJsRoot, JsAssignmentExpression, JsCallExpression, JsComputedMemberAssignment,
+    AnyJsRoot, JsAssignmentExpression, JsAssignmentOperator, JsBinaryExpression, JsBinaryOperator,
+    JsCallExpression, JsCaseClause, JsComputedMemberAssignment, JsComputedMemberExpression,
     JsExpressionStatement, JsGetterClassMember, JsGetterObjectMember, JsLanguage,
     JsMethodClassMember, JsMethodObjectMember, JsModuleItemList, JsPropertyClassMember,
     JsPropertyObjectMember, JsSetterClassMember, JsSetterObjectMember, JsStatementList,
     JsStaticMemberAssignment, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, T,
 };
 use biome_rowan::TriviaPieceKind;
-use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Direction, SyntaxTriviaPiece};
+use biome_rowan::{
+    AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, Direction, SyntaxTriviaPiece,
+};
 use rustc_hash::FxHashSet;
 use std::{cell::RefCell, sync::Arc};
 
@@ -32,6 +35,8 @@ struct CachedModuleConstantFacts {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum ModuleConstantNameKind {
     Binding,
+    Assignment,
+    SwitchCase,
     Function,
     Property,
     Member,
@@ -46,8 +51,8 @@ pub(crate) struct ModuleConstantNameCandidate {
 
 /// Returns readable naming contexts found while walking from `node` toward its root.
 ///
-/// Candidates are emitted in ancestor order. Within one ancestor, bindings, functions, methods,
-/// properties, members, and call callees are emitted in that order.
+/// Candidates are emitted in ancestor order. Within one ancestor, bindings, assignments, switch
+/// cases, functions, methods, properties, members, and call callees are emitted in that order.
 pub(crate) fn module_constant_name_candidates(
     node: &JsSyntaxNode,
 ) -> Vec<ModuleConstantNameCandidate> {
@@ -63,6 +68,39 @@ pub(crate) fn module_constant_name_candidates(
         {
             candidates.push(ModuleConstantNameCandidate {
                 kind: ModuleConstantNameKind::Binding,
+                name,
+            });
+        }
+
+        if let Some(assignment) = JsAssignmentExpression::cast(ancestor.clone())
+            && let Some(name) = assignment
+                .left()
+                .ok()
+                .and_then(|left| left.as_any_js_assignment().cloned())
+                .and_then(|assignment| assignment.as_js_identifier_assignment().cloned())
+                .and_then(|assignment| assignment.name_token().ok())
+                .map(|token| token.text_trimmed().to_string())
+        {
+            candidates.push(ModuleConstantNameCandidate {
+                kind: ModuleConstantNameKind::Assignment,
+                name,
+            });
+        }
+
+        if let Some(case) = JsCaseClause::cast(ancestor.clone())
+            && let Some(name) = case.test().ok().and_then(|test| {
+                test.get_callee_member_name()
+                    .map(|name| name.token_text_trimmed().text().to_string())
+                    .or_else(|| {
+                        test.as_any_js_literal_expression()?
+                            .as_js_string_literal_expression()
+                            .and_then(|literal| literal.inner_string_text().ok())
+                            .map(|text| text.to_string())
+                    })
+            })
+        {
+            candidates.push(ModuleConstantNameCandidate {
+                kind: ModuleConstantNameKind::SwitchCase,
                 name,
             });
         }
@@ -252,7 +290,9 @@ pub(crate) fn normalize_module_constant_name_component(
 }
 
 /// Builds a stable uppercase name from the syntax surrounding a runtime number.
-pub(crate) fn module_constant_numeric_name(target: &JsSyntaxNode, literal_text: &str) -> String {
+pub(crate) fn module_constant_numeric_context(target: &JsSyntaxNode) -> Vec<String> {
+    let mut assignment = None;
+    let mut switch_case = None;
     let mut variable = None;
     let mut property = None;
     let mut function = None;
@@ -260,6 +300,12 @@ pub(crate) fn module_constant_numeric_name(target: &JsSyntaxNode, literal_text: 
 
     for candidate in module_constant_name_candidates(target) {
         match candidate.kind {
+            ModuleConstantNameKind::Assignment if assignment.is_none() => {
+                assignment = Some(candidate.name)
+            }
+            ModuleConstantNameKind::SwitchCase if switch_case.is_none() => {
+                switch_case = Some(candidate.name)
+            }
             ModuleConstantNameKind::Binding if variable.is_none() => {
                 variable = Some(candidate.name)
             }
@@ -273,6 +319,8 @@ pub(crate) fn module_constant_numeric_name(target: &JsSyntaxNode, literal_text: 
             }
             ModuleConstantNameKind::CallCallee if call.is_none() => call = Some(candidate.name),
             ModuleConstantNameKind::Binding
+            | ModuleConstantNameKind::Assignment
+            | ModuleConstantNameKind::SwitchCase
             | ModuleConstantNameKind::Function
             | ModuleConstantNameKind::Property
             | ModuleConstantNameKind::Member
@@ -281,8 +329,14 @@ pub(crate) fn module_constant_numeric_name(target: &JsSyntaxNode, literal_text: 
         }
     }
 
+    let contexts = if let Some(assignment) = assignment {
+        [switch_case, Some(assignment), None, None]
+    } else {
+        [variable, property, function, call]
+    };
+
     let mut parts = Vec::new();
-    for context in [variable, property, function, call].into_iter().flatten() {
+    for context in contexts.into_iter().flatten() {
         if let Some(normalized) =
             normalize_module_constant_name_component(&context, Some("NUMBER_"))
             && !parts.contains(&normalized)
@@ -291,12 +345,168 @@ pub(crate) fn module_constant_numeric_name(target: &JsSyntaxNode, literal_text: 
         }
     }
 
-    let value = normalize_module_constant_name_component(literal_text, None)
-        .unwrap_or_else(|| "NUMBER".to_string());
+    if module_constant_numeric_is_index(target) && !parts.iter().any(|part| part == "INDEX") {
+        parts.push("INDEX".to_string());
+    }
+
+    if let Some(role) = module_constant_numeric_operation_role(target)
+        && !parts.iter().any(|part| part == role)
+    {
+        parts.push(role.to_string());
+    }
+
+    parts
+}
+
+fn module_constant_numeric_is_index(target: &JsSyntaxNode) -> bool {
+    let target_range = target.text_trimmed_range();
+
+    target.ancestors().skip(1).any(|ancestor| {
+        if let Some(member) = JsComputedMemberExpression::cast(ancestor.clone()) {
+            return member.member().is_ok_and(|member| {
+                member
+                    .syntax()
+                    .text_trimmed_range()
+                    .contains_range(target_range)
+            });
+        }
+        if let Some(member) = JsComputedMemberAssignment::cast(ancestor.clone()) {
+            return member.member().is_ok_and(|member| {
+                member
+                    .syntax()
+                    .text_trimmed_range()
+                    .contains_range(target_range)
+            });
+        }
+
+        let Some(call) = JsCallExpression::cast(ancestor) else {
+            return false;
+        };
+        let Some(method) = call
+            .callee()
+            .ok()
+            .and_then(|callee| callee.get_callee_member_name())
+        else {
+            return false;
+        };
+        if !matches!(method.text_trimmed(), "at" | "get") {
+            return false;
+        }
+
+        call.arguments().is_ok_and(|arguments| {
+            arguments.args().first().is_some_and(|argument| {
+                argument
+                    .ok()
+                    .and_then(|argument| argument.as_any_js_expression().cloned())
+                    .is_some_and(|argument| {
+                        argument
+                            .syntax()
+                            .text_trimmed_range()
+                            .contains_range(target_range)
+                    })
+            })
+        })
+    })
+}
+
+fn module_constant_numeric_operation_role(target: &JsSyntaxNode) -> Option<&'static str> {
+    let target_range = target.text_trimmed_range();
+
+    for ancestor in target.ancestors().skip(1) {
+        if let Some(binary) = JsBinaryExpression::cast(ancestor.clone()) {
+            let operator = binary.operator().ok()?;
+            let left = binary.left().ok()?.syntax().text_trimmed_range();
+            let right = binary.right().ok()?.syntax().text_trimmed_range();
+            let role = match operator {
+                JsBinaryOperator::Plus if left.contains_range(target_range) => Some("AUGEND"),
+                JsBinaryOperator::Plus if right.contains_range(target_range) => Some("ADDEND"),
+                JsBinaryOperator::Minus if left.contains_range(target_range) => Some("MINUEND"),
+                JsBinaryOperator::Minus if right.contains_range(target_range) => Some("SUBTRAHEND"),
+                JsBinaryOperator::Times if left.contains_range(target_range) => {
+                    Some("MULTIPLICAND")
+                }
+                JsBinaryOperator::Times if right.contains_range(target_range) => Some("MULTIPLIER"),
+                JsBinaryOperator::Divide if left.contains_range(target_range) => Some("DIVIDEND"),
+                JsBinaryOperator::Divide if right.contains_range(target_range) => Some("DIVISOR"),
+                JsBinaryOperator::Exponent if left.contains_range(target_range) => Some("BASE"),
+                JsBinaryOperator::Exponent if right.contains_range(target_range) => {
+                    Some("EXPONENT")
+                }
+                JsBinaryOperator::Remainder if left.contains_range(target_range) => {
+                    Some("DIVIDEND")
+                }
+                JsBinaryOperator::Remainder if right.contains_range(target_range) => {
+                    Some("MODULUS")
+                }
+                _ => None,
+            };
+            if role.is_some() {
+                return role;
+            }
+        }
+
+        if let Some(assignment) = JsAssignmentExpression::cast(ancestor.clone()) {
+            let right = assignment.right().ok()?.syntax().text_trimmed_range();
+            if !right.contains_range(target_range) {
+                continue;
+            }
+
+            let role = match assignment.operator().ok()? {
+                JsAssignmentOperator::AddAssign => Some("ADDEND"),
+                JsAssignmentOperator::SubtractAssign => Some("SUBTRAHEND"),
+                JsAssignmentOperator::TimesAssign => Some("MULTIPLIER"),
+                JsAssignmentOperator::SlashAssign => Some("DIVISOR"),
+                JsAssignmentOperator::ExponentAssign => Some("EXPONENT"),
+                JsAssignmentOperator::RemainderAssign => Some("MODULUS"),
+                _ => None,
+            };
+            if role.is_some() {
+                return role;
+            }
+        }
+
+        if let Some(call) = JsCallExpression::cast(ancestor) {
+            let callee_name = call
+                .callee()
+                .ok()?
+                .get_callee_member_name()?
+                .text_trimmed()
+                .to_string();
+            let arguments = call.arguments().ok()?.args();
+            let argument_index = arguments.iter().enumerate().find_map(|(index, argument)| {
+                let argument = argument.ok()?;
+                let expression = argument.as_any_js_expression()?;
+                expression
+                    .syntax()
+                    .text_trimmed_range()
+                    .contains_range(target_range)
+                    .then_some(index)
+            });
+
+            let role = match (callee_name.as_str(), arguments.len(), argument_index) {
+                ("at" | "get", _, Some(0)) => Some("INDEX"),
+                ("sqrt" | "cbrt", 1, Some(0)) => Some("RADICAND"),
+                ("log", 2, Some(0)) => Some("BASE"),
+                ("log", 2, Some(1)) => Some("ARGUMENT"),
+                ("root", 2, Some(0)) => Some("RADICAND"),
+                ("root", 2, Some(1)) => Some("INDEX"),
+                _ => None,
+            };
+            if role.is_some() {
+                return role;
+            }
+        }
+    }
+
+    None
+}
+
+/// Builds the semantic portion of a stable uppercase name for a runtime number.
+pub(crate) fn module_constant_numeric_name(target: &JsSyntaxNode) -> String {
+    let parts = module_constant_numeric_context(target);
     if parts.is_empty() {
-        format!("NUMBER_{value}")
+        "NUMBER".to_string()
     } else {
-        parts.push(value);
         parts.join("_")
     }
 }
@@ -791,7 +1001,7 @@ fn is_directive_statement(node: &JsSyntaxNode) -> bool {
         return false;
     };
 
-    statement.expression().ok().is_some_and(|expression| {
+    statement.expression().is_ok_and(|expression| {
         expression
             .as_any_js_literal_expression()
             .is_some_and(|literal| literal.as_js_string_literal_expression().is_some())
