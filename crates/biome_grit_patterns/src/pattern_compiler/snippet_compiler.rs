@@ -65,7 +65,19 @@ pub(crate) fn parse_snippet_content(
     }
 
     let snippet_trees = context.compilation.lang.parse_snippet_contexts(source);
-    let snippet_nodes = nodes_from_trees(&snippet_trees);
+    let mut snippet_nodes = nodes_from_trees(&snippet_trees);
+    // Almost any snippet parses as JSX text, so keeping that parse would make
+    // `process.env = $value` also match `<p>process.env = value</p>`. Only
+    // snippets that don't parse as a single node without a surrounding
+    // context, such as `Hello $name`, keep it.
+    let parses_as_single_node = snippet_trees
+        .iter()
+        .filter(|tree| tree.prefix.is_empty())
+        .filter_map(node_from_tree)
+        .any(|node| !node.is_list());
+    if parses_as_single_node {
+        snippet_nodes.retain(|node| node.kind().as_js_kind() != Some(JsSyntaxKind::JSX_TEXT));
+    }
     if snippet_nodes.is_empty() {
         // not checking if is_rhs. So could potentially
         // be harder to find bugs where we expect the pattern
