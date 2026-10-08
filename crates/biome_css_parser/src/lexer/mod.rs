@@ -438,6 +438,17 @@ impl<'src> CssLexer<'src> {
                 {
                     position += 1;
                 }
+                // A decimal point belongs to the number, such as in
+                // `1.5${unit}`, while a selector dot like in `${Item}.active`
+                // is a boundary.
+                Some(b'.')
+                    if source
+                        .as_bytes()
+                        .get(position + 1)
+                        .is_some_and(u8::is_ascii_digit) =>
+                {
+                    position += 1;
+                }
                 Some(byte) if !byte.is_ascii() => {
                     position += source[position..].chars().next().map_or(1, char::len_utf8);
                 }
@@ -564,7 +575,9 @@ impl<'src> CssLexer<'src> {
         match dispatched {
             // Only these bytes can start a word with a metavariable, such as
             // `${width}px` or `border-${side}`.
-            DOL | IDT | UNI | BSL | DIG | ZER | MIN | HAS if self.is_at_metavariable_word() => {
+            DOL | IDT | UNI | BSL | DIG | ZER | MIN | PRD | HAS
+                if self.is_at_metavariable_word() =>
+            {
                 self.consume_metavariable_word()
             }
             WHS => {
