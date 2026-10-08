@@ -384,6 +384,23 @@ impl<'src> CssLexer<'src> {
         }
     }
 
+    /// Returns `true` if the word that starts at the current position contains
+    /// a Grit metavariable. See [Self::metavariable_word_end].
+    #[inline]
+    fn is_at_metavariable_word(&self) -> bool {
+        !self.metavariables.is_empty() && self.metavariable_word_end().is_some()
+    }
+
+    /// Consumes the word that starts at the current position as a single Grit
+    /// metavariable. See [Self::metavariable_word_end].
+    fn consume_metavariable_word(&mut self) -> CssSyntaxKind {
+        if let Some(end) = self.metavariable_word_end() {
+            self.advance(end - self.position());
+        }
+
+        GRIT_METAVARIABLE
+    }
+
     /// Returns the end of the word that starts at the current position, if the
     /// word contains a Grit metavariable.
     ///
@@ -396,18 +413,7 @@ impl<'src> CssLexer<'src> {
     /// ```
     ///
     /// Elsewhere, such as in Grit snippets, a metavariable is a token on its own.
-    #[inline]
     fn metavariable_word_end(&self) -> Option<usize> {
-        if self.metavariables.is_empty() {
-            return None;
-        }
-
-        self.scan_metavariable_word()
-    }
-
-    /// Scans the word that starts at the current position for a Grit
-    /// metavariable. See [Self::metavariable_word_end].
-    fn scan_metavariable_word(&self) -> Option<usize> {
         if !matches!(
             self.source_type.as_embedding_kind(),
             CssEmbeddingKind::Styled
@@ -555,12 +561,12 @@ impl<'src> CssLexer<'src> {
         // to do more aggressive optimizations on the match regarding how to map it to instructions
         let dispatched = lookup_byte(current);
 
-        if let Some(end) = self.metavariable_word_end() {
-            self.advance(end - self.position());
-            return GRIT_METAVARIABLE;
-        }
-
         match dispatched {
+            // Only these bytes can start a word with a metavariable, such as
+            // `${width}px` or `border-${side}`.
+            DOL | IDT | UNI | BSL | DIG | ZER | MIN | HAS if self.is_at_metavariable_word() => {
+                self.consume_metavariable_word()
+            }
             WHS => {
                 let kind = self.consume_newline_or_whitespaces();
                 if kind == Self::NEWLINE {
