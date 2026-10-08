@@ -2923,6 +2923,7 @@ fn format_js_with_embedded_css_with_interpolations() {
   width : ${({width})=>width}px;
   border-${side}:1px solid;
   ${truncate};
+  ${base}   ${hover};
   content: '${quote}';
   background:url(${image("logo.png")});
   ${Icon}:hover &{
@@ -2988,6 +2989,7 @@ fn format_js_with_embedded_css_with_interpolations() {
     	width: ${({ width }) => width}px;
     	border-${side}: 1px solid;
     	${truncate};
+    	${base} ${hover};
     	content: '${quote}';
     	background: url(${image("logo.png")});
     	${Icon}:hover & {
