@@ -1,0 +1,686 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// `&` used to guard a property access
+obj & obj.a;
+if (obj & obj.prop) {}
+obj & obj[key];
+(obj) & obj.a;
+obj & (obj.a);
+obj /* comment */ & obj.a;
+
+// `|` used as a fallback
+options | {};
+options | '';
+options | true;
+options | [];
+options | `template`;
+x | function () {};
+x | (() => {});
+x | class {};
+foo() | {};
+a.b | {};
+a | b | {};
+
+// `|=` used as a fallback
+input |= '';
+input |= {};
+input |= false;
+
+// The fix keeps the meaning of the surrounding expression
+obj & obj.a | x;
+x | obj & obj.a;
+x ?? obj & obj.a;
+a | {} && b;
+a | {} || b;
+b || a | {};
+b && a | {};
+x | /* before */ obj & obj.a /* after */;
+
+```
+
+# Diagnostics
+```
+invalid.js:4:5 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator & is used where the logical operator && was likely intended.
+  
+    3 │ // `&` used to guard a property access
+  > 4 │ obj & obj.a;
+      │     ^
+    5 │ if (obj & obj.prop) {}
+    6 │ obj & obj[key];
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace & with &&.
+  
+    4 │ obj·&&·obj.a;
+      │      +       
+
+```
+
+```
+invalid.js:5:9 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator & is used where the logical operator && was likely intended.
+  
+    3 │ // `&` used to guard a property access
+    4 │ obj & obj.a;
+  > 5 │ if (obj & obj.prop) {}
+      │         ^
+    6 │ obj & obj[key];
+    7 │ (obj) & obj.a;
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace & with &&.
+  
+    5 │ if·(obj·&&·obj.prop)·{}
+      │          +             
+
+```
+
+```
+invalid.js:6:5 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator & is used where the logical operator && was likely intended.
+  
+    4 │ obj & obj.a;
+    5 │ if (obj & obj.prop) {}
+  > 6 │ obj & obj[key];
+      │     ^
+    7 │ (obj) & obj.a;
+    8 │ obj & (obj.a);
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace & with &&.
+  
+    6 │ obj·&&·obj[key];
+      │      +          
+
+```
+
+```
+invalid.js:7:7 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator & is used where the logical operator && was likely intended.
+  
+    5 │ if (obj & obj.prop) {}
+    6 │ obj & obj[key];
+  > 7 │ (obj) & obj.a;
+      │       ^
+    8 │ obj & (obj.a);
+    9 │ obj /* comment */ & obj.a;
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace & with &&.
+  
+    7 │ (obj)·&&·obj.a;
+      │        +       
+
+```
+
+```
+invalid.js:8:5 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator & is used where the logical operator && was likely intended.
+  
+     6 │ obj & obj[key];
+     7 │ (obj) & obj.a;
+   > 8 │ obj & (obj.a);
+       │     ^
+     9 │ obj /* comment */ & obj.a;
+    10 │ 
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace & with &&.
+  
+    8 │ obj·&&·(obj.a);
+      │      +         
+
+```
+
+```
+invalid.js:9:19 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator & is used where the logical operator && was likely intended.
+  
+     7 │ (obj) & obj.a;
+     8 │ obj & (obj.a);
+   > 9 │ obj /* comment */ & obj.a;
+       │                   ^
+    10 │ 
+    11 │ // `|` used as a fallback
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace & with &&.
+  
+    9 │ obj·/*·comment·*/·&&·obj.a;
+      │                    +       
+
+```
+
+```
+invalid.js:12:9 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator | is used where the logical operator || was likely intended.
+  
+    11 │ // `|` used as a fallback
+  > 12 │ options | {};
+       │         ^
+    13 │ options | '';
+    14 │ options | true;
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace | with ||.
+  
+    12 │ options·||·{};
+       │          +    
+
+```
+
+```
+invalid.js:13:9 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator | is used where the logical operator || was likely intended.
+  
+    11 │ // `|` used as a fallback
+    12 │ options | {};
+  > 13 │ options | '';
+       │         ^
+    14 │ options | true;
+    15 │ options | [];
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace | with ||.
+  
+    13 │ options·||·'';
+       │          +    
+
+```
+
+```
+invalid.js:14:9 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator | is used where the logical operator || was likely intended.
+  
+    12 │ options | {};
+    13 │ options | '';
+  > 14 │ options | true;
+       │         ^
+    15 │ options | [];
+    16 │ options | `template`;
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace | with ||.
+  
+    14 │ options·||·true;
+       │          +      
+
+```
+
+```
+invalid.js:15:9 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator | is used where the logical operator || was likely intended.
+  
+    13 │ options | '';
+    14 │ options | true;
+  > 15 │ options | [];
+       │         ^
+    16 │ options | `template`;
+    17 │ x | function () {};
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace | with ||.
+  
+    15 │ options·||·[];
+       │          +    
+
+```
+
+```
+invalid.js:16:9 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator | is used where the logical operator || was likely intended.
+  
+    14 │ options | true;
+    15 │ options | [];
+  > 16 │ options | `template`;
+       │         ^
+    17 │ x | function () {};
+    18 │ x | (() => {});
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace | with ||.
+  
+    16 │ options·||·`template`;
+       │          +            
+
+```
+
+```
+invalid.js:17:3 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator | is used where the logical operator || was likely intended.
+  
+    15 │ options | [];
+    16 │ options | `template`;
+  > 17 │ x | function () {};
+       │   ^
+    18 │ x | (() => {});
+    19 │ x | class {};
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace | with ||.
+  
+    17 │ x·||·function·()·{};
+       │    +                
+
+```
+
+```
+invalid.js:18:3 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator | is used where the logical operator || was likely intended.
+  
+    16 │ options | `template`;
+    17 │ x | function () {};
+  > 18 │ x | (() => {});
+       │   ^
+    19 │ x | class {};
+    20 │ foo() | {};
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace | with ||.
+  
+    18 │ x·||·(()·=>·{});
+       │    +            
+
+```
+
+```
+invalid.js:19:3 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator | is used where the logical operator || was likely intended.
+  
+    17 │ x | function () {};
+    18 │ x | (() => {});
+  > 19 │ x | class {};
+       │   ^
+    20 │ foo() | {};
+    21 │ a.b | {};
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace | with ||.
+  
+    19 │ x·||·class·{};
+       │    +          
+
+```
+
+```
+invalid.js:20:7 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator | is used where the logical operator || was likely intended.
+  
+    18 │ x | (() => {});
+    19 │ x | class {};
+  > 20 │ foo() | {};
+       │       ^
+    21 │ a.b | {};
+    22 │ a | b | {};
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace | with ||.
+  
+    20 │ foo()·||·{};
+       │        +    
+
+```
+
+```
+invalid.js:21:5 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator | is used where the logical operator || was likely intended.
+  
+    19 │ x | class {};
+    20 │ foo() | {};
+  > 21 │ a.b | {};
+       │     ^
+    22 │ a | b | {};
+    23 │ 
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace | with ||.
+  
+    21 │ a.b·||·{};
+       │      +    
+
+```
+
+```
+invalid.js:22:7 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator | is used where the logical operator || was likely intended.
+  
+    20 │ foo() | {};
+    21 │ a.b | {};
+  > 22 │ a | b | {};
+       │       ^
+    23 │ 
+    24 │ // `|=` used as a fallback
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace | with ||.
+  
+    22 │ a·|·b·||·{};
+       │        +    
+
+```
+
+```
+invalid.js:25:7 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator |= is used where the logical operator ||= was likely intended.
+  
+    24 │ // `|=` used as a fallback
+  > 25 │ input |= '';
+       │       ^^
+    26 │ input |= {};
+    27 │ input |= false;
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace |= with ||=.
+  
+    25 │ input·||=·'';
+       │        +     
+
+```
+
+```
+invalid.js:26:7 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator |= is used where the logical operator ||= was likely intended.
+  
+    24 │ // `|=` used as a fallback
+    25 │ input |= '';
+  > 26 │ input |= {};
+       │       ^^
+    27 │ input |= false;
+    28 │ 
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace |= with ||=.
+  
+    26 │ input·||=·{};
+       │        +     
+
+```
+
+```
+invalid.js:27:7 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator |= is used where the logical operator ||= was likely intended.
+  
+    25 │ input |= '';
+    26 │ input |= {};
+  > 27 │ input |= false;
+       │       ^^
+    28 │ 
+    29 │ // The fix keeps the meaning of the surrounding expression
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace |= with ||=.
+  
+    27 │ input·||=·false;
+       │        +        
+
+```
+
+```
+invalid.js:30:5 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator & is used where the logical operator && was likely intended.
+  
+    29 │ // The fix keeps the meaning of the surrounding expression
+  > 30 │ obj & obj.a | x;
+       │     ^
+    31 │ x | obj & obj.a;
+    32 │ x ?? obj & obj.a;
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace & with &&.
+  
+    30 │ (obj·&&·obj.a)·|·x;
+       │ +     +      +     
+
+```
+
+```
+invalid.js:31:9 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator & is used where the logical operator && was likely intended.
+  
+    29 │ // The fix keeps the meaning of the surrounding expression
+    30 │ obj & obj.a | x;
+  > 31 │ x | obj & obj.a;
+       │         ^
+    32 │ x ?? obj & obj.a;
+    33 │ a | {} && b;
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace & with &&.
+  
+    31 │ x·|·(obj·&&·obj.a);
+       │     +     +      + 
+
+```
+
+```
+invalid.js:32:10 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator & is used where the logical operator && was likely intended.
+  
+    30 │ obj & obj.a | x;
+    31 │ x | obj & obj.a;
+  > 32 │ x ?? obj & obj.a;
+       │          ^
+    33 │ a | {} && b;
+    34 │ a | {} || b;
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace & with &&.
+  
+    32 │ x·??·(obj·&&·obj.a);
+       │      +     +      + 
+
+```
+
+```
+invalid.js:33:3 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator | is used where the logical operator || was likely intended.
+  
+    31 │ x | obj & obj.a;
+    32 │ x ?? obj & obj.a;
+  > 33 │ a | {} && b;
+       │   ^
+    34 │ a | {} || b;
+    35 │ b || a | {};
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace | with ||.
+  
+    33 │ (a·||·{})·&&·b;
+       │ +   +   +      
+
+```
+
+```
+invalid.js:34:3 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator | is used where the logical operator || was likely intended.
+  
+    32 │ x ?? obj & obj.a;
+    33 │ a | {} && b;
+  > 34 │ a | {} || b;
+       │   ^
+    35 │ b || a | {};
+    36 │ b && a | {};
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace | with ||.
+  
+    34 │ a·||·{}·||·b;
+       │    +         
+
+```
+
+```
+invalid.js:35:8 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator | is used where the logical operator || was likely intended.
+  
+    33 │ a | {} && b;
+    34 │ a | {} || b;
+  > 35 │ b || a | {};
+       │        ^
+    36 │ b && a | {};
+    37 │ x | /* before */ obj & obj.a /* after */;
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace | with ||.
+  
+    35 │ b·||·a·||·{};
+       │         +    
+
+```
+
+```
+invalid.js:36:8 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator | is used where the logical operator || was likely intended.
+  
+    34 │ a | {} || b;
+    35 │ b || a | {};
+  > 36 │ b && a | {};
+       │        ^
+    37 │ x | /* before */ obj & obj.a /* after */;
+    38 │ 
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace | with ||.
+  
+    36 │ b·&&·(a·||·{});
+       │      +   +   + 
+
+```
+
+```
+invalid.js:37:22 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator & is used where the logical operator && was likely intended.
+  
+    35 │ b || a | {};
+    36 │ b && a | {};
+  > 37 │ x | /* before */ obj & obj.a /* after */;
+       │                      ^
+    38 │ 
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace & with &&.
+  
+    37 │ x·|·/*·before·*/·(obj·&&·obj.a)·/*·after·*/;
+       │                  +     +      +             
+
+```

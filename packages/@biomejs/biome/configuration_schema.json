@@ -3286,6 +3286,16 @@
 			]
 		},
 		"NoAccessKeyOptions": { "type": "object", "additionalProperties": false },
+		"NoAccidentalBitwiseOperatorsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoAccidentalBitwiseOperatorsOptions" }
+			]
+		},
+		"NoAccidentalBitwiseOperatorsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoAccumulatingSpreadConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7344,6 +7354,13 @@
 			"description": "Configures all rules in one lint group.",
 			"type": "object",
 			"properties": {
+				"noAccidentalBitwiseOperators": {
+					"description": "Disallow bitwise operators where a logical operator was likely intended.\nSee https://biomejs.dev/linter/rules/no-accidental-bitwise-operators",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoAccidentalBitwiseOperatorsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noAstroConflictingSetDirectives": {
 					"description": "Disallow conflicting content sources on Astro elements.\nSee https://biomejs.dev/linter/rules/no-astro-conflicting-set-directives",
 					"anyOf": [
@@ -8701,6 +8718,19 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoAccessKeyOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoAccidentalBitwiseOperatorsOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoAccidentalBitwiseOperatorsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

@@ -2870,6 +2870,11 @@ export interface Correctness {
  */
 export interface Nursery {
 	/**
+	 * Disallow bitwise operators where a logical operator was likely intended.
+	 * See https://biomejs.dev/linter/rules/no-accidental-bitwise-operators
+	 */
+	noAccidentalBitwiseOperators?: NoAccidentalBitwiseOperatorsConfiguration;
+	/**
 	 * Disallow conflicting content sources on Astro elements.
 	 * See https://biomejs.dev/linter/rules/no-astro-conflicting-set-directives
 	 */
@@ -5438,6 +5443,9 @@ export type UseVueValidVTextConfiguration =
 export type UseYieldConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseYieldOptions;
+export type NoAccidentalBitwiseOperatorsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAccidentalBitwiseOperatorsOptions;
 export type NoAstroConflictingSetDirectivesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAstroConflictingSetDirectivesOptions;
@@ -7761,6 +7769,14 @@ export interface RuleWithUseVueValidVTextOptions {
 export interface RuleWithUseYieldOptions {
 	level: RulePlainConfiguration;
 	options?: UseYieldOptions;
+}
+export interface RuleWithNoAccidentalBitwiseOperatorsOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoAccidentalBitwiseOperatorsOptions;
 }
 export interface RuleWithNoAstroConflictingSetDirectivesOptions {
 	level: RulePlainConfiguration;
@@ -10173,6 +10189,7 @@ export type UseVueValidVOnceOptions = {};
 export type UseVueValidVPreOptions = {};
 export type UseVueValidVTextOptions = {};
 export type UseYieldOptions = {};
+export type NoAccidentalBitwiseOperatorsOptions = {};
 export type NoAstroConflictingSetDirectivesOptions = {};
 export type NoAstroSetHtmlDirectiveOptions = {};
 export interface NoBaseToStringOptions {
@@ -11821,6 +11838,7 @@ export type Category =
 	| "lint/correctness/useVueValidVPre"
 	| "lint/correctness/useVueValidVText"
 	| "lint/correctness/useYield"
+	| "lint/nursery/noAccidentalBitwiseOperators"
 	| "lint/nursery/noAstroConflictingSetDirectives"
 	| "lint/nursery/noAstroSetHtmlDirective"
 	| "lint/nursery/noBaseToString"
