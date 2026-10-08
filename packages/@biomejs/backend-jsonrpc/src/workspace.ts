@@ -2970,6 +2970,11 @@ export interface Nursery {
 	 */
 	noObsoleteTags?: NoObsoleteTagsConfiguration;
 	/**
+	 * Disallow numbers written with an extra leading zero.
+	 * See https://biomejs.dev/linter/rules/no-octal
+	 */
+	noOctal?: NoOctalConfiguration;
+	/**
 	 * Disallow the use of process.exit().
 	 * See https://biomejs.dev/linter/rules/no-process-exit
 	 */
@@ -5493,6 +5498,9 @@ export type NoNonScalableViewportConfiguration =
 export type NoObsoleteTagsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoObsoleteTagsOptions;
+export type NoOctalConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoOctalOptions;
 export type NoProcessExitConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoProcessExitOptions;
@@ -7854,6 +7862,10 @@ export interface RuleWithNoObsoleteTagsOptions {
 	level: RulePlainConfiguration;
 	options?: NoObsoleteTagsOptions;
 }
+export interface RuleWithNoOctalOptions {
+	level: RulePlainConfiguration;
+	options?: NoOctalOptions;
+}
 export interface RuleWithNoProcessExitOptions {
 	level: RulePlainConfiguration;
 	options?: NoProcessExitOptions;
@@ -10206,6 +10218,7 @@ export type NoNegationInEqualityCheckOptions = {};
 export type NoNestedSwitchOptions = {};
 export type NoNonScalableViewportOptions = {};
 export type NoObsoleteTagsOptions = {};
+export type NoOctalOptions = {};
 export type NoProcessExitOptions = {};
 export type NoReactObjectTypeAsDefaultPropOptions = {};
 export type NoRestrictedDependenciesOptions = {};
@@ -11831,7 +11844,21 @@ export type Category =
 	| "lint/nursery/noNestedSwitch"
 	| "lint/nursery/noNonScalableViewport"
 	| "lint/nursery/noObsoleteTags"
+	| "lint/nursery/noOctal"
 	| "lint/nursery/noProcessExit"
+	| "lint/nursery/noPlaywrightElementHandle"
+	| "lint/nursery/noPlaywrightEval"
+	| "lint/nursery/noPlaywrightForceOption"
+	| "lint/nursery/noPlaywrightMissingAwait"
+	| "lint/nursery/noPlaywrightNetworkidle"
+	| "lint/nursery/noPlaywrightPagePause"
+	| "lint/nursery/noPlaywrightUselessAwait"
+	| "lint/nursery/noPlaywrightWaitForNavigation"
+	| "lint/nursery/noPlaywrightWaitForSelector"
+	| "lint/nursery/noPlaywrightWaitForTimeout"
+	| "lint/nursery/noReactNativeDeepImports"
+	| "lint/nursery/noReactNativeLiteralColors"
+	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noReactObjectTypeAsDefaultProp"
 	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noReturnInFinally"
