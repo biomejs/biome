@@ -5,8 +5,8 @@ expression: settings.json
 # Input
 ```json
 {
-  "editor.code_action_on_format": {
-    "quickfix.biome": true
+  "editor.codeActionsOnSave": {
+    "quickfix.biome": "explicit"
   }
 }
 
@@ -19,8 +19,8 @@ settings.json:3:5 lint/suspicious/noQuickfixBiome  FIXABLE  ━━━━━━�
   i The use of quickfix.biome is deprecated.
   
     1 │ {
-    2 │   "editor.code_action_on_format": {
-  > 3 │     "quickfix.biome": true
+    2 │   "editor.codeActionsOnSave": {
+  > 3 │     "quickfix.biome": "explicit"
       │     ^^^^^^^^^^^^^^^^
     4 │   }
     5 │ }
@@ -30,9 +30,9 @@ settings.json:3:5 lint/suspicious/noQuickfixBiome  FIXABLE  ━━━━━━�
   i Safe fix: Remove the code action.
   
     1 1 │   {
-    2 2 │     "editor.code_action_on_format": {
-    3   │ - ····"quickfix.biome":·true
-      3 │ + ····"source.fixAll.biome":·true
+    2 2 │     "editor.codeActionsOnSave": {
+    3   │ - ····"quickfix.biome":·"explicit"
+      3 │ + ····"source.fixAll.biome":·"explicit"
     4 4 │     }
     5 5 │   }
   

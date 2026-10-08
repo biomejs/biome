@@ -6,8 +6,8 @@ expression: package.json
 ```json
 {
     "dependencies": {
-        "fsf-pkg": "^1.0.0",
-        "non-fsf-pkg": "^1.0.0"
+        "osi-pkg": "^1.0.0",
+        "non-osi-pkg": "^1.0.0"
     }
 }
 
@@ -17,11 +17,11 @@ expression: package.json
 ```
 package.json:4:9 lint/suspicious/noUntrustedLicenses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The dependency non-fsf-pkg in dependencies has a license that is not FSF libre: 0BSD.
+  ! The dependency non-osi-pkg in dependencies has a license that is not OSI-approved: Abstyles.
   
     2 │     "dependencies": {
-    3 │         "fsf-pkg": "^1.0.0",
-  > 4 │         "non-fsf-pkg": "^1.0.0"
+    3 │         "osi-pkg": "^1.0.0",
+  > 4 │         "non-osi-pkg": "^1.0.0"
       │         ^^^^^^^^^^^^^
     5 │     }
     6 │ }
