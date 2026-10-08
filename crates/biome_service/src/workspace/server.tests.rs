@@ -3169,6 +3169,11 @@ fn format_js_with_embedded_css_with_interpolations() {
   ${Icon}:hover &{
     margin:-${gap}px;
   }
+  ${mixin}
+  /* a comment */
+  div{
+    margin:0;
+  }
   @media (min-width:${breakpoint}px){
     display:none;
   }
@@ -3228,6 +3233,11 @@ fn format_js_with_embedded_css_with_interpolations() {
     	background: url(${image("logo.png")});
     	${Icon}:hover & {
     		margin: -${gap}px;
+    	}
+    	${mixin}
+    	/* a comment */
+    	div {
+    		margin: 0;
     	}
     	@media (min-width: ${breakpoint}px) {
     		display: none;
