@@ -13,4 +13,5 @@ mod migrate_prettier;
 mod migrate_stylelint;
 mod rage;
 mod search;
+mod stdin;
 mod version;

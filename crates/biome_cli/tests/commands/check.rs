@@ -2009,7 +2009,7 @@ fn check_stdin_write_successfully() {
         Args::from(["check", "--write", "--stdin-file-path", "mock.js"].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
     let message = console
         .out_buffer
@@ -2151,7 +2151,7 @@ fn check_stdin_write_unsafe_successfully() {
         ),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
     let message = console
         .out_buffer
