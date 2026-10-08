@@ -83,19 +83,22 @@ use biome_html_syntax::{
 #[cfg(feature = "html_embeds")]
 use biome_js_analyze::JsSuppression;
 #[cfg(feature = "html_embeds")]
+use biome_js_formatter::context::Semicolons;
+#[cfg(feature = "html_embeds")]
 use biome_js_parser::{JsParserOptions, parse as parse_js};
 #[cfg(feature = "html_embeds")]
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsRoot, JsLanguage, JsSyntaxToken, JsTemplateChunkElement,
+    AnyJsExpression, AnyJsRoot, AnyJsStatement, JsLanguage, JsScript, JsSyntaxToken,
+    JsTemplateChunkElement,
 };
 #[cfg(feature = "html_embeds")]
 use biome_json_syntax::JsonLanguage;
 use biome_languages::HtmlFileSource;
 #[cfg(feature = "html_embeds")]
 use biome_parser::AnyParse;
-#[cfg(feature = "html_embeds")]
-use biome_rowan::TokenAtOffset;
 use biome_rowan::{AstNode, BatchMutation, NodeCache, SendNode, TextRange, TextSize};
+#[cfg(feature = "html_embeds")]
+use biome_rowan::{AstNodeList, TokenAtOffset};
 use camino::Utf8Path;
 #[cfg(feature = "html_embeds")]
 use rustc_hash::FxHashMap;
@@ -832,9 +835,11 @@ fn format_embedded(
                     AnyJsRoot::JsExpressionTemplateRoot(root) if root.expression().is_none() => {
                         return None;
                     }
-                    AnyJsRoot::JsExpressionTemplateRoot(_) | AnyJsRoot::JsVueSlotPropsRoot(_) => {}
-                    // Statements, such as those of a Vue event handler, are printed
-                    // on their own lines, which doesn't fit inside an attribute value.
+                    // A script in an attribute value holds the statements of a Vue
+                    // event handler, such as `@click="count++"`.
+                    AnyJsRoot::JsExpressionTemplateRoot(_)
+                    | AnyJsRoot::JsVueSlotPropsRoot(_)
+                    | AnyJsRoot::JsScript(_) => {}
                     _ if attribute_snippet.is_some() => return None,
                     _ => {}
                 }
@@ -848,7 +853,19 @@ fn format_embedded(
                 if attribute_snippet.is_some() {
                     js_options = js_options
                         .with_quote_style(QuoteStyle::Single)
-                        .with_jsx_quote_style(QuoteStyle::Single);
+                        .with_jsx_quote_style(QuoteStyle::Single)
+                        .with_trailing_newline(TrailingNewline::from(false));
+                }
+                // Vue compiles an event handler as the body of a function only
+                // when it contains a `;`, and as an expression otherwise.
+                let handler_needs_semicolon = match &root {
+                    AnyJsRoot::JsScript(script) if attribute_snippet.is_some() => {
+                        !is_single_expression_statement(script)
+                    }
+                    _ => false,
+                };
+                if handler_needs_semicolon {
+                    js_options = js_options.with_semicolons(Semicolons::Always);
                 }
                 let node = parse.embedded_syntax::<JsLanguage>();
                 let formatted =
@@ -856,8 +873,16 @@ fn format_embedded(
                 // The preferred quote gives way to the other one when it needs
                 // fewer escapes, and template literals and comments keep their
                 // quotes. Either would end the attribute value early.
-                if attribute_snippet.is_some() && formatted.print().ok()?.as_code().contains('"') {
-                    return None;
+                if attribute_snippet.is_some() {
+                    let printed = formatted.print().ok()?;
+                    if printed.as_code().contains('"') {
+                        return None;
+                    }
+                    // Removing an empty statement, such as the `;` of
+                    // `if (ok) {};`, can leave a handler without any `;`.
+                    if handler_needs_semicolon && !printed.as_code().contains(';') {
+                        return None;
+                    }
                 }
                 match attribute_snippet {
                     Some(AttributeSnippet::Value) => {
@@ -938,12 +963,25 @@ impl AttributeSnippet {
     }
 }
 
+/// Returns `true` if the statements of a Vue event handler are a single
+/// expression statement, such as `count++`, which Vue compiles the same way
+/// with or without its `;`.
+#[cfg(feature = "html_embeds")]
+fn is_single_expression_statement(script: &JsScript) -> bool {
+    let statements = script.statements();
+    script.directives().is_empty()
+        && statements.len() == 1
+        && statements
+            .first()
+            .is_some_and(|statement| matches!(statement, AnyJsStatement::JsExpressionStatement(_)))
+}
+
 /// Writes the formatted JavaScript `document` of a whole attribute value
 /// between double quotes, laid out the way Prettier does.
 ///
 /// An object, array, template literal, or string stays next to the quotes when
-/// it breaks. Any other expression moves between the quotes, on lines of its
-/// own:
+/// it breaks. Any other expression, and the statements of a Vue event handler,
+/// move between the quotes, on lines of their own:
 ///
 /// ```vue
 /// <div
@@ -964,6 +1002,7 @@ fn format_attribute_value(root: &AnyJsRoot, document: Document) -> Option<Docume
             }
             _ => false,
         },
+        AnyJsRoot::JsScript(_) => false,
         _ => true,
     };
 
