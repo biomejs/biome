@@ -127,6 +127,7 @@ jobs:
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:
+          bins: cargo-nextest
           cache-base: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -135,10 +136,25 @@ jobs:
         env:
           CARGO_PROFILE_TEST_DEBUG: '0'
           CARGO_INCREMENTAL: '0'
-        run: cargo test --workspace --features=js_plugin
+        run: cargo nextest run --workspace --features=js_plugin --no-fail-fast
       - name: Run tests on ${{ matrix.os }}
         if: matrix.os != 'depot-windows-2022-16'
-        run: cargo test --workspace --features=js_plugin
+        run: cargo nextest run --workspace --features=js_plugin --no-fail-fast
+
+  doc-test:
+    name: Doc tests
+    runs-on: depot-ubuntu-24.04-arm
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
+        with:
+          cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run doc tests
+        run: cargo test --workspace --doc --features=js_plugin --no-fail-fast
 
   coverage:
     name: Test262 Coverage
