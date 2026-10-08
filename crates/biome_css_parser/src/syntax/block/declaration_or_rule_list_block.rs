@@ -108,24 +108,51 @@ fn parse_exclusive_scss_interpolated_block_item(
 
 /// Parses a block item that starts with a Grit metavariable.
 ///
-/// The metavariable is a standalone item unless it starts a complete nested
-/// qualified rule:
+/// The metavariable starts a nested qualified rule if its selector stays on
+/// the same line, and is a standalone item otherwise:
 ///
 /// ```css
 /// .parent {
-///     µselector {}
-///     µitem
+///     ${selector} {}
+///     ${mixin}
+///     .child {}
 /// }
 /// ```
 #[inline]
 fn parse_metavariable_block_item(p: &mut CssParser) -> ParsedSyntax {
     // The rule must reach its own closing brace, also at the root of a styled
     // snippet, whose list ends at the end of the file.
-    if let Ok(rule) = try_parse_nested_qualified_rule_without_selector_recovery(p, T!['}']) {
+    if is_at_single_line_selector(p)
+        && let Ok(rule) = try_parse_nested_qualified_rule_without_selector_recovery(p, T!['}'])
+    {
         return rule;
     }
 
     parse_metavariable(p)
+}
+
+/// The number of tokens [is_at_single_line_selector] looks ahead for the `{`.
+const MAX_SELECTOR_LOOKAHEAD: usize = 64;
+
+/// Returns `true` if the tokens up to the next `{` stay on the same line,
+/// except after the commas between the selectors of a list:
+///
+/// ```css
+/// ${first},
+/// ${second} {}
+/// ```
+fn is_at_single_line_selector(p: &mut CssParser) -> bool {
+    for n in 1..=MAX_SELECTOR_LOOKAHEAD {
+        match p.nth(n) {
+            T!['{'] => return true,
+            T![;] | T!['}'] | EOF => return false,
+            _ if p.has_nth_preceding_line_break(n) && !p.nth_at(n - 1, T![,]) => return false,
+            _ => {}
+        }
+    }
+
+    // Leave the decision to the speculative parse for longer selectors.
+    true
 }
 
 struct DeclarationOrRuleListParseRecovery {
