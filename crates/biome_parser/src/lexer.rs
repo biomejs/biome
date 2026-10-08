@@ -300,8 +300,10 @@ pub trait Lexer<'src> {
     }
 
     /// Check if a Grit metavariable starts at the current position.
+    #[inline]
     fn is_metavariable_start(&self) -> bool {
-        metavariable_end(self.metavariable_ranges(), self.position()).is_some()
+        let ranges = self.metavariable_ranges();
+        !ranges.is_empty() && metavariable_end(ranges, self.position()).is_some()
     }
 
     /// Consume the Grit metavariable that starts at the current position.

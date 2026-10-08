@@ -396,11 +396,18 @@ impl<'src> CssLexer<'src> {
     /// ```
     ///
     /// Elsewhere, such as in Grit snippets, a metavariable is a token on its own.
+    #[inline]
     fn metavariable_word_end(&self) -> Option<usize> {
         if self.metavariables.is_empty() {
             return None;
         }
 
+        self.scan_metavariable_word()
+    }
+
+    /// Scans the word that starts at the current position for a Grit
+    /// metavariable. See [Self::metavariable_word_end].
+    fn scan_metavariable_word(&self) -> Option<usize> {
         if !matches!(
             self.source_type.as_embedding_kind(),
             CssEmbeddingKind::Styled
