@@ -78,8 +78,8 @@ use biome_js_semantic::{SVELTE_RUNES, SemanticModelOptions, js_semantic_model, s
 #[cfg(feature = "js_embeds")]
 use biome_js_syntax::{
     AnyJsExpression, AnyJsTemplateElement, AnyJsxAttributeName, AnyJsxAttributeValue,
-    JsCallArgumentList, JsCallArguments, JsCallExpression, JsTemplateExpression, JsxAttribute,
-    JsxAttributeList, jsx_ext::AnyJsxElement,
+    JsCallArgumentList, JsCallArguments, JsCallExpression, JsSyntaxKind, JsTemplateExpression,
+    JsxAttribute, JsxAttributeList, jsx_ext::AnyJsxElement,
 };
 #[cfg(feature = "type_inference")]
 use biome_js_syntax::{
@@ -106,6 +106,8 @@ use biome_project_layout::ProjectLayout;
 #[cfg(feature = "js_embeds")]
 use biome_rowan::AstNodeList;
 use biome_rowan::SyntaxKind;
+#[cfg(feature = "js_embeds")]
+use biome_rowan::TokenText;
 #[cfg(feature = "type_inference")]
 use biome_rowan::WalkEvent;
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Direction, NodeCache, SendNode};
@@ -813,30 +815,43 @@ fn build_jsx_style_candidate(attribute: &JsxAttribute) -> Option<EmbedCandidate>
 /// Build an `EmbedCandidate::TaggedTemplate` from a `JsTemplateExpression`.
 ///
 /// Returns `None` if:
-/// - The template has interpolations (not supported yet)
+/// - The template is empty
 /// - The tag can't be classified (unknown pattern)
 #[cfg(feature = "js_embeds")]
 fn build_js_template_candidate(expr: &JsTemplateExpression) -> Option<EmbedCandidate> {
-    // TODO: Interpolations are not supported yet.
-    if expr.elements().len() != 1 {
-        return None;
-    }
-
-    let Some(AnyJsTemplateElement::JsTemplateChunkElement(chunk)) = expr.elements().first() else {
-        return None;
-    };
-
+    let elements = expr.elements();
+    let first = elements.first()?;
     let tag_kind = template_expression_to_template_tag(expr)?;
 
-    let content_token = chunk.template_chunk_token().ok()?;
+    let content_range = elements.syntax().text_trimmed_range();
+    let text = match first {
+        AnyJsTemplateElement::JsTemplateChunkElement(chunk) if elements.len() == 1 => {
+            chunk.template_chunk_token().ok()?.token_text()
+        }
+        _ => TokenText::new_raw(
+            JsSyntaxKind::TEMPLATE_CHUNK.to_raw(),
+            &elements.syntax().text_trimmed().to_string(),
+        ),
+    };
+    let interpolations = elements
+        .iter()
+        .filter_map(|element| match element {
+            AnyJsTemplateElement::JsTemplateElement(element) => {
+                Some(element.syntax().text_trimmed_range())
+            }
+            AnyJsTemplateElement::JsTemplateChunkElement(_) => None,
+        })
+        .collect();
+
     Some(EmbedCandidate::TaggedTemplate {
         tag: tag_kind,
         content: EmbedContent {
-            element_range: chunk.range(),
-            content_range: content_token.text_range(),
-            content_offset: content_token.text_range().start(),
-            text: content_token.token_text(),
+            element_range: content_range,
+            content_range,
+            content_offset: content_range.start(),
+            text,
         },
+        interpolations,
     })
 }
 
@@ -918,6 +933,13 @@ fn parse_js_matched_embed(
     settings: &SettingsWithEditor,
 ) -> Option<(AnyParse, EmbedContent, DocumentFileSource)> {
     let content = candidate.content();
+    let metavariables: Vec<TextRange> = match candidate {
+        EmbedCandidate::TaggedTemplate { interpolations, .. } => interpolations
+            .iter()
+            .map(|range| *range - content.content_offset)
+            .collect(),
+        EmbedCandidate::JsxStyleAttribute { .. } => Vec::new(),
+    };
 
     match embed_match.guest {
         GuestLanguage::Css => {
@@ -935,7 +957,7 @@ fn parse_js_matched_embed(
                 content.content_offset,
                 cache,
                 options,
-                &[],
+                &metavariables,
             );
 
             Some((parse.into(), content.clone(), file_source))
@@ -943,6 +965,11 @@ fn parse_js_matched_embed(
 
         #[cfg(feature = "lang_graphql")]
         GuestLanguage::GraphQL => {
+            // The GraphQL parser doesn't lex interpolations as metavariables.
+            if !metavariables.is_empty() {
+                return None;
+            }
+
             let file_source = DocumentFileSource::Graphql(GraphqlFileSource::graphql());
             let parse = parse_graphql_with_offset_and_cache(
                 content.text.text(),
