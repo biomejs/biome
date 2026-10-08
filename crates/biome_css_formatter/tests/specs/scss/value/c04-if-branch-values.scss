@@ -13,3 +13,25 @@ $map:if(sass(false):(first:1px + 2px);else:(else:(4px,5px)));
 .suppressed{width:if(sass(true):
 // biome-ignore format: preserve this branch value
 1px+   2px;else:0)}
+.line-comments{width:if(sass(true):
+// branch
+1px+2px;else: // fallback
+3px+4px)}
+.line-comments{width:if(sass(true): // branch
+1px+2px;else:
+// fallback
+3px+4px)}
+.suppressed-inline{width:if(sass(true): // biome-ignore format: preserve this branch value
+1px+   2px;else:3px+4px)}
+.nested-comments{width:if(media(width > 400px): // outer
+if(sass(false):
+// inner
+1px+2px;else:3px);else:0)}
+.mixed-comments{width:if(sass(true):
+/* block */
+// line
+1px+2px;else:0)}
+@include emit(if(sass(true): // numeric value
+1px+2px;else:0));
+@include emit(if(sass(true): // biome-ignore format: preserve this branch value
+1px+   2px;else:3px+4px));
