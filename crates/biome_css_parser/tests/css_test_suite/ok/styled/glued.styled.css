@@ -1,0 +1,20 @@
+width: ${width}px;
+margin: ${top}px ${right}px;
+width: calc(100% - ${offset}px);
+width: 10${unit};
+margin: -${gap}px;
+height: ${ratio}%;
+font: ${size}${family};
+transition: opacity ${duration}ms;
+color: #${hex};
+border-${side}: 1px solid;
+--${name}: 1;
+.foo-${modifier} {
+	color: red;
+}
+${First}${Second} {
+	color: red;
+}
+@media (min-width: ${breakpoint}px) {
+	display: none;
+}

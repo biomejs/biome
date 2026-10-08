@@ -17198,6 +17198,7 @@ pub enum AnyCssQueryFeatureValue {
     AnyCssDimension(AnyCssDimension),
     AnyCssFunction(AnyCssFunction),
     CssIdentifier(CssIdentifier),
+    CssMetavariable(CssMetavariable),
     CssNumber(CssNumber),
     CssRatio(CssRatio),
     ScssExpression(ScssExpression),
@@ -17221,6 +17222,12 @@ impl AnyCssQueryFeatureValue {
     pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
         match &self {
             Self::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_metavariable(&self) -> Option<&CssMetavariable> {
+        match &self {
+            Self::CssMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -17500,12 +17507,19 @@ impl AnyCssSelector {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssSelectorCustomIdentifier {
     CssCustomIdentifier(CssCustomIdentifier),
+    CssMetavariable(CssMetavariable),
     ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
 }
 impl AnyCssSelectorCustomIdentifier {
     pub fn as_css_custom_identifier(&self) -> Option<&CssCustomIdentifier> {
         match &self {
             Self::CssCustomIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_metavariable(&self) -> Option<&CssMetavariable> {
+        match &self {
+            Self::CssMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -44707,6 +44721,11 @@ impl From<CssIdentifier> for AnyCssQueryFeatureValue {
         Self::CssIdentifier(node)
     }
 }
+impl From<CssMetavariable> for AnyCssQueryFeatureValue {
+    fn from(node: CssMetavariable) -> Self {
+        Self::CssMetavariable(node)
+    }
+}
 impl From<CssNumber> for AnyCssQueryFeatureValue {
     fn from(node: CssNumber) -> Self {
         Self::CssNumber(node)
@@ -44742,6 +44761,7 @@ impl AstNode for AnyCssQueryFeatureValue {
     const KIND_SET: SyntaxKindSet<Language> = AnyCssDimension::KIND_SET
         .union(AnyCssFunction::KIND_SET)
         .union(CssIdentifier::KIND_SET)
+        .union(CssMetavariable::KIND_SET)
         .union(CssNumber::KIND_SET)
         .union(CssRatio::KIND_SET)
         .union(ScssExpression::KIND_SET)
@@ -44751,6 +44771,7 @@ impl AstNode for AnyCssQueryFeatureValue {
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
             CSS_IDENTIFIER
+            | CSS_METAVARIABLE
             | CSS_NUMBER
             | CSS_RATIO
             | SCSS_EXPRESSION
@@ -44765,6 +44786,7 @@ impl AstNode for AnyCssQueryFeatureValue {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
+            CSS_METAVARIABLE => Self::CssMetavariable(CssMetavariable { syntax }),
             CSS_NUMBER => Self::CssNumber(CssNumber { syntax }),
             CSS_RATIO => Self::CssRatio(CssRatio { syntax }),
             SCSS_EXPRESSION => Self::ScssExpression(ScssExpression { syntax }),
@@ -44791,6 +44813,7 @@ impl AstNode for AnyCssQueryFeatureValue {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssIdentifier(it) => it.syntax(),
+            Self::CssMetavariable(it) => it.syntax(),
             Self::CssNumber(it) => it.syntax(),
             Self::CssRatio(it) => it.syntax(),
             Self::ScssExpression(it) => it.syntax(),
@@ -44804,6 +44827,7 @@ impl AstNode for AnyCssQueryFeatureValue {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssIdentifier(it) => it.into_syntax(),
+            Self::CssMetavariable(it) => it.into_syntax(),
             Self::CssNumber(it) => it.into_syntax(),
             Self::CssRatio(it) => it.into_syntax(),
             Self::ScssExpression(it) => it.into_syntax(),
@@ -44821,6 +44845,7 @@ impl std::fmt::Debug for AnyCssQueryFeatureValue {
             Self::AnyCssDimension(it) => std::fmt::Debug::fmt(it, f),
             Self::AnyCssFunction(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssMetavariable(it) => std::fmt::Debug::fmt(it, f),
             Self::CssNumber(it) => std::fmt::Debug::fmt(it, f),
             Self::CssRatio(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssExpression(it) => std::fmt::Debug::fmt(it, f),
@@ -44836,6 +44861,7 @@ impl From<AnyCssQueryFeatureValue> for SyntaxNode {
             AnyCssQueryFeatureValue::AnyCssDimension(it) => it.into_syntax(),
             AnyCssQueryFeatureValue::AnyCssFunction(it) => it.into_syntax(),
             AnyCssQueryFeatureValue::CssIdentifier(it) => it.into_syntax(),
+            AnyCssQueryFeatureValue::CssMetavariable(it) => it.into_syntax(),
             AnyCssQueryFeatureValue::CssNumber(it) => it.into_syntax(),
             AnyCssQueryFeatureValue::CssRatio(it) => it.into_syntax(),
             AnyCssQueryFeatureValue::ScssExpression(it) => it.into_syntax(),
@@ -45509,6 +45535,11 @@ impl From<CssCustomIdentifier> for AnyCssSelectorCustomIdentifier {
         Self::CssCustomIdentifier(node)
     }
 }
+impl From<CssMetavariable> for AnyCssSelectorCustomIdentifier {
+    fn from(node: CssMetavariable) -> Self {
+        Self::CssMetavariable(node)
+    }
+}
 impl From<ScssInterpolatedIdentifier> for AnyCssSelectorCustomIdentifier {
     fn from(node: ScssInterpolatedIdentifier) -> Self {
         Self::ScssInterpolatedIdentifier(node)
@@ -45516,14 +45547,19 @@ impl From<ScssInterpolatedIdentifier> for AnyCssSelectorCustomIdentifier {
 }
 impl AstNode for AnyCssSelectorCustomIdentifier {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssCustomIdentifier::KIND_SET.union(ScssInterpolatedIdentifier::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssCustomIdentifier::KIND_SET
+        .union(CssMetavariable::KIND_SET)
+        .union(ScssInterpolatedIdentifier::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_CUSTOM_IDENTIFIER | SCSS_INTERPOLATED_IDENTIFIER)
+        matches!(
+            kind,
+            CSS_CUSTOM_IDENTIFIER | CSS_METAVARIABLE | SCSS_INTERPOLATED_IDENTIFIER
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_CUSTOM_IDENTIFIER => Self::CssCustomIdentifier(CssCustomIdentifier { syntax }),
+            CSS_METAVARIABLE => Self::CssMetavariable(CssMetavariable { syntax }),
             SCSS_INTERPOLATED_IDENTIFIER => {
                 Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
             }
@@ -45534,12 +45570,14 @@ impl AstNode for AnyCssSelectorCustomIdentifier {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssCustomIdentifier(it) => it.syntax(),
+            Self::CssMetavariable(it) => it.syntax(),
             Self::ScssInterpolatedIdentifier(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssCustomIdentifier(it) => it.into_syntax(),
+            Self::CssMetavariable(it) => it.into_syntax(),
             Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
         }
     }
@@ -45548,6 +45586,7 @@ impl std::fmt::Debug for AnyCssSelectorCustomIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CssCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssMetavariable(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -45556,6 +45595,7 @@ impl From<AnyCssSelectorCustomIdentifier> for SyntaxNode {
     fn from(n: AnyCssSelectorCustomIdentifier) -> Self {
         match n {
             AnyCssSelectorCustomIdentifier::CssCustomIdentifier(it) => it.into_syntax(),
+            AnyCssSelectorCustomIdentifier::CssMetavariable(it) => it.into_syntax(),
             AnyCssSelectorCustomIdentifier::ScssInterpolatedIdentifier(it) => it.into_syntax(),
         }
     }
