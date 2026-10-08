@@ -150,6 +150,14 @@ impl Document {
         &self.elements
     }
 
+    /// Returns the content the host formatter wrote for each embedded element,
+    /// by the range of the element.
+    pub fn embedded_contents(&self) -> FxHashMap<TextRange, Interned> {
+        let mut contents = FxHashMap::default();
+        collect_embedded_contents(&self.elements, &mut contents);
+        contents
+    }
+
     /// Transforms the document by visiting every embedded element, optionally
     /// replacing its content.
     ///
@@ -161,6 +169,31 @@ impl Document {
         format_embedded: &mut impl FnMut(TextRange) -> Option<Self>,
     ) {
         replace_embedded_elements(&mut self.elements, format_embedded);
+    }
+}
+
+/// Collects the host content of each embedded element in `elements`,
+/// including the ones nested in the content of other elements.
+fn collect_embedded_contents(
+    elements: &[FormatElement],
+    contents: &mut FxHashMap<TextRange, Interned>,
+) {
+    let mut embedded_range = None;
+    for element in elements {
+        let host_content_range = embedded_range.take();
+        match element {
+            FormatElement::Tag(Tag::StartEmbedded(range)) => embedded_range = Some(*range),
+            FormatElement::Interned(interned) => {
+                if let Some(range) = host_content_range {
+                    contents.insert(range, interned.clone());
+                }
+                collect_embedded_contents(interned, contents);
+            }
+            FormatElement::BestFitting(best_fitting) => {
+                collect_embedded_contents(best_fitting.as_slice(), contents);
+            }
+            _ => {}
+        }
     }
 }
 
