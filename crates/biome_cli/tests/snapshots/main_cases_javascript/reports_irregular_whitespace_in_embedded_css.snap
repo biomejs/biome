@@ -1,0 +1,113 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint file.js
+```
+
+## `biome.json`
+
+```json
+{
+  "javascript": { "experimentalEmbeddedSnippetsEnabled": true },
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "suspicious": {
+        "noIrregularWhitespace": "error"
+      }
+    }
+  }
+}
+```
+
+## `file.js`
+
+```js
+const Button = styled.button`
+  &:hover {
+    padding:　10px;
+  }
+  &::before {
+    content: "　";
+  }
+`;
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+biome.json:3:13 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.
+  
+     1 │ {
+     2 │   "javascript": { "experimentalEmbeddedSnippetsEnabled": true },
+   > 3 │   "linter": {
+       │             ^
+   > 4 │     "rules": {
+        ...
+   > 8 │       }
+   > 9 │     }
+  > 10 │   }
+       │   ^
+    11 │ }
+  
+  i Migrate the configuration with the proper command
+  
+  $ biome migrate
+  
+
+```
+
+```block
+file.js:3:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `　`
+  
+    1 │ const Button = styled.button`
+    2 │   &:hover {
+  > 3 │     padding:␠10px;
+      │             ^
+    4 │   }
+    5 │   &::before {
+  
+
+```
+
+```block
+file.js:3:13 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Irregular whitespace found.
+  
+    1 │ const Button = styled.button`
+    2 │   &:hover {
+  > 3 │     padding:␠10px;
+      │             ^
+    4 │   }
+    5 │   &::before {
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 2 errors.
+```

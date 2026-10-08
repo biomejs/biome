@@ -1,0 +1,12 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid_bom.css
+---
+# Input
+```css
+﻿.firstClass .secondClass {
+	/* should not generate diagnostics */
+	padding: 10px;
+}
+
+```

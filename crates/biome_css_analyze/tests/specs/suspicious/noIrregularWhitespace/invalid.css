@@ -95,3 +95,11 @@
 @container　(width < 15rem) {
 	color: blue;
 }
+/* \u{3000} before a string */
+.firstClass::before {
+	content:　"a";
+}
+/* \u{a0} after a string */
+.firstClass::after {
+	content: "a" ;
+}

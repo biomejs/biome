@@ -101,10 +101,18 @@ expression: invalid.css
 @container　(width < 15rem) {
 	color: blue;
 }
+/* \u{3000} before a string */
+.firstClass::before {
+	content:　"a";
+}
+/* \u{a0} after a string */
+.firstClass::after {
+	content: "a" ;
+}
 
 ```
 
-_Note: The parser emitted 25 diagnostics which are not shown here._
+_Note: The parser emitted 27 diagnostics which are not shown here._
 
 # Diagnostics
 ```
@@ -311,23 +319,6 @@ invalid.css:56:11 lint/suspicious/noIrregularWhitespace ━━━━━━━━
 ```
 
 ```
-invalid.css:56:11 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Irregular whitespace found.
-  
-    54 │ @layer state {
-    55 │ 	body {
-  > 56 │ 		padding:␠10px;
-       │ 		        ^
-    57 │ 	}
-    58 │ }
-  
-  i Replace the irregular whitespace with normal whitespaces.
-  
-
-```
-
-```
 invalid.css:60:7 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
@@ -406,6 +397,40 @@ invalid.css:95:11 lint/suspicious/noIrregularWhitespace ━━━━━━━━
        │           ^
     96 │ 	color: blue;
     97 │ }
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:100:10 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+     98 │ /* \u{3000} before a string */
+     99 │ .firstClass::before {
+  > 100 │ 	content:␠"a";
+        │ 	        ^
+    101 │ }
+    102 │ /* \u{a0} after a string */
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:104:14 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    102 │ /* \u{a0} after a string */
+    103 │ .firstClass::after {
+  > 104 │ 	content: "a"␠;
+        │ 	            ^
+    105 │ }
+    106 │ 
   
   i Replace the irregular whitespace with normal whitespaces.
   

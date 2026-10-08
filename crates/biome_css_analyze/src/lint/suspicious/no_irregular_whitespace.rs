@@ -2,7 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{AnyCssRule, CssSyntaxNode};
+use biome_css_syntax::{AnyCssRoot, CssSyntaxKind, CssSyntaxNode};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, Direction, TextRange};
 use biome_rule_options::no_irregular_whitespace::NoIrregularWhitespaceOptions;
@@ -13,6 +13,9 @@ declare_lint_rule! {
     /// Some Unicode and control characters look like spaces but can change how a selector is
     /// parsed. The invalid example contains a vertical tab between the class selectors, so it does
     /// not behave like a normal descendant separator.
+    ///
+    /// Irregular whitespace inside strings and comments is allowed, because it doesn't affect how
+    /// the stylesheet is parsed.
     ///
     /// ## Examples
     ///
@@ -32,6 +35,12 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```css
+    /// .firstClass::before {
+    ///   content: "　";
+    /// }
+    /// ```
+    ///
     pub NoIrregularWhitespace {
         version: "1.9.0",
         name: "noIrregularWhitespace",
@@ -43,7 +52,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoIrregularWhitespace {
-    type Query = Ast<AnyCssRule>;
+    type Query = Ast<AnyCssRoot>;
     type State = TextRange;
     type Signals = Box<[Self::State]>;
     type Options = NoIrregularWhitespaceOptions;
@@ -87,10 +96,29 @@ fn get_irregular_whitespace(syntax: &CssSyntaxNode) -> Vec<TextRange> {
 
     let mut results = vec![];
     for token in syntax.descendants_tokens(Direction::Next) {
-        if !token.has_leading_comments()
-            && !token.has_trailing_comments()
-            && token.text().chars().any(is_irregular_whitespace)
+        // The byte order mark is U+FEFF, but it's an encoding marker rather than whitespace.
+        if token.kind() == CssSyntaxKind::UNICODE_BOM
+            || token.has_leading_comments()
+            || token.has_trailing_comments()
         {
+            continue;
+        }
+
+        // Irregular whitespace inside a string is part of its value, so only its trivia is checked.
+        if matches!(
+            token.kind(),
+            CssSyntaxKind::CSS_STRING_LITERAL | CssSyntaxKind::SCSS_STRING_CONTENT_LITERAL
+        ) {
+            for trivia in token
+                .leading_trivia()
+                .pieces()
+                .chain(token.trailing_trivia().pieces())
+            {
+                if trivia.text().chars().any(is_irregular_whitespace) {
+                    results.push(trivia.text_range());
+                }
+            }
+        } else if token.text().chars().any(is_irregular_whitespace) {
             results.push(token.text_range());
         }
     }

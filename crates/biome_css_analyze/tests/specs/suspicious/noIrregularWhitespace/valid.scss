@@ -1,0 +1,6 @@
+/* should not generate diagnostics */
+$name: "b";
+
+.firstClass::before {
+	content: "a　#{$name} c";
+}

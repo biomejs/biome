@@ -1,0 +1,4 @@
+﻿.firstClass .secondClass {
+	/* should not generate diagnostics */
+	padding: 10px;
+}

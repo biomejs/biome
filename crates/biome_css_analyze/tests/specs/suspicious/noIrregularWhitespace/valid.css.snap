@@ -14,5 +14,18 @@ expression: valid.css
 	padding: 10px;
 }
 
+.firstClass::before {
+	content: '　';
+}
+
+.firstClass::after {
+	content: "a b";
+}
+
+.firstClass {
+	font-family: "MS　Gothic", sans-serif;
+}
+
+@import "a b.css";
 
 ```
