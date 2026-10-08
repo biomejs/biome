@@ -806,3 +806,45 @@ fn full_support_writes_attribute_expression_fix() {
         result,
     ));
 }
+
+#[test]
+fn issue_11304_format_attribute_expressions_write_is_idempotent() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let file = Utf8Path::new("issue_11304.svelte");
+    fs.insert(
+        "biome.json".into(),
+        r#"{"html":{"experimentalFullSupportEnabled":true,"formatter":{"enabled":true}}}"#
+            .as_bytes(),
+    );
+    fs.insert(
+        file.into(),
+        "<form onsubmit={(e)=>{e.preventDefault(); save()}}></form>",
+    );
+
+    let (fs, first_result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", file.as_str()].as_slice()),
+    );
+    assert!(first_result.is_ok(), "{first_result:?}");
+    assert_file_contents(
+        &fs,
+        file,
+        "<form\n\tonsubmit={(e) => {\n\t\te.preventDefault();\n\t\tsave();\n\t}}\n></form>\n",
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", file.as_str()].as_slice()),
+    );
+    assert!(result.is_ok(), "{result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "issue_11304_format_attribute_expressions_write_is_idempotent",
+        fs,
+        console,
+        result,
+    ));
+}

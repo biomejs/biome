@@ -1,5 +1,7 @@
 use std::{fmt, ops::Deref, rc::Rc, str::FromStr};
 
+use crate::HtmlInlineEmbeddedExpression;
+
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSameLine, CstFormatContext, FormatContext, FormatOptions,
@@ -424,6 +426,7 @@ pub struct HtmlFormatContext {
     /// Content ranges of the embedded snippets whose formatting is delegated to
     /// the formatter of their language, sorted by position.
     embedded_node_ranges: Vec<TextRange>,
+    inline_embedded_expressions: Rc<[HtmlInlineEmbeddedExpression]>,
 }
 
 impl HtmlFormatContext {
@@ -433,6 +436,7 @@ impl HtmlFormatContext {
             comments: Rc::new(comments),
             source_map: None,
             embedded_node_ranges: Vec::new(),
+            inline_embedded_expressions: Rc::from([]),
         }
     }
 
@@ -462,6 +466,25 @@ impl HtmlFormatContext {
                 (range.start(), range.end())
             })
             .is_ok()
+    }
+
+    pub(crate) fn with_inline_embedded_expressions(
+        mut self,
+        expressions: Vec<HtmlInlineEmbeddedExpression>,
+    ) -> Self {
+        self.inline_embedded_expressions = expressions.into();
+        self
+    }
+
+    pub(crate) fn inline_embedded_expression(
+        &self,
+        range: biome_rowan::TextRange,
+    ) -> Option<&HtmlInlineEmbeddedExpression> {
+        self.inline_embedded_expressions
+            .binary_search_by_key(&range.start(), |expression| expression.range.start())
+            .ok()
+            .and_then(|index| self.inline_embedded_expressions.get(index))
+            .filter(|expression| expression.range == range)
     }
 }
 

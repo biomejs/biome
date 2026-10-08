@@ -1,0 +1,42 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format issue_11304.svelte
+```
+
+## `biome.json`
+
+```json
+{
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "formatter": { "enabled": true }
+  }
+}
+```
+
+## `issue_11304.svelte`
+
+```svelte
+<form
+	onsubmit={(e) => {
+		e.preventDefault();
+		save();
+	}}
+></form>
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```

@@ -1,0 +1,59 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/issue_11304_options/handler.svelte
+---
+
+# Input
+
+```svelte
+<form onsubmit={(e)=>{const x={a:1,b:2}; e.preventDefault(); save(x) }}>
+  <button on:click={(e)=>{e.preventDefault(); run("save")}}>Go</button>
+</form>
+
+```
+
+
+# Options
+
+```json
+{
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "trailingCommas": "none"
+    }
+  },
+  "html": {
+    "formatter": {
+      "indentScriptAndStyle": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```svelte
+<form
+  onsubmit={(e) => {
+    const x = { a: 1, b: 2 };
+    e.preventDefault();
+    save(x);
+  }}
+>
+  <button
+    on:click={(e) => {
+      e.preventDefault();
+      run('save');
+    }}
+  >
+    Go
+  </button>
+</form>
+
+```

@@ -1,0 +1,27 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: svelte/issue_11304_errors.svelte
+---
+
+# Input
+
+```svelte
+<button onclick={foo(} title={  1+2  }>Go</button>
+<button onclick={(event)=>{run(event)}}>Okay</button>
+
+```
+
+
+# Formatted
+
+```svelte
+<button onclick={foo(} title={1 + 2}>Go</button>
+<button
+	onclick={(event) => {
+		run(event);
+	}}
+>
+	Okay
+</button>
+
+```

@@ -11,7 +11,7 @@ use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
 use biome_formatter::{CstFormatContext, FormatOwnedWithRule, FormatRefWithRule, prelude::*};
 use biome_formatter::{FormatLanguage, FormatResult, Formatted, VecBuffer, write};
 use biome_html_syntax::{HtmlLanguage, HtmlSyntaxNode, HtmlSyntaxToken};
-use biome_rowan::{AstNode, SyntaxToken, TextRange};
+use biome_rowan::{AstNode, SyntaxToken, TextRange, TokenText};
 use comments::HtmlCommentStyle;
 use context::HtmlFormatContext;
 pub use context::HtmlFormatOptions;
@@ -174,6 +174,27 @@ where
 pub struct HtmlFormatLanguage {
     options: HtmlFormatOptions,
     embedded_node_ranges: Vec<TextRange>,
+    inline_embedded_expressions: Vec<HtmlInlineEmbeddedExpression>,
+}
+
+/// JavaScript formatting prepared for an expression inside a Svelte attribute.
+#[derive(Debug, Clone)]
+pub struct HtmlInlineEmbeddedExpression {
+    /// The exact source range of the expression content between its braces.
+    pub range: TextRange,
+    /// The prepared output, or a request to preserve the original expression.
+    pub content: HtmlInlineEmbeddedContent,
+    /// The unwrapped identifier when shorthand is safe and the expression has no comments.
+    pub shorthand_identifier: Option<TokenText>,
+}
+
+/// The formatting result for a Svelte attribute expression.
+#[derive(Debug, Clone)]
+pub enum HtmlInlineEmbeddedContent {
+    /// A guest-language document to render inside the original attribute braces.
+    Formatted(Document),
+    /// Preserve the source expression when guest-language formatting fails.
+    Verbatim,
 }
 
 impl HtmlFormatLanguage {
@@ -181,11 +202,22 @@ impl HtmlFormatLanguage {
         Self {
             options,
             embedded_node_ranges: Vec::new(),
+            inline_embedded_expressions: Vec::new(),
         }
     }
 
     pub fn with_embedded_node_ranges(mut self, embedded_node_ranges: Vec<TextRange>) -> Self {
         self.embedded_node_ranges = embedded_node_ranges;
+        self
+    }
+
+    /// Supplies expressions indexed by their source ranges.
+    pub fn with_inline_embedded_expressions(
+        mut self,
+        mut expressions: Vec<HtmlInlineEmbeddedExpression>,
+    ) -> Self {
+        expressions.sort_by_key(|expression| expression.range.start());
+        self.inline_embedded_expressions = expressions;
         self
     }
 }
@@ -206,7 +238,9 @@ impl FormatLanguage for HtmlFormatLanguage {
         delegate_fmt_embedded_nodes: bool,
     ) -> Self::Context {
         let comments = Comments::from_node(root, &HtmlCommentStyle, source_map.as_ref());
-        let context = HtmlFormatContext::new(self.options, comments).with_source_map(source_map);
+        let context = HtmlFormatContext::new(self.options, comments)
+            .with_source_map(source_map)
+            .with_inline_embedded_expressions(self.inline_embedded_expressions);
         if delegate_fmt_embedded_nodes {
             context.with_embedded_node_ranges(self.embedded_node_ranges)
         } else {

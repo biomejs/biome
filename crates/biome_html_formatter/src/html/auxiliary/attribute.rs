@@ -62,13 +62,19 @@ fn can_compact(node: &HtmlAttribute, f: &mut HtmlFormatter) -> bool {
             return false;
         };
 
-        let initializer_value = initializer_value
-            .expression()
-            .ok()
-            .and_then(|expression| expression.string_value());
-
-        if let (Some(name), Some(initializer_value)) = (name, initializer_value) {
-            return initializer_value.text() == name.text();
+        let initializer_value = initializer_value.expression().ok();
+        if let (Some(name), Some(expression)) = (name, initializer_value) {
+            if let Ok(token) = expression.html_literal_token()
+                && let Some(embedded) = f.context().inline_embedded_expression(token.text_range())
+            {
+                return embedded
+                    .shorthand_identifier
+                    .as_ref()
+                    .is_some_and(|identifier| identifier.text() == name.text());
+            }
+            return expression
+                .string_value()
+                .is_some_and(|value| value.text() == name.text());
         }
     }
 

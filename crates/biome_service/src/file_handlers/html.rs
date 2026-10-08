@@ -61,6 +61,10 @@ use biome_html_analyze::analyze_with_snippets;
 use biome_html_analyze::{HtmlAnalyzerServices, HtmlSuppression, analyze};
 use biome_html_factory::make::ident;
 use biome_html_formatter::context::SelfCloseVoidElements;
+#[cfg(feature = "html_embeds")]
+use biome_html_formatter::{
+    HtmlFormatLanguage, HtmlInlineEmbeddedContent, HtmlInlineEmbeddedExpression,
+};
 use biome_html_formatter::{
     HtmlFormatOptions,
     context::{IndentScriptAndStyle, WhitespaceSensitivity},
@@ -70,13 +74,18 @@ use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::{AnyEmbeddedContent, AnyHtmlTagElement};
 use biome_html_syntax::{HtmlAttribute, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
 #[cfg(feature = "html_embeds")]
-use biome_html_syntax::{HtmlElementList, HtmlSingleTextExpression, HtmlTextExpression};
+use biome_html_syntax::{
+    HtmlAttributeInitializerClause, HtmlAttributeSingleTextExpression, HtmlElementList,
+    HtmlSingleTextExpression, HtmlTextExpression, SvelteBindFunctionBindingExpression,
+};
 #[cfg(feature = "html_embeds")]
 use biome_js_analyze::JsSuppression;
 #[cfg(feature = "html_embeds")]
 use biome_js_parser::{JsParserOptions, parse as parse_js};
 #[cfg(feature = "html_embeds")]
-use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxToken, JsTemplateChunkElement};
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsRoot, JsLanguage, JsSyntaxToken, JsTemplateChunkElement,
+};
 #[cfg(feature = "html_embeds")]
 use biome_json_syntax::JsonLanguage;
 use biome_languages::HtmlFileSource;
@@ -783,6 +792,96 @@ fn format(
 }
 
 #[cfg(feature = "html_embeds")]
+fn prepare_svelte_attribute_expressions(
+    tree: &HtmlSyntaxNode,
+    biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
+    settings: &SettingsWithEditor,
+    snippets: &FxHashMap<TextRange, super::ParsedSnippetOrigin>,
+    workspace_db: &WorkspaceDb,
+) -> Vec<HtmlInlineEmbeddedExpression> {
+    if !document_file_source
+        .to_html_file_source()
+        .is_some_and(|source| source.is_svelte())
+    {
+        return Vec::new();
+    }
+
+    let mut expressions = Vec::new();
+    for node in tree.descendants() {
+        if let Some(attribute) = HtmlAttributeSingleTextExpression::cast_ref(&node)
+            && attribute
+                .syntax()
+                .parent()
+                .is_some_and(|parent| HtmlAttributeInitializerClause::can_cast(parent.kind()))
+            && let Ok(expression) = attribute.expression()
+        {
+            expressions.push(expression);
+        }
+        if let Some(binding) = SvelteBindFunctionBindingExpression::cast_ref(&node) {
+            expressions.extend(binding.get().ok());
+            expressions.extend(binding.set().ok());
+        }
+    }
+
+    expressions
+        .into_iter()
+        .filter_map(|expression| {
+            let range = expression.html_literal_token().ok()?.text_range();
+            let parsed = snippets
+                .get(&range)
+                .map(|snippet| snippet.parsed_origin().parse(workspace_db));
+            let prepared = parsed.as_ref().and_then(|parsed| {
+                if parsed.has_errors() {
+                    return None;
+                }
+                let AnyJsRoot::JsExpressionTemplateRoot(root) = parsed.tree::<AnyJsRoot>() else {
+                    return None;
+                };
+                let mut shorthand = root.expression()?;
+                let has_comments = root.syntax().has_comments_descendants();
+                while let AnyJsExpression::JsParenthesizedExpression(parenthesized) = &shorthand {
+                    shorthand = parenthesized.expression().ok()?;
+                }
+                let shorthand_identifier = if has_comments {
+                    None
+                } else {
+                    shorthand
+                        .as_js_identifier_expression()
+                        .and_then(|identifier| identifier.name().ok())
+                        .and_then(|name| name.value_token().ok())
+                        .map(|token| token.token_text_trimmed())
+                };
+                let snippet = snippets.get(&range)?;
+                let snippet_file_source = snippet.file_source(workspace_db)?;
+                let js_options = javascript::resolve_format_options(
+                    biome_path,
+                    &snippet_file_source,
+                    settings,
+                    workspace_db,
+                );
+                let syntax = parsed.clone().embedded_syntax::<JsLanguage>();
+                let document = biome_js_formatter::format_node_with_offset(js_options, &syntax)
+                    .ok()?
+                    .into_document();
+                Some((document, shorthand_identifier))
+            });
+            let (content, shorthand_identifier) = match prepared {
+                Some((document, identifier)) => {
+                    (HtmlInlineEmbeddedContent::Formatted(document), identifier)
+                }
+                None => (HtmlInlineEmbeddedContent::Verbatim, None),
+            };
+            Some(HtmlInlineEmbeddedExpression {
+                range,
+                content,
+                shorthand_identifier,
+            })
+        })
+        .collect()
+}
+
+#[cfg(feature = "html_embeds")]
 fn format_embedded(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
@@ -802,7 +901,34 @@ fn format_embedded(
         .into_iter()
         .map(|snippet| (snippet.content_range(&workspace_db), snippet))
         .collect();
-    let mut formatted = format_node(options, &tree, snippets.keys().copied().collect())?;
+    // Svelte attribute expressions are written by the HTML formatter itself,
+    // which decides whether to print them or their shorthand, so they don't get
+    // a placeholder.
+    let inline_expressions = prepare_svelte_attribute_expressions(
+        &tree,
+        biome_path,
+        document_file_source,
+        settings,
+        &snippets,
+        &workspace_db,
+    );
+    let inline_ranges: rustc_hash::FxHashSet<TextRange> = inline_expressions
+        .iter()
+        .map(|expression| expression.range)
+        .collect();
+    let embedded_node_ranges: Vec<TextRange> = snippets
+        .keys()
+        .copied()
+        .filter(|range| !inline_ranges.contains(range))
+        .collect();
+    let delegate_fmt_embedded_nodes = !embedded_node_ranges.is_empty();
+    let mut formatted = biome_formatter::format_node(
+        &tree,
+        HtmlFormatLanguage::new(options)
+            .with_embedded_node_ranges(embedded_node_ranges)
+            .with_inline_embedded_expressions(inline_expressions),
+        delegate_fmt_embedded_nodes,
+    )?;
     formatted.format_embedded(move |range| {
         let snippet = snippets.get(&range)?;
         let snippet_file_source = snippet.file_source(&workspace_db)?;

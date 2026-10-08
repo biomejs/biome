@@ -1,7 +1,11 @@
+use crate::HtmlInlineEmbeddedContent;
 use crate::prelude::*;
+use biome_formatter::FormatElement;
+use biome_formatter::format_element::Interned;
+use biome_formatter::prelude::Document;
 use biome_formatter::write;
 use biome_formatter::{CstFormatContext, FormatRuleWithOptions, normalize_newlines};
-use biome_html_syntax::HtmlTextExpression;
+use biome_html_syntax::{HtmlAttribute, HtmlTextExpression};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlTextExpression {
@@ -16,6 +20,40 @@ impl FormatNodeRule<HtmlTextExpression> for FormatHtmlTextExpression {
 
         if self.compact {
             return format_removed(&token).fmt(f);
+        }
+
+        if let Some(embedded) = f
+            .context()
+            .inline_embedded_expression(token.text_range())
+            .cloned()
+        {
+            if let Some(identifier) = &embedded.shorthand_identifier
+                && node
+                    .syntax()
+                    .ancestors()
+                    .find_map(HtmlAttribute::cast)
+                    .and_then(|attribute| attribute.name().ok())
+                    .and_then(|name| name.token_text_trimmed())
+                    .is_some_and(|name| name.text() == identifier.text())
+            {
+                return format_replaced(
+                    &token,
+                    &text(identifier.text(), Some(token.text_range().start())),
+                )
+                .fmt(f);
+            }
+            return match embedded.content {
+                HtmlInlineEmbeddedContent::Formatted(document) => format_replaced(
+                    &token,
+                    &FormatInlineEmbeddedExpression {
+                        document: &document,
+                    },
+                )
+                .fmt(f),
+                HtmlInlineEmbeddedContent::Verbatim => {
+                    format_verbatim_skipped(node.syntax()).fmt(f)
+                }
+            };
         }
 
         let token_text = token.text();
@@ -37,5 +75,18 @@ impl FormatRuleWithOptions<HtmlTextExpression> for FormatHtmlTextExpression {
     fn with_options(mut self, options: Self::Options) -> Self {
         self.compact = options;
         self
+    }
+}
+
+struct FormatInlineEmbeddedExpression<'a> {
+    document: &'a Document,
+}
+
+impl Format<HtmlFormatContext> for FormatInlineEmbeddedExpression<'_> {
+    fn fmt(&self, f: &mut HtmlFormatter) -> FormatResult<()> {
+        f.write_element(FormatElement::Interned(Interned::new(
+            self.document.clone().into_elements(),
+        )))?;
+        line_suffix_boundary().fmt(f)
     }
 }
