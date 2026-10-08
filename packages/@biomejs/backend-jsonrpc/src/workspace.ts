@@ -2988,6 +2988,11 @@ export interface Nursery {
 	 */
 	noBunModules?: NoBunModulesConfiguration;
 	/**
+	 * Disallow leading and trailing spaces in console method arguments.
+	 * See https://biomejs.dev/linter/rules/no-console-spaces
+	 */
+	noConsoleSpaces?: NoConsoleSpacesConfiguration;
+	/**
 	 * Disallow names that start or end with an underscore.
 	 * See https://biomejs.dev/linter/rules/no-dangling-underscore
 	 */
@@ -5902,6 +5907,9 @@ export type NoBooleanSortComparatorConfiguration =
 export type NoBunModulesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBunModulesOptions;
+export type NoConsoleSpacesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoConsoleSpacesOptions;
 export type NoDanglingUnderscoreConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDanglingUnderscoreOptions;
@@ -8464,6 +8472,14 @@ export interface RuleWithNoBooleanSortComparatorOptions {
 export interface RuleWithNoBunModulesOptions {
 	level: RulePlainConfiguration;
 	options?: NoBunModulesOptions;
+}
+export interface RuleWithNoConsoleSpacesOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoConsoleSpacesOptions;
 }
 export interface RuleWithNoDanglingUnderscoreOptions {
 	level: RulePlainConfiguration;
@@ -11238,6 +11254,7 @@ export interface NoBaseToStringOptions {
 }
 export type NoBooleanSortComparatorOptions = {};
 export type NoBunModulesOptions = {};
+export type NoConsoleSpacesOptions = {};
 export type NoDanglingUnderscoreOptions = {};
 export type NoDoubleComparisonOptions = {};
 export type NoDuplicateMapKeysOptions = {};
@@ -13057,6 +13074,7 @@ export type Category =
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noDanglingUnderscore"
+	| "lint/nursery/noConsoleSpaces"
 	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
