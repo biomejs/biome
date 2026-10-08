@@ -3169,6 +3169,11 @@ export interface Nursery {
 	 */
 	useExhaustiveSwitchCases?: UseExhaustiveSwitchCasesConfiguration;
 	/**
+	 * Enforce using toContain() to check whether an array or string contains a value.
+	 * See https://biomejs.dev/linter/rules/use-expect-to-contain
+	 */
+	useExpectToContain?: UseExpectToContainConfiguration;
+	/**
 	 * Require explicit return types on functions and class methods.
 	 * See https://biomejs.dev/linter/rules/use-explicit-return-type
 	 */
@@ -5604,6 +5609,9 @@ export type UseDisposablesConfiguration =
 export type UseExhaustiveSwitchCasesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExhaustiveSwitchCasesOptions;
+export type UseExpectToContainConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseExpectToContainOptions;
 export type UseExplicitReturnTypeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseExplicitReturnTypeOptions;
@@ -8042,6 +8050,14 @@ export interface RuleWithUseExhaustiveSwitchCasesOptions {
 	level: RulePlainConfiguration;
 	options?: UseExhaustiveSwitchCasesOptions;
 }
+export interface RuleWithUseExpectToContainOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseExpectToContainOptions;
+}
 export interface RuleWithUseExplicitReturnTypeOptions {
 	level: RulePlainConfiguration;
 	options?: UseExplicitReturnTypeOptions;
@@ -10280,6 +10296,7 @@ export interface UseExhaustiveSwitchCasesOptions {
 	 */
 	requireExplicitCase?: boolean;
 }
+export type UseExpectToContainOptions = {};
 /**
  * Options for the `useExplicitReturnType` rule.
  */
@@ -11834,6 +11851,7 @@ export type Category =
 	| "lint/nursery/useControlLabel"
 	| "lint/nursery/useDisposables"
 	| "lint/nursery/useExhaustiveSwitchCases"
+	| "lint/nursery/useExpectToContain"
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitReturnType"
 	| "lint/nursery/useExplicitType"
