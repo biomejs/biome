@@ -631,7 +631,12 @@ pub(crate) fn parse_class_selector(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![.]);
-    parse_selector_custom_identifier(p).or_add_diagnostic(p, expected_identifier);
+    if is_nth_at_metavariable(p, 0) {
+        parse_selector_metavariable(p)
+    } else {
+        parse_selector_custom_identifier(p)
+    }
+    .or_add_diagnostic(p, expected_identifier);
 
     Present(m.complete(p, CSS_CLASS_SELECTOR))
 }

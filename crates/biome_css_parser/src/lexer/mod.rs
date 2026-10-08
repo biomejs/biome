@@ -12,6 +12,7 @@ use biome_css_syntax::{
     scan_css_number,
 };
 use biome_languages::CssFileSource;
+use biome_languages::css::CssEmbeddingKind;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
@@ -383,6 +384,66 @@ impl<'src> CssLexer<'src> {
         }
     }
 
+    /// Returns the end of the word that starts at the current position, if the
+    /// word contains a Grit metavariable.
+    ///
+    /// In a styled template, the whole word is a single metavariable, because
+    /// the interpolations are substituted as text glued to the text around them:
+    ///
+    /// ```css
+    /// width: ${width}px;
+    /// border-${side}: none;
+    /// ```
+    ///
+    /// Elsewhere, such as in Grit snippets, a metavariable is a token on its own.
+    fn metavariable_word_end(&self) -> Option<usize> {
+        if self.metavariables.is_empty() {
+            return None;
+        }
+
+        if !matches!(
+            self.source_type.as_embedding_kind(),
+            CssEmbeddingKind::Styled
+        ) {
+            return self.metavariable_end_at(self.position());
+        }
+
+        let source = self.source();
+        let mut position = self.position();
+        let mut has_metavariable = false;
+        loop {
+            if let Some(end) = self.metavariable_end_at(position) {
+                position = end;
+                has_metavariable = true;
+                continue;
+            }
+
+            match source.as_bytes().get(position) {
+                Some(byte)
+                    if byte.is_ascii_alphanumeric()
+                        || matches!(byte, b'_' | b'-' | b'%' | b'#') =>
+                {
+                    position += 1;
+                }
+                Some(byte) if !byte.is_ascii() => {
+                    position += source[position..].chars().next().map_or(1, char::len_utf8);
+                }
+                _ => break,
+            }
+        }
+
+        has_metavariable.then_some(position)
+    }
+
+    /// Returns the end of the Grit metavariable that starts at `position`.
+    fn metavariable_end_at(&self, position: usize) -> Option<usize> {
+        let position = TextSize::from(position as u32);
+        self.metavariables
+            .binary_search_by_key(&position, |range| range.start())
+            .ok()
+            .map(|index| self.metavariables[index].end().into())
+    }
+
     pub(crate) fn with_source_type(self, source_type: CssFileSource) -> Self {
         Self {
             source_type,
@@ -487,8 +548,9 @@ impl<'src> CssLexer<'src> {
         // to do more aggressive optimizations on the match regarding how to map it to instructions
         let dispatched = lookup_byte(current);
 
-        if self.is_metavariable_start() {
-            return self.consume_metavariable(GRIT_METAVARIABLE);
+        if let Some(end) = self.metavariable_word_end() {
+            self.advance(end - self.position());
+            return GRIT_METAVARIABLE;
         }
 
         match dispatched {
