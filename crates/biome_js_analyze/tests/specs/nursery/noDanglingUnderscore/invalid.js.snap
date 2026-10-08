@@ -1,0 +1,431 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+var _foo = 1;
+let foo_ = 1;
+const __bar__ = 1;
+var __proto__ = 1;
+for (const _item of items) {}
+for (let _i = 0; _i < 10; _i++) {}
+function _init() {}
+function init_() {}
+foo._bar;
+foo?._bar;
+foo._bar();
+foo.bar._baz;
+this._count;
+this.constructor._instances;
+foo._bar = 1;
+[foo._bar] = [1];
+({ a: foo._bar } = {});
+delete foo._bar;
+class A extends B {
+	constructor() {
+		super._prop;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:2:5 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name _foo starts with an underscore.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ var _foo = 1;
+      │     ^^^^
+    3 │ let foo_ = 1;
+    4 │ const __bar__ = 1;
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:5 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name foo_ ends with an underscore.
+  
+    1 │ /* should generate diagnostics */
+    2 │ var _foo = 1;
+  > 3 │ let foo_ = 1;
+      │     ^^^^
+    4 │ const __bar__ = 1;
+    5 │ var __proto__ = 1;
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:7 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name __bar__ starts and ends with an underscore.
+  
+    2 │ var _foo = 1;
+    3 │ let foo_ = 1;
+  > 4 │ const __bar__ = 1;
+      │       ^^^^^^^
+    5 │ var __proto__ = 1;
+    6 │ for (const _item of items) {}
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:5 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name __proto__ starts and ends with an underscore.
+  
+    3 │ let foo_ = 1;
+    4 │ const __bar__ = 1;
+  > 5 │ var __proto__ = 1;
+      │     ^^^^^^^^^
+    6 │ for (const _item of items) {}
+    7 │ for (let _i = 0; _i < 10; _i++) {}
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:12 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name _item starts with an underscore.
+  
+    4 │ const __bar__ = 1;
+    5 │ var __proto__ = 1;
+  > 6 │ for (const _item of items) {}
+      │            ^^^^^
+    7 │ for (let _i = 0; _i < 10; _i++) {}
+    8 │ function _init() {}
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:10 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name _i starts with an underscore.
+  
+    5 │ var __proto__ = 1;
+    6 │ for (const _item of items) {}
+  > 7 │ for (let _i = 0; _i < 10; _i++) {}
+      │          ^^
+    8 │ function _init() {}
+    9 │ function init_() {}
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:10 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name _init starts with an underscore.
+  
+     6 │ for (const _item of items) {}
+     7 │ for (let _i = 0; _i < 10; _i++) {}
+   > 8 │ function _init() {}
+       │          ^^^^^
+     9 │ function init_() {}
+    10 │ foo._bar;
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:10 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name init_ ends with an underscore.
+  
+     7 │ for (let _i = 0; _i < 10; _i++) {}
+     8 │ function _init() {}
+   > 9 │ function init_() {}
+       │          ^^^^^
+    10 │ foo._bar;
+    11 │ foo?._bar;
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:5 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name _bar starts with an underscore.
+  
+     8 │ function _init() {}
+     9 │ function init_() {}
+  > 10 │ foo._bar;
+       │     ^^^^
+    11 │ foo?._bar;
+    12 │ foo._bar();
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:6 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name _bar starts with an underscore.
+  
+     9 │ function init_() {}
+    10 │ foo._bar;
+  > 11 │ foo?._bar;
+       │      ^^^^
+    12 │ foo._bar();
+    13 │ foo.bar._baz;
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:5 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name _bar starts with an underscore.
+  
+    10 │ foo._bar;
+    11 │ foo?._bar;
+  > 12 │ foo._bar();
+       │     ^^^^
+    13 │ foo.bar._baz;
+    14 │ this._count;
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:9 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name _baz starts with an underscore.
+  
+    11 │ foo?._bar;
+    12 │ foo._bar();
+  > 13 │ foo.bar._baz;
+       │         ^^^^
+    14 │ this._count;
+    15 │ this.constructor._instances;
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:6 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name _count starts with an underscore.
+  
+    12 │ foo._bar();
+    13 │ foo.bar._baz;
+  > 14 │ this._count;
+       │      ^^^^^^
+    15 │ this.constructor._instances;
+    16 │ foo._bar = 1;
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:18 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name _instances starts with an underscore.
+  
+    13 │ foo.bar._baz;
+    14 │ this._count;
+  > 15 │ this.constructor._instances;
+       │                  ^^^^^^^^^^
+    16 │ foo._bar = 1;
+    17 │ [foo._bar] = [1];
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:5 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name _bar starts with an underscore.
+  
+    14 │ this._count;
+    15 │ this.constructor._instances;
+  > 16 │ foo._bar = 1;
+       │     ^^^^
+    17 │ [foo._bar] = [1];
+    18 │ ({ a: foo._bar } = {});
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:6 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name _bar starts with an underscore.
+  
+    15 │ this.constructor._instances;
+    16 │ foo._bar = 1;
+  > 17 │ [foo._bar] = [1];
+       │      ^^^^
+    18 │ ({ a: foo._bar } = {});
+    19 │ delete foo._bar;
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:11 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name _bar starts with an underscore.
+  
+    16 │ foo._bar = 1;
+    17 │ [foo._bar] = [1];
+  > 18 │ ({ a: foo._bar } = {});
+       │           ^^^^
+    19 │ delete foo._bar;
+    20 │ class A extends B {
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:12 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name _bar starts with an underscore.
+  
+    17 │ [foo._bar] = [1];
+    18 │ ({ a: foo._bar } = {});
+  > 19 │ delete foo._bar;
+       │            ^^^^
+    20 │ class A extends B {
+    21 │ 	constructor() {
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:9 lint/nursery/noDanglingUnderscore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The name _prop starts with an underscore.
+  
+    20 │ class A extends B {
+    21 │ 	constructor() {
+  > 22 │ 		super._prop;
+       │ 		      ^^^^^
+    23 │ 	}
+    24 │ }
+  
+  i An underscore at the start or end of a name is often used to mark something as private, but it doesn't change how the code works, so it can mislead readers.
+  
+  i Remove the underscore from the name. For a class member that must stay private, start its name with # instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
