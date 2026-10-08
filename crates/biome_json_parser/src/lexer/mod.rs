@@ -332,7 +332,8 @@ impl<'src> Lexer<'src> {
         // to do more aggressive optimizations on the match regarding how to map it to instructions
         let dispatched = lookup_byte(current);
 
-        if self.is_metavariable_start() {
+        // GritQL metavariables always start with `$`.
+        if current == b'$' && self.is_metavariable_start() {
             return self.consume_metavariable(GRIT_METAVARIABLE);
         }
 
