@@ -819,7 +819,7 @@ mod tests {
 
         assert_eq!(
             formatted.print().unwrap().as_code(),
-            "$Selector {\n\t$Declaration\n\tcolor: $Value;\n}\n@media $Query {\n\tA:hover {\n\t\tcolor: RED;\n\t}\n}\n"
+            "$Selector {\n\t$Declaration;\n\tcolor: $Value;\n}\n@media $Query {\n\tA:hover {\n\t\tcolor: RED;\n\t}\n}\n"
         );
     }
 
