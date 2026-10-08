@@ -10,6 +10,7 @@ expression: c04-if-branch.scss
   --inner: blue;
   color: var(--outer, if(style(--enabled: true): --inner; else: blue));
   background: var(--outer, if(style(--enabled: true): var(--inner); else: blue));
+  border-color: var(--outer, if(sass(--inner == --inner): red; else: blue));
 }
 
 ```
@@ -25,7 +26,7 @@ c04-if-branch.scss:5:50 lint/correctness/noMissingVarFunction ━━━━━━
   > 5 │   color: var(--outer, if(style(--enabled: true): --inner; else: blue));
       │                                                  ^^^^^^^
     6 │   background: var(--outer, if(style(--enabled: true): var(--inner); else: blue));
-    7 │ }
+    7 │   border-color: var(--outer, if(sass(--inner == --inner): red; else: blue));
   
   i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
   

@@ -6,7 +6,8 @@
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_syntax::{
-    AnyCssProperty, CssDashedIdentifier, CssDeclaration, CssGenericProperty, CssSyntaxKind,
+    AnyCssProperty, CssDashedIdentifier, CssDeclaration, CssGenericProperty, CssIfBranch,
+    CssSyntaxKind,
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, Text};
@@ -252,7 +253,14 @@ fn is_wrapped_in_var(node: &CssDashedIdentifier) -> bool {
             //             ^^^^^^^^^^^^^^^^ CSS_GENERIC_COMPONENT_VALUE_LIST
             CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST => return false,
             CssSyntaxKind::CSS_FUNCTION => return parent.text_trimmed().starts_with("var"),
-            CssSyntaxKind::CSS_IF_BRANCH | CssSyntaxKind::SCSS_LEGACY_IF_FUNCTION => return false,
+            CssSyntaxKind::CSS_IF_BRANCH
+                if CssIfBranch::cast_ref(&parent)
+                    .and_then(|branch| branch.value().ok())
+                    .is_some_and(|value| value.range().contains_range(node.range())) =>
+            {
+                return false;
+            }
+            CssSyntaxKind::SCSS_LEGACY_IF_FUNCTION => return false,
             _ => {}
         }
         current_node = parent.parent();

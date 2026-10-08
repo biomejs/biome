@@ -4,4 +4,5 @@
   --inner: blue;
   color: var(--outer, if(style(--enabled: true): --inner; else: blue));
   background: var(--outer, if(style(--enabled: true): var(--inner); else: blue));
+  border-color: var(--outer, if(sass(--inner == --inner): red; else: blue));
 }
