@@ -18,3 +18,8 @@ ${First}${Second} {
 @media (min-width: ${breakpoint}px) {
 	display: none;
 }
+width: 1.5${unit};
+margin: -.5${unit};
+${Item}.active {
+	color: red;
+}
