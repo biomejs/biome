@@ -431,25 +431,23 @@ impl<'src> CssLexer<'src> {
                 continue;
             }
 
-            match source.as_bytes().get(position) {
-                Some(byte)
-                    if byte.is_ascii_alphanumeric()
-                        || matches!(byte, b'_' | b'-' | b'%' | b'#') =>
-                {
-                    position += 1;
-                }
+            let Some(&byte) = source.as_bytes().get(position) else {
+                break;
+            };
+
+            match lookup_byte(byte) {
+                IDT | DIG | ZER | MIN | PRC | HAS => position += 1,
                 // A decimal point belongs to the number, such as in
                 // `1.5${unit}`, while a selector dot like in `${Item}.active`
                 // is a boundary.
-                Some(b'.')
-                    if source
-                        .as_bytes()
-                        .get(position + 1)
-                        .is_some_and(u8::is_ascii_digit) =>
+                PRD if source
+                    .as_bytes()
+                    .get(position + 1)
+                    .is_some_and(|&next| matches!(lookup_byte(next), DIG | ZER)) =>
                 {
                     position += 1;
                 }
-                Some(byte) if !byte.is_ascii() => {
+                UNI => {
                     position += source[position..].chars().next().map_or(1, char::len_utf8);
                 }
                 _ => break,
