@@ -1,0 +1,24 @@
+# should not generate diagnostics
+name: foo
+---
+- foo
+---
+foo
+---
+~
+---
+''
+---
+{}
+---
+[]
+---
+|
+  foo
+---
+!!str foo
+---
+&anchor foo
+---
+*anchor
+...

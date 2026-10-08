@@ -1,0 +1,72 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: invalidAllowComments.yaml
+---
+# Input
+```yaml
+# should generate diagnostics
+---
+...
+# Comment between documents
+---
+---
+
+```
+
+# Diagnostics
+```
+invalidAllowComments.yaml:2:1 lint/suspicious/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty document is not allowed.
+  
+    1 │ # should generate diagnostics
+  > 2 │ ---
+      │ ^^^
+  > 3 │ ...
+      │ ^^^
+    4 │ # Comment between documents
+    5 │ ---
+  
+  i Tools that read this file get an empty value for this document, which is rarely intended.
+  
+  i Add content to the document, or remove it.
+  
+
+```
+
+```
+invalidAllowComments.yaml:5:1 lint/suspicious/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty document is not allowed.
+  
+    3 │ ...
+    4 │ # Comment between documents
+  > 5 │ ---
+      │ ^^^
+    6 │ ---
+    7 │ 
+  
+  i Tools that read this file get an empty value for this document, which is rarely intended.
+  
+  i Add content to the document, or remove it.
+  
+
+```
+
+```
+invalidAllowComments.yaml:6:1 lint/suspicious/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty document is not allowed.
+  
+    4 │ # Comment between documents
+    5 │ ---
+  > 6 │ ---
+      │ ^^^
+    7 │ 
+  
+  i Tools that read this file get an empty value for this document, which is rarely intended.
+  
+  i Add content to the document, or remove it.
+  
+
+```
