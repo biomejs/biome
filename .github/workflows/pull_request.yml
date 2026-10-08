@@ -124,6 +124,7 @@ jobs:
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:
+          bins: cargo-nextest
           cache-base: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -132,10 +133,10 @@ jobs:
         env:
           CARGO_PROFILE_TEST_DEBUG: '0'
           CARGO_INCREMENTAL: '0'
-        run: cargo test --workspace --features=js_plugin
+        run: cargo nextest run --workspace --features=js_plugin --no-fail-fast
       - name: Run tests on ${{ matrix.os }}
         if: matrix.os != 'depot-windows-2022-16'
-        run: cargo test --workspace --features=js_plugin
+        run: cargo nextest run --workspace --features=js_plugin --no-fail-fast
 
   e2e-tests:
     name: End-to-end tests
@@ -168,3 +169,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run doc command
         run: cargo documentation
+      - name: Run doc tests
+        run: cargo test --workspace --doc --features=js_plugin --no-fail-fast
