@@ -19,6 +19,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noAccessKey",
         TypeId::of::<biome_rule_options::no_access_key::NoAccessKeyOptions>(),
     ));
+    result.push(("nursery", "noAccidentalBitwiseOperators", TypeId::of::<biome_rule_options::no_accidental_bitwise_operators::NoAccidentalBitwiseOperatorsOptions>()));
     result.push((
         "performance",
         "noAccumulatingSpread",
