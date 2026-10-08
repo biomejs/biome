@@ -26,7 +26,8 @@ use crate::{
     utils::module_constant::{
         collision_free_module_constant_name_with_facts,
         extract_module_constant_with_reserved_names, is_module_constant_extractable_with_facts,
-        module_constant_facts, module_constant_insertion_slot, module_constant_numeric_name,
+        module_constant_facts, module_constant_insertion_slot, module_constant_numeric_context,
+        module_constant_numeric_name, normalize_module_constant_name_component,
     },
 };
 
@@ -187,7 +188,10 @@ fn build_coordinated_extractions(
     let facts = module_constant_facts(root, model);
     let mut extractions = FxHashMap::default();
     let mut reserved_names = FxHashSet::default();
-    let mut names_by_value: FxHashMap<String, Vec<String>> = FxHashMap::default();
+    let mut names_by_value: FxHashMap<(String, Vec<String>), Vec<String>> = FxHashMap::default();
+    let mut candidates = Vec::new();
+    let mut values_by_context: FxHashMap<(Vec<String>, String), FxHashSet<String>> =
+        FxHashMap::default();
 
     for descendant in root.syntax().descendants() {
         let Some(numeric_literal) = AnyJsNumericLiteral::cast(descendant) else {
@@ -202,8 +206,34 @@ fn build_coordinated_extractions(
         }
 
         let value_key = numeric_literal.syntax().text_trimmed().to_string();
-        let candidate_name = module_constant_numeric_name(numeric_literal.syntax(), &value_key);
-        let (name, reused_name) = if let Some(names) = names_by_value.get(&value_key) {
+        let context_key = module_constant_numeric_context(numeric_literal.syntax());
+        let base_name = module_constant_numeric_name(numeric_literal.syntax());
+        let value_component = normalize_module_constant_name_component(&value_key, None)
+            .unwrap_or_else(|| "NUMBER".to_string());
+        values_by_context
+            .entry((context_key.clone(), base_name.clone()))
+            .or_default()
+            .insert(value_key.clone());
+        candidates.push((
+            numeric_literal,
+            value_key,
+            context_key,
+            base_name,
+            value_component,
+        ));
+    }
+
+    for (numeric_literal, value_key, context_key, base_name, value_component) in candidates {
+        let reuse_key = (value_key.clone(), context_key.clone());
+        let has_distinct_values = values_by_context
+            .get(&(context_key, base_name.clone()))
+            .is_some_and(|values| values.len() > 1);
+        let candidate_name = if has_distinct_values {
+            format!("{base_name}_{value_component}")
+        } else {
+            base_name.clone()
+        };
+        let (name, reused_name) = if let Some(names) = names_by_value.get(&reuse_key) {
             let reusable_name = names.iter().find(|name| {
                 let name = name.as_str();
                 let mut names_available_for_target = reserved_names.clone();
@@ -220,28 +250,50 @@ fn build_coordinated_extractions(
             if let Some(name) = reusable_name {
                 (name.clone(), true)
             } else {
-                (
-                    collision_free_module_constant_name_with_facts(
-                        model,
-                        numeric_literal.syntax(),
-                        &candidate_name,
-                        &reserved_names,
-                        &facts,
-                    ),
-                    false,
-                )
-            }
-        } else {
-            (
-                collision_free_module_constant_name_with_facts(
+                let name = collision_free_module_constant_name_with_facts(
                     model,
                     numeric_literal.syntax(),
                     &candidate_name,
                     &reserved_names,
                     &facts,
-                ),
-                false,
-            )
+                );
+                if !has_distinct_values && name != base_name {
+                    (
+                        collision_free_module_constant_name_with_facts(
+                            model,
+                            numeric_literal.syntax(),
+                            &format!("{base_name}_{value_component}"),
+                            &reserved_names,
+                            &facts,
+                        ),
+                        false,
+                    )
+                } else {
+                    (name, false)
+                }
+            }
+        } else {
+            let name = collision_free_module_constant_name_with_facts(
+                model,
+                numeric_literal.syntax(),
+                &candidate_name,
+                &reserved_names,
+                &facts,
+            );
+            if !has_distinct_values && name != base_name {
+                (
+                    collision_free_module_constant_name_with_facts(
+                        model,
+                        numeric_literal.syntax(),
+                        &format!("{base_name}_{value_component}"),
+                        &reserved_names,
+                        &facts,
+                    ),
+                    false,
+                )
+            } else {
+                (name, false)
+            }
         };
 
         let mut names_for_current = reserved_names.clone();
@@ -258,7 +310,7 @@ fn build_coordinated_extractions(
 
         if !reused_name {
             names_by_value
-                .entry(value_key)
+                .entry(reuse_key)
                 .or_default()
                 .push(name.clone());
             reserved_names.insert(name);
@@ -649,7 +701,7 @@ mod tests {
         let parsed = parse(
             r#"function read(value) {
     value + 123;
-    ((READ_123) => value + 123)(value);
+    ((READ_ADDEND) => value + 123)(value);
 }
 "#,
             JsFileSource::js_module(),
@@ -666,6 +718,6 @@ mod tests {
         let (name, _, _) = coordinated_extraction(&parsed.tree(), &model, second)
             .expect("expected a coordinated extraction");
 
-        assert_eq!(name, "READ_123_2");
+        assert_eq!(name, "READ_ADDEND_123");
     }
 }
