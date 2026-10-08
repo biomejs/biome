@@ -1,0 +1,16 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-issue-8762.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+/**
+ * Helpers for working with {@linkcode Foo}.
+ * @module
+ */
+
+import { Foo } from "./foo";
+
+```

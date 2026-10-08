@@ -21,7 +21,7 @@ use biome_js_syntax::{
     AnyJsBinding, AnyJsClassMember, AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportClause,
     AnyJsExportNamedSpecifier, AnyJsImportClause, AnyJsModuleItem, AnyJsNamedImportSpecifier,
     AnyJsObjectMember, AnyTsTypeMember, JsExport, JsLanguage, JsNamedImportSpecifiers,
-    JsStaticMemberAssignment, JsSyntaxNode, T, TsEnumMember,
+    JsStaticMemberAssignment, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, T, TsEnumMember,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_languages::JsFileSource;
@@ -539,6 +539,9 @@ impl Visitor for JsDocTypeCollectorVisitor {
     ) {
         match event {
             WalkEvent::Enter(node) => {
+                if matches!(node.kind(), JsSyntaxKind::JS_MODULE | JsSyntaxKind::JS_SCRIPT) {
+                    load_jsdoc_types_from_module_comments(&mut self.jsdoc_types, node);
+                }
                 if AnyJsWithTypeReferencingJsDoc::can_cast(node.kind()) {
                     load_jsdoc_types_from_node(&mut self.jsdoc_types, node);
                 }
@@ -556,6 +559,44 @@ fn load_jsdoc_types_from_node(model: &mut JsDocTypeModel, node: &SyntaxNode<JsLa
     JsdocComment::get_jsdocs(node)
         .for_each(|comment| load_jsdoc_types_from_jsdoc_comment(model, comment.as_str()));
 }
+
+/// Loads the types referenced by module-level JSDoc comments, i.e. comments
+/// with a `@module` tag.
+///
+/// These comments document the whole file, so they are usually placed before
+/// the imports or at the end of the file, where they aren't attached to any
+/// declaration. Only the top-level statements and the EOF token are inspected.
+fn load_jsdoc_types_from_module_comments(model: &mut JsDocTypeModel, root: &JsSyntaxNode) {
+    for element in root.children_with_tokens() {
+        match element {
+            NodeOrToken::Node(list) => {
+                for item in list.children() {
+                    if let Some(token) = item.first_token() {
+                        load_jsdoc_types_from_module_comments_of_token(model, &token);
+                    }
+                }
+            }
+            NodeOrToken::Token(token) => {
+                load_jsdoc_types_from_module_comments_of_token(model, &token);
+            }
+        }
+    }
+}
+
+fn load_jsdoc_types_from_module_comments_of_token(model: &mut JsDocTypeModel, token: &JsSyntaxToken) {
+    for piece in token.leading_trivia().pieces() {
+        let text = piece.text();
+        if piece.is_comments()
+            && JsdocComment::text_is_jsdoc_comment(text)
+            && JSDOC_MODULE_TAG_REGEX.is_match(text)
+        {
+            load_jsdoc_types_from_jsdoc_comment(model, text);
+        }
+    }
+}
+
+static JSDOC_MODULE_TAG_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?:^|[\s*])@module\b").unwrap());
 
 static JSDOC_INLINE_TAG_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"\{@(linkcode|linkplain|link|see)\s*([^}| #\.]+)(?:[^}]+)?\}").unwrap()

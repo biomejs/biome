@@ -1,0 +1,110 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-issue-8762.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// Without a `@module` tag, a JSDoc comment that isn't attached to a
+// declaration doesn't count as a usage.
+
+/** {@link Foo} */
+
+import type { Foo } from "./foo";
+import type { Bar } from "./bar";
+import type { Baz } from "./baz";
+
+/** {@link Bar} */
+console.log("side effect");
+
+/** {@link Baz} @modules */
+
+```
+
+# Diagnostics
+```
+invalid-issue-8762.ts:8:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+     6 │ /** {@link Foo} */
+     7 │ 
+   > 8 │ import type { Foo } from "./foo";
+       │             ^^^^^^^
+     9 │ import type { Bar } from "./bar";
+    10 │ import type { Baz } from "./baz";
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     1    │ - /*·should·generate·diagnostics·*/
+     2    │ - 
+     3    │ - //·Without·a·`@module`·tag,·a·JSDoc·comment·that·isn't·attached·to·a
+     4    │ - //·declaration·doesn't·count·as·a·usage.
+     5    │ - 
+     6    │ - /**·{@link·Foo}·*/
+     7    │ - 
+     8    │ - import·type·{·Foo·}·from·"./foo";
+        1 │ + /*·should·generate·diagnostics·*/
+        2 │ + 
+        3 │ + //·Without·a·`@module`·tag,·a·JSDoc·comment·that·isn't·attached·to·a
+        4 │ + //·declaration·doesn't·count·as·a·usage.
+        5 │ + 
+        6 │ + /**·{@link·Foo}·*/
+        7 │ + 
+     9  8 │   import type { Bar } from "./bar";
+    10  9 │   import type { Baz } from "./baz";
+  
+
+```
+
+```
+invalid-issue-8762.ts:9:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+     8 │ import type { Foo } from "./foo";
+   > 9 │ import type { Bar } from "./bar";
+       │             ^^^^^^^
+    10 │ import type { Baz } from "./baz";
+    11 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     7  7 │   
+     8  8 │   import type { Foo } from "./foo";
+     9    │ - import·type·{·Bar·}·from·"./bar";
+    10  9 │   import type { Baz } from "./baz";
+    11 10 │   
+  
+
+```
+
+```
+invalid-issue-8762.ts:10:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+     8 │ import type { Foo } from "./foo";
+     9 │ import type { Bar } from "./bar";
+  > 10 │ import type { Baz } from "./baz";
+       │             ^^^^^^^
+    11 │ 
+    12 │ /** {@link Bar} */
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     8  8 │   import type { Foo } from "./foo";
+     9  9 │   import type { Bar } from "./bar";
+    10    │ - import·type·{·Baz·}·from·"./baz";
+    11 10 │   
+    12 11 │   /** {@link Bar} */
+  
+
+```
