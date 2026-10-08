@@ -1,0 +1,173 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+expression: issue_5756.json
+---
+# Input
+```json
+{
+  "282828": null,
+  "404040": null,
+  "444444": null,
+  "493099": null,
+  "555555": null,
+  "666666": null,
+  "696969": null,
+  "777777": null,
+  "808080": null,
+  "999999": null,
+  "000000": null,
+  "0000FF": null,
+  "001F3F": null,
+  "008000": null,
+  "00E6B8": null,
+  "00FF00": null,
+  "00FFFF": null,
+  "01A9DB": null,
+  "14CD61": null,
+  "33FF00": null,
+  "4EA24E": null,
+  "5A0EDE": null,
+  "6141CD": null,
+  "64C864": null,
+  "8A2BE2": null,
+  "8B0000": null,
+  "8B4513": null,
+  "9400D3": null,
+  "9A2EFE": null,
+  "A00000": null,
+  "A8A7AC": null,
+  "AAAAAA": null,
+  "C0C0C0": null,
+  "CD853F": null,
+  "CECEC3": null,
+  "CF4F20": null,
+  "D2B48C": null,
+  "D3D3D3": null,
+  "DBA901": null,
+  "DCDCDC": null,
+  "DF01D7": null,
+  "E00000": null,
+  "EEEEEE": null,
+  "EFEFF4": null,
+  "F4A460": null,
+  "F6F6F6": null,
+  "F9F9F9": null,
+  "FA0EDE": null,
+  "FF0000": null,
+  "FF00FF": null,
+  "FF3030": null,
+  "FF4136": null,
+  "FF571A": null,
+  "FF7F50": null,
+  "FFA500": null,
+  "FFD700": null,
+  "FFFF00": null,
+  "FFFFFF": null
+}
+
+```
+
+# Diagnostics
+```
+issue_5756.json:1:1 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The members are not sorted by key.
+  
+   > 1 │ {
+       │ ^
+   > 2 │   "282828": null,
+   > 3 │   "404040": null,
+   > 4 │   "444444": null,
+        ...
+  > 58 │   "FFFF00": null,
+  > 59 │   "FFFFFF": null
+  > 60 │ }
+       │ ^
+    61 │ 
+  
+  i Safe fix: Sort the members by key.
+  
+     1  1 │   {
+     2    │ - ··"282828":·null,
+     3    │ - ··"404040":·null,
+     4    │ - ··"444444":·null,
+     5    │ - ··"493099":·null,
+     6    │ - ··"555555":·null,
+     7    │ - ··"666666":·null,
+     8    │ - ··"696969":·null,
+     9    │ - ··"777777":·null,
+    10    │ - ··"808080":·null,
+    11    │ - ··"999999":·null,
+    12    │ - ··"000000":·null,
+    13    │ - ··"0000FF":·null,
+    14    │ - ··"001F3F":·null,
+    15    │ - ··"008000":·null,
+    16    │ - ··"00E6B8":·null,
+    17    │ - ··"00FF00":·null,
+    18    │ - ··"00FFFF":·null,
+    19    │ - ··"01A9DB":·null,
+    20    │ - ··"14CD61":·null,
+    21    │ - ··"33FF00":·null,
+    22    │ - ··"4EA24E":·null,
+    23    │ - ··"5A0EDE":·null,
+    24    │ - ··"6141CD":·null,
+    25    │ - ··"64C864":·null,
+    26    │ - ··"8A2BE2":·null,
+    27    │ - ··"8B0000":·null,
+    28    │ - ··"8B4513":·null,
+    29    │ - ··"9400D3":·null,
+    30    │ - ··"9A2EFE":·null,
+    31    │ - ··"A00000":·null,
+    32    │ - ··"A8A7AC":·null,
+        2 │ + ··"4EA24E":·null,
+        3 │ + ··"5A0EDE":·null,
+        4 │ + ··"8A2BE2":·null,
+        5 │ + ··"8B0000":·null,
+        6 │ + ··"8B4513":·null,
+        7 │ + ··"9A2EFE":·null,
+        8 │ + ··"00E6B8":·null,
+        9 │ + ··"00FF00":·null,
+       10 │ + ··"00FFFF":·null,
+       11 │ + ··"01A9DB":·null,
+       12 │ + ··"14CD61":·null,
+       13 │ + ··"33FF00":·null,
+       14 │ + ··"64C864":·null,
+       15 │ + ··"001F3F":·null,
+       16 │ + ··"0000FF":·null,
+       17 │ + ··"6141CD":·null,
+       18 │ + ··"9400D3":·null,
+       19 │ + ··"000000":·null,
+       20 │ + ··"008000":·null,
+       21 │ + ··"282828":·null,
+       22 │ + ··"404040":·null,
+       23 │ + ··"444444":·null,
+       24 │ + ··"493099":·null,
+       25 │ + ··"555555":·null,
+       26 │ + ··"666666":·null,
+       27 │ + ··"696969":·null,
+       28 │ + ··"777777":·null,
+       29 │ + ··"808080":·null,
+       30 │ + ··"999999":·null,
+       31 │ + ··"A8A7AC":·null,
+       32 │ + ··"A00000":·null,
+    33 33 │     "AAAAAA": null,
+    34 34 │     "C0C0C0": null,
+    ····· │ 
+    48 48 │     "F9F9F9": null,
+    49 49 │     "FA0EDE": null,
+    50    │ - ··"FF0000":·null,
+       50 │ + ··"FF7F50":·null,
+    51 51 │     "FF00FF": null,
+    52    │ - ··"FF3030":·null,
+    53    │ - ··"FF4136":·null,
+    54    │ - ··"FF571A":·null,
+    55    │ - ··"FF7F50":·null,
+       52 │ + ··"FF571A":·null,
+       53 │ + ··"FF0000":·null,
+       54 │ + ··"FF3030":·null,
+       55 │ + ··"FF4136":·null,
+    56 56 │     "FFA500": null,
+    57 57 │     "FFD700": null,
+  
+
+```
