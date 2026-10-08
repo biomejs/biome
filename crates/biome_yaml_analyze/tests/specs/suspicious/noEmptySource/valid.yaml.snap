@@ -1,0 +1,32 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: valid.yaml
+---
+# Input
+```yaml
+# should not generate diagnostics
+name: foo
+---
+- foo
+---
+foo
+---
+~
+---
+''
+---
+{}
+---
+[]
+---
+|
+  foo
+---
+!!str foo
+---
+&anchor foo
+---
+*anchor
+...
+
+```
