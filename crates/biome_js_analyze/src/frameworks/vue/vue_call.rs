@@ -1,6 +1,6 @@
-use crate::frameworks::is_framework_api_reference;
+use crate::frameworks::{framework_api_name, is_framework_api_reference};
 use biome_js_semantic::SemanticModel;
-use biome_js_syntax::{AnyJsExpression, JsCallExpression};
+use biome_js_syntax::{AnyJsExpression, JsCallExpression, static_value::StaticValue};
 
 /// Given a Vue compiler macro, checks if the given call expression is a call to that macro.
 pub fn is_vue_compiler_macro_call(
@@ -46,6 +46,12 @@ pub fn is_vue_api_reference(
         VUE_PACKAGE_NAMES,
         VUE_GLOBAL_NAME,
     )
+}
+
+/// Returns the name of the Vue API function that `expression` refers to, such as `onMounted` for
+/// `onMounted` imported from `vue` (also when renamed) or for `Vue.onMounted`.
+pub fn vue_api_name(expression: &AnyJsExpression, model: &SemanticModel) -> Option<StaticValue> {
+    framework_api_name(expression, model, VUE_PACKAGE_NAMES, VUE_GLOBAL_NAME)
 }
 
 const VUE_PACKAGE_NAMES: &[&str] = &["vue"];
