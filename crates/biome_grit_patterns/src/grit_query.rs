@@ -5,6 +5,7 @@ use crate::grit_definitions::{
     Definitions, ScannedDefinitionInfo, compile_definitions, scan_definitions,
 };
 use crate::grit_file::GritFile;
+use crate::grit_node_patterns::are_import_kinds_compatible;
 use crate::grit_resolved_pattern::GritResolvedPattern;
 use crate::grit_target_language::GritTargetLanguage;
 use crate::grit_target_node::GritTargetSyntaxKind;
@@ -19,6 +20,7 @@ use crate::{BuiltInFunction, CompileError};
 use biome_analyze::RuleDiagnostic;
 use biome_diagnostics::Applicability;
 use biome_grit_syntax::{GritRoot, GritRootExt};
+use biome_js_syntax::JsSyntaxKind;
 use camino::Utf8Path;
 use grit_pattern_matcher::constants::{
     ABSOLUTE_PATH_INDEX, FILENAME_INDEX, GLOBAL_VARS_SCOPE_INDEX, NEW_FILES_INDEX, PROGRAM_INDEX,
@@ -26,8 +28,8 @@ use grit_pattern_matcher::constants::{
 use grit_pattern_matcher::context::ExecContext;
 use grit_pattern_matcher::file_owners::{FileOwner, FileOwners};
 use grit_pattern_matcher::pattern::{
-    File as GritFileTrait, FilePtr, FileRegistry, Matcher, Pattern, Predicate, ResolvedPattern,
-    State, VariableSource,
+    File as GritFileTrait, FilePtr, FileRegistry, Match as MatchPredicate, Matcher, Or, Pattern,
+    Predicate, ResolvedPattern, State, VariableSource, Where,
 };
 use grit_util::error::{GritPatternError, GritResult};
 use grit_util::{AnalysisLogs, Ast, ByteRange, InputRanges, Range, VariableMatch};
@@ -52,6 +54,11 @@ pub struct GritQuery {
 
     /// Cached syntax kinds targeted by the compiled pattern.
     anchor_kinds: Vec<GritTargetSyntaxKind>,
+
+    /// Copies of the pattern run at anchor nodes of some kinds, which keep
+    /// only the `or` branches able to match those kinds. See
+    /// [`or_branches_by_kind()`].
+    inner_by_kind: Vec<(GritTargetSyntaxKind, Pattern<GritQueryContext>)>,
 
     /// Definitions for named patterns, predicates and functions.
     pub definitions: Definitions,
@@ -205,9 +212,14 @@ impl GritQuery {
         // Execute inner pattern (Bubble) at each anchor-kind node.
         let mut matched = false;
         for node in anchor_nodes {
+            let pattern = self
+                .inner_by_kind
+                .iter()
+                .find_map(|(kind, pattern)| (*kind == node.kind()).then_some(pattern))
+                .unwrap_or(inner);
             let binding = GritResolvedPattern::from_node_binding(node);
             let saved = state.clone();
-            if inner.execute(&binding, &mut state, &context, &mut logs)? {
+            if pattern.execute(&binding, &mut state, &context, &mut logs)? {
                 matched = true;
             } else {
                 state = saved;
@@ -350,6 +362,7 @@ impl GritQuery {
         )?;
 
         let anchor_kinds = extract_anchor_kinds(&pattern);
+        let inner_by_kind = or_branches_by_kind(&pattern);
 
         let name = source_path
             .and_then(Utf8Path::file_stem)
@@ -360,6 +373,7 @@ impl GritQuery {
         Ok(Self {
             pattern,
             anchor_kinds,
+            inner_by_kind,
             definitions,
             name,
             built_ins,
@@ -650,6 +664,79 @@ fn extract_anchor_kinds_from_predicate(
     }
 }
 
+/// Builds copies of the inner pattern of `execute_optimized()` for a query
+/// whose pattern is an `or`, each keeping only the branches that can match
+/// nodes of one kind.
+///
+/// `Or` clones the whole matcher state before trying each branch, so a query
+/// made of many snippets otherwise spends most of its time on branches that
+/// can't match the node. Branch kinds come from [`extract_anchor_kinds()`].
+/// Returns no copies if any branch can match nodes of every kind, and no copy
+/// for a kind that every branch can match.
+fn or_branches_by_kind(
+    pattern: &Pattern<GritQueryContext>,
+) -> Vec<(GritTargetSyntaxKind, Pattern<GritQueryContext>)> {
+    let Some(Pattern::Bubble(bubble)) = extract_contains_inner(pattern) else {
+        return Vec::new();
+    };
+    let Pattern::Where(where_pattern) = bubble.pattern_def.pattern() else {
+        return Vec::new();
+    };
+    let Predicate::Match(match_predicate) = &where_pattern.side_condition else {
+        return Vec::new();
+    };
+    let Some(Pattern::Or(or)) = &match_predicate.pattern else {
+        return Vec::new();
+    };
+    let branch_kinds: Vec<_> = or.patterns.iter().map(extract_anchor_kinds).collect();
+    if branch_kinds.iter().any(Vec::is_empty) {
+        return Vec::new();
+    }
+
+    let mut kinds: Vec<GritTargetSyntaxKind> = Vec::new();
+    for &kind in branch_kinds.iter().flatten() {
+        // Snippets also match the only child of an identifier expression, so
+        // any branch may match one.
+        if kind.as_js_kind() != Some(JsSyntaxKind::JS_IDENTIFIER_EXPRESSION)
+            && !kinds.contains(&kind)
+        {
+            kinds.push(kind);
+        }
+    }
+
+    let mut result = Vec::new();
+    for kind in kinds {
+        let branches: Vec<_> = or
+            .patterns
+            .iter()
+            .zip(&branch_kinds)
+            .filter(|(_, branch_kinds)| {
+                branch_kinds.iter().any(|&branch_kind| {
+                    branch_kind == kind || are_import_kinds_compatible(branch_kind, kind)
+                })
+            })
+            .map(|(branch, _)| branch.clone())
+            .collect();
+        if branches.len() == or.patterns.len() {
+            continue;
+        }
+
+        let mut specialized = bubble.clone();
+        specialized
+            .pattern_def
+            .replace_pattern(Pattern::Where(Box::new(Where::new(
+                where_pattern.pattern.clone(),
+                Predicate::Match(Box::new(MatchPredicate::new(
+                    match_predicate.val.clone(),
+                    Some(Pattern::Or(Box::new(Or::new(branches)))),
+                ))),
+            ))));
+        result.push((kind, Pattern::Bubble(specialized)));
+    }
+
+    result
+}
+
 /// Navigates the auto-wrapped pattern tree to find the inner pattern
 /// of the Contains node (the Bubble pattern).
 ///
@@ -876,6 +963,74 @@ mod tests {
             };
             assert_eq!(rewrite.rewritten.content, expected);
         }
+    }
+
+    fn or_branch_count(query: &GritQuery, kind: JsSyntaxKind) -> Option<usize> {
+        let (_, pattern) = query
+            .inner_by_kind
+            .iter()
+            .find(|(inner_kind, _)| inner_kind.as_js_kind() == Some(kind))?;
+        let Pattern::Bubble(bubble) = pattern else {
+            return None;
+        };
+        let Pattern::Where(where_pattern) = bubble.pattern_def.pattern() else {
+            return None;
+        };
+        let Predicate::Match(match_predicate) = &where_pattern.side_condition else {
+            return None;
+        };
+        let Some(Pattern::Or(or)) = &match_predicate.pattern else {
+            return None;
+        };
+        Some(or.patterns.len())
+    }
+
+    #[test]
+    fn or_branches_by_kind_keeps_branches_matching_each_kind() {
+        let query = compile_js_query("or { `foo($x)`, `bar($x)`, `x = $b` }");
+
+        assert_eq!(
+            or_branch_count(&query, JsSyntaxKind::JS_CALL_EXPRESSION),
+            Some(2)
+        );
+        assert_eq!(
+            or_branch_count(&query, JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION),
+            Some(1)
+        );
+    }
+
+    #[test]
+    fn or_branches_by_kind_is_empty_with_universal_branch() {
+        let query = compile_js_query("or { `foo($x)`, $y }");
+
+        assert!(query.inner_by_kind.is_empty());
+    }
+
+    #[test]
+    fn execute_optimized_matches_execute_for_or_of_snippets() {
+        let query = compile_js_query(
+            "or { `foo($x)` => `qux($x)`, `bar($x)` => `quux($x)`, `x = $b` => `$b` }",
+        );
+        let code = r#"
+            foo(1);
+            bar(2);
+            x = 3;
+            y = 4;
+        "#;
+
+        let opt_result = query
+            .execute_optimized(make_js_file(code))
+            .expect("optimized failed");
+        let full_result = query.execute(make_js_file(code)).expect("execute failed");
+
+        assert!(
+            !full_result.effects.is_empty(),
+            "full execute should produce rewrite effects"
+        );
+        assert_eq!(
+            opt_result.effects, full_result.effects,
+            "or of snippets: optimized and full should produce identical effects"
+        );
     }
 
     #[test]

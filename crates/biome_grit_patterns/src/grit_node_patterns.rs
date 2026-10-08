@@ -14,7 +14,7 @@ use grit_util::{AnalysisLogs, ByteRange, Language};
 use regex::Regex;
 
 /// Check if two syntax kinds are compatible for import pattern matching
-fn are_import_kinds_compatible(
+pub(crate) fn are_import_kinds_compatible(
     pattern_kind: GritTargetSyntaxKind,
     node_kind: GritTargetSyntaxKind,
 ) -> bool {
