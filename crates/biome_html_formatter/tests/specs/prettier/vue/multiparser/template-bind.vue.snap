@@ -46,8 +46,7 @@ info: vue/multiparser/template-bind.vue
 -  <button .disabled="a && b"></button>
 +  <button .disabled="   a &&b "></button>
  
--  <button @click="foo(arg, 'string')"></button>
-+  <button @click=" foo ( arg, 'string' ) "></button>
+   <button @click="foo(arg, 'string')"></button>
  </template>
 ```
 
@@ -65,7 +64,7 @@ info: vue/multiparser/template-bind.vue
   <button :disabled="a && b"></button>
   <button .disabled="   a &&b "></button>
 
-  <button @click=" foo ( arg, 'string' ) "></button>
+  <button @click="foo(arg, 'string')"></button>
 </template>
 ```
 
