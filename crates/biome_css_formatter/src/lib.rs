@@ -270,11 +270,21 @@ where
 #[derive(Debug, Default, Clone)]
 pub struct CssFormatLanguage {
     options: CssFormatOptions,
+    metavariable_ranges: Vec<TextRange>,
 }
 
 impl CssFormatLanguage {
     pub fn new(options: CssFormatOptions) -> Self {
-        Self { options }
+        Self {
+            options,
+            metavariable_ranges: Vec::new(),
+        }
+    }
+
+    /// Writes the given ranges of metavariables as embedded elements.
+    pub fn with_metavariable_ranges(mut self, metavariable_ranges: Vec<TextRange>) -> Self {
+        self.metavariable_ranges = metavariable_ranges;
+        self
     }
 }
 
@@ -312,7 +322,9 @@ impl FormatLanguage for CssFormatLanguage {
         _delegate_fmt_embedded_nodes: bool,
     ) -> Self::Context {
         let comments = Comments::from_node(root, &CssCommentStyle, source_map.as_ref());
-        CssFormatContext::new(self.options, comments).with_source_map(source_map)
+        CssFormatContext::new(self.options, comments)
+            .with_source_map(source_map)
+            .with_metavariable_ranges(self.metavariable_ranges)
     }
 }
 
@@ -425,6 +437,23 @@ pub fn format_node_with_offset(
     root: &CssSyntaxNodeWithOffset,
 ) -> FormatResult<Formatted<CssFormatContext>> {
     biome_formatter::format_node_with_offset(root, CssFormatLanguage::new(options), false)
+}
+
+/// Formats a CSS syntax tree with an offset, writing the given ranges of
+/// metavariables as embedded elements.
+///
+/// The ranges are relative to the start of `root`, such as the interpolations
+/// of a styled-components template.
+pub fn format_node_with_offset_and_metavariables(
+    options: CssFormatOptions,
+    root: &CssSyntaxNodeWithOffset,
+    metavariable_ranges: Vec<TextRange>,
+) -> FormatResult<Formatted<CssFormatContext>> {
+    biome_formatter::format_node_with_offset(
+        root,
+        CssFormatLanguage::new(options).with_metavariable_ranges(metavariable_ranges),
+        false,
+    )
 }
 
 /// Formats a single node within a file, supported by Biome.
