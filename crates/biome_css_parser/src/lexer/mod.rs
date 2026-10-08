@@ -154,6 +154,10 @@ pub enum CssReLexContext {
     UnicodeRange,
     /// Re-lexes `+` and `-` as standalone tokens for SCSS expression parsing.
     ScssExpression,
+    /// Re-lexes a name suffix without requiring an identifier-start character.
+    ///
+    /// `@custom-#{$name}01 token;` keeps `01` without number normalization.
+    ScssIdentifierContinuation,
 }
 
 /// An extremely fast, lookup table based, lossless CSS lexer
@@ -1690,6 +1694,17 @@ impl<'src> ReLexer<'src> for CssLexer<'src> {
                 CssReLexContext::Regular => self.consume_token(current),
                 CssReLexContext::UnicodeRange => self.consume_unicode_range_token(current),
                 CssReLexContext::ScssExpression => self.consume_scss_expression_token(current),
+                CssReLexContext::ScssIdentifierContinuation => {
+                    let mut cursor = self.scan_cursor();
+                    cursor.advance_ident_sequence();
+                    let end = cursor.position();
+                    if end > self.position() {
+                        self.set_position(end);
+                        IDENT
+                    } else {
+                        self.consume_token(current)
+                    }
+                }
             },
             None => EOF,
         };

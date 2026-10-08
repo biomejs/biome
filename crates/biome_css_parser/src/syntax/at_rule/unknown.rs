@@ -2,7 +2,8 @@ use crate::parser::CssParser;
 use crate::syntax::block::parse_declaration_or_rule_list_block;
 use crate::syntax::scss::{
     expect_scss_semicolon_at_rule, is_at_scss_interpolation,
-    parse_scss_interpolation_or_identifier, parse_scss_regular_interpolation,
+    is_nth_at_scss_interpolated_dashed_identifier, is_nth_at_scss_interpolation,
+    parse_scss_interpolated_at_rule_name, parse_scss_regular_interpolation,
 };
 use crate::syntax::{CssSyntaxFeatures, is_at_identifier, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::*;
@@ -42,24 +43,42 @@ pub(crate) fn parse_unknown_at_rule(p: &mut CssParser) -> ParsedSyntax {
     complete_unknown_at_rule(p, m)
 }
 
-/// Parses an unknown SCSS at-rule with an interpolated name.
+/// Returns whether an at-rule name starts with interpolation or continues into it.
+///
+/// ```scss
+/// @key#{$suffix} fade {}
+/// @#{$name} token;
+/// ```
+#[inline]
+pub(crate) fn is_at_scss_interpolated_unknown_at_rule(p: &mut CssParser) -> bool {
+    is_at_scss_interpolation(p)
+        || ((is_at_identifier(p) || p.at(T![-]))
+            && is_nth_at_scss_interpolation(p, 1)
+            && p.source_mut().is_nth_source_tight(1))
+        || (is_nth_at_scss_interpolated_dashed_identifier(p, 0)
+            && p.source_mut().is_nth_source_tight(1)
+            && p.source_mut().is_nth_source_tight(2))
+}
+
+/// Keeps adjacent name fragments separate from an unknown SCSS at-rule's prelude.
 ///
 /// Example:
 /// ```scss
 /// @#{$rule-name} #{$value};
+/// @custom-#{$name}-suffix token;
 /// ```
 ///
 /// Docs: https://sass-lang.com/documentation/at-rules/css/
 #[inline]
 pub(crate) fn parse_scss_interpolated_unknown_at_rule(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_scss_interpolation(p) {
+    if !is_at_scss_interpolated_unknown_at_rule(p) {
         return Absent;
     }
 
     let m = p.start();
 
-    // Guarded by `is_at_scss_interpolation`.
-    parse_scss_interpolation_or_identifier(p).ok();
+    // Guarded by `is_at_scss_interpolated_unknown_at_rule`.
+    parse_scss_interpolated_at_rule_name(p).ok();
     parse_scss_unknown_at_rule_components(p);
 
     complete_unknown_at_rule(p, m)
