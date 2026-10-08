@@ -821,6 +821,13 @@ fn build_jsx_style_candidate(attribute: &JsxAttribute) -> Option<EmbedCandidate>
 fn build_js_template_candidate(expr: &JsTemplateExpression) -> Option<EmbedCandidate> {
     let elements = expr.elements();
     let first = elements.first()?;
+    // A template made only of interpolations has no embedded code to format.
+    if !elements
+        .iter()
+        .any(|element| matches!(element, AnyJsTemplateElement::JsTemplateChunkElement(_)))
+    {
+        return None;
+    }
     let tag_kind = template_expression_to_template_tag(expr)?;
 
     let content_range = elements.syntax().text_trimmed_range();
@@ -1800,59 +1807,14 @@ fn format_embedded(
             .collect();
         let mut formatted = format_node(options, &tree, snippets.keys().copied().collect())?;
 
-        formatted.format_embedded(move |range| {
-            let snippet = snippets.get(&range)?;
-            let snippet_file_source = snippet.file_source(&workspace_db)?;
-
-            let wrap_document = |document: Document| {
-                // TODO: Option to disable indent here?
-                let elements = vec![
-                    FormatElement::Line(LineMode::Hard),
-                    FormatElement::Tag(Tag::StartIndent),
-                    FormatElement::Line(LineMode::Hard),
-                    FormatElement::Interned(Interned::new(document.into_elements())),
-                    FormatElement::Tag(Tag::EndIndent),
-                    FormatElement::Line(LineMode::Hard),
-                ];
-                Document::new(elements)
-            };
-
-            match snippet_file_source {
-                DocumentFileSource::Css(_) => {
-                    let css_options = super::css::resolve_format_options(
-                        biome_path,
-                        &snippet_file_source,
-                        settings,
-                        &workspace_db,
-                    );
-                    let node = snippet
-                        .parsed_origin()
-                        .parse(&workspace_db)
-                        .embedded_syntax::<CssLanguage>();
-                    let formatted =
-                        biome_css_formatter::format_node_with_offset(css_options, &node).ok()?;
-                    Some(wrap_document(formatted.into_document()))
-                }
-                #[cfg(feature = "lang_graphql")]
-                DocumentFileSource::Graphql(_) => {
-                    let graphql_options = super::graphql::resolve_format_options(
-                        biome_path,
-                        &snippet_file_source,
-                        settings,
-                        &workspace_db,
-                    );
-                    let node = snippet
-                        .parsed_origin()
-                        .parse(&workspace_db)
-                        .embedded_syntax::<GraphqlLanguage>();
-                    let formatted =
-                        biome_graphql_formatter::format_node_with_offset(graphql_options, &node)
-                            .ok()?;
-                    Some(wrap_document(formatted.into_document()))
-                }
-                _ => None,
-            }
-        });
+        let embedded_formatter = EmbeddedSnippetFormatter {
+            biome_path,
+            settings,
+            workspace_db: &workspace_db,
+            host_contents: formatted.document().embedded_contents(),
+            snippets,
+        };
+        formatted.format_embedded(|range| embedded_formatter.format(range));
 
         // Propagate expand flags again after inserting embedded content,
         // so that groups inside the embedded documents properly expand.
@@ -1875,6 +1837,106 @@ fn format_embedded(
             workspace_db,
         );
         panic!("formatting embedded JavaScript snippets requires the `js_embeds` feature")
+    }
+}
+
+/// Formats the snippets embedded in a JavaScript document.
+#[cfg(feature = "js_embeds")]
+struct EmbeddedSnippetFormatter<'a, 'settings> {
+    biome_path: &'a BiomePath,
+    settings: &'a SettingsWithEditor<'settings>,
+    workspace_db: &'a WorkspaceDb,
+    snippets: FxHashMap<TextRange, super::ParsedSnippetOrigin>,
+    /// The content the JavaScript formatter wrote for each embedded element,
+    /// including the interpolations of the embedded templates.
+    host_contents: FxHashMap<TextRange, Interned>,
+}
+
+#[cfg(feature = "js_embeds")]
+impl EmbeddedSnippetFormatter<'_, '_> {
+    /// Returns the formatted document of the snippet at `range`.
+    fn format(&self, range: TextRange) -> Option<Document> {
+        let snippet = self.snippets.get(&range)?;
+        let snippet_file_source = snippet.file_source(self.workspace_db)?;
+        let document = match snippet_file_source {
+            DocumentFileSource::Css(_) => {
+                let css_options = super::css::resolve_format_options(
+                    self.biome_path,
+                    &snippet_file_source,
+                    self.settings,
+                    self.workspace_db,
+                );
+                let node = snippet
+                    .parsed_origin()
+                    .parse(self.workspace_db)
+                    .embedded_syntax::<CssLanguage>();
+                let mut formatted = biome_css_formatter::format_node_with_offset_and_metavariables(
+                    css_options,
+                    &node,
+                    self.interpolations_in(range),
+                )
+                .ok()?;
+                formatted.format_embedded(|interpolation| {
+                    self.format_interpolation(interpolation + range.start())
+                });
+                formatted.into_document()
+            }
+            #[cfg(feature = "lang_graphql")]
+            DocumentFileSource::Graphql(_) => {
+                let graphql_options = super::graphql::resolve_format_options(
+                    self.biome_path,
+                    &snippet_file_source,
+                    self.settings,
+                    self.workspace_db,
+                );
+                let node = snippet
+                    .parsed_origin()
+                    .parse(self.workspace_db)
+                    .embedded_syntax::<GraphqlLanguage>();
+                biome_graphql_formatter::format_node_with_offset(graphql_options, &node)
+                    .ok()?
+                    .into_document()
+            }
+            _ => return None,
+        };
+
+        // TODO: Option to disable indent here?
+        Some(Document::new(vec![
+            FormatElement::Line(LineMode::Hard),
+            FormatElement::Tag(Tag::StartIndent),
+            FormatElement::Line(LineMode::Hard),
+            FormatElement::Interned(Interned::new(document.into_elements())),
+            FormatElement::Tag(Tag::EndIndent),
+            FormatElement::Line(LineMode::Hard),
+        ]))
+    }
+
+    /// Returns the ranges of the interpolations of the template at `range`,
+    /// relative to its start.
+    ///
+    /// These are the outermost embedded elements inside the template, while the
+    /// others are inside the interpolations.
+    fn interpolations_in(&self, range: TextRange) -> Vec<TextRange> {
+        let is_inside = |inner: &TextRange| *inner != range && range.contains_range(*inner);
+        self.host_contents
+            .keys()
+            .filter(|inner| is_inside(inner))
+            .filter(|inner| {
+                !self.host_contents.keys().any(|outer| {
+                    outer != *inner && is_inside(outer) && outer.contains_range(**inner)
+                })
+            })
+            .map(|inner| *inner - range.start())
+            .collect()
+    }
+
+    /// Returns the JavaScript formatting of the interpolation at `range`, with
+    /// the snippets embedded in it formatted, too.
+    fn format_interpolation(&self, range: TextRange) -> Option<Document> {
+        let content = self.host_contents.get(&range)?;
+        let mut document = Document::new(content.to_vec());
+        document.replace_embedded(&mut |range| self.format(range));
+        Some(document)
     }
 }
 

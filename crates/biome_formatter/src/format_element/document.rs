@@ -164,7 +164,7 @@ impl Document {
     /// Accepts a `format_embedded` function that will be called with the range of
     /// each embedded element, and which may optionally return the [Document] that
     /// replaces the element's content.
-    pub(crate) fn replace_embedded(
+    pub fn replace_embedded(
         &mut self,
         format_embedded: &mut impl FnMut(TextRange) -> Option<Self>,
     ) {

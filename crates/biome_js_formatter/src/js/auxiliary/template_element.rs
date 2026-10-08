@@ -6,11 +6,14 @@ use biome_formatter::{
 
 use crate::context::TabWidth;
 use crate::js::expressions::array_expression::FormatJsArrayExpressionOptions;
-use crate::js::lists::template_element_list::TemplateElementIndention;
-use biome_js_syntax::{
-    AnyJsExpression, JsSyntaxNode, JsSyntaxToken, JsTemplateElement, TsTemplateElement,
+use crate::js::lists::template_element_list::{
+    TemplateElementIndention, embedded_source_range, source_range,
 };
-use biome_rowan::{AstNode, NodeOrToken, SyntaxResult, declare_node_union};
+use biome_js_syntax::{
+    AnyJsExpression, JsSyntaxNode, JsSyntaxToken, JsTemplateElement, JsTemplateElementList,
+    TsTemplateElement,
+};
+use biome_rowan::{AstNode, NodeOrToken, SyntaxResult, TextRange, declare_node_union};
 
 enum TemplateElementLayout {
     /// Tries to format the expression on a single line regardless of the print width.
@@ -43,6 +46,19 @@ impl FormatNodeRule<JsTemplateElement> for FormatJsTemplateElement {
         let element = AnyTemplateElement::from(node.clone());
 
         FormatTemplateElement::new(element, self.options).fmt(formatter)
+    }
+
+    fn embedded_node_range(
+        &self,
+        node: &JsTemplateElement,
+        f: &mut JsFormatter,
+    ) -> Option<TextRange> {
+        // The interpolations of an embedded template are inserted into the
+        // embedded document by the embedding service.
+        let list = node.parent::<JsTemplateElementList>()?;
+        embedded_source_range(f, list.syntax().text_trimmed_range())?;
+
+        Some(source_range(f, node.syntax().text_trimmed_range()))
     }
 }
 
