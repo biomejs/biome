@@ -12,8 +12,11 @@ use std::collections::BTreeSet;
 use std::hash::{Hash, Hasher};
 use std::ops::Deref;
 use std::sync::Arc;
+pub use tailwind::{
+    TailwindFunctionalUtility, TailwindStylesheet, TailwindThemeEntry, TailwindUtility,
+    TailwindUtilityDeclaration, TailwindValueArgument, TailwindValueFunction,
+};
 pub(crate) use tailwind::{TailwindImport, TailwindPosition};
-pub use tailwind::{TailwindStylesheet, TailwindThemeEntry, TailwindUtility};
 pub use traverse::{CssClassStep, CssTraversalStep, ImportTreeDisplay, ImportTreeNode};
 pub(crate) use visitor::CssModuleVisitor;
 

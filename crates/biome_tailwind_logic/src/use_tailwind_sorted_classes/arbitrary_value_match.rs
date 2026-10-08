@@ -224,6 +224,7 @@ pub fn value_matches_type(list: &CssGenericComponentValueList, vt: CssDataType) 
         CssDataType::BgSize => return is_bg_size(list),
         CssDataType::LineWidth => return is_line_width(list),
         CssDataType::Image => return is_image(list),
+        CssDataType::FamilyName => return is_family_name(list),
         CssDataType::Vector => return is_vector(list),
         _ => {}
     }
@@ -255,10 +256,29 @@ pub fn value_matches_type(list: &CssGenericComponentValueList, vt: CssDataType) 
             ],
         ),
         CssDataType::RelativeSize => is_identifier_one_of(&value, &["larger", "smaller"]),
+        CssDataType::GenericName => is_identifier_one_of(
+            &value,
+            &[
+                "serif",
+                "sans-serif",
+                "monospace",
+                "cursive",
+                "fantasy",
+                "system-ui",
+                "ui-serif",
+                "ui-sans-serif",
+                "ui-monospace",
+                "ui-rounded",
+                "math",
+                "emoji",
+                "fangsong",
+            ],
+        ),
         CssDataType::Position
         | CssDataType::BgSize
         | CssDataType::LineWidth
         | CssDataType::Image
+        | CssDataType::FamilyName
         | CssDataType::Vector => unreachable!(),
     }
 }
@@ -547,6 +567,34 @@ fn is_image(list: &CssGenericComponentValueList) -> bool {
             continue;
         }
         return false;
+    }
+
+    count > 0
+}
+
+/// A comma-separated list of font families, none of which starts with a
+/// digit. `var()` entries are allowed but don't count as a family.
+fn is_family_name(list: &CssGenericComponentValueList) -> bool {
+    let Some(segments) = split_by_comma(list) else {
+        return false;
+    };
+    let mut count = 0;
+
+    for segment in segments {
+        let Some(first) = segment.first() else {
+            return false;
+        };
+        if first
+            .syntax()
+            .text_trimmed()
+            .char_at(0.into())
+            .is_some_and(|c| c.is_ascii_digit())
+        {
+            return false;
+        }
+        if !matches!(segment.as_slice(), [value] if is_var_function(value)) {
+            count += 1;
+        }
     }
 
     count > 0

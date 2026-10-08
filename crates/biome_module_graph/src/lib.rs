@@ -23,8 +23,9 @@ pub use biome_js_type_info::{
 pub use biome_resolver::{PathInfo, ResolveError, ResolvedPath};
 pub use css_module_info::{
     CssClassReference, CssClassStep, CssImport, CssImports, CssModuleInfo, CssPropertyDefinition,
-    CssTraversalStep, ImportTreeDisplay, ImportTreeNode, TailwindStylesheet, TailwindThemeEntry,
-    TailwindUtility,
+    CssTraversalStep, ImportTreeDisplay, ImportTreeNode, TailwindFunctionalUtility,
+    TailwindStylesheet, TailwindThemeEntry, TailwindUtility, TailwindUtilityDeclaration,
+    TailwindValueArgument, TailwindValueFunction,
 };
 pub use db::queries::{
     BindingTypeInput, CallArgumentTypeInput, CallExpressionTypeInput, ExpressionTypeInput,

@@ -29,7 +29,7 @@ pub enum NamedValueType {
 
 // CSS data types (from infer-data-type.ts). Bracketed arbitrary values use
 // AST predicates — see sort_v4::resolve_arbitrary_branch.
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[repr(u8)]
 pub enum CssDataType {
     Color,
@@ -44,9 +44,37 @@ pub enum CssDataType {
     BgSize,
     LineWidth,
     Image,
+    FamilyName,
+    GenericName,
     AbsoluteSize,
     RelativeSize,
     Vector,
+}
+
+impl CssDataType {
+    /// The data type Tailwind names `name`, such as `bg-size`.
+    pub fn from_name(name: &str) -> Option<Self> {
+        Some(match name {
+            "color" => Self::Color,
+            "length" => Self::Length,
+            "percentage" => Self::Percentage,
+            "number" => Self::Number,
+            "integer" => Self::Integer,
+            "ratio" => Self::Ratio,
+            "angle" => Self::Angle,
+            "url" => Self::Url,
+            "position" => Self::Position,
+            "bg-size" => Self::BgSize,
+            "line-width" => Self::LineWidth,
+            "image" => Self::Image,
+            "family-name" => Self::FamilyName,
+            "generic-name" => Self::GenericName,
+            "absolute-size" => Self::AbsoluteSize,
+            "relative-size" => Self::RelativeSize,
+            "vector" => Self::Vector,
+            _ => return None,
+        })
+    }
 }
 
 // Theme namespaces (from default theme.css).

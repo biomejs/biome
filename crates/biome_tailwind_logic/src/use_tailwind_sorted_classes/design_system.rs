@@ -12,21 +12,31 @@ use std::sync::{Arc, LazyLock};
 
 use biome_analyze::options::TailwindOptions;
 use biome_module_graph::{
-    ModuleDb, ModuleInfo, TailwindStylesheet, TailwindThemeEntry, tailwind_stylesheet,
+    ModuleDb, ModuleInfo, TailwindFunctionalUtility, TailwindStylesheet, TailwindThemeEntry,
+    TailwindValueArgument, tailwind_stylesheet,
 };
 use biome_tailwind_parser::{BaseNameStore, TailwindParserOptions};
 use biome_tailwind_syntax::metadata::BASENAMES_WITH_DASHES;
 use rustc_hash::{FxHashMap, FxHashSet};
 
 use super::tailwind_preset_v4::PROPERTY_INDEX;
-use super::tailwind_preset_v4_types::ThemeNamespace;
+use super::tailwind_preset_v4_types::{CssDataType, ThemeNamespace};
 
 /// The parts of a user's Tailwind CSS configuration that change how classes
 /// sort. The default value describes the default configuration.
 #[derive(Debug, Default, Eq, PartialEq)]
 pub struct TailwindDesignSystem {
     theme: FxHashMap<ThemeNamespace, ThemeValues>,
+    /// Every theme variable the stylesheet defines, such as
+    /// `--percentage-50`, including those outside the known namespaces.
+    theme_variables: FxHashSet<Box<str>>,
     utilities: FxHashMap<Box<str>, CustomUtility>,
+    /// Utilities declared with `@utility <name>-*`, by name. A negative
+    /// utility's name keeps its sign, as in `-zoom-in`. Tailwind compiles
+    /// every definition of a name.
+    functional_utilities: FxHashMap<Box<str>, Vec<CustomFunctionalUtility>>,
+    /// The names of [Self::functional_utilities] without their sign.
+    functional_roots: FxHashSet<Box<str>>,
     /// Custom variant names, mapped to their declaration index. Tailwind
     /// registers them after its own variants, in declaration order.
     variants: FxHashMap<Box<str>, u16>,
@@ -53,6 +63,57 @@ pub(super) struct CustomUtility {
     pub(super) signature: Box<[u16]>,
     /// The number of declarations, Tailwind's tie-break after the signature.
     pub(super) count: u8,
+}
+
+/// A utility declared with `@utility <name>-*`.
+#[derive(Debug, Eq, PartialEq)]
+pub(super) struct CustomFunctionalUtility {
+    /// The declarations, including those of nested rules, in source order.
+    pub(super) declarations: Box<[CustomDeclaration]>,
+}
+
+/// A declaration of a [CustomFunctionalUtility].
+#[derive(Debug, Eq, PartialEq)]
+pub(super) struct CustomDeclaration {
+    /// The index of the property in Tailwind's property order, or `None` for
+    /// a custom property or a property outside the order.
+    pub(super) property: Option<u16>,
+    /// The `--value(…)` and `--modifier(…)` functions of the value, in source
+    /// order.
+    pub(super) functions: Box<[ValueFunction]>,
+}
+
+/// A `--value(…)` or `--modifier(…)` function.
+#[derive(Debug, Eq, PartialEq)]
+pub(super) struct ValueFunction {
+    pub(super) is_modifier: bool,
+    pub(super) arguments: Box<[ValueArgument]>,
+}
+
+/// An argument of a [ValueFunction] that Tailwind can match a value against.
+#[derive(Debug, Eq, PartialEq)]
+pub(super) enum ValueArgument {
+    /// A bare value of a type, such as `integer` in `--value(integer)`.
+    Bare(BareValueType),
+    /// Any arbitrary value: `--value([*])`.
+    AnyArbitrary,
+    /// An arbitrary value of a type, such as `length` in `--value([length])`,
+    /// or `None` for a type Tailwind can't infer, such as `duration`.
+    Arbitrary(Option<CssDataType>),
+    /// A key of a theme namespace, such as `--tab-size` in
+    /// `--value(--tab-size-*)`.
+    Theme(Box<str>),
+    /// A literal value, such as `auto` in `--value("auto")`.
+    Literal(Box<str>),
+}
+
+/// The bare value types `--value(…)` accepts.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(super) enum BareValueType {
+    Integer,
+    Number,
+    Percentage,
+    Ratio,
 }
 
 /// What the stylesheet says about a theme key.
@@ -87,12 +148,20 @@ impl TailwindDesignSystem {
 
     /// Whether the design system has nothing beyond the default configuration.
     pub fn is_default(&self) -> bool {
-        self.theme.is_empty() && self.utilities.is_empty() && self.variants.is_empty()
+        self.theme.is_empty()
+            && self.utilities.is_empty()
+            && self.functional_utilities.is_empty()
+            && self.variants.is_empty()
     }
 
     /// Records a theme variable such as `--color-brand: #00f`. The value
     /// `initial` removes the key, as in `--color-red-500: initial`.
     pub fn add_theme_variable(&mut self, name: &str, value: &str) {
+        if value.trim() == "initial" {
+            self.theme_variables.remove(name);
+        } else {
+            self.theme_variables.insert(name.into());
+        }
         let Some((namespace, key)) = theme_key(name) else {
             return;
         };
@@ -114,6 +183,15 @@ impl TailwindDesignSystem {
         let Some(name) = reference.strip_prefix("--") else {
             return;
         };
+        if name.is_empty() {
+            self.theme_variables.clear();
+        } else {
+            self.theme_variables.retain(|variable| {
+                variable
+                    .strip_prefix(reference)
+                    .is_none_or(|key| !key.starts_with('-'))
+            });
+        }
         if name.is_empty() {
             for namespace in ThemeNamespace::ALL {
                 self.reset_namespace(namespace);
@@ -183,6 +261,40 @@ impl TailwindDesignSystem {
         self.utilities.get(name)
     }
 
+    /// The definitions of the functional utility `name`, such as `tab` for
+    /// `@utility tab-*`.
+    pub(super) fn functional_utility(&self, name: &str) -> &[CustomFunctionalUtility] {
+        self.functional_utilities
+            .get(name)
+            .map_or(&[], |definitions| definitions.as_slice())
+    }
+
+    pub(super) fn has_functional_utilities(&self) -> bool {
+        !self.functional_utilities.is_empty()
+    }
+
+    /// Whether a functional utility, negative or not, has the root `name`,
+    /// such as `zoom-in` for `@utility -zoom-in-*`.
+    pub(super) fn is_functional_root(&self, name: &str) -> bool {
+        self.functional_roots.contains(name)
+    }
+
+    /// Whether the theme namespace `reference`, such as `--color` or
+    /// `--percentage`, has the key `key`.
+    pub(super) fn has_theme_value(&self, reference: &str, key: &str) -> bool {
+        if let Some(namespace) = reference
+            .strip_prefix("--")
+            .and_then(ThemeNamespace::from_css_name)
+        {
+            return self.has_theme_key(namespace, key);
+        }
+        let mut name = String::with_capacity(reference.len() + 1 + key.len());
+        name.push_str(reference);
+        name.push('-');
+        name.push_str(key);
+        self.theme_variables.contains(name.as_str())
+    }
+
     pub(super) fn has_utilities(&self) -> bool {
         !self.utilities.is_empty()
     }
@@ -190,12 +302,6 @@ impl TailwindDesignSystem {
     /// The declaration index of a custom variant.
     pub(super) fn variant(&self, name: &str) -> Option<u16> {
         self.variants.get(name).copied()
-    }
-
-    /// Whether the stylesheet adds dashed utility roots, which can split a
-    /// class where the built-in roots wouldn't.
-    pub(super) fn has_custom_base_names(&self) -> bool {
-        self.base_names.is_some()
     }
 
     /// Options for parsing class strings, aware of the stylesheet's utility
@@ -229,22 +335,79 @@ impl From<&TailwindStylesheet> for TailwindDesignSystem {
         for variant in &stylesheet.custom_variants {
             design.add_variant(variant.text());
         }
-        // The sign of a negative root such as `-zoom-in` is parsed separately,
-        // and roots without a dash already parse as a whole.
-        let mut base_names: Vec<&str> = stylesheet
-            .functional_utilities
+        for utility in &stylesheet.functional_utilities {
+            // The sign of a negative root such as `-zoom-in` is parsed
+            // separately.
+            let name = utility.name.text();
+            design
+                .functional_roots
+                .insert(name.strip_prefix('-').unwrap_or(name).into());
+            design
+                .functional_utilities
+                .entry(utility.name.text().into())
+                .or_default()
+                .push(CustomFunctionalUtility::from(utility));
+        }
+        // Roots without a dash already parse as a whole.
+        let mut base_names: Vec<&str> = design
+            .functional_roots
             .iter()
-            .map(|utility| {
-                let name = utility.name.text();
-                name.strip_prefix('-').unwrap_or(name)
-            })
+            .map(AsRef::as_ref)
             .filter(|name| name.contains('-'))
             .collect();
         if !base_names.is_empty() {
+            // Sorted so that equal stylesheets build equal stores.
+            base_names.sort_unstable();
             base_names.extend_from_slice(BASENAMES_WITH_DASHES);
             design.base_names = Some(BaseNameStore::new(&base_names));
         }
         design
+    }
+}
+
+impl From<&TailwindFunctionalUtility> for CustomFunctionalUtility {
+    fn from(utility: &TailwindFunctionalUtility) -> Self {
+        let declarations = utility
+            .declarations
+            .iter()
+            .map(|declaration| CustomDeclaration {
+                property: PROPERTY_INDEX.get(declaration.property.text()).copied(),
+                functions: declaration
+                    .functions
+                    .iter()
+                    .map(|function| ValueFunction {
+                        is_modifier: function.is_modifier,
+                        arguments: function
+                            .arguments
+                            .iter()
+                            .filter_map(ValueArgument::new)
+                            .collect(),
+                    })
+                    .collect(),
+            })
+            .collect();
+        Self { declarations }
+    }
+}
+
+impl ValueArgument {
+    /// Tailwind ignores bare value types other than [BareValueType]'s.
+    fn new(argument: &TailwindValueArgument) -> Option<Self> {
+        Some(match argument {
+            TailwindValueArgument::Type(name) => Self::Bare(match name.text() {
+                "integer" => BareValueType::Integer,
+                "number" => BareValueType::Number,
+                "percentage" => BareValueType::Percentage,
+                "ratio" => BareValueType::Ratio,
+                _ => return None,
+            }),
+            TailwindValueArgument::ArbitraryType(name) => match name.text() {
+                "*" => Self::AnyArbitrary,
+                name => Self::Arbitrary(CssDataType::from_name(name)),
+            },
+            TailwindValueArgument::Theme(reference) => Self::Theme(reference.text().into()),
+            TailwindValueArgument::Literal(literal) => Self::Literal(literal.text().into()),
+        })
     }
 }
 
@@ -276,7 +439,7 @@ fn theme_key(name: &str) -> Option<(ThemeNamespace, &str)> {
 
 #[cfg(test)]
 mod tests {
-    use biome_module_graph::TailwindUtility;
+    use biome_module_graph::TailwindFunctionalUtility;
     use biome_rowan::{Direction, NodeCache};
     use biome_tailwind_parser::parse_tailwind_with_options;
     use biome_tailwind_syntax::TailwindSyntaxKind;
@@ -327,12 +490,27 @@ mod tests {
     }
 
     #[test]
+    fn theme_values_outside_known_namespaces_follow_resets() {
+        let mut design = TailwindDesignSystem::default();
+        design.add_theme_variable("--percentage-half", "0.5");
+        design.add_theme_variable("--percentages-half", "0.5");
+        design.reset_theme("--percentage");
+        design.add_theme_variable("--percentage-full", "1");
+        assert!(!design.has_theme_value("--percentage", "half"));
+        assert!(design.has_theme_value("--percentages", "half"));
+        assert!(design.has_theme_value("--percentage", "full"));
+        design.add_theme_variable("--percentage-full", "initial");
+        assert!(!design.has_theme_value("--percentage", "full"));
+        // Known namespaces keep their default keys.
+        assert!(design.has_theme_value("--color", "red-500"));
+    }
+
+    #[test]
     fn functional_utility_roots_split_classes() {
         let functional_utilities = ["slide-in-from-top", "-zoom-in", "delay"]
-            .map(|name| TailwindUtility {
+            .map(|name| TailwindFunctionalUtility {
                 name: name.into(),
-                properties: Box::default(),
-                declaration_count: 0,
+                declarations: Box::default(),
             })
             .into();
         let design = TailwindDesignSystem::from(&TailwindStylesheet {

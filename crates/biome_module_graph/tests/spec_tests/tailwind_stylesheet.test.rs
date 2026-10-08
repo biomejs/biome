@@ -1,4 +1,6 @@
-use biome_module_graph::{ModuleDb, TailwindThemeEntry, TailwindUtility, tailwind_stylesheet};
+use biome_module_graph::{
+    ModuleDb, TailwindThemeEntry, TailwindValueArgument, tailwind_stylesheet,
+};
 use camino::Utf8Path;
 
 use super::support::build_tailwind_css_db;
@@ -119,15 +121,110 @@ fn functional_utilities_are_recorded_by_root() {
     ]);
     let module = db.module_for_path(Utf8Path::new("/main.css")).unwrap();
     let stylesheet = tailwind_stylesheet(&db, module);
-    let names = |utilities: &[TailwindUtility]| -> Vec<String> {
-        utilities
+    assert_eq!(
+        stylesheet
+            .utilities
             .iter()
             .map(|utility| utility.name.to_string())
-            .collect()
-    };
-    assert_eq!(names(&stylesheet.utilities), ["tab-4"]);
+            .collect::<Vec<_>>(),
+        ["tab-4"]
+    );
     assert_eq!(
-        names(&stylesheet.functional_utilities),
+        stylesheet
+            .functional_utilities
+            .iter()
+            .map(|utility| utility.name.to_string())
+            .collect::<Vec<_>>(),
         ["slide-in-from-top", "-zoom-in", "tab"]
+    );
+}
+
+#[test]
+fn functional_utilities_record_value_functions() {
+    let db = build_tailwind_css_db(&[(
+        "/main.css",
+        r#"@utility fade-in-* {
+    --tw-enter-opacity: calc(--value(number) / 100);
+    --tw-enter-opacity: --value(--percentage-*, --opacity, [*], "initial");
+    &:hover { opacity: --modifier([percentage]); }
+    animation-name: enter;
+}"#,
+    )]);
+    let module = db.module_for_path(Utf8Path::new("/main.css")).unwrap();
+    let stylesheet = tailwind_stylesheet(&db, module);
+    let [utility] = stylesheet.functional_utilities.as_slice() else {
+        panic!("expected one functional utility");
+    };
+    let declarations: Vec<_> = utility
+        .declarations
+        .iter()
+        .map(|declaration| {
+            let functions: Vec<_> = declaration
+                .functions
+                .iter()
+                .map(|function| (function.is_modifier, function.arguments.to_vec()))
+                .collect();
+            (declaration.property.to_string(), functions)
+        })
+        .collect();
+    assert_eq!(
+        declarations,
+        [
+            (
+                "--tw-enter-opacity".to_string(),
+                vec![(false, vec![TailwindValueArgument::Type("number".into())])]
+            ),
+            (
+                "--tw-enter-opacity".to_string(),
+                vec![(
+                    false,
+                    vec![
+                        TailwindValueArgument::Theme("--percentage".into()),
+                        TailwindValueArgument::Theme("--opacity".into()),
+                        TailwindValueArgument::ArbitraryType("*".into()),
+                        TailwindValueArgument::Literal("initial".into()),
+                    ]
+                )]
+            ),
+            (
+                "opacity".to_string(),
+                vec![(
+                    true,
+                    vec![TailwindValueArgument::ArbitraryType("percentage".into())]
+                )]
+            ),
+            ("animation-name".to_string(), vec![]),
+        ]
+    );
+}
+
+#[test]
+fn functional_utilities_record_minified_value_functions() {
+    let db = build_tailwind_css_db(&[(
+        "/main.css",
+        r#"@utility delay-*{animation-delay:calc(--value(number)*1ms);--tw-animation-delay:--value(--animation-delay-*,[duration],"initial",[*])}"#,
+    )]);
+    let module = db.module_for_path(Utf8Path::new("/main.css")).unwrap();
+    let stylesheet = tailwind_stylesheet(&db, module);
+    let [utility] = stylesheet.functional_utilities.as_slice() else {
+        panic!("expected one functional utility");
+    };
+    let arguments: Vec<_> = utility
+        .declarations
+        .iter()
+        .flat_map(|declaration| &declaration.functions)
+        .map(|function| function.arguments.to_vec())
+        .collect();
+    assert_eq!(
+        arguments,
+        [
+            vec![TailwindValueArgument::Type("number".into())],
+            vec![
+                TailwindValueArgument::Theme("--animation-delay".into()),
+                TailwindValueArgument::ArbitraryType("duration".into()),
+                TailwindValueArgument::Literal("initial".into()),
+                TailwindValueArgument::ArbitraryType("*".into()),
+            ],
+        ]
     );
 }
