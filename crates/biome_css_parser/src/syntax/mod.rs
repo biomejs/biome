@@ -1091,7 +1091,12 @@ mod tests {
     fn exclusive_syntax_kind_applies_only_when_unsupported() {
         for source_type in [CssFileSource::css(), CssFileSource::scss()] {
             for kind in [None, Some(CssSyntaxKind::CSS_BOGUS_CUSTOM_IDENTIFIER)] {
-                let mut p = CssParser::new("; value", source_type, CssParserOptions::default());
+                let mut p = CssParser::new_with_metavariables(
+                    "; value",
+                    source_type,
+                    CssParserOptions::default(),
+                    &[],
+                );
                 p.bump(T![;]);
                 p.error(p.err_builder("before", TextRange::empty(0.into())));
 
@@ -1136,7 +1141,12 @@ mod tests {
     fn exclusive_syntax_kind_preserves_absent_results() {
         for source_type in [CssFileSource::css(), CssFileSource::scss()] {
             for kind in [None, Some(CssSyntaxKind::CSS_BOGUS_DECLARATION)] {
-                let mut p = CssParser::new("; }", source_type, CssParserOptions::default());
+                let mut p = CssParser::new_with_metavariables(
+                    "; }",
+                    source_type,
+                    CssParserOptions::default(),
+                    &[],
+                );
                 p.bump(T![;]);
                 p.error(p.err_builder("before", TextRange::empty(0.into())));
                 let position = p.cur_range();
@@ -1174,10 +1184,11 @@ mod tests {
 
     #[test]
     fn css_parser_context_allows_scss_exclusive_value_recovery() {
-        let css_parser = CssParser::new(
+        let css_parser = CssParser::new_with_metavariables(
             ".selector { width: 10px; }",
             CssFileSource::css(),
             CssParserOptions::default(),
+            &[],
         );
         assert_eq!(
             ValueParsingContext::new(&css_parser, ValueParsingMode::ScssAware).scss_capability(),
@@ -1192,10 +1203,11 @@ mod tests {
                 .is_scss_qualified_function_recovery_allowed()
         );
 
-        let reporting_css_parser = CssParser::new(
+        let reporting_css_parser = CssParser::new_with_metavariables(
             ".selector { color: $color; }",
             CssFileSource::css(),
             CssParserOptions::default().report_scss_exclusive_syntax(),
+            &[],
         );
         assert_eq!(
             ValueParsingContext::new(&reporting_css_parser, ValueParsingMode::ScssAware)
@@ -1203,10 +1215,11 @@ mod tests {
             ScssCapability::ExclusiveOnly
         );
 
-        let scss_parser = CssParser::new(
+        let scss_parser = CssParser::new_with_metavariables(
             ".selector { color: $color; }",
             CssFileSource::scss(),
             CssParserOptions::default(),
+            &[],
         );
         assert_eq!(
             ValueParsingContext::new(&scss_parser, ValueParsingMode::ScssAware).scss_capability(),
@@ -1216,10 +1229,11 @@ mod tests {
 
     #[test]
     fn try_parse_rewinds_to_checkpoint() {
-        let mut p = CssParser::new(
+        let mut p = CssParser::new_with_metavariables(
             "width: blue;",
             CssFileSource::css(),
             CssParserOptions::default(),
+            &[],
         );
 
         let pre_try_range = p.cur_range();
@@ -1245,10 +1259,11 @@ mod tests {
 
     #[test]
     fn try_parse_preserves_position_on_success() {
-        let mut p = CssParser::new(
+        let mut p = CssParser::new_with_metavariables(
             "width: 100;",
             CssFileSource::css(),
             CssParserOptions::default(),
+            &[],
         );
 
         let pre_try_range = p.cur_range();

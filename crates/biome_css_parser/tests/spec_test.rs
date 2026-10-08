@@ -9,7 +9,7 @@ use biome_diagnostics::{print_diagnostic_to_string, termcolor};
 use biome_fs::BiomePath;
 use biome_languages::CssFileSource;
 use biome_languages::css::CssEmbeddingKind;
-use biome_rowan::SyntaxKind;
+use biome_rowan::{SyntaxKind, TextRange, TextSize};
 use biome_service::settings::Settings;
 use biome_test_utils::{
     grit_metavariable_ranges, has_bogus_nodes_or_empty_slots, validate_eof_token,
@@ -115,6 +115,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 
     let metavariables = if test_case.contains("grit_metavariable") {
         grit_metavariable_ranges(&content)
+    } else if file_name.ends_with(".styled.css") {
+        template_interpolation_ranges(&content)
     } else {
         Vec::new()
     };
@@ -210,4 +212,39 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     }, {
         insta::assert_snapshot!(file_name, snapshot);
     });
+}
+
+/// Returns the ranges of the template interpolations in a styled fixture, such
+/// as `${props.color}`.
+fn template_interpolation_ranges(source: &str) -> Vec<TextRange> {
+    let mut ranges = Vec::new();
+    let mut position = 0;
+    while let Some(offset) = source[position..].find("${") {
+        let start = position + offset;
+        let mut depth = 0usize;
+        let end = source[start..]
+            .char_indices()
+            .find_map(|(index, chr)| {
+                match chr {
+                    '{' => depth += 1,
+                    '}' => {
+                        depth -= 1;
+                        if depth == 0 {
+                            return Some(start + index + 1);
+                        }
+                    }
+                    _ => {}
+                }
+                None
+            })
+            .unwrap_or(source.len());
+
+        ranges.push(TextRange::new(
+            TextSize::from(start as u32),
+            TextSize::from(end as u32),
+        ));
+        position = end;
+    }
+
+    ranges
 }

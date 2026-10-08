@@ -45,6 +45,7 @@ pub(crate) struct CssScanCursor<'src> {
     cursor: SourceCursor<'src>,
     is_scss: bool,
     line_comments_enabled: bool,
+    metavariables: &'src [TextRange],
 }
 
 /// Result metadata from scanning one identifier sequence with the shared
@@ -77,7 +78,36 @@ impl<'src> CssScanCursor<'src> {
             cursor,
             is_scss,
             line_comments_enabled,
+            metavariables: &[],
         }
+    }
+
+    /// Skips the given source ranges of Grit metavariables when scanning
+    /// strings, comments, and raw URLs.
+    pub(crate) const fn with_metavariables(self, metavariables: &'src [TextRange]) -> Self {
+        Self {
+            metavariables,
+            ..self
+        }
+    }
+
+    /// Skips the Grit metavariable that starts at the current position, if any.
+    ///
+    /// ```css
+    /// content: "${'"'}";
+    /// ```
+    fn skip_metavariable(&mut self) -> bool {
+        let position = TextSize::from(self.position() as u32);
+        let Ok(index) = self
+            .metavariables
+            .binary_search_by_key(&position, |range| range.start())
+        else {
+            return false;
+        };
+
+        let end = usize::from(self.metavariables[index].end());
+        self.advance(end - self.position());
+        true
     }
 
     /// Returns the current absolute byte position.
@@ -379,6 +409,7 @@ impl<'src> CssScanCursor<'src> {
                     self.advance(1);
                     return;
                 }
+                b'$' if self.skip_metavariable() => {}
                 _ => self.advance_byte_or_char(current),
             }
         }
@@ -405,6 +436,7 @@ impl<'src> CssScanCursor<'src> {
                         return;
                     }
                 }
+                b'$' if self.skip_metavariable() => {}
                 _ => self.advance_byte_or_char(current),
             }
         }
@@ -419,6 +451,7 @@ impl<'src> CssScanCursor<'src> {
         while let Some(current) = self.current_byte() {
             match current {
                 b'\n' | b'\r' => return true,
+                b'$' if self.skip_metavariable() => {}
                 _ => self.advance_byte_or_char(current),
             }
         }
@@ -779,6 +812,10 @@ impl<'src> ScssStringScanner<'src> {
                     stop: StringBodyScanStop::Interpolation { position },
                     invalid_escape_ranges,
                 };
+            }
+
+            if byte == b'$' && self.cursor.skip_metavariable() {
+                continue;
             }
 
             match lookup_byte(byte) {

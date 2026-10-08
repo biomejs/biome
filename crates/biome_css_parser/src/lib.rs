@@ -245,21 +245,25 @@ pub fn parse_css_with_offset(
     options: CssParserOptions,
 ) -> CssOffsetParse {
     let mut cache = NodeCache::default();
-    parse_css_with_offset_and_cache(source, source_type, base_offset, &mut cache, options)
+    parse_css_with_offset_and_cache(source, source_type, base_offset, &mut cache, options, &[])
 }
 
 /// Parses CSS code with an offset and cache for embedded content.
 ///
 /// This is the cache-enabled version of [`parse_css_with_offset`] for improved performance
 /// when parsing multiple embedded CSS blocks.
+///
+/// The `metavariables` ranges, relative to `source`, are lexed as Grit
+/// metavariables, such as the interpolations of a styled-components template.
 pub fn parse_css_with_offset_and_cache(
     source: &str,
     source_type: CssFileSource,
     base_offset: biome_rowan::TextSize,
     cache: &mut NodeCache,
     options: CssParserOptions,
+    metavariables: &[TextRange],
 ) -> CssOffsetParse {
-    let mut parser = CssParser::new(source, source_type, options);
+    let mut parser = CssParser::new_with_metavariables(source, source_type, options, metavariables);
 
     parse_root(&mut parser);
 

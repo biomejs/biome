@@ -107,14 +107,6 @@ impl CssParserOptions {
 }
 
 impl<'source> CssParser<'source> {
-    pub fn new(
-        source: &'source str,
-        source_type: CssFileSource,
-        options: CssParserOptions,
-    ) -> Self {
-        Self::new_with_metavariables(source, source_type, options, &[])
-    }
-
     /// Creates a parser that lexes the given source ranges as Grit
     /// metavariables.
     pub fn new_with_metavariables(
