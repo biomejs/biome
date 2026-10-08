@@ -3672,6 +3672,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoConsoleSpacesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoConsoleSpacesOptions" }
+			]
+		},
+		"NoConsoleSpacesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoConstAssignConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7423,6 +7433,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noConsoleSpaces": {
+					"description": "Disallow leading and trailing spaces in console method arguments.\nSee https://biomejs.dev/linter/rules/no-console-spaces",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoConsoleSpacesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateMapKeys": {
 					"description": "Disallow two keys with the same name inside YAML maps.\nSee https://biomejs.dev/linter/rules/no-duplicate-map-keys",
 					"anyOf": [
@@ -9145,6 +9162,19 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoConsoleOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoConsoleSpacesOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoConsoleSpacesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
