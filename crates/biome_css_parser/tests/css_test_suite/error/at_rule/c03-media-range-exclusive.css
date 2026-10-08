@@ -1,0 +1,5 @@
+@media ($min < width) { .reverse { color: red; } }
+@media ($min < width < $max) { .interval { color: red; } }
+@media ($min + 1rem < width < $max - 1rem) { .arithmetic { color: red; } }
+@media (tokens.$min < width), (- $min < width), (#{$min} < width) { .other { color: red; } }
+.after { display: block; }
