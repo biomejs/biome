@@ -449,6 +449,7 @@ impl<'a> TryFrom<&'a EslintRuleName> for RuleSource<'a> {
             Some("svelte") => RuleSource::EslintSvelte,
             Some("sonarjs") => RuleSource::EslintSonarJs,
             Some("@stylistic") => RuleSource::EslintStylistic,
+            Some("tailwindcss") => RuleSource::EslintTailwindcss,
             Some("@typescript-eslint") => RuleSource::EslintTypeScript,
             Some("unicorn") => RuleSource::EslintUnicorn,
             Some("unused-imports") => RuleSource::EslintUnusedImports,
@@ -1420,7 +1421,10 @@ mod tests {
                 "astro/semi",
                 UnsupportedRuleReason::FormatterOption("semicolons"),
             ),
-            ("astro/valid-compile", UnsupportedRuleReason::NotApplicable),
+            (
+                "astro/valid-compile",
+                UnsupportedRuleReason::RequiresExternalTool,
+            ),
             (
                 "markdown/no-space-in-emphasis",
                 UnsupportedRuleReason::FormatterCovers,
@@ -1452,6 +1456,38 @@ mod tests {
             (
                 "yml/quotes",
                 UnsupportedRuleReason::FormatterOption("quoteStyle"),
+            ),
+        ] {
+            assert_eq!(
+                unsupported_rule_reason(&EslintRuleName::from_str(name)),
+                reason
+            );
+        }
+    }
+
+    #[test]
+    fn scope_decisions_unsupported_rule_lookup() {
+        for (name, reason) in [
+            ("no-iterator", UnsupportedRuleReason::Legacy),
+            (
+                "svelte/no-unused-svelte-ignore",
+                UnsupportedRuleReason::RequiresExternalTool,
+            ),
+            (
+                "svelte/valid-compile",
+                UnsupportedRuleReason::RequiresExternalTool,
+            ),
+            (
+                "tailwindcss/important-modifier-suffix",
+                UnsupportedRuleReason::Deprecated,
+            ),
+            (
+                "@typescript-eslint/typedef",
+                UnsupportedRuleReason::Deprecated,
+            ),
+            (
+                "yml/flow-mapping-curly-newline",
+                UnsupportedRuleReason::FormatterCovers,
             ),
         ] {
             assert_eq!(
