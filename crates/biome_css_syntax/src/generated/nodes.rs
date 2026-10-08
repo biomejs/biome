@@ -15154,6 +15154,7 @@ impl AnyCssDeclarationBlock {
 pub enum AnyCssDeclarationName {
     AnyCssDashedIdentifier(AnyCssDashedIdentifier),
     CssIdentifier(CssIdentifier),
+    CssMetavariable(CssMetavariable),
     ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
     TwValueThemeReference(TwValueThemeReference),
 }
@@ -15167,6 +15168,12 @@ impl AnyCssDeclarationName {
     pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
         match &self {
             Self::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_metavariable(&self) -> Option<&CssMetavariable> {
+        match &self {
+            Self::CssMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -17229,11 +17236,18 @@ impl AnyCssSelectorIdentifier {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssSimpleSelector {
+    CssMetavariable(CssMetavariable),
     CssTypeSelector(CssTypeSelector),
     CssUniversalSelector(CssUniversalSelector),
     ScssPlaceholderSelector(ScssPlaceholderSelector),
 }
 impl AnyCssSimpleSelector {
+    pub fn as_css_metavariable(&self) -> Option<&CssMetavariable> {
+        match &self {
+            Self::CssMetavariable(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_css_type_selector(&self) -> Option<&CssTypeSelector> {
         match &self {
             Self::CssTypeSelector(item) => Some(item),
@@ -38710,6 +38724,11 @@ impl From<CssIdentifier> for AnyCssDeclarationName {
         Self::CssIdentifier(node)
     }
 }
+impl From<CssMetavariable> for AnyCssDeclarationName {
+    fn from(node: CssMetavariable) -> Self {
+        Self::CssMetavariable(node)
+    }
+}
 impl From<ScssInterpolatedIdentifier> for AnyCssDeclarationName {
     fn from(node: ScssInterpolatedIdentifier) -> Self {
         Self::ScssInterpolatedIdentifier(node)
@@ -38724,11 +38743,15 @@ impl AstNode for AnyCssDeclarationName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssDashedIdentifier::KIND_SET
         .union(CssIdentifier::KIND_SET)
+        .union(CssMetavariable::KIND_SET)
         .union(ScssInterpolatedIdentifier::KIND_SET)
         .union(TwValueThemeReference::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_IDENTIFIER | SCSS_INTERPOLATED_IDENTIFIER | TW_VALUE_THEME_REFERENCE => true,
+            CSS_IDENTIFIER
+            | CSS_METAVARIABLE
+            | SCSS_INTERPOLATED_IDENTIFIER
+            | TW_VALUE_THEME_REFERENCE => true,
             k if AnyCssDashedIdentifier::can_cast(k) => true,
             _ => false,
         }
@@ -38736,6 +38759,7 @@ impl AstNode for AnyCssDeclarationName {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
+            CSS_METAVARIABLE => Self::CssMetavariable(CssMetavariable { syntax }),
             SCSS_INTERPOLATED_IDENTIFIER => {
                 Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
             }
@@ -38754,6 +38778,7 @@ impl AstNode for AnyCssDeclarationName {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssIdentifier(it) => it.syntax(),
+            Self::CssMetavariable(it) => it.syntax(),
             Self::ScssInterpolatedIdentifier(it) => it.syntax(),
             Self::TwValueThemeReference(it) => it.syntax(),
             Self::AnyCssDashedIdentifier(it) => it.syntax(),
@@ -38762,6 +38787,7 @@ impl AstNode for AnyCssDeclarationName {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssIdentifier(it) => it.into_syntax(),
+            Self::CssMetavariable(it) => it.into_syntax(),
             Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
             Self::TwValueThemeReference(it) => it.into_syntax(),
             Self::AnyCssDashedIdentifier(it) => it.into_syntax(),
@@ -38773,6 +38799,7 @@ impl std::fmt::Debug for AnyCssDeclarationName {
         match self {
             Self::AnyCssDashedIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssMetavariable(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::TwValueThemeReference(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -38783,6 +38810,7 @@ impl From<AnyCssDeclarationName> for SyntaxNode {
         match n {
             AnyCssDeclarationName::AnyCssDashedIdentifier(it) => it.into_syntax(),
             AnyCssDeclarationName::CssIdentifier(it) => it.into_syntax(),
+            AnyCssDeclarationName::CssMetavariable(it) => it.into_syntax(),
             AnyCssDeclarationName::ScssInterpolatedIdentifier(it) => it.into_syntax(),
             AnyCssDeclarationName::TwValueThemeReference(it) => it.into_syntax(),
         }
@@ -44605,6 +44633,11 @@ impl From<AnyCssSelectorIdentifier> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssMetavariable> for AnyCssSimpleSelector {
+    fn from(node: CssMetavariable) -> Self {
+        Self::CssMetavariable(node)
+    }
+}
 impl From<CssTypeSelector> for AnyCssSimpleSelector {
     fn from(node: CssTypeSelector) -> Self {
         Self::CssTypeSelector(node)
@@ -44622,17 +44655,22 @@ impl From<ScssPlaceholderSelector> for AnyCssSimpleSelector {
 }
 impl AstNode for AnyCssSimpleSelector {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssTypeSelector::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = CssMetavariable::KIND_SET
+        .union(CssTypeSelector::KIND_SET)
         .union(CssUniversalSelector::KIND_SET)
         .union(ScssPlaceholderSelector::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_TYPE_SELECTOR | CSS_UNIVERSAL_SELECTOR | SCSS_PLACEHOLDER_SELECTOR
+            CSS_METAVARIABLE
+                | CSS_TYPE_SELECTOR
+                | CSS_UNIVERSAL_SELECTOR
+                | SCSS_PLACEHOLDER_SELECTOR
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            CSS_METAVARIABLE => Self::CssMetavariable(CssMetavariable { syntax }),
             CSS_TYPE_SELECTOR => Self::CssTypeSelector(CssTypeSelector { syntax }),
             CSS_UNIVERSAL_SELECTOR => Self::CssUniversalSelector(CssUniversalSelector { syntax }),
             SCSS_PLACEHOLDER_SELECTOR => {
@@ -44644,6 +44682,7 @@ impl AstNode for AnyCssSimpleSelector {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::CssMetavariable(it) => it.syntax(),
             Self::CssTypeSelector(it) => it.syntax(),
             Self::CssUniversalSelector(it) => it.syntax(),
             Self::ScssPlaceholderSelector(it) => it.syntax(),
@@ -44651,6 +44690,7 @@ impl AstNode for AnyCssSimpleSelector {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::CssMetavariable(it) => it.into_syntax(),
             Self::CssTypeSelector(it) => it.into_syntax(),
             Self::CssUniversalSelector(it) => it.into_syntax(),
             Self::ScssPlaceholderSelector(it) => it.into_syntax(),
@@ -44660,6 +44700,7 @@ impl AstNode for AnyCssSimpleSelector {
 impl std::fmt::Debug for AnyCssSimpleSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::CssMetavariable(it) => std::fmt::Debug::fmt(it, f),
             Self::CssTypeSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUniversalSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssPlaceholderSelector(it) => std::fmt::Debug::fmt(it, f),
@@ -44669,6 +44710,7 @@ impl std::fmt::Debug for AnyCssSimpleSelector {
 impl From<AnyCssSimpleSelector> for SyntaxNode {
     fn from(n: AnyCssSimpleSelector) -> Self {
         match n {
+            AnyCssSimpleSelector::CssMetavariable(it) => it.into_syntax(),
             AnyCssSimpleSelector::CssTypeSelector(it) => it.into_syntax(),
             AnyCssSimpleSelector::CssUniversalSelector(it) => it.into_syntax(),
             AnyCssSimpleSelector::ScssPlaceholderSelector(it) => it.into_syntax(),

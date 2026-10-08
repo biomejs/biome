@@ -1,0 +1,5 @@
+a:hover { color: red; }
+
+a, :hover { color: red; }
+
+a:focus { color: red; }

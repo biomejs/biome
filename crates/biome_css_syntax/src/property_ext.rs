@@ -32,7 +32,9 @@ impl AnyCssDeclarationName {
             ) => Err(SyntaxError::MissingRequiredChild),
             Self::CssIdentifier(name) => name.value_token(),
             Self::TwValueThemeReference(name) => name.reference()?.value_token(),
-            Self::ScssInterpolatedIdentifier(_) => Err(SyntaxError::MissingRequiredChild),
+            Self::ScssInterpolatedIdentifier(_) | Self::CssMetavariable(_) => {
+                Err(SyntaxError::MissingRequiredChild)
+            }
         }
     }
 }
