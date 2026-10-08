@@ -9,7 +9,8 @@ use biome_js_factory::make::{
     js_binary_expression, js_string_literal, js_string_literal_expression,
 };
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression, JsBinaryOperator, JsSyntaxToken,
+    numbers::parse_js_number_with_single_rounding, AnyJsExpression, AnyJsLiteralExpression,
+    JsBinaryExpression, JsBinaryOperator, JsSyntaxToken,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange, TextSize};
 use biome_rule_options::no_useless_string_concat::NoUselessStringConcatOptions;
@@ -337,9 +338,13 @@ fn extract_string_value(expression: &Option<AnyJsExpression>) -> Option<String> 
 
         Some(AnyJsExpression::AnyJsLiteralExpression(
             AnyJsLiteralExpression::JsNumberLiteralExpression(number_literal_expression),
-        )) => number_literal_expression
-            .as_number()
-            .map(|number_value| number_value.to_string()),
+        )) => {
+            let token = number_literal_expression.value_token().ok()?;
+            let text = token.text_trimmed();
+            let number_value = parse_js_number_with_single_rounding(text)?;
+            let mut buffer = ryu_js::Buffer::new();
+            Some(buffer.format(number_value).to_string())
+        }
 
         Some(AnyJsExpression::JsBinaryExpression(binary_expression)) => {
             match (

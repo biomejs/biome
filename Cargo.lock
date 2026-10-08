@@ -1088,6 +1088,7 @@ dependencies = [
  "regex",
  "roaring",
  "rustc-hash 2.1.3",
+ "ryu-js",
  "salsa",
  "schemars",
  "serde",
