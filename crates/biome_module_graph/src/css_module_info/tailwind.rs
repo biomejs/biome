@@ -7,10 +7,12 @@
 //! the files it imports.
 
 use biome_css_syntax::{
-    AnyCssDeclarationName, AnyCssDeclarationOrRule, AnyCssDeclarationOrRuleBlock, AnyCssProperty,
-    AnyTwUtilityName, CssDeclaration, TwCustomVariantAtRule, TwThemeAtRule, TwUtilityAtRule,
+    AnyCssBracketedValueItem, AnyCssCustomIdentifier, AnyCssDashedIdentifier,
+    AnyCssDeclarationName, AnyCssDeclarationOrRule, AnyCssDeclarationOrRuleBlock, AnyCssExpression,
+    AnyCssFunction, AnyCssFunctionName, AnyCssProperty, AnyCssValue, AnyTwUtilityName,
+    CssDeclaration, CssIdentifier, TwCustomVariantAtRule, TwThemeAtRule, TwUtilityAtRule,
 };
-use biome_rowan::{AstNode, Text};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, Text};
 
 use super::CssImport;
 
@@ -22,6 +24,9 @@ pub struct TailwindStylesheet {
     pub theme: Vec<TailwindThemeEntry>,
     /// Utilities with a fixed name from `@utility` rules.
     pub utilities: Vec<TailwindUtility>,
+    /// Utilities that take a value from `@utility` rules ending in `-*`, such
+    /// as `@utility tab-* { ... }`.
+    pub functional_utilities: Vec<TailwindFunctionalUtility>,
     /// Variant names from `@custom-variant` rules.
     pub custom_variants: Vec<Text>,
 }
@@ -46,12 +51,57 @@ pub struct TailwindUtility {
     pub declaration_count: usize,
 }
 
+/// A utility declared with `@utility <name>-*`, such as
+/// `@utility tab-* { tab-size: --value(integer); }`.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct TailwindFunctionalUtility {
+    /// The part before `-*`, such as `tab`. A negative utility keeps its
+    /// sign, as in `-zoom-in`.
+    pub name: Text,
+    /// The declarations of the rule, including nested rules, in source order.
+    pub declarations: Box<[TailwindUtilityDeclaration]>,
+}
+
+/// A declaration of a [TailwindFunctionalUtility].
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct TailwindUtilityDeclaration {
+    /// The property name, such as `tab-size` or `--tw-enter-opacity`.
+    pub property: Text,
+    /// The `--value(…)` and `--modifier(…)` functions in the value, in source
+    /// order.
+    pub functions: Box<[TailwindValueFunction]>,
+}
+
+/// A `--value(…)` or `--modifier(…)` function, which Tailwind CSS replaces
+/// with the candidate's value or modifier when one of the arguments accepts it.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct TailwindValueFunction {
+    /// Whether the function is `--modifier(…)` rather than `--value(…)`.
+    pub is_modifier: bool,
+    pub arguments: Box<[TailwindValueArgument]>,
+}
+
+/// An argument of a [TailwindValueFunction].
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum TailwindValueArgument {
+    /// A bare value type, such as `integer` in `--value(integer)`.
+    Type(Text),
+    /// An arbitrary value type, such as `length` in `--value([length])`, or
+    /// `*` in `--value([*])`.
+    ArbitraryType(Text),
+    /// A theme namespace, such as `--tab-size` in `--value(--tab-size-*)`.
+    Theme(Text),
+    /// A literal value, such as `auto` in `--value("auto")`.
+    Literal(Text),
+}
+
 /// A point in the source of a [TailwindStylesheet], as the number of theme
 /// entries, utilities, and custom variants declared before it.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub(crate) struct TailwindPosition {
     theme: usize,
     utilities: usize,
+    functional_utilities: usize,
     custom_variants: usize,
 }
 
@@ -66,7 +116,10 @@ pub(crate) struct TailwindImport {
 
 impl TailwindStylesheet {
     pub fn is_empty(&self) -> bool {
-        self.theme.is_empty() && self.utilities.is_empty() && self.custom_variants.is_empty()
+        self.theme.is_empty()
+            && self.utilities.is_empty()
+            && self.functional_utilities.is_empty()
+            && self.custom_variants.is_empty()
     }
 
     /// The position after everything declared so far.
@@ -74,6 +127,7 @@ impl TailwindStylesheet {
         TailwindPosition {
             theme: self.theme.len(),
             utilities: self.utilities.len(),
+            functional_utilities: self.functional_utilities.len(),
             custom_variants: self.custom_variants.len(),
         }
     }
@@ -89,6 +143,9 @@ impl TailwindStylesheet {
             .extend_from_slice(&other.theme[start.theme..end.theme]);
         self.utilities
             .extend_from_slice(&other.utilities[start.utilities..end.utilities]);
+        self.functional_utilities.extend_from_slice(
+            &other.functional_utilities[start.functional_utilities..end.functional_utilities],
+        );
         self.custom_variants
             .extend_from_slice(&other.custom_variants[start.custom_variants..end.custom_variants]);
     }
@@ -133,13 +190,33 @@ impl TailwindStylesheet {
     }
 
     pub(crate) fn visit_utility(&mut self, utility: &TwUtilityAtRule) {
-        // Utilities ending in `-*` take values, which aren't supported yet.
-        let Ok(AnyTwUtilityName::CssIdentifier(name)) = utility.name() else {
-            return;
-        };
         let Ok(block) = utility.block() else {
             return;
         };
+        match utility.name() {
+            Ok(AnyTwUtilityName::CssIdentifier(name)) => {
+                self.utilities.push(TailwindUtility::new(&name, &block));
+            }
+            Ok(AnyTwUtilityName::TwFunctionalUtilityName(name)) => {
+                if let Ok(name) = name.identifier() {
+                    self.functional_utilities
+                        .push(TailwindFunctionalUtility::new(&name, &block));
+                }
+            }
+            Err(_) => {}
+        }
+    }
+
+    pub(crate) fn visit_custom_variant(&mut self, variant: &TwCustomVariantAtRule) {
+        if let Ok(name) = variant.name() {
+            self.custom_variants
+                .push(name.syntax().text_trimmed().to_string().into());
+        }
+    }
+}
+
+impl TailwindUtility {
+    fn new(name: &CssIdentifier, block: &AnyCssDeclarationOrRuleBlock) -> Self {
         let mut properties = Vec::new();
         let mut declaration_count = 0;
         for declaration in block
@@ -154,17 +231,120 @@ impl TailwindStylesheet {
                 properties.push(property_name.syntax().text_trimmed().to_string().into());
             }
         }
-        self.utilities.push(TailwindUtility {
+        Self {
             name: name.syntax().text_trimmed().to_string().into(),
             properties: properties.into_boxed_slice(),
             declaration_count,
-        });
-    }
-
-    pub(crate) fn visit_custom_variant(&mut self, variant: &TwCustomVariantAtRule) {
-        if let Ok(name) = variant.name() {
-            self.custom_variants
-                .push(name.syntax().text_trimmed().to_string().into());
         }
     }
+}
+
+impl TailwindFunctionalUtility {
+    fn new(name: &CssIdentifier, block: &AnyCssDeclarationOrRuleBlock) -> Self {
+        let declarations = block
+            .syntax()
+            .descendants()
+            .filter_map(CssDeclaration::cast)
+            .filter_map(|declaration| {
+                let AnyCssProperty::CssGenericProperty(property) = declaration.property().ok()?
+                else {
+                    return None;
+                };
+                let functions = property
+                    .value()
+                    .ok()?
+                    .syntax()
+                    .descendants()
+                    .filter_map(AnyCssFunction::cast)
+                    .filter_map(|function| TailwindValueFunction::new(&function))
+                    .collect();
+                Some(TailwindUtilityDeclaration {
+                    property: property
+                        .name()
+                        .ok()?
+                        .syntax()
+                        .text_trimmed()
+                        .to_string()
+                        .into(),
+                    functions,
+                })
+            })
+            .collect();
+        Self {
+            name: name.syntax().text_trimmed().to_string().into(),
+            declarations,
+        }
+    }
+}
+
+impl TailwindValueFunction {
+    fn new(function: &AnyCssFunction) -> Option<Self> {
+        let AnyCssFunction::CssFunction(function) = function else {
+            return None;
+        };
+        let Ok(AnyCssFunctionName::CssIdentifier(name)) = function.name() else {
+            return None;
+        };
+        let is_modifier = match name.syntax().text_trimmed().to_string().as_str() {
+            "--value" => false,
+            "--modifier" => true,
+            _ => return None,
+        };
+        let arguments = function
+            .items()
+            .iter()
+            .filter_map(|argument| {
+                let Ok(AnyCssExpression::CssListOfComponentValuesExpression(argument)) = argument
+                else {
+                    return None;
+                };
+                let mut values = argument.css_component_value_list().iter();
+                let value = values.next()?;
+                if values.next().is_some() {
+                    return None;
+                }
+                TailwindValueArgument::new(&value)
+            })
+            .collect();
+        Some(Self {
+            is_modifier,
+            arguments,
+        })
+    }
+}
+
+impl TailwindValueArgument {
+    fn new(value: &AnyCssValue) -> Option<Self> {
+        match value {
+            AnyCssValue::CssIdentifier(identifier) => Some(Self::Type(node_text(identifier))),
+            AnyCssValue::CssBracketedValue(bracketed) => {
+                let mut items = bracketed.items().iter();
+                let Some(AnyCssBracketedValueItem::AnyCssCustomIdentifier(
+                    AnyCssCustomIdentifier::CssCustomIdentifier(data_type),
+                )) = items.next()
+                else {
+                    return None;
+                };
+                items
+                    .next()
+                    .is_none()
+                    .then(|| Self::ArbitraryType(node_text(&data_type)))
+            }
+            AnyCssValue::TwValueThemeReference(reference) => {
+                Some(Self::Theme(node_text(&reference.reference().ok()?)))
+            }
+            // Tailwind CSS reads `--value(--tab-size)` as `--value(--tab-size-*)`.
+            AnyCssValue::AnyCssDashedIdentifier(AnyCssDashedIdentifier::CssDashedIdentifier(
+                reference,
+            )) => Some(Self::Theme(node_text(reference))),
+            AnyCssValue::CssString(literal) => {
+                Some(Self::Literal(literal.inner_string_text().ok()?.into()))
+            }
+            _ => None,
+        }
+    }
+}
+
+fn node_text(node: &impl AstNode) -> Text {
+    node.syntax().text_trimmed().to_string().into()
 }

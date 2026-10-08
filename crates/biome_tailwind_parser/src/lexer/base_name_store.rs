@@ -5,7 +5,8 @@ use biome_unicode_table::{Dispatch, Dispatch::*, lookup_byte};
 
 /// A global store of dashed basenames for efficient reuse across lexing.
 ///
-/// Ideally, this will be built by parsing a project's tailwind config, since it can add custom utilities and variants.
+/// It holds Tailwind's built-in basenames. A project's stylesheet can add utilities, so a store
+/// that also holds those can be passed through [TailwindParserOptions](crate::TailwindParserOptions).
 pub static BASENAME_STORE: LazyLock<BaseNameStore> =
     LazyLock::new(|| BaseNameStore::new(BASENAMES_WITH_DASHES));
 
@@ -13,11 +14,12 @@ pub static BASENAME_STORE: LazyLock<BaseNameStore> =
 /// at the beginning of a byte slice.
 ///
 /// Build it once from `BASENAMES_WITH_DASHES` and reuse it across lexing.
-pub(crate) struct BaseNameStore {
+#[derive(Debug, Eq, PartialEq)]
+pub struct BaseNameStore {
     nodes: Vec<Node>,
 }
 
-#[derive(Default)]
+#[derive(Debug, Default, Eq, PartialEq)]
 struct Node {
     terminal: bool,
     // Children are stored as (byte, child_index)
@@ -26,7 +28,7 @@ struct Node {
 
 impl BaseNameStore {
     /// Creates a store from a list of ASCII basenames.
-    pub(crate) fn new(list: &[&str]) -> Self {
+    pub fn new(list: &[&str]) -> Self {
         let mut store = Self {
             nodes: vec![Node::default()], // root
         };

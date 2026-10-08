@@ -50,6 +50,57 @@ fn resolution_requests_intern_equal_queries() {
 }
 
 #[test]
+fn css_package_imports_use_style_exports() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/project/node_modules/tw-animate-css/package.json".into(),
+        r#"{
+            "exports": {
+                ".": { "import": "./index.js", "style": "./dist/tw-animate.css" },
+                "./prefix": { "style": "./dist/tw-animate-prefix.css" },
+                "./fallback": { "default": "./dist/fallback.css" }
+            }
+        }"#,
+    );
+    for path in [
+        "/project/node_modules/tw-animate-css/index.js",
+        "/project/node_modules/tw-animate-css/dist/tw-animate.css",
+        "/project/node_modules/tw-animate-css/dist/tw-animate-prefix.css",
+        "/project/node_modules/tw-animate-css/dist/fallback.css",
+    ] {
+        fs.insert(path.into(), "");
+    }
+    let db = TestModuleDb::with_fs(&fs);
+    for (specifier, expected) in [
+        ("tw-animate-css", "dist/tw-animate.css"),
+        ("tw-animate-css/prefix", "dist/tw-animate-prefix.css"),
+        ("tw-animate-css/fallback", "dist/fallback.css"),
+    ] {
+        let request = request(&db, "/project/src", specifier, ResolutionMode::Css);
+        assert_eq!(
+            resolve_module_request(&db, request).path().as_path(),
+            Some(
+                Utf8Path::new("/project/node_modules/tw-animate-css")
+                    .join(expected)
+                    .as_path()
+            )
+        );
+    }
+    let request = request(
+        &db,
+        "/project/src",
+        "tw-animate-css",
+        ResolutionMode::JavaScript,
+    );
+    assert_eq!(
+        resolve_module_request(&db, request).path().as_path(),
+        Some(Utf8Path::new(
+            "/project/node_modules/tw-animate-css/index.js"
+        ))
+    );
+}
+
+#[test]
 fn resolution_query_is_memoized_and_tracks_consumed_paths() {
     let fs = MemoryFileSystem::default();
     fs.insert("/src/dependency.css".into(), "");

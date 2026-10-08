@@ -1,0 +1,133 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --only=nursery/useTailwindSortedClasses '<TEMP_DIR>/tailwind_stylesheet_functional_utilities_parse'
+```
+
+## `biome.json`
+
+```json
+{
+  "tailwind": { "stylesheet": "./src/app.css" },
+  "linter": { "rules": { "nursery": { "useTailwindSortedClasses": "error" } } }
+}
+```
+
+## `src/App.jsx`
+
+```jsx
+export const arbitrary = <div className="slide-in-from-top-[48%] flex" />;
+export const negative = <div className="-zoom-in-50 flex" />;
+export const template = <div className={`${a}x p-4 flex slide-in-from-top-[48%]`} />;
+
+```
+
+## `src/app.css`
+
+```css
+@utility slide-in-from-top-* {
+    --tw-enter-translate-y: calc(--value(integer) * var(--spacing));
+    --tw-enter-translate-y: --value(--percentage-*, [*]);
+}
+@utility -zoom-in-* {
+    --tw-enter-scale: calc(--value(number) * -1%);
+}
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+src/App.jsx:1:41 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × These CSS classes should be sorted.
+  
+  > 1 │ export const arbitrary = <div className="slide-in-from-top-[48%] flex" />;
+      │                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ export const negative = <div className="-zoom-in-50 flex" />;
+    3 │ export const template = <div className={`${a}x p-4 flex slide-in-from-top-[48%]`} />;
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+    1   │ - export·const·arbitrary·=·<div·className="slide-in-from-top-[48%]·flex"·/>;
+      1 │ + export·const·arbitrary·=·<div·className="flex·slide-in-from-top-[48%]"·/>;
+    2 2 │   export const negative = <div className="-zoom-in-50 flex" />;
+    3 3 │   export const template = <div className={`${a}x p-4 flex slide-in-from-top-[48%]`} />;
+  
+
+```
+
+```block
+src/App.jsx:2:40 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × These CSS classes should be sorted.
+  
+    1 │ export const arbitrary = <div className="slide-in-from-top-[48%] flex" />;
+  > 2 │ export const negative = <div className="-zoom-in-50 flex" />;
+      │                                        ^^^^^^^^^^^^^^^^^^
+    3 │ export const template = <div className={`${a}x p-4 flex slide-in-from-top-[48%]`} />;
+    4 │ 
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+    1 1 │   export const arbitrary = <div className="slide-in-from-top-[48%] flex" />;
+    2   │ - export·const·negative·=·<div·className="-zoom-in-50·flex"·/>;
+      2 │ + export·const·negative·=·<div·className="flex·-zoom-in-50"·/>;
+    3 3 │   export const template = <div className={`${a}x p-4 flex slide-in-from-top-[48%]`} />;
+    4 4 │   
+  
+
+```
+
+```block
+src/App.jsx:3:47 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × These CSS classes should be sorted.
+  
+    1 │ export const arbitrary = <div className="slide-in-from-top-[48%] flex" />;
+    2 │ export const negative = <div className="-zoom-in-50 flex" />;
+  > 3 │ export const template = <div className={`${a}x p-4 flex slide-in-from-top-[48%]`} />;
+      │                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+    1 1 │   export const arbitrary = <div className="slide-in-from-top-[48%] flex" />;
+    2 2 │   export const negative = <div className="-zoom-in-50 flex" />;
+    3   │ - export·const·template·=·<div·className={`${a}x·p-4·flex·slide-in-from-top-[48%]`}·/>;
+      3 │ + export·const·template·=·<div·className={`${a}x·flex·p-4·slide-in-from-top-[48%]`}·/>;
+    4 4 │   
+  
+
+```
+
+```block
+Checked 3 files in <TIME>. No fixes applied.
+Found 3 errors.
+```

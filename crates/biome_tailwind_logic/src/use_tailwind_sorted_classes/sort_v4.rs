@@ -2,13 +2,17 @@ use std::cmp::Ordering;
 
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeText, TextRange, TextSize, TokenText};
 use biome_string_case::Collator;
+use biome_tailwind_parser::parse_tailwind;
 use biome_tailwind_syntax::{
     AnyTwCandidate, AnyTwFullCandidate, AnyTwModifier, AnyTwValue, CssGenericComponentValueList,
-    TailwindSyntaxNode, TailwindSyntaxToken, TwNumberValue, TwRoot,
+    TailwindSyntaxNode, TailwindSyntaxToken, TwFullCandidate, TwFunctionalCandidate, TwNumberValue,
+    TwRoot,
 };
 
 use super::arbitrary_value_match::value_matches_type;
-use super::design_system::TailwindDesignSystem;
+use super::design_system::{
+    BareValueType, CustomFunctionalUtility, TailwindDesignSystem, ValueArgument,
+};
 use super::sort_v4_variants::{
     VariantGroups, VariantKey, VariantWeight, variant_keys_from_candidate,
 };
@@ -34,7 +38,7 @@ pub fn sort_class_list(root: &TwRoot, design: &TailwindDesignSystem) -> String {
     let mut pending: Vec<(PendingSortKey, SyntaxNodeText)> = Vec::with_capacity(candidates.len());
     for candidate in candidates.iter().flatten() {
         let text = candidate.syntax().text_trimmed();
-        let key = PendingSortKey::from_candidate(&candidate, design);
+        let key = PendingSortKey::classify(&candidate, design);
         pending.push((key, text));
     }
 
@@ -362,6 +366,123 @@ impl Collator for TwNameCollator {
 }
 
 impl PendingSortKey {
+    /// Classify a candidate like [Self::from_candidate], including the
+    /// functional utilities of the user's stylesheet. Tailwind compiles a
+    /// candidate with every utility it matches and places it by the first
+    /// rule it generates.
+    fn classify(candidate: &AnyTwFullCandidate, design: &TailwindDesignSystem) -> Self {
+        let key = Self::from_candidate(candidate, design);
+        if !design.has_functional_utilities() {
+            return key;
+        }
+        let AnyTwFullCandidate::TwFullCandidate(node) = candidate else {
+            return key;
+        };
+        let Ok(inner) = node.candidate() else {
+            return key;
+        };
+        let base = match &inner {
+            AnyTwCandidate::TwFunctionalCandidate(functional) => functional.base_token(),
+            AnyTwCandidate::TwStaticCandidate(candidate) => candidate.base_token(),
+            _ => return key,
+        };
+        let Ok(base) = base else {
+            return key;
+        };
+        let base = base.text_trimmed();
+        if !design.is_functional_root(base) {
+            return key;
+        }
+        let key = match &inner {
+            AnyTwCandidate::TwFunctionalCandidate(functional) => {
+                key.or_first(Self::from_custom_functional(node, functional, base, design))
+            }
+            _ => key,
+        };
+        // A stylesheet root such as `bg-red` makes the parser split
+        // `bg-red-500` at that root, but Tailwind also tries its built-in
+        // roots, such as `bg`.
+        let has_built_in_prefix = base
+            .match_indices('-')
+            .any(|(end, _)| FUNCTIONAL_UTILITIES.contains_key(&base[..end]));
+        if !has_built_in_prefix {
+            return key;
+        }
+        let parse = parse_tailwind(&candidate.syntax().text_trimmed().to_string());
+        if parse.has_errors() {
+            return key;
+        }
+        match parse.tree().candidates().iter().flatten().next() {
+            Some(candidate) => key.or_first(Self::from_candidate(&candidate, design)),
+            None => key,
+        }
+    }
+
+    /// Of two classifications of the same candidate, the one Tailwind places
+    /// first.
+    fn or_first(self, other: Self) -> Self {
+        match (&self, &other) {
+            (Self::Unknown, _) => other,
+            (
+                Self::Known {
+                    signature: s1,
+                    count: c1,
+                    ..
+                },
+                Self::Known {
+                    signature: s2,
+                    count: c2,
+                    ..
+                },
+            ) if s2.cmp(s1).then_with(|| c1.cmp(c2)).is_lt() => other,
+            _ => self,
+        }
+    }
+
+    /// Classify a candidate with the stylesheet's functional utilities whose
+    /// root is `base`, such as `tab` for `@utility tab-*`, or `-tab` when the
+    /// candidate is negative.
+    fn from_custom_functional(
+        node: &TwFullCandidate,
+        functional: &TwFunctionalCandidate,
+        base: &str,
+        design: &TailwindDesignSystem,
+    ) -> Self {
+        if node.legacy_important_token().is_some() && node.excl_token().is_some() {
+            return Self::Unknown;
+        }
+        let negative_root;
+        let root = if node.negative_token().is_some() {
+            negative_root = format!("-{base}");
+            &negative_root
+        } else {
+            base
+        };
+        let Ok(value) = functional.value() else {
+            return Self::Unknown;
+        };
+        let modifier = functional.modifier();
+        let Some((signature, count)) = design
+            .functional_utility(root)
+            .iter()
+            .filter_map(|utility| {
+                compile_custom_functional(utility, &value, modifier.as_ref(), design)
+            })
+            .min_by(|(s1, c1), (s2, c2)| s1.cmp(s2).then_with(|| c2.cmp(c1)))
+        else {
+            return Self::Unknown;
+        };
+        let Some(variants) = variant_keys_from_candidate(node, design) else {
+            return Self::Unknown;
+        };
+        Self::Known {
+            signature,
+            count,
+            text: CandidateText(node.syntax().clone()),
+            variants,
+        }
+    }
+
     /// Classify a candidate into its utility placement and variants, or
     /// `Unknown` for a shape we can't place.
     fn from_candidate(candidate: &AnyTwFullCandidate, design: &TailwindDesignSystem) -> Self {
@@ -569,6 +690,149 @@ impl PendingSortKey {
             }
         }
     }
+}
+
+/// Compiles a candidate's value and modifier with a functional utility the
+/// way Tailwind does, and returns the signature and count of the declarations
+/// it keeps, or `None` when Tailwind generates nothing.
+///
+/// A declaration is dropped when one of its `--value(…)` or `--modifier(…)`
+/// functions accepts neither the value nor the modifier. The candidate is
+/// invalid when no `--value(…)` accepts its value, when it has a modifier that
+/// no `--modifier(…)` of the utility accepts, or when its modifier is accepted
+/// neither by a `--modifier(…)` nor as the denominator of a ratio.
+fn compile_custom_functional(
+    utility: &CustomFunctionalUtility,
+    value: &AnyTwValue,
+    modifier: Option<&AnyTwModifier>,
+    design: &TailwindDesignSystem,
+) -> Option<(Signature, u8)> {
+    let modifier = match modifier {
+        None => None,
+        Some(AnyTwModifier::TwModifier(modifier)) => Some(modifier.value().ok()?),
+        Some(AnyTwModifier::TwBogusModifier(_)) => return None,
+    };
+    let mut used_value = false;
+    let mut resolved_value = false;
+    let mut used_modifier = false;
+    let mut resolved_modifier = false;
+    let mut resolved_ratio = false;
+    // The kept declarations' properties, and whether a `--value(…)` resolved
+    // in them other than as a ratio.
+    let mut kept = Vec::with_capacity(utility.declarations.len());
+    'declarations: for declaration in &utility.declarations {
+        let mut resolved_non_ratio = false;
+        for function in &declaration.functions {
+            if function.is_modifier {
+                used_modifier = true;
+                let resolved = modifier.as_ref().is_some_and(|modifier| {
+                    resolve_value_function(&function.arguments, modifier, None, design).is_some()
+                });
+                if !resolved {
+                    continue 'declarations;
+                }
+                resolved_modifier = true;
+            } else {
+                used_value = true;
+                match resolve_value_function(&function.arguments, value, modifier.as_ref(), design)
+                {
+                    None => continue 'declarations,
+                    Some(is_ratio) => {
+                        resolved_value = true;
+                        resolved_ratio |= is_ratio;
+                        resolved_non_ratio |= !is_ratio;
+                    }
+                }
+            }
+        }
+        kept.push((declaration.property, resolved_non_ratio));
+    }
+    if !used_value
+        || !resolved_value
+        || modifier.is_some() && used_modifier && !resolved_modifier
+        || resolved_ratio && resolved_modifier
+        || modifier.is_some() && !resolved_ratio && !resolved_modifier
+    {
+        return None;
+    }
+    // A ratio replaces the declarations that took the value some other way.
+    if resolved_ratio {
+        kept.retain(|(_, resolved_non_ratio)| !resolved_non_ratio);
+    }
+    let count = u8::try_from(kept.len()).unwrap_or(u8::MAX);
+    let mut signature: Vec<u16> = kept
+        .into_iter()
+        .filter_map(|(property, _)| property)
+        .collect();
+    signature.sort_unstable();
+    signature.dedup();
+    Some((Signature::Custom(signature.into_boxed_slice()), count))
+}
+
+/// Matches `value` against the arguments of a `--value(…)` or
+/// `--modifier(…)` function and returns whether it matched as a ratio, or
+/// `None` when no argument accepts it. `denominator` is the candidate's
+/// modifier, which makes the value a fraction such as `16/9`.
+fn resolve_value_function(
+    arguments: &[ValueArgument],
+    value: &AnyTwValue,
+    denominator: Option<&AnyTwValue>,
+    design: &TailwindDesignSystem,
+) -> Option<bool> {
+    arguments.iter().find_map(|argument| {
+        let matched = match argument {
+            ValueArgument::Literal(literal) => {
+                named_or_number_text(value).is_some_and(|text| text.text() == literal.as_ref())
+            }
+            ValueArgument::Theme(reference) => named_or_number_text(value)
+                .is_some_and(|text| design.has_theme_value(reference, text.text())),
+            ValueArgument::Bare(BareValueType::Integer) => is_bare_integer(value),
+            ValueArgument::Bare(BareValueType::Number) => matches!(value,
+                AnyTwValue::TwNumberValue(number) if bare_number(number).is_some_and(is_quarter_step)),
+            ValueArgument::Bare(BareValueType::Percentage) => matches!(value,
+                AnyTwValue::TwPercentageValue(percentage) if percentage
+                    .value_token()
+                    .is_ok_and(|token| is_bare_integer_text(token.text_trimmed()))),
+            ValueArgument::Bare(BareValueType::Ratio) => {
+                if is_integral_number(value) && denominator.is_some_and(is_integral_number) {
+                    return Some(true);
+                }
+                false
+            }
+            ValueArgument::AnyArbitrary => matches!(
+                value,
+                AnyTwValue::TwArbitraryValue(_) | AnyTwValue::TwCssVariableValue(_)
+            ),
+            ValueArgument::Arbitrary(data_type) => match (value, data_type) {
+                (AnyTwValue::TwArbitraryValue(arbitrary), Some(data_type)) => {
+                    value_matches_type(&arbitrary.value(), *data_type)
+                }
+                _ => false,
+            },
+        };
+        matched.then_some(false)
+    })
+}
+
+/// Whether `value` is a number with an integer value, however it's written,
+/// so `7`, `07`, and `7.0`. Tailwind reads the parts of a ratio this way.
+fn is_integral_number(value: &AnyTwValue) -> bool {
+    let AnyTwValue::TwNumberValue(number) = value else {
+        return false;
+    };
+    number
+        .value_token()
+        .ok()
+        .and_then(|token| token.text_trimmed().parse::<f64>().ok())
+        .is_some_and(|n| n.fract() == 0.0)
+}
+
+/// Whether `text` is a non-negative integer written the way Tailwind
+/// accepts it, so `7` but not `07`.
+fn is_bare_integer_text(text: &str) -> bool {
+    !text.is_empty()
+        && text.bytes().all(|byte| byte.is_ascii_digit())
+        && (text == "0" || !text.starts_with('0'))
 }
 
 fn pool_signature(idx: u16) -> Signature {
@@ -882,7 +1146,12 @@ fn resolve_css_variable_branch(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use biome_tailwind_parser::parse_tailwind;
+    use biome_module_graph::{
+        TailwindFunctionalUtility, TailwindStylesheet, TailwindThemeEntry,
+        TailwindUtilityDeclaration, TailwindValueArgument, TailwindValueFunction,
+    };
+    use biome_rowan::NodeCache;
+    use biome_tailwind_parser::parse_tailwind_with_options;
 
     /// A known key with the given placement whose text is the placeholder
     /// candidate `x`, for tests that only exercise the placement.
@@ -1047,6 +1316,329 @@ mod tests {
         assert_eq!(
             sort_with("text-red-500 btn-primary bg-blue-500", &design),
             "btn-primary bg-blue-500 text-red-500"
+        );
+    }
+
+    #[test]
+    fn stylesheet_functional_roots_keep_built_in_splits() {
+        let functional_utilities = ["bg-red", "bg-white"]
+            .map(|name| TailwindFunctionalUtility {
+                name: name.into(),
+                declarations: Box::default(),
+            })
+            .into();
+        let design = TailwindDesignSystem::from(&TailwindStylesheet {
+            functional_utilities,
+            ..TailwindStylesheet::default()
+        });
+        let sort_with_roots = |input: &str| {
+            let parse = parse_tailwind_with_options(
+                input,
+                &mut NodeCache::default(),
+                design.parser_options(),
+            );
+            sort_class_list(&parse.tree(), &design)
+        };
+        assert_eq!(sort_with_roots("bg-red-500 flex"), "flex bg-red-500");
+        assert_eq!(sort_with_roots("bg-white flex"), "flex bg-white");
+    }
+
+    /// A declaration of `property`, with a `--value(…)` function, or a
+    /// `--modifier(…)` one when `is_modifier`, taking `arguments`.
+    fn declaration(
+        property: &str,
+        function: Option<(bool, &[TailwindValueArgument])>,
+    ) -> TailwindUtilityDeclaration {
+        TailwindUtilityDeclaration {
+            property: property.to_string().into(),
+            functions: function
+                .map(|(is_modifier, arguments)| TailwindValueFunction {
+                    is_modifier,
+                    arguments: arguments.into(),
+                })
+                .into_iter()
+                .collect(),
+        }
+    }
+
+    fn value(property: &str, arguments: &[TailwindValueArgument]) -> TailwindUtilityDeclaration {
+        declaration(property, Some((false, arguments)))
+    }
+
+    fn functional(
+        name: &str,
+        declarations: impl Into<Box<[TailwindUtilityDeclaration]>>,
+    ) -> TailwindFunctionalUtility {
+        TailwindFunctionalUtility {
+            name: name.to_string().into(),
+            declarations: declarations.into(),
+        }
+    }
+
+    /// Sorts `input` with a design system that declares `utilities` and the
+    /// theme variables `theme`, parsing it the way the analyzer does.
+    fn sort_with_functional(
+        input: &str,
+        utilities: impl Into<Vec<TailwindFunctionalUtility>>,
+        theme: &[(&str, &str)],
+    ) -> String {
+        let design = TailwindDesignSystem::from(&TailwindStylesheet {
+            theme: theme
+                .iter()
+                .map(|(name, value)| TailwindThemeEntry::Variable {
+                    name: name.to_string().into(),
+                    value: value.to_string().into(),
+                })
+                .collect(),
+            functional_utilities: utilities.into(),
+            ..TailwindStylesheet::default()
+        });
+        let parse =
+            parse_tailwind_with_options(input, &mut NodeCache::default(), design.parser_options());
+        sort_class_list(&parse.tree(), &design)
+    }
+
+    // The expected orders below come from Tailwind CSS 4.3.3's `getClassOrder`.
+
+    #[test]
+    fn functional_utility_takes_values_its_arguments_accept() {
+        use TailwindValueArgument::*;
+        let tab = functional(
+            "tab",
+            [value(
+                "tab-size",
+                &[
+                    Type("integer".into()),
+                    Theme("--tab-size".into()),
+                    Literal("inherit".into()),
+                    ArbitraryType("integer".into()),
+                ],
+            )],
+        );
+        assert_eq!(
+            sort_with_functional(
+                "tab-4 tab-github tab-inherit tab-[3] tab-foo flex p-2",
+                [tab],
+                &[("--tab-size-github", "8")],
+            ),
+            "tab-foo flex p-2 tab-4 tab-[3] tab-github tab-inherit"
+        );
+    }
+
+    #[test]
+    fn functional_utility_takes_bare_numbers_tailwind_accepts() {
+        let num = functional(
+            "num",
+            [value(
+                "margin-top",
+                &[TailwindValueArgument::Type("number".into())],
+            )],
+        );
+        assert_eq!(
+            sort_with_functional("num-1.5 num-1.3 num-2 num-02 flex mt-2", [num], &[]),
+            "num-1.3 num-02 mt-2 num-1.5 num-2 flex"
+        );
+    }
+
+    #[test]
+    fn functional_utility_ratio_drops_other_values() {
+        let ratio = functional(
+            "ratio",
+            [
+                value(
+                    "aspect-ratio",
+                    &[TailwindValueArgument::Type("ratio".into())],
+                ),
+                value("width", &[TailwindValueArgument::Type("integer".into())]),
+            ],
+        );
+        assert_eq!(
+            sort_with_functional(
+                "ratio-16/9 ratio-4 ratio-[16/9] flex aspect-video",
+                [ratio],
+                &[]
+            ),
+            "ratio-[16/9] flex aspect-video ratio-16/9 ratio-4"
+        );
+    }
+
+    #[test]
+    fn functional_utility_ratio_parts_are_read_as_numbers() {
+        let ratio = functional(
+            "rt",
+            [value(
+                "aspect-ratio",
+                &[TailwindValueArgument::Type("ratio".into())],
+            )],
+        );
+        assert_eq!(
+            sort_with_functional("rt-07/9 rt-1.0/2 rt-1.5/2 flex", [ratio], &[]),
+            "rt-1.5/2 flex rt-1.0/2 rt-07/9"
+        );
+    }
+
+    #[test]
+    fn functional_utility_ratio_rejects_an_unresolved_modifier() {
+        use TailwindValueArgument::*;
+        let utility = functional(
+            "ar",
+            [
+                value("aspect-ratio", &[Type("ratio".into())]),
+                declaration("opacity", Some((true, &[ArbitraryType("*".into())]))),
+            ],
+        );
+        assert_eq!(
+            sort_with_functional("ar-16/9 flex", [utility], &[]),
+            "ar-16/9 flex"
+        );
+    }
+
+    #[test]
+    fn functional_utility_takes_integer_percentages() {
+        let utility = functional(
+            "pc",
+            [value(
+                "opacity",
+                &[TailwindValueArgument::Type("percentage".into())],
+            )],
+        );
+        assert_eq!(
+            sort_with_functional("pc-50% pc-1.5% pc-05% flex", [utility], &[]),
+            "pc-1.5% pc-05% flex pc-50%"
+        );
+    }
+
+    #[test]
+    fn functional_utility_infers_font_family_types() {
+        use TailwindValueArgument::*;
+        let family = functional(
+            "ff",
+            [value("font-family", &[ArbitraryType("family-name".into())])],
+        );
+        let generic = functional(
+            "gf",
+            [value(
+                "font-family",
+                &[ArbitraryType("generic-name".into())],
+            )],
+        );
+        assert_eq!(
+            sort_with_functional(
+                "ff-[Inter] ff-['Open_Sans'] ff-[serif] ff-[10px] flex",
+                [family],
+                &[]
+            ),
+            "ff-[10px] flex ff-['Open_Sans'] ff-[Inter] ff-[serif]"
+        );
+        assert_eq!(
+            sort_with_functional("gf-[serif] gf-[sans-serif] gf-[Inter] flex", [generic], &[]),
+            "gf-[Inter] flex gf-[sans-serif] gf-[serif]"
+        );
+    }
+
+    #[test]
+    fn functional_utility_modifier_must_resolve() {
+        use TailwindValueArgument::*;
+        let utility = functional(
+            "mod",
+            [
+                value(
+                    "color",
+                    &[ArbitraryType("color".into()), Theme("--color".into())],
+                ),
+                declaration("opacity", Some((true, &[Type("integer".into())]))),
+            ],
+        );
+        assert_eq!(
+            sort_with_functional(
+                "mod-red-500/50 mod-red-500 mod-[#fff]/20 mod-red-500/foo flex text-red-500",
+                [utility],
+                &[]
+            ),
+            "mod-red-500/foo flex mod-[#fff]/20 mod-red-500/50 mod-red-500 text-red-500"
+        );
+    }
+
+    #[test]
+    fn functional_utility_definitions_sort_by_the_first() {
+        use TailwindValueArgument::*;
+        let numeric = functional("two", [value("padding", &[Type("integer".into())])]);
+        let keyword = functional(
+            "two",
+            [
+                value("display", &[Literal("grid".into()), Literal("flex".into())]),
+                declaration("gap", None),
+            ],
+        );
+        assert_eq!(
+            sort_with_functional(
+                "two-4 two-grid two-block flex p-4 grid",
+                [numeric, keyword],
+                &[]
+            ),
+            "two-block two-grid flex grid p-4 two-4"
+        );
+    }
+
+    #[test]
+    fn functional_utility_needs_a_value_function() {
+        let utility = functional("novalue", [declaration("color", None)]);
+        assert_eq!(
+            sort_with_functional("novalue-4 novalue-red flex", [utility], &[]),
+            "novalue-4 novalue-red flex"
+        );
+    }
+
+    #[test]
+    fn negative_functional_utility_needs_the_sign() {
+        let utility = functional(
+            "-neg",
+            [value(
+                "translate",
+                &[TailwindValueArgument::Type("integer".into())],
+            )],
+        );
+        assert_eq!(
+            sort_with_functional("-neg-4 neg-4 flex translate-x-2", [utility], &[]),
+            "neg-4 flex translate-x-2 -neg-4"
+        );
+    }
+
+    #[test]
+    fn negative_functional_root_keeps_built_in_splits() {
+        let utility = functional(
+            "-bg-red",
+            [value(
+                "outline-width",
+                &[TailwindValueArgument::Type("integer".into())],
+            )],
+        );
+        assert_eq!(
+            sort_with_functional(
+                "bg-red-500 -bg-red-4 bg-red-4 flex outline-2",
+                [utility],
+                &[]
+            ),
+            "bg-red-4 flex bg-red-500 outline-2 -bg-red-4"
+        );
+    }
+
+    #[test]
+    fn functional_utility_and_built_in_root_both_apply() {
+        let utility = functional(
+            "bg-red",
+            [value(
+                "outline-width",
+                &[TailwindValueArgument::Type("integer".into())],
+            )],
+        );
+        assert_eq!(
+            sort_with_functional(
+                "bg-red-500 bg-red-4 bg-red bg-white flex outline-2",
+                [utility],
+                &[]
+            ),
+            "bg-red flex bg-red-500 bg-white outline-2 bg-red-4"
         );
     }
 

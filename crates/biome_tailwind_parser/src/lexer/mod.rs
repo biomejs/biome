@@ -1,7 +1,8 @@
 mod base_name_store;
 mod tests;
 
-use crate::lexer::base_name_store::{BASENAME_STORE, is_delimiter};
+use crate::lexer::base_name_store::is_delimiter;
+pub use crate::lexer::base_name_store::{BASENAME_STORE, BaseNameStore};
 use crate::token_source::TailwindLexContext;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags};
@@ -22,6 +23,8 @@ pub(crate) struct TailwindLexer<'src> {
     current_flags: TokenFlags,
     after_newline: bool,
     unicode_bom_length: usize,
+    /// The dashed basenames to match, [BASENAME_STORE] unless the project declares more.
+    base_names: &'src BaseNameStore,
 }
 
 impl<'src> TailwindLexer<'src> {
@@ -35,7 +38,13 @@ impl<'src> TailwindLexer<'src> {
             current_flags: TokenFlags::empty(),
             after_newline: false,
             unicode_bom_length: 0,
+            base_names: &BASENAME_STORE,
         }
+    }
+
+    pub(crate) fn with_base_names(mut self, base_names: &'src BaseNameStore) -> Self {
+        self.base_names = base_names;
+        self
     }
 
     fn consume_token(&mut self, current: u8) -> TailwindSyntaxKind {
@@ -422,7 +431,7 @@ impl<'src> TailwindLexer<'src> {
         }
 
         // Fallback to dashed-basename trie matching for cases with '-' inside the basename
-        let dashed_end = BASENAME_STORE.matcher(slice).base_end();
+        let dashed_end = self.base_names.matcher(slice).base_end();
         self.advance(dashed_end);
 
         if dashed_end == 4 && &slice[..dashed_end] == b"data" {
