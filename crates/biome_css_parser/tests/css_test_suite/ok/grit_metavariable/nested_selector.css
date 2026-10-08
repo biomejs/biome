@@ -1,20 +1,20 @@
 .a {
-    µb {}
+    $b {}
 }
 
 .a {
-    µb:hover {}
+    $b:hover {}
 }
 
 .a {
-    & µb {}
+    & $b {}
 }
 
 .a {
-    µb .c {}
+    $b .c {}
 }
 
 .a {
-    µb
+    $b
     color: red;
 }

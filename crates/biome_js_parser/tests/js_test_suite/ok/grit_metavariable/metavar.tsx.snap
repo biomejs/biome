@@ -1,0 +1,493 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```tsx
+import $defaultImport from $source;
+import { $namedImport, type $namedType } from $source;
+
+$statement;
+
+function foo() {
+    $statement;
+    const bar = $expression;
+}
+
+class Foo {
+    $classMember;
+}
+
+const { $key: key } = { $key: $value };
+
+function $functionName() {}
+
+type $Type = $OtherType;
+
+interface $Interface {
+    $body
+}
+
+<$tag $_>$_</$tag>
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsImport {
+            import_token: IMPORT_KW@0..7 "import" [] [Whitespace(" ")],
+            import_clause: JsImportDefaultClause {
+                type_token: missing (optional),
+                phase_token: missing (optional),
+                default_specifier: JsDefaultImportSpecifier {
+                    local_name: JsMetavariable {
+                        value_token: GRIT_METAVARIABLE@7..22 "$defaultImport" [] [Whitespace(" ")],
+                    },
+                },
+                from_token: FROM_KW@22..27 "from" [] [Whitespace(" ")],
+                source: JsMetavariable {
+                    value_token: GRIT_METAVARIABLE@27..34 "$source" [] [],
+                },
+                assertion: missing (optional),
+            },
+            semicolon_token: SEMICOLON@34..35 ";" [] [],
+        },
+        JsImport {
+            import_token: IMPORT_KW@35..43 "import" [Newline("\n")] [Whitespace(" ")],
+            import_clause: JsImportNamedClause {
+                type_token: missing (optional),
+                named_specifiers: JsNamedImportSpecifiers {
+                    l_curly_token: L_CURLY@43..45 "{" [] [Whitespace(" ")],
+                    specifiers: JsNamedImportSpecifierList [
+                        JsShorthandNamedImportSpecifier {
+                            type_token: missing (optional),
+                            local_name: JsMetavariable {
+                                value_token: GRIT_METAVARIABLE@45..57 "$namedImport" [] [],
+                            },
+                        },
+                        COMMA@57..59 "," [] [Whitespace(" ")],
+                        JsShorthandNamedImportSpecifier {
+                            type_token: TYPE_KW@59..64 "type" [] [Whitespace(" ")],
+                            local_name: JsMetavariable {
+                                value_token: GRIT_METAVARIABLE@64..75 "$namedType" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@75..77 "}" [] [Whitespace(" ")],
+                },
+                from_token: FROM_KW@77..82 "from" [] [Whitespace(" ")],
+                source: JsMetavariable {
+                    value_token: GRIT_METAVARIABLE@82..89 "$source" [] [],
+                },
+                assertion: missing (optional),
+            },
+            semicolon_token: SEMICOLON@89..90 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsMetavariable {
+                value_token: GRIT_METAVARIABLE@90..102 "$statement" [Newline("\n"), Newline("\n")] [],
+            },
+            semicolon_token: SEMICOLON@102..103 ";" [] [],
+        },
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@103..114 "function" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsIdentifierBinding {
+                name_token: IDENT@114..117 "foo" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@117..118 "(" [] [],
+                items: JsParameterList [],
+                r_paren_token: R_PAREN@118..120 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@120..121 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [
+                    JsMetavariable {
+                        value_token: GRIT_METAVARIABLE@121..136 "$statement" [Newline("\n"), Whitespace("    ")] [],
+                    },
+                    JsEmptyStatement {
+                        semicolon_token: SEMICOLON@136..137 ";" [] [],
+                    },
+                    JsVariableStatement {
+                        declaration: JsVariableDeclaration {
+                            await_token: missing (optional),
+                            kind: CONST_KW@137..148 "const" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            declarators: JsVariableDeclaratorList [
+                                JsVariableDeclarator {
+                                    id: JsIdentifierBinding {
+                                        name_token: IDENT@148..152 "bar" [] [Whitespace(" ")],
+                                    },
+                                    variable_annotation: missing (optional),
+                                    initializer: JsInitializerClause {
+                                        eq_token: EQ@152..154 "=" [] [Whitespace(" ")],
+                                        expression: JsMetavariable {
+                                            value_token: GRIT_METAVARIABLE@154..165 "$expression" [] [],
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                        semicolon_token: SEMICOLON@165..166 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@166..168 "}" [Newline("\n")] [],
+            },
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@168..176 "class" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@176..180 "Foo" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@180..181 "{" [] [],
+            members: JsClassMemberList [
+                JsMetavariable {
+                    value_token: GRIT_METAVARIABLE@181..198 "$classMember" [Newline("\n"), Whitespace("    ")] [],
+                },
+                JsEmptyClassMember {
+                    semicolon_token: SEMICOLON@198..199 ";" [] [],
+                },
+            ],
+            r_curly_token: R_CURLY@199..201 "}" [Newline("\n")] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@201..209 "const" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsObjectBindingPattern {
+                            l_curly_token: L_CURLY@209..211 "{" [] [Whitespace(" ")],
+                            properties: JsObjectBindingPatternPropertyList [
+                                JsObjectBindingPatternProperty {
+                                    member: JsMetavariable {
+                                        value_token: GRIT_METAVARIABLE@211..215 "$key" [] [],
+                                    },
+                                    colon_token: COLON@215..217 ":" [] [Whitespace(" ")],
+                                    pattern: JsIdentifierBinding {
+                                        name_token: IDENT@217..221 "key" [] [Whitespace(" ")],
+                                    },
+                                    init: missing (optional),
+                                },
+                            ],
+                            r_curly_token: R_CURLY@221..223 "}" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@223..225 "=" [] [Whitespace(" ")],
+                            expression: JsObjectExpression {
+                                l_curly_token: L_CURLY@225..227 "{" [] [Whitespace(" ")],
+                                members: JsObjectMemberList [
+                                    JsPropertyObjectMember {
+                                        name: JsMetavariable {
+                                            value_token: GRIT_METAVARIABLE@227..231 "$key" [] [],
+                                        },
+                                        colon_token: COLON@231..233 ":" [] [Whitespace(" ")],
+                                        value: JsMetavariable {
+                                            value_token: GRIT_METAVARIABLE@233..240 "$value" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@240..241 "}" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@241..242 ";" [] [],
+        },
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@242..253 "function" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsMetavariable {
+                value_token: GRIT_METAVARIABLE@253..266 "$functionName" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@266..267 "(" [] [],
+                items: JsParameterList [],
+                r_paren_token: R_PAREN@267..269 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@269..270 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@270..271 "}" [] [],
+            },
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@271..278 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            binding_identifier: JsMetavariable {
+                value_token: GRIT_METAVARIABLE@278..284 "$Type" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@284..286 "=" [] [Whitespace(" ")],
+            ty: JsMetavariable {
+                value_token: GRIT_METAVARIABLE@286..296 "$OtherType" [] [],
+            },
+            semicolon_token: SEMICOLON@296..297 ";" [] [],
+        },
+        TsInterfaceDeclaration {
+            interface_token: INTERFACE_KW@297..309 "interface" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+            id: JsMetavariable {
+                value_token: GRIT_METAVARIABLE@309..320 "$Interface" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            l_curly_token: L_CURLY@320..321 "{" [] [],
+            members: TsTypeMemberList [
+                JsMetavariable {
+                    value_token: GRIT_METAVARIABLE@321..331 "$body" [Newline("\n"), Whitespace("    ")] [],
+                },
+            ],
+            r_curly_token: R_CURLY@331..333 "}" [Newline("\n")] [],
+        },
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxElement {
+                    opening_element: JsxOpeningElement {
+                        l_angle_token: L_ANGLE@333..336 "<" [Newline("\n"), Newline("\n")] [],
+                        name: JsMetavariable {
+                            value_token: GRIT_METAVARIABLE@336..341 "$tag" [] [Whitespace(" ")],
+                        },
+                        type_arguments: missing (optional),
+                        attributes: JsxAttributeList [
+                            JsMetavariable {
+                                value_token: GRIT_METAVARIABLE@341..343 "$_" [] [],
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@343..344 ">" [] [],
+                    },
+                    elements: JsxChildList [
+                        JsMetavariable {
+                            value_token: GRIT_METAVARIABLE@344..346 "$_" [] [],
+                        },
+                    ],
+                    closing_element: JsxClosingElement {
+                        l_angle_token: L_ANGLE@346..347 "<" [] [],
+                        slash_token: SLASH@347..348 "/" [] [],
+                        name: JsMetavariable {
+                            value_token: GRIT_METAVARIABLE@348..352 "$tag" [] [],
+                        },
+                        r_angle_token: R_ANGLE@352..353 ">" [] [],
+                    },
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@353..354 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..354
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..353
+    0: JS_IMPORT@0..35
+      0: IMPORT_KW@0..7 "import" [] [Whitespace(" ")]
+      1: JS_IMPORT_DEFAULT_CLAUSE@7..34
+        0: (empty)
+        1: (empty)
+        2: JS_DEFAULT_IMPORT_SPECIFIER@7..22
+          0: JS_METAVARIABLE@7..22
+            0: GRIT_METAVARIABLE@7..22 "$defaultImport" [] [Whitespace(" ")]
+        3: FROM_KW@22..27 "from" [] [Whitespace(" ")]
+        4: JS_METAVARIABLE@27..34
+          0: GRIT_METAVARIABLE@27..34 "$source" [] []
+        5: (empty)
+      2: SEMICOLON@34..35 ";" [] []
+    1: JS_IMPORT@35..90
+      0: IMPORT_KW@35..43 "import" [Newline("\n")] [Whitespace(" ")]
+      1: JS_IMPORT_NAMED_CLAUSE@43..89
+        0: (empty)
+        1: JS_NAMED_IMPORT_SPECIFIERS@43..77
+          0: L_CURLY@43..45 "{" [] [Whitespace(" ")]
+          1: JS_NAMED_IMPORT_SPECIFIER_LIST@45..75
+            0: JS_SHORTHAND_NAMED_IMPORT_SPECIFIER@45..57
+              0: (empty)
+              1: JS_METAVARIABLE@45..57
+                0: GRIT_METAVARIABLE@45..57 "$namedImport" [] []
+            1: COMMA@57..59 "," [] [Whitespace(" ")]
+            2: JS_SHORTHAND_NAMED_IMPORT_SPECIFIER@59..75
+              0: TYPE_KW@59..64 "type" [] [Whitespace(" ")]
+              1: JS_METAVARIABLE@64..75
+                0: GRIT_METAVARIABLE@64..75 "$namedType" [] [Whitespace(" ")]
+          2: R_CURLY@75..77 "}" [] [Whitespace(" ")]
+        2: FROM_KW@77..82 "from" [] [Whitespace(" ")]
+        3: JS_METAVARIABLE@82..89
+          0: GRIT_METAVARIABLE@82..89 "$source" [] []
+        4: (empty)
+      2: SEMICOLON@89..90 ";" [] []
+    2: JS_EXPRESSION_STATEMENT@90..103
+      0: JS_METAVARIABLE@90..102
+        0: GRIT_METAVARIABLE@90..102 "$statement" [Newline("\n"), Newline("\n")] []
+      1: SEMICOLON@102..103 ";" [] []
+    3: JS_FUNCTION_DECLARATION@103..168
+      0: (empty)
+      1: FUNCTION_KW@103..114 "function" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: (empty)
+      3: JS_IDENTIFIER_BINDING@114..117
+        0: IDENT@114..117 "foo" [] []
+      4: (empty)
+      5: JS_PARAMETERS@117..120
+        0: L_PAREN@117..118 "(" [] []
+        1: JS_PARAMETER_LIST@118..118
+        2: R_PAREN@118..120 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@120..168
+        0: L_CURLY@120..121 "{" [] []
+        1: JS_DIRECTIVE_LIST@121..121
+        2: JS_STATEMENT_LIST@121..166
+          0: JS_METAVARIABLE@121..136
+            0: GRIT_METAVARIABLE@121..136 "$statement" [Newline("\n"), Whitespace("    ")] []
+          1: JS_EMPTY_STATEMENT@136..137
+            0: SEMICOLON@136..137 ";" [] []
+          2: JS_VARIABLE_STATEMENT@137..166
+            0: JS_VARIABLE_DECLARATION@137..165
+              0: (empty)
+              1: CONST_KW@137..148 "const" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+              2: JS_VARIABLE_DECLARATOR_LIST@148..165
+                0: JS_VARIABLE_DECLARATOR@148..165
+                  0: JS_IDENTIFIER_BINDING@148..152
+                    0: IDENT@148..152 "bar" [] [Whitespace(" ")]
+                  1: (empty)
+                  2: JS_INITIALIZER_CLAUSE@152..165
+                    0: EQ@152..154 "=" [] [Whitespace(" ")]
+                    1: JS_METAVARIABLE@154..165
+                      0: GRIT_METAVARIABLE@154..165 "$expression" [] []
+            1: SEMICOLON@165..166 ";" [] []
+        3: R_CURLY@166..168 "}" [Newline("\n")] []
+    4: JS_CLASS_DECLARATION@168..201
+      0: JS_DECORATOR_LIST@168..168
+      1: (empty)
+      2: CLASS_KW@168..176 "class" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@176..180
+        0: IDENT@176..180 "Foo" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@180..181 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@181..199
+        0: JS_METAVARIABLE@181..198
+          0: GRIT_METAVARIABLE@181..198 "$classMember" [Newline("\n"), Whitespace("    ")] []
+        1: JS_EMPTY_CLASS_MEMBER@198..199
+          0: SEMICOLON@198..199 ";" [] []
+      9: R_CURLY@199..201 "}" [Newline("\n")] []
+    5: JS_VARIABLE_STATEMENT@201..242
+      0: JS_VARIABLE_DECLARATION@201..241
+        0: (empty)
+        1: CONST_KW@201..209 "const" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@209..241
+          0: JS_VARIABLE_DECLARATOR@209..241
+            0: JS_OBJECT_BINDING_PATTERN@209..223
+              0: L_CURLY@209..211 "{" [] [Whitespace(" ")]
+              1: JS_OBJECT_BINDING_PATTERN_PROPERTY_LIST@211..221
+                0: JS_OBJECT_BINDING_PATTERN_PROPERTY@211..221
+                  0: JS_METAVARIABLE@211..215
+                    0: GRIT_METAVARIABLE@211..215 "$key" [] []
+                  1: COLON@215..217 ":" [] [Whitespace(" ")]
+                  2: JS_IDENTIFIER_BINDING@217..221
+                    0: IDENT@217..221 "key" [] [Whitespace(" ")]
+                  3: (empty)
+              2: R_CURLY@221..223 "}" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@223..241
+              0: EQ@223..225 "=" [] [Whitespace(" ")]
+              1: JS_OBJECT_EXPRESSION@225..241
+                0: L_CURLY@225..227 "{" [] [Whitespace(" ")]
+                1: JS_OBJECT_MEMBER_LIST@227..240
+                  0: JS_PROPERTY_OBJECT_MEMBER@227..240
+                    0: JS_METAVARIABLE@227..231
+                      0: GRIT_METAVARIABLE@227..231 "$key" [] []
+                    1: COLON@231..233 ":" [] [Whitespace(" ")]
+                    2: JS_METAVARIABLE@233..240
+                      0: GRIT_METAVARIABLE@233..240 "$value" [] [Whitespace(" ")]
+                2: R_CURLY@240..241 "}" [] []
+      1: SEMICOLON@241..242 ";" [] []
+    6: JS_FUNCTION_DECLARATION@242..271
+      0: (empty)
+      1: FUNCTION_KW@242..253 "function" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      2: (empty)
+      3: JS_METAVARIABLE@253..266
+        0: GRIT_METAVARIABLE@253..266 "$functionName" [] []
+      4: (empty)
+      5: JS_PARAMETERS@266..269
+        0: L_PAREN@266..267 "(" [] []
+        1: JS_PARAMETER_LIST@267..267
+        2: R_PAREN@267..269 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@269..271
+        0: L_CURLY@269..270 "{" [] []
+        1: JS_DIRECTIVE_LIST@270..270
+        2: JS_STATEMENT_LIST@270..270
+        3: R_CURLY@270..271 "}" [] []
+    7: TS_TYPE_ALIAS_DECLARATION@271..297
+      0: TYPE_KW@271..278 "type" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      1: JS_METAVARIABLE@278..284
+        0: GRIT_METAVARIABLE@278..284 "$Type" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@284..286 "=" [] [Whitespace(" ")]
+      4: JS_METAVARIABLE@286..296
+        0: GRIT_METAVARIABLE@286..296 "$OtherType" [] []
+      5: SEMICOLON@296..297 ";" [] []
+    8: TS_INTERFACE_DECLARATION@297..333
+      0: INTERFACE_KW@297..309 "interface" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+      1: JS_METAVARIABLE@309..320
+        0: GRIT_METAVARIABLE@309..320 "$Interface" [] [Whitespace(" ")]
+      2: (empty)
+      3: (empty)
+      4: L_CURLY@320..321 "{" [] []
+      5: TS_TYPE_MEMBER_LIST@321..331
+        0: JS_METAVARIABLE@321..331
+          0: GRIT_METAVARIABLE@321..331 "$body" [Newline("\n"), Whitespace("    ")] []
+      6: R_CURLY@331..333 "}" [Newline("\n")] []
+    9: JS_EXPRESSION_STATEMENT@333..353
+      0: JSX_TAG_EXPRESSION@333..353
+        0: JSX_ELEMENT@333..353
+          0: JSX_OPENING_ELEMENT@333..344
+            0: L_ANGLE@333..336 "<" [Newline("\n"), Newline("\n")] []
+            1: JS_METAVARIABLE@336..341
+              0: GRIT_METAVARIABLE@336..341 "$tag" [] [Whitespace(" ")]
+            2: (empty)
+            3: JSX_ATTRIBUTE_LIST@341..343
+              0: JS_METAVARIABLE@341..343
+                0: GRIT_METAVARIABLE@341..343 "$_" [] []
+            4: R_ANGLE@343..344 ">" [] []
+          1: JSX_CHILD_LIST@344..346
+            0: JS_METAVARIABLE@344..346
+              0: GRIT_METAVARIABLE@344..346 "$_" [] []
+          2: JSX_CLOSING_ELEMENT@346..353
+            0: L_ANGLE@346..347 "<" [] []
+            1: SLASH@347..348 "/" [] []
+            2: JS_METAVARIABLE@348..352
+              0: GRIT_METAVARIABLE@348..352 "$tag" [] []
+            3: R_ANGLE@352..353 ">" [] []
+      1: (empty)
+  4: EOF@353..354 "" [Newline("\n")] []
+
+```

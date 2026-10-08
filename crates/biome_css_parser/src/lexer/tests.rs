@@ -325,6 +325,7 @@ fn scss_url_value_uses_precomputed_classification_after_leading_trivia() {
         "url( #{$name}.png)",
         CssParserOptions::default(),
         CssFileSource::scss(),
+        &[],
     );
 
     assert_eq!(source.current(), CssSyntaxKind::URL_KW);
@@ -341,6 +342,7 @@ fn scss_url_value_checkpoint_restores_interpolation_boundary() {
         "url( #{$name}.png)",
         CssParserOptions::default(),
         CssFileSource::scss(),
+        &[],
     );
 
     source.bump_with_context(CssLexContext::Regular);

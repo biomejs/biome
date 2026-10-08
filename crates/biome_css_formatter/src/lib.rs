@@ -448,7 +448,7 @@ mod tests {
     use crate::format_node;
     use crate::utils::case::CssCase;
     use crate::{AsFormat, CssFormatContext, CssFormatLanguage, CssFormatter, FormatNodeRule};
-    use biome_css_parser::{CssParserOptions, parse_css};
+    use biome_css_parser::{CssParserOptions, parse_css, parse_css_with_metavariables};
     use biome_css_syntax::{
         AnyCssFunctionName, AnyCssGenericComponentValue, CssCompoundSelector,
         CssGenericComponentValueList, CssIdentifier, CssIfSupportsIdentifierTest,
@@ -776,11 +776,13 @@ mod tests {
 
     #[test]
     fn grit_metavariables_preserve_casing() {
-        let src = "\u{00b5}Selector { \u{00b5}Declaration; COLOR: \u{00b5}Value; }\n@media \u{00b5}Query { A:HOVER { COLOR: RED; } }";
-        let parse = parse_css(
+        let src =
+            "$Selector { $Declaration; COLOR: $Value; }\n@media $Query { A:HOVER { COLOR: RED; } }";
+        let parse = parse_css_with_metavariables(
             src,
             CssFileSource::css(),
-            CssParserOptions::default().allow_metavariables(),
+            CssParserOptions::default(),
+            &biome_test_utils::grit_metavariable_ranges(src),
         );
         assert!(parse.diagnostics().is_empty(), "{:?}", parse.diagnostics());
 
@@ -788,7 +790,7 @@ mod tests {
 
         assert_eq!(
             formatted.print().unwrap().as_code(),
-            "\u{00b5}Selector {\n\t\u{00b5}Declaration\n\tcolor: \u{00b5}Value;\n}\n@media \u{00b5}Query {\n\tA:hover {\n\t\tcolor: RED;\n\t}\n}\n"
+            "$Selector {\n\t$Declaration\n\tcolor: $Value;\n}\n@media $Query {\n\tA:hover {\n\t\tcolor: RED;\n\t}\n}\n"
         );
     }
 

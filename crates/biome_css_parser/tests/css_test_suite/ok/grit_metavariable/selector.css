@@ -1,23 +1,23 @@
-µa .b {}
+$a .b {}
 
-µa > .b {}
+$a > .b {}
 
-.a µb {}
+.a $b {}
 
-.a ~ µb {}
+.a ~ $b {}
 
-µa µb {}
+$a $b {}
 
-µa:hover {}
+$a:hover {}
 
-µa.b {}
+$a.b {}
 
-µa[href]::before {}
+$a[href]::before {}
 
-&µa {}
+&$a {}
 
-µa, .b {}
+$a, .b {}
 
-:is(µa, .b) {}
+:is($a, .b) {}
 
-:has(> µa) {}
+:has(> $a) {}

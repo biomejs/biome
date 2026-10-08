@@ -1,12 +1,12 @@
 .a {
-    µprop: red;
+    $prop: red;
 }
 
 .a {
-    µprop: µvalue;
+    $prop: $value;
     color: blue;
 }
 
 .a {
-    µprop: red
+    $prop: red
 }

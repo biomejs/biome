@@ -1,7 +1,7 @@
 use biome_configuration::Configuration;
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
-use biome_css_parser::{CssModulesKind, CssParserOptions, parse_css};
+use biome_css_parser::{CssModulesKind, CssParserOptions, parse_css_with_metavariables};
 use biome_deserialize::json::deserialize_from_str;
 use biome_diagnostics::DiagnosticExt;
 use biome_diagnostics::display::PrintDiagnostic;
@@ -11,7 +11,9 @@ use biome_languages::CssFileSource;
 use biome_languages::css::CssEmbeddingKind;
 use biome_rowan::SyntaxKind;
 use biome_service::settings::Settings;
-use biome_test_utils::{has_bogus_nodes_or_empty_slots, validate_eof_token};
+use biome_test_utils::{
+    grit_metavariable_ranges, has_bogus_nodes_or_empty_slots, validate_eof_token,
+};
 use camino::Utf8Path;
 use std::fmt::Write;
 use std::fs;
@@ -47,11 +49,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let content = fs::read_to_string(test_case_path)
         .expect("Expected test path to be a readable file in UTF8 encoding");
 
-    let mut options = CssParserOptions::default()
-        // it is an internal option that cannot be configured via options.json
-        // TODO: find a way to make it configurable
-        .allow_metavariables()
-        .report_scss_exclusive_syntax();
+    let mut options = CssParserOptions::default().report_scss_exclusive_syntax();
 
     let mut css_modules_enabled = false;
     let mut css_modules_kind = CssModulesKind::Classic;
@@ -115,7 +113,12 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         }
     }
 
-    let parsed = parse_css(&content, source_type, options);
+    let metavariables = if test_case.contains("grit_metavariable") {
+        grit_metavariable_ranges(&content)
+    } else {
+        Vec::new()
+    };
+    let parsed = parse_css_with_metavariables(&content, source_type, options, &metavariables);
     validate_eof_token(parsed.syntax());
 
     let formatted_ast = format!("{:#?}", parsed.tree());

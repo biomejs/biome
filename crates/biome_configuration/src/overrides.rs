@@ -144,7 +144,6 @@ impl OverridePattern {
             javascript.resolver = None;
             javascript.experimental_embedded_snippets_enabled = None;
             if let Some(parser) = javascript.parser.as_mut() {
-                parser.grit_metavariables = None;
                 parser.jsx_everywhere = None;
             }
             if javascript
