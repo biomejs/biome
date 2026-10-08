@@ -6,18 +6,23 @@
 use super::tailwind_preset_v4::{
     THEME_KEYS_ANIMATE, THEME_KEYS_ASPECT, THEME_KEYS_BACKGROUND_IMAGE, THEME_KEYS_BLUR,
     THEME_KEYS_BREAKPOINT, THEME_KEYS_COLOR, THEME_KEYS_CONTAINER, THEME_KEYS_DROP_SHADOW,
-    THEME_KEYS_EASE, THEME_KEYS_FONT, THEME_KEYS_FONT_WEIGHT, THEME_KEYS_INSET_SHADOW,
-    THEME_KEYS_LEADING, THEME_KEYS_PERSPECTIVE, THEME_KEYS_RADIUS, THEME_KEYS_SHADOW,
-    THEME_KEYS_SPACING, THEME_KEYS_TEXT, THEME_KEYS_TEXT_SHADOW, THEME_KEYS_TRACKING,
+    THEME_KEYS_EASE, THEME_KEYS_FONT, THEME_KEYS_FONT_WEIGHT, THEME_KEYS_GRID_TEMPLATE_COLUMNS,
+    THEME_KEYS_GRID_TEMPLATE_ROWS, THEME_KEYS_INSET_SHADOW, THEME_KEYS_LEADING,
+    THEME_KEYS_PERSPECTIVE, THEME_KEYS_RADIUS, THEME_KEYS_SHADOW, THEME_KEYS_SPACING,
+    THEME_KEYS_TEXT, THEME_KEYS_TEXT_SHADOW, THEME_KEYS_TRACKING,
 };
 
 // Named-path typed value categories. Matching is dispatched by the consumer
 // on parser node kind (TwNumberValue / TwPercentageValue / TwModifier+number),
-// not by CSS data-type predicates.
+// not by CSS data-type predicates. A bare number must also be one the utility
+// takes: `Integer` takes whole numbers (`z-10`) and `Multiplier` takes
+// multiples of 0.25 (`p-1.5`). No utility takes any number, so the codegen's
+// `Number` has no variant here.
 #[derive(Copy, Clone, PartialEq, Eq)]
 #[repr(u8)]
 pub enum NamedValueType {
-    Number,
+    Integer,
+    Multiplier,
     Percentage,
     Ratio,
 }
@@ -45,7 +50,7 @@ pub enum CssDataType {
 }
 
 // Theme namespaces (from default theme.css).
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, Hash, PartialEq, Eq)]
 #[repr(u8)]
 pub enum ThemeNamespace {
     Color,
@@ -68,9 +73,71 @@ pub enum ThemeNamespace {
     Ease,
     Animate,
     BackgroundImage,
+    GridTemplateColumns,
+    GridTemplateRows,
 }
 
 impl ThemeNamespace {
+    pub const ALL: [Self; 22] = [
+        Self::Color,
+        Self::Spacing,
+        Self::Text,
+        Self::TextShadow,
+        Self::Font,
+        Self::FontWeight,
+        Self::Leading,
+        Self::Tracking,
+        Self::Breakpoint,
+        Self::Container,
+        Self::Radius,
+        Self::Shadow,
+        Self::InsetShadow,
+        Self::DropShadow,
+        Self::Blur,
+        Self::Perspective,
+        Self::Aspect,
+        Self::Ease,
+        Self::Animate,
+        Self::BackgroundImage,
+        Self::GridTemplateColumns,
+        Self::GridTemplateRows,
+    ];
+
+    /// The name of the namespace in theme variables: `color` in
+    /// `--color-red-500`.
+    pub fn css_name(self) -> &'static str {
+        match self {
+            Self::Color => "color",
+            Self::Spacing => "spacing",
+            Self::Text => "text",
+            Self::TextShadow => "text-shadow",
+            Self::Font => "font",
+            Self::FontWeight => "font-weight",
+            Self::Leading => "leading",
+            Self::Tracking => "tracking",
+            Self::Breakpoint => "breakpoint",
+            Self::Container => "container",
+            Self::Radius => "radius",
+            Self::Shadow => "shadow",
+            Self::InsetShadow => "inset-shadow",
+            Self::DropShadow => "drop-shadow",
+            Self::Blur => "blur",
+            Self::Perspective => "perspective",
+            Self::Aspect => "aspect",
+            Self::Ease => "ease",
+            Self::Animate => "animate",
+            Self::BackgroundImage => "background-image",
+            Self::GridTemplateColumns => "grid-template-columns",
+            Self::GridTemplateRows => "grid-template-rows",
+        }
+    }
+
+    pub fn from_css_name(name: &str) -> Option<Self> {
+        Self::ALL
+            .into_iter()
+            .find(|namespace| namespace.css_name() == name)
+    }
+
     pub fn keys(self) -> &'static phf::Set<&'static str> {
         match self {
             Self::Color => &THEME_KEYS_COLOR,
@@ -93,6 +160,8 @@ impl ThemeNamespace {
             Self::Ease => &THEME_KEYS_EASE,
             Self::Animate => &THEME_KEYS_ANIMATE,
             Self::BackgroundImage => &THEME_KEYS_BACKGROUND_IMAGE,
+            Self::GridTemplateColumns => &THEME_KEYS_GRID_TEMPLATE_COLUMNS,
+            Self::GridTemplateRows => &THEME_KEYS_GRID_TEMPLATE_ROWS,
         }
     }
 }

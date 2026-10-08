@@ -90,8 +90,7 @@ gen-global-types:
 # Generates the Tailwind CSS preset for utility class sorting
 [working-directory: 'packages/tailwindcss-config-analyzer']
 gen-tw:
-  pnpm build
-  pnpm execute
+  pnpm execute:v4
 
 # Build WASM for bundler target (development)
 build-wasm-bundler-dev:

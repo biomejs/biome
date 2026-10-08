@@ -1612,7 +1612,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "inset" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 5, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 5, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 5, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 5, 1),
         ],
         arbitrary_branches: &[
@@ -1626,7 +1626,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "inset-x" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 6, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 6, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 6, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 6, 1),
         ],
         arbitrary_branches: &[
@@ -1640,7 +1640,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "inset-y" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 7, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 7, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 7, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 7, 1),
         ],
         arbitrary_branches: &[
@@ -1654,7 +1654,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "inset-s" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 8, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 8, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 8, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 8, 1),
         ],
         arbitrary_branches: &[
@@ -1668,7 +1668,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "inset-e" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 9, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 9, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 9, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 9, 1),
         ],
         arbitrary_branches: &[
@@ -1682,7 +1682,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "inset-bs" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 10, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 10, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 10, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 10, 1),
         ],
         arbitrary_branches: &[
@@ -1696,7 +1696,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "inset-be" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 11, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 11, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 11, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 11, 1),
         ],
         arbitrary_branches: &[
@@ -1710,7 +1710,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "top" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 12, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 12, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 12, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 12, 1),
         ],
         arbitrary_branches: &[
@@ -1724,7 +1724,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "right" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 13, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 13, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 13, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 13, 1),
         ],
         arbitrary_branches: &[
@@ -1738,7 +1738,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "bottom" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 14, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 14, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 14, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 14, 1),
         ],
         arbitrary_branches: &[
@@ -1752,7 +1752,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "left" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 15, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 15, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 15, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 15, 1),
         ],
         arbitrary_branches: &[
@@ -1766,7 +1766,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "z" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Keyword(0, ModifierKind::None, 191, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 191, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 191, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 191, 1),
@@ -1776,7 +1776,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         bare_name: None,
         negative: Some(Distinct {
             named_branches: &[
-                NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 191, 1),
+                NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 191, 1),
             ],
             arbitrary_branches: &[
                 ArbitraryBranch::Fallback(ModifierKind::None, 191, 1),
@@ -1786,7 +1786,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "order" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Keyword(1, ModifierKind::None, 190, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 190, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 190, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 190, 1),
@@ -1796,7 +1796,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         bare_name: None,
         negative: Some(Distinct {
             named_branches: &[
-                NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 190, 1),
+                NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 190, 1),
             ],
             arbitrary_branches: &[
                 ArbitraryBranch::Fallback(ModifierKind::None, 190, 1),
@@ -1806,7 +1806,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "col" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Keyword(0, ModifierKind::None, 192, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 192, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 192, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 192, 1),
@@ -1816,7 +1816,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         bare_name: None,
         negative: Some(Distinct {
             named_branches: &[
-                NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 192, 1),
+                NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 192, 1),
             ],
             arbitrary_branches: &[
                 ArbitraryBranch::Fallback(ModifierKind::None, 192, 1),
@@ -1826,7 +1826,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "col-span" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Keyword(2, ModifierKind::None, 192, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 192, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 192, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 192, 1),
@@ -1839,7 +1839,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "col-start" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Keyword(0, ModifierKind::None, 193, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 193, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 193, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 193, 1),
@@ -1849,7 +1849,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         bare_name: None,
         negative: Some(Distinct {
             named_branches: &[
-                NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 193, 1),
+                NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 193, 1),
             ],
             arbitrary_branches: &[
                 ArbitraryBranch::Fallback(ModifierKind::None, 193, 1),
@@ -1859,7 +1859,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "col-end" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Keyword(0, ModifierKind::None, 194, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 194, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 194, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 194, 1),
@@ -1869,7 +1869,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         bare_name: None,
         negative: Some(Distinct {
             named_branches: &[
-                NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 194, 1),
+                NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 194, 1),
             ],
             arbitrary_branches: &[
                 ArbitraryBranch::Fallback(ModifierKind::None, 194, 1),
@@ -1879,7 +1879,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "row" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Keyword(0, ModifierKind::None, 195, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 195, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 195, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 195, 1),
@@ -1889,7 +1889,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         bare_name: None,
         negative: Some(Distinct {
             named_branches: &[
-                NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 195, 1),
+                NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 195, 1),
             ],
             arbitrary_branches: &[
                 ArbitraryBranch::Fallback(ModifierKind::None, 195, 1),
@@ -1899,7 +1899,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "row-span" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Keyword(2, ModifierKind::None, 195, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 195, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 195, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 195, 1),
@@ -1912,7 +1912,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "row-start" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Keyword(0, ModifierKind::None, 196, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 196, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 196, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 196, 1),
@@ -1922,7 +1922,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         bare_name: None,
         negative: Some(Distinct {
             named_branches: &[
-                NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 196, 1),
+                NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 196, 1),
             ],
             arbitrary_branches: &[
                 ArbitraryBranch::Fallback(ModifierKind::None, 196, 1),
@@ -1932,7 +1932,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "row-end" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Keyword(0, ModifierKind::None, 197, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 197, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 197, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 197, 1),
@@ -1942,7 +1942,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         bare_name: None,
         negative: Some(Distinct {
             named_branches: &[
-                NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 197, 1),
+                NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 197, 1),
             ],
             arbitrary_branches: &[
                 ArbitraryBranch::Fallback(ModifierKind::None, 197, 1),
@@ -1952,7 +1952,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "m" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 19, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 19, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 19, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 19, 1),
@@ -1965,7 +1965,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "mx" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 20, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 20, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 20, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 20, 1),
@@ -1978,7 +1978,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "my" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 21, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 21, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 21, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 21, 1),
@@ -1991,7 +1991,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "ms" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 22, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 22, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 22, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 22, 1),
@@ -2004,7 +2004,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "me" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 23, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 23, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 23, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 23, 1),
@@ -2017,7 +2017,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "mbs" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 24, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 24, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 24, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 24, 1),
@@ -2030,7 +2030,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "mbe" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 25, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 25, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 25, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 25, 1),
@@ -2043,7 +2043,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "mt" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 26, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 26, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 26, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 26, 1),
@@ -2056,7 +2056,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "mr" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 27, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 27, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 27, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 27, 1),
@@ -2069,7 +2069,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "mb" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 28, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 28, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 28, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 28, 1),
@@ -2082,7 +2082,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "ml" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 29, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 29, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 29, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 29, 1),
@@ -2095,7 +2095,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "line-clamp" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Keyword(3, ModifierKind::None, 198, 4),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 198, 4),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 198, 4),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 198, 4),
@@ -2108,7 +2108,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "block" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 40, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 40, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 40, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 40, 1),
         ],
         arbitrary_branches: &[
@@ -2123,7 +2123,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 40, 1),
             NamedBranch::Theme(ThemeNamespace::Container, ModifierKind::None, 40, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 40, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 40, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 40, 1),
         ],
         arbitrary_branches: &[
@@ -2136,7 +2136,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "flex" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 42, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 42, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 42, 1),
         ],
         arbitrary_branches: &[
@@ -2174,7 +2174,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "size" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 33, 3),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 33, 3),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 33, 3),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 33, 3),
         ],
         arbitrary_branches: &[
@@ -2189,7 +2189,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 34, 1),
             NamedBranch::Theme(ThemeNamespace::Container, ModifierKind::None, 34, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 34, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 34, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 34, 1),
         ],
         arbitrary_branches: &[
@@ -2204,7 +2204,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 36, 1),
             NamedBranch::Theme(ThemeNamespace::Container, ModifierKind::None, 36, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 36, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 36, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 36, 1),
         ],
         arbitrary_branches: &[
@@ -2220,7 +2220,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             NamedBranch::Keyword(5, ModifierKind::None, 38, 1),
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 38, 1),
             NamedBranch::Theme(ThemeNamespace::Container, ModifierKind::None, 38, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 38, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 38, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 38, 1),
         ],
         arbitrary_branches: &[
@@ -2234,7 +2234,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "h" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 35, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 35, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 35, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 35, 1),
         ],
         arbitrary_branches: &[
@@ -2248,7 +2248,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "min-h" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 37, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 37, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 37, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 37, 1),
         ],
         arbitrary_branches: &[
@@ -2262,7 +2262,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "max-h" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 39, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 39, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 39, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 39, 1),
         ],
         arbitrary_branches: &[
@@ -2277,7 +2277,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 40, 1),
             NamedBranch::Theme(ThemeNamespace::Container, ModifierKind::None, 40, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 40, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 40, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 40, 1),
         ],
         arbitrary_branches: &[
@@ -2292,7 +2292,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 40, 1),
             NamedBranch::Theme(ThemeNamespace::Container, ModifierKind::None, 40, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 40, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 40, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 40, 1),
         ],
         arbitrary_branches: &[
@@ -2306,7 +2306,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "min-block" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 40, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 40, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 40, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 40, 1),
         ],
         arbitrary_branches: &[
@@ -2320,7 +2320,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "max-block" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 40, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 40, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 40, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 40, 1),
         ],
         arbitrary_branches: &[
@@ -2333,7 +2333,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "shrink" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 200, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 200, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 200, 1),
@@ -2345,7 +2345,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "grow" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 201, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 201, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 201, 1),
@@ -2359,7 +2359,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 43, 1),
             NamedBranch::Theme(ThemeNamespace::Container, ModifierKind::None, 43, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 43, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 43, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 43, 1),
         ],
         arbitrary_branches: &[
@@ -2373,7 +2373,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "border-spacing" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 47, 3),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 47, 3),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 47, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 47, 3),
@@ -2386,7 +2386,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "border-spacing-x" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 47, 2),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 47, 2),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 47, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 47, 2),
@@ -2399,7 +2399,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "border-spacing-y" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 47, 2),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 47, 2),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 47, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 47, 2),
@@ -2449,7 +2449,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "translate" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 49, 3),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 49, 3),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 49, 3),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 49, 3),
         ],
         arbitrary_branches: &[
@@ -2463,7 +2463,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "translate-x" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 50, 2),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 50, 2),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 50, 2),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 50, 2),
         ],
         arbitrary_branches: &[
@@ -2477,7 +2477,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "translate-y" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 51, 2),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 51, 2),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 51, 2),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 51, 2),
         ],
         arbitrary_branches: &[
@@ -2491,7 +2491,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "translate-z" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 52, 2),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 52, 2),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 52, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 52, 2),
@@ -2503,7 +2503,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "scale" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 203, 4),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 203, 4),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 53, 1),
@@ -2515,7 +2515,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "scale-x" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 204, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 204, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 204, 2),
@@ -2527,7 +2527,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "scale-y" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 205, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 205, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 205, 2),
@@ -2539,7 +2539,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "scale-z" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 206, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 206, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 206, 2),
@@ -2551,7 +2551,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "rotate" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 54, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 54, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 54, 1),
@@ -2563,7 +2563,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "rotate-x" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 207, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 207, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 207, 2),
@@ -2575,7 +2575,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "rotate-y" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 208, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 208, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 208, 2),
@@ -2587,7 +2587,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "rotate-z" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 209, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 209, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 209, 2),
@@ -2599,7 +2599,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "skew" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 210, 3),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 210, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 210, 3),
@@ -2611,7 +2611,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "skew-x" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 211, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 211, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 211, 2),
@@ -2623,7 +2623,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "skew-y" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 212, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 212, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 212, 2),
@@ -2645,7 +2645,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "zoom" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 213, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 213, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 213, 1),
@@ -2668,7 +2668,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scroll-m" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 66, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 66, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 66, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 66, 1),
@@ -2681,7 +2681,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scroll-mx" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 67, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 67, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 67, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 67, 1),
@@ -2694,7 +2694,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scroll-my" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 68, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 68, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 68, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 68, 1),
@@ -2707,7 +2707,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scroll-ms" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 69, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 69, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 69, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 69, 1),
@@ -2720,7 +2720,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scroll-me" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 70, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 70, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 70, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 70, 1),
@@ -2733,7 +2733,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scroll-mbs" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 71, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 71, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 71, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 71, 1),
@@ -2746,7 +2746,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scroll-mbe" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 72, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 72, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 72, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 72, 1),
@@ -2759,7 +2759,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scroll-mt" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 73, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 73, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 73, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 73, 1),
@@ -2772,7 +2772,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scroll-mr" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 74, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 74, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 74, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 74, 1),
@@ -2785,7 +2785,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scroll-mb" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 75, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 75, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 75, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 75, 1),
@@ -2798,7 +2798,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scroll-ml" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 76, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 76, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 76, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 76, 1),
@@ -2811,7 +2811,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scroll-p" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 77, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 77, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 77, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 77, 1),
@@ -2824,7 +2824,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scroll-px" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 78, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 78, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 78, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 78, 1),
@@ -2837,7 +2837,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scroll-py" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 79, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 79, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 79, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 79, 1),
@@ -2850,7 +2850,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scroll-ps" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 80, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 80, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 80, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 80, 1),
@@ -2863,7 +2863,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scroll-pe" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 81, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 81, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 81, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 81, 1),
@@ -2876,7 +2876,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scroll-pbs" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 82, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 82, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 82, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 82, 1),
@@ -2889,7 +2889,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scroll-pbe" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 83, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 83, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 83, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 83, 1),
@@ -2902,7 +2902,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scroll-pt" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 84, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 84, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 84, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 84, 1),
@@ -2915,7 +2915,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scroll-pr" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 85, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 85, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 85, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 85, 1),
@@ -2928,7 +2928,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scroll-pb" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 86, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 86, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 86, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 86, 1),
@@ -2941,7 +2941,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "scroll-pl" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 87, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 87, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 87, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 87, 1),
@@ -2979,7 +2979,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(0, ModifierKind::None, 216, 1),
             NamedBranch::Theme(ThemeNamespace::Container, ModifierKind::None, 216, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 216, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 216, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 216, 1),
@@ -2992,7 +2992,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "auto-cols" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Keyword(8, ModifierKind::None, 217, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 217, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 217, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 217, 1),
@@ -3005,7 +3005,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "auto-rows" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Keyword(8, ModifierKind::None, 218, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 218, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 218, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 218, 1),
@@ -3018,7 +3018,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "grid-cols" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Keyword(9, ModifierKind::None, 219, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 219, 1),
+            NamedBranch::Theme(ThemeNamespace::GridTemplateColumns, ModifierKind::None, 219, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 219, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 219, 1),
@@ -3031,7 +3032,8 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "grid-rows" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Keyword(9, ModifierKind::None, 220, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 220, 1),
+            NamedBranch::Theme(ThemeNamespace::GridTemplateRows, ModifierKind::None, 220, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 220, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 220, 1),
@@ -3044,7 +3046,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "gap" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 103, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 103, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 103, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 103, 1),
@@ -3057,7 +3059,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "gap-x" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 104, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 104, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 104, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 104, 1),
@@ -3070,7 +3072,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "gap-y" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 105, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 105, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 105, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 105, 1),
@@ -3083,7 +3085,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "space-x" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 105, 4),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 105, 4),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 105, 4),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 105, 4),
@@ -3096,7 +3098,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "space-y" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 104, 4),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 104, 4),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 104, 4),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 104, 4),
@@ -3173,7 +3175,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "tab" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 224, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 224, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 224, 1),
@@ -3382,7 +3384,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 240, 1),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 240, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 241, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 241, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, ModifierKind::None, 241, 2),
@@ -3398,7 +3400,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 242, 1),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 242, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 243, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 243, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, ModifierKind::None, 243, 2),
@@ -3414,7 +3416,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 244, 1),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 244, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 245, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 245, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, ModifierKind::None, 245, 2),
@@ -3430,7 +3432,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 246, 1),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 246, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 247, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 247, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, ModifierKind::None, 247, 2),
@@ -3446,7 +3448,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 248, 1),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 248, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 249, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 249, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, ModifierKind::None, 249, 2),
@@ -3462,7 +3464,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 250, 1),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 250, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 251, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 251, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, ModifierKind::None, 251, 2),
@@ -3478,7 +3480,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 252, 1),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 252, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 253, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 253, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, ModifierKind::None, 253, 2),
@@ -3494,7 +3496,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 254, 1),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 254, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 255, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 255, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, ModifierKind::None, 255, 2),
@@ -3510,7 +3512,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 256, 1),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 256, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 257, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 257, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, ModifierKind::None, 257, 2),
@@ -3526,7 +3528,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 258, 1),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 258, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 259, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 259, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, ModifierKind::None, 259, 2),
@@ -3542,7 +3544,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 260, 1),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 260, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 261, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 261, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, ModifierKind::None, 261, 2),
@@ -3556,7 +3558,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "divide-x" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 262, 5),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 262, 5),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 262, 5),
@@ -3568,7 +3570,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "divide-y" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 263, 6),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 263, 6),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 263, 6),
@@ -3601,7 +3603,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "bg-linear" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Keyword(12, ModifierKind::LineHeight, 188, 3),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 188, 3),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 188, 3),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 188, 3),
         ],
         arbitrary_branches: &[
@@ -3612,7 +3614,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         bare_name: None,
         negative: Some(Distinct {
             named_branches: &[
-                NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 188, 3),
+                NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 188, 3),
                 NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 188, 3),
             ],
             arbitrary_branches: &[
@@ -3622,7 +3624,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "bg-conic" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 188, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 188, 2),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 188, 2),
         ],
         arbitrary_branches: &[
@@ -3749,7 +3751,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 271, 7),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 271, 7),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 272, 7),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 272, 7),
             NamedBranch::Typed(NamedValueType::Percentage, ModifierKind::None, 272, 7),
         ],
         arbitrary_branches: &[
@@ -3765,7 +3767,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 273, 7),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 273, 7),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 274, 7),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 274, 7),
             NamedBranch::Typed(NamedValueType::Percentage, ModifierKind::None, 274, 7),
         ],
         arbitrary_branches: &[
@@ -3781,7 +3783,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 275, 7),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 275, 7),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 276, 7),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 276, 7),
             NamedBranch::Typed(NamedValueType::Percentage, ModifierKind::None, 276, 7),
         ],
         arbitrary_branches: &[
@@ -3797,7 +3799,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 277, 7),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 277, 7),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 278, 7),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 278, 7),
             NamedBranch::Typed(NamedValueType::Percentage, ModifierKind::None, 278, 7),
         ],
         arbitrary_branches: &[
@@ -3813,7 +3815,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 279, 5),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 279, 5),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 280, 5),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 280, 5),
             NamedBranch::Typed(NamedValueType::Percentage, ModifierKind::None, 280, 5),
         ],
         arbitrary_branches: &[
@@ -3829,7 +3831,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 281, 5),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 281, 5),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 282, 5),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 282, 5),
             NamedBranch::Typed(NamedValueType::Percentage, ModifierKind::None, 282, 5),
         ],
         arbitrary_branches: &[
@@ -3845,7 +3847,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 283, 5),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 283, 5),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 284, 5),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 284, 5),
             NamedBranch::Typed(NamedValueType::Percentage, ModifierKind::None, 284, 5),
         ],
         arbitrary_branches: &[
@@ -3861,7 +3863,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 285, 5),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 285, 5),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 286, 5),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 286, 5),
             NamedBranch::Typed(NamedValueType::Percentage, ModifierKind::None, 286, 5),
         ],
         arbitrary_branches: &[
@@ -3877,7 +3879,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 287, 5),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 287, 5),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 288, 5),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 288, 5),
             NamedBranch::Typed(NamedValueType::Percentage, ModifierKind::None, 288, 5),
         ],
         arbitrary_branches: &[
@@ -3893,7 +3895,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 289, 5),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 289, 5),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 290, 5),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 290, 5),
             NamedBranch::Typed(NamedValueType::Percentage, ModifierKind::None, 290, 5),
         ],
         arbitrary_branches: &[
@@ -3909,7 +3911,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 291, 5),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 291, 5),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 292, 5),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 292, 5),
             NamedBranch::Typed(NamedValueType::Percentage, ModifierKind::None, 292, 5),
         ],
         arbitrary_branches: &[
@@ -3925,7 +3927,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 293, 5),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 293, 5),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 294, 5),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 294, 5),
             NamedBranch::Typed(NamedValueType::Percentage, ModifierKind::None, 294, 5),
         ],
         arbitrary_branches: &[
@@ -3939,7 +3941,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "mask-linear" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 295, 4),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 295, 4),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 295, 4),
@@ -3953,7 +3955,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 296, 5),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 296, 5),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 297, 5),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 297, 5),
             NamedBranch::Typed(NamedValueType::Percentage, ModifierKind::None, 297, 5),
         ],
         arbitrary_branches: &[
@@ -3969,7 +3971,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 298, 5),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 298, 5),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 299, 5),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 299, 5),
             NamedBranch::Typed(NamedValueType::Percentage, ModifierKind::None, 299, 5),
         ],
         arbitrary_branches: &[
@@ -4005,7 +4007,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 301, 5),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 301, 5),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 302, 5),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 302, 5),
             NamedBranch::Typed(NamedValueType::Percentage, ModifierKind::None, 302, 5),
         ],
         arbitrary_branches: &[
@@ -4021,7 +4023,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 303, 5),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 303, 5),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 304, 5),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 304, 5),
             NamedBranch::Typed(NamedValueType::Percentage, ModifierKind::None, 304, 5),
         ],
         arbitrary_branches: &[
@@ -4035,7 +4037,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "mask-conic" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 305, 4),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 305, 4),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 305, 4),
@@ -4049,7 +4051,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 306, 5),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 306, 5),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 307, 5),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 307, 5),
             NamedBranch::Typed(NamedValueType::Percentage, ModifierKind::None, 307, 5),
         ],
         arbitrary_branches: &[
@@ -4065,7 +4067,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 308, 5),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 308, 5),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 309, 5),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 309, 5),
             NamedBranch::Typed(NamedValueType::Percentage, ModifierKind::None, 309, 5),
         ],
         arbitrary_branches: &[
@@ -4094,7 +4096,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 154, 1),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 154, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 310, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 310, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 310, 1),
         ],
         arbitrary_branches: &[
@@ -4123,7 +4125,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "p" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 156, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 156, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 156, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 156, 1),
@@ -4136,7 +4138,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "px" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 157, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 157, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 157, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 157, 1),
@@ -4149,7 +4151,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "py" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 158, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 158, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 158, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 158, 1),
@@ -4162,7 +4164,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "ps" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 159, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 159, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 159, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 159, 1),
@@ -4175,7 +4177,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "pe" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 160, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 160, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 160, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 160, 1),
@@ -4188,7 +4190,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "pbs" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 161, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 161, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 161, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 161, 1),
@@ -4201,7 +4203,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "pbe" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 162, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 162, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 162, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 162, 1),
@@ -4214,7 +4216,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "pt" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 163, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 163, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 163, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 163, 1),
@@ -4227,7 +4229,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "pr" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 164, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 164, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 164, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 164, 1),
@@ -4240,7 +4242,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "pb" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 165, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 165, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 165, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 165, 1),
@@ -4253,7 +4255,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "pl" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 166, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 166, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 166, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 166, 1),
@@ -4266,7 +4268,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "indent" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 168, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 168, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 168, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 168, 1),
@@ -4325,7 +4327,9 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         negative: None,
     },
     "font-stretch" => FunctionalEntry {
-        named_branches: &[],
+        named_branches: &[
+            NamedBranch::Typed(NamedValueType::Percentage, ModifierKind::None, 173, 1),
+        ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 173, 1),
         ],
@@ -4351,7 +4355,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 315, 1),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 315, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 175, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 175, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, ModifierKind::None, 175, 1),
@@ -4424,7 +4428,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "brightness" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 321, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 321, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 321, 2),
@@ -4436,7 +4440,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "backdrop-brightness" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 322, 3),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 322, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 322, 3),
@@ -4448,7 +4452,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "contrast" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 323, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 323, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 323, 2),
@@ -4460,7 +4464,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "backdrop-contrast" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 324, 3),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 324, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 324, 3),
@@ -4472,7 +4476,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "grayscale" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 325, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 325, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 325, 2),
@@ -4484,7 +4488,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "backdrop-grayscale" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 326, 3),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 326, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 326, 3),
@@ -4496,7 +4500,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "hue-rotate" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 327, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 327, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 327, 2),
@@ -4508,7 +4512,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "backdrop-hue-rotate" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 328, 3),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 328, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 328, 3),
@@ -4520,7 +4524,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "invert" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 329, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 329, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 329, 2),
@@ -4532,7 +4536,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "backdrop-invert" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 330, 3),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 330, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 330, 3),
@@ -4544,7 +4548,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "saturate" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 331, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 331, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 331, 2),
@@ -4556,7 +4560,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "backdrop-saturate" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 332, 3),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 332, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 332, 3),
@@ -4568,7 +4572,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "sepia" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 333, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 333, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 333, 2),
@@ -4580,7 +4584,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "backdrop-sepia" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 334, 3),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 334, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 334, 3),
@@ -4607,7 +4611,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "backdrop-opacity" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 336, 3),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 336, 3),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 336, 3),
@@ -4632,7 +4636,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "delay" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 339, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 339, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 339, 1),
@@ -4644,7 +4648,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "duration" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 340, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 340, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 340, 2),
@@ -4703,7 +4707,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
             NamedBranch::Keyword(3, ModifierKind::None, 182, 2),
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 182, 2),
             NamedBranch::Theme(ThemeNamespace::Leading, ModifierKind::None, 182, 2),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 182, 2),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 182, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 182, 2),
@@ -4729,7 +4733,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 343, 1),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 343, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 344, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 344, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, ModifierKind::None, 344, 2),
@@ -4744,7 +4748,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "outline-offset" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 345, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 345, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 345, 1),
@@ -4756,7 +4760,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "opacity" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 346, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 346, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 346, 1),
@@ -4769,7 +4773,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "underline-offset" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Keyword(0, ModifierKind::None, 347, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 347, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 347, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 347, 1),
@@ -4779,7 +4783,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         bare_name: None,
         negative: Some(Distinct {
             named_branches: &[
-                NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 347, 1),
+                NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 347, 1),
             ],
             arbitrary_branches: &[
                 ArbitraryBranch::Fallback(ModifierKind::None, 347, 1),
@@ -4854,7 +4858,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 352, 1),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 352, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 353, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 353, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, ModifierKind::None, 353, 2),
@@ -4869,7 +4873,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 354, 1),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 354, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 355, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 355, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, ModifierKind::None, 355, 2),
@@ -4884,7 +4888,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
         named_branches: &[
             NamedBranch::Keyword(10, ModifierKind::Opacity, 356, 1),
             NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 356, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 357, 2),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 357, 2),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Typed(CssDataType::Length, ModifierKind::None, 357, 2),
@@ -4907,7 +4911,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "flex-shrink" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 200, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 200, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 200, 1),
@@ -4919,7 +4923,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     },
     "flex-grow" => FunctionalEntry {
         named_branches: &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 201, 1),
+            NamedBranch::Typed(NamedValueType::Integer, ModifierKind::None, 201, 1),
         ],
         arbitrary_branches: &[
             ArbitraryBranch::Fallback(ModifierKind::None, 201, 1),
@@ -4932,7 +4936,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "start" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 8, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 8, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 8, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 8, 1),
         ],
         arbitrary_branches: &[
@@ -4946,7 +4950,7 @@ pub static FUNCTIONAL_UTILITIES: phf::Map<&'static str, FunctionalEntry> = phf_m
     "end" => FunctionalEntry {
         named_branches: &[
             NamedBranch::Theme(ThemeNamespace::Spacing, ModifierKind::None, 9, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 9, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 9, 1),
             NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 9, 1),
         ],
         arbitrary_branches: &[
@@ -5504,3 +5508,5 @@ pub(super) static THEME_KEYS_ANIMATE: phf::Set<&'static str> = phf_set! {
     "spin",
 };
 pub(super) static THEME_KEYS_BACKGROUND_IMAGE: phf::Set<&'static str> = phf_set! {};
+pub(super) static THEME_KEYS_GRID_TEMPLATE_COLUMNS: phf::Set<&'static str> = phf_set! {};
+pub(super) static THEME_KEYS_GRID_TEMPLATE_ROWS: phf::Set<&'static str> = phf_set! {};

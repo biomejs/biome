@@ -157,6 +157,18 @@
 	"to-100% via-25% from-50%",   // three gradient stops, stable order within bucket
 	"flex w-1/2 w-1/3",           // two ratios share the same w branch, ordered by value text
 
+	// ─── bare numbers ──────────────────────────────────────────────
+	// A bare number must be one the utility takes, spelled the way
+	// Tailwind spells it: whole numbers for `z-*`, `tab-*`, `border-*` and
+	// the like, multiples of 0.25 for spacing, no leading or trailing
+	// zeros. Anything else is unknown and floats front.
+	"flex z-1.5 z-10",                  // z takes whole numbers
+	"flex tab-1.5 tab-4 border-1.5",    // so do tab-size and border width
+	"flex p-1.3 p-1.25",                // spacing takes quarter steps
+	"flex p-01 p-1.50 p-.5 p-0.5",      // only the canonical spelling resolves
+	"flex w-1.5/2 w-01/2 w-1/2",        // a fraction is two whole numbers
+	"flex font-stretch-50%",            // font-stretch takes 50% to 200%
+
 	// ─── modifiers ─────────────────────────────────────────────────
 	// A `/modifier` is valid only where the utility accepts one: a color
 	// takes an opacity modifier (number / arbitrary / CSS variable), a
@@ -169,6 +181,8 @@
 	"flex bg-current/50",         // keyword color + opacity → valid
 	"flex text-lg/8",             // font-size + numeric line-height → valid
 	"flex text-lg/loose",         // font-size + `--leading-loose` keyword → valid
+	"flex bg-red-500/2.5 bg-red-500/1.3 bg-red-500/01", // opacity takes canonical quarter steps
+	"flex text-lg/1.25 text-lg/1.3",  // so does line-height
 	"flex w-1/foo",               // number takes no modifier → invalid, floats front
 	"flex bg-red-500/foo",        // bare word is not an opacity value → invalid
 	"flex bg-red-500/50%",        // percentage is not an opacity value → invalid

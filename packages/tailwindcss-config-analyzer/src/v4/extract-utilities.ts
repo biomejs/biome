@@ -33,6 +33,7 @@ import { makeLoadStylesheet } from "./css-helpers.js";
 import { extractThemeKeys } from "./extract-theme-keys.js";
 import {
 	ARBITRARY_PROBES,
+	NAMED_NUMBER_PROBES,
 	NAMED_PREDICATE_PROBES,
 	NAMESPACE_PROBE_VALUE,
 	NONSENSE_PROBE,
@@ -334,13 +335,33 @@ function extractFunctionalBranches(
 			});
 		}
 
+		// A bare number/Percentage/Ratio value is never a color or a
+		// font-size, so a typed branch never carries an opacity or
+		// line-height modifier. (Probing would also misread `w-7/50` as
+		// the fraction `7/50` on a ratio-capable utility.)
+		const numberSort = propertySortOf(
+			ds,
+			`${basename}-${NAMED_NUMBER_PROBES.integer}`,
+		);
+		if (numberSort) {
+			const accepts = (value: string) =>
+				propertySortOf(ds, `${basename}-${value}`) !== null;
+			branches.namedBranches.push({
+				kind: "Typed",
+				value_type: accepts(NAMED_NUMBER_PROBES.number)
+					? "Number"
+					: accepts(NAMED_NUMBER_PROBES.multiplier)
+						? "Multiplier"
+						: "Integer",
+				modifier: "None",
+				sort: numberSort,
+			});
+		}
 		for (const p of NAMED_PREDICATE_PROBES) {
-			const sort = propertySortOf(ds, `${basename}-${p.value}`);
+			const sort = p.values
+				.map((value) => propertySortOf(ds, `${basename}-${value}`))
+				.find((found) => found !== null);
 			if (!sort) continue;
-			// A bare Number/Percentage/Ratio value is never a color or a
-			// font-size, so a typed branch never carries an opacity or
-			// line-height modifier. (Probing would also misread `w-7/50` as
-			// the fraction `7/50` on a ratio-capable utility.)
 			branches.namedBranches.push({
 				kind: "Typed",
 				value_type: p.type,

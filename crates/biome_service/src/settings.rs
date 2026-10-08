@@ -279,7 +279,12 @@ impl Settings {
         }
 
         if let Some(tailwind) = configuration.tailwind {
-            self.tailwind = tailwind.into();
+            let stylesheet = tailwind.stylesheet.as_deref().map(|stylesheet| {
+                working_directory
+                    .as_deref()
+                    .map_or_else(|| stylesheet.into(), |directory| directory.join(stylesheet))
+            });
+            self.tailwind = TailwindOptions::from(tailwind).with_stylesheet(stylesheet);
         }
 
         // assist part
@@ -359,6 +364,15 @@ impl Settings {
             if let Some(plugins) = configuration.plugins {
                 self.plugins = plugins;
             }
+        }
+
+        // A Tailwind CSS stylesheet uses Tailwind directives, so CSS files parse
+        // them unless the user decides otherwise.
+        #[cfg(feature = "lang_css")]
+        if self.tailwind.stylesheet().is_some()
+            && self.languages.css.parser.tailwind_directives.is_none()
+        {
+            self.languages.css.parser.tailwind_directives = Some(true.into());
         }
 
         // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.

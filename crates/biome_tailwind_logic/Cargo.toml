@@ -10,6 +10,10 @@ keywords.workspace   = true
 categories.workspace = true
 publish              = false
 
+[[bench]]
+harness = false
+name    = "use_tailwind_sorted_classes_v4"
+
 [dependencies]
 biome_analyze          = { workspace = true }
 biome_console          = { workspace = true }
@@ -17,6 +21,7 @@ biome_diagnostics      = { workspace = true }
 biome_html_syntax      = { workspace = true }
 biome_js_syntax        = { workspace = true }
 biome_languages        = { workspace = true, features = ["lang_js"] }
+biome_module_graph     = { workspace = true }
 biome_package          = { workspace = true }
 biome_parser           = { workspace = true }
 biome_rowan            = { workspace = true }
@@ -31,7 +36,16 @@ rustc-hash             = { workspace = true }
 smallvec               = { workspace = true }
 
 [dev-dependencies]
-insta = { workspace = true }
+criterion     = { package = "codspeed-criterion-compat", version = "=5.0.1" }
+insta         = { workspace = true, features = ["glob"] }
+json_comments = "0.2.2"
+serde_json    = { workspace = true }
+
+[target.'cfg(all(target_family="unix", not(all(target_arch = "aarch64", target_env = "musl"))))'.dev-dependencies]
+tikv-jemallocator = { workspace = true }
+
+[target.'cfg(target_os = "windows")'.dev-dependencies]
+mimalloc = { workspace = true }
 
 [lints]
 workspace = true

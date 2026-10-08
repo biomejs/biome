@@ -730,6 +730,20 @@ pub struct NoIgnoreFileFound {
 )]
 pub struct DisabledVcs {}
 
+#[derive(Debug, Diagnostic, Serialize, Deserialize)]
+#[diagnostic(
+    category = "configuration",
+    severity = Error,
+    message(
+        description = "Biome couldn't find the Tailwind CSS stylesheet {path} set in `tailwind.stylesheet`.",
+        message("Biome couldn't find the Tailwind CSS stylesheet "<Emphasis>{self.path}</Emphasis>" set in "<Emphasis>"tailwind.stylesheet"</Emphasis>"."),
+    )
+)]
+pub struct TailwindStylesheetNotFound {
+    #[location(resource)]
+    pub path: String,
+}
+
 #[cfg(feature = "plugins")]
 #[cfg_attr(feature = "plugins", derive(Debug, Serialize, Deserialize))]
 pub struct PluginErrors {

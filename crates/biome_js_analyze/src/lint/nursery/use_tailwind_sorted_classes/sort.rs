@@ -1,49 +1,51 @@
-use biome_analyze::shared::sorted_classes::sort as shared_sort;
 use biome_js_syntax::{JsTemplateChunkElement, JsTemplateElement};
 use biome_rowan::{AstNode, TextRange, TextSize, TokenText};
+use biome_tailwind_logic::syntax_service::TailwindSyntax;
+use biome_tailwind_logic::use_tailwind_sorted_classes::{TailwindDesignSystem, sort_class_list};
+use biome_tailwind_parser::parse_tailwind;
 
-use biome_analyze::shared::sorted_classes::sort_config::SortConfig;
-use crate::shared::any_class_string_like::AnyClassStringLike;
+use crate::tailwind::AnyTailwindClassString;
 
-/// Sort the given class string according to the given sort config.
-pub fn sort_class_name(
+/// Sorts the classes of the queried class string. Returns `None` when the
+/// classes can't be parsed.
+pub(crate) fn sort_classes(
+    query: &TailwindSyntax<AnyTailwindClassString>,
     class_name: &TokenText,
-    sort_config: &SortConfig,
-    template_literal_space_context: &Option<TemplateLiteralSpaceContext>,
-) -> String {
-    let (ignore_prefix, ignore_postfix) = template_literal_space_context
-        .as_ref()
-        .map_or((false, false), |ctx| ctx.get_ignore_flags());
+    template_literal_space_context: Option<&TemplateLiteralSpaceContext>,
+    design: &TailwindDesignSystem,
+) -> Option<String> {
+    let (ignore_prefix, ignore_postfix) =
+        template_literal_space_context.map_or((false, false), |ctx| ctx.get_ignore_flags());
 
-    // Obtain classes by splitting the class string by whitespace.
-    let mut classes_iter = class_name.split_whitespace();
-    let class_str_prefix = if ignore_prefix {
-        classes_iter.next()
+    let mut result = if ignore_prefix || ignore_postfix {
+        // A class glued to an interpolation can be a fragment, such as `bg-` in
+        // `` `bg-${color}` ``, so it stays in place and only the classes between
+        // the glued ones are parsed and sorted.
+        let mut classes = class_name.split_whitespace();
+        let prefix = if ignore_prefix { classes.next() } else { None };
+        let postfix = if ignore_postfix {
+            classes.next_back()
+        } else {
+            None
+        };
+        let middle = classes.collect::<Vec<_>>().join(" ");
+        let parse = parse_tailwind(&middle);
+        if parse.has_errors() {
+            return None;
+        }
+        let sorted_middle = sort_class_list(&parse.tree(), design);
+        prefix
+            .into_iter()
+            .chain((!sorted_middle.is_empty()).then_some(sorted_middle.as_str()))
+            .chain(postfix)
+            .collect::<Vec<_>>()
+            .join(" ")
     } else {
-        None
+        if query.tailwind_has_errors() {
+            return None;
+        }
+        sort_class_list(&query.tailwind_root(), design)
     };
-    let class_str_postfix = if ignore_postfix {
-        classes_iter.next_back()
-    } else {
-        None
-    };
-
-    // Collect the remaining classes into a vector if needed.
-    let classes: Vec<&str> = classes_iter.collect();
-    let sorted_value = shared_sort::sort_class_name_from_slice(&classes, sort_config);
-
-    let mut parts: Vec<&str> = sorted_value.split_whitespace().collect();
-
-    // Add the first class back if it was ignored.
-    if let Some(class_str_prefix) = class_str_prefix {
-        parts.insert(0, class_str_prefix);
-    }
-    // Add the last class back if it was ignored.
-    if let Some(class_str_postfix) = class_str_postfix {
-        parts.push(class_str_postfix);
-    }
-
-    let mut result = parts.join(" ");
 
     // Edge space handling for template literals only
     if let Some(ctx) = template_literal_space_context {
@@ -55,7 +57,7 @@ pub fn sort_class_name(
         }
     }
 
-    result
+    Some(result)
 }
 
 // Get the range of the class name to be sorted.
@@ -146,10 +148,10 @@ impl TemplateLiteralSpaceContext {
 
 /// Returns the template space context for the given node
 pub(crate) fn get_template_literal_space_context(
-    node: &AnyClassStringLike,
+    node: &AnyTailwindClassString,
 ) -> Option<TemplateLiteralSpaceContext> {
     match node {
-        AnyClassStringLike::JsTemplateChunkElement(chunk) => {
+        AnyTailwindClassString::JsTemplateChunkElement(chunk) => {
             TemplateLiteralSpaceContext::from_chunk(chunk)
         }
         _ => None,

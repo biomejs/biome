@@ -1,14 +1,17 @@
 use std::cmp::Ordering;
 
-use biome_rowan::{
-    AstNode, AstSeparatedList, SyntaxNodeText, TextRange, TextSize, TokenText,
-};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxNodeText, TextRange, TextSize, TokenText};
 use biome_string_case::Collator;
 use biome_tailwind_syntax::{
     AnyTwCandidate, AnyTwFullCandidate, AnyTwModifier, AnyTwValue, CssGenericComponentValueList,
-    TailwindSyntaxNode, TailwindSyntaxToken, TwRoot,
+    TailwindSyntaxNode, TailwindSyntaxToken, TwNumberValue, TwRoot,
 };
 
+use super::arbitrary_value_match::value_matches_type;
+use super::design_system::TailwindDesignSystem;
+use super::sort_v4_variants::{
+    VariantGroups, VariantKey, VariantWeight, variant_keys_from_candidate,
+};
 use super::tailwind_preset_v4::{
     FUNCTIONAL_UTILITIES, KEYWORD_POOL, PROPERTY_INDEX, SIGNATURE_POOL, STATIC_UTILITIES,
 };
@@ -16,26 +19,22 @@ use super::tailwind_preset_v4_types::{
     ArbitraryBranch, ModifierKind, NamedBranch, NamedValueType, Negative, ThemeNamespace,
     UtilityEntry,
 };
-use super::arbitrary_value_match::value_matches_type;
-use super::sort_v4_variants::{
-    VariantWeight, VariantGroups, VariantKey, variant_keys_from_candidate,
-};
 
 #[cfg(test)]
 use super::tailwind_preset_v4_types::CssDataType;
 
 /// Sort the candidates of a parsed Tailwind class list and return the joined,
-/// space-separated result.
-pub fn sort_class_list(root: &TwRoot) -> String {
+/// space-separated result. `design` adds the user's theme values, utilities,
+/// and variants to the default configuration.
+pub fn sort_class_list(root: &TwRoot, design: &TailwindDesignSystem) -> String {
     let candidates = root.candidates();
 
     // A variant's weight depends on the whole list, so classify first and
     // weight in a second pass.
-    let mut pending: Vec<(PendingSortKey, SyntaxNodeText)> =
-        Vec::with_capacity(candidates.len());
+    let mut pending: Vec<(PendingSortKey, SyntaxNodeText)> = Vec::with_capacity(candidates.len());
     for candidate in candidates.iter().flatten() {
         let text = candidate.syntax().text_trimmed();
-        let key = PendingSortKey::from_candidate(&candidate);
+        let key = PendingSortKey::from_candidate(&candidate, design);
         pending.push((key, text));
     }
 
@@ -215,7 +214,10 @@ impl TextChunks {
     /// The unread bytes of the current chunk, or `None` at the end.
     fn rest(&self) -> Option<&[u8]> {
         let (token, local) = self.current.as_ref()?;
-        Some(&token.text().as_bytes()[usize::from(local.start()) + self.offset..usize::from(local.end())])
+        Some(
+            &token.text().as_bytes()
+                [usize::from(local.start()) + self.offset..usize::from(local.end())],
+        )
     }
 
     fn advance(&mut self, bytes: usize) {
@@ -225,7 +227,10 @@ impl TextChunks {
             .as_ref()
             .is_some_and(|(_, local)| self.offset >= usize::from(local.len()));
         if done {
-            let next = self.current.as_ref().and_then(|(token, _)| token.next_token());
+            let next = self
+                .current
+                .as_ref()
+                .and_then(|(token, _)| token.next_token());
             self.enter(next);
         }
     }
@@ -259,6 +264,8 @@ enum PendingSortKey {
 enum Signature {
     /// A generated `SIGNATURE_POOL` entry.
     Pool(&'static [u16]),
+    /// A utility declared with `@utility` in the user's stylesheet.
+    Custom(Box<[u16]>),
     /// A single property, for arbitrary-property candidates
     /// (`[display:block]`).
     Property(u16),
@@ -275,6 +282,7 @@ impl Signature {
     fn as_slice(&self) -> &[u16] {
         match self {
             Self::Pool(indices) => indices,
+            Self::Custom(indices) => indices,
             Self::Property(index) => std::slice::from_ref(index),
             Self::CustomProperty => &[],
         }
@@ -356,13 +364,13 @@ impl Collator for TwNameCollator {
 impl PendingSortKey {
     /// Classify a candidate into its utility placement and variants, or
     /// `Unknown` for a shape we can't place.
-    fn from_candidate(candidate: &AnyTwFullCandidate) -> Self {
+    fn from_candidate(candidate: &AnyTwFullCandidate, design: &TailwindDesignSystem) -> Self {
         let AnyTwFullCandidate::TwFullCandidate(node) = candidate else {
             return Self::Unknown;
         };
 
         // An unrecognized variant leaves the candidate unplaced.
-        let Some(variants) = variant_keys_from_candidate(node) else {
+        let Some(variants) = variant_keys_from_candidate(node, design) else {
             return Self::Unknown;
         };
 
@@ -377,6 +385,25 @@ impl PendingSortKey {
         let Ok(inner) = node.candidate() else {
             return Self::Unknown;
         };
+
+        // A utility from the user's stylesheet. The grammar splits a dashed
+        // name like `btn-primary` into a base and a value, so the whole
+        // candidate text is matched. Built-in static utilities take
+        // precedence.
+        if design.has_utilities() && !is_negative {
+            let name = inner.syntax().text_trimmed().to_string();
+            if !STATIC_UTILITIES.contains_key(name.as_str())
+                && let Some(utility) = design.utility(&name)
+            {
+                return Self::Known {
+                    signature: Signature::Custom(utility.signature.clone()),
+                    count: utility.count,
+                    text: CandidateText(node.syntax().clone()),
+                    variants,
+                };
+            }
+        }
+
         let placement = match &inner {
             AnyTwCandidate::TwArbitraryCandidate(a) => {
                 let Ok(property_token) = a.property_token() else {
@@ -387,7 +414,7 @@ impl PendingSortKey {
                 // `[--my-var:1]/(--x)`) but not a bare word or percentage
                 // (`[color:red]/foo`), regardless of the property.
                 if let Some(modifier) = a.modifier()
-                    && !modifier_accepted(ModifierKind::Opacity, &modifier)
+                    && !modifier_accepted(ModifierKind::Opacity, &modifier, design)
                 {
                     return Self::Unknown;
                 }
@@ -420,12 +447,12 @@ impl PendingSortKey {
                         None
                     } else {
                         FUNCTIONAL_UTILITIES.get(name).and_then(|entry| {
-                            let placement = if modifier_accepted(ModifierKind::Opacity, &modifier)
-                            {
-                                entry.bare_opacity
-                            } else {
-                                entry.bare_name
-                            };
+                            let placement =
+                                if modifier_accepted(ModifierKind::Opacity, &modifier, design) {
+                                    entry.bare_opacity
+                                } else {
+                                    entry.bare_name
+                                };
                             placement.map(|(sig, count)| (pool_signature(sig), count))
                         })
                     }
@@ -492,9 +519,16 @@ impl PendingSortKey {
 
                     let modifier = f.modifier();
                     let resolved = if let AnyTwValue::TwArbitraryValue(arb) = &value {
-                        resolve_arbitrary_branch(arbitrary_branches, &arb.value(), modifier.as_ref())
+                        resolve_arbitrary_branch(
+                            arbitrary_branches,
+                            &arb.value(),
+                            modifier.as_ref(),
+                            design,
+                        )
+                    } else if let AnyTwValue::TwCssVariableValue(_) = &value {
+                        resolve_css_variable_branch(arbitrary_branches, modifier.as_ref(), design)
                     } else {
-                        resolve_named_branch(named_branches, &value, modifier.as_ref())
+                        resolve_named_branch(named_branches, &value, modifier.as_ref(), design)
                     };
                     resolved.map(|(sig, count)| (pool_signature(sig), count))
                 }
@@ -585,8 +619,8 @@ fn entry_has_ratio_branch(branches: &[NamedBranch]) -> bool {
         .any(|b| matches!(b, NamedBranch::Typed(NamedValueType::Ratio, ..)))
 }
 
-/// `n/m` Tailwind fraction shorthand: the value is a bare number, the
-/// modifier is a bare number, and the utility actually accepts fractions.
+/// `n/m` Tailwind fraction shorthand: the value and the modifier are bare
+/// integers, and the utility actually accepts fractions.
 fn is_fraction_modifier(
     value: &AnyTwValue,
     modifier: &AnyTwModifier,
@@ -595,9 +629,38 @@ fn is_fraction_modifier(
     let AnyTwModifier::TwModifier(m) = modifier else {
         return false;
     };
-    matches!(value, AnyTwValue::TwNumberValue(_))
-        && matches!(m.value(), Ok(AnyTwValue::TwNumberValue(_)))
+    is_bare_integer(value)
+        && m.value()
+            .is_ok_and(|denominator| is_bare_integer(&denominator))
         && entry_has_ratio_branch(branches)
+}
+
+/// The value of a bare number written the way Tailwind accepts it: the text
+/// JavaScript's `String(Number(text))` gives back, so `7` and `0.5` but not
+/// `07`, `1.50`, or `.5`.
+fn bare_number(number: &TwNumberValue) -> Option<f64> {
+    let token = number.value_token().ok()?;
+    let text = token.text_trimmed();
+    let (whole, fraction) = match text.split_once('.') {
+        Some((whole, fraction)) => (whole, Some(fraction)),
+        None => (text, None),
+    };
+    let digits = |s: &str| !s.is_empty() && s.bytes().all(|b| b.is_ascii_digit());
+    let canonical = digits(whole)
+        && (whole == "0" || !whole.starts_with('0'))
+        && fraction.is_none_or(|fraction| digits(fraction) && !fraction.ends_with('0'));
+    if canonical { text.parse().ok() } else { None }
+}
+
+fn is_bare_integer(value: &AnyTwValue) -> bool {
+    matches!(value, AnyTwValue::TwNumberValue(number)
+        if bare_number(number).is_some_and(|n| n.fract() == 0.0))
+}
+
+/// Whether `n` is a multiple of 0.25, the step Tailwind's spacing scale,
+/// opacity, and line-height take.
+fn is_quarter_step(n: f64) -> bool {
+    (n * 4.0).fract() == 0.0
 }
 
 fn named_text(value: &AnyTwValue) -> Option<TokenText> {
@@ -629,16 +692,15 @@ fn named_value_type_matches(
     value: &AnyTwValue,
     has_fraction_modifier: bool,
 ) -> bool {
-    matches!(
-        (value_type, value, has_fraction_modifier),
-        (NamedValueType::Number, AnyTwValue::TwNumberValue(_), false)
-            | (
-                NamedValueType::Percentage,
-                AnyTwValue::TwPercentageValue(_),
-                false
-            )
-            | (NamedValueType::Ratio, AnyTwValue::TwNumberValue(_), true)
-    )
+    match (value_type, value, has_fraction_modifier) {
+        (NamedValueType::Integer, AnyTwValue::TwNumberValue(_), false) => is_bare_integer(value),
+        (NamedValueType::Multiplier, AnyTwValue::TwNumberValue(number), false) => {
+            bare_number(number).is_some_and(is_quarter_step)
+        }
+        (NamedValueType::Percentage, AnyTwValue::TwPercentageValue(_), false)
+        | (NamedValueType::Ratio, AnyTwValue::TwNumberValue(_), true) => true,
+        _ => false,
+    }
 }
 
 /// Look up `base-value` in `STATIC_UTILITIES` without allocating,
@@ -667,6 +729,7 @@ fn resolve_named_branch(
     branches: &[NamedBranch],
     value: &AnyTwValue,
     modifier: Option<&AnyTwModifier>,
+    design: &TailwindDesignSystem,
 ) -> Option<(u16, u8)> {
     let has_fraction_modifier = match modifier {
         None => false,
@@ -687,7 +750,7 @@ fn resolve_named_branch(
                 let Some(text) = named_or_number_text(value) else {
                     continue;
                 };
-                if !namespace.keys().contains(text.text()) {
+                if !design.has_theme_key(namespace, text.text()) {
                     continue;
                 }
                 (m, p, c)
@@ -715,7 +778,7 @@ fn resolve_named_branch(
         // ill-formed one — makes the candidate invalid (`w-1/foo`, `p-4/2`).
         if !has_fraction_modifier
             && let Some(modifier) = modifier
-            && !modifier_accepted(modifier_kind, modifier)
+            && !modifier_accepted(modifier_kind, modifier, design)
         {
             return None;
         }
@@ -728,7 +791,11 @@ fn resolve_named_branch(
 /// `kind`. Opacity takes a number, arbitrary value, or CSS variable;
 /// line-height takes those plus a `--leading-*` theme keyword. A percentage
 /// or a bare word is never a valid modifier.
-fn modifier_accepted(kind: ModifierKind, modifier: &AnyTwModifier) -> bool {
+fn modifier_accepted(
+    kind: ModifierKind,
+    modifier: &AnyTwModifier,
+    design: &TailwindDesignSystem,
+) -> bool {
     let AnyTwModifier::TwModifier(modifier) = modifier else {
         return false;
     };
@@ -741,22 +808,22 @@ fn modifier_accepted(kind: ModifierKind, modifier: &AnyTwModifier) -> bool {
         ModifierKind::LineHeight => {
             is_numeric_modifier(&value)
                 || matches!(&value, AnyTwValue::TwNamedValue(_))
-                    && named_text(&value)
-                        .is_some_and(|text| ThemeNamespace::Leading.keys().contains(text.text()))
+                    && named_text(&value).is_some_and(|text| {
+                        design.has_theme_key(ThemeNamespace::Leading, text.text())
+                    })
         }
     }
 }
 
 /// A number (`/50`), an arbitrary value (`/[0.5]`), or a CSS variable
 /// (`/(--x)`) — the modifier value kinds every modifier-accepting branch
-/// allows.
+/// allows. A bare number must be a multiple of 0.25 (`/2.5`, not `/1.3`).
 fn is_numeric_modifier(value: &AnyTwValue) -> bool {
-    matches!(
-        value,
-        AnyTwValue::TwNumberValue(_)
-            | AnyTwValue::TwArbitraryValue(_)
-            | AnyTwValue::TwCssVariableValue(_)
-    )
+    match value {
+        AnyTwValue::TwNumberValue(number) => bare_number(number).is_some_and(is_quarter_step),
+        AnyTwValue::TwArbitraryValue(_) | AnyTwValue::TwCssVariableValue(_) => true,
+        _ => false,
+    }
 }
 
 /// Walk a basename's arbitrary branch list and return the first matching
@@ -769,6 +836,7 @@ fn resolve_arbitrary_branch(
     branches: &[ArbitraryBranch],
     list: &CssGenericComponentValueList,
     modifier: Option<&AnyTwModifier>,
+    design: &TailwindDesignSystem,
 ) -> Option<(u16, u8)> {
     for &branch in branches {
         let (modifier_kind, property_idx, property_count) = match branch {
@@ -781,13 +849,34 @@ fn resolve_arbitrary_branch(
             ArbitraryBranch::Fallback(m, p, c) => (m, p, c),
         };
         if let Some(modifier) = modifier
-            && !modifier_accepted(modifier_kind, modifier)
+            && !modifier_accepted(modifier_kind, modifier, design)
         {
             return None;
         }
         return Some((property_idx, property_count));
     }
     None
+}
+
+/// Resolve a CSS variable value (`w-(--x)`), which Tailwind treats as the
+/// arbitrary value `w-[var(--x)]`. A `var()` value never matches a typed
+/// branch (see [value_matches_type]), so only the fallback branch places it.
+fn resolve_css_variable_branch(
+    branches: &[ArbitraryBranch],
+    modifier: Option<&AnyTwModifier>,
+    design: &TailwindDesignSystem,
+) -> Option<(u16, u8)> {
+    let (modifier_kind, property_idx, property_count) =
+        branches.iter().find_map(|&branch| match branch {
+            ArbitraryBranch::Fallback(m, p, c) => Some((m, p, c)),
+            ArbitraryBranch::Typed(..) => None,
+        })?;
+    if let Some(modifier) = modifier
+        && !modifier_accepted(modifier_kind, modifier, design)
+    {
+        return None;
+    }
+    Some((property_idx, property_count))
 }
 
 #[cfg(test)]
@@ -824,7 +913,7 @@ mod tests {
     fn classify(input: &str) -> SortKey {
         let parsed = parse_tailwind(input);
         let full = parsed.tree().candidates().iter().next().unwrap().unwrap();
-        let pending = PendingSortKey::from_candidate(&full);
+        let pending = PendingSortKey::from_candidate(&full, &TailwindDesignSystem::default());
         // Groups from this one candidate; a plain utility gets empty
         // `variant_weight`.
         let variants: &[VariantKey] = match &pending {
@@ -863,20 +952,144 @@ mod tests {
         for a in &texts {
             for b in &texts {
                 let expected = TwNameCollator.cmp(a.text().chars(), b.text().chars());
-                assert_eq!(
-                    a.compare(b),
-                    expected,
-                    "{} vs {}",
-                    a.text(),
-                    b.text()
-                );
+                assert_eq!(a.compare(b), expected, "{} vs {}", a.text(), b.text());
             }
         }
     }
 
     /// Sort a class string end to end.
     fn sort(input: &str) -> String {
-        sort_class_list(&parse_tailwind(input).tree())
+        sort_class_list(
+            &parse_tailwind(input).tree(),
+            &TailwindDesignSystem::default(),
+        )
+    }
+
+    #[test]
+    fn css_variable_value_sorts_like_arbitrary_var() {
+        assert_eq!(
+            sort("w-(--sidebar-width) flex h-full flex-col"),
+            "flex h-full w-(--sidebar-width) flex-col"
+        );
+        assert_eq!(
+            sort("max-h-(--console-max-h) flex shrink-0 flex-col"),
+            "flex max-h-(--console-max-h) shrink-0 flex-col"
+        );
+        assert_eq!(
+            sort("min-w-(--anchor-width) w-max max-w-sm p-0"),
+            "w-max max-w-sm min-w-(--anchor-width) p-0"
+        );
+        assert_eq!(
+            sort("w-(--x) w-[var(--x)] flex"),
+            sort("w-[var(--x)] w-(--x) flex")
+        );
+        assert_eq!(sort("bg-(--brand)/50 flex"), "flex bg-(--brand)/50");
+    }
+
+    #[test]
+    fn dashed_bare_variant_value_is_known() {
+        assert_eq!(
+            sort("supports-backdrop-filter:backdrop-blur-xs fixed inset-0"),
+            "fixed inset-0 supports-backdrop-filter:backdrop-blur-xs"
+        );
+        assert_eq!(
+            sort("supports-backdrop-filter:flex supports-grid:flex"),
+            "supports-backdrop-filter:flex supports-grid:flex"
+        );
+    }
+
+    #[test]
+    fn stylesheet_grid_template_values_make_class_known() {
+        let mut design = TailwindDesignSystem::default();
+        design.add_theme_variable("--grid-template-columns-master-aside", "1fr 20rem");
+        design.add_theme_variable("--grid-template-rows-layout", "auto 1fr");
+        assert_eq!(
+            sort("lg:grid-cols-master-aside grid gap-6"),
+            "lg:grid-cols-master-aside grid gap-6"
+        );
+        assert_eq!(
+            sort_with("lg:grid-cols-master-aside grid gap-6", &design),
+            "grid gap-6 lg:grid-cols-master-aside"
+        );
+        assert_eq!(
+            sort_with("grid-rows-layout flex", &design),
+            "flex grid-rows-layout"
+        );
+    }
+
+    fn sort_with(input: &str, design: &TailwindDesignSystem) -> String {
+        sort_class_list(&parse_tailwind(input).tree(), design)
+    }
+
+    #[test]
+    fn stylesheet_theme_value_makes_class_known() {
+        let mut design = TailwindDesignSystem::default();
+        design.add_theme_variable("--color-brand", "#00f");
+        // Unknown classes come first, so `bg-brand` only moves once the theme
+        // defines it.
+        assert_eq!(sort("bg-brand flex"), "bg-brand flex");
+        assert_eq!(sort_with("bg-brand flex", &design), "flex bg-brand");
+    }
+
+    #[test]
+    fn stylesheet_theme_reset_removes_defaults() {
+        let mut design = TailwindDesignSystem::default();
+        design.reset_theme("--color");
+        assert_eq!(sort_with("flex bg-red-500", &design), "bg-red-500 flex");
+    }
+
+    #[test]
+    fn stylesheet_utility_sorts_by_its_properties() {
+        let mut design = TailwindDesignSystem::default();
+        design.add_utility("btn-primary", ["color", "background-color"], 2);
+        assert_eq!(sort("btn-primary flex"), "btn-primary flex");
+        assert_eq!(sort_with("btn-primary flex", &design), "flex btn-primary");
+        assert_eq!(
+            sort_with("text-red-500 btn-primary bg-blue-500", &design),
+            "btn-primary bg-blue-500 text-red-500"
+        );
+    }
+
+    #[test]
+    fn stylesheet_variant_sorts_after_built_in_variants() {
+        let mut design = TailwindDesignSystem::default();
+        design.add_variant("theme-midnight");
+        assert_eq!(
+            sort_with("theme-midnight:flex hover:flex flex", &design),
+            "flex hover:flex theme-midnight:flex"
+        );
+    }
+
+    #[test]
+    fn stylesheet_breakpoints_sort_by_length() {
+        let mut design = TailwindDesignSystem::default();
+        design.add_theme_variable("--breakpoint-3xl", "120rem");
+        design.add_theme_variable("--breakpoint-sm", "100rem");
+        assert_eq!(
+            sort_with("3xl:flex sm:flex 2xl:flex md:flex", &design),
+            "md:flex 2xl:flex sm:flex 3xl:flex"
+        );
+        assert_eq!(
+            sort_with("max-md:flex max-3xl:flex", &design),
+            "max-3xl:flex max-md:flex"
+        );
+    }
+
+    #[test]
+    fn stylesheet_breakpoint_reset_removes_defaults() {
+        let mut design = TailwindDesignSystem::default();
+        design.reset_theme("--breakpoint");
+        assert_eq!(sort_with("flex sm:flex", &design), "sm:flex flex");
+    }
+
+    #[test]
+    fn stylesheet_container_sizes_sort_by_length() {
+        let mut design = TailwindDesignSystem::default();
+        design.add_theme_variable("--container-8xl", "100rem");
+        assert_eq!(
+            sort_with("@8xl:flex @sm:flex", &design),
+            "@sm:flex @8xl:flex"
+        );
     }
 
     fn classify_all(input: &str) -> Vec<SortKey> {
@@ -886,7 +1099,9 @@ mod tests {
             .candidates()
             .iter()
             .flatten()
-            .map(|candidate| PendingSortKey::from_candidate(&candidate))
+            .map(|candidate| {
+                PendingSortKey::from_candidate(&candidate, &TailwindDesignSystem::default())
+            })
             .collect();
         let groups = VariantGroups::new(
             pending
@@ -1062,15 +1277,20 @@ mod tests {
 
     #[test]
     fn resolve_named_branch_returns_first_matching_branch() {
-        // Two NamedBranch::Typed(Number) branches with different property_idx;
+        // Two NamedBranch::Typed(Multiplier) branches with different property_idx;
         // first one to match wins.
         let (value, modifier) = functional_parts("p-5");
         let branches = &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 10, 1),
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 20, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 10, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 20, 1),
         ];
         assert_eq!(
-            resolve_named_branch(branches, &value, modifier.as_ref()),
+            resolve_named_branch(
+                branches,
+                &value,
+                modifier.as_ref(),
+                &TailwindDesignSystem::default()
+            ),
             Some((10, 1))
         );
     }
@@ -1078,10 +1298,20 @@ mod tests {
     #[test]
     fn resolve_named_branch_classifies_value_internally() {
         let (value, modifier) = functional_parts("p-5");
-        let branches = &[NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 10, 1)];
+        let branches = &[NamedBranch::Typed(
+            NamedValueType::Multiplier,
+            ModifierKind::None,
+            10,
+            1,
+        )];
 
         assert_eq!(
-            resolve_named_branch(branches, &value, modifier.as_ref()),
+            resolve_named_branch(
+                branches,
+                &value,
+                modifier.as_ref(),
+                &TailwindDesignSystem::default()
+            ),
             Some((10, 1))
         );
     }
@@ -1108,7 +1338,12 @@ mod tests {
             panic!("expected arbitrary value")
         };
         assert_eq!(
-            resolve_arbitrary_branch(branches, &arbitrary.value(), None),
+            resolve_arbitrary_branch(
+                branches,
+                &arbitrary.value(),
+                None,
+                &TailwindDesignSystem::default()
+            ),
             Some((20, 1))
         );
     }
@@ -1132,7 +1367,12 @@ mod tests {
         };
         let branches = &[ArbitraryBranch::Fallback(ModifierKind::None, 20, 1)];
         assert_eq!(
-            resolve_arbitrary_branch(branches, &arbitrary.value(), None),
+            resolve_arbitrary_branch(
+                branches,
+                &arbitrary.value(),
+                None,
+                &TailwindDesignSystem::default()
+            ),
             Some((20, 1))
         );
     }
@@ -1147,7 +1387,12 @@ mod tests {
         };
         let branches = &[ArbitraryBranch::Fallback(ModifierKind::None, 20, 1)];
         assert_eq!(
-            resolve_arbitrary_branch(branches, &arb.value(), modifier.as_ref()),
+            resolve_arbitrary_branch(
+                branches,
+                &arb.value(),
+                modifier.as_ref(),
+                &TailwindDesignSystem::default()
+            ),
             None
         );
     }
@@ -1159,28 +1404,61 @@ mod tests {
         let AnyTwValue::TwArbitraryValue(arb) = &value else {
             panic!("expected arbitrary value")
         };
-        let branches = &[ArbitraryBranch::Typed(CssDataType::Color, ModifierKind::Opacity, 10, 1)];
+        let branches = &[ArbitraryBranch::Typed(
+            CssDataType::Color,
+            ModifierKind::Opacity,
+            10,
+            1,
+        )];
         assert_eq!(
-            resolve_arbitrary_branch(branches, &arb.value(), modifier.as_ref()),
+            resolve_arbitrary_branch(
+                branches,
+                &arb.value(),
+                modifier.as_ref(),
+                &TailwindDesignSystem::default()
+            ),
             Some((10, 1))
         );
     }
 
     #[test]
     fn resolve_named_branch_returns_none_when_kind_does_not_match_value_type() {
-        // A named value like "abc" never satisfies NamedBranch::Typed(Number)
+        // A named value like "abc" never satisfies NamedBranch::Typed(Multiplier)
         // because dispatch is by parser node kind, not text scanning.
         let (value, modifier) = functional_parts("p-abc");
-        let branches = &[NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 1, 1)];
-        assert_eq!(resolve_named_branch(branches, &value, modifier.as_ref()), None);
+        let branches = &[NamedBranch::Typed(
+            NamedValueType::Multiplier,
+            ModifierKind::None,
+            1,
+            1,
+        )];
+        assert_eq!(
+            resolve_named_branch(
+                branches,
+                &value,
+                modifier.as_ref(),
+                &TailwindDesignSystem::default()
+            ),
+            None
+        );
     }
 
     #[test]
     fn resolve_named_branch_ratio_matches_ratio_typed_branch() {
         let (value, modifier) = functional_parts("w-1/2");
-        let branches = &[NamedBranch::Typed(NamedValueType::Ratio, ModifierKind::None, 7, 1)];
+        let branches = &[NamedBranch::Typed(
+            NamedValueType::Ratio,
+            ModifierKind::None,
+            7,
+            1,
+        )];
         assert_eq!(
-            resolve_named_branch(branches, &value, modifier.as_ref()),
+            resolve_named_branch(
+                branches,
+                &value,
+                modifier.as_ref(),
+                &TailwindDesignSystem::default()
+            ),
             Some((7, 1))
         );
     }
@@ -1189,22 +1467,74 @@ mod tests {
     fn resolve_named_branch_percentage_only_matches_percentage_typed_branch() {
         let (value, modifier) = functional_parts("from-25%");
         let branches = &[
-            NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 1, 1),
+            NamedBranch::Typed(NamedValueType::Multiplier, ModifierKind::None, 1, 1),
             NamedBranch::Typed(NamedValueType::Percentage, ModifierKind::None, 2, 1),
         ];
         assert_eq!(
-            resolve_named_branch(branches, &value, modifier.as_ref()),
+            resolve_named_branch(
+                branches,
+                &value,
+                modifier.as_ref(),
+                &TailwindDesignSystem::default()
+            ),
             Some((2, 1))
         );
+    }
+
+    #[test]
+    fn resolve_named_branch_takes_only_numbers_tailwind_accepts() {
+        let spacing = &[NamedBranch::Typed(
+            NamedValueType::Multiplier,
+            ModifierKind::None,
+            10,
+            1,
+        )];
+        let index = &[NamedBranch::Typed(
+            NamedValueType::Integer,
+            ModifierKind::None,
+            20,
+            1,
+        )];
+        for (class, branches, expected) in [
+            ("p-0.5", spacing, Some((10, 1))),
+            ("p-1.25", spacing, Some((10, 1))),
+            ("p-1.3", spacing, None),
+            ("p-01", spacing, None),
+            ("p-1.50", spacing, None),
+            ("z-10", index, Some((20, 1))),
+            ("z-1.5", index, None),
+        ] {
+            let (value, modifier) = functional_parts(class);
+            assert_eq!(
+                resolve_named_branch(
+                    branches,
+                    &value,
+                    modifier.as_ref(),
+                    &TailwindDesignSystem::default()
+                ),
+                expected,
+                "{class}"
+            );
+        }
     }
 
     #[test]
     fn resolve_named_branch_accepts_valid_opacity_modifier() {
         // A numeric opacity modifier is valid on a color branch.
         let (value, modifier) = functional_parts("bg-red-500/50");
-        let branches = &[NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 10, 1)];
+        let branches = &[NamedBranch::Theme(
+            ThemeNamespace::Color,
+            ModifierKind::Opacity,
+            10,
+            1,
+        )];
         assert_eq!(
-            resolve_named_branch(branches, &value, modifier.as_ref()),
+            resolve_named_branch(
+                branches,
+                &value,
+                modifier.as_ref(),
+                &TailwindDesignSystem::default()
+            ),
             Some((10, 1))
         );
     }
@@ -1214,8 +1544,21 @@ mod tests {
         // `w-1/foo`: the number branch takes no modifier, so the `/foo`
         // modifier makes the candidate invalid rather than sorting as `w-1`.
         let (value, modifier) = functional_parts("w-1/foo");
-        let branches = &[NamedBranch::Typed(NamedValueType::Number, ModifierKind::None, 10, 1)];
-        assert_eq!(resolve_named_branch(branches, &value, modifier.as_ref()), None);
+        let branches = &[NamedBranch::Typed(
+            NamedValueType::Multiplier,
+            ModifierKind::None,
+            10,
+            1,
+        )];
+        assert_eq!(
+            resolve_named_branch(
+                branches,
+                &value,
+                modifier.as_ref(),
+                &TailwindDesignSystem::default()
+            ),
+            None
+        );
     }
 
     #[test]
@@ -1223,8 +1566,21 @@ mod tests {
         // `bg-red-500/foo`: a color branch takes a numeric opacity modifier,
         // not a bare word.
         let (value, modifier) = functional_parts("bg-red-500/foo");
-        let branches = &[NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 10, 1)];
-        assert_eq!(resolve_named_branch(branches, &value, modifier.as_ref()), None);
+        let branches = &[NamedBranch::Theme(
+            ThemeNamespace::Color,
+            ModifierKind::Opacity,
+            10,
+            1,
+        )];
+        assert_eq!(
+            resolve_named_branch(
+                branches,
+                &value,
+                modifier.as_ref(),
+                &TailwindDesignSystem::default()
+            ),
+            None
+        );
     }
 
     #[test]
@@ -1232,9 +1588,19 @@ mod tests {
         // `text-lg/loose` is a valid line-height modifier (`loose` is a
         // `--leading-*` keyword).
         let (value, modifier) = functional_parts("text-lg/loose");
-        let line_height = &[NamedBranch::Theme(ThemeNamespace::Text, ModifierKind::LineHeight, 10, 1)];
+        let line_height = &[NamedBranch::Theme(
+            ThemeNamespace::Text,
+            ModifierKind::LineHeight,
+            10,
+            1,
+        )];
         assert_eq!(
-            resolve_named_branch(line_height, &value, modifier.as_ref()),
+            resolve_named_branch(
+                line_height,
+                &value,
+                modifier.as_ref(),
+                &TailwindDesignSystem::default()
+            ),
             Some((10, 1))
         );
     }
@@ -1243,8 +1609,21 @@ mod tests {
     fn resolve_named_branch_rejects_a_leading_keyword_on_an_opacity_branch() {
         // `bg-red-500/loose`: a leading keyword is not a valid opacity modifier.
         let (value, modifier) = functional_parts("bg-red-500/loose");
-        let opacity = &[NamedBranch::Theme(ThemeNamespace::Color, ModifierKind::Opacity, 10, 1)];
-        assert_eq!(resolve_named_branch(opacity, &value, modifier.as_ref()), None);
+        let opacity = &[NamedBranch::Theme(
+            ThemeNamespace::Color,
+            ModifierKind::Opacity,
+            10,
+            1,
+        )];
+        assert_eq!(
+            resolve_named_branch(
+                opacity,
+                &value,
+                modifier.as_ref(),
+                &TailwindDesignSystem::default()
+            ),
+            None
+        );
     }
 
     // endregion: branch resolution
@@ -1315,8 +1694,14 @@ mod tests {
     #[test]
     fn important_suffix_classifies_functional_and_arbitrary_candidates() {
         assert!(matches!(classify("p-4!"), SortKey::Known { .. }));
-        assert!(matches!(classify("[display:block]!"), SortKey::Known { .. }));
-        assert_eq!(sort("p-4! p-4 [display:block]! [display:block]"), "[display:block] [display:block]! p-4 p-4!");
+        assert!(matches!(
+            classify("[display:block]!"),
+            SortKey::Known { .. }
+        ));
+        assert_eq!(
+            sort("p-4! p-4 [display:block]! [display:block]"),
+            "[display:block] [display:block]! p-4 p-4!"
+        );
     }
 
     #[test]

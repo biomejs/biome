@@ -2093,6 +2093,7 @@ dependencies = [
  "biome_html_syntax",
  "biome_js_syntax",
  "biome_languages",
+ "biome_module_graph",
  "biome_package",
  "biome_parser",
  "biome_rowan",
@@ -2102,10 +2103,15 @@ dependencies = [
  "biome_tailwind_parser",
  "biome_tailwind_syntax",
  "biome_unicode_table",
+ "codspeed-criterion-compat",
  "insta",
+ "json_comments",
+ "mimalloc",
  "phf 0.13.1",
  "rustc-hash 2.1.3",
+ "serde_json",
  "smallvec",
+ "tikv-jemallocator",
 ]
 
 [[package]]

@@ -537,6 +537,7 @@ jobs:
       matrix:
         package:
           - biome_tailwind_parser
+          - biome_tailwind_logic
     steps: *bench_steps
 
   configuration:

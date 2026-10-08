@@ -7,7 +7,7 @@ on:
       - main
     paths: # Only run when the generator, its dependencies or its output change
       - 'packages/tailwindcss-config-analyzer/**'
-      - 'crates/biome_js_analyze/src/lint/nursery/use_tailwind_sorted_classes/tailwind_preset_v4.rs'
+      - 'crates/biome_tailwind_logic/src/use_tailwind_sorted_classes/tailwind_preset_v4.rs'
       - 'pnpm-lock.yaml'
       - 'rust-toolchain.toml'
       - '.github/workflows/pull_request_tailwind_preset.yml'
@@ -54,4 +54,4 @@ jobs:
           pnpm --filter tailwindcss-config-analyzer i --frozen-lockfile
           pnpm --filter tailwindcss-config-analyzer run execute:v4
       - name: Check that the preset is up to date
-        run: git diff --exit-code -- crates/biome_js_analyze/src/lint/nursery/use_tailwind_sorted_classes/tailwind_preset_v4.rs
+        run: git diff --exit-code -- crates/biome_tailwind_logic/src/use_tailwind_sorted_classes/tailwind_preset_v4.rs
