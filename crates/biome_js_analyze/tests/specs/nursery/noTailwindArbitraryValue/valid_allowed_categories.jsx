@@ -1,0 +1,6 @@
+/* should not generate diagnostics */
+<div className="w-[320px] m-[13px] -top-[3px]" />;
+<div className="md:max-h-[calc(100dvh-40px)]!" />;
+<div className="[margin:1rem] [width:100%]" />;
+<div className="p-[13px] gap-[3px] space-x-[3px]" />;
+<div className="[padding:13px]" />;
