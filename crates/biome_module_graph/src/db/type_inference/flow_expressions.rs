@@ -3,18 +3,14 @@
 
 use super::ResolutionCtx;
 use crate::db::queries::{ExpressionTypeInput, infer_flow_expression_type};
-use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, JsAwaitExpression, JsBinaryExpression, JsBinaryOperator,
-    JsCallArgumentList, JsCallArguments, JsCallExpression, JsComputedMemberExpression,
-    JsConditionalExpression, JsIdentifierExpression, JsLogicalExpression, JsLogicalOperator,
-    JsParenthesizedExpression, JsSequenceExpression, JsStaticMemberExpression,
-};
+use crate::js_module_info::flow::AnyFlowExpression;
+use biome_js_syntax::{AnyJsCallArgument, AnyJsExpression, JsLogicalOperator};
 use biome_js_type_info::{
     NarrowingPredicate, RawTypeData, RawTypeId, TypeReference, TypeofExpression,
     interned_types::{Literal, TypeData},
     narrow_type,
 };
-use biome_rowan::{AstNode, AstSeparatedList, declare_node_union};
+use biome_rowan::{AstNode, AstSeparatedList};
 
 /// Limits how many [evaluated ancestors](AnyFlowExpression::evaluated_ancestors)
 /// an evaluated expression may have.
@@ -23,94 +19,6 @@ use biome_rowan::{AstNode, AstSeparatedList, declare_node_union};
 /// run on the call stack. Each operand has one more evaluated ancestor than the
 /// expression that queries it, so this bounds the depth of that recursion.
 const MAX_FLOW_EXPRESSION_DEPTH: usize = 48;
-
-declare_node_union! {
-    /// Expressions whose type at a source occurrence can follow a refined
-    /// operand.
-    ///
-    /// [`ResolutionCtx::resolve_flow_expression`] evaluates exactly the members
-    /// for which [`Self::is_evaluated`] returns true; every other expression
-    /// keeps its raw type.
-    pub(super) AnyFlowExpression = JsIdentifierExpression
-        | JsParenthesizedExpression
-        | JsStaticMemberExpression
-        | JsComputedMemberExpression
-        | JsLogicalExpression
-        | JsConditionalExpression
-        | JsCallExpression
-        | JsAwaitExpression
-        | JsSequenceExpression
-        | JsBinaryExpression
-}
-
-impl AnyFlowExpression {
-    /// Returns whether flow evaluation supports this expression's shape.
-    ///
-    /// Among binary expressions only addition is evaluated, and calls are
-    /// evaluated only without explicit type arguments or spread arguments.
-    pub(super) fn is_evaluated(&self) -> bool {
-        match self {
-            Self::JsBinaryExpression(binary) => {
-                binary.operator().ok() == Some(JsBinaryOperator::Plus)
-            }
-            Self::JsCallExpression(call) => {
-                call.type_arguments().is_none()
-                    && call.arguments().is_ok_and(|arguments| {
-                        arguments.args().iter().all(|argument| {
-                            matches!(argument, Ok(AnyJsCallArgument::AnyJsExpression(_)))
-                        })
-                    })
-            }
-            Self::JsIdentifierExpression(_)
-            | Self::JsParenthesizedExpression(_)
-            | Self::JsStaticMemberExpression(_)
-            | Self::JsComputedMemberExpression(_)
-            | Self::JsLogicalExpression(_)
-            | Self::JsConditionalExpression(_)
-            | Self::JsAwaitExpression(_)
-            | Self::JsSequenceExpression(_) => true,
-        }
-    }
-
-    /// Returns the enclosing expressions whose evaluation queries this one,
-    /// directly or through other operands, innermost first.
-    ///
-    /// A refined type can only propagate along this chain, and its length
-    /// bounds the operand recursion that can reach this expression.
-    pub(super) fn evaluated_ancestors(&self) -> impl Iterator<Item = Self> + use<> {
-        std::iter::successors(self.evaluated_parent(), Self::evaluated_parent)
-    }
-
-    /// Returns the parent expression whose evaluation queries this one as an
-    /// operand.
-    ///
-    /// An operand is a direct child or a call argument. A sequence reads only
-    /// its right side; every other evaluated expression reads all of its operands.
-    fn evaluated_parent(&self) -> Option<Self> {
-        let mut parent = self.syntax().parent()?;
-        while JsCallArguments::can_cast(parent.kind())
-            || JsCallArgumentList::can_cast(parent.kind())
-        {
-            parent = parent.parent()?;
-        }
-        let parent = Self::cast(parent)?;
-        let reads_operand = match &parent {
-            Self::JsSequenceExpression(sequence) => sequence
-                .right()
-                .is_ok_and(|right| right.syntax() == self.syntax()),
-            Self::JsIdentifierExpression(_)
-            | Self::JsParenthesizedExpression(_)
-            | Self::JsStaticMemberExpression(_)
-            | Self::JsComputedMemberExpression(_)
-            | Self::JsLogicalExpression(_)
-            | Self::JsConditionalExpression(_)
-            | Self::JsCallExpression(_)
-            | Self::JsAwaitExpression(_)
-            | Self::JsBinaryExpression(_) => true,
-        };
-        (reads_operand && parent.is_evaluated()).then_some(parent)
-    }
-}
 
 impl<'db> ResolutionCtx<'db, '_> {
     /// Infers `expression` at its source occurrence from refined operands.
