@@ -1,0 +1,16 @@
+<!-- should not generate diagnostics -->
+<template>
+  <VueComponent @custom-event="onEvent" />
+  <VueComponent v-on:custom-event="onEvent" />
+  <VueComponent @update:model-value="onEvent" />
+  <VueComponent @custom_event="onEvent" />
+  <VueComponent :customEvent="onEvent" />
+  <VueComponent v-on="events" />
+  <VueComponent @[eventName]="onEvent" />
+  <VueComponent v-on:[eventName]="onEvent" />
+  <div v-on:unknownEvent="onEvent"></div>
+  <button @customEvent="onEvent"></button>
+  <div is="vue:my-component" @customEvent="onEvent"></div>
+  <component :is="currentView" @customEvent="onEvent" />
+  <svg><circle @customEvent="onEvent" /></svg>
+</template>
