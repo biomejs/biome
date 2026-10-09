@@ -28,8 +28,8 @@ use biome_js_syntax::{
     JsVariableDeclaration, JsVariableDeclarator, TsDeclareFunctionDeclaration,
     TsExternalModuleDeclaration, TsInstantiationExpression, TsInterfaceDeclaration, TsMappedType,
     TsModuleDeclaration, TsPropertyParameterModifierList, TsReferenceType, TsReturnTypeAnnotation,
-    TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeParameter,
-    TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
+    TsTypeAliasDeclaration, TsTypeAnnotation, TsTypeArguments, TsTypeList, TsTypeMemberList,
+    TsTypeParameter, TsTypeParameters, TsTypeofType, inner_string_text, unescape_js_string,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxResult, Text, TextRange, TokenText};
 use rustc_hash::FxHashMap;
@@ -814,20 +814,11 @@ impl TypeData {
             },
             AnyTsType::TsNumberType(_) => Self::reference(GLOBAL_NUMBER_KEYWORD_ID),
             AnyTsType::TsObjectType(ty) => {
-                let mut has_unknown_members = false;
-                let members = ty
-                    .members()
-                    .into_iter()
-                    .filter_map(|member| {
-                        let member =
-                            TypeMember::from_any_ts_type_member(collector, scope_id, &member);
-                        has_unknown_members |= member.is_none();
-                        member
-                    })
-                    .collect();
+                let (members, has_unknown_members) =
+                    TypeMember::from_ts_type_member_list(collector, scope_id, ty.members());
                 Self::Object(Box::new(Object {
                     prototype: None,
-                    members,
+                    members: members.into(),
                     has_unknown_members,
                 }))
             }
@@ -1524,13 +1515,9 @@ impl TypeData {
                     TypeReference::types_from_ts_type_list(collector, scope_id, extends.types())
                 })
                 .unwrap_or_default(),
-            members: decl
-                .members()
-                .into_iter()
-                .filter_map(|member| {
-                    TypeMember::from_any_ts_type_member(collector, scope_id, &member)
-                })
-                .collect(),
+            members: TypeMember::from_ts_type_member_list(collector, scope_id, decl.members())
+                .0
+                .into(),
         }))
     }
 
@@ -2550,6 +2537,59 @@ impl TypeMember {
                 None
             }
         }
+    }
+
+    /// Creates the members of an interface or object type, merging overloaded
+    /// method signatures into one member. Also returns whether any member was
+    /// unknown.
+    fn from_ts_type_member_list(
+        collector: &mut dyn RawTypeCollector,
+        scope_id: ScopeId,
+        member_list: TsTypeMemberList,
+    ) -> (Vec<Self>, bool) {
+        // Each member is paired with the signatures of its later overloads.
+        let mut collected = Vec::new();
+        let mut has_unknown_members = false;
+        let mut overloads_by_name = FxHashMap::default();
+        for syntax_member in member_list {
+            let Some(member) = Self::from_any_ts_type_member(collector, scope_id, &syntax_member)
+            else {
+                has_unknown_members = true;
+                continue;
+            };
+
+            if let AnyTsTypeMember::TsMethodSignatureTypeMember(_) = syntax_member
+                && let TypeMemberKind::Named(name) = &member.kind
+            {
+                if let Some(&index) = overloads_by_name.get(name) {
+                    let (_, overloads): &mut (_, Vec<_>) = &mut collected[index];
+                    overloads.push(member.ty);
+                    continue;
+                }
+                overloads_by_name.insert(name.clone(), collected.len());
+            }
+            collected.push((member, Vec::new()));
+        }
+
+        let members = collected
+            .into_iter()
+            .map(|(mut member, overloads)| {
+                if !overloads.is_empty() {
+                    let signatures = std::iter::once(member.ty)
+                        .chain(overloads)
+                        .map(|ty| Self {
+                            kind: TypeMemberKind::CallSignature,
+                            ty,
+                        })
+                        .collect();
+                    member.ty = collector
+                        .reference_to_owned_data(TypeData::object_with_members(signatures));
+                }
+                member
+            })
+            .collect();
+
+        (members, has_unknown_members)
     }
 
     pub fn from_any_ts_type_member(
