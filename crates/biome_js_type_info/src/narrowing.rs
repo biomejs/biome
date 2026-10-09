@@ -38,14 +38,26 @@ pub enum NarrowingPredicate<'db> {
     Literal(InferredTypeData<'db>),
 }
 
+/// Returns whether `ty` carries no information that a runtime test could
+/// filter: `any` and the internal `Unknown`.
+///
+/// Either type absorbs every union it joins, and [`narrow_type`] returns it
+/// unchanged for every predicate and branch. No test can therefore refine it or
+/// prove a branch impossible, so callers can skip collecting tests for it.
+/// `never` is excluded: it also stays unchanged, but it already proves that a
+/// branch is impossible.
+pub fn is_narrowing_invariant(ty: InferredTypeData<'_>) -> bool {
+    matches!(ty, InferredTypeData::AnyKeyword | InferredTypeData::Unknown)
+}
+
 /// Retains the values of `ty` that can pass a runtime test.
 ///
 /// `positive` selects the test's true branch; `false` selects its complement.
 /// Inputs should be normalized. Unresolved handles, wrappers, unsupported
-/// structures, `any`, and internal `Unknown` stay unchanged. A `void` result
-/// becomes `Unknown` because its runtime value is unspecified. Explicit TypeScript
-/// `unknown` supports positive primitive `typeof` and literal tests. Only proven
-/// empty results become `NeverKeyword`.
+/// structures, and [narrowing-invariant](is_narrowing_invariant) types stay
+/// unchanged. A `void` result becomes `Unknown` because its runtime value is
+/// unspecified. Explicit TypeScript `unknown` supports positive primitive
+/// `typeof` and literal tests. Only proven empty results become `NeverKeyword`.
 ///
 /// Union traversal visits at most 256 types and returns the original input on
 /// exhaustion. Literal decoding accepts at most 1024 bytes per operand. Escaped
@@ -58,6 +70,9 @@ pub fn narrow_type<'db>(
     predicate: NarrowingPredicate<'db>,
     positive: bool,
 ) -> InferredTypeData<'db> {
+    if is_narrowing_invariant(ty) {
+        return ty;
+    }
     let predicate = match predicate {
         NarrowingPredicate::Truthy => PreparedPredicate::Truthy,
         NarrowingPredicate::Nullish => PreparedPredicate::Nullish,
@@ -785,6 +800,23 @@ mod tests {
                 narrow_type(&db, ty, NarrowingPredicate::Nullish, false),
                 unknown
             );
+        }
+    }
+
+    #[test]
+    fn only_any_and_inference_failures_are_narrowing_invariant() {
+        let db = TestDb::default();
+        for ty in [InferredTypeData::AnyKeyword, InferredTypeData::Unknown] {
+            assert!(is_narrowing_invariant(ty), "{ty:?}");
+        }
+        for ty in [
+            InferredTypeData::UnknownKeyword,
+            InferredTypeData::NeverKeyword,
+            InferredTypeData::String,
+            InferredTypeData::Null,
+            number(&db, "1"),
+        ] {
+            assert!(!is_narrowing_invariant(ty), "{ty:?}");
         }
     }
 

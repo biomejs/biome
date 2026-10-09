@@ -22,7 +22,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsIdentifierExpression, JsSyntaxNode,
 };
 use biome_js_type_info::interned_types::TypeData;
-use biome_js_type_info::{NarrowingPredicate, narrow_type};
+use biome_js_type_info::{NarrowingPredicate, is_narrowing_invariant, narrow_type};
 use biome_rowan::{AstNode, TextRange};
 use std::collections::VecDeque;
 
@@ -64,7 +64,7 @@ pub(in crate::db) fn flow_binding_baseline<'db>(
     let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
     let baseline = ctx.resolve(reference);
     match ctx.flow_baseline(baseline) {
-        Some(TypeData::Unknown | TypeData::AnyKeyword) => None,
+        Some(baseline) if is_narrowing_invariant(baseline) => None,
         Some(baseline) => Some(baseline),
         None => Some(TypeData::Unknown),
     }

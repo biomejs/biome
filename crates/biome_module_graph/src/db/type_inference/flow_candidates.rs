@@ -2,9 +2,10 @@
 //!
 //! The index stores source ranges, not inferred types or flow states. Semantic
 //! references connect conditions to reads of the same binding, and only tests in
-//! the binding's own execution root count. A read's enclosing expressions stay
-//! candidates up to the first one that flow evaluation does not support; the
-//! occurrence query decides whether an operand actually changes their type.
+//! the binding's own execution root count. A read and its evaluated ancestors,
+//! the enclosing expressions that flow evaluation reaches through operands, are
+//! candidates; the occurrence query decides whether an operand actually changes
+//! their type.
 
 use super::flow_conditions::condition_subjects;
 use super::flow_expressions::AnyFlowExpression;
@@ -13,8 +14,7 @@ use crate::js_module_info::flow_sources::{FlowConditionSource, is_flow_construct
 use biome_js_control_flow::{AnyJsControlFlowRoot, FlowOutcome};
 use biome_js_semantic::{JsDeclarationKind, Reference, SemanticModel};
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsRoot, AnyTsType, JsIdentifierExpression, JsLogicalOperator, JsSyntaxKind,
-    JsSyntaxNodePtr,
+    AnyJsRoot, AnyTsType, JsIdentifierExpression, JsLogicalOperator, JsSyntaxKind, JsSyntaxNodePtr,
 };
 use biome_rowan::{AstNode, SyntaxKind, TextRange, TextSize, WalkEvent};
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -62,7 +62,6 @@ fn collect_candidates(info: &JsModuleInfo) -> Option<FxHashSet<TextRange>> {
     }
 
     let mut tested = Vec::new();
-    let mut expression_ancestors = Vec::new();
     for binding in info.semantic_model.all_bindings() {
         remaining = remaining.checked_sub(1)?;
         if binding.is_imported() || binding.declaration_kind() == JsDeclarationKind::HoistedValue {
@@ -139,25 +138,22 @@ fn collect_candidates(info: &JsModuleInfo) -> Option<FxHashSet<TextRange>> {
             else {
                 continue;
             };
-            expression_ancestors.clear();
-            let mut carries_flow = true;
+            let mut root = None;
             for ancestor in identifier.syntax().ancestors() {
                 remaining = remaining.checked_sub(1)?;
                 if AnyJsControlFlowRoot::can_cast(ancestor.kind()) {
-                    if &ancestor == declaration_root.syntax() {
-                        candidates.extend(expression_ancestors.iter().copied());
-                    }
+                    root = Some(ancestor);
                     break;
                 }
-                // Only an unevaluated expression drops a refined operand. Skipping
-                // other syntax, such as call arguments, can only add candidates.
-                if carries_flow && AnyJsExpression::can_cast(ancestor.kind()) {
-                    carries_flow = AnyFlowExpression::cast_ref(&ancestor)
-                        .is_some_and(|expression| expression.is_evaluated());
-                    if carries_flow {
-                        expression_ancestors.push(ancestor.text_trimmed_range());
-                    }
-                }
+            }
+            if root.as_ref() != Some(declaration_root.syntax()) {
+                continue;
+            }
+            let read = AnyFlowExpression::JsIdentifierExpression(identifier);
+            candidates.insert(read.range());
+            for expression in read.evaluated_ancestors() {
+                remaining = remaining.checked_sub(1)?;
+                candidates.insert(expression.range());
             }
         }
     }
