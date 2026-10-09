@@ -1,9 +1,11 @@
-// Extract per-namespace theme keys from Tailwind v4's default theme.css.
+// Extract per-namespace theme keys and values from Tailwind v4's default
+// theme.css.
 //
 // For every prefix listed in `THEME_NAMESPACES`, scan
 // https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/theme.css
-// for declarations of the form `--<prefix><key>: <value>;` and collect the
-// `<key>` strings.
+// for declarations of the form `--<prefix><key>: <value>;` and collect each
+// `<key>` with its `<value>`. Values that span several lines (e.g.
+// `--font-sans`) are joined with single spaces.
 //
 // Companion declarations like `--text-lg--line-height` are skipped (they
 // share a prefix but the key contains `--`, signalling a sub-token rather
@@ -17,7 +19,8 @@ import {
 	type ThemeNamespacePrefix,
 } from "./theme-namespaces.js";
 
-export type ThemeKeysByPrefix = Map<ThemeNamespacePrefix, Set<string>>;
+// Theme key (e.g. `red-500`) to its value, with whitespace collapsed.
+export type ThemeKeysByPrefix = Map<ThemeNamespacePrefix, Map<string, string>>;
 
 export async function extractThemeKeys(): Promise<ThemeKeysByPrefix> {
 	const require = createRequire(import.meta.url);
@@ -32,26 +35,25 @@ export async function extractThemeKeys(): Promise<ThemeKeysByPrefix> {
 	const result: ThemeKeysByPrefix = new Map();
 
 	// Sort prefixes by length descending so e.g. `--text-shadow-` matches
-	// before `--text-` when scanning a single line.
+	// before `--text-` when matching a declaration name.
 	const prefixes = THEME_NAMESPACES.map((n) => n.cssPrefix).sort(
 		(a, b) => b.length - a.length,
 	);
 
-	for (const line of themeCss.split("\n")) {
-		const m = line.match(/^\s*(--[a-z][a-z0-9-]*):/);
-		if (!m) continue;
+	for (const m of themeCss.matchAll(/^\s*(--[a-z][a-z0-9-]*):([^;]*);/gm)) {
 		const decl = m[1];
+		const value = m[2].trim().replace(/\s+/g, " ");
 		for (const prefix of prefixes) {
 			if (!decl.startsWith(prefix)) continue;
 			const key = decl.slice(prefix.length);
 			if (key.length === 0) break; // bare `--color-:` shouldn't happen
 			if (key.includes("--")) break; // companion (e.g. lg--line-height)
-			let set = result.get(prefix as ThemeNamespacePrefix);
-			if (!set) {
-				set = new Set();
-				result.set(prefix as ThemeNamespacePrefix, set);
+			let entries = result.get(prefix as ThemeNamespacePrefix);
+			if (!entries) {
+				entries = new Map();
+				result.set(prefix as ThemeNamespacePrefix, entries);
 			}
-			set.add(key);
+			entries.set(key, value);
 			break;
 		}
 	}

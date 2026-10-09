@@ -19,6 +19,7 @@ import type {
 	ExtractedVariants,
 	ThemeValue,
 } from "./extract-variants.js";
+import { parseThemeColor } from "./parse-theme-color.js";
 import {
 	THEME_NAMESPACES,
 	type ThemeNamespacePrefix,
@@ -36,6 +37,7 @@ const HEADER = `//! AUTO-GENERATED. DO NOT EDIT MANUALLY.
 //! - default theme:   https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/theme.css
 //! - infer-data-type: https://github.com/tailwindlabs/tailwindcss/blob/main/packages/tailwindcss/src/utils/infer-data-type.ts
 
+use color::{ColorSpaceTag, DynamicColor, Flags, Missing};
 use phf::{phf_map, phf_set};
 
 use super::tailwind_preset_v4_types::{
@@ -330,12 +332,14 @@ function formatArbitraryBranch(
 	}
 }
 
-function renderThemeKeys(keys: Map<ThemeNamespacePrefix, Set<string>>): string {
+function renderThemeKeys(
+	keys: Map<ThemeNamespacePrefix, Map<string, string>>,
+): string {
 	const blocks: string[] = [];
 	for (const ns of THEME_NAMESPACES) {
-		const set = keys.get(ns.cssPrefix);
-		const items = set
-			? [...set]
+		const entries = keys.get(ns.cssPrefix);
+		const items = entries
+			? [...entries.keys()]
 					.sort()
 					.map((k) => `    ${rustString(k)},`)
 					.join("\n")
@@ -368,9 +372,57 @@ ${lines.join("\n")}
 `;
 }
 
+// Rust `f32` literal for `n`, rounded to `f32` as `as f32` does. Emits the
+// shortest decimal that rounds back to the same `f32`; nine significant
+// digits always suffice.
+function rustF32(n: number): string {
+	const f = Math.fround(n);
+	let s = String(Number(f.toPrecision(9)));
+	for (let p = 1; p < 9; p++) {
+		const candidate = Number(f.toPrecision(p));
+		if (Math.fround(candidate) === f) {
+			s = String(candidate);
+			break;
+		}
+	}
+	return /[.e]/.test(s) ? s : `${s}.0`;
+}
+
+function renderThemeColors(
+	keys: Map<ThemeNamespacePrefix, Map<string, string>>,
+): string {
+	const entries = [...(keys.get("--color-") ?? [])].sort(([a], [b]) =>
+		a < b ? -1 : a > b ? 1 : 0,
+	);
+	const lines = entries.map(([name, value]) => {
+		const { space, components } = parseThemeColor(value);
+		const missing = components.flatMap((c, i) => (c === null ? [i] : []));
+		if (missing.length > 1) {
+			// `Missing` has no const constructor for several components.
+			throw new Error(`more than one \`none\` component in: ${value}`);
+		}
+		const flags =
+			missing.length === 0
+				? "Flags::from_missing(Missing::EMPTY)"
+				: `Flags::from_missing(Missing::single(${missing[0]}))`;
+		const values = components.map((c) => rustF32(c ?? 0)).join(", ");
+		return `    ${rustString(name)} => DynamicColor { cs: ColorSpaceTag::${space}, flags: ${flags}, components: [${values}] },`;
+	});
+	return `/// Default theme colors, keyed by the name after \`--color-\` (e.g. \`red-500\`).
+///
+/// Each value has the color space, components, and missing components that
+/// [\`color::parse_color\`] returns for the declaration in theme.css. Unlike
+/// parsed colors, \`flags.named()\` is false, so compare \`cs\`, \`components\`,
+/// and \`flags.missing()\` instead of the whole value.
+pub static THEME_COLOR_VALUES: phf::Map<&'static str, DynamicColor> = phf_map! {
+${lines.join("\n")}
+};
+`;
+}
+
 export function renderRust(input: {
 	propertyOrder: string[];
-	themeKeys: Map<ThemeNamespacePrefix, Set<string>>;
+	themeKeys: Map<ThemeNamespacePrefix, Map<string, string>>;
 	utilities: ExtractedUtilities;
 	variants: ExtractedVariants;
 }): string {
@@ -392,5 +444,6 @@ export function renderRust(input: {
 		renderThemeValueMap("BREAKPOINT_VALUES", input.variants.breakpoints),
 		renderThemeValueMap("CONTAINER_VALUES", input.variants.containers),
 		renderThemeKeys(input.themeKeys),
+		renderThemeColors(input.themeKeys),
 	].join("\n");
 }

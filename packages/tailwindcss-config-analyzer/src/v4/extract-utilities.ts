@@ -206,7 +206,8 @@ export async function extractUtilities(): Promise<ExtractedUtilities> {
 
 	const themeKeys = await extractThemeKeys();
 	const allThemeKeys = new Set<string>();
-	for (const ks of themeKeys.values()) for (const k of ks) allThemeKeys.add(k);
+	for (const ks of themeKeys.values())
+		for (const k of ks.keys()) allThemeKeys.add(k);
 	const probeTokens = new Set(
 		THEME_NAMESPACES.map(({ variant }) => probeToken(variant)),
 	);
