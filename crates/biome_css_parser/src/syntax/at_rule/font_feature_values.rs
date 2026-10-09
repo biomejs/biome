@@ -3,7 +3,8 @@ use super::parse_error::{
     expected_font_feature_values_item,
 };
 use crate::syntax::block::{ParseBlockBody, parse_declaration_block};
-use crate::syntax::is_at_string;
+use crate::syntax::declaration::parse_empty_declaration;
+use crate::syntax::{CssSyntaxFeatures, is_at_string};
 use crate::{
     lexer::CssLexContext,
     parser::CssParser,
@@ -19,7 +20,7 @@ use biome_css_syntax::{
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parse_recovery::ParseRecovery;
 use biome_parser::{
-    Parser, TokenSet,
+    Parser, SyntaxFeature, TokenSet,
     parse_lists::ParseNodeList,
     parse_recovery::{ParseRecoveryTokenSet, RecoveryResult},
     parsed_syntax::ParsedSyntax::{self, Absent, Present},
@@ -248,7 +249,13 @@ impl ParseNodeList for FontFeatureValuesItemList {
     const LIST_KIND: Self::Kind = CSS_FONT_FEATURE_VALUES_ITEM_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_font_feature_values_item(p)
+        if let Present(empty) =
+            CssSyntaxFeatures::Scss.parse_supported_syntax(p, parse_empty_declaration)
+        {
+            Present(empty)
+        } else {
+            parse_font_feature_values_item(p)
+        }
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -260,12 +267,14 @@ impl ParseNodeList for FontFeatureValuesItemList {
         p: &mut Self::Parser<'_>,
         parsed_element: ParsedSyntax,
     ) -> RecoveryResult {
+        let recovery_set = if CssSyntaxFeatures::Scss.is_supported(p) {
+            FONT_FEATURE_VALUES_ITEM_LIST_RECOVERY_SET.union(token_set![T![;]])
+        } else {
+            FONT_FEATURE_VALUES_ITEM_LIST_RECOVERY_SET
+        };
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(
-                CSS_BOGUS_FONT_FEATURE_VALUES_ITEM,
-                FONT_FEATURE_VALUES_ITEM_LIST_RECOVERY_SET,
-            ),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS_FONT_FEATURE_VALUES_ITEM, recovery_set),
             expected_font_feature_values_item,
         )
     }
