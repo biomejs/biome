@@ -357,6 +357,7 @@ pub mod no_vue_duplicate_keys;
 pub mod no_vue_import_compiler_macros;
 pub mod no_vue_options_api;
 pub mod no_vue_ref_as_operand;
+pub mod no_vue_required_prop_with_default;
 pub mod no_vue_reserved_keys;
 pub mod no_vue_reserved_props;
 pub mod no_vue_root_v_if;

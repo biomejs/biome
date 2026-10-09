@@ -1,0 +1,102 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-props-object.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+const props = defineProps({
+  name: {
+    required: true,
+    default: "Hello",
+  },
+  list: {
+    type: Array,
+    required: true,
+    default() {
+      return [];
+    },
+  },
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-define-props-object.vue:5:5 lint/nursery/noVueRequiredPropWithDefault  FIXABLE  ━━━━━━━━━━━━
+
+  ! The prop name is required, but it also has a default value.
+  
+    3 │ const props = defineProps({
+    4 │   name: {
+  > 5 │     required: true,
+      │     ^^^^^^^^^^^^^^
+    6 │     default: "Hello",
+    7 │   },
+  
+  i The default value is declared here.
+  
+    4 │   name: {
+    5 │     required: true,
+  > 6 │     default: "Hello",
+      │     ^^^^^^^^^^^^^^^^
+    7 │   },
+    8 │   list: {
+  
+  i Parent components are expected to always pass a required prop, so its default value should never be needed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Make the prop optional.
+  
+     2  2 │   const props = defineProps({
+     3  3 │     name: {
+     4    │ - ····required:·true,
+        4 │ + ····required:·false,
+     5  5 │       default: "Hello",
+     6  6 │     },
+  
+
+```
+
+```
+invalid-define-props-object.vue:10:5 lint/nursery/noVueRequiredPropWithDefault  FIXABLE  ━━━━━━━━━━━
+
+  ! The prop list is required, but it also has a default value.
+  
+     8 │   list: {
+     9 │     type: Array,
+  > 10 │     required: true,
+       │     ^^^^^^^^^^^^^^
+    11 │     default() {
+    12 │       return [];
+  
+  i The default value is declared here.
+  
+     9 │     type: Array,
+    10 │     required: true,
+  > 11 │     default() {
+       │     ^^^^^^^^^^^
+  > 12 │       return [];
+  > 13 │     },
+       │     ^
+    14 │   },
+    15 │ });
+  
+  i Parent components are expected to always pass a required prop, so its default value should never be needed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Make the prop optional.
+  
+     7  7 │     list: {
+     8  8 │       type: Array,
+     9    │ - ····required:·true,
+        9 │ + ····required:·false,
+    10 10 │       default() {
+    11 11 │         return [];
+  
+
+```
