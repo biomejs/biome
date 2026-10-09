@@ -401,18 +401,13 @@ fn tests_in_nested_roots_or_after_the_read_skip_flow_queries() {
 
 #[test]
 fn unrefinable_binding_types_skip_flow_graphs() {
-    for parameter in ["value: any", "value"] {
+    for (parameter, resolved_queries) in [("value: any", 0), ("value", 0), ("value: Loose", 1)] {
         let source = format!(
-            "function f({parameter}) {{ /*before*/value; if (typeof value === 'string') {{ /*after*/value; }} }}"
+            "type Loose = any;\n\
+             function f({parameter}) {{ /*before*/value; if (typeof value === 'string') {{ /*after*/value; }} }}"
         );
         let (db, module) = narrowing_db(&source);
-        let read = |marker| {
-            infer_expression_type(
-                &db,
-                ExpressionTypeInput::new(&db, module, marked_range(&source, marker, "value")),
-            )
-            .unwrap()
-        };
+        let read = |marker| normalized_type_at(&db, module, &source, marker, "value");
         let ordinary = read("before");
         assert!(
             matches!(
@@ -424,15 +419,15 @@ fn unrefinable_binding_types_skip_flow_graphs() {
         db.clear_salsa_events();
         assert_eq!(read("after"), ordinary, "{parameter}");
         let events = db.take_salsa_events();
-        assert_eq!(
-            function_query_will_execute_count_by_name(&db, "infer_flow_binding_baseline", &events),
-            1,
-            "{parameter}"
-        );
-        for query in ["narrowing_flow_for_root", "infer_flow_binding_type"] {
+        // Only a type that resolves to `any` needs a flow graph to find out.
+        for query in [
+            "narrowing_flow_for_root",
+            "infer_flow_binding_type",
+            "infer_flow_binding_baseline",
+        ] {
             assert_eq!(
                 function_query_will_execute_count_by_name(&db, query, &events),
-                0,
+                resolved_queries,
                 "{parameter}: {query}"
             );
         }
@@ -441,18 +436,18 @@ fn unrefinable_binding_types_skip_flow_graphs() {
 
 #[test]
 fn editing_a_binding_type_recomputes_whether_it_can_narrow() {
-    const ANY: &str = "function f(value: any) { if (value !== null) { /*read*/value; } }";
-    const NULLABLE: &str =
-        "function f(value: string | null) { if (value !== null) { /*read*/value; } }";
+    const ANY: &str =
+        "type Value = any; function f(value: Value) { if (value !== null) { /*read*/value; } }";
+    const NULLABLE: &str = "type Value = string | null; function f(value: Value) { if (value !== null) { /*read*/value; } }";
     let fs = MemoryFileSystem::default();
     fs.insert("/src/index.ts".into(), ANY);
     let mut db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
     let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
 
-    for (index, (source, expected, graphs)) in [
-        (ANY, InferredTypeData::AnyKeyword, 0),
-        (NULLABLE, InferredTypeData::String, 1),
-        (ANY, InferredTypeData::AnyKeyword, 0),
+    for (index, (source, expected)) in [
+        (ANY, InferredTypeData::AnyKeyword),
+        (NULLABLE, InferredTypeData::String),
+        (ANY, InferredTypeData::AnyKeyword),
     ]
     .into_iter()
     .enumerate()
@@ -472,11 +467,6 @@ fn editing_a_binding_type_recomputes_whether_it_can_narrow() {
         assert_eq!(
             function_query_will_execute_count_by_name(&db, "infer_flow_binding_baseline", &events),
             1,
-            "{source}"
-        );
-        assert_eq!(
-            function_query_will_execute_count_by_name(&db, "narrowing_flow_for_root", &events),
-            graphs,
             "{source}"
         );
     }
