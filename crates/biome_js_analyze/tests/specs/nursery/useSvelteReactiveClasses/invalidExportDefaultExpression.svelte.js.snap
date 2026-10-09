@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalidExportDefaultExpression.svelte.js
+---
+# Input
+```js
+/* should generate diagnostics */
+export default new Date(8.64e15);
+
+```
+
+# Diagnostics
+```
+invalidExportDefaultExpression.svelte.js:2:16 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━
+
+  ! This Date is exported, but Svelte doesn't detect changes to it.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ export default new Date(8.64e15);
+      │                ^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Other files that import it can modify it, and Svelte doesn't detect changes made inside a built-in Date.
+  
+  i Use SvelteDate from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

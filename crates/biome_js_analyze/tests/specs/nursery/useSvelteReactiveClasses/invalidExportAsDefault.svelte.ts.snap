@@ -1,0 +1,66 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalidExportAsDefault.svelte.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+const variable1 = new Date(8.64e15);
+const variable2 = new Map<string, number>();
+variable2.set("one", 1);
+
+export { variable1 as default };
+
+```
+
+# Diagnostics
+```
+invalidExportAsDefault.svelte.ts:2:19 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Date is exported, but Svelte doesn't detect changes to it.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const variable1 = new Date(8.64e15);
+      │                   ^^^^^^^^^^^^^^^^^
+    3 │ const variable2 = new Map<string, number>();
+    4 │ variable2.set("one", 1);
+  
+  i Other files that import it can modify it, and Svelte doesn't detect changes made inside a built-in Date.
+  
+  i Use SvelteDate from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidExportAsDefault.svelte.ts:3:19 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Map is modified, but Svelte doesn't detect changes to it.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const variable1 = new Date(8.64e15);
+  > 3 │ const variable2 = new Map<string, number>();
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ variable2.set("one", 1);
+    5 │ 
+  
+  i It's modified here.
+  
+    2 │ const variable1 = new Date(8.64e15);
+    3 │ const variable2 = new Map<string, number>();
+  > 4 │ variable2.set("one", 1);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ export { variable1 as default };
+  
+  i Svelte doesn't detect changes made inside a built-in Map, so the parts of the page that use it don't update.
+  
+  i Use SvelteMap from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

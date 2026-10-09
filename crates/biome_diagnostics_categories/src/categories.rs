@@ -342,6 +342,7 @@ define_categories! {
     "lint/nursery/useStrictBooleanExpressions": "https://biomejs.dev/linter/rules/use-strict-boolean-expressions",
     "lint/nursery/useStringStartsEndsWith": "https://biomejs.dev/linter/rules/use-string-starts-ends-with",
     "lint/nursery/useSvelteKitRuneImports": "https://biomejs.dev/linter/rules/use-svelte-kit-rune-imports",
+    "lint/nursery/useSvelteReactiveClasses": "https://biomejs.dev/linter/rules/use-svelte-reactive-classes",
     "lint/nursery/useSvelteRequireEachKey": "https://biomejs.dev/linter/rules/use-svelte-require-each-key",
     "lint/nursery/useTailwindShorthandClasses": "https://biomejs.dev/linter/rules/use-tailwind-shorthand-classes",
     "lint/nursery/useTestHooksInOrder": "https://biomejs.dev/linter/rules/use-test-hooks-in-order",

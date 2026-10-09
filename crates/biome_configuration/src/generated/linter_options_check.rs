@@ -2479,6 +2479,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("nursery", "useStringStartsEndsWith", TypeId::of::<biome_rule_options::use_string_starts_ends_with::UseStringStartsEndsWithOptions>()));
     result.push(("nursery", "useSvelteKitRuneImports", TypeId::of::<biome_rule_options::use_svelte_kit_rune_imports::UseSvelteKitRuneImportsOptions>()));
+    result.push((
+        "nursery",
+        "useSvelteReactiveClasses",
+        TypeId::of::<
+            biome_rule_options::use_svelte_reactive_classes::UseSvelteReactiveClassesOptions,
+        >(),
+    ));
     result.push(("nursery", "useSvelteRequireEachKey", TypeId::of::<biome_rule_options::use_svelte_require_each_key::UseSvelteRequireEachKeyOptions>()));
     result.push((
         "style",

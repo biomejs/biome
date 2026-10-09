@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validExports.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+export const map = new Map();
+map.set(1, "one");
+
+```

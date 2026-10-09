@@ -1,0 +1,260 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalidExports.svelte.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const variable1 = new Date(8.64e15);
+const variable2 = new Map([[1, "one"], [2, "two"]]);
+const variable3 = new Set([1, 2, 1, 3, 3]);
+const variable4 = new URLSearchParams("foo=1&bar=2");
+const variable5 = new URL("https://svelte.dev/");
+const variable6 = new Date(8.64e15);
+
+export { variable1, variable2, variable3, variable4, variable5, variable6 as var };
+
+export const variable7 = new Date(8.64e15);
+
+export const store = { items: new Map(), tags: [new Set()] };
+
+export class Store {
+	items = new Map();
+}
+
+class Hidden {
+	static cache = new Map();
+}
+export { Hidden };
+
+```
+
+# Diagnostics
+```
+invalidExports.svelte.js:2:19 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Date is exported, but Svelte doesn't detect changes to it.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const variable1 = new Date(8.64e15);
+      │                   ^^^^^^^^^^^^^^^^^
+    3 │ const variable2 = new Map([[1, "one"], [2, "two"]]);
+    4 │ const variable3 = new Set([1, 2, 1, 3, 3]);
+  
+  i Other files that import it can modify it, and Svelte doesn't detect changes made inside a built-in Date.
+  
+  i Use SvelteDate from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidExports.svelte.js:3:19 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Map is exported, but Svelte doesn't detect changes to it.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const variable1 = new Date(8.64e15);
+  > 3 │ const variable2 = new Map([[1, "one"], [2, "two"]]);
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ const variable3 = new Set([1, 2, 1, 3, 3]);
+    5 │ const variable4 = new URLSearchParams("foo=1&bar=2");
+  
+  i Other files that import it can modify it, and Svelte doesn't detect changes made inside a built-in Map.
+  
+  i Use SvelteMap from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidExports.svelte.js:4:19 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set is exported, but Svelte doesn't detect changes to it.
+  
+    2 │ const variable1 = new Date(8.64e15);
+    3 │ const variable2 = new Map([[1, "one"], [2, "two"]]);
+  > 4 │ const variable3 = new Set([1, 2, 1, 3, 3]);
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ const variable4 = new URLSearchParams("foo=1&bar=2");
+    6 │ const variable5 = new URL("https://svelte.dev/");
+  
+  i Other files that import it can modify it, and Svelte doesn't detect changes made inside a built-in Set.
+  
+  i Use SvelteSet from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidExports.svelte.js:5:19 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This URLSearchParams is exported, but Svelte doesn't detect changes to it.
+  
+    3 │ const variable2 = new Map([[1, "one"], [2, "two"]]);
+    4 │ const variable3 = new Set([1, 2, 1, 3, 3]);
+  > 5 │ const variable4 = new URLSearchParams("foo=1&bar=2");
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ const variable5 = new URL("https://svelte.dev/");
+    7 │ const variable6 = new Date(8.64e15);
+  
+  i Other files that import it can modify it, and Svelte doesn't detect changes made inside a built-in URLSearchParams.
+  
+  i Use SvelteURLSearchParams from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidExports.svelte.js:6:19 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This URL is exported, but Svelte doesn't detect changes to it.
+  
+    4 │ const variable3 = new Set([1, 2, 1, 3, 3]);
+    5 │ const variable4 = new URLSearchParams("foo=1&bar=2");
+  > 6 │ const variable5 = new URL("https://svelte.dev/");
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ const variable6 = new Date(8.64e15);
+    8 │ 
+  
+  i Other files that import it can modify it, and Svelte doesn't detect changes made inside a built-in URL.
+  
+  i Use SvelteURL from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidExports.svelte.js:7:19 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Date is exported, but Svelte doesn't detect changes to it.
+  
+    5 │ const variable4 = new URLSearchParams("foo=1&bar=2");
+    6 │ const variable5 = new URL("https://svelte.dev/");
+  > 7 │ const variable6 = new Date(8.64e15);
+      │                   ^^^^^^^^^^^^^^^^^
+    8 │ 
+    9 │ export { variable1, variable2, variable3, variable4, variable5, variable6 as var };
+  
+  i Other files that import it can modify it, and Svelte doesn't detect changes made inside a built-in Date.
+  
+  i Use SvelteDate from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidExports.svelte.js:11:26 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Date is exported, but Svelte doesn't detect changes to it.
+  
+     9 │ export { variable1, variable2, variable3, variable4, variable5, variable6 as var };
+    10 │ 
+  > 11 │ export const variable7 = new Date(8.64e15);
+       │                          ^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ export const store = { items: new Map(), tags: [new Set()] };
+  
+  i Other files that import it can modify it, and Svelte doesn't detect changes made inside a built-in Date.
+  
+  i Use SvelteDate from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidExports.svelte.js:13:31 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Map is exported, but Svelte doesn't detect changes to it.
+  
+    11 │ export const variable7 = new Date(8.64e15);
+    12 │ 
+  > 13 │ export const store = { items: new Map(), tags: [new Set()] };
+       │                               ^^^^^^^^^
+    14 │ 
+    15 │ export class Store {
+  
+  i Other files that import it can modify it, and Svelte doesn't detect changes made inside a built-in Map.
+  
+  i Use SvelteMap from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidExports.svelte.js:13:49 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Set is exported, but Svelte doesn't detect changes to it.
+  
+    11 │ export const variable7 = new Date(8.64e15);
+    12 │ 
+  > 13 │ export const store = { items: new Map(), tags: [new Set()] };
+       │                                                 ^^^^^^^^^
+    14 │ 
+    15 │ export class Store {
+  
+  i Other files that import it can modify it, and Svelte doesn't detect changes made inside a built-in Set.
+  
+  i Use SvelteSet from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidExports.svelte.js:16:10 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Map is exported, but Svelte doesn't detect changes to it.
+  
+    15 │ export class Store {
+  > 16 │ 	items = new Map();
+       │ 	        ^^^^^^^^^
+    17 │ }
+    18 │ 
+  
+  i Other files that import it can modify it, and Svelte doesn't detect changes made inside a built-in Map.
+  
+  i Use SvelteMap from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidExports.svelte.js:20:17 lint/nursery/useSvelteReactiveClasses ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This Map is exported, but Svelte doesn't detect changes to it.
+  
+    19 │ class Hidden {
+  > 20 │ 	static cache = new Map();
+       │ 	               ^^^^^^^^^
+    21 │ }
+    22 │ export { Hidden };
+  
+  i Other files that import it can modify it, and Svelte doesn't detect changes made inside a built-in Map.
+  
+  i Use SvelteMap from svelte/reactivity instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

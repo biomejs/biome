@@ -3151,6 +3151,11 @@ export interface Nursery {
 	 */
 	useSvelteKitRuneImports?: UseSvelteKitRuneImportsConfiguration;
 	/**
+	 * Require the reactive classes from svelte/reactivity instead of mutable built-in classes.
+	 * See https://biomejs.dev/linter/rules/use-svelte-reactive-classes
+	 */
+	useSvelteReactiveClasses?: UseSvelteReactiveClassesConfiguration;
+	/**
 	 * Require keyed {#each} blocks in Svelte templates.
 	 * See https://biomejs.dev/linter/rules/use-svelte-require-each-key
 	 */
@@ -5460,6 +5465,9 @@ export type UseStringStartsEndsWithConfiguration =
 export type UseSvelteKitRuneImportsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSvelteKitRuneImportsOptions;
+export type UseSvelteReactiveClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseSvelteReactiveClassesOptions;
 export type UseSvelteRequireEachKeyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSvelteRequireEachKeyOptions;
@@ -7967,6 +7975,10 @@ export interface RuleWithUseSvelteKitRuneImportsOptions {
 	level: RulePlainConfiguration;
 	options?: UseSvelteKitRuneImportsOptions;
 }
+export interface RuleWithUseSvelteReactiveClassesOptions {
+	level: RulePlainConfiguration;
+	options?: UseSvelteReactiveClassesOptions;
+}
 export interface RuleWithUseSvelteRequireEachKeyOptions {
 	level: RulePlainConfiguration;
 	options?: UseSvelteRequireEachKeyOptions;
@@ -10137,6 +10149,7 @@ export interface UseSortedClassesOptions {
 export type UseStrictBooleanExpressionsOptions = {};
 export type UseStringStartsEndsWithOptions = {};
 export type UseSvelteKitRuneImportsOptions = {};
+export type UseSvelteReactiveClassesOptions = {};
 export type UseSvelteRequireEachKeyOptions = {};
 export type UseTailwindShorthandClassesOptions = {};
 export type UseTestHooksInOrderOptions = {};
@@ -11482,6 +11495,7 @@ export type Category =
 	| "lint/nursery/useStrictBooleanExpressions"
 	| "lint/nursery/useStringStartsEndsWith"
 	| "lint/nursery/useSvelteKitRuneImports"
+	| "lint/nursery/useSvelteReactiveClasses"
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useTailwindShorthandClasses"
 	| "lint/nursery/useTestHooksInOrder"
