@@ -7,9 +7,10 @@ use biome_js_syntax::numbers::{
 };
 use biome_rowan::Text;
 
-use crate::TypeDb;
+use crate::globals::{GLOBAL_ANY_KEYWORD_ID, GLOBAL_UNKNOWN_ID};
 use crate::interned_types::{InternedLiteral, Literal};
 use crate::resolved::InferredTypeData;
+use crate::{RawTypeData, RawTypeId, TypeDb, TypeReference};
 
 const MAX_NARROWING_STEPS: usize = 256;
 const MAX_LITERAL_BYTES: usize = 1024;
@@ -48,6 +49,25 @@ pub enum NarrowingPredicate<'db> {
 /// branch is impossible.
 pub fn is_narrowing_invariant(ty: InferredTypeData<'_>) -> bool {
     matches!(ty, InferredTypeData::AnyKeyword | InferredTypeData::Unknown)
+}
+
+/// Returns whether a collected type reference already denotes `any` or the
+/// internal `Unknown`, without resolving it.
+///
+/// This is the resolution-free counterpart of [`is_narrowing_invariant`];
+/// `raw_types` is the module table that local references index. It returns
+/// false for references that only resolve to such a type, such as an alias.
+pub fn is_raw_narrowing_invariant(reference: &TypeReference, raw_types: &[RawTypeData]) -> bool {
+    let TypeReference::Resolved(id) = reference else {
+        return false;
+    };
+    match id {
+        RawTypeId::Global(_) => *id == GLOBAL_UNKNOWN_ID || *id == GLOBAL_ANY_KEYWORD_ID,
+        RawTypeId::Local(local) => matches!(
+            raw_types.get(local.index()),
+            Some(RawTypeData::Unknown | RawTypeData::AnyKeyword)
+        ),
+    }
 }
 
 /// Retains the values of `ty` that can pass a runtime test.
@@ -817,6 +837,26 @@ mod tests {
             number(&db, "1"),
         ] {
             assert!(!is_narrowing_invariant(ty), "{ty:?}");
+        }
+    }
+
+    #[test]
+    fn raw_narrowing_invariance_needs_no_resolution() {
+        let local = TypeReference::Resolved(RawTypeId::Local(crate::TypeId::new(0)));
+        for (reference, raw_types, expected) in [
+            (TypeReference::unknown(), vec![], true),
+            (TypeReference::Resolved(GLOBAL_ANY_KEYWORD_ID), vec![], true),
+            (local.clone(), vec![RawTypeData::AnyKeyword], true),
+            (local.clone(), vec![RawTypeData::Unknown], true),
+            (local.clone(), vec![RawTypeData::UnknownKeyword], false),
+            (local.clone(), vec![RawTypeData::String], false),
+            (local, vec![], false),
+        ] {
+            assert_eq!(
+                is_raw_narrowing_invariant(&reference, &raw_types),
+                expected,
+                "{reference:?} in {raw_types:?}"
+            );
         }
     }
 
