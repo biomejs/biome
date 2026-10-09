@@ -3024,6 +3024,11 @@ export interface Nursery {
 	 */
 	noSvelteAtHtmlTags?: NoSvelteAtHtmlTagsConfiguration;
 	/**
+	 * Disallow bind:value on checkbox and radio inputs.
+	 * See https://biomejs.dev/linter/rules/no-svelte-bind-value-on-checkable-inputs
+	 */
+	noSvelteBindValueOnCheckableInputs?: NoSvelteBindValueOnCheckableInputsConfiguration;
+	/**
 	 * Disallow declaring Svelte component props with export let.
 	 * See https://biomejs.dev/linter/rules/no-svelte-export-let
 	 */
@@ -5536,6 +5541,9 @@ export type NoSvelteAtDebugTagsConfiguration =
 export type NoSvelteAtHtmlTagsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteAtHtmlTagsOptions;
+export type NoSvelteBindValueOnCheckableInputsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteBindValueOnCheckableInputsOptions;
 export type NoSvelteExportLetConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteExportLetOptions;
@@ -7918,6 +7926,14 @@ export interface RuleWithNoSvelteAtHtmlTagsOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteAtHtmlTagsOptions;
 }
+export interface RuleWithNoSvelteBindValueOnCheckableInputsOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoSvelteBindValueOnCheckableInputsOptions;
+}
 export interface RuleWithNoSvelteExportLetOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteExportLetOptions;
@@ -10246,6 +10262,7 @@ export type NoReturnInFinallyOptions = {};
 export type NoSelfImportOptions = {};
 export type NoSvelteAtDebugTagsOptions = {};
 export type NoSvelteAtHtmlTagsOptions = {};
+export type NoSvelteBindValueOnCheckableInputsOptions = {};
 export type NoSvelteExportLetOptions = {};
 export type NoSvelteInspectOptions = {};
 export type NoSvelteLegacyConstOptions = {};
@@ -11856,7 +11873,6 @@ export type Category =
 	| "lint/nursery/noNonScalableViewport"
 	| "lint/nursery/noObsoleteTags"
 	| "lint/nursery/noOctal"
-	| "lint/nursery/noProcessExit"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"
@@ -11867,6 +11883,7 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForNavigation"
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
+	| "lint/nursery/noProcessExit"
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
@@ -11876,6 +11893,7 @@ export type Category =
 	| "lint/nursery/noSelfImport"
 	| "lint/nursery/noSvelteAtDebugTags"
 	| "lint/nursery/noSvelteAtHtmlTags"
+	| "lint/nursery/noSvelteBindValueOnCheckableInputs"
 	| "lint/nursery/noSvelteExportLet"
 	| "lint/nursery/noSvelteInspect"
 	| "lint/nursery/noSvelteLegacyConst"
@@ -11932,13 +11950,13 @@ export type Category =
 	| "lint/nursery/useReactNamingConvention"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useSingleTopLevelHeading"
-	| "lint/nursery/useTailwindSortedClasses"
 	| "lint/nursery/useStrictBooleanExpressions"
 	| "lint/nursery/useStringStartsEndsWith"
 	| "lint/nursery/useSvelteKitResolve"
 	| "lint/nursery/useSvelteKitRuneImports"
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useTailwindShorthandClasses"
+	| "lint/nursery/useTailwindSortedClasses"
 	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"

@@ -1240,6 +1240,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noSvelteAtHtmlTags",
         TypeId::of::<biome_rule_options::no_svelte_at_html_tags::NoSvelteAtHtmlTagsOptions>(),
     ));
+    result.push(("nursery", "noSvelteBindValueOnCheckableInputs", TypeId::of::<biome_rule_options::no_svelte_bind_value_on_checkable_inputs::NoSvelteBindValueOnCheckableInputsOptions>()));
     result.push((
         "nursery",
         "noSvelteExportLet",
