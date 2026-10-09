@@ -3,40 +3,113 @@
 
 use super::ResolutionCtx;
 use crate::db::queries::{ExpressionTypeInput, infer_flow_expression_type};
-use biome_js_syntax::{AnyJsCallArgument, AnyJsExpression, JsBinaryOperator, JsLogicalOperator};
+use biome_js_control_flow::AnyJsControlFlowRoot;
+use biome_js_syntax::{
+    AnyJsCallArgument, AnyJsExpression, JsAwaitExpression, JsBinaryExpression, JsBinaryOperator,
+    JsCallArgumentList, JsCallArguments, JsCallExpression, JsComputedMemberExpression,
+    JsConditionalExpression, JsIdentifierExpression, JsLogicalExpression, JsLogicalOperator,
+    JsParenthesizedExpression, JsSequenceExpression, JsStaticMemberExpression,
+};
 use biome_js_type_info::{
     NarrowingPredicate, RawTypeData, RawTypeId, TypeReference, TypeofExpression,
     interned_types::{Literal, TypeData},
     narrow_type,
 };
-use biome_rowan::{AstNode, AstSeparatedList};
+use biome_rowan::{AstNode, AstSeparatedList, declare_node_union};
 
+/// Limits how many expressions may enclose an evaluated expression.
+///
+/// Evaluating an expression queries its operands, and nested tracked queries
+/// run on the call stack. Each operand has one more enclosing expression than
+/// its parent, so this bounds the depth of that recursion.
 const MAX_FLOW_EXPRESSION_DEPTH: usize = 48;
 
-impl<'db> ResolutionCtx<'db, '_> {
-    #[expect(
-        clippy::wildcard_enum_match_arm,
-        reason = "Unsupported expressions use raw inference."
-    )]
-    pub(super) fn resolve_flow_expression(
-        &mut self,
-        expression: &AnyJsExpression,
-    ) -> Option<TypeData<'db>> {
-        if expression
-            .syntax()
+declare_node_union! {
+    /// Expressions whose type at a source occurrence can follow a refined
+    /// operand.
+    ///
+    /// [`ResolutionCtx::resolve_flow_expression`] evaluates exactly the members
+    /// for which [`Self::is_evaluated`] returns true; every other expression
+    /// keeps its raw type. Walking up from a read, the first enclosing
+    /// expression that is not evaluated ends the chain of expressions whose type
+    /// can depend on that read.
+    pub(super) AnyFlowExpression = JsIdentifierExpression
+        | JsParenthesizedExpression
+        | JsStaticMemberExpression
+        | JsComputedMemberExpression
+        | JsLogicalExpression
+        | JsConditionalExpression
+        | JsCallExpression
+        | JsAwaitExpression
+        | JsSequenceExpression
+        | JsBinaryExpression
+}
+
+impl AnyFlowExpression {
+    /// Returns whether flow evaluation supports this expression's operator.
+    ///
+    /// Only addition is evaluated among binary expressions.
+    pub(super) fn is_evaluated(&self) -> bool {
+        match self {
+            Self::JsBinaryExpression(binary) => {
+                binary.operator().ok() == Some(JsBinaryOperator::Plus)
+            }
+            Self::JsIdentifierExpression(_)
+            | Self::JsParenthesizedExpression(_)
+            | Self::JsStaticMemberExpression(_)
+            | Self::JsComputedMemberExpression(_)
+            | Self::JsLogicalExpression(_)
+            | Self::JsConditionalExpression(_)
+            | Self::JsCallExpression(_)
+            | Self::JsAwaitExpression(_)
+            | Self::JsSequenceExpression(_) => true,
+        }
+    }
+
+    /// Returns whether more than [`MAX_FLOW_EXPRESSION_DEPTH`] expressions
+    /// enclose this one.
+    ///
+    /// Counting stops at the first ancestor that is neither an expression nor
+    /// the argument syntax of a call, and at a nested function. Statements,
+    /// blocks, and enclosing functions therefore do not count.
+    fn exceeds_nesting_limit(&self) -> bool {
+        self.syntax()
             .ancestors()
+            .skip(1)
+            .take_while(|node| {
+                let kind = node.kind();
+                (AnyJsExpression::can_cast(kind) && !AnyJsControlFlowRoot::can_cast(kind))
+                    || JsCallArguments::can_cast(kind)
+                    || JsCallArgumentList::can_cast(kind)
+            })
+            .filter(|node| AnyJsExpression::can_cast(node.kind()))
             .take(MAX_FLOW_EXPRESSION_DEPTH + 1)
             .count()
             > MAX_FLOW_EXPRESSION_DEPTH
-        {
+    }
+}
+
+impl<'db> ResolutionCtx<'db, '_> {
+    /// Infers `expression` at its source occurrence from refined operands.
+    ///
+    /// Returns `None` when no operand is refined, when [`AnyFlowExpression::is_evaluated`]
+    /// rejects the expression, or when more than [`MAX_FLOW_EXPRESSION_DEPTH`]
+    /// expressions enclose it.
+    pub(super) fn resolve_flow_expression(
+        &mut self,
+        expression: &AnyFlowExpression,
+    ) -> Option<TypeData<'db>> {
+        if !expression.is_evaluated() || expression.exceeds_nesting_limit() {
             return None;
         }
         match expression {
-            AnyJsExpression::JsIdentifierExpression(_) => self.narrow_reference(expression),
-            AnyJsExpression::JsParenthesizedExpression(parenthesized) => {
+            AnyFlowExpression::JsIdentifierExpression(identifier) => {
+                self.narrow_reference(identifier)
+            }
+            AnyFlowExpression::JsParenthesizedExpression(parenthesized) => {
                 self.flow_operand(&parenthesized.expression().ok()?)
             }
-            AnyJsExpression::JsStaticMemberExpression(member) => {
+            AnyFlowExpression::JsStaticMemberExpression(member) => {
                 let object = self.flow_operand(&member.object().ok()?)?;
                 let name = member.member().ok()?.value_token().ok()?;
                 let result = self
@@ -48,7 +121,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     result
                 })
             }
-            AnyJsExpression::JsComputedMemberExpression(member) => {
+            AnyFlowExpression::JsComputedMemberExpression(member) => {
                 let object_expression = member.object().ok()?;
                 let member_expression = member.member().ok()?;
                 let object = self.flow_operand(&object_expression);
@@ -67,7 +140,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     result
                 })
             }
-            AnyJsExpression::JsLogicalExpression(logical) => {
+            AnyFlowExpression::JsLogicalExpression(logical) => {
                 let left_expression = logical.left().ok()?;
                 let right_expression = logical.right().ok()?;
                 let left = self.flow_operand(&left_expression);
@@ -89,7 +162,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                 let retained = narrow_type(self.db, left, predicate, retained);
                 Some(TypeData::union_from_types(self.db, vec![retained, right]))
             }
-            AnyJsExpression::JsConditionalExpression(conditional) => {
+            AnyFlowExpression::JsConditionalExpression(conditional) => {
                 let test_expression = conditional.test().ok()?;
                 let consequent_expression = conditional.consequent().ok()?;
                 let alternate_expression = conditional.alternate().ok()?;
@@ -117,7 +190,7 @@ impl<'db> ResolutionCtx<'db, '_> {
                     vec![consequent, alternate],
                 ))
             }
-            AnyJsExpression::JsCallExpression(call) => {
+            AnyFlowExpression::JsCallExpression(call) => {
                 if call.type_arguments().is_some() {
                     return None;
                 }
@@ -156,19 +229,17 @@ impl<'db> ResolutionCtx<'db, '_> {
                     result
                 })
             }
-            AnyJsExpression::JsAwaitExpression(await_expression) => {
+            AnyFlowExpression::JsAwaitExpression(await_expression) => {
                 let argument = self.flow_operand(&await_expression.argument().ok()?)?;
                 Some(
                     self.resolve_await_expression(argument)
                         .unwrap_or(TypeData::Unknown),
                 )
             }
-            AnyJsExpression::JsSequenceExpression(sequence) => {
+            AnyFlowExpression::JsSequenceExpression(sequence) => {
                 self.flow_operand(&sequence.right().ok()?)
             }
-            AnyJsExpression::JsBinaryExpression(binary)
-                if binary.operator().ok() == Some(JsBinaryOperator::Plus) =>
-            {
+            AnyFlowExpression::JsBinaryExpression(binary) => {
                 let left_expression = binary.left().ok()?;
                 let right_expression = binary.right().ok()?;
                 let left = self.flow_operand(&left_expression);
@@ -187,7 +258,6 @@ impl<'db> ResolutionCtx<'db, '_> {
                         .unwrap_or(TypeData::Unknown),
                 )
             }
-            _ => None,
         }
     }
 

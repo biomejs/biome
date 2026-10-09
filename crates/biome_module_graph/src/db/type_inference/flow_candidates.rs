@@ -1,15 +1,17 @@
 //! Rejects occurrence lookups that cannot depend on runtime conditions.
 //!
 //! The index stores source ranges, not inferred types or flow states. Semantic
-//! references connect conditions to reads of the same binding. Expression
-//! ancestors remain candidates even when their own evaluation is unsupported;
-//! the occurrence query decides whether an operand actually changes their type.
+//! references connect conditions to reads of the same binding, and only tests in
+//! the binding's own execution root count. A read's enclosing expressions stay
+//! candidates up to the first one that flow evaluation does not support; the
+//! occurrence query decides whether an operand actually changes their type.
 
 use super::flow_conditions::condition_subjects;
+use super::flow_expressions::AnyFlowExpression;
 use crate::JsModuleInfo;
 use crate::js_module_info::flow_sources::{FlowConditionSource, is_flow_construct};
 use biome_js_control_flow::{AnyJsControlFlowRoot, FlowOutcome};
-use biome_js_semantic::{JsDeclarationKind, SemanticModel};
+use biome_js_semantic::{JsDeclarationKind, Reference, SemanticModel};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsRoot, AnyTsType, JsIdentifierExpression, JsLogicalOperator, JsSyntaxKind,
     JsSyntaxNodePtr,
@@ -59,6 +61,7 @@ fn collect_candidates(info: &JsModuleInfo) -> Option<FxHashSet<TextRange>> {
         return Some(candidates);
     }
 
+    let mut tested = Vec::new();
     let mut expression_ancestors = Vec::new();
     for binding in info.semantic_model.all_bindings() {
         remaining = remaining.checked_sub(1)?;
@@ -66,7 +69,7 @@ fn collect_candidates(info: &JsModuleInfo) -> Option<FxHashSet<TextRange>> {
             continue;
         }
 
-        let mut mentioned = false;
+        tested.clear();
         let mut written = false;
         for reference in binding.all_references() {
             remaining = remaining.checked_sub(1)?;
@@ -78,12 +81,15 @@ fn collect_candidates(info: &JsModuleInfo) -> Option<FxHashSet<TextRange>> {
             let index = conditions
                 .subjects
                 .partition_point(|range| range.end() <= start);
-            mentioned |= conditions
+            if conditions
                 .subjects
                 .get(index)
-                .is_some_and(|range| range.contains(start));
+                .is_some_and(|range| range.contains(start))
+            {
+                tested.push(reference);
+            }
         }
-        if written || !mentioned {
+        if written || tested.is_empty() {
             continue;
         }
 
@@ -98,13 +104,32 @@ fn collect_candidates(info: &JsModuleInfo) -> Option<FxHashSet<TextRange>> {
         let Some(declaration_root) = declaration_root else {
             continue;
         };
+        // Flow facts do not cross execution roots, so a test inside a nested
+        // function cannot refine reads in the declaring root.
+        let first_test = tested
+            .iter()
+            .filter(|reference| {
+                reference
+                    .syntax()
+                    .ancestors()
+                    .find_map(AnyJsControlFlowRoot::cast)
+                    .is_some_and(|root| root == declaration_root)
+            })
+            .map(Reference::range_start)
+            .min();
+        let Some(first_test) = first_test else {
+            continue;
+        };
 
-        let first_condition = conditions
+        // Roots without loops evaluate in source order, so a read that starts
+        // before the binding's first test cannot observe it.
+        let first_read = conditions
             .first_by_root
-            .get(&JsSyntaxNodePtr::new(declaration_root.syntax()));
+            .get(&JsSyntaxNodePtr::new(declaration_root.syntax()))
+            .map(|first_condition| first_test.max(*first_condition));
         for reference in binding.all_reads() {
             remaining = remaining.checked_sub(1)?;
-            if first_condition.is_some_and(|first| reference.range_start() < *first) {
+            if first_read.is_some_and(|first| reference.range_start() < first) {
                 continue;
             }
             let Some(identifier) = reference
@@ -115,6 +140,7 @@ fn collect_candidates(info: &JsModuleInfo) -> Option<FxHashSet<TextRange>> {
                 continue;
             };
             expression_ancestors.clear();
+            let mut carries_flow = true;
             for ancestor in identifier.syntax().ancestors() {
                 remaining = remaining.checked_sub(1)?;
                 if AnyJsControlFlowRoot::can_cast(ancestor.kind()) {
@@ -123,8 +149,14 @@ fn collect_candidates(info: &JsModuleInfo) -> Option<FxHashSet<TextRange>> {
                     }
                     break;
                 }
-                if AnyJsExpression::can_cast(ancestor.kind()) {
-                    expression_ancestors.push(ancestor.text_trimmed_range());
+                // Only an unevaluated expression drops a refined operand. Skipping
+                // other syntax, such as call arguments, can only add candidates.
+                if carries_flow && AnyJsExpression::can_cast(ancestor.kind()) {
+                    carries_flow = AnyFlowExpression::cast_ref(&ancestor)
+                        .is_some_and(|expression| expression.is_evaluated());
+                    if carries_flow {
+                        expression_ancestors.push(ancestor.text_trimmed_range());
+                    }
                 }
             }
         }
