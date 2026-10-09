@@ -38,10 +38,7 @@ impl Format<MarkdownFormatContext> for FormatSourceLine<'_> {
 /// Starting at `start`, this examines spaces, soft breaks, and removed source indentation between
 /// adjacent word groups. Returns `None` when there is no soft break, either adjacent word group is
 /// absent, or replacing the break with a space preserves the rendered whitespace.
-fn find_preserved_soft_break_range(
-    items: &[ProseItem],
-    start: usize,
-) -> Option<Range<usize>> {
+fn find_preserved_soft_break_range(items: &[ProseItem], start: usize) -> Option<Range<usize>> {
     let separator_count = items
         .get(start..)?
         .iter()
