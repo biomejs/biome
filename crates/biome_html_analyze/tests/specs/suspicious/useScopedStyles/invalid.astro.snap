@@ -16,9 +16,9 @@ expression: invalid.astro
 
 # Diagnostics
 ```
-invalid.astro:3:8 lint/style/useScopedStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.astro:3:8 lint/suspicious/useScopedStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This is:global directive is making the styles in this block global.
+  ! This is:global directive is making the styles in this block global.
   
     1 │ <!-- should generate diagnostics -->
     2 │ 

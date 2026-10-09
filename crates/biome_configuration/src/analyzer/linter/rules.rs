@@ -1764,7 +1764,7 @@ impl RuleName {
             Self::UseRegexpExec => RuleGroup::Nursery,
             Self::UseRegexpTest => RuleGroup::Complexity,
             Self::UseRequiredScripts => RuleGroup::Suspicious,
-            Self::UseScopedStyles => RuleGroup::Style,
+            Self::UseScopedStyles => RuleGroup::Suspicious,
             Self::UseSelfClosingElements => RuleGroup::Style,
             Self::UseSemanticElements => RuleGroup::A11y,
             Self::UseShorthandAssign => RuleGroup::Style,

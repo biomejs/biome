@@ -3,6 +3,7 @@ use biome_analyze::{
     declare_lint_rule,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_html_factory::make;
 use biome_html_syntax::{
     AnyHtmlAttribute, AstroIsDirective, HtmlOpeningElement, HtmlSyntaxKind, HtmlSyntaxToken, T,
@@ -62,6 +63,7 @@ declare_lint_rule! {
         name: "useScopedStyles",
         language: "html",
         recommended: true,
+        severity: Severity::Warning,
         domains: &[RuleDomain::Vue],
         sources: &[RuleSource::EslintVueJs("enforce-style-attribute").inspired()],
         fix_kind: FixKind::Unsafe,

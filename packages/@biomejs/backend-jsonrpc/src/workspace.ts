@@ -3965,11 +3965,6 @@ export interface Style {
 	 */
 	useReduceTypeParameter?: UseReduceTypeParameterConfiguration;
 	/**
-	 * Keep component styles scoped in Vue and Astro files.
-	 * See https://biomejs.dev/linter/rules/use-scoped-styles
-	 */
-	useScopedStyles?: UseScopedStylesConfiguration;
-	/**
 	 * Prevent extra closing tags for components without children.
 	 * See https://biomejs.dev/linter/rules/use-self-closing-elements
 	 */
@@ -4781,6 +4776,11 @@ export interface Suspicious {
 	 * See https://biomejs.dev/linter/rules/use-required-scripts
 	 */
 	useRequiredScripts?: UseRequiredScriptsConfiguration;
+	/**
+	 * Keep component styles scoped in Vue and Astro files.
+	 * See https://biomejs.dev/linter/rules/use-scoped-styles
+	 */
+	useScopedStyles?: UseScopedStylesConfiguration;
 	/**
 	 * Use static Response methods instead of new Response() constructor when possible.
 	 * See https://biomejs.dev/linter/rules/use-static-response-methods
@@ -6080,9 +6080,6 @@ export type UseReadonlyClassPropertiesConfiguration =
 export type UseReduceTypeParameterConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReduceTypeParameterOptions;
-export type UseScopedStylesConfiguration =
-	| RulePlainConfiguration
-	| RuleWithUseScopedStylesOptions;
 export type UseSelfClosingElementsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSelfClosingElementsOptions;
@@ -6558,6 +6555,9 @@ export type UseNumberToFixedDigitsArgumentConfiguration =
 export type UseRequiredScriptsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseRequiredScriptsOptions;
+export type UseScopedStylesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseScopedStylesOptions;
 export type UseStaticResponseMethodsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStaticResponseMethodsOptions;
@@ -8930,14 +8930,6 @@ export interface RuleWithUseReduceTypeParameterOptions {
 	level: RulePlainConfiguration;
 	options?: UseReduceTypeParameterOptions;
 }
-export interface RuleWithUseScopedStylesOptions {
-	/**
-	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
-	 */
-	fix?: FixKind;
-	level: RulePlainConfiguration;
-	options?: UseScopedStylesOptions;
-}
 export interface RuleWithUseSelfClosingElementsOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -9773,6 +9765,14 @@ export interface RuleWithUseNumberToFixedDigitsArgumentOptions {
 export interface RuleWithUseRequiredScriptsOptions {
 	level: RulePlainConfiguration;
 	options?: UseRequiredScriptsOptions;
+}
+export interface RuleWithUseScopedStylesOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseScopedStylesOptions;
 }
 export interface RuleWithUseStaticResponseMethodsOptions {
 	/**
@@ -10855,7 +10855,6 @@ export interface UseReadonlyClassPropertiesOptions {
 	checkAllProperties?: boolean;
 }
 export type UseReduceTypeParameterOptions = {};
-export type UseScopedStylesOptions = {};
 export interface UseSelfClosingElementsOptions {
 	ignoreHtmlElements?: boolean;
 }
@@ -11256,6 +11255,7 @@ export interface UseRequiredScriptsOptions {
 	 */
 	requiredScripts?: string[];
 }
+export type UseScopedStylesOptions = {};
 export type UseStaticResponseMethodsOptions = {};
 export type UseStrictModeOptions = {};
 export type ImportGroup = null | GroupMatcher | GroupMatcher[];
@@ -12109,7 +12109,6 @@ export type Category =
 	| "lint/style/useReactFunctionComponents"
 	| "lint/style/useReadonlyClassProperties"
 	| "lint/style/useReduceTypeParameter"
-	| "lint/style/useScopedStyles"
 	| "lint/style/useSelfClosingElements"
 	| "lint/style/useShorthandAssign"
 	| "lint/style/useShorthandFunctionType"
@@ -12270,6 +12269,7 @@ export type Category =
 	| "lint/suspicious/useNamespaceKeyword"
 	| "lint/suspicious/useNumberToFixedDigitsArgument"
 	| "lint/suspicious/useRequiredScripts"
+	| "lint/suspicious/useScopedStyles"
 	| "lint/suspicious/useStaticResponseMethods"
 	| "lint/suspicious/useStrictMode"
 	| "assist/source/noDuplicateClasses"
