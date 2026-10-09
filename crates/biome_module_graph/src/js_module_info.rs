@@ -1,7 +1,7 @@
 mod binding;
 mod collector;
 mod diagnostics;
-pub(crate) mod flow_sources;
+pub(crate) mod flow;
 mod scope;
 pub(crate) use scope::TsBindingReferenceExt;
 mod utils;
@@ -264,11 +264,10 @@ pub struct JsModuleInfoInner {
     /// Whether type inference was enabled when this module info was created
     pub(crate) infer_types: bool,
 
-    /// Whether syntax may require flow-candidate indexing.
+    /// Syntax-only flow facts used to refine reads after runtime tests.
     ///
-    /// False rules out both narrowing and flow-budget overrides. Type-only
-    /// syntax and small block-only roots may conservatively make this true.
-    pub(crate) has_flow_candidate_sources: bool,
+    /// Empty when type inference is disabled or no test can refine a read.
+    pub(crate) flow: flow::ModuleFlow,
 
     /// CSS class references from JSX `className` or `class` attributes.
     ///

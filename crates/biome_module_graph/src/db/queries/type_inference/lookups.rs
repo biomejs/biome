@@ -7,12 +7,11 @@
 
 use super::{
     BindingTypeInput, BindingTypeWithImportBudgetInput, ExpressionTypeInput, FlowBindingTypeInput,
-    FlowRootInput, LocalTypeInput, LocalTypeWithImportBudgetInput,
+    LocalTypeInput, LocalTypeWithImportBudgetInput,
 };
 use crate::ModuleDb;
 use crate::db::type_inference::{
-    FlowCandidates, ImportResolution, ResolutionCtx,
-    find_member_type_on_demand as find_member_type_impl,
+    ImportResolution, ResolutionCtx, find_member_type_on_demand as find_member_type_impl,
     find_value_member_type_on_demand as find_value_member_type_impl, flow_binding_baseline,
     flow_binding_type, flow_expression_type, resolve_local_type_on_demand,
 };
@@ -20,11 +19,7 @@ use crate::module_graph::ModuleInfoKind;
 use crate::type_inference::profiling::{
     TypeInferenceProfileOrigin, TypeInferenceQueryKind, execute_query,
 };
-use biome_js_control_flow::{
-    AnyJsControlFlowRoot, NarrowingFlowGraph, control_flow_graph, narrowing_flow_graph,
-};
 use biome_js_type_info::{InferredType, TypeId, interned_types::TypeData as InferredTypeData};
-use biome_rowan::AstNode;
 
 // #region LOOKUP QUERIES
 
@@ -65,25 +60,6 @@ pub fn infer_expression_type<'db>(
             }
             let mut ctx = ResolutionCtx::new(db, module, js_info, ImportResolution::on_demand());
             Some(ctx.resolve(reference))
-        },
-    )
-}
-
-#[salsa::tracked]
-pub(in crate::db) fn flow_candidates_for_module(
-    db: &dyn ModuleDb,
-    module: crate::ModuleInfo,
-) -> Option<FlowCandidates> {
-    execute_query(
-        TypeInferenceQueryKind::Lookups,
-        TypeInferenceProfileOrigin::document(module),
-        "flow_candidates_for_module",
-        || {
-            let ModuleInfoKind::Js(info) = module.kind(db) else {
-                return None;
-            };
-            (info.infer_types && info.has_flow_candidate_sources)
-                .then(|| FlowCandidates::collect(info))
         },
     )
 }
@@ -146,10 +122,10 @@ pub(crate) fn infer_flow_binding_baseline<'db>(
     )
 }
 
-/// Refines one binding at a demanded incoming flow point, shared by its reads.
+/// Refines one binding at a collected flow point, shared by its reads there.
 ///
-/// Returns `None` for unavailable or ineligible bindings, invalid roots or points,
-/// unsupported flow, or an unchanged type. Cycles and incomplete flow evaluation
+/// Returns `None` for unavailable roots or points, a binding whose type no
+/// test can change, or an unchanged type. Cycles and incomplete flow evaluation
 /// return an `Unknown` override rather than allowing the raw lookup to take over.
 #[salsa::tracked(returns(copy), cycle_result=infer_flow_binding_type_cycle_result)]
 pub(crate) fn infer_flow_binding_type<'db>(
@@ -166,55 +142,12 @@ pub(crate) fn infer_flow_binding_type<'db>(
             let ModuleInfoKind::Js(info) = module.kind(db) else {
                 return None;
             };
-            if !info.infer_types || input.root(db).module(db) != module {
+            if !info.infer_types {
                 return None;
             }
             flow_binding_type(db, module, info, input)
         },
     )
-}
-
-#[salsa::tracked]
-pub(crate) fn narrowing_flow_for_root<'db>(
-    db: &'db dyn ModuleDb,
-    input: FlowRootInput<'db>,
-) -> Option<NarrowingFlowGraph> {
-    let module = input.module(db);
-    let ModuleInfoKind::Js(info) = module.kind(db) else {
-        return None;
-    };
-    let tree = info.semantic_model.root();
-    let range = input.root(db);
-    if !tree.syntax().text_range_with_trivia().contains_range(range) {
-        return None;
-    }
-    let root = tree
-        .syntax()
-        .covering_element(range)
-        .ancestors()
-        .find_map(|node| {
-            (node.text_trimmed_range() == range)
-                .then(|| AnyJsControlFlowRoot::cast(node))
-                .flatten()
-        })?;
-    let mut nodes = root.syntax().descendants();
-    for _ in 0..16_384 {
-        let Some(node) = nodes.next() else {
-            let graph = control_flow_graph(&root)?;
-            return narrowing_flow_graph(&graph);
-        };
-        if let Some(reference) = biome_js_syntax::JsReferenceIdentifier::cast(node)
-            && reference.value_token().is_ok_and(|token| {
-                matches!(
-                    biome_js_syntax::unescape_js_identifier(token.text_trimmed()).as_ref(),
-                    "eval" | "arguments"
-                )
-            })
-        {
-            return None;
-        }
-    }
-    None
 }
 
 /// Infers the type collected for one binding range.
@@ -409,22 +342,18 @@ fn infer_local_type_with_import_budget_cycle_result<'db>(
 
 /// Returns an occurrence-sensitive result when runtime flow affects an expression.
 ///
-/// Proven non-candidates avoid the occurrence query entirely. `None` preserves
-/// the raw lookup path when no supported refinement applies. Cycles or incomplete
-/// flow evaluation return `Unknown`, not a raw fallback.
+/// Expressions that collection did not mark as flow candidates avoid the
+/// occurrence query entirely. `None` preserves the raw lookup path when no
+/// supported refinement applies. Cycles or incomplete flow evaluation return
+/// `Unknown`, not a raw fallback.
 pub(crate) fn infer_flow_expression_type<'db>(
     db: &'db dyn ModuleDb,
     input: ExpressionTypeInput<'db>,
 ) -> Option<InferredTypeData<'db>> {
-    let module = input.module(db);
-    let ModuleInfoKind::Js(info) = module.kind(db) else {
+    let ModuleInfoKind::Js(info) = input.module(db).kind(db) else {
         return None;
     };
-    if !info.has_flow_candidate_sources {
-        return None;
-    }
-    let candidates = flow_candidates_for_module(db, module).as_ref()?;
-    if !candidates.contains(input.expression(db)) {
+    if !info.flow.is_candidate(input.expression(db)) {
         return None;
     }
     infer_flow_expression_type_impl(db, input)
