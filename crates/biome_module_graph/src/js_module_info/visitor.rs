@@ -52,7 +52,7 @@ impl JsModuleVisitor {
             match event {
                 WalkEvent::Enter(node) => {
                     if scan_flow_roots {
-                        flow_roots.enter(&node);
+                        flow_roots.enter(&node, &self.semantic_model);
                     }
                     if let Some(import) = AnyJsImportLike::cast_ref(&node) {
                         self.visit_import(import, &mut collector);
