@@ -13,8 +13,8 @@ use crate::ModuleDb;
 use crate::db::type_inference::{
     FlowCandidates, ImportResolution, ResolutionCtx,
     find_member_type_on_demand as find_member_type_impl,
-    find_value_member_type_on_demand as find_value_member_type_impl, flow_binding_type,
-    flow_expression_type, resolve_local_type_on_demand,
+    find_value_member_type_on_demand as find_value_member_type_impl, flow_binding_baseline,
+    flow_binding_type, flow_expression_type, resolve_local_type_on_demand,
 };
 use crate::module_graph::ModuleInfoKind;
 use crate::type_inference::profiling::{
@@ -107,6 +107,41 @@ fn infer_flow_expression_type_impl<'db>(
                 return None;
             }
             flow_expression_type(db, module, info, expression)
+        },
+    )
+}
+
+/// Resolves the type that flow refinement starts from, shared by every read of
+/// a binding.
+///
+/// Returns `None` when the module does not support inference, the binding has
+/// no collected type, or no supported runtime test can change its type. The
+/// last case applies when the type contains `any` or an undetermined
+/// (`Unknown`) member, because either one absorbs the whole union and narrowing
+/// leaves both unchanged; TypeScript's `unknown` can still narrow.
+///
+/// `Unknown` means the type exceeds the refinement budget or a query cycle
+/// passes through this lookup; a relevant test then produces an `Unknown`
+/// override.
+#[salsa::tracked(returns(copy), cycle_result=infer_flow_binding_baseline_cycle_result)]
+pub(crate) fn infer_flow_binding_baseline<'db>(
+    db: &'db dyn ModuleDb,
+    input: BindingTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    let module = input.module(db);
+    let range = input.range(db);
+    execute_query(
+        TypeInferenceQueryKind::Lookups,
+        TypeInferenceProfileOrigin::exact(module, range),
+        "infer_flow_binding_baseline",
+        || {
+            let ModuleInfoKind::Js(info) = module.kind(db) else {
+                return None;
+            };
+            if !info.infer_types {
+                return None;
+            }
+            flow_binding_baseline(db, module, info, range)
         },
     )
 }
@@ -316,6 +351,14 @@ fn infer_expression_type_cycle_result<'db>(
     _db: &'db dyn ModuleDb,
     _id: salsa::Id,
     _input: ExpressionTypeInput<'db>,
+) -> Option<InferredTypeData<'db>> {
+    Some(InferredTypeData::Unknown)
+}
+
+fn infer_flow_binding_baseline_cycle_result<'db>(
+    _db: &'db dyn ModuleDb,
+    _id: salsa::Id,
+    _input: BindingTypeInput<'db>,
 ) -> Option<InferredTypeData<'db>> {
     Some(InferredTypeData::Unknown)
 }

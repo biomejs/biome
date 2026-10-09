@@ -66,10 +66,14 @@ read-specific results as individual expression queries.
 
 Collection records whether a file contains syntax that could affect flow. If it
 does not, lookups skip the flow-candidate index too. Otherwise, the index selects
-variables that a supported condition actually tests. For example,
-`typeof value === "string"` can narrow `value`; `check(value)` and `value.length`
-cannot. Those unsupported tests keep ordinary inference without resolving the
-variable's type again for flow.
+variables that a supported condition in their own execution root actually tests.
+For example, `typeof value === "string"` can narrow `value`; `check(value)` and
+`value.length` cannot. Those unsupported tests keep ordinary inference without
+resolving the variable's type again for flow. A test inside a nested function
+does not select reads in the enclosing one, and in a root without loops, reads
+before the variable's first test are not selected either. The index also stops
+at the first enclosing expression that cannot use a narrowed operand, such as an
+array or object literal.
 
 Candidate collection and flow evaluation share the same condition matching. If
 checking a condition cannot finish within its work limit, Biome continues with
@@ -85,14 +89,18 @@ Narrowing does not support `var`, imported variables, predicate/assertion
 functions, or facts about individual object properties. Unsupported control flow
 includes exception handlers, `switch`, `for-in`/`for-of`, destructuring, classes,
 and logical assignments. Roots using `eval` or `arguments` also keep ordinary
-inference. If flow solving exhausts its work limit or a query cycle occurs, the
-result is unknown. Callers must respect that result rather than replace it with
-a more confident answer from raw type information.
+inference. Variables typed `any`, or whose type includes an undetermined part,
+skip flow analysis entirely because no supported test can change them; this
+check runs before Biome builds a control-flow graph. If flow solving exhausts its
+work limit or a query cycle occurs, the result is unknown. Callers must respect
+that result rather than replace it with a more confident answer from raw type
+information.
 
 A control-flow graph records the possible paths through one execution root.
 Biome builds it only when needed, without building graphs for nested or sibling
-roots. Reads within that root share the graph. Reads of the same variable at the
-same graph point also share their narrowing calculation. These caches depend on
+roots. Reads within that root share the graph. All reads of a variable share the
+type that narrowing starts from, and reads at the same graph point also share
+their narrowing calculation. These caches depend on
 the current syntax tree: changing a condition must invalidate them even if
 variable declarations and references stay the same. An edit elsewhere in the module can also rebuild
 the graph; the cache does not track edits separately for each function.

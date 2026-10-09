@@ -7,17 +7,20 @@
 use super::flow_conditions::{
     ConditionStep, MAX_CONDITION_DEPTH, SyntaxGuard, condition_step, condition_subjects,
 };
+use super::flow_expressions::AnyFlowExpression;
 use super::{ImportResolution, ResolutionCtx, resolve_local_type_on_demand};
 use crate::db::queries::{
-    BindingTypeInput, FlowBindingTypeInput, FlowRootInput, infer_flow_binding_type,
-    narrowing_flow_for_root,
+    BindingTypeInput, FlowBindingTypeInput, FlowRootInput, infer_flow_binding_baseline,
+    infer_flow_binding_type, narrowing_flow_for_root,
 };
 use crate::{JsModuleInfo, ModuleDb, ModuleInfo};
 use biome_js_control_flow::{
     AnyJsControlFlowRoot, FlowNode, FlowNodeId, FlowOutcome, NarrowingFlowGraph,
 };
 use biome_js_semantic::{Binding, JsDeclarationKind};
-use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression, JsSyntaxNode};
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsLiteralExpression, JsIdentifierExpression, JsSyntaxNode,
+};
 use biome_js_type_info::interned_types::TypeData;
 use biome_js_type_info::{NarrowingPredicate, narrow_type};
 use biome_rowan::{AstNode, TextRange};
@@ -44,9 +47,27 @@ pub(in crate::db) fn flow_expression_type<'db>(
     range: TextRange,
 ) -> Option<TypeData<'db>> {
     let tree = info.semantic_model.root();
-    let expression = expression_at(tree.syntax(), range)?;
+    let expression = AnyFlowExpression::cast(expression_at(tree.syntax(), range)?.into_syntax())?;
     let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
     ctx.resolve_flow_expression(&expression)
+}
+
+pub(in crate::db) fn flow_binding_baseline<'db>(
+    db: &'db dyn ModuleDb,
+    module: ModuleInfo,
+    info: &JsModuleInfo,
+    range: TextRange,
+) -> Option<TypeData<'db>> {
+    // Declaration queries can erase a cyclic object's shape. The raw baseline
+    // still lets flow detect an impossible branch and return an unknown override.
+    let reference = info.raw_binding_types.get(&range)?;
+    let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
+    let baseline = ctx.resolve(reference);
+    match ctx.flow_baseline(baseline) {
+        Some(TypeData::Unknown | TypeData::AnyKeyword) => None,
+        Some(baseline) => Some(baseline),
+        None => Some(TypeData::Unknown),
+    }
 }
 
 pub(in crate::db) fn flow_binding_type<'db>(
@@ -55,6 +76,7 @@ pub(in crate::db) fn flow_binding_type<'db>(
     info: &JsModuleInfo,
     input: FlowBindingTypeInput<'db>,
 ) -> Option<TypeData<'db>> {
+    let baseline = infer_flow_binding_baseline(db, input.binding(db))?;
     let range = input.binding(db).range(db);
     let binding = info.semantic_model.as_binding_by_range(range)?;
     // The semantic index matches the start offset, not the entire range.
@@ -68,7 +90,7 @@ pub(in crate::db) fn flow_binding_type<'db>(
     }
     let graph = narrowing_flow_for_root(db, root_input).as_ref()?;
     let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
-    ctx.narrow_binding_at_flow(graph, input.point(db), &root, &binding)
+    ctx.narrow_binding_at_flow(graph, input.point(db), &root, &binding, baseline)
 }
 
 fn binding_flow_root(binding: &Binding) -> Option<AnyJsControlFlowRoot> {
@@ -89,34 +111,30 @@ fn binding_flow_root(binding: &Binding) -> Option<AnyJsControlFlowRoot> {
 impl<'db> ResolutionCtx<'db, '_> {
     pub(super) fn narrow_reference(
         &mut self,
-        expression: &AnyJsExpression,
+        identifier: &JsIdentifierExpression,
     ) -> Option<TypeData<'db>> {
-        let AnyJsExpression::JsIdentifierExpression(identifier) = expression else {
-            return None;
-        };
         let binding = self
             .js_info
             .semantic_model
             .binding(&identifier.name().ok()?)?;
         let declaration_root = binding_flow_root(&binding)?;
-        let root = expression
+        let root = identifier
             .syntax()
             .ancestors()
             .find_map(AnyJsControlFlowRoot::cast)?;
         if root.syntax() != declaration_root.syntax() {
             return None;
         }
+        // The baseline is shared by every read, so checking it first avoids
+        // building a flow graph that cannot change the binding's type.
+        let binding_input = BindingTypeInput::new(self.db, self.module, binding.range());
+        infer_flow_binding_baseline(self.db, binding_input)?;
         let input = FlowRootInput::new(self.db, self.module, root.range());
         let graph = narrowing_flow_for_root(self.db, input).as_ref()?;
-        let point = *graph.expression_flows.get(&expression.range())?;
+        let point = *graph.expression_flows.get(&identifier.range())?;
         infer_flow_binding_type(
             self.db,
-            FlowBindingTypeInput::new(
-                self.db,
-                BindingTypeInput::new(self.db, self.module, binding.range()),
-                input,
-                point,
-            ),
+            FlowBindingTypeInput::new(self.db, binding_input, input, point),
         )
     }
 
@@ -126,6 +144,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         point: FlowNodeId,
         root: &AnyJsControlFlowRoot,
         binding: &Binding,
+        baseline: TypeData<'db>,
     ) -> Option<TypeData<'db>> {
         let mut pending = vec![point];
         let mut seen = vec![false; graph.nodes.len()];
@@ -191,17 +210,9 @@ impl<'db> ResolutionCtx<'db, '_> {
         if !relevant {
             return None;
         }
-        // Declaration queries can erase a cyclic object's shape. The raw baseline
-        // still lets flow detect an impossible branch and return an unknown override.
-        let reference = self
-            .js_info
-            .raw_binding_types
-            .get(&binding.range())?
-            .clone();
-        let baseline = self.resolve(&reference);
-        let Some(baseline) = self.flow_baseline(baseline) else {
+        if baseline == TypeData::Unknown {
             return Some(TypeData::Unknown);
-        };
+        }
         let narrowed = self.solve_flow(graph, &seen, point, root.syntax(), binding, baseline);
         if narrowed == TypeData::NeverKeyword {
             return Some(TypeData::Unknown);
