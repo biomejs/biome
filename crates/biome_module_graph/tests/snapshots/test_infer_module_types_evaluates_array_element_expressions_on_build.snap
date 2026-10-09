@@ -8,7 +8,7 @@ expression: content
 ## Source
 
 ```ts
-export const tuple = ["value", 1];
+export const tuple = ["value", 1] as const;
 export const tupleFirst = tuple[0];
 export const numbers: number[] = [1, 2];
 export const arrayFirst = numbers[0];
@@ -25,7 +25,9 @@ for (const item of numbers) {
 Binding tuple "tuple" => [string: value,
 number: 1]
 
-Expression "[\"value\", 1]" => [string: value,
+Expression "[\"value\", 1]" => instanceof Array<string | number>
+
+Expression "[\"value\", 1] as const" => [string: value,
 number: 1]
 
 Expression "\"value\"" => string: value
@@ -43,8 +45,7 @@ Expression "0" => number: 0
 
 Binding numbers "numbers" => instanceof Array<number>
 
-Expression "[1, 2]" => [number: 1,
-number: 2]
+Expression "[1, 2]" => instanceof Array<number>
 
 Expression "1" => number: 1
 
