@@ -22,7 +22,9 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, JsIdentifierExpression, JsSyntaxNode,
 };
 use biome_js_type_info::interned_types::TypeData;
-use biome_js_type_info::{NarrowingPredicate, is_narrowing_invariant, narrow_type};
+use biome_js_type_info::{
+    NarrowingPredicate, is_narrowing_invariant, is_raw_narrowing_invariant, narrow_type,
+};
 use biome_rowan::{AstNode, TextRange};
 use std::collections::VecDeque;
 
@@ -76,7 +78,6 @@ pub(in crate::db) fn flow_binding_type<'db>(
     info: &JsModuleInfo,
     input: FlowBindingTypeInput<'db>,
 ) -> Option<TypeData<'db>> {
-    let baseline = infer_flow_binding_baseline(db, input.binding(db))?;
     let range = input.binding(db).range(db);
     let binding = info.semantic_model.as_binding_by_range(range)?;
     // The semantic index matches the start offset, not the entire range.
@@ -90,7 +91,7 @@ pub(in crate::db) fn flow_binding_type<'db>(
     }
     let graph = narrowing_flow_for_root(db, root_input).as_ref()?;
     let mut ctx = ResolutionCtx::new(db, module, info, ImportResolution::on_demand());
-    ctx.narrow_binding_at_flow(graph, input.point(db), &root, &binding, baseline)
+    ctx.narrow_binding_at_flow(graph, input.point(db), &root, &binding, input.binding(db))
 }
 
 fn binding_flow_root(binding: &Binding) -> Option<AnyJsControlFlowRoot> {
@@ -125,10 +126,18 @@ impl<'db> ResolutionCtx<'db, '_> {
         if root.syntax() != declaration_root.syntax() {
             return None;
         }
-        // The baseline is shared by every read, so checking it first avoids
-        // building a flow graph that cannot change the binding's type.
+        // Untyped and `any` bindings are recognizable without resolution, so
+        // they skip building a flow graph that cannot change their type. Other
+        // types are resolved only once a relevant test is reachable.
+        if self
+            .js_info
+            .raw_binding_types
+            .get(&binding.range())
+            .is_none_or(|reference| is_raw_narrowing_invariant(reference, &self.js_info.raw_types))
+        {
+            return None;
+        }
         let binding_input = BindingTypeInput::new(self.db, self.module, binding.range());
-        infer_flow_binding_baseline(self.db, binding_input)?;
         let input = FlowRootInput::new(self.db, self.module, root.range());
         let graph = narrowing_flow_for_root(self.db, input).as_ref()?;
         let point = *graph.expression_flows.get(&identifier.range())?;
@@ -144,7 +153,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         point: FlowNodeId,
         root: &AnyJsControlFlowRoot,
         binding: &Binding,
-        baseline: TypeData<'db>,
+        binding_input: BindingTypeInput<'db>,
     ) -> Option<TypeData<'db>> {
         let mut pending = vec![point];
         let mut seen = vec![false; graph.nodes.len()];
@@ -210,6 +219,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         if !relevant {
             return None;
         }
+        let baseline = infer_flow_binding_baseline(self.db, binding_input)?;
         if baseline == TypeData::Unknown {
             return Some(TypeData::Unknown);
         }

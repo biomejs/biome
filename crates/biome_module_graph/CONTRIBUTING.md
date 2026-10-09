@@ -90,8 +90,10 @@ functions, or facts about individual object properties. Unsupported control flow
 includes exception handlers, `switch`, `for-in`/`for-of`, destructuring, classes,
 and logical assignments. Roots using `eval` or `arguments` also keep ordinary
 inference. Variables typed `any`, or whose type includes an undetermined part,
-skip flow analysis entirely because no supported test can change them; this
-check runs before Biome builds a control-flow graph. If flow solving exhausts its
+never narrow because no supported test can change them. Untyped and
+`any`-annotated variables are recognized from collected data before Biome builds
+a control-flow graph; other variable types are resolved only after a relevant
+test is found, because resolving them can be costly. If flow solving exhausts its
 work limit or a query cycle occurs, the result is unknown. Callers must respect
 that result rather than replace it with a more confident answer from raw type
 information.
