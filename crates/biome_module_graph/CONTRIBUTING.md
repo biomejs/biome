@@ -68,7 +68,10 @@ Flow is split like types: collection gathers syntax-only facts, and tracked
 queries do everything that needs a resolved type. When type inference is
 enabled, collection (`src/js_module_info/flow.rs`) builds a graph of the
 possible paths through each execution root that tests one of its own
-variables. It decomposes every condition into guards on semantic bindings. For
+variables. The module visitor selects the roots that contain a condition
+during its own syntax walk, so collection never walks the whole module again
+and a module without conditions builds no graph. Collection decomposes every
+condition into guards on semantic bindings. For
 example, `typeof value === "string"` can narrow `value`; `check(value)` and
 `value.length` cannot. Collection then records which reads a test of their
 variable can reach, and those reads plus the enclosing expressions that can use
