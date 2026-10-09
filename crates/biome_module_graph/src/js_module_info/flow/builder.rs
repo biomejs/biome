@@ -4,8 +4,8 @@ use biome_js_control_flow::{AnyJsControlFlowRoot, is_truthy_literal};
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunction, AnyJsFunctionBody, AnyJsStatement, AnyTsType,
-    JsDoWhileStatement, JsForStatement, JsIdentifierExpression, JsIfStatement, JsSyntaxKind,
-    JsSyntaxNode, JsWhileStatement, T,
+    JsAssignmentExpression, JsAssignmentOperator, JsDoWhileStatement, JsForStatement,
+    JsIdentifierExpression, JsIfStatement, JsSyntaxKind, JsSyntaxNode, JsWhileStatement, T,
 };
 use biome_rowan::{AstNode, AstSeparatedList, SyntaxKind, TextRange, TokenText};
 
@@ -118,19 +118,22 @@ fn is_supported_syntax(root: &JsSyntaxNode) -> bool {
         ) {
             return false;
         }
-        for child in node.children_with_tokens() {
-            if let Some(token) = child.as_token()
-                && matches!(token.kind(), T![&&=] | T![||=] | T![??=])
-            {
+        if JsAssignmentExpression::cast_ref(&node).is_some_and(|assignment| {
+            matches!(
+                assignment.operator(),
+                Ok(JsAssignmentOperator::LogicalAndAssign
+                    | JsAssignmentOperator::LogicalOrAssign
+                    | JsAssignmentOperator::NullishCoalescingAssign)
+            )
+        }) {
+            return false;
+        }
+        for child in node.children() {
+            let Some(next) = remaining.checked_sub(1) else {
                 return false;
-            }
-            if let Some(child) = child.into_node() {
-                let Some(next) = remaining.checked_sub(1) else {
-                    return false;
-                };
-                remaining = next;
-                pending.push((child, depth + 1));
-            }
+            };
+            remaining = next;
+            pending.push((child, depth + 1));
         }
     }
     true
