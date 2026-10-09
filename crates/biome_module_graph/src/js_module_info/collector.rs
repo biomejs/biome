@@ -1,4 +1,4 @@
-use super::flow::ModuleFlow;
+use super::flow::{FlowRootScanner, ModuleFlow};
 use crate::css_module_info::CssClassReference;
 use std::{borrow::Cow, sync::Arc};
 
@@ -995,6 +995,7 @@ impl JsModuleInfo {
         mut collector: JsModuleInfoCollector,
         semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
         inference_mode: TypeInferenceMode,
+        flow_roots: FlowRootScanner,
     ) -> Self {
         collector.inference_mode = inference_mode;
         let finalised = collector.finalise(&semantic_model);
@@ -1023,7 +1024,7 @@ impl JsModuleInfo {
             ModuleFlow::default()
         } else {
             ModuleFlow::collect(
-                &semantic_model.root(),
+                flow_roots,
                 &semantic_model,
                 &finalised.raw_types,
                 &finalised.raw_binding_types,
