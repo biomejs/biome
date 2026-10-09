@@ -68,10 +68,10 @@ Flow is split like types: collection gathers syntax-only facts, and tracked
 queries do everything that needs a resolved type. When type inference is
 enabled, collection (`src/js_module_info/flow.rs`) builds a graph of the
 possible paths through each execution root that tests one of its own
-variables. The module visitor selects the roots that contain a condition
-during its own syntax walk, so collection never walks the whole module again
-and a module without conditions builds no graph. Collection decomposes every
-condition into guards on semantic bindings. For
+variables. The module visitor selects the roots that contain a condition and
+only supported syntax during its own syntax walk, so collection never walks the
+whole module again and a module without conditions builds no graph. Collection
+decomposes every condition into guards on semantic bindings. For
 example, `typeof value === "string"` can narrow `value`; `check(value)` and
 `value.length` cannot. Collection then records which reads a test of their
 variable can reach, and those reads plus the enclosing expressions that can use
@@ -95,14 +95,18 @@ uncertainty.
 Narrowing does not support `var`, imported variables, predicate/assertion
 functions, or facts about individual object properties. Unsupported control flow
 includes exception handlers, `switch`, `for-in`/`for-of`, destructuring, classes,
-and logical assignments. Roots using `eval` or `arguments`, and roots that
-exceed a work limit while their flow is collected, also keep ordinary inference. Variables typed `any`, or whose type includes an undetermined part,
-never narrow because no supported test can change them. Collection already
-drops reads of untyped and `any`-annotated variables; other variable types are
-resolved only when a candidate read is queried, because resolving them can be
-costly. If flow solving exhausts its work limit or a query cycle occurs, the
-result is unknown. Callers must respect that result rather than replace it with
-a more confident answer from raw type information.
+and logical assignments. Roots that read the global `eval` or the implicit
+`arguments` object, directly or in a nested function, and roots that exceed a
+work limit while their flow is collected, also keep ordinary inference. The
+semantic model decides whether a reference reads either one, so a variable that
+shadows the name and a reference inside a type do not count. Variables typed
+`any`, or whose type includes an undetermined part, never narrow because no
+supported test can change them. Collection already drops reads of untyped and
+`any`-annotated variables; other variable types are resolved only when a
+candidate read is queried, because resolving them can be costly. If flow
+solving exhausts its work limit or a query cycle occurs, the result is unknown.
+Callers must respect that result rather than replace it with a more confident
+answer from raw type information.
 
 Collected flow belongs to the module input, so an edit replaces it together
 with the raw type tables, even when variable declarations and references stay
