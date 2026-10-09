@@ -1,0 +1,34 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-shadowed.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { DynamicColorIOS } from 'react-native';
+import { PlatformColor } from './theme';
+
+const color = DynamicColorIOS({light: PlatformColor('labelColor'), dark: 'white'});
+
+```
+
+# Diagnostics
+```
+invalid-shadowed.js:5:32 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This value of DynamicColorIOS() is not a literal or a PlatformColor() call.
+  
+    3 │ import { PlatformColor } from './theme';
+    4 │ 
+  > 5 │ const color = DynamicColorIOS({light: PlatformColor('labelColor'), dark: 'white'});
+      │                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i React Native can only optimize dynamic colors whose values are written directly in the call.
+  
+  i Write the color as a string, or use a PlatformColor() call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

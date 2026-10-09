@@ -365,6 +365,7 @@ define_categories! {
     "lint/nursery/useReactCompiler": "https://biomejs.dev/linter/rules/use-react-compiler",
     "lint/nursery/useReactFunctionComponentDefinition": "https://biomejs.dev/linter/rules/use-react-function-component-definition",
     "lint/nursery/useReactNamingConvention": "https://biomejs.dev/linter/rules/use-react-naming-convention",
+    "lint/nursery/useReactNativeValidPlatformColors": "https://biomejs.dev/linter/rules/use-react-native-valid-platform-colors",
     "lint/nursery/useRegexpExec": "https://biomejs.dev/linter/rules/use-regexp-exec",
     "lint/nursery/useRegexpTest": "https://biomejs.dev/linter/rules/use-regexp-test",
     "lint/nursery/useScopedStyles": "https://biomejs.dev/linter/rules/use-scoped-styles",

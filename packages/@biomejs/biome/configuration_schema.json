@@ -8390,6 +8390,15 @@
 						{ "type": "null" }
 					]
 				},
+				"useReactNativeValidPlatformColors": {
+					"description": "Require PlatformColor() and DynamicColorIOS() calls to use values written directly in the call.\nSee https://biomejs.dev/linter/rules/use-react-native-valid-platform-colors",
+					"anyOf": [
+						{
+							"$ref": "#/$defs/UseReactNativeValidPlatformColorsConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"useRegexpExec": {
 					"description": "Enforce RegExp#exec over String#match if no global flag is provided.\nSee https://biomejs.dev/linter/rules/use-regexp-exec",
 					"anyOf": [
@@ -14829,6 +14838,17 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseReactNativeValidPlatformColorsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": {
+					"$ref": "#/$defs/UseReactNativeValidPlatformColorsOptions"
+				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseReadonlyClassPropertiesOptions": {
 			"type": "object",
 			"properties": {
@@ -19879,6 +19899,16 @@
 					"items": { "$ref": "#/$defs/NormalizedGlob" }
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseReactNativeValidPlatformColorsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseReactNativeValidPlatformColorsOptions" }
+			]
+		},
+		"UseReactNativeValidPlatformColorsOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseReadonlyClassPropertiesConfiguration": {
