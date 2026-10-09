@@ -591,8 +591,11 @@ fn load_jsdoc_types_from_module_comment(model: &mut JsDocTypeModel, root: &AnyJs
     }
 }
 
+/// Matches a `@module` block tag. Like any block tag it has to start a line of
+/// the comment, either right after the opening `/**` or after the optional
+/// leading `*`, so a `@module` mentioned in prose doesn't count.
 static JSDOC_MODULE_TAG_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"(?:^|[\s*])@module\b").unwrap());
+    LazyLock::new(|| Regex::new(r"(?m)^(?:/\*\*|[ \t]*\*?)[ \t]*@module\b").unwrap());
 
 static JSDOC_INLINE_TAG_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"\{@(linkcode|linkplain|link|see)\s*([^}| #\.]+)(?:[^}]+)?\}").unwrap()
