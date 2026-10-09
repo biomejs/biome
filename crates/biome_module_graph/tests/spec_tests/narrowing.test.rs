@@ -65,12 +65,9 @@ fn assert_variants<'db>(
 
 fn assert_no_flow_queries(db: &TestModuleDb, events: &[salsa::Event]) {
     for query in [
-        "infer_flow_expression_type",
         "infer_flow_expression_type_impl",
         "infer_flow_binding_baseline",
         "infer_flow_binding_type",
-        "narrowing_flow_for_root",
-        "module_control_flow",
     ] {
         assert_eq!(
             function_query_will_execute_count_by_name(db, query, events),
@@ -81,7 +78,7 @@ fn assert_no_flow_queries(db: &TestModuleDb, events: &[salsa::Event]) {
 }
 
 #[test]
-fn declaration_only_modules_do_not_build_flow_candidates() {
+fn declaration_only_modules_skip_flow_queries() {
     let (db, module) = narrowing_db("type Alias = string; interface Shape { value: Alias; }");
     let ModuleInfoKind::Js(info) = module.kind(&db) else {
         panic!("module must contain JavaScript information");
@@ -91,10 +88,6 @@ fn declaration_only_modules_do_not_build_flow_candidates() {
     assert!(infer_module_types(&db, module).is_some());
     let events = db.take_salsa_events();
     assert_no_flow_queries(&db, &events);
-    assert_eq!(
-        function_query_will_execute_count_by_name(&db, "flow_candidates_for_module", &events),
-        0
-    );
 }
 
 #[test]
@@ -144,11 +137,6 @@ fn branchless_promise_batches_skip_flow_queries() {
         let events = db.take_salsa_events();
         assert_no_flow_queries(&db, &events);
         assert_eq!(
-            function_query_will_execute_count_by_name(&db, "flow_candidates_for_module", &events),
-            0,
-            "collection already rules out flow in this module"
-        );
-        assert_eq!(
             function_query_will_execute_count_by_name(&db, "infer_expression_is_promise", &events),
             if cold { 16 } else { 0 }
         );
@@ -157,7 +145,7 @@ fn branchless_promise_batches_skip_flow_queries() {
 }
 
 #[test]
-fn reads_before_the_first_condition_do_not_build_flow_graphs() {
+fn reads_before_the_first_condition_skip_flow_queries() {
     const SOURCE: &str = r#"
         function f(value: string | null) {
             /*before*/value;
@@ -299,6 +287,34 @@ fn incomplete_conditions_do_not_expand_unrelated_binding_types() {
 }
 
 #[test]
+fn conditions_with_missing_operands_make_guarded_reads_unknown() {
+    const SOURCE: &str = "function f(value: string | null) { if (value === ) { /*read*/value; } }";
+    // The shared fixtures reject syntax errors, so this module is built directly.
+    let parsed = parse(SOURCE, JsFileSource::ts(), JsParserOptions::default());
+    assert!(parsed.has_errors());
+    let root = parsed.tree();
+    let semantic_model = std::sync::Arc::new(biome_js_semantic::semantic_model(
+        &root,
+        biome_js_semantic::SemanticModelOptions::default(),
+    ));
+    let fs = MemoryFileSystem::default();
+    let mut db = TestModuleDb::with_fs(&fs);
+    let path = BiomePath::new("/src/index.ts");
+    let (info, _, _) = resolve_js_module(&db, root, &path, semantic_model, true);
+    let module = ModuleInfo::new(
+        &db,
+        Utf8PathBuf::from("/src/index.ts"),
+        ModuleInfoKind::Js(info),
+    );
+    db.modules
+        .insert(Utf8PathBuf::from("/src/index.ts"), module);
+    assert_eq!(
+        normalized_type_at(&db, module, SOURCE, "read", "value"),
+        InferredTypeData::Unknown
+    );
+}
+
+#[test]
 fn shadowed_undefined_does_not_expand_the_compared_binding() {
     let variants = (0..1100)
         .map(|index| format!("\"value{index}\""))
@@ -400,7 +416,7 @@ fn tests_in_nested_roots_or_after_the_read_skip_flow_queries() {
 }
 
 #[test]
-fn unrefinable_binding_types_skip_flow_graphs() {
+fn unrefinable_binding_types_skip_flow_queries() {
     for (parameter, resolved_queries) in [("value: any", 0), ("value", 0), ("value: Loose", 1)] {
         let source = format!(
             "type Loose = any;\n\
@@ -419,12 +435,8 @@ fn unrefinable_binding_types_skip_flow_graphs() {
         db.clear_salsa_events();
         assert_eq!(read("after"), ordinary, "{parameter}");
         let events = db.take_salsa_events();
-        // Only a type that resolves to `any` needs a flow graph to find out.
-        for query in [
-            "narrowing_flow_for_root",
-            "infer_flow_binding_type",
-            "infer_flow_binding_baseline",
-        ] {
+        // Only a type that resolves to `any` needs flow queries to find out.
+        for query in ["infer_flow_binding_type", "infer_flow_binding_baseline"] {
             assert_eq!(
                 function_query_will_execute_count_by_name(&db, query, &events),
                 resolved_queries,
@@ -789,15 +801,6 @@ fn repeated_narrowed_reads_share_flow_states_and_agree_with_complete_tables() {
         function_query_will_execute_count_by_name(&db, "infer_flow_binding_baseline", &events),
         1,
         "reads at different flow points must share the binding's baseline"
-    );
-    assert_eq!(
-        function_query_will_execute_count_by_name(&db, "narrowing_flow_for_root", &events),
-        1
-    );
-    assert_eq!(
-        function_query_will_execute_count_by_name(&db, "module_control_flow", &events),
-        0,
-        "narrowing must construct only the selected root's CFG"
     );
     assert_function_query_was_not_run(&db, infer_module_types, module, &events);
 
@@ -1484,14 +1487,11 @@ fn adding_and_removing_conditions_invalidates_flow_candidates_with_equal_semanti
         };
         assert_variants(&db, ty, expected, source);
         let events = db.take_salsa_events();
-        assert_eq!(
-            function_query_will_execute_count_by_name(&db, "flow_candidates_for_module", &events),
-            1,
-            "condition edits must invalidate the syntax-derived candidate index"
-        );
+        // Collected flow belongs to the module input, so editing a condition
+        // replaces it even when declarations and references stay equal.
         if guarded {
             assert_eq!(
-                function_query_will_execute_count_by_name(&db, "narrowing_flow_for_root", &events),
+                function_query_will_execute_count_by_name(&db, "infer_flow_binding_type", &events),
                 1
             );
         } else {

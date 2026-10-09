@@ -1,17 +1,198 @@
-//! Shares supported condition syntax between flow evaluation and subject discovery.
-
-use biome_js_control_flow::FlowOutcome;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsLiteralExpression, JsBinaryOperator, JsLogicalOperator,
-    JsReferenceIdentifier, JsUnaryOperator,
+    AnyJsExpression, AnyJsLiteralExpression, JsBinaryOperator, JsIdentifierExpression,
+    JsLogicalOperator, JsReferenceIdentifier, JsUnaryOperator,
 };
 use biome_js_type_info::TypeofKind;
-use biome_rowan::{AstNode, SyntaxKind};
+use biome_rowan::{AstNode, SyntaxKind, TextRange};
 
-pub(super) const MAX_CONDITION_DEPTH: usize = 32;
+/// Limits the nested `!`, `&&`, and `||` operators decomposed in one
+/// condition. Deeper operands keep the incoming type.
+const MAX_CONDITION_DEPTH: usize = 32;
+/// Limits the syntax steps spent decomposing one condition.
+const MAX_CONDITION_STEPS: usize = 16_384;
+/// Limits the descendants scanned for variables when decomposition stops early.
+const MAX_FALLBACK_NODES: usize = 1024;
 
-pub(in crate::db) enum SyntaxGuard {
+/// The result of a condition that a flow path has observed.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum FlowOutcome {
+    Truthy,
+    Falsy,
+    Nullish,
+    NonNullish,
+}
+
+/// One step of a decomposed condition, stored in an arena per execution root.
+///
+/// Applying a guard to a variable's incoming type yields its type once the
+/// condition holds. `Keep` and tests of other variables return the incoming
+/// type, while `Incomplete` makes it unknown.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub(crate) enum FlowGuard {
+    /// The step cannot refine any variable, so the incoming type is kept.
+    Keep,
+    /// Decomposition stopped at its work limit or at missing syntax, so the
+    /// incoming type becomes unknown.
+    Incomplete,
+    /// A runtime test of the variable declared at `binding`.
+    Test {
+        binding: TextRange,
+        test: FlowTest,
+        positive: bool,
+    },
+    /// The operands of `&&` or `||`. A sequential pair applies `right` to the
+    /// result of `left`; otherwise both apply to the incoming type and their
+    /// results are joined.
+    Both {
+        left: usize,
+        right: usize,
+        sequential: bool,
+    },
+}
+
+/// A runtime test whose result a guard assumes.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum FlowTest {
+    Truthy,
+    Nullish,
+    Typeof(TypeofKind),
+    /// Strict equality with `null`.
+    Null,
+    /// Strict equality with the primitive literal expression at this range.
+    Literal(TextRange),
+    /// Equality with `undefined`; loose equality also matches `null`.
+    Undefined {
+        strict: bool,
+    },
+}
+
+/// A condition decomposed into the arena.
+pub(super) struct DecomposedCondition {
+    pub(super) guard: usize,
+    /// Bindings whose type the condition may refine.
+    ///
+    /// When decomposition stops early, this conservatively lists every
+    /// variable read directly in the condition.
+    pub(super) mentions: Vec<TextRange>,
+}
+
+/// Decomposes `expression`, assuming `outcome`, into guards appended to `guards`.
+pub(super) fn decompose_condition(
+    expression: &AnyJsExpression,
+    outcome: FlowOutcome,
+    model: &SemanticModel,
+    guards: &mut Vec<FlowGuard>,
+) -> DecomposedCondition {
+    let mut decomposer = Decomposer {
+        model,
+        guards,
+        remaining: MAX_CONDITION_STEPS,
+        mentions: Vec::new(),
+        complete: true,
+    };
+    let guard = decomposer.guard(expression.clone(), outcome, 0);
+    let mentions = if decomposer.complete {
+        decomposer.mentions
+    } else {
+        expression
+            .syntax()
+            .descendants()
+            .take(MAX_FALLBACK_NODES)
+            .filter_map(JsIdentifierExpression::cast)
+            .filter_map(|identifier| model.binding(&identifier.name().ok()?))
+            .map(|binding| binding.range())
+            .collect()
+    };
+    DecomposedCondition { guard, mentions }
+}
+
+struct Decomposer<'a> {
+    model: &'a SemanticModel,
+    guards: &'a mut Vec<FlowGuard>,
+    remaining: usize,
+    mentions: Vec<TextRange>,
+    complete: bool,
+}
+
+impl Decomposer<'_> {
+    fn guard(&mut self, expression: AnyJsExpression, outcome: FlowOutcome, depth: usize) -> usize {
+        if depth >= MAX_CONDITION_DEPTH {
+            self.complete = false;
+            return self.push(FlowGuard::Keep);
+        }
+        let Some(step) = condition_step(expression, outcome, &mut self.remaining) else {
+            self.complete = false;
+            return self.push(FlowGuard::Incomplete);
+        };
+        let guard = match step {
+            ConditionStep::Unsupported => FlowGuard::Keep,
+            ConditionStep::Guard {
+                subject,
+                guard,
+                positive,
+            } => self.test(&subject, guard, positive),
+            ConditionStep::Negated { argument, outcome } => {
+                return self.guard(argument, outcome, depth + 1);
+            }
+            ConditionStep::Logical {
+                left,
+                right,
+                outcome,
+                sequential,
+            } => {
+                let left = self.guard(left, outcome, depth + 1);
+                let right = self.guard(right, outcome, depth + 1);
+                FlowGuard::Both {
+                    left,
+                    right,
+                    sequential,
+                }
+            }
+        };
+        self.push(guard)
+    }
+
+    fn test(
+        &mut self,
+        subject: &JsReferenceIdentifier,
+        guard: SyntaxGuard,
+        positive: bool,
+    ) -> FlowGuard {
+        let test = match guard {
+            SyntaxGuard::Truthy => FlowTest::Truthy,
+            SyntaxGuard::Nullish => FlowTest::Nullish,
+            SyntaxGuard::Typeof(kind) => FlowTest::Typeof(kind),
+            SyntaxGuard::Literal(AnyJsLiteralExpression::JsNullLiteralExpression(_)) => {
+                FlowTest::Null
+            }
+            SyntaxGuard::Literal(literal) => FlowTest::Literal(literal.range()),
+            // A local variable named `undefined` can hold any value.
+            SyntaxGuard::Undefined { reference, .. }
+                if self.model.binding(&reference).is_some() =>
+            {
+                return FlowGuard::Keep;
+            }
+            SyntaxGuard::Undefined { strict, .. } => FlowTest::Undefined { strict },
+        };
+        let Some(binding) = self.model.binding(subject) else {
+            return FlowGuard::Keep;
+        };
+        self.mentions.push(binding.range());
+        FlowGuard::Test {
+            binding: binding.range(),
+            test,
+            positive,
+        }
+    }
+
+    fn push(&mut self, guard: FlowGuard) -> usize {
+        self.guards.push(guard);
+        self.guards.len() - 1
+    }
+}
+
+enum SyntaxGuard {
     Truthy,
     Nullish,
     Typeof(TypeofKind),
@@ -22,17 +203,8 @@ pub(in crate::db) enum SyntaxGuard {
     },
 }
 
-impl SyntaxGuard {
-    pub(super) fn is_applicable(&self, model: &SemanticModel) -> bool {
-        !matches!(self, Self::Undefined { reference, .. } if model.binding(reference).is_some())
-    }
-}
-
-/// One syntax step, with child expressions left unevaluated.
-///
-/// Unsupported steps preserve the incoming type, including in logical alternatives.
-/// Literal conversion belongs to evaluation; applicability only inspects bindings.
-pub(in crate::db) enum ConditionStep {
+/// One syntax step, with child expressions left undecomposed.
+enum ConditionStep {
     Unsupported,
     Guard {
         subject: JsReferenceIdentifier,
@@ -51,64 +223,14 @@ pub(in crate::db) enum ConditionStep {
     },
 }
 
-/// Returns direct identifier subjects without resolving their types.
-///
-/// Subjects may repeat. An empty result proves there is no supported target.
-/// `None` means required syntax is missing or the work/depth limit was reached;
-/// callers must not use it to exclude candidates. The semantic model rules out
-/// comparisons against a variable that shadows `undefined`.
-pub(in crate::db) fn condition_subjects(
-    expression: AnyJsExpression,
-    outcome: FlowOutcome,
-    model: &SemanticModel,
-    remaining: &mut usize,
-) -> Option<Vec<JsReferenceIdentifier>> {
-    let mut subjects = Vec::new();
-    collect_subjects(expression, outcome, model, 0, remaining, &mut subjects)?;
-    Some(subjects)
-}
-
-fn collect_subjects(
-    expression: AnyJsExpression,
-    outcome: FlowOutcome,
-    model: &SemanticModel,
-    depth: usize,
-    remaining: &mut usize,
-    subjects: &mut Vec<JsReferenceIdentifier>,
-) -> Option<()> {
-    if depth >= MAX_CONDITION_DEPTH {
-        return None;
-    }
-    match condition_step(expression, outcome, remaining)? {
-        ConditionStep::Unsupported => {}
-        ConditionStep::Guard { subject, guard, .. } => {
-            if guard.is_applicable(model) {
-                subjects.push(subject);
-            }
-        }
-        ConditionStep::Negated { argument, outcome } => {
-            collect_subjects(argument, outcome, model, depth + 1, remaining, subjects)?;
-        }
-        ConditionStep::Logical {
-            left,
-            right,
-            outcome,
-            ..
-        } => {
-            collect_subjects(left, outcome, model, depth + 1, remaining, subjects)?;
-            collect_subjects(right, outcome, model, depth + 1, remaining, subjects)?;
-        }
-    }
-    Some(())
-}
-
-/// Decomposes one condition, spending work on the step and parenthesis traversal.
-/// Missing syntax and exhausted work return `None`, not `Unsupported`.
+/// Decomposes one condition step, spending work on the step and on removing
+/// parentheses. Missing syntax and exhausted work return `None`, not
+/// `Unsupported`.
 #[expect(
     clippy::wildcard_enum_match_arm,
     reason = "Only supported narrowing syntax is decomposed."
 )]
-pub(in crate::db) fn condition_step(
+fn condition_step(
     expression: AnyJsExpression,
     outcome: FlowOutcome,
     remaining: &mut usize,
@@ -294,25 +416,46 @@ mod tests {
     use biome_js_syntax::JsIfStatement;
     use biome_languages::JsFileSource;
 
-    fn condition(source: &str) -> (AnyJsExpression, SemanticModel) {
+    /// Decomposes the `if` test `source` and names the mentioned bindings.
+    fn decompose(source: &str, outcome: FlowOutcome) -> (Vec<FlowGuard>, Vec<String>) {
         let parsed = parse(
-            &format!("if ({source}) {{}}"),
+            &format!("function f(value, other) {{ if ({source}) {{}} }}"),
             JsFileSource::ts(),
             JsParserOptions::default(),
         );
         let model = semantic_model(&parsed.tree(), SemanticModelOptions::default());
-        let expression = parsed
+        let test = parsed
             .syntax()
             .descendants()
             .find_map(JsIfStatement::cast)
             .unwrap()
             .test()
             .unwrap();
-        (expression, model)
+        let mut guards = Vec::new();
+        let condition = decompose_condition(&test, outcome, &model, &mut guards);
+        let names = condition
+            .mentions
+            .iter()
+            .map(|range| {
+                model
+                    .as_binding_by_range(*range)
+                    .unwrap()
+                    .tree()
+                    .name_token()
+                    .unwrap()
+                    .text_trimmed()
+                    .to_owned()
+            })
+            .collect();
+        (guards, names)
+    }
+
+    fn mentioned_names(source: &str, outcome: FlowOutcome) -> Vec<String> {
+        decompose(source, outcome).1
     }
 
     #[test]
-    fn subjects_match_supported_condition_shapes() {
+    fn mentions_match_supported_condition_shapes() {
         for (source, outcome, expected) in [
             ("value", FlowOutcome::Truthy, vec!["value"]),
             ("(!((value)))", FlowOutcome::Falsy, vec!["value"]),
@@ -344,28 +487,25 @@ mod tests {
             ("value === void 0", FlowOutcome::Truthy, vec![]),
             ("value ?? other", FlowOutcome::Truthy, vec![]),
             ("value && other", FlowOutcome::Nullish, vec![]),
+            ("global", FlowOutcome::Truthy, vec![]),
         ] {
-            let (expression, model) = condition(source);
-            let subjects = condition_subjects(expression, outcome, &model, &mut 1024).unwrap();
-            let names = subjects
-                .iter()
-                .map(|subject| subject.value_token().unwrap().text_trimmed().to_owned())
-                .collect::<Vec<_>>();
-            assert_eq!(names, expected, "{source}");
+            assert_eq!(mentioned_names(source, outcome), expected, "{source}");
         }
     }
 
     #[test]
-    fn incomplete_discovery_does_not_prove_an_empty_subject_set() {
-        for (source, mut remaining) in [("value", 0), ("((value))", 1), ("value ===", 1024)] {
-            let (expression, model) = condition(source);
-            assert!(
-                condition_subjects(expression, FlowOutcome::Truthy, &model, &mut remaining)
-                    .is_none()
-            );
-        }
-        let source = format!("{}value", "!".repeat(MAX_CONDITION_DEPTH));
-        let (expression, model) = condition(&source);
-        assert!(condition_subjects(expression, FlowOutcome::Truthy, &model, &mut 1024).is_none());
+    fn missing_operands_make_the_guard_incomplete() {
+        let (guards, names) = decompose("other === null || value ===", FlowOutcome::Truthy);
+        assert!(guards.contains(&FlowGuard::Incomplete));
+        assert_eq!(names, ["other", "value"]);
+    }
+
+    #[test]
+    fn incomplete_decomposition_mentions_every_direct_read() {
+        let source = format!("{}value && other.length", "!".repeat(MAX_CONDITION_DEPTH));
+        assert_eq!(
+            mentioned_names(&source, FlowOutcome::Truthy),
+            ["value", "other"]
+        );
     }
 }

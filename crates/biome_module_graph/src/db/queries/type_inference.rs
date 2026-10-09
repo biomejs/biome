@@ -46,17 +46,16 @@ pub use interned::{
     LocalTypeInput, NormalizeTypeInput,
 };
 pub(crate) use interned::{
-    BindingTypeWithImportBudgetInput, CallableFunctionInput, FlowBindingTypeInput, FlowRootInput,
+    BindingTypeWithImportBudgetInput, CallableFunctionInput, FlowBindingTypeInput,
     LocalTypeWithImportBudgetInput, TypeSubstitutionInput,
 };
-pub(in crate::db) use lookups::flow_candidates_for_module;
 pub use lookups::{
     find_member_type, find_value_member_type, infer_binding_type, infer_expression_type,
     infer_local_type, resolve_callable_type,
 };
 pub(crate) use lookups::{
     infer_binding_type_with_import_budget, infer_flow_binding_baseline, infer_flow_binding_type,
-    infer_flow_expression_type, infer_local_type_with_import_budget, narrowing_flow_for_root,
+    infer_flow_expression_type, infer_local_type_with_import_budget,
 };
 pub use module_types::{infer_module_types, infer_module_types_bottom_up};
 pub(crate) use module_types::{

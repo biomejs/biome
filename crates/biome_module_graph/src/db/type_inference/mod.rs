@@ -11,8 +11,6 @@ use rustc_hash::{FxHashMap, FxHashSet};
 
 mod expressions;
 mod flow;
-mod flow_candidates;
-pub(in crate::db) mod flow_conditions;
 mod flow_expressions;
 mod globals;
 mod imports;
@@ -22,7 +20,6 @@ mod qualifiers;
 mod resolver;
 
 pub(in crate::db) use flow::{flow_binding_baseline, flow_binding_type, flow_expression_type};
-pub(in crate::db) use flow_candidates::FlowCandidates;
 pub(in crate::db) use imports::{
     ExportOriginResult, collect_namespace_export_names, find_export_origin,
     resolve_export_type_on_demand,

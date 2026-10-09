@@ -18,8 +18,8 @@
 
 use super::{BindingTypeData, InferredModuleTypes, globals::global_type, lookup::MemberLookupMode};
 use crate::db::queries::{
-    ExpressionTypeInput, LocalTypeInput, flow_candidates_for_module, infer_flow_expression_type,
-    infer_local_type, infer_module_types, infer_module_types_from_tables, inference_module_sccs,
+    ExpressionTypeInput, LocalTypeInput, infer_flow_expression_type, infer_local_type,
+    infer_module_types, infer_module_types_from_tables, inference_module_sccs,
 };
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::{JsModuleInfo, ModuleDb, ModuleGraphGeneration, module_for_key};
@@ -247,16 +247,11 @@ pub(in crate::db) fn resolve_raw_types<'db>(
         .map(|index| ctx.resolve_raw_type_id(TypeId::new(index)))
         .collect();
 
-    let candidates = if !js_info.has_flow_candidate_sources || js_info.raw_expressions.is_empty() {
-        None
-    } else {
-        flow_candidates_for_module(db, module).as_ref()
-    };
     let expressions = js_info
         .raw_expressions
         .iter()
         .map(|(range, reference)| {
-            let ty = if candidates.is_some_and(|candidates| candidates.contains(*range)) {
+            let ty = if js_info.flow.is_candidate(*range) {
                 infer_flow_expression_type(db, ExpressionTypeInput::new(db, module, *range))
             } else {
                 None
