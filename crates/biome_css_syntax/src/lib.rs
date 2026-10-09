@@ -133,6 +133,7 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
 
     fn to_bogus(&self) -> Self {
         match self {
+            CSS_EMPTY_DECLARATION => CSS_BOGUS,
             kind if AnyCssSubSelector::can_cast(*kind) => CSS_BOGUS_SUB_SELECTOR,
             kind if AnyCssSelector::can_cast(*kind) => CSS_BOGUS_SELECTOR,
             kind if AnyCssRule::can_cast(*kind) => CSS_BOGUS_RULE,

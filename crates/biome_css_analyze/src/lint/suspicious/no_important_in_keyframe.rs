@@ -66,6 +66,7 @@ impl Rule for NoImportantInKeyframe {
             let keyframe_item = match item {
                 AnyCssKeyframesItem::CssKeyframesItem(keyframe_item) => keyframe_item,
                 AnyCssKeyframesItem::CssAtRule(_) => continue,
+                AnyCssKeyframesItem::CssEmptyDeclaration(_) => continue,
                 AnyCssKeyframesItem::ScssKeyframesVariableDeclaration(_) => continue,
                 AnyCssKeyframesItem::CssBogusKeyframesItem(_) => return None,
             };

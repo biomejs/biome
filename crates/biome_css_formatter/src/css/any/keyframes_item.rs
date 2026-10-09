@@ -10,6 +10,7 @@ impl FormatRule<AnyCssKeyframesItem> for FormatAnyCssKeyframesItem {
         match node {
             AnyCssKeyframesItem::CssAtRule(node) => node.format().fmt(f),
             AnyCssKeyframesItem::CssBogusKeyframesItem(node) => node.format().fmt(f),
+            AnyCssKeyframesItem::CssEmptyDeclaration(node) => node.format().fmt(f),
             AnyCssKeyframesItem::CssKeyframesItem(node) => node.format().fmt(f),
             AnyCssKeyframesItem::ScssKeyframesVariableDeclaration(node) => node.format().fmt(f),
         }

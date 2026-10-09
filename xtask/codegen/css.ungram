@@ -92,6 +92,7 @@ CssRootItemList = AnyCssRootItem*
 AnyCssRootItem =
 	AnyCssRule
 	| ScssVariableDeclaration
+	| CssEmptyDeclaration
 	| CssBogus
 
 CssRuleList = AnyCssRuleListItem*
@@ -99,6 +100,7 @@ CssRuleList = AnyCssRuleListItem*
 AnyCssRuleListItem =
 	AnyCssRule
 	| ScssVariableDeclaration
+	| CssEmptyDeclaration
 
 AnyCssRule =
 	CssQualifiedRule
@@ -1136,6 +1138,7 @@ CssFontFeatureValuesItemList = AnyCssFontFeatureValuesItem*
 
 AnyCssFontFeatureValuesItem =
 	CssFontFeatureValuesItem
+	| CssEmptyDeclaration
 	| CssBogusFontFeatureValuesItem
 
 // @font-feature-values Font One { @styleset { nice-style: 12; } }
@@ -1451,6 +1454,7 @@ AnyCssKeyframesItem =
 	CssKeyframesItem
 	| CssAtRule
 	| ScssKeyframesVariableDeclaration
+	| CssEmptyDeclaration
 	| CssBogusKeyframesItem
 
 ScssKeyframesVariableDeclaration =
