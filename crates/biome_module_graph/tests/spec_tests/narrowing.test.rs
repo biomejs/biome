@@ -503,38 +503,99 @@ fn contextually_typed_callback_parameters_narrow() {
 }
 
 #[test]
-fn only_enclosing_expressions_count_toward_the_flow_nesting_limit() {
+fn only_evaluated_ancestors_count_toward_the_flow_nesting_limit() {
     use InferredTypeData::{Null, String};
-    let source = format!(
-        "function f(value: string | null) {{ if (value !== null) {{ {}/*read*/value;{} }} }}",
-        "{".repeat(24),
-        "}".repeat(24)
-    );
-    let (db, module) = narrowing_db(&source);
-    assert_eq!(
-        normalized_type_at(&db, module, &source, "read", "value"),
-        String,
-        "nested blocks"
-    );
-
-    let source = format!(
-        "function f(value: string | null) {{ if (value !== null) {{ {}/*read*/value{}; }} }}",
-        "(".repeat(60),
-        ")".repeat(60)
-    );
-    let (db, module) = narrowing_db(&source);
-    let ty = normalized_type_at(&db, module, &source, "read", "value");
-    assert_variants(&db, ty, &[String, Null], "nested parentheses");
+    let nested = |open: &str, inner: &str, close: &str, count: usize| {
+        format!("{}{inner}{}", open.repeat(count), close.repeat(count))
+    };
+    for (label, body, narrowed) in [
+        (
+            "nested blocks",
+            nested("{ ", "/*read*/value;", " }", 24),
+            true,
+        ),
+        (
+            "unevaluated operators",
+            format!("consume(/*read*/value{});", " - 1".repeat(49)),
+            true,
+        ),
+        (
+            "function boundary",
+            format!(
+                "{};",
+                nested(
+                    "id(",
+                    "(other: string | null) => other !== null && /*read*/other",
+                    ")",
+                    49
+                )
+            ),
+            true,
+        ),
+        (
+            "sequence left operands",
+            format!("/*read*/value{};", ", 0".repeat(49)),
+            true,
+        ),
+        (
+            "calls with type arguments",
+            format!(
+                "{};",
+                nested(
+                    "id<string | null>(",
+                    &nested("(", "/*read*/value", ")", 40),
+                    ")",
+                    10
+                )
+            ),
+            true,
+        ),
+        (
+            "parentheses",
+            format!("{};", nested("(", "/*read*/value", ")", 60)),
+            false,
+        ),
+        (
+            "call arguments",
+            format!(
+                "{};",
+                nested("id(", &nested("(", "/*read*/value", ")", 40), ")", 10)
+            ),
+            false,
+        ),
+    ] {
+        let source = format!(
+            "declare function id<T>(value: T): T;\n\
+             declare function consume(value: unknown): void;\n\
+             function f(value: string | null) {{ if (value !== null) {{ {body} }} }}"
+        );
+        let (db, module) = narrowing_db(&source);
+        let read = if label == "function boundary" {
+            "other"
+        } else {
+            "value"
+        };
+        let ty = normalized_type_at(&db, module, &source, "read", read);
+        if narrowed {
+            assert_eq!(ty, String, "{label}");
+        } else {
+            assert_variants(&db, ty, &[String, Null], label);
+        }
+    }
 }
 
 #[test]
 fn enclosing_expressions_that_drop_a_narrowed_read_skip_flow_queries() {
     const SOURCE: &str = r#"
-        function f(value: string | null) {
+        declare function id<T>(...values: T[]): T;
+        function f(value: string | null, values: string[]) {
             if (value !== null) {
                 /*array*/[/*element*/value];
                 /*object*/({ key: value });
                 /*template*/`${value}`;
+                /*spread*/id(...values, value);
+                /*typed*/id<string | null>(value);
+                /*sequence*/(value, 0);
             }
         }
     "#;
@@ -547,6 +608,9 @@ fn enclosing_expressions_that_drop_a_narrowed_read_skip_flow_queries() {
         ("array", "[/*element*/value]"),
         ("object", "({ key: value })"),
         ("template", "`${value}`"),
+        ("spread", "id(...values, value)"),
+        ("typed", "id<string | null>(value)"),
+        ("sequence", "(value, 0)"),
     ] {
         db.clear_salsa_events();
         let input = ExpressionTypeInput::new(&db, module, marked_range(SOURCE, marker, expression));
