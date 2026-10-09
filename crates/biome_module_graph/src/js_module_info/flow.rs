@@ -16,27 +16,22 @@
 mod builder;
 mod expressions;
 mod guards;
+mod scanner;
 
 pub(crate) use expressions::AnyFlowExpression;
 pub(crate) use guards::{FlowGuard, FlowTest};
+pub(crate) use scanner::FlowRootScanner;
 
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::{JsDeclarationKind, SemanticModel};
-use biome_js_syntax::{
-    JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIfStatement,
-    JsLogicalExpression, JsReferenceIdentifier, JsSyntaxNode, JsWhileStatement,
-    unescape_js_identifier,
-};
 use biome_js_type_info::{RawTypeData, TypeReference, is_raw_narrowing_invariant};
-use biome_rowan::{AstNode, TextRange, declare_node_union};
+use biome_rowan::{AstNode, TextRange};
 use builder::{BuiltRoot, build_root};
 use rustc_hash::{FxHashMap, FxHashSet};
 
 /// Index of a node in [`RootFlow::nodes`].
 pub(crate) type FlowNodeId = usize;
 
-/// Limits the syntax nodes, including nested roots, of a root that gets flow.
-const MAX_ROOT_NODES: usize = 16_384;
 /// Limits the graph steps spent deciding which reads a test can reach in one
 /// execution root. Like other construction limits, exceeding it leaves the
 /// root without flow, so its reads keep their ordinary types.
@@ -120,7 +115,7 @@ impl ModuleFlow {
             raw_binding_types,
             relevance_budget,
         };
-        for root in &roots.selected {
+        for root in roots.selected() {
             collector.add_root(&mut flow, root);
         }
         flow
@@ -139,84 +134,6 @@ impl ModuleFlow {
     pub(crate) fn root(&self, index: usize) -> Option<&RootFlow> {
         self.roots.get(index)
     }
-}
-
-declare_node_union! {
-    /// Syntax that tests a condition along some path.
-    AnyFlowConditionSource = JsIfStatement
-        | JsWhileStatement
-        | JsDoWhileStatement
-        | JsForStatement
-        | JsLogicalExpression
-        | JsConditionalExpression
-}
-
-/// Selects the execution roots that may need flow while the module visitor
-/// walks the syntax tree, so collection never walks the module again.
-///
-/// The visitor must report every node of the module in preorder through
-/// [`Self::enter`] and [`Self::leave`]. A root is selected when it directly
-/// contains a condition, outside its nested roots, has fewer than
-/// [`MAX_ROOT_NODES`] syntax nodes, and neither it nor a nested root
-/// references `eval` or `arguments`: direct `eval` and mapped `arguments` can
-/// write any enclosing variable.
-#[derive(Default)]
-pub(crate) struct FlowRootScanner {
-    open: Vec<OpenRoot>,
-    visited: usize,
-    selected: Vec<AnyJsControlFlowRoot>,
-}
-
-impl FlowRootScanner {
-    pub(crate) fn enter(&mut self, node: &JsSyntaxNode) {
-        self.visited += 1;
-        let kind = node.kind();
-        if AnyJsControlFlowRoot::can_cast(kind) {
-            self.open.push(OpenRoot {
-                first_node: self.visited - 1,
-                has_condition: false,
-                has_dynamic_scope: false,
-            });
-        } else if AnyFlowConditionSource::can_cast(kind) {
-            if let Some(root) = self.open.last_mut() {
-                root.has_condition = true;
-            }
-        } else if let Some(reference) = JsReferenceIdentifier::cast_ref(node)
-            && let Ok(token) = reference.value_token()
-            && matches!(
-                unescape_js_identifier(token.text_trimmed()).as_ref(),
-                "eval" | "arguments"
-            )
-            && let Some(root) = self.open.last_mut()
-        {
-            root.has_dynamic_scope = true;
-        }
-    }
-
-    pub(crate) fn leave(&mut self, node: &JsSyntaxNode) {
-        if !AnyJsControlFlowRoot::can_cast(node.kind()) {
-            return;
-        }
-        let Some(root) = self.open.pop() else {
-            return;
-        };
-        if root.has_dynamic_scope {
-            if let Some(parent) = self.open.last_mut() {
-                parent.has_dynamic_scope = true;
-            }
-        } else if root.has_condition
-            && self.visited - root.first_node < MAX_ROOT_NODES
-            && let Some(root) = AnyJsControlFlowRoot::cast_ref(node)
-        {
-            self.selected.push(root);
-        }
-    }
-}
-
-struct OpenRoot {
-    first_node: usize,
-    has_condition: bool,
-    has_dynamic_scope: bool,
 }
 
 struct RootCollector<'a> {
@@ -411,23 +328,6 @@ mod tests {
     }
 
     #[test]
-    fn nested_roots_count_toward_the_root_node_limit() {
-        // Each `other;` statement adds three syntax nodes to the nested arrow.
-        for (statements, expected) in [(1, true), (super::MAX_ROOT_NODES / 3, false)] {
-            let source = format!(
-                "function f(value: string | null) {{ const g = () => {{ {} }}; if (value !== null) {{ /*read*/value; }} }}",
-                "other;".repeat(statements)
-            );
-            let info = module(&source);
-            assert_eq!(
-                info.flow.is_candidate(marked(&source, "read", "value")),
-                expected,
-                "{statements}"
-            );
-        }
-    }
-
-    #[test]
     fn roots_over_the_relevance_budget_keep_no_reads() {
         const SOURCE: &str =
             "function f(value: string | null) { if (value !== null) { /*read*/value; } }";
@@ -437,7 +337,7 @@ mod tests {
         let mut roots = super::FlowRootScanner::default();
         for event in info.semantic_model.root().syntax().preorder() {
             match event {
-                WalkEvent::Enter(node) => roots.enter(&node),
+                WalkEvent::Enter(node) => roots.enter(&node, &info.semantic_model),
                 WalkEvent::Leave(node) => roots.leave(&node),
             }
         }
