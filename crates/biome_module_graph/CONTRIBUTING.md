@@ -64,21 +64,25 @@ uses narrowed operands when inferring member accesses, calls, logical and
 conditional expressions, and `await`. Complete module inference uses the same
 read-specific results as individual expression queries.
 
-Collection records whether a file contains syntax that could affect flow. If it
-does not, lookups skip the flow-candidate index too. Otherwise, the index selects
-variables that a supported condition in their own execution root actually tests.
-For example, `typeof value === "string"` can narrow `value`; `check(value)` and
-`value.length` cannot. Those unsupported tests keep ordinary inference without
-resolving the variable's type again for flow. A test inside a nested function
-does not select reads in the enclosing one, and in a root without loops, reads
-before the variable's first test are not selected either. The index also stops
-at the first enclosing expression that cannot use a narrowed operand, such as an
-array or object literal.
+Flow is split like types: collection gathers syntax-only facts, and tracked
+queries do everything that needs a resolved type. When type inference is
+enabled, collection (`src/js_module_info/flow.rs`) builds a graph of the
+possible paths through each execution root that tests one of its own
+variables. It decomposes every condition into guards on semantic bindings. For
+example, `typeof value === "string"` can narrow `value`; `check(value)` and
+`value.length` cannot. Collection then records which reads a test of their
+variable can reach, and those reads plus the enclosing expressions that can use
+a narrowed operand become candidates. A test inside a nested function never
+reaches reads in the enclosing one, and an array or object literal ends the
+chain of enclosing candidates.
 
-Candidate collection and flow evaluation share the same condition matching. If
-checking a condition cannot finish within its work limit, Biome continues with
-normal flow analysis rather than assuming the expression is unaffected. The
-variable's ordinary type stays separate from the result at each read.
+Lookups skip flow for any expression that is not a candidate. For a candidate
+read, `infer_flow_binding_baseline` resolves the variable's type once, and
+`infer_flow_binding_type` applies the guards on every path to the read's
+incoming flow point. If decomposing a condition cannot finish within its work
+limit, the guard makes the result unknown rather than assuming the expression is
+unaffected. The variable's ordinary type stays separate from the result at each
+read.
 
 An object shape such as `{}` can also describe `0` or `""`. Removing `null`
 therefore does not prove that the value is truthy. A `void` return annotation
@@ -88,24 +92,21 @@ uncertainty.
 Narrowing does not support `var`, imported variables, predicate/assertion
 functions, or facts about individual object properties. Unsupported control flow
 includes exception handlers, `switch`, `for-in`/`for-of`, destructuring, classes,
-and logical assignments. Roots using `eval` or `arguments` also keep ordinary
-inference. Variables typed `any`, or whose type includes an undetermined part,
-never narrow because no supported test can change them. Untyped and
-`any`-annotated variables are recognized from collected data before Biome builds
-a control-flow graph; other variable types are resolved only after a relevant
-test is found, because resolving them can be costly. If flow solving exhausts its
-work limit or a query cycle occurs, the result is unknown. Callers must respect
-that result rather than replace it with a more confident answer from raw type
-information.
+and logical assignments. Roots using `eval` or `arguments`, and roots that
+exceed a work limit while their flow is collected, also keep ordinary inference. Variables typed `any`, or whose type includes an undetermined part,
+never narrow because no supported test can change them. Collection already
+drops reads of untyped and `any`-annotated variables; other variable types are
+resolved only when a candidate read is queried, because resolving them can be
+costly. If flow solving exhausts its work limit or a query cycle occurs, the
+result is unknown. Callers must respect that result rather than replace it with
+a more confident answer from raw type information.
 
-A control-flow graph records the possible paths through one execution root.
-Biome builds it only when needed, without building graphs for nested or sibling
-roots. Reads within that root share the graph. All reads of a variable share the
-type that narrowing starts from, and reads at the same graph point also share
-their narrowing calculation. These caches depend on
-the current syntax tree: changing a condition must invalidate them even if
-variable declarations and references stay the same. An edit elsewhere in the module can also rebuild
-the graph; the cache does not track edits separately for each function.
+Collected flow belongs to the module input, so an edit replaces it together
+with the raw type tables, even when variable declarations and references stay
+the same. Salsa caches the type work: all reads of a variable share the type that
+narrowing starts from, and reads at the same flow point also share their
+narrowing calculation. These caches recompute when the module input changes; they
+do not track edits separately for each function.
 
 ### Analyzer-facing requests
 

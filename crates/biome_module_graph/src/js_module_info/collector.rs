@@ -1,4 +1,4 @@
-use super::flow_sources::may_affect_flow_candidates;
+use super::flow::ModuleFlow;
 use crate::css_module_info::CssClassReference;
 use std::{borrow::Cow, sync::Arc};
 
@@ -84,8 +84,6 @@ pub(super) struct JsModuleInfoCollector {
     /// How much type inference work to perform when finalizing the module info
     inference_mode: TypeInferenceMode,
 
-    has_flow_candidate_sources: bool,
-
     /// CSS class references from JSX `className` or `class` attributes
     /// (static string literals only).
     pub(super) referenced_classes: Vec<CssClassReference>,
@@ -157,15 +155,11 @@ impl JsModuleInfoCollector {
             static_imports: IndexMap::new(),
             diagnostics: Vec::new(),
             inference_mode: TypeInferenceMode::Disabled,
-            has_flow_candidate_sources: false,
             referenced_classes: Vec::new(),
         }
     }
 
     pub fn leave_node(&mut self, node: &JsSyntaxNode) {
-        if !self.has_flow_candidate_sources {
-            self.has_flow_candidate_sources = may_affect_flow_candidates(node.kind());
-        }
         if let Some(expr) = AnyJsExpression::cast_ref(node) {
             let range = expr.range();
             let scope_id = self.semantic_model.scope(node).id();
@@ -1025,6 +1019,16 @@ impl JsModuleInfo {
             &finalised.raw_types,
             &finalised.raw_binding_types,
         );
+        let flow = if collector.inference_mode == TypeInferenceMode::Disabled {
+            ModuleFlow::default()
+        } else {
+            ModuleFlow::collect(
+                &semantic_model.root(),
+                &semantic_model,
+                &finalised.raw_types,
+                &finalised.raw_binding_types,
+            )
+        };
 
         Self(Arc::new(JsModuleInfoInner {
             static_imports: Imports(collector.static_imports),
@@ -1039,7 +1043,7 @@ impl JsModuleInfo {
             namespace_members,
             diagnostics: collector.diagnostics.into_iter().map(Into::into).collect(),
             infer_types: collector.inference_mode != TypeInferenceMode::Disabled,
-            has_flow_candidate_sources: collector.has_flow_candidate_sources,
+            flow,
             referenced_classes: collector.referenced_classes,
         }))
     }
