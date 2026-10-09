@@ -942,4 +942,62 @@ mod specificity_tests {
 
         assert_eq!(specificity.next().unwrap(), Specificity(6, 0, 1));
     }
+
+    #[test]
+    fn nested_complex_selector_uses_nearest_parent() {
+        let source = r#".card {
+    code {
+        :root[data-theme="dark"] & {}
+        html body & {}
+    }
+}"#;
+        let model = to_semantic_model(source);
+
+        let specificity = model.specificity_of_rules().collect::<Vec<_>>();
+
+        let mut specificity = specificity.into_iter();
+
+        assert_eq!(specificity.next().unwrap(), Specificity(0, 1, 0), ".card");
+        assert_eq!(specificity.next().unwrap(), Specificity(0, 1, 1), "code");
+        assert_eq!(
+            specificity.next().unwrap(),
+            Specificity(0, 3, 1),
+            ":root[data-theme=\"dark\"] &"
+        );
+        assert_eq!(
+            specificity.next().unwrap(),
+            Specificity(0, 1, 3),
+            "html body &"
+        );
+    }
+
+    #[test]
+    fn nested_selectors_with_container_and_starting_style() {
+        let source = r#".card {
+    @container (min-width: 1px) {
+        & > p {}
+    }
+    @starting-style {
+        &:hover {}
+    }
+}"#;
+        let model = to_semantic_model(source);
+
+        let specificity = model.specificity_of_rules().collect::<Vec<_>>();
+
+        let mut specificity = specificity.into_iter();
+
+        assert_eq!(specificity.next().unwrap(), Specificity(0, 1, 0), ".card");
+        assert_eq!(
+            specificity.next().unwrap(),
+            Specificity(0, 1, 1),
+            "@container & > p"
+        );
+        assert_eq!(
+            specificity.next().unwrap(),
+            Specificity(0, 2, 0),
+            "@starting-style &:hover"
+        );
+        assert_eq!(specificity.next(), None);
+    }
 }

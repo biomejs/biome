@@ -1,6 +1,7 @@
 use biome_css_syntax::{
-    AnyCssRoot, CssLanguage, CssMediaAtRule, CssScopeAtRule, CssSupportsAtRule, CssSyntaxKind,
-    CssSyntaxToken, ScssAtRootAtRule, T, single_expression_item,
+    AnyCssRoot, CssContainerAtRule, CssLanguage, CssMediaAtRule, CssScopeAtRule,
+    CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxKind, CssSyntaxToken, ScssAtRootAtRule, T,
+    single_expression_item,
 };
 use biome_rowan::{AstNode, AstPtr, SyntaxKindSet, TextRange, TokenText};
 use rustc_hash::FxHashMap;
@@ -19,8 +20,10 @@ static EXPLICIT_COMBINATOR_KINDS: LazyLock<SyntaxKindSet<CssLanguage>> = LazyLoc
         .union(SyntaxKindSet::of(T![~]))
         .union(SyntaxKindSet::of(T![||]))
 });
-const NON_SELECTOR_RULE_KINDS: SyntaxKindSet<CssLanguage> = CssMediaAtRule::KIND_SET
+const NON_SELECTOR_RULE_KINDS: SyntaxKindSet<CssLanguage> = CssContainerAtRule::KIND_SET
+    .union(CssMediaAtRule::KIND_SET)
     .union(CssScopeAtRule::KIND_SET)
+    .union(CssStartingStyleAtRule::KIND_SET)
     .union(CssSupportsAtRule::KIND_SET);
 
 pub struct SemanticModelBuilder {
@@ -59,6 +62,9 @@ impl SemanticModelBuilder {
         }
     }
 
+    /// Returns the nearest enclosing rule that carries selectors, skipping
+    /// at-rules such as `@media` or `@container`, which are transparent for
+    /// nesting-selector resolution.
     fn get_last_parent_selector_rule(&self) -> Option<&RuleData> {
         let mut iterator = self.current_rule_stack.iter().rev();
         let mut current_parent_id = iterator
