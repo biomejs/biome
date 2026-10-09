@@ -67,6 +67,7 @@ fn assert_no_flow_queries(db: &TestModuleDb, events: &[salsa::Event]) {
     for query in [
         "infer_flow_expression_type",
         "infer_flow_expression_type_impl",
+        "infer_flow_binding_baseline",
         "infer_flow_binding_type",
         "narrowing_flow_for_root",
         "module_control_flow",
@@ -380,6 +381,190 @@ fn unrelated_conditions_writes_and_captures_skip_flow_queries() {
 }
 
 #[test]
+fn tests_in_nested_roots_or_after_the_read_skip_flow_queries() {
+    for source in [
+        "function f(value: string | null, flag: boolean) { const check = () => (value === null ? 0 : 1); if (flag) {} /*read*/value; }",
+        "function f(value: string | null, flag: boolean) { if (flag) {} /*read*/value; if (value !== null) {} }",
+    ] {
+        let (db, module) = narrowing_db(source);
+        db.clear_salsa_events();
+        let ty = normalized_type_at(&db, module, source, "read", "value");
+        assert_variants(
+            &db,
+            ty,
+            &[InferredTypeData::String, InferredTypeData::Null],
+            source,
+        );
+        assert_no_flow_queries(&db, &db.take_salsa_events());
+    }
+}
+
+#[test]
+fn unrefinable_binding_types_skip_flow_graphs() {
+    for parameter in ["value: any", "value"] {
+        let source = format!(
+            "function f({parameter}) {{ /*before*/value; if (typeof value === 'string') {{ /*after*/value; }} }}"
+        );
+        let (db, module) = narrowing_db(&source);
+        let read = |marker| {
+            infer_expression_type(
+                &db,
+                ExpressionTypeInput::new(&db, module, marked_range(&source, marker, "value")),
+            )
+            .unwrap()
+        };
+        let ordinary = read("before");
+        assert!(
+            matches!(
+                ordinary,
+                InferredTypeData::AnyKeyword | InferredTypeData::Unknown
+            ),
+            "{parameter}"
+        );
+        db.clear_salsa_events();
+        assert_eq!(read("after"), ordinary, "{parameter}");
+        let events = db.take_salsa_events();
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, "infer_flow_binding_baseline", &events),
+            1,
+            "{parameter}"
+        );
+        for query in ["narrowing_flow_for_root", "infer_flow_binding_type"] {
+            assert_eq!(
+                function_query_will_execute_count_by_name(&db, query, &events),
+                0,
+                "{parameter}: {query}"
+            );
+        }
+    }
+}
+
+#[test]
+fn editing_a_binding_type_recomputes_whether_it_can_narrow() {
+    const ANY: &str = "function f(value: any) { if (value !== null) { /*read*/value; } }";
+    const NULLABLE: &str =
+        "function f(value: string | null) { if (value !== null) { /*read*/value; } }";
+    let fs = MemoryFileSystem::default();
+    fs.insert("/src/index.ts".into(), ANY);
+    let mut db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+
+    for (index, (source, expected, graphs)) in [
+        (ANY, InferredTypeData::AnyKeyword, 0),
+        (NULLABLE, InferredTypeData::String, 1),
+        (ANY, InferredTypeData::AnyKeyword, 0),
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        if index > 0 {
+            fs.insert("/src/index.ts".into(), source);
+            let kind = resolve_js_module_kind_for_test(&fs, "/src/index.ts", true);
+            salsa::Setter::to(module.set_kind(&mut db), kind);
+        }
+        db.clear_salsa_events();
+        assert_eq!(
+            normalized_type_at(&db, module, source, "read", "value"),
+            expected,
+            "{source}"
+        );
+        let events = db.take_salsa_events();
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, "infer_flow_binding_baseline", &events),
+            1,
+            "{source}"
+        );
+        assert_eq!(
+            function_query_will_execute_count_by_name(&db, "narrowing_flow_for_root", &events),
+            graphs,
+            "{source}"
+        );
+    }
+}
+
+#[test]
+fn contextually_typed_callback_parameters_narrow() {
+    const SOURCE: &str = r#"
+        declare function run(callback: (value: string | null) => void): void;
+        run((value) => {
+            if (value !== null) {
+                /*read*/value;
+            }
+        });
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    let range = marked_range(SOURCE, "read", "value");
+    let ty = infer_expression_type(&db, ExpressionTypeInput::new(&db, module, range)).unwrap();
+    assert_eq!(normalize_type(&db, module, ty), InferredTypeData::String);
+    assert_eq!(
+        infer_module_types(&db, module).unwrap().expressions[&range],
+        ty
+    );
+}
+
+#[test]
+fn only_enclosing_expressions_count_toward_the_flow_nesting_limit() {
+    use InferredTypeData::{Null, String};
+    let source = format!(
+        "function f(value: string | null) {{ if (value !== null) {{ {}/*read*/value;{} }} }}",
+        "{".repeat(24),
+        "}".repeat(24)
+    );
+    let (db, module) = narrowing_db(&source);
+    assert_eq!(
+        normalized_type_at(&db, module, &source, "read", "value"),
+        String,
+        "nested blocks"
+    );
+
+    let source = format!(
+        "function f(value: string | null) {{ if (value !== null) {{ {}/*read*/value{}; }} }}",
+        "(".repeat(60),
+        ")".repeat(60)
+    );
+    let (db, module) = narrowing_db(&source);
+    let ty = normalized_type_at(&db, module, &source, "read", "value");
+    assert_variants(&db, ty, &[String, Null], "nested parentheses");
+}
+
+#[test]
+fn enclosing_expressions_that_drop_a_narrowed_read_skip_flow_queries() {
+    const SOURCE: &str = r#"
+        function f(value: string | null) {
+            if (value !== null) {
+                /*array*/[/*element*/value];
+                /*object*/({ key: value });
+                /*template*/`${value}`;
+            }
+        }
+    "#;
+    let (db, module) = narrowing_db(SOURCE);
+    assert_eq!(
+        normalized_type_at(&db, module, SOURCE, "element", "value"),
+        InferredTypeData::String
+    );
+    for (marker, expression) in [
+        ("array", "[/*element*/value]"),
+        ("object", "({ key: value })"),
+        ("template", "`${value}`"),
+    ] {
+        db.clear_salsa_events();
+        let input = ExpressionTypeInput::new(&db, module, marked_range(SOURCE, marker, expression));
+        assert!(infer_expression_type(&db, input).is_some(), "{marker}");
+        let events = db.take_salsa_events();
+        assert_eq!(
+            function_query_will_execute_count_by_name(
+                &db,
+                "infer_flow_expression_type_impl",
+                &events
+            ),
+            0,
+            "{marker}"
+        );
+    }
+}
+
+#[test]
 fn typeof_narrows_occurrences_without_changing_the_binding_or_join() {
     use InferredTypeData::{Number, String};
     const SOURCE: &str = r#"
@@ -545,6 +730,11 @@ fn repeated_narrowed_reads_share_flow_states_and_agree_with_complete_tables() {
         function_query_will_execute_count_by_name(&db, "infer_flow_binding_type", &events),
         2,
         "reads in each branch must share its incoming flow state"
+    );
+    assert_eq!(
+        function_query_will_execute_count_by_name(&db, "infer_flow_binding_baseline", &events),
+        1,
+        "reads at different flow points must share the binding's baseline"
     );
     assert_eq!(
         function_query_will_execute_count_by_name(&db, "narrowing_flow_for_root", &events),

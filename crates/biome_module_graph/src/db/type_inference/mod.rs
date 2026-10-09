@@ -21,7 +21,7 @@ mod promise_classification;
 mod qualifiers;
 mod resolver;
 
-pub(in crate::db) use flow::{flow_binding_type, flow_expression_type};
+pub(in crate::db) use flow::{flow_binding_baseline, flow_binding_type, flow_expression_type};
 pub(in crate::db) use flow_candidates::FlowCandidates;
 pub(in crate::db) use imports::{
     ExportOriginResult, collect_namespace_export_names, find_export_origin,
