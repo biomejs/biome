@@ -348,7 +348,7 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
             // Pass 2: text expressions via registry using merged embedded_file_source
             for snippet in snippet_expressions {
                 if let Some(expression) = snippet.expression()
-                    && let Some(candidate) = build_text_expression_candidate(&expression)
+                    && let Some(candidate) = build_svelte_mustache_candidate(&expression)
                 {
                     ctx.parse_and_push(
                         &candidate,
@@ -400,13 +400,14 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                     );
                 }
 
-                // Shorthand attributes: <MyComponent {text} /> (Svelte shorthand syntax)
+                // Shorthand attributes, such as <MyComponent {text} />, and mustaches in
+                // quoted attribute values, such as class="item {text}"
                 if let Some(attr) = HtmlAttributeSingleTextExpression::cast_ref(&element)
                     && !attr.syntax().parent().is_some_and(|parent| {
                         HtmlAttributeInitializerClause::can_cast(parent.kind())
                     })
                     && let Ok(expression) = attr.expression()
-                    && let Some(candidate) = build_text_expression_candidate(&expression)
+                    && let Some(candidate) = build_svelte_mustache_candidate(&expression)
                 {
                     ctx.parse_and_push(
                         &candidate,
@@ -825,6 +826,18 @@ fn build_text_expression_candidate(expression: &HtmlTextExpression) -> Option<Em
     })
 }
 
+/// Build an `EmbedCandidate::TextExpression` from an `HtmlTextExpression` in a
+/// Svelte template, recording whether Svelte renders its value as text.
+fn build_svelte_mustache_candidate(expression: &HtmlTextExpression) -> Option<EmbedCandidate> {
+    let mut candidate = build_text_expression_candidate(expression)?;
+    if expression.is_svelte_text_interpolation()
+        && let EmbedCandidate::TextExpression { block_kind, .. } = &mut candidate
+    {
+        *block_kind = EmbedBlockKind::SvelteTextInterpolation;
+    }
+    Some(candidate)
+}
+
 fn build_attribute_candidate(
     attribute: &HtmlAttribute,
     host_variant: &HtmlVariant,
@@ -1163,6 +1176,9 @@ fn parse_matched_embed(
                             }
                             EmbedBlockKind::Svelte(SvelteBlockKind::Declaration) => {
                                 SvelteEmbeddingKind::Declaration
+                            }
+                            EmbedBlockKind::SvelteTextInterpolation => {
+                                SvelteEmbeddingKind::TextInterpolation
                             }
                             _ => SvelteEmbeddingKind::Expression,
                         };

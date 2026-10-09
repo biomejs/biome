@@ -349,6 +349,15 @@ mod tests {
                     is_module_script: false,
                     is_class_attribute: false,
                     file_kind: SvelteFileKind::Component,
+                    embedding_kind: SvelteEmbeddingKind::TextInterpolation,
+                }),
+                r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"svelte","fileKind":"component","embeddingKind":"textInterpolation"}]"#,
+            ),
+            (
+                JsFileSource::js_module().with_embedding_kind(JsEmbeddingKind::Svelte {
+                    is_module_script: false,
+                    is_class_attribute: false,
+                    file_kind: SvelteFileKind::Component,
                     embedding_kind: SvelteEmbeddingKind::SnippetSignature,
                 }),
                 r#"[{"kind":"javascript"},"standard","module","es2022",{"kind":"svelte","fileKind":"component","embeddingKind":"snippetSignature"}]"#,

@@ -3039,6 +3039,11 @@ export interface Nursery {
 	 */
 	noSvelteLegacyConst?: NoSvelteLegacyConstConfiguration;
 	/**
+	 * Disallow objects, arrays, functions, and classes in Svelte text mustaches.
+	 * See https://biomejs.dev/linter/rules/no-svelte-object-in-text-mustaches
+	 */
+	noSvelteObjectInTextMustaches?: NoSvelteObjectInTextMustachesConfiguration;
+	/**
 	 * Disallow unnecessary $state wrapping of reactive classes.
 	 * See https://biomejs.dev/linter/rules/no-svelte-unnecessary-state-wrap
 	 */
@@ -5545,6 +5550,9 @@ export type NoSvelteInspectConfiguration =
 export type NoSvelteLegacyConstConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteLegacyConstOptions;
+export type NoSvelteObjectInTextMustachesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteObjectInTextMustachesOptions;
 export type NoSvelteUnnecessaryStateWrapConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteUnnecessaryStateWrapOptions;
@@ -7930,6 +7938,10 @@ export interface RuleWithNoSvelteLegacyConstOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteLegacyConstOptions;
 }
+export interface RuleWithNoSvelteObjectInTextMustachesOptions {
+	level: RulePlainConfiguration;
+	options?: NoSvelteObjectInTextMustachesOptions;
+}
 export interface RuleWithNoSvelteUnnecessaryStateWrapOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -10249,6 +10261,7 @@ export type NoSvelteAtHtmlTagsOptions = {};
 export type NoSvelteExportLetOptions = {};
 export type NoSvelteInspectOptions = {};
 export type NoSvelteLegacyConstOptions = {};
+export type NoSvelteObjectInTextMustachesOptions = {};
 export interface NoSvelteUnnecessaryStateWrapOptions {
 	/**
 	 * Additional class names to treat as already reactive (beyond the built-in `svelte/reactivity` classes).
@@ -11889,6 +11902,7 @@ export type Category =
 	| "lint/nursery/noSvelteExportLet"
 	| "lint/nursery/noSvelteInspect"
 	| "lint/nursery/noSvelteLegacyConst"
+	| "lint/nursery/noSvelteObjectInTextMustaches"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTailwindArbitraryValue"
 	| "lint/nursery/noTailwindLegacyUtilities"
@@ -12673,6 +12687,7 @@ export type MarkdownVariant = "Standard";
 export type SvelteEmbeddingKind =
 	| "Source"
 	| "Expression"
+	| "TextInterpolation"
 	| "SnippetSignature"
 	| "LegacyConst"
 	| "Declaration";

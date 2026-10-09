@@ -267,6 +267,7 @@ define_categories! {
     "lint/nursery/noSvelteExportLet": "https://biomejs.dev/linter/rules/no-svelte-export-let",
     "lint/nursery/noSvelteInspect": "https://biomejs.dev/linter/rules/no-svelte-inspect",
     "lint/nursery/noSvelteLegacyConst": "https://biomejs.dev/linter/rules/no-svelte-legacy-const",
+    "lint/nursery/noSvelteObjectInTextMustaches": "https://biomejs.dev/linter/rules/no-svelte-object-in-text-mustaches",
     "lint/nursery/noSvelteUnnecessaryStateWrap": "https://biomejs.dev/linter/rules/no-svelte-unnecessary-state-wrap",
     "lint/nursery/noTailwindArbitraryValue": "https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value",
     "lint/nursery/noTailwindLegacyUtilities": "https://biomejs.dev/linter/rules/no-tailwind-legacy-utilities",
