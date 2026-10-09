@@ -59,9 +59,6 @@ pub(crate) fn inspect(
 }
 
 /// Owns the inputs and application state for one `inspect config` invocation.
-///
-/// Validation happens during construction so `execute` can run the inspection pipeline without
-/// representing invalid combinations such as `--path` without a configuration key.
 struct ConfigInspectionCommand<'app, 'options> {
     session: CliSession<'app>,
     cli_options: &'options CliOptions,
@@ -70,7 +67,6 @@ struct ConfigInspectionCommand<'app, 'options> {
 }
 
 impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
-    /// Parses the optional key and rejects argument combinations that cannot be executed.
     fn new(
         session: CliSession<'app>,
         cli_options: &'options CliOptions,
@@ -78,10 +74,6 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
         path: Option<String>,
     ) -> Result<Self, CliDiagnostic> {
         let key = key.map(ConfigurationKey::parse).transpose()?;
-
-        if path.is_some() && key.is_none() {
-            return Err(CliDiagnostic::missing_argument("KEY", "inspect config"));
-        }
 
         Ok(Self {
             session,
@@ -124,14 +116,6 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
                 )
             })?;
 
-        let Some(key) = key else {
-            return Self::print_resolved_configuration(
-                session,
-                configuration_path.as_deref(),
-                &inspector,
-            );
-        };
-
         let matched_path = path.as_deref().map(|path| {
             let path = Utf8PathBuf::from(path);
             let path = path.strip_prefix("./").unwrap_or(&path);
@@ -155,6 +139,24 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
                 .matching_indices(path)
                 .collect::<Vec<_>>()
         });
+
+        let Some(key) = key else {
+            let serialized_configuration = path
+                .as_ref()
+                .map(|_| inspector.serialized_configuration_with_overrides(&matching_overrides))
+                .transpose()?;
+            let serialized_configuration = serialized_configuration
+                .as_ref()
+                .unwrap_or_else(|| inspector.serialized_configuration());
+            return Self::print_resolved_configuration(
+                session,
+                configuration_path.as_deref(),
+                &inspector,
+                serialized_configuration,
+                path.is_none() && inspector.has_overrides(),
+            );
+        };
+
         let inspection =
             inspector.inspect_key(&key, &matching_overrides, matched_path_display.as_deref())?;
 
@@ -175,13 +177,15 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
         Ok(())
     }
 
-    /// Renders the structurally resolved configuration without evaluating overrides for a path.
+    /// Renders the resolved configuration, applying matching overrides when a path is provided.
     fn print_resolved_configuration(
         session: CliSession,
         configuration_path: Option<&Utf8Path>,
         inspector: &ConfigurationInspector,
+        serialized_configuration: &serde_json::Value,
+        has_unevaluated_overrides: bool,
     ) -> Result<(), CliDiagnostic> {
-        let output = serde_json::to_string_pretty(inspector.serialized_configuration())
+        let output = serde_json::to_string_pretty(serialized_configuration)
             .map_err(|_| WorkspaceError::from(BiomeDiagnostic::new_serialization_error()))?;
 
         let configuration_paths = inspector.configuration_paths().collect::<Vec<_>>();
@@ -189,7 +193,7 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
             configuration_path,
             &configuration_paths,
             output,
-            inspector.has_overrides(),
+            has_unevaluated_overrides,
         );
         session
             .app
