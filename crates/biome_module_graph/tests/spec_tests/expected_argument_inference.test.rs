@@ -782,3 +782,403 @@ fn test_infer_constructor_argument_type_supports_interface_and_object_signatures
         );
     }
 }
+
+#[test]
+fn test_infer_call_argument_type_applies_explicit_type_arguments_to_overload_sets() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export declare function run<T>(value: T, callback: (value: T) => void): void;
+            export declare function run<T>(value: T | null, callback: (value: T | null) => void): void;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let run = inferred_overload_ty_by_name(&db, module, inferred, "run")
+        .expect("run overload set must be inferred");
+
+    // `run<string>(null, callback)`: the callee carries the explicit argument
+    // exactly as `callee_reference` records it for a call expression.
+    let callee = InferredTypeData::instance_of(&db, run, Box::from([InferredTypeData::String]));
+    let input = CallArgumentTypeInput::new(
+        &db,
+        callee,
+        Vec::from([
+            InferredCallArgumentType::Argument(InferredTypeData::Null),
+            InferredCallArgumentType::Argument(InferredTypeData::Unknown),
+        ])
+        .into_boxed_slice(),
+        1,
+    );
+    let expected =
+        infer_call_argument_type(&db, input).expect("callback expected type must be inferred");
+
+    // `<string>` turns the first overload into `(value: string, ...)`, which
+    // `null` rejects, so the callback comes from the nullable overload.
+    let InferredTypeData::Function(function) = expected else {
+        panic!(
+            "expected a callback type, got {}",
+            format_inferred_type(&db, expected)
+        );
+    };
+    let value_ty = function.parameters(&db)[0].ty();
+    let InferredTypeData::Union(union) = value_ty else {
+        panic!(
+            "callback parameter must be `string | null`, got {}",
+            format_inferred_type(&db, value_ty)
+        );
+    };
+    assert!(union.types(&db).contains(&InferredTypeData::Null));
+    assert!(
+        union
+            .types(&db)
+            .iter()
+            .any(|ty| is_inferred_string(&db, *ty))
+    );
+}
+
+#[test]
+fn test_infer_call_argument_type_checks_overload_candidacy_for_explicit_type_arguments() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export declare function pick<T extends string>(x: T, callback: (value: T) => void): void;
+            export declare function pick<T>(x: T, callback: (value: T | null) => void): void;
+
+            export declare function f<T>(x: T, callback: (value: T) => void): void;
+            export declare function f(x: null, callback: (value: object) => void): void;
+            export declare function f<T>(x: T | null, callback: (value: T | null) => void): void;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let callback_parameter = |name: &str, type_argument, first_argument| {
+        let overloads = inferred_overload_ty_by_name(&db, module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} overload set must be inferred"));
+        let callee = InferredTypeData::instance_of(&db, overloads, Box::from([type_argument]));
+        let input = CallArgumentTypeInput::new(
+            &db,
+            callee,
+            Vec::from([
+                InferredCallArgumentType::Argument(first_argument),
+                InferredCallArgumentType::Argument(InferredTypeData::Unknown),
+            ])
+            .into_boxed_slice(),
+            1,
+        );
+        let expected = infer_call_argument_type(&db, input)
+            .unwrap_or_else(|| panic!("{name} callback expected type must be inferred"));
+        let InferredTypeData::Function(function) = expected else {
+            panic!(
+                "{name} must expect a callback, got {}",
+                format_inferred_type(&db, expected)
+            );
+        };
+        function.parameters(&db)[0].ty()
+    };
+
+    // `pick<number>(0, cb)`: `number` violates `T extends string`, so the
+    // callback comes from the unconstrained overload.
+    let value_ty = callback_parameter("pick", InferredTypeData::Number, InferredTypeData::Number);
+    let InferredTypeData::Union(union) = value_ty else {
+        panic!(
+            "pick callback parameter must be `number | null`, got {}",
+            format_inferred_type(&db, value_ty)
+        );
+    };
+    assert!(union.types(&db).contains(&InferredTypeData::Null));
+    assert!(
+        union
+            .types(&db)
+            .iter()
+            .any(|ty| is_inferred_number(&db, *ty))
+    );
+
+    // `f<string>(null, cb)`: the non-generic overload is not a candidate, and
+    // `(x: string)` rejects `null`, so the nullable overload is selected.
+    let value_ty = callback_parameter("f", InferredTypeData::String, InferredTypeData::Null);
+    let InferredTypeData::Union(union) = value_ty else {
+        panic!(
+            "f callback parameter must be `string | null`, got {}",
+            format_inferred_type(&db, value_ty)
+        );
+    };
+    assert!(union.types(&db).contains(&InferredTypeData::Null));
+    assert!(
+        union
+            .types(&db)
+            .iter()
+            .any(|ty| is_inferred_string(&db, *ty))
+    );
+}
+
+#[test]
+fn test_infer_call_argument_type_accepts_union_type_arguments_within_generic_constraints() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export declare function pick<T extends string | number | boolean>(
+                x: T,
+                callback: (value: T | null) => void,
+            ): void;
+            export declare function pick<T>(x: T, callback: (value: T) => void): void;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let overloads = inferred_overload_ty_by_name(&db, module, inferred, "pick")
+        .expect("pick overload set must be inferred");
+
+    // `pick<string | number>(0, cb)`: every member of the written union
+    // satisfies the constraint, so the callback comes from the first
+    // overload and accepts `null`.
+    let type_argument = InferredTypeData::union_from_types(
+        &db,
+        Vec::from([InferredTypeData::String, InferredTypeData::Number]),
+    );
+    let callee = InferredTypeData::instance_of(&db, overloads, Box::from([type_argument]));
+    let input = CallArgumentTypeInput::new(
+        &db,
+        callee,
+        Vec::from([
+            InferredCallArgumentType::Argument(InferredTypeData::Number),
+            InferredCallArgumentType::Argument(InferredTypeData::Unknown),
+        ])
+        .into_boxed_slice(),
+        1,
+    );
+    let expected =
+        infer_call_argument_type(&db, input).expect("callback expected type must be inferred");
+    let InferredTypeData::Function(function) = expected else {
+        panic!(
+            "expected a callback type, got {}",
+            format_inferred_type(&db, expected)
+        );
+    };
+    let value_ty = function.parameters(&db)[0].ty();
+    let InferredTypeData::Union(union) = value_ty else {
+        panic!(
+            "callback parameter must be `string | number | null`, got {}",
+            format_inferred_type(&db, value_ty)
+        );
+    };
+    let members = union.types(&db);
+    assert!(
+        members.contains(&InferredTypeData::Null),
+        "{}",
+        format_inferred_type(&db, value_ty)
+    );
+    assert!(members.iter().any(|ty| is_inferred_string(&db, *ty)));
+    assert!(members.iter().any(|ty| is_inferred_number(&db, *ty)));
+}
+
+#[test]
+fn test_infer_call_argument_type_accepts_callable_type_arguments_within_generic_constraints() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export declare function pick<T extends () => unknown>(
+                factory: T,
+                callback: (value: T | null) => void,
+            ): void;
+            export declare function pick<T>(factory: T, callback: (value: T) => void): void;
+
+            export declare const makeNumber: () => Promise<number>;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let overloads = inferred_overload_ty_by_name(&db, module, inferred, "pick")
+        .expect("pick overload set must be inferred");
+    let make_number = inferred_binding_ty_by_name(&db, module, inferred, "makeNumber")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("makeNumber binding type must be inferred");
+
+    // `pick<() => Promise<number>>(makeNumber, cb)`: the constraint's
+    // `unknown` return accepts a Promise, so the callback comes from the
+    // first overload and accepts `null`.
+    let callee = InferredTypeData::instance_of(&db, overloads, Box::from([make_number]));
+    let input = CallArgumentTypeInput::new(
+        &db,
+        callee,
+        Vec::from([
+            InferredCallArgumentType::Argument(make_number),
+            InferredCallArgumentType::Argument(InferredTypeData::Unknown),
+        ])
+        .into_boxed_slice(),
+        1,
+    );
+    let expected =
+        infer_call_argument_type(&db, input).expect("callback expected type must be inferred");
+    let InferredTypeData::Function(function) = expected else {
+        panic!(
+            "expected a callback type, got {}",
+            format_inferred_type(&db, expected)
+        );
+    };
+    let value_ty = function.parameters(&db)[0].ty();
+    let InferredTypeData::Union(union) = value_ty else {
+        panic!(
+            "callback parameter must be `(() => Promise<number>) | null`, got {}",
+            format_inferred_type(&db, value_ty)
+        );
+    };
+    assert!(union.types(&db).contains(&InferredTypeData::Null));
+    assert!(union.types(&db).iter().any(|ty| {
+        ty.callable_function(&db)
+            .is_some_and(|function| function.returns_promise(&db))
+    }));
+}
+
+#[test]
+fn test_infer_call_argument_type_uses_instantiated_generic_alias_call_signatures() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            type Handlers<T> = {
+                (value: T, callback: (value: T) => void): void;
+                (value: T | null, callback: (value: T | null) => void): void;
+            };
+            export declare const handlers: Handlers<string>;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let handlers = inferred_binding_ty_by_name(&db, module, inferred, "handlers")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("handlers binding type must be inferred");
+
+    // `handlers(null, cb)`: the alias's `string` binds `T` before overloads
+    // are tested, and is not treated as a call-site type argument.
+    let input = CallArgumentTypeInput::new(
+        &db,
+        handlers,
+        Vec::from([
+            InferredCallArgumentType::Argument(InferredTypeData::Null),
+            InferredCallArgumentType::Argument(InferredTypeData::Unknown),
+        ])
+        .into_boxed_slice(),
+        1,
+    );
+    let expected =
+        infer_call_argument_type(&db, input).expect("callback expected type must be inferred");
+    let InferredTypeData::Function(function) = expected else {
+        panic!(
+            "expected a callback type, got {}",
+            format_inferred_type(&db, expected)
+        );
+    };
+    let value_ty = function.parameters(&db)[0].ty();
+    let InferredTypeData::Union(union) = value_ty else {
+        panic!(
+            "callback parameter must be `string | null`, got {}",
+            format_inferred_type(&db, value_ty)
+        );
+    };
+    assert!(union.types(&db).contains(&InferredTypeData::Null));
+    assert!(
+        union
+            .types(&db)
+            .iter()
+            .any(|ty| is_inferred_string(&db, *ty))
+    );
+}
+
+#[test]
+fn test_infer_call_argument_type_keeps_strict_callback_return_types_for_async_callbacks() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            export declare function voided(
+                factory: () => string | void,
+                callback: (value: "voided") => void,
+            ): void;
+            export declare function voided(
+                factory: () => Promise<string>,
+                callback: (value: "promise") => void,
+            ): void;
+
+            export declare function constrained<T extends string>(
+                factory: () => T,
+                callback: (value: "constrained") => void,
+            ): void;
+            export declare function constrained(
+                factory: () => Promise<string>,
+                callback: (value: "promise") => void,
+            ): void;
+
+            export declare const asyncFactory: () => Promise<string>;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, module).expect("types must be inferred");
+    let async_factory = inferred_binding_ty_by_name(&db, module, inferred, "asyncFactory")
+        .map(|ty| inferred.resolve_type(&db, ty))
+        .expect("asyncFactory binding type must be inferred");
+    let callback_parameter = |name: &str| {
+        let overloads = inferred_overload_ty_by_name(&db, module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} overload set must be inferred"));
+        let input = CallArgumentTypeInput::new(
+            &db,
+            overloads,
+            Vec::from([
+                InferredCallArgumentType::Argument(async_factory),
+                InferredCallArgumentType::Argument(InferredTypeData::Unknown),
+            ])
+            .into_boxed_slice(),
+            1,
+        );
+        let expected = infer_call_argument_type(&db, input)
+            .unwrap_or_else(|| panic!("{name} callback expected type must be inferred"));
+        let InferredTypeData::Function(function) = expected else {
+            panic!(
+                "{name} must expect a callback, got {}",
+                format_inferred_type(&db, expected)
+            );
+        };
+        function.parameters(&db)[0].ty()
+    };
+
+    // Neither `string | void` nor `T extends string` accepts a Promise, so
+    // the callback comes from the Promise overload in both cases.
+    assert!(is_inferred_string_literal(
+        &db,
+        callback_parameter("voided"),
+        "promise"
+    ));
+    assert!(is_inferred_string_literal(
+        &db,
+        callback_parameter("constrained"),
+        "promise"
+    ));
+}
