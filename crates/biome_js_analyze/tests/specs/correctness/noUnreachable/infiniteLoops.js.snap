@@ -15,6 +15,8 @@ export function innerBreak() { while (true) { while (true) { break; } } return 1
 export function continued() { do { continue; } while (true); return 1; }
 export function forTrue() { for (; true ;) {} return 1; }
 export function forTrueWithBreak() { for (; true ;) { break; } return 1; }
+export function forNoTest() { for (;;) {} return 1; }
+export function forFalse() { for (; false ;) {} return 1; }
 
 ```
 
@@ -204,7 +206,7 @@ infiniteLoops.js:9:47 lint/correctness/noUnreachable ━━━━━━━━━
    > 9 │ export function forTrue() { for (; true ;) {} return 1; }
        │                                               ^^^^^^^^^
     10 │ export function forTrueWithBreak() { for (; true ;) { break; } return 1; }
-    11 │ 
+    11 │ export function forNoTest() { for (;;) {} return 1; }
   
   i ... because this statement will stop the flow of the code beforehand
   
@@ -213,7 +215,22 @@ infiniteLoops.js:9:47 lint/correctness/noUnreachable ━━━━━━━━━
    > 9 │ export function forTrue() { for (; true ;) {} return 1; }
        │                                    ^^^^
     10 │ export function forTrueWithBreak() { for (; true ;) { break; } return 1; }
-    11 │ 
+    11 │ export function forNoTest() { for (;;) {} return 1; }
+  
+
+```
+
+```
+infiniteLoops.js:11:43 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code is unreachable
+  
+     9 │ export function forTrue() { for (; true ;) {} return 1; }
+    10 │ export function forTrueWithBreak() { for (; true ;) { break; } return 1; }
+  > 11 │ export function forNoTest() { for (;;) {} return 1; }
+       │                                           ^^^^^^^^^
+    12 │ export function forFalse() { for (; false ;) {} return 1; }
+    13 │ 
   
 
 ```
