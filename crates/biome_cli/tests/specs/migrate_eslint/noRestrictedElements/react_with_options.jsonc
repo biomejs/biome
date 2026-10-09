@@ -1,0 +1,15 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "react/forbid-elements": ["warn", {
+        "forbid": [
+          "button",
+          { "element": "input", "message": "use TextField instead" },
+          { "element": "Modal" },
+          { "element": "button", "message": "use Button instead" }
+        ]
+      }]
+    }
+  }
+}

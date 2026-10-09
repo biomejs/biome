@@ -18,7 +18,7 @@ biome check fix.js
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "complexity": {
         "noUselessSwitchCase": "off"
       }

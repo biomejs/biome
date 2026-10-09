@@ -1,0 +1,93 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: vue/vue/expression-binding.vue
+---
+
+# Input
+
+```vue
+<!-- #7396 -->
+<template>
+<MyComponent
+:foo="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo} template literal value`"
+:foo1="`${first} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`
+        +`${second} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`"
+:foo2="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo +               bar} template literal value`"
+:string="'loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog literal string value'"
+:add="'first loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog' + 'second loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog'"
+:number="100000000000000000000000000000000000000000000000000000000000000000000000000"
+:short-template="`1
+2`"
+/>
+</template>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -2,12 +2,19 @@
+ <template>
+   <MyComponent
+     :foo="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo} template literal value`"
+-    :foo1="`${first} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`
+-        +`${second} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`"
+-    :foo2="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo +               bar} template literal value`"
++    :foo1="
++      `${first} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}` +
++      `${second} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`
++    "
++    :foo2="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo + bar} template literal value`"
+     :string="'loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog literal string value'"
+-    :add="'first loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog' + 'second loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog'"
+-    :number="100000000000000000000000000000000000000000000000000000000000000000000000000"
++    :add="
++      'first loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog' +
++      'second loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog'
++    "
++    :number="
++      100000000000000000000000000000000000000000000000000000000000000000000000000
++    "
+     :short-template="`1
+ 2`"
+   />
+```
+
+# Output
+
+```vue
+<!-- #7396 -->
+<template>
+  <MyComponent
+    :foo="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo} template literal value`"
+    :foo1="
+      `${first} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}` +
+      `${second} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`
+    "
+    :foo2="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo + bar} template literal value`"
+    :string="'loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog literal string value'"
+    :add="
+      'first loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog' +
+      'second loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog'
+    "
+    :number="
+      100000000000000000000000000000000000000000000000000000000000000000000000000
+    "
+    :short-template="`1
+2`"
+  />
+</template>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    4:     :foo="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo} template literal value`"
+    6:       `${first} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}` +
+    7:       `${second} loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${template} ${literal}`
+    9:     :foo2="`loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog ${foo + bar} template literal value`"
+   10:     :string="'loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooog literal string value'"
+   16:       100000000000000000000000000000000000000000000000000000000000000000000000000
+```

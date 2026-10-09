@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crate::utils::comment_trivia::{
-    is_leading_comment_on_node, is_token_boundary_suppressed, is_trailing_comment_on_node,
+    has_line_comment, is_leading_comment_on_node, is_token_boundary_suppressed,
+    is_trailing_comment_on_node,
 };
 use crate::utils::component_value_list::is_comma_separated_declaration_value_list;
 use crate::utils::custom_property::CustomPropertyContainer;
@@ -10,16 +11,17 @@ use crate::utils::scss_include_comments::{
     place_separated_list_comment,
 };
 use biome_css_syntax::{
-    AnyCssAtRule, AnyCssDeclarationName, AnyCssMediaQuery, AnyCssProperty, AnyCssPseudoClass,
-    AnyCssPseudoElement, AnyCssSelector, AnyCssSelectorIdentifier, CssComplexSelector,
-    CssDeclaration, CssDeclarationImportant, CssDeclarationOrRuleBlock, CssFunction,
-    CssGenericComponentValueList, CssGenericProperty, CssIdentifier, CssLanguage,
-    CssMediaQueryList, CssNestedQualifiedRule, CssPseudoElementFunction, CssQualifiedRule,
-    CssSyntaxKind, CssSyntaxNode, CssSyntaxToken, ScssAtRootAtRule, ScssAtRootSelector,
-    ScssEachHeader, ScssEachValueList, ScssExpression, ScssExpressionItemList, ScssIfAtRule,
-    ScssInterpolatedPseudoClassFunction, ScssInterpolatedPseudoElementFunction, ScssListExpression,
-    ScssListExpressionElement, ScssMapExpression, ScssMapExpressionPair, ScssVariableDeclaration,
-    T, TextLen, TextSize, is_in_scss_include_arguments,
+    AnyCssAtRule, AnyCssControlBlock, AnyCssDeclarationName, AnyCssMediaQuery, AnyCssProperty,
+    AnyCssPseudoClass, AnyCssPseudoElement, AnyCssSelector, AnyCssSelectorIdentifier,
+    AnyCssUnknownAtRuleName, CssComplexSelector, CssDeclaration, CssDeclarationImportant,
+    CssDeclarationOrRuleBlock, CssFunction, CssGenericComponentValueList, CssGenericProperty,
+    CssIdentifier, CssIfBranch, CssLanguage, CssMediaQueryList, CssNestedQualifiedRule,
+    CssPseudoElementFunction, CssQualifiedRule, CssSyntaxKind, CssSyntaxNode, CssSyntaxToken,
+    ScssAtRootAtRule, ScssAtRootQueryClause, ScssAtRootSelector, ScssEachHeader, ScssEachValueList,
+    ScssExpression, ScssExpressionItemList, ScssIfAtRule, ScssInterpolatedPseudoClassFunction,
+    ScssInterpolatedPseudoElementFunction, ScssListExpression, ScssListExpressionElement,
+    ScssMapExpression, ScssMapExpressionPair, ScssVariableDeclaration, T, TextLen, TextSize,
+    is_in_scss_include_arguments,
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
@@ -113,11 +115,13 @@ impl CommentStyle for CssCommentStyle {
         comment: DecoratedComment<Self::Language>,
     ) -> CommentPlacement<Self::Language> {
         handle_statement_at_rule_terminator_comment(comment)
+            .or_else(handle_scss_if_branch_value_comment)
             .or_else(handle_scss_map_trailing_separator_comment)
             .or_else(place_separated_list_comment)
             .or_else(handle_scss_list_trailing_separator_comment)
             .or_else(handle_scss_each_value_list_comment)
             .or_else(handle_scss_expression_item_trailing_line_comment)
+            .or_else(handle_scss_at_root_query_comment)
             .or_else(handle_scss_at_root_selector_comment)
             .or_else(handle_scss_else_clause_comment)
             .or_else(handle_empty_custom_property_container_comment)
@@ -129,6 +133,7 @@ impl CommentStyle for CssCommentStyle {
             .or_else(handle_declaration_important_comment)
             .or_else(handle_component_value_boundary_comment)
             .or_else(handle_generic_property_comment)
+            .or_else(handle_scss_at_rule_name_comment)
             .or_else(handle_declaration_name_comment)
             .or_else(handle_selector_block_comment)
             .or_else(handle_complex_selector_comment)
@@ -299,6 +304,32 @@ fn handle_scss_expression_item_trailing_line_comment(
     }
 }
 
+/// Keeps `(without: // comment\n media)` comments at the colon boundary.
+fn handle_scss_at_root_query_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(clause) = comment
+        .enclosing_node()
+        .ancestors()
+        .find_map(ScssAtRootQueryClause::cast)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+    let (Ok(colon), Ok(rules)) = (clause.colon_token(), clause.rules()) else {
+        return CommentPlacement::Default(comment);
+    };
+    let boundary = TextRange::new(
+        colon.text_trimmed_range().end(),
+        rules.syntax().text_trimmed_range().start(),
+    );
+
+    if boundary.contains_range(comment.piece().text_range()) {
+        CommentPlacement::dangling(clause.into_syntax(), comment)
+    } else {
+        CommentPlacement::Default(comment)
+    }
+}
+
 fn handle_scss_at_root_selector_comment(
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
@@ -346,7 +377,7 @@ fn handle_scss_else_clause_comment(
 
     let Some(block) = comment
         .preceding_node()
-        .and_then(CssDeclarationOrRuleBlock::cast_ref)
+        .and_then(AnyCssControlBlock::cast_ref)
     else {
         return CommentPlacement::Default(comment);
     };
@@ -363,6 +394,43 @@ fn handle_scss_else_clause_comment(
             CommentPlacement::leading(else_clause.into_syntax(), comment)
         }
         _ => CommentPlacement::Default(comment),
+    }
+}
+
+/// Keeps comments after an `if()` branch colon with its Sass value when the gap
+/// contains a line comment. Mixed block/line groups retain one owner so their
+/// order and suppression target survive formatting.
+///
+/// ```scss
+/// width: if(sass(true): // value
+///   1px; else: 0);
+/// ```
+fn handle_scss_if_branch_value_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(value) = comment.following_node().and_then(ScssExpression::cast_ref) else {
+        return CommentPlacement::Default(comment);
+    };
+    let Some(branch) = value.parent::<CssIfBranch>() else {
+        return CommentPlacement::Default(comment);
+    };
+    let (Ok(colon), Some(first_value_token)) = (branch.colon_token(), value.syntax().first_token())
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let range = comment.piece().text_range();
+    let is_value_boundary = range.start() >= colon.text_trimmed_range().end()
+        && range.end() <= first_value_token.text_trimmed_range().start();
+
+    if is_value_boundary
+        && (comment.kind().is_line()
+            || has_line_comment(colon.trailing_trivia())
+            || has_line_comment(first_value_token.leading_trivia()))
+    {
+        CommentPlacement::leading(value.into_syntax(), comment)
+    } else {
+        CommentPlacement::Default(comment)
     }
 }
 
@@ -741,6 +809,45 @@ fn is_between_property_colon_and_value(
     };
 
     comment_start >= colon.text_trimmed_range().end() && comment_start < value_start
+}
+
+/// Keeps `@custom-#{$name} /* note */ token;` comments in the prelude.
+fn handle_scss_at_rule_name_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(name) = comment
+        .preceding_node()
+        .and_then(AnyCssUnknownAtRuleName::cast_ref)
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let components = match name.parent::<AnyCssAtRule>() {
+        Some(AnyCssAtRule::CssUnknownValueAtRule(rule)) => rule.components(),
+        Some(AnyCssAtRule::CssUnknownBlockAtRule(rule)) => rule.components(),
+        _ => return CommentPlacement::Default(comment),
+    };
+
+    let Ok(components) = components else {
+        return CommentPlacement::Default(comment);
+    };
+    if name.as_css_identifier().is_some()
+        && components
+            .items()
+            .next()
+            .is_none_or(|part| part.kind() != CssSyntaxKind::SCSS_INTERPOLATION)
+    {
+        return CommentPlacement::Default(comment);
+    }
+
+    let range = comment.piece().text_range();
+    if range.start() >= name.syntax().text_trimmed_range().end()
+        && range.end() <= components.syntax().text_trimmed_range().start()
+    {
+        CommentPlacement::leading(components.into_syntax(), comment)
+    } else {
+        CommentPlacement::Default(comment)
+    }
 }
 
 fn handle_declaration_name_comment(

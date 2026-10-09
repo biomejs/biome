@@ -1,4 +1,4 @@
-use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, RuleDomain, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::AnyJsExpression;
@@ -120,6 +120,9 @@ declare_lint_rule! {
         version: "2.3.12",
         name: "noVueOptionsApi",
         language: "js",
+        sources: &[
+            RuleSource::EslintVueJs("component-api-style").inspired(),
+        ],
         recommended: false,
         severity: Severity::Information,
         domains: &[RuleDomain::Vue],

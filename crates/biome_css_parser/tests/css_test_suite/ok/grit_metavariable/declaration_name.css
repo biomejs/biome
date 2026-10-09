@@ -1,0 +1,12 @@
+.a {
+    $prop: red;
+}
+
+.a {
+    $prop: $value;
+    color: blue;
+}
+
+.a {
+    $prop: red
+}

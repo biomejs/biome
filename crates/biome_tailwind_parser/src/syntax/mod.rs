@@ -152,7 +152,7 @@ fn parse_functional_or_static_candidate(p: &mut TailwindParser) -> ParsedSyntax 
         return Present(m.complete(p, TW_STATIC_CANDIDATE));
     }
     p.expect(T![-]);
-    match parse_value(p).or_recover_with_token_set(
+    match parse_value(p, true).or_recover_with_token_set(
         p,
         &ParseRecoveryTokenSet::new(TW_BOGUS_VALUE, token_set![WHITESPACE, T![!]]),
         expected_value,
@@ -258,7 +258,7 @@ pub(crate) fn parse_modifier(p: &mut TailwindParser) -> ParsedSyntax {
         m.abandon(p);
         return Absent;
     }
-    match parse_value(p).or_recover_with_token_set(
+    match parse_value(p, false).or_recover_with_token_set(
         p,
         &ParseRecoveryTokenSet::new(TW_BOGUS_MODIFIER, token_set![WHITESPACE, T![!]]),
         expected_value,

@@ -9,7 +9,7 @@ const value = <div className={[
 ]} />;
 clsx({ 'bg-primary': 'bg-pink-500' });
 cva('', {
-    variants: { size: { 'bg-pink-500': 'bg-primary', small: { 'text-white': 'bg-pink-500' } } },
+    variants: { size: { 'bg-pink-500': 'bg-primary', small: { 'text-white': isSmall } } },
     defaultVariants: { size: 'bg-pink-500' },
     compoundVariants: [{ size: 'bg-pink-500', class: 'bg-primary' }],
 });

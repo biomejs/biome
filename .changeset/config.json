@@ -18,9 +18,12 @@
       "@biomejs/cli-linux-arm64",
       "@biomejs/cli-linux-x64-musl",
       "@biomejs/cli-linux-arm64-musl",
+      "@biomejs/cli-android-x64",
+      "@biomejs/cli-android-arm64",
       "@biomejs/wasm-web",
       "@biomejs/wasm-bundler",
-      "@biomejs/wasm-nodejs"
+      "@biomejs/wasm-nodejs",
+      "@biomejs/runtime"
     ]
   ],
   "linked": [],
@@ -29,7 +32,6 @@
   "updateInternalDependencies": "patch",
   "ignore": [
     "@biomejs/aria-data",
-    "@biomejs/runtime",
     "tailwindcss-config-analyzer",
     "@biomejs/prettier-compare"
   ]

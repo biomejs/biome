@@ -12,8 +12,7 @@ use biome_js_syntax::{
     JsParenthesizedExpression, JsSyntaxElement, T, global_identifier,
 };
 use biome_rowan::{
-    AstNode, AstSeparatedList, BatchMutationExt, Direction, TriviaPieceKind, WalkEvent,
-    syntax::Preorder,
+    AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind, WalkEvent, syntax::Preorder,
 };
 use biome_rule_options::use_flat_math_min_max::UseFlatMathMinMaxOptions;
 
@@ -91,7 +90,7 @@ impl Rule for UseFlatMathMinMax {
 
     fn action(ctx: &RuleContext<Self>, method: &Self::State) -> Option<JsRuleAction> {
         let call = ctx.query();
-        if has_comments_inside(call) {
+        if call.syntax().has_inner_comments() {
             return None;
         }
 
@@ -315,19 +314,3 @@ impl Iterator for FlattenedArguments<'_> {
 }
 
 impl FusedIterator for FlattenedArguments<'_> {}
-
-fn has_comments_inside(call: &JsCallExpression) -> bool {
-    let Some(first_token) = call.syntax().first_token() else {
-        return false;
-    };
-    let Some(last_token) = call.syntax().last_token() else {
-        return false;
-    };
-
-    call.syntax()
-        .descendants_tokens(Direction::Next)
-        .any(|token| {
-            (token != first_token && token.has_leading_comments())
-                || (token != last_token && token.has_trailing_comments())
-        })
-}

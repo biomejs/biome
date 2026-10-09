@@ -1,7 +1,8 @@
 mod base_name_store;
 mod tests;
 
-use crate::lexer::base_name_store::{BASENAME_STORE, is_delimiter};
+use crate::lexer::base_name_store::is_delimiter;
+pub use crate::lexer::base_name_store::{BASENAME_STORE, BaseNameStore};
 use crate::token_source::TailwindLexContext;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags};
@@ -22,6 +23,8 @@ pub(crate) struct TailwindLexer<'src> {
     current_flags: TokenFlags,
     after_newline: bool,
     unicode_bom_length: usize,
+    /// The dashed basenames to match, [BASENAME_STORE] unless the project declares more.
+    base_names: &'src BaseNameStore,
 }
 
 impl<'src> TailwindLexer<'src> {
@@ -35,7 +38,13 @@ impl<'src> TailwindLexer<'src> {
             current_flags: TokenFlags::empty(),
             after_newline: false,
             unicode_bom_length: 0,
+            base_names: &BASENAME_STORE,
         }
+    }
+
+    pub(crate) fn with_base_names(mut self, base_names: &'src BaseNameStore) -> Self {
+        self.base_names = base_names;
+        self
     }
 
     fn consume_token(&mut self, current: u8) -> TailwindSyntaxKind {
@@ -104,10 +113,12 @@ impl<'src> TailwindLexer<'src> {
         match dispatched {
             PNO => self.consume_byte(T!['(']),
             PNC => self.consume_byte(T![')']),
-            BTO => self.consume_byte(T!['[']),
             BTC => self.consume_byte(T![']']),
             WHS => self.consume_whitespace_token(),
+            // A selector can itself start with `[` (`[[data-state=open]_&]`),
+            // so check for the selector before lexing `[` as a bracket.
             _ if self.current_kind == T!['['] => self.consume_bracketed_thing(TW_SELECTOR, BTC),
+            BTO => self.consume_byte(T!['[']),
             _ => self.consume_named_value(),
         }
     }
@@ -156,6 +167,17 @@ impl<'src> TailwindLexer<'src> {
             BTO => self.consume_byte(T!['[']),
             BTC => self.consume_byte(T![']']),
             COL => self.consume_byte(T![:]),
+            // In math functions, Tailwind adds whitespace around a `-` that
+            // directly follows a value (`calc(100svh-var(--header))` becomes
+            // `calc(100svh - var(--header))`), so it is a binary operator
+            // rather than the start of a negative number or an identifier.
+            // The lexer does not track the enclosing function, so this also
+            // applies outside math functions.
+            //
+            // This deviates from the CSS Syntax spec and `biome_css_parser`,
+            // which require whitespace around `-` in math functions and lex
+            // `100svh-var` as one dimension with the unit `svh-var`.
+            MIN if self.is_after_css_value() => self.consume_byte(T![-]),
             MIN if self.peek_byte().is_some_and(is_css_identifier_start) => {
                 self.consume_css_identifier()
             }
@@ -165,6 +187,7 @@ impl<'src> TailwindLexer<'src> {
                 self.consume_css_number()
             }
             IDT if current == b'_' => self.consume_css_underscore_whitespace(),
+            IDT if self.current_kind == CSS_DIMENSION_VALUE => self.consume_css_unit(),
             IDT => self.consume_css_identifier(),
             QOT => self.consume_css_string(current),
             HAS => self.consume_css_color(),
@@ -249,7 +272,7 @@ impl<'src> TailwindLexer<'src> {
 
         if self.current_byte() == Some(b'%') {
             CSS_PERCENTAGE_VALUE
-        } else if self.current_byte().is_some_and(is_css_identifier_start) {
+        } else if self.current_byte().is_some_and(is_css_unit_continue) {
             CSS_DIMENSION_VALUE
         } else {
             CSS_NUMBER_LITERAL
@@ -265,81 +288,49 @@ impl<'src> TailwindLexer<'src> {
         }
     }
 
+    /// Whether the byte before the current position can end a value: an ASCII
+    /// letter or digit, `%`, or `)`. Identifiers consume a following `-`, so a
+    /// letter here ends a unit or a hex color.
+    fn is_after_css_value(&self) -> bool {
+        self.position
+            .checked_sub(1)
+            .and_then(|index| self.source.as_bytes().get(index))
+            .is_some_and(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'%' | b')'))
+    }
+
     fn consume_css_identifier(&mut self) -> TailwindSyntaxKind {
         let start = self.position;
-        while self.current_byte().is_some_and(is_css_identifier_continue) {
+        // Tailwind keeps underscores in custom property names instead of
+        // decoding them to spaces (`bg-(--a_b)` is `var(--a_b)`), and CSS
+        // allows non-ASCII characters in them.
+        let is_custom_property = self.source.as_bytes()[start..].starts_with(b"--");
+        while let Some(byte) = self.current_byte() {
+            if is_css_identifier_continue(byte) {
+                self.advance(1);
+            } else if is_custom_property && (byte == b'_' || !byte.is_ascii()) {
+                let char = self.current_char_unchecked();
+                self.advance(char.len_utf8());
+            } else {
+                break;
+            }
+        }
+
+        css_identifier_kind(&self.source.as_bytes()[start..self.position])
+    }
+
+    /// Consumes the unit of a dimension. Unlike an identifier, a unit stops at
+    /// `-`, which is a binary operator in `100svh-var(--header)`.
+    ///
+    /// This deviates from the CSS Syntax spec and `biome_css_parser`, where the
+    /// unit is a full identifier and includes `-` (`svh-var`). It follows
+    /// Tailwind, which inserts whitespace around the `-` instead.
+    fn consume_css_unit(&mut self) -> TailwindSyntaxKind {
+        let start = self.position;
+        while self.current_byte().is_some_and(is_css_unit_continue) {
             self.advance(1);
         }
 
-        match &self.source.as_bytes()[start..self.position] {
-            b"url" => URL_KW,
-            b"var" => VAR_KW,
-            b"em" => EM_KW,
-            b"rem" => REM_KW,
-            b"ex" => EX_KW,
-            b"rex" => REX_KW,
-            b"cap" => CAP_KW,
-            b"rcap" => RCAP_KW,
-            b"ch" => CH_KW,
-            b"rch" => RCH_KW,
-            b"ic" => IC_KW,
-            b"ric" => RIC_KW,
-            b"lh" => LH_KW,
-            b"rlh" => RLH_KW,
-            b"vw" => VW_KW,
-            b"svw" => SVW_KW,
-            b"lvw" => LVW_KW,
-            b"dvw" => DVW_KW,
-            b"vh" => VH_KW,
-            b"svh" => SVH_KW,
-            b"lvh" => LVH_KW,
-            b"dvh" => DVH_KW,
-            b"vi" => VI_KW,
-            b"svi" => SVI_KW,
-            b"lvi" => LVI_KW,
-            b"dvi" => DVI_KW,
-            b"vb" => VB_KW,
-            b"svb" => SVB_KW,
-            b"lvb" => LVB_KW,
-            b"dvb" => DVB_KW,
-            b"vmin" => VMIN_KW,
-            b"svmin" => SVMIN_KW,
-            b"lvmin" => LVMIN_KW,
-            b"dvmin" => DVMIN_KW,
-            b"vmax" => VMAX_KW,
-            b"svmax" => SVMAX_KW,
-            b"lvmax" => LVMAX_KW,
-            b"dvmax" => DVMAX_KW,
-            b"cm" => CM_KW,
-            b"mm" => MM_KW,
-            b"q" => Q_KW,
-            b"in" => IN_KW,
-            b"pc" => PC_KW,
-            b"pt" => PT_KW,
-            b"px" => PX_KW,
-            b"mozmm" => MOZMM_KW,
-            b"rpx" => RPX_KW,
-            b"cqw" => CQW_KW,
-            b"cqh" => CQH_KW,
-            b"cqi" => CQI_KW,
-            b"cqb" => CQB_KW,
-            b"cqmin" => CQMIN_KW,
-            b"cqmax" => CQMAX_KW,
-            b"deg" => DEG_KW,
-            b"grad" => GRAD_KW,
-            b"rad" => RAD_KW,
-            b"turn" => TURN_KW,
-            b"s" => S_KW,
-            b"ms" => MS_KW,
-            b"hz" => HZ_KW,
-            b"khz" => KHZ_KW,
-            b"dpi" => DPI_KW,
-            b"dpcm" => DPCM_KW,
-            b"dppx" => DPPX_KW,
-            b"x" => X_KW,
-            b"fr" => FR_KW,
-            _ => IDENT,
-        }
+        css_identifier_kind(&self.source.as_bytes()[start..self.position])
     }
 
     fn consume_css_string(&mut self, quote: u8) -> TailwindSyntaxKind {
@@ -440,7 +431,7 @@ impl<'src> TailwindLexer<'src> {
         }
 
         // Fallback to dashed-basename trie matching for cases with '-' inside the basename
-        let dashed_end = BASENAME_STORE.matcher(slice).base_end();
+        let dashed_end = self.base_names.matcher(slice).base_end();
         self.advance(dashed_end);
 
         if dashed_end == 4 && &slice[..dashed_end] == b"data" {
@@ -725,12 +716,88 @@ impl<'src> ReLexer<'src> for TailwindLexer<'src> {
     }
 }
 
+fn css_identifier_kind(text: &[u8]) -> TailwindSyntaxKind {
+    match text {
+        b"url" => URL_KW,
+        b"var" => VAR_KW,
+        b"em" => EM_KW,
+        b"rem" => REM_KW,
+        b"ex" => EX_KW,
+        b"rex" => REX_KW,
+        b"cap" => CAP_KW,
+        b"rcap" => RCAP_KW,
+        b"ch" => CH_KW,
+        b"rch" => RCH_KW,
+        b"ic" => IC_KW,
+        b"ric" => RIC_KW,
+        b"lh" => LH_KW,
+        b"rlh" => RLH_KW,
+        b"vw" => VW_KW,
+        b"svw" => SVW_KW,
+        b"lvw" => LVW_KW,
+        b"dvw" => DVW_KW,
+        b"vh" => VH_KW,
+        b"svh" => SVH_KW,
+        b"lvh" => LVH_KW,
+        b"dvh" => DVH_KW,
+        b"vi" => VI_KW,
+        b"svi" => SVI_KW,
+        b"lvi" => LVI_KW,
+        b"dvi" => DVI_KW,
+        b"vb" => VB_KW,
+        b"svb" => SVB_KW,
+        b"lvb" => LVB_KW,
+        b"dvb" => DVB_KW,
+        b"vmin" => VMIN_KW,
+        b"svmin" => SVMIN_KW,
+        b"lvmin" => LVMIN_KW,
+        b"dvmin" => DVMIN_KW,
+        b"vmax" => VMAX_KW,
+        b"svmax" => SVMAX_KW,
+        b"lvmax" => LVMAX_KW,
+        b"dvmax" => DVMAX_KW,
+        b"cm" => CM_KW,
+        b"mm" => MM_KW,
+        b"q" => Q_KW,
+        b"in" => IN_KW,
+        b"pc" => PC_KW,
+        b"pt" => PT_KW,
+        b"px" => PX_KW,
+        b"mozmm" => MOZMM_KW,
+        b"rpx" => RPX_KW,
+        b"cqw" => CQW_KW,
+        b"cqh" => CQH_KW,
+        b"cqi" => CQI_KW,
+        b"cqb" => CQB_KW,
+        b"cqmin" => CQMIN_KW,
+        b"cqmax" => CQMAX_KW,
+        b"deg" => DEG_KW,
+        b"grad" => GRAD_KW,
+        b"rad" => RAD_KW,
+        b"turn" => TURN_KW,
+        b"s" => S_KW,
+        b"ms" => MS_KW,
+        b"hz" => HZ_KW,
+        b"khz" => KHZ_KW,
+        b"dpi" => DPI_KW,
+        b"dpcm" => DPCM_KW,
+        b"dppx" => DPPX_KW,
+        b"x" => X_KW,
+        b"fr" => FR_KW,
+        _ => IDENT,
+    }
+}
+
 fn is_css_identifier_start(byte: u8) -> bool {
     byte != b'_' && matches!(lookup_byte(byte), IDT | MIN)
 }
 
 fn is_css_identifier_continue(byte: u8) -> bool {
     byte != b'_' && matches!(lookup_byte(byte), IDT | MIN | DIG | ZER)
+}
+
+fn is_css_unit_continue(byte: u8) -> bool {
+    byte != b'_' && lookup_byte(byte) == IDT
 }
 
 #[inline]

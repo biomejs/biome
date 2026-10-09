@@ -1,0 +1,21 @@
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"tailwind": {
+		"attributes": [
+			"class",
+			"className",
+			"customClassAttribute"
+		],
+		"mergeFunctions": [
+			"clsx",
+			"tw"
+		]
+	},
+	"linter": {
+		"rules": {
+			"nursery": {
+				"useTailwindSortedClasses": "error"
+			}
+		}
+	}
+}

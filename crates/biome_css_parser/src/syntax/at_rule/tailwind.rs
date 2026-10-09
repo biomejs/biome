@@ -127,7 +127,7 @@ pub(crate) fn parse_custom_variant_at_rule(p: &mut CssParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.bump(T![custom_variant]);
+    p.bump_with_context(T![custom_variant], CssLexContext::TailwindUtilityName);
 
     if !is_at_identifier(p) {
         p.error(expected_identifier(p, p.cur_range()));

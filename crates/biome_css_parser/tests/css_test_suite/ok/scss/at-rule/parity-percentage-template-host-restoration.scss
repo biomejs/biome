@@ -1,0 +1,11 @@
+@mixin frames {
+  @keyframes inner { 0% { @if true { opacity: 0; } } }
+  25% { opacity: 0.25; }
+  @font-face { @if true { font-family: example; } }
+  @page { @top-left { @if true { content: "example"; } } }
+  50% { opacity: 0.5; }
+  @function --value() { @if true { result: 1; } }
+  75% { opacity: 0.75; }
+  @if true { 100% { opacity: 1; } }
+}
+.after { color: red; }

@@ -2,7 +2,9 @@ use super::{document::Document, *};
 use crate::Watcher;
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::db::{DbReadGuard, DbState, WorkspaceDb};
-use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
+use crate::diagnostics::{
+    FileTooLarge, NoIgnoreFileFound, TailwindStylesheetNotFound, VcsDiagnostic,
+};
 use crate::embed::EmbedContent;
 #[cfg(feature = "lang_js")]
 use crate::file_handlers::AstroFileHandler;
@@ -1417,8 +1419,8 @@ impl WorkspaceServerWithDb<'_> {
                 } else {
                     Vec::new()
                 }
-            },
-            _ => biome_analyze::AnalyzerPluginVec::new()
+            }
+            _ => biome_analyze::AnalyzerPluginVec::new(),
         };
         let settings =
             self.settings_handle_with_query(&settings, EditorFeatures::default(), query_context);
@@ -1509,8 +1511,12 @@ impl WorkspaceServerWithDb<'_> {
                                 // reindent_embedded_code — so byte offsets match.
                                 let trimmed = new_code.trim();
                                 match document_file_source {
-                                    DocumentFileSource::Js(_) => crate::file_handlers::html::js_verbatim_ranges(trimmed),
-                                    DocumentFileSource::Css(_) => crate::file_handlers::html::css_verbatim_ranges(trimmed),
+                                    DocumentFileSource::Js(_) => {
+                                        crate::file_handlers::html::js_verbatim_ranges(trimmed)
+                                    }
+                                    DocumentFileSource::Css(_) => {
+                                        crate::file_handlers::html::css_verbatim_ranges(trimmed)
+                                    }
                                     _ => vec![],
                                 }
                             } else {
@@ -1686,8 +1692,8 @@ impl WorkspaceServerWithDb<'_> {
                     } else {
                         Vec::new()
                     }
-                },
-                _ => Vec::new()
+                }
+                _ => Vec::new(),
             };
             let settings = self.settings_handle_with_query(
                 &settings,
@@ -1767,26 +1773,32 @@ impl WorkspaceServerWithDb<'_> {
     }
 
     #[cfg(feature = "plugins")]
-    fn load_plugins(&self, base_path: &Utf8Path, plugins: &Plugins) -> Vec<PluginDiagnostic> {
+    fn load_plugins(
+        &self,
+        base_path: &Utf8Path,
+        plugins: &Plugins,
+    ) -> (PluginCache, Vec<PluginDiagnostic>) {
         let mut diagnostics = Vec::new();
         let plugin_cache = PluginCache::default();
 
         for plugin_config in plugins.iter() {
             let plugin_path = plugin_config.path();
             let includes = plugin_config.includes();
-            match BiomePlugin::load(self.fs.clone(), plugin_path, base_path, includes) {
+            match BiomePlugin::load_with_package_specifier(
+                self.fs.clone(),
+                plugin_path,
+                base_path,
+                includes,
+                plugin_config.resolved_package_specifier(),
+            ) {
                 Ok((plugin, _)) => {
-                    plugin_cache.insert_plugin(plugin_path.to_owned().into(), plugin);
+                    plugin_cache.insert_plugin(plugin_config, plugin);
                 }
                 Err(diagnostic) => diagnostics.push(diagnostic),
             }
         }
 
-        self.plugin_caches
-            .pin()
-            .insert(base_path.to_path_buf(), plugin_cache);
-
-        diagnostics
+        (plugin_cache, diagnostics)
     }
 
     #[cfg(feature = "plugins")]
@@ -1843,12 +1855,16 @@ impl WorkspaceServerWithDb<'_> {
             // If the path is a dependency of an indexed file, we accept them
             // under the following conditions:
             // - If the path is inside `node_modules`, we only care about
-            //   `package.json` and type declarations, to avoid accidentally
-            //   indexing minified files.
+            //   `package.json`, type declarations, and imported stylesheets.
+            //   Runtime JavaScript may be minified and isn't indexed.
             // - The path shouldn't be indexed yet, to avoid double indexing.
             IndexRequestKind::Dependency(_) => {
                 let path = BiomePath::new(path);
-                if path.is_dependency() && !path.is_package_json() && !path.is_type_declaration() {
+                if path.is_dependency()
+                    && !path.is_package_json()
+                    && !path.is_type_declaration()
+                    && path.extension() != Some("css")
+                {
                     return Ok(true);
                 }
 
@@ -2824,6 +2840,47 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         };
         settings.module_graph_resolution_kind = module_graph_resolution_kind;
 
+        #[cfg(feature = "plugins")]
+        let configuration = {
+            let mut configuration = configuration;
+            let plugin_resolution_base = workspace_directory
+                .clone()
+                .or_else(|| self.project_get_path(project_key))
+                .unwrap_or_default();
+            if let Some(plugins) = configuration.plugins.as_mut() {
+                plugins
+                    .resolve_paths(self.fs.as_ref(), &plugin_resolution_base)
+                    .map_err(|diagnostic| WorkspaceError::plugin_errors(vec![diagnostic]))?;
+            }
+            if let Some(overrides) = configuration.overrides.as_mut() {
+                for pattern in overrides.0.iter_mut() {
+                    if let Some(plugins) = pattern.plugins.as_mut() {
+                        plugins
+                            .resolve_paths(self.fs.as_ref(), &plugin_resolution_base)
+                            .map_err(|diagnostic| {
+                                WorkspaceError::plugin_errors(vec![diagnostic])
+                            })?;
+                    }
+                }
+            }
+            configuration
+        };
+
+        // Resolve the stylesheet from the configuration that declares it. Nested
+        // configurations that extend this one then inherit the absolute path.
+        let mut configuration = configuration;
+        if let Some(stylesheet) = configuration
+            .tailwind
+            .as_mut()
+            .and_then(|tailwind| tailwind.stylesheet.as_mut())
+        {
+            let base = workspace_directory
+                .clone()
+                .or_else(|| self.project_get_path(project_key))
+                .unwrap_or_default();
+            *stylesheet = normalize_path(&base.join(stylesheet.as_str())).into_string();
+        }
+
         settings.merge_with_configuration(
             configuration,
             workspace_directory.clone(),
@@ -2833,12 +2890,21 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 .collect(),
         )?;
 
+        if let Some(stylesheet) = settings.tailwind.stylesheet()
+            && !self.fs.path_is_file(stylesheet)
+        {
+            diagnostics.push(biome_diagnostics::serde::Diagnostic::new(
+                TailwindStylesheetNotFound {
+                    path: stylesheet.to_string(),
+                },
+            ));
+        }
+
         #[cfg(feature = "plugins")]
         {
-            let plugin_diagnostics = self.load_plugins(
-                &workspace_directory.clone().unwrap_or_default(),
-                &settings.as_all_plugins(),
-            );
+            let plugin_base_path = workspace_directory.clone().unwrap_or_default();
+            let (plugin_cache, plugin_diagnostics) =
+                self.load_plugins(&plugin_base_path, &settings.as_all_plugins());
 
             let has_errors = plugin_diagnostics
                 .iter()
@@ -2847,6 +2913,9 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             if has_errors {
                 return Err(WorkspaceError::plugin_errors(plugin_diagnostics));
             }
+            self.plugin_caches
+                .pin()
+                .insert(plugin_base_path, plugin_cache);
             diagnostics.extend(
                 plugin_diagnostics
                     .into_iter()
@@ -3606,8 +3675,8 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                     } else {
                         Vec::new()
                     }
-                },
-                _ => Vec::new()
+                }
+                _ => Vec::new(),
             };
             let handle = self.settings_handle_with_query(
                 &settings,
@@ -3725,15 +3794,19 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             feature = "plugins" => {
                 if categories.contains(biome_analyze::RuleCategory::Lint) {
                     self.get_analyzer_plugins_for_project(
-                        settings.as_ref().source_path().unwrap_or_default().as_path(),
+                        settings
+                            .as_ref()
+                            .source_path()
+                            .unwrap_or_default()
+                            .as_path(),
                         &settings.as_ref().get_plugins_for_path(&path),
                     )
                     .map_err(WorkspaceError::plugin_errors)?
                 } else {
                     Vec::new()
                 }
-            },
-            _ => biome_analyze::AnalyzerPluginVec::new()
+            }
+            _ => biome_analyze::AnalyzerPluginVec::new(),
         };
 
         let mut result = code_actions(CodeActionsParams {
@@ -4415,13 +4488,12 @@ impl WorkspaceScannerBridge for WorkspaceServerWithDb<'_> {
             let loaded_nested_configuration =
                 LoadedConfiguration::try_from_payload(config, self.fs.as_ref())?;
 
-            let LoadedConfiguration {
-                directory_path: nested_directory_path,
-                configuration: nested_configuration,
-                diagnostics,
-                extended_configurations,
-                ..
-            } = loaded_nested_configuration;
+            let nested_directory_path = loaded_nested_configuration
+                .directory_path()
+                .map(Utf8Path::to_path_buf);
+            let nested_configuration = loaded_nested_configuration.resolved_configuration();
+            let extended_configurations = loaded_nested_configuration.extended_configurations();
+            let diagnostics = loaded_nested_configuration.diagnostics;
             let has_errors = diagnostics.iter().any(|d| d.severity() >= Severity::Error);
             returned_diagnostics.extend(
                 diagnostics
@@ -4754,3 +4826,7 @@ fn init_thread_pool(_threads: Option<usize>) {}
 #[cfg(test)]
 #[path = "server.tests.rs"]
 mod tests;
+
+#[cfg(all(test, feature = "md_embeds"))]
+#[path = "md_embeds.tests.rs"]
+mod md_embeds_tests;

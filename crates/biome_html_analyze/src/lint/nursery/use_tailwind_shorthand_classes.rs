@@ -42,9 +42,14 @@ declare_lint_rule! {
     /// <div class="size-4"></div>
     /// ```
     ///
+    /// ## Recognized class strings
+    ///
+    /// This rule checks the attributes and functions recognized by the top-level
+    /// [`tailwind` configuration](https://biomejs.dev/reference/configuration/#tailwind).
+    ///
     /// ## Known limitations
     ///
-    /// This rule currently doesn't check bare strings inside framework-specific class collections,
+    /// This rule doesn't check bare strings inside framework-specific class collections,
     /// such as array or object entries in Vue, Svelte, or Astro class bindings:
     ///
     /// ```svelte
@@ -58,14 +63,17 @@ declare_lint_rule! {
     /// <div class={`border-x border-y ${extra}`}></div>
     /// ```
     ///
-    /// In Astro, bare strings inside `class:list` arrays are currently not checked unless they are passed
-    /// to a recognized helper function such as `clsx`.
+    /// In Astro, bare strings inside `class:list` arrays are not checked unless they are passed to a
+    /// recognized helper function such as `clsx`.
     pub UseTailwindShorthandClasses {
         version: "2.5.9",
         name: "useTailwindShorthandClasses",
         language: "html",
         domains: &[RuleDomain::Tailwind],
-        sources: &[RuleSource::EslintBetterTailwindcss("enforce-shorthand-classes").inspired()],
+        sources: &[
+            RuleSource::EslintBetterTailwindcss("enforce-shorthand-classes").inspired(),
+            RuleSource::EslintTailwindcss("enforces-shorthand").same(),
+        ],
         recommended: false,
         fix_kind: FixKind::Unsafe,
         issue_number: Some("11342"),

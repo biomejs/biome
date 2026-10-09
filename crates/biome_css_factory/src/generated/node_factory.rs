@@ -29,7 +29,7 @@ pub fn css_at_rule_declarator(
 }
 pub fn css_attr_fallback_value(
     comma_token: SyntaxToken,
-    value: CssGenericComponentValueList,
+    value: AnyCssAttrFallbackValue,
 ) -> CssAttrFallbackValue {
     CssAttrFallbackValue::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_ATTR_FALLBACK_VALUE,
@@ -1219,7 +1219,7 @@ pub fn css_identifier(value_token: SyntaxToken) -> CssIdentifier {
 pub fn css_if_branch(
     condition: AnyCssIfCondition,
     colon_token: SyntaxToken,
-    value: CssGenericComponentValueList,
+    value: AnyCssIfBranchValue,
 ) -> CssIfBranch {
     CssIfBranch::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_IF_BRANCH,
@@ -3277,19 +3277,29 @@ impl ScssAtRootAtRuleBuilder {
 }
 pub fn scss_at_root_query(
     l_paren_token: SyntaxToken,
-    modifier_token: SyntaxToken,
-    colon_token: SyntaxToken,
-    queries: ScssAtRootQueryList,
+    query: AnyScssAtRootQuery,
     r_paren_token: SyntaxToken,
 ) -> ScssAtRootQuery {
     ScssAtRootQuery::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_AT_ROOT_QUERY,
         [
             Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Token(modifier_token)),
-            Some(SyntaxElement::Token(colon_token)),
-            Some(SyntaxElement::Node(queries.into_syntax())),
+            Some(SyntaxElement::Node(query.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn scss_at_root_query_clause(
+    modifier: ScssExpression,
+    colon_token: SyntaxToken,
+    rules: ScssExpression,
+) -> ScssAtRootQueryClause {
+    ScssAtRootQueryClause::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_AT_ROOT_QUERY_CLAUSE,
+        [
+            Some(SyntaxElement::Node(modifier.into_syntax())),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Node(rules.into_syntax())),
         ],
     ))
 }
@@ -3390,7 +3400,7 @@ impl ScssDebugAtRuleBuilder {
 pub fn scss_each_at_rule(
     each_token: SyntaxToken,
     header: ScssEachHeader,
-    block: CssDeclarationOrRuleBlock,
+    block: AnyCssControlBlock,
 ) -> ScssEachAtRule {
     ScssEachAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_EACH_AT_RULE,
@@ -3526,7 +3536,7 @@ pub fn scss_for_at_rule(
     lower_bound: ScssExpression,
     operator_token: SyntaxToken,
     upper_bound: ScssExpression,
-    block: CssDeclarationOrRuleBlock,
+    block: AnyCssControlBlock,
 ) -> ScssForAtRule {
     ScssForAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_FOR_AT_RULE,
@@ -3662,7 +3672,7 @@ pub fn scss_hide_clause(hide_token: SyntaxToken, members: ScssModuleMemberList) 
 pub fn scss_if_at_rule(
     if_token: SyntaxToken,
     condition: ScssExpression,
-    block: CssDeclarationOrRuleBlock,
+    block: AnyCssControlBlock,
 ) -> ScssIfAtRuleBuilder {
     ScssIfAtRuleBuilder {
         if_token,
@@ -3674,7 +3684,7 @@ pub fn scss_if_at_rule(
 pub struct ScssIfAtRuleBuilder {
     if_token: SyntaxToken,
     condition: ScssExpression,
-    block: CssDeclarationOrRuleBlock,
+    block: AnyCssControlBlock,
     else_clause: Option<ScssElseClause>,
 }
 impl ScssIfAtRuleBuilder {
@@ -4069,6 +4079,22 @@ pub fn scss_keyword_argument(
             Some(SyntaxElement::Node(name.into_syntax())),
             Some(SyntaxElement::Token(colon_token)),
             Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn scss_legacy_if_function(
+    if_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    items: CssParameterList,
+    r_paren_token: SyntaxToken,
+) -> ScssLegacyIfFunction {
+    ScssLegacyIfFunction::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_LEGACY_IF_FUNCTION,
+        [
+            Some(SyntaxElement::Token(if_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
         ],
     ))
 }
@@ -4496,6 +4522,50 @@ pub fn scss_string_text(value_token: SyntaxToken) -> ScssStringText {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn scss_supports_feature_declaration(
+    l_paren_token: SyntaxToken,
+    name: ScssVariable,
+    colon_token: SyntaxToken,
+    value: AnyCssGenericPropertyValueOrExpression,
+    r_paren_token: SyntaxToken,
+) -> ScssSupportsFeatureDeclarationBuilder {
+    ScssSupportsFeatureDeclarationBuilder {
+        l_paren_token,
+        name,
+        colon_token,
+        value,
+        r_paren_token,
+        important: None,
+    }
+}
+pub struct ScssSupportsFeatureDeclarationBuilder {
+    l_paren_token: SyntaxToken,
+    name: ScssVariable,
+    colon_token: SyntaxToken,
+    value: AnyCssGenericPropertyValueOrExpression,
+    r_paren_token: SyntaxToken,
+    important: Option<CssDeclarationImportant>,
+}
+impl ScssSupportsFeatureDeclarationBuilder {
+    pub fn with_important(mut self, important: CssDeclarationImportant) -> Self {
+        self.important = Some(important);
+        self
+    }
+    pub fn build(self) -> ScssSupportsFeatureDeclaration {
+        ScssSupportsFeatureDeclaration::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_SUPPORTS_FEATURE_DECLARATION,
+            [
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                Some(SyntaxElement::Token(self.colon_token)),
+                Some(SyntaxElement::Node(self.value.into_syntax())),
+                self.important
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+            ],
+        ))
+    }
+}
 pub fn scss_supports_interpolated_condition(
     condition: ScssInterpolation,
 ) -> ScssSupportsInterpolatedCondition {
@@ -4678,7 +4748,7 @@ impl ScssWarnAtRuleBuilder {
 pub fn scss_while_at_rule(
     while_token: SyntaxToken,
     condition: ScssExpression,
-    block: CssDeclarationOrRuleBlock,
+    block: AnyCssControlBlock,
 ) -> ScssWhileAtRule {
     ScssWhileAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_WHILE_AT_RULE,
@@ -5652,18 +5722,6 @@ where
                 Some(separators.next()?.into())
             }
         }),
-    ))
-}
-pub fn scss_at_root_query_list<I>(items: I) -> ScssAtRootQueryList
-where
-    I: IntoIterator<Item = AnyCssCustomIdentifier>,
-    I::IntoIter: ExactSizeIterator,
-{
-    ScssAtRootQueryList::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::SCSS_AT_ROOT_QUERY_LIST,
-        items
-            .into_iter()
-            .map(|item| Some(item.into_syntax().into())),
     ))
 }
 pub fn scss_each_binding_list<I, S>(items: I, separators: S) -> ScssEachBindingList

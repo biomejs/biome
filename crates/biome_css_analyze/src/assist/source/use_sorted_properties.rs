@@ -22,28 +22,32 @@ use std::{
 };
 
 declare_source_rule! {
-    /// Enforce ordering of CSS properties and nested rules.
+    /// Sort CSS properties and nested rules into a consistent order.
     ///
-    /// This rule ensures the contents of a CSS rule are ordered consistently.
+    /// The action uses a predefined order that groups related properties by purpose.
+    /// Custom properties come first, and nested rules or at-rules such as `@media` come after
+    /// declarations.
     ///
-    /// Properties are ordered semantically, with more important properties near the top and
-    /// similar properties grouped together. Nested rules and at-rules are placed after properties.
+    /// The main groups are:
     ///
-    /// The ordering is roughly:
-    /// 1. Custom properties
-    /// 1. Layout properties (display, flex, grid)
-    /// 1. Margin and padding properties
-    /// 1. Typography properties (font, color)
-    /// 1. Interaction properties (pointer-events, visibility)
-    /// 1. Background and border properties
-    /// 1. Transition and animation properties
-    /// 1. Nested rules, media queries and other at-rules
+    /// 1. Custom properties.
+    /// 2. Layout properties, including `display`, `visibility`, flexbox, and grid.
+    /// 3. Margin and padding properties.
+    /// 4. Typography properties, including `font` and `color`.
+    /// 5. Interaction properties, including `pointer-events`.
+    /// 6. Background and border properties.
+    /// 7. Transition and animation properties.
+    /// 8. Nested rules, media queries, and other at-rules.
+    ///
+    /// Biome skips blocks containing unknown properties because their correct position is not
+    /// known. If sorting could change the result of a shorthand and longhand combination, Biome
+    /// reports the block but does not offer the action.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```css,expect_diagnostic
+    /// ```css,expect_diff
     /// p {
     ///   transition: opacity 1s ease;
     ///   border: 1px solid black;
@@ -55,7 +59,7 @@ declare_source_rule! {
     /// }
     /// ```
     ///
-    /// ```css,expect_diagnostic
+    /// ```css,expect_diff
     /// p {
     ///   span { color: blue; }
     ///   color: red;
@@ -114,6 +118,17 @@ impl Rule for UseSortedProperties {
             .items()
             .into_iter()
             .collect::<Vec<AnyCssDeclarationOrRule>>();
+
+        // Template steps can depend on declarations before enclosing controls or content blocks.
+        // Native keyframe lists do not use the declaration-or-rule list alternative.
+        if node.syntax().descendants().any(|descendant| {
+            descendant.kind() == CssSyntaxKind::CSS_KEYFRAMES_ITEM
+                && descendant.parent().is_some_and(|parent| {
+                    parent.kind() == CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST
+                })
+        }) {
+            return None;
+        }
 
         if contains_shorthand_after_longhand(&original_properties) {
             // This would be unsafe to sort
@@ -239,6 +254,7 @@ impl RecessOrderMember {
     pub fn kind(&self) -> NodeKindOrder {
         match &self.0 {
             AnyCssDeclarationOrRule::CssBogus(_) => NodeKindOrder::UnknownKind,
+            AnyCssDeclarationOrRule::CssKeyframesItem(_) => NodeKindOrder::UnknownKind,
             AnyCssDeclarationOrRule::CssMetavariable(_) => NodeKindOrder::UnknownKind,
             AnyCssDeclarationOrRule::ScssVariableDeclaration(_) => NodeKindOrder::UnknownKind,
             AnyCssDeclarationOrRule::ScssNestingDeclaration(_) => NodeKindOrder::UnknownKind,
@@ -277,6 +293,9 @@ impl RecessOrderMember {
                             }
                             AnyCssDeclarationName::TwValueThemeReference(_) => {
                                 NodeKindOrder::Declaration
+                            }
+                            AnyCssDeclarationName::CssMetavariable(_) => {
+                                NodeKindOrder::UnknownKind
                             }
                         }
                     }

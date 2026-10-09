@@ -15,12 +15,65 @@ biome migrate eslint --write
   "linter": {
     "rules": {
       "preset": "none",
-      "a11y": { "useButtonType": "error" },
-      "correctness": { "noUnusedVariables": "error" },
-      "style": { "useConsistentObjectDefinitions": "error" },
+      "a11y": {
+        "noAccessKey": "error",
+        "noAmbiguousAnchorText": "error",
+        "noAriaHiddenOnFocusable": "error",
+        "noAriaUnsupportedElements": "error",
+        "noAutofocus": "error",
+        "noDistractingElements": "error",
+        "noHeaderScope": "error",
+        "noInteractiveElementToNoninteractiveRole": "error",
+        "noLabelWithoutControl": "error",
+        "noNoninteractiveElementInteractions": "error",
+        "noNoninteractiveElementToInteractiveRole": "error",
+        "noNoninteractiveTabindex": "error",
+        "noPositiveTabindex": "error",
+        "noRedundantAlt": "error",
+        "noRedundantRoles": "error",
+        "noStaticElementInteractions": "error",
+        "useAltText": "error",
+        "useAnchorContent": "error",
+        "useAriaActivedescendantWithTabindex": "error",
+        "useAriaPropsForRole": "error",
+        "useAriaPropsSupportedByRole": "error",
+        "useButtonType": "error",
+        "useFocusableInteractive": "error",
+        "useHeadingContent": "error",
+        "useHtmlLang": "error",
+        "useIframeTitle": "error",
+        "useKeyWithClickEvents": "error",
+        "useKeyWithMouseEvents": "error",
+        "useMediaCaption": "error",
+        "useSemanticElements": "error",
+        "useValidAnchor": "error",
+        "useValidAriaProps": "error",
+        "useValidAriaRole": "error",
+        "useValidAriaValues": "error",
+        "useValidAutocomplete": "error",
+        "useValidLang": "error"
+      },
+      "correctness": {
+        "noPrecisionLoss": "error",
+        "noUnusedVariables": "error"
+      },
+      "performance": { "noDelete": "error" },
+      "security": { "noBlankTarget": "error", "useIframeSandbox": "error" },
+      "style": {
+        "noInlineStyles": "error",
+        "noProcessEnv": "error",
+        "useConsistentObjectDefinitions": "error",
+        "useConst": "error",
+        "useForOf": "error",
+        "useNodejsImportProtocol": "error",
+        "useReactFunctionComponents": "error"
+      },
       "suspicious": {
         "noConsole": "error",
         "noDoubleEquals": "error",
+        "noFocusedTests": "error",
+        "noGlobalAssign": "error",
+        "noIdenticalTestTitle": "error",
         "noIrregularWhitespace": "error",
         "noShadow": "error"
       }
@@ -32,7 +85,7 @@ biome migrate eslint --write
 ## `.eslintrc.json`
 
 ```json
-{"rules":{"@typescript-eslint/prefer-promise-reject-errors":"error","no-catch-shadow":"error","svelte/button-has-type":"warn","svelte/first-attribute-linebreak":"error","svelte/html-closing-bracket-new-line":"error","svelte/html-closing-bracket-spacing":"error","svelte/html-quotes":"error","svelte/indent":"error","svelte/mustache-spacing":"error","svelte/no-at-const-tags":"error","svelte/no-spaces-around-equal-signs-in-attribute":"error","svelte/no-trailing-spaces":"error","vue/eqeqeq":"error","vue/html-button-has-type":"error","vue/no-console":"error","vue/no-irregular-whitespace":"error","vue/no-restricted-v-on":"error","vue/no-unused-vars":"error","vue/object-shorthand":"error","vue/padding-line-between-blocks":"error","vue/padding-line-between-tags":"error","vue/padding-lines-in-component-definition":"error"}}
+{"rules":{"@html-eslint/no-target-blank":"warn","@mysticatea/block-scoped-var":"error","@mysticatea/prefer-for-of":"error","@stylistic/curly-newline":"error","@stylistic/function-call-spacing":"error","@stylistic/jsx-curly-brace-presence":"error","@stylistic/jsx-indent":"error","@stylistic/jsx-props-no-multi-spaces":"error","@stylistic/jsx-props-style":"error","@stylistic/jsx-sort-props":"error","@stylistic/no-mixed-spaces-and-tabs":"error","@stylistic/semi":"error","@stylistic/semi-spacing":"error","@stylistic/semi-style":"error","@typescript-eslint/prefer-promise-reject-errors":"error","@typescript-eslint/typedef":"error","astro/jsx-a11y/alt-text":"error","astro/jsx-a11y/anchor-ambiguous-text":"error","astro/jsx-a11y/anchor-has-content":"error","astro/jsx-a11y/anchor-is-valid":"error","astro/jsx-a11y/aria-activedescendant-has-tabindex":"error","astro/jsx-a11y/aria-props":"error","astro/jsx-a11y/aria-proptypes":"error","astro/jsx-a11y/aria-role":"error","astro/jsx-a11y/aria-unsupported-elements":"error","astro/jsx-a11y/autocomplete-valid":"error","astro/jsx-a11y/click-events-have-key-events":"error","astro/jsx-a11y/control-has-associated-label":"error","astro/jsx-a11y/heading-has-content":"error","astro/jsx-a11y/html-has-lang":"error","astro/jsx-a11y/iframe-has-title":"error","astro/jsx-a11y/img-redundant-alt":"error","astro/jsx-a11y/interactive-supports-focus":"error","astro/jsx-a11y/label-has-associated-control":"error","astro/jsx-a11y/lang":"error","astro/jsx-a11y/media-has-caption":"error","astro/jsx-a11y/mouse-events-have-key-events":"error","astro/jsx-a11y/no-access-key":"error","astro/jsx-a11y/no-aria-hidden-on-focusable":"error","astro/jsx-a11y/no-autofocus":"error","astro/jsx-a11y/no-distracting-elements":"error","astro/jsx-a11y/no-interactive-element-to-noninteractive-role":"error","astro/jsx-a11y/no-noninteractive-element-interactions":"error","astro/jsx-a11y/no-noninteractive-element-to-interactive-role":"error","astro/jsx-a11y/no-noninteractive-tabindex":"error","astro/jsx-a11y/no-redundant-roles":"error","astro/jsx-a11y/no-static-element-interactions":"error","astro/jsx-a11y/prefer-tag-over-role":"error","astro/jsx-a11y/role-has-required-aria-props":"error","astro/jsx-a11y/role-supports-aria-props":"error","astro/jsx-a11y/scope":"error","astro/jsx-a11y/tabindex-no-positive":"error","astro/no-omitted-end-tags":"error","astro/semi":"error","astro/valid-compile":"error","block-scoped-var":"error","camelcase":"error","init-declarations":"error","jsx-a11y/label-has-for":"error","jsx-a11y/no-onchange":"error","markdown/no-space-in-emphasis":"error","n/no-hide-core-modules":"error","n/prefer-node-protocol":"error","no-catch-shadow":"error","no-delete-var":"error","no-iterator":"error","no-native-reassign":"error","no-negated-in-lhs":"error","no-new-symbol":"error","no-process-env":"error","no-return-await":"error","playwright/consistent-spacing-between-blocks":"error","playwright/no-focused-test":"error","playwright/no-identical-title":"error","prefer-reflect":"error","qwik/no-async-prevent-default":"error","react-native/no-inline-styles":"error","react-prefer-function-component/prefer-function-component":"error","react/iframe-missing-sandbox":"error","shadcn/no-inline-styles":"error","strict":"error","svelte/button-has-type":"warn","svelte/first-attribute-linebreak":"error","svelte/html-closing-bracket-new-line":"error","svelte/html-closing-bracket-spacing":"error","svelte/html-quotes":"error","svelte/indent":"error","svelte/max-attributes-per-line":"error","svelte/mustache-spacing":"error","svelte/no-at-const-tags":"error","svelte/no-inline-styles":"error","svelte/no-spaces-around-equal-signs-in-attribute":"error","svelte/no-target-blank":"error","svelte/no-trailing-spaces":"error","svelte/no-unused-svelte-ignore":"error","svelte/prefer-const":"error","svelte/valid-compile":"error","svelte/valid-style-parse":"error","tailwindcss/enforces-shorthand":"warn","tailwindcss/important-modifier-suffix":"error","unicorn/comma-spacing":"error","unicorn/indent":"error","vitest/padding-around-after-all-blocks":"error","vitest/padding-around-after-each-blocks":"error","vitest/padding-around-all":"error","vitest/padding-around-before-all-blocks":"error","vitest/padding-around-before-each-blocks":"error","vitest/padding-around-describe-blocks":"error","vitest/padding-around-expect-groups":"error","vitest/padding-around-test-blocks":"error","vue/camelcase":"error","vue/component-api-style":"error","vue/eqeqeq":"error","vue/html-button-has-type":"error","vue/no-console":"error","vue/no-irregular-whitespace":"error","vue/no-loss-of-precision":"error","vue/no-restricted-v-on":"error","vue/no-unused-vars":"error","vue/object-shorthand":"error","vue/padding-line-between-blocks":"error","vue/padding-line-between-tags":"error","vue/padding-lines-in-component-definition":"error","yml/flow-mapping-curly-newline":"error","yml/indent":"error","yml/no-tab-indent":"error","yml/no-trailing-spaces":"error","yml/quotes":"error"}}
 ```
 
 # Emitted Messages
@@ -40,48 +93,175 @@ biome migrate eslint --write
 ```block
 migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i 22 ESLint rules found
-    - 2 are obsolete because of Biome's formatter
-    - 9 have been migrated to Biome's rules
-    - 59% (13) of your ESLint rules are fully covered by Biome
-      - 40% (9) via direct migration to Biome rules
+  i 128 ESLint rules found
+    - 17 are obsolete because of Biome's formatter
+    - 59 have been migrated to Biome's rules
+    - 69% (89) of your ESLint rules are fully covered by Biome
+      - 46% (59) via direct migration to Biome rules
   
   
   i Migrated rules:
   
   - no-catch-shadow
+  - no-delete-var
+  - no-native-reassign
+  - no-process-env
+  - @html-eslint/no-target-blank
+  - @mysticatea/prefer-for-of
+  - astro/jsx-a11y/alt-text
+  - astro/jsx-a11y/anchor-ambiguous-text
+  - astro/jsx-a11y/anchor-has-content
+  - astro/jsx-a11y/anchor-is-valid
+  - astro/jsx-a11y/aria-activedescendant-has-tabindex
+  - astro/jsx-a11y/aria-props
+  - astro/jsx-a11y/aria-proptypes
+  - astro/jsx-a11y/aria-role
+  - astro/jsx-a11y/aria-unsupported-elements
+  - astro/jsx-a11y/autocomplete-valid
+  - astro/jsx-a11y/click-events-have-key-events
+  - astro/jsx-a11y/heading-has-content
+  - astro/jsx-a11y/html-has-lang
+  - astro/jsx-a11y/iframe-has-title
+  - astro/jsx-a11y/img-redundant-alt
+  - astro/jsx-a11y/interactive-supports-focus
+  - astro/jsx-a11y/label-has-associated-control
+  - astro/jsx-a11y/lang
+  - astro/jsx-a11y/media-has-caption
+  - astro/jsx-a11y/mouse-events-have-key-events
+  - astro/jsx-a11y/no-access-key
+  - astro/jsx-a11y/no-aria-hidden-on-focusable
+  - astro/jsx-a11y/no-autofocus
+  - astro/jsx-a11y/no-distracting-elements
+  - astro/jsx-a11y/no-interactive-element-to-noninteractive-role
+  - astro/jsx-a11y/no-noninteractive-element-interactions
+  - astro/jsx-a11y/no-noninteractive-element-to-interactive-role
+  - astro/jsx-a11y/no-noninteractive-tabindex
+  - astro/jsx-a11y/no-redundant-roles
+  - astro/jsx-a11y/no-static-element-interactions
+  - astro/jsx-a11y/prefer-tag-over-role
+  - astro/jsx-a11y/role-has-required-aria-props
+  - astro/jsx-a11y/role-supports-aria-props
+  - astro/jsx-a11y/scope
+  - astro/jsx-a11y/tabindex-no-positive
+  - n/prefer-node-protocol
+  - playwright/no-focused-test
+  - playwright/no-identical-title
+  - react/iframe-missing-sandbox
+  - react-native/no-inline-styles
+  - react-prefer-function-component/prefer-function-component
+  - shadcn/no-inline-styles
   - svelte/button-has-type
+  - svelte/no-inline-styles
+  - svelte/no-target-blank
+  - svelte/prefer-const
   - vue/eqeqeq
   - vue/html-button-has-type
   - vue/no-console
   - vue/no-irregular-whitespace
-  - vue/no-restricted-v-on
+  - vue/no-loss-of-precision
   - vue/no-unused-vars
   - vue/object-shorthand
+  
+  i Rules that can be migrated to an inspired rule using --include-inspired:
+  
+  - camelcase
+  - init-declarations
+  - no-negated-in-lhs
+  - no-new-symbol
+  - strict
+  - @stylistic/jsx-curly-brace-presence
+  - astro/jsx-a11y/control-has-associated-label
+  - jsx-a11y/label-has-for
+  - vue/camelcase
+  - vue/component-api-style
   
   i Rules that can be migrated to a nursery rule using --include-nursery:
   
   - @typescript-eslint/prefer-promise-reject-errors
   - svelte/no-at-const-tags
+  - tailwindcss/enforces-shorthand
   
-  i Unsupported rules (9 incompatible with formatter, 2 made obsolete by the formatter, 0 covered by a formatter option, 0 not yet implemented, 0 unknown source):
+  i Unsupported rules (21 incompatible with formatter, 11 made obsolete by the formatter, 6 covered by a formatter option, 1 not yet implemented, 0 unknown source):
   
   i These rules enforce code styles that are incompatible with the formatter in some way:
   
+  - @stylistic/curly-newline
+  - @stylistic/jsx-props-style
+  - playwright/consistent-spacing-between-blocks
   - svelte/first-attribute-linebreak
   - svelte/html-closing-bracket-new-line
   - svelte/html-closing-bracket-spacing
   - svelte/html-quotes
   - svelte/indent
+  - svelte/max-attributes-per-line
   - svelte/mustache-spacing
+  - vitest/padding-around-after-all-blocks
+  - vitest/padding-around-after-each-blocks
+  - vitest/padding-around-all
+  - vitest/padding-around-before-all-blocks
+  - vitest/padding-around-before-each-blocks
+  - vitest/padding-around-describe-blocks
+  - vitest/padding-around-expect-groups
+  - vitest/padding-around-test-blocks
   - vue/padding-line-between-blocks
   - vue/padding-line-between-tags
   - vue/padding-lines-in-component-definition
   
   i These rules enforce behavior completely covered by the formatter (so you don't lose the functionality):
   
+  - @stylistic/function-call-spacing
+  - @stylistic/semi-spacing
+  - @stylistic/semi-style
+  - markdown/no-space-in-emphasis
   - svelte/no-spaces-around-equal-signs-in-attribute
   - svelte/no-trailing-spaces
+  - svelte/valid-style-parse
+  - unicorn/comma-spacing
+  - yml/flow-mapping-curly-newline
+  - yml/no-tab-indent
+  - yml/no-trailing-spaces
+  
+  i These rules are covered by formatter options, but they require manual migration:
+  
+  - @stylistic/no-mixed-spaces-and-tabs - Covered by Biome's indentStyle formatter option.
+  - @stylistic/semi - Covered by Biome's semicolons formatter option.
+  - astro/semi - Covered by Biome's semicolons formatter option.
+  - unicorn/indent - Covered by Biome's indentStyle, indentWidth formatter option.
+  - yml/indent - Covered by Biome's indentWidth formatter option.
+  - yml/quotes - Covered by Biome's quoteStyle formatter option.
+  
+  i These rules have not yet been implemented:
+  
+  - vue/no-restricted-v-on
+  
+  i These rules are covered by another rule, but they require manual migration:
+  
+  - block-scoped-var - Covered by the noVar rule.
+  - @mysticatea/block-scoped-var - Covered by the noVar rule.
+  
+  i These rules have been deprecated upstream:
+  
+  - no-return-await
+  - prefer-reflect
+  - @stylistic/jsx-indent
+  - @stylistic/jsx-props-no-multi-spaces
+  - @stylistic/jsx-sort-props
+  - @typescript-eslint/typedef
+  - astro/no-omitted-end-tags
+  - jsx-a11y/no-onchange
+  - n/no-hide-core-modules
+  - qwik/no-async-prevent-default
+  - tailwindcss/important-modifier-suffix
+  
+  i These rules enforce legacy practices that go against Biome's focus on modern code:
+  
+  - no-iterator
+  
+  i These rules require integration with an external tool, such as a compiler:
+  
+  - astro/valid-compile
+  - svelte/no-unused-svelte-ignore
+  - svelte/valid-compile
   
 
 ```

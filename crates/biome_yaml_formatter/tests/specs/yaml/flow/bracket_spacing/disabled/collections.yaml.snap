@@ -1,0 +1,89 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: yaml/flow/bracket_spacing/disabled/collections.yaml
+---
+
+# Input
+
+```yaml
+mapping: { one: 1, two: 2 }
+sequence: [ one, two ]
+empty_mapping: { }
+empty_sequence: [ ]
+nested: { map: { a: b }, seq: [ a, { b: c } ], empty: [ {}, [] ] }
+pairs: [ key: value, ? explicit, : empty ]
+empty_pair: [ : ]
+empty_entry: { : }
+explicit: { ? key : value }
+collection_keys: { [ a, b ]: value, { a: b }: other }
+anchor: &anchor key
+aliases: { *anchor : value }
+tagged: { key: !!str , !!str : value }
+block:
+  - { key: [ a, b ] }
+boundary: [ one, two, three, four, five ]
+long_mapping: { first_key: first_value, second_key: second_value, third_key: third_value, fourth_key: fourth_value }
+long_sequence: [ first_value, second_value, third_value, fourth_value, fifth_value, sixth_value ]
+
+```
+
+
+# Options
+
+```json
+{
+  "formatter": {
+    "lineWidth": 40,
+    "bracketSpacing": true
+  },
+  "yaml": {
+    "formatter": {
+      "bracketSpacing": false
+    }
+  }
+}
+```
+
+# Formatted
+
+```yaml
+mapping: {one: 1, two: 2}
+sequence: [one, two]
+empty_mapping: {}
+empty_sequence: []
+nested:
+  {
+    map: {a: b},
+    seq: [a, {b: c}],
+    empty: [{}, []],
+  }
+pairs: [key: value, ? explicit, : empty]
+empty_pair: [: ]
+empty_entry: {:}
+explicit: {key: value}
+collection_keys:
+  {[a, b]: value, {a: b}: other}
+anchor: &anchor key
+aliases: {*anchor : value}
+tagged: {key: !!str , !!str : value}
+block:
+  - {key: [a, b]}
+boundary: [one, two, three, four, five]
+long_mapping:
+  {
+    first_key: first_value,
+    second_key: second_value,
+    third_key: third_value,
+    fourth_key: fourth_value,
+  }
+long_sequence:
+  [
+    first_value,
+    second_value,
+    third_value,
+    fourth_value,
+    fifth_value,
+    sixth_value,
+  ]
+
+```

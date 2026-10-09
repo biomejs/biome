@@ -2,15 +2,41 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{AnyCssRootItem, AnyCssRule, CssRootItemList};
+use biome_css_syntax::{
+    AnyCssAtRule, AnyCssRootItem, AnyCssRule, AnyScssImportItem, CssLanguage, CssRootItemList,
+    ScssAtRootAtRule, ScssContentAtRule, ScssDebugAtRule, ScssEachAtRule, ScssErrorAtRule,
+    ScssExtendAtRule, ScssForAtRule, ScssForwardAtRule, ScssFunctionAtRule, ScssIfAtRule,
+    ScssImportAtRule, ScssIncludeAtRule, ScssMixinAtRule, ScssReturnAtRule, ScssUseAtRule,
+    ScssWarnAtRule, ScssWhileAtRule,
+};
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, SyntaxKindSet, TextRange};
 use biome_rule_options::no_invalid_position_at_import_rule::NoInvalidPositionAtImportRuleOptions;
 
+const SCSS_AT_RULE_KINDS: SyntaxKindSet<CssLanguage> = ScssAtRootAtRule::KIND_SET
+    .union(ScssContentAtRule::KIND_SET)
+    .union(ScssDebugAtRule::KIND_SET)
+    .union(ScssEachAtRule::KIND_SET)
+    .union(ScssErrorAtRule::KIND_SET)
+    .union(ScssExtendAtRule::KIND_SET)
+    .union(ScssForAtRule::KIND_SET)
+    .union(ScssForwardAtRule::KIND_SET)
+    .union(ScssFunctionAtRule::KIND_SET)
+    .union(ScssIfAtRule::KIND_SET)
+    .union(ScssImportAtRule::KIND_SET)
+    .union(ScssIncludeAtRule::KIND_SET)
+    .union(ScssMixinAtRule::KIND_SET)
+    .union(ScssReturnAtRule::KIND_SET)
+    .union(ScssUseAtRule::KIND_SET)
+    .union(ScssWarnAtRule::KIND_SET)
+    .union(ScssWhileAtRule::KIND_SET);
+
 declare_lint_rule! {
-    /// Disallow the use of `@import` at-rules in invalid positions.
+    /// Disallow `@import` after other rules.
     ///
-    /// Any `@import` rules must precede all other valid at-rules and style rules in a stylesheet (ignoring `@charset` and `@layer`), or else the `@import` rule is invalid.
+    /// An `@import` must appear before style rules and most at-rules. Only `@charset` and `@layer`
+    /// may appear before it. Browsers ignore an `@import` placed later in the stylesheet.
+    /// SCSS load imports are ignored because they don't emit CSS `@import` rules.
     ///
     /// ## Examples
     ///
@@ -50,30 +76,36 @@ impl Rule for NoInvalidPositionAtImportRule {
         let mut invalid_import_list = Vec::new();
 
         for item in node {
-            let any_css_at_rule = match item {
+            let at_rule = match item {
                 AnyCssRootItem::AnyCssRule(AnyCssRule::CssAtRule(at_rule)) => at_rule.rule().ok(),
-                _ => None,
+                AnyCssRootItem::ScssVariableDeclaration(_) => continue,
+                _ => {
+                    is_invalid_position = true;
+                    continue;
+                }
             };
 
-            if let Some(any_css_at_rule) = any_css_at_rule {
-                // Ignore @charset, @layer
-                if any_css_at_rule.as_css_charset_at_rule().is_some() {
-                    continue;
-                }
-                if any_css_at_rule.as_css_layer_at_rule().is_some() {
-                    continue;
-                }
-
-                let import_rule = any_css_at_rule.as_css_import_at_rule();
-                if let Some(import_rule) = import_rule {
+            match at_rule {
+                Some(AnyCssAtRule::CssCharsetAtRule(_) | AnyCssAtRule::CssLayerAtRule(_)) => {}
+                Some(AnyCssAtRule::CssImportAtRule(import_rule)) => {
                     if is_invalid_position {
                         invalid_import_list.push(import_rule.range());
                     }
-                } else {
-                    is_invalid_position = true;
                 }
-            } else {
-                is_invalid_position = true;
+                Some(AnyCssAtRule::ScssImportAtRule(import_rule)) => {
+                    if is_invalid_position {
+                        invalid_import_list.extend(import_rule.imports().into_iter().filter_map(
+                            |item| {
+                                let AnyScssImportItem::ScssPlainImport(import) = item.ok()? else {
+                                    return None;
+                                };
+                                Some(import.range())
+                            },
+                        ));
+                    }
+                }
+                Some(rule) if is_scss_at_rule(&rule) => {}
+                _ => is_invalid_position = true,
             }
         }
         invalid_import_list.into_boxed_slice()
@@ -95,4 +127,8 @@ impl Rule for NoInvalidPositionAtImportRule {
             })
         )
     }
+}
+
+fn is_scss_at_rule(rule: &AnyCssAtRule) -> bool {
+    SCSS_AT_RULE_KINDS.matches(rule.syntax().kind())
 }

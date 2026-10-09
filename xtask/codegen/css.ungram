@@ -201,6 +201,7 @@ CssSubSelectorList = AnyCssSubSelector*
 AnyCssSimpleSelector =
 	CssUniversalSelector
 	| CssTypeSelector
+	| CssMetavariable
 	| ScssPlaceholderSelector
 
 AnyCssSubSelector =
@@ -656,6 +657,7 @@ CssDeclarationOrRuleList = AnyCssDeclarationOrRule*
 
 AnyCssDeclarationOrRule =
 	AnyCssRule
+	| CssKeyframesItem
 	| CssDeclarationWithSemicolon
 	| ScssVariableDeclaration
 	| ScssNestingDeclaration
@@ -887,7 +889,7 @@ AnyCssDashedIdentifier =
 	CssDashedIdentifier
 	| ScssInterpolatedDashedIdentifier
 
-AnyCssDeclarationName = CssIdentifier | AnyCssDashedIdentifier | ScssInterpolatedIdentifier | TwValueThemeReference
+AnyCssDeclarationName = CssIdentifier | AnyCssDashedIdentifier | CssMetavariable | ScssInterpolatedIdentifier | TwValueThemeReference
 
 CssDeclarationImportant =
 	'!'
@@ -1447,6 +1449,7 @@ CssKeyframesItemList = AnyCssKeyframesItem*
 
 AnyCssKeyframesItem =
 	CssKeyframesItem
+	| CssAtRule
 	| ScssKeyframesVariableDeclaration
 	| CssBogusKeyframesItem
 
@@ -1914,6 +1917,7 @@ AnyCssSupportsInParens =
 	CssSupportsConditionInParens
 	| CssSupportsFeatureDeclaration
 	| CssSupportsFeatureSelector
+	| ScssSupportsFeatureDeclaration
 	| ScssSupportsInterpolatedCondition
 	| AnyCssValue // general-enclosed
 
@@ -1934,6 +1938,16 @@ CssSupportsConditionInParens =
 CssSupportsFeatureDeclaration =
 	'('
 	declaration: CssDeclaration
+	')'
+
+// @supports ($property: grid) {}
+//           ^^^^^^^^^^^^^^^
+ScssSupportsFeatureDeclaration =
+	'('
+	name: ScssVariable
+	':'
+	value: AnyCssGenericPropertyValueOrExpression
+	important: CssDeclarationImportant?
 	')'
 
 // @supports selector(:focus-visible) { }
@@ -2342,6 +2356,7 @@ AnyCssFunction =
 	| CssUrlFunction
 	| CssIfFunction
 	| CssAttrFunction
+	| ScssLegacyIfFunction
 
 // content: counter(section);
 // 					^^^^^^^^^^^^^^^^
@@ -2378,6 +2393,7 @@ CssUrlModifierList = AnyCssUrlModifier*
 AnyCssUrlModifier =
 	CssIdentifier
 	| CssFunction
+	| ScssLegacyIfFunction
 	| CssBogusUrlModifier
 
 AnyCssUrlValue =
@@ -2426,6 +2442,13 @@ CssIfFunction =
 	'if'
 	'('
 	CssIfBranchList
+	')'
+
+// if($condition, $if-true, $if-false)
+ScssLegacyIfFunction =
+	'if'
+	'('
+	items: CssParameterList
 	')'
 
 // if(style(--theme: dark): red; else: blue)
@@ -2498,7 +2521,13 @@ AnyCssIfCondition = AnyCssIfTestBooleanExpr | CssElseKeyword
 CssIfBranch =
 	condition: AnyCssIfCondition
 	':'
-	value: CssGenericComponentValueList
+	value: AnyCssIfBranchValue
+
+// if(sass(true): 1px + 2px; else: 0)
+//                ^^^^^^^^^
+AnyCssIfBranchValue =
+	CssGenericComponentValueList
+	| ScssExpression
 
 AnyCssIfBranch =
 	CssIfBranch
@@ -2684,6 +2713,7 @@ CssAttrNameList = (AnyCssAttrName  ('|' AnyCssAttrName)*)
 AnyCssAttrName =
 	CssIdentifier
 	| ScssInterpolatedIdentifier
+	| ScssVariable
 	| CssBogusAttrName
 
 // Literal value that can be used as a type in the attr() function.
@@ -2722,7 +2752,15 @@ AnyCssAttrType =
 //                       ^^^^^
 CssAttrFallbackValue =
 	','
-	value: CssGenericComponentValueList
+	value: AnyCssAttrFallbackValue
+
+// attr(data-size px, 4px)
+//                    ^^^
+// attr(data-size px, $gap * 2)
+//                    ^^^^^^^^
+AnyCssAttrFallbackValue =
+	CssGenericComponentValueList
+	| ScssExpression
 
 // type( <syntax> )
 CssTypeFunction =
@@ -2963,7 +3001,16 @@ TwSlotAtRule =
 ScssEachAtRule =
 	'each'
 	header: ScssEachHeader
-	block: CssDeclarationOrRuleBlock
+	block: AnyCssControlBlock
+
+// SCSS control bodies reuse the enclosing declaration/rule or keyframes grammar.
+// .box { @if $enabled { color: red; } }
+//                     ^^^^^^^^^^^^^^^
+// @keyframes fade { @if $enabled { from { opacity: 0; } } }
+//                                ^^^^^^^^^^^^^^^^^^^^^^^^
+AnyCssControlBlock =
+	CssDeclarationOrRuleBlock
+	| CssKeyframesBlock
 
 // @each $item in $list { color: $item; }
 //       ^^^^^^^^^^^^^^
@@ -2989,7 +3036,7 @@ ScssForAtRule =
 	lower_bound: ScssExpression
 	operator: ('to' | 'through')
 	upper_bound: ScssExpression
-	block: CssDeclarationOrRuleBlock
+	block: AnyCssControlBlock
 
 // @mixin button($radius: 4px, $args...) { border-radius: $radius; }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -3113,16 +3160,27 @@ ScssAtRootAtRule =
 	selector: ScssAtRootSelector?
 	block: CssDeclarationOrRuleBlock
 
-// (without: media supports)
-// ^^^^^^^^^^^^^^^^^^^^^^^^^
+// @at-root ($query) {}
+//          ^^^^^^^^
 ScssAtRootQuery =
 	'('
-	modifier: ('with' | 'without')
-	':'
-	queries: ScssAtRootQueryList
+	query: AnyScssAtRootQuery
 	')'
 
-ScssAtRootQueryList = AnyCssCustomIdentifier*
+// @at-root ($query) {}
+//           ^^^^^^
+// @at-root (without: media) {}
+//           ^^^^^^^^^^^^^^
+AnyScssAtRootQuery =
+	ScssExpression
+	| ScssAtRootQueryClause
+
+// @at-root (without: $rules) {}
+//           ^^^^^^^^^^^^^^^
+ScssAtRootQueryClause =
+	modifier: ScssExpression
+	':'
+	rules: ScssExpression
 
 // .root-only, .another-root
 // ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -3273,7 +3331,7 @@ AnyScssInterpolatedValuePart =
 ScssIfAtRule =
 	'if'
 	condition: ScssExpression
-	block: CssDeclarationOrRuleBlock
+	block: AnyCssControlBlock
 	else_clause: ScssElseClause?
 
 // @else if $theme == light { color: black; }
@@ -3288,13 +3346,14 @@ ScssElseClause =
 AnyScssElseClauseBody =
 	ScssIfAtRule
 	| CssDeclarationOrRuleBlock
+	| CssKeyframesBlock
 
 // @while $i > 0 { $i: $i - 1; }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ScssWhileAtRule =
 	'while'
 	condition: ScssExpression
-	block: CssDeclarationOrRuleBlock
+	block: AnyCssControlBlock
 
 // @content;
 // ^^^^^^^^^

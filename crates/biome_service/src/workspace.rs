@@ -1962,10 +1962,8 @@ pub fn server(fs: Arc<dyn FsWithResolverProxy>, threads: Option<usize>) -> Box<d
     let (watcher_tx, _) = bounded(0);
     let (service_tx, _) = watch::channel(ServiceNotification::IndexUpdated);
     let search_provider = cfg_select! {
-        feature = "lang_grit" => {
-            crate::workspace::search::grit::GritSearchQuery::default()
-        }
-        _ => NoopQueryProvider {}
+        feature = "lang_grit" => crate::workspace::search::grit::GritSearchQuery::default(),
+        _ => NoopQueryProvider {},
     };
     Box::new(LocalWorkspace::new(
         fs,

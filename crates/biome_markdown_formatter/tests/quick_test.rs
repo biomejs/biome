@@ -4,9 +4,7 @@ use biome_markdown_parser::{MarkdownParserOptions, parse_markdown};
 #[ignore]
 #[test]
 fn quick_test() {
-    let source = r#"1. 123
-2. 123
-   1.   123
+    let source = r#"[हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md) 
 "#;
     let parse = parse_markdown(source, MarkdownParserOptions::default());
 

@@ -1,0 +1,152 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<marquee>Breaking news</marquee>
+<MARQUEE>Shouting news</MARQUEE>
+<button type="button">Click</button>
+<Button type="button" />
+<my-widget></my-widget>
+<svg><foreignObject></foreignObject></svg>
+<svg><foreignobject /></svg>
+<div><marquee /></div>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:2 lint/correctness/noRestrictedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The marquee element is restricted in this project.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <marquee>Breaking news</marquee>
+      │  ^^^^^^^
+    3 │ <MARQUEE>Shouting news</MARQUEE>
+    4 │ <button type="button">Click</button>
+  
+  i Use CSS animations instead.
+  
+
+```
+
+```
+invalid.html:3:2 lint/correctness/noRestrictedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The MARQUEE element is restricted in this project.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <marquee>Breaking news</marquee>
+  > 3 │ <MARQUEE>Shouting news</MARQUEE>
+      │  ^^^^^^^
+    4 │ <button type="button">Click</button>
+    5 │ <Button type="button" />
+  
+  i Use CSS animations instead.
+  
+
+```
+
+```
+invalid.html:4:2 lint/correctness/noRestrictedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The button element is restricted in this project.
+  
+    2 │ <marquee>Breaking news</marquee>
+    3 │ <MARQUEE>Shouting news</MARQUEE>
+  > 4 │ <button type="button">Click</button>
+      │  ^^^^^^
+    5 │ <Button type="button" />
+    6 │ <my-widget></my-widget>
+  
+  i Use the Button component instead.
+  
+
+```
+
+```
+invalid.html:5:2 lint/correctness/noRestrictedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Button element is restricted in this project.
+  
+    3 │ <MARQUEE>Shouting news</MARQUEE>
+    4 │ <button type="button">Click</button>
+  > 5 │ <Button type="button" />
+      │  ^^^^^^
+    6 │ <my-widget></my-widget>
+    7 │ <svg><foreignObject></foreignObject></svg>
+  
+  i Use the Button component instead.
+  
+
+```
+
+```
+invalid.html:6:2 lint/correctness/noRestrictedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The my-widget element is restricted in this project.
+  
+    4 │ <button type="button">Click</button>
+    5 │ <Button type="button" />
+  > 6 │ <my-widget></my-widget>
+      │  ^^^^^^^^^
+    7 │ <svg><foreignObject></foreignObject></svg>
+    8 │ <svg><foreignobject /></svg>
+  
+  i Use the new widget instead.
+  
+
+```
+
+```
+invalid.html:7:7 lint/correctness/noRestrictedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The foreignObject element is restricted in this project.
+  
+    5 │ <Button type="button" />
+    6 │ <my-widget></my-widget>
+  > 7 │ <svg><foreignObject></foreignObject></svg>
+      │       ^^^^^^^^^^^^^
+    8 │ <svg><foreignobject /></svg>
+    9 │ <div><marquee /></div>
+  
+  i Avoid embedding HTML inside SVG.
+  
+
+```
+
+```
+invalid.html:8:7 lint/correctness/noRestrictedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The foreignobject element is restricted in this project.
+  
+     6 │ <my-widget></my-widget>
+     7 │ <svg><foreignObject></foreignObject></svg>
+   > 8 │ <svg><foreignobject /></svg>
+       │       ^^^^^^^^^^^^^
+     9 │ <div><marquee /></div>
+    10 │ 
+  
+  i Avoid embedding HTML inside SVG.
+  
+
+```
+
+```
+invalid.html:9:7 lint/correctness/noRestrictedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The marquee element is restricted in this project.
+  
+     7 │ <svg><foreignObject></foreignObject></svg>
+     8 │ <svg><foreignobject /></svg>
+   > 9 │ <div><marquee /></div>
+       │       ^^^^^^^
+    10 │ 
+  
+  i Use CSS animations instead.
+  
+
+```

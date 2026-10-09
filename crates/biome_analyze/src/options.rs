@@ -1,4 +1,4 @@
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use rustc_hash::FxHashMap;
 
 use crate::{FixKind, Rule, RuleKey};
@@ -93,6 +93,9 @@ pub struct AnalyzerConfiguration {
     /// The JSX fragment factory function identifier (e.g., "Fragment")
     /// Only applies when jsx_runtime is ReactClassic.
     jsx_fragment_factory: Option<Box<str>>,
+
+    /// Configures which attributes and functions contain Tailwind classes.
+    tailwind: TailwindOptions,
 }
 
 impl AnalyzerConfiguration {
@@ -138,6 +141,11 @@ impl AnalyzerConfiguration {
         preferred_indentation: PreferredIndentation,
     ) -> Self {
         self.preferred_indentation = preferred_indentation;
+        self
+    }
+
+    pub fn with_tailwind(mut self, tailwind: TailwindOptions) -> Self {
+        self.tailwind = tailwind;
         self
     }
 }
@@ -242,6 +250,69 @@ impl AnalyzerOptions {
 
     pub fn preferred_indentation(&self) -> PreferredIndentation {
         self.configuration.preferred_indentation
+    }
+
+    pub fn tailwind(&self) -> &TailwindOptions {
+        &self.configuration.tailwind
+    }
+}
+
+/// User-provided names that Tailwind-aware analyzer queries use to identify class strings.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct TailwindOptions {
+    attributes: Option<Arc<[Box<str>]>>,
+    merge_functions: Option<Arc<[Box<str>]>>,
+    variant_functions: Option<Arc<[Box<str>]>>,
+    stylesheet: Option<Utf8PathBuf>,
+}
+
+impl TailwindOptions {
+    /// Creates analyzer options from optional replacement lists.
+    pub fn new(
+        attributes: Option<Box<[Box<str>]>>,
+        merge_functions: Option<Box<[Box<str>]>>,
+        variant_functions: Option<Box<[Box<str>]>>,
+    ) -> Self {
+        Self {
+            attributes: attributes.map(Arc::from),
+            merge_functions: merge_functions.map(Arc::from),
+            variant_functions: variant_functions.map(Arc::from),
+            stylesheet: None,
+        }
+    }
+
+    /// Sets the path of the stylesheet that holds the Tailwind CSS
+    /// configuration.
+    pub fn with_stylesheet(mut self, stylesheet: Option<Utf8PathBuf>) -> Self {
+        self.stylesheet = stylesheet;
+        self
+    }
+
+    /// Returns the path of the stylesheet that holds the Tailwind CSS
+    /// configuration, if one is configured.
+    pub fn stylesheet(&self) -> Option<&Utf8Path> {
+        self.stylesheet.as_deref()
+    }
+
+    /// Returns the configured attribute replacement list, or `None` when defaults apply.
+    pub fn attributes(&self) -> Option<&[Box<str>]> {
+        self.attributes.as_deref()
+    }
+
+    /// Returns the configured merge function replacement list, or `None` when defaults apply.
+    pub fn merge_functions(&self) -> Option<&[Box<str>]> {
+        self.merge_functions.as_deref()
+    }
+
+    /// Returns the configured variant function replacement list, or `None` when defaults apply.
+    pub fn variant_functions(&self) -> Option<&[Box<str>]> {
+        self.variant_functions.as_deref()
+    }
+}
+
+impl Default for TailwindOptions {
+    fn default() -> Self {
+        Self::new(None, None, None)
     }
 }
 

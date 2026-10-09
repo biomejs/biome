@@ -1,4 +1,4 @@
-name: "Lint Pull Request Titles"
+name: 'Lint Pull Request Titles'
 
 on:
   pull_request_target:
@@ -46,8 +46,9 @@ jobs:
             release
             [A-Z_-]+
           # Configure additional validation for the subject based on a regex.
-          # Ensures that the subject doesn't start with an uppercase character or end with three periods.
-          subjectPattern: ^(?!.*\.\.\.$)[^A-Z].*$
+          # Ensures that the subject doesn't start with an uppercase character or end with three periods
+          # or an ellipsis character. GitHub truncates long titles with `…` (U+2026).
+          subjectPattern: ^(?!.*(\.\.\.|…)$)[^A-Z].*$
           # If `subjectPattern` is configured, you can use this property to override
           # the default error message that is shown when the pattern doesn't match.
           # The variables `subject` and `title` can be used within the message.
@@ -55,5 +56,5 @@ jobs:
             The subject "{subject}" found in the pull request title "{title}"
             didn't match the configured pattern.
             Please ensure that the subject doesn't start with an uppercase character
-            or end with three periods.
+            or end with three periods or an ellipsis (…).
             The scope should not be in UPPERCASE.

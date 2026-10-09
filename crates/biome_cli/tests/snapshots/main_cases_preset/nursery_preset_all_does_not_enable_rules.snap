@@ -25,12 +25,9 @@ biome lint test.js
 ## `test.js`
 
 ```js
-const queue = [];
-let shared = 0;
-for (let i = 0; i < 10; i += 1) {
-    queue.push(() => shared);
+export function getContext() {
+    return this;
 }
-shared = 100;
 
 ```
 

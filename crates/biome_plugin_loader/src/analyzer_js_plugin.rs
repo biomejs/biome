@@ -50,6 +50,7 @@ fn load_plugin(fs: Arc<dyn FsWithResolverProxy>, path: &Utf8Path) -> JsResult<Lo
 pub struct AnalyzerJsPlugin {
     fs: Arc<dyn FsWithResolverProxy>,
     path: Utf8PathBuf,
+    name: Option<Box<str>>,
     loaded: ThreadLocalCell<LoadedPlugin>,
 
     /// The union of the syntax kinds queried by the rules of the plugin.
@@ -94,18 +95,26 @@ impl AnalyzerJsPlugin {
         Ok(Self {
             fs,
             path: path.to_owned(),
+            name: None,
             loaded: ThreadLocalCell::new(),
             kinds,
             requires_semantic_model: plugin.rules.iter().any(|rule| rule.requires_semantic),
             includes: includes.map(Into::into),
         })
     }
+
+    pub(crate) fn with_name(mut self, name: impl Into<Box<str>>) -> Self {
+        self.name = Some(name.into());
+        self
+    }
 }
 
 impl AnalyzerPlugin for AnalyzerJsPlugin {
     fn name(&self) -> &str {
-        // JS plugins don't declare a name; fall back to the plugin file stem.
-        self.path.file_stem().unwrap_or("anonymous")
+        self.name
+            .as_deref()
+            .or_else(|| self.path.file_stem())
+            .unwrap_or("anonymous")
     }
 
     fn language(&self) -> PluginTargetLanguage {
@@ -182,6 +191,7 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
         let mut entries = Vec::new();
 
         for rule in rules.iter().filter(|rule| rule.kinds.contains(&kind)) {
+            let name = self.name.as_deref().unwrap_or(&rule.name);
             let result = ctx.call_rule(rule, node.clone(), &path, *source_type, services);
 
             // Drain the diagnostics even on errors, so a failed rule can't leak
@@ -193,14 +203,14 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
                     diagnostic: RuleDiagnostic::new(
                         category!("plugin"),
                         None::<TextRange>,
-                        markup!("Rule "<Emphasis>{rule.name}</Emphasis>" errored: "<Error>{err.to_string()}</Error>),
+                        markup!("Rule "<Emphasis>{name}</Emphasis>" errored: "<Error>{err.to_string()}</Error>),
                     ),
                     action: None,
                 });
             }
 
             entries.extend(diagnostics.into_iter().map(|entry| PluginDiagnosticEntry {
-                diagnostic: entry.diagnostic.subcategory(rule.name.clone()),
+                diagnostic: entry.diagnostic.subcategory(name.to_string()),
                 action: entry.action,
             }));
         }

@@ -1,3 +1,4 @@
+use crate::TailwindParserOptions;
 use crate::lexer::TailwindLexer;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{BufferedLexer, LexContext};
@@ -47,8 +48,8 @@ impl LexContext for TailwindLexContext {
 
 impl<'source> TailwindTokenSource<'source> {
     /// Creates a new token source for the given string
-    pub fn from_str(source: &'source str) -> Self {
-        let lexer = TailwindLexer::from_str(source);
+    pub fn from_str(source: &'source str, options: TailwindParserOptions<'source>) -> Self {
+        let lexer = TailwindLexer::from_str(source).with_base_names(options.base_names);
 
         let buffered = BufferedLexer::new(lexer);
         let mut source = Self::new(buffered);

@@ -15,7 +15,7 @@ pub(crate) fn load_config(specifier: &str) -> Result<Resolution, CliDiagnostic> 
     match content_output {
         Err(_) => {
             Err(CliDiagnostic::MigrateError(MigrationDiagnostic {
-                reason: "The `node` program doesn't exist or cannot be invoked by Biome.\n`node` is invoked to resolve ESLint configurations written in JavaScript.\nThis includes shared configurations and plugin configurations imported with ESLint's `extends`.".to_string()
+                reason: "The `node` program doesn't exist or cannot be invoked by Biome.\n`node` is invoked to resolve configurations written in JavaScript.\nThis includes shared configurations and plugin configurations imported with `extends`.".to_string()
             }))
         },
         Ok(output) => {

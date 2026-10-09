@@ -8,9 +8,10 @@ use biome_rowan::{AstNode, SyntaxNodeCast, TextRange};
 use biome_rule_options::use_lone_anonymous_operation::UseLoneAnonymousOperationOptions;
 
 declare_lint_rule! {
-    /// Disallow anonymous operations when more than one operation specified in document.
+    /// Disallow an anonymous operation in a document with other operations.
     ///
-    /// A GraphQL document that contains an anonymous operation (the query short-hand) is only valid if it contains only that one operation definition.
+    /// GraphQL allows the shorthand `{ field }` without an operation name only when it is the sole
+    /// operation in the document. Name every operation when the document contains more than one.
     ///
     /// ## Examples
     ///

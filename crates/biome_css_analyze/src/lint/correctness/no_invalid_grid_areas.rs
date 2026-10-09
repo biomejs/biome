@@ -3,7 +3,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::{
-    AnyCssGenericPropertyValueOrExpression, CssDeclarationOrRuleList, css_grid_template_property,
+    AnyCssGenericPropertyValueOrExpression, AnyCssValue, AnyScssExpressionItem,
+    CssDeclarationOrRuleList, CssSyntaxToken, css_grid_template_property,
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{TextRange, TokenText};
@@ -12,14 +13,16 @@ use biome_rule_options::no_invalid_grid_areas::NoInvalidGridAreasOptions;
 use rustc_hash::FxHashSet;
 
 declare_lint_rule! {
-    /// Disallows invalid named grid areas in CSS Grid Layouts.
+    /// Disallow invalid named areas in CSS grid templates.
     ///
-    /// For a named grid area to be valid, all strings must define:
+    /// Each quoted row in `grid-template-areas` contains space-separated cells. Every row must
+    /// contain the same number of cells and must not be empty. When an area name appears in more
+    /// than one cell, those cells must form one filled rectangle.
     ///
-    /// - the same number of cell tokens
-    /// - at least one cell token
+    /// ## SCSS limitations
     ///
-    /// And all named grid areas that spans multiple grid cells must form a single filled-in rectangle.
+    /// A `grid-template-areas` value that requires SCSS evaluation is ignored. This includes values
+    /// containing variables, interpolation, functions, or arithmetic expressions.
     ///
     /// ## Examples
     ///
@@ -101,7 +104,7 @@ impl Rule for NoInvalidGridAreas {
                 let decl = binding.as_css_generic_property()?;
                 let name = decl.name().ok()?.as_css_identifier()?.value_token().ok()?;
 
-                if css_grid_template_property(name.text())
+                if css_grid_template_property(name.text_trimmed())
                     .is_some_and(|property| property.is_grid_area_property())
                 {
                     let grid_props = decl.value();
@@ -110,26 +113,9 @@ impl Rule for NoInvalidGridAreas {
                 None
             })
             .flat_map(|grid_props| {
-                let value = match grid_props {
-                    Ok(value) => value,
-                    Err(_) => return Vec::new(),
-                };
-                let list = match value {
-                    AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(_) => {
-                        return Vec::new();
-                    }
-                    AnyCssGenericPropertyValueOrExpression::CssLegacyFilterValue(_) => {
-                        return Vec::new();
-                    }
-                    AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(list) => {
-                        list
-                    }
-                    AnyCssGenericPropertyValueOrExpression::ScssExpression(_) => return Vec::new(),
-                };
-
-                list.into_iter()
-                    .filter_map(|x| x.as_any_css_value()?.as_css_string()?.value_token().ok())
-                    .collect::<Vec<_>>()
+                grid_props
+                    .ok()
+                    .map_or_else(Vec::new, grid_area_string_tokens)
             })
             // Need to remove `"` with escaping slash from the grid area
             // Ex: "\"a a a\""
@@ -186,6 +172,47 @@ impl Rule for NoInvalidGridAreas {
                 }),
             ),
         }
+    }
+}
+
+fn grid_area_string_tokens(value: AnyCssGenericPropertyValueOrExpression) -> Vec<CssSyntaxToken> {
+    match value {
+        AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(list) => list
+            .into_iter()
+            .filter_map(|value| {
+                value
+                    .as_any_css_value()?
+                    .as_css_string()?
+                    .value_token()
+                    .ok()
+            })
+            .collect(),
+        AnyCssGenericPropertyValueOrExpression::ScssExpression(expression) => {
+            let mut strings = Vec::new();
+            for item in expression.items() {
+                match item {
+                    AnyScssExpressionItem::AnyCssValue(AnyCssValue::CssString(string)) => {
+                        if let Ok(token) = string.value_token() {
+                            strings.push(token);
+                        }
+                    }
+                    AnyScssExpressionItem::AnyCssValue(
+                        AnyCssValue::AnyCssFunction(_)
+                        | AnyCssValue::ScssInterpolatedIdentifier(_)
+                        | AnyCssValue::ScssInterpolatedString(_)
+                        | AnyCssValue::ScssInterpolatedValue(_)
+                        | AnyCssValue::ScssModuleMemberAccess(_)
+                        | AnyCssValue::ScssVariable(_),
+                    ) => return Vec::new(),
+                    AnyScssExpressionItem::AnyCssValue(_)
+                    | AnyScssExpressionItem::CssGenericDelimiter(_) => {}
+                    _ => return Vec::new(),
+                }
+            }
+            strings
+        }
+        AnyCssGenericPropertyValueOrExpression::CssCustomPropertyValue(_)
+        | AnyCssGenericPropertyValueOrExpression::CssLegacyFilterValue(_) => Vec::new(),
     }
 }
 

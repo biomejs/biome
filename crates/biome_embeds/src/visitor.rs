@@ -1,4 +1,5 @@
 use crate::bindings::EmbeddedBinding;
+use crate::components::collect_embedded_elements;
 use crate::data::{EmbeddedData, VueDirectiveDeclarations};
 use crate::references::{EmbeddedTypeReference, EmbeddedValueReference};
 use biome_db::ParsedSource;
@@ -73,6 +74,7 @@ pub fn collect_embedded_data<'a>(
             .as_ref()
             .map_or_else(Vec::new, build_type_references),
         collected_bindings.vue_directive_declarations,
+        collect_embedded_elements(host_source, host_parse),
     )
 }
 

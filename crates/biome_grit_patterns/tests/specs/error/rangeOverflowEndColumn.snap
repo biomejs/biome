@@ -1,0 +1,11 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: rangeOverflowEndColumn
+---
+ErrorSnapshotResult {
+    diagnostics: [
+        InvalidRange(
+            "end_column must be an integer between 0 and 4294967295",
+        ),
+    ],
+}

@@ -24,10 +24,10 @@ biome check --write file.vue
 
 ```vue
 <template>
-	<Component v-slot="{value}:{value:ValueType}">{{
+	<Component v-slot="{ value }: { value: ValueType }">{{
 		value.innerValue
 	}}</Component>
-	<Component #item="{ item=fallback }:{ item?: ItemType }">{{
+	<Component #item="{ item = fallback }: { item?: ItemType }">{{
 		item
 	}}</Component>
 </template>

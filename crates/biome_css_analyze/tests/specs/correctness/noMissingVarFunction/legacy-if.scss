@@ -1,0 +1,6 @@
+/* should generate diagnostics */
+.a {
+  --inner: red;
+  color: if(true, --inner, blue);
+  background: var(--outer, if(true, --inner, blue));
+}

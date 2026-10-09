@@ -40,6 +40,7 @@ biome_plugin_loader        = { workspace = true, optional = true }
 biome_resolver             = { workspace = true }
 biome_rowan                = { workspace = true, features = ["serde"] }
 biome_rule_options         = { workspace = true }
+biome_string_case          = { workspace = true }
 biome_yaml_syntax          = { workspace = true, optional = true }
 bpaf                       = { workspace = true, optional = true }
 camino                     = { workspace = true }
@@ -64,11 +65,15 @@ mimalloc = { workspace = true }
 cli          = ["dep:bpaf"]
 lang_css     = ["biome_configuration_macros/lang_css"]
 lang_graphql = ["biome_configuration_macros/lang_graphql"]
-lang_html    = ["biome_configuration_macros/lang_html", "dep:biome_html_formatter", "dep:biome_html_syntax"]
+lang_html    = [
+  "biome_configuration_macros/lang_html",
+  "dep:biome_html_formatter",
+  "dep:biome_html_syntax",
+]
 lang_js      = ["biome_configuration_macros/lang_js", "dep:biome_js_formatter"]
 lang_json    = ["biome_configuration_macros/lang_json", "dep:biome_json_formatter"]
 lang_md      = ["biome_configuration_macros/lang_md", "dep:biome_markdown_formatter"]
-lang_yaml    = ["dep:biome_yaml_syntax"]
+lang_yaml    = ["biome_configuration_macros/lang_yaml", "dep:biome_yaml_syntax"]
 plugins      = ["dep:biome_plugin_loader"]
 schema       = [
   "biome_analyze/schema",

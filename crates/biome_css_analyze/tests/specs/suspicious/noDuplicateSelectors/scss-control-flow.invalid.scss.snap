@@ -1,0 +1,102 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: scss-control-flow.invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+$condition: true;
+@if $condition {
+  .conditional {}
+  .conditional {}
+}
+
+@mixin duplicates {
+  .mixin-selector {}
+  .mixin-selector {}
+}
+@include duplicates;
+
+@for $index from 1 through 2 {
+  .loop-selector {}
+  .loop-selector {}
+}
+
+```
+
+# Diagnostics
+```
+scss-control-flow.invalid.scss:5:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list ".conditional".
+  
+    3 │ @if $condition {
+    4 │   .conditional {}
+  > 5 │   .conditional {}
+      │   ^^^^^^^^^^^^^^^
+    6 │ }
+    7 │ 
+  
+  i It was first defined here.
+  
+    2 │ $condition: true;
+    3 │ @if $condition {
+  > 4 │   .conditional {}
+      │   ^^^^^^^^^^^^^^^
+    5 │   .conditional {}
+    6 │ }
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+
+```
+
+```
+scss-control-flow.invalid.scss:10:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list ".mixin-selector".
+  
+     8 │ @mixin duplicates {
+     9 │   .mixin-selector {}
+  > 10 │   .mixin-selector {}
+       │   ^^^^^^^^^^^^^^^^^^
+    11 │ }
+    12 │ @include duplicates;
+  
+  i It was first defined here.
+  
+     8 │ @mixin duplicates {
+   > 9 │   .mixin-selector {}
+       │   ^^^^^^^^^^^^^^^^^^
+    10 │   .mixin-selector {}
+    11 │ }
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+
+```
+
+```
+scss-control-flow.invalid.scss:16:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list ".loop-selector".
+  
+    14 │ @for $index from 1 through 2 {
+    15 │   .loop-selector {}
+  > 16 │   .loop-selector {}
+       │   ^^^^^^^^^^^^^^^^^
+    17 │ }
+    18 │ 
+  
+  i It was first defined here.
+  
+    14 │ @for $index from 1 through 2 {
+  > 15 │   .loop-selector {}
+       │   ^^^^^^^^^^^^^^^^^
+    16 │   .loop-selector {}
+    17 │ }
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+
+```

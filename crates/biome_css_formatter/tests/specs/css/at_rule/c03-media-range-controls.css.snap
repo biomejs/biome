@@ -1,0 +1,30 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/at_rule/c03-media-range-controls.css
+---
+
+# Input
+
+```css
+@media(40rem<width),(40rem<width<80rem),(width>=40rem),(color),(aspect-ratio:16/9){.native{color:red}}
+@media(40rem<width<calc(80rem - 1rem)){.calculation{display:block}}
+
+```
+
+
+# Formatted
+
+```css
+@media (40rem < width), (40rem < width < 80rem), (width >= 40rem), (color),
+	(aspect-ratio: 16 / 9) {
+	.native {
+		color: red;
+	}
+}
+@media (40rem < width < calc(80rem - 1rem)) {
+	.calculation {
+		display: block;
+	}
+}
+
+```

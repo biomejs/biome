@@ -1,14 +1,27 @@
-use biome_css_syntax::{AnyCssRoot, CssSyntaxKind, CssSyntaxToken, T};
-use biome_rowan::{AstNode, AstPtr, TextRange, TokenText};
+use biome_css_syntax::{
+    AnyCssRoot, CssLanguage, CssMediaAtRule, CssScopeAtRule, CssSupportsAtRule, CssSyntaxKind,
+    CssSyntaxToken, ScssAtRootAtRule, T, single_expression_item,
+};
+use biome_rowan::{AstNode, AstPtr, SyntaxKindSet, TextRange, TokenText};
 use rustc_hash::FxHashMap;
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, sync::LazyLock};
 
 use super::model::{
     CssGlobalCustomVariableData, CssModelDeclarationData, CssPropertyAtRuleData, ResolvedSelector,
     RuleData, RuleId, SelectorData, SemanticModel, SemanticModelData, Specificity, selector_tokens,
 };
 use crate::events::SemanticEvent;
-use crate::model::AnyRuleStart;
+use crate::model::{AnyCssSelectorLike, AnyRuleStart};
+
+static EXPLICIT_COMBINATOR_KINDS: LazyLock<SyntaxKindSet<CssLanguage>> = LazyLock::new(|| {
+    SyntaxKindSet::of(T![>])
+        .union(SyntaxKindSet::of(T![+]))
+        .union(SyntaxKindSet::of(T![~]))
+        .union(SyntaxKindSet::of(T![||]))
+});
+const NON_SELECTOR_RULE_KINDS: SyntaxKindSet<CssLanguage> = CssMediaAtRule::KIND_SET
+    .union(CssScopeAtRule::KIND_SET)
+    .union(CssSupportsAtRule::KIND_SET);
 
 pub struct SemanticModelBuilder {
     root: AnyCssRoot,
@@ -57,12 +70,15 @@ impl SemanticModelBuilder {
             if let Some(parent_id) = &current_parent_id {
                 let rule = self.all_rules.get(parent_id.index())?;
                 let typed_node = rule.node.to_node(self.root.syntax());
-                if matches!(
-                    typed_node,
-                    AnyRuleStart::CssMediaAtRule(_)
-                        | AnyRuleStart::CssScopeAtRule(_)
-                        | AnyRuleStart::CssSupportsAtRule(_)
-                ) {
+                let is_at_root_without_selector =
+                    if let AnyRuleStart::ScssAtRootAtRule(at_root) = &typed_node {
+                        at_root.selector().is_none()
+                    } else {
+                        false
+                    };
+                if NON_SELECTOR_RULE_KINDS.matches(typed_node.syntax().kind())
+                    || is_at_root_without_selector
+                {
                     current_parent_id = iterator
                         .next()
                         .and_then(|rule_id| self.all_rules.get(rule_id.index()))
@@ -76,43 +92,23 @@ impl SemanticModelBuilder {
         }
     }
 
-    fn get_parent_selector_at(&self, index: usize) -> Option<&RuleData> {
-        let mut iterator = self.current_rule_stack.iter().rev();
-        let mut current_index = 1;
-        let mut current_parent_id = iterator
-            .next()
-            .and_then(|rule_id| self.all_rules.get(rule_id.index()))
-            .and_then(|rule| rule.parent_id);
-
-        loop {
-            if let Some(parent_id) = &current_parent_id {
-                let rule = self.all_rules.get(parent_id.index())?;
-                let typed_node = rule.node.to_node(self.root.syntax());
-                if matches!(
-                    typed_node,
-                    AnyRuleStart::CssMediaAtRule(_)
-                        | AnyRuleStart::CssScopeAtRule(_)
-                        | AnyRuleStart::CssSupportsAtRule(_)
-                ) {
-                    current_parent_id = iterator
-                        .next()
-                        .and_then(|rule_id| self.all_rules.get(rule_id.index()))
-                        .and_then(|rule| rule.parent_id);
-                } else {
-                    if current_index == index {
-                        return Some(rule);
-                    }
-
-                    current_parent_id = iterator
-                        .next()
-                        .and_then(|rule_id| self.all_rules.get(rule_id.index()))
-                        .and_then(|rule| rule.parent_id);
-                    current_index += 1;
-                }
-            } else {
-                return None;
-            }
+    fn selector_detaches_from_parent(&self, node: &AnyCssSelectorLike) -> bool {
+        if selector_tokens(node)
+            .iter()
+            .any(|token| token.kind() == CssSyntaxKind::AMP)
+        {
+            return false;
         }
+        let Some(parent_rule) = self.get_last_parent_selector_rule() else {
+            return false;
+        };
+        let parent_range = parent_rule.range(&self.root);
+
+        node.syntax()
+            .ancestors()
+            .take_while(|ancestor| ancestor.text_trimmed_range() != parent_range)
+            .filter_map(ScssAtRootAtRule::cast)
+            .any(|at_root| at_root_excludes_style_rules(&at_root))
     }
 
     pub fn build(self) -> SemanticModel {
@@ -169,32 +165,30 @@ impl SemanticModelBuilder {
             }
             SemanticEvent::SelectorDeclaration { node, specificity } => {
                 if let Some(&current_rule_id) = self.current_rule_stack.last() {
-                    let parent_specificity = if node.has_nesting_selectors() {
-                        let nesting_level = node.nesting_level();
-                        self.get_parent_selector_at(nesting_level)
-                            .map(|rule| {
-                                rule.selectors
-                                    .iter()
-                                    .map(|s| s.specificity)
-                                    .max()
-                                    .unwrap_or_default()
-                            })
-                            .unwrap_or_default()
+                    let current_tokens = selector_tokens(&node);
+                    let nesting_selector_count = current_tokens
+                        .iter()
+                        .filter(|token| token.kind() == CssSyntaxKind::AMP)
+                        .count();
+                    let detaches_from_parent = self.selector_detaches_from_parent(&node);
+                    let parent_rule = if detaches_from_parent {
+                        None
                     } else {
                         self.get_last_parent_selector_rule()
-                            .map(|rule| {
-                                rule.selectors
-                                    .iter()
-                                    .map(|s| s.specificity)
-                                    .max()
-                                    .unwrap_or_default()
-                            })
-                            .unwrap_or_default()
                     };
-
-                    let current_tokens = selector_tokens(&node);
-
-                    let parent_rule = self.get_last_parent_selector_rule();
+                    let parent_specificity = parent_rule
+                        .map(|rule| {
+                            rule.selectors
+                                .iter()
+                                .map(|selector| selector.specificity)
+                                .max()
+                                .unwrap_or_default()
+                        })
+                        .unwrap_or_default();
+                    let parent_specificity = (0..nesting_selector_count.max(1))
+                        .fold(Specificity::default(), |specificity, _| {
+                            specificity + parent_specificity
+                        });
                     let resolved_selectors: Vec<ResolvedSelector> =
                         if let Some(parent_rule) = parent_rule {
                             resolve_selector(&current_tokens, &parent_rule.selectors)
@@ -265,6 +259,7 @@ impl SemanticModelBuilder {
                 initial_value,
                 syntax,
                 inherits,
+                inherits_requires_evaluation,
                 range,
             } => {
                 if let Ok(property_name) = property.value_token() {
@@ -279,6 +274,7 @@ impl SemanticModelBuilder {
                         initial_value,
                         syntax,
                         inherits,
+                        inherits_requires_evaluation,
                         range,
                     };
                     let is_registration_candidate = rule.is_registration_candidate(&self.root);
@@ -293,6 +289,46 @@ impl SemanticModelBuilder {
     }
 }
 
+fn at_root_excludes_style_rules(at_root: &ScssAtRootAtRule) -> bool {
+    let Some(query) = at_root.query() else {
+        return true;
+    };
+    let Ok(query) = query.query() else {
+        return true;
+    };
+    let Some(clause) = query.as_scss_at_root_query_clause() else {
+        return true;
+    };
+    let Ok(modifier) = clause.modifier() else {
+        return true;
+    };
+    let Some(modifier) = single_expression_item(&modifier).and_then(|item| {
+        item.as_any_css_value()
+            .and_then(|value| value.identifier_text())
+    }) else {
+        return true;
+    };
+    let includes_rules = if modifier.text().eq_ignore_ascii_case("with") {
+        true
+    } else if modifier.text().eq_ignore_ascii_case("without") {
+        false
+    } else {
+        return true;
+    };
+    let names_rules = clause.rules().is_ok_and(|rules| {
+        rules.items().into_iter().any(|query| {
+            query
+                .as_any_css_value()
+                .and_then(|value| value.identifier_text())
+                .is_some_and(|query| {
+                    query.text().eq_ignore_ascii_case("all")
+                        || query.text().eq_ignore_ascii_case("rule")
+                })
+        })
+    });
+    names_rules != includes_rules
+}
+
 /// Synthetic space-literal `(kind, TokenText)` pair used as the implicit descendant
 /// combinator when a nested selector contains no `&` reference.
 fn space_combinator() -> (CssSyntaxKind, TokenText) {
@@ -304,7 +340,7 @@ fn space_combinator() -> (CssSyntaxKind, TokenText) {
 }
 
 fn is_explicit_combinator(kind: CssSyntaxKind) -> bool {
-    matches!(kind, T![>] | T![+] | T![~] | T![||])
+    EXPLICIT_COMBINATOR_KINDS.matches(kind)
 }
 
 /// Resolves the `current` token sequence against each parent [`Selector`],

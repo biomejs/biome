@@ -1,0 +1,10 @@
+/* should not generate diagnostics */
+cva('w-4 h-4', { variants: { size: { sm: 'px-2 py-2' } } });
+clsx('w-4 h-4');
+styles({ 'w-4 h-4': active });
+styles('', {
+    defaultVariants: { size: 'w-4 h-4' },
+    compoundVariants: [{ size: 'w-4 h-4', class: 'p-2' }],
+    unknown: 'w-4 h-4',
+});
+cx({ size: 'w-4 h-4' });

@@ -18,7 +18,7 @@ biome ci --linter-enabled=false --formatter-enabled=false --assist-enabled=false
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "preset": "recommended"
     }
   }
 }

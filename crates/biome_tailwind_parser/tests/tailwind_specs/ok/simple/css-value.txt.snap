@@ -27,7 +27,16 @@ TwRoot {
                 minus_token: DASH@4..5 "-" [] [],
                 value: TwCssVariableValue {
                     l_paren_token: L_PAREN@5..6 "(" [] [],
-                    value_token: TW_VALUE@6..16 "--my-color" [] [],
+                    type_hint: missing (optional),
+                    value: CssParameterList [
+                        CssListOfComponentValuesExpression {
+                            css_component_value_list: CssComponentValueList [
+                                CssDashedIdentifier {
+                                    ident_token: IDENT@6..16 "--my-color" [] [],
+                                },
+                            ],
+                        },
+                    ],
                     r_paren_token: R_PAREN@16..17 ")" [] [],
                 },
                 modifier: missing (optional),
@@ -56,8 +65,13 @@ TwRoot {
         1: DASH@4..5 "-" [] []
         2: TW_CSS_VARIABLE_VALUE@5..17
           0: L_PAREN@5..6 "(" [] []
-          1: TW_VALUE@6..16 "--my-color" [] []
-          2: R_PAREN@16..17 ")" [] []
+          1: (empty)
+          2: CSS_PARAMETER_LIST@6..16
+            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@6..16
+              0: CSS_COMPONENT_VALUE_LIST@6..16
+                0: CSS_DASHED_IDENTIFIER@6..16
+                  0: IDENT@6..16 "--my-color" [] []
+          3: R_PAREN@16..17 ")" [] []
         3: (empty)
       4: (empty)
     1: WHITESPACE@17..18 "\n" [] []

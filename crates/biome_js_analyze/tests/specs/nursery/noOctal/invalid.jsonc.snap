@@ -1,0 +1,623 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.jsonc
+---
+# Input
+```cjs
+/* should generate diagnostics */
+var a = 01234;
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:9 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ var a = 01234;
+      │         ^^^^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+a = 1 + 01234;
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:9 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ a = 1 + 01234;
+      │         ^^^^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+00;
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:1 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ 00;
+      │ ^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+08;
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:1 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ 08;
+      │ ^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+09.1;
+```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalid.jsonc:2:1 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ 09.1;
+      │ ^^^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+09e1;
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:1 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ 09e1;
+      │ ^^^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+09.1e1;
+```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalid.jsonc:2:1 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ 09.1e1;
+      │ ^^^^^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+018;
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:1 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ 018;
+      │ ^^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+019.1;
+```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalid.jsonc:2:1 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ 019.1;
+      │ ^^^^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+019e1;
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:1 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ 019e1;
+      │ ^^^^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+019.1e1;
+```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalid.jsonc:2:1 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ 019.1e1;
+      │ ^^^^^^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const number = 071; const result = 5 + 07;
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:16 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const number = 071; const result = 5 + 07;
+      │                ^^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsonc:2:40 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const number = 071; const result = 5 + 07;
+      │                                        ^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const numbers = [-071, +007, 000, 0777, 0008, 09E1];
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:19 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const numbers = [-071, +007, 000, 0777, 0008, 09E1];
+      │                   ^^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsonc:2:25 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const numbers = [-071, +007, 000, 0777, 0008, 09E1];
+      │                         ^^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsonc:2:30 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const numbers = [-071, +007, 000, 0777, 0008, 09E1];
+      │                              ^^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsonc:2:35 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const numbers = [-071, +007, 000, 0777, 0008, 09E1];
+      │                                   ^^^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsonc:2:41 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const numbers = [-071, +007, 000, 0777, 0008, 09E1];
+      │                                         ^^^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsonc:2:47 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const numbers = [-071, +007, 000, 0777, 0008, 09E1];
+      │                                               ^^^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const object = { 071: true, 08: false, 007() {} };
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:18 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const object = { 071: true, 08: false, 007() {} };
+      │                  ^^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsonc:2:29 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const object = { 071: true, 08: false, 007() {} };
+      │                             ^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsonc:2:40 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const object = { 071: true, 08: false, 007() {} };
+      │                                        ^^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const { 071: value } = object;
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:9 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const { 071: value } = object;
+      │         ^^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const object = { get 071() {}, set 007(value) {} };
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:22 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const object = { get 071() {}, set 007(value) {} };
+      │                      ^^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.jsonc:2:36 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const object = { get 071() {}, set 007(value) {} };
+      │                                    ^^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const value = object[071];
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:22 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const value = object[071];
+      │                      ^^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+# Input
+```cjs
+/* should generate diagnostics */
+const number = /* leading */ 071 /* trailing */;
+```
+
+# Diagnostics
+```
+invalid.jsonc:2:30 lint/nursery/noOctal ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use number literals with leading zeros.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const number = /* leading */ 071 /* trailing */;
+      │                              ^^^
+  
+  i A leading zero can make a number use base 8 instead of base 10, and is forbidden in strict mode.
+  
+  i Use the 0o prefix for octal numbers, or remove leading zeros from decimal numbers.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

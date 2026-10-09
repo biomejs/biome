@@ -80,6 +80,7 @@ biome_json_value             = { path = "./crates/biome_json_value", version = "
 biome_line_index             = { path = "./crates/biome_line_index", version = "0.7.0" }
 biome_lsp                    = { path = "./crates/biome_lsp" }
 biome_lsp_converters         = { path = "./crates/biome_lsp_converters", version = "0.7.0" }
+biome_manifest               = { path = "./crates/biome_manifest", version = "0.0.1" }
 biome_markdown_factory       = { path = "./crates/biome_markdown_factory", version = "0.7.0" }
 biome_markdown_formatter     = { path = "./crates/biome_markdown_formatter", version = "0.7.0" }
 biome_markdown_parser        = { path = "./crates/biome_markdown_parser", version = "0.7.0" }
@@ -110,6 +111,7 @@ biome_text_edit              = { path = "./crates/biome_text_edit", version = "0
 biome_text_size              = { path = "./crates/biome_text_size", version = "0.7.0" }
 biome_ungrammar              = { path = "./crates/biome_ungrammar", version = "0.3.1" }
 biome_unicode_table          = { path = "./crates/biome_unicode_table", version = "0.7.0" }
+biome_yaml_analyze           = { path = "./crates/biome_yaml_analyze", version = "0.1.0" }
 biome_yaml_factory           = { path = "./crates/biome_yaml_factory", version = "0.7.0" }
 biome_yaml_formatter         = { path = "./crates/biome_yaml_formatter", version = "0.7.0" }
 biome_yaml_parser            = { path = "./crates/biome_yaml_parser", version = "0.7.0" }
@@ -135,7 +137,7 @@ ignore                       = "0.4.25"
 indexmap                     = { version = "2.14.2" }
 insta                        = "1.48.0"
 jiff                         = "0.2.37"
-libc                         = "0.2.189"
+libc                         = "0.2.190"
 # mimalloc is pinned because of bug that causes access violation crashes on windows arm 64
 # See: https://github.com/biomejs/biome/issues/10270
 # See: https://github.com/biomejs/biome/issues/11242

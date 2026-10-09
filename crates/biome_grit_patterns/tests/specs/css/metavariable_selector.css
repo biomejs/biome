@@ -1,0 +1,7 @@
+.a { color: red; }
+
+a:hover { color: red; }
+
+.a .b, .c { color: red; }
+
+.a { color: blue; }

@@ -146,6 +146,7 @@ pub enum TypeData<'db> {
     Union(InternedUnion<'db>),
     TypeOperator(InternedTypeOperatorType<'db>),
     IndexedAccess(InternedIndexedAccessType<'db>),
+    MappedType(InternedMappedType<'db>),
     Literal(InternedLiteral<'db>),
     InstanceOf(InternedTypeInstance<'db>),
     MergedReference(InternedMergedReference<'db>),
@@ -275,6 +276,7 @@ impl<'db> TypeData<'db> {
                 | Self::Local(_)
                 | Self::TypeofExpression(_)
                 | Self::IndexedAccess(_)
+                | Self::MappedType(_)
                 | Self::AnyKeyword
                 | Self::UnknownKeyword
         )
@@ -357,6 +359,7 @@ impl<'db> TypeData<'db> {
                 Self::MergedReference(_) => "merged type",
                 Self::TypeOperator(_) => "type operator",
                 Self::IndexedAccess(_) => "indexed access",
+                Self::MappedType(_) => "mapped type",
                 Self::TypeofExpression(_) | Self::TypeofType(_) | Self::TypeofValue(_) => "typeof",
                 Self::Conditional => "conditional",
                 Self::Global | Self::GlobalType(_) => "global",
@@ -617,6 +620,7 @@ impl<'db> TypeData<'db> {
             | Self::Local(_)
             | Self::TypeOperator(_)
             | Self::IndexedAccess(_)
+            | Self::MappedType(_)
             | Self::TypeofType(_)
             | Self::TypeofValue(_)
             | Self::InstanceOf(_)
@@ -653,6 +657,7 @@ impl<'db> TypeData<'db> {
             | Self::InstanceOf(_)
             | Self::Interface(_)
             | Self::Intersection(_)
+            | Self::MappedType(_)
             | Self::Object(_)
             | Self::Tuple(_)
             | Self::Union(_) => type_parameters.is_empty(),
@@ -943,6 +948,7 @@ impl<'db> TypeData<'db> {
             | Self::Union(_)
             | Self::TypeOperator(_)
             | Self::IndexedAccess(_)
+            | Self::MappedType(_)
             | Self::Literal(_)
             | Self::InstanceOf(_)
             | Self::MergedReference(_)
@@ -1162,6 +1168,17 @@ impl<'db> TypeData<'db> {
                     resolve_reference(&access.index),
                 ))
             }
+            raw::TypeData::MappedType(mapped) => Self::MappedType(InternedMappedType::new(
+                db,
+                resolve_reference(&mapped.type_parameter),
+                match &mapped.keys {
+                    raw::MappedTypeKeys::Keyof(ty) => MappedTypeKeys::Keyof(resolve_reference(ty)),
+                    raw::MappedTypeKeys::Type(ty) => MappedTypeKeys::Type(resolve_reference(ty)),
+                },
+                resolve_reference(&mapped.ty),
+                mapped.readonly_modifier,
+                mapped.optional_modifier,
+            )),
             raw::TypeData::Literal(literal) => Self::Literal(InternedLiteral::new(
                 db,
                 convert_literal(db, literal.as_ref(), resolve_reference),
@@ -1293,6 +1310,13 @@ impl<'db> TypeDataSlots<'db> {
             TypeData::IndexedAccess(access) => {
                 result.slots.extend([access.object(db), access.index(db)])
             }
+            // The type parameter comes first so root-body substitution can
+            // skip the declared parameter like it does for other binders.
+            TypeData::MappedType(mapped) => result.slots.extend([
+                *mapped.type_parameter(db),
+                mapped.keys(db).operand(),
+                mapped.ty(db),
+            ]),
             TypeData::Literal(literal) => {
                 if let Literal::Object(members) = literal.literal(db) {
                     result.push_type_members_slots(members);
@@ -1651,6 +1675,17 @@ impl<'db> TypeDataSlotReplacements<'db> {
                     TypeData::IndexedAccess(InternedIndexedAccessType::new(db, object, index))
                 }
             }
+            TypeData::MappedType(mapped) => TypeData::MappedType(InternedMappedType::new(
+                db,
+                self.take_type()?,
+                match mapped.keys(db) {
+                    MappedTypeKeys::Keyof(_) => MappedTypeKeys::Keyof(self.take_type()?),
+                    MappedTypeKeys::Type(_) => MappedTypeKeys::Type(self.take_type()?),
+                },
+                self.take_type()?,
+                mapped.readonly_modifier(db),
+                mapped.optional_modifier(db),
+            )),
             TypeData::Literal(literal) => TypeData::Literal(InternedLiteral::new(
                 db,
                 match literal.literal(db) {
@@ -2086,11 +2121,65 @@ pub struct TypeMember<'db> {
     pub ty: TypeData<'db>,
 }
 
+/// Returns whether a member name or string literal needs escape handling before
+/// it can be compared or used as a key.
+///
+/// Names and string literals keep their source spelling. The key `"\u0041"` is
+/// stored as written rather than as `A`, so it would compare unequal to the
+/// property `A` that it names. Quotes and line breaks also need escaping before
+/// a consumer can insert the name into a double-quoted literal.
+pub(crate) fn requires_escape_handling(text: &str) -> bool {
+    text.contains(['\\', '"', '\n', '\r'])
+}
+
 const CUSTOM_STRINGIFICATION_MEMBER_NAMES: [&str; 3] = ["toLocaleString", "toString", "valueOf"];
+
+/// The key a member contributes to `keyof`, and to a mapped type over `keyof T`.
+#[derive(Clone, Copy, Debug)]
+pub(crate) enum ProjectedKey<'a> {
+    /// The key is the string literal type of this name.
+    Name(&'a Text),
+    /// The member has no key, as with a call signature.
+    NoKey,
+    /// The member has a key that can't be written as a string literal type,
+    /// such as a computed key, an index signature, or a numeric name.
+    Unsupported,
+}
 
 impl TypeMember<'_> {
     pub(crate) fn name(&self) -> Option<Text> {
         self.kind.name()
+    }
+
+    /// Returns the key this member contributes to `keyof`, and to a mapped
+    /// type over `keyof T`.
+    ///
+    /// Numeric names are unsupported because member names don't record
+    /// whether a numeric key was quoted. The two spellings have different
+    /// `keyof` types: `keyof { 1: x }` is `1`, while `keyof { "1": x }` is
+    /// `"1"`. Names that need escape handling are unsupported too; see
+    /// [`requires_escape_handling`].
+    pub(crate) fn projected_key(&self) -> ProjectedKey<'_> {
+        let name = match &self.kind {
+            TypeMemberKind::Named(name)
+            | TypeMemberKind::NamedOptional(name)
+            | TypeMemberKind::Getter(name)
+            | TypeMemberKind::ConstAssertedNamed(name)
+            | TypeMemberKind::ConstAssertedNamedOptional(name)
+            | TypeMemberKind::ConstAssertedGetter(name) => name,
+            TypeMemberKind::CallSignature | TypeMemberKind::ConstAssertedCallSignature => {
+                return ProjectedKey::NoKey;
+            }
+            _ => return ProjectedKey::Unsupported,
+        };
+        if requires_escape_handling(name.text())
+            || name
+                .text()
+                .starts_with(|c: char| c.is_ascii_digit() || matches!(c, '.' | '-' | '+'))
+        {
+            return ProjectedKey::Unsupported;
+        }
+        ProjectedKey::Name(name)
     }
 
     /// Returns whether this member declares one of JavaScript's object
@@ -2669,6 +2758,53 @@ impl<'db> InternedIndexedAccessType<'db> {
             .iter()
             .map(|member| matches!(member.kind, TypeMemberKind::Named(_)).then_some(member.ty))
             .collect()
+    }
+}
+
+/// The parts of a TypeScript mapped type, stored in the database. See
+/// [`raw::MappedType`] for an example of the parts.
+#[salsa::interned]
+#[derive(Debug)]
+pub struct InternedMappedType<'db> {
+    #[returns(ref)]
+    pub type_parameter: TypeData<'db>,
+    #[returns(copy)]
+    pub keys: MappedTypeKeys<'db>,
+    #[returns(copy)]
+    pub ty: TypeData<'db>,
+    #[returns(copy)]
+    pub readonly_modifier: Option<raw::MappedTypeModifier>,
+    #[returns(copy)]
+    pub optional_modifier: Option<raw::MappedTypeModifier>,
+}
+
+/// The keys iterated by a mapped type. See [`raw::MappedTypeKeys`] for why
+/// `Keyof` stores the operand of `keyof` rather than the keys.
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, salsa::SalsaValue)]
+pub enum MappedTypeKeys<'db> {
+    Keyof(TypeData<'db>),
+    Type(TypeData<'db>),
+}
+
+impl<'db> MappedTypeKeys<'db> {
+    /// Returns the stored type: the operand `T` for `keyof T`, or the key type
+    /// itself otherwise.
+    pub fn operand(self) -> TypeData<'db> {
+        match self {
+            Self::Keyof(ty) | Self::Type(ty) => ty,
+        }
+    }
+
+    /// Returns whether these keys cannot be enumerated whatever substitutions
+    /// are applied first.
+    ///
+    /// Indexing with a literal, as in `[K in T[0]]` or `[K in keyof T["key"]]`,
+    /// normalizes to unknown, so the mapped type cannot be evaluated.
+    pub fn are_never_enumerable(self, db: &'db dyn TypeDb) -> bool {
+        matches!(
+            self.operand(),
+            TypeData::IndexedAccess(access) if access.index(db).is_never_supported_index()
+        )
     }
 }
 

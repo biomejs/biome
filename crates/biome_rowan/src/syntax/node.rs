@@ -723,6 +723,82 @@ impl<L: Language> SyntaxNode<L> {
         self.has_trailing_comments() || self.has_leading_comments()
     }
 
+    /// Whether any comment sits between this node's first and last token.
+    ///
+    /// The leading trivia of the first token and the trailing trivia of the last token are
+    /// ignored, because [BatchMutation::replace_node](crate::BatchMutation::replace_node) carries
+    /// them over to the replacement. Fixes that rebuild a node from parts use this to decide
+    /// whether rebuilding would lose a comment.
+    ///
+    /// ```
+    /// use biome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+    /// use biome_rowan::*;
+    ///
+    /// // `/* a */ let /* b */ a; /* c */`
+    /// let node = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |builder| {
+    ///     builder.token_with_trivia(
+    ///         RawLanguageKind::LET_TOKEN,
+    ///         "/* a */ let /* b */",
+    ///         &[TriviaPiece::multi_line_comment(7), TriviaPiece::whitespace(1)],
+    ///         &[TriviaPiece::whitespace(1), TriviaPiece::multi_line_comment(7)],
+    ///     );
+    ///     builder.token_with_trivia(RawLanguageKind::STRING_TOKEN, " a", &[TriviaPiece::whitespace(1)], &[]);
+    ///     builder.token_with_trivia(
+    ///         RawLanguageKind::SEMICOLON_TOKEN,
+    ///         "; /* c */",
+    ///         &[],
+    ///         &[TriviaPiece::whitespace(1), TriviaPiece::multi_line_comment(7)],
+    ///     );
+    /// });
+    /// assert!(node.has_inner_comments());
+    ///
+    /// // `/* a */ let a; /* c */`
+    /// let node = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |builder| {
+    ///     builder.token_with_trivia(
+    ///         RawLanguageKind::LET_TOKEN,
+    ///         "/* a */ let",
+    ///         &[TriviaPiece::multi_line_comment(7), TriviaPiece::whitespace(1)],
+    ///         &[],
+    ///     );
+    ///     builder.token_with_trivia(RawLanguageKind::STRING_TOKEN, " a", &[TriviaPiece::whitespace(1)], &[]);
+    ///     builder.token_with_trivia(
+    ///         RawLanguageKind::SEMICOLON_TOKEN,
+    ///         "; /* c */",
+    ///         &[],
+    ///         &[TriviaPiece::whitespace(1), TriviaPiece::multi_line_comment(7)],
+    ///     );
+    /// });
+    /// assert!(!node.has_inner_comments());
+    ///
+    /// // `/* a */ let /* b */`
+    /// let node = RawSyntaxTreeBuilder::wrap_with_node(RawLanguageKind::ROOT, |builder| {
+    ///     builder.token_with_trivia(
+    ///         RawLanguageKind::LET_TOKEN,
+    ///         "/* a */ let /* b */",
+    ///         &[TriviaPiece::multi_line_comment(7), TriviaPiece::whitespace(1)],
+    ///         &[TriviaPiece::whitespace(1), TriviaPiece::multi_line_comment(7)],
+    ///     );
+    /// });
+    /// assert!(!node.has_inner_comments());
+    /// ```
+    pub fn has_inner_comments(&self) -> bool {
+        let mut tokens = self.descendants_tokens(Direction::Next).peekable();
+        let Some(first) = tokens.next() else {
+            return false;
+        };
+        if tokens.peek().is_some() && first.has_trailing_comments() {
+            return true;
+        }
+        while let Some(token) = tokens.next() {
+            if token.has_leading_comments()
+                || (tokens.peek().is_some() && token.has_trailing_comments())
+            {
+                return true;
+            }
+        }
+        false
+    }
+
     /// It checks if the current node has comments at the edges:
     /// if first or last tokens contain comments (leading or trailing)
     pub fn first_or_last_token_have_comments(&self) -> bool {
@@ -1225,12 +1301,7 @@ where
     }
 
     /// Create a [Send] + [Sync] handle to this node.
-    ///
-    /// ### Panics
-    ///
-    /// It panics if the `base_offset` isn't greater than zero
     pub fn as_embedded_send(&self) -> EmbeddedSendNode {
-        debug_assert!(self.offset > 0.into(), "range must be greater than 0");
         EmbeddedSendNode {
             green: self.node.green_node(),
             offset: self.offset,

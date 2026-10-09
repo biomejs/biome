@@ -1,0 +1,26 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@mixin empty {}
+
+```
+
+# Diagnostics
+```
+invalid.scss:2:14 lint/suspicious/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty block isn't allowed.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ @mixin empty {}
+      │              ^^
+    3 │ 
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+
+```

@@ -18,16 +18,14 @@ use biome_rule_options::use_sorted_attributes::{SortOrder, UseSortedAttributesOp
 use crate::JsRuleAction;
 
 declare_source_rule! {
-    /// Enforce attribute sorting in JSX elements.
+    /// Sort JSX attributes by name.
     ///
-    /// This rule checks if the JSX props are sorted in a consistent way.
-    /// Props are sorted alphabetically using a [natural sort order](https://en.wikipedia.org/wiki/Natural_sort_order).
-    /// This rule will not consider spread props as sortable.
-    /// Instead, whenever it encounters a spread prop, it will sort all the
-    /// previous non spread props up until the nearest spread prop, if one
-    /// exist.
-    /// This prevents breaking the override of certain props using spread
-    /// props.
+    /// By default, the action uses [natural order](https://en.wikipedia.org/wiki/Natural_sort_order),
+    /// which compares numbers by value so that `prop9` comes before `prop10`.
+    ///
+    /// A spread attribute such as `{...properties}` can provide or replace any attribute. The
+    /// action therefore treats each spread as a boundary and sorts only the named attributes on
+    /// each side. It never moves an attribute across a spread.
     ///
     /// ## Examples
     ///
@@ -36,16 +34,17 @@ declare_source_rule! {
     /// ```
     ///
     /// ```jsx,expect_diff
-    /// <Hello lastName="Smith" firstName="John" {...this.props} tel="0000" address="111 Main Street"  {...another.props} lastName="Smith" />;
+    /// <Hello lastName="Smith" firstName="John" {...this.props} tel="0000" address="111 Main Street" {...another.props} />;
     /// ```
     ///
     /// ## Options
-    /// This actions accepts following options
     ///
     /// ### `sortOrder`
-    /// This options supports `natural` and `lexicographic` values. Where as `natural` is the default.
     ///
-    /// Following will apply the natural sort order.
+    /// Selects `natural` or `lexicographic` ordering. Natural ordering compares numbers by value
+    /// and is the default. Lexicographic ordering compares names character by character.
+    ///
+    /// The following configuration uses natural order:
     ///
     /// ```json,options
     /// {
@@ -54,11 +53,12 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
-    /// ```jsx,use_options,expect_diagnostic
-    /// <Hello tel={5555555} {...this.props} opt1="John" opt2="" opt12="" opt11="" />;
+    ///
+    /// ```jsx,use_options,expect_diff
+    /// <Hello {...this.props} opt1="" opt2="" opt12="" opt11="" />;
     /// ```
     ///
-    /// Following will apply the lexicographic sort order.
+    /// The following configuration uses lexicographic order:
     ///
     /// ```json,options
     /// {
@@ -67,8 +67,25 @@ declare_source_rule! {
     ///     }
     /// }
     /// ```
+    ///
+    /// ```jsx,use_options,expect_diff
+    /// <Hello {...this.props} opt1="" opt2="" opt12="" opt11="" />;
+    /// ```
+    ///
+    /// ### `sortFirst`
+    /// A list of attribute names that should be sorted before all other attributes,
+    /// in the order they appear in this list. The remaining attributes are sorted
+    /// after the listed ones. This is useful to keep attributes such as `key` first.
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "sortFirst": ["key"]
+    ///     }
+    /// }
+    /// ```
     /// ```jsx,use_options,expect_diagnostic
-    /// <Hello tel={5555555} {...this.props} opt1="John" opt2="" opt12="" opt11="" />;
+    /// <Hello firstName="John" key={id} lastName="Smith" />;
     /// ```
     ///
     pub UseSortedAttributes {
@@ -93,10 +110,15 @@ impl Rule for UseSortedAttributes {
         let mut prop_groups = Vec::new();
         let options = ctx.options();
         let sort_by = options.sort_order.unwrap_or_default();
+        let sort_first = options.sort_first.as_deref().unwrap_or_default();
 
-        let comparator = match sort_by {
+        let base = match sort_by {
             SortOrder::Natural => SortableJsxAttribute::ascii_nat_cmp,
             SortOrder::Lexicographic => SortableJsxAttribute::lexicographic_cmp,
+        };
+
+        let comparator = |a: &SortableJsxAttribute, b: &SortableJsxAttribute| {
+            a.cmp_sort_first(b, sort_first, base)
         };
 
         // Convert to boolean-based comparator for is_sorted_by
@@ -172,10 +194,15 @@ impl Rule for UseSortedAttributes {
         let mut mutation = ctx.root().begin();
         let options = ctx.options();
         let sort_by = options.sort_order.unwrap_or_default();
+        let sort_first = options.sort_first.as_deref().unwrap_or_default();
 
-        let comparator = match sort_by {
+        let base = match sort_by {
             SortOrder::Natural => SortableJsxAttribute::ascii_nat_cmp,
             SortOrder::Lexicographic => SortableJsxAttribute::lexicographic_cmp,
+        };
+
+        let comparator = |a: &SortableJsxAttribute, b: &SortableJsxAttribute| {
+            a.cmp_sort_first(b, sort_first, base)
         };
 
         for (SortableJsxAttribute(attr), SortableJsxAttribute(sorted_attr)) in

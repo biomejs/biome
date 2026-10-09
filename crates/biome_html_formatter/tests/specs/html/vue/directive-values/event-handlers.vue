@@ -1,0 +1,37 @@
+<template>
+  <div @click="count++"></div>
+  <div @click="  count  +=   1  "></div>
+  <div @click="handler( )"></div>
+  <div @click="count++;"></div>
+  <div v-on:click="foo = 'bar'"></div>
+  <div @click='foo = "bar"'></div>
+  <div @click="[a].forEach(f)"></div>
+  <div @click="a( );b( )"></div>
+  <div @click="a();[b].forEach(f)"></div>
+  <div @click="if (x) { y() };"></div>
+  <div @click="if (x) y(); else z()"></div>
+  <div @click="const x = 1; f(x)"></div>
+  <div @click="let x = 1;"></div>
+  <div @click="for (const a of b) c(a);"></div>
+  <div @click="someVeryLongFunctionName(argumentNumberOne); anotherVeryLongFunctionName(argumentNumberTwo); third()"></div>
+  <div @click="someVeryLongFunctionName(argumentNumberOne, argumentNumberTwo, argumentNumberThree)"></div>
+  <div @click="someVeryLongVariableName = anotherVeryLongFunctionName(argumentNumberOne, two)"></div>
+  <div @click="a(); // trailing
+  b()"></div>
+  <div @click="a() // c"></div>
+  <div @click="a() /* c */"></div>
+  <div @click="
+    a()
+    b()
+  "></div>
+  <div @click="x = `a`"></div>
+  <div @click="if (ok) save()"></div>
+  <div @click="if (ok) {};"></div>
+  <div @click="const x = 1"></div>
+  <div @click="handler;"></div>
+  <div @click="(handler);"></div>
+  <div @click="foo.bar;"></div>
+  <div @click="foo?.bar;"></div>
+  <div @click="foo[bar];"></div>
+  <div @click="undefined;"></div>
+</template>

@@ -106,7 +106,7 @@ pub enum CssLexContext {
     /// Currently, only applicable to when we encounter a `@apply` rule.
     TailwindUtility,
     /// Applied when lexing Tailwind CSS utility and variant names in
-    /// `@utility` and `@variant`.
+    /// `@utility`, `@variant`, and `@custom-variant`.
     TailwindUtilityName,
 }
 
@@ -154,6 +154,10 @@ pub enum CssReLexContext {
     UnicodeRange,
     /// Re-lexes `+` and `-` as standalone tokens for SCSS expression parsing.
     ScssExpression,
+    /// Re-lexes a name suffix without requiring an identifier-start character.
+    ///
+    /// `@custom-#{$name}01 token;` keeps `01` without number normalization.
+    ScssIdentifierContinuation,
 }
 
 /// An extremely fast, lookup table based, lossless CSS lexer
@@ -186,6 +190,9 @@ pub(crate) struct CssLexer<'src> {
     options: CssParserOptions,
     source_type: CssFileSource,
     pending_scss_string_start: Option<PendingScssInterpolatedStringStart>,
+
+    /// Ranges of the Grit metavariables in the source.
+    metavariables: &'src [TextRange],
 }
 
 impl<'src> Lexer<'src> for CssLexer<'src> {
@@ -198,6 +205,10 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
 
     fn source(&self) -> &'src str {
         self.cursor.source()
+    }
+
+    fn metavariable_ranges(&self) -> &[TextRange] {
+        self.metavariables
     }
 
     fn current(&self) -> Self::Kind {
@@ -360,11 +371,20 @@ impl<'src> CssLexer<'src> {
             options: CssParserOptions::default(),
             source_type: CssFileSource::default(),
             pending_scss_string_start: None,
+            metavariables: &[],
         }
     }
 
     pub(crate) fn with_options(self, options: CssParserOptions) -> Self {
         Self { options, ..self }
+    }
+
+    /// Lexes the given source ranges as Grit metavariables.
+    pub(crate) fn with_metavariables(self, metavariables: &'src [TextRange]) -> Self {
+        Self {
+            metavariables,
+            ..self
+        }
     }
 
     pub(crate) fn with_source_type(self, source_type: CssFileSource) -> Self {
@@ -470,6 +490,10 @@ impl<'src> CssLexer<'src> {
         // to do more aggressive optimizations on the match regarding how to map it to instructions
         let dispatched = lookup_byte(current);
 
+        if self.is_metavariable_start() {
+            return self.consume_metavariable(GRIT_METAVARIABLE);
+        }
+
         match dispatched {
             WHS => {
                 let kind = self.consume_newline_or_whitespaces();
@@ -508,16 +532,11 @@ impl<'src> CssLexer<'src> {
                     return bom;
                 }
                 // Not a BOM, check other UNI cases below
-                if self.options.is_metavariable_enabled() && self.is_metavariable_start() {
-                    self.consume_metavariable(GRIT_METAVARIABLE)
-                } else if self.is_ident_start() {
+                if self.is_ident_start() {
                     self.consume_identifier()
                 } else {
                     self.consume_fallback(fallback)
                 }
-            }
-            UNI if self.options.is_metavariable_enabled() && self.is_metavariable_start() => {
-                self.consume_metavariable(GRIT_METAVARIABLE)
             }
             IDT | UNI | BSL if self.is_ident_start() => self.consume_identifier(),
 
@@ -1675,6 +1694,17 @@ impl<'src> ReLexer<'src> for CssLexer<'src> {
                 CssReLexContext::Regular => self.consume_token(current),
                 CssReLexContext::UnicodeRange => self.consume_unicode_range_token(current),
                 CssReLexContext::ScssExpression => self.consume_scss_expression_token(current),
+                CssReLexContext::ScssIdentifierContinuation => {
+                    let mut cursor = self.scan_cursor();
+                    cursor.advance_ident_sequence();
+                    let end = cursor.position();
+                    if end > self.position() {
+                        self.set_position(end);
+                        IDENT
+                    } else {
+                        self.consume_token(current)
+                    }
+                }
             },
             None => EOF,
         };

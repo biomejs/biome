@@ -5,7 +5,8 @@ use biome_console::markup;
 use biome_css_syntax::{
     AnyCssAtRule, AnyCssDashedIdentifier, AnyCssDeclarationName, CssContainerAtRule,
     CssFunctionAtRule, CssGenericProperty, CssLayerAtRule, CssMediaAtRule, CssScopeAtRule,
-    CssStartingStyleAtRule, CssSupportsAtRule, TwApplyAtRule,
+    CssStartingStyleAtRule, CssSupportsAtRule, ScssAtRootAtRule, ScssEachAtRule, ScssForAtRule,
+    ScssIfAtRule, ScssIncludeAtRule, ScssMixinAtRule, ScssWhileAtRule, TwApplyAtRule,
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange, declare_node_union};
@@ -15,16 +16,17 @@ use biome_string_case::StrLikeExtension;
 use crate::utils::{is_known_properties, vendor_prefixed};
 
 declare_lint_rule! {
-    /// Disallow unknown properties.
+    /// Disallow unrecognized CSS properties.
     ///
-    /// This rule considers properties defined in the CSS Specifications and browser specific properties to be known.
-    /// https://github.com/known-css/known-css-properties#source
+    /// The known-property list includes standard and browser-specific properties from
+    /// [known-css-properties](https://github.com/known-css/known-css-properties#source).
+    /// Custom properties such as `--custom-property` and vendor-prefixed properties such as
+    /// `-moz-align-self` or `-webkit-align-self` are allowed.
     ///
+    /// ## SCSS limitations
     ///
-    /// This rule ignores:
-    ///
-    /// - custom variables e.g. `--custom-property`
-    /// - vendor-prefixed properties (e.g., `-moz-align-self,` `-webkit-align-self`)
+    /// Property names containing SCSS interpolation are ignored because the emitted name cannot be
+    /// determined statically.
     ///
     /// ## Examples
     ///
@@ -66,7 +68,8 @@ declare_lint_rule! {
     ///
     /// ### `ignore`
     ///
-    /// A list of unknown property names to ignore (case-insensitive).
+    /// Lists additional property names to allow, without regard to letter case. Defaults to an
+    /// empty list.
     ///
     /// ```json,options
     /// {
@@ -104,17 +107,12 @@ impl Rule for NoUnknownProperty {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        let is_at_rule_supporting_descriptors = node.syntax().ancestors().skip(1).any(|ancestor| {
-            if AnyCssAtRule::can_cast(ancestor.kind())
-                && !AnyDescriptorSupportingAtRules::can_cast(ancestor.kind())
-            {
-                return true;
-            }
-
-            false
+        let is_in_descriptor_at_rule = node.syntax().ancestors().skip(1).any(|ancestor| {
+            AnyCssAtRule::can_cast(ancestor.kind())
+                && !AnyDeclarationSupportingAtRule::can_cast(ancestor.kind())
         });
 
-        if is_at_rule_supporting_descriptors {
+        if is_in_descriptor_at_rule {
             return None;
         }
 
@@ -122,13 +120,11 @@ impl Rule for NoUnknownProperty {
         let property_name_token = declaration_name_value_token(&property_name)?;
         let property_name_lower = property_name_token.text_trimmed().to_ascii_lowercase_cow();
 
-        let in_function_at_rule = node.syntax().ancestors().skip(1).any(|ancestor| {
-            if CssFunctionAtRule::can_cast(ancestor.kind()) {
-                return true;
-            }
-
-            false
-        });
+        let in_function_at_rule = node
+            .syntax()
+            .ancestors()
+            .skip(1)
+            .any(|ancestor| CssFunctionAtRule::can_cast(ancestor.kind()));
 
         if in_function_at_rule && property_name_lower == "result" {
             return None;
@@ -167,13 +163,20 @@ impl Rule for NoUnknownProperty {
 }
 
 declare_node_union! {
-    pub AnyDescriptorSupportingAtRules = TwApplyAtRule | CssContainerAtRule
+    pub AnyDeclarationSupportingAtRule = TwApplyAtRule | CssContainerAtRule
                     | CssLayerAtRule
                     | CssMediaAtRule
                     | CssScopeAtRule
                     | CssStartingStyleAtRule
                     | CssSupportsAtRule
                     | CssFunctionAtRule
+                    | ScssAtRootAtRule
+                    | ScssEachAtRule
+                    | ScssForAtRule
+                    | ScssIfAtRule
+                    | ScssIncludeAtRule
+                    | ScssMixinAtRule
+                    | ScssWhileAtRule
 }
 
 fn should_ignore(name: &str, options: &NoUnknownPropertyOptions) -> bool {
@@ -199,6 +202,7 @@ fn declaration_name_value_token(
         AnyCssDeclarationName::TwValueThemeReference(name) => {
             name.reference().ok()?.value_token().ok()
         }
-        AnyCssDeclarationName::ScssInterpolatedIdentifier(_) => None,
+        AnyCssDeclarationName::ScssInterpolatedIdentifier(_)
+        | AnyCssDeclarationName::CssMetavariable(_) => None,
     }
 }

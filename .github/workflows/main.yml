@@ -55,7 +55,7 @@ jobs:
       - name: Run rustfmt
         run: |
           cargo fmt --all --verbose -- --check
-      - uses: tombi-toml/setup-tombi@ea139001852855a7f1cf30a9b60c71ebb6446a99 # v1.5.5
+      - uses: tombi-toml/setup-tombi@b4c080f8f2b95efb36f254032cb607eed7c70a33 # v1.7.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Format TOML files
@@ -103,7 +103,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install cargo-deny
-        uses: taiki-e/install-action@9983c65e42da123ff25d1f78505eb6de315aa172 # v2.87.20
+        uses: taiki-e/install-action@83ac0ad63c0167e6f06796fab0fce28db1bf3db0 # v2.87.22
         with:
           tool: cargo-deny
       - name: Audit crates.io dependencies
@@ -127,18 +127,34 @@ jobs:
       - name: Install toolchain
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:
+          bins: cargo-nextest
           cache-base: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run tests on ${{ matrix.os }}
         if: matrix.os == 'depot-windows-2022-16'
         env:
-          CARGO_PROFILE_TEST_DEBUG: "0"
-          CARGO_INCREMENTAL: "0"
-        run: cargo test --workspace --features=js_plugin
+          CARGO_PROFILE_TEST_DEBUG: '0'
+          CARGO_INCREMENTAL: '0'
+        run: cargo nextest run --workspace --no-fail-fast
       - name: Run tests on ${{ matrix.os }}
         if: matrix.os != 'depot-windows-2022-16'
-        run: cargo test --workspace --features=js_plugin
+        run: cargo nextest run --workspace --no-fail-fast
+
+  doc-test:
+    name: Doc tests
+    runs-on: depot-ubuntu-24.04-arm
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install toolchain
+        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
+        with:
+          cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run doc tests
+        run: cargo test --workspace --doc --no-fail-fast
 
   coverage:
     name: Test262 Coverage
@@ -146,7 +162,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ depot-windows-2022-16, depot-ubuntu-24.04-arm-16 ]
+        os: [depot-windows-2022-16, depot-ubuntu-24.04-arm-16]
     steps:
       # ref: https://github.com/orgs/community/discussions/26952
       - name: Support longpaths

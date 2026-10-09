@@ -19,6 +19,7 @@ fn evaluate_any_simple_selector(selector: &AnyCssSimpleSelector) -> Specificity 
         AnyCssSimpleSelector::CssTypeSelector(_) => TYPE_SPECIFICITY,
         AnyCssSimpleSelector::CssUniversalSelector(_) => ZERO_SPECIFICITY,
         AnyCssSimpleSelector::ScssPlaceholderSelector(_) => CLASS_SPECIFICITY,
+        AnyCssSimpleSelector::CssMetavariable(_) => ZERO_SPECIFICITY,
     }
 }
 

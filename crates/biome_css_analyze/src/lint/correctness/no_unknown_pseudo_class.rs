@@ -27,11 +27,16 @@ use biome_rule_options::no_unknown_pseudo_class::NoUnknownPseudoClassOptions;
 use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
-    /// Disallow unknown pseudo-class selectors.
+    /// Disallow unrecognized pseudo-class selectors.
     ///
-    /// For details on known pseudo-class, see the [MDN web docs](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes)
+    /// A pseudo-class begins with `:` and selects an element in a particular state or position, as
+    /// in `:hover` or `:first-child`. Vendor-prefixed pseudo-classes are allowed. See
+    /// [MDN's pseudo-class reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes).
     ///
-    /// This rule ignores vendor-prefixed pseudo-class selectors.
+    /// ## SCSS limitations
+    ///
+    /// Pseudo-class names containing SCSS interpolation are ignored because the emitted name cannot
+    /// be determined statically.
     ///
     /// ## Examples
     ///
@@ -71,7 +76,8 @@ declare_lint_rule! {
     ///
     /// ### `ignore`
     ///
-    /// A list of unknown pseudo-class names to ignore (case-insensitive).
+    /// Lists additional pseudo-class names to allow, without regard to letter case. Defaults to an
+    /// empty list.
     ///
     /// ```json,options
     /// {
@@ -246,7 +252,7 @@ impl AnyPseudoLike {
 }
 
 fn css_selector_identifier_token(name: AnyCssSelectorIdentifier) -> Option<CssSyntaxToken> {
-    // `:foo-#{$name}` cannot be validated before Sass interpolation is resolved.
+    // `:foo-#{$name}` cannot be validated before SCSS interpolation is resolved.
     name.as_css_identifier()?.value_token().ok()
 }
 

@@ -12,6 +12,7 @@ expression: invalid.html
 <div class="text-red-500/[0.31]"></div>
 <div class="[color:red]"></div>
 <div CLASS="m-[2px]"></div>
+<div className="w-[400px]"></div>
 
 ```
 
@@ -130,7 +131,7 @@ invalid.html:7:13 lint/nursery/noTailwindArbitraryValue ━━━━━━━━
   > 7 │ <div class="[color:red]"></div>
       │             ^^^^^^^^^^^
     8 │ <div CLASS="m-[2px]"></div>
-    9 │ 
+    9 │ <div className="w-[400px]"></div>
   
   i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
   
@@ -146,11 +147,32 @@ invalid.html:8:15 lint/nursery/noTailwindArbitraryValue ━━━━━━━━
 
   i Found an arbitrary value in a Tailwind CSS class.
   
-    6 │ <div class="text-red-500/[0.31]"></div>
-    7 │ <div class="[color:red]"></div>
-  > 8 │ <div CLASS="m-[2px]"></div>
-      │               ^^^^^
-    9 │ 
+     6 │ <div class="text-red-500/[0.31]"></div>
+     7 │ <div class="[color:red]"></div>
+   > 8 │ <div CLASS="m-[2px]"></div>
+       │               ^^^^^
+     9 │ <div className="w-[400px]"></div>
+    10 │ 
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
+  i Use a named utility from your Tailwind configuration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.html:9:19 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found an arbitrary value in a Tailwind CSS class.
+  
+     7 │ <div class="[color:red]"></div>
+     8 │ <div CLASS="m-[2px]"></div>
+   > 9 │ <div className="w-[400px]"></div>
+       │                   ^^^^^^^
+    10 │ 
   
   i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
   

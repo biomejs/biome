@@ -1,0 +1,119 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: mappedTypesInvalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+type Source = { run: () => Promise<void>; count: number };
+type Mapped<T> = { [K in keyof T]: T[K] };
+type Handlers = { [K in "start" | "stop"]: () => Promise<void> };
+
+declare const handlers: Handlers;
+handlers.start();
+
+declare const inline: { [K in keyof Source]: Source[K] };
+inline.run();
+
+declare const mapped: Mapped<Source>;
+mapped.run();
+
+function readMapped(value: Mapped<Source>) {
+	value.run();
+}
+
+declare function wrap<T>(value: T): { [K in keyof T]: () => Promise<T[K]> };
+wrap({ count: 1 }).count();
+
+```
+
+# Diagnostics
+```
+mappedTypesInvalid.ts:8:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+     7 │ declare const handlers: Handlers;
+   > 8 │ handlers.start();
+       │ ^^^^^^^^^^^^^^^^^
+     9 │ 
+    10 │ declare const inline: { [K in keyof Source]: Source[K] };
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+mappedTypesInvalid.ts:11:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    10 │ declare const inline: { [K in keyof Source]: Source[K] };
+  > 11 │ inline.run();
+       │ ^^^^^^^^^^^^^
+    12 │ 
+    13 │ declare const mapped: Mapped<Source>;
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+mappedTypesInvalid.ts:14:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    13 │ declare const mapped: Mapped<Source>;
+  > 14 │ mapped.run();
+       │ ^^^^^^^^^^^^^
+    15 │ 
+    16 │ function readMapped(value: Mapped<Source>) {
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+mappedTypesInvalid.ts:17:2 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    16 │ function readMapped(value: Mapped<Source>) {
+  > 17 │ 	value.run();
+       │ 	^^^^^^^^^^^^
+    18 │ }
+    19 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+mappedTypesInvalid.ts:21:1 lint/nursery/noFloatingPromises ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i A "floating" Promise was found, meaning it is not properly handled and could lead to ignored errors or unexpected behavior.
+  
+    20 │ declare function wrap<T>(value: T): { [K in keyof T]: () => Promise<T[K]> };
+  > 21 │ wrap({ count: 1 }).count();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ 
+  
+  i This happens when a Promise is not awaited, lacks a `.catch` or `.then` rejection handler, or is not explicitly ignored using the `void` operator.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

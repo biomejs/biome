@@ -11,9 +11,10 @@ use biome_rowan::AstNode;
 use biome_rule_options::no_important_in_keyframe::NoImportantInKeyframeOptions;
 
 declare_lint_rule! {
-    /// Disallow invalid `!important` within keyframe declarations
+    /// Disallow `!important` in `@keyframes` declarations.
     ///
-    /// Using `!important` within keyframes declarations is completely ignored in some browsers.
+    /// CSS ignores declarations marked with `!important` inside a keyframe, so the declaration has
+    /// no effect. Remove `!important` and let the animation control the property value.
     ///
     /// ## Examples
     ///
@@ -64,6 +65,7 @@ impl Rule for NoImportantInKeyframe {
         for item in node.items() {
             let keyframe_item = match item {
                 AnyCssKeyframesItem::CssKeyframesItem(keyframe_item) => keyframe_item,
+                AnyCssKeyframesItem::CssAtRule(_) => continue,
                 AnyCssKeyframesItem::ScssKeyframesVariableDeclaration(_) => continue,
                 AnyCssKeyframesItem::CssBogusKeyframesItem(_) => return None,
             };

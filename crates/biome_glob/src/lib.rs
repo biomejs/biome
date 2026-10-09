@@ -153,7 +153,7 @@ pub mod editorconfig;
 /// segment-only `**`, brace alternatives such as `{js,ts}`, backslash escaping, and leading `!` or
 /// `!!` negation. Does not support `?`, character classes, nested brace alternatives, partial
 /// globstars, or consecutive globstars. Leading `./` sequences are removed before parsing.
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, Hash, PartialEq)]
 #[cfg_attr(
     feature = "biome_deserialize",
     derive(biome_deserialize_macros::Deserializable)

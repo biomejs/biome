@@ -1,6 +1,6 @@
 # Agent Guidelines for Contributing to Biome
 
-This file contains rules that apply to every automated contribution. Detailed workflows live in `.claude/skills/` or the contributing guides they reference.
+This file contains rules that apply to every automated contribution. Detailed workflows live in `.agents/skills/` or the contributing guides they reference.
 
 > [!NOTE]
 > Automated agents may add 🤖🤖🤖 to the end of a PR title to opt into the streamlined merge process.
@@ -27,7 +27,7 @@ This file contains rules that apply to every automated contribution. Detailed wo
 - Review generated snapshots as behavior, not disposable output.
 - Run `just f` and `just l` before committing.
 
-Load [testing-codegen](./.claude/skills/testing-codegen/SKILL.md) for test fixtures, snapshots, and generator selection.
+Load [testing-codegen](./.agents/skills/testing-codegen/SKILL.md) for test fixtures, snapshots, and generator selection.
 
 Required generated artifacts:
 
@@ -43,7 +43,7 @@ Bindings and other full analyzer outputs may be left to the CI Autofix job unles
 
 ## Final Review
 
-After implementation, code generation, formatting, linting, and tests, review the complete change with [biome-code-review](./.claude/skills/biome-code-review/SKILL.md).
+After implementation, code generation, formatting, linting, and tests, review the complete change with [biome-code-review](./.agents/skills/biome-code-review/SKILL.md).
 
 - Use a fresh subagent when one is available.
 - Provide only the review scope and intended business requirements. Do not include suspected defects, implementation hints, prior findings, or expected outcomes.
@@ -54,7 +54,7 @@ After implementation, code generation, formatting, linting, and tests, review th
 
 Before opening a PR, explicitly confirm whether the change is user-facing. User-facing behavior requires a changeset; internal refactors, tests, CI, and documentation-only changes do not.
 
-For a user-facing change, load [changeset](./.claude/skills/changeset/SKILL.md) to choose the release level and create or edit the entry. Branch targeting and changeset policy are canonical in [`CONTRIBUTING.md`](./CONTRIBUTING.md#creating-pull-requests).
+For a user-facing change, load [changeset](./.agents/skills/changeset/SKILL.md) to choose the release level and create or edit the entry. Branch targeting and changeset policy are canonical in [`CONTRIBUTING.md`](./CONTRIBUTING.md#creating-pull-requests).
 
 ## Pull Requests
 
@@ -65,7 +65,7 @@ For a user-facing change, load [changeset](./.claude/skills/changeset/SKILL.md) 
 
 ## Comments and Rustdoc
 
-Load [doc-comments](./.claude/skills/doc-comments/SKILL.md) whenever editing `//`, `///`, or `//!` comments, including comments added incidentally.
+Load [doc-comments](./.agents/skills/doc-comments/SKILL.md) whenever editing `//`, `///`, or `//!` comments, including comments added incidentally.
 
 - Write for a contributor reading the code at HEAD without access to the conversation, issue, PR, or diff.
 - State contracts in `///`, module rationale and terminology in `//!`, and non-obvious rationale in `//`.
@@ -79,4 +79,4 @@ Internal `biome_*` crates under `[dev-dependencies]` use `path = "../biome_*"`, 
 
 ## Skills
 
-The skill catalog and trigger boundaries are maintained in [`.claude/skills/README.md`](./.claude/skills/README.md). Load only the skills relevant to the current task.
+The skill catalog and trigger boundaries are maintained in [`.agents/skills/README.md`](./.agents/skills/README.md). Load only the skills relevant to the current task.

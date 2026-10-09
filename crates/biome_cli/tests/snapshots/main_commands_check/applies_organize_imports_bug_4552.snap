@@ -19,7 +19,7 @@ biome check index.ts
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "correctness": { "noUnusedImports": "off" }
     }
   }

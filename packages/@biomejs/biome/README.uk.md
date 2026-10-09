@@ -1,18 +1,19 @@
 <div align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-dark-transparent.svg">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg">
-    <img alt="Shows the banner of Biome, with its logo and the phrase 'Biome - Toolchain of the web'." src="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg" width="700">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-dark-transparent.svg" />
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg" />
+    <img alt="Shows the banner of Biome, with its logo and the phrase 'Biome - Toolchain of the web'." src="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg" width="700" />
   </picture>
+</div>
 
   <br>
   <br>
 
-  [![CI on main][ci-badge]][ci-url]
-  [![Discord chat][discord-badge]][discord-url]
-  [![npm version][npm-badge]][npm-url]
-  [![VSCode version][vscode-badge]][vscode-url]
-  [![Open VSX version][open-vsx-badge]][open-vsx-url]
+[![CI on main][ci-badge]][ci-url]
+[![Discord chat][discord-badge]][discord-url]
+[![npm version][npm-badge]][npm-url]
+[![VSCode version][vscode-badge]][vscode-url]
+[![Open VSX version][open-vsx-badge]][open-vsx-url]
 
   [ci-badge]: https://github.com/biomejs/biome/actions/workflows/main.yml/badge.svg
   [ci-url]: https://github.com/biomejs/biome/actions/workflows/main.yml
@@ -29,16 +30,14 @@
      For example given below is the same order as these files appear on page:
      https://github.com/biomejs/biome/tree/main/packages/@biomejs/biome -->
 
-  [हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md) | [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | [Español](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.es.md) | [Français](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.fr.md) | [繁體中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-TW.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | [Polski](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pl.md) | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-BR.md) | [한국어](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.kr.md)| [Русский](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ru.md) | Українська
-</div>
-
+[हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md) | [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | [Español](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.es.md) | [Français](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.fr.md) | [繁體中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-TW.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | [Polski](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pl.md) | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-BR.md) | [한국어](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.kr.md)| [Русский](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ru.md) | Українська
 <br>
 
 **Biome** - це високопродуктивний інструментарій для веб-проєктів, який має на меті надавати інструменти розробникам для підтримки здоров'я проєктів.
 
-**Biome - це [швидкий форматувальник](https://github.com/biomejs/benchmark#formatting)** для _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ та _GraphQL_, який досягає **[97% сумісності з _Prettier_](https://algora.io/challenges/prettier)**.
+**Biome - це [швидкий форматувальник](https://github.com/biomejs/benchmark#formatting)** для _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_, _GraphQL_, _Markdown_, _YAML_ та _SCSS_, який досягає **[97% сумісності з _Prettier_](https://algora.io/challenges/prettier)**.
 
-**Biome - це [високопродуктивний лінтер](https://github.com/biomejs/benchmark#linting)** для _JavaScript_, _TypeScript_, _JSX_, _CSS_ та _GraphQL_, який містить **[понад 500 правил](https://biomejs.dev/uk/linter/javascript/rules/)** з ESLint, typescript-eslint та [інших джерел](https://github.com/biomejs/biome/discussions/3).
+**Biome - це [високопродуктивний лінтер](https://github.com/biomejs/benchmark#linting)** для _JavaScript_, _TypeScript_, _JSX_, _CSS_, _GraphQL_, _Markdown_, _YAML_ та _SCSS_, який містить **[понад 500 правил](https://biomejs.dev/uk/linter/javascript/rules/)** з ESLint, typescript-eslint та [інших джерел](https://github.com/biomejs/biome/discussions/3).
 Він **виводить детальні та контекстуалізовані діагностичні дані**, які допомагають вам покращити ваш код та стати кращим програмістом!
 
 **Biome** з самого початку розроблений для [інтерактивного використання в редакторі](https://biomejs.dev/uk/editors/first-party-extensions/). Він може форматувати та лінтити некоректний код під час його написання.

@@ -15,7 +15,7 @@ biome migrate eslint --include-inspired --include-nursery --write
   "linter": {
     "rules": {
       "preset": "none",
-      "nursery": {
+      "style": {
         "useConsistentTestIt": {
           "level": "error",
           "options": { "function": "it", "withinDescribe": "test" }

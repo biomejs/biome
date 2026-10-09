@@ -1,0 +1,13 @@
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"tailwind": {
+		"attributes": ["data-classes"]
+	},
+	"linter": {
+		"rules": {
+			"nursery": {
+				"useTailwindShorthandClasses": "error"
+			}
+		}
+	}
+}

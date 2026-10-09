@@ -43,7 +43,7 @@ use biome_module_graph::resolve_js_module;
 use biome_package::{Catalogs, Manifest, PackageJson, TsConfigJson, TurboJson};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_project_layout::ProjectLayout;
-use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot};
+use biome_rowan::{Direction, Language, SyntaxKind, SyntaxNode, SyntaxSlot, TextRange, TextSize};
 #[cfg(feature = "html_embeds")]
 use biome_service::Workspace;
 use biome_service::WorkspaceError;
@@ -95,7 +95,10 @@ pub fn create_analyzer_options<L: ServiceLanguage>(
         return options.with_configuration(analyzer_configuration);
     };
     if loaded_configuration.has_errors() {
-        let configuration_path = loaded_configuration.file_path.unwrap().clone();
+        let Some(configuration_path) = loaded_configuration.file_path().map(Utf8Path::to_path_buf)
+        else {
+            return options.with_configuration(analyzer_configuration);
+        };
         diagnostics.extend(
             loaded_configuration
                 .diagnostics
@@ -114,11 +117,7 @@ pub fn create_analyzer_options<L: ServiceLanguage>(
     } else {
         let mut settings = Settings::default();
         settings
-            .merge_with_configuration(
-                loaded_configuration.configuration,
-                None,
-                loaded_configuration.extended_configurations,
-            )
+            .merge_with_configuration_source(loaded_configuration.source)
             .unwrap();
 
         settings
@@ -144,13 +143,10 @@ pub fn load_configuration_source(
         .map(|configuration| (source, configuration))
         .ok()?;
 
-    let LoadedConfiguration {
-        configuration,
-        extended_configurations,
-        ..
-    } = loaded_configuration;
-
-    Some((configuration, extended_configurations))
+    Some((
+        loaded_configuration.resolved_configuration(),
+        loaded_configuration.extended_configurations(),
+    ))
 }
 
 /// It loads `<input_file>.options.json`
@@ -178,7 +174,7 @@ pub fn create_parser_options<L: ServiceLanguage>(
     };
 
     if loaded_configuration.has_errors() {
-        let configuration_path = loaded_configuration.file_path.unwrap().clone();
+        let configuration_path = loaded_configuration.file_path()?.to_path_buf();
         diagnostics.extend(
             loaded_configuration
                 .diagnostics
@@ -195,14 +191,9 @@ pub fn create_parser_options<L: ServiceLanguage>(
 
         Default::default()
     } else {
-        let configuration = loaded_configuration.configuration;
         let mut settings = Settings::default();
         settings
-            .merge_with_configuration(
-                configuration,
-                None,
-                loaded_configuration.extended_configurations,
-            )
+            .merge_with_configuration_source(loaded_configuration.source)
             .unwrap();
 
         let document_file_source = DocumentFileSource::from_path(
@@ -230,7 +221,10 @@ where
         return Default::default();
     };
     if loaded_configuration.has_errors() {
-        let configuration_path = loaded_configuration.file_path.unwrap().clone();
+        let Some(configuration_path) = loaded_configuration.file_path().map(Utf8Path::to_path_buf)
+        else {
+            return Default::default();
+        };
         diagnostics.extend(
             loaded_configuration
                 .diagnostics
@@ -247,14 +241,9 @@ where
 
         Default::default()
     } else {
-        let configuration = loaded_configuration.configuration;
         let mut settings = Settings::default();
         settings
-            .merge_with_configuration(
-                configuration,
-                None,
-                loaded_configuration.extended_configurations,
-            )
+            .merge_with_configuration_source(loaded_configuration.source)
             .unwrap();
 
         let document_file_source = DocumentFileSource::from_path(
@@ -311,7 +300,12 @@ pub fn module_graph_for_test_file(
     let mut db = WorkspaceDb::new(Arc::new(OsFileSystem::new(dir.clone())));
     insert_test_manifests(&mut db, input_file);
 
-    let js_paths = get_js_like_paths_in_dir(&dir);
+    // Vue, Svelte and Astro files can't be parsed as plain JS. HTML-ish test
+    // files get their module graph from the workspace instead.
+    let js_paths = get_js_like_paths_in_dir(&dir)
+        .into_iter()
+        .filter(|path| !matches!(path.extension(), Some("vue" | "svelte" | "astro")))
+        .collect::<Vec<_>>();
     let js_roots = get_added_js_paths(&fs, &js_paths);
     for (path, root, semantic_model) in js_roots {
         let (module_info, _, _) = resolve_js_module(&db, root, path, semantic_model, true);
@@ -872,6 +866,31 @@ pub fn parse_test_path(file: &Utf8Path) -> (&str, &str) {
     }
 
     (group_name, rule_name)
+}
+
+/// Returns the ranges of the Grit metavariables in a test fixture, such as
+/// `$name` and `$...`.
+pub fn grit_metavariable_ranges(source: &str) -> Vec<TextRange> {
+    let mut ranges = Vec::new();
+    for (start, _) in source.match_indices('$') {
+        let name_len = match &source.as_bytes()[start + 1..] {
+            [b'a'..=b'z' | b'A'..=b'Z' | b'_', rest @ ..] => {
+                1 + rest
+                    .iter()
+                    .take_while(|byte| byte.is_ascii_alphanumeric() || **byte == b'_')
+                    .count()
+            }
+            [b'.', b'.', b'.', ..] => 3,
+            _ => continue,
+        };
+
+        ranges.push(TextRange::at(
+            TextSize::from(start as u32),
+            TextSize::from(1 + name_len as u32),
+        ));
+    }
+
+    ranges
 }
 
 /// This check is used in the parser test to ensure it doesn't emit

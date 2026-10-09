@@ -16,14 +16,6 @@ publish              = false
 harness = false
 name    = "js_analyzer"
 
-[[bench]]
-harness = false
-name    = "use_sorted_classes_parser"
-
-[[bench]]
-harness = false
-name    = "use_sorted_classes_v4"
-
 [dependencies]
 biome_analyze             = { workspace = true }
 biome_analyze_macros      = { workspace = true }
@@ -63,7 +55,6 @@ biome_tailwind_logic      = { workspace = true }
 biome_tailwind_parser     = { workspace = true }
 biome_tailwind_syntax     = { workspace = true }
 biome_unicode_table       = { workspace = true }
-bitvec                    = "1.0.1"
 camino                    = { workspace = true }
 either                    = { workspace = true }
 enumflags2                = { workspace = true }

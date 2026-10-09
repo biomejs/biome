@@ -11,7 +11,7 @@ mod font_feature_values;
 mod font_palette_values;
 mod function;
 mod import;
-mod keyframes;
+pub(crate) mod keyframes;
 mod layer;
 pub(crate) mod media;
 mod namespace;
@@ -69,7 +69,8 @@ use crate::syntax::at_rule::tailwind::{
     parse_utility_at_rule, parse_variant_at_rule,
 };
 use crate::syntax::at_rule::unknown::{
-    is_at_unknown_at_rule, parse_scss_interpolated_unknown_at_rule, parse_unknown_at_rule,
+    is_at_scss_interpolated_unknown_at_rule, is_at_unknown_at_rule,
+    parse_scss_interpolated_unknown_at_rule, parse_unknown_at_rule,
 };
 use crate::syntax::at_rule::value::parse_value_at_rule;
 use crate::syntax::at_rule::view_transition::{
@@ -130,6 +131,18 @@ pub(crate) fn parse_at_rule(p: &mut CssParser) -> ParsedSyntax {
 #[inline]
 pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
     match p.cur() {
+        _ if is_at_scss_interpolation(p)
+            || (CssSyntaxFeatures::Scss.is_supported(p)
+                && is_at_scss_interpolated_unknown_at_rule(p)) =>
+        {
+            CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+                p,
+                parse_scss_interpolated_unknown_at_rule,
+                |p, marker| {
+                    scss_only_syntax_error(p, "SCSS interpolated at-rule names", marker.range(p))
+                },
+            )
+        }
         T![charset] => parse_charset_at_rule(p),
         T![color_profile] => parse_color_profile_at_rule(p),
         T![counter_style] => parse_counter_style_at_rule(p),
@@ -263,13 +276,6 @@ pub(crate) fn parse_any_at_rule(p: &mut CssParser) -> ParsedSyntax {
                 tailwind_disabled(p, m.range(p))
             })
             .or_else(|| parse_unknown_at_rule(p)),
-        _ if is_at_scss_interpolation(p) => CssSyntaxFeatures::Scss.parse_exclusive_syntax(
-            p,
-            parse_scss_interpolated_unknown_at_rule,
-            |p, marker| {
-                scss_only_syntax_error(p, "SCSS interpolated at-rule names", marker.range(p))
-            },
-        ),
         _ if is_at_unknown_at_rule(p) => parse_unknown_at_rule(p),
         _ => Absent,
     }

@@ -1,8 +1,8 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use super::{
-    eslint_any_rule_to_biome::migrate_eslint_any_rule, eslint_eslint, eslint_jest,
-    eslint_typescript,
+    eslint_any_rule_to_biome::migrate_eslint_any_rule, eslint_eslint, eslint_jest, eslint_svelte,
+    eslint_typescript, eslint_vue,
 };
 use biome_analyze::{RuleSource, UNSUPPORTED_RULES, UnsupportedRuleReason};
 use biome_configuration::analyzer::SeverityOrGroup;
@@ -12,7 +12,8 @@ use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_diagnostics::Location;
 use biome_rule_options::{no_js_restricted_properties, no_restricted_globals};
-use rustc_hash::FxHashMap;
+use indexmap::IndexMap;
+use rustc_hash::{FxBuildHasher, FxHashMap};
 
 /// This modules includes implementations for converting an ESLint config to a Biome config.
 ///
@@ -187,6 +188,9 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
             let mut covered_by_rule = Vec::new();
             let mut not_applicable = Vec::new();
             let mut deprecated = Vec::new();
+            let mut legacy = Vec::new();
+            let mut requires_external_tool = Vec::new();
+            let mut parser_covers = Vec::new();
 
             for (rule, reason) in &self.unsupported {
                 match reason {
@@ -202,6 +206,11 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
                     UnsupportedRuleReason::CoveredByRule(_) => covered_by_rule.push((rule, reason)),
                     UnsupportedRuleReason::NotApplicable => not_applicable.push(rule),
                     UnsupportedRuleReason::Deprecated => deprecated.push(rule),
+                    UnsupportedRuleReason::Legacy => legacy.push(rule),
+                    UnsupportedRuleReason::RequiresExternalTool => {
+                        requires_external_tool.push(rule)
+                    }
+                    UnsupportedRuleReason::ParserCovers => parser_covers.push(rule),
                 }
             }
 
@@ -313,6 +322,42 @@ impl biome_diagnostics::Diagnostic for MigrationResults {
                     .collect();
                 visitor.record_list(list.as_slice())?;
             }
+
+            if !legacy.is_empty() {
+                visitor.record_log(
+                    biome_diagnostics::LogCategory::Info,
+                    &markup! { "These rules enforce legacy practices that go against Biome's focus on modern code:" },
+                )?;
+                let list: Vec<_> = legacy
+                    .iter()
+                    .map(|item| *item as &dyn biome_console::fmt::Display)
+                    .collect();
+                visitor.record_list(list.as_slice())?;
+            }
+
+            if !requires_external_tool.is_empty() {
+                visitor.record_log(
+                    biome_diagnostics::LogCategory::Info,
+                    &markup! { "These rules require integration with an external tool, such as a compiler:" },
+                )?;
+                let list: Vec<_> = requires_external_tool
+                    .iter()
+                    .map(|item| *item as &dyn biome_console::fmt::Display)
+                    .collect();
+                visitor.record_list(list.as_slice())?;
+            }
+
+            if !parser_covers.is_empty() {
+                visitor.record_log(
+                    biome_diagnostics::LogCategory::Info,
+                    &markup! { "These rules report syntax errors that Biome's parser already reports (so you don't lose the functionality):" },
+                )?;
+                let list: Vec<_> = parser_covers
+                    .iter()
+                    .map(|item| *item as &dyn biome_console::fmt::Display)
+                    .collect();
+                visitor.record_list(list.as_slice())?;
+            }
         }
         Ok(())
     }
@@ -371,6 +416,8 @@ impl<'a> TryFrom<&'a EslintRuleName> for RuleSource<'a> {
         } = value;
         let constructor: fn(&'a str) -> RuleSource<'a> = match plugin_name.as_deref() {
             None => RuleSource::Eslint,
+            Some("astro") => RuleSource::EslintAstro,
+            Some("markdown") => RuleSource::EslintMarkdown,
             Some("barrel-files") => RuleSource::EslintBarrelFiles,
             Some("@graphql-eslint") => RuleSource::EslintGraphql,
             Some("import") => RuleSource::EslintImport,
@@ -385,6 +432,7 @@ impl<'a> TryFrom<&'a EslintRuleName> for RuleSource<'a> {
             Some("package-json") => RuleSource::EslintPackageJson,
             Some("package-json-dependencies") => RuleSource::EslintPackageJsonDependencies,
             Some("perfectionist") => RuleSource::EslintPerfectionist,
+            Some("playwright") => RuleSource::EslintPlaywright,
             Some("qwik") => RuleSource::EslintQwik,
             Some("react") => RuleSource::EslintReact,
             Some("react-hooks") => RuleSource::EslintReactHooks,
@@ -401,11 +449,13 @@ impl<'a> TryFrom<&'a EslintRuleName> for RuleSource<'a> {
             Some("svelte") => RuleSource::EslintSvelte,
             Some("sonarjs") => RuleSource::EslintSonarJs,
             Some("@stylistic") => RuleSource::EslintStylistic,
+            Some("tailwindcss") => RuleSource::EslintTailwindcss,
             Some("@typescript-eslint") => RuleSource::EslintTypeScript,
             Some("unicorn") => RuleSource::EslintUnicorn,
             Some("unused-imports") => RuleSource::EslintUnusedImports,
             Some("vitest" | "@vitest") => RuleSource::EslintVitest,
             Some("vue") => RuleSource::EslintVueJs,
+            Some("yml") => RuleSource::EslintYml,
             Some("turbo") => RuleSource::EslintTurbo,
             Some("@html-eslint") => RuleSource::HtmlEslint,
             Some("typescript-sort-keys") => RuleSource::EslintTypescriptSortKeys,
@@ -604,9 +654,17 @@ impl eslint_eslint::Rules {
         results: &mut MigrationResults,
     ) -> biome_config::Rules {
         let mut rules = biome_config::Rules::default();
+        let mut restricted_elements = RestrictedElementsMigration::default();
         for eslint_rule in self.0 {
-            migrate_eslint_rule(&mut rules, eslint_rule, options, results);
+            migrate_eslint_rule(
+                &mut rules,
+                &mut restricted_elements,
+                eslint_rule,
+                options,
+                results,
+            );
         }
+        restricted_elements.apply(&mut rules);
         rules
     }
 }
@@ -616,6 +674,7 @@ impl eslint_eslint::Rules {
 /// Also, takes care of Biome's rules with options.
 fn migrate_eslint_rule(
     rules: &mut biome_config::Rules,
+    restricted_elements: &mut RestrictedElementsMigration,
     rule: eslint_eslint::Rule,
     opts: &MigrationOptions,
     results: &mut MigrationResults,
@@ -645,7 +704,7 @@ fn migrate_eslint_rule(
                 if let eslint_eslint::RuleConf::Option(_, rule_options) = conf
                     && let Some(rule_options) = rule_options.into_biome_options()
                 {
-                    let group = rules.nursery.get_or_insert_with(Default::default);
+                    let group = rules.style.get_or_insert_with(Default::default);
                     if let SeverityOrGroup::Group(group) = group {
                         group.use_this_in_class_methods =
                             Some(biome_config::RuleConfiguration::WithOptions(
@@ -684,7 +743,7 @@ fn migrate_eslint_rule(
         }
         eslint_eslint::Rule::MaxNestedCallbacks(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
-                let group = rules.nursery.get_or_insert_with(Default::default);
+                let group = rules.complexity.get_or_insert_with(Default::default);
                 if let SeverityOrGroup::Group(group) = group {
                     group.no_excessive_nested_callbacks =
                         Some(biome_config::RuleConfiguration::WithOptions(
@@ -745,7 +804,7 @@ fn migrate_eslint_rule(
                         g.name().to_string().into_boxed_str(),
                         g.message()
                             .map_or_else(
-                                || "TODO: Add a custom message here.".to_string(),
+                                || MISSING_MESSAGE_PLACEHOLDER.to_string(),
                                 |m| m.to_string(),
                             )
                             .into_boxed_str(),
@@ -768,10 +827,35 @@ fn migrate_eslint_rule(
                 }
             }
         }
+        eslint_eslint::Rule::ReactForbidElements(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
+                && !matches!(conf.severity(), eslint_eslint::Severity::Off)
+            {
+                restricted_elements.add(conf.option_or_default().into_restricted_elements());
+            }
+        }
+        eslint_eslint::Rule::VueNoRestrictedHtmlElements(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
+                && !matches!(conf.severity(), eslint_eslint::Severity::Off)
+            {
+                restricted_elements.add(
+                    eslint_vue::RestrictedHtmlElement::into_restricted_elements(conf.into_vec()),
+                );
+            }
+        }
+        eslint_eslint::Rule::SvelteNoRestrictedHtmlElements(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
+                && !matches!(conf.severity(), eslint_eslint::Severity::Off)
+            {
+                restricted_elements.add(
+                    eslint_svelte::RestrictedHtmlElement::into_restricted_elements(conf.into_vec()),
+                );
+            }
+        }
         eslint_eslint::Rule::JestConsistentTestIt(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let severity = conf.severity();
-                let group = rules.nursery.get_or_insert_with(Default::default);
+                let group = rules.style.get_or_insert_with(Default::default);
                 if let SeverityOrGroup::Group(group) = group {
                     let rule_options =
                         if let eslint_eslint::RuleConf::Option(_, rule_options) = conf {
@@ -969,7 +1053,70 @@ fn migrate_eslint_rule(
     }
 }
 
-fn to_biome_includes(
+/// Elements restricted by an ESLint rule, mapped to their optional messages.
+pub(crate) type RestrictedElements = IndexMap<Box<str>, Option<Box<str>>, FxBuildHasher>;
+
+/// The message of a migrated entry that ESLint configured without one, because Biome requires one.
+const MISSING_MESSAGE_PLACEHOLDER: &str = "TODO: Add a custom message here.";
+
+/// Elements restricted by the ESLint rules that migrate to `noRestrictedElements`.
+///
+/// `react/forbid-elements`, `svelte/no-restricted-html-elements`, and
+/// `vue/no-restricted-html-elements` all migrate to `noRestrictedElements`, so their elements
+/// are collected across rules and merged into one list.
+#[derive(Debug, Default)]
+struct RestrictedElementsMigration(IndexMap<Box<str>, BTreeSet<Box<str>>, FxBuildHasher>);
+impl RestrictedElementsMigration {
+    fn add(&mut self, elements: RestrictedElements) {
+        for (element, message) in elements {
+            let messages = self.0.entry(element).or_default();
+            messages.extend(message);
+        }
+    }
+
+    /// Adds the collected elements to the options of `noRestrictedElements`.
+    ///
+    /// When several rules restrict the same element, their distinct messages are sorted and
+    /// joined, so the result doesn't depend on the order of the ESLint rules.
+    ///
+    /// The level must already be set by [migrate_eslint_any_rule].
+    fn apply(self, rules: &mut biome_config::Rules) {
+        if self.0.is_empty() {
+            return;
+        }
+        let group = rules.correctness.get_or_insert_with(Default::default);
+        let SeverityOrGroup::Group(group) = group else {
+            return;
+        };
+        let Some(rule) = &mut group.no_restricted_elements else {
+            return;
+        };
+        if let biome_config::RuleConfiguration::Plain(level) = rule {
+            *rule = biome_config::RuleConfiguration::WithOptions(biome_config::RuleWithOptions {
+                level: *level,
+                options: Default::default(),
+            });
+        }
+        let biome_config::RuleConfiguration::WithOptions(rule) = rule else {
+            return;
+        };
+        let configured = rule.options.elements.get_or_insert_with(Default::default);
+        for (element, messages) in self.0 {
+            let message = if messages.is_empty() {
+                MISSING_MESSAGE_PLACEHOLDER.into()
+            } else {
+                messages
+                    .into_iter()
+                    .collect::<Vec<_>>()
+                    .join(" ")
+                    .into_boxed_str()
+            };
+            configured.insert(element, message);
+        }
+    }
+}
+
+pub(crate) fn to_biome_includes(
     files: &[impl AsRef<str>],
     ignores: &[impl AsRef<str>],
 ) -> Vec<biome_glob::NormalizedGlob> {
@@ -1261,6 +1408,93 @@ mod tests {
                 biome_config::RulePlainConfiguration::Off
             ))
         );
+    }
+
+    #[test]
+    fn astro_and_markdown_unsupported_rule_lookup() {
+        for (name, reason) in [
+            (
+                "astro/no-omitted-end-tags",
+                UnsupportedRuleReason::Deprecated,
+            ),
+            (
+                "astro/semi",
+                UnsupportedRuleReason::FormatterOption("semicolons"),
+            ),
+            (
+                "astro/valid-compile",
+                UnsupportedRuleReason::RequiresExternalTool,
+            ),
+            (
+                "markdown/no-space-in-emphasis",
+                UnsupportedRuleReason::FormatterCovers,
+            ),
+        ] {
+            assert_eq!(
+                unsupported_rule_reason(&EslintRuleName::from_str(name)),
+                reason
+            );
+        }
+    }
+
+    #[test]
+    fn playwright_and_yml_unsupported_rule_lookup() {
+        for (name, reason) in [
+            (
+                "playwright/consistent-spacing-between-blocks",
+                UnsupportedRuleReason::Stylistic,
+            ),
+            (
+                "yml/indent",
+                UnsupportedRuleReason::FormatterOption("indentWidth"),
+            ),
+            ("yml/no-tab-indent", UnsupportedRuleReason::FormatterCovers),
+            (
+                "yml/no-trailing-spaces",
+                UnsupportedRuleReason::FormatterCovers,
+            ),
+            (
+                "yml/quotes",
+                UnsupportedRuleReason::FormatterOption("quoteStyle"),
+            ),
+        ] {
+            assert_eq!(
+                unsupported_rule_reason(&EslintRuleName::from_str(name)),
+                reason
+            );
+        }
+    }
+
+    #[test]
+    fn scope_decisions_unsupported_rule_lookup() {
+        for (name, reason) in [
+            ("no-iterator", UnsupportedRuleReason::Legacy),
+            (
+                "svelte/no-unused-svelte-ignore",
+                UnsupportedRuleReason::RequiresExternalTool,
+            ),
+            (
+                "svelte/valid-compile",
+                UnsupportedRuleReason::RequiresExternalTool,
+            ),
+            (
+                "tailwindcss/important-modifier-suffix",
+                UnsupportedRuleReason::Deprecated,
+            ),
+            (
+                "@typescript-eslint/typedef",
+                UnsupportedRuleReason::Deprecated,
+            ),
+            (
+                "yml/flow-mapping-curly-newline",
+                UnsupportedRuleReason::FormatterCovers,
+            ),
+        ] {
+            assert_eq!(
+                unsupported_rule_reason(&EslintRuleName::from_str(name)),
+                reason
+            );
+        }
     }
 
     #[test]

@@ -41,8 +41,8 @@ use biome_analyze::{
 };
 use biome_configuration::javascript::{
     JsAssistConfiguration, JsAssistEnabled, JsFormatterConfiguration, JsFormatterEnabled,
-    JsGritMetavariable, JsLinterConfiguration, JsLinterEnabled, JsParserConfiguration,
-    JsxEverywhere, JsxRuntime, UnsafeParameterDecoratorsEnabled,
+    JsLinterConfiguration, JsLinterEnabled, JsParserConfiguration, JsxEverywhere, JsxRuntime,
+    UnsafeParameterDecoratorsEnabled,
 };
 #[cfg(feature = "js_embeds")]
 use biome_css_parser::parse_css_with_offset_and_cache;
@@ -172,7 +172,6 @@ impl From<JsFormatterConfiguration> for JsFormatterSettings {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct JsParserSettings {
     pub parse_class_parameter_decorators: Option<UnsafeParameterDecoratorsEnabled>,
-    pub grit_metavariables: Option<JsGritMetavariable>,
     pub jsx_everywhere: Option<JsxEverywhere>,
 }
 
@@ -180,7 +179,6 @@ impl From<JsParserConfiguration> for JsParserSettings {
     fn from(value: JsParserConfiguration) -> Self {
         Self {
             parse_class_parameter_decorators: value.unsafe_parameter_decorators_enabled,
-            grit_metavariables: value.grit_metavariables,
             jsx_everywhere: value.jsx_everywhere,
         }
     }
@@ -280,7 +278,6 @@ impl ServiceLanguage for JsLanguage {
         _file_source: &DocumentFileSource,
     ) -> Self::ParserOptions {
         let mut options = JsParserOptions {
-            grit_metavariables: false,
             parse_class_parameter_decorators: language
                 .parse_class_parameter_decorators
                 .unwrap_or_default()
@@ -478,6 +475,7 @@ impl ServiceLanguage for JsLanguage {
         let configuration = configuration
             .with_rules(to_analyzer_rules_by_indices(global, override_indices))
             .with_globals(globals)
+            .with_tailwind(global.tailwind.clone())
             .with_preferred_quote(preferred_quote)
             .with_preferred_jsx_quote(preferred_jsx_quote)
             .with_preferred_indentation(preferred_indentation);
@@ -1191,7 +1189,9 @@ fn js_analyzer_services(
 
     let services = services.with_language_db(workspace_db.rc_language_db());
     match parsed_source {
-        Some(source) => services.with_parsed_source(source.clone()),
+        Some(source) => services
+            .with_parsed_source(source.clone())
+            .with_snippet_offset(source.diagnostic_offset(workspace_db)),
         None => services,
     }
 }
@@ -1210,7 +1210,8 @@ fn js_analyzer_services_for_fix(
         params.module_db.clone(),
         params.project_layout.clone(),
         source_type,
-    );
+    )
+    .with_snippet_offset(params.parsed_source.diagnostic_offset(&params.workspace_db));
     #[cfg(feature = "html_embeds")]
     let services = services.with_embedded_data(params.embedded_data.clone());
 
@@ -1310,7 +1311,8 @@ pub(super) fn lint_with_inspector(
         params.module_db.clone(),
         params.project_layout.clone(),
         files_source,
-    );
+    )
+    .with_snippet_offset(params.parsed_source.diagnostic_offset(&params.workspace_db));
     #[cfg(feature = "html_embeds")]
     let services = services.with_embedded_data(params.embedded_data.clone());
 

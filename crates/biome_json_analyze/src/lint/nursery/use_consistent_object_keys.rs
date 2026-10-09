@@ -22,17 +22,48 @@ declare_lint_rule! {
     /// Unicode normalization converts text to a standard form (such as NFC) so visually identical keys share the same representation.
     /// This avoids confusing behavior in JSON objects where equality checks and key lookups should treat matching text consistently.
     ///
-    /// More on Unicode normalization can be found [here](https://www.unicode.org/reports/tr15/).
+    /// See [Unicode Standard Annex #15](https://www.unicode.org/reports/tr15/) for the normalization
+    /// standard.
+    ///
+    /// ## Examples
+    ///
+    /// ### Invalid
+    ///
+    /// In JSON, `\u` followed by four hexadecimal digits represents a Unicode code point. The
+    /// following key uses `\u0065` for `e` followed by `\u0301` for a separate combining accent:
+    ///
+    /// ```json,expect_diagnostic
+    /// {
+    ///     "caf\u0065\u0301": "espresso"
+    /// }
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// The same visible key can use the single precomposed character `é`:
+    ///
+    /// ```json
+    /// {
+    ///     "caf\u00e9": "espresso"
+    /// }
+    /// ```
     ///
     /// ## Options
     ///
     /// ### `form`
     ///
-    /// Select the Unicode representation that keys must follow.
+    /// Selects the Unicode normalization form. Defaults to `NFC`.
     ///
-    /// Default: `NFC`
+    /// - `NFC` combines equivalent character sequences where possible;
+    /// - `NFD` separates characters into their base character and combining marks;
+    /// - `NFKC` replaces compatibility characters with ordinary equivalents, then combines
+    ///   sequences;
+    /// - `NFKD` makes the same compatibility replacements but keeps sequences separated.
     ///
-    /// `NFC`: Canonical Decomposition followed by Canonical Composition
+    /// For example, the compatibility forms rewrite the single character `½` as the three-character
+    /// sequence `1⁄2`.
+    ///
+    /// The following configuration selects `NFC`:
     ///
     /// ```json,options
     /// {
@@ -42,13 +73,13 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```json,expect_diagnostic
+    /// ```json,expect_diagnostic,use_options
     /// {
     ///     "caf\u0065\u0301": "espresso"
     /// }
     /// ```
     ///
-    /// `NFD`: Canonical Decomposition
+    /// The following configuration selects `NFD`:
     ///
     /// ```json,options
     /// {
@@ -64,7 +95,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// `NFKC`: Compatibility Decomposition followed by Canonical Composition
+    /// The following configuration selects `NFKC`:
     ///
     /// ```json,options
     /// {
@@ -76,11 +107,11 @@ declare_lint_rule! {
     ///
     /// ```json,expect_diagnostic,use_options
     /// {
-    ///     "\u00BD": "circled digit one"
+    ///     "\u00BD": "vulgar fraction one half"
     /// }
     /// ```
     ///
-    /// `NFKD`: Compatibility Decomposition
+    /// The following configuration selects `NFKD`:
     ///
     /// ```json,options
     /// {

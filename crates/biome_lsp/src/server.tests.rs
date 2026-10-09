@@ -2054,6 +2054,83 @@ async fn pull_diagnostics_for_css_files() -> Result<()> {
 }
 
 #[tokio::test]
+async fn pull_diagnostics_for_htm_files() -> Result<()> {
+    let fs = MemoryFileSystem::default();
+    let config = r#"{
+        "html": {
+            "linter": { "enabled": true }
+        }
+    }"#;
+
+    fs.insert(to_utf8_file_path_buf(uri!("biome.json")), config);
+
+    let factory = ServerFactory::new_with_fs(Arc::new(fs));
+    let (service, client) = factory.create().into_inner();
+
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, mut receiver) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server.load_configuration().await?;
+
+    let invalid_html = r#"<div scope="col"></div>"#;
+    server
+        // VS Code assigns the `html` language identifier to `.htm` files.
+        .open_named_document(invalid_html, uri!("document.htm"), "html")
+        .await?;
+
+    let notification = wait_for_notification(&mut receiver, |n| n.is_publish_diagnostics()).await;
+
+    assert_eq!(
+        notification,
+        Some(ServerNotification::PublishDiagnostics(
+            PublishDiagnosticsParams {
+                uri: uri!("document.htm"),
+                version: Some(0),
+                diagnostics: vec![Diagnostic {
+                    range: Range {
+                        start: Position {
+                            line: 0,
+                            character: 5,
+                        },
+                        end: Position {
+                            line: 0,
+                            character: 16,
+                        },
+                    },
+                    severity: Some(DiagnosticSeverity::ERROR),
+                    code: Some(NumberOrString::String(String::from(
+                        "lint/a11y/noHeaderScope"
+                    ))),
+                    code_description: Some(CodeDescription {
+                        href: "https://biomejs.dev/linter/rules/no-header-scope".parse()?
+                    }),
+                    source: Some(String::from("biome")),
+                    message: String::from(
+                        "Avoid using the scope attribute on elements other than th elements.",
+                    ),
+                    related_information: None,
+                    tags: None,
+                    data: None,
+                }],
+            }
+        ))
+    );
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn pull_diagnostics_for_svg_files() -> Result<()> {
     let fs = MemoryFileSystem::default();
     let config = r#"{
@@ -4393,6 +4470,206 @@ export function bar() {
 
     // ASSERT: Diagnostic should disappear again with a fixed `bar.ts`.
     assert_eq!(result.diagnostics.len(), 0);
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn watcher_updates_tailwind_stylesheet() -> Result<()> {
+    const THEME_WITH_BRAND: &str = "@theme {\n    --color-brand: #00f;\n}\n";
+    const THEME_WITHOUT_BRAND: &str = "@theme {\n}\n";
+
+    // ARRANGE: `bg-brand` is only known through the theme that `app.css`
+    // imports, so the class list is only unsorted while the theme defines it.
+    let mut fs = TemporaryFs::new("watcher_updates_tailwind_stylesheet");
+    fs.create_file(
+        "app.css",
+        "@import \"tailwindcss\";\n@import \"./theme.css\";\n",
+    );
+    fs.create_file("theme.css", THEME_WITH_BRAND);
+    fs.create_file(
+        "App.jsx",
+        "export const a = <div className=\"bg-brand flex\" />;\n",
+    );
+
+    let (watcher, instruction_channel) = Watcher::new(WatcherOptions::default())?;
+    let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
+    let workspace = factory.workspace();
+    let db_state = factory.db_state();
+    spawn_blocking(move || {
+        workspace.start_watcher(&db_state, watcher);
+    });
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+    server.initialize().await?;
+
+    let OpenProjectResult { project_key } = server
+        .request(
+            "biome/open_project",
+            "open_project",
+            OpenProjectParams {
+                path: fs.working_directory.clone().into(),
+                open_uninitialized: true,
+            },
+        )
+        .await?
+        .expect("open_project returned an error");
+
+    // These tests don't load `biome.json`, so the settings are sent directly.
+    let _: biome_service::workspace::UpdateSettingsResult = server
+        .request(
+            "biome/update_settings",
+            "update_settings",
+            biome_service::workspace::UpdateSettingsParams {
+                project_key,
+                configuration: Configuration {
+                    tailwind: Some(biome_configuration::TailwindConfiguration {
+                        stylesheet: Some("./app.css".into()),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+                workspace_directory: Some(fs.working_directory.clone().into()),
+                extended_configurations: Vec::new(),
+                module_graph_resolution_kind: Default::default(),
+            },
+        )
+        .await?
+        .expect("update_settings returned an error");
+
+    let result: ScanProjectResult = server
+        .request(
+            "biome/scan_project",
+            "scan_project",
+            ScanProjectParams {
+                project_key,
+                watch: true,
+                force: false,
+                scan_kind: ScanKind::Project,
+                verbose: false,
+            },
+        )
+        .await?
+        .expect("scan_project returned an error");
+    assert_eq!(result.diagnostics.len(), 0);
+
+    let _: OpenFileResult = server
+        .request(
+            "biome/open_file",
+            "open_file",
+            OpenFileParams {
+                project_key,
+                path: fs.working_directory.join("App.jsx").into(),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            },
+        )
+        .await?
+        .expect("open_file returned an error");
+
+    // ACT: Pull diagnostics.
+    let result: PullDiagnosticsResult = server
+        .request(
+            "biome/pull_diagnostics",
+            "pull_diagnostics",
+            PullDiagnosticsParams {
+                project_key,
+                path: fs.working_directory.join("App.jsx").into(),
+                categories: RuleCategories::all(),
+                only: Vec::new(),
+                skip: Vec::new(),
+                enabled_rules: vec![
+                    RuleSelector::Rule("nursery", "useTailwindSortedClasses").into(),
+                ],
+                include_code_fix: false,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
+            },
+        )
+        .await?
+        .expect("pull_diagnostics returned an error");
+
+    // ASSERT: `bg-brand` is a known color, so it sorts after `flex`.
+    assert_eq!(result.diagnostics.len(), 1);
+    assert_eq!(
+        PrintDescription(&result.diagnostics[0]).to_string(),
+        "These CSS classes should be sorted."
+    );
+
+    // ARRANGE: Remove `--color-brand` from the imported theme.
+    clear_notifications!(factory.service_rx);
+    fs.create_file("theme.css", THEME_WITHOUT_BRAND);
+    await_notification!(factory.service_rx);
+
+    // ACT: Pull diagnostics.
+    let result: PullDiagnosticsResult = server
+        .request(
+            "biome/pull_diagnostics",
+            "pull_diagnostics",
+            PullDiagnosticsParams {
+                project_key,
+                path: fs.working_directory.join("App.jsx").into(),
+                categories: RuleCategories::all(),
+                only: Vec::new(),
+                skip: Vec::new(),
+                enabled_rules: vec![
+                    RuleSelector::Rule("nursery", "useTailwindSortedClasses").into(),
+                ],
+                include_code_fix: false,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
+            },
+        )
+        .await?
+        .expect("pull_diagnostics returned an error");
+
+    // ASSERT: `bg-brand` is unknown now, so it keeps its place in front.
+    assert_eq!(result.diagnostics.len(), 0);
+
+    // ARRANGE: Restore `--color-brand`.
+    clear_notifications!(factory.service_rx);
+    fs.create_file("theme.css", THEME_WITH_BRAND);
+    await_notification!(factory.service_rx);
+
+    // ACT: Pull diagnostics.
+    let result: PullDiagnosticsResult = server
+        .request(
+            "biome/pull_diagnostics",
+            "pull_diagnostics",
+            PullDiagnosticsParams {
+                project_key,
+                path: fs.working_directory.join("App.jsx").into(),
+                categories: RuleCategories::all(),
+                only: Vec::new(),
+                skip: Vec::new(),
+                enabled_rules: vec![
+                    RuleSelector::Rule("nursery", "useTailwindSortedClasses").into(),
+                ],
+                include_code_fix: false,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
+            },
+        )
+        .await?
+        .expect("pull_diagnostics returned an error");
+
+    // ASSERT: The diagnostic is expected to reappear.
+    assert_eq!(result.diagnostics.len(), 1);
 
     server.shutdown().await?;
     reader.abort();

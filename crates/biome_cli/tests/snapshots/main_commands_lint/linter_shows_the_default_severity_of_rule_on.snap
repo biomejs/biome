@@ -71,6 +71,7 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - noImplicitBoolean
   - noIncrementDecrement
   - noInferrableTypes
+  - noInlineStyles
   - noJsxLiterals
   - noMagicNumbers
   - noMultiAssign
@@ -81,7 +82,11 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - noNonNullAssertion
   - noParameterAssign
   - noParameterProperties
+  - noPlaywrightElementHandle
+  - noPlaywrightEval
+  - noPlaywrightWaitForSelector
   - noProcessEnv
+  - noReactNativeLiteralColors
   - noRestrictedGlobals
   - noRestrictedImports
   - noRestrictedTypes
@@ -89,6 +94,7 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - noShoutyConstants
   - noSubstr
   - noTernary
+  - noTopLevelLiterals
   - noUnusedTemplateLiteral
   - noUselessElse
   - noValueAtRule
@@ -110,12 +116,14 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - useConsistentMemberAccessibility
   - useConsistentMethodSignatures
   - useConsistentObjectDefinitions
+  - useConsistentTestIt
   - useConsistentTypeDefinitions
   - useConst
   - useDefaultParameterLast
   - useDefaultSwitchClause
   - useDeprecatedReason
   - useDestructuring
+  - useDomQuerySelector
   - useEnumInitializers
   - useErrorCause
   - useExplicitLengthCheck
@@ -129,9 +137,11 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - useGraphqlNamingConvention
   - useGroupedAccessorPairs
   - useImportType
+  - useImportsFirst
   - useInputName
   - useLiteralEnumMembers
   - useLoneExecutableDefinition
+  - useNamedCaptureGroup
   - useNamingConvention
   - useNodeAssertStrict
   - useNodejsImportProtocol
@@ -140,6 +150,8 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - useObjectSpread
   - useReactFunctionComponents
   - useReadonlyClassProperties
+  - useReduceTypeParameter
+  - useScopedStyles
   - useSelfClosingElements
   - useShorthandAssign
   - useShorthandFunctionType
@@ -147,15 +159,22 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - useSpreadOverApply
   - useSymbolDescription
   - useTemplate
+  - useTestHooksInOrder
+  - useTestHooksOnTop
+  - useThisInClassMethods
   - useThrowNewError
   - useThrowOnlyError
   - useTrimStartEnd
+  - useUnicodeRegex
   - useUnifiedTypeSignatures
+  - useVarsOnTop
+  - useVueConsistentDefinePropsDeclaration
   - useVueConsistentVBindStyle
   - useVueConsistentVOnStyle
   - useVueDefineMacrosOrder
   - useVueHyphenatedAttributes
   - useVueMultiWordComponentNames
+  - useVueNextTickPromise
   
 
 ```

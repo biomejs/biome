@@ -1,0 +1,99 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<marquee>Breaking news</marquee>
+<button>Click</button>
+<RouterLink to="/">Home</RouterLink>
+<Ui.Dialog open />
+<my-widget />
+
+
+```
+
+# Diagnostics
+```
+invalid.svelte:2:2 lint/correctness/noRestrictedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The marquee element is restricted in this project.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <marquee>Breaking news</marquee>
+      │  ^^^^^^^
+    3 │ <button>Click</button>
+    4 │ <RouterLink to="/">Home</RouterLink>
+  
+  i Use CSS animations instead.
+  
+
+```
+
+```
+invalid.svelte:3:2 lint/correctness/noRestrictedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The button element is restricted in this project.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <marquee>Breaking news</marquee>
+  > 3 │ <button>Click</button>
+      │  ^^^^^^
+    4 │ <RouterLink to="/">Home</RouterLink>
+    5 │ <Ui.Dialog open />
+  
+  i Use the Button component instead.
+  
+
+```
+
+```
+invalid.svelte:4:2 lint/correctness/noRestrictedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The RouterLink element is restricted in this project.
+  
+    2 │ <marquee>Breaking news</marquee>
+    3 │ <button>Click</button>
+  > 4 │ <RouterLink to="/">Home</RouterLink>
+      │  ^^^^^^^^^^
+    5 │ <Ui.Dialog open />
+    6 │ <my-widget />
+  
+  i Use NuxtLink instead.
+  
+
+```
+
+```
+invalid.svelte:5:2 lint/correctness/noRestrictedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The Ui.Dialog element is restricted in this project.
+  
+    3 │ <button>Click</button>
+    4 │ <RouterLink to="/">Home</RouterLink>
+  > 5 │ <Ui.Dialog open />
+      │  ^^^^^^^^^
+    6 │ <my-widget />
+    7 │ 
+  
+  i Use the Modal component instead.
+  
+
+```
+
+```
+invalid.svelte:6:2 lint/correctness/noRestrictedElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The my-widget element is restricted in this project.
+  
+    4 │ <RouterLink to="/">Home</RouterLink>
+    5 │ <Ui.Dialog open />
+  > 6 │ <my-widget />
+      │  ^^^^^^^^^
+    7 │ 
+  
+  i Use the new widget instead.
+  
+
+```

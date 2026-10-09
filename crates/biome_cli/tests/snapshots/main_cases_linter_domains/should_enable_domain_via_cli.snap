@@ -58,25 +58,51 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-test2.js:5:5 lint/nursery/useExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+biome.json:2:15 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Test callback is missing an expect() assertion.
+  i The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.
+  
+     1 │ {
+   > 2 │     "linter": {
+       │               ^
+   > 3 │         "rules": {
+   > 4 │             "recommended": false
+        ...
+   > 8 │         }
+   > 9 │     }
+       │     ^
+    10 │ }
+    11 │ 
+  
+  i Migrate the configuration with the proper command
+  
+  $ biome migrate
+  
+
+```
+
+```block
+test2.js:5:5 lint/style/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The test function test is inconsistent with the configured preferred function it.
   
     3 │ 	beforeEach(() => {});
     4 │     beforeEach(() => {});
   > 5 │     test("bar", () => {
-      │     ^^^^^^^^^^^^^^^^^^^
-  > 6 │         someFn();
-  > 7 │     });
-      │     ^^
-    8 │ });
-    9 │     
+      │     ^^^^
+    6 │         someFn();
+    7 │     });
   
-  i Tests without assertions may pass even when the behavior is broken.
+  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
   
-  i Add an assertion using expect() to verify the expected behavior.
+  i Safe fix: Use it instead.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+    3 3 │   	beforeEach(() => {});
+    4 4 │       beforeEach(() => {});
+    5   │ - ····test("bar",·()·=>·{
+      5 │ + ····it("bar",·()·=>·{
+    6 6 │           someFn();
+    7 7 │       });
   
 
 ```
@@ -102,29 +128,23 @@ test1.js:1:10 lint/suspicious/noFocusedTests  FIXABLE  ━━━━━━━━�
 ```
 
 ```block
-test2.js:5:5 lint/nursery/useConsistentTestIt  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+test2.js:5:5 lint/suspicious/useExpect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The test function test is inconsistent with the configured preferred function it.
+  ! Test callback is missing an expect() assertion.
   
     3 │ 	beforeEach(() => {});
     4 │     beforeEach(() => {});
   > 5 │     test("bar", () => {
-      │     ^^^^
-    6 │         someFn();
-    7 │     });
+      │     ^^^^^^^^^^^^^^^^^^^
+  > 6 │         someFn();
+  > 7 │     });
+      │     ^^
+    8 │ });
+    9 │     
   
-  i Using a consistent function for tests improves readability and makes it easier to search for tests in the codebase.
+  i Tests without assertions may pass even when the behavior is broken.
   
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-  i Safe fix: Use it instead.
-  
-    3 3 │   	beforeEach(() => {});
-    4 4 │       beforeEach(() => {});
-    5   │ - ····test("bar",·()·=>·{
-      5 │ + ····it("bar",·()·=>·{
-    6 6 │           someFn();
-    7 7 │       });
+  i Add an assertion using expect() to verify the expected behavior.
   
 
 ```

@@ -1,0 +1,6 @@
+@keyframes rejected {
+  @include frames;
+  to { opacity: 1; }
+}
+
+.after { color: red; }

@@ -6,9 +6,9 @@ use biome_rowan::AstNode;
 use biome_rule_options::use_graphql_naming_convention::UseGraphqlNamingConventionOptions;
 
 declare_lint_rule! {
-    /// Validates that all enum values are capitalized.
+    /// Require uppercase names for GraphQL enum values.
     ///
-    /// By convention in GraphQL, enum values are all caps.
+    /// GraphQL convention writes enum values with uppercase letters, such as `IN_PROGRESS`.
     ///
     /// ## Examples
     ///

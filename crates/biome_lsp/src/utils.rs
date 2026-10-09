@@ -13,6 +13,7 @@ use biome_diagnostics::{
 use biome_line_index::LineIndex;
 use biome_lsp_converters::{PositionEncoding, from_proto, to_proto};
 use biome_rowan::{TextRange, TextSize};
+use biome_service::WorkspaceError;
 use biome_service::workspace::CodeAction;
 use biome_text_edit::{CompressedOp, DiffOp, TextEdit};
 use std::any::Any;
@@ -394,6 +395,12 @@ pub(crate) fn into_lsp_error(msg: impl Display + Debug) -> LspError {
     error.message = Cow::Owned(msg.to_string());
     error.data = Some(format!("{msg:?}").into());
     error
+}
+
+pub(crate) fn workspace_error_to_lsp(error: WorkspaceError) -> LspError {
+    let mut lsp_error = into_lsp_error(&error);
+    lsp_error.data = serde_json::to_value(biome_diagnostics::serde::Diagnostic::from(error)).ok();
+    lsp_error
 }
 
 pub(crate) fn panic_to_lsp_error(err: Box<dyn Any + Send>) -> LspError {

@@ -51,10 +51,17 @@ use biome_css_parser::{CssParserOptions, parse_css};
 #[cfg(feature = "html_embeds")]
 use biome_css_syntax::CssLanguage;
 use biome_db::AnyParsedSource;
+#[cfg(feature = "html_embeds")]
+use biome_formatter::prelude::{
+    Document, Interned, SimpleFormatContext, format_args, format_with, group, indent,
+    line_suffix_boundary, soft_line_break, token,
+};
 use biome_formatter::{
     AttributePosition, BracketSameLine, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
     TrailingNewline,
 };
+#[cfg(feature = "html_embeds")]
+use biome_formatter::{Buffer, FormatElement, QuoteStyle};
 use biome_fs::BiomePath;
 #[cfg(feature = "html_embeds")]
 use biome_html_analyze::analyze_with_snippets;
@@ -70,21 +77,28 @@ use biome_html_parser::{HtmlParserOptions, parse_html_with_cache};
 use biome_html_syntax::element_ext::{AnyEmbeddedContent, AnyHtmlTagElement};
 use biome_html_syntax::{HtmlAttribute, HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
 #[cfg(feature = "html_embeds")]
-use biome_html_syntax::{HtmlElementList, HtmlSingleTextExpression, HtmlTextExpression};
+use biome_html_syntax::{
+    HtmlElementList, HtmlSingleTextExpression, HtmlSyntaxKind, HtmlTextExpression,
+};
 #[cfg(feature = "html_embeds")]
 use biome_js_analyze::JsSuppression;
 #[cfg(feature = "html_embeds")]
+use biome_js_formatter::context::Semicolons;
+#[cfg(feature = "html_embeds")]
 use biome_js_parser::{JsParserOptions, parse as parse_js};
 #[cfg(feature = "html_embeds")]
-use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxToken, JsTemplateChunkElement};
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsRoot, AnyJsStatement, JsLanguage, JsScript, JsSyntaxToken,
+    JsTemplateChunkElement,
+};
 #[cfg(feature = "html_embeds")]
 use biome_json_syntax::JsonLanguage;
 use biome_languages::HtmlFileSource;
 #[cfg(feature = "html_embeds")]
 use biome_parser::AnyParse;
-#[cfg(feature = "html_embeds")]
-use biome_rowan::TokenAtOffset;
 use biome_rowan::{AstNode, BatchMutation, NodeCache, SendNode, TextRange, TextSize};
+#[cfg(feature = "html_embeds")]
+use biome_rowan::{AstNodeList, TokenAtOffset};
 use camino::Utf8Path;
 #[cfg(feature = "html_embeds")]
 use rustc_hash::FxHashMap;
@@ -431,7 +445,8 @@ impl ServiceLanguage for HtmlLanguage {
         _file_source: &super::DocumentFileSource,
     ) -> AnalyzerOptions {
         let configuration = AnalyzerConfiguration::default()
-            .with_rules(to_analyzer_rules_by_indices(global, override_indices));
+            .with_rules(to_analyzer_rules_by_indices(global, override_indices))
+            .with_tailwind(global.tailwind.clone());
 
         AnalyzerOptions::default().with_configuration(configuration)
     }
@@ -809,26 +824,72 @@ fn format_embedded(
         if parse.has_errors() {
             return None;
         }
+        let attribute_snippet = AttributeSnippet::find(&tree, range);
 
         let document = match snippet_file_source {
             DocumentFileSource::Js(_) => {
-                // The JavaScript formatter adds a space after a comment that is
-                // the only content of an expression, such as `{/* note */}`.
-                if let AnyJsRoot::JsExpressionTemplateRoot(root) = parse.tree::<AnyJsRoot>()
-                    && root.expression().is_none()
-                {
-                    return None;
+                let root = parse.tree::<AnyJsRoot>();
+                match &root {
+                    // The JavaScript formatter adds a space after a comment that is
+                    // the only content of an expression, such as `{/* note */}`.
+                    AnyJsRoot::JsExpressionTemplateRoot(root) if root.expression().is_none() => {
+                        return None;
+                    }
+                    // A script in an attribute value holds the statements of a Vue
+                    // event handler, such as `@click="count++"`.
+                    AnyJsRoot::JsExpressionTemplateRoot(_)
+                    | AnyJsRoot::JsVueSlotPropsRoot(_)
+                    | AnyJsRoot::JsScript(_) => {}
+                    _ if attribute_snippet.is_some() => return None,
+                    _ => {}
                 }
-                let js_options = javascript::resolve_format_options(
+                let mut js_options = javascript::resolve_format_options(
                     biome_path,
                     &snippet_file_source,
                     settings,
                     &workspace_db,
                 );
+                // An attribute value is written between double quotes.
+                if attribute_snippet.is_some() {
+                    js_options = js_options
+                        .with_quote_style(QuoteStyle::Single)
+                        .with_jsx_quote_style(QuoteStyle::Single)
+                        .with_trailing_newline(TrailingNewline::from(false));
+                }
+                // Vue compiles an event handler as the body of a function only
+                // when it contains a `;`, and as an expression otherwise.
+                let handler_needs_semicolon = match &root {
+                    AnyJsRoot::JsScript(script) if attribute_snippet.is_some() => {
+                        !is_single_expression_statement(script)
+                    }
+                    _ => false,
+                };
+                if handler_needs_semicolon {
+                    js_options = js_options.with_semicolons(Semicolons::Always);
+                }
                 let node = parse.embedded_syntax::<JsLanguage>();
-                biome_js_formatter::format_node_with_offset(js_options, &node)
-                    .ok()?
-                    .into_document()
+                let formatted =
+                    biome_js_formatter::format_node_with_offset(js_options, &node).ok()?;
+                // The preferred quote gives way to the other one when it needs
+                // fewer escapes, and template literals and comments keep their
+                // quotes. Either would end the attribute value early.
+                if attribute_snippet.is_some() {
+                    let printed = formatted.print().ok()?;
+                    if printed.as_code().contains('"') {
+                        return None;
+                    }
+                    // Removing an empty statement, such as the `;` of
+                    // `if (ok) {};`, can leave a handler without any `;`.
+                    if handler_needs_semicolon && !printed.as_code().contains(';') {
+                        return None;
+                    }
+                }
+                match attribute_snippet {
+                    Some(AttributeSnippet::Value) => {
+                        format_attribute_value(&root, formatted.into_document())?
+                    }
+                    _ => formatted.into_document(),
+                }
             }
             DocumentFileSource::Json(_) => {
                 let json_options =
@@ -838,6 +899,9 @@ fn format_embedded(
                     .ok()?
                     .into_document()
             }
+            // The CSS formatter prints each declaration of a `style` attribute
+            // on its own line.
+            DocumentFileSource::Css(_) if attribute_snippet.is_some() => return None,
             DocumentFileSource::Css(_) => {
                 let css_options = css::resolve_format_options(
                     biome_path,
@@ -863,6 +927,112 @@ fn format_embedded(
         Ok(printed) => Ok(printed),
         Err(error) => Err(WorkspaceError::FormatError(error.into())),
     }
+}
+
+/// An embedded snippet written inside the quotes of an attribute value. The
+/// HTML formatter writes such a value between double quotes.
+#[cfg(feature = "html_embeds")]
+#[derive(Clone, Copy)]
+enum AttributeSnippet {
+    /// The snippet is the whole value, such as the expression of a Vue
+    /// directive. Its formatted code replaces the value, quotes included.
+    Value,
+    /// The snippet is the expression of a `v-for`, which follows the binding
+    /// and the operator.
+    VForExpression,
+}
+
+#[cfg(feature = "html_embeds")]
+impl AttributeSnippet {
+    /// Returns the kind of the attribute snippet whose content spans `range`,
+    /// or `None` when the snippet isn't inside an attribute value.
+    fn find(root: &HtmlSyntaxNode, range: TextRange) -> Option<Self> {
+        let token = root.covering_element(range).into_token()?;
+        let parent = token.parent()?;
+        match parent.kind() {
+            HtmlSyntaxKind::HTML_STRING => Some(Self::Value),
+            HtmlSyntaxKind::HTML_TEXT_EXPRESSION
+                if parent
+                    .parent()
+                    .is_some_and(|node| node.kind() == HtmlSyntaxKind::VUE_V_FOR_VALUE) =>
+            {
+                Some(Self::VForExpression)
+            }
+            _ => None,
+        }
+    }
+}
+
+/// Returns `true` if the statements of a Vue event handler are a single
+/// expression statement, such as `count++`, which Vue compiles the same way
+/// with or without its `;`.
+#[cfg(feature = "html_embeds")]
+fn is_single_expression_statement(script: &JsScript) -> bool {
+    let statements = script.statements();
+    script.directives().is_empty()
+        && statements.len() == 1
+        && statements
+            .first()
+            .is_some_and(|statement| matches!(statement, AnyJsStatement::JsExpressionStatement(_)))
+}
+
+/// Writes the formatted JavaScript `document` of a whole attribute value
+/// between double quotes, laid out the way Prettier does.
+///
+/// An object, array, template literal, or string stays next to the quotes when
+/// it breaks. Any other expression, and the statements of a Vue event handler,
+/// move between the quotes, on lines of their own:
+///
+/// ```vue
+/// <div
+///   v-if="
+///     firstCondition &&
+///     secondCondition
+///   "
+/// ></div>
+/// ```
+#[cfg(feature = "html_embeds")]
+fn format_attribute_value(root: &AnyJsRoot, document: Document) -> Option<Document> {
+    let hugs_quotes = match root {
+        AnyJsRoot::JsExpressionTemplateRoot(root) => match root.expression()? {
+            AnyJsExpression::JsObjectExpression(_) | AnyJsExpression::JsArrayExpression(_) => true,
+            AnyJsExpression::JsTemplateExpression(template) => template.tag().is_none(),
+            AnyJsExpression::AnyJsLiteralExpression(literal) => {
+                literal.as_js_string_literal_expression().is_some()
+            }
+            _ => false,
+        },
+        AnyJsRoot::JsScript(_) => false,
+        _ => true,
+    };
+
+    let content = Interned::new(document.into_elements());
+    let content = format_with(|f| f.write_element(FormatElement::Interned(content.clone())));
+    let formatted = if hugs_quotes {
+        biome_formatter::format!(
+            SimpleFormatContext::default(),
+            [
+                token("\""),
+                group(&content),
+                // A trailing line comment must end before the closing quote.
+                line_suffix_boundary(),
+                token("\"")
+            ]
+        )
+    } else {
+        biome_formatter::format!(
+            SimpleFormatContext::default(),
+            [
+                token("\""),
+                group(&format_args![
+                    indent(&format_args![soft_line_break(), content]),
+                    soft_line_break()
+                ]),
+                token("\"")
+            ]
+        )
+    };
+    Some(formatted.ok()?.into_document())
 }
 
 #[cfg(not(feature = "html_embeds"))]

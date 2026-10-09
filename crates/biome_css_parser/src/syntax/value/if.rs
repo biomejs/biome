@@ -12,7 +12,6 @@ use biome_parser::token_set;
 use biome_parser::{Parser, SyntaxFeature};
 
 use crate::parser::CssParser;
-use crate::syntax::CssSyntaxFeatures;
 use crate::syntax::at_rule::container::error::expected_any_container_style_query;
 use crate::syntax::at_rule::container::parse_any_container_style_query;
 use crate::syntax::at_rule::error::AnyInParensParseRecovery;
@@ -29,10 +28,14 @@ use crate::syntax::property::{
     END_OF_PROPERTY_VALUE_COMPONENT_LIST_TOKEN_SET, END_OF_PROPERTY_VALUE_TOKEN_SET,
     GenericComponentValueList,
 };
-use crate::syntax::scss::{expected_scss_expression, parse_scss_expression_until};
+use crate::syntax::scss::{
+    expected_scss_expression, parse_scss_expression_until,
+    parse_scss_optional_value_until_with_boundary,
+};
 use crate::syntax::value::parse_error::expected_if_branch;
 use crate::syntax::value::parse_error::expected_if_test_boolean_expr_group;
 use crate::syntax::value::parse_error::expected_if_test_boolean_not_expr;
+use crate::syntax::{CssSyntaxFeatures, ValueParsingContext};
 
 const IF_BRANCH_RECOVERY_TOKEN_SET: TokenSet<CssSyntaxKind> =
     token_set![T![;], T![')'], T!['}'], EOF];
@@ -41,12 +44,14 @@ const IF_BRANCH_VALUE_END_SET: TokenSet<CssSyntaxKind> =
     END_OF_PROPERTY_VALUE_COMPONENT_LIST_TOKEN_SET.union(token_set!(T![')']));
 const IF_BRANCH_VALUE_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     END_OF_PROPERTY_VALUE_TOKEN_SET.union(token_set!(T![')'], T![else]));
+const SCSS_IF_BRANCH_VALUE_END_SET: TokenSet<CssSyntaxKind> = token_set![T![;], T![')'], T!['}']];
 
 pub(crate) fn is_at_if_function(p: &mut CssParser) -> bool {
-    p.at(T![if])
+    p.at(T![if]) && p.nth_at(1, T!['('])
 }
 
-/// Parses an if function from the current position of the CSS parser.
+/// Parses a modern `if()` function with colon-separated conditions and values
+/// and semicolon-separated branches.
 ///
 /// For more detailed information on the CSS if function syntax, refer to the
 /// [CSS Values and Units Module](https://drafts.csswg.org/css-values-5/#if-notation).
@@ -106,7 +111,7 @@ pub(crate) fn is_at_if_function(p: &mut CssParser) -> bool {
 ///   sass( <expression> ) |
 ///   style( <style-query> )
 /// ```
-pub(crate) fn parse_if_function(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_if_function(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyntax {
     if !is_at_if_function(p) {
         return Absent;
     }
@@ -122,7 +127,7 @@ pub(crate) fn parse_if_function(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T![if]);
     p.expect(T!['(']);
 
-    CssIfBranchList.parse_list(p);
+    CssIfBranchList { context }.parse_list(p);
 
     p.expect(T![')']);
 
@@ -478,7 +483,7 @@ fn parse_any_if_condition(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_if_branch(p: &mut CssParser) -> ParsedSyntax {
+fn parse_if_branch(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyntax {
     if !is_at_any_if_condition(p) {
         return Absent;
     }
@@ -498,9 +503,22 @@ fn parse_if_branch(p: &mut CssParser) -> ParsedSyntax {
 
     p.expect(T![:]);
 
-    GenericComponentValueList::new(IF_BRANCH_VALUE_END_SET, IF_BRANCH_VALUE_RECOVERY_SET)
-        .with_boundary(is_at_if_branch_boundary)
-        .parse_list(p);
+    let scss_value = if context.is_full_scss_parsing_allowed() {
+        parse_scss_optional_value_until_with_boundary(
+            p,
+            SCSS_IF_BRANCH_VALUE_END_SET,
+            is_at_if_branch_boundary,
+        )
+    } else {
+        Absent
+    };
+
+    if scss_value.is_absent() {
+        GenericComponentValueList::new(IF_BRANCH_VALUE_END_SET, IF_BRANCH_VALUE_RECOVERY_SET)
+            .with_boundary(is_at_if_branch_boundary)
+            .with_context(context)
+            .parse_list(p);
+    }
 
     Present(m.complete(p, CSS_IF_BRANCH))
 }
@@ -540,7 +558,9 @@ impl ParseRecovery for IfBranchListParseRecovery {
     }
 }
 
-struct CssIfBranchList;
+struct CssIfBranchList {
+    context: ValueParsingContext,
+}
 
 impl ParseSeparatedList for CssIfBranchList {
     type Kind = CssSyntaxKind;
@@ -548,7 +568,7 @@ impl ParseSeparatedList for CssIfBranchList {
     const LIST_KIND: Self::Kind = CSS_IF_BRANCH_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_if_branch(p)
+        parse_if_branch(p, self.context)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {

@@ -37,5 +37,29 @@ const ignored = styled.div`
 # Emitted Messages
 
 ```block
+biome.json:3:13 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The use of the recommended field has been deprecated, and will removed in the next major version of Biome. Use preset instead.
+  
+    1 │ {
+    2 │   "javascript": { "experimentalEmbeddedSnippetsEnabled": true },
+  > 3 │   "linter": {
+      │             ^
+  > 4 │     "rules": {
+  > 5 │       "recommended": false,
+  > 6 │       "correctness": { "noUnknownProperty": "error" }
+  > 7 │     }
+  > 8 │   }
+      │   ^
+    9 │ }
+  
+  i Migrate the configuration with the proper command
+  
+  $ biome migrate
+  
+
+```
+
+```block
 Checked 1 file in <TIME>. No fixes applied.
 ```

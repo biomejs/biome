@@ -18,35 +18,72 @@ Usage: lint [--write] [--unsafe] [--suppress] [--reason=STRING] [--only=<GROUP|R
 --watch] [PATH]...
 
 Options that change how the JSON parser behaves.
-        --json-parse-allow-comments=<true|false>  Allows parsing comments in `.json` files.
-        --json-parse-allow-trailing-commas=<true|false>  Allows parsing trailing commas in `.json`
-                              files.
+        --json-parse-allow-comments=<true|false>  Controls whether comments are allowed in files
+                              parsed as JSON. When unset, Biome follows the file type's default
+                              behavior. An explicit value overrides that behavior, except that
+                              `biome.jsonc` always allows comments.
+        --json-parse-allow-trailing-commas=<true|false>  Controls whether trailing commas are
+                              allowed in files parsed as JSON. When unset, Biome follows the file
+                              type's default behavior. An explicit value overrides that behavior,
+                              except that `biome.jsonc` always allows trailing commas.
 
-Settings for integrating Biome with version control.
-        --vcs-enabled=<true|false>  Whether Biome should integrate with the version control client.
-        --vcs-client-kind=<git>  The version control client.
-        --vcs-use-ignore-file=<true|false>  When `true`, Biome ignores files listed in `.gitignore`,
-                              `.ignore`, and Git's local exclude file.
-        --vcs-root=PATH       Sets the directory where Biome checks for version control files.
+Options that change how the CSS parser behaves.
+        --css-parse-css-modules=<true|false>  Enables CSS Modules-specific syntax such as `:local`,
+                              `:global`, `composes`, and `@value`. When unset, Biome enables this
+                              syntax automatically for files whose names end in `.module.css` or
+                              `.module.scss; otherwise, it defaults to `false`. Enable it explicitly
+                              when CSS Module files use another naming convention.
+        --css-parse-tailwind-directives=<true|false>  Enables parsing Tailwind CSS 4.0 directives
+                              and functions, including `@theme`, `@utility`, `@variant`, `@source`,
+                              and `@apply`. Defaults to `false`.
+
+Options that change how the Markdown parser behaves
+        --md-parse-frontmatter=<true|false>  Enables parsing frontmatter at the start of the file.
+                              Defaults to `false`.
+
+Configures how Biome integrates with a version control system.
+        --vcs-enabled=<true|false>  Enables or disables version-control integration. Defaults to
+                              `false`. Enabling integration requires `vcs.clientKind` to be set.
+        --vcs-client-kind=<git>  Selects the version-control client. Currently, only `git` is
+                              supported.
+        --vcs-use-ignore-file=<true|false>  Controls whether Biome applies patterns from
+                              `.gitignore`, Git's local `.git/info/exclude`, and supported `.ignore`
+                              files, including nested ignore files. Patterns in the root ignore file
+                              are resolved from `vcs.root`. Patterns in nested ignore files are
+                              resolved from the directory containing that file. Defaults to `false`.
+        --vcs-root=PATH       Sets the directory where Biome looks for version-control files. A
+                              relative value is resolved from the directory containing the current
+                              configuration file, while an absolute path is used directly.
                               Defaults to the directory containing `biome.json` or `biome.jsonc`. If
                               no configuration is found, Biome uses the current working directory.
                               If neither directory is available, Biome disables version control
                               integration and emits a diagnostic.
-        --vcs-default-branch=BRANCH  The project's default branch.
+        --vcs-default-branch=BRANCH  Sets the base branch used by `--changed` when `--since` is not
+                              provided. If neither this option nor `--since` is set, commands using
+                              `--changed` fail because Biome cannot determine the comparison base.
 
 The file handling configuration.
-        --files-max-size=NUMBER  The maximum source file size in bytes. Biome ignores larger files.
-                              Defaults to `1 MiB`.
+        --files-max-size=NUMBER  The maximum source-file size in bytes. Biome skips larger files and
+                              emits a warning diagnostic. Defaults to `1 MiB`.
         --files-ignore-unknown=<true|false>  Prevents Biome from emitting diagnostics for
-                              unrecognized file types.
+                              unrecognized file types. Defaults to `false`.
 
 Linter options specific to the JavaScript linter
-        --javascript-linter-enabled=<true|false>  Controls the linter for JavaScript and languages
-                              that extend it.
+        --javascript-linter-enabled=<true|false>  Enables or disables the linter for JavaScript and
+                              languages that extend it.
 
 Linter options specific to the JSON linter
-        --json-linter-enabled=<true|false>  Controls the linter for JSON and languages that extend
-                              it.
+        --json-linter-enabled=<true|false>  Enables or disables the linter for JSON and languages
+                              that extend it.
+
+Options that change how the CSS linter behaves.
+        --css-linter-enabled=<true|false>  Enables or disables the linter for CSS.
+
+Options that change how the GraphQL linter behaves.
+        --graphql-linter-enabled=<true|false>  Enables or disables the linter for GraphQL.
+
+Options that change how the Markdown linter behaves
+        --md-linter-enabled=<true|false>  Control the linter for Markdown files.
 
 These options are available to many commands and control general CLI behavior, diagnostics, and
 output.
@@ -148,6 +185,8 @@ Available options:
                               `vcs.defaultBranch`. Requires `--changed`.
         --profile-rules       Reports how long each rule takes to run. It excludes the time spent
                               preparing the analysis, such as building the semantic model.
+        --profile-type-inference  Enables type-inference profiling output, grouped and ranked by
+                              source file.
         --watch               After the initial run, watches the selected paths and reprocesses
                               files modified afterward.
     -h, --help                Prints help information
