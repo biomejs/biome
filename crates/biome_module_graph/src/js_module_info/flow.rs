@@ -23,11 +23,12 @@ pub(crate) use guards::{FlowGuard, FlowTest};
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::{JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
-    AnyJsRoot, JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIfStatement,
-    JsLogicalExpression, JsReferenceIdentifier, JsWhileStatement, unescape_js_identifier,
+    JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIfStatement,
+    JsLogicalExpression, JsReferenceIdentifier, JsSyntaxNode, JsWhileStatement,
+    unescape_js_identifier,
 };
 use biome_js_type_info::{RawTypeData, TypeReference, is_raw_narrowing_invariant};
-use biome_rowan::{AstNode, TextRange, WalkEvent, declare_node_union};
+use biome_rowan::{AstNode, TextRange, declare_node_union};
 use builder::{BuiltRoot, build_root};
 use rustc_hash::{FxHashMap, FxHashSet};
 
@@ -83,20 +84,21 @@ pub(crate) struct ModuleFlow {
 }
 
 impl ModuleFlow {
-    /// Collects flow for every execution root of `root`.
+    /// Collects flow for the execution roots that a [`FlowRootScanner`]
+    /// selected.
     ///
     /// Reads are kept only when their binding has a narrowable collected type,
     /// as decided by [`is_raw_narrowing_invariant`], and a test of that binding
     /// can reach them. Execution roots that exceed a construction or relevance
     /// work limit keep no reads.
     pub(crate) fn collect(
-        root: &AnyJsRoot,
+        roots: FlowRootScanner,
         model: &SemanticModel,
         raw_types: &[RawTypeData],
         raw_binding_types: &FxHashMap<TextRange, TypeReference>,
     ) -> Self {
         Self::collect_with_relevance_budget(
-            root,
+            roots,
             model,
             raw_types,
             raw_binding_types,
@@ -105,7 +107,7 @@ impl ModuleFlow {
     }
 
     fn collect_with_relevance_budget(
-        root: &AnyJsRoot,
+        roots: FlowRootScanner,
         model: &SemanticModel,
         raw_types: &[RawTypeData],
         raw_binding_types: &FxHashMap<TextRange, TypeReference>,
@@ -118,55 +120,8 @@ impl ModuleFlow {
             raw_binding_types,
             relevance_budget,
         };
-        let mut open = Vec::<OpenRoot>::new();
-        let mut visited = 0usize;
-        for event in root.syntax().preorder() {
-            match event {
-                WalkEvent::Enter(node) => {
-                    visited += 1;
-                    if JsReferenceIdentifier::cast_ref(&node)
-                        .and_then(|reference| reference.value_token().ok())
-                        .is_some_and(|token| {
-                            matches!(
-                                unescape_js_identifier(token.text_trimmed()).as_ref(),
-                                "eval" | "arguments"
-                            )
-                        })
-                    {
-                        // Direct `eval` and mapped `arguments` can write any
-                        // enclosing variable.
-                        for root in &mut open {
-                            root.has_dynamic_scope = true;
-                        }
-                    }
-                    if AnyFlowConditionSource::can_cast(node.kind())
-                        && let Some(root) = open.last_mut()
-                    {
-                        root.has_condition = true;
-                    }
-                    if AnyJsControlFlowRoot::can_cast(node.kind()) {
-                        open.push(OpenRoot {
-                            first_node: visited - 1,
-                            has_condition: false,
-                            has_dynamic_scope: false,
-                        });
-                    }
-                }
-                WalkEvent::Leave(node) => {
-                    let Some(root) = AnyJsControlFlowRoot::cast(node) else {
-                        continue;
-                    };
-                    let Some(open_root) = open.pop() else {
-                        continue;
-                    };
-                    if open_root.has_condition
-                        && !open_root.has_dynamic_scope
-                        && visited - open_root.first_node < MAX_ROOT_NODES
-                    {
-                        collector.add_root(&mut flow, &root);
-                    }
-                }
-            }
+        for root in &roots.selected {
+            collector.add_root(&mut flow, root);
         }
         flow
     }
@@ -194,6 +149,68 @@ declare_node_union! {
         | JsForStatement
         | JsLogicalExpression
         | JsConditionalExpression
+}
+
+/// Selects the execution roots that may need flow while the module visitor
+/// walks the syntax tree, so collection never walks the module again.
+///
+/// The visitor must report every node of the module in preorder through
+/// [`Self::enter`] and [`Self::leave`]. A root is selected when it directly
+/// contains a condition, outside its nested roots, has fewer than
+/// [`MAX_ROOT_NODES`] syntax nodes, and neither it nor a nested root
+/// references `eval` or `arguments`: direct `eval` and mapped `arguments` can
+/// write any enclosing variable.
+#[derive(Default)]
+pub(crate) struct FlowRootScanner {
+    open: Vec<OpenRoot>,
+    visited: usize,
+    selected: Vec<AnyJsControlFlowRoot>,
+}
+
+impl FlowRootScanner {
+    pub(crate) fn enter(&mut self, node: &JsSyntaxNode) {
+        self.visited += 1;
+        let kind = node.kind();
+        if AnyJsControlFlowRoot::can_cast(kind) {
+            self.open.push(OpenRoot {
+                first_node: self.visited - 1,
+                has_condition: false,
+                has_dynamic_scope: false,
+            });
+        } else if AnyFlowConditionSource::can_cast(kind) {
+            if let Some(root) = self.open.last_mut() {
+                root.has_condition = true;
+            }
+        } else if let Some(reference) = JsReferenceIdentifier::cast_ref(node)
+            && let Ok(token) = reference.value_token()
+            && matches!(
+                unescape_js_identifier(token.text_trimmed()).as_ref(),
+                "eval" | "arguments"
+            )
+            && let Some(root) = self.open.last_mut()
+        {
+            root.has_dynamic_scope = true;
+        }
+    }
+
+    pub(crate) fn leave(&mut self, node: &JsSyntaxNode) {
+        if !AnyJsControlFlowRoot::can_cast(node.kind()) {
+            return;
+        }
+        let Some(root) = self.open.pop() else {
+            return;
+        };
+        if root.has_dynamic_scope {
+            if let Some(parent) = self.open.last_mut() {
+                parent.has_dynamic_scope = true;
+            }
+        } else if root.has_condition
+            && self.visited - root.first_node < MAX_ROOT_NODES
+            && let Some(root) = AnyJsControlFlowRoot::cast_ref(node)
+        {
+            self.selected.push(root);
+        }
+    }
 }
 
 struct OpenRoot {
@@ -351,7 +368,7 @@ mod tests {
     use biome_js_parser::{JsParserOptions, parse};
     use biome_js_semantic::{SemanticModelOptions, semantic_model};
     use biome_languages::JsFileSource;
-    use biome_rowan::{TextRange, TextSize};
+    use biome_rowan::{AstNode, TextRange, TextSize, WalkEvent};
     use camino::Utf8PathBuf;
     use std::sync::Arc;
 
@@ -394,14 +411,38 @@ mod tests {
     }
 
     #[test]
+    fn nested_roots_count_toward_the_root_node_limit() {
+        // Each `other;` statement adds three syntax nodes to the nested arrow.
+        for (statements, expected) in [(1, true), (super::MAX_ROOT_NODES / 3, false)] {
+            let source = format!(
+                "function f(value: string | null) {{ const g = () => {{ {} }}; if (value !== null) {{ /*read*/value; }} }}",
+                "other;".repeat(statements)
+            );
+            let info = module(&source);
+            assert_eq!(
+                info.flow.is_candidate(marked(&source, "read", "value")),
+                expected,
+                "{statements}"
+            );
+        }
+    }
+
+    #[test]
     fn roots_over_the_relevance_budget_keep_no_reads() {
         const SOURCE: &str =
             "function f(value: string | null) { if (value !== null) { /*read*/value; } }";
         let info = module(SOURCE);
         let read = marked(SOURCE, "read", "value");
         assert!(info.flow.is_candidate(read));
+        let mut roots = super::FlowRootScanner::default();
+        for event in info.semantic_model.root().syntax().preorder() {
+            match event {
+                WalkEvent::Enter(node) => roots.enter(&node),
+                WalkEvent::Leave(node) => roots.leave(&node),
+            }
+        }
         let flow = super::ModuleFlow::collect_with_relevance_budget(
-            &info.semantic_model.root(),
+            roots,
             &info.semantic_model,
             &info.raw_types,
             &info.raw_binding_types,
