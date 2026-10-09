@@ -4,13 +4,14 @@ use biome_js_control_flow::{AnyJsControlFlowRoot, is_truthy_literal};
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunction, AnyJsFunctionBody, AnyJsStatement, AnyTsType,
-    JsAssignmentExpression, JsAssignmentOperator, JsDoWhileStatement, JsForStatement,
-    JsIdentifierExpression, JsIfStatement, JsSyntaxKind, JsSyntaxNode, JsWhileStatement, T,
+    JsDoWhileStatement, JsForStatement, JsIdentifierExpression, JsIfStatement, JsSyntaxNode,
+    JsWhileStatement, T,
 };
-use biome_rowan::{AstNode, AstSeparatedList, SyntaxKind, TextRange, TokenText};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText};
 
 const MAX_SYNTAX_NODES: usize = 16_384;
-const MAX_DEPTH: usize = 128;
+/// Limits how deeply syntax can nest below the execution root that gets flow.
+pub(super) const MAX_DEPTH: usize = 128;
 const MAX_FLOW_NODES: usize = 65_536;
 
 /// The flow of one execution root before relevance filtering.
@@ -36,19 +37,20 @@ type Build<T> = Result<T, Unsupported>;
 
 /// Builds the flow of `root`, excluding nested execution roots.
 ///
-/// Supports truthiness tests in `if`, `while`, `do` and ordinary `for`
-/// statements, and expression-level `&&`, `||`, `??` and `?:`, including
-/// expression-bodied arrows. Parameter initializers and module export
-/// declarations are not evaluated, and unreachable code records no reads.
+/// `root` must be selected by a [`FlowRootScanner`], which only selects roots
+/// whose syntax the builder supports. Expression-bodied arrows are supported.
+/// Parameter initializers and module export declarations are not evaluated,
+/// and unreachable code records no reads.
 ///
-/// Returns `None` for exception handlers, `switch`, `for-in`/`for-of`, `with`,
-/// classes, destructuring, logical assignments, bogus syntax, and inputs
-/// exceeding construction limits. Like the statement control-flow graph, it
-/// also returns `None` when any statement, including unreachable code, lacks
-/// syntax that graph requires, such as a jump target or an `if` test. An
-/// unlabeled `break` or `continue` only targets an unlabeled loop.
+/// Returns `None` for inputs exceeding construction limits. Like the statement
+/// control-flow graph, it also returns `None` when any statement, including
+/// unreachable code, lacks syntax that graph requires, such as a jump target or
+/// an `if` test. An unlabeled `break` or `continue` only targets an unlabeled
+/// loop.
+///
+/// [`FlowRootScanner`]: super::FlowRootScanner
 pub(super) fn build_root(root: &AnyJsControlFlowRoot, model: &SemanticModel) -> Option<BuiltRoot> {
-    if !is_supported_syntax(root.syntax()) || !has_complete_statements(root) {
+    if !has_complete_statements(root) {
         return None;
     }
     let mut builder = RootBuilder {
@@ -68,75 +70,6 @@ pub(super) fn build_root(root: &AnyJsControlFlowRoot, model: &SemanticModel) -> 
         mentions: builder.mentions,
         reads: builder.reads,
     })
-}
-
-fn is_supported_syntax(root: &JsSyntaxNode) -> bool {
-    let mut pending = vec![(root.clone(), 0)];
-    let mut remaining = MAX_SYNTAX_NODES - 1;
-    while let Some((node, depth)) = pending.pop() {
-        if depth > MAX_DEPTH {
-            return false;
-        }
-        if &node != root && AnyJsControlFlowRoot::can_cast(node.kind()) {
-            continue;
-        }
-        if node.kind().is_bogus() || node.kind().is_metavariable() {
-            return false;
-        }
-        if let Some(statement) = AnyJsStatement::cast_ref(&node) {
-            match statement {
-                AnyJsStatement::JsBlockStatement(_)
-                | AnyJsStatement::JsBreakStatement(_)
-                | AnyJsStatement::JsContinueStatement(_)
-                | AnyJsStatement::JsDebuggerStatement(_)
-                | AnyJsStatement::JsDoWhileStatement(_)
-                | AnyJsStatement::JsEmptyStatement(_)
-                | AnyJsStatement::JsExpressionStatement(_)
-                | AnyJsStatement::JsForStatement(_)
-                | AnyJsStatement::JsFunctionDeclaration(_)
-                | AnyJsStatement::JsIfStatement(_)
-                | AnyJsStatement::JsLabeledStatement(_)
-                | AnyJsStatement::JsReturnStatement(_)
-                | AnyJsStatement::JsThrowStatement(_)
-                | AnyJsStatement::JsVariableStatement(_)
-                | AnyJsStatement::JsWhileStatement(_) => {}
-                AnyJsStatement::TsTypeAliasDeclaration(_)
-                | AnyJsStatement::TsInterfaceDeclaration(_)
-                | AnyJsStatement::TsDeclareFunctionDeclaration(_) => continue,
-                _ => return false,
-            }
-        }
-        if matches!(
-            node.kind(),
-            JsSyntaxKind::JS_CLASS_EXPRESSION
-                | JsSyntaxKind::JS_CLASS_EXPORT_DEFAULT_DECLARATION
-                | JsSyntaxKind::JS_ARRAY_BINDING_PATTERN
-                | JsSyntaxKind::JS_OBJECT_BINDING_PATTERN
-                | JsSyntaxKind::JS_ARRAY_ASSIGNMENT_PATTERN
-                | JsSyntaxKind::JS_OBJECT_ASSIGNMENT_PATTERN
-                | JsSyntaxKind::TS_PROPERTY_SIGNATURE_TYPE_MEMBER
-        ) {
-            return false;
-        }
-        if JsAssignmentExpression::cast_ref(&node).is_some_and(|assignment| {
-            matches!(
-                assignment.operator(),
-                Ok(JsAssignmentOperator::LogicalAndAssign
-                    | JsAssignmentOperator::LogicalOrAssign
-                    | JsAssignmentOperator::NullishCoalescingAssign)
-            )
-        }) {
-            return false;
-        }
-        for child in node.children() {
-            let Some(next) = remaining.checked_sub(1) else {
-                return false;
-            };
-            remaining = next;
-            pending.push((child, depth + 1));
-        }
-    }
-    true
 }
 
 /// Checks every statement of `root`, reachable or not, for the syntax that the
@@ -689,6 +622,7 @@ mod tests {
     use crate::js_module_info::flow::FlowTest;
     use biome_js_parser::{JsParserOptions, parse};
     use biome_js_semantic::{SemanticModelOptions, semantic_model};
+    use biome_js_syntax::JsSyntaxKind;
     use biome_languages::JsFileSource;
     use biome_rowan::TextSize;
 
@@ -980,32 +914,5 @@ mod tests {
         );
         assert_eq!(built.paths("x", 1), [Vec::<String>::new()]);
         assert!(contains(&built.paths("x", 2), "x:Truthy"));
-    }
-
-    #[test]
-    fn unsupported_syntax_and_limits_reject_the_root() {
-        for body in [
-            "try { read(x); } catch {}",
-            "try { read(x); } finally {}",
-            "switch (x) { case 1: read(x); }",
-            "for (const key in x) read(key);",
-            "for (const item of x) read(item);",
-            "x &&= read(x);",
-            "x ||= read(x);",
-            "x ??= read(x);",
-            "const { value = read(x) } = x;",
-            "class C { field = read(x); }",
-        ] {
-            let source = format!("function f(x) {{ {body} }}");
-            assert!(function(&source).root.is_none(), "{body}");
-        }
-        let source = format!(
-            "function f(x) {{ {}x{}; }}",
-            "(".repeat(MAX_DEPTH),
-            ")".repeat(MAX_DEPTH)
-        );
-        assert!(function(&source).root.is_none());
-        let source = format!("function f(x) {{ {} }}", "x;".repeat(MAX_SYNTAX_NODES / 3));
-        assert!(function(&source).root.is_none());
     }
 }
