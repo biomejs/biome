@@ -1,0 +1,6 @@
+@supports (display: grid); .after-supports{display:grid}
+@if true{.first{color:red}};;;@else{.second{color:blue}}.after-else{color:red}
+@keyframes separated-else{@if true{from{opacity:0}};;;@else{to{opacity:1}}}.after-keyframes{color:blue}
+@keyframes #{$name}; from{opacity:0}.after-interpolation{color:red}
+@if true
+};;;@else{.broken{color:red}}.after-broken-if{color:blue}
