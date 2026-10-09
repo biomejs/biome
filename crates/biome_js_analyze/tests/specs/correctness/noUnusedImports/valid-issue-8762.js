@@ -1,8 +1,8 @@
-/* should not generate diagnostics */
-
 /**
- * Helpers for working with {@linkcode Foo}.
- * @module
+ * Re-exports the {@link helper} utilities.
+ * @module helpers
  */
 
-import { Foo } from "./foo";
+/* should not generate diagnostics */
+
+import { helper } from "./helper";

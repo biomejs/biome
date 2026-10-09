@@ -20,8 +20,8 @@ use biome_js_semantic::{ReferencesExtensions, SemanticModel};
 use biome_js_syntax::{
     AnyJsBinding, AnyJsClassMember, AnyJsCombinedSpecifier, AnyJsDeclaration, AnyJsExportClause,
     AnyJsExportNamedSpecifier, AnyJsImportClause, AnyJsModuleItem, AnyJsNamedImportSpecifier,
-    AnyJsObjectMember, AnyTsTypeMember, JsExport, JsLanguage, JsNamedImportSpecifiers,
-    JsStaticMemberAssignment, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, T, TsEnumMember,
+    AnyJsObjectMember, AnyJsRoot, AnyTsTypeMember, JsExport, JsLanguage, JsNamedImportSpecifiers,
+    JsStaticMemberAssignment, JsSyntaxKind, JsSyntaxNode, T, TsEnumMember,
 };
 use biome_jsdoc_comment::JsdocComment;
 use biome_languages::JsFileSource;
@@ -539,8 +539,8 @@ impl Visitor for JsDocTypeCollectorVisitor {
     ) {
         match event {
             WalkEvent::Enter(node) => {
-                if matches!(node.kind(), JsSyntaxKind::JS_MODULE | JsSyntaxKind::JS_SCRIPT) {
-                    load_jsdoc_types_from_module_comments(&mut self.jsdoc_types, node);
+                if let Some(root) = AnyJsRoot::cast_ref(node) {
+                    load_jsdoc_types_from_module_comment(&mut self.jsdoc_types, &root);
                 }
                 if AnyJsWithTypeReferencingJsDoc::can_cast(node.kind()) {
                     load_jsdoc_types_from_node(&mut self.jsdoc_types, node);
@@ -560,38 +560,34 @@ fn load_jsdoc_types_from_node(model: &mut JsDocTypeModel, node: &SyntaxNode<JsLa
         .for_each(|comment| load_jsdoc_types_from_jsdoc_comment(model, comment.as_str()));
 }
 
-/// Loads the types referenced by module-level JSDoc comments, i.e. comments
-/// with a `@module` tag.
+/// Loads the types referenced by the module comment of a file.
 ///
-/// These comments document the whole file, so they are usually placed before
-/// the imports or at the end of the file, where they aren't attached to any
-/// declaration. Only the top-level statements and the EOF token are inspected.
-fn load_jsdoc_types_from_module_comments(model: &mut JsDocTypeModel, root: &JsSyntaxNode) {
-    for element in root.children_with_tokens() {
-        match element {
-            NodeOrToken::Node(list) => {
-                for item in list.children() {
-                    if let Some(token) = item.first_token() {
-                        load_jsdoc_types_from_module_comments_of_token(model, &token);
-                    }
-                }
-            }
-            NodeOrToken::Token(token) => {
-                load_jsdoc_types_from_module_comments_of_token(model, &token);
-            }
-        }
+/// The module comment is a JSDoc comment with a `@module` tag that documents
+/// the whole file. TypeDoc requires it to be the first comment in the file, so
+/// there is at most one per file and only the first comment is inspected. A
+/// `@module` comment anywhere else is ignored, like any other JSDoc comment
+/// that isn't attached to a declaration.
+fn load_jsdoc_types_from_module_comment(model: &mut JsDocTypeModel, root: &AnyJsRoot) {
+    let Some(mut token) = root.syntax().first_token() else {
+        return;
+    };
+    // A shebang is not a comment, so the first comment comes after it.
+    if token.kind() == JsSyntaxKind::JS_SHEBANG {
+        let Some(next) = token.next_token() else {
+            return;
+        };
+        token = next;
     }
-}
-
-fn load_jsdoc_types_from_module_comments_of_token(model: &mut JsDocTypeModel, token: &JsSyntaxToken) {
-    for piece in token.leading_trivia().pieces() {
-        let text = piece.text();
-        if piece.is_comments()
-            && JsdocComment::text_is_jsdoc_comment(text)
-            && JSDOC_MODULE_TAG_REGEX.is_match(text)
-        {
-            load_jsdoc_types_from_jsdoc_comment(model, text);
-        }
+    let Some(comment) = token
+        .leading_trivia()
+        .pieces()
+        .find(|piece| piece.is_comments())
+    else {
+        return;
+    };
+    let text = comment.text();
+    if JsdocComment::text_is_jsdoc_comment(text) && JSDOC_MODULE_TAG_REGEX.is_match(text) {
+        load_jsdoc_types_from_jsdoc_comment(model, text);
     }
 }
 

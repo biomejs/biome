@@ -1,5 +1,3 @@
-/* should not generate diagnostics */
-
 /**
  * Helpers for working with {@linkcode Foo}.
  *
@@ -7,18 +5,9 @@
  * @module
  */
 
+/* should not generate diagnostics */
+
 import type { Foo } from "./foo";
 import type { Bar } from "./bar";
-import type { Baz } from "./baz";
-import type { Qux } from "./qux";
 
-/**
- * The side effect below relies on {@link Baz}.
- * @module helpers
- */
 console.log("side effect");
-
-/**
- * Documents {@link Qux}.
- * @module
- */

@@ -6,34 +6,43 @@ expression: invalid-issue-8762.ts
 ```ts
 /* should generate diagnostics */
 
-// Without a `@module` tag, a JSDoc comment that isn't attached to a
-// declaration doesn't count as a usage.
+// Only the first comment of a file can be its module comment. Every `@module`
+// comment below comes after another comment, so none of them count.
 
-/** {@link Foo} */
+/**
+ * Documents {@link Foo}.
+ * @module
+ */
 
 import type { Foo } from "./foo";
 import type { Bar } from "./bar";
 import type { Baz } from "./baz";
 
-/** {@link Bar} */
+/**
+ * Documents {@link Bar}.
+ * @module
+ */
 console.log("side effect");
 
-/** {@link Baz} @modules */
+/**
+ * Documents {@link Baz}.
+ * @module
+ */
 
 ```
 
 # Diagnostics
 ```
-invalid-issue-8762.ts:8:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-issue-8762.ts:11:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This import is unused.
   
-     6 │ /** {@link Foo} */
-     7 │ 
-   > 8 │ import type { Foo } from "./foo";
+     9 │  */
+    10 │ 
+  > 11 │ import type { Foo } from "./foo";
        │             ^^^^^^^
-     9 │ import type { Bar } from "./bar";
-    10 │ import type { Baz } from "./baz";
+    12 │ import type { Bar } from "./bar";
+    13 │ import type { Baz } from "./baz";
   
   i Unused imports might be the result of an incomplete refactoring.
   
@@ -41,70 +50,76 @@ invalid-issue-8762.ts:8:13 lint/correctness/noUnusedImports  FIXABLE  ━━━�
   
      1    │ - /*·should·generate·diagnostics·*/
      2    │ - 
-     3    │ - //·Without·a·`@module`·tag,·a·JSDoc·comment·that·isn't·attached·to·a
-     4    │ - //·declaration·doesn't·count·as·a·usage.
+     3    │ - //·Only·the·first·comment·of·a·file·can·be·its·module·comment.·Every·`@module`
+     4    │ - //·comment·below·comes·after·another·comment,·so·none·of·them·count.
      5    │ - 
-     6    │ - /**·{@link·Foo}·*/
-     7    │ - 
-     8    │ - import·type·{·Foo·}·from·"./foo";
+     6    │ - /**
+     7    │ - ·*·Documents·{@link·Foo}.
+     8    │ - ·*·@module
+     9    │ - ·*/
+    10    │ - 
+    11    │ - import·type·{·Foo·}·from·"./foo";
         1 │ + /*·should·generate·diagnostics·*/
         2 │ + 
-        3 │ + //·Without·a·`@module`·tag,·a·JSDoc·comment·that·isn't·attached·to·a
-        4 │ + //·declaration·doesn't·count·as·a·usage.
+        3 │ + //·Only·the·first·comment·of·a·file·can·be·its·module·comment.·Every·`@module`
+        4 │ + //·comment·below·comes·after·another·comment,·so·none·of·them·count.
         5 │ + 
-        6 │ + /**·{@link·Foo}·*/
-        7 │ + 
-     9  8 │   import type { Bar } from "./bar";
-    10  9 │   import type { Baz } from "./baz";
+        6 │ + /**
+        7 │ + ·*·Documents·{@link·Foo}.
+        8 │ + ·*·@module
+        9 │ + ·*/
+       10 │ + 
+    12 11 │   import type { Bar } from "./bar";
+    13 12 │   import type { Baz } from "./baz";
   
 
 ```
 
 ```
-invalid-issue-8762.ts:9:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-issue-8762.ts:12:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This import is unused.
   
-     8 │ import type { Foo } from "./foo";
-   > 9 │ import type { Bar } from "./bar";
+    11 │ import type { Foo } from "./foo";
+  > 12 │ import type { Bar } from "./bar";
        │             ^^^^^^^
-    10 │ import type { Baz } from "./baz";
-    11 │ 
+    13 │ import type { Baz } from "./baz";
+    14 │ 
   
   i Unused imports might be the result of an incomplete refactoring.
   
   i Unsafe fix: Remove the unused imports.
   
-     7  7 │   
-     8  8 │   import type { Foo } from "./foo";
-     9    │ - import·type·{·Bar·}·from·"./bar";
-    10  9 │   import type { Baz } from "./baz";
-    11 10 │   
+    10 10 │   
+    11 11 │   import type { Foo } from "./foo";
+    12    │ - import·type·{·Bar·}·from·"./bar";
+    13 12 │   import type { Baz } from "./baz";
+    14 13 │   
   
 
 ```
 
 ```
-invalid-issue-8762.ts:10:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-issue-8762.ts:13:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This import is unused.
   
-     8 │ import type { Foo } from "./foo";
-     9 │ import type { Bar } from "./bar";
-  > 10 │ import type { Baz } from "./baz";
+    11 │ import type { Foo } from "./foo";
+    12 │ import type { Bar } from "./bar";
+  > 13 │ import type { Baz } from "./baz";
        │             ^^^^^^^
-    11 │ 
-    12 │ /** {@link Bar} */
+    14 │ 
+    15 │ /**
   
   i Unused imports might be the result of an incomplete refactoring.
   
   i Unsafe fix: Remove the unused imports.
   
-     8  8 │   import type { Foo } from "./foo";
-     9  9 │   import type { Bar } from "./bar";
-    10    │ - import·type·{·Baz·}·from·"./baz";
-    11 10 │   
-    12 11 │   /** {@link Bar} */
+    11 11 │   import type { Foo } from "./foo";
+    12 12 │   import type { Bar } from "./bar";
+    13    │ - import·type·{·Baz·}·from·"./baz";
+    14 13 │   
+    15 14 │   /**
   
 
 ```

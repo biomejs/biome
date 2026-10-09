@@ -1,15 +1,24 @@
 /* should generate diagnostics */
 
-// Without a `@module` tag, a JSDoc comment that isn't attached to a
-// declaration doesn't count as a usage.
+// Only the first comment of a file can be its module comment. Every `@module`
+// comment below comes after another comment, so none of them count.
 
-/** {@link Foo} */
+/**
+ * Documents {@link Foo}.
+ * @module
+ */
 
 import type { Foo } from "./foo";
 import type { Bar } from "./bar";
 import type { Baz } from "./baz";
 
-/** {@link Bar} */
+/**
+ * Documents {@link Bar}.
+ * @module
+ */
 console.log("side effect");
 
-/** {@link Baz} @modules */
+/**
+ * Documents {@link Baz}.
+ * @module
+ */

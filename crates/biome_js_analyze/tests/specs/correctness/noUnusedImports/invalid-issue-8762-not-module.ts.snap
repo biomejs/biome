@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-issue-8762-not-module.ts
+---
+# Input
+```ts
+/** {@link Foo} @modules */
+
+/* should generate diagnostics */
+
+// The first comment is JSDoc, but `@modules` is not the `@module` tag.
+
+import type { Foo } from "./foo";
+
+```
+
+# Diagnostics
+```
+invalid-issue-8762-not-module.ts:7:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    5 │ // The first comment is JSDoc, but `@modules` is not the `@module` tag.
+    6 │ 
+  > 7 │ import type { Foo } from "./foo";
+      │             ^^^^^^^
+    8 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    5 5 │   // The first comment is JSDoc, but `@modules` is not the `@module` tag.
+    6 6 │   
+    7   │ - import·type·{·Foo·}·from·"./foo";
+    8 7 │   
+  
+
+```
