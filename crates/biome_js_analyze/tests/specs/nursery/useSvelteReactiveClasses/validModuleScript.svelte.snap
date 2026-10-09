@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validModuleScript.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script module>
+	import { SvelteSet as Set } from "svelte/reactivity";
+</script>
+
+<script>
+	const set = new Set();
+	set.add(1);
+</script>
+
+```

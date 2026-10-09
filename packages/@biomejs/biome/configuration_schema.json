@@ -8333,6 +8333,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSvelteReactiveClasses": {
+					"description": "Require the reactive classes from svelte/reactivity instead of built-in objects that are modified.\nSee https://biomejs.dev/linter/rules/use-svelte-reactive-classes",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSvelteReactiveClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSvelteRequireEachKey": {
 					"description": "Require keyed {#each} blocks in Svelte templates.\nSee https://biomejs.dev/linter/rules/use-svelte-require-each-key",
 					"anyOf": [
@@ -14908,6 +14915,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseSvelteReactiveClassesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSvelteReactiveClassesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseSvelteRequireEachKeyOptions": {
 			"type": "object",
 			"properties": {
@@ -19973,6 +19989,16 @@
 			]
 		},
 		"UseSvelteKitRuneImportsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseSvelteReactiveClassesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseSvelteReactiveClassesOptions" }
+			]
+		},
+		"UseSvelteReactiveClassesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
