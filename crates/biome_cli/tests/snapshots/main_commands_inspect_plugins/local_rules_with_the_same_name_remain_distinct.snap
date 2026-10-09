@@ -37,12 +37,14 @@ biome inspect plugins
 ```block
 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i 2 rules resolved.
+  i The configuration enables 2 plugin rules.
   
   Local plugins
   
-  - shared (first/shared.grit)
-  - shared (second/shared.grit)
+  - first/shared.grit (rule name: shared)
+  - second/shared.grit (rule name: shared)
+  
+  i 2 plugin rules are named shared. A suppression comment for lint/plugin/shared applies to all of them.
   
 
 ```

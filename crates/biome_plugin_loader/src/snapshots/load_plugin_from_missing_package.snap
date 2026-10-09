@@ -4,11 +4,7 @@ expression: content
 ---
 # Plugin
 
-## `/my-plugin/rules/1.grit`
-
-```grit
-`hello`
-```
+No plugin source was loaded.
 
 # Input
 
@@ -19,5 +15,7 @@ No input was analyzed.
 ```block
 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Biome couldn't find a biome-manifest.json or biome-manifest.jsonc file in /my-plugin.
+  × Biome couldn't find the plugin package missing-package.
+  
+  i Make sure the package is installed. Biome looks for it in the node_modules directory of /project and of each parent directory.
 ```

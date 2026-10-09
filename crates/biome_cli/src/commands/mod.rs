@@ -715,15 +715,16 @@ pub enum MigrateSubCommand {
 
 #[derive(Debug, Bpaf, Clone)]
 pub enum InspectSubCommand {
-    /// Resolves plugin files and manifest exports without loading or executing plugin code.
+    /// Lists the plugin rules enabled by the configuration, grouped by plugin.
     ///
-    /// Lists resolved rules by plugin and importing preset, including their include globs.
-    /// Without `--path`, filtered imports are listed separately. Resolution does not establish language
-    /// compatibility or successful compilation.
+    /// Each rule shows whether the configuration lists it directly or through a preset. Rules
+    /// that apply only to some files are listed separately with their `includes` globs. Biome
+    /// locates the plugin files but doesn't compile or run them, so this command doesn't report
+    /// syntax errors or runtime failures.
     #[bpaf(command)]
     Plugins {
-        /// Lists only rules selected by override and plugin includes for this path.
-        /// Does not discover nested configurations or evaluate file/VCS ignores.
+        /// Lists only the rules that apply to this file, based on `overrides` and plugin `includes`.
+        /// Nested configuration files and ignore files are not considered.
         #[bpaf(long("path"), argument("PATH"), optional)]
         path: Option<String>,
     },

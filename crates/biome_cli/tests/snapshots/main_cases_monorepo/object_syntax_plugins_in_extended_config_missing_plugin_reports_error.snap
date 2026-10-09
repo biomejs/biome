@@ -50,7 +50,7 @@ configuration ━━━━━━━━━━━━━━━━━━━━━━
 plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Error(s) during loading of plugins:
-    Failed to read plugin file <TEMP_DIR>/object_syntax_plugins_in_extended_config_missing_plugin_reports_error/packages/tools/biome-plugins/no-object-assign.grit
+    Biome couldn't find the plugin file <TEMP_DIR>/object_syntax_plugins_in_extended_config_missing_plugin_reports_error/packages/tools/biome-plugins/no-object-assign.grit.
   
 
 ```
