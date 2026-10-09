@@ -1,0 +1,291 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { createApp, defineComponent, onMounted, onUnmounted } from "vue";
+
+defineComponent({
+	setup: async function () {
+		await doSomething();
+		onMounted(() => {});
+	},
+});
+
+defineComponent({
+	setup: async () => {
+		await doSomething();
+		onMounted(() => {});
+	},
+});
+
+createApp({
+	async setup() {
+		await doSomething();
+		onMounted(() => {});
+	},
+});
+
+// The `await` is inside a block that comes before the hook.
+defineComponent({
+	async setup() {
+		if (shouldLoad) {
+			await doSomething();
+		}
+		onMounted(() => {});
+	},
+});
+
+// The `await` is in the arguments of an earlier call.
+defineComponent({
+	async setup() {
+		const data = useData(await doSomething());
+		onMounted(() => {});
+	},
+});
+
+// The hook is called after its argument is awaited.
+defineComponent({
+	async setup() {
+		onMounted(await loadHandler());
+	},
+});
+
+defineComponent({
+	async setup() {
+		for await (const item of items) {
+			onMounted(() => {});
+		}
+		onUnmounted(() => {});
+	},
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:7:3 lint/nursery/noVueLifecycleAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This lifecycle hook is registered after an await, so it never runs.
+  
+    5 │ 	setup: async function () {
+    6 │ 		await doSomething();
+  > 7 │ 		onMounted(() => {});
+      │ 		^^^^^^^^^^^^^^^^^^^
+    8 │ 	},
+    9 │ });
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component the hook belongs to.
+  
+    4 │ defineComponent({
+    5 │ 	setup: async function () {
+  > 6 │ 		await doSomething();
+      │ 		^^^^^
+    7 │ 		onMounted(() => {});
+    8 │ 	},
+  
+  i Call the lifecycle hook before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:3 lint/nursery/noVueLifecycleAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This lifecycle hook is registered after an await, so it never runs.
+  
+    12 │ 	setup: async () => {
+    13 │ 		await doSomething();
+  > 14 │ 		onMounted(() => {});
+       │ 		^^^^^^^^^^^^^^^^^^^
+    15 │ 	},
+    16 │ });
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component the hook belongs to.
+  
+    11 │ defineComponent({
+    12 │ 	setup: async () => {
+  > 13 │ 		await doSomething();
+       │ 		^^^^^
+    14 │ 		onMounted(() => {});
+    15 │ 	},
+  
+  i Call the lifecycle hook before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:3 lint/nursery/noVueLifecycleAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This lifecycle hook is registered after an await, so it never runs.
+  
+    19 │ 	async setup() {
+    20 │ 		await doSomething();
+  > 21 │ 		onMounted(() => {});
+       │ 		^^^^^^^^^^^^^^^^^^^
+    22 │ 	},
+    23 │ });
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component the hook belongs to.
+  
+    18 │ createApp({
+    19 │ 	async setup() {
+  > 20 │ 		await doSomething();
+       │ 		^^^^^
+    21 │ 		onMounted(() => {});
+    22 │ 	},
+  
+  i Call the lifecycle hook before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:3 lint/nursery/noVueLifecycleAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This lifecycle hook is registered after an await, so it never runs.
+  
+    29 │ 			await doSomething();
+    30 │ 		}
+  > 31 │ 		onMounted(() => {});
+       │ 		^^^^^^^^^^^^^^^^^^^
+    32 │ 	},
+    33 │ });
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component the hook belongs to.
+  
+    27 │ 	async setup() {
+    28 │ 		if (shouldLoad) {
+  > 29 │ 			await doSomething();
+       │ 			^^^^^
+    30 │ 		}
+    31 │ 		onMounted(() => {});
+  
+  i Call the lifecycle hook before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:3 lint/nursery/noVueLifecycleAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This lifecycle hook is registered after an await, so it never runs.
+  
+    37 │ 	async setup() {
+    38 │ 		const data = useData(await doSomething());
+  > 39 │ 		onMounted(() => {});
+       │ 		^^^^^^^^^^^^^^^^^^^
+    40 │ 	},
+    41 │ });
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component the hook belongs to.
+  
+    36 │ defineComponent({
+    37 │ 	async setup() {
+  > 38 │ 		const data = useData(await doSomething());
+       │ 		                     ^^^^^
+    39 │ 		onMounted(() => {});
+    40 │ 	},
+  
+  i Call the lifecycle hook before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:46:3 lint/nursery/noVueLifecycleAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This lifecycle hook is registered after an await, so it never runs.
+  
+    44 │ defineComponent({
+    45 │ 	async setup() {
+  > 46 │ 		onMounted(await loadHandler());
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    47 │ 	},
+    48 │ });
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component the hook belongs to.
+  
+    44 │ defineComponent({
+    45 │ 	async setup() {
+  > 46 │ 		onMounted(await loadHandler());
+       │ 		          ^^^^^
+    47 │ 	},
+    48 │ });
+  
+  i Call the lifecycle hook before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:53:4 lint/nursery/noVueLifecycleAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This lifecycle hook is registered after an await, so it never runs.
+  
+    51 │ 	async setup() {
+    52 │ 		for await (const item of items) {
+  > 53 │ 			onMounted(() => {});
+       │ 			^^^^^^^^^^^^^^^^^^^
+    54 │ 		}
+    55 │ 		onUnmounted(() => {});
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component the hook belongs to.
+  
+    50 │ defineComponent({
+    51 │ 	async setup() {
+  > 52 │ 		for await (const item of items) {
+       │ 		    ^^^^^
+    53 │ 			onMounted(() => {});
+    54 │ 		}
+  
+  i Call the lifecycle hook before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:55:3 lint/nursery/noVueLifecycleAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This lifecycle hook is registered after an await, so it never runs.
+  
+    53 │ 			onMounted(() => {});
+    54 │ 		}
+  > 55 │ 		onUnmounted(() => {});
+       │ 		^^^^^^^^^^^^^^^^^^^^^
+    56 │ 	},
+    57 │ });
+  
+  i The setup() function pauses here. After this point, Vue no longer knows which component the hook belongs to.
+  
+    50 │ defineComponent({
+    51 │ 	async setup() {
+  > 52 │ 		for await (const item of items) {
+       │ 		    ^^^^^
+    53 │ 			onMounted(() => {});
+    54 │ 		}
+  
+  i Call the lifecycle hook before the first await in setup().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
