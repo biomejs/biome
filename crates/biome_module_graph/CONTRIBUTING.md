@@ -97,9 +97,14 @@ functions, or facts about individual object properties. Unsupported control flow
 includes exception handlers, `switch`, `for-in`/`for-of`, destructuring, classes,
 and logical assignments. Roots that read the global `eval` or the implicit
 `arguments` object, directly or in a nested function, and roots that exceed a
-work limit while their flow is collected, also keep ordinary inference. The
-semantic model decides whether a reference reads either one, so a variable that
-shadows the name and a reference inside a type do not count. Variables typed
+work limit while their flow is collected, also keep ordinary inference.
+References inside types never run, so the scanner ignores them. Every other
+reference to `eval` counts, because calling a variable named `eval` that holds
+the global function is still a direct `eval`. A reference to `arguments` is an
+ordinary read only when the semantic model resolves it to a parameter, catch
+parameter, `let`, or `const` declared inside the function that owns the
+`arguments` object, or anywhere when no enclosing function has one, such as at
+the top level of a script. Variables typed
 `any`, or whose type includes an undetermined part, never narrow because no
 supported test can change them. Collection already drops reads of untyped and
 `any`-annotated variables; other variable types are resolved only when a
