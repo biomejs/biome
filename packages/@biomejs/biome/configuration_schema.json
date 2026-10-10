@@ -3163,6 +3163,10 @@
 			"description": "Options applied to Markdown files",
 			"type": "object",
 			"properties": {
+				"analyzeEmbeds": {
+					"description": "Runs the linter and assist actions on the code inside fenced code blocks, frontmatter, and\nHTML blocks, with the rules and actions of the code's language. Defaults to `false`.\n\nFenced code blocks often hold partial examples that aren't meant to be valid on their own,\nso Biome doesn't analyze them unless you enable this option. When enabled, Biome reports\nsyntax errors, rule violations, and assist actions in every block whose language it\nsupports, and the `--write` option applies their fixes. Biome reads the language of a\nfenced code block from the first word after the opening fence, such as `js` or `css`, and\nreads frontmatter as YAML. Code blocks inside lists and quotes aren't analyzed.\n\nTo ignore a rule inside a block, add a suppression comment to the block's code.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				},
 				"formatter": {
 					"description": "Formatter options",
 					"anyOf": [
@@ -3193,6 +3197,10 @@
 			"properties": {
 				"enabled": {
 					"description": "Control the formatter for Markdown (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				},
+				"formatEmbeds": {
+					"description": "Formats the code inside fenced code blocks, frontmatter, and HTML blocks with the formatter\nof the code's language. Defaults to `true`.\n\nBiome reads the language of a fenced code block from the first word after the opening\nfence, such as `js` or `css`, and reads frontmatter as YAML. Biome formats a block only when\nit supports the block's language and the formatter for that language is enabled. It uses\nthat language's formatter options, except for the indentation, line width, and line ending,\nwhich come from the Markdown formatter options. Other blocks stay as written. For example,\nHTML blocks stay as written unless `html.formatter.enabled` is `true`. Blocks inside lists\nand quotes, and indented HTML blocks, also stay as written.\n\nA block with a syntax error stays as written, and Biome still formats the rest of the file.\nThe linter reports such errors when `markdown.analyzeEmbeds` is `true`.\n\nWhen this option is `false`, Biome keeps every block as written.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"indentStyle": {

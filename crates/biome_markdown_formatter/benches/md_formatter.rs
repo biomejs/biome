@@ -40,7 +40,8 @@ fn bench_formatter(criterion: &mut Criterion) {
             &code,
             |b, _| {
                 fn format(root: &biome_markdown_syntax::MarkdownSyntaxNode) -> Printed {
-                    let formatted = format_node(MdFormatOptions::default(), root).unwrap();
+                    let formatted =
+                        format_node(MdFormatOptions::default(), root, Vec::new()).unwrap();
                     let printed = formatted.print();
                     drop(formatted);
                     printed.expect("Document to be valid")

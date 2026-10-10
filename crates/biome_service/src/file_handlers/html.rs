@@ -39,7 +39,7 @@ use biome_analyze::SnippetAnalyzer;
 use biome_analyze::SuppressionComment;
 use biome_analyze::{
     ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, AnalyzerSuppression,
-    ControlFlow, Never, Suppression,
+    ControlFlow, EmbeddedSignalInspector, Never, Suppression,
 };
 use biome_configuration::html::{
     HtmlAssistConfiguration, HtmlAssistEnabled, HtmlFormatterConfiguration, HtmlFormatterEnabled,
@@ -65,7 +65,7 @@ use biome_formatter::{Buffer, FormatElement, QuoteStyle};
 use biome_fs::BiomePath;
 #[cfg(feature = "html_embeds")]
 use biome_html_analyze::analyze_with_snippets;
-use biome_html_analyze::{HtmlAnalyzerServices, HtmlSuppression, analyze};
+use biome_html_analyze::{HtmlAnalyzerServices, HtmlSuppression, analyze, analyze_snippet};
 use biome_html_factory::make::ident;
 use biome_html_formatter::context::SelfCloseVoidElements;
 use biome_html_formatter::{
@@ -1056,6 +1056,15 @@ fn format_embedded(
 
 #[tracing::instrument(level = "debug", skip(params))]
 fn lint(params: LintParams) -> LintResults {
+    lint_with_inspector(&params, None)
+}
+
+/// Lints HTML. When `inspector` is set, the HTML is embedded in another file,
+/// whose ignore comments can also apply to the findings.
+pub(super) fn lint_with_inspector(
+    params: &LintParams,
+    inspector: Option<EmbeddedSignalInspector<'_, '_>>,
+) -> LintResults {
     let analyzer_options = resolve_analyzer_options(
         params.path,
         params.working_directory,
@@ -1093,7 +1102,13 @@ fn lint(params: LintParams) -> LintResults {
         for snippet in params
             .parsed_source
             .snippets(&params.workspace_db)
-            .for_analysis(&params.parsed_source, params.language, &params.workspace_db)
+            .for_analysis(
+                &params.parsed_source,
+                params.language,
+                params.settings.as_ref(),
+                params.path,
+                &params.workspace_db,
+            )
         {
             let Some(language) = snippet.file_source(&params.workspace_db) else {
                 continue;
@@ -1129,7 +1144,7 @@ fn lint(params: LintParams) -> LintResults {
         snippets
     };
 
-    let mut process_lint = ProcessLint::new(&params);
+    let mut process_lint = ProcessLint::new(params);
 
     let source_type = params.language.to_html_file_source().unwrap_or_default();
     let html_services = HtmlAnalyzerServices {
@@ -1155,27 +1170,39 @@ fn lint(params: LintParams) -> LintResults {
         &params.parsed_source,
         &params.workspace_db,
     );
-    #[cfg(feature = "html_embeds")]
-    let (_, analyze_diagnostics) = analyze_with_snippets(
-        &tree,
-        filter,
-        &analyzer_options,
-        source_type,
-        html_services,
-        Some(Box::new(suppression)),
-        &mut snippets,
-        |signal| process_lint.process_signal(signal),
-    );
-    #[cfg(not(feature = "html_embeds"))]
-    let (_, analyze_diagnostics) = analyze(
-        &tree,
-        filter,
-        &analyzer_options,
-        source_type,
-        html_services,
-        Some(Box::new(suppression)),
-        |signal| process_lint.process_signal(signal),
-    );
+    let (_, analyze_diagnostics) = match inspector {
+        Some(inspector) => analyze_snippet(
+            &tree,
+            filter,
+            &analyzer_options,
+            source_type,
+            html_services,
+            Some(Box::new(suppression)),
+            inspector,
+            |signal| process_lint.process_signal(signal),
+        ),
+        #[cfg(feature = "html_embeds")]
+        None => analyze_with_snippets(
+            &tree,
+            filter,
+            &analyzer_options,
+            source_type,
+            html_services,
+            Some(Box::new(suppression)),
+            &mut snippets,
+            |signal| process_lint.process_signal(signal),
+        ),
+        #[cfg(not(feature = "html_embeds"))]
+        None => analyze(
+            &tree,
+            filter,
+            &analyzer_options,
+            source_type,
+            html_services,
+            Some(Box::new(suppression)),
+            |signal| process_lint.process_signal(signal),
+        ),
+    };
 
     let results = process_lint.into_result(
         params.parsed_source.serde_diagnostics(&params.workspace_db),

@@ -10,8 +10,8 @@ pub use crate::registry::visit_registry;
 pub use crate::suppression::MarkdownSuppression;
 use crate::suppression_action::MarkdownSuppressionAction;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams,
-    MetadataRegistry, RuleAction, RuleRegistry,
+    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, EmbeddedSignalInspector,
+    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry, SnippetAnalyzer,
 };
 use biome_diagnostics::Error;
 use biome_languages::MdFileSource;
@@ -45,6 +45,61 @@ where
     analyze_with_inspect_matcher(root, filter, |_| {}, options, file_source, emit_signal)
 }
 
+/// Analyzes Markdown and embedded snippets together. Ignore comments in
+/// Markdown can also apply to findings in the snippets.
+pub fn analyze_with_snippets<'a, F, B, Output>(
+    root: &LanguageRoot<MarkdownLanguage>,
+    filter: AnalysisFilter,
+    options: &'a AnalyzerOptions,
+    file_source: MdFileSource,
+    snippets: &mut [Box<dyn SnippetAnalyzer<B, Output = Output> + '_>],
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    F: FnMut(&dyn AnalyzerSignal<MarkdownLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_optional_snippets(
+        AnalyzerParams {
+            root,
+            filter,
+            options,
+            file_source,
+            snippet_inspector: None,
+            snippets: Some(snippets),
+        },
+        |_| {},
+        emit_signal,
+    )
+}
+
+/// Analyzes Markdown embedded in another file, honoring ignore comments in both.
+pub fn analyze_snippet<'a, F, B>(
+    root: &LanguageRoot<MarkdownLanguage>,
+    filter: AnalysisFilter,
+    options: &'a AnalyzerOptions,
+    file_source: MdFileSource,
+    inspector: EmbeddedSignalInspector<'_, '_>,
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    F: FnMut(&dyn AnalyzerSignal<MarkdownLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_optional_snippets::<_, _, B, ()>(
+        AnalyzerParams {
+            root,
+            filter,
+            options,
+            file_source,
+            snippet_inspector: Some(inspector),
+            snippets: None,
+        },
+        |_| {},
+        emit_signal,
+    )
+}
+
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
 /// to selectively restrict analysis to specific rules / a specific source range,
 /// then call `emit_signal` when an analysis rule emits a diagnostic or action.
@@ -57,6 +112,42 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     inspect_matcher: V,
     options: &'a AnalyzerOptions,
     file_source: MdFileSource,
+    emit_signal: F,
+) -> (Option<B>, Vec<Error>)
+where
+    V: FnMut(&MatchQueryParams<MarkdownLanguage>) + 'a,
+    F: FnMut(&dyn AnalyzerSignal<MarkdownLanguage>) -> ControlFlow<B> + 'a,
+    B: 'a,
+{
+    analyze_with_optional_snippets::<_, _, B, ()>(
+        AnalyzerParams {
+            root,
+            filter,
+            options,
+            file_source,
+            snippet_inspector: None,
+            snippets: None,
+        },
+        inspect_matcher,
+        emit_signal,
+    )
+}
+
+struct AnalyzerParams<'a, 'guest, 'registry, 'snippets, 'analyzer, B, Output> {
+    root: &'a LanguageRoot<MarkdownLanguage>,
+    filter: AnalysisFilter<'a>,
+    options: &'a AnalyzerOptions,
+    file_source: MdFileSource,
+    /// Checks ignore comments of the file that contains `root`, when `root`
+    /// is a snippet.
+    snippet_inspector: Option<EmbeddedSignalInspector<'guest, 'registry>>,
+    /// Snippets embedded in `root`, analyzed after it.
+    snippets: Option<&'snippets mut [Box<dyn SnippetAnalyzer<B, Output = Output> + 'analyzer>]>,
+}
+
+fn analyze_with_optional_snippets<'a, V, F, B, Output>(
+    params: AnalyzerParams<'a, '_, '_, '_, '_, B, Output>,
+    inspect_matcher: V,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
@@ -64,6 +155,14 @@ where
     F: FnMut(&dyn AnalyzerSignal<MarkdownLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
+    let AnalyzerParams {
+        root,
+        filter,
+        options,
+        file_source,
+        snippet_inspector,
+        snippets,
+    } = params;
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
@@ -88,15 +187,19 @@ where
         analyzer.add_visitor(phase, visitor);
     }
 
-    (
-        analyzer.run(biome_analyze::AnalyzerContext {
-            root: root.clone(),
-            range: filter.range,
-            services,
-            options,
-        }),
-        diagnostics,
-    )
+    let ctx = biome_analyze::AnalyzerContext {
+        root: root.clone(),
+        range: filter.range,
+        services,
+        options,
+    };
+    let result = match (snippet_inspector, snippets) {
+        (Some(inspector), _) => analyzer.run_snippet(ctx, inspector),
+        (None, Some(snippets)) => analyzer.run_with_snippets(ctx, snippets),
+        (None, None) => analyzer.run(ctx),
+    };
+
+    (result, diagnostics)
 }
 
 #[cfg(test)]

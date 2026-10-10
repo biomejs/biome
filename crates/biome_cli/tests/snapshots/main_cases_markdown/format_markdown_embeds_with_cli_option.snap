@@ -1,0 +1,24 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write --md-formatter-format-embeds=false file.md
+```
+
+## `file.md`
+
+```md
+```js
+const   value   =   {a:1,b:2}
+```
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. No fixes applied.
+```

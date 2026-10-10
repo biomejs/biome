@@ -35,6 +35,24 @@ pub struct MarkdownConfiguration {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub linter: Option<MarkdownLinterConfiguration>,
+
+    /// Runs the linter and assist actions on the code inside fenced code blocks, frontmatter, and
+    /// HTML blocks, with the rules and actions of the code's language. Defaults to `false`.
+    ///
+    /// Fenced code blocks often hold partial examples that aren't meant to be valid on their own,
+    /// so Biome doesn't analyze them unless you enable this option. When enabled, Biome reports
+    /// syntax errors, rule violations, and assist actions in every block whose language it
+    /// supports, and the `--write` option applies their fixes. Biome reads the language of a
+    /// fenced code block from the first word after the opening fence, such as `js` or `css`, and
+    /// reads frontmatter as YAML. Code blocks inside lists and quotes aren't analyzed.
+    ///
+    /// To ignore a rule inside a block, add a suppression comment to the block's code.
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("md-analyze-embeds"), argument("true|false"))
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub analyze_embeds: Option<MarkdownAnalyzeEmbeds>,
 }
 
 pub type MarkdownFormatterEnabled = Bool<true>;
@@ -43,6 +61,8 @@ pub type MarkdownAssistEnabled = Bool<true>;
 pub type MarkdownParseFrontmatter = Bool<false>;
 pub type MarkdownParseGfm = Bool<true>;
 pub type MarkdownParseCjkFriendlyEmphasis = Bool<false>;
+pub type MarkdownFormatEmbeds = Bool<true>;
+pub type MarkdownAnalyzeEmbeds = Bool<false>;
 
 /// Options that change how the Markdown parser behaves
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
@@ -164,6 +184,28 @@ pub struct MarkdownFormatterConfiguration {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub prose_wrap: Option<ProseWrap>,
+
+    /// Formats the code inside fenced code blocks, frontmatter, and HTML blocks with the formatter
+    /// of the code's language. Defaults to `true`.
+    ///
+    /// Biome reads the language of a fenced code block from the first word after the opening
+    /// fence, such as `js` or `css`, and reads frontmatter as YAML. Biome formats a block only when
+    /// it supports the block's language and the formatter for that language is enabled. It uses
+    /// that language's formatter options, except for the indentation, line width, and line ending,
+    /// which come from the Markdown formatter options. Other blocks stay as written. For example,
+    /// HTML blocks stay as written unless `html.formatter.enabled` is `true`. Blocks inside lists
+    /// and quotes, and indented HTML blocks, also stay as written.
+    ///
+    /// A block with a syntax error stays as written, and Biome still formats the rest of the file.
+    /// The linter reports such errors when `markdown.analyzeEmbeds` is `true`.
+    ///
+    /// When this option is `false`, Biome keeps every block as written.
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("md-formatter-format-embeds"), argument("true|false"))
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub format_embeds: Option<MarkdownFormatEmbeds>,
 }
 
 /// Options that change how the Markdown linter behaves
@@ -179,4 +221,5 @@ pub struct MarkdownLinterConfiguration {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub enabled: Option<MarkdownLinterEnabled>,
+
 }

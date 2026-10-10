@@ -1,0 +1,86 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write file.md
+```
+
+## `biome.json`
+
+```json
+{
+  "html": {
+    "formatter": {
+      "enabled": true
+    }
+  }
+}
+```
+
+## `file.md`
+
+```md
+<div>
+	<p>
+		aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+		bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+	</p>
+</div>
+
+<span>
+label
+</span>
+
+   <div><span>indented</span>
+   </div>
+
+- item
+
+  <div><span>listed</span>
+  </div>
+
+- item
+
+  ```js
+  const   listed = 1
+  ```
+
+> ```js
+> const   quoted = 2
+> ```
+
+```js
+const indented = `a
+b`;
+```
+
+````md
+# Nested
+
+```js
+const   nested = 3
+```
+````
+
+```md
+#   Tilde fence
+
+~~~js
+const   nested = 4
+~~~
+```
+
+```js
+const unclosed = 4;
+```
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 1 file in <TIME>. Fixed 1 file.
+```

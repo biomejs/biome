@@ -376,27 +376,48 @@ pub(crate) enum SnippetsIterator<'a> {
 }
 
 impl<'a> SnippetsIterator<'a> {
-    /// Excludes host-owned template comments and Markdown fenced code blocks from
-    /// guest analysis. The unfiltered iterator remains available for formatting
-    /// and host suppression extraction.
+    /// Excludes host-owned template comments from guest analysis, and every
+    /// snippet of a Markdown file whose `markdown.analyzeEmbeds` is disabled. The unfiltered iterator remains available for formatting and
+    /// host suppression extraction.
     pub(crate) fn for_analysis(
         self,
         host: &'a ParsedOrigin,
         source: DocumentFileSource,
+        settings: &Settings,
+        path: &Utf8Path,
         db: &'a WorkspaceDb,
     ) -> impl Iterator<Item = ParsedSnippetOrigin> + 'a {
+        let _ = (settings, path);
+        #[cfg(feature = "md_embeds")]
+        let skips_markdown_snippets =
+            source.to_markdown_file_source().is_some() && !md::analyze_embeds_enabled(settings, path);
         self.filter(move |snippet| {
             let _ = (host, source, snippet, db);
+            #[cfg(feature = "md_embeds")]
+            if skips_markdown_snippets {
+                return false;
+            }
             #[cfg(feature = "html_embeds")]
             if html::is_astro_template_comment(host, source, snippet, db) {
                 return false;
             }
-            #[cfg(feature = "md_embeds")]
-            if md::is_fenced_code_block(host, source, snippet, db) {
-                return false;
-            }
             true
         })
+    }
+
+    /// Excludes the snippets whose syntax errors don't stop formatting the
+    /// containing file: the formatter of a Markdown file keeps such snippets as
+    /// written.
+    pub(crate) fn blocking_formatting(
+        self,
+        source: DocumentFileSource,
+    ) -> impl Iterator<Item = ParsedSnippetOrigin> + 'a {
+        let _ = source;
+        #[cfg(feature = "lang_md")]
+        let blocks = source.to_markdown_file_source().is_none();
+        #[cfg(not(feature = "lang_md"))]
+        let blocks = true;
+        self.filter(move |_| blocks)
     }
 }
 

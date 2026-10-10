@@ -1077,6 +1077,7 @@ mod tests {
             line_width: Some(LineWidth::try_from(80).expect("valid line width")),
             trailing_newline: global_formatter.trailing_newline,
             prose_wrap: Some(ProseWrap::Always),
+            format_embeds: None,
         };
         assert_eq!(
             configuration

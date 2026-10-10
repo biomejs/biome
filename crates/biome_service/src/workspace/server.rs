@@ -99,7 +99,7 @@ use biome_rowan::NodeCache;
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
 use papaya::HashMap;
-use rustc_hash::{FxBuildHasher, FxHashMap};
+use rustc_hash::{FxBuildHasher, FxHashMap, FxHashSet};
 use std::fmt::Debug;
 use std::ops::Deref;
 use std::panic::RefUnwindSafe;
@@ -290,17 +290,35 @@ impl ProcessFileState {
         )))
     }
 
-    fn has_errors(&self) -> bool {
+    /// Returns `true` when the document, or a snippet whose syntax errors stop
+    /// formatting the document, has syntax errors.
+    fn has_errors_for_formatting(&self) -> bool {
         self.parsed
             .diagnostics(&self.db)
             .iter()
             .any(|diagnostic| diagnostic.severity() >= Severity::Error)
             || self
                 .iter_snippets()
+                .blocking_formatting(self.file_source)
                 .any(|snippet| snippet.has_errors(&self.db))
     }
 
-    fn error_count(&self) -> usize {
+    /// Counts the syntax errors of the document and of the snippets whose errors
+    /// count for it: the snippets that stop formatting the document, and when
+    /// `analyzed` is `true`, the snippets that the linter analyzes.
+    fn error_count(&self, settings: &Settings, path: &Utf8Path, analyzed: bool) -> usize {
+        let mut counted: FxHashSet<TextRange> = self
+            .iter_snippets()
+            .blocking_formatting(self.file_source)
+            .map(|snippet| snippet.content_range(&self.db))
+            .collect();
+        if analyzed {
+            counted.extend(
+                self.iter_snippets()
+                    .for_analysis(&self.parsed, self.file_source, settings, path, &self.db)
+                    .map(|snippet| snippet.content_range(&self.db)),
+            );
+        }
         self.parsed
             .diagnostics(&self.db)
             .iter()
@@ -308,6 +326,7 @@ impl ProcessFileState {
             .count()
             + self
                 .iter_snippets()
+                .filter(|snippet| counted.contains(&snippet.content_range(&self.db)))
                 .map(|snippet| snippet.error_count(&self.db))
                 .sum::<usize>()
     }
@@ -1443,9 +1462,19 @@ impl WorkspaceServerWithDb<'_> {
         let mut skipped_suggested_fixes = 0;
 
         if let Some(update_snippets) = capabilities.analyzer.update_snippets {
+            // Markdown formats its snippets when it formats the whole document,
+            // according to `markdown.formatter.formatEmbeds`.
+            #[cfg(feature = "lang_md")]
+            let should_format = should_format && state.file_source.to_markdown_file_source().is_none();
             let embedded_snippets: Vec<_> = state
                 .iter_snippets()
-                .for_analysis(&state.parsed, state.file_source, &state.db)
+                .for_analysis(
+                    &state.parsed,
+                    state.file_source,
+                    settings.as_ref(),
+                    &path,
+                    &state.db,
+                )
                 .collect();
             let mut new_snippets = Vec::new();
             for embedded_snippet in embedded_snippets {
@@ -1626,7 +1655,7 @@ impl WorkspaceServerWithDb<'_> {
             .ok_or_else(WorkspaceError::no_project)?;
         if respect_format_with_errors
             && !settings.format_with_errors_enabled_for_this_file_path(path)
-            && state.has_errors()
+            && state.has_errors_for_formatting()
         {
             return Ok(None);
         }
@@ -1687,7 +1716,8 @@ impl WorkspaceServerWithDb<'_> {
             .project_get_settings_query(&state.db, project_key, &path, inline_config)
             .ok_or_else(WorkspaceError::no_project)?;
         let capabilities = self.features.get_deprecated_capabilities(state.file_source);
-        let parse_errors = state.error_count();
+        let parse_errors =
+            state.error_count(&settings, &path, categories.is_lint() || categories.is_assist());
 
         let (diagnostics, errors, warnings, infos, skipped_diagnostics) = if (categories.is_lint()
             || categories.is_assist())
@@ -1755,7 +1785,11 @@ impl WorkspaceServerWithDb<'_> {
                 .iter()
                 .filter(|diagnostic| diagnostic.severity() >= Severity::Error)
                 .count();
-            for embedded_node in state.iter_snippets() {
+            for embedded_node in
+                state
+                    .iter_snippets()
+                    .blocking_formatting(state.file_source)
+            {
                 let embedded_diagnostics: Vec<_> = embedded_node
                     .serde_diagnostics(&state.db)
                     .into_iter()
@@ -3461,11 +3495,16 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             let mut applied_fixes = 0;
             let mut skipped_suggested_fixes = 0;
             let mut fixed_source = None;
-            let can_transform = !(skip_parse_errors && state.has_errors());
+            let can_transform = !(skip_parse_errors
+                && state.error_count(
+                    &settings,
+                    &path,
+                    categories.is_lint() || categories.is_assist(),
+                ) > 0);
             let format_with_errors_disabled = can_transform
                 && format
                 && !settings.format_with_errors_enabled_for_this_file_path(&path)
-                && state.has_errors();
+                && state.has_errors_for_formatting();
             let should_format = can_transform && format && !format_with_errors_disabled;
 
             if can_transform && let Some(fix_file_mode) = fix_file_mode {
@@ -3716,6 +3755,8 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             for embedded_node in SnippetsIterator::Workspace(embedded_snippets.iter()).for_analysis(
                 &parse.into(),
                 language,
+                handle.as_ref(),
+                &path,
                 &workspace_db,
             ) {
                 let ParsedSnippetOrigin::Workspace(embedded_node) = embedded_node else {
@@ -3856,6 +3897,8 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         for embedded_snippet in SnippetsIterator::Workspace(parsed_snippets.iter()).for_analysis(
             &parsed_source.into(),
             language,
+            settings.as_ref(),
+            &path,
             &workspace_db,
         ) {
             let ParsedSnippetOrigin::Workspace(embedded_snippet) = embedded_snippet else {
@@ -3926,17 +3969,20 @@ impl Workspace for WorkspaceServerWithDb<'_> {
 
         let format_embedded = capabilities.formatter.format_embedded;
         let (parse, embedded_nodes) = self.get_parsed_snippets_and_parse_source(&params.path)?;
-
-        if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
-            && parse.has_errors(&*workspace_db)
-        {
-            return Err(WorkspaceError::format_with_errors_disabled());
-        }
-
         let document_file_source = self.get_file_source(
             &params.path,
             settings.experimental_full_html_support_enabled(),
         );
+
+        if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
+            && (parse.parsed(&*workspace_db).has_errors()
+                || SnippetsIterator::Workspace(embedded_nodes.iter())
+                    .blocking_formatting(document_file_source)
+                    .any(|snippet| snippet.has_errors(&workspace_db)))
+        {
+            return Err(WorkspaceError::format_with_errors_disabled());
+        }
+
         let settings =
             self.settings_handle_with_query(&settings, EditorFeatures::default(), query_context);
 
@@ -4079,7 +4125,8 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                     .format_with_errors_enabled_for_this_file_path(&path)
             },
         );
-        let should_format = params.should_format && (format_with_errors || !state.has_errors());
+        let should_format = params.should_format
+            && (format_with_errors || !state.has_errors_for_formatting());
         params.should_format = should_format;
         let settings_handle =
             self.settings_handle_with_query(&settings, EditorFeatures::default(), query);

@@ -86,6 +86,42 @@ Some rules you can start using already:
 
 ##### Markdown snippets
 
-Thanks to Biome capabilities, elements such as frontmatter, inline HTML and fenced code blocks are recognized as embedded
-languages, which means they are formatted using your configuration. Frontmatter and HTML blocks are also linted, while fenced code blocks
-aren't, because they usually contain examples or partial code.
+Biome recognizes the code inside fenced code blocks, frontmatter, and HTML blocks as embedded languages, and formats it with
+the formatter of its language and your configuration:
+
+````diff
+ ```js
+-const   value   =   {a:1,b:2}
++const value = { a: 1, b: 2 };
+ ```
+````
+
+HTML blocks are formatted only when the HTML formatter is enabled. A block with a syntax error stays as written, and Biome
+still formats the rest of the file.
+
+The option `markdown.formatter.formatEmbeds` controls this behavior, and it's enabled by default. Set it to `false` to keep
+the code of these blocks as written:
+
+```json5
+// biome.json
+{
+  "markdown": {
+    "formatter": {
+      "formatEmbeds": false
+    }
+  }
+}
+```
+
+The option `markdown.analyzeEmbeds` runs the linter and assist actions on the same blocks, with the rules and actions of
+their language, and reports their syntax errors. It's disabled by default, because fenced code blocks usually contain
+examples or partial code:
+
+```json5
+// biome.json
+{
+  "markdown": {
+    "analyzeEmbeds": true
+  }
+}
+```

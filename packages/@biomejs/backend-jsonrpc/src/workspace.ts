@@ -473,6 +473,20 @@ export interface LinterConfiguration {
  */
 export interface MarkdownConfiguration {
 	/**
+	 * Runs the linter and assist actions on the code inside fenced code blocks, frontmatter, and
+	 * HTML blocks, with the rules and actions of the code's language. Defaults to `false`.
+	 *
+	 * Fenced code blocks often hold partial examples that aren't meant to be valid on their own,
+	 * so Biome doesn't analyze them unless you enable this option. When enabled, Biome reports
+	 * syntax errors, rule violations, and assist actions in every block whose language it
+	 * supports, and the `--write` option applies their fixes. Biome reads the language of a
+	 * fenced code block from the first word after the opening fence, such as `js` or `css`, and
+	 * reads frontmatter as YAML. Code blocks inside lists and quotes aren't analyzed.
+	 *
+	 * To ignore a rule inside a block, add a suppression comment to the block's code.
+	 */
+	analyzeEmbeds?: Bool;
+	/**
 	 * Formatter options
 	 */
 	formatter?: MarkdownFormatterConfiguration;
@@ -1298,6 +1312,24 @@ export interface MarkdownFormatterConfiguration {
 	 * Control the formatter for Markdown (and its super languages) files.
 	 */
 	enabled?: Bool;
+	/**
+	 * Formats the code inside fenced code blocks, frontmatter, and HTML blocks with the formatter
+	 * of the code's language. Defaults to `true`.
+	 *
+	 * Biome reads the language of a fenced code block from the first word after the opening
+	 * fence, such as `js` or `css`, and reads frontmatter as YAML. Biome formats a block only when
+	 * it supports the block's language and the formatter for that language is enabled. It uses
+	 * that language's formatter options, except for the indentation, line width, and line ending,
+	 * which come from the Markdown formatter options. Other blocks stay as written. For example,
+	 * HTML blocks stay as written unless `html.formatter.enabled` is `true`. Blocks inside lists
+	 * and quotes, and indented HTML blocks, also stay as written.
+	 *
+	 * A block with a syntax error stays as written, and Biome still formats the rest of the file.
+	 * The linter reports such errors when `markdown.analyzeEmbeds` is `true`.
+	 *
+	 * When this option is `false`, Biome keeps every block as written.
+	 */
+	formatEmbeds?: Bool;
 	/**
 	 * The indent style applied to Markdown files.
 	 */
