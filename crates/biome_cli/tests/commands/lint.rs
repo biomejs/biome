@@ -145,7 +145,7 @@ fn maximum_diagnostics() {
                 let content = format!("{:?}", m.content);
                 content.contains("The number of diagnostics exceeds the limit allowed")
                     && content.contains("Diagnostics not shown")
-                    && content.contains("28")
+                    && content.contains("29")
             })
     );
 

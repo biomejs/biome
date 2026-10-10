@@ -8,4 +8,6 @@ export const getters = {
     get innerBreak() { while (true) { while (true) { break; } } },
     get continued() { do { continue; } while (true); },
     get returned() { while (true) { return 1; } },
+    get forTrue() { for (; true ;) {} },
+    get forNoTest() { for (;;) {} },
 };
