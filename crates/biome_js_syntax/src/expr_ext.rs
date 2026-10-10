@@ -1892,6 +1892,13 @@ impl AnyJsObjectMemberName {
     /// assert_eq!(computed.name().unwrap().text(), "a");
     /// ```
     pub fn name(&self) -> Option<TokenText> {
+        Some(inner_string_text(&self.name_token()?))
+    }
+
+    /// Returns the token that holds the text of [Self::name].
+    ///
+    /// The token text can include the quotes around the name.
+    pub fn name_token(&self) -> Option<JsSyntaxToken> {
         let token = match self {
             Self::JsComputedMemberName(expr) => {
                 let expr = expr.expression().ok()?;
@@ -1911,7 +1918,7 @@ impl AnyJsObjectMemberName {
             Self::JsLiteralMemberName(expr) => expr.value().ok()?,
             Self::JsMetavariable(_) => return None,
         };
-        Some(inner_string_text(&token))
+        Some(token)
     }
 }
 

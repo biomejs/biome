@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-script-mode.cjs
+---
+# Input
+```cjs
+/* should generate diagnostics */
+Vue.createApp({
+    props: ['key'],
+});
+
+```
+
+# Diagnostics
+```
+invalid-script-mode.cjs:3:13 lint/correctness/noVueReservedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × key is a reserved attribute and cannot be used as props.
+  
+    1 │ /* should generate diagnostics */
+    2 │ Vue.createApp({
+  > 3 │     props: ['key'],
+      │             ^^^^^
+    4 │ });
+    5 │ 
+  
+  i Rename the prop to avoid possible conflicts.
+  
+
+```
