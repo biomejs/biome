@@ -1,13 +1,25 @@
 //! This is a generated file. Don't modify it by hand! Run 'cargo codegen formatter' to re-generate the file.
 
+pub(crate) mod after_time_clause;
 pub(crate) mod binding_name;
 pub(crate) mod block_body;
 pub(crate) mod case_clause;
 pub(crate) mod default_clause;
 pub(crate) mod default_expression_clause;
+pub(crate) mod defer_block;
+pub(crate) mod defer_hydrate_never_clause;
+pub(crate) mod defer_hydrate_on_clause;
+pub(crate) mod defer_hydrate_when_clause;
+pub(crate) mod defer_on_clause;
+pub(crate) mod defer_opening_block;
+pub(crate) mod defer_parameters;
+pub(crate) mod defer_prefetch_on_clause;
+pub(crate) mod defer_prefetch_when_clause;
+pub(crate) mod defer_when_clause;
 pub(crate) mod else_clause;
 pub(crate) mod else_if_clause;
 pub(crate) mod empty_clause;
+pub(crate) mod error_clause;
 pub(crate) mod event_binding;
 pub(crate) mod for_block;
 pub(crate) mod for_expression;
@@ -21,6 +33,11 @@ pub(crate) mod if_opening_block;
 pub(crate) mod if_parameters;
 pub(crate) mod let_block;
 pub(crate) mod let_initializer_clause;
+pub(crate) mod loading_clause;
+pub(crate) mod loading_parameters;
+pub(crate) mod minimum_time_clause;
+pub(crate) mod placeholder_clause;
+pub(crate) mod placeholder_parameters;
 pub(crate) mod property_binding;
 pub(crate) mod structural_directive;
 pub(crate) mod switch_block;
