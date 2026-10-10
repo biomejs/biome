@@ -1,0 +1,243 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<input bind:value={value} />
+<input bind:value={ value } />
+<input bind:checked={checked}>
+<div class:active={active}></div>
+<div class:active={active} class:hidden></div>
+<div style:color={color}></div>
+<div style:color="{color}"></div>
+<div class:active={active}>content</div>
+<Component bind:open={open} />
+
+```
+
+# Diagnostics
+```
+invalid.svelte:2:8 lint/nursery/useSvelteShorthandDirective  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This directive can use the shorthand syntax.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <input bind:value={value} />
+      │        ^^^^^^^^^^^^^^^^^^
+    3 │ <input bind:value={ value } />
+    4 │ <input bind:checked={checked}>
+  
+  i The value is a variable with the same name as the directive, so repeating it is redundant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the shorthand syntax.
+  
+     1  1 │   <!-- should generate diagnostics -->
+     2    │ - <input·bind:value={value}·/>
+        2 │ + <input·bind:value·/>
+     3  3 │   <input bind:value={ value } />
+     4  4 │   <input bind:checked={checked}>
+  
+
+```
+
+```
+invalid.svelte:3:8 lint/nursery/useSvelteShorthandDirective  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This directive can use the shorthand syntax.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <input bind:value={value} />
+  > 3 │ <input bind:value={ value } />
+      │        ^^^^^^^^^^^^^^^^^^^^
+    4 │ <input bind:checked={checked}>
+    5 │ <div class:active={active}></div>
+  
+  i The value is a variable with the same name as the directive, so repeating it is redundant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the shorthand syntax.
+  
+     1  1 │   <!-- should generate diagnostics -->
+     2  2 │   <input bind:value={value} />
+     3    │ - <input·bind:value={·value·}·/>
+        3 │ + <input·bind:value·/>
+     4  4 │   <input bind:checked={checked}>
+     5  5 │   <div class:active={active}></div>
+  
+
+```
+
+```
+invalid.svelte:4:8 lint/nursery/useSvelteShorthandDirective  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This directive can use the shorthand syntax.
+  
+    2 │ <input bind:value={value} />
+    3 │ <input bind:value={ value } />
+  > 4 │ <input bind:checked={checked}>
+      │        ^^^^^^^^^^^^^^^^^^^^^^
+    5 │ <div class:active={active}></div>
+    6 │ <div class:active={active} class:hidden></div>
+  
+  i The value is a variable with the same name as the directive, so repeating it is redundant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the shorthand syntax.
+  
+    4 │ <input·bind:checked={checked}>
+      │                    ---------- 
+
+```
+
+```
+invalid.svelte:5:6 lint/nursery/useSvelteShorthandDirective  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This directive can use the shorthand syntax.
+  
+    3 │ <input bind:value={ value } />
+    4 │ <input bind:checked={checked}>
+  > 5 │ <div class:active={active}></div>
+      │      ^^^^^^^^^^^^^^^^^^^^^
+    6 │ <div class:active={active} class:hidden></div>
+    7 │ <div style:color={color}></div>
+  
+  i The value is a variable with the same name as the directive, so repeating it is redundant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the shorthand syntax.
+  
+    5 │ <div·class:active={active}></div>
+      │                  ---------       
+
+```
+
+```
+invalid.svelte:6:6 lint/nursery/useSvelteShorthandDirective  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This directive can use the shorthand syntax.
+  
+    4 │ <input bind:checked={checked}>
+    5 │ <div class:active={active}></div>
+  > 6 │ <div class:active={active} class:hidden></div>
+      │      ^^^^^^^^^^^^^^^^^^^^^
+    7 │ <div style:color={color}></div>
+    8 │ <div style:color="{color}"></div>
+  
+  i The value is a variable with the same name as the directive, so repeating it is redundant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the shorthand syntax.
+  
+     4  4 │   <input bind:checked={checked}>
+     5  5 │   <div class:active={active}></div>
+     6    │ - <div·class:active={active}·class:hidden></div>
+        6 │ + <div·class:active·class:hidden></div>
+     7  7 │   <div style:color={color}></div>
+     8  8 │   <div style:color="{color}"></div>
+  
+
+```
+
+```
+invalid.svelte:7:6 lint/nursery/useSvelteShorthandDirective  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This directive can use the shorthand syntax.
+  
+    5 │ <div class:active={active}></div>
+    6 │ <div class:active={active} class:hidden></div>
+  > 7 │ <div style:color={color}></div>
+      │      ^^^^^^^^^^^^^^^^^^^
+    8 │ <div style:color="{color}"></div>
+    9 │ <div class:active={active}>content</div>
+  
+  i The value is a variable with the same name as the directive, so repeating it is redundant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the shorthand syntax.
+  
+    7 │ <div·style:color={color}></div>
+      │                 --------       
+
+```
+
+```
+invalid.svelte:8:6 lint/nursery/useSvelteShorthandDirective  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This directive can use the shorthand syntax.
+  
+     6 │ <div class:active={active} class:hidden></div>
+     7 │ <div style:color={color}></div>
+   > 8 │ <div style:color="{color}"></div>
+       │      ^^^^^^^^^^^^^^^^^^^^^
+     9 │ <div class:active={active}>content</div>
+    10 │ <Component bind:open={open} />
+  
+  i The value is a variable with the same name as the directive, so repeating it is redundant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the shorthand syntax.
+  
+    8 │ <div·style:color="{color}"></div>
+      │                 ----------       
+
+```
+
+```
+invalid.svelte:9:6 lint/nursery/useSvelteShorthandDirective  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This directive can use the shorthand syntax.
+  
+     7 │ <div style:color={color}></div>
+     8 │ <div style:color="{color}"></div>
+   > 9 │ <div class:active={active}>content</div>
+       │      ^^^^^^^^^^^^^^^^^^^^^
+    10 │ <Component bind:open={open} />
+    11 │ 
+  
+  i The value is a variable with the same name as the directive, so repeating it is redundant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the shorthand syntax.
+  
+    9 │ <div·class:active={active}>content</div>
+      │                  ---------              
+
+```
+
+```
+invalid.svelte:10:12 lint/nursery/useSvelteShorthandDirective  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This directive can use the shorthand syntax.
+  
+     8 │ <div style:color="{color}"></div>
+     9 │ <div class:active={active}>content</div>
+  > 10 │ <Component bind:open={open} />
+       │            ^^^^^^^^^^^^^^^^
+    11 │ 
+  
+  i The value is a variable with the same name as the directive, so repeating it is redundant.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Use the shorthand syntax.
+  
+     8  8 │   <div style:color="{color}"></div>
+     9  9 │   <div class:active={active}>content</div>
+    10    │ - <Component·bind:open={open}·/>
+       10 │ + <Component·bind:open·/>
+    11 11 │   
+  
+
+```

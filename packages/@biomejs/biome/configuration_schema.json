@@ -7992,6 +7992,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSvelteShorthandDirective": {
+					"description": "Enforce the shorthand syntax for Svelte bind:, class:, and style: directives.\nSee https://biomejs.dev/linter/rules/use-svelte-shorthand-directive",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSvelteShorthandDirectiveConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useTailwindShorthandClasses": {
 					"description": "Enforce using fewer Tailwind utilities instead of multiple utilities that are functionally the same.\nSee https://biomejs.dev/linter/rules/use-tailwind-shorthand-classes",
 					"anyOf": [
@@ -14308,6 +14315,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseSvelteShorthandDirectiveOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSvelteShorthandDirectiveOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseSymbolDescriptionOptions": {
 			"type": "object",
 			"properties": {
@@ -19246,6 +19266,16 @@
 			]
 		},
 		"UseSvelteRequireEachKeyOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseSvelteShorthandDirectiveConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseSvelteShorthandDirectiveOptions" }
+			]
+		},
+		"UseSvelteShorthandDirectiveOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

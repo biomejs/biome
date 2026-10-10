@@ -331,6 +331,7 @@ define_categories! {
     "lint/nursery/useSvelteKitResolve": "https://biomejs.dev/linter/rules/use-svelte-kit-resolve",
     "lint/nursery/useSvelteKitRuneImports": "https://biomejs.dev/linter/rules/use-svelte-kit-rune-imports",
     "lint/nursery/useSvelteRequireEachKey": "https://biomejs.dev/linter/rules/use-svelte-require-each-key",
+    "lint/nursery/useSvelteShorthandDirective": "https://biomejs.dev/linter/rules/use-svelte-shorthand-directive",
     "lint/nursery/useTailwindShorthandClasses": "https://biomejs.dev/linter/rules/use-tailwind-shorthand-classes",
     "lint/nursery/useTopLevelHeading": "https://biomejs.dev/linter/rules/use-top-level-heading",
     "lint/nursery/useUniqueArgumentNames": "https://biomejs.dev/linter/rules/use-unique-argument-names",
