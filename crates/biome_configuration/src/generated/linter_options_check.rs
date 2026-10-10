@@ -2251,6 +2251,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
+        "nursery",
+        "useLowercaseTestTitle",
+        TypeId::of::<biome_rule_options::use_lowercase_test_title::UseLowercaseTestTitleOptions>(),
+    ));
+    result.push((
         "complexity",
         "useMathMinMax",
         TypeId::of::<biome_rule_options::use_math_min_max::UseMathMinMaxOptions>(),

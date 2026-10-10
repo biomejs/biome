@@ -7892,6 +7892,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useLowercaseTestTitle": {
+					"description": "Require test and test suite titles to start with a lowercase letter.\nSee https://biomejs.dev/linter/rules/use-lowercase-test-title",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseLowercaseTestTitleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useModernMathApis": {
 					"description": "Use modern Math APIs for common mathematical operations.\nSee https://biomejs.dev/linter/rules/use-modern-math-apis",
 					"anyOf": [
@@ -13681,6 +13688,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseLowercaseTestTitleOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseLowercaseTestTitleOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseMathMinMaxOptions": {
 			"type": "object",
 			"properties": {
@@ -18456,6 +18476,23 @@
 		},
 		"UseLoneExecutableDefinitionOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseLowercaseTestTitleConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseLowercaseTestTitleOptions" }
+			]
+		},
+		"UseLowercaseTestTitleOptions": {
+			"type": "object",
+			"properties": {
+				"allowedPrefixes": {
+					"description": "A list of prefixes. Titles that start with one of these prefixes are not checked.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseMathMinMaxConfiguration": {
