@@ -352,7 +352,7 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
                 propagate_break(result)?;
             }
         }
-        DocumentFileSource::Markdown(_) => {
+        DocumentFileSource::Markdown(file_source) => {
             let parse =
                 biome_markdown_parser::parse_markdown(code, MarkdownParserOptions::default());
 
@@ -368,9 +368,13 @@ pub fn analyze_rule_code(analyzer: RuleCodeAnalyzer) -> Result<()> {
                 let root = parse.tree();
                 let options =
                     code_block.create_analyzer_options::<MarkdownLanguage>(configuration)?;
-                let result = biome_markdown_analyze::analyze(&root, filter, &options, |signal| {
-                    process_signal(signal, code, &file_path, writer, None, None)
-                });
+                let result = biome_markdown_analyze::analyze(
+                    &root,
+                    filter,
+                    &options,
+                    file_source,
+                    |signal| process_signal(signal, code, &file_path, writer, None, None),
+                );
                 propagate_break(result)?;
             }
         }

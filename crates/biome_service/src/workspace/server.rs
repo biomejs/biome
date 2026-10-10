@@ -874,6 +874,20 @@ impl WorkspaceServerWithDb<'_> {
             }
         }
 
+        #[cfg(feature = "lang_md")]
+        if let DocumentFileSource::Markdown(markdown) = &mut source {
+            markdown.set_cjk_friendly_emphasis(
+                settings
+                    .as_ref()
+                    .languages
+                    .markdown
+                    .parser
+                    .cjk_friendly_emphasis
+                    .unwrap_or_default()
+                    .into(),
+            );
+        }
+
         let (content, version) = match content {
             FileContent::FromClient { content, version } => (content, Some(version)),
             FileContent::FromServer => (self.fs.read_file_from_path(&path)?, None),

@@ -29,6 +29,7 @@ fn open_markdown_with_embeds(content: &str, frontmatter: bool) -> (LocalWorkspac
                     parser: Some(MarkdownParserConfiguration {
                         frontmatter: Some(frontmatter.into()),
                         gfm: Some(true.into()),
+                        cjk_friendly_emphasis: None,
                     }),
                     ..Default::default()
                 }),

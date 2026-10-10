@@ -2,6 +2,7 @@ use biome_analyze::{
     ActionFilter, AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleFilter,
 };
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to_string};
+use biome_languages::MdFileSource;
 use biome_markdown_parser::{MarkdownParserOptions, parse_markdown};
 use std::slice;
 
@@ -29,6 +30,7 @@ d { font: 1em SF Mono, Liberation Mono, sans-serif; }
             ..AnalysisFilter::default()
         },
         &options,
+        MdFileSource::markdown(),
         |signal| {
             if let Some(diag) = signal.diagnostic() {
                 error_ranges.push(diag.location().span.unwrap());

@@ -28,7 +28,8 @@ use biome_analyze::{
 use biome_configuration::analyzer::assist::AssistEnabled;
 use biome_configuration::markdown::{
     MarkdownFormatterConfiguration, MarkdownFormatterEnabled, MarkdownLinterEnabled,
-    MarkdownParseFrontmatter, MarkdownParseGfm, MarkdownParserConfiguration,
+    MarkdownParseCjkFriendlyEmphasis, MarkdownParseFrontmatter, MarkdownParseGfm,
+    MarkdownParserConfiguration,
 };
 use biome_db::AnyParsedSource;
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline};
@@ -77,6 +78,7 @@ impl From<MarkdownFormatterConfiguration> for MarkdownFormatterSettings {
 pub struct MarkdownParserSettings {
     pub frontmatter: Option<MarkdownParseFrontmatter>,
     pub gfm: Option<MarkdownParseGfm>,
+    pub cjk_friendly_emphasis: Option<MarkdownParseCjkFriendlyEmphasis>,
 }
 
 impl From<MarkdownParserConfiguration> for MarkdownParserSettings {
@@ -84,6 +86,7 @@ impl From<MarkdownParserConfiguration> for MarkdownParserSettings {
         Self {
             frontmatter: configuration.frontmatter,
             gfm: configuration.gfm,
+            cjk_friendly_emphasis: configuration.cjk_friendly_emphasis,
         }
     }
 }
@@ -121,11 +124,16 @@ impl ServiceLanguage for MarkdownLanguage {
         _overrides: &OverrideSettings,
         language: &Self::ParserSettings,
         _path: &BiomePath,
-        _file_source: &DocumentFileSource,
+        file_source: &DocumentFileSource,
     ) -> Self::ParserOptions {
         MarkdownParserOptions::default()
             .with_frontmatter(language.frontmatter.unwrap_or_default().into())
             .with_gfm(language.gfm.unwrap_or_default().into())
+            .with_cjk_friendly_emphasis(
+                file_source
+                    .to_markdown_file_source()
+                    .is_some_and(|source| source.cjk_friendly_emphasis()),
+            )
     }
 
     fn resolve_format_options(
@@ -133,7 +141,7 @@ impl ServiceLanguage for MarkdownLanguage {
         overrides: &OverrideSettings,
         language: &Self::FormatterSettings,
         override_indices: &[usize],
-        _file_source: &DocumentFileSource,
+        file_source: &DocumentFileSource,
     ) -> Self::FormatOptions {
         let indent_style = language
             .indent_style
@@ -156,13 +164,14 @@ impl ServiceLanguage for MarkdownLanguage {
             .or(global.trailing_newline)
             .unwrap_or_default();
         let prose_wrap = language.prose_wrap.unwrap_or_default();
-        let mut options = MdFormatOptions::new()
-            .with_indent_style(indent_style)
-            .with_indent_width(indent_width)
-            .with_line_width(line_width)
-            .with_line_ending(line_ending)
-            .with_trailing_newline(trailing_newline)
-            .with_prose_wrap(prose_wrap);
+        let mut options =
+            MdFormatOptions::new(file_source.to_markdown_file_source().unwrap_or_default())
+                .with_indent_style(indent_style)
+                .with_indent_width(indent_width)
+                .with_line_width(line_width)
+                .with_line_ending(line_ending)
+                .with_trailing_newline(trailing_newline)
+                .with_prose_wrap(prose_wrap);
 
         overrides.apply_override_markdown_format_options_by_indices(override_indices, &mut options);
 
@@ -554,9 +563,14 @@ fn lint(params: LintParams) -> LintResults {
 
     let mut process_lint = ProcessLint::new(&params);
 
-    let (_, analyze_diagnostics) = analyze(&root, filter, &analyzer_options, |signal| {
-        process_lint.process_signal(signal)
-    });
+    let file_source = params
+        .language
+        .to_markdown_file_source()
+        .unwrap_or_default();
+    let (_, analyze_diagnostics) =
+        analyze(&root, filter, &analyzer_options, file_source, |signal| {
+            process_lint.process_signal(signal)
+        });
 
     let diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);
 
@@ -614,7 +628,8 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     };
 
     let action_offset = parsed_source.diagnostic_offset(&workspace_db);
-    analyze(&tree, filter, &analyzer_options, |signal| {
+    let file_source = language.to_markdown_file_source().unwrap_or_default();
+    analyze(&tree, filter, &analyzer_options, file_source, |signal| {
         if compute_actions {
             actions.extend(
                 signal
@@ -684,12 +699,16 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
 
     let mut process_fix_all =
         ProcessFixAll::new(&params, tree.syntax().text_range_with_trivia().len().into());
+    let file_source = params
+        .document_file_source
+        .to_markdown_file_source()
+        .unwrap_or_default();
 
     if matches!(params.fix_file_mode, FixFileMode::ApplySuppressions) {
         loop {
             let mut pending_actions = Vec::new();
 
-            let (_, _) = analyze(&tree, filter, &analyzer_options, |signal| {
+            let (_, _) = analyze(&tree, filter, &analyzer_options, file_source, |signal| {
                 if params.collect_final_diagnostics {
                     process_fix_all.collect_signal(signal, &mut pending_actions)
                 } else {
@@ -724,9 +743,13 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
     loop {
         let mut pending_actions = Vec::new();
 
-        let (_, _) = analyze(&tree, fixable_filter, &analyzer_options, |signal| {
-            process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions)
-        });
+        let (_, _) = analyze(
+            &tree,
+            fixable_filter,
+            &analyzer_options,
+            file_source,
+            |signal| process_fix_all.collect_signal_fixes_only(signal, &mut pending_actions),
+        );
 
         let result = process_fix_all.process_batch_actions(pending_actions, |root| {
             tree = match MdRoot::cast(root) {
@@ -743,7 +766,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
 
     // Phase 2: all rules for final diagnostics
     if params.collect_final_diagnostics {
-        let (_, _) = analyze(&tree, filter, &analyzer_options, |signal| {
+        let (_, _) = analyze(&tree, filter, &analyzer_options, file_source, |signal| {
             process_fix_all.collect_diagnostic_only(signal)
         });
     }
