@@ -392,6 +392,7 @@ pub mod use_bigint_literals;
 pub mod use_biome_ignore_folder;
 pub mod use_block_statements;
 pub mod use_button_type;
+pub mod use_capitalized_constructors;
 pub mod use_collapsed_else_if;
 pub mod use_collapsed_if;
 pub mod use_component_export_only_modules;
