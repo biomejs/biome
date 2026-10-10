@@ -905,7 +905,8 @@ impl AnyVueSetupDeclaration {
 }
 
 /// Checks if the reference resolves to a variable initialized by a `defineProps()` call,
-/// as in `const props = defineProps(['foo'])`.
+/// as in `const props = defineProps(['foo'])` or
+/// `const props = withDefaults(defineProps<Props>(), {})`.
 fn is_props_reference(reference: &JsReferenceIdentifier, model: &SemanticModel) -> bool {
     model
         .binding(reference)
@@ -918,13 +919,8 @@ fn is_props_reference(reference: &JsReferenceIdentifier, model: &SemanticModel) 
         })
         .and_then(|declarator| declarator.initializer())
         .and_then(|initializer| initializer.expression().ok())
-        .and_then(|expression| expression.inner_expression())
-        .is_some_and(|expression| match expression {
-            AnyJsExpression::JsCallExpression(call) => {
-                is_vue_compiler_macro_call(&call, model, "defineProps")
-            }
-            _ => false,
-        })
+        .and_then(|expression| VueDefinePropsCall::from_expression(&expression, model, None))
+        .is_some()
 }
 
 impl VueDeclarationName for AnyVueSetupDeclaration {
