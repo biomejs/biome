@@ -207,6 +207,13 @@ pub(crate) fn is_at_empty_declaration(p: &mut CssParser) -> bool {
     p.at(T![;])
 }
 
+/// Includes the SCSS feature check for statement-list lookahead and recovery.
+/// Declaration lists use [`is_at_empty_declaration`] in both CSS and SCSS.
+#[inline]
+pub(crate) fn is_at_scss_empty_declaration(p: &mut CssParser) -> bool {
+    CssSyntaxFeatures::Scss.is_supported(p) && is_at_empty_declaration(p)
+}
+
 #[inline]
 pub(crate) fn parse_empty_declaration(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_empty_declaration(p) {

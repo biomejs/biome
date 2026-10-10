@@ -249,13 +249,9 @@ impl ParseNodeList for FontFeatureValuesItemList {
     const LIST_KIND: Self::Kind = CSS_FONT_FEATURE_VALUES_ITEM_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        if let Present(empty) =
-            CssSyntaxFeatures::Scss.parse_supported_syntax(p, parse_empty_declaration)
-        {
-            Present(empty)
-        } else {
-            parse_font_feature_values_item(p)
-        }
+        CssSyntaxFeatures::Scss
+            .parse_supported_syntax(p, parse_empty_declaration)
+            .or_else(|| parse_font_feature_values_item(p))
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {

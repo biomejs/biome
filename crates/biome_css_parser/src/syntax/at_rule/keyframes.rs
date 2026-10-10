@@ -10,7 +10,9 @@ use crate::syntax::block::{
 use crate::syntax::css_modules::{
     CSS_MODULES_SCOPE_SET, expected_any_css_module_scope, local_or_global_not_allowed,
 };
-use crate::syntax::declaration::{is_at_empty_declaration, parse_empty_declaration};
+use crate::syntax::declaration::{
+    is_at_empty_declaration, is_at_scss_empty_declaration, parse_empty_declaration,
+};
 use crate::syntax::parse_error::{
     expected_non_css_wide_keyword_identifier, scss_only_syntax_error,
 };
@@ -269,27 +271,29 @@ fn is_at_any_keyframes_item(p: &mut CssParser) -> bool {
     is_at_scss_variable_declaration(p)
         || is_at_scss_keyframes_statement(p)
         || is_at_keyframes_item_selector(p)
-        || (CssSyntaxFeatures::Scss.is_supported(p) && is_at_empty_declaration(p))
+        || is_at_scss_empty_declaration(p)
 }
 
 #[inline]
 fn parse_any_keyframes_item(p: &mut CssParser) -> ParsedSyntax {
-    if let Present(empty) =
-        CssSyntaxFeatures::Scss.parse_supported_syntax(p, parse_empty_declaration)
-    {
-        Present(empty)
-    } else if is_at_scss_variable_declaration(p) {
-        parse_scss_keyframes_variable_declaration(p)
-    } else if is_at_scss_keyframes_statement(p) {
-        CssSyntaxFeatures::Scss.parse_exclusive_syntax_with_kind(
-            p,
-            parse_scss_keyframes_statement,
-            |p, marker| scss_only_syntax_error(p, "SCSS statements in keyframes", marker.range(p)),
-            Some(CSS_BOGUS_KEYFRAMES_ITEM),
-        )
-    } else {
-        parse_keyframes_item(p)
-    }
+    CssSyntaxFeatures::Scss
+        .parse_supported_syntax(p, parse_empty_declaration)
+        .or_else(|| {
+            if is_at_scss_variable_declaration(p) {
+                parse_scss_keyframes_variable_declaration(p)
+            } else if is_at_scss_keyframes_statement(p) {
+                CssSyntaxFeatures::Scss.parse_exclusive_syntax_with_kind(
+                    p,
+                    parse_scss_keyframes_statement,
+                    |p, marker| {
+                        scss_only_syntax_error(p, "SCSS statements in keyframes", marker.range(p))
+                    },
+                    Some(CSS_BOGUS_KEYFRAMES_ITEM),
+                )
+            } else {
+                parse_keyframes_item(p)
+            }
+        })
 }
 
 const SCSS_KEYFRAMES_STATEMENT_SET: TokenSet<CssSyntaxKind> = token_set!(
