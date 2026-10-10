@@ -3344,6 +3344,11 @@ export interface Nursery {
 	 */
 	useTailwindSortedClasses?: UseTailwindSortedClassesConfiguration;
 	/**
+	 * Require complete, statically written class names.
+	 * See https://biomejs.dev/linter/rules/use-tailwind-static-class-strings
+	 */
+	useTailwindStaticClassStrings?: UseTailwindStaticClassStringsConfiguration;
+	/**
 	 * Require Markdown documents to start with a top-level heading.
 	 * See https://biomejs.dev/linter/rules/use-top-level-heading
 	 */
@@ -5758,6 +5763,9 @@ export type UseTailwindShorthandClassesConfiguration =
 export type UseTailwindSortedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTailwindSortedClassesOptions;
+export type UseTailwindStaticClassStringsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTailwindStaticClassStringsOptions;
 export type UseTopLevelHeadingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTopLevelHeadingOptions;
@@ -8291,6 +8299,10 @@ export interface RuleWithUseTailwindSortedClassesOptions {
 	level: RulePlainConfiguration;
 	options?: UseTailwindSortedClassesOptions;
 }
+export interface RuleWithUseTailwindStaticClassStringsOptions {
+	level: RulePlainConfiguration;
+	options?: UseTailwindStaticClassStringsOptions;
+}
 export interface RuleWithUseTopLevelHeadingOptions {
 	level: RulePlainConfiguration;
 	options?: UseTopLevelHeadingOptions;
@@ -10554,6 +10566,7 @@ export type UseSvelteKitRuneImportsOptions = {};
 export type UseSvelteRequireEachKeyOptions = {};
 export type UseTailwindShorthandClassesOptions = {};
 export type UseTailwindSortedClassesOptions = {};
+export type UseTailwindStaticClassStringsOptions = {};
 export type UseTopLevelHeadingOptions = {};
 export interface UseValidTestTitleOptions {
 	/**
@@ -12059,6 +12072,7 @@ export type Category =
 	| "lint/nursery/useSvelteKitRuneImports"
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useTailwindShorthandClasses"
+	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"
