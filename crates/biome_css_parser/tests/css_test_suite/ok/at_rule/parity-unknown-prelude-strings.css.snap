@@ -1,0 +1,266 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@foo "plain ;{}() string";
+@foo "literal #{'inner'} after";
+@foo 'literal #{"inner"} after';
+@foo "escaped \"quote\"" { .item { color: red; } }
+.following { color: green; }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssUnknownValueAtRule {
+                name: CssIdentifier {
+                    value_token: IDENT@1..5 "foo" [] [Whitespace(" ")],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        CSS_STRING_LITERAL@5..25 "\"plain ;{}() string\"" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@25..26 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@26..28 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: CssIdentifier {
+                    value_token: IDENT@28..32 "foo" [] [Whitespace(" ")],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        CSS_STRING_LITERAL@32..58 "\"literal #{'inner'} after\"" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@58..59 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@59..61 "@" [Newline("\n")] [],
+            rule: CssUnknownValueAtRule {
+                name: CssIdentifier {
+                    value_token: IDENT@61..65 "foo" [] [Whitespace(" ")],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        CSS_STRING_LITERAL@65..91 "'literal #{\"inner\"} after'" [] [],
+                    ],
+                },
+                semicolon_token: SEMICOLON@91..92 ";" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@92..94 "@" [Newline("\n")] [],
+            rule: CssUnknownBlockAtRule {
+                name: CssIdentifier {
+                    value_token: IDENT@94..98 "foo" [] [Whitespace(" ")],
+                },
+                components: CssUnknownAtRuleComponentList {
+                    items: [
+                        CSS_STRING_LITERAL@98..118 "\"escaped \\\"quote\\\"\"" [] [Whitespace(" ")],
+                    ],
+                },
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@118..120 "{" [] [Whitespace(" ")],
+                    items: CssDeclarationOrRuleList [
+                        CssNestedQualifiedRule {
+                            prelude: CssRelativeSelectorList [
+                                CssRelativeSelector {
+                                    combinator: missing (optional),
+                                    selector: CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: missing (optional),
+                                        sub_selectors: CssSubSelectorList [
+                                            CssClassSelector {
+                                                dot_token: DOT@120..121 "." [] [],
+                                                name: CssCustomIdentifier {
+                                                    value_token: IDENT@121..126 "item" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@126..128 "{" [] [Whitespace(" ")],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@128..133 "color" [] [],
+                                                },
+                                                colon_token: COLON@133..135 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@135..138 "red" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@138..140 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@140..142 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@142..143 "}" [] [],
+                },
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@143..145 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@145..155 "following" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@155..157 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@157..162 "color" [] [],
+                                },
+                                colon_token: COLON@162..164 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@164..169 "green" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@169..171 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@171..172 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@172..173 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..173
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..172
+    0: CSS_AT_RULE@0..26
+      0: AT@0..1 "@" [] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@1..26
+        0: CSS_IDENTIFIER@1..5
+          0: IDENT@1..5 "foo" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@5..25
+          0: CSS_STRING_LITERAL@5..25 "\"plain ;{}() string\"" [] []
+        2: SEMICOLON@25..26 ";" [] []
+    1: CSS_AT_RULE@26..59
+      0: AT@26..28 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@28..59
+        0: CSS_IDENTIFIER@28..32
+          0: IDENT@28..32 "foo" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@32..58
+          0: CSS_STRING_LITERAL@32..58 "\"literal #{'inner'} after\"" [] []
+        2: SEMICOLON@58..59 ";" [] []
+    2: CSS_AT_RULE@59..92
+      0: AT@59..61 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_VALUE_AT_RULE@61..92
+        0: CSS_IDENTIFIER@61..65
+          0: IDENT@61..65 "foo" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@65..91
+          0: CSS_STRING_LITERAL@65..91 "'literal #{\"inner\"} after'" [] []
+        2: SEMICOLON@91..92 ";" [] []
+    3: CSS_AT_RULE@92..143
+      0: AT@92..94 "@" [Newline("\n")] []
+      1: CSS_UNKNOWN_BLOCK_AT_RULE@94..143
+        0: CSS_IDENTIFIER@94..98
+          0: IDENT@94..98 "foo" [] [Whitespace(" ")]
+        1: CSS_UNKNOWN_AT_RULE_COMPONENT_LIST@98..118
+          0: CSS_STRING_LITERAL@98..118 "\"escaped \\\"quote\\\"\"" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@118..143
+          0: L_CURLY@118..120 "{" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_OR_RULE_LIST@120..142
+            0: CSS_NESTED_QUALIFIED_RULE@120..142
+              0: CSS_RELATIVE_SELECTOR_LIST@120..126
+                0: CSS_RELATIVE_SELECTOR@120..126
+                  0: (empty)
+                  1: CSS_COMPOUND_SELECTOR@120..126
+                    0: CSS_NESTED_SELECTOR_LIST@120..120
+                    1: (empty)
+                    2: CSS_SUB_SELECTOR_LIST@120..126
+                      0: CSS_CLASS_SELECTOR@120..126
+                        0: DOT@120..121 "." [] []
+                        1: CSS_CUSTOM_IDENTIFIER@121..126
+                          0: IDENT@121..126 "item" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@126..142
+                0: L_CURLY@126..128 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_OR_RULE_LIST@128..140
+                  0: CSS_DECLARATION_WITH_SEMICOLON@128..140
+                    0: CSS_DECLARATION@128..138
+                      0: CSS_GENERIC_PROPERTY@128..138
+                        0: CSS_IDENTIFIER@128..133
+                          0: IDENT@128..133 "color" [] []
+                        1: COLON@133..135 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@135..138
+                          0: CSS_IDENTIFIER@135..138
+                            0: IDENT@135..138 "red" [] []
+                      1: (empty)
+                    1: SEMICOLON@138..140 ";" [] [Whitespace(" ")]
+                2: R_CURLY@140..142 "}" [] [Whitespace(" ")]
+          2: R_CURLY@142..143 "}" [] []
+    4: CSS_QUALIFIED_RULE@143..172
+      0: CSS_SELECTOR_LIST@143..155
+        0: CSS_COMPOUND_SELECTOR@143..155
+          0: CSS_NESTED_SELECTOR_LIST@143..143
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@143..155
+            0: CSS_CLASS_SELECTOR@143..155
+              0: DOT@143..145 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@145..155
+                0: IDENT@145..155 "following" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@155..172
+        0: L_CURLY@155..157 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@157..171
+          0: CSS_DECLARATION_WITH_SEMICOLON@157..171
+            0: CSS_DECLARATION@157..169
+              0: CSS_GENERIC_PROPERTY@157..169
+                0: CSS_IDENTIFIER@157..162
+                  0: IDENT@157..162 "color" [] []
+                1: COLON@162..164 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@164..169
+                  0: CSS_IDENTIFIER@164..169
+                    0: IDENT@164..169 "green" [] []
+              1: (empty)
+            1: SEMICOLON@169..171 ";" [] [Whitespace(" ")]
+        2: R_CURLY@171..172 "}" [] []
+  2: EOF@172..173 "" [Newline("\n")] []
+
+```

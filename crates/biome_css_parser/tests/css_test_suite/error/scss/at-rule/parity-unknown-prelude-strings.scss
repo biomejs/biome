@@ -1,0 +1,14 @@
+@foo "before #{1";
+@after-interpolation ok;
+
+@foo "before #{'inner
+@after-inner-string ok;
+
+@foo "before #{"inner"} after
+@after-outer-string ok;
+
+@foo url("before #{"inner"} after
+);
+@after-url-string ok;
+
+.following { color: green; }
