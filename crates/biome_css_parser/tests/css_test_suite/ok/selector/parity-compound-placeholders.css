@@ -1,0 +1,2 @@
+a.card[data-ready]:hover, .x > .y + .z { color: red; width: 50%; }
+@keyframes pulse { 50% { opacity: 0.5; } }

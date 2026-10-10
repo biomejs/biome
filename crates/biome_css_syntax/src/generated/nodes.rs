@@ -17374,6 +17374,7 @@ pub enum AnyCssSubSelector {
     CssPseudoClassSelector(CssPseudoClassSelector),
     CssPseudoElementSelector(CssPseudoElementSelector),
     ScssInterpolatedSubSelector(ScssInterpolatedSubSelector),
+    ScssPlaceholderSelector(ScssPlaceholderSelector),
 }
 impl AnyCssSubSelector {
     pub fn as_css_attribute_selector(&self) -> Option<&CssAttributeSelector> {
@@ -17421,6 +17422,12 @@ impl AnyCssSubSelector {
     pub fn as_scss_interpolated_sub_selector(&self) -> Option<&ScssInterpolatedSubSelector> {
         match &self {
             Self::ScssInterpolatedSubSelector(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_placeholder_selector(&self) -> Option<&ScssPlaceholderSelector> {
+        match &self {
+            Self::ScssPlaceholderSelector(item) => Some(item),
             _ => None,
         }
     }
@@ -45054,6 +45061,11 @@ impl From<ScssInterpolatedSubSelector> for AnyCssSubSelector {
         Self::ScssInterpolatedSubSelector(node)
     }
 }
+impl From<ScssPlaceholderSelector> for AnyCssSubSelector {
+    fn from(node: ScssPlaceholderSelector) -> Self {
+        Self::ScssPlaceholderSelector(node)
+    }
+}
 impl AstNode for AnyCssSubSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssAttributeSelector::KIND_SET
@@ -45063,7 +45075,8 @@ impl AstNode for AnyCssSubSelector {
         .union(CssNestedSelector::KIND_SET)
         .union(CssPseudoClassSelector::KIND_SET)
         .union(CssPseudoElementSelector::KIND_SET)
-        .union(ScssInterpolatedSubSelector::KIND_SET);
+        .union(ScssInterpolatedSubSelector::KIND_SET)
+        .union(ScssPlaceholderSelector::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
@@ -45075,6 +45088,7 @@ impl AstNode for AnyCssSubSelector {
                 | CSS_PSEUDO_CLASS_SELECTOR
                 | CSS_PSEUDO_ELEMENT_SELECTOR
                 | SCSS_INTERPOLATED_SUB_SELECTOR
+                | SCSS_PLACEHOLDER_SELECTOR
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -45093,6 +45107,9 @@ impl AstNode for AnyCssSubSelector {
             SCSS_INTERPOLATED_SUB_SELECTOR => {
                 Self::ScssInterpolatedSubSelector(ScssInterpolatedSubSelector { syntax })
             }
+            SCSS_PLACEHOLDER_SELECTOR => {
+                Self::ScssPlaceholderSelector(ScssPlaceholderSelector { syntax })
+            }
             _ => return None,
         };
         Some(res)
@@ -45107,6 +45124,7 @@ impl AstNode for AnyCssSubSelector {
             Self::CssPseudoClassSelector(it) => it.syntax(),
             Self::CssPseudoElementSelector(it) => it.syntax(),
             Self::ScssInterpolatedSubSelector(it) => it.syntax(),
+            Self::ScssPlaceholderSelector(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -45119,6 +45137,7 @@ impl AstNode for AnyCssSubSelector {
             Self::CssPseudoClassSelector(it) => it.into_syntax(),
             Self::CssPseudoElementSelector(it) => it.into_syntax(),
             Self::ScssInterpolatedSubSelector(it) => it.into_syntax(),
+            Self::ScssPlaceholderSelector(it) => it.into_syntax(),
         }
     }
 }
@@ -45133,6 +45152,7 @@ impl std::fmt::Debug for AnyCssSubSelector {
             Self::CssPseudoClassSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoElementSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolatedSubSelector(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssPlaceholderSelector(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -45147,6 +45167,7 @@ impl From<AnyCssSubSelector> for SyntaxNode {
             AnyCssSubSelector::CssPseudoClassSelector(it) => it.into_syntax(),
             AnyCssSubSelector::CssPseudoElementSelector(it) => it.into_syntax(),
             AnyCssSubSelector::ScssInterpolatedSubSelector(it) => it.into_syntax(),
+            AnyCssSubSelector::ScssPlaceholderSelector(it) => it.into_syntax(),
         }
     }
 }

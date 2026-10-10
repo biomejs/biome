@@ -1,0 +1,31 @@
+$name:b;
+%a%b{c:d}
+%a%b%c{c:d}
+%a:not(%b%c),:is(%a%b),:host(%a%b),:not(%a/**/%b){c:d}
+%a.card:hover%b,.card%a%b{c:d}
+%a   %b,%a>%b,%a+%b,%a~%b{c:d}
+%a,%b{c:d}
+%#{a}%b,%a%#{$name},%a#{"x"}%b{c:d}
+/*before*/%a%b/*after*/{c:d}
+%a /*descendant*/ %b{c:d}
+%a/**/%b{c:d}
+%a%b/*descendant*/%c{c:d}
+%a/*descendant*/.card%b,.card%a/*descendant*/.active{c:d}
+%a
+// descendant
+%b{c:d}
+%a/* biome-ignore format: preserve the placeholder */%#{  b  }{c:d}
+.x{@extend %a}.y{@extend %b}
+// biome-ignore format: preserve the compound rule
+%a%b{ c :   d }
+
+%foo %bar%baz{c:d}
+.parent1{@extend %foo;.child1{@extend %bar}}
+.parent2{@extend %foo;.child2{@extend %baz}}
+
+:host(%a/**/%b),:host-context(%a/**/%b),:-webkit-any(%a/**/%b){c:d}
+.long-parent>%aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa%bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/**/%c{c:d}
+/*outside-before*/%a/**/%b/*outside-after*/{c:d}
+:host(/*inside-before*/%a/**/%b/*inside-after*/){c:d}
+
+.outer{:host(&/**/%a%b),:host(&/**/&%a%b){c:d}}

@@ -448,3 +448,37 @@ fn test_specificity_scss_interpolated_sub_selector() {
         ]
     );
 }
+
+#[test]
+fn test_specificity_scss_compound_placeholders() {
+    let parse = parse_css(
+        "%a, %a%b, %a%b%c, %a.card:hover%b, .card%a%b, button%a%b {}",
+        CssFileSource::scss(),
+        CssParserOptions::default(),
+    );
+    assert!(parse.diagnostics().is_empty(), "{:#?}", parse.diagnostics());
+
+    let root = parse.tree();
+    let model = semantic_model(&root);
+    let rules = model.rules();
+    let rule = rules
+        .first()
+        .expect("expected the compound placeholder selector rule");
+    let specificities = rule
+        .selectors
+        .iter()
+        .map(|selector| selector.specificity)
+        .collect::<Vec<_>>();
+
+    assert_eq!(
+        specificities,
+        [
+            Specificity(0, 1, 0),
+            Specificity(0, 2, 0),
+            Specificity(0, 3, 0),
+            Specificity(0, 4, 0),
+            Specificity(0, 3, 0),
+            Specificity(0, 2, 1),
+        ]
+    );
+}

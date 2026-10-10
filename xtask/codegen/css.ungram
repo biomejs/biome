@@ -214,6 +214,7 @@ AnyCssSubSelector =
 	| CssPseudoElementSelector
 	| CssNestedSelector
 	| ScssInterpolatedSubSelector
+	| ScssPlaceholderSelector
 	| CssBogusSubSelector
 
 // [hidden]#{$suffix} {}
