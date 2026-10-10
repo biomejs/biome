@@ -1,0 +1,330 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_numbers.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const a = 'a' + 1e21;
+const b = 'a' + 0.1e-6;
+const c = 'a' + 0x10;
+const d = 'a' + 1_000;
+const e = 1e21 + 'a';
+const f = 0.1e-6 + 'a';
+const g = 0x10 + 'a';
+const h = 1_000 + 'a';
+const i = 'a' + 123;
+const j = 'a' + 0;
+const k = 'a' + 45.67;
+const l = 'a' + 0x1000000000000081;
+
+```
+
+# Diagnostics
+```
+invalid_numbers.js:2:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const a = 'a' + 1e21;
+      │           ^^^^^^^^^^
+    3 │ const b = 'a' + 0.1e-6;
+    4 │ const c = 'a' + 0x10;
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - const·a·=·'a'·+·1e21;
+        2 │ + const·a·=·"a1e+21";
+     3  3 │   const b = 'a' + 0.1e-6;
+     4  4 │   const c = 'a' + 0x10;
+  
+
+```
+
+```
+invalid_numbers.js:3:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const a = 'a' + 1e21;
+  > 3 │ const b = 'a' + 0.1e-6;
+      │           ^^^^^^^^^^^^
+    4 │ const c = 'a' + 0x10;
+    5 │ const d = 'a' + 1_000;
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   const a = 'a' + 1e21;
+     3    │ - const·b·=·'a'·+·0.1e-6;
+        3 │ + const·b·=·"a1e-7";
+     4  4 │   const c = 'a' + 0x10;
+     5  5 │   const d = 'a' + 1_000;
+  
+
+```
+
+```
+invalid_numbers.js:4:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    2 │ const a = 'a' + 1e21;
+    3 │ const b = 'a' + 0.1e-6;
+  > 4 │ const c = 'a' + 0x10;
+      │           ^^^^^^^^^^
+    5 │ const d = 'a' + 1_000;
+    6 │ const e = 1e21 + 'a';
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     2  2 │   const a = 'a' + 1e21;
+     3  3 │   const b = 'a' + 0.1e-6;
+     4    │ - const·c·=·'a'·+·0x10;
+        4 │ + const·c·=·"a16";
+     5  5 │   const d = 'a' + 1_000;
+     6  6 │   const e = 1e21 + 'a';
+  
+
+```
+
+```
+invalid_numbers.js:5:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    3 │ const b = 'a' + 0.1e-6;
+    4 │ const c = 'a' + 0x10;
+  > 5 │ const d = 'a' + 1_000;
+      │           ^^^^^^^^^^^
+    6 │ const e = 1e21 + 'a';
+    7 │ const f = 0.1e-6 + 'a';
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     3  3 │   const b = 'a' + 0.1e-6;
+     4  4 │   const c = 'a' + 0x10;
+     5    │ - const·d·=·'a'·+·1_000;
+        5 │ + const·d·=·"a1000";
+     6  6 │   const e = 1e21 + 'a';
+     7  7 │   const f = 0.1e-6 + 'a';
+  
+
+```
+
+```
+invalid_numbers.js:6:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    4 │ const c = 'a' + 0x10;
+    5 │ const d = 'a' + 1_000;
+  > 6 │ const e = 1e21 + 'a';
+      │           ^^^^^^^^^^
+    7 │ const f = 0.1e-6 + 'a';
+    8 │ const g = 0x10 + 'a';
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     4  4 │   const c = 'a' + 0x10;
+     5  5 │   const d = 'a' + 1_000;
+     6    │ - const·e·=·1e21·+·'a';
+        6 │ + const·e·=·"1e+21a";
+     7  7 │   const f = 0.1e-6 + 'a';
+     8  8 │   const g = 0x10 + 'a';
+  
+
+```
+
+```
+invalid_numbers.js:7:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    5 │ const d = 'a' + 1_000;
+    6 │ const e = 1e21 + 'a';
+  > 7 │ const f = 0.1e-6 + 'a';
+      │           ^^^^^^^^^^^^
+    8 │ const g = 0x10 + 'a';
+    9 │ const h = 1_000 + 'a';
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     5  5 │   const d = 'a' + 1_000;
+     6  6 │   const e = 1e21 + 'a';
+     7    │ - const·f·=·0.1e-6·+·'a';
+        7 │ + const·f·=·"1e-7a";
+     8  8 │   const g = 0x10 + 'a';
+     9  9 │   const h = 1_000 + 'a';
+  
+
+```
+
+```
+invalid_numbers.js:8:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+     6 │ const e = 1e21 + 'a';
+     7 │ const f = 0.1e-6 + 'a';
+   > 8 │ const g = 0x10 + 'a';
+       │           ^^^^^^^^^^
+     9 │ const h = 1_000 + 'a';
+    10 │ const i = 'a' + 123;
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     6  6 │   const e = 1e21 + 'a';
+     7  7 │   const f = 0.1e-6 + 'a';
+     8    │ - const·g·=·0x10·+·'a';
+        8 │ + const·g·=·"16a";
+     9  9 │   const h = 1_000 + 'a';
+    10 10 │   const i = 'a' + 123;
+  
+
+```
+
+```
+invalid_numbers.js:9:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+     7 │ const f = 0.1e-6 + 'a';
+     8 │ const g = 0x10 + 'a';
+   > 9 │ const h = 1_000 + 'a';
+       │           ^^^^^^^^^^^
+    10 │ const i = 'a' + 123;
+    11 │ const j = 'a' + 0;
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     7  7 │   const f = 0.1e-6 + 'a';
+     8  8 │   const g = 0x10 + 'a';
+     9    │ - const·h·=·1_000·+·'a';
+        9 │ + const·h·=·"1000a";
+    10 10 │   const i = 'a' + 123;
+    11 11 │   const j = 'a' + 0;
+  
+
+```
+
+```
+invalid_numbers.js:10:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+     8 │ const g = 0x10 + 'a';
+     9 │ const h = 1_000 + 'a';
+  > 10 │ const i = 'a' + 123;
+       │           ^^^^^^^^^
+    11 │ const j = 'a' + 0;
+    12 │ const k = 'a' + 45.67;
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     8  8 │   const g = 0x10 + 'a';
+     9  9 │   const h = 1_000 + 'a';
+    10    │ - const·i·=·'a'·+·123;
+       10 │ + const·i·=·"a123";
+    11 11 │   const j = 'a' + 0;
+    12 12 │   const k = 'a' + 45.67;
+  
+
+```
+
+```
+invalid_numbers.js:11:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+     9 │ const h = 1_000 + 'a';
+    10 │ const i = 'a' + 123;
+  > 11 │ const j = 'a' + 0;
+       │           ^^^^^^^
+    12 │ const k = 'a' + 45.67;
+    13 │ const l = 'a' + 0x1000000000000081;
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+     9  9 │   const h = 1_000 + 'a';
+    10 10 │   const i = 'a' + 123;
+    11    │ - const·j·=·'a'·+·0;
+       11 │ + const·j·=·"a0";
+    12 12 │   const k = 'a' + 45.67;
+    13 13 │   const l = 'a' + 0x1000000000000081;
+  
+
+```
+
+```
+invalid_numbers.js:12:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    10 │ const i = 'a' + 123;
+    11 │ const j = 'a' + 0;
+  > 12 │ const k = 'a' + 45.67;
+       │           ^^^^^^^^^^^
+    13 │ const l = 'a' + 0x1000000000000081;
+    14 │ 
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+    10 10 │   const i = 'a' + 123;
+    11 11 │   const j = 'a' + 0;
+    12    │ - const·k·=·'a'·+·45.67;
+       12 │ + const·k·=·"a45.67";
+    13 13 │   const l = 'a' + 0x1000000000000081;
+    14 14 │   
+  
+
+```
+
+```
+invalid_numbers.js:13:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Useless string concatenation.
+  
+    11 │ const j = 'a' + 0;
+    12 │ const k = 'a' + 45.67;
+  > 13 │ const l = 'a' + 0x1000000000000081;
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+  
+  i Consider turning the expression into a single string to improve readability and runtime performance.
+  
+  i Safe fix: Remove the useless concatenation
+  
+    11 11 │   const j = 'a' + 0;
+    12 12 │   const k = 'a' + 45.67;
+    13    │ - const·l·=·'a'·+·0x1000000000000081;
+       13 │ + const·l·=·"a1152921504606847200";
+    14 14 │   
+  
+
+```
