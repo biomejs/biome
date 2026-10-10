@@ -1,0 +1,20 @@
+@switch (condition) {
+  @case ('a') {
+    <p>a</p>
+  }
+  @case ('b')
+  @case ('c') {
+    <p>b & c</p>
+  }
+  @default {
+    <p>default</p>
+  }
+}
+
+@switch (state.mode) {
+	@case ('show') {
+		{{ state.menu }}
+	}
+	@case ('hide') {}
+	@default never;
+}

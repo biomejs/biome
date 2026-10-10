@@ -11,6 +11,7 @@ impl FormatRule<AnyAngularBlock> for FormatAnyAngularBlock {
             AnyAngularBlock::AngularForBlock(node) => node.format().fmt(f),
             AnyAngularBlock::AngularIfBlock(node) => node.format().fmt(f),
             AnyAngularBlock::AngularLetBlock(node) => node.format().fmt(f),
+            AnyAngularBlock::AngularSwitchBlock(node) => node.format().fmt(f),
         }
     }
 }
