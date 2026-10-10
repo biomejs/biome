@@ -263,6 +263,7 @@ define_categories! {
     "lint/nursery/noObjectConstructor": "https://biomejs.dev/linter/rules/no-object-constructor",
     "lint/nursery/noObsoleteTags": "https://biomejs.dev/linter/rules/no-obsolete-tags",
     "lint/nursery/noOctal": "https://biomejs.dev/linter/rules/no-octal",
+    "lint/nursery/noPathConcat": "https://biomejs.dev/linter/rules/no-path-concat",
     "lint/nursery/noPlaywrightElementHandle": "https://biomejs.dev/linter/rules/no-playwright-element-handle",
     "lint/nursery/noPlaywrightEval": "https://biomejs.dev/linter/rules/no-playwright-eval",
     "lint/nursery/noPlaywrightForceOption": "https://biomejs.dev/linter/rules/no-playwright-force-option",
