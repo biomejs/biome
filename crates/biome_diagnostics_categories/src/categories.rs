@@ -281,6 +281,7 @@ define_categories! {
     "lint/nursery/noUnsafeIframeSandbox": "https://biomejs.dev/linter/rules/no-unsafe-iframe-sandbox",
     "lint/nursery/noUnsafePlusOperands": "https://biomejs.dev/linter/rules/no-unsafe-plus-operands",
     "lint/nursery/noUnsafeTypeAssertion": "https://biomejs.dev/linter/rules/no-unsafe-type-assertion",
+    "lint/nursery/noUnsafeUnaryMinus": "https://biomejs.dev/linter/rules/no-unsafe-unary-minus",
     "lint/nursery/noUnusedClasses": "https://biomejs.dev/linter/rules/no-unused-classes",
     "lint/nursery/noUselessBackrefInRegex": "https://biomejs.dev/linter/rules/no-useless-backref-in-regex",
     "lint/nursery/noUselessTypeConversion": "https://biomejs.dev/linter/rules/no-useless-type-conversion",
