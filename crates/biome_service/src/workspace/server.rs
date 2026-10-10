@@ -1465,7 +1465,8 @@ impl WorkspaceServerWithDb<'_> {
             // Markdown formats its snippets when it formats the whole document,
             // according to `markdown.formatter.formatEmbeds`.
             #[cfg(feature = "lang_md")]
-            let should_format = should_format && state.file_source.to_markdown_file_source().is_none();
+            let should_format =
+                should_format && state.file_source.to_markdown_file_source().is_none();
             let embedded_snippets: Vec<_> = state
                 .iter_snippets()
                 .for_analysis(
@@ -1716,8 +1717,11 @@ impl WorkspaceServerWithDb<'_> {
             .project_get_settings_query(&state.db, project_key, &path, inline_config)
             .ok_or_else(WorkspaceError::no_project)?;
         let capabilities = self.features.get_deprecated_capabilities(state.file_source);
-        let parse_errors =
-            state.error_count(&settings, &path, categories.is_lint() || categories.is_assist());
+        let parse_errors = state.error_count(
+            &settings,
+            &path,
+            categories.is_lint() || categories.is_assist(),
+        );
 
         let (diagnostics, errors, warnings, infos, skipped_diagnostics) = if (categories.is_lint()
             || categories.is_assist())
@@ -1785,11 +1789,7 @@ impl WorkspaceServerWithDb<'_> {
                 .iter()
                 .filter(|diagnostic| diagnostic.severity() >= Severity::Error)
                 .count();
-            for embedded_node in
-                state
-                    .iter_snippets()
-                    .blocking_formatting(state.file_source)
-            {
+            for embedded_node in state.iter_snippets().blocking_formatting(state.file_source) {
                 let embedded_diagnostics: Vec<_> = embedded_node
                     .serde_diagnostics(&state.db)
                     .into_iter()
@@ -4125,8 +4125,8 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                     .format_with_errors_enabled_for_this_file_path(&path)
             },
         );
-        let should_format = params.should_format
-            && (format_with_errors || !state.has_errors_for_formatting());
+        let should_format =
+            params.should_format && (format_with_errors || !state.has_errors_for_formatting());
         params.should_format = should_format;
         let settings_handle =
             self.settings_handle_with_query(&settings, EditorFeatures::default(), query);

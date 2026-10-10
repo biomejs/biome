@@ -1,8 +1,8 @@
 use super::*;
-use biome_analyze::RuleCategoriesBuilder;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
 use crate::workspace::UpdateSettingsParams;
+use biome_analyze::RuleCategoriesBuilder;
 use biome_configuration::MarkdownConfiguration;
 use biome_configuration::html::{HtmlConfiguration, HtmlFormatterConfiguration};
 use biome_configuration::markdown::{MarkdownFormatterConfiguration, MarkdownParserConfiguration};
@@ -346,7 +346,8 @@ const   unclosed = 1
 
 #[test]
 fn fix_file_fixes_and_formats_embeds() {
-    const CONTENT: &str = "#   Embeds\n\n```js\ndebugger;\nconsole.log(   1)\n```\n\n```js\nfunction () {}\n```\n";
+    const CONTENT: &str =
+        "#   Embeds\n\n```js\ndebugger;\nconsole.log(   1)\n```\n\n```js\nfunction () {}\n```\n";
 
     let (workspace, project_key) = open_markdown(CONTENT, embeds_configuration(true, true));
     let result = workspace

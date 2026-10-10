@@ -1,4 +1,4 @@
-use super::{format_embeds_enabled, analyze_embeds_enabled};
+use super::{analyze_embeds_enabled, format_embeds_enabled};
 use crate::embed::EmbedContent;
 use crate::embed::markdown::{EmbedCandidate, EmbedDetectorsRegistry, EmbedMatch};
 use crate::file_handlers::{ParseEmbedResult, ParseEmbeddedParams};
@@ -202,87 +202,46 @@ fn parse_code(
             let options = context
                 .settings
                 .parse_options::<JsLanguage>(context.path, &file_source);
-            parse_js_with_offset_and_cache(
-                code,
-                offset,
-                js_source,
-                options,
-                context.cache,
-            )
-            .into()
+            parse_js_with_offset_and_cache(code, offset, js_source, options, context.cache).into()
         }
         DocumentFileSource::Json(_) => {
             let options = context
                 .settings
                 .parse_options::<JsonLanguage>(context.path, &file_source);
-            parse_json_with_offset_and_cache(
-                code,
-                offset,
-                context.cache,
-                options,
-            )
-            .into()
+            parse_json_with_offset_and_cache(code, offset, context.cache, options).into()
         }
         #[cfg(feature = "lang_css")]
         DocumentFileSource::Css(css_source) => {
             let options = context
                 .settings
                 .parse_options::<CssLanguage>(context.path, &file_source);
-            parse_css_with_offset_and_cache(
-                code,
-                css_source,
-                offset,
-                context.cache,
-                options,
-            )
-            .into()
+            parse_css_with_offset_and_cache(code, css_source, offset, context.cache, options).into()
         }
         #[cfg(feature = "lang_graphql")]
-        DocumentFileSource::Graphql(_) => parse_graphql_with_offset_and_cache(
-            code,
-            offset,
-            context.cache,
-        )
-        .into(),
+        DocumentFileSource::Graphql(_) => {
+            parse_graphql_with_offset_and_cache(code, offset, context.cache).into()
+        }
         #[cfg(feature = "lang_html")]
         DocumentFileSource::Html(_) => {
             let options = context
                 .settings
                 .parse_options::<HtmlLanguage>(context.path, &file_source);
-            parse_html_with_offset_and_cache(
-                code,
-                offset,
-                context.cache,
-                options,
-            )
-            .into()
+            parse_html_with_offset_and_cache(code, offset, context.cache, options).into()
         }
         #[cfg(feature = "lang_grit")]
-        DocumentFileSource::Grit(_) => parse_grit_with_offset_and_cache(
-            code,
-            offset,
-            context.cache,
-        )
-        .into(),
+        DocumentFileSource::Grit(_) => {
+            parse_grit_with_offset_and_cache(code, offset, context.cache).into()
+        }
         DocumentFileSource::Markdown(_) => {
             let options = context
                 .settings
                 .parse_options::<MarkdownLanguage>(context.path, &file_source);
-            parse_markdown_with_offset_and_cache(
-                code,
-                offset,
-                context.cache,
-                options,
-            )
-            .into()
+            parse_markdown_with_offset_and_cache(code, offset, context.cache, options).into()
         }
         #[cfg(feature = "lang_yaml")]
-        DocumentFileSource::Yaml(_) => parse_yaml_with_offset_and_cache(
-            code,
-            offset,
-            context.cache,
-        )
-        .into(),
+        DocumentFileSource::Yaml(_) => {
+            parse_yaml_with_offset_and_cache(code, offset, context.cache).into()
+        }
         DocumentFileSource::Ignore | DocumentFileSource::Unknown => return None,
     };
 

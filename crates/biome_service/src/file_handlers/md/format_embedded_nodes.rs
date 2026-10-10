@@ -89,7 +89,14 @@ pub(super) fn format_embedded(
         if parse.has_errors() {
             return None;
         }
-        format_snippet(biome_path, file_source, parse, settings, &workspace_db, &host)
+        format_snippet(
+            biome_path,
+            file_source,
+            parse,
+            settings,
+            &workspace_db,
+            &host,
+        )
     });
 
     // Groups inside the inserted documents must propagate their expand flags.

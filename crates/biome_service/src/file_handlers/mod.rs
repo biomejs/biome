@@ -389,8 +389,8 @@ impl<'a> SnippetsIterator<'a> {
     ) -> impl Iterator<Item = ParsedSnippetOrigin> + 'a {
         let _ = (settings, path);
         #[cfg(feature = "md_embeds")]
-        let skips_markdown_snippets =
-            source.to_markdown_file_source().is_some() && !md::analyze_embeds_enabled(settings, path);
+        let skips_markdown_snippets = source.to_markdown_file_source().is_some()
+            && !md::analyze_embeds_enabled(settings, path);
         self.filter(move |snippet| {
             let _ = (host, source, snippet, db);
             #[cfg(feature = "md_embeds")]
