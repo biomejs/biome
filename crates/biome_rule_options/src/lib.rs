@@ -38,6 +38,7 @@ pub mod no_conditional_expect;
 pub mod no_confusing_labels;
 pub mod no_confusing_void_type;
 pub mod no_console;
+pub mod no_console_spaces;
 pub mod no_const_assign;
 pub mod no_const_enum;
 pub mod no_constant_binary_expressions;

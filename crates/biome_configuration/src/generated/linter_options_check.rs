@@ -176,6 +176,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_console::NoConsoleOptions>(),
     ));
     result.push((
+        "nursery",
+        "noConsoleSpaces",
+        TypeId::of::<biome_rule_options::no_console_spaces::NoConsoleSpacesOptions>(),
+    ));
+    result.push((
         "correctness",
         "noConstAssign",
         TypeId::of::<biome_rule_options::no_const_assign::NoConstAssignOptions>(),
