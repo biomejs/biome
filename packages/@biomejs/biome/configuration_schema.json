@@ -15843,13 +15843,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useScopedStyles": {
-					"description": "Keep component styles scoped in Vue and Astro files.\nSee https://biomejs.dev/linter/rules/use-scoped-styles",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseScopedStylesConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useSelfClosingElements": {
 					"description": "Prevent extra closing tags for components without children.\nSee https://biomejs.dev/linter/rules/use-self-closing-elements",
 					"anyOf": [
@@ -16979,6 +16972,13 @@
 					"description": "Require configured scripts in package.json.\nSee https://biomejs.dev/linter/rules/use-required-scripts",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseRequiredScriptsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useScopedStyles": {
+					"description": "Keep component styles scoped in Vue and Astro files.\nSee https://biomejs.dev/linter/rules/use-scoped-styles",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseScopedStylesConfiguration" },
 						{ "type": "null" }
 					]
 				},

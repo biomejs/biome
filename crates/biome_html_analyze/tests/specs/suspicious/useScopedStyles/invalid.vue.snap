@@ -18,9 +18,9 @@ expression: invalid.vue
 
 # Diagnostics
 ```
-invalid.vue:3:1 lint/style/useScopedStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:3:1 lint/suspicious/useScopedStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This <style> block is missing the scoped attribute.
+  ! This <style> block is missing the scoped attribute.
   
     1 │ <!-- should generate diagnostics -->
     2 │ 
@@ -39,9 +39,9 @@ invalid.vue:3:1 lint/style/useScopedStyles  FIXABLE  ━━━━━━━━━
 ```
 
 ```
-invalid.vue:7:1 lint/style/useScopedStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.vue:7:1 lint/suspicious/useScopedStyles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i This <style> block is missing the scoped attribute.
+  ! This <style> block is missing the scoped attribute.
   
     5 │ </style>
     6 │ 

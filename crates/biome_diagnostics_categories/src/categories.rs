@@ -462,7 +462,6 @@ define_categories! {
     "lint/style/useReactFunctionComponents": "https://biomejs.dev/linter/rules/use-react-function-components",
     "lint/style/useReadonlyClassProperties": "https://biomejs.dev/linter/rules/use-readonly-class-properties",
     "lint/style/useReduceTypeParameter": "https://biomejs.dev/linter/rules/use-reduce-type-parameter",
-    "lint/style/useScopedStyles": "https://biomejs.dev/linter/rules/use-scoped-styles",
     "lint/style/useSelfClosingElements": "https://biomejs.dev/linter/rules/use-self-closing-elements",
     "lint/style/useShorthandAssign": "https://biomejs.dev/linter/rules/use-shorthand-assign",
     "lint/style/useShorthandFunctionType": "https://biomejs.dev/linter/rules/use-shorthand-function-type",
@@ -623,6 +622,7 @@ define_categories! {
     "lint/suspicious/useNamespaceKeyword": "https://biomejs.dev/linter/rules/use-namespace-keyword",
     "lint/suspicious/useNumberToFixedDigitsArgument": "https://biomejs.dev/linter/rules/use-number-to-fixed-digits-argument",
     "lint/suspicious/useRequiredScripts": "https://biomejs.dev/linter/rules/use-required-scripts",
+    "lint/suspicious/useScopedStyles": "https://biomejs.dev/linter/rules/use-scoped-styles",
     "lint/suspicious/useStaticResponseMethods": "https://biomejs.dev/linter/rules/use-static-response-methods",
     "lint/suspicious/useStrictMode": "https://biomejs.dev/linter/rules/use-strict-mode",
     // end lint rules

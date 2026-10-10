@@ -220,7 +220,6 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "useVueConsistentEventHyphenation"),
         RuleFilter::Rule("performance", "useVueVapor"),
         RuleFilter::Rule("style", "noVueOptionsApi"),
-        RuleFilter::Rule("style", "useScopedStyles"),
         RuleFilter::Rule("style", "useVueConsistentDefinePropsDeclaration"),
         RuleFilter::Rule("style", "useVueConsistentVBindStyle"),
         RuleFilter::Rule("style", "useVueConsistentVOnStyle"),
@@ -229,6 +228,7 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("style", "useVueMultiWordComponentNames"),
         RuleFilter::Rule("style", "useVueNextTickPromise"),
         RuleFilter::Rule("suspicious", "noVueArrowFuncInWatch"),
+        RuleFilter::Rule("suspicious", "useScopedStyles"),
     ]
 });
 impl DomainSelector {
