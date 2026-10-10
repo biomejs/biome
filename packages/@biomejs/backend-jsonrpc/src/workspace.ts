@@ -2999,6 +2999,11 @@ export interface Nursery {
 	 */
 	noNestedSwitch?: NoNestedSwitchConfiguration;
 	/**
+	 * Disallow template literals inside other template literals.
+	 * See https://biomejs.dev/linter/rules/no-nested-template-literals
+	 */
+	noNestedTemplateLiterals?: NoNestedTemplateLiteralsConfiguration;
+	/**
 	 * Disallow disabling zoom with user-scalable=no in the \<meta name="viewport"> element.
 	 * See https://biomejs.dev/linter/rules/no-non-scalable-viewport
 	 */
@@ -5561,6 +5566,9 @@ export type NoNegationInEqualityCheckConfiguration =
 export type NoNestedSwitchConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNestedSwitchOptions;
+export type NoNestedTemplateLiteralsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoNestedTemplateLiteralsOptions;
 export type NoNonScalableViewportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNonScalableViewportOptions;
@@ -7946,6 +7954,10 @@ export interface RuleWithNoNegationInEqualityCheckOptions {
 export interface RuleWithNoNestedSwitchOptions {
 	level: RulePlainConfiguration;
 	options?: NoNestedSwitchOptions;
+}
+export interface RuleWithNoNestedTemplateLiteralsOptions {
+	level: RulePlainConfiguration;
+	options?: NoNestedTemplateLiteralsOptions;
 }
 export interface RuleWithNoNonScalableViewportOptions {
 	level: RulePlainConfiguration;
@@ -10349,6 +10361,7 @@ export type NoMisplacedListElementsOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoNegationInEqualityCheckOptions = {};
 export type NoNestedSwitchOptions = {};
+export type NoNestedTemplateLiteralsOptions = {};
 export type NoNonScalableViewportOptions = {};
 export type NoObsoleteTagsOptions = {};
 export type NoOctalOptions = {};
@@ -12010,6 +12023,7 @@ export type Category =
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNegationInEqualityCheck"
 	| "lint/nursery/noNestedSwitch"
+	| "lint/nursery/noNestedTemplateLiterals"
 	| "lint/nursery/noNonScalableViewport"
 	| "lint/nursery/noObsoleteTags"
 	| "lint/nursery/noOctal"

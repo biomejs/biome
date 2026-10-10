@@ -5258,6 +5258,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoNestedTemplateLiteralsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoNestedTemplateLiteralsOptions" }
+			]
+		},
+		"NoNestedTemplateLiteralsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoNestedTernaryConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7532,6 +7542,13 @@
 					"description": "Disallow switch statements inside other switch statements.\nSee https://biomejs.dev/linter/rules/no-nested-switch",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoNestedSwitchConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noNestedTemplateLiterals": {
+					"description": "Disallow template literals inside other template literals.\nSee https://biomejs.dev/linter/rules/no-nested-template-literals",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoNestedTemplateLiteralsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10613,6 +10630,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoNestedSwitchOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoNestedTemplateLiteralsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoNestedTemplateLiteralsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
