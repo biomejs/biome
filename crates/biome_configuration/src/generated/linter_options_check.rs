@@ -926,6 +926,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("suspicious", "noParametersOnlyUsedInRecursion", TypeId::of::<biome_rule_options::no_parameters_only_used_in_recursion::NoParametersOnlyUsedInRecursionOptions>()));
     result.push((
+        "nursery",
+        "noPathConcat",
+        TypeId::of::<biome_rule_options::no_path_concat::NoPathConcatOptions>(),
+    ));
+    result.push((
         "style",
         "noPlaywrightElementHandle",
         TypeId::of::<

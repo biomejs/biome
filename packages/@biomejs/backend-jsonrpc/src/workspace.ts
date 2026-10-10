@@ -3014,6 +3014,11 @@ export interface Nursery {
 	 */
 	noOctal?: NoOctalConfiguration;
 	/**
+	 * Disallow building file paths and URLs by joining strings to __dirname, __filename, or import.meta values.
+	 * See https://biomejs.dev/linter/rules/no-path-concat
+	 */
+	noPathConcat?: NoPathConcatConfiguration;
+	/**
 	 * Disallow the use of process.exit().
 	 * See https://biomejs.dev/linter/rules/no-process-exit
 	 */
@@ -5560,6 +5565,9 @@ export type NoObsoleteTagsConfiguration =
 export type NoOctalConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoOctalOptions;
+export type NoPathConcatConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPathConcatOptions;
 export type NoProcessExitConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoProcessExitOptions;
@@ -7943,6 +7951,10 @@ export interface RuleWithNoOctalOptions {
 	level: RulePlainConfiguration;
 	options?: NoOctalOptions;
 }
+export interface RuleWithNoPathConcatOptions {
+	level: RulePlainConfiguration;
+	options?: NoPathConcatOptions;
+}
 export interface RuleWithNoProcessExitOptions {
 	level: RulePlainConfiguration;
 	options?: NoProcessExitOptions;
@@ -10320,6 +10332,7 @@ export type NoNestedSwitchOptions = {};
 export type NoNonScalableViewportOptions = {};
 export type NoObsoleteTagsOptions = {};
 export type NoOctalOptions = {};
+export type NoPathConcatOptions = {};
 export type NoProcessExitOptions = {};
 export type NoReactObjectTypeAsDefaultPropOptions = {};
 export type NoRestrictedDependenciesOptions = {};
@@ -11971,7 +11984,7 @@ export type Category =
 	| "lint/nursery/noNonScalableViewport"
 	| "lint/nursery/noObsoleteTags"
 	| "lint/nursery/noOctal"
-	| "lint/nursery/noProcessExit"
+	| "lint/nursery/noPathConcat"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"
@@ -11982,6 +11995,7 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForNavigation"
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
+	| "lint/nursery/noProcessExit"
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
@@ -12012,10 +12026,10 @@ export type Category =
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
-	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRequiredPropWithDefault"
+	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noXorAsExponentiation"
 	| "lint/nursery/noZeroFractions"
@@ -12052,13 +12066,13 @@ export type Category =
 	| "lint/nursery/useReactNamingConvention"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useSingleTopLevelHeading"
-	| "lint/nursery/useTailwindSortedClasses"
 	| "lint/nursery/useStrictBooleanExpressions"
 	| "lint/nursery/useStringStartsEndsWith"
 	| "lint/nursery/useSvelteKitResolve"
 	| "lint/nursery/useSvelteKitRuneImports"
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useTailwindShorthandClasses"
+	| "lint/nursery/useTailwindSortedClasses"
 	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"

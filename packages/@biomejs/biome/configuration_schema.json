@@ -5409,6 +5409,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoPathConcatConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoPathConcatOptions" }
+			]
+		},
+		"NoPathConcatOptions": { "type": "object", "additionalProperties": false },
 		"NoPlaywrightElementHandleConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7539,6 +7546,13 @@
 					"description": "Disallow numbers written with an extra leading zero.\nSee https://biomejs.dev/linter/rules/no-octal",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoOctalConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noPathConcat": {
+					"description": "Disallow building file paths and URLs by joining strings to __dirname, __filename, or import.meta values.\nSee https://biomejs.dev/linter/rules/no-path-concat",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoPathConcatConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10757,6 +10771,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoParametersOnlyUsedInRecursionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoPathConcatOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoPathConcatOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
