@@ -6094,6 +6094,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoSvelteBindValueOnCheckableInputsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSvelteBindValueOnCheckableInputsOptions" }
+			]
+		},
+		"NoSvelteBindValueOnCheckableInputsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoSvelteExportLetConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7588,6 +7598,15 @@
 					"description": "Disallow the use of Svelte's {@html} tag.\nSee https://biomejs.dev/linter/rules/no-svelte-at-html-tags",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSvelteAtHtmlTagsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSvelteBindValueOnCheckableInputs": {
+					"description": "Disallow bind:value on checkbox and radio inputs.\nSee https://biomejs.dev/linter/rules/no-svelte-bind-value-on-checkable-inputs",
+					"anyOf": [
+						{
+							"$ref": "#/$defs/NoSvelteBindValueOnCheckableInputsConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -11400,6 +11419,21 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSvelteAtHtmlTagsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSvelteBindValueOnCheckableInputsOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": {
+					"$ref": "#/$defs/NoSvelteBindValueOnCheckableInputsOptions"
+				}
 			},
 			"additionalProperties": false,
 			"required": ["level"]

@@ -262,6 +262,7 @@ pub mod no_substr;
 pub mod no_suspicious_semicolon_in_jsx;
 pub mod no_svelte_at_debug_tags;
 pub mod no_svelte_at_html_tags;
+pub mod no_svelte_bind_value_on_checkable_inputs;
 pub mod no_svelte_export_let;
 pub mod no_svelte_inspect;
 pub mod no_svelte_legacy_const;
