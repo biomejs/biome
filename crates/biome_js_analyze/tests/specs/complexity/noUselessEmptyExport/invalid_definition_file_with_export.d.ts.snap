@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_definition_file_with_export.d.ts
+---
+# Input
+```ts
+declare const a: number;
+declare const b: number;
+export { a };
+export {};
+
+```
+
+# Diagnostics
+```
+invalid_definition_file_with_export.d.ts:4:1 lint/complexity/noUselessEmptyExport  FIXABLE  ━━━━━━━━━━
+
+  i This empty export is useless because there's another export or import.
+  
+    2 │ declare const b: number;
+    3 │ export { a };
+  > 4 │ export {};
+      │ ^^^^^^^^^^
+    5 │ 
+  
+  i This export makes useless the empty export.
+  
+    1 │ declare const a: number;
+    2 │ declare const b: number;
+  > 3 │ export { a };
+      │ ^^^^^^
+    4 │ export {};
+    5 │ 
+  
+  i Safe fix: Remove this useless empty export.
+  
+    2 2 │   declare const b: number;
+    3 3 │   export { a };
+    4   │ - export·{};
+    5 4 │   
+  
+
+```

@@ -3,7 +3,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsModuleItem, JsExport, JsModuleItemList, JsSyntaxToken};
+use biome_js_syntax::{
+    AnyJsExportClause, AnyJsModuleItem, JsExport, JsModuleItemList, JsSyntaxToken,
+    declaration_ext::is_in_ambient_context,
+};
 use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::no_useless_empty_export::NoUselessEmptyExportOptions;
@@ -23,8 +26,11 @@ declare_lint_rule! {
     ///
     /// However, an `export {}` statement does nothing if there are any other top-level import or export in the file.
     ///
-    /// The rule ignores TypeScript declaration files (`.d.ts`).
-    /// In a declaration file, an empty `export {}` stops the declarations that aren't exported from being exported anyway.
+    /// In an ambient context (a declaration file, or the body of a `declare module` or `declare namespace`),
+    /// TypeScript implicitly exports every declaration unless the scope contains an export declaration
+    /// (such as `export { a }` or `export * from "mod"`) or an export assignment (such as `export = a` or `export default a`).
+    /// There, an empty `export {}` stops the declarations without the `export` modifier from being exported,
+    /// so the rule reports it only if the same scope contains another export declaration or export assignment.
     ///
     /// ## Examples
     ///
@@ -40,10 +46,26 @@ declare_lint_rule! {
     /// export {};
     /// ```
     ///
+    /// ```ts,expect_diagnostic
+    /// declare module "mod" {
+    ///     type A = 0;
+    ///     export { A };
+    ///     export {};
+    /// }
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```js
     /// export {};
+    /// ```
+    ///
+    /// ```ts
+    /// declare module "mod" {
+    ///     type Private = 0;
+    ///     export type Public = 1;
+    ///     export {};
+    /// }
     /// ```
     ///
     pub NoUselessEmptyExport {
@@ -65,31 +87,34 @@ impl Rule for NoUselessEmptyExport {
     type Options = NoUselessEmptyExportOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        if ctx
-            .source_type::<JsFileSource>()
-            .language()
-            .is_definition_file()
-        {
-            return None;
-        }
         let node = ctx.query();
         if is_empty_export(node) {
+            let is_ambient = ctx
+                .source_type::<JsFileSource>()
+                .language()
+                .is_definition_file()
+                || is_in_ambient_context(node.syntax());
             let module_item_list = JsModuleItemList::cast(node.syntax().parent()?)?;
             // allow reporting an empty export that precedes another empty export.
             let mut ignore_empty_export = true;
             for module_item in module_item_list {
                 match module_item {
                     AnyJsModuleItem::AnyJsStatement(_) => {}
-                    AnyJsModuleItem::JsImport(import) => return import.import_token().ok(),
+                    AnyJsModuleItem::JsImport(import) => {
+                        if !is_ambient {
+                            return import.import_token().ok();
+                        }
+                    }
                     AnyJsModuleItem::JsExport(export) => {
-                        if !is_empty_export(&export) {
+                        if is_empty_export(&export) {
+                            if !ignore_empty_export {
+                                return export.export_token().ok();
+                            }
+                            if node == &export {
+                                ignore_empty_export = false
+                            }
+                        } else if !is_ambient || is_export_declaration_or_assignment(&export) {
                             return export.export_token().ok();
-                        }
-                        if !ignore_empty_export {
-                            return export.export_token().ok();
-                        }
-                        if node == &export {
-                            ignore_empty_export = false
                         }
                     }
                 }
@@ -138,4 +163,17 @@ fn is_empty_export(export: &JsExport) -> bool {
         )
     })()
     .unwrap_or(false)
+}
+
+/// Returns `true` if `export` is an export declaration or an export assignment.
+/// In an ambient context, they turn off the implicit export of declarations.
+fn is_export_declaration_or_assignment(export: &JsExport) -> bool {
+    matches!(
+        export.export_clause(),
+        Ok(AnyJsExportClause::JsExportNamedClause(_)
+            | AnyJsExportClause::JsExportFromClause(_)
+            | AnyJsExportClause::JsExportNamedFromClause(_)
+            | AnyJsExportClause::JsExportDefaultExpressionClause(_)
+            | AnyJsExportClause::TsExportAssignmentClause(_))
+    )
 }

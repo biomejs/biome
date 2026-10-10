@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_declare_module.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+declare module "foo" {
+	type Private = 1;
+	export type Public = 2;
+	export {};
+}
+
+```

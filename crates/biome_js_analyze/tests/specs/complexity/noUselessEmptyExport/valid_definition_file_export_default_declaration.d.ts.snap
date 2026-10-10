@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_definition_file_export_default_declaration.d.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+export default function f(): void;
+type privateType = 1;
+export {};
+
+```

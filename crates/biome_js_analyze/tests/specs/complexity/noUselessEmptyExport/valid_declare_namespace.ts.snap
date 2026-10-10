@@ -1,0 +1,14 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_declare_namespace.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+declare namespace N {
+	const hidden: number;
+	export const shown: number;
+	export {};
+}
+
+```
