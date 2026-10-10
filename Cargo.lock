@@ -2106,6 +2106,7 @@ dependencies = [
  "biome_tailwind_syntax",
  "biome_unicode_table",
  "codspeed-criterion-compat",
+ "color",
  "insta",
  "json_comments",
  "mimalloc",
@@ -2817,6 +2818,12 @@ dependencies = [
  "libc",
  "regex-lite",
 ]
+
+[[package]]
+name = "color"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2ec7c5eb7a16992b1904d76c517d170ab353b0e0b3d5a0c81a8a0cd1037893cf"
 
 [[package]]
 name = "colored"

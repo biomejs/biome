@@ -122,6 +122,7 @@ boxcar                       = "0.2.14"
 bpaf                         = { version = "0.9.28", features = ["derive"] }
 camino                       = "1.2.6"
 cfg-if                       = "1.0.5"
+color                        = "0.3.3"
 countme                      = "3.0.1"
 crossbeam                    = "0.8.5"
 directories                  = "6.0.0"
