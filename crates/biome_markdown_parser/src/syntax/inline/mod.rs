@@ -35,6 +35,20 @@
 //! 2. Not preceded by punctuation, OR followed by whitespace/punctuation
 //!
 //! Underscore (`_`) has additional intraword restrictions (§6.2 rules 2, 5, 7, 8).
+//!
+//! # CJK-friendly Amendments
+//!
+//! CommonMark rejects `**テスト。**テスト` because the closing run sits between
+//! punctuation and a letter, a position that is common in Chinese, Japanese,
+//! and Korean text written without spaces. When
+//! [`MarkdownParserOptions::with_cjk_friendly_emphasis`](crate::MarkdownParserOptions::with_cjk_friendly_emphasis)
+//! is enabled, the flanking rules follow the
+//! [CommonMark CJK-friendly amendments](https://github.com/tats-u/markdown-cjk-friendly/blob/main/specification.md):
+//! punctuation next to a run doesn't prevent flanking when either side is a CJK
+//! character. Delimiter runs that touch neither CJK characters nor variation
+//! selectors keep their CommonMark flanking, but they can still pair
+//! differently: in `**テスト。**テスト a**`, the middle run closes the first
+//! one, so the last run stays unmatched instead of closing the middle one.
 
 use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_markdown_syntax::T;
@@ -50,7 +64,7 @@ mod entities;
 mod html;
 mod links;
 
-pub(crate) use emphasis::EmphasisContext;
+pub(crate) use emphasis::{EmphasisContext, is_non_emoji_variation_selector};
 pub(crate) use html::is_inline_html;
 
 enum InlineLinksPolicy {

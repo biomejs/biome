@@ -4,6 +4,7 @@ use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding,
     LineWidth, TrailingNewline, TransformSourceMap, comments::Comments, printer::PrinterOptions,
 };
+use biome_languages::MdFileSource;
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode};
 use std::{fmt, rc::Rc, str::FromStr};
 
@@ -24,6 +25,7 @@ pub struct MdFormatOptions {
     line_width: LineWidth,
     trailing_newline: TrailingNewline,
     prose_wrap: ProseWrap,
+    file_source: MdFileSource,
 }
 
 /// Controls whether Biome keeps, adds, or removes line breaks in Markdown paragraphs.
@@ -107,8 +109,9 @@ impl FormatOptions for MdFormatOptions {
 }
 
 impl MdFormatOptions {
-    pub fn new() -> Self {
+    pub fn new(file_source: MdFileSource) -> Self {
         Self {
+            file_source,
             indent_style: IndentStyle::default(),
             indent_width: IndentWidth::default(),
             line_ending: LineEnding::default(),
@@ -174,6 +177,12 @@ impl MdFormatOptions {
 
     pub fn set_prose_wrap(&mut self, prose_wrap: ProseWrap) {
         self.prose_wrap = prose_wrap;
+    }
+
+    /// Returns the file source that the document was parsed with, including whether
+    /// its emphasis follows the CommonMark CJK-friendly amendments.
+    pub fn file_source(&self) -> MdFileSource {
+        self.file_source
     }
 }
 
