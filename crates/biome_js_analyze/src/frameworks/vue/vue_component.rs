@@ -658,7 +658,10 @@ impl<T: VueOptionsApiBasedComponent> VueComponentDeclarations for T {
                         continue;
                     };
                     if let Ok(expression) = property.value() {
-                        result.extend(collect_computed_and_method_declarations(&expression));
+                        result.extend(collect_computed_and_method_declarations(
+                            &expression,
+                            VueDeclaration::Computed,
+                        ));
                     }
                 }
                 "methods" => {
@@ -670,7 +673,10 @@ impl<T: VueOptionsApiBasedComponent> VueComponentDeclarations for T {
                         continue;
                     };
                     if let Ok(expression) = property.value() {
-                        result.extend(collect_computed_and_method_declarations(&expression));
+                        result.extend(collect_computed_and_method_declarations(
+                            &expression,
+                            VueDeclaration::Method,
+                        ));
                     }
                 }
                 "data" => {
@@ -1118,7 +1124,12 @@ fn collect_props_declarations_from_expression(expression: &AnyJsExpression) -> V
     }
 }
 
-fn collect_computed_and_method_declarations(expression: &AnyJsExpression) -> Vec<VueDeclaration> {
+/// Collects the members of a `computed` or `methods` group. `declaration` wraps each member in
+/// the declaration kind of the group.
+fn collect_computed_and_method_declarations(
+    expression: &AnyJsExpression,
+    declaration: fn(AnyVueMethod) -> VueDeclaration,
+) -> Vec<VueDeclaration> {
     let AnyJsExpression::JsObjectExpression(object_expression) = expression else {
         return vec![];
     };
@@ -1127,12 +1138,12 @@ fn collect_computed_and_method_declarations(expression: &AnyJsExpression) -> Vec
         .iter()
         .flatten()
         .filter_map(|member| match member {
-            AnyJsObjectMember::JsPropertyObjectMember(property) => Some(VueDeclaration::Computed(
-                AnyVueMethod::JsPropertyObjectMember(property),
-            )),
-            AnyJsObjectMember::JsMethodObjectMember(method) => Some(VueDeclaration::Computed(
-                AnyVueMethod::JsMethodObjectMember(method),
-            )),
+            AnyJsObjectMember::JsPropertyObjectMember(property) => {
+                Some(declaration(AnyVueMethod::JsPropertyObjectMember(property)))
+            }
+            AnyJsObjectMember::JsMethodObjectMember(method) => {
+                Some(declaration(AnyVueMethod::JsMethodObjectMember(method)))
+            }
             _ => None,
         })
         .collect()

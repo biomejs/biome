@@ -1,0 +1,53 @@
+---
+source: crates/biome_vue_semantic/src/tests/sfc.rs
+expression: sfc(LIST).to_string()
+---
+block Script <script> 0..179 lang=ts setup
+block Template <template> 181..308
+component Setup 25..169 template
+  Import Card 32..36 uses=1
+  Local props 61..66 origin=DefineProps
+  Local emit 123..127 origin=DefineEmits uses=1
+  Prop items 83..88 form=TypeMember types=Array required=Yes uses=1
+  Prop title 98..103 form=TypeMember types=String required=Yes uses=1
+  Emit select 144..150 form=TypeMember payload=1 uses=1
+<script> 0..179
+  @setup
+  @lang = "ts"
+<template> 181..308
+  <Card> 194..296 component
+    @v-for = <unparsed>
+    @v-bind:key shorthand = snippet#2
+    @v-on:click shorthand = snippet#3
+    let VForAlias item 207..211 uses=2
+snippet#0 24..170 Script(BlockId(0)) root=Module
+snippet#1 214..220 VForIterable(AttrId(2)) root=Identifier
+snippet#2 228..235 DirectiveValue(AttrId(3)) root=MemberChain
+snippet#3 245..268 DirectiveValue(AttrId(4)) root=Call
+snippet#4 277..284 Interpolation(Some(ElementId(2))) root=Identifier
+scope Module(Some(BlockId(0)))
+  Import Card 32..36 uses=1
+  Local props 61..66 origin=DefineProps
+  Local emit 123..127 origin=DefineEmits uses=1
+scope Builtins
+  Builtin $attrs 0..0
+  Builtin $data 0..0
+  Builtin $el 0..0
+  Builtin $emit 0..0
+  Builtin $event 0..0
+  Builtin $forceUpdate 0..0
+  Builtin $nextTick 0..0
+  Builtin $options 0..0
+  Builtin $parent 0..0
+  Builtin $props 0..0
+  Builtin $refs 0..0
+  Builtin $root 0..0
+  Builtin $slots 0..0
+  Builtin $watch 0..0
+ref items 215..220 Binding Identifier Read -> Prop items
+ref item 228..232 Binding Identifier Read path=id -> VForAlias item
+ref emit 245..249 Binding Identifier Call args=2 -> Local emit
+ref select 250..258 Emit EventName Call via=emit args=1 -> Emit select
+ref item 260..264 Binding Identifier Escape path=id -> VForAlias item
+ref title 278..283 Binding Identifier Read -> Prop title
+ref Card 195..199 Component TagName(ElementId(2)) Read -> Import Card

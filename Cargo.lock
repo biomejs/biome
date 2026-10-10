@@ -1076,6 +1076,7 @@ dependencies = [
  "biome_tailwind_syntax",
  "biome_test_utils",
  "biome_unicode_table",
+ "biome_vue_semantic",
  "camino",
  "codspeed-criterion-compat",
  "either",
@@ -2217,6 +2218,26 @@ version = "0.3.1"
 [[package]]
 name = "biome_unicode_table"
 version = "0.7.0"
+
+[[package]]
+name = "biome_vue_semantic"
+version = "0.1.0"
+dependencies = [
+ "biome_db",
+ "biome_html_parser",
+ "biome_html_syntax",
+ "biome_js_parser",
+ "biome_js_semantic",
+ "biome_js_syntax",
+ "biome_languages",
+ "biome_rowan",
+ "biome_string_case",
+ "camino",
+ "insta",
+ "papaya",
+ "rustc-hash 2.1.3",
+ "salsa",
+]
 
 [[package]]
 name = "biome_wasm"
