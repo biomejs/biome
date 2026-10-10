@@ -333,6 +333,7 @@ define_categories! {
     "lint/nursery/useSvelteRequireEachKey": "https://biomejs.dev/linter/rules/use-svelte-require-each-key",
     "lint/nursery/useTailwindShorthandClasses": "https://biomejs.dev/linter/rules/use-tailwind-shorthand-classes",
     "lint/nursery/useTopLevelHeading": "https://biomejs.dev/linter/rules/use-top-level-heading",
+    "lint/nursery/useUnaryMinus": "https://biomejs.dev/linter/rules/use-unary-minus",
     "lint/nursery/useUniqueArgumentNames": "https://biomejs.dev/linter/rules/use-unique-argument-names",
     "lint/nursery/useUniqueFieldDefinitionNames": "https://biomejs.dev/linter/rules/use-unique-field-definition-names",
     "lint/nursery/useUniqueGraphqlOperationName": "https://biomejs.dev/linter/rules/use-unique-graphql-operation-name",

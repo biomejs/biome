@@ -3349,6 +3349,11 @@ export interface Nursery {
 	 */
 	useTopLevelHeading?: UseTopLevelHeadingConfiguration;
 	/**
+	 * Enforce the use of the unary minus operator over multiplying or dividing by -1.
+	 * See https://biomejs.dev/linter/rules/use-unary-minus
+	 */
+	useUnaryMinus?: UseUnaryMinusConfiguration;
+	/**
 	 * Enforce valid titles for unit test cases and test suites.
 	 * See https://biomejs.dev/linter/rules/use-valid-test-title
 	 */
@@ -5761,6 +5766,9 @@ export type UseTailwindSortedClassesConfiguration =
 export type UseTopLevelHeadingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTopLevelHeadingOptions;
+export type UseUnaryMinusConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseUnaryMinusOptions;
 export type UseValidTestTitleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseValidTestTitleOptions;
@@ -8295,6 +8303,14 @@ export interface RuleWithUseTopLevelHeadingOptions {
 	level: RulePlainConfiguration;
 	options?: UseTopLevelHeadingOptions;
 }
+export interface RuleWithUseUnaryMinusOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseUnaryMinusOptions;
+}
 export interface RuleWithUseValidTestTitleOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -10555,6 +10571,7 @@ export type UseSvelteRequireEachKeyOptions = {};
 export type UseTailwindShorthandClassesOptions = {};
 export type UseTailwindSortedClassesOptions = {};
 export type UseTopLevelHeadingOptions = {};
+export type UseUnaryMinusOptions = {};
 export interface UseValidTestTitleOptions {
 	/**
 	 * A list of words that are disallowed in test titles.
@@ -12060,6 +12077,7 @@ export type Category =
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useTailwindShorthandClasses"
 	| "lint/nursery/useTopLevelHeading"
+	| "lint/nursery/useUnaryMinus"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"
 	| "lint/nursery/useUniqueGraphqlOperationName"

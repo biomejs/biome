@@ -551,6 +551,7 @@ pub mod use_throw_only_error;
 pub mod use_top_level_heading;
 pub mod use_top_level_regex;
 pub mod use_trim_start_end;
+pub mod use_unary_minus;
 pub mod use_unicode_regex;
 pub mod use_unified_type_signatures;
 pub mod use_unique_element_ids;

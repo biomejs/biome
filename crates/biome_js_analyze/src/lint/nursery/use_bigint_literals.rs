@@ -7,19 +7,17 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, AnyJsOptionalChainExpression,
     JsArrayElementList, JsArrowFunctionExpression, JsCallArgumentList, JsCallExpression,
-    JsComputedMemberExpression, JsExpressionStatement, JsForInStatement, JsForOfStatement,
-    JsForStatement, JsIfStatement, JsInitializerClause, JsLanguage, JsParenthesizedExpression,
-    JsPropertyObjectMember, JsReturnStatement, JsSyntaxKind, JsSyntaxToken, JsThrowStatement,
-    JsUnaryOperator, JsWhileStatement, JsWithStatement, T, global_identifier,
+    JsComputedMemberExpression, JsExpressionStatement, JsInitializerClause, JsLanguage,
+    JsParenthesizedExpression, JsPropertyObjectMember, JsReturnStatement, JsSyntaxKind,
+    JsSyntaxToken, JsThrowStatement, JsUnaryOperator, T, global_identifier,
 };
-use biome_parser::{TokenSet, token_set};
 use biome_rowan::{
     AstNode, AstSeparatedList, BatchMutationExt, SyntaxKindSet, TextRange, TextSize, TokenText,
 };
 use biome_rule_options::use_bigint_literals::UseBigintLiteralsOptions;
 use biome_unicode_table::{Dispatch, lookup_byte};
 
-use crate::{JsRuleAction, services::semantic::Semantic};
+use crate::{JsRuleAction, ast_utils::starts_unterminated_statement, services::semantic::Semantic};
 
 declare_lint_rule! {
     /// Enforce the use of bigint literals over the `BigInt()` constructor.
@@ -164,7 +162,7 @@ impl Rule for UseBigintLiterals {
         if state.is_negative {
             // The replacement starts with `-` or `(`, both of which would continue
             // the previous statement when no semicolon separates them.
-            if starts_unterminated_statement(call) {
+            if starts_unterminated_statement(&AnyJsExpression::from(call.clone())) {
                 return None;
             }
             replacement = make::js_unary_expression(make::token(T![-]), replacement).into();
@@ -431,62 +429,6 @@ fn needs_parentheses(call: &JsCallExpression) -> bool {
             .is_ok_and(|member| member.syntax() != call.syntax());
     }
     !UNPARENTHESIZED_NEGATIVE_LITERAL_PARENTS.matches(parent.kind())
-}
-
-/// Returns `true` if `call` is the first token of an expression statement that
-/// isn't separated from the previous statement by a semicolon or another token
-/// that can't be continued by an expression.
-fn starts_unterminated_statement(call: &JsCallExpression) -> bool {
-    let Some(first_token) = call.syntax().first_token() else {
-        return false;
-    };
-    let is_statement_start = call
-        .syntax()
-        .ancestors()
-        .find_map(JsExpressionStatement::cast)
-        .and_then(|statement| statement.syntax().first_token())
-        .is_some_and(|token| token == first_token);
-    if !is_statement_start {
-        return false;
-    }
-    let Some(previous) = first_token.prev_token() else {
-        return false;
-    };
-    !terminates_statement(&previous)
-}
-
-const STATEMENT_TERMINATORS: TokenSet<JsSyntaxKind> =
-    token_set![T![;], T!['{'], T![:], T![else], T![do]];
-
-const CONTROL_FLOW_STATEMENT_KINDS: SyntaxKindSet<JsLanguage> = JsIfStatement::KIND_SET
-    .union(JsWhileStatement::KIND_SET)
-    .union(JsForStatement::KIND_SET)
-    .union(JsForInStatement::KIND_SET)
-    .union(JsForOfStatement::KIND_SET)
-    .union(JsWithStatement::KIND_SET);
-
-/// Returns `true` if `token` can't be continued by a following `(` or `-`.
-fn terminates_statement(token: &JsSyntaxToken) -> bool {
-    if STATEMENT_TERMINATORS.contains(token.kind()) {
-        return true;
-    }
-    match token.kind() {
-        T![')'] => token
-            .parent()
-            .is_some_and(|parent| CONTROL_FLOW_STATEMENT_KINDS.matches(parent.kind())),
-        T!['}'] => {
-            let Some(mut parent) = token.parent() else {
-                return false;
-            };
-            if parent.kind() == JsSyntaxKind::JS_FUNCTION_BODY
-                && let Some(grand_parent) = parent.parent()
-            {
-                parent = grand_parent;
-            }
-            !AnyJsExpression::can_cast(parent.kind())
-        }
-        _ => false,
-    }
 }
 
 #[cfg(test)]
