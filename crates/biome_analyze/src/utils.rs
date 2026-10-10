@@ -1,6 +1,7 @@
 use biome_rowan::{
     AstNode, AstSeparatedElement, AstSeparatedList, Language, SyntaxError, SyntaxNode, SyntaxToken,
-    chain_trivia_pieces, trim_trailing_trivia_pieces,
+    SyntaxTriviaPiece, TriviaPiece, TriviaPieceKind, chain_trivia_pieces,
+    trim_trailing_trivia_pieces,
 };
 use std::cmp::Ordering;
 
@@ -72,6 +73,10 @@ where
         elements.push((get_key(&node), node, trailing_separator));
     }
 
+    let first_had_leading_newline = elements
+        .first()
+        .map_or(false, |(_, node, _)| has_leading_newline(node));
+
     // Iterate over chunks of node with a key
     for slice in elements.split_mut(|(key, _, _)| key.is_none()) {
         let last_has_separator = slice.last().is_some_and(|(_, _, sep)| sep.is_some());
@@ -86,6 +91,44 @@ where
             last_has_separator,
             make_separator,
         );
+    }
+
+    let indent = get_indentation_from_nodes(elements.iter().map(|(_, node, _)| node));
+
+    // Invariant 2: If the original first element had a leading newline, ensure the new first element does too.
+    if first_had_leading_newline && !elements.is_empty() && !has_leading_newline(&elements[0].1) {
+        let new_leading = std::iter::once(TriviaPiece::newline(1)).chain(indent.iter().copied());
+        if let Some(first_tok) = elements[0].1.syntax().first_token() {
+            let new_leading_syntax = trivia_pieces_to_syntax_pieces(&first_tok, new_leading);
+            if let Some(new_node) =
+                elements[0].1.clone().with_leading_trivia_pieces(new_leading_syntax)
+            {
+                elements[0].1 = new_node;
+            }
+        }
+    }
+
+    // Invariant 1: Ensure any element following an unclosed single-line comment has a leading newline.
+    for i in 0..elements.len().saturating_sub(1) {
+        let preceding_ends_with_comment = if let Some(sep) = &elements[i].2 {
+            has_trailing_unclosed_comment(sep)
+        } else if let Some(last_tok) = elements[i].1.syntax().last_token() {
+            has_trailing_unclosed_comment(&last_tok)
+        } else {
+            false
+        };
+
+        if preceding_ends_with_comment && !has_leading_newline(&elements[i + 1].1) {
+            let new_leading = std::iter::once(TriviaPiece::newline(1)).chain(indent.iter().copied());
+            if let Some(first_tok) = elements[i + 1].1.syntax().first_token() {
+                let new_leading_syntax = trivia_pieces_to_syntax_pieces(&first_tok, new_leading);
+                if let Some(new_node) =
+                    elements[i + 1].1.clone().with_leading_trivia_pieces(new_leading_syntax)
+                {
+                    elements[i + 1].1 = new_node;
+                }
+            }
+        }
     }
 
     let separators: Vec<_> = elements
@@ -105,6 +148,70 @@ where
             }
         }),
     )))
+}
+
+fn has_trailing_unclosed_comment<L: Language>(token: &SyntaxToken<L>) -> bool {
+    let trailing = token.trailing_trivia();
+    for piece in trailing.pieces().rev() {
+        if piece.kind().is_whitespace() {
+            continue;
+        }
+        if piece.kind() == TriviaPieceKind::SingleLineComment {
+            return !piece.text().ends_with("*/");
+        }
+        break;
+    }
+    false
+}
+
+fn has_leading_newline<L: Language, N: AstNode<Language = L>>(node: &N) -> bool {
+    node.syntax()
+        .first_token()
+        .map_or(false, |token| {
+            token.leading_trivia().pieces().any(|piece| piece.kind().is_newline())
+        })
+}
+
+fn get_indentation_from_nodes<'a, L: Language + 'a, N: AstNode<Language = L> + 'a>(
+    nodes: impl IntoIterator<Item = &'a N>,
+) -> Vec<TriviaPiece> {
+    for node in nodes {
+        if let Some(token) = node.syntax().first_token() {
+            let pieces: Vec<_> = token.leading_trivia().pieces().collect();
+            if let Some(pos) = pieces.iter().rposition(|p| p.kind().is_newline()) {
+                let indent: Vec<_> = pieces[pos + 1..]
+                    .iter()
+                    .filter(|p| p.kind().is_whitespace())
+                    .map(|p| TriviaPiece::new(p.kind(), p.text_len()))
+                    .collect();
+                if !indent.is_empty() {
+                    return indent;
+                }
+            }
+        }
+    }
+    vec![TriviaPiece::whitespace(2)]
+}
+
+fn trivia_pieces_to_syntax_pieces<L: Language>(
+    token: &SyntaxToken<L>,
+    pieces: impl IntoIterator<Item = TriviaPiece>,
+) -> Vec<SyntaxTriviaPiece<L>> {
+    let pieces: Vec<_> = pieces.into_iter().collect();
+    let mut text = String::new();
+    for p in &pieces {
+        match p.kind() {
+            TriviaPieceKind::Newline => text.push('\n'),
+            TriviaPieceKind::Whitespace => {
+                for _ in 0..usize::from(p.text_len()) {
+                    text.push(' ');
+                }
+            }
+            _ => {}
+        }
+    }
+    let dummy = SyntaxToken::<L>::new_detached(token.kind(), &text, pieces, []);
+    dummy.leading_trivia().pieces().collect()
 }
 
 /// Fix the ordered sequence of nodes and separators adding missing separators and removing an extra separator.
