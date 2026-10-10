@@ -300,6 +300,7 @@ define_categories! {
     "lint/nursery/useCapitalizedConstructors": "https://biomejs.dev/linter/rules/use-capitalized-constructors",
     "lint/nursery/useConsistentFunctionStyle": "https://biomejs.dev/linter/rules/use-consistent-function-style",
     "lint/nursery/useConsistentHeadingLevel": "https://biomejs.dev/linter/rules/use-consistent-heading-level",
+    "lint/nursery/useConsistentJsonFileRead": "https://biomejs.dev/linter/rules/use-consistent-json-file-read",
     "lint/nursery/useConsistentObjectDefinition": "https://biomejs.dev/linter/rules/use-consistent-object-definition",
     "lint/nursery/useConsistentObjectKeys": "https://biomejs.dev/linter/rules/use-consistent-object-keys",
     "lint/nursery/useControlLabel": "https://biomejs.dev/linter/rules/use-control-label",

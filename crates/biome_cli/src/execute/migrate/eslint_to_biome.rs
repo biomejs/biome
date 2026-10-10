@@ -1021,6 +1021,24 @@ fn migrate_eslint_rule(
                 }
             }
         }
+        eslint_eslint::Rule::UnicornConsistentJsonFileRead(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
+                // A severity-only configuration uses the same default as Biome, so it needs no options.
+                && let eslint_eslint::RuleConf::Option(severity, option) = conf
+            {
+                let group = rules.nursery.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group {
+                    group.use_consistent_json_file_read =
+                        Some(biome_config::RuleFixConfiguration::WithOptions(
+                            biome_config::RuleWithFixOptions {
+                                level: severity.into(),
+                                fix: None,
+                                options: option.into(),
+                            },
+                        ));
+                }
+            }
+        }
         eslint_eslint::Rule::UnicornFilenameCase(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let group = rules.style.get_or_insert_with(Default::default);
