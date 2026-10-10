@@ -16,6 +16,35 @@ pub fn matches_component_name<S: AsRef<str>>(segments: &[S], name: &str) -> bool
         .any(|window| window.iter().map(AsRef::as_ref).eq(name.split('.')))
 }
 
+/// A utility that restyles a component.
+pub struct RestyledUtility {
+    /// The range of the utility in the class string.
+    pub range: TextRange,
+    /// The index in the configured `allow` list of the entry whose `advice` is shown.
+    pub advice_index: Option<usize>,
+}
+
+/// Returns the entries of `allow` whose components match a component, using `matches_name`
+/// to test each configured name.
+///
+/// Also returns the index in `allow` of the first matching entry that has `advice`.
+pub fn component_allowances(
+    allow: &[TailwindComponentAllowance],
+    matches_name: impl Fn(&str) -> bool,
+) -> (Vec<&TailwindComponentAllowance>, Option<usize>) {
+    let mut allowances = Vec::new();
+    let mut advice = None;
+    for (index, allowance) in allow.iter().enumerate() {
+        if allowance.components.matches(&matches_name) {
+            if advice.is_none() && allowance.advice.is_some() {
+                advice = Some(index);
+            }
+            allowances.push(allowance);
+        }
+    }
+    (allowances, advice)
+}
+
 /// Returns ranges of appearance utilities not covered by the supplied allowances.
 /// Layout utilities are ignored.
 pub fn restyled_component_ranges(
@@ -112,6 +141,7 @@ mod tests {
                     components: TailwindAllowedComponents::Name("*".into()),
                     categories: vec![category],
                     classes: vec![],
+                    advice: None,
                 };
                 let ranges = restyled_component_ranges(&parse.tree().candidates(), &[&allow]);
                 assert_eq!(
@@ -192,6 +222,7 @@ mod tests {
                 TailwindUtilityCategory::Color,
             ],
             classes: vec![],
+            advice: None,
         };
         for input in [
             "",

@@ -35,6 +35,10 @@ pub struct TailwindComponentAllowance {
     /// Exact classes, including variants and modifiers. Defaults to an empty list.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub classes: Vec<Box<str>>,
+    /// Instructions on how to fix the problem, shown in diagnostics for the matching
+    /// components in place of the default advice.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub advice: Option<Box<str>>,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
