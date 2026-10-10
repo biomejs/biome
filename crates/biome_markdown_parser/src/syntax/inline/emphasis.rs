@@ -1,12 +1,12 @@
 use crate::syntax::parse_error::unclosed_emphasis;
 use crate::syntax::reference::normalize_reference_label;
-use crate::{MarkdownParser, MarkdownSyntaxFeatures};
+use crate::{MarkdownParser, MarkdownParserOptions};
 use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_markdown_syntax::T;
 use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
+use biome_parser::Parser;
 use biome_parser::prelude::ParsedSyntax::{self, *};
-use biome_parser::{Parser, SyntaxFeature};
-use biome_unicode_table::is_unicode_punctuation;
+use biome_unicode_table::{is_cjk_character, is_unicode_punctuation};
 use std::rc::Rc;
 
 // ============================================================================
@@ -53,19 +53,99 @@ struct EmphasisMatch {
     is_strong: bool,
 }
 
-/// Check if a character is Unicode whitespace for flanking rules.
-fn is_whitespace(c: char) -> bool {
-    c.is_whitespace()
-}
-
 fn is_emphasis_marker(c: char) -> bool {
     matches!(c, '*' | '_' | '~')
 }
 
-/// Check if a character is Unicode punctuation for flanking rules.
-/// Per CommonMark spec, this includes ASCII punctuation and Unicode punctuation categories.
-fn is_punctuation(c: char) -> bool {
-    is_unicode_punctuation(c)
+/// Returns `true` for the variation selectors U+FE00 to U+FE0E. The
+/// CJK-friendly amendments classify such a selector by the character it
+/// modifies. U+FE0F is excluded because it requests emoji presentation.
+pub(crate) fn is_non_emoji_variation_selector(c: char) -> bool {
+    matches!(c, '\u{FE00}'..='\u{FE0E}')
+}
+
+/// Returns `true` for the ideographic variation selectors U+E0100 to U+E01EF,
+/// which only follow CJK ideographs.
+fn is_ideographic_variation_selector(c: char) -> bool {
+    matches!(c, '\u{E0100}'..='\u{E01EF}')
+}
+
+/// Character classes of the text on one side of a delimiter run, as used by
+/// the flanking rules (§6.2).
+#[derive(Debug, Clone, Copy)]
+struct DelimiterNeighbor {
+    /// Unicode whitespace, or the start or end of the inline content.
+    is_whitespace: bool,
+    /// Unicode punctuation. When the CJK-friendly amendments apply, this also
+    /// covers a punctuation character followed by a variation selector.
+    is_punctuation: bool,
+    is_emphasis_marker: bool,
+    /// A CJK character as defined by the CJK-friendly amendments. Always
+    /// `false` when the amendments don't apply.
+    is_cjk: bool,
+}
+
+impl DelimiterNeighbor {
+    const BOUNDARY: Self = Self {
+        is_whitespace: true,
+        is_punctuation: false,
+        is_emphasis_marker: false,
+        is_cjk: false,
+    };
+
+    fn new(c: char, cjk_friendly: bool) -> Self {
+        Self {
+            is_whitespace: c.is_whitespace(),
+            is_punctuation: is_unicode_punctuation(c),
+            is_emphasis_marker: is_emphasis_marker(c),
+            is_cjk: cjk_friendly && is_cjk_character(c),
+        }
+    }
+
+    /// Classifies the first character of `text`, which follows a delimiter run.
+    fn after(text: &str, cjk_friendly: bool) -> Self {
+        text.chars()
+            .next()
+            .map_or(Self::BOUNDARY, |c| Self::new(c, cjk_friendly))
+    }
+
+    /// Classifies the last character of `text`, which precedes a delimiter run.
+    ///
+    /// When `cjk_friendly` is set, a variation selector takes the punctuation
+    /// and CJK classes of the character it modifies, and an ideographic
+    /// variation selector counts as CJK.
+    fn before(text: &str, cjk_friendly: bool) -> Self {
+        let mut chars = text.chars().rev();
+        let Some(c) = chars.next() else {
+            return Self::BOUNDARY;
+        };
+        if !cjk_friendly {
+            return Self::new(c, false);
+        }
+
+        if is_ideographic_variation_selector(c) {
+            return Self {
+                is_cjk: true,
+                ..Self::new(c, true)
+            };
+        }
+
+        if is_non_emoji_variation_selector(c)
+            && let Some(base) = chars.next()
+        {
+            // U+FE01 selects the fullwidth form of these quotation marks.
+            let is_fullwidth_quote = c == '\u{FE01}'
+                && matches!(base, '\u{2018}' | '\u{2019}' | '\u{201C}' | '\u{201D}');
+            let base_classes = Self::new(base, true);
+            return Self {
+                is_punctuation: base_classes.is_punctuation,
+                is_cjk: base_classes.is_cjk || is_fullwidth_quote,
+                ..Self::new(c, true)
+            };
+        }
+
+        Self::new(c, true)
+    }
 }
 
 fn backtick_run_len(bytes: &[u8], start: usize) -> usize {
@@ -103,50 +183,56 @@ fn skip_angle_bracket(bytes: &[u8], i: &mut usize) {
     }
 }
 
-fn is_flanking_delimiter(primary: Option<char>, secondary: Option<char>) -> bool {
-    match primary {
-        None => false,                        // At start/end of input, can't be flanking
-        Some(c) if is_whitespace(c) => false, // Next to whitespace
-        Some(c) if is_emphasis_marker(c) => true,
-        Some(c) if is_punctuation(c) => {
-            // Only flanking if the other side is whitespace or punctuation
-            match secondary {
-                None => true, // Boundary counts as whitespace
-                Some(s) => is_whitespace(s) || is_punctuation(s),
-            }
-        }
-        Some(_) => true, // Not next to whitespace or punctuation = flanking
+fn is_flanking_delimiter(primary: DelimiterNeighbor, secondary: DelimiterNeighbor) -> bool {
+    if primary.is_whitespace {
+        return false;
     }
+    if primary.is_emphasis_marker {
+        return true;
+    }
+    // The CJK-friendly amendments also accept punctuation when either side is
+    // CJK, because CJK text doesn't put spaces around punctuation.
+    !primary.is_punctuation
+        || secondary.is_whitespace
+        || secondary.is_punctuation
+        || primary.is_cjk
+        || secondary.is_cjk
 }
 
 /// Check if an opening delimiter is left-flanking per CommonMark rules.
 /// A left-flanking delimiter run is one that is:
 /// - Not followed by Unicode whitespace, AND
 /// - Either (a) not followed by punctuation, OR (b) preceded by whitespace/punctuation
-fn is_left_flanking_delimiter(char_after: Option<char>, char_before: Option<char>) -> bool {
-    is_flanking_delimiter(char_after, char_before)
+///
+/// The CJK-friendly amendments add (c): the punctuation after the run or the
+/// character before it is CJK.
+fn is_left_flanking_delimiter(after: DelimiterNeighbor, before: DelimiterNeighbor) -> bool {
+    is_flanking_delimiter(after, before)
 }
 
 /// Check if a closing delimiter is right-flanking per CommonMark rules.
 /// A right-flanking delimiter run is one that is:
 /// - Not preceded by Unicode whitespace, AND
 /// - Either (a) not preceded by punctuation, OR (b) followed by whitespace/punctuation
-fn is_right_flanking_delimiter(char_before: Option<char>, char_after: Option<char>) -> bool {
-    is_flanking_delimiter(char_before, char_after)
+///
+/// The CJK-friendly amendments add (c): the punctuation before the run or the
+/// character after it is CJK.
+fn is_right_flanking_delimiter(before: DelimiterNeighbor, after: DelimiterNeighbor) -> bool {
+    is_flanking_delimiter(before, after)
 }
 
 /// Check if underscore can open emphasis (stricter rules than asterisk).
 /// Per CommonMark 6.2, underscore can open emphasis iff it is left-flanking AND either:
 /// - Not part of a right-flanking delimiter run, OR
 /// - Preceded by a punctuation character
-fn can_underscore_open(char_before: Option<char>, char_after: Option<char>) -> bool {
+fn can_underscore_open(before: DelimiterNeighbor, after: DelimiterNeighbor) -> bool {
     // Must be left-flanking
-    if !is_left_flanking_delimiter(char_after, char_before) {
+    if !is_left_flanking_delimiter(after, before) {
         return false;
     }
     // If also right-flanking, must be preceded by punctuation
-    if is_right_flanking_delimiter(char_before, char_after) {
-        return matches!(char_before, Some(c) if is_punctuation(c));
+    if is_right_flanking_delimiter(before, after) {
+        return before.is_punctuation;
     }
     true
 }
@@ -155,14 +241,14 @@ fn can_underscore_open(char_before: Option<char>, char_after: Option<char>) -> b
 /// Per CommonMark 6.2, underscore can close emphasis iff it is right-flanking AND either:
 /// - Not part of a left-flanking delimiter run, OR
 /// - Followed by a punctuation character
-fn can_underscore_close(char_before: Option<char>, char_after: Option<char>) -> bool {
+fn can_underscore_close(before: DelimiterNeighbor, after: DelimiterNeighbor) -> bool {
     // Must be right-flanking
-    if !is_right_flanking_delimiter(char_before, char_after) {
+    if !is_right_flanking_delimiter(before, after) {
         return false;
     }
     // If also left-flanking, must be followed by punctuation
-    if is_left_flanking_delimiter(char_after, char_before) {
-        return matches!(char_after, Some(c) if is_punctuation(c));
+    if is_left_flanking_delimiter(after, before) {
+        return after.is_punctuation;
     }
     true
 }
@@ -240,9 +326,11 @@ fn extract_label_text(source: &str, start: usize, close_pos: usize) -> &str {
 
 fn collect_delimiters(
     source: &str,
-    allow_strikethrough: bool,
+    options: &MarkdownParserOptions,
     reference_checker: impl Fn(&str) -> bool,
 ) -> Vec<DelimRun> {
+    let allow_strikethrough = options.gfm;
+    let cjk_friendly = options.cjk_friendly_emphasis;
     let mut runs = Vec::new();
     let bytes = source.as_bytes();
     let mut i = 0;
@@ -309,29 +397,20 @@ fn collect_delimiters(
             }
             let end_offset = i + count;
 
-            // Get character before delimiter run
-            let char_before = if start_offset > 0 {
-                // Get the char ending at start_offset
-                let before_slice = &source[..start_offset];
-                before_slice.chars().next_back()
-            } else {
-                None
-            };
-
-            // Get character after delimiter run
-            let char_after = source[end_offset..].chars().next();
+            let before = DelimiterNeighbor::before(&source[..start_offset], cjk_friendly);
+            let after = DelimiterNeighbor::after(&source[end_offset..], cjk_friendly);
 
             // Compute flanking status
             let (can_open, can_close) = if kind == DelimKind::Underscore {
                 (
-                    can_underscore_open(char_before, char_after),
-                    can_underscore_close(char_before, char_after),
+                    can_underscore_open(before, after),
+                    can_underscore_close(before, after),
                 )
             } else {
                 // Asterisks and tildes can open if left-flanking and close if right-flanking.
                 (
-                    is_left_flanking_delimiter(char_after, char_before),
-                    is_right_flanking_delimiter(char_before, char_after),
+                    is_left_flanking_delimiter(after, before),
+                    is_right_flanking_delimiter(before, after),
                 )
             };
 
@@ -501,12 +580,12 @@ impl EmphasisContext {
     pub(crate) fn new(
         source: &str,
         base_offset: usize,
-        allow_strikethrough: bool,
+        options: &MarkdownParserOptions,
         reference_checker: impl Fn(&str) -> bool,
     ) -> Self {
         if !source
             .bytes()
-            .any(|byte| matches!(byte, b'*' | b'_') || (allow_strikethrough && byte == b'~'))
+            .any(|byte| matches!(byte, b'*' | b'_') || (options.gfm && byte == b'~'))
         {
             return Self {
                 matches: Vec::new(),
@@ -514,7 +593,7 @@ impl EmphasisContext {
             };
         }
 
-        let mut runs = collect_delimiters(source, allow_strikethrough, reference_checker);
+        let mut runs = collect_delimiters(source, options, reference_checker);
         let matches = match_delimiters(&mut runs);
         Self {
             matches,
@@ -745,12 +824,9 @@ pub(crate) fn set_inline_emphasis_context_until(
     };
     let base_offset = u32::from(p.cur_range().start()) as usize;
     // Create a reference checker closure that uses the parser's link reference definitions
-    let context = EmphasisContext::new(
-        inline_source,
-        base_offset,
-        MarkdownSyntaxFeatures::Gfm.is_supported(p),
-        |label| p.has_link_reference_definition(label),
-    );
+    let context = EmphasisContext::new(inline_source, base_offset, p.options(), |label| {
+        p.has_link_reference_definition(label)
+    });
     p.set_new_emphasis_context(context)
 }
 
@@ -772,10 +848,12 @@ fn inline_list_source_len_until(p: &mut MarkdownParser, stop: MarkdownSyntaxKind
 #[cfg(test)]
 mod tests {
     use super::EmphasisContext;
+    use crate::MarkdownParserOptions;
 
     #[test]
     fn skips_reference_lookups_without_emphasis_delimiters() {
-        let context = EmphasisContext::new("[shortcut]", 0, false, |_| {
+        let options = MarkdownParserOptions::default();
+        let context = EmphasisContext::new("[shortcut]", 0, &options, |_| {
             panic!("reference lookup should be skipped")
         });
 

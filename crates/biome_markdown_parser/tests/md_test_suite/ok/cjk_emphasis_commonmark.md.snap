@@ -1,0 +1,165 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+**このアスタリスクは強調記号として認識されず、そのまま表示されます。**この文のせいで。
+
+カッコに注意**（太字にならない）**文が続く場合に要警戒。
+
+*テスト。*テスト
+
+正體字。︁_Traditional._
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@0..1 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@1..101 "*このアスタリスクは強調記号として認識されず、そのまま表示されます。" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@101..102 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@102..127 "*この文のせいで。" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@127..128 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@128..129 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@129..147 "カッコに注意" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@147..148 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@148..176 "*（太字にならない）" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@176..177 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@177..211 "*文が続く場合に要警戒。" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@211..212 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@212..213 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@213..226 "*テスト。" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@226..236 "*テスト" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@236..237 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@237..238 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@238..266 "正體字。\u{fe01}_Traditional." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@266..267 "_" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@267..268 "\n" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@268..268 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..268
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..268
+    0: MD_PARAGRAPH@0..128
+      0: MD_INLINE_ITEM_LIST@0..128
+        0: MD_TEXTUAL@0..1
+          0: MD_TEXTUAL_LITERAL@0..1 "*" [] []
+        1: MD_TEXTUAL@1..101
+          0: MD_TEXTUAL_LITERAL@1..101 "*このアスタリスクは強調記号として認識されず、そのまま表示されます。" [] []
+        2: MD_TEXTUAL@101..102
+          0: MD_TEXTUAL_LITERAL@101..102 "*" [] []
+        3: MD_TEXTUAL@102..127
+          0: MD_TEXTUAL_LITERAL@102..127 "*この文のせいで。" [] []
+        4: MD_TEXTUAL@127..128
+          0: MD_TEXTUAL_LITERAL@127..128 "\n" [] []
+    1: MD_NEWLINE@128..129
+      0: NEWLINE@128..129 "\n" [] []
+    2: MD_PARAGRAPH@129..212
+      0: MD_INLINE_ITEM_LIST@129..212
+        0: MD_TEXTUAL@129..147
+          0: MD_TEXTUAL_LITERAL@129..147 "カッコに注意" [] []
+        1: MD_TEXTUAL@147..148
+          0: MD_TEXTUAL_LITERAL@147..148 "*" [] []
+        2: MD_TEXTUAL@148..176
+          0: MD_TEXTUAL_LITERAL@148..176 "*（太字にならない）" [] []
+        3: MD_TEXTUAL@176..177
+          0: MD_TEXTUAL_LITERAL@176..177 "*" [] []
+        4: MD_TEXTUAL@177..211
+          0: MD_TEXTUAL_LITERAL@177..211 "*文が続く場合に要警戒。" [] []
+        5: MD_TEXTUAL@211..212
+          0: MD_TEXTUAL_LITERAL@211..212 "\n" [] []
+    3: MD_NEWLINE@212..213
+      0: NEWLINE@212..213 "\n" [] []
+    4: MD_PARAGRAPH@213..237
+      0: MD_INLINE_ITEM_LIST@213..237
+        0: MD_TEXTUAL@213..226
+          0: MD_TEXTUAL_LITERAL@213..226 "*テスト。" [] []
+        1: MD_TEXTUAL@226..236
+          0: MD_TEXTUAL_LITERAL@226..236 "*テスト" [] []
+        2: MD_TEXTUAL@236..237
+          0: MD_TEXTUAL_LITERAL@236..237 "\n" [] []
+    5: MD_NEWLINE@237..238
+      0: NEWLINE@237..238 "\n" [] []
+    6: MD_PARAGRAPH@238..268
+      0: MD_INLINE_ITEM_LIST@238..268
+        0: MD_TEXTUAL@238..266
+          0: MD_TEXTUAL_LITERAL@238..266 "正體字。\u{fe01}_Traditional." [] []
+        1: MD_TEXTUAL@266..267
+          0: MD_TEXTUAL_LITERAL@266..267 "_" [] []
+        2: MD_TEXTUAL@267..268
+          0: MD_TEXTUAL_LITERAL@267..268 "\n" [] []
+  3: EOF@268..268 "" [] []
+
+```

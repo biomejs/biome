@@ -1655,12 +1655,9 @@ fn set_inline_emphasis_context(p: &mut MarkdownParser) -> Option<Rc<EmphasisCont
     };
     let base_offset = u32::from(p.cur_range().start()) as usize;
     // Create a reference checker closure that uses the parser's link reference definitions
-    let context = EmphasisContext::new(
-        inline_source,
-        base_offset,
-        MarkdownSyntaxFeatures::Gfm.is_supported(p),
-        |label| p.has_link_reference_definition(label),
-    );
+    let context = EmphasisContext::new(inline_source, base_offset, p.options(), |label| {
+        p.has_link_reference_definition(label)
+    });
     p.set_new_emphasis_context(context)
 }
 
