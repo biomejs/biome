@@ -1,15 +1,10 @@
-use crate::frameworks::vue::vue_component::{
-    VueComponent, VueComponentDeclarations, VueComponentQuery, VueDeclaration,
-    VueDeclarationCollectionFilter, VueDeclarationName,
-};
+use crate::services::vue::VueProp;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_languages::JsFileSource;
 use biome_rule_options::no_vue_reserved_props::NoVueReservedPropsOptions;
-use enumflags2::make_bitflags;
 
 declare_lint_rule! {
     /// Disallow reserved names to be used as props.
@@ -109,42 +104,22 @@ declare_lint_rule! {
 }
 
 impl Rule for NoVueReservedProps {
-    type Query = VueComponentQuery;
-    type State = VueDeclaration;
-    type Signals = Box<[Self::State]>;
+    type Query = VueProp;
+    type State = ();
+    type Signals = Option<Self::State>;
     type Options = NoVueReservedPropsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let Some(component) = VueComponent::from_potential_component(
-            ctx.query(),
-            ctx.model(),
-            ctx.source_type::<JsFileSource>(),
-            ctx.file_path(),
-        ) else {
-            return Box::new([]);
-        };
-
-        component
-            .declarations(make_bitflags!(VueDeclarationCollectionFilter::Prop))
-            .into_iter()
-            .filter_map(|declaration| {
-                let name = declaration.declaration_name()?;
-                if RESERVED_PROPS.contains(&name.text()) {
-                    Some(declaration)
-                } else {
-                    None
-                }
-            })
-            .collect::<Vec<_>>()
-            .into_boxed_slice()
+        RESERVED_PROPS.contains(&ctx.query().name()).then_some(())
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+        let prop = ctx.query();
         Some(RuleDiagnostic::new(
             rule_category!(),
-            state.declaration_name_range()?,
+            prop.range(),
             markup! {
-                <Emphasis>{state.declaration_name()?.text()}</Emphasis>" is a reserved attribute and cannot be used as props."
+                <Emphasis>{prop.name()}</Emphasis>" is a reserved attribute and cannot be used as props."
             },
         ).note(
             markup! {

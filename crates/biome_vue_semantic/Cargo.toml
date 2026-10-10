@@ -1,0 +1,33 @@
+[package]
+name                 = "biome_vue_semantic"
+version              = "0.1.0"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome's semantic model for Vue components"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = false
+
+[dependencies]
+biome_db          = { workspace = true }
+biome_html_syntax = { workspace = true }
+biome_js_semantic = { workspace = true }
+biome_js_syntax   = { workspace = true }
+biome_languages   = { workspace = true, features = ["lang_html", "lang_js"] }
+biome_rowan       = { workspace = true }
+biome_string_case = { workspace = true }
+rustc-hash        = { workspace = true }
+salsa             = { workspace = true }
+
+[dev-dependencies]
+biome_html_parser = { path = "../biome_html_parser" }
+biome_js_parser   = { path = "../biome_js_parser" }
+camino            = { workspace = true }
+insta             = { workspace = true }
+papaya            = { workspace = true }
+
+[lints]
+workspace = true
