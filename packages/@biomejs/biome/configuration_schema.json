@@ -17008,6 +17008,10 @@
 		"TailwindComponentAllowance": {
 			"type": "object",
 			"properties": {
+				"advice": {
+					"description": "Instructions on how to fix the problem, shown in diagnostics for the matching\ncomponents in place of the default advice.",
+					"type": ["string", "null"]
+				},
 				"categories": {
 					"description": "Categories allowed on the matching components. Defaults to an empty list.",
 					"type": "array",

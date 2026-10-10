@@ -7,10 +7,10 @@ use biome_console::markup;
 use biome_js_syntax::{AnyJsxElementName, AnyJsxObjectName, JsxAttribute};
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_languages::JsFileSource;
-use biome_rowan::{AstNode, TextRange, TokenText};
+use biome_rowan::{AstNode, TokenText};
 use biome_rule_options::no_tailwind_restyled_components::NoTailwindRestyledComponentsOptions;
 use biome_tailwind_logic::no_tailwind_restyled_components::{
-    matches_component_name, restyled_component_ranges,
+    RestyledUtility, component_allowances, matches_component_name, restyled_component_ranges,
 };
 use biome_tailwind_logic::syntax_service::TailwindSyntax;
 use smallvec::{SmallVec, smallvec};
@@ -73,6 +73,9 @@ declare_lint_rule! {
     /// - `components`: a component name, an array of names, or `"*"` for all components.
     /// - `categories`: any of `color`, `typography`, `spacing`, `shape`, `effects`, or `motion`. Default: `[]`.
     /// - `classes`: exact classes, including variants and modifiers. Default: `[]`.
+    /// - `advice`: instructions on how to fix the problem, shown in diagnostics for the
+    ///   matching components in place of the default advice. If several matching entries
+    ///   have `advice`, the first one is shown. Default: none.
     ///
     /// A name matches any segment of a member name, so both `UI` and `Button` match
     /// `UI.Button`. Dotted names such as `UI.Button` match consecutive segments.
@@ -91,6 +94,22 @@ declare_lint_rule! {
     /// <Button className="rounded-none hover:shadow-lg" />;
     /// ```
     ///
+    /// An entry can tell users how to change the appearance of a component:
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "allow": [
+    ///       { "components": "Button", "advice": "Use the `variant` prop of `Button` to change its appearance." }
+    ///     ]
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic,use_options
+    /// <Button className="rounded-none" />;
+    /// ```
+    ///
     pub NoTailwindRestyledComponents {
         version: "next",
         name: "noTailwindRestyledComponents",
@@ -104,7 +123,7 @@ declare_lint_rule! {
 
 impl Rule for NoTailwindRestyledComponents {
     type Query = TailwindSyntax<AnyTailwindClassString>;
-    type State = TextRange;
+    type State = RestyledUtility;
     type Signals = Vec<Self::State>;
     type Options = NoTailwindRestyledComponentsOptions;
 
@@ -118,7 +137,7 @@ impl Rule for NoTailwindRestyledComponents {
             .ancestors()
             .skip(1)
             .find_map(JsxAttribute::cast);
-        let allowances: Vec<_> = if let Some(attribute) = attribute {
+        let (allowances, advice_index) = if let Some(attribute) = attribute {
             let Some(element) = class_attribute_element(&attribute) else {
                 return vec![];
             };
@@ -126,17 +145,11 @@ impl Rule for NoTailwindRestyledComponents {
                 return vec![];
             }
             let segments = element.name().ok().and_then(|name| name_segments(&name));
-            ctx.options()
-                .allow()
-                .iter()
-                .filter(|allow| {
-                    allow.components.matches(|name| match &segments {
-                        Some(segments) => matches_component_name(segments, name),
-                        // Namespaced names such as `svg:rect` are not split into segments.
-                        None => element.matches_name(name).unwrap_or(false),
-                    })
-                })
-                .collect()
+            component_allowances(ctx.options().allow(), |name| match &segments {
+                Some(segments) => matches_component_name(segments, name),
+                // Namespaced names such as `svg:rect` are not split into segments.
+                None => element.matches_name(name).unwrap_or(false),
+            })
         } else if ctx
             .source_type::<JsFileSource>()
             .as_embedding_kind()
@@ -150,31 +163,36 @@ impl Rule for NoTailwindRestyledComponents {
             else {
                 return vec![];
             };
-            ctx.options()
-                .allow()
-                .iter()
-                .filter(|allow| {
-                    allow
-                        .components
-                        .matches(|name| matches_component_name(&segments, name))
-                })
-                .collect()
+            component_allowances(ctx.options().allow(), |name| {
+                matches_component_name(&segments, name)
+            })
         } else {
             return vec![];
         };
         restyled_component_ranges(&ctx.query().tailwind_root().candidates(), &allowances)
+            .into_iter()
+            .map(|range| RestyledUtility {
+                range,
+                advice_index,
+            })
+            .collect()
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                host_range(ctx.query().node(), *range)?,
-                markup! { "This Tailwind utility restyles a component." },
-            )
-            .note(markup! { "The design system should manage the component's appearance." })
-            .note(markup! { "Use a supported component variant or move this style into the component's definition." }),
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let diagnostic = RuleDiagnostic::new(
+            rule_category!(),
+            host_range(ctx.query().node(), state.range)?,
+            markup! { "This Tailwind utility restyles a component." },
         )
+        .note(markup! { "The design system should manage the component's appearance." });
+        let allow = ctx.options().allow();
+        let advice = state
+            .advice_index
+            .and_then(|index| allow.get(index)?.advice.as_deref());
+        Some(match advice {
+            Some(advice) => diagnostic.note(markup! { {advice} }),
+            None => diagnostic.note(markup! { "Use a supported component variant or move this style into the component's definition." }),
+        })
     }
 }
 
