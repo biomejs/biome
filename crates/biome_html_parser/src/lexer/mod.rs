@@ -936,10 +936,18 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
-    fn consume_svelte_literal(&mut self) -> HtmlSyntaxKind {
+    fn consume_svelte_literal(&mut self, current: u8) -> HtmlSyntaxKind {
+        match lookup_byte(current) {
+            WHS => return self.consume_newline_or_whitespaces(),
+            EQL => return self.consume_byte(T![=]),
+            MOR => return self.consume_byte(T![>]),
+            SLH => return self.consume_byte(T![/]),
+            PIP => return self.consume_byte(T![|]),
+            _ => {}
+        }
+
         while let Some(current) = self.current_byte() {
-            let dispatched = lookup_byte(current);
-            if dispatched == WHS || dispatched == EQL || dispatched == MOR {
+            if matches!(lookup_byte(current), WHS | EQL | MOR | SLH | PIP) {
                 break;
             }
             self.advance(1);
@@ -1792,7 +1800,7 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                     HtmlLexContext::CdataSection => self.consume_inside_cdata(current),
                     HtmlLexContext::AstroFencedCodeBlock => self.consume_astro_frontmatter(current),
                     HtmlLexContext::Svelte => self.consume_svelte(current),
-                    HtmlLexContext::SvelteBindingLiteral => self.consume_svelte_literal(),
+                    HtmlLexContext::SvelteBindingLiteral => self.consume_svelte_literal(current),
                 },
                 None => EOF,
             }

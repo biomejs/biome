@@ -1039,8 +1039,11 @@ fn parse_svelte_binding_property(p: &mut HtmlParser) -> ParsedSyntax {
 }
 
 fn parse_binding_literal(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(HTML_LITERAL) {
+        return Absent;
+    }
     let m = p.start();
-    p.bump_with_context(HTML_LITERAL, super::inside_tag_context(p));
+    p.bump_with_context(HTML_LITERAL, HtmlLexContext::SvelteBindingLiteral);
     Present(m.complete(p, SVELTE_LITERAL))
 }
 
