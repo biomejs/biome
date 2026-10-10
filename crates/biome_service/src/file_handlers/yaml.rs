@@ -16,7 +16,10 @@ use crate::settings::{
 };
 use crate::workspace::{CodeAction, FixFileMode, GetSyntaxTreeResult, PullActionsResult};
 use biome_analyze::AnalyzerOptions;
-use biome_analyze::{ActionFilter, AnalysisFilter, AnalyzerConfiguration, ControlFlow, Never};
+use biome_analyze::{
+    ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerSignal, ControlFlow,
+    EmbeddedSignalInspector, Never,
+};
 use biome_configuration::analyzer::assist::AssistEnabled;
 use biome_configuration::yaml::YamlLinterEnabled;
 use biome_configuration::yaml::{YamlFormatterConfiguration, YamlFormatterEnabled};
@@ -29,7 +32,7 @@ use biome_fs::BiomePath;
 use biome_languages::DocumentFileSource;
 use biome_parser::NodeParse;
 use biome_rowan::{AstNode, NodeCache};
-use biome_yaml_analyze::analyze;
+use biome_yaml_analyze::{analyze, analyze_snippet};
 use biome_yaml_formatter::{YamlFormatOptions, format_node};
 use biome_yaml_parser::parse_yaml_with_cache;
 use biome_yaml_syntax::{YamlLanguage, YamlRoot, YamlSyntaxNode};
@@ -453,6 +456,15 @@ pub(crate) fn format(
 }
 
 fn lint(params: LintParams) -> LintResults {
+    lint_with_inspector(&params, None)
+}
+
+/// Lints YAML. When `inspector` is set, the YAML is embedded in another file,
+/// whose ignore comments can also apply to the findings.
+pub(super) fn lint_with_inspector(
+    params: &LintParams,
+    inspector: Option<EmbeddedSignalInspector<'_, '_>>,
+) -> LintResults {
     let _ = debug_span!("Linting YAML file", path =? params.path, language =? params.language)
         .entered();
     let root: YamlRoot = params.parsed_source.tree(&params.workspace_db);
@@ -486,11 +498,16 @@ fn lint(params: LintParams) -> LintResults {
         range: None,
     };
 
-    let mut process_lint = ProcessLint::new(&params);
+    let mut process_lint = ProcessLint::new(params);
 
-    let (_, analyze_diagnostics) = analyze(&root, filter, &analyzer_options, |signal| {
-        process_lint.process_signal(signal)
-    });
+    let emit_signal =
+        |signal: &dyn AnalyzerSignal<YamlLanguage>| process_lint.process_signal(signal);
+    let (_, analyze_diagnostics) = match inspector {
+        Some(inspector) => {
+            analyze_snippet(&root, filter, &analyzer_options, inspector, emit_signal)
+        }
+        None => analyze(&root, filter, &analyzer_options, emit_signal),
+    };
 
     let diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);
 

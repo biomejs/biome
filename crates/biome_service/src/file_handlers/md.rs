@@ -1,8 +1,16 @@
 #[cfg(feature = "md_embeds")]
+mod format_embedded_nodes;
+#[cfg(feature = "md_embeds")]
+mod lint_embedded_nodes;
+#[cfg(feature = "md_embeds")]
 mod parse_embedded_nodes;
+mod update_snippets;
 
 #[cfg(feature = "md_embeds")]
+use self::format_embedded_nodes::format_embedded;
+#[cfg(feature = "md_embeds")]
 use self::parse_embedded_nodes::parse_embedded_nodes;
+use self::update_snippets::update_snippets;
 use super::{
     AnalyzerCapabilities, AnalyzerVisitorBuilder, AnalyzerVisitorResult, Capabilities,
     CodeActionsParams, DebugCapabilities, DocumentFileSource, EditorCapabilities, EnabledForPath,
@@ -11,8 +19,6 @@ use super::{
 };
 #[cfg(not(feature = "md_embeds"))]
 use super::{ParseEmbedResult, ParseEmbeddedParams};
-#[cfg(feature = "md_embeds")]
-use super::{ParsedOrigin, ParsedSnippetOrigin};
 use crate::WorkspaceError;
 use crate::configuration::to_analyzer_rules_by_indices;
 use crate::db::WorkspaceDb;
@@ -23,23 +29,24 @@ use crate::settings::{
 };
 use crate::workspace::{CodeAction, FixFileMode, GetSyntaxTreeResult, PullActionsResult};
 use biome_analyze::{
-    ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
+    ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, AnalyzerSignal,
+    ControlFlow, EmbeddedSignalInspector, Never,
 };
 use biome_configuration::analyzer::assist::AssistEnabled;
 use biome_configuration::markdown::{
-    MarkdownFormatterConfiguration, MarkdownFormatterEnabled, MarkdownLinterEnabled,
-    MarkdownParseCjkFriendlyEmphasis, MarkdownParseFrontmatter, MarkdownParseGfm,
-    MarkdownParserConfiguration,
+    MarkdownAnalyzeEmbeds, MarkdownFormatEmbeds, MarkdownFormatterConfiguration,
+    MarkdownFormatterEnabled, MarkdownLinterEnabled, MarkdownParseCjkFriendlyEmphasis,
+    MarkdownParseFrontmatter, MarkdownParseGfm, MarkdownParserConfiguration,
 };
 use biome_db::AnyParsedSource;
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline};
 use biome_fs::BiomePath;
-use biome_markdown_analyze::analyze;
+#[cfg(feature = "md_embeds")]
+use biome_markdown_analyze::analyze_with_snippets;
+use biome_markdown_analyze::{analyze, analyze_snippet};
 use biome_markdown_formatter::context::{MdFormatOptions, ProseWrap};
 use biome_markdown_formatter::format_node;
 use biome_markdown_parser::{MarkdownParserOptions, parse_markdown_with_cache};
-#[cfg(feature = "md_embeds")]
-use biome_markdown_syntax::MdFencedCodeBlock;
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdRoot};
 use biome_parser::NodeParse;
 use biome_rowan::{AstNode, NodeCache};
@@ -57,6 +64,7 @@ pub struct MarkdownFormatterSettings {
     pub trailing_newline: Option<TrailingNewline>,
     pub enabled: Option<MarkdownFormatterEnabled>,
     pub prose_wrap: Option<ProseWrap>,
+    pub format_embeds: Option<MarkdownFormatEmbeds>,
 }
 
 impl From<MarkdownFormatterConfiguration> for MarkdownFormatterSettings {
@@ -69,6 +77,7 @@ impl From<MarkdownFormatterConfiguration> for MarkdownFormatterSettings {
             enabled: configuration.enabled,
             trailing_newline: configuration.trailing_newline,
             prose_wrap: configuration.prose_wrap,
+            format_embeds: configuration.format_embeds,
         }
     }
 }
@@ -95,6 +104,9 @@ impl From<MarkdownParserConfiguration> for MarkdownParserSettings {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct MarkdownLinterSettings {
     pub enabled: Option<MarkdownLinterEnabled>,
+    /// Whether lint rules and assist actions analyze the snippets of the file.
+    /// Both read the analyzer options resolved from these settings.
+    pub analyze_embeds: Option<MarkdownAnalyzeEmbeds>,
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -388,7 +400,7 @@ impl ExtensionHandler for MarkdownFileHandler {
                 code_actions: Some(code_actions),
                 fix_all: Some(fix_all),
                 rename: None,
-                update_snippets: None,
+                update_snippets: Some(update_snippets),
                 pull_diagnostics_and_actions: None,
             },
             formatter: FormatterCapabilities {
@@ -411,24 +423,46 @@ fn parse_embedded_nodes(_params: ParseEmbeddedParams) -> ParseEmbedResult {
     ParseEmbedResult::default()
 }
 
-/// Identifies snippets extracted from fenced code blocks. Code blocks are
-/// usually examples or partial code, so they're formatted but not analyzed.
-#[cfg(feature = "md_embeds")]
-pub(crate) fn is_fenced_code_block(
-    host: &ParsedOrigin,
-    source: DocumentFileSource,
-    snippet: &ParsedSnippetOrigin,
-    db: &WorkspaceDb,
-) -> bool {
-    if source.to_markdown_file_source().is_none() {
-        return false;
-    }
-    let element_range = snippet.element_range(db);
-    host.syntax::<MarkdownLanguage>(db)
-        .covering_element(element_range)
-        .ancestors()
-        .filter_map(MdFencedCodeBlock::cast)
-        .any(|code_block| code_block.range() == element_range)
+/// Returns whether the formatter formats the snippets of the Markdown file at
+/// `path`, applying the last matching override.
+pub(crate) fn format_embeds_enabled(settings: &Settings, path: &Utf8Path) -> bool {
+    settings
+        .override_settings
+        .patterns
+        .iter()
+        .rev()
+        .find_map(|pattern| {
+            pattern
+                .languages
+                .markdown
+                .formatter
+                .format_embeds
+                .filter(|_| pattern.is_file_included(path))
+        })
+        .or(settings.languages.markdown.formatter.format_embeds)
+        .unwrap_or_default()
+        .into()
+}
+
+/// Returns whether lint rules and assist actions analyze the snippets of the
+/// Markdown file at `path`, applying the last matching override.
+pub(crate) fn analyze_embeds_enabled(settings: &Settings, path: &Utf8Path) -> bool {
+    settings
+        .override_settings
+        .patterns
+        .iter()
+        .rev()
+        .find_map(|pattern| {
+            pattern
+                .languages
+                .markdown
+                .linter
+                .analyze_embeds
+                .filter(|_| pattern.is_file_included(path))
+        })
+        .or(settings.languages.markdown.linter.analyze_embeds)
+        .unwrap_or_default()
+        .into()
 }
 
 fn formatter_enabled(path: &Utf8Path, settings: &SettingsWithEditor) -> bool {
@@ -484,7 +518,7 @@ fn debug_formatter_ir(
     let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
 
     let tree = parse.syntax(&workspace_db);
-    let formatted = format_node(options, &tree)?;
+    let formatted = format_node(options, &tree, Vec::new())?;
 
     let root_element = formatted.into_document();
     Ok(root_element.to_string())
@@ -500,7 +534,7 @@ pub(crate) fn format(
     let options = resolve_format_options(biome_path, document_file_source, settings, &workspace_db);
     debug!("{:?}", &options);
     let tree = parse.syntax(&workspace_db);
-    let formatted = format_node(options, &tree)?;
+    let formatted = format_node(options, &tree, Vec::new())?;
     match formatted.print() {
         Ok(printed) => Ok(printed),
         Err(error) => {
@@ -510,6 +544,7 @@ pub(crate) fn format(
     }
 }
 
+#[cfg(not(feature = "md_embeds"))]
 fn format_embedded(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
@@ -528,6 +563,15 @@ fn format_embedded(
 }
 
 fn lint(params: LintParams) -> LintResults {
+    lint_with_inspector(&params, None)
+}
+
+/// Lints Markdown. When `inspector` is set, the Markdown is embedded in
+/// another file, whose ignore comments can also apply to the findings.
+pub(crate) fn lint_with_inspector(
+    params: &LintParams,
+    inspector: Option<EmbeddedSignalInspector<'_, '_>>,
+) -> LintResults {
     let _ = debug_span!("Linting Markdown file", path =? params.path, language =? params.language)
         .entered();
     let root: MdRoot = params.parsed_source.tree(&params.workspace_db);
@@ -561,20 +605,49 @@ fn lint(params: LintParams) -> LintResults {
         range: None,
     };
 
-    let mut process_lint = ProcessLint::new(&params);
+    #[cfg(feature = "md_embeds")]
+    let mut snippets = lint_embedded_nodes::snippet_analyzers(params);
+
+    let mut process_lint = ProcessLint::new(params);
 
     let file_source = params
         .language
         .to_markdown_file_source()
         .unwrap_or_default();
-    let (_, analyze_diagnostics) =
-        analyze(&root, filter, &analyzer_options, file_source, |signal| {
-            process_lint.process_signal(signal)
-        });
+    let emit_signal =
+        |signal: &dyn AnalyzerSignal<MarkdownLanguage>| process_lint.process_signal(signal);
+    let (_, analyze_diagnostics) = match inspector {
+        Some(inspector) => analyze_snippet(
+            &root,
+            filter,
+            &analyzer_options,
+            file_source,
+            inspector,
+            emit_signal,
+        ),
+        #[cfg(feature = "md_embeds")]
+        None => analyze_with_snippets(
+            &root,
+            filter,
+            &analyzer_options,
+            file_source,
+            &mut snippets,
+            emit_signal,
+        ),
+        #[cfg(not(feature = "md_embeds"))]
+        None => analyze(&root, filter, &analyzer_options, file_source, emit_signal),
+    };
 
     let diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);
 
-    process_lint.into_result(diagnostics, analyze_diagnostics)
+    let results = process_lint.into_result(diagnostics, analyze_diagnostics);
+    #[cfg(feature = "md_embeds")]
+    let mut results = results;
+    #[cfg(feature = "md_embeds")]
+    for snippet in snippets {
+        results.extend(snippet.into_output());
+    }
+    results
 }
 
 fn code_actions(params: CodeActionsParams) -> PullActionsResult {

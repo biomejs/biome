@@ -16,7 +16,8 @@ use biome_configuration::json::{
     JsonFormatterConfiguration, JsonLinterConfiguration, JsonParserConfiguration,
 };
 use biome_configuration::markdown::{
-    MarkdownFormatterConfiguration, MarkdownLinterConfiguration, MarkdownParserConfiguration,
+    MarkdownAnalyzeEmbeds, MarkdownFormatterConfiguration, MarkdownLinterConfiguration,
+    MarkdownParserConfiguration,
 };
 use biome_configuration::vcs::VcsConfiguration;
 use biome_configuration::yaml::YamlFormatterConfiguration;
@@ -297,6 +298,16 @@ pub enum BiomeCommand {
 
         #[bpaf(external(markdown_linter_configuration), optional, hide_usage)]
         markdown_linter: Option<MarkdownLinterConfiguration>,
+
+        /// Runs the linter and assist actions on the code inside the fenced code blocks,
+        /// frontmatter, and HTML blocks of Markdown files. Defaults to `false`.
+        #[bpaf(
+            long("md-analyze-embeds"),
+            argument("true|false"),
+            optional,
+            hide_usage
+        )]
+        markdown_analyze_embeds: Option<MarkdownAnalyzeEmbeds>,
 
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,

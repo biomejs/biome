@@ -1,8 +1,8 @@
+use crate::FormatEmbedded;
 use crate::prelude::*;
+use crate::shared::FormatLiteralLines;
 use biome_formatter::{FormatRuleWithOptions, write};
 use biome_markdown_syntax::{MdCodeContent, MdCodeContentFields};
-use biome_rowan::TextSize;
-use std::borrow::Cow;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdCodeContent {
@@ -16,75 +16,20 @@ impl FormatNodeRule<MdCodeContent> for FormatMdCodeContent {
         // The literal starts with the newline that ends the opening-fence
         // line. The fenced code block formatter writes that line break and
         // normalizes the optional fence indentation separately.
-        let replacement = format_with(|f| {
-            // Trivia is excluded on both sides: the opening fence line's trimmed
-            // info-string whitespace is attached to this token as leading
-            // whitespace trivia, and printing it would insert it as an extra
-            // content line.
-            let text = value_token.text_trimmed();
-            let bytes = text.as_bytes();
-            let token_start = value_token.text_trimmed_range().start();
-            let format_slice = |start: usize, end: usize, f: &mut MarkdownFormatter| {
-                syntax_token_cow_slice(
-                    Cow::Borrowed(&text[start..end]),
-                    &value_token,
-                    token_start + TextSize::from(start as u32),
-                )
-                .with_literal_line_breaks()
-                .fmt(f)
-            };
-            let mut line_start = match bytes {
-                [b'\r', b'\n', ..] => 2,
-                [b'\r' | b'\n', ..] => 1,
-                _ => 0,
-            };
+        let lines = FormatLiteralLines {
+            token: &value_token,
+            max_indent: self.opening_fence_indent,
+        };
+        let content = format_replaced(&value_token, &lines);
 
-            while line_start < bytes.len() {
-                let mut content_start = line_start;
-                let max_content_start = line_start + self.opening_fence_indent;
-                while content_start < bytes.len()
-                    && content_start < max_content_start
-                    && bytes[content_start] == b' '
-                {
-                    content_start += 1;
-                }
-
-                let mut line_end = content_start;
-                while line_end < bytes.len() && !matches!(bytes[line_end], b'\r' | b'\n') {
-                    line_end += 1;
-                }
-
-                match bytes.get(line_end) {
-                    Some(b'\n') => {
-                        format_slice(content_start, line_end + 1, f)?;
-                        line_start = line_end + 1;
-                    }
-                    Some(b'\r') => {
-                        if content_start < line_end {
-                            format_slice(content_start, line_end, f)?;
-                        }
-
-                        if bytes.get(line_end + 1) == Some(&b'\n') {
-                            format_slice(line_end + 1, line_end + 2, f)?;
-                            line_start = line_end + 2;
-                        } else {
-                            literal_line_break_without_parent().fmt(f)?;
-                            line_start = line_end + 1;
-                        }
-                    }
-                    _ => {
-                        if content_start < line_end {
-                            format_slice(content_start, line_end, f)?;
-                        }
-                        break;
-                    }
-                }
-            }
-
-            Ok(())
-        });
-
-        write!(f, [format_replaced(&value_token, &replacement)])
+        let range = value_token.text_range();
+        if f.context().is_embedded_node_range(range) {
+            let embedded = FormatEmbedded::new(range, &content, f)?;
+            // The closing fence must start on its own line.
+            write!(f, [embedded, hard_line_break()])
+        } else {
+            write!(f, [content])
+        }
     }
 }
 

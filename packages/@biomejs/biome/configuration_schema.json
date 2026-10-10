@@ -3177,6 +3177,10 @@
 			"description": "Options applied to Markdown files",
 			"type": "object",
 			"properties": {
+				"analyzeEmbeds": {
+					"description": "Runs the linter and assist actions on the code inside fenced code blocks, frontmatter, and\nHTML blocks, with the rules and actions of the code's language. Defaults to `false`.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				},
 				"formatter": {
 					"description": "Formatter options",
 					"anyOf": [
@@ -3207,6 +3211,10 @@
 			"properties": {
 				"enabled": {
 					"description": "Control the formatter for Markdown (and its super languages) files.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				},
+				"formatEmbeds": {
+					"description": "Formats the code inside fenced code blocks, frontmatter, and HTML blocks with the formatter\nof the code's language. Defaults to `true`.\n\nA block with a syntax error stays as written, and Biome still formats the rest of the file.\n\nWhen this option is `false`, Biome keeps every block is written as is.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"indentStyle": {

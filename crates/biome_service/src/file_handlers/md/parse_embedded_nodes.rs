@@ -1,3 +1,4 @@
+use super::{analyze_embeds_enabled, format_embeds_enabled};
 use crate::embed::EmbedContent;
 use crate::embed::markdown::{EmbedCandidate, EmbedDetectorsRegistry, EmbedMatch};
 use crate::file_handlers::{ParseEmbedResult, ParseEmbeddedParams};
@@ -27,7 +28,7 @@ use biome_markdown_syntax::{
     MarkdownLanguage, MarkdownSyntaxToken, MdFencedCodeBlock, MdFrontmatter, MdHtmlBlock, MdRoot,
 };
 use biome_parser::AnyParse;
-use biome_rowan::{AstNode, AstNodeList, NodeCache, TextRange};
+use biome_rowan::{AstNode, AstNodeList, NodeCache, TextRange, TextSize};
 #[cfg(feature = "lang_yaml")]
 use biome_yaml_parser::parse_yaml_with_offset_and_cache;
 
@@ -47,6 +48,12 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
     } = params;
 
     if file_source.to_markdown_file_source().is_none() {
+        return ParseEmbedResult::default();
+    }
+    // Snippets are only parsed to format or lint their code.
+    if !format_embeds_enabled(settings.as_ref(), path)
+        && !analyze_embeds_enabled(settings.as_ref(), path)
+    {
         return ParseEmbedResult::default();
     }
 
@@ -129,6 +136,11 @@ fn build_fenced_code_block_candidate(
 
 fn build_html_block_candidate(html_block: &MdHtmlBlock) -> Option<EmbedCandidate> {
     let token = html_block.content().ok()?.value_token().ok()?;
+    if token.text_trimmed().trim().is_empty() {
+        // The block only holds comments, which belong to the Markdown file,
+        // such as its suppression comments.
+        return None;
+    }
     Some(EmbedCandidate::HtmlBlock {
         content: embed_content(html_block.range(), token),
     })
@@ -151,96 +163,87 @@ fn parse_matched_embed(
 ) -> Option<(AnyParse, EmbedContent, DocumentFileSource)> {
     let content = candidate.content();
     let file_source = embed_match.file_source;
+    let parse = parse_code(
+        content.text.text(),
+        content.content_offset,
+        file_source,
+        context,
+    )?;
+    Some((parse, content, file_source))
+}
 
+/// Parses `code` with the parser of `file_source` and the parser options of the
+/// Markdown file at `path`, as code that starts at `offset` in that file.
+pub(super) fn parse_snippet_code(
+    code: &str,
+    offset: TextSize,
+    file_source: DocumentFileSource,
+    path: &BiomePath,
+    settings: &SettingsWithEditor,
+) -> Option<AnyParse> {
+    let mut cache = NodeCache::default();
+    let mut context = EmbedParseContext {
+        cache: &mut cache,
+        path,
+        settings,
+    };
+    parse_code(code, offset, file_source, &mut context)
+}
+
+fn parse_code(
+    code: &str,
+    offset: TextSize,
+    file_source: DocumentFileSource,
+    context: &mut EmbedParseContext,
+) -> Option<AnyParse> {
     let parse = match file_source {
         #[cfg(feature = "lang_js")]
         DocumentFileSource::Js(js_source) => {
             let options = context
                 .settings
                 .parse_options::<JsLanguage>(context.path, &file_source);
-            parse_js_with_offset_and_cache(
-                content.text.text(),
-                content.content_offset,
-                js_source,
-                options,
-                context.cache,
-            )
-            .into()
+            parse_js_with_offset_and_cache(code, offset, js_source, options, context.cache).into()
         }
         DocumentFileSource::Json(_) => {
             let options = context
                 .settings
                 .parse_options::<JsonLanguage>(context.path, &file_source);
-            parse_json_with_offset_and_cache(
-                content.text.text(),
-                content.content_offset,
-                context.cache,
-                options,
-            )
-            .into()
+            parse_json_with_offset_and_cache(code, offset, context.cache, options).into()
         }
         #[cfg(feature = "lang_css")]
         DocumentFileSource::Css(css_source) => {
             let options = context
                 .settings
                 .parse_options::<CssLanguage>(context.path, &file_source);
-            parse_css_with_offset_and_cache(
-                content.text.text(),
-                css_source,
-                content.content_offset,
-                context.cache,
-                options,
-            )
-            .into()
+            parse_css_with_offset_and_cache(code, css_source, offset, context.cache, options).into()
         }
         #[cfg(feature = "lang_graphql")]
-        DocumentFileSource::Graphql(_) => parse_graphql_with_offset_and_cache(
-            content.text.text(),
-            content.content_offset,
-            context.cache,
-        )
-        .into(),
+        DocumentFileSource::Graphql(_) => {
+            parse_graphql_with_offset_and_cache(code, offset, context.cache).into()
+        }
         #[cfg(feature = "lang_html")]
         DocumentFileSource::Html(_) => {
             let options = context
                 .settings
                 .parse_options::<HtmlLanguage>(context.path, &file_source);
-            parse_html_with_offset_and_cache(
-                content.text.text(),
-                content.content_offset,
-                context.cache,
-                options,
-            )
-            .into()
+            parse_html_with_offset_and_cache(code, offset, context.cache, options).into()
         }
         #[cfg(feature = "lang_grit")]
-        DocumentFileSource::Grit(_) => parse_grit_with_offset_and_cache(
-            content.text.text(),
-            content.content_offset,
-            context.cache,
-        )
-        .into(),
+        DocumentFileSource::Grit(_) => {
+            parse_grit_with_offset_and_cache(code, offset, context.cache).into()
+        }
         DocumentFileSource::Markdown(_) => {
             let options = context
                 .settings
                 .parse_options::<MarkdownLanguage>(context.path, &file_source);
-            parse_markdown_with_offset_and_cache(
-                content.text.text(),
-                content.content_offset,
-                context.cache,
-                options,
-            )
-            .into()
+            parse_markdown_with_offset_and_cache(code, offset, context.cache, options).into()
         }
         #[cfg(feature = "lang_yaml")]
-        DocumentFileSource::Yaml(_) => parse_yaml_with_offset_and_cache(
-            content.text.text(),
-            content.content_offset,
-            context.cache,
-        )
-        .into(),
+        DocumentFileSource::Yaml(_) => {
+            parse_yaml_with_offset_and_cache(code, offset, context.cache).into()
+        }
         DocumentFileSource::Ignore | DocumentFileSource::Unknown => return None,
     };
 
-    Some((parse, content, file_source))
+    Some(parse)
 }

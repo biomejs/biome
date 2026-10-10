@@ -6,6 +6,7 @@ use biome_formatter::{
 };
 use biome_languages::MdFileSource;
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode};
+use biome_rowan::TextRange;
 use std::{fmt, rc::Rc, str::FromStr};
 
 pub type MarkdownComments = Comments<MarkdownLanguage>;
@@ -15,6 +16,10 @@ pub struct MarkdownFormatContext {
     source_map: Option<TransformSourceMap>,
     options: MdFormatOptions,
     comments: Rc<MarkdownComments>,
+
+    /// Content ranges of the embedded snippets whose formatting is delegated to
+    /// the formatter of their language, sorted by position.
+    embedded_node_ranges: Vec<TextRange>,
 }
 
 #[derive(Debug, Default, Clone, PartialEq)]
@@ -200,6 +205,7 @@ impl MarkdownFormatContext {
                 source_map.as_ref(),
             )),
             source_map,
+            embedded_node_ranges: Vec::new(),
         }
     }
 
@@ -208,8 +214,24 @@ impl MarkdownFormatContext {
         self
     }
 
+    pub fn with_embedded_node_ranges(mut self, mut embedded_node_ranges: Vec<TextRange>) -> Self {
+        embedded_node_ranges.sort_unstable_by_key(|range| (range.start(), range.end()));
+        self.embedded_node_ranges = embedded_node_ranges;
+        self
+    }
+
     pub fn comments(&self) -> &MarkdownComments {
         &self.comments
+    }
+
+    /// Returns `true` when the embedded snippet whose content spans `range` is
+    /// formatted by the formatter of its language.
+    pub fn is_embedded_node_range(&self, range: TextRange) -> bool {
+        self.embedded_node_ranges
+            .binary_search_by_key(&(range.start(), range.end()), |range| {
+                (range.start(), range.end())
+            })
+            .is_ok()
     }
 }
 

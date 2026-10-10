@@ -255,6 +255,12 @@ Options that change how the Markdown formatter behaves
                               removes line breaks in Markdown paragraphs.
                               Manual line breaks are always kept. In Markdown, a manual line break
                               is created by ending a line with two spaces or a backslash.
+        --md-formatter-format-embeds=<true|false>  Formats the code inside fenced code blocks,
+                              frontmatter, and HTML blocks with the formatter of the code's
+                              language. Defaults to `true`.
+                              A block with a syntax error stays as written, and Biome still formats
+                              the rest of the file.
+                              When this option is `false`, Biome keeps every block is written as is.
 
 Options that change how the Yaml formatter behaves
         --yaml-formatter-enabled=<true|false>  Control the formatter for Yaml (and its super

@@ -35,6 +35,15 @@ pub struct MarkdownConfiguration {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub linter: Option<MarkdownLinterConfiguration>,
+
+    /// Runs the linter and assist actions on the code inside fenced code blocks, frontmatter, and
+    /// HTML blocks, with the rules and actions of the code's language. Defaults to `false`.
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("md-analyze-embeds"), argument("true|false"))
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub analyze_embeds: Option<MarkdownAnalyzeEmbeds>,
 }
 
 pub type MarkdownFormatterEnabled = Bool<true>;
@@ -43,6 +52,8 @@ pub type MarkdownAssistEnabled = Bool<true>;
 pub type MarkdownParseFrontmatter = Bool<false>;
 pub type MarkdownParseGfm = Bool<true>;
 pub type MarkdownParseCjkFriendlyEmphasis = Bool<false>;
+pub type MarkdownFormatEmbeds = Bool<true>;
+pub type MarkdownAnalyzeEmbeds = Bool<false>;
 
 /// Options that change how the Markdown parser behaves
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Deserializable, Merge)]
@@ -164,6 +175,19 @@ pub struct MarkdownFormatterConfiguration {
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub prose_wrap: Option<ProseWrap>,
+
+    /// Formats the code inside fenced code blocks, frontmatter, and HTML blocks with the formatter
+    /// of the code's language. Defaults to `true`.
+    ///
+    /// A block with a syntax error stays as written, and Biome still formats the rest of the file.
+    ///
+    /// When this option is `false`, Biome keeps every block is written as is.
+    #[cfg_attr(
+        feature = "cli",
+        bpaf(long("md-formatter-format-embeds"), argument("true|false"))
+    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub format_embeds: Option<MarkdownFormatEmbeds>,
 }
 
 /// Options that change how the Markdown linter behaves
