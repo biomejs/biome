@@ -1,4 +1,5 @@
 use super::*;
+use biome_analyze::RuleCategoriesBuilder;
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
 use crate::workspace::UpdateSettingsParams;
