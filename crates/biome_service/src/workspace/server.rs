@@ -1789,11 +1789,7 @@ impl WorkspaceServerWithDb<'_> {
                 .iter()
                 .filter(|diagnostic| diagnostic.severity() >= Severity::Error)
                 .count();
-            for embedded_node in
-                state
-                    .iter_snippets()
-                    .blocking_formatting(state.file_source)
-            {
+            for embedded_node in state.iter_snippets().blocking_formatting(state.file_source) {
                 let embedded_diagnostics: Vec<_> = embedded_node
                     .serde_diagnostics(&state.db)
                     .into_iter()
@@ -4130,8 +4126,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             },
         );
         let should_format =
-            params.should_format
-            && (format_with_errors || !state.has_errors_for_formatting());
+            params.should_format && (format_with_errors || !state.has_errors_for_formatting());
         params.should_format = should_format;
         let settings_handle =
             self.settings_handle_with_query(&settings, EditorFeatures::default(), query);
