@@ -44,6 +44,82 @@ module's type table; it does not mean block- or function-scoped source code.
 Start at `src/module_graph.rs`, `src/js_module_info/collector.rs`, and
 `src/db/type_inference/resolver.rs`.
 
+### Flow-sensitive expression reads
+
+An expression lookup can give a variable a more specific type at a particular
+read. For example, after `if (value === null) return`, a variable typed
+`string | null` can be read as `string`. The type stored for the variable's
+declaration does not change.
+
+An execution root is a body analyzed independently, such as a module, function,
+or method. Narrowing applies to `let`/`const` variables and parameters declared
+in the same execution root as the read, provided they are never reassigned.
+Reads inside a nested function do not inherit facts from the outer function.
+Biome uses its semantic model to distinguish variables with the same name.
+
+`src/db/type_inference/flow.rs` applies `typeof`, literal equality, nullish, and
+truthiness tests. Where branches meet, or a loop returns to an earlier point,
+it keeps every type still possible on a reachable path. `flow_expressions.rs`
+uses narrowed operands when inferring member accesses, calls, logical and
+conditional expressions, and `await`. Complete module inference uses the same
+read-specific results as individual expression queries.
+
+Flow is split like types: collection gathers syntax-only facts, and tracked
+queries do everything that needs a resolved type. When type inference is
+enabled, collection (`src/js_module_info/flow.rs`) builds a graph of the
+possible paths through each execution root that tests one of its own
+variables. The module visitor selects the roots that contain a condition and
+only supported syntax during its own syntax walk, so collection never walks the
+whole module again and a module without conditions builds no graph. Collection
+decomposes every condition into guards on semantic bindings. For
+example, `typeof value === "string"` can narrow `value`; `check(value)` and
+`value.length` cannot. Collection then records which reads a test of their
+variable can reach, and those reads plus the enclosing expressions that can use
+a narrowed operand become candidates. A test inside a nested function never
+reaches reads in the enclosing one, and an array or object literal ends the
+chain of enclosing candidates.
+
+Lookups skip flow for any expression that is not a candidate. For a candidate
+read, `infer_flow_binding_baseline` resolves the variable's type once, and
+`infer_flow_binding_type` applies the guards on every path to the read's
+incoming flow point. If decomposing a condition cannot finish within its work
+limit, the guard makes the result unknown rather than assuming the expression is
+unaffected. The variable's ordinary type stays separate from the result at each
+read.
+
+An object shape such as `{}` can also describe `0` or `""`. Removing `null`
+therefore does not prove that the value is truthy. A `void` return annotation
+does not guarantee runtime `undefined` either. These cases must retain
+uncertainty.
+
+Narrowing does not support `var`, imported variables, predicate/assertion
+functions, or facts about individual object properties. Unsupported control flow
+includes exception handlers, `switch`, `for-in`/`for-of`, destructuring, classes,
+and logical assignments. Roots that read the global `eval` or the implicit
+`arguments` object, directly or in a nested function, and roots that exceed a
+work limit while their flow is collected, also keep ordinary inference.
+References inside types never run, so the scanner ignores them. Every other
+reference to `eval` counts, because calling a variable named `eval` that holds
+the global function is still a direct `eval`. A reference to `arguments` is an
+ordinary read only when the semantic model resolves it to a parameter, catch
+parameter, `let`, or `const` declared inside the function that owns the
+`arguments` object, or anywhere when no enclosing function has one, such as at
+the top level of a script. Variables typed
+`any`, or whose type includes an undetermined part, never narrow because no
+supported test can change them. Collection already drops reads of untyped and
+`any`-annotated variables; other variable types are resolved only when a
+candidate read is queried, because resolving them can be costly. If flow
+solving exhausts its work limit or a query cycle occurs, the result is unknown.
+Callers must respect that result rather than replace it with a more confident
+answer from raw type information.
+
+Collected flow belongs to the module input, so an edit replaces it together
+with the raw type tables, even when variable declarations and references stay
+the same. Salsa caches the type work: all reads of a variable share the type that
+narrowing starts from, and reads at the same flow point also share their
+narrowing calculation. These caches recompute when the module input changes; they
+do not track edits separately for each function.
+
 ### Analyzer-facing requests
 
 A request is a typed operation used by analyzer rules. It stores module and

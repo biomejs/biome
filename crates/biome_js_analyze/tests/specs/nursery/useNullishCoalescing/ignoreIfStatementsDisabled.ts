@@ -5,12 +5,12 @@
 declare let obj: { x: number } | null;
 declare function makeObj(): { x: number };
 
-// `!obj` on an object union: truthiness is equivalent to a null check, fix is safe.
+// Object-shaped annotations do not prove truthiness, so no safe fix is offered.
 if (!obj) {
 	obj = makeObj();
 }
 
-// single-statement body without braces, also safe.
+// The same uncertainty applies to a single-statement body.
 if (!obj) obj = makeObj();
 
 // loose null check: always safe to fix.

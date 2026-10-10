@@ -469,8 +469,17 @@ impl<'db> ResolutionCtx<'db, '_> {
         callee: InferredTypeData<'db>,
         arguments: &[RawCallArgumentType],
     ) -> InferredTypeData<'db> {
+        self.resolve_call_expression_with_overrides(callee, arguments, &[])
+    }
+
+    pub(super) fn resolve_call_expression_with_overrides(
+        &mut self,
+        callee: InferredTypeData<'db>,
+        arguments: &[RawCallArgumentType],
+        overrides: &[Option<InferredTypeData<'db>>],
+    ) -> InferredTypeData<'db> {
         let callee = self.resolve_call_callee(callee);
-        let args = if self.has_const_call_parameters(callee) {
+        let mut args = if self.has_const_call_parameters(callee) {
             self.resolve_const_call_arguments(arguments)
         } else if let InferredTypeData::Function(function) = callee
             && arguments
@@ -485,6 +494,21 @@ impl<'db> ResolutionCtx<'db, '_> {
         } else {
             self.resolve_call_arguments(arguments)
         };
+        for (argument, replacement) in args.iter_mut().zip(overrides) {
+            if let Some(ty) = replacement {
+                *argument = match argument {
+                    ResolvedCallArgument::ConstArgument { .. } => {
+                        ResolvedCallArgument::ConstArgument {
+                            ty: *ty,
+                            const_ty: *ty,
+                        }
+                    }
+                    ResolvedCallArgument::Argument(_)
+                    | ResolvedCallArgument::Optional(_)
+                    | ResolvedCallArgument::Spread(_) => ResolvedCallArgument::Argument(*ty),
+                };
+            }
+        }
         infer_call_expression_return_type_from_args(self.db, callee, &args)
     }
 
@@ -1547,7 +1571,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
-    fn resolve_computed_member_expression(
+    pub(super) fn resolve_computed_member_expression(
         &mut self,
         object: InferredTypeData<'db>,
         member: InferredTypeData<'db>,
@@ -2120,7 +2144,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
-    fn optional_chain_result(
+    pub(super) fn optional_chain_result(
         &mut self,
         object: InferredTypeData<'db>,
         result: InferredTypeData<'db>,
@@ -2580,7 +2604,7 @@ impl<'db> ResolutionCtx<'db, '_> {
         }
     }
 
-    fn resolve_addition_expression(
+    pub(super) fn resolve_addition_expression(
         &mut self,
         left: InferredTypeData<'db>,
         right: InferredTypeData<'db>,

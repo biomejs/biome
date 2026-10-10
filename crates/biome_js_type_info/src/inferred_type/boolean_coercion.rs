@@ -1,6 +1,6 @@
 use super::{InferredType, MAX_TYPE_VARIANT_STEPS, TypeTraversalError};
 use crate::TypeDb;
-use crate::interned_types::{FunctionParameter, Literal, ReturnType, TypeData};
+use crate::interned_types::{ConditionalType, FunctionParameter, Literal, ReturnType, TypeData};
 use crate::type_traversal::{DepthFirstVisitor, TraversalOutcome, VisitContext};
 use std::ops::ControlFlow;
 
@@ -20,8 +20,9 @@ pub enum BooleanCoercion {
 
 impl<'db> InferredType<'db> {
     /// Classifies boolean coercion, allowing non-nullable strings and numbers
-    /// and nullable objects. Unresolved types, cycles, and exhausted traversal
-    /// budgets return an error rather than a classification.
+    /// and nullable objects. Structural shapes whose primitive inhabitants are
+    /// unknown, unresolved types, cycles, and exhausted traversal budgets return
+    /// an error rather than a classification.
     pub fn boolean_coercion(self) -> Result<BooleanCoercion, TypeTraversalError> {
         let mut visitor = BooleanCoercionVisitor {
             db: self.db,
@@ -156,7 +157,9 @@ impl<'db> DepthFirstVisitor<TypeData<'db>> for BooleanCoercionVisitor<'db> {
             | TypeData::TypeofExpression(_)
             | TypeData::IndexedAccess(_)
             | TypeData::MappedType(_)
-            | TypeData::ThisKeyword => {
+            | TypeData::ThisKeyword
+            | TypeData::Object(_)
+            | TypeData::Interface(_) => {
                 return ControlFlow::Break(TypeTraversalError::UnresolvedType);
             }
             TypeData::AnyKeyword | TypeData::UnknownKeyword => ANY,
@@ -202,11 +205,12 @@ impl<'db> DepthFirstVisitor<TypeData<'db>> for BooleanCoercionVisitor<'db> {
                 if primitives.clone().next().is_some() {
                     context.extend(primitives);
                     0
-                } else if intersection
-                    .types(self.db)
-                    .iter()
-                    .all(|ty| ty.is_object_like(self.db))
-                {
+                } else if intersection.types(self.db).iter().all(|ty| {
+                    matches!(
+                        ty.value_conditional_type_shallow(self.db),
+                        Some(ConditionalType::Truthy)
+                    )
+                }) {
                     OBJECT
                 } else {
                     return ControlFlow::Break(TypeTraversalError::UnresolvedType);
@@ -243,24 +247,14 @@ impl<'db> DepthFirstVisitor<TypeData<'db>> for BooleanCoercionVisitor<'db> {
                 context.push(ty.ty(self.db));
                 0
             }
-            TypeData::InstanceOf(instance) => {
-                let target = instance.ty(self.db);
-                if matches!(
-                    target,
-                    TypeData::Unknown | TypeData::Local(_) | TypeData::TypeofExpression(_)
-                ) {
-                    return ControlFlow::Break(TypeTraversalError::UnresolvedType);
-                }
-                if matches!(
-                    target,
-                    TypeData::Class(_) | TypeData::Interface(_) | TypeData::Object(_)
-                ) {
-                    OBJECT
-                } else {
-                    context.push(target);
+            TypeData::InstanceOf(instance) => match data.value_conditional_type_shallow(self.db) {
+                Some(ConditionalType::Truthy) => OBJECT,
+                Some(_) => return ControlFlow::Break(TypeTraversalError::UnresolvedType),
+                None => {
+                    context.push(instance.ty(self.db));
                     0
                 }
-            }
+            },
             TypeData::MergedReference(_) => {
                 return ControlFlow::Break(TypeTraversalError::UnresolvedType);
             }
@@ -268,10 +262,8 @@ impl<'db> DepthFirstVisitor<TypeData<'db>> for BooleanCoercionVisitor<'db> {
             | TypeData::Class(_)
             | TypeData::Constructor(_)
             | TypeData::Function(_)
-            | TypeData::Interface(_)
             | TypeData::Module(_)
             | TypeData::Namespace(_)
-            | TypeData::Object(_)
             | TypeData::Tuple(_)
             | TypeData::ObjectKeyword
             | TypeData::Symbol => OBJECT,
@@ -283,7 +275,9 @@ impl<'db> DepthFirstVisitor<TypeData<'db>> for BooleanCoercionVisitor<'db> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::interned_types::{InternedIntersection, InternedLiteral, InternedUnion};
+    use crate::interned_types::{
+        InternedInterface, InternedIntersection, InternedLiteral, InternedObject, InternedUnion,
+    };
     use crate::literal::{BooleanLiteral, NumberLiteral, StringLiteral};
     use biome_rowan::Text;
 
@@ -355,6 +349,43 @@ mod tests {
         assert_eq!(
             InferredType::new(&db, mixed).boolean_coercion(),
             Ok(BooleanCoercion::Mixed)
+        );
+    }
+
+    #[test]
+    fn structural_intersections_do_not_prove_truthiness() {
+        let db = TestDb::default();
+        let object = TypeData::Object(InternedObject::new(&db, None, Box::default(), false));
+        let interface = TypeData::Interface(InternedInterface::new(
+            &db,
+            Box::default(),
+            Box::default(),
+            Box::default(),
+            Text::new_static("Shape"),
+        ));
+        let structural = TypeData::Intersection(InternedIntersection::new(
+            &db,
+            Vec::from([object, interface]).into_boxed_slice(),
+        ));
+        assert_eq!(
+            InferredType::new(&db, structural).boolean_coercion(),
+            Err(TypeTraversalError::UnresolvedType)
+        );
+        let nullable = TypeData::Union(InternedUnion::new(
+            &db,
+            Vec::from([structural, TypeData::Null]).into_boxed_slice(),
+        ));
+        assert_eq!(
+            InferredType::new(&db, nullable).boolean_coercion(),
+            Err(TypeTraversalError::UnresolvedType)
+        );
+        let number = TypeData::Intersection(InternedIntersection::new(
+            &db,
+            Vec::from([object, TypeData::Number]).into_boxed_slice(),
+        ));
+        assert_eq!(
+            InferredType::new(&db, number).boolean_coercion(),
+            Ok(BooleanCoercion::Safe)
         );
     }
 
