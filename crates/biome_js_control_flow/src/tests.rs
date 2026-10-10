@@ -4,9 +4,12 @@ use biome_db::{
     testing::{Events, assert_function_query_was_not_run, assert_function_query_was_run},
 };
 use biome_js_parser::{JsParserOptions, parse};
-use biome_js_syntax::{JsNumberLiteralExpression, JsReturnStatement};
+use biome_js_syntax::{
+    JsExpressionStatement, JsFunctionDeclaration, JsNumberLiteralExpression, JsReturnStatement,
+};
 use biome_languages::JsFileSource;
 use biome_rowan::{TextRange, TextSize};
+use rustc_hash::FxHashSet;
 use salsa::Setter;
 
 static_assertions::assert_impl_all!(ControlFlowModel: Send, Sync, Eq);
@@ -233,5 +236,100 @@ fn loop_literal_truthiness() {
             expected,
             "{condition}"
         );
+    }
+}
+
+/// Builds the graph of the first function in `source` and returns the text of
+/// every expression statement reachable from its entry block.
+fn reachable_statements(source: &str) -> FxHashSet<String> {
+    let parse = parsed(source);
+    assert!(!parse.has_errors(), "{source}");
+    let tree = parse.tree();
+    let function = tree
+        .syntax()
+        .descendants()
+        .find_map(JsFunctionDeclaration::cast)
+        .unwrap();
+    let root = AnyJsControlFlowRoot::cast(function.into_syntax()).unwrap();
+    let graph = control_flow_model(&tree)
+        .graph(&root)
+        .unwrap_or_else(|| panic!("graph should be built for {source}"));
+
+    let mut reachable = FxHashSet::default();
+    let mut visited = FxHashSet::default();
+    let mut stack = vec![0];
+    while let Some(index) = stack.pop() {
+        if !visited.insert(index) {
+            continue;
+        }
+        let block = &graph.blocks[index as usize];
+        stack.extend(
+            block
+                .exception_handlers
+                .iter()
+                .chain(&block.cleanup_handlers)
+                .map(|handler| handler.target.index()),
+        );
+        for instruction in &block.instructions {
+            match instruction.kind {
+                biome_control_flow::InstructionKind::Statement => {
+                    if let Some(node) = instruction.node.as_ref().and_then(|node| node.as_node()) {
+                        reachable.insert(node.text_trimmed().to_string());
+                    }
+                }
+                biome_control_flow::InstructionKind::Jump {
+                    conditional, block, ..
+                } => {
+                    stack.push(block.index());
+                    if !conditional {
+                        break;
+                    }
+                }
+                biome_control_flow::InstructionKind::Return => break,
+            }
+        }
+    }
+    reachable
+}
+
+#[test]
+fn unlabeled_jump_in_labeled_statement() {
+    for source in [
+        // `break` leaves the labeled loop
+        "function f() { outer: for (;;) { break; skipped(); } reached(); }",
+        "function f(xs) { outer: for (const x of xs) { if (x) break; reached(); } reached2(); }",
+        "function f(xs) { outer: for (const x of xs) { break; skipped(); } reached(); }",
+        "function f(o) { outer: for (const k in o) { break; skipped(); } reached(); }",
+        "function f() { outer: while (true) { break; skipped(); } reached(); }",
+        "function f() { outer: do { break; skipped(); } while (true); reached(); }",
+        "function f(x) { outer: switch (x) { case 1: break; skipped(); default: reached(); } reached2(); }",
+        // `break` targets the innermost loop, not an outer labeled one
+        "function f() { outer: for (;;) { inner: for (;;) { break; } reached(); break; } reached2(); }",
+        // `break` targets the loop, not a closer labeled block
+        "function f() { outer: for (;;) { block: { break; skipped(); } skipped2(); } reached(); }",
+        "function f() { for (;;) { block: { break; skipped(); } skipped2(); } reached(); }",
+        // `continue` stays in the labeled loop
+        "function f() { outer: for (let i = 0; i < 1; i++) { continue; skipped(); } reached(); }",
+        "function f(xs) { outer: for (const x of xs) { if (x) continue; reached(); } reached2(); }",
+        "function f(xs) { outer: for (const x of xs) { continue; skipped(); } reached(); }",
+        "function f(o) { outer: for (const k in o) { continue; skipped(); } reached(); }",
+        "function f(x) { outer: while (x) { continue; skipped(); } reached(); }",
+        "function f(x) { outer: do { continue; skipped(); } while (x); reached(); }",
+        "function f() { for (;;) { inner: while (true) { continue; } skipped(); } }",
+    ] {
+        let reachable = reachable_statements(source);
+        let parse = parsed(source);
+        for statement in parse
+            .syntax()
+            .descendants()
+            .filter_map(JsExpressionStatement::cast)
+        {
+            let text = statement.syntax().text_trimmed().to_string();
+            assert_eq!(
+                reachable.contains(&text),
+                text.starts_with("reached"),
+                "{text} in {source}"
+            );
+        }
     }
 }
