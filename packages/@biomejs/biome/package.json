@@ -4,6 +4,9 @@
   "bin": {
     "biome": "bin/biome"
   },
+  "scripts": {
+    "test": "node --test tests/bin.test.mjs"
+  },
   "homepage": "https://biomejs.dev",
   "repository": {
     "type": "git",

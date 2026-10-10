@@ -70,7 +70,14 @@ if (binPath) {
 		throw result.error;
 	}
 
-	process.exitCode = result.status;
+	if (result.signal) {
+		// The binary was terminated by a signal (e.g. it crashed), so `status` is
+		// `null`. Follow the shell convention of exiting with 128 + signal number.
+		const { signals } = require("os").constants;
+		process.exitCode = 128 + (signals[result.signal] ?? 0);
+	} else {
+		process.exitCode = result.status;
+	}
 } else {
 	console.error(
 		"The Biome CLI package doesn't ship with prebuilt binaries for your platform yet. " +
