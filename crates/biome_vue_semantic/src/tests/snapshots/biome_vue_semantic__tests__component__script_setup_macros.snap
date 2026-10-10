@@ -1,0 +1,36 @@
+---
+source: crates/biome_vue_semantic/src/tests/component.rs
+expression: model.to_string()
+---
+component Setup 0..532 name=MyList inheritAttrs=No
+  Import ref 9..12
+  Import computed 14..22
+  Import onMounted 24..33
+  Import watch 35..40
+  Local Props 65..70 type-only
+  Local props 113..118 origin=DefineProps
+  Local emit 184..188 origin=DefineEmits
+  Local model 267..272 origin=DefineModel
+  Local count 424..429 origin=Ref
+  Local double 446..452 origin=Computed getter
+  Prop title 73..78 form=TypeMember types=String required=Yes
+  Prop items 88..93 form=TypeMember types=Array required=No default=WithDefaults@165..173
+  Emit change 205..211 form=TypeMember payload=1
+  Emit close 231..238 form=CallSignature payload=0
+  Emit open 241..247 form=CallSignature payload=0
+  Model value 295..302
+  Slot default 319..326
+  Slot header 344..350
+  LifecycleHook mounted 488..497
+  Watcher watch 509..514
+scope Module(None)
+  Import ref 9..12
+  Import computed 14..22
+  Import onMounted 24..33
+  Import watch 35..40
+  Local Props 65..70 type-only
+  Local props 113..118 origin=DefineProps
+  Local emit 184..188 origin=DefineEmits
+  Local model 267..272 origin=DefineModel
+  Local count 424..429 origin=Ref
+  Local double 446..452 origin=Computed getter
