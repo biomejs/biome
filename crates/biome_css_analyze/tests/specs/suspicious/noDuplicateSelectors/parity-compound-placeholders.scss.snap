@@ -1,0 +1,47 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: parity-compound-placeholders.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+%a%b {}
+%a%b {}
+
+.card%a%b {}
+.card%a%b {}
+
+%a%b {
+  .nested-target {}
+  .nested-target {}
+}
+
+.normal-target {}
+.normal-target {}
+
+```
+
+# Diagnostics
+```
+parity-compound-placeholders.scss:14:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Duplicate selector list ".normal-target".
+  
+    13 │ .normal-target {}
+  > 14 │ .normal-target {}
+       │ ^^^^^^^^^^^^^^^^^
+    15 │ 
+  
+  i It was first defined here.
+  
+    11 │ }
+    12 │ 
+  > 13 │ .normal-target {}
+       │ ^^^^^^^^^^^^^^^^^
+    14 │ .normal-target {}
+    15 │ 
+  
+  i Remove or merge the duplicate rule to keep the stylesheet clean.
+  
+
+```
