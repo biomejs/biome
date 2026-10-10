@@ -31,7 +31,7 @@ CssRoot {
             at_token: AT@0..1 "@" [] [],
             rule: TwThemeAtRule {
                 theme_token: THEME_KW@1..7 "theme" [] [Whitespace(" ")],
-                name: missing (optional),
+                options: TwThemeOptionList [],
                 block: CssDeclarationOrRuleBlock {
                     l_curly_token: L_CURLY@7..8 "{" [] [],
                     items: CssDeclarationOrRuleList [
@@ -143,7 +143,7 @@ CssRoot {
       0: AT@0..1 "@" [] []
       1: TW_THEME_AT_RULE@1..131
         0: THEME_KW@1..7 "theme" [] [Whitespace(" ")]
-        1: (empty)
+        1: TW_THEME_OPTION_LIST@7..7
         2: CSS_DECLARATION_OR_RULE_BLOCK@7..131
           0: L_CURLY@7..8 "{" [] []
           1: CSS_DECLARATION_OR_RULE_LIST@8..129

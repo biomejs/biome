@@ -24,6 +24,7 @@ CssRoot {
             rule: CssBogusAtRule {
                 items: [
                     THEME_KW@1..7 "theme" [] [Whitespace(" ")],
+                    TwThemeOptionList [],
                     CssDeclarationOrRuleBlock {
                         l_curly_token: L_CURLY@7..8 "{" [] [],
                         items: CssDeclarationOrRuleList [
@@ -66,7 +67,8 @@ CssRoot {
       0: AT@0..1 "@" [] []
       1: CSS_BOGUS_AT_RULE@1..37
         0: THEME_KW@1..7 "theme" [] [Whitespace(" ")]
-        1: CSS_DECLARATION_OR_RULE_BLOCK@7..37
+        1: TW_THEME_OPTION_LIST@7..7
+        2: CSS_DECLARATION_OR_RULE_BLOCK@7..37
           0: L_CURLY@7..8 "{" [] []
           1: CSS_DECLARATION_OR_RULE_LIST@8..35
             0: CSS_DECLARATION_WITH_SEMICOLON@8..35

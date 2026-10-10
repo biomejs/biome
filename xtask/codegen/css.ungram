@@ -2900,10 +2900,28 @@ TwFunctionalUtilityName =
 
 // Tailwind 4.0 @theme directive
 // @theme { --color-primary: #3b82f6; }
+// @theme default inline reference { --color-primary: #3b82f6; }
 TwThemeAtRule =
   'theme'
-  name: CssIdentifier?
+  options: TwThemeOptionList
   block: AnyCssDeclarationOrRuleBlock
+
+// @theme static prefix(tw) { ... }
+//        ^^^^^^^^^^^^^^^^^
+TwThemeOptionList = AnyTwThemeOption*
+
+AnyTwThemeOption =
+	CssIdentifier
+	| TwThemePrefixOption
+	| CssBogus
+
+// @theme prefix(tw) { ... }
+//        ^^^^^^^^^^
+TwThemePrefixOption =
+	'prefix'
+	'('
+	name: CssIdentifier
+	')'
 
 // Tailwind 4.0 @variant directive
 // @variant dark { background: black; }

@@ -1,0 +1,266 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@theme prefix (tw) {
+	--color-brand: red;
+}
+
+@theme PREFIX(tw) {
+	--color-brand: red;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: TwThemeAtRule {
+                theme_token: THEME_KW@1..7 "theme" [] [Whitespace(" ")],
+                options: TwThemeOptionList [
+                    CssIdentifier {
+                        value_token: IDENT@7..14 "prefix" [] [Whitespace(" ")],
+                    },
+                    CssBogus {
+                        items: [
+                            L_PAREN@14..15 "(" [] [],
+                        ],
+                    },
+                    CssIdentifier {
+                        value_token: IDENT@15..17 "tw" [] [],
+                    },
+                    CssBogus {
+                        items: [
+                            R_PAREN@17..19 ")" [] [Whitespace(" ")],
+                        ],
+                    },
+                ],
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@19..20 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssDashedIdentifier {
+                                        value_token: IDENT@20..35 "--color-brand" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@35..37 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@37..40 "red" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@40..41 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@41..43 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@43..46 "@" [Newline("\n"), Newline("\n")] [],
+            rule: TwThemeAtRule {
+                theme_token: THEME_KW@46..52 "theme" [] [Whitespace(" ")],
+                options: TwThemeOptionList [
+                    CssIdentifier {
+                        value_token: IDENT@52..58 "PREFIX" [] [],
+                    },
+                    CssBogus {
+                        items: [
+                            L_PAREN@58..59 "(" [] [],
+                        ],
+                    },
+                    CssIdentifier {
+                        value_token: IDENT@59..61 "tw" [] [],
+                    },
+                    CssBogus {
+                        items: [
+                            R_PAREN@61..63 ")" [] [Whitespace(" ")],
+                        ],
+                    },
+                ],
+                block: CssDeclarationOrRuleBlock {
+                    l_curly_token: L_CURLY@63..64 "{" [] [],
+                    items: CssDeclarationOrRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssDashedIdentifier {
+                                        value_token: IDENT@64..79 "--color-brand" [Newline("\n"), Whitespace("\t")] [],
+                                    },
+                                    colon_token: COLON@79..81 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssIdentifier {
+                                            value_token: IDENT@81..84 "red" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@84..85 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@85..87 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@87..88 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..88
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..87
+    0: CSS_AT_RULE@0..43
+      0: AT@0..1 "@" [] []
+      1: TW_THEME_AT_RULE@1..43
+        0: THEME_KW@1..7 "theme" [] [Whitespace(" ")]
+        1: TW_THEME_OPTION_LIST@7..19
+          0: CSS_IDENTIFIER@7..14
+            0: IDENT@7..14 "prefix" [] [Whitespace(" ")]
+          1: CSS_BOGUS@14..15
+            0: L_PAREN@14..15 "(" [] []
+          2: CSS_IDENTIFIER@15..17
+            0: IDENT@15..17 "tw" [] []
+          3: CSS_BOGUS@17..19
+            0: R_PAREN@17..19 ")" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@19..43
+          0: L_CURLY@19..20 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@20..41
+            0: CSS_DECLARATION_WITH_SEMICOLON@20..41
+              0: CSS_DECLARATION@20..40
+                0: CSS_GENERIC_PROPERTY@20..40
+                  0: CSS_DASHED_IDENTIFIER@20..35
+                    0: IDENT@20..35 "--color-brand" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@35..37 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@37..40
+                    0: CSS_IDENTIFIER@37..40
+                      0: IDENT@37..40 "red" [] []
+                1: (empty)
+              1: SEMICOLON@40..41 ";" [] []
+          2: R_CURLY@41..43 "}" [Newline("\n")] []
+    1: CSS_AT_RULE@43..87
+      0: AT@43..46 "@" [Newline("\n"), Newline("\n")] []
+      1: TW_THEME_AT_RULE@46..87
+        0: THEME_KW@46..52 "theme" [] [Whitespace(" ")]
+        1: TW_THEME_OPTION_LIST@52..63
+          0: CSS_IDENTIFIER@52..58
+            0: IDENT@52..58 "PREFIX" [] []
+          1: CSS_BOGUS@58..59
+            0: L_PAREN@58..59 "(" [] []
+          2: CSS_IDENTIFIER@59..61
+            0: IDENT@59..61 "tw" [] []
+          3: CSS_BOGUS@61..63
+            0: R_PAREN@61..63 ")" [] [Whitespace(" ")]
+        2: CSS_DECLARATION_OR_RULE_BLOCK@63..87
+          0: L_CURLY@63..64 "{" [] []
+          1: CSS_DECLARATION_OR_RULE_LIST@64..85
+            0: CSS_DECLARATION_WITH_SEMICOLON@64..85
+              0: CSS_DECLARATION@64..84
+                0: CSS_GENERIC_PROPERTY@64..84
+                  0: CSS_DASHED_IDENTIFIER@64..79
+                    0: IDENT@64..79 "--color-brand" [Newline("\n"), Whitespace("\t")] []
+                  1: COLON@79..81 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@81..84
+                    0: CSS_IDENTIFIER@81..84
+                      0: IDENT@81..84 "red" [] []
+                1: (empty)
+              1: SEMICOLON@84..85 ";" [] []
+          2: R_CURLY@85..87 "}" [Newline("\n")] []
+  2: EOF@87..88 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+theme-prefix-not-adjacent.css:1:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, or a prefix(...) but instead found '('.
+  
+  > 1 │ @theme prefix (tw) {
+      │               ^
+    2 │ 	--color-brand: red;
+    3 │ }
+  
+  i Expected an identifier, or a prefix(...) here.
+  
+  > 1 │ @theme prefix (tw) {
+      │               ^
+    2 │ 	--color-brand: red;
+    3 │ }
+  
+theme-prefix-not-adjacent.css:1:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, or a prefix(...) but instead found ')'.
+  
+  > 1 │ @theme prefix (tw) {
+      │                  ^
+    2 │ 	--color-brand: red;
+    3 │ }
+  
+  i Expected an identifier, or a prefix(...) here.
+  
+  > 1 │ @theme prefix (tw) {
+      │                  ^
+    2 │ 	--color-brand: red;
+    3 │ }
+  
+theme-prefix-not-adjacent.css:5:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, or a prefix(...) but instead found '('.
+  
+    3 │ }
+    4 │ 
+  > 5 │ @theme PREFIX(tw) {
+      │              ^
+    6 │ 	--color-brand: red;
+    7 │ }
+  
+  i Expected an identifier, or a prefix(...) here.
+  
+    3 │ }
+    4 │ 
+  > 5 │ @theme PREFIX(tw) {
+      │              ^
+    6 │ 	--color-brand: red;
+    7 │ }
+  
+theme-prefix-not-adjacent.css:5:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, or a prefix(...) but instead found ')'.
+  
+    3 │ }
+    4 │ 
+  > 5 │ @theme PREFIX(tw) {
+      │                 ^
+    6 │ 	--color-brand: red;
+    7 │ }
+  
+  i Expected an identifier, or a prefix(...) here.
+  
+    3 │ }
+    4 │ 
+  > 5 │ @theme PREFIX(tw) {
+      │                 ^
+    6 │ 	--color-brand: red;
+    7 │ }
+  
+```

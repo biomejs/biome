@@ -259,6 +259,10 @@ pub(crate) fn expected_tw_source(p: &CssParser, range: TextRange) -> ParseDiagno
     expected_any(&["string literal", "inline(\"...\")"], range, p)
 }
 
+pub(crate) fn expected_tw_theme_option(p: &CssParser, range: TextRange) -> ParseDiagnostic {
+    expected_any(&["identifier", "prefix(...)"], range, p)
+}
+
 pub(crate) fn scss_only_syntax_error(
     p: &CssParser,
     syntax: &str,

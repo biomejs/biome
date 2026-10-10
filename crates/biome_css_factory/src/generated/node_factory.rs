@@ -4974,35 +4974,33 @@ pub fn tw_source_inline(
 }
 pub fn tw_theme_at_rule(
     theme_token: SyntaxToken,
+    options: TwThemeOptionList,
     block: AnyCssDeclarationOrRuleBlock,
-) -> TwThemeAtRuleBuilder {
-    TwThemeAtRuleBuilder {
-        theme_token,
-        block,
-        name: None,
-    }
+) -> TwThemeAtRule {
+    TwThemeAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_THEME_AT_RULE,
+        [
+            Some(SyntaxElement::Token(theme_token)),
+            Some(SyntaxElement::Node(options.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
 }
-pub struct TwThemeAtRuleBuilder {
-    theme_token: SyntaxToken,
-    block: AnyCssDeclarationOrRuleBlock,
-    name: Option<CssIdentifier>,
-}
-impl TwThemeAtRuleBuilder {
-    pub fn with_name(mut self, name: CssIdentifier) -> Self {
-        self.name = Some(name);
-        self
-    }
-    pub fn build(self) -> TwThemeAtRule {
-        TwThemeAtRule::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::TW_THEME_AT_RULE,
-            [
-                Some(SyntaxElement::Token(self.theme_token)),
-                self.name
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Node(self.block.into_syntax())),
-            ],
-        ))
-    }
+pub fn tw_theme_prefix_option(
+    prefix_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    name: CssIdentifier,
+    r_paren_token: SyntaxToken,
+) -> TwThemePrefixOption {
+    TwThemePrefixOption::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_THEME_PREFIX_OPTION,
+        [
+            Some(SyntaxElement::Token(prefix_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
 }
 pub fn tw_utility_at_rule(
     utility_token: SyntaxToken,
@@ -6001,6 +5999,18 @@ where
 {
     TwApplyClassList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::TW_APPLY_CLASS_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn tw_theme_option_list<I>(items: I) -> TwThemeOptionList
+where
+    I: IntoIterator<Item = AnyTwThemeOption>,
+    I::IntoIter: ExactSizeIterator,
+{
+    TwThemeOptionList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_THEME_OPTION_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),

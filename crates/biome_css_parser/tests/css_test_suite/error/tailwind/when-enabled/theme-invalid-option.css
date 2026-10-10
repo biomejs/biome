@@ -1,0 +1,7 @@
+@theme "inline" {
+	--color-brand: red;
+}
+
+@theme 123 inline {
+	--color-brand: red;
+}
