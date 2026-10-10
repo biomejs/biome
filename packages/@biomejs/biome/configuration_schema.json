@@ -6090,6 +6090,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoSvelteClassDirectiveConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSvelteClassDirectiveOptions" }
+			]
+		},
+		"NoSvelteClassDirectiveOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoSvelteExportLetConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7584,6 +7594,13 @@
 					"description": "Disallow the use of Svelte's {@html} tag.\nSee https://biomejs.dev/linter/rules/no-svelte-at-html-tags",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSvelteAtHtmlTagsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSvelteClassDirective": {
+					"description": "Disallow Svelte's class: directive.\nSee https://biomejs.dev/linter/rules/no-svelte-class-directive",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSvelteClassDirectiveConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11396,6 +11413,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSvelteAtHtmlTagsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSvelteClassDirectiveOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSvelteClassDirectiveOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
