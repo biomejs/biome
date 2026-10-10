@@ -11366,6 +11366,11 @@ export type TailwindUtilityCategory =
 	| "layout";
 export interface TailwindComponentAllowance {
 	/**
+	 * Instructions on how to fix the problem, shown in diagnostics for the matching
+	 * components in place of the default advice.
+	 */
+	advice?: string;
+	/**
 	 * Categories allowed on the matching components. Defaults to an empty list.
 	 */
 	categories?: TailwindUtilityCategory[];
