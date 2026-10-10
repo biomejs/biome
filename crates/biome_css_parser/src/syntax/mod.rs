@@ -13,6 +13,7 @@ use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::{DeclarationOrRuleList, parse_declaration_or_rule_list_block};
+use crate::syntax::declaration::{is_at_scss_empty_declaration, parse_empty_declaration};
 use crate::syntax::parse_error::{
     expected_any_rule, expected_any_rule_list_item, expected_non_css_wide_keyword_identifier,
     inconsistent_scss_bracketed_list_separators, scss_only_syntax_error, tailwind_disabled,
@@ -107,7 +108,10 @@ struct RootItemList;
 
 #[inline]
 pub(crate) fn is_at_root_item_list_element(p: &mut CssParser) -> bool {
-    is_at_at_rule(p) || is_at_scss_variable_declaration(p) || is_at_qualified_rule(p)
+    is_at_at_rule(p)
+        || is_at_scss_variable_declaration(p)
+        || is_at_qualified_rule(p)
+        || is_at_scss_empty_declaration(p)
 }
 
 struct RootItemListParseRecovery;
@@ -141,7 +145,7 @@ impl ParseNodeList for RootItemList {
         } else if is_at_qualified_rule(p) {
             parse_qualified_rule(p)
         } else {
-            Absent
+            CssSyntaxFeatures::Scss.parse_supported_syntax(p, parse_empty_declaration)
         }
     }
 
@@ -170,7 +174,10 @@ impl RuleList {
 
 #[inline]
 pub(crate) fn is_at_rule_list_element(p: &mut CssParser) -> bool {
-    is_at_at_rule(p) || is_at_scss_variable_declaration(p) || is_at_qualified_rule(p)
+    is_at_at_rule(p)
+        || is_at_scss_variable_declaration(p)
+        || is_at_qualified_rule(p)
+        || is_at_scss_empty_declaration(p)
 }
 
 struct RuleListParseRecovery {
@@ -212,7 +219,7 @@ impl ParseNodeList for RuleList {
         } else if is_at_qualified_rule(p) {
             parse_qualified_rule(p)
         } else {
-            Absent
+            CssSyntaxFeatures::Scss.parse_supported_syntax(p, parse_empty_declaration)
         }
     }
 

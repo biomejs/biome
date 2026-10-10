@@ -1,0 +1,28 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: parity-empty-statements.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@keyframes valid { ; from { opacity: 0 }; ; to { opacity: 1 }; }
+@keyframes invalid { ;; from { opacity: 0 }; ; to { opacity: 1 !important }; }
+
+```
+
+# Diagnostics
+```
+parity-empty-statements.scss:3:64 lint/suspicious/noImportantInKeyframe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using !important within keyframes declaration is completely ignored in some browsers.
+  
+    1 │ /* should generate diagnostics */
+    2 │ @keyframes valid { ; from { opacity: 0 }; ; to { opacity: 1 }; }
+  > 3 │ @keyframes invalid { ;; from { opacity: 0 }; ; to { opacity: 1 !important }; }
+      │                                                                ^^^^^^^^^^
+    4 │ 
+  
+  i Consider removing useless !important declaration.
+  
+
+```

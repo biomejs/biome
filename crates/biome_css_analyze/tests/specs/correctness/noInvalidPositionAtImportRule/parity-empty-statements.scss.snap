@@ -1,0 +1,32 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: parity-empty-statements.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+;; @import "early.css";;
+$color: red;; @import "also-early.css";
+.rule { color: $color };;
+@import "late.css";
+
+```
+
+# Diagnostics
+```
+parity-empty-statements.scss:5:9 lint/correctness/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━
+
+  × This @import is in the wrong position.
+  
+    3 │ $color: red;; @import "also-early.css";
+    4 │ .rule { color: $color };;
+  > 5 │ @import "late.css";
+      │         ^^^^^^^^^^
+    6 │ 
+  
+  i Any @import rules must precede all other valid at-rules and style rules in a stylesheet (ignoring @charset and @layer), or else the @import rule is invalid.
+  
+  i Consider moving import position.
+  
+
+```

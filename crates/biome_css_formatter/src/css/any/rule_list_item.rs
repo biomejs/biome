@@ -9,6 +9,7 @@ impl FormatRule<AnyCssRuleListItem> for FormatAnyCssRuleListItem {
     fn fmt(&self, node: &AnyCssRuleListItem, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyCssRuleListItem::AnyCssRule(node) => node.format().fmt(f),
+            AnyCssRuleListItem::CssEmptyDeclaration(node) => node.format().fmt(f),
             AnyCssRuleListItem::ScssVariableDeclaration(node) => node.format().fmt(f),
         }
     }

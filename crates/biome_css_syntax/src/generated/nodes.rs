@@ -15554,12 +15554,19 @@ impl AnyCssFontFeatureValuesBlock {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssFontFeatureValuesItem {
     CssBogusFontFeatureValuesItem(CssBogusFontFeatureValuesItem),
+    CssEmptyDeclaration(CssEmptyDeclaration),
     CssFontFeatureValuesItem(CssFontFeatureValuesItem),
 }
 impl AnyCssFontFeatureValuesItem {
     pub fn as_css_bogus_font_feature_values_item(&self) -> Option<&CssBogusFontFeatureValuesItem> {
         match &self {
             Self::CssBogusFontFeatureValuesItem(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_empty_declaration(&self) -> Option<&CssEmptyDeclaration> {
+        match &self {
+            Self::CssEmptyDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -16042,6 +16049,7 @@ impl AnyCssKeyframesIdentifier {
 pub enum AnyCssKeyframesItem {
     CssAtRule(CssAtRule),
     CssBogusKeyframesItem(CssBogusKeyframesItem),
+    CssEmptyDeclaration(CssEmptyDeclaration),
     CssKeyframesItem(CssKeyframesItem),
     ScssKeyframesVariableDeclaration(ScssKeyframesVariableDeclaration),
 }
@@ -16055,6 +16063,12 @@ impl AnyCssKeyframesItem {
     pub fn as_css_bogus_keyframes_item(&self) -> Option<&CssBogusKeyframesItem> {
         match &self {
             Self::CssBogusKeyframesItem(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_empty_declaration(&self) -> Option<&CssEmptyDeclaration> {
+        match &self {
+            Self::CssEmptyDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -17099,6 +17113,7 @@ impl AnyCssRoot {
 pub enum AnyCssRootItem {
     AnyCssRule(AnyCssRule),
     CssBogus(CssBogus),
+    CssEmptyDeclaration(CssEmptyDeclaration),
     ScssVariableDeclaration(ScssVariableDeclaration),
 }
 impl AnyCssRootItem {
@@ -17111,6 +17126,12 @@ impl AnyCssRootItem {
     pub fn as_css_bogus(&self) -> Option<&CssBogus> {
         match &self {
             Self::CssBogus(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_empty_declaration(&self) -> Option<&CssEmptyDeclaration> {
+        match &self {
+            Self::CssEmptyDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -17176,12 +17197,19 @@ impl AnyCssRuleBlock {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssRuleListItem {
     AnyCssRule(AnyCssRule),
+    CssEmptyDeclaration(CssEmptyDeclaration),
     ScssVariableDeclaration(ScssVariableDeclaration),
 }
 impl AnyCssRuleListItem {
     pub fn as_any_css_rule(&self) -> Option<&AnyCssRule> {
         match &self {
             Self::AnyCssRule(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_empty_declaration(&self) -> Option<&CssEmptyDeclaration> {
+        match &self {
+            Self::CssEmptyDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -39838,6 +39866,11 @@ impl From<CssBogusFontFeatureValuesItem> for AnyCssFontFeatureValuesItem {
         Self::CssBogusFontFeatureValuesItem(node)
     }
 }
+impl From<CssEmptyDeclaration> for AnyCssFontFeatureValuesItem {
+    fn from(node: CssEmptyDeclaration) -> Self {
+        Self::CssEmptyDeclaration(node)
+    }
+}
 impl From<CssFontFeatureValuesItem> for AnyCssFontFeatureValuesItem {
     fn from(node: CssFontFeatureValuesItem) -> Self {
         Self::CssFontFeatureValuesItem(node)
@@ -39845,12 +39878,15 @@ impl From<CssFontFeatureValuesItem> for AnyCssFontFeatureValuesItem {
 }
 impl AstNode for AnyCssFontFeatureValuesItem {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusFontFeatureValuesItem::KIND_SET.union(CssFontFeatureValuesItem::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusFontFeatureValuesItem::KIND_SET
+        .union(CssEmptyDeclaration::KIND_SET)
+        .union(CssFontFeatureValuesItem::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_FONT_FEATURE_VALUES_ITEM | CSS_FONT_FEATURE_VALUES_ITEM
+            CSS_BOGUS_FONT_FEATURE_VALUES_ITEM
+                | CSS_EMPTY_DECLARATION
+                | CSS_FONT_FEATURE_VALUES_ITEM
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -39858,6 +39894,7 @@ impl AstNode for AnyCssFontFeatureValuesItem {
             CSS_BOGUS_FONT_FEATURE_VALUES_ITEM => {
                 Self::CssBogusFontFeatureValuesItem(CssBogusFontFeatureValuesItem { syntax })
             }
+            CSS_EMPTY_DECLARATION => Self::CssEmptyDeclaration(CssEmptyDeclaration { syntax }),
             CSS_FONT_FEATURE_VALUES_ITEM => {
                 Self::CssFontFeatureValuesItem(CssFontFeatureValuesItem { syntax })
             }
@@ -39868,12 +39905,14 @@ impl AstNode for AnyCssFontFeatureValuesItem {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssBogusFontFeatureValuesItem(it) => it.syntax(),
+            Self::CssEmptyDeclaration(it) => it.syntax(),
             Self::CssFontFeatureValuesItem(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssBogusFontFeatureValuesItem(it) => it.into_syntax(),
+            Self::CssEmptyDeclaration(it) => it.into_syntax(),
             Self::CssFontFeatureValuesItem(it) => it.into_syntax(),
         }
     }
@@ -39882,6 +39921,7 @@ impl std::fmt::Debug for AnyCssFontFeatureValuesItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::CssBogusFontFeatureValuesItem(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssEmptyDeclaration(it) => std::fmt::Debug::fmt(it, f),
             Self::CssFontFeatureValuesItem(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -39890,6 +39930,7 @@ impl From<AnyCssFontFeatureValuesItem> for SyntaxNode {
     fn from(n: AnyCssFontFeatureValuesItem) -> Self {
         match n {
             AnyCssFontFeatureValuesItem::CssBogusFontFeatureValuesItem(it) => it.into_syntax(),
+            AnyCssFontFeatureValuesItem::CssEmptyDeclaration(it) => it.into_syntax(),
             AnyCssFontFeatureValuesItem::CssFontFeatureValuesItem(it) => it.into_syntax(),
         }
     }
@@ -41343,6 +41384,11 @@ impl From<CssBogusKeyframesItem> for AnyCssKeyframesItem {
         Self::CssBogusKeyframesItem(node)
     }
 }
+impl From<CssEmptyDeclaration> for AnyCssKeyframesItem {
+    fn from(node: CssEmptyDeclaration) -> Self {
+        Self::CssEmptyDeclaration(node)
+    }
+}
 impl From<CssKeyframesItem> for AnyCssKeyframesItem {
     fn from(node: CssKeyframesItem) -> Self {
         Self::CssKeyframesItem(node)
@@ -41357,6 +41403,7 @@ impl AstNode for AnyCssKeyframesItem {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssAtRule::KIND_SET
         .union(CssBogusKeyframesItem::KIND_SET)
+        .union(CssEmptyDeclaration::KIND_SET)
         .union(CssKeyframesItem::KIND_SET)
         .union(ScssKeyframesVariableDeclaration::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
@@ -41364,6 +41411,7 @@ impl AstNode for AnyCssKeyframesItem {
             kind,
             CSS_AT_RULE
                 | CSS_BOGUS_KEYFRAMES_ITEM
+                | CSS_EMPTY_DECLARATION
                 | CSS_KEYFRAMES_ITEM
                 | SCSS_KEYFRAMES_VARIABLE_DECLARATION
         )
@@ -41374,6 +41422,7 @@ impl AstNode for AnyCssKeyframesItem {
             CSS_BOGUS_KEYFRAMES_ITEM => {
                 Self::CssBogusKeyframesItem(CssBogusKeyframesItem { syntax })
             }
+            CSS_EMPTY_DECLARATION => Self::CssEmptyDeclaration(CssEmptyDeclaration { syntax }),
             CSS_KEYFRAMES_ITEM => Self::CssKeyframesItem(CssKeyframesItem { syntax }),
             SCSS_KEYFRAMES_VARIABLE_DECLARATION => {
                 Self::ScssKeyframesVariableDeclaration(ScssKeyframesVariableDeclaration { syntax })
@@ -41386,6 +41435,7 @@ impl AstNode for AnyCssKeyframesItem {
         match self {
             Self::CssAtRule(it) => it.syntax(),
             Self::CssBogusKeyframesItem(it) => it.syntax(),
+            Self::CssEmptyDeclaration(it) => it.syntax(),
             Self::CssKeyframesItem(it) => it.syntax(),
             Self::ScssKeyframesVariableDeclaration(it) => it.syntax(),
         }
@@ -41394,6 +41444,7 @@ impl AstNode for AnyCssKeyframesItem {
         match self {
             Self::CssAtRule(it) => it.into_syntax(),
             Self::CssBogusKeyframesItem(it) => it.into_syntax(),
+            Self::CssEmptyDeclaration(it) => it.into_syntax(),
             Self::CssKeyframesItem(it) => it.into_syntax(),
             Self::ScssKeyframesVariableDeclaration(it) => it.into_syntax(),
         }
@@ -41404,6 +41455,7 @@ impl std::fmt::Debug for AnyCssKeyframesItem {
         match self {
             Self::CssAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssBogusKeyframesItem(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssEmptyDeclaration(it) => std::fmt::Debug::fmt(it, f),
             Self::CssKeyframesItem(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssKeyframesVariableDeclaration(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -41414,6 +41466,7 @@ impl From<AnyCssKeyframesItem> for SyntaxNode {
         match n {
             AnyCssKeyframesItem::CssAtRule(it) => it.into_syntax(),
             AnyCssKeyframesItem::CssBogusKeyframesItem(it) => it.into_syntax(),
+            AnyCssKeyframesItem::CssEmptyDeclaration(it) => it.into_syntax(),
             AnyCssKeyframesItem::CssKeyframesItem(it) => it.into_syntax(),
             AnyCssKeyframesItem::ScssKeyframesVariableDeclaration(it) => it.into_syntax(),
         }
@@ -44251,6 +44304,11 @@ impl From<CssBogus> for AnyCssRootItem {
         Self::CssBogus(node)
     }
 }
+impl From<CssEmptyDeclaration> for AnyCssRootItem {
+    fn from(node: CssEmptyDeclaration) -> Self {
+        Self::CssEmptyDeclaration(node)
+    }
+}
 impl From<ScssVariableDeclaration> for AnyCssRootItem {
     fn from(node: ScssVariableDeclaration) -> Self {
         Self::ScssVariableDeclaration(node)
@@ -44260,10 +44318,11 @@ impl AstNode for AnyCssRootItem {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssRule::KIND_SET
         .union(CssBogus::KIND_SET)
+        .union(CssEmptyDeclaration::KIND_SET)
         .union(ScssVariableDeclaration::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_BOGUS | SCSS_VARIABLE_DECLARATION => true,
+            CSS_BOGUS | CSS_EMPTY_DECLARATION | SCSS_VARIABLE_DECLARATION => true,
             k if AnyCssRule::can_cast(k) => true,
             _ => false,
         }
@@ -44271,6 +44330,7 @@ impl AstNode for AnyCssRootItem {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_BOGUS => Self::CssBogus(CssBogus { syntax }),
+            CSS_EMPTY_DECLARATION => Self::CssEmptyDeclaration(CssEmptyDeclaration { syntax }),
             SCSS_VARIABLE_DECLARATION => {
                 Self::ScssVariableDeclaration(ScssVariableDeclaration { syntax })
             }
@@ -44286,6 +44346,7 @@ impl AstNode for AnyCssRootItem {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssBogus(it) => it.syntax(),
+            Self::CssEmptyDeclaration(it) => it.syntax(),
             Self::ScssVariableDeclaration(it) => it.syntax(),
             Self::AnyCssRule(it) => it.syntax(),
         }
@@ -44293,6 +44354,7 @@ impl AstNode for AnyCssRootItem {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssBogus(it) => it.into_syntax(),
+            Self::CssEmptyDeclaration(it) => it.into_syntax(),
             Self::ScssVariableDeclaration(it) => it.into_syntax(),
             Self::AnyCssRule(it) => it.into_syntax(),
         }
@@ -44303,6 +44365,7 @@ impl std::fmt::Debug for AnyCssRootItem {
         match self {
             Self::AnyCssRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssBogus(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssEmptyDeclaration(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssVariableDeclaration(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -44312,6 +44375,7 @@ impl From<AnyCssRootItem> for SyntaxNode {
         match n {
             AnyCssRootItem::AnyCssRule(it) => it.into_syntax(),
             AnyCssRootItem::CssBogus(it) => it.into_syntax(),
+            AnyCssRootItem::CssEmptyDeclaration(it) => it.into_syntax(),
             AnyCssRootItem::ScssVariableDeclaration(it) => it.into_syntax(),
         }
     }
@@ -44468,6 +44532,11 @@ impl From<AnyCssRuleBlock> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssEmptyDeclaration> for AnyCssRuleListItem {
+    fn from(node: CssEmptyDeclaration) -> Self {
+        Self::CssEmptyDeclaration(node)
+    }
+}
 impl From<ScssVariableDeclaration> for AnyCssRuleListItem {
     fn from(node: ScssVariableDeclaration) -> Self {
         Self::ScssVariableDeclaration(node)
@@ -44475,17 +44544,19 @@ impl From<ScssVariableDeclaration> for AnyCssRuleListItem {
 }
 impl AstNode for AnyCssRuleListItem {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        AnyCssRule::KIND_SET.union(ScssVariableDeclaration::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssRule::KIND_SET
+        .union(CssEmptyDeclaration::KIND_SET)
+        .union(ScssVariableDeclaration::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            SCSS_VARIABLE_DECLARATION => true,
+            CSS_EMPTY_DECLARATION | SCSS_VARIABLE_DECLARATION => true,
             k if AnyCssRule::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            CSS_EMPTY_DECLARATION => Self::CssEmptyDeclaration(CssEmptyDeclaration { syntax }),
             SCSS_VARIABLE_DECLARATION => {
                 Self::ScssVariableDeclaration(ScssVariableDeclaration { syntax })
             }
@@ -44500,12 +44571,14 @@ impl AstNode for AnyCssRuleListItem {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::CssEmptyDeclaration(it) => it.syntax(),
             Self::ScssVariableDeclaration(it) => it.syntax(),
             Self::AnyCssRule(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::CssEmptyDeclaration(it) => it.into_syntax(),
             Self::ScssVariableDeclaration(it) => it.into_syntax(),
             Self::AnyCssRule(it) => it.into_syntax(),
         }
@@ -44515,6 +44588,7 @@ impl std::fmt::Debug for AnyCssRuleListItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AnyCssRule(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssEmptyDeclaration(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssVariableDeclaration(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -44523,6 +44597,7 @@ impl From<AnyCssRuleListItem> for SyntaxNode {
     fn from(n: AnyCssRuleListItem) -> Self {
         match n {
             AnyCssRuleListItem::AnyCssRule(it) => it.into_syntax(),
+            AnyCssRuleListItem::CssEmptyDeclaration(it) => it.into_syntax(),
             AnyCssRuleListItem::ScssVariableDeclaration(it) => it.into_syntax(),
         }
     }
