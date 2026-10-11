@@ -7032,6 +7032,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUselessDateGetTimeConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUselessDateGetTimeOptions" }
+			]
+		},
+		"NoUselessDateGetTimeOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUselessElseConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7888,6 +7898,13 @@
 					"description": "Disallow assignments whose value is never read.\nSee https://biomejs.dev/linter/rules/no-useless-assignment",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUselessAssignmentConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessDateGetTime": {
+					"description": "Disallow calling .getTime() on a date before passing it to the Date constructor.\nSee https://biomejs.dev/linter/rules/no-useless-date-get-time",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUselessDateGetTimeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12340,6 +12357,19 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUselessContinueOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUselessDateGetTimeOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUselessDateGetTimeOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
