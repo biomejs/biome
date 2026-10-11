@@ -22,4 +22,7 @@
   <!-- Custom components may render accessible content -->
   <a><Image alt="description" /></a>
   <a><CustomIcon /></a>
+  <a><CustomIcon></CustomIcon></a>
+  <!-- Components written with explicit closing tags are treated the same -->
+  <a><Link href="/home"></Link></a>
 </template>

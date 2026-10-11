@@ -1,0 +1,13 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: issue_11872.astro
+---
+# Input
+```astro
+<!-- should not generate diagnostics -->
+<a href="/x"><Icon /></a>
+<a href="/y"><Icon></Icon></a>
+<a href="/z"><img src="/a.png" alt="x" /></a>
+<a><Image alt="x"></Image></a>
+
+```
