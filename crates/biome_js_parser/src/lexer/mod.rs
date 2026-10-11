@@ -576,7 +576,7 @@ impl<'src> JsLexer<'src> {
             b'<' => self.eat_byte(T![<]),
             // `{`: empty jsx text, directly followed by an expression
             b'{' => self.eat_byte(T!['{']),
-            _ if self.is_metavariable_start() => self.consume_metavariable(GRIT_METAVARIABLE),
+            b'$' if self.is_metavariable_start() => self.consume_metavariable(GRIT_METAVARIABLE),
             _ => {
                 while let Some(chr) = self.current_byte() {
                     // but not one of: { or < or > or }
@@ -2073,10 +2073,6 @@ impl<'src> JsLexer<'src> {
         // to do more aggressive optimizations on the match regarding how to map it to instructions
         let dispatched = lookup_byte(byte);
 
-        if self.is_metavariable_start() {
-            return self.consume_metavariable(GRIT_METAVARIABLE);
-        }
-
         match dispatched {
             WHS => {
                 let kind = self.consume_newline_or_whitespaces();
@@ -2146,6 +2142,8 @@ impl<'src> JsLexer<'src> {
                     ERROR_TOKEN
                 }
             }
+            // Grit metavariables always start with `$`.
+            DOL if self.is_metavariable_start() => self.consume_metavariable(GRIT_METAVARIABLE),
             IDT | DOL => self.resolve_identifier(byte as char),
             DIG => {
                 self.read_number(false);

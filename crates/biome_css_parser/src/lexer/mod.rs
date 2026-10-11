@@ -12,6 +12,7 @@ use biome_css_syntax::{
     scan_css_number,
 };
 use biome_languages::CssFileSource;
+use biome_languages::css::CssEmbeddingKind;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
@@ -387,6 +388,88 @@ impl<'src> CssLexer<'src> {
         }
     }
 
+    /// Returns `true` if the word that starts at the current position contains
+    /// a Grit metavariable. See [Self::metavariable_word_end].
+    #[inline]
+    fn is_at_metavariable_word(&self) -> bool {
+        !self.metavariables.is_empty() && self.metavariable_word_end().is_some()
+    }
+
+    /// Consumes the word that starts at the current position as a single Grit
+    /// metavariable. See [Self::metavariable_word_end].
+    fn consume_metavariable_word(&mut self) -> CssSyntaxKind {
+        if let Some(end) = self.metavariable_word_end() {
+            self.advance(end - self.position());
+        }
+
+        GRIT_METAVARIABLE
+    }
+
+    /// Returns the end of the word that starts at the current position, if the
+    /// word contains a Grit metavariable.
+    ///
+    /// In a styled template, the whole word is a single metavariable, because
+    /// the interpolations are substituted as text glued to the text around them:
+    ///
+    /// ```css
+    /// width: ${width}px;
+    /// border-${side}: none;
+    /// ```
+    ///
+    /// Elsewhere, such as in Grit snippets, a metavariable is a token on its own.
+    fn metavariable_word_end(&self) -> Option<usize> {
+        if !matches!(
+            self.source_type.as_embedding_kind(),
+            CssEmbeddingKind::Styled
+        ) {
+            return self.metavariable_end_at(self.position());
+        }
+
+        let source = self.source();
+        let mut position = self.position();
+        let mut has_metavariable = false;
+        loop {
+            if let Some(end) = self.metavariable_end_at(position) {
+                position = end;
+                has_metavariable = true;
+                continue;
+            }
+
+            let Some(&byte) = source.as_bytes().get(position) else {
+                break;
+            };
+
+            match lookup_byte(byte) {
+                IDT | DIG | ZER | MIN | PRC | HAS => position += 1,
+                // A decimal point belongs to the number, such as in
+                // `1.5${unit}`, while a selector dot like in `${Item}.active`
+                // is a boundary.
+                PRD if source
+                    .as_bytes()
+                    .get(position + 1)
+                    .is_some_and(|&next| matches!(lookup_byte(next), DIG | ZER)) =>
+                {
+                    position += 1;
+                }
+                UNI => {
+                    position += source[position..].chars().next().map_or(1, char::len_utf8);
+                }
+                _ => break,
+            }
+        }
+
+        has_metavariable.then_some(position)
+    }
+
+    /// Returns the end of the Grit metavariable that starts at `position`.
+    fn metavariable_end_at(&self, position: usize) -> Option<usize> {
+        let position = TextSize::from(position as u32);
+        self.metavariables
+            .binary_search_by_key(&position, |range| range.start())
+            .ok()
+            .map(|index| self.metavariables[index].end().into())
+    }
+
     pub(crate) fn with_source_type(self, source_type: CssFileSource) -> Self {
         Self {
             source_type,
@@ -440,6 +523,7 @@ impl<'src> CssLexer<'src> {
             self.is_scss(),
             self.is_line_comment_enabled(),
         )
+        .with_metavariables(self.metavariables)
     }
 
     fn byte_before(&self, position: usize, offset: usize) -> Option<u8> {
@@ -490,11 +574,14 @@ impl<'src> CssLexer<'src> {
         // to do more aggressive optimizations on the match regarding how to map it to instructions
         let dispatched = lookup_byte(current);
 
-        if self.is_metavariable_start() {
-            return self.consume_metavariable(GRIT_METAVARIABLE);
-        }
-
         match dispatched {
+            // Only these bytes can start a word with a metavariable, such as
+            // `${width}px` or `border-${side}`.
+            DOL | IDT | UNI | BSL | DIG | ZER | MIN | PRD | HAS
+                if self.is_at_metavariable_word() =>
+            {
+                self.consume_metavariable_word()
+            }
             WHS => {
                 let kind = self.consume_newline_or_whitespaces();
                 if kind == Self::NEWLINE {
@@ -1379,6 +1466,12 @@ impl<'src> CssLexer<'src> {
                             has_newline = true;
                             self.advance(1)
                         }
+                        b'$' if self.is_metavariable_start() => {
+                            let start = self.position();
+                            self.consume_metavariable(());
+                            has_newline |=
+                                self.source()[start..self.position()].contains(['\n', '\r']);
+                        }
                         chr => self.advance_byte_or_char(chr),
                     }
                 }
@@ -1404,6 +1497,7 @@ impl<'src> CssLexer<'src> {
                 while let Some(chr) = self.current_byte() {
                     match chr {
                         b'\n' | b'\r' => return COMMENT,
+                        b'$' if self.is_metavariable_start() => self.consume_metavariable(()),
                         chr => self.advance_byte_or_char(chr),
                     }
                 }

@@ -237,6 +237,11 @@ impl<'src> UrlBodyScanner<'src> {
                 }
             }
 
+            // `url(${image("a")})`: an inner `)` belongs to the metavariable.
+            if current == b'$' && self.cursor.skip_metavariable() {
+                continue;
+            }
+
             match lookup_byte(current) {
                 PNC => {
                     return UrlRawValueScan {

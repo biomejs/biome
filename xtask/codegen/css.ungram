@@ -273,6 +273,7 @@ AnyCssSelectorIdentifier =
 
 AnyCssSelectorCustomIdentifier =
 	CssCustomIdentifier
+	| CssMetavariable
 	| ScssInterpolatedIdentifier
 
 // [title = "title" i] {}
@@ -1715,6 +1716,7 @@ AnyCssQueryFeatureValue =
 	| CssIdentifier
 	| CssRatio
 	| AnyCssFunction
+	| CssMetavariable
 	| ScssVariable
 	| ScssInterpolatedIdentifier
 	| ScssInterpolation

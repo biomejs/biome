@@ -935,6 +935,7 @@ fn parse_js_matched_embed(
                 content.content_offset,
                 cache,
                 options,
+                &[],
             );
 
             Some((parse.into(), content.clone(), file_source))

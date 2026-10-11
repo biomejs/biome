@@ -190,6 +190,7 @@ fn parse_matched_embed(
                 content.content_offset,
                 context.cache,
                 options,
+                &[],
             )
             .into()
         }
