@@ -1,0 +1,163 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { getEntryBySlug } from "astro:content";
+import { getEntryBySlug as getPost } from "astro:content";
+import { getCollection, getEntryBySlug as getPage } from "astro:content";
+import content, { getEntryBySlug as getEntry2 } from "astro:content";
+import { "getEntryBySlug" as getEntry3 } from "astro:content";
+export { getEntryBySlug } from "astro:content";
+export { getEntryBySlug as getBySlug } from "astro:content";
+
+```
+
+# Diagnostics
+```
+invalid.js:2:10 lint/nursery/noAstroDeprecatedGetEntryBySlug ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × getEntryBySlug() is deprecated.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ import { getEntryBySlug } from "astro:content";
+      │          ^^^^^^^^^^^^^^
+    3 │ import { getEntryBySlug as getPost } from "astro:content";
+    4 │ import { getCollection, getEntryBySlug as getPage } from "astro:content";
+  
+  i Astro 6 removed this function, and calling it throws an error.
+  
+  i Use getEntry() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:10 lint/nursery/noAstroDeprecatedGetEntryBySlug ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × getEntryBySlug() is deprecated.
+  
+    1 │ /* should generate diagnostics */
+    2 │ import { getEntryBySlug } from "astro:content";
+  > 3 │ import { getEntryBySlug as getPost } from "astro:content";
+      │          ^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ import { getCollection, getEntryBySlug as getPage } from "astro:content";
+    5 │ import content, { getEntryBySlug as getEntry2 } from "astro:content";
+  
+  i Astro 6 removed this function, and calling it throws an error.
+  
+  i Use getEntry() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:25 lint/nursery/noAstroDeprecatedGetEntryBySlug ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × getEntryBySlug() is deprecated.
+  
+    2 │ import { getEntryBySlug } from "astro:content";
+    3 │ import { getEntryBySlug as getPost } from "astro:content";
+  > 4 │ import { getCollection, getEntryBySlug as getPage } from "astro:content";
+      │                         ^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ import content, { getEntryBySlug as getEntry2 } from "astro:content";
+    6 │ import { "getEntryBySlug" as getEntry3 } from "astro:content";
+  
+  i Astro 6 removed this function, and calling it throws an error.
+  
+  i Use getEntry() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:19 lint/nursery/noAstroDeprecatedGetEntryBySlug ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × getEntryBySlug() is deprecated.
+  
+    3 │ import { getEntryBySlug as getPost } from "astro:content";
+    4 │ import { getCollection, getEntryBySlug as getPage } from "astro:content";
+  > 5 │ import content, { getEntryBySlug as getEntry2 } from "astro:content";
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ import { "getEntryBySlug" as getEntry3 } from "astro:content";
+    7 │ export { getEntryBySlug } from "astro:content";
+  
+  i Astro 6 removed this function, and calling it throws an error.
+  
+  i Use getEntry() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:10 lint/nursery/noAstroDeprecatedGetEntryBySlug ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × getEntryBySlug() is deprecated.
+  
+    4 │ import { getCollection, getEntryBySlug as getPage } from "astro:content";
+    5 │ import content, { getEntryBySlug as getEntry2 } from "astro:content";
+  > 6 │ import { "getEntryBySlug" as getEntry3 } from "astro:content";
+      │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ export { getEntryBySlug } from "astro:content";
+    8 │ export { getEntryBySlug as getBySlug } from "astro:content";
+  
+  i Astro 6 removed this function, and calling it throws an error.
+  
+  i Use getEntry() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:10 lint/nursery/noAstroDeprecatedGetEntryBySlug ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × getEntryBySlug() is deprecated.
+  
+    5 │ import content, { getEntryBySlug as getEntry2 } from "astro:content";
+    6 │ import { "getEntryBySlug" as getEntry3 } from "astro:content";
+  > 7 │ export { getEntryBySlug } from "astro:content";
+      │          ^^^^^^^^^^^^^^
+    8 │ export { getEntryBySlug as getBySlug } from "astro:content";
+    9 │ 
+  
+  i Astro 6 removed this function, and calling it throws an error.
+  
+  i Use getEntry() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:10 lint/nursery/noAstroDeprecatedGetEntryBySlug ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × getEntryBySlug() is deprecated.
+  
+    6 │ import { "getEntryBySlug" as getEntry3 } from "astro:content";
+    7 │ export { getEntryBySlug } from "astro:content";
+  > 8 │ export { getEntryBySlug as getBySlug } from "astro:content";
+      │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i Astro 6 removed this function, and calling it throws an error.
+  
+  i Use getEntry() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
