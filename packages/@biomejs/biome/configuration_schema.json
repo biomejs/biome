@@ -5496,6 +5496,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoObsoleteAttributesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoObsoleteAttributesOptions" }
+			]
+		},
+		"NoObsoleteAttributesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoObsoleteTagsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7935,6 +7945,13 @@
 					"description": "Disallow calling Object without arguments to create an empty object.\nSee https://biomejs.dev/linter/rules/no-object-constructor",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoObjectConstructorConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noObsoleteAttributes": {
+					"description": "Disallow obsolete attributes on HTML elements.\nSee https://biomejs.dev/linter/rules/no-obsolete-attributes",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoObsoleteAttributesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11496,6 +11513,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoObjectConstructorOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoObsoleteAttributesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoObsoleteAttributesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
