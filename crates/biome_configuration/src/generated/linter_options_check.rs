@@ -492,6 +492,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::no_excessive_lines_per_function::NoExcessiveLinesPerFunctionOptions,
         >(),
     ));
+    result.push(("nursery", "noExcessiveNestedBlocks", TypeId::of::<biome_rule_options::no_excessive_nested_blocks::NoExcessiveNestedBlocksOptions>()));
     result.push((
         "complexity",
         "noExcessiveNestedCallbacks",
