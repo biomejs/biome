@@ -1,10 +1,10 @@
 use crate::TestArgs as Args;
 use crate::{
-    run_cli,
+    run_cli, run_cli_with_dyn_fs,
     snap_test::{SnapshotPayload, assert_cli_snapshot},
 };
 use biome_console::BufferConsole;
-use biome_fs::MemoryFileSystem;
+use biome_fs::{MemoryFileSystem, TemporaryFs};
 use serde_json::{Map, Value, json};
 
 #[test]
@@ -22,6 +22,48 @@ fn parent_relative_target_matches_normalized_target() {
         module_path!(),
         "parent_relative_target_matches_normalized_target",
         fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn absolute_target_matches_includes_relative_to_configuration_directory() {
+    let mut fs =
+        TemporaryFs::new("absolute_target_matches_includes_relative_to_configuration_directory");
+    fs.create_file(
+        "biome.json",
+        r#"{
+  "plugins": [
+    "./base.grit",
+    { "path": "./src-only.grit", "includes": ["src/**"] },
+    { "path": "./other-only.grit", "includes": ["other/**"] }
+  ]
+}"#,
+    );
+    for name in ["base", "src-only", "other-only"] {
+        fs.create_file(&format!("{name}.grit"), "`unterminated");
+    }
+
+    let mut console = BufferConsole::default();
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(
+            [
+                "inspect",
+                "plugins",
+                &format!("--path={}/src/file.ts", fs.cli_path()),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "absolute_target_matches_includes_relative_to_configuration_directory",
+        fs.create_mem(),
         console,
         result,
     ));

@@ -263,8 +263,12 @@ impl PluginConfiguration {
 
     /// Returns whether `path` matches the plugin's includes, including negated globs.
     /// Omitted includes match every file; an empty list matches none.
-    pub fn matches_includes(&self, path: &Utf8Path) -> bool {
-        crate::file_matches_includes(self.includes(), path)
+    ///
+    /// `path` is made relative to `base_path` before matching. Pass the directory that the
+    /// `files.includes` patterns of the same configuration are relative to.
+    pub fn matches_includes(&self, base_path: &Utf8Path, path: &Utf8Path) -> bool {
+        self.includes()
+            .is_none_or(|includes| crate::file_matches_includes(includes, base_path, path))
     }
 
     pub fn resolved_package_specifier(&self) -> Option<&str> {
@@ -615,7 +619,10 @@ mod tests {
         let config: PluginConfiguration = serde_json::from_str(r#""my-plugin.grit""#).unwrap();
         assert_eq!(config.path(), "my-plugin.grit");
         assert!(config.includes().is_none());
-        assert!(config.matches_includes(Utf8Path::new("src/main.ts")));
+        assert!(config.matches_includes(
+            Utf8Path::new("/project"),
+            Utf8Path::new("/project/src/main.ts")
+        ));
     }
 
     #[test]
@@ -626,10 +633,12 @@ mod tests {
         .unwrap();
         assert_eq!(config.path(), "my-plugin.grit");
         assert_eq!(config.includes().unwrap().len(), 2);
-        assert!(config.matches_includes(Utf8Path::new("src/main.ts")));
-        assert!(!config.matches_includes(Utf8Path::new("src/main.js")));
-        assert!(!config.matches_includes(Utf8Path::new("src/main.test.ts")));
-        assert!(!config.matches_includes(Utf8Path::new("/project/src/main.ts")));
+        let base_path = Utf8Path::new("/project");
+        assert!(config.matches_includes(base_path, Utf8Path::new("/project/src/main.ts")));
+        assert!(!config.matches_includes(base_path, Utf8Path::new("/project/src/main.js")));
+        assert!(!config.matches_includes(base_path, Utf8Path::new("/project/src/main.test.ts")));
+        assert!(!config.matches_includes(base_path, Utf8Path::new("/project/lib/src/main.ts")));
+        assert!(!config.matches_includes(base_path, Utf8Path::new("/other/src/main.ts")));
     }
 
     #[test]
@@ -638,14 +647,20 @@ mod tests {
             serde_json::from_str(r#"{ "path": "my-plugin.grit" }"#).unwrap();
         assert_eq!(config.path(), "my-plugin.grit");
         assert!(config.includes().is_none());
-        assert!(config.matches_includes(Utf8Path::new("src/main.ts")));
+        assert!(config.matches_includes(
+            Utf8Path::new("/project"),
+            Utf8Path::new("/project/src/main.ts")
+        ));
     }
 
     #[test]
     fn empty_includes_match_nothing() {
         let config: PluginConfiguration =
             serde_json::from_str(r#"{ "path": "my-plugin.grit", "includes": [] }"#).unwrap();
-        assert!(!config.matches_includes(Utf8Path::new("src/main.ts")));
+        assert!(!config.matches_includes(
+            Utf8Path::new("/project"),
+            Utf8Path::new("/project/src/main.ts")
+        ));
     }
 
     #[test]

@@ -1,4 +1,4 @@
-use crate::{AnalyzerPlugin, PluginDiagnostic, file_matches_includes};
+use crate::{AnalyzerPlugin, PluginDiagnostic, PluginIncludes};
 use biome_analyze::{
     PluginActionData, PluginDiagnosticEntry, PluginEvalResult, PluginTargetLanguage,
     RuleDiagnostic, ServiceBag,
@@ -7,7 +7,6 @@ use biome_console::markup;
 use biome_css_syntax::{CssRoot, CssSyntaxNode};
 use biome_diagnostics::{Applicability, Severity, category};
 use biome_fs::FileSystem;
-use biome_glob::NormalizedGlob;
 use biome_grit_patterns::{
     BuiltInFunction, CompilePatternOptions, GritBinding, GritExecContext, GritPattern, GritQuery,
     GritQueryContext, GritQueryEffect, GritQueryState, GritResolvedPattern, GritTargetFile,
@@ -31,15 +30,14 @@ pub struct AnalyzerGritPlugin {
 
     /// Glob patterns that restrict which files this plugin runs on.
     /// `None` means the plugin runs on all files.
-    /// `Some(&[])` (an empty list) means the plugin never runs on any file.
-    includes: Option<Box<[NormalizedGlob]>>,
+    includes: Option<PluginIncludes>,
 }
 
 impl AnalyzerGritPlugin {
     pub fn load(
         fs: &dyn FileSystem,
         path: &Utf8Path,
-        includes: Option<&[NormalizedGlob]>,
+        includes: Option<PluginIncludes>,
     ) -> Result<Self, PluginDiagnostic> {
         let source = fs.read_file_from_path(path).map_err(|source| {
             PluginDiagnostic::cant_read_plugin_file(path.to_path_buf(), source)
@@ -59,7 +57,7 @@ impl AnalyzerGritPlugin {
         Ok(Self {
             grit_query,
             name: None,
-            includes: includes.map(Into::into),
+            includes,
         })
     }
 
@@ -102,7 +100,9 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
     }
 
     fn applies_to_file(&self, path: &Utf8Path) -> bool {
-        file_matches_includes(self.includes.as_deref(), path)
+        self.includes
+            .as_ref()
+            .is_none_or(|includes| includes.matches(path))
     }
 
     fn evaluate(
@@ -316,10 +316,12 @@ fn register_diagnostic<'a>(
 mod tests {
     use super::*;
     use biome_fs::MemoryFileSystem;
+    use biome_glob::NormalizedGlob;
 
     fn load_test_plugin(includes: Option<&[NormalizedGlob]>) -> AnalyzerGritPlugin {
         let fs = MemoryFileSystem::default();
         fs.insert("/test.grit".into(), r#"`hello`"#);
+        let includes = includes.map(|globs| PluginIncludes::new(Utf8Path::new("/project"), globs));
         AnalyzerGritPlugin::load(&fs, Utf8Path::new("/test.grit"), includes).unwrap()
     }
 
@@ -364,14 +366,16 @@ mod tests {
     }
 
     #[test]
-    fn glob_does_not_match_absolute_paths_without_prefix() {
-        let globs: Vec<NormalizedGlob> = vec!["src/**/*.ts".parse().unwrap()];
+    fn matches_globs_relative_to_base_path() {
+        let globs: Vec<NormalizedGlob> = vec![
+            "src/**/*.ts".parse().unwrap(),
+            "!src/generated/**".parse().unwrap(),
+        ];
         let plugin = load_test_plugin(Some(&globs));
-        // Relative paths match as expected
-        assert!(plugin.applies_to_file(Utf8Path::new("src/main.ts")));
-        // Absolute paths do NOT match a relative glob — this is expected behavior.
-        // Users should use `**/src/**/*.ts` for absolute path matching.
-        assert!(!plugin.applies_to_file(Utf8Path::new("/project/src/main.ts")));
+        assert!(plugin.applies_to_file(Utf8Path::new("/project/src/main.ts")));
+        assert!(!plugin.applies_to_file(Utf8Path::new("/project/src/generated/main.ts")));
+        assert!(!plugin.applies_to_file(Utf8Path::new("/project/packages/src/main.ts")));
+        assert!(!plugin.applies_to_file(Utf8Path::new("/other/src/main.ts")));
     }
 
     #[test]

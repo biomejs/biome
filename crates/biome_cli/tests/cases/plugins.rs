@@ -473,3 +473,53 @@ fn extended_config_resolves_plugin_package_from_config() {
         result,
     ));
 }
+
+#[test]
+fn plugin_includes_are_relative_to_configuration_directory() {
+    let mut fs = TemporaryFs::new("plugin_includes_are_relative_to_configuration_directory");
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "plugins": [
+        {
+            "path": "./no-assign.grit",
+            "includes": ["packages/**/src/**", "!packages/**/src/generated/**"]
+        }
+    ]
+}"#,
+    );
+    fs.create_file(
+        "no-assign.grit",
+        r#"`Object.assign($args)` where {
+    register_diagnostic(span = $args, message = "Prefer object spread")
+}"#,
+    );
+    fs.create_file(
+        "packages/example/src/index.js",
+        "Object.assign({}, value);\n",
+    );
+    fs.create_file(
+        "packages/example/src/generated/index.js",
+        "Object.assign({}, value);\n",
+    );
+    fs.create_file(
+        "packages/example/scripts/index.js",
+        "Object.assign({}, value);\n",
+    );
+
+    let mut console = BufferConsole::default();
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", fs.cli_path()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "plugin_includes_are_relative_to_configuration_directory",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
