@@ -228,6 +228,470 @@ fn test_type_projections_track_imports_without_whole_module_inference() {
 }
 
 #[test]
+fn test_type_projections_select_merged_export_side_by_context() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/node_modules/@repro/lib/package.json".into(),
+        r#"{"name":"@repro/lib","version":"1.0.0","types":"src/index.ts"}"#,
+    );
+    fs.insert(
+        "/node_modules/@repro/lib/src/index.ts".into(),
+        r#"
+        export const S = ["a", "b", "c"] as const;
+        export type S = (typeof S)[number];
+    "#,
+    );
+    fs.insert(
+        "/package.json".into(),
+        r#"{"name":"app","dependencies":{"@repro/lib":"workspace:*"}}"#,
+    );
+    fs.insert(
+        "/src/values.ts".into(),
+        r#"
+        export const S = ["a", "b", "c"] as const;
+        export type S = (typeof S)[number];
+    "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        import type { S as PackageType } from "@repro/lib";
+        import type { S as RelativeType } from "./values.ts";
+        import { S as values } from "./values.ts";
+        import * as namespace from "./values.ts";
+        declare const packageElement: PackageType;
+        declare const relativeElement: RelativeType;
+        declare const valueElement: (typeof values)[number];
+        declare const namespaceElement: namespace.S;
+        declare const namespaceValueElement: (typeof namespace.S)[number];
+    "#,
+    );
+    let db = build_js_test_module_db(
+        &fs,
+        &[
+            "/node_modules/@repro/lib/src/index.ts",
+            "/src/values.ts",
+            "/src/index.ts",
+        ],
+        true,
+    );
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let names = [
+        "packageElement",
+        "relativeElement",
+        "valueElement",
+        "namespaceElement",
+        "namespaceValueElement",
+    ];
+    let projections = names.map(|name| {
+        let ty = projected_binding(&db, module, name);
+        (name, format_inferred_type(&db, ty))
+    });
+    assert_eq!(
+        projections,
+        names.map(|name| (name, "string: a | string: b | string: c".to_string()))
+    );
+}
+
+#[test]
+fn test_type_projections_keep_every_side_of_imported_declaration_merges() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/declarations.ts".into(),
+        r#"
+        export declare class ClassInterface { member: "class"; }
+        export interface ClassInterface { extra: "interface"; }
+        export interface InterfaceNamespace { member: "interface"; }
+        export namespace InterfaceNamespace { export const value = "namespace"; }
+        export declare class ClassNamespace { member: "class"; }
+        export namespace ClassNamespace { export const value = "namespace"; }
+        export function FunctionNamespace() {}
+        export namespace FunctionNamespace { export type Inner = "i1" | "i2"; }
+        export type FunctionNamespace = "alias";
+    "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        import {
+            ClassInterface,
+            ClassNamespace,
+            FunctionNamespace,
+            InterfaceNamespace,
+        } from "./declarations.ts";
+        import * as declarations from "./declarations.ts";
+        declare const classInterface: ClassInterface;
+        const classInterfaceMember = classInterface.member;
+        const classInterfaceExtra = classInterface.extra;
+        declare const interfaceNamespace: InterfaceNamespace;
+        const interfaceNamespaceMember = interfaceNamespace.member;
+        declare const classNamespace: ClassNamespace;
+        const classNamespaceMember = classNamespace.member;
+        declare const classInterfaceValue: typeof ClassInterface;
+        declare const interfaceNamespaceValue: typeof InterfaceNamespace;
+        declare const classNamespaceValue: typeof ClassNamespace;
+        declare const functionNamespaceInner: FunctionNamespace.Inner;
+        declare const namespaceFunctionNamespaceInner: declarations.FunctionNamespace.Inner;
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/declarations.ts", "/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+
+    let members = [
+        ("classInterfaceMember", "string: class"),
+        ("classInterfaceExtra", "string: interface"),
+        ("interfaceNamespaceMember", "string: interface"),
+        ("classNamespaceMember", "string: class"),
+        ("functionNamespaceInner", "string: i1 | string: i2"),
+        ("namespaceFunctionNamespaceInner", "string: i1 | string: i2"),
+    ];
+    let projections = members.map(|(name, _)| {
+        let ty = projected_binding(&db, module, name);
+        (name, format_inferred_type(&db, ty))
+    });
+    assert_eq!(
+        projections,
+        members.map(|(name, expected)| (name, expected.to_string()))
+    );
+
+    let values = [
+        (
+            "classInterfaceValue",
+            [r#"class "ClassInterface""#, r#"interface "ClassInterface""#],
+        ),
+        (
+            "interfaceNamespaceValue",
+            [
+                r#"interface "InterfaceNamespace""#,
+                r#"namespace Identifier("InterfaceNamespace")"#,
+            ],
+        ),
+        (
+            "classNamespaceValue",
+            [
+                r#"class "ClassNamespace""#,
+                r#"namespace Identifier("ClassNamespace")"#,
+            ],
+        ),
+    ];
+    for (name, sides) in values {
+        let formatted = format_inferred_type(&db, projected_binding(&db, module, name));
+        for side in sides {
+            assert!(
+                formatted.contains(side),
+                "{name} must keep {side}: {formatted}"
+            );
+        }
+    }
+}
+
+#[test]
+fn test_type_projections_select_merged_namespace_member_side_beyond_import_depth() {
+    const IMPORT_COUNT: usize = 130;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/values.ts".into(),
+        r#"
+        export const S = ["a", "b", "c"] as const;
+        export type S = (typeof S)[number];
+    "#,
+    );
+    let mut paths = (0..=IMPORT_COUNT)
+        .map(|index| format!("/src/chain{index}.ts"))
+        .collect::<Vec<_>>();
+    for (index, path) in paths.iter().enumerate() {
+        let source = if index == IMPORT_COUNT {
+            r#"
+            import * as namespace from "./values.ts";
+            export declare const element: namespace.S;
+            export declare const valueElement: (typeof namespace.S)[number];
+            "#
+            .to_string()
+        } else {
+            let next = index + 1;
+            format!(
+                "import {{ element as nextElement, valueElement as nextValueElement }} from \"./chain{next}.ts\";
+                export const element = nextElement;
+                export const valueElement = nextValueElement;"
+            )
+        };
+        fs.insert(path.into(), source);
+    }
+    paths.push("/src/values.ts".to_string());
+    let path_refs = paths.iter().map(String::as_str).collect::<Vec<_>>();
+    let db = build_js_test_module_db(&fs, &path_refs, true);
+    let root = db.module_for_path(Utf8Path::new(&paths[0])).unwrap();
+
+    let names = ["element", "valueElement"];
+    let projections = names.map(|name| {
+        let ty = projected_binding(&db, root, name);
+        (name, format_inferred_type(&db, ty))
+    });
+    assert_eq!(
+        projections,
+        names.map(|name| (name, "string: a | string: b | string: c".to_string()))
+    );
+}
+
+#[test]
+fn test_type_projections_select_class_value_side_of_merged_export() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/classes.ts".into(),
+        r#"
+        export declare class Widget { instance: "instance"; static shared: "shared"; }
+        export const Alias = Widget;
+        export type Alias = Widget;
+    "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        import { Alias, Widget } from "./classes.ts";
+        declare const instance: Alias;
+        const instanceMember = instance.instance;
+        const aliasStatic = Alias.shared;
+        const constructedMember = new Alias().instance;
+        declare const aliasValue: typeof Alias;
+        declare const widgetValue: typeof Widget;
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/classes.ts", "/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+
+    let members = [
+        ("instanceMember", "string: instance"),
+        ("aliasStatic", "string: shared"),
+        ("constructedMember", "string: instance"),
+    ];
+    let projections = members.map(|(name, _)| {
+        let ty = projected_binding(&db, module, name);
+        (name, format_inferred_type(&db, ty))
+    });
+    assert_eq!(
+        projections,
+        members.map(|(name, expected)| (name, expected.to_string()))
+    );
+    assert_eq!(
+        format_inferred_type(&db, projected_binding(&db, module, "aliasValue")),
+        format_inferred_type(&db, projected_binding(&db, module, "widgetValue")),
+        "`typeof Alias` must be the class value `typeof Widget`"
+    );
+}
+
+#[test]
+fn test_type_projections_select_merged_export_side_through_barrels() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/values.ts".into(),
+        r#"
+        export const S = ["a", "b", "c"] as const;
+        export type S = (typeof S)[number];
+    "#,
+    );
+    fs.insert(
+        "/src/named.ts".into(),
+        r#"export { S } from "./values.ts";"#,
+    );
+    fs.insert("/src/star.ts".into(), r#"export * from "./values.ts";"#);
+    fs.insert(
+        "/src/namespace.ts".into(),
+        r#"export * as ns from "./values.ts";"#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        import { S as Named } from "./named.ts";
+        import { S as Star } from "./star.ts";
+        import { ns } from "./namespace.ts";
+        declare const named: Named;
+        declare const namedValue: (typeof Named)[number];
+        declare const star: Star;
+        declare const starValue: (typeof Star)[number];
+        declare const namespace: ns.S;
+        declare const namespaceValue: (typeof ns.S)[number];
+    "#,
+    );
+    let db = build_js_test_module_db(
+        &fs,
+        &[
+            "/src/values.ts",
+            "/src/named.ts",
+            "/src/star.ts",
+            "/src/namespace.ts",
+            "/src/index.ts",
+        ],
+        true,
+    );
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    let names = [
+        "named",
+        "namedValue",
+        "star",
+        "starValue",
+        "namespace",
+        "namespaceValue",
+    ];
+    let projections = names.map(|name| {
+        let ty = projected_binding(&db, module, name);
+        (name, format_inferred_type(&db, ty))
+    });
+    assert_eq!(
+        projections,
+        names.map(|name| (name, "string: a | string: b | string: c".to_string()))
+    );
+}
+
+#[test]
+fn test_type_projections_select_merged_export_side_in_import_cycle() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/a.ts".into(),
+        r#"
+        import { B } from "./b.ts";
+        export const A = { kind: "a" } as const;
+        export type A = { kind: "a" | "a2"; next: B | null };
+    "#,
+    );
+    fs.insert(
+        "/src/b.ts".into(),
+        r#"
+        import { A } from "./a.ts";
+        export const B = { kind: "b" } as const;
+        export type B = { kind: "b" | "b2"; prev: A };
+        export type Plain = { back: A };
+    "#,
+    );
+    fs.insert(
+        "/src/c.ts".into(),
+        r#"
+        import { A } from "./a.ts";
+        import { Plain } from "./b.ts";
+        declare const x: A;
+        const kind = x.kind;
+        declare const plain: Plain;
+        const backKind = plain.back.kind;
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/a.ts", "/src/b.ts", "/src/c.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/c.ts")).unwrap();
+    let names = ["kind", "backKind"];
+    let projections = names.map(|name| {
+        let ty = projected_binding(&db, module, name);
+        (name, format_inferred_type(&db, ty))
+    });
+    assert_eq!(
+        projections,
+        names.map(|name| (name, "string: a | string: a2".to_string()))
+    );
+}
+
+#[test]
+fn test_type_projections_select_alias_side_when_alias_is_any_or_unresolved() {
+    let fs = MemoryFileSystem::default();
+    let many = (0..100)
+        .map(|index| format!("\"m{index}\""))
+        .collect::<Vec<_>>();
+    fs.insert(
+        "/src/values.ts".into(),
+        format!(
+            r#"
+            export const Loose = {{ member: "loose" }} as const;
+            export type Loose = any;
+            export const Missing = {{ member: "missing" }} as const;
+            export type Missing = NotDeclared;
+            export const Many = [{}] as const;
+            export type Many = {};
+            "#,
+            many.join(", "),
+            many.join(" | "),
+        ),
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        import { Loose, Many, Missing } from "./values.ts";
+        declare const loose: Loose;
+        const looseMember = loose.member;
+        declare const missing: Missing;
+        const missingMember = missing.member;
+        declare const many: Many;
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/values.ts", "/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+
+    let members = [
+        ("loose", "any"),
+        ("looseMember", "unknown"),
+        ("missing", "unknown"),
+        ("missingMember", "unknown"),
+    ];
+    let projections = members.map(|(name, _)| {
+        let ty = projected_binding(&db, module, name);
+        (name, format_inferred_type(&db, ty))
+    });
+    assert_eq!(
+        projections,
+        members.map(|(name, expected)| (name, expected.to_string()))
+    );
+
+    let expected_many = (0..100)
+        .map(|index| format!("string: m{index}"))
+        .collect::<Vec<_>>()
+        .join(" | ");
+    assert_eq!(
+        format_inferred_type(&db, projected_binding(&db, module, "many")).replace('\n', " "),
+        expected_many,
+        "a large literal union must still select the type side"
+    );
+}
+
+#[test]
+fn test_type_projections_merged_export_chain_beyond_import_depth_does_not_overflow() {
+    const CHAIN_LENGTH: usize = 200;
+
+    let fs = MemoryFileSystem::default();
+    let mut paths = (0..=CHAIN_LENGTH)
+        .map(|index| format!("/src/chain{index}.ts"))
+        .collect::<Vec<_>>();
+    for (index, path) in paths.iter().enumerate() {
+        let source = if index == CHAIN_LENGTH {
+            "export const K = { v: -1 }; export type K = \"leaf\";".to_string()
+        } else {
+            format!(
+                "import {{ K as Next }} from \"./chain{}.ts\"; export const K = {{ v: {index} }}; export type K = Next;",
+                index + 1
+            )
+        };
+        fs.insert(path.into(), source);
+    }
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        import { K } from "./chain0.ts";
+        declare const chained: K;
+        const value = K.v;
+    "#,
+    );
+    paths.push("/src/index.ts".to_string());
+    let path_refs = paths.iter().map(String::as_str).collect::<Vec<_>>();
+    let db = build_js_test_module_db(&fs, &path_refs, true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+
+    let names = ["chained", "value"];
+    let projections = names.map(|name| {
+        let ty = projected_binding(&db, module, name);
+        (name, format_inferred_type(&db, ty))
+    });
+    assert_eq!(
+        projections,
+        [("chained", "string: leaf"), ("value", "number: 0")].map(|(n, v)| (n, v.to_string()))
+    );
+}
+
+#[test]
 fn test_type_projections_exceeding_normalization_budget_are_unknown() {
     let fs = MemoryFileSystem::default();
     let elements = "\"A\",".repeat(1100);

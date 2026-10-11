@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue12026Letters.ts
+---
+# Input
+```ts
+export const Letters = ["a", "b", "c"] as const;
+export type Letters = (typeof Letters)[number];
+
+```
