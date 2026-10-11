@@ -7,7 +7,7 @@ use biome_formatter::{
 use biome_formatter::{DelimiterSpacing, IndentWidth, QuoteStyle, prelude::*};
 
 use crate::comments::{CssComments, FormatCssLeadingComment};
-use biome_css_syntax::CssLanguage;
+use biome_css_syntax::{CssLanguage, TextRange};
 use biome_languages::CssFileSource;
 use std::fmt;
 use std::rc::Rc;
@@ -19,6 +19,8 @@ pub struct CssFormatContext {
     comments: Rc<CssComments>,
     source_map: Option<TransformSourceMap>,
     identifier_case: CssCase,
+    /// Ranges of the metavariables that are written as embedded elements.
+    metavariable_ranges: Vec<TextRange>,
 }
 
 impl CssFormatContext {
@@ -28,12 +30,29 @@ impl CssFormatContext {
             comments: Rc::new(comments),
             source_map: None,
             identifier_case: CssCase::Auto,
+            metavariable_ranges: Vec::new(),
         }
     }
 
     pub fn with_source_map(mut self, source_map: Option<TransformSourceMap>) -> Self {
         self.source_map = source_map;
         self
+    }
+
+    pub fn with_metavariable_ranges(mut self, metavariable_ranges: Vec<TextRange>) -> Self {
+        self.metavariable_ranges = metavariable_ranges;
+        self
+    }
+
+    /// Returns the ranges of the metavariables inside `range`.
+    pub(crate) fn metavariable_ranges_in(
+        &self,
+        range: TextRange,
+    ) -> impl Iterator<Item = TextRange> {
+        self.metavariable_ranges
+            .iter()
+            .copied()
+            .filter(move |metavariable| range.contains_range(*metavariable))
     }
 
     pub(crate) fn identifier_case(&self) -> CssCase {
