@@ -933,19 +933,7 @@ impl WorkspaceServerWithDb<'_> {
 
         let (content, version) = match content {
             FileContent::FromClient { content, version } => (content, Some(version)),
-            FileContent::FromServer => {
-                // The LSP applies incremental client changes to an open document's content.
-                let client_content = self
-                    .documents
-                    .pin()
-                    .get(path.as_path())
-                    .filter(|document| document.version.is_some())
-                    .map(|document| document.content.clone());
-                match client_content {
-                    Some(content) => (content, None),
-                    None => (self.fs.read_file_from_path(&path)?, None),
-                }
-            }
+            FileContent::FromServer => (self.fs.read_file_from_path(&path)?, None),
         };
 
         let mut file_source_index = self.db_add_source(source);
@@ -1003,6 +991,28 @@ impl WorkspaceServerWithDb<'_> {
 
         #[cfg(test)]
         self.scanner_test_state.enter_file_commit(reason);
+
+        if version.is_none()
+            && self
+                .documents
+                .pin()
+                .get(path.as_path())
+                .is_some_and(|document| document.version.is_some())
+        {
+            // The LSP applies incremental client changes to an open document's content.
+            let Ok(parsed) = self.get_parse(&path) else {
+                return Ok(InternalOpenFileResult::default());
+            };
+            let (dependencies, diagnostics) = self.update_service_data(
+                &path,
+                UpdateKind::AddedOrChanged(reason, parsed.into()),
+                project_key,
+            )?;
+            return Ok(InternalOpenFileResult {
+                dependencies,
+                diagnostics,
+            });
+        }
 
         let mut parsed_source = None;
         let syntax = match parsed {

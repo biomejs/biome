@@ -2,4 +2,4 @@
 "@biomejs/biome": patch
 ---
 
-Fixed the language server losing track of an open file when the file watcher re-indexed it. Biome now keeps the editor's text of open files, and diagnostics and code actions stay at the right positions.
+Fixed [biomejs/biome-vscode#923](https://github.com/biomejs/biome-vscode/issues/923): the language server lost track of an open file when the file watcher re-indexed it. Biome now keeps the editor's text of open files, and diagnostics, code actions and formatting stay at the right positions.
