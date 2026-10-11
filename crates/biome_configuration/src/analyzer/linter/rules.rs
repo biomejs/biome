@@ -92,6 +92,7 @@ impl std::fmt::Display for RuleGroup {
 #[serde(rename_all = "camelCase")]
 pub enum RuleName {
     NoAccessKey,
+    NoAccidentalBitwiseOperators,
     NoAccumulatingSpread,
     NoAdjacentSpacesInRegex,
     NoAlert,
@@ -679,6 +680,7 @@ impl RuleName {
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::NoAccessKey => "noAccessKey",
+            Self::NoAccidentalBitwiseOperators => "noAccidentalBitwiseOperators",
             Self::NoAccumulatingSpread => "noAccumulatingSpread",
             Self::NoAdjacentSpacesInRegex => "noAdjacentSpacesInRegex",
             Self::NoAlert => "noAlert",
@@ -1274,6 +1276,7 @@ impl RuleName {
     pub const fn group(self) -> RuleGroup {
         match self {
             Self::NoAccessKey => RuleGroup::A11y,
+            Self::NoAccidentalBitwiseOperators => RuleGroup::Nursery,
             Self::NoAccumulatingSpread => RuleGroup::Performance,
             Self::NoAdjacentSpacesInRegex => RuleGroup::Complexity,
             Self::NoAlert => RuleGroup::Suspicious,
@@ -1864,6 +1867,7 @@ impl std::str::FromStr for RuleName {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "noAccessKey" => Ok(Self::NoAccessKey),
+            "noAccidentalBitwiseOperators" => Ok(Self::NoAccidentalBitwiseOperators),
             "noAccumulatingSpread" => Ok(Self::NoAccumulatingSpread),
             "noAdjacentSpacesInRegex" => Ok(Self::NoAdjacentSpacesInRegex),
             "noAlert" => Ok(Self::NoAlert),

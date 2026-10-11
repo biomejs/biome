@@ -1,0 +1,81 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid-no-semicolons.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// No fix is offered, because the added parentheses would continue the previous line
+foo()
+obj & obj.a | x
+foo()
+a | {} && b
+
+// A fix is offered at the start of the file or after a semicolon
+foo();
+obj & obj.a | x
+
+```
+
+# Diagnostics
+```
+invalid-no-semicolons.js:5:5 lint/nursery/noAccidentalBitwiseOperators ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator & is used where the logical operator && was likely intended.
+  
+    3 │ // No fix is offered, because the added parentheses would continue the previous line
+    4 │ foo()
+  > 5 │ obj & obj.a | x
+      │     ^
+    6 │ foo()
+    7 │ a | {} && b
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-no-semicolons.js:7:3 lint/nursery/noAccidentalBitwiseOperators ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator | is used where the logical operator || was likely intended.
+  
+    5 │ obj & obj.a | x
+    6 │ foo()
+  > 7 │ a | {} && b
+      │   ^
+    8 │ 
+    9 │ // A fix is offered at the start of the file or after a semicolon
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-no-semicolons.js:11:5 lint/nursery/noAccidentalBitwiseOperators  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! The bitwise operator & is used where the logical operator && was likely intended.
+  
+     9 │ // A fix is offered at the start of the file or after a semicolon
+    10 │ foo();
+  > 11 │ obj & obj.a | x
+       │     ^
+    12 │ 
+  
+  i Bitwise operators always evaluate both sides and turn them into numbers, so the result is not the value of either side.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Replace & with &&.
+  
+    11 │ (obj·&&·obj.a)·|·x
+       │ +     +      +    
+
+```

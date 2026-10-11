@@ -220,6 +220,7 @@ define_categories! {
     "lint/correctness/useVueValidVPre": "https://biomejs.dev/linter/rules/use-vue-valid-v-pre",
     "lint/correctness/useVueValidVText": "https://biomejs.dev/linter/rules/use-vue-valid-v-text",
     "lint/correctness/useYield": "https://biomejs.dev/linter/rules/use-yield",
+    "lint/nursery/noAccidentalBitwiseOperators": "https://biomejs.dev/linter/rules/no-accidental-bitwise-operators",
     "lint/nursery/noAstroConflictingSetDirectives": "https://biomejs.dev/linter/rules/no-astro-conflicting-set-directives",
     "lint/nursery/noAstroSetHtmlDirective": "https://biomejs.dev/linter/rules/no-astro-set-html-directive",
     "lint/nursery/noBaseToString": "https://biomejs.dev/linter/rules/no-base-to-string",
