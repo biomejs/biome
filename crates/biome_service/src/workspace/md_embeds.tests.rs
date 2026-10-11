@@ -3,7 +3,6 @@ use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
 use crate::workspace::UpdateSettingsParams;
 use biome_analyze::RuleCategoriesBuilder;
-use biome_analyze::RuleCategoriesBuilder;
 use biome_configuration::MarkdownConfiguration;
 use biome_configuration::html::{HtmlConfiguration, HtmlFormatterConfiguration};
 use biome_configuration::markdown::{MarkdownFormatterConfiguration, MarkdownParserConfiguration};
