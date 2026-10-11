@@ -933,7 +933,19 @@ impl WorkspaceServerWithDb<'_> {
 
         let (content, version) = match content {
             FileContent::FromClient { content, version } => (content, Some(version)),
-            FileContent::FromServer => (self.fs.read_file_from_path(&path)?, None),
+            FileContent::FromServer => {
+                // The LSP applies incremental client changes to an open document's content.
+                let client_content = self
+                    .documents
+                    .pin()
+                    .get(path.as_path())
+                    .filter(|document| document.version.is_some())
+                    .map(|document| document.content.clone());
+                match client_content {
+                    Some(content) => (content, None),
+                    None => (self.fs.read_file_from_path(&path)?, None),
+                }
+            }
         };
 
         let mut file_source_index = self.db_add_source(source);

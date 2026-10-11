@@ -125,3 +125,62 @@ fn close_modified_file_from_client_before_watcher() {
         "index should've reverted to the filesystem state"
     );
 }
+
+#[test]
+fn index_file_opened_by_client_keeps_client_content() {
+    const FILE_CONTENT: &str = "import 'foo';";
+    const CLIENT_CONTENT: &str = "import 'bar';";
+
+    let file_path = Utf8PathBuf::from("/project/a.js");
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(file_path.clone(), FILE_CONTENT);
+
+    let (workspace, project_key, _watcher_rx) =
+        setup_workspace_and_open_project_and_get_watcher_instruction_receiver(fs, "/project");
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(&file_path),
+            content: FileContent::FromClient {
+                content: CLIENT_CONTENT.to_string(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: true,
+            inline_config: None,
+            editor_features: None,
+        })
+        .expect("can open from client");
+
+    ScannerWatcherBridge::new((&workspace.scanner, &workspace))
+        .index_file(project_key, file_path.clone())
+        .expect("can also index file");
+
+    let content = workspace
+        .get_file_content(GetFileContentParams {
+            project_key,
+            path: BiomePath::new(&file_path),
+        })
+        .expect("can get file content");
+
+    assert_eq!(content, CLIENT_CONTENT);
+
+    let module_graph = workspace
+        .get_module_graph(GetModuleGraphParams {})
+        .expect("can get module graph");
+
+    assert_eq!(
+        module_graph
+            .data
+            .get(file_path.as_str())
+            .map(|module_info| module_info
+                .as_js_module_info()
+                .unwrap()
+                .static_import_paths
+                .clone()),
+        Some(BTreeMap::from([("bar".to_string(), "bar".to_string())])),
+        "index should've used the client state"
+    );
+}
