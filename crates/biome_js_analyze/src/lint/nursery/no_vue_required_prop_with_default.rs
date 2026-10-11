@@ -102,7 +102,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueRequiredPropWithDefault {
-        version: "next",
+        version: "2.6.0",
         name: "noVueRequiredPropWithDefault",
         language: "js",
         recommended: true,

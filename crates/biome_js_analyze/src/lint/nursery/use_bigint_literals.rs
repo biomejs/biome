@@ -60,7 +60,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseBigintLiterals {
-        version: "next",
+        version: "2.6.0",
         name: "useBigintLiterals",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-bigint-literals").same()],

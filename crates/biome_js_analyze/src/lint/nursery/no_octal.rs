@@ -39,7 +39,7 @@ declare_lint_rule! {
     /// const text = "071";
     /// ```
     pub NoOctal {
-        version: "next",
+        version: "2.6.0",
         name: "noOctal",
         language: "js",
         sources: &[RuleSource::Eslint("no-octal").same()],
