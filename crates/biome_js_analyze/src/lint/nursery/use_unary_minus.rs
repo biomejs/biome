@@ -52,7 +52,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseUnaryMinus {
-        version: "next",
+        version: "2.6.0",
         name: "useUnaryMinus",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-unary-minus").same()],

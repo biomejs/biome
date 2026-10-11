@@ -36,7 +36,7 @@ declare_lint_rule! {
     /// - [Vue `v-text` directive](https://vuejs.org/api/built-in-directives.html#v-text)
     /// - [Vue text interpolation](https://vuejs.org/guide/essentials/template-syntax.html#text-interpolation)
     pub NoVueVText {
-        version: "next",
+        version: "2.6.0",
         name: "noVueVText",
         language: "html",
         recommended: false,

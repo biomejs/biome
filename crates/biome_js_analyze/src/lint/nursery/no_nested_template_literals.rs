@@ -43,7 +43,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoNestedTemplateLiterals {
-        version: "next",
+        version: "2.6.0",
         name: "noNestedTemplateLiterals",
         language: "js",
         recommended: false,

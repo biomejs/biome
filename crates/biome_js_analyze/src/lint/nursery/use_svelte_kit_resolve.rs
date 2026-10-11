@@ -138,7 +138,7 @@ declare_lint_rule! {
     /// - [`pushState()` documentation](https://svelte.dev/docs/kit/$app-navigation#pushState)
     /// - [`replaceState()` documentation](https://svelte.dev/docs/kit/$app-navigation#replaceState)
     pub UseSvelteKitResolve {
-        version: "next",
+        version: "2.6.0",
         name: "useSvelteKitResolve",
         language: "js",
         recommended: true,

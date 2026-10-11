@@ -48,7 +48,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDuplicateMapKeys {
-        version: "next",
+        version: "2.6.0",
         name: "noDuplicateMapKeys",
         language: "yaml",
         recommended: true,

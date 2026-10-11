@@ -75,7 +75,7 @@ declare_lint_rule! {
     ///
     /// - [`resolve()` documentation](https://svelte.dev/docs/kit/$app-paths#resolve)
     pub UseSvelteKitResolve {
-        version: "next",
+        version: "2.6.0",
         name: "useSvelteKitResolve",
         language: "html",
         recommended: true,
