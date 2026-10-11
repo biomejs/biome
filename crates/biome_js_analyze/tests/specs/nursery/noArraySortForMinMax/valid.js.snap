@@ -1,0 +1,59 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+const minimum = Math.min(...array);
+const reduced = array.reduce((minimum, value) => Math.min(minimum, value));
+const noComparator1 = array.sort()[0];
+const noComparator2 = array.toSorted()[0];
+const strings = array.sort((a, b) => a.localeCompare(b))[0];
+const named = array.sort(compare)[0];
+const multiKey = array.sort((a, b) => a - b || a.id - b.id)[0];
+const property = array.sort((a, b) => a.value - b.value)[0];
+const second1 = array.sort((a, b) => a - b)[1];
+const second2 = array.sort((a, b) => a - b).at(1);
+const dynamicIndex = array.sort((a, b) => a - b).at(index);
+const optional1 = array.sort?.((a, b) => a - b)[0];
+const optional2 = array?.sort((a, b) => a - b)[0];
+const optional3 = array.sort((a, b) => a - b)?.[0];
+const optional4 = object?.array.toSorted((a, b) => a - b)[0];
+const optional5 = object?.array.toSorted((a, b) => a - b).at(0);
+const optional6 = object?.array.sort((a, b) => a - b)[0];
+const optional7 = object?.getArray().toSorted((a, b) => a - b)[0];
+const optional8 = object?.getArray().toSorted((a, b) => a - b).at(0);
+const optional9 = array.toSorted((a, b) => a - b)?.at(0);
+const computed = array["sort"]((a, b) => a - b)[0];
+const twoStatements = array.sort((a, b) => { return a - b; return 0; })[0];
+const emptyBody = array.sort((a, b) => {})[0];
+const asyncComparator = array.sort(async (a, b) => a - b)[0];
+const generator = array.sort(function* (a, b) { return a - b; })[0];
+const defaultValue = array.sort((a, b = 0) => a - b)[0];
+const restParameter = array.sort((a, ...b) => a - b)[0];
+const destructured = array.sort(({ a }, b) => a - b)[0];
+const sameOperands = array.sort((a, b) => a - a)[0];
+const objectLiteral = ({ sort() {} }).sort((a, b) => a - b)[0];
+const set = new Set().sort((a, b) => a - b)[0];
+const twoArguments = array.toSorted((a, b) => a - b).at(0, 1);
+array.sort((a, b) => a - b)[0] = value;
+array.sort((a, b) => a - b)[0]++;
+delete array.sort((a, b) => a - b)[0];
+delete array.sort((a, b) => a - b).at(0);
+for (array.sort((a, b) => a - b)[0] of values) {}
+for (array.sort((a, b) => a - b)[0] in object) {}
+new BigInt64Array().sort((a, b) => a - b)[0];
+new BigUint64Array().sort((a, b) => a - b).at(-1);
+BigInt64Array.from([]).toSorted((a, b) => a - b)[0];
+BigUint64Array.of(1n).toSorted((a, b) => a - b).at(-1);
+const bigints = new BigInt64Array(4);
+bigints.toSorted((a, b) => a - b)[0];
+const map = new Map();
+map.sort((a, b) => a - b)[0];
+const duplicateParameters = array.sort(function (a, a) { return a - a; })[0];
+const template = `${value}`.sort((a, b) => a - b)[0];
+
+```
