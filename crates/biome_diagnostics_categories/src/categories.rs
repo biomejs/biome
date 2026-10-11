@@ -229,6 +229,7 @@ define_categories! {
     "lint/nursery/noDuplicateMapKeys": "https://biomejs.dev/linter/rules/no-duplicate-map-keys",
     "lint/nursery/noComponentHookFactories": "https://biomejs.dev/linter/rules/no-component-hook-factories",
     "lint/nursery/noConditionalExpect": "https://biomejs.dev/linter/rules/no-conditional-expect",
+    "lint/nursery/noDoubleComparison": "https://biomejs.dev/linter/rules/no-double-comparison",
     "lint/nursery/noDrizzleDeleteWithoutWhere": "https://biomejs.dev/linter/rules/no-drizzle-delete-without-where",
     "lint/nursery/noDrizzleUpdateWithoutWhere": "https://biomejs.dev/linter/rules/no-drizzle-update-without-where",
     "lint/nursery/noDuplicateFieldDefinitionNames": "https://biomejs.dev/linter/rules/no-duplicate-field-definition-names",
