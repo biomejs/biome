@@ -127,18 +127,6 @@ pub struct FormatCssVerbatimNode<'node> {
     format_comments: bool,
 }
 
-/// Preserves a node body whose source boundaries must remain unchanged.
-///
-/// Call from a node rule that handles suppression and outer comments. Comments
-/// inside the node remain in the copied source, such as in `%a/**/%b`.
-pub(crate) fn format_verbatim_skipped_body(node: &CssSyntaxNode) -> FormatCssVerbatimNode<'_> {
-    FormatCssVerbatimNode {
-        node,
-        kind: VerbatimKind::Skipped,
-        format_comments: false,
-    }
-}
-
 impl Format<CssFormatContext> for FormatCssVerbatimNode<'_> {
     fn fmt(&self, f: &mut Formatter<CssFormatContext>) -> FormatResult<()> {
         fn source_range<Context>(f: &Formatter<Context>, range: TextRange) -> TextRange
