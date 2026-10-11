@@ -3,7 +3,7 @@ use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic, RuleSource, declare_lint
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsObjectMember, JsObjectExpression, JsSyntaxKind};
-use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken, TokenText};
+use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken};
 use biome_rule_options::no_duplicate_object_keys::NoDuplicateObjectKeysOptions;
 use rustc_hash::FxHashMap;
 use std::collections::hash_map;
@@ -70,14 +70,19 @@ impl Rule for NoDuplicateObjectKeys {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        let mut defined_properties: FxHashMap<TokenText, DefinedProperties> = FxHashMap::default();
+        let mut defined_properties: FxHashMap<Box<str>, DefinedProperties> = FxHashMap::default();
         let mut signals = Vec::new();
 
         for (member_name, defined_property) in node
             .members()
             .into_iter()
             .flatten()
-            .filter_map(|member| Some((member.name()?, DefinedProperty::try_from(&member).ok()?)))
+            .filter_map(|member| {
+                Some((
+                    member.canonical_name()?.into(),
+                    DefinedProperty::try_from(&member).ok()?,
+                ))
+            })
             // Note that we iterate from last to first property, so that we highlight properties being overwritten as problems and not those that take effect.
             .rev()
         {

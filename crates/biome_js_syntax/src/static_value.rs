@@ -1,6 +1,11 @@
+use std::borrow::Cow;
+
 use biome_rowan::TextRange;
 
-use crate::numbers::canonicalize_js_bigint_literal;
+use crate::numbers::{
+    canonicalize_js_bigint_literal, canonicalize_js_bigint_property_key,
+    canonicalize_js_number_literal,
+};
 use crate::{JsSyntaxKind, JsSyntaxToken};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -71,6 +76,21 @@ impl StaticValue {
                 text
             }
             Self::EmptyString(_) => "",
+        }
+    }
+
+    /// Return the canonical property name corresponding to ECMAScript `ToPropertyKey(value)`.
+    ///
+    /// For Numbers and BigInts, this canonicalizes hexadecimal, octal, binary,
+    /// scientific notation, separators, and decimals into their standard decimal representation.
+    pub fn canonical_property_name(&self) -> Option<Cow<'_, str>> {
+        match self {
+            Self::Boolean(token)
+            | Self::Null(token)
+            | Self::Undefined(token) => Some(Cow::Borrowed(token.text_trimmed())),
+            Self::String(_) | Self::EmptyString(_) => Some(Cow::Borrowed(self.text())),
+            Self::Number(token) => canonicalize_js_number_literal(token.text_trimmed()),
+            Self::BigInt(token) => canonicalize_js_bigint_property_key(token.text_trimmed()),
         }
     }
 
