@@ -106,6 +106,7 @@ fn vue_template_expressions_get_instance_properties() {
         event_handler: false,
         allow_statements: false,
         slot_props: false,
+        generic: false,
     });
     let options =
         settings.analyzer_options::<JsLanguage>(&[], &DocumentFileSource::from(template_source));
@@ -128,6 +129,7 @@ fn vue_event_handlers_get_dollar_event() {
             event_handler: true,
             allow_statements: false,
             slot_props: false,
+            generic: false,
         });
     let options = settings
         .analyzer_options::<JsLanguage>(&[], &DocumentFileSource::from(event_handler_source));

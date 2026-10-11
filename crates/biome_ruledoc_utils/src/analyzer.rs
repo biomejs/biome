@@ -572,6 +572,7 @@ fn extract_html_embedded_js<'a>(
                         event_handler: false,
                         allow_statements: true,
                         slot_props: false,
+                        generic: false,
                         is_class_attribute: false,
                     })
                 } else {
@@ -634,6 +635,7 @@ fn extract_html_embedded_js<'a>(
                     event_handler: false,
                     allow_statements: false,
                     slot_props: false,
+                    generic: false,
                     is_class_attribute,
                 })
             } else {

@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-vue-script-generic.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts" generic="TData extends object">
+defineProps<{ rows: TData[]; other: TOther }>();
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-vue-script-generic.vue:3:37 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The TOther variable is undeclared.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup lang="ts" generic="TData extends object">
+  > 3 │ defineProps<{ rows: TData[]; other: TOther }>();
+      │                                     ^^^^^^
+    4 │ </script>
+    5 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+```

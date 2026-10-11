@@ -174,6 +174,7 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
             // Pass 1: elements via registry, collecting JS file sources
             let mut embedded_file_source = JsFileSource::js_module();
             let mut css_v_bind_candidates = vec![];
+            let mut generic_candidates = vec![];
             for element in elements {
                 if let Some(candidate) = build_html_candidate(&element)
                     && let Some(parsed) = ctx.detect_and_parse(&candidate, &doc_file_source, None)
@@ -184,6 +185,12 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                     } = parsed;
                     if let Some(js_fs) = js_file_source {
                         embedded_file_source = merge_js_file_source(embedded_file_source, js_fs);
+
+                        if js_fs.is_typescript()
+                            && let Some(candidate) = build_vue_generic_candidate(&element)
+                        {
+                            generic_candidates.push(candidate);
+                        }
                     }
                     if file_source.to_css_file_source().is_some() {
                         css_v_bind_candidates
@@ -191,6 +198,15 @@ pub(crate) fn parse_embedded_nodes(params: ParseEmbeddedParams) -> ParseEmbedRes
                     }
                     nodes.push((parse, content, file_source));
                 }
+            }
+
+            for candidate in generic_candidates {
+                ctx.parse_and_push(
+                    &candidate,
+                    &doc_file_source,
+                    Some(embedded_file_source),
+                    &mut nodes,
+                );
             }
 
             for candidate in css_v_bind_candidates {
@@ -702,6 +718,7 @@ fn build_text_expression_directive_candidate(
         is_event_handler: false,
         is_class_attribute: false,
         is_slot_props: false,
+        is_generic: false,
     })
 }
 
@@ -729,6 +746,7 @@ fn build_attribute_expression_candidate(
         is_event_handler: false,
         is_class_attribute,
         is_slot_props: false,
+        is_generic: false,
     })
 }
 
@@ -805,6 +823,36 @@ fn build_vue_directive_candidate(
         is_event_handler,
         is_class_attribute,
         is_slot_props,
+        is_generic: false,
+    })
+}
+
+/// Build an `EmbedCandidate::Directive` from the `generic` attribute of a Vue `<script setup>`,
+/// e.g. `<script setup lang="ts" generic="T extends Item">`.
+///
+/// The TypeScript content is the text inside the quotes.
+fn build_vue_generic_candidate(element: &HtmlElement) -> Option<EmbedCandidate> {
+    if !element.is_script_tag() || element.find_attribute_by_name("setup").is_none() {
+        return None;
+    }
+    let attribute = element.find_attribute_by_name("generic")?;
+    let initializer = attribute.as_html_attribute()?.initializer()?;
+    let html_string = initializer.value().ok()?.as_html_string()?.clone();
+    let content_token = html_string.value_token().ok()?;
+    let inner_text = html_string.inner_string_text().ok()?;
+    let content_range = inner_text.source_range(content_token.text_range());
+
+    Some(EmbedCandidate::Directive {
+        content: EmbedContent {
+            element_range: initializer.range(),
+            content_range,
+            content_offset: content_range.start(),
+            text: inner_text,
+        },
+        is_event_handler: false,
+        is_class_attribute: false,
+        is_slot_props: false,
+        is_generic: true,
     })
 }
 
@@ -1155,6 +1203,7 @@ fn parse_matched_embed(
                             event_handler: false,
                             allow_statements: true,
                             slot_props: false,
+                            generic: false,
                         });
                     }
                     // Astro <script> tags and plain HTML: no EmbeddingKind
@@ -1196,6 +1245,7 @@ fn parse_matched_embed(
                             event_handler: false,
                             allow_statements: false,
                             slot_props: false,
+                            generic: false,
                         });
                     }
                     false
@@ -1204,6 +1254,7 @@ fn parse_matched_embed(
                     is_event_handler,
                     is_class_attribute,
                     is_slot_props,
+                    is_generic,
                     ..
                 } => {
                     match ctx.host_file_source.variant() {
@@ -1222,6 +1273,7 @@ fn parse_matched_embed(
                                 event_handler: *is_event_handler,
                                 allow_statements: false,
                                 slot_props: *is_slot_props,
+                                generic: *is_generic,
                             });
                         }
                         HtmlVariant::Svelte => {

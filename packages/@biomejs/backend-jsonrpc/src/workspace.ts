@@ -12809,6 +12809,11 @@ export type JsEmbeddingKind =
 				 */
 				event_handler: boolean;
 				/**
+				 * Whether this is the value of the `generic` attribute of `<script setup>`
+				 * (e.g. `generic="T extends Item"`), which is parsed as a list of type parameters.
+				 */
+				generic: boolean;
+				/**
 				 * Whether this snippet is from a class-related attribute
 				 * (e.g. :class="...")
 				 */

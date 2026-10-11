@@ -58,6 +58,7 @@ AnyJsRoot =
 	| JsSvelteSnippetRoot
 	| JsSvelteDeclarationRoot
 	| JsVueSlotPropsRoot
+	| JsVueGenericRoot
 
 JsScript =
 	bom: 'UNICODE_BOM'?
@@ -101,6 +102,16 @@ JsSvelteSnippetRoot =
 JsVueSlotPropsRoot =
 		parameters: JsParameterList
 		eof: 'EOF'
+
+// <script setup lang="ts" generic="T extends U">
+//                                  ^^^^^^^^^^^
+JsVueGenericRoot =
+		items: AnyJsVueGenericTypeParameters
+		eof: 'EOF'
+
+AnyJsVueGenericTypeParameters =
+	TsTypeParameterList
+	| JsBogus
 
 // Special root created for Svelte declaration tags
 JsSvelteDeclarationRoot =

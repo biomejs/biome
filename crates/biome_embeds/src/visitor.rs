@@ -15,10 +15,11 @@ use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsCallArgument, AnyJsDeclarationClause,
     AnyJsExportClause, AnyJsExpression, AnyJsIdentifierReference, AnyJsModuleItem,
     AnyJsObjectAssignmentPatternMember, AnyJsObjectBindingPatternMember, AnyJsObjectMember,
-    AnyJsParameter, AnyJsRoot, AnyJsStatement, AnyTsIdentifierBinding, AnyTsType,
-    JsAssignmentExpression, JsCallExpression, JsExport, JsIdentifierAssignment, JsImport,
-    JsModuleItemList, JsParameterList, JsReferenceIdentifier, JsStaticMemberExpression,
-    JsSvelteDeclarationRoot, JsSvelteSnippetRoot, JsVariableStatement, JsxReferenceIdentifier,
+    AnyJsParameter, AnyJsRoot, AnyJsStatement, AnyJsVueGenericTypeParameters,
+    AnyTsIdentifierBinding, AnyTsType, JsAssignmentExpression, JsCallExpression, JsExport,
+    JsIdentifierAssignment, JsImport, JsModuleItemList, JsParameterList, JsReferenceIdentifier,
+    JsStaticMemberExpression, JsSvelteDeclarationRoot, JsSvelteSnippetRoot, JsSyntaxToken,
+    JsVariableStatement, JsxReferenceIdentifier,
 };
 use biome_languages::html::HtmlVariant;
 use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind};
@@ -284,6 +285,9 @@ fn collect_embedded_references(
         .is_some_and(|s| s.is_svelte());
 
     let mut builder = EmbeddedReferencesBuilder::new();
+    let generic_names: Vec<_> = vue_generic_parameter_names(snippets)
+        .map(|token| token.token_text_trimmed())
+        .collect();
 
     for snippet in snippets {
         let Some(js_file_source) = snippet.file_source.to_js_file_source() else {
@@ -295,6 +299,8 @@ fn collect_embedded_references(
         // the other block must still count as used.
         if !js_file_source.is_embedded_source() || is_svelte {
             builder.visit_non_source_snippet(&snippet.parse.tree(), &js_file_source);
+        } else if js_file_source.as_embedding_kind().is_vue_setup() && !generic_names.is_empty() {
+            builder.visit_vue_setup_generic_references(&snippet.parse.tree(), &generic_names);
         }
     }
 
@@ -328,6 +334,32 @@ fn build_type_references(builder: &EmbeddedReferencesBuilder) -> Vec<EmbeddedTyp
             text: text.clone(),
         })
         .collect()
+}
+
+/// Returns the name tokens of the type parameters declared by the `generic` attribute of a
+/// Vue `<script setup>`.
+///
+/// A `generic` attribute that fails to parse declares no names.
+fn vue_generic_parameter_names<'a>(
+    snippets: &'a [EmbeddedSnippet],
+) -> impl Iterator<Item = JsSyntaxToken> + 'a {
+    snippets
+        .iter()
+        .filter(|snippet| {
+            snippet
+                .file_source
+                .to_js_file_source()
+                .is_some_and(|source| source.is_vue_generic())
+        })
+        .filter_map(|snippet| {
+            let root = snippet.parse.tree::<AnyJsRoot>();
+            match root.as_js_vue_generic_root()?.items().ok()? {
+                AnyJsVueGenericTypeParameters::TsTypeParameterList(items) => Some(items),
+                _ => None,
+            }
+        })
+        .flat_map(|items| items.iter())
+        .filter_map(|type_parameter| type_parameter.ok()?.name().ok()?.ident_token().ok())
 }
 
 fn block_kind_from_js_source(source: &JsFileSource) -> Option<EmbeddedBlockKind> {
@@ -494,6 +526,10 @@ impl EmbeddedBindingsBuilder {
             {
                 self.visit_parameter_list_bindings(&root.parameters());
             }
+        }
+
+        for token in vue_generic_parameter_names(snippets) {
+            self.register_type_only_binding(token.text_trimmed_range(), token.token_text_trimmed());
         }
     }
 
@@ -1681,6 +1717,29 @@ impl EmbeddedReferencesBuilder {
                     }
                 }
                 WalkEvent::Leave(_) => {}
+            }
+        }
+    }
+
+    /// Registers the type references of a Vue `<script setup>` that refer to one of the
+    /// `generic_names` declared by its `generic` attribute.
+    fn visit_vue_setup_generic_references(
+        &mut self,
+        root: &AnyJsRoot,
+        generic_names: &[TokenText],
+    ) {
+        for node in root.syntax().descendants() {
+            if let Some(reference) = JsReferenceIdentifier::cast_ref(&node)
+                && let Ok(name_token) = reference.value_token()
+                && AnyJsIdentifierReference::from(reference).is_only_type()
+                && generic_names
+                    .iter()
+                    .any(|name| name.text() == name_token.text_trimmed())
+            {
+                self.register_type_reference(
+                    name_token.text_trimmed_range(),
+                    name_token.token_text_trimmed(),
+                );
             }
         }
     }

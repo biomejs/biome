@@ -28,4 +28,5 @@ pub(crate) mod template_chunk_element;
 pub(crate) mod template_element;
 pub(crate) mod variable_declaration_clause;
 pub(crate) mod variable_declarator;
+pub(crate) mod vue_generic_root;
 pub(crate) mod vue_slot_props_root;

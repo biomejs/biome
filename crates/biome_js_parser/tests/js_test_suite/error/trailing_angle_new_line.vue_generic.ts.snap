@@ -1,0 +1,71 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```ts
+T
+> U
+
+```
+
+
+## AST
+
+```
+JsVueGenericRoot {
+    items: JsBogus {
+        items: [
+            TsTypeParameterList [
+                TsTypeParameter {
+                    modifiers: TsTypeParameterModifierList [],
+                    name: TsTypeParameterName {
+                        ident_token: IDENT@0..1 "T" [] [],
+                    },
+                    constraint: missing (optional),
+                    default: missing (optional),
+                },
+            ],
+            R_ANGLE@1..4 ">" [Newline("\n")] [Whitespace(" ")],
+            IDENT@4..5 "U" [] [],
+        ],
+    },
+    eof_token: EOF@5..6 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_VUE_GENERIC_ROOT@0..6
+  0: JS_BOGUS@0..5
+    0: TS_TYPE_PARAMETER_LIST@0..1
+      0: TS_TYPE_PARAMETER@0..1
+        0: TS_TYPE_PARAMETER_MODIFIER_LIST@0..0
+        1: TS_TYPE_PARAMETER_NAME@0..1
+          0: IDENT@0..1 "T" [] []
+        2: (empty)
+        3: (empty)
+    1: R_ANGLE@1..4 ">" [Newline("\n")] [Whitespace(" ")]
+    2: IDENT@4..5 "U" [] []
+  1: EOF@5..6 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+trailing_angle_new_line.vue_generic.ts:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `>`
+  
+    1 │ T
+  > 2 │ > U
+      │ ^
+    3 │ 
+  
+  i Remove >
+  
+```
