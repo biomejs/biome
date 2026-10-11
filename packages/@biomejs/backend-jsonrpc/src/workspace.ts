@@ -2914,6 +2914,11 @@ export interface Nursery {
 	 */
 	noAstroConflictingSetDirectives?: NoAstroConflictingSetDirectivesConfiguration;
 	/**
+	 * Disallow the deprecated Astro.resolve() API.
+	 * See https://biomejs.dev/linter/rules/no-astro-deprecated-resolve
+	 */
+	noAstroDeprecatedResolve?: NoAstroDeprecatedResolveConfiguration;
+	/**
 	 * Disallow the use of Astro's set:html directive.
 	 * See https://biomejs.dev/linter/rules/no-astro-set-html-directive
 	 */
@@ -5530,6 +5535,9 @@ export type UseYieldConfiguration =
 export type NoAstroConflictingSetDirectivesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAstroConflictingSetDirectivesOptions;
+export type NoAstroDeprecatedResolveConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoAstroDeprecatedResolveOptions;
 export type NoAstroSetHtmlDirectiveConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAstroSetHtmlDirectiveOptions;
@@ -7890,6 +7898,10 @@ export interface RuleWithUseYieldOptions {
 export interface RuleWithNoAstroConflictingSetDirectivesOptions {
 	level: RulePlainConfiguration;
 	options?: NoAstroConflictingSetDirectivesOptions;
+}
+export interface RuleWithNoAstroDeprecatedResolveOptions {
+	level: RulePlainConfiguration;
+	options?: NoAstroDeprecatedResolveOptions;
 }
 export interface RuleWithNoAstroSetHtmlDirectiveOptions {
 	level: RulePlainConfiguration;
@@ -10355,6 +10367,7 @@ export type UseVueValidVPreOptions = {};
 export type UseVueValidVTextOptions = {};
 export type UseYieldOptions = {};
 export type NoAstroConflictingSetDirectivesOptions = {};
+export type NoAstroDeprecatedResolveOptions = {};
 export type NoAstroSetHtmlDirectiveOptions = {};
 export interface NoBaseToStringOptions {
 	ignoredTypeNames?: string[];
@@ -12042,6 +12055,7 @@ export type Category =
 	| "lint/correctness/useVueValidVText"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noAstroConflictingSetDirectives"
+	| "lint/nursery/noAstroDeprecatedResolve"
 	| "lint/nursery/noAstroSetHtmlDirective"
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noBunModules"
