@@ -34,20 +34,20 @@ c
 
 ```md
 ```js
-a
+a;
 ```
 
 1. one
 1. two
 
 ```js
-b
+b;
 ```
 
 - alpha
 
 ```js
-c
+c;
 ```
 
 1. one

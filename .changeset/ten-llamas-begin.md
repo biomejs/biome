@@ -113,6 +113,9 @@ the code of these blocks as written:
 }
 ```
 
+The command `biome migrate prettier` migrates the Prettier option [`embeddedLanguageFormatting`](https://prettier.io/docs/options#embedded-language-formatting)
+to `markdown.formatter.formatEmbeds`.
+
 The option `markdown.analyzeEmbeds` runs the linter and assist actions on the same blocks, with the rules and actions of
 their language, and reports their syntax errors. It's disabled by default, because fenced code blocks usually contain
 examples or partial code:

@@ -29,8 +29,8 @@ use crate::settings::{
 };
 use crate::workspace::{CodeAction, FixFileMode, GetSyntaxTreeResult, PullActionsResult};
 use biome_analyze::{
-    ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, AnalyzerSignal,
-    ControlFlow, EmbeddedSignalInspector, Never,
+    ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow,
+    EmbeddedSignalInspector, Never,
 };
 use biome_configuration::analyzer::assist::AssistEnabled;
 use biome_configuration::markdown::{
@@ -614,8 +614,6 @@ pub(crate) fn lint_with_inspector(
         .language
         .to_markdown_file_source()
         .unwrap_or_default();
-    let emit_signal =
-        |signal: &dyn AnalyzerSignal<MarkdownLanguage>| process_lint.process_signal(signal);
     let (_, analyze_diagnostics) = match inspector {
         Some(inspector) => analyze_snippet(
             &root,
@@ -623,7 +621,7 @@ pub(crate) fn lint_with_inspector(
             &analyzer_options,
             file_source,
             inspector,
-            emit_signal,
+            |signal| process_lint.process_signal(signal),
         ),
         #[cfg(feature = "md_embeds")]
         None => analyze_with_snippets(
@@ -632,10 +630,12 @@ pub(crate) fn lint_with_inspector(
             &analyzer_options,
             file_source,
             &mut snippets,
-            emit_signal,
+            |signal| process_lint.process_signal(signal),
         ),
         #[cfg(not(feature = "md_embeds"))]
-        None => analyze(&root, filter, &analyzer_options, file_source, emit_signal),
+        None => analyze(&root, filter, &analyzer_options, file_source, |signal| {
+            process_lint.process_signal(signal)
+        }),
     };
 
     let diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);

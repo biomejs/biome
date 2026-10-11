@@ -85,7 +85,7 @@ fn fixed_literal(token: &MarkdownSyntaxToken, code: &str) -> Option<MarkdownSynt
         .strip_prefix(leading_trivia.text())?
         .strip_suffix(trailing_trivia.text())?;
     let original = token.text_trimmed();
-    let is_line_break = |character: char| matches!(character, '\n' | '\r');
+    let is_line_break = |character| matches!(character, '\n' | '\r');
     if original.starts_with(is_line_break) && !text.starts_with(is_line_break) {
         return None;
     }

@@ -17,8 +17,8 @@ use crate::settings::{
 use crate::workspace::{CodeAction, FixFileMode, GetSyntaxTreeResult, PullActionsResult};
 use biome_analyze::AnalyzerOptions;
 use biome_analyze::{
-    ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerSignal, ControlFlow,
-    EmbeddedSignalInspector, Never,
+    ActionFilter, AnalysisFilter, AnalyzerConfiguration, ControlFlow, EmbeddedSignalInspector,
+    Never,
 };
 use biome_configuration::analyzer::assist::AssistEnabled;
 use biome_configuration::yaml::YamlLinterEnabled;
@@ -500,13 +500,13 @@ pub(super) fn lint_with_inspector(
 
     let mut process_lint = ProcessLint::new(params);
 
-    let emit_signal =
-        |signal: &dyn AnalyzerSignal<YamlLanguage>| process_lint.process_signal(signal);
     let (_, analyze_diagnostics) = match inspector {
-        Some(inspector) => {
-            analyze_snippet(&root, filter, &analyzer_options, inspector, emit_signal)
-        }
-        None => analyze(&root, filter, &analyzer_options, emit_signal),
+        Some(inspector) => analyze_snippet(&root, filter, &analyzer_options, inspector, |signal| {
+            process_lint.process_signal(signal)
+        }),
+        None => analyze(&root, filter, &analyzer_options, |signal| {
+            process_lint.process_signal(signal)
+        }),
     };
 
     let diagnostics = params.parsed_source.serde_diagnostics(&params.workspace_db);

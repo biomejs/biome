@@ -31,7 +31,7 @@ biome format --write file.md
 </div>
 
 <span>
-label
+	label
 </span>
 
    <div><span>indented</span>

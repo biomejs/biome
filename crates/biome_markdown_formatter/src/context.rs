@@ -214,6 +214,10 @@ impl MarkdownFormatContext {
         self
     }
 
+    /// Sets the content ranges of the snippets whose formatting is delegated.
+    ///
+    /// The ranges can come in any order. They're sorted here because
+    /// [Self::is_embedded_node_range] looks them up with a binary search.
     pub fn with_embedded_node_ranges(mut self, mut embedded_node_ranges: Vec<TextRange>) -> Self {
         embedded_node_ranges.sort_unstable_by_key(|range| (range.start(), range.end()));
         self.embedded_node_ranges = embedded_node_ranges;

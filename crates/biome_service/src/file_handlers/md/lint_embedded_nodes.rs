@@ -12,7 +12,7 @@ use biome_languages::DocumentFileSource;
 pub(super) fn snippet_analyzers<'a>(
     params: &LintParams<'a>,
 ) -> Vec<Box<dyn SnippetAnalyzer<Never, Output = LintResults> + 'a>> {
-    let mut analyzers: Vec<Box<dyn SnippetAnalyzer<Never, Output = LintResults> + 'a>> = Vec::new();
+    let mut analyzers = Vec::new();
     for snippet in params
         .parsed_source
         .snippets(&params.workspace_db)
@@ -76,7 +76,7 @@ pub(super) fn snippet_analyzers<'a>(
             | DocumentFileSource::Ignore
             | DocumentFileSource::Unknown => continue,
         };
-        analyzers.push(Box::new(analyzer));
+        analyzers.push(Box::new(analyzer) as _);
     }
     analyzers
 }

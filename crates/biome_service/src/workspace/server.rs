@@ -307,7 +307,7 @@ impl ProcessFileState {
     /// count for it: the snippets that stop formatting the document, and when
     /// `analyzed` is `true`, the snippets that the linter analyzes.
     fn error_count(&self, settings: &Settings, path: &Utf8Path, analyzed: bool) -> usize {
-        let mut counted: FxHashSet<TextRange> = self
+        let mut counted: FxHashSet<_> = self
             .iter_snippets()
             .blocking_formatting(self.file_source)
             .map(|snippet| snippet.content_range(&self.db))

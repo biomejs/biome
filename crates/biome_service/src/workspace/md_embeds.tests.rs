@@ -7,6 +7,7 @@ use biome_configuration::MarkdownConfiguration;
 use biome_configuration::html::{HtmlConfiguration, HtmlFormatterConfiguration};
 use biome_configuration::markdown::{MarkdownFormatterConfiguration, MarkdownParserConfiguration};
 use biome_fs::MemoryFileSystem;
+use biome_languages::html::HtmlEmbeddingKind;
 use biome_languages::{
     CssFileSource, DocumentFileSource, GraphqlFileSource, GritFileSource, HtmlFileSource,
     JsFileSource, JsonFileSource, MdFileSource, YamlFileSource,
@@ -172,7 +173,9 @@ fn main() {}
             DocumentFileSource::Html(HtmlFileSource::vue()),
             DocumentFileSource::Markdown(MdFileSource::markdown()),
             DocumentFileSource::Grit(GritFileSource::grit()),
-            DocumentFileSource::Html(HtmlFileSource::html()),
+            DocumentFileSource::Html(
+                HtmlFileSource::html().with_embedding_kind(HtmlEmbeddingKind::MarkdownBlock)
+            ),
         ]
     );
 
@@ -204,7 +207,9 @@ fn parses_html_block_at_document_start() {
     assert_eq!(snippet.content_offset(&db), TextSize::from(0));
     assert_eq!(
         db.source_from_index(snippet.document_source_index(&db)),
-        Some(DocumentFileSource::Html(HtmlFileSource::html()))
+        Some(DocumentFileSource::Html(
+            HtmlFileSource::html().with_embedding_kind(HtmlEmbeddingKind::MarkdownBlock)
+        ))
     );
     let AnyParse::EmbeddedNode(parse) = snippet.parsed(&db) else {
         panic!("HTML blocks must use offset-aware parses");
