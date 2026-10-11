@@ -91,7 +91,7 @@ impl VueFileHandler {
                             event_handler: false,
                             allow_statements: true,
                             slot_props: false,
-                            generic: false,
+                            generics_list: false,
                         }),
                 )
             })

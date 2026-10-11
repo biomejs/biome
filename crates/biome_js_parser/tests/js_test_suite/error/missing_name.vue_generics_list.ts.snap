@@ -68,7 +68,7 @@ JsVueGenericRoot {
 ## Diagnostics
 
 ```
-missing_name.vue_generic.ts:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+missing_name.vue_generics_list.ts:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a type parameter but instead found the end of the file.
   

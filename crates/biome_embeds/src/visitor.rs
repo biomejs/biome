@@ -349,7 +349,7 @@ fn vue_generic_parameter_names<'a>(
             snippet
                 .file_source
                 .to_js_file_source()
-                .is_some_and(|source| source.is_vue_generic())
+                .is_some_and(|source| source.is_vue_generics_list())
         })
         .filter_map(|snippet| {
             let root = snippet.parse.tree::<AnyJsRoot>();

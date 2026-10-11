@@ -52,7 +52,7 @@ JsVueGenericRoot {
 ## Diagnostics
 
 ```
-in_modifier.vue_generic.ts:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+in_modifier.vue_generics_list.ts:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × 'in' modifier can only appear on a type parameter of a class, interface or type alias.
   

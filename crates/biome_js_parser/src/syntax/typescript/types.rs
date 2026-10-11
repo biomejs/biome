@@ -276,7 +276,7 @@ impl ParseSeparatedList for TsTypeParameterList {
     fn is_at_list_end(&self, p: &mut JsParser) -> bool {
         // A Vue `generic` attribute has no closing `>`, so its list ends at the end of the file,
         // even after a trailing comma.
-        if p.source_type().is_vue_generic() && p.at(EOF) {
+        if p.source_type().is_vue_generics_list() && p.at(EOF) {
             return true;
         }
 

@@ -50,7 +50,7 @@ pub(crate) fn parse(p: &mut JsParser) -> CompletedMarker {
         return parse_vue_slot_props(p, m);
     }
 
-    if p.source_type().is_vue_generic() {
+    if p.source_type().is_vue_generics_list() {
         return parse_vue_generic(p, m);
     }
 

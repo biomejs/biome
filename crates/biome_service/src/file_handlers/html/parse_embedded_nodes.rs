@@ -717,7 +717,7 @@ fn build_text_expression_directive_candidate(
         is_event_handler: false,
         is_class_attribute: false,
         is_slot_props: false,
-        is_generic: false,
+        is_generics_list: false,
     })
 }
 
@@ -745,7 +745,7 @@ fn build_attribute_expression_candidate(
         is_event_handler: false,
         is_class_attribute,
         is_slot_props: false,
-        is_generic: false,
+        is_generics_list: false,
     })
 }
 
@@ -822,7 +822,7 @@ fn build_vue_directive_candidate(
         is_event_handler,
         is_class_attribute,
         is_slot_props,
-        is_generic: false,
+        is_generics_list: false,
     })
 }
 
@@ -851,7 +851,7 @@ fn build_vue_generic_candidate(element: &HtmlElement) -> Option<EmbedCandidate> 
         is_event_handler: false,
         is_class_attribute: false,
         is_slot_props: false,
-        is_generic: true,
+        is_generics_list: true,
     })
 }
 
@@ -1190,7 +1190,7 @@ fn parse_matched_embed(
                             event_handler: false,
                             allow_statements: true,
                             slot_props: false,
-                            generic: false,
+                            generics_list: false,
                         });
                     }
                     // Astro <script> tags and plain HTML: no EmbeddingKind
@@ -1229,7 +1229,7 @@ fn parse_matched_embed(
                             event_handler: false,
                             allow_statements: false,
                             slot_props: false,
-                            generic: false,
+                            generics_list: false,
                         });
                     }
                     false
@@ -1238,7 +1238,7 @@ fn parse_matched_embed(
                     is_event_handler,
                     is_class_attribute,
                     is_slot_props,
-                    is_generic,
+                    is_generics_list,
                     ..
                 } => {
                     match ctx.host_file_source.variant() {
@@ -1257,7 +1257,7 @@ fn parse_matched_embed(
                                 event_handler: *is_event_handler,
                                 allow_statements: false,
                                 slot_props: *is_slot_props,
-                                generic: *is_generic,
+                                generics_list: *is_generics_list,
                             });
                         }
                         HtmlVariant::Svelte => {

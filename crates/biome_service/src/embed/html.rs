@@ -76,7 +76,7 @@ pub(crate) enum EmbedCandidate {
         is_slot_props: bool,
         /// Whether the value holds the type parameters of a Vue `<script setup>`
         /// (`generic="T extends Item"`)
-        is_generic: bool,
+        is_generics_list: bool,
     },
     Attribute {
         name: TokenText,

@@ -191,7 +191,7 @@ pub enum JsEmbeddingKind {
         slot_props: bool,
         /// Whether this is the value of the `generic` attribute of `<script setup>`
         /// (e.g. `generic="T extends Item"`), which is parsed as a list of type parameters.
-        generic: bool,
+        generics_list: bool,
         /// Whether this snippet is from a class-related attribute
         /// (e.g. :class="...")
         is_class_attribute: bool,
@@ -259,13 +259,13 @@ impl JsEmbeddingKind {
             self,
             Self::Vue {
                 slot_props: true,
-                generic: false,
+                generics_list: false,
                 ..
             }
         )
     }
-    pub const fn is_vue_generic(&self) -> bool {
-        matches!(self, Self::Vue { generic: true, .. })
+    pub const fn is_vue_generics_list(&self) -> bool {
+        matches!(self, Self::Vue { generics_list: true, .. })
     }
     pub const fn is_svelte(&self) -> bool {
         matches!(self, Self::Svelte { .. })
@@ -427,7 +427,7 @@ impl JsFileSource {
             event_handler: false,
             allow_statements: true,
             slot_props: false,
-            generic: false,
+            generics_list: false,
         })
     }
 
@@ -440,7 +440,7 @@ impl JsFileSource {
             event_handler: false,
             allow_statements: true,
             slot_props: false,
-            generic: false,
+            generics_list: false,
         })
     }
 
@@ -582,8 +582,8 @@ impl JsFileSource {
     }
 
     /// Returns true if this is the value of the `generic` attribute of a Vue `<script setup>`
-    pub const fn is_vue_generic(&self) -> bool {
-        self.embedding_kind.is_vue_generic()
+    pub const fn is_vue_generics_list(&self) -> bool {
+        self.embedding_kind.is_vue_generics_list()
     }
 
     /// Returns true if this is a Svelte `{@const}` block
@@ -824,7 +824,7 @@ mod tests {
                 event_handler: false,
                 allow_statements: false,
                 slot_props: false,
-                generic: false,
+                generics_list: false,
                 is_class_attribute: true,
             },
             JsEmbeddingKind::Svelte {

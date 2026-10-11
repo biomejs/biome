@@ -106,9 +106,9 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             event_handler: false,
             allow_statements: false,
             slot_props: true,
-            generic: false,
+            generics_list: false,
         });
-    } else if file_name.contains(".vue_generic.") {
+    } else if file_name.contains(".vue_generics_list.") {
         // Fixture text is the value of the `generic` attribute of a Vue `<script setup>`.
         file_source = file_source.with_embedding_kind(JsEmbeddingKind::Vue {
             is_class_attribute: false,
@@ -117,7 +117,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             event_handler: false,
             allow_statements: false,
             slot_props: false,
-            generic: true,
+            generics_list: true,
         });
     } else if file_name.contains(".astro_expr.") {
         // Fixture text is the brace-less body of an Astro `{...}` expression.
