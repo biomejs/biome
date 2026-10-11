@@ -307,3 +307,61 @@ export const template = <div className={`${a}x p-4 flex slide-in-from-top-[48%]`
         result,
     ));
 }
+
+#[test]
+fn no_tailwind_raw_colors_suggests_stylesheet_colors() {
+    let mut console = BufferConsole::default();
+    let mut fs = TemporaryFs::new("no_tailwind_raw_colors_suggests_stylesheet_colors");
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "tailwind": { "stylesheet": "./src/app.css" },
+    "linter": { "rules": { "nursery": { "noTailwindRawColors": "error" } } }
+}"#,
+    );
+    fs.create_file(
+        "src/app.css",
+        r#"@import "tailwindcss";
+@import "./theme.css";
+"#,
+    );
+    // `primary` refers to another value and `pink-400` is a palette color, so
+    // neither is suggested.
+    fs.create_file(
+        "src/theme.css",
+        r#"@theme {
+    --color-brand: #ec4899;
+    --color-danger: oklch(0.58 0.24 27);
+    --color-surface: #fff;
+    --color-muted: oklch(0.97 0 0);
+    --color-primary: var(--primary);
+    --color-pink-400: #f472b6;
+}
+"#,
+    );
+    fs.create_file(
+        "src/App.jsx",
+        r#"export const pink = <div className="bg-pink-500" />;
+export const gray = <div className="hover:text-slate-100/80" />;
+"#,
+    );
+    fs.create_file(
+        "src/index.html",
+        "<div class=\"dark:border-t-red-600/50!\"></div>\n",
+    );
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", "--only=nursery/noTailwindRawColors", fs.cli_path()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "no_tailwind_raw_colors_suggests_stylesheet_colors",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
