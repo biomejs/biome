@@ -1,0 +1,35 @@
+/* should not generate diagnostics */
+
+// `apply` without an array literal
+foo.apply(obj, 1, 2);
+obj.foo.apply(null, 1, 2);
+obj.foo.apply(otherObj, 1, 2);
+a.b(x, y).c.foo.apply(a.b(x, z).c, 1, 2);
+foo.apply(null, args);
+obj.foo.apply(obj, args);
+foo.apply(null, ...args);
+
+// different `this`
+foo.apply(obj, [1, 2]);
+obj.foo.apply(null, [1, 2]);
+obj.foo.apply(otherObj, [1, 2]);
+a.b(x, y).c.foo.apply(a.b(x, z).c, [1, 2]);
+a.b.foo.apply(a.b.c, [1, 2]);
+foo.call(obj, 1, 2);
+obj.foo.call(null, 1, 2);
+obj.foo.call(otherObj, 1, 2);
+obj?.foo.bar.call(obj.foo, 1, 2);
+foo.call(...args);
+obj.foo.call(...obj);
+
+// computed or private `call`/`apply`
+var call; foo[call](null, 1, 2);
+var apply; foo[apply](null, [1, 2]);
+foo["call"](null, 1, 2);
+class C { #call; wrap(foo) { foo.#call(undefined, 1, 2); } }
+
+// no arguments
+foo.call();
+obj.foo.call();
+foo.apply();
+obj.foo.apply();

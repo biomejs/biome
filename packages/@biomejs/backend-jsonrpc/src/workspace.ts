@@ -3144,6 +3144,11 @@ export interface Nursery {
 	 */
 	noUnusedClasses?: NoUnusedClassesConfiguration;
 	/**
+	 * Disallow unnecessary .call() and .apply().
+	 * See https://biomejs.dev/linter/rules/no-useless-call
+	 */
+	noUselessCall?: NoUselessCallConfiguration;
+	/**
 	 * Disallow type conversions that do not change the type of an expression.
 	 * See https://biomejs.dev/linter/rules/no-useless-type-conversion
 	 */
@@ -5673,6 +5678,9 @@ export type NoUnsafeUnaryMinusConfiguration =
 export type NoUnusedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnusedClassesOptions;
+export type NoUselessCallConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessCallOptions;
 export type NoUselessTypeConversionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessTypeConversionOptions;
@@ -8115,6 +8123,10 @@ export interface RuleWithNoUnusedClassesOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnusedClassesOptions;
 }
+export interface RuleWithNoUselessCallOptions {
+	level: RulePlainConfiguration;
+	options?: NoUselessCallOptions;
+}
 export interface RuleWithNoUselessTypeConversionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessTypeConversionOptions;
@@ -10469,6 +10481,7 @@ export type NoUnsafePlusOperandsOptions = {};
 export type NoUnsafeTypeAssertionOptions = {};
 export type NoUnsafeUnaryMinusOptions = {};
 export type NoUnusedClassesOptions = {};
+export type NoUselessCallOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueBooleanDefaultOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
@@ -12118,6 +12131,7 @@ export type Category =
 	| "lint/nursery/noUnsafeUnaryMinus"
 	| "lint/nursery/noUnusedClasses"
 	| "lint/nursery/noUselessBackrefInRegex"
+	| "lint/nursery/noUselessCall"
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
