@@ -265,7 +265,13 @@ impl JsEmbeddingKind {
         )
     }
     pub const fn is_vue_generics_list(&self) -> bool {
-        matches!(self, Self::Vue { generics_list: true, .. })
+        matches!(
+            self,
+            Self::Vue {
+                generics_list: true,
+                ..
+            }
+        )
     }
     pub const fn is_svelte(&self) -> bool {
         matches!(self, Self::Svelte { .. })
