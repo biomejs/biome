@@ -1,0 +1,15 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "svelte/block-lang": [
+        "error",
+        {
+          "enforceStylePresent": true,
+          "script": null,
+          "style": [null]
+        }
+      ]
+    }
+  }
+}

@@ -2,11 +2,16 @@
 /// [Vue ESLint plugin](https://eslint.vuejs.org/).
 ///
 /// Also, the module includes implementation to convert rule options to Biome's rule options.
+use super::eslint_eslint::OneOrMany;
 use super::eslint_to_biome::RestrictedElements;
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
 };
 use biome_deserialize_macros::Deserializable;
+use biome_rule_options::use_consistent_block_lang::{
+    BlockLangMap, BlockLangOptions as BlockLangBlockOptions, UseConsistentBlockLangOptions,
+};
+use std::collections::BTreeMap;
 
 /// An option of the [vue/no-restricted-html-elements](https://eslint.vuejs.org/rules/no-restricted-html-elements) rule.
 ///
@@ -84,5 +89,65 @@ impl Deserializable for ElementNames {
         } else {
             Deserializable::deserialize(ctx, value, name).map(Self::Many)
         }
+    }
+}
+
+/// Options of [`vue/block-lang`](https://eslint.vuejs.org/rules/block-lang), keyed by block name.
+#[derive(Debug, Deserializable)]
+pub(crate) struct BlockLangOptions(BTreeMap<Box<str>, BlockOptions>);
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct BlockOptions {
+    lang: Option<OneOrMany<Box<str>>>,
+    allow_no_lang: Option<bool>,
+}
+impl BlockLangOptions {
+    /// Returns `None` when every block only allows omitting `lang`, which
+    /// Biome doesn't enforce.
+    pub(crate) fn into_biome_options(self) -> Option<UseConsistentBlockLangOptions> {
+        let blocks: BlockLangMap = self
+            .0
+            .into_iter()
+            .filter_map(|(name, block)| {
+                let default_langs: &[&str] = match name.as_ref() {
+                    "template" => &["html"],
+                    "style" => &["css"],
+                    "script" => &["js", "javascript"],
+                    _ => &[],
+                };
+                // eslint-plugin-vue reads a block's default language, such as
+                // `js` for `<script>`, as "omit `lang`", and reports it when it's
+                // written explicitly.
+                let (defaults, langs): (Vec<_>, Vec<_>) = block
+                    .lang
+                    .map(|langs| langs.0)
+                    .unwrap_or_default()
+                    .into_iter()
+                    .partition(|lang| default_langs.contains(&lang.as_ref()));
+                let options = if !langs.is_empty() {
+                    let allow_no_lang = !defaults.is_empty() || block.allow_no_lang == Some(true);
+                    BlockLangBlockOptions {
+                        lang: Some(langs.into()),
+                        allow_no_lang: allow_no_lang.then_some(true),
+                        required: None,
+                    }
+                } else if !defaults.is_empty() {
+                    // Only default languages are listed. Biome can't enforce omitting
+                    // `lang`, so it allows the default languages as well as no `lang`,
+                    // which stops reporting an explicit `lang="js"`.
+                    BlockLangBlockOptions {
+                        lang: Some(defaults.into()),
+                        allow_no_lang: Some(true),
+                        required: None,
+                    }
+                } else {
+                    // Biome doesn't enforce omitting `lang`, so the block isn't migrated.
+                    return None;
+                };
+                Some((name, options))
+            })
+            .collect();
+        (!blocks.is_empty()).then_some(UseConsistentBlockLangOptions {
+            blocks: Some(blocks),
+        })
     }
 }

@@ -1,0 +1,16 @@
+{
+  "biome": {},
+  "eslint": {
+    "rules": {
+      "svelte/block-lang": [
+        "error",
+        {
+          "enforceScriptPresent": true,
+          "enforceStylePresent": false,
+          "script": "ts",
+          "style": ["scss", null]
+        }
+      ]
+    }
+  }
+}

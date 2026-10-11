@@ -1,0 +1,1 @@
+{"linter":{"rules":{"nursery":{"useConsistentBlockLang":{"level":"error","options":{"blocks":{"script":{"lang":["ts"],"required":true},"style":{"lang":["scss"],"allowNoLang":true,"required":true}}}}}}}}

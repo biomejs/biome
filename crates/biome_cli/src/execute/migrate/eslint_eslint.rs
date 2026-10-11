@@ -626,6 +626,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::TypeScriptSwitchExhaustivenessCheck(conf));
                             }
                         }
+                        "svelte/block-lang" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::SvelteBlockLang(conf));
+                            }
+                        }
                         "svelte/no-restricted-html-elements" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::SvelteNoRestrictedHtmlElements(conf));
@@ -634,6 +639,11 @@ impl Deserializable for Rules {
                         "svelte/no-unnecessary-state-wrap" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::SvelteNoUnnecessaryStateWrap(conf));
+                            }
+                        }
+                        "vue/block-lang" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::VueBlockLang(conf));
                             }
                         }
                         "vue/no-restricted-html-elements" => {
@@ -973,11 +983,13 @@ pub(crate) enum Rule {
     TypeScriptSwitchExhaustivenessCheck(
         RuleConf<eslint_typescript::SwitchExhaustivenessCheckOptions>,
     ),
+    SvelteBlockLang(RuleConf<eslint_svelte::BlockLangOptions>),
     SvelteNoRestrictedHtmlElements(RuleConf<eslint_svelte::RestrictedHtmlElement>),
     SvelteNoUnnecessaryStateWrap(RuleConf<SvelteNoUnnecessaryStateWrapOptions>),
     UnicornConsistentJsonFileRead(RuleConf<eslint_unicorn::ConsistentJsonFileReadOption>),
     UnicornFilenameCase(RuleConf<eslint_unicorn::FilenameCaseOptions>),
     UnicornNumericSeparatorsStyle(RuleConf<eslint_unicorn::NumericSeparatorsStyleOptions>),
+    VueBlockLang(RuleConf<eslint_vue::BlockLangOptions>),
     VueNoRestrictedHtmlElements(RuleConf<eslint_vue::RestrictedHtmlElement>),
     // If you add new variants, don't forget to update [Rules::deserialize].
 }
@@ -1013,6 +1025,7 @@ impl Rule {
             Self::TypeScriptSwitchExhaustivenessCheck(_) => {
                 Cow::Borrowed("@typescript-eslint/switch-exhaustiveness-check")
             }
+            Self::SvelteBlockLang(_) => Cow::Borrowed("svelte/block-lang"),
             Self::SvelteNoRestrictedHtmlElements(_) => {
                 Cow::Borrowed("svelte/no-restricted-html-elements")
             }
@@ -1022,6 +1035,7 @@ impl Rule {
             Self::UnicornConsistentJsonFileRead(_) => {
                 Cow::Borrowed("unicorn/consistent-json-file-read")
             }
+            Self::VueBlockLang(_) => Cow::Borrowed("vue/block-lang"),
             Self::UnicornFilenameCase(_) => Cow::Borrowed("unicorn/filename-case"),
             Self::UnicornNumericSeparatorsStyle(_) => {
                 Cow::Borrowed("unicorn/numeric-separators-style")
@@ -1060,6 +1074,23 @@ impl From<SvelteNoUnnecessaryStateWrapOptions>
             additional_reactive_classes: (!value.additional_reactive_classes.is_empty())
                 .then_some(value.additional_reactive_classes),
             allow_reassign: value.allow_reassign,
+        }
+    }
+}
+
+/// A value that is either a single item or an array of items.
+#[derive(Debug)]
+pub(crate) struct OneOrMany<T>(pub(crate) Vec<T>);
+impl<T: Deserializable> Deserializable for OneOrMany<T> {
+    fn deserialize(
+        ctx: &mut dyn DeserializationContext,
+        value: &impl DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        if value.visitable_type()? == DeserializableType::Array {
+            Vec::deserialize(ctx, value, name).map(Self)
+        } else {
+            T::deserialize(ctx, value, name).map(|item| Self(vec![item]))
         }
     }
 }
