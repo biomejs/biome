@@ -12662,6 +12662,10 @@ export interface GraphqlFileSource {
 	variant: GraphqlVariant;
 }
 export interface HtmlFileSource {
+	/**
+	 * Marks HTML embedded inside another language. This affects the formatting.
+	 */
+	embedding_kind: HtmlEmbeddingKind;
 	variant: HtmlVariant;
 }
 export interface GritFileSource {
@@ -12791,6 +12795,10 @@ export type CssVariant = "standard" | "cssModules" | "tailwindCss";
  * The style of GraphQL contained in the file.
  */
 export type GraphqlVariant = "standard";
+/**
+ * The language that embeds an HTML source.
+ */
+export type HtmlEmbeddingKind = "None" | "MarkdownBlock";
 export type HtmlVariant =
 	| { Standard: HtmlTextExpressions }
 	| "Astro"
