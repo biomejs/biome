@@ -1,0 +1,513 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+const noArguments = PlatformColor();
+
+const labelColor = 'labelColor';
+const variableArgument = PlatformColor(labelColor);
+
+const templateArgument = PlatformColor(`labelColor`);
+
+const spreadArgument = PlatformColor(...names);
+
+const raw = '#FF0000';
+const variableFallback = PlatformColor('labelColor', {fallback: raw});
+
+const fallbackNotLast = PlatformColor({fallback: '#FF0000'}, 'labelColor');
+
+const duplicateFallback = PlatformColor('labelColor', {fallback: '#FF0000', fallback: '#00FF00'});
+
+const extraFallbackMember = PlatformColor('labelColor', {fallback: '#FF0000', extra: 'red'});
+
+const computedFallback = PlatformColor('labelColor', {['fallback']: '#FF0000'});
+
+const stringFallbackKey = PlatformColor('labelColor', {'fallback': '#FF0000'});
+
+const shorthandFallback = PlatformColor('labelColor', {fallback});
+
+const tuple = {light: 'black', dark: 'white'};
+const variableObject = DynamicColorIOS(tuple);
+
+const noObject = DynamicColorIOS();
+
+const twoObjects = DynamicColorIOS({light: 'black'}, {dark: 'white'});
+
+const black = 'black';
+const variableLight = DynamicColorIOS({light: black, dark: 'white'});
+
+const white = 'white';
+const variableDark = DynamicColorIOS({light: 'black', dark: white});
+
+const bothVariables = DynamicColorIOS({light: black, dark: white});
+
+const shorthandValue = DynamicColorIOS({light, dark: 'white'});
+
+const spreadValue = DynamicColorIOS({...colors});
+
+const otherCall = DynamicColorIOS({light: getColor(), dark: 'white'});
+
+const methodValue = DynamicColorIOS({light() { return 'black'; }, dark: 'white'});
+
+const getterValue = DynamicColorIOS({get dark() { return 'white'; }, light: 'black'});
+
+```
+
+# Diagnostics
+```
+invalid.js:2:21 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × PlatformColor() is called without a color name.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const noArguments = PlatformColor();
+      │                     ^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ const labelColor = 'labelColor';
+  
+  i A platform color needs at least one color name to look up.
+  
+  i Pass at least one color name as a string, for example: PlatformColor("labelColor").
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:40 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This argument of PlatformColor() is not a literal value.
+  
+    4 │ const labelColor = 'labelColor';
+  > 5 │ const variableArgument = PlatformColor(labelColor);
+      │                                        ^^^^^^^^^^
+    6 │ 
+    7 │ const templateArgument = PlatformColor(`labelColor`);
+  
+  i React Native can only optimize platform colors whose values are written directly in the call.
+  
+  i Write the color name as a string. The last argument can also be an object like { fallback: "red" }, with a literal value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:40 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This argument of PlatformColor() is not a literal value.
+  
+    5 │ const variableArgument = PlatformColor(labelColor);
+    6 │ 
+  > 7 │ const templateArgument = PlatformColor(`labelColor`);
+      │                                        ^^^^^^^^^^^^
+    8 │ 
+    9 │ const spreadArgument = PlatformColor(...names);
+  
+  i React Native can only optimize platform colors whose values are written directly in the call.
+  
+  i Write the color name as a string. The last argument can also be an object like { fallback: "red" }, with a literal value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:38 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This argument of PlatformColor() is not a literal value.
+  
+     7 │ const templateArgument = PlatformColor(`labelColor`);
+     8 │ 
+   > 9 │ const spreadArgument = PlatformColor(...names);
+       │                                      ^^^^^^^^
+    10 │ 
+    11 │ const raw = '#FF0000';
+  
+  i React Native can only optimize platform colors whose values are written directly in the call.
+  
+  i Write the color name as a string. The last argument can also be an object like { fallback: "red" }, with a literal value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:54 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This argument of PlatformColor() is not a literal value.
+  
+    11 │ const raw = '#FF0000';
+  > 12 │ const variableFallback = PlatformColor('labelColor', {fallback: raw});
+       │                                                      ^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ const fallbackNotLast = PlatformColor({fallback: '#FF0000'}, 'labelColor');
+  
+  i React Native can only optimize platform colors whose values are written directly in the call.
+  
+  i Write the color name as a string. The last argument can also be an object like { fallback: "red" }, with a literal value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:39 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This argument of PlatformColor() is not a literal value.
+  
+    12 │ const variableFallback = PlatformColor('labelColor', {fallback: raw});
+    13 │ 
+  > 14 │ const fallbackNotLast = PlatformColor({fallback: '#FF0000'}, 'labelColor');
+       │                                       ^^^^^^^^^^^^^^^^^^^^^
+    15 │ 
+    16 │ const duplicateFallback = PlatformColor('labelColor', {fallback: '#FF0000', fallback: '#00FF00'});
+  
+  i React Native can only optimize platform colors whose values are written directly in the call.
+  
+  i Write the color name as a string. The last argument can also be an object like { fallback: "red" }, with a literal value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:55 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This argument of PlatformColor() is not a literal value.
+  
+    14 │ const fallbackNotLast = PlatformColor({fallback: '#FF0000'}, 'labelColor');
+    15 │ 
+  > 16 │ const duplicateFallback = PlatformColor('labelColor', {fallback: '#FF0000', fallback: '#00FF00'});
+       │                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 
+    18 │ const extraFallbackMember = PlatformColor('labelColor', {fallback: '#FF0000', extra: 'red'});
+  
+  i React Native can only optimize platform colors whose values are written directly in the call.
+  
+  i Write the color name as a string. The last argument can also be an object like { fallback: "red" }, with a literal value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:57 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This argument of PlatformColor() is not a literal value.
+  
+    16 │ const duplicateFallback = PlatformColor('labelColor', {fallback: '#FF0000', fallback: '#00FF00'});
+    17 │ 
+  > 18 │ const extraFallbackMember = PlatformColor('labelColor', {fallback: '#FF0000', extra: 'red'});
+       │                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 
+    20 │ const computedFallback = PlatformColor('labelColor', {['fallback']: '#FF0000'});
+  
+  i React Native can only optimize platform colors whose values are written directly in the call.
+  
+  i Write the color name as a string. The last argument can also be an object like { fallback: "red" }, with a literal value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:54 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This argument of PlatformColor() is not a literal value.
+  
+    18 │ const extraFallbackMember = PlatformColor('labelColor', {fallback: '#FF0000', extra: 'red'});
+    19 │ 
+  > 20 │ const computedFallback = PlatformColor('labelColor', {['fallback']: '#FF0000'});
+       │                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ const stringFallbackKey = PlatformColor('labelColor', {'fallback': '#FF0000'});
+  
+  i React Native can only optimize platform colors whose values are written directly in the call.
+  
+  i Write the color name as a string. The last argument can also be an object like { fallback: "red" }, with a literal value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:22:55 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This argument of PlatformColor() is not a literal value.
+  
+    20 │ const computedFallback = PlatformColor('labelColor', {['fallback']: '#FF0000'});
+    21 │ 
+  > 22 │ const stringFallbackKey = PlatformColor('labelColor', {'fallback': '#FF0000'});
+       │                                                       ^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ 
+    24 │ const shorthandFallback = PlatformColor('labelColor', {fallback});
+  
+  i React Native can only optimize platform colors whose values are written directly in the call.
+  
+  i Write the color name as a string. The last argument can also be an object like { fallback: "red" }, with a literal value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:55 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This argument of PlatformColor() is not a literal value.
+  
+    22 │ const stringFallbackKey = PlatformColor('labelColor', {'fallback': '#FF0000'});
+    23 │ 
+  > 24 │ const shorthandFallback = PlatformColor('labelColor', {fallback});
+       │                                                       ^^^^^^^^^^
+    25 │ 
+    26 │ const tuple = {light: 'black', dark: 'white'};
+  
+  i React Native can only optimize platform colors whose values are written directly in the call.
+  
+  i Write the color name as a string. The last argument can also be an object like { fallback: "red" }, with a literal value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:27:39 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × DynamicColorIOS() must be called with a single object written directly in the call.
+  
+    26 │ const tuple = {light: 'black', dark: 'white'};
+  > 27 │ const variableObject = DynamicColorIOS(tuple);
+       │                                       ^^^^^^^
+    28 │ 
+    29 │ const noObject = DynamicColorIOS();
+  
+  i React Native can only optimize dynamic colors whose values are written directly in the call.
+  
+  i Pass an object like { light: "black", dark: "white" }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:33 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × DynamicColorIOS() must be called with a single object written directly in the call.
+  
+    27 │ const variableObject = DynamicColorIOS(tuple);
+    28 │ 
+  > 29 │ const noObject = DynamicColorIOS();
+       │                                 ^^
+    30 │ 
+    31 │ const twoObjects = DynamicColorIOS({light: 'black'}, {dark: 'white'});
+  
+  i React Native can only optimize dynamic colors whose values are written directly in the call.
+  
+  i Pass an object like { light: "black", dark: "white" }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:31:35 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × DynamicColorIOS() must be called with a single object written directly in the call.
+  
+    29 │ const noObject = DynamicColorIOS();
+    30 │ 
+  > 31 │ const twoObjects = DynamicColorIOS({light: 'black'}, {dark: 'white'});
+       │                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ 
+    33 │ const black = 'black';
+  
+  i React Native can only optimize dynamic colors whose values are written directly in the call.
+  
+  i Pass an object like { light: "black", dark: "white" }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:34:40 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This value of DynamicColorIOS() is not a literal or a PlatformColor() call.
+  
+    33 │ const black = 'black';
+  > 34 │ const variableLight = DynamicColorIOS({light: black, dark: 'white'});
+       │                                        ^^^^^^^^^^^^
+    35 │ 
+    36 │ const white = 'white';
+  
+  i React Native can only optimize dynamic colors whose values are written directly in the call.
+  
+  i Write the color as a string, or use a PlatformColor() call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:37:55 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This value of DynamicColorIOS() is not a literal or a PlatformColor() call.
+  
+    36 │ const white = 'white';
+  > 37 │ const variableDark = DynamicColorIOS({light: 'black', dark: white});
+       │                                                       ^^^^^^^^^^^
+    38 │ 
+    39 │ const bothVariables = DynamicColorIOS({light: black, dark: white});
+  
+  i React Native can only optimize dynamic colors whose values are written directly in the call.
+  
+  i Write the color as a string, or use a PlatformColor() call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:40 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This value of DynamicColorIOS() is not a literal or a PlatformColor() call.
+  
+    37 │ const variableDark = DynamicColorIOS({light: 'black', dark: white});
+    38 │ 
+  > 39 │ const bothVariables = DynamicColorIOS({light: black, dark: white});
+       │                                        ^^^^^^^^^^^^
+    40 │ 
+    41 │ const shorthandValue = DynamicColorIOS({light, dark: 'white'});
+  
+  i React Native can only optimize dynamic colors whose values are written directly in the call.
+  
+  i Write the color as a string, or use a PlatformColor() call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:41 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This value of DynamicColorIOS() is not a literal or a PlatformColor() call.
+  
+    39 │ const bothVariables = DynamicColorIOS({light: black, dark: white});
+    40 │ 
+  > 41 │ const shorthandValue = DynamicColorIOS({light, dark: 'white'});
+       │                                         ^^^^^
+    42 │ 
+    43 │ const spreadValue = DynamicColorIOS({...colors});
+  
+  i React Native can only optimize dynamic colors whose values are written directly in the call.
+  
+  i Write the color as a string, or use a PlatformColor() call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:43:38 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This value of DynamicColorIOS() is not a literal or a PlatformColor() call.
+  
+    41 │ const shorthandValue = DynamicColorIOS({light, dark: 'white'});
+    42 │ 
+  > 43 │ const spreadValue = DynamicColorIOS({...colors});
+       │                                      ^^^^^^^^^
+    44 │ 
+    45 │ const otherCall = DynamicColorIOS({light: getColor(), dark: 'white'});
+  
+  i React Native can only optimize dynamic colors whose values are written directly in the call.
+  
+  i Write the color as a string, or use a PlatformColor() call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:45:36 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This value of DynamicColorIOS() is not a literal or a PlatformColor() call.
+  
+    43 │ const spreadValue = DynamicColorIOS({...colors});
+    44 │ 
+  > 45 │ const otherCall = DynamicColorIOS({light: getColor(), dark: 'white'});
+       │                                    ^^^^^^^^^^^^^^^^^
+    46 │ 
+    47 │ const methodValue = DynamicColorIOS({light() { return 'black'; }, dark: 'white'});
+  
+  i React Native can only optimize dynamic colors whose values are written directly in the call.
+  
+  i Write the color as a string, or use a PlatformColor() call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:47:38 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This value of DynamicColorIOS() is not a literal or a PlatformColor() call.
+  
+    45 │ const otherCall = DynamicColorIOS({light: getColor(), dark: 'white'});
+    46 │ 
+  > 47 │ const methodValue = DynamicColorIOS({light() { return 'black'; }, dark: 'white'});
+       │                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    48 │ 
+    49 │ const getterValue = DynamicColorIOS({get dark() { return 'white'; }, light: 'black'});
+  
+  i React Native can only optimize dynamic colors whose values are written directly in the call.
+  
+  i Write the color as a string, or use a PlatformColor() call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:49:38 lint/nursery/useReactNativeValidPlatformColors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This value of DynamicColorIOS() is not a literal or a PlatformColor() call.
+  
+    47 │ const methodValue = DynamicColorIOS({light() { return 'black'; }, dark: 'white'});
+    48 │ 
+  > 49 │ const getterValue = DynamicColorIOS({get dark() { return 'white'; }, light: 'black'});
+       │                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    50 │ 
+  
+  i React Native can only optimize dynamic colors whose values are written directly in the call.
+  
+  i Write the color as a string, or use a PlatformColor() call.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

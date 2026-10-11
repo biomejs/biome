@@ -511,6 +511,7 @@ pub mod use_react_function_component_definition;
 pub mod use_react_function_components;
 pub mod use_react_naming_convention;
 pub mod use_react_native_platform_components;
+pub mod use_react_native_valid_platform_colors;
 pub mod use_readonly_class_properties;
 pub mod use_reduce_type_parameter;
 pub mod use_regex_literals;
