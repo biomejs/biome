@@ -473,3 +473,494 @@ fn extended_config_resolves_plugin_package_from_config() {
         result,
     ));
 }
+
+#[test]
+fn plugin_includes_are_relative_to_configuration_directory() {
+    let mut fs = TemporaryFs::new("plugin_includes_are_relative_to_configuration_directory");
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "plugins": [
+        {
+            "path": "./no-assign.grit",
+            "includes": ["packages/**/src/**", "!packages/**/src/generated/**"]
+        }
+    ]
+}"#,
+    );
+    fs.create_file(
+        "no-assign.grit",
+        r#"`Object.assign($args)` where {
+    register_diagnostic(span = $args, message = "Prefer object spread")
+}"#,
+    );
+    fs.create_file(
+        "packages/example/src/index.js",
+        "Object.assign({}, value);\n",
+    );
+    fs.create_file(
+        "packages/example/src/generated/index.js",
+        "Object.assign({}, value);\n",
+    );
+    fs.create_file(
+        "packages/example/scripts/index.js",
+        "Object.assign({}, value);\n",
+    );
+
+    let mut console = BufferConsole::default();
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", fs.cli_path()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "plugin_includes_are_relative_to_configuration_directory",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+/// Returns a GritQL plugin that reports every `Object.assign()` call with `message`.
+fn report_assign_plugin(message: &str) -> String {
+    format!(
+        r#"`Object.assign($args)` where {{
+    register_diagnostic(span = $args, message = "{message}")
+}}"#
+    )
+}
+
+/// Lints the whole project in `fs` and snapshots the result as `test_name`.
+fn lint_project(fs: TemporaryFs, test_name: &str) {
+    let mut console = BufferConsole::default();
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(["lint", fs.cli_path()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        test_name,
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn plugin_includes_in_overrides_are_anchored_to_project_directory() {
+    let mut fs = TemporaryFs::new("plugin_includes_in_overrides_are_anchored_to_project_directory");
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "overrides": [
+        {
+            "includes": ["src/**", "!src/vendor/**"],
+            "plugins": [
+                { "path": "./no-assign.grit", "includes": ["src/**", "!src/generated/**"] }
+            ]
+        }
+    ]
+}"#,
+    );
+    fs.create_file(
+        "no-assign.grit",
+        &report_assign_plugin("Prefer object spread"),
+    );
+    for path in [
+        "src/index.js",
+        "src/generated/index.js",
+        "src/vendor/index.js",
+        "lib/index.js",
+        "packages/app/src/index.js",
+    ] {
+        fs.create_file(path, "Object.assign({}, value);\n");
+    }
+
+    lint_project(
+        fs,
+        "plugin_includes_in_overrides_are_anchored_to_project_directory",
+    );
+}
+
+#[test]
+fn javascript_plugin_includes_are_relative_to_project_directory() {
+    let mut fs = TemporaryFs::new("javascript_plugin_includes_are_relative_to_project_directory");
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "plugins": [
+        { "path": "./no-assign.js", "includes": ["src/**", "!src/generated/**"] }
+    ]
+}"#,
+    );
+    fs.create_file(
+        "no-assign.js",
+        r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
+
+export const noAssign = defineRule({
+    query: ast("JS_CALL_EXPRESSION"),
+    run(node) {
+        registerDiagnostic(node, "error", "Do not use Object.assign");
+    },
+});"#,
+    );
+    for path in [
+        "src/index.js",
+        "src/generated/index.js",
+        "packages/app/src/index.js",
+    ] {
+        fs.create_file(path, "Object.assign({}, value);\n");
+    }
+
+    lint_project(
+        fs,
+        "javascript_plugin_includes_are_relative_to_project_directory",
+    );
+}
+
+#[test]
+fn package_preset_includes_apply_to_every_rule() {
+    let mut fs = TemporaryFs::new("package_preset_includes_apply_to_every_rule");
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "plugins": [
+        {
+            "path": "@scope/plugin/presets/recommended",
+            "includes": ["src/**", "!src/generated/**"]
+        }
+    ]
+}"#,
+    );
+    fs.create_file(
+        "node_modules/@scope/plugin/package.json",
+        r#"{ "name": "@scope/plugin" }"#,
+    );
+    fs.create_file(
+        "node_modules/@scope/plugin/biome-manifest.json",
+        r#"{
+    "version": 1,
+    "plugins": {
+        "rules": [{
+            "noAssign": "rules/noAssign.grit",
+            "noKeys": "rules/noKeys.js"
+        }],
+        "presets": { "recommended": ["noAssign", "noKeys"] }
+    }
+}"#,
+    );
+    fs.create_file(
+        "node_modules/@scope/plugin/rules/noAssign.grit",
+        &report_assign_plugin("Do not use Object.assign"),
+    );
+    fs.create_file(
+        "node_modules/@scope/plugin/rules/noKeys.js",
+        r#"import { ast, defineRule, registerDiagnostic } from "@biomejs/runtime/plugin";
+
+export const noKeys = defineRule({
+    query: ast("JS_CALL_EXPRESSION"),
+    run(node) {
+        if (node.callee.text.startsWith("Object.keys")) {
+            registerDiagnostic(node, "error", "Do not use Object.keys");
+        }
+    },
+});"#,
+    );
+    for path in [
+        "src/index.js",
+        "src/generated/index.js",
+        "packages/app/src/index.js",
+    ] {
+        fs.create_file(path, "Object.assign({}, value);\nObject.keys(value);\n");
+    }
+
+    lint_project(fs, "package_preset_includes_apply_to_every_rule");
+}
+
+#[test]
+fn plugin_includes_globstar_patterns_match_nested_directories() {
+    let mut fs = TemporaryFs::new("plugin_includes_globstar_patterns_match_nested_directories");
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "plugins": [
+        { "path": "./no-assign.grit", "includes": ["**/src/**", "!**/generated/**"] }
+    ]
+}"#,
+    );
+    fs.create_file(
+        "no-assign.grit",
+        &report_assign_plugin("Prefer object spread"),
+    );
+    for path in [
+        "src/index.js",
+        "packages/app/src/index.js",
+        "packages/app/src/generated/index.js",
+        "lib/index.js",
+    ] {
+        fs.create_file(path, "Object.assign({}, value);\n");
+    }
+
+    lint_project(
+        fs,
+        "plugin_includes_globstar_patterns_match_nested_directories",
+    );
+}
+
+#[test]
+fn root_plugin_includes_are_relative_to_child_config_that_extends_root() {
+    let mut fs =
+        TemporaryFs::new("root_plugin_includes_are_relative_to_child_config_that_extends_root");
+
+    fs.create_file(
+        "biome.json",
+        r#"{
+    "root": true,
+    "plugins": [
+        { "path": "./biome/root-relative.grit", "includes": ["packages/mobile/src/**"] },
+        { "path": "./biome/child-relative.grit", "includes": ["src/**"] },
+        {
+            "path": "./biome/root-relative-config.grit",
+            "resolutionKind": "config",
+            "includes": ["packages/mobile/src/**"]
+        },
+        {
+            "path": "./biome/child-relative-config.grit",
+            "resolutionKind": "config",
+            "includes": ["src/**"]
+        }
+    ]
+}"#,
+    );
+    for (name, message) in [
+        ("root-relative", "Pattern relative to the root directory"),
+        ("child-relative", "Pattern relative to the child directory"),
+        (
+            "root-relative-config",
+            "Pattern relative to the root directory, resolutionKind config",
+        ),
+        (
+            "child-relative-config",
+            "Pattern relative to the child directory, resolutionKind config",
+        ),
+    ] {
+        fs.create_file(
+            &format!("biome/{name}.grit"),
+            &report_assign_plugin(message),
+        );
+    }
+    fs.create_file("packages/mobile/biome.json", r#"{ "extends": "//" }"#);
+    fs.create_file("src/file.js", "Object.assign({}, value);\n");
+    fs.create_file("packages/mobile/src/file.js", "Object.assign({}, value);\n");
+
+    lint_project(
+        fs,
+        "root_plugin_includes_are_relative_to_child_config_that_extends_root",
+    );
+}
+
+#[test]
+fn child_plugin_includes_are_relative_to_child_config() {
+    let mut fs = TemporaryFs::new("child_plugin_includes_are_relative_to_child_config");
+
+    fs.create_file("biome.json", r#"{ "root": true }"#);
+    fs.create_file(
+        "packages/mobile/biome.json",
+        r#"{
+    "root": false,
+    "plugins": [
+        { "path": "./biome/root-relative.grit", "includes": ["packages/mobile/src/**"] },
+        { "path": "./biome/child-relative.grit", "includes": ["src/**"] }
+    ]
+}"#,
+    );
+    fs.create_file(
+        "packages/mobile/biome/root-relative.grit",
+        &report_assign_plugin("Pattern relative to the root directory"),
+    );
+    fs.create_file(
+        "packages/mobile/biome/child-relative.grit",
+        &report_assign_plugin("Pattern relative to the child directory"),
+    );
+    fs.create_file("src/file.js", "Object.assign({}, value);\n");
+    fs.create_file("packages/mobile/src/file.js", "Object.assign({}, value);\n");
+    fs.create_file("packages/mobile/lib/file.js", "Object.assign({}, value);\n");
+
+    lint_project(fs, "child_plugin_includes_are_relative_to_child_config");
+}
+
+#[test]
+fn extended_config_plugin_includes_ignore_resolution_kind() {
+    let mut fs = TemporaryFs::new("extended_config_plugin_includes_ignore_resolution_kind");
+
+    fs.create_file("biome.json", r#"{ "extends": ["./shared/base.json"] }"#);
+    fs.create_file(
+        "shared/base.json",
+        r#"{
+    "plugins": [
+        { "path": "./plugins/default.grit", "includes": ["src/**"] },
+        { "path": "./plugins/project.grit", "resolutionKind": "project", "includes": ["src/**"] },
+        { "path": "./plugins/config.grit", "resolutionKind": "config", "includes": ["src/**"] }
+    ]
+}"#,
+    );
+    fs.create_file(
+        "plugins/default.grit",
+        &report_assign_plugin("Default resolutionKind"),
+    );
+    fs.create_file(
+        "plugins/project.grit",
+        &report_assign_plugin("resolutionKind project"),
+    );
+    fs.create_file(
+        "shared/plugins/config.grit",
+        &report_assign_plugin("resolutionKind config"),
+    );
+    fs.create_file("src/file.js", "Object.assign({}, value);\n");
+    fs.create_file("shared/src/file.js", "Object.assign({}, value);\n");
+
+    lint_project(fs, "extended_config_plugin_includes_ignore_resolution_kind");
+}
+
+/// Returns a GritQL plugin that reports every `Object.keys()` call with `message`.
+fn report_keys_plugin(message: &str) -> String {
+    format!(
+        r#"`Object.keys($args)` where {{
+    register_diagnostic(span = $args, message = "{message}")
+}}"#
+    )
+}
+
+/// Creates a plugin package named `@shared/plugin` in `directory`. Its `recommended` preset
+/// contains two rules, whose diagnostics start with `origin`.
+fn create_preset_package(fs: &mut TemporaryFs, directory: &str, origin: &str) {
+    fs.create_file(
+        &format!("{directory}/package.json"),
+        r#"{ "name": "@shared/plugin" }"#,
+    );
+    fs.create_file(
+        &format!("{directory}/biome-manifest.json"),
+        r#"{
+    "version": 1,
+    "plugins": {
+        "rules": [{
+            "noAssign": "rules/noAssign.grit",
+            "noKeys": "rules/noKeys.grit"
+        }],
+        "presets": { "recommended": ["noAssign", "noKeys"] }
+    }
+}"#,
+    );
+    fs.create_file(
+        &format!("{directory}/rules/noAssign.grit"),
+        &report_assign_plugin(&format!("{origin}: do not use Object.assign")),
+    );
+    fs.create_file(
+        &format!("{directory}/rules/noKeys.grit"),
+        &report_keys_plugin(&format!("{origin}: do not use Object.keys")),
+    );
+}
+
+#[test]
+fn config_relative_package_preset_includes_are_relative_to_consuming_config() {
+    let mut fs = TemporaryFs::new(
+        "config_relative_package_preset_includes_are_relative_to_consuming_config",
+    );
+
+    fs.create_file("biome.json", r#"{ "extends": ["@shared/config/biome"] }"#);
+    fs.create_file(
+        "node_modules/@shared/config/biome.jsonc",
+        r#"{
+    "root": false,
+    "plugins": [
+        {
+            "path": "@shared/plugin/presets/recommended",
+            "resolutionKind": "config",
+            "includes": ["src/**", "!src/generated/**"]
+        }
+    ]
+}"#,
+    );
+    fs.create_file(
+        "node_modules/@shared/config/package.json",
+        r#"{
+    "name": "@shared/config",
+    "exports": { "./biome": "./biome.jsonc" }
+}"#,
+    );
+    create_preset_package(
+        &mut fs,
+        "node_modules/@shared/config/node_modules/@shared/plugin",
+        "Package of the extended configuration",
+    );
+    for path in [
+        "src/index.js",
+        "src/generated/index.js",
+        "lib/index.js",
+        "packages/app/src/index.js",
+    ] {
+        fs.create_file(path, "Object.assign({}, value);\nObject.keys(value);\n");
+    }
+
+    lint_project(
+        fs,
+        "config_relative_package_preset_includes_are_relative_to_consuming_config",
+    );
+}
+
+#[test]
+fn package_preset_includes_in_local_extended_config_are_relative_to_consuming_config() {
+    let mut fs = TemporaryFs::new(
+        "package_preset_includes_in_local_extended_config_are_relative_to_consuming_config",
+    );
+
+    fs.create_file("biome.json", r#"{ "extends": ["./shared/base.json"] }"#);
+    fs.create_file(
+        "shared/base.json",
+        r#"{
+    "plugins": [
+        {
+            "path": "@shared/plugin/presets/recommended",
+            "resolutionKind": "config",
+            "includes": ["src/**", "!src/generated/**"]
+        },
+        {
+            "path": "@shared/plugin/presets/recommended",
+            "includes": ["src/**", "!src/generated/**"]
+        }
+    ]
+}"#,
+    );
+    create_preset_package(
+        &mut fs,
+        "shared/node_modules/@shared/plugin",
+        "Package of the extended configuration",
+    );
+    create_preset_package(
+        &mut fs,
+        "node_modules/@shared/plugin",
+        "Package of the consuming project",
+    );
+    for path in [
+        "src/index.js",
+        "src/generated/index.js",
+        "shared/src/index.js",
+        "packages/app/src/index.js",
+    ] {
+        fs.create_file(path, "Object.assign({}, value);\nObject.keys(value);\n");
+    }
+
+    lint_project(
+        fs,
+        "package_preset_includes_in_local_extended_config_are_relative_to_consuming_config",
+    );
+}

@@ -378,7 +378,7 @@ pub(crate) fn inspect_plugins(
     for (override_index, override_includes, declarations) in declarations {
         for configuration in declarations.into_iter().flat_map(|plugins| plugins.iter()) {
             let applies_to_target = matched_path.as_deref().map(|path| {
-                configuration.matches_includes(path)
+                configuration.matches_includes(base_path, path)
                     && override_index.is_none_or(|index| {
                         matching_overrides
                             .as_ref()

@@ -1,10 +1,10 @@
 use crate::TestArgs as Args;
 use crate::{
-    run_cli,
+    run_cli, run_cli_with_dyn_fs,
     snap_test::{SnapshotPayload, assert_cli_snapshot},
 };
 use biome_console::BufferConsole;
-use biome_fs::MemoryFileSystem;
+use biome_fs::{MemoryFileSystem, TemporaryFs};
 use serde_json::{Map, Value, json};
 
 #[test]
@@ -22,6 +22,295 @@ fn parent_relative_target_matches_normalized_target() {
         module_path!(),
         "parent_relative_target_matches_normalized_target",
         fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn absolute_target_matches_includes_relative_to_configuration_directory() {
+    let mut fs =
+        TemporaryFs::new("absolute_target_matches_includes_relative_to_configuration_directory");
+    fs.create_file(
+        "biome.json",
+        r#"{
+  "plugins": [
+    "./base.grit",
+    { "path": "./src-only.grit", "includes": ["src/**"] },
+    { "path": "./other-only.grit", "includes": ["other/**"] }
+  ]
+}"#,
+    );
+    for name in ["base", "src-only", "other-only"] {
+        fs.create_file(&format!("{name}.grit"), "`unterminated");
+    }
+
+    let mut console = BufferConsole::default();
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(
+            [
+                "inspect",
+                "plugins",
+                &format!("--path={}/src/file.ts", fs.cli_path()),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "absolute_target_matches_includes_relative_to_configuration_directory",
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn absolute_target_matches_anchored_override_and_plugin_includes() {
+    inspect_absolute_target(
+        "absolute_target_matches_anchored_override_and_plugin_includes",
+        "src/file.ts",
+    );
+}
+
+#[test]
+fn absolute_target_excluded_by_plugin_includes() {
+    inspect_absolute_target(
+        "absolute_target_excluded_by_plugin_includes",
+        "src/generated/file.ts",
+    );
+}
+
+#[test]
+fn absolute_target_excluded_by_override_includes() {
+    inspect_absolute_target(
+        "absolute_target_excluded_by_override_includes",
+        "src/vendor/file.ts",
+    );
+}
+
+#[test]
+fn absolute_target_in_nested_directory_does_not_match_anchored_includes() {
+    inspect_absolute_target(
+        "absolute_target_in_nested_directory_does_not_match_anchored_includes",
+        "packages/app/src/file.ts",
+    );
+}
+
+/// Inspects the plugins that apply to the absolute path of `target` in a project that declares
+/// plugins with anchored `includes` in the root configuration, an override, and an extended
+/// configuration.
+fn inspect_absolute_target(test_name: &str, target: &str) {
+    let mut fs = TemporaryFs::new(test_name);
+    fs.create_file(
+        "biome.json",
+        r#"{
+  "extends": ["./shared/base.json"],
+  "plugins": [
+    "./base.grit",
+    { "path": "./src-only.grit", "includes": ["src/**", "!src/generated/**"] }
+  ],
+  "overrides": [
+    {
+      "includes": ["src/**", "!src/vendor/**"],
+      "plugins": [
+        { "path": "./src-override.grit", "includes": ["src/**", "!src/generated/**"] }
+      ]
+    }
+  ]
+}"#,
+    );
+    fs.create_file(
+        "shared/base.json",
+        r#"{
+  "plugins": [
+    { "path": "./extended-config.grit", "resolutionKind": "config", "includes": ["src/**"] },
+    { "path": "./extended-project.grit", "resolutionKind": "project", "includes": ["src/**"] }
+  ]
+}"#,
+    );
+    for path in [
+        "base.grit",
+        "src-only.grit",
+        "src-override.grit",
+        "extended-project.grit",
+        "shared/extended-config.grit",
+    ] {
+        fs.create_file(path, "`unterminated");
+    }
+
+    let mut console = BufferConsole::default();
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(
+            [
+                "inspect",
+                "plugins",
+                &format!("--path={}/{target}", fs.cli_path()),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        test_name,
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn config_path_below_working_directory_matches_target_in_configuration_directory() {
+    inspect_with_config_path_below_working_directory(
+        "config_path_below_working_directory_matches_target_in_configuration_directory",
+        "packages/mobile/src/file.ts",
+    );
+}
+
+#[test]
+fn config_path_below_working_directory_does_not_match_target_in_working_directory() {
+    inspect_with_config_path_below_working_directory(
+        "config_path_below_working_directory_does_not_match_target_in_working_directory",
+        "src/file.ts",
+    );
+}
+
+/// Inspects the plugins that apply to `target` when `--config-path` selects a configuration in
+/// `packages/mobile`, below the working directory. The configuration declares a plugin and an
+/// override whose `includes` are both anchored to `src/**`.
+fn inspect_with_config_path_below_working_directory(test_name: &str, target: &str) {
+    let mut fs = TemporaryFs::new(test_name);
+    fs.create_file(
+        "packages/mobile/biome.json",
+        r#"{
+  "plugins": [
+    "./base.grit",
+    { "path": "./src-only.grit", "includes": ["src/**"] }
+  ],
+  "overrides": [
+    { "includes": ["src/**"], "plugins": ["./src-override.grit"] }
+  ]
+}"#,
+    );
+    for name in ["base", "src-only", "src-override"] {
+        fs.create_file(&format!("packages/mobile/{name}.grit"), "`unterminated");
+    }
+
+    let mut console = BufferConsole::default();
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(
+            [
+                "inspect",
+                "plugins",
+                "--config-path=packages/mobile",
+                &format!("--path={target}"),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        test_name,
+        fs.create_mem(),
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn config_relative_package_preset_matches_target_in_consuming_project() {
+    inspect_config_relative_package_preset(
+        "config_relative_package_preset_matches_target_in_consuming_project",
+        "src/file.ts",
+    );
+}
+
+#[test]
+fn config_relative_package_preset_excludes_target_by_includes() {
+    inspect_config_relative_package_preset(
+        "config_relative_package_preset_excludes_target_by_includes",
+        "src/generated/file.ts",
+    );
+}
+
+#[test]
+fn config_relative_package_preset_does_not_match_target_in_extended_config_directory() {
+    inspect_config_relative_package_preset(
+        "config_relative_package_preset_does_not_match_target_in_extended_config_directory",
+        "shared/src/file.ts",
+    );
+}
+
+/// Inspects the plugins that apply to the absolute path of `target` in a project that extends
+/// `shared/base.json`. The extended configuration loads a preset from the package installed next
+/// to it and restricts the preset with anchored `includes`.
+fn inspect_config_relative_package_preset(test_name: &str, target: &str) {
+    let mut fs = TemporaryFs::new(test_name);
+    fs.create_file("biome.json", r#"{ "extends": ["./shared/base.json"] }"#);
+    fs.create_file(
+        "shared/base.json",
+        r#"{
+  "plugins": [
+    {
+      "path": "@shared/plugin/presets/recommended",
+      "resolutionKind": "config",
+      "includes": ["src/**", "!src/generated/**"]
+    }
+  ]
+}"#,
+    );
+    fs.create_file(
+        "shared/node_modules/@shared/plugin/package.json",
+        r#"{ "name": "@shared/plugin" }"#,
+    );
+    fs.create_file(
+        "shared/node_modules/@shared/plugin/biome-manifest.json",
+        r#"{
+  "version": 1,
+  "plugins": {
+    "rules": [{ "noAssign": "rules/noAssign.grit", "noKeys": "rules/noKeys.grit" }],
+    "presets": { "recommended": ["noAssign", "noKeys"] }
+  }
+}"#,
+    );
+    for rule in ["noAssign", "noKeys"] {
+        fs.create_file(
+            &format!("shared/node_modules/@shared/plugin/rules/{rule}.grit"),
+            "`unterminated",
+        );
+    }
+
+    let mut console = BufferConsole::default();
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(
+            [
+                "inspect",
+                "plugins",
+                &format!("--path={}/{target}", fs.cli_path()),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        test_name,
+        fs.create_mem(),
         console,
         result,
     ));

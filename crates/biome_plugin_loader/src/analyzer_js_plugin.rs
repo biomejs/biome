@@ -11,7 +11,6 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::category;
-use biome_glob::NormalizedGlob;
 use biome_js_runtime::{JsExecContext, JsPluginRule};
 use biome_js_syntax::JsSyntaxNode;
 use biome_languages::JsFileSource;
@@ -20,7 +19,7 @@ use biome_rowan::{AnySyntaxNode, RawSyntaxKind, SyntaxKind};
 use biome_text_size::TextRange;
 
 use crate::PluginDiagnostic;
-use crate::file_matches_includes;
+use crate::PluginIncludes;
 use crate::thread_local::ThreadLocalCell;
 
 /// Already loaded plugin in a thread.
@@ -61,8 +60,7 @@ pub struct AnalyzerJsPlugin {
 
     /// Glob patterns that restrict which files this plugin runs on.
     /// `None` means the plugin runs on all files.
-    /// `Some(&[])` (an empty list) means the plugin never runs on any file.
-    includes: Option<Box<[NormalizedGlob]>>,
+    includes: Option<PluginIncludes>,
 }
 
 impl Debug for AnalyzerJsPlugin {
@@ -77,7 +75,7 @@ impl AnalyzerJsPlugin {
     pub fn load(
         fs: Arc<dyn FsWithResolverProxy>,
         path: &Utf8Path,
-        includes: Option<&[NormalizedGlob]>,
+        includes: Option<PluginIncludes>,
     ) -> Result<Self, PluginDiagnostic> {
         // Load the plugin in the main thread here to catch errors while loading,
         // and to extract the queried kinds.
@@ -99,7 +97,7 @@ impl AnalyzerJsPlugin {
             loaded: ThreadLocalCell::new(),
             kinds,
             requires_semantic_model: plugin.rules.iter().any(|rule| rule.requires_semantic),
-            includes: includes.map(Into::into),
+            includes,
         })
     }
 
@@ -122,7 +120,9 @@ impl AnalyzerPlugin for AnalyzerJsPlugin {
     }
 
     fn applies_to_file(&self, path: &Utf8Path) -> bool {
-        file_matches_includes(self.includes.as_deref(), path)
+        self.includes
+            .as_ref()
+            .is_none_or(|includes| includes.matches(path))
     }
 
     fn query(&self) -> Vec<RawSyntaxKind> {
@@ -226,6 +226,7 @@ mod tests {
     use biome_diagnostics::advice::CodeSuggestionAdvice;
     use biome_diagnostics::{DiagnosticExt, Error, PrintDescription, print_diagnostic_to_string};
     use biome_fs::MemoryFileSystem;
+    use biome_glob::NormalizedGlob;
     use biome_js_parser::JsParserOptions;
     use biome_js_syntax::JsSyntaxKind;
     use boa_engine::JsValue;
@@ -547,6 +548,7 @@ mod tests {
         let fs = MemoryFileSystem::default();
         fs.insert(path.into(), source);
         let fs = Arc::new(fs) as Arc<dyn FsWithResolverProxy>;
+        let includes = includes.map(|globs| PluginIncludes::new(Utf8Path::new("/project"), globs));
         AnalyzerJsPlugin::load(fs, path.into(), includes).unwrap()
     }
 
@@ -591,6 +593,15 @@ mod tests {
         let plugin = load_test_plugin(Some(&globs));
         assert!(!plugin.applies_to_file(Utf8Path::new("test/foo.ts")));
         assert!(!plugin.applies_to_file(Utf8Path::new("src/main.js")));
+    }
+
+    #[test]
+    fn matches_globs_relative_to_base_path() {
+        let globs: Vec<NormalizedGlob> = vec!["src/**/*.ts".parse().unwrap()];
+        let plugin = load_test_plugin(Some(&globs));
+        assert!(plugin.applies_to_file(Utf8Path::new("/project/src/main.ts")));
+        assert!(!plugin.applies_to_file(Utf8Path::new("/project/packages/src/main.ts")));
+        assert!(!plugin.applies_to_file(Utf8Path::new("/other/src/main.ts")));
     }
 
     /// The AST is exposed through lazy getters installed on the prototype of each kind, so the
