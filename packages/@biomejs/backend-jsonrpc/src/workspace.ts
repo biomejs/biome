@@ -2914,6 +2914,11 @@ export interface Nursery {
 	 */
 	noAccidentalBitwiseOperators?: NoAccidentalBitwiseOperatorsConfiguration;
 	/**
+	 * Disallow the use of arguments.caller and arguments.callee.
+	 * See https://biomejs.dev/linter/rules/no-arguments-caller-or-callee
+	 */
+	noArgumentsCallerOrCallee?: NoArgumentsCallerOrCalleeConfiguration;
+	/**
 	 * Disallow conflicting content sources on Astro elements.
 	 * See https://biomejs.dev/linter/rules/no-astro-conflicting-set-directives
 	 */
@@ -5580,6 +5585,9 @@ export type UseYieldConfiguration =
 export type NoAccidentalBitwiseOperatorsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAccidentalBitwiseOperatorsOptions;
+export type NoArgumentsCallerOrCalleeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoArgumentsCallerOrCalleeOptions;
 export type NoAstroConflictingSetDirectivesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAstroConflictingSetDirectivesOptions;
@@ -7974,6 +7982,10 @@ export interface RuleWithNoAccidentalBitwiseOperatorsOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoAccidentalBitwiseOperatorsOptions;
+}
+export interface RuleWithNoArgumentsCallerOrCalleeOptions {
+	level: RulePlainConfiguration;
+	options?: NoArgumentsCallerOrCalleeOptions;
 }
 export interface RuleWithNoAstroConflictingSetDirectivesOptions {
 	level: RulePlainConfiguration;
@@ -10499,6 +10511,7 @@ export type UseVueValidVPreOptions = {};
 export type UseVueValidVTextOptions = {};
 export type UseYieldOptions = {};
 export type NoAccidentalBitwiseOperatorsOptions = {};
+export type NoArgumentsCallerOrCalleeOptions = {};
 export type NoAstroConflictingSetDirectivesOptions = {};
 export type NoAstroSetHtmlDirectiveOptions = {};
 export interface NoBaseToStringOptions {
@@ -12242,6 +12255,7 @@ export type Category =
 	| "lint/correctness/useVueValidVText"
 	| "lint/correctness/useYield"
 	| "lint/nursery/noAccidentalBitwiseOperators"
+	| "lint/nursery/noArgumentsCallerOrCallee"
 	| "lint/nursery/noAstroConflictingSetDirectives"
 	| "lint/nursery/noAstroSetHtmlDirective"
 	| "lint/nursery/noBaseToString"
