@@ -318,8 +318,14 @@ fn is_vue_raw_text_block(name_kind: HtmlSyntaxKind, names_a_language: bool) -> b
     }
 }
 
-/// Parses an element. See [parse_element_allowing_sfc_blocks] for `in_math`.
-fn parse_element(p: &mut HtmlParser, at_vue_sfc_top_level: bool, in_math: bool) -> ParsedSyntax {
+/// Parses an element. See [parse_element_allowing_sfc_blocks] for `in_math`
+/// and `at_root`.
+fn parse_element(
+    p: &mut HtmlParser,
+    at_vue_sfc_top_level: bool,
+    in_math: bool,
+    at_root: bool,
+) -> ParsedSyntax {
     if !p.at(T![<]) {
         return Absent;
     }
@@ -332,13 +338,13 @@ fn parse_element(p: &mut HtmlParser, at_vue_sfc_top_level: bool, in_math: bool) 
         // and if it turns out to be unclosed, parse the element again as
         // ordinary markup so that its diagnostics stay where the mistake is.
         let checkpoint = p.checkpoint();
-        match parse_element_allowing_sfc_blocks(p, true, in_math) {
+        match parse_element_allowing_sfc_blocks(p, true, in_math, at_root) {
             block @ Present(_) => return block,
             Absent => p.rewind(checkpoint),
         }
     }
 
-    parse_element_allowing_sfc_blocks(p, false, in_math)
+    parse_element_allowing_sfc_blocks(p, false, in_math, at_root)
 }
 
 /// Parses an element, reading its content as opaque text when it opens a block
@@ -348,6 +354,8 @@ fn parse_element(p: &mut HtmlParser, at_vue_sfc_top_level: bool, in_math: bool) 
 /// is text rather than the start of an expression. It propagates to the
 /// children, since MathML is foreign content all the way down.
 ///
+/// `at_root` marks the element as a direct child of the document root.
+///
 /// Returns `Absent` only when such a block turned out to have no closing tag.
 /// The caller has already established that the parser is at a `<`, so nothing
 /// else can make this fail.
@@ -355,6 +363,7 @@ fn parse_element_allowing_sfc_blocks(
     p: &mut HtmlParser,
     sfc_blocks: bool,
     in_math: bool,
+    at_root: bool,
 ) -> ParsedSyntax {
     let m = p.start();
 
@@ -400,9 +409,15 @@ fn parse_element_allowing_sfc_blocks(
         _ => {}
     }
 
+    // Svelte reads the attributes of a top-level `<script>` or `<style>` as plain
+    // strings, so `generics="T extends { id: string }"` holds no `{expression}`.
+    // Nested ones, such as a `<script>` inside `<svelte:head>`, keep templates.
+    let has_static_attribute_values =
+        at_root && Svelte.is_supported(p) && matches!(name_kind, T![script] | T![style]);
     // Only a top-level block of a single-file component asks about `lang`, so
     // the list looks for it there and nowhere else.
-    let mut attributes = AttributeList::new(sfc_blocks);
+    let mut attributes =
+        AttributeList::new(sfc_blocks).with_static_values(has_static_attribute_values);
     attributes.parse_list(p);
     let is_raw_text_block =
         sfc_blocks && is_vue_raw_text_block(name_kind, attributes.names_a_language);
@@ -623,17 +638,18 @@ fn is_void_closing_tag(p: &HtmlParser, closing: &CompletedMarker) -> bool {
 }
 
 /// Parses any element or text-expression child. See
-/// [parse_element_allowing_sfc_blocks] for `in_math`.
+/// [parse_element_allowing_sfc_blocks] for `in_math` and `at_root`.
 #[inline]
 pub(crate) fn parse_html_element(
     p: &mut HtmlParser,
     at_vue_sfc_top_level: bool,
     in_math: bool,
+    at_root: bool,
 ) -> ParsedSyntax {
     match p.cur() {
         T!["<![CDATA["] => parse_cdata_section(p),
         T![<?] => parse_processing_instruction(p),
-        T![<] => parse_element(p, at_vue_sfc_top_level, in_math),
+        T![<] => parse_element(p, at_vue_sfc_top_level, in_math, at_root),
         // Astro turns expression parsing off inside MathML, so that LaTeX such
         // as `R^{2x}` and `R^{{2x}}` survives as text.
         T!['{'] | T!["{{"] if in_math => {
@@ -741,7 +757,7 @@ impl ParseNodeList for ElementList {
         if p.at(T![<]) && p.nth_at(1, T![/]) {
             return self.parse_stray_closing_tag(p);
         }
-        parse_html_element(p, self.vue_sfc_top_level, self.in_math)
+        parse_html_element(p, self.vue_sfc_top_level, self.in_math, self.at_root)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -780,6 +796,9 @@ struct AttributeList {
     names_a_language: bool,
     /// Whether the list held Astro's `is:raw`. Always false outside Astro.
     is_raw: bool,
+    /// Whether quoted attribute values are plain strings even where they would
+    /// otherwise be templates, as on a top-level Svelte `<script>` or `<style>`.
+    has_static_values: bool,
 }
 
 impl AttributeList {
@@ -788,7 +807,13 @@ impl AttributeList {
             track_lang,
             names_a_language: false,
             is_raw: false,
+            has_static_values: false,
         }
+    }
+
+    fn with_static_values(mut self, has_static_values: bool) -> Self {
+        self.has_static_values = has_static_values;
+        self
     }
 }
 
@@ -803,7 +828,12 @@ impl ParseNodeList for AttributeList {
         }
         self.is_raw |= is_at_astro_raw_directive(p);
 
-        parse_attribute(p)
+        let initializer_context = if self.has_static_values {
+            AttrInitializerContext::Static
+        } else {
+            AttrInitializerContext::Regular
+        };
+        parse_attribute(p, initializer_context)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -848,7 +878,10 @@ fn is_at_lang_naming_a_language(p: &mut HtmlParser) -> bool {
     })
 }
 
-fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
+fn parse_attribute(
+    p: &mut HtmlParser,
+    initializer_context: AttrInitializerContext,
+) -> ParsedSyntax {
     if !is_at_attribute_start(p) {
         return Absent;
     }
@@ -948,7 +981,7 @@ fn parse_attribute(p: &mut HtmlParser) -> ParsedSyntax {
             }
 
             if p.at(T![=]) {
-                parse_attribute_initializer(p, AttrInitializerContext::Regular).ok();
+                parse_attribute_initializer(p, initializer_context).ok();
             }
             Present(m.complete(p, HTML_ATTRIBUTE))
         }
@@ -1175,6 +1208,12 @@ fn parse_attribute_initializer(
                 expected_attribute,
             )
             .ok();
+    } else if context == AttrInitializerContext::Static
+        && Svelte.is_supported(p)
+        && matches!(p.cur(), T!['"'] | T!["'"])
+    {
+        p.re_lex(HtmlReLexContext::SvelteAttributeString);
+        parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
     } else if Svelte.is_supported(p) && matches!(p.cur(), T!['"'] | T!["'"]) {
         // Speculatively parse as a template. If no interpolation is found the
         // value is a plain string, so rewind and re-lex it as a single
@@ -1196,6 +1235,8 @@ pub(crate) enum AttrInitializerContext {
     #[default]
     Regular,
     VueVFor,
+    /// A quoted value is a plain string, never a template with `{expression}`s.
+    Static,
 }
 
 fn parse_cdata_section(p: &mut HtmlParser) -> ParsedSyntax {
