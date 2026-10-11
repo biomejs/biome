@@ -1746,6 +1746,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_vue_v_on_number_values::NoVueVOnNumberValuesOptions>(),
     ));
     result.push((
+        "nursery",
+        "noVueVText",
+        TypeId::of::<biome_rule_options::no_vue_v_text::NoVueVTextOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noWith",
         TypeId::of::<biome_rule_options::no_with::NoWithOptions>(),
