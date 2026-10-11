@@ -2934,6 +2934,11 @@ export interface Nursery {
 	 */
 	noDuplicateMapKeys?: NoDuplicateMapKeysConfiguration;
 	/**
+	 * Enforce a maximum number of statements allowed in a function.
+	 * See https://biomejs.dev/linter/rules/no-excessive-statements-per-function
+	 */
+	noExcessiveStatementsPerFunction?: NoExcessiveStatementsPerFunctionConfiguration;
+	/**
 	 * Disallow extending the prototype of built-in objects.
 	 * See https://biomejs.dev/linter/rules/no-extend-native
 	 */
@@ -5547,6 +5552,9 @@ export type NoBunModulesConfiguration =
 export type NoDuplicateMapKeysConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateMapKeysOptions;
+export type NoExcessiveStatementsPerFunctionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoExcessiveStatementsPerFunctionOptions;
 export type NoExtendNativeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExtendNativeOptions;
@@ -7914,6 +7922,10 @@ export interface RuleWithNoBunModulesOptions {
 export interface RuleWithNoDuplicateMapKeysOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateMapKeysOptions;
+}
+export interface RuleWithNoExcessiveStatementsPerFunctionOptions {
+	level: RulePlainConfiguration;
+	options?: NoExcessiveStatementsPerFunctionOptions;
 }
 export interface RuleWithNoExtendNativeOptions {
 	level: RulePlainConfiguration;
@@ -10373,6 +10385,17 @@ export interface NoBaseToStringOptions {
 }
 export type NoBunModulesOptions = {};
 export type NoDuplicateMapKeysOptions = {};
+export interface NoExcessiveStatementsPerFunctionOptions {
+	/**
+	 * When this option is set to `true`, a function that isn't nested in another function is
+	 * not checked, as long as it's the only such function in the file (default: false).
+	 */
+	ignoreTopLevelFunctions?: boolean;
+	/**
+	 * The maximum number of statements allowed in a function (default: 10).
+	 */
+	max?: number;
+}
 /**
  * Options for the `noExtendNative` rule.
  */
@@ -12060,6 +12083,16 @@ export type Category =
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noDuplicateMapKeys"
+	| "lint/nursery/noComponentHookFactories"
+	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noDrizzleDeleteWithoutWhere"
+	| "lint/nursery/noDrizzleUpdateWithoutWhere"
+	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateSelectors"
+	| "lint/nursery/noEmptyObjectKeys"
+	| "lint/nursery/noExcessiveNestedCallbacks"
+	| "lint/nursery/noExcessiveSelectorClasses"
+	| "lint/nursery/noExcessiveStatementsPerFunction"
 	| "lint/nursery/noExtendNative"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noImplicitCoercion"
