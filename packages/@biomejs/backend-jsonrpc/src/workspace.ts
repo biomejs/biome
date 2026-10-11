@@ -3019,6 +3019,11 @@ export interface Nursery {
 	 */
 	noNonScalableViewport?: NoNonScalableViewportConfiguration;
 	/**
+	 * Disallow obsolete attributes on HTML elements.
+	 * See https://biomejs.dev/linter/rules/no-obsolete-attributes
+	 */
+	noObsoleteAttributes?: NoObsoleteAttributesConfiguration;
+	/**
 	 * Disallow obsolete HTML elements.
 	 * See https://biomejs.dev/linter/rules/no-obsolete-tags
 	 */
@@ -5628,6 +5633,9 @@ export type NoNestedTemplateLiteralsConfiguration =
 export type NoNonScalableViewportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNonScalableViewportOptions;
+export type NoObsoleteAttributesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoObsoleteAttributesOptions;
 export type NoObsoleteTagsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoObsoleteTagsOptions;
@@ -8054,6 +8062,10 @@ export interface RuleWithNoNestedTemplateLiteralsOptions {
 export interface RuleWithNoNonScalableViewportOptions {
 	level: RulePlainConfiguration;
 	options?: NoNonScalableViewportOptions;
+}
+export interface RuleWithNoObsoleteAttributesOptions {
+	level: RulePlainConfiguration;
+	options?: NoObsoleteAttributesOptions;
 }
 export interface RuleWithNoObsoleteTagsOptions {
 	level: RulePlainConfiguration;
@@ -10507,6 +10519,7 @@ export type NoNegationInEqualityCheckOptions = {};
 export type NoNestedSwitchOptions = {};
 export type NoNestedTemplateLiteralsOptions = {};
 export type NoNonScalableViewportOptions = {};
+export type NoObsoleteAttributesOptions = {};
 export type NoObsoleteTagsOptions = {};
 export type NoOctalOptions = {};
 export type NoProcessExitOptions = {};
@@ -12224,6 +12237,7 @@ export type Category =
 	| "lint/nursery/noNestedSwitch"
 	| "lint/nursery/noNestedTemplateLiterals"
 	| "lint/nursery/noNonScalableViewport"
+	| "lint/nursery/noObsoleteAttributes"
 	| "lint/nursery/noObsoleteTags"
 	| "lint/nursery/noOctal"
 	| "lint/nursery/noProcessExit"

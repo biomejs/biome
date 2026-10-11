@@ -196,6 +196,7 @@ pub mod no_noninteractive_element_interactions;
 pub mod no_noninteractive_element_to_interactive_role;
 pub mod no_noninteractive_tabindex;
 pub mod no_nonoctal_decimal_escape;
+pub mod no_obsolete_attributes;
 pub mod no_obsolete_tags;
 pub mod no_octal;
 pub mod no_octal_escape;
