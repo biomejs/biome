@@ -1,0 +1,426 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+Foo.prototype.bar = function() {};
+(function(){}());
+f(function(){});
+var a = new Date(function() {});
+var test = function(d, e, f) {};
+new function() {};
+var foo = function() {};
+var obj = { foo: function() {} };
+(foo = function(){});
+({foo = function(){}} = {});
+[foo = function(){}] = [];
+function fn(foo = function(){}) {}
+class C { foo = function() {}; }
+class D { [foo] = function() {}; }
+class E { #foo = function() {}; }
+var asyncFn = async function() {};
+var gen = function*() {};
+var asyncGen = async function*() {};
+var gen2 = function *() {};
+
+```
+
+# Diagnostics
+```
+invalid.js:2:21 lint/nursery/useNamedFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has no name.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ Foo.prototype.bar = function() {};
+      │                     ^^^^^^^^
+    3 │ (function(){}());
+    4 │ f(function(){});
+  
+  i Error messages and debugging tools can show a function without a name as <anonymous>, which makes it harder to find where an error came from.
+  
+  i Give this function a name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:3:2 lint/nursery/useNamedFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has no name.
+  
+    1 │ /* should generate diagnostics */
+    2 │ Foo.prototype.bar = function() {};
+  > 3 │ (function(){}());
+      │  ^^^^^^^^
+    4 │ f(function(){});
+    5 │ var a = new Date(function() {});
+  
+  i Error messages and debugging tools can show a function without a name as <anonymous>, which makes it harder to find where an error came from.
+  
+  i Give this function a name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:4:3 lint/nursery/useNamedFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has no name.
+  
+    2 │ Foo.prototype.bar = function() {};
+    3 │ (function(){}());
+  > 4 │ f(function(){});
+      │   ^^^^^^^^
+    5 │ var a = new Date(function() {});
+    6 │ var test = function(d, e, f) {};
+  
+  i Error messages and debugging tools can show a function without a name as <anonymous>, which makes it harder to find where an error came from.
+  
+  i Give this function a name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:5:18 lint/nursery/useNamedFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has no name.
+  
+    3 │ (function(){}());
+    4 │ f(function(){});
+  > 5 │ var a = new Date(function() {});
+      │                  ^^^^^^^^
+    6 │ var test = function(d, e, f) {};
+    7 │ new function() {};
+  
+  i Error messages and debugging tools can show a function without a name as <anonymous>, which makes it harder to find where an error came from.
+  
+  i Give this function a name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:12 lint/nursery/useNamedFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has no name.
+  
+    4 │ f(function(){});
+    5 │ var a = new Date(function() {});
+  > 6 │ var test = function(d, e, f) {};
+      │            ^^^^^^^^
+    7 │ new function() {};
+    8 │ var foo = function() {};
+  
+  i Error messages and debugging tools can show a function without a name as <anonymous>, which makes it harder to find where an error came from.
+  
+  i Give this function a name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:7:5 lint/nursery/useNamedFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has no name.
+  
+    5 │ var a = new Date(function() {});
+    6 │ var test = function(d, e, f) {};
+  > 7 │ new function() {};
+      │     ^^^^^^^^
+    8 │ var foo = function() {};
+    9 │ var obj = { foo: function() {} };
+  
+  i Error messages and debugging tools can show a function without a name as <anonymous>, which makes it harder to find where an error came from.
+  
+  i Give this function a name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:11 lint/nursery/useNamedFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has no name.
+  
+     6 │ var test = function(d, e, f) {};
+     7 │ new function() {};
+   > 8 │ var foo = function() {};
+       │           ^^^^^^^^
+     9 │ var obj = { foo: function() {} };
+    10 │ (foo = function(){});
+  
+  i Error messages and debugging tools can show a function without a name as <anonymous>, which makes it harder to find where an error came from.
+  
+  i Give this function a name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:18 lint/nursery/useNamedFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has no name.
+  
+     7 │ new function() {};
+     8 │ var foo = function() {};
+   > 9 │ var obj = { foo: function() {} };
+       │                  ^^^^^^^^
+    10 │ (foo = function(){});
+    11 │ ({foo = function(){}} = {});
+  
+  i Error messages and debugging tools can show a function without a name as <anonymous>, which makes it harder to find where an error came from.
+  
+  i Give this function a name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:8 lint/nursery/useNamedFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has no name.
+  
+     8 │ var foo = function() {};
+     9 │ var obj = { foo: function() {} };
+  > 10 │ (foo = function(){});
+       │        ^^^^^^^^
+    11 │ ({foo = function(){}} = {});
+    12 │ [foo = function(){}] = [];
+  
+  i Error messages and debugging tools can show a function without a name as <anonymous>, which makes it harder to find where an error came from.
+  
+  i Give this function a name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:11:9 lint/nursery/useNamedFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has no name.
+  
+     9 │ var obj = { foo: function() {} };
+    10 │ (foo = function(){});
+  > 11 │ ({foo = function(){}} = {});
+       │         ^^^^^^^^
+    12 │ [foo = function(){}] = [];
+    13 │ function fn(foo = function(){}) {}
+  
+  i Error messages and debugging tools can show a function without a name as <anonymous>, which makes it harder to find where an error came from.
+  
+  i Give this function a name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:8 lint/nursery/useNamedFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has no name.
+  
+    10 │ (foo = function(){});
+    11 │ ({foo = function(){}} = {});
+  > 12 │ [foo = function(){}] = [];
+       │        ^^^^^^^^
+    13 │ function fn(foo = function(){}) {}
+    14 │ class C { foo = function() {}; }
+  
+  i Error messages and debugging tools can show a function without a name as <anonymous>, which makes it harder to find where an error came from.
+  
+  i Give this function a name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:13:19 lint/nursery/useNamedFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has no name.
+  
+    11 │ ({foo = function(){}} = {});
+    12 │ [foo = function(){}] = [];
+  > 13 │ function fn(foo = function(){}) {}
+       │                   ^^^^^^^^
+    14 │ class C { foo = function() {}; }
+    15 │ class D { [foo] = function() {}; }
+  
+  i Error messages and debugging tools can show a function without a name as <anonymous>, which makes it harder to find where an error came from.
+  
+  i Give this function a name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:17 lint/nursery/useNamedFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has no name.
+  
+    12 │ [foo = function(){}] = [];
+    13 │ function fn(foo = function(){}) {}
+  > 14 │ class C { foo = function() {}; }
+       │                 ^^^^^^^^
+    15 │ class D { [foo] = function() {}; }
+    16 │ class E { #foo = function() {}; }
+  
+  i Error messages and debugging tools can show a function without a name as <anonymous>, which makes it harder to find where an error came from.
+  
+  i Give this function a name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:19 lint/nursery/useNamedFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has no name.
+  
+    13 │ function fn(foo = function(){}) {}
+    14 │ class C { foo = function() {}; }
+  > 15 │ class D { [foo] = function() {}; }
+       │                   ^^^^^^^^
+    16 │ class E { #foo = function() {}; }
+    17 │ var asyncFn = async function() {};
+  
+  i Error messages and debugging tools can show a function without a name as <anonymous>, which makes it harder to find where an error came from.
+  
+  i Give this function a name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:18 lint/nursery/useNamedFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has no name.
+  
+    14 │ class C { foo = function() {}; }
+    15 │ class D { [foo] = function() {}; }
+  > 16 │ class E { #foo = function() {}; }
+       │                  ^^^^^^^^
+    17 │ var asyncFn = async function() {};
+    18 │ var gen = function*() {};
+  
+  i Error messages and debugging tools can show a function without a name as <anonymous>, which makes it harder to find where an error came from.
+  
+  i Give this function a name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:17:15 lint/nursery/useNamedFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has no name.
+  
+    15 │ class D { [foo] = function() {}; }
+    16 │ class E { #foo = function() {}; }
+  > 17 │ var asyncFn = async function() {};
+       │               ^^^^^^^^^^^^^^
+    18 │ var gen = function*() {};
+    19 │ var asyncGen = async function*() {};
+  
+  i Error messages and debugging tools can show a function without a name as <anonymous>, which makes it harder to find where an error came from.
+  
+  i Give this function a name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:11 lint/nursery/useNamedFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has no name.
+  
+    16 │ class E { #foo = function() {}; }
+    17 │ var asyncFn = async function() {};
+  > 18 │ var gen = function*() {};
+       │           ^^^^^^^^^
+    19 │ var asyncGen = async function*() {};
+    20 │ var gen2 = function *() {};
+  
+  i Error messages and debugging tools can show a function without a name as <anonymous>, which makes it harder to find where an error came from.
+  
+  i Give this function a name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:19:16 lint/nursery/useNamedFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has no name.
+  
+    17 │ var asyncFn = async function() {};
+    18 │ var gen = function*() {};
+  > 19 │ var asyncGen = async function*() {};
+       │                ^^^^^^^^^^^^^^^
+    20 │ var gen2 = function *() {};
+    21 │ 
+  
+  i Error messages and debugging tools can show a function without a name as <anonymous>, which makes it harder to find where an error came from.
+  
+  i Give this function a name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:12 lint/nursery/useNamedFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function has no name.
+  
+    18 │ var gen = function*() {};
+    19 │ var asyncGen = async function*() {};
+  > 20 │ var gen2 = function *() {};
+       │            ^^^^^^^^^^
+    21 │ 
+  
+  i Error messages and debugging tools can show a function without a name as <anonymous>, which makes it harder to find where an error came from.
+  
+  i Give this function a name.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

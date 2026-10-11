@@ -7982,6 +7982,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useNamedFunction": {
+					"description": "Require function expressions to have a name.\nSee https://biomejs.dev/linter/rules/use-named-function",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseNamedFunctionConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useNamedLayer": {
 					"description": "Disallow anonymous cascade layers.\nSee https://biomejs.dev/linter/rules/use-named-layer",
 					"anyOf": [
@@ -13873,6 +13880,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseNamedFunctionOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseNamedFunctionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseNamedLayerOptions": {
 			"type": "object",
 			"properties": {
@@ -18679,6 +18695,16 @@
 			]
 		},
 		"UseNamedCaptureGroupOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseNamedFunctionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseNamedFunctionOptions" }
+			]
+		},
+		"UseNamedFunctionOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

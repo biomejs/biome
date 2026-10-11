@@ -3294,6 +3294,11 @@ export interface Nursery {
 	 */
 	useModernMathApis?: UseModernMathApisConfiguration;
 	/**
+	 * Require function expressions to have a name.
+	 * See https://biomejs.dev/linter/rules/use-named-function
+	 */
+	useNamedFunction?: UseNamedFunctionConfiguration;
+	/**
 	 * Disallow anonymous cascade layers.
 	 * See https://biomejs.dev/linter/rules/use-named-layer
 	 */
@@ -5758,6 +5763,9 @@ export type UseLogicalPropertiesConfiguration =
 export type UseModernMathApisConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseModernMathApisOptions;
+export type UseNamedFunctionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseNamedFunctionOptions;
 export type UseNamedLayerConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNamedLayerOptions;
@@ -8283,6 +8291,10 @@ export interface RuleWithUseModernMathApisOptions {
 	level: RulePlainConfiguration;
 	options?: UseModernMathApisOptions;
 }
+export interface RuleWithUseNamedFunctionOptions {
+	level: RulePlainConfiguration;
+	options?: UseNamedFunctionOptions;
+}
 export interface RuleWithUseNamedLayerOptions {
 	level: RulePlainConfiguration;
 	options?: UseNamedLayerOptions;
@@ -10571,6 +10583,7 @@ export interface UseLogicalPropertiesOptions {
 	direction?: UseLogicalPropertiesDirection;
 }
 export type UseModernMathApisOptions = {};
+export type UseNamedFunctionOptions = {};
 export type UseNamedLayerOptions = {};
 /**
  * Options for the `useNullishCoalescing` rule.
@@ -12144,6 +12157,8 @@ export type Category =
 	| "lint/nursery/useLayeredStyles"
 	| "lint/nursery/useLogicalProperties"
 	| "lint/nursery/useModernMathApis"
+	| "lint/nursery/useNamedCaptureGroup"
+	| "lint/nursery/useNamedFunction"
 	| "lint/nursery/useNamedLayer"
 	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/usePromiseRejectErrors"
