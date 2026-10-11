@@ -718,10 +718,75 @@ impl From<NoConsoleOptions> for biome_rule_options::no_console::NoConsoleOptions
 /// Only the options with a Biome equivalent are kept.
 /// The `*IgnorePattern` options are regular expressions,
 /// whereas Biome's `ignore` option only matches exact names.
-#[derive(Debug, Default)]
+#[derive(Clone, Copy, Debug, Default)]
 pub(crate) struct NoUnusedVarsOptions {
-    ignore_rest_siblings: Option<bool>,
-    ignore_using_declarations: Option<bool>,
+    pub(crate) ignore_rest_siblings: Option<bool>,
+    pub(crate) ignore_using_declarations: Option<bool>,
+}
+
+/// How a base configuration configures one of the `no-unused-vars` rules.
+#[derive(Clone, Copy, Debug, Default)]
+pub(crate) struct BaseNoUnusedVarsRule {
+    /// Whether the base configuration enables the rule.
+    pub(crate) is_enabled: bool,
+    /// The options that the base configuration provides for the rule, even if it disables it.
+    pub(crate) options: Option<NoUnusedVarsOptions>,
+}
+
+impl BaseNoUnusedVarsRule {
+    fn new(conf: &RuleConf<NoUnusedVarsOptions>) -> Self {
+        Self {
+            is_enabled: !matches!(conf.severity(), Severity::Off),
+            options: match conf {
+                RuleConf::Option(_, options) => Some(*options),
+                _ => None,
+            },
+        }
+    }
+}
+
+/// How a base configuration configures each of the `no-unused-vars` rules.
+///
+/// ESLint keeps the options of a rule when a configuration that applies on top of the base one
+/// only sets the severity of that rule.
+/// The options of the other rules are not inherited, even if they migrate to the same Biome rule.
+#[derive(Clone, Copy, Debug, Default)]
+pub(crate) struct BaseNoUnusedVarsRules {
+    eslint: BaseNoUnusedVarsRule,
+    typescript: BaseNoUnusedVarsRule,
+    unused_imports: BaseNoUnusedVarsRule,
+}
+
+impl BaseNoUnusedVarsRules {
+    /// Returns how the base configuration configures the ESLint rule `eslint_name`.
+    pub(crate) fn get(&self, eslint_name: &str) -> BaseNoUnusedVarsRule {
+        match eslint_name {
+            "no-unused-vars" => self.eslint,
+            "@typescript-eslint/no-unused-vars" => self.typescript,
+            "unused-imports/no-unused-vars" => self.unused_imports,
+            _ => BaseNoUnusedVarsRule::default(),
+        }
+    }
+}
+
+impl Rules {
+    /// Returns how these rules configure each of the `no-unused-vars` rules.
+    pub(crate) fn base_no_unused_vars_rules(&self) -> BaseNoUnusedVarsRules {
+        let mut result = BaseNoUnusedVarsRules::default();
+        for rule in &self.0 {
+            match rule {
+                Rule::NoUnusedVars(conf) => result.eslint = BaseNoUnusedVarsRule::new(conf),
+                Rule::TypeScriptNoUnusedVars(conf) => {
+                    result.typescript = BaseNoUnusedVarsRule::new(conf);
+                }
+                Rule::UnusedImportsNoUnusedVars(conf) => {
+                    result.unused_imports = BaseNoUnusedVarsRule::new(conf);
+                }
+                _ => {}
+            }
+        }
+        result
+    }
 }
 
 impl NoUnusedVarsOptions {

@@ -155,7 +155,8 @@ declare_lint_rule! {
     ///
     /// Default: `false`
     ///
-    /// Whether to ignore unused variables declared with `using` or `await using`.
+    /// Whether to ignore unused variables declared with `using` or `await using`. Variables declared
+    /// with `const`, `let`, or `var` are still reported.
     ///
     /// A `using` declaration cleans up its value automatically when the enclosing block ends,
     /// so the variable can be useful even if the code never reads it.
@@ -166,14 +167,6 @@ declare_lint_rule! {
     ///     "ignoreUsingDeclarations": true
     ///   }
     /// }
-    /// ```
-    ///
-    /// #### Invalid
-    ///
-    /// Variables declared with `const`, `let`, or `var` are still reported.
-    ///
-    /// ```js,expect_diagnostic,use_options
-    /// const unused = createResource();
     /// ```
     ///
     /// #### Valid
