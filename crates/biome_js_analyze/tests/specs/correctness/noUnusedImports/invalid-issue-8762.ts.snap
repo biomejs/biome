@@ -1,0 +1,125 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-issue-8762.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// Only the first comment of a file can be its module comment. Every `@module`
+// comment below comes after another comment, so none of them count.
+
+/**
+ * Documents {@link Foo}.
+ * @module
+ */
+
+import type { Foo } from "./foo";
+import type { Bar } from "./bar";
+import type { Baz } from "./baz";
+
+/**
+ * Documents {@link Bar}.
+ * @module
+ */
+console.log("side effect");
+
+/**
+ * Documents {@link Baz}.
+ * @module
+ */
+
+```
+
+# Diagnostics
+```
+invalid-issue-8762.ts:11:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+     9 │  */
+    10 │ 
+  > 11 │ import type { Foo } from "./foo";
+       │             ^^^^^^^
+    12 │ import type { Bar } from "./bar";
+    13 │ import type { Baz } from "./baz";
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     1    │ - /*·should·generate·diagnostics·*/
+     2    │ - 
+     3    │ - //·Only·the·first·comment·of·a·file·can·be·its·module·comment.·Every·`@module`
+     4    │ - //·comment·below·comes·after·another·comment,·so·none·of·them·count.
+     5    │ - 
+     6    │ - /**
+     7    │ - ·*·Documents·{@link·Foo}.
+     8    │ - ·*·@module
+     9    │ - ·*/
+    10    │ - 
+    11    │ - import·type·{·Foo·}·from·"./foo";
+        1 │ + /*·should·generate·diagnostics·*/
+        2 │ + 
+        3 │ + //·Only·the·first·comment·of·a·file·can·be·its·module·comment.·Every·`@module`
+        4 │ + //·comment·below·comes·after·another·comment,·so·none·of·them·count.
+        5 │ + 
+        6 │ + /**
+        7 │ + ·*·Documents·{@link·Foo}.
+        8 │ + ·*·@module
+        9 │ + ·*/
+       10 │ + 
+    12 11 │   import type { Bar } from "./bar";
+    13 12 │   import type { Baz } from "./baz";
+  
+
+```
+
+```
+invalid-issue-8762.ts:12:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    11 │ import type { Foo } from "./foo";
+  > 12 │ import type { Bar } from "./bar";
+       │             ^^^^^^^
+    13 │ import type { Baz } from "./baz";
+    14 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    10 10 │   
+    11 11 │   import type { Foo } from "./foo";
+    12    │ - import·type·{·Bar·}·from·"./bar";
+    13 12 │   import type { Baz } from "./baz";
+    14 13 │   
+  
+
+```
+
+```
+invalid-issue-8762.ts:13:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    11 │ import type { Foo } from "./foo";
+    12 │ import type { Bar } from "./bar";
+  > 13 │ import type { Baz } from "./baz";
+       │             ^^^^^^^
+    14 │ 
+    15 │ /**
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    11 11 │   import type { Foo } from "./foo";
+    12 12 │   import type { Bar } from "./bar";
+    13    │ - import·type·{·Baz·}·from·"./baz";
+    14 13 │   
+    15 14 │   /**
+  
+
+```

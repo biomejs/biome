@@ -1,0 +1,49 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-issue-8762-second-module.ts
+---
+# Input
+```ts
+/**
+ * Documents {@link Foo}.
+ * @module
+ */
+
+/* should generate diagnostics */
+
+import type { Foo } from "./foo";
+import type { Bar } from "./bar";
+
+/**
+ * A second `@module` comment is not the module comment: {@link Bar} is
+ * still unused.
+ * @module
+ */
+console.log("side effect");
+
+```
+
+# Diagnostics
+```
+invalid-issue-8762-second-module.ts:9:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+     8 │ import type { Foo } from "./foo";
+   > 9 │ import type { Bar } from "./bar";
+       │             ^^^^^^^
+    10 │ 
+    11 │ /**
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     7  7 │   
+     8  8 │   import type { Foo } from "./foo";
+     9    │ - import·type·{·Bar·}·from·"./bar";
+    10  9 │   
+    11 10 │   /**
+  
+
+```
