@@ -3099,6 +3099,11 @@ export interface Nursery {
 	 */
 	noTailwindRestyledComponents?: NoTailwindRestyledComponentsConfiguration;
 	/**
+	 * Disallow rest destructuring on the result of a TanStack Query hook.
+	 * See https://biomejs.dev/linter/rules/no-tanstack-query-rest-destructuring
+	 */
+	noTanstackQueryRestDestructuring?: NoTanstackQueryRestDestructuringConfiguration;
+	/**
 	 * Disallow this outside of classes.
 	 * See https://biomejs.dev/linter/rules/no-this-outside-of-class
 	 */
@@ -5646,6 +5651,9 @@ export type NoTailwindRawColorsConfiguration =
 export type NoTailwindRestyledComponentsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTailwindRestyledComponentsOptions;
+export type NoTanstackQueryRestDestructuringConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTanstackQueryRestDestructuringOptions;
 export type NoThisOutsideOfClassConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoThisOutsideOfClassOptions;
@@ -8079,6 +8087,10 @@ export interface RuleWithNoTailwindRestyledComponentsOptions {
 	level: RulePlainConfiguration;
 	options?: NoTailwindRestyledComponentsOptions;
 }
+export interface RuleWithNoTanstackQueryRestDestructuringOptions {
+	level: RulePlainConfiguration;
+	options?: NoTanstackQueryRestDestructuringOptions;
+}
 export interface RuleWithNoThisOutsideOfClassOptions {
 	level: RulePlainConfiguration;
 	options?: NoThisOutsideOfClassOptions;
@@ -10457,6 +10469,7 @@ export interface NoTailwindRestyledComponentsOptions {
 	 */
 	allow?: TailwindComponentAllowance[];
 }
+export type NoTanstackQueryRestDestructuringOptions = {};
 export type NoThisOutsideOfClassOptions = {};
 /**
  * Options for the `noUndeclaredClasses` rule.
@@ -12079,7 +12092,6 @@ export type Category =
 	| "lint/nursery/noNonScalableViewport"
 	| "lint/nursery/noObsoleteTags"
 	| "lint/nursery/noOctal"
-	| "lint/nursery/noProcessExit"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"
@@ -12090,6 +12102,7 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForNavigation"
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
+	| "lint/nursery/noProcessExit"
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
@@ -12108,6 +12121,7 @@ export type Category =
 	| "lint/nursery/noTailwindLegacyUtilities"
 	| "lint/nursery/noTailwindRawColors"
 	| "lint/nursery/noTailwindRestyledComponents"
+	| "lint/nursery/noTanstackQueryRestDestructuring"
 	| "lint/nursery/noThisOutsideOfClass"
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUndeclaredCustomProperties"
@@ -12121,10 +12135,10 @@ export type Category =
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
-	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRequiredPropWithDefault"
+	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueVHtml"
 	| "lint/nursery/noVueVOnNumberValues"
@@ -12167,13 +12181,13 @@ export type Category =
 	| "lint/nursery/useReactNamingConvention"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useSingleTopLevelHeading"
-	| "lint/nursery/useTailwindSortedClasses"
 	| "lint/nursery/useStrictBooleanExpressions"
 	| "lint/nursery/useStringStartsEndsWith"
 	| "lint/nursery/useSvelteKitResolve"
 	| "lint/nursery/useSvelteKitRuneImports"
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useTailwindShorthandClasses"
+	| "lint/nursery/useTailwindSortedClasses"
 	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useUnaryMinus"
 	| "lint/nursery/useUniqueArgumentNames"

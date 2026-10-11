@@ -1,0 +1,57 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAlias.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { useIsFetching as useQuery } from "@tanstack/react-query";
+import { useQueries as useSuspenseQuery } from "@tanstack/react-query";
+
+// The local name is a hook name.
+const { data, ...rest } = useQuery();
+
+// The imported name takes precedence over the local name, so this is a `useQueries` call.
+const [{ data: first, ...firstRest }] = useSuspenseQuery([]);
+
+```
+
+# Diagnostics
+```
+invalidAlias.js:6:15 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Rest destructuring of a TanStack Query result is not allowed.
+  
+    5 │ // The local name is a hook name.
+  > 6 │ const { data, ...rest } = useQuery();
+      │               ^^^^^^^
+    7 │ 
+    8 │ // The imported name takes precedence over the local name, so this is a `useQueries` call.
+  
+  i Reading every field of the result makes the component re-render whenever any of them changes.
+  
+  i Destructure only the fields you use.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidAlias.js:9:23 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Rest destructuring of a TanStack Query result is not allowed.
+  
+     8 │ // The imported name takes precedence over the local name, so this is a `useQueries` call.
+   > 9 │ const [{ data: first, ...firstRest }] = useSuspenseQuery([]);
+       │                       ^^^^^^^^^^^^
+    10 │ 
+  
+  i Reading every field of the result makes the component re-render whenever any of them changes.
+  
+  i Destructure only the fields you use.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

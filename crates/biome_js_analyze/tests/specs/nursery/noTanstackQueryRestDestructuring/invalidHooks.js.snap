@@ -1,0 +1,261 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidHooks.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import {
+	useQuery,
+	useInfiniteQuery,
+	useSuspenseQuery,
+	useSuspenseInfiniteQuery,
+	useQueries,
+	useSuspenseQueries,
+} from "@tanstack/react-query";
+
+function Component() {
+	const { data, ...rest } = useQuery();
+	const { data: infiniteData, ...infiniteRest } = useInfiniteQuery();
+	const { data: suspenseData, ...suspenseRest } = useSuspenseQuery();
+	const { data: suspenseInfiniteData, ...suspenseInfiniteRest } = useSuspenseInfiniteQuery();
+	const [query1, { data: queriesData, ...queriesRest }] = useQueries([
+		{ queryKey: ["key1"], queryFn: () => {} },
+		{ queryKey: ["key2"], queryFn: () => {} },
+	]);
+	const [suspenseQuery1, { data: suspenseQueriesData, ...suspenseQueriesRest }] = useSuspenseQueries([
+		{ queryKey: ["key1"], queryFn: () => {} },
+		{ queryKey: ["key2"], queryFn: () => {} },
+	]);
+	return;
+}
+
+function SpreadInReturn() {
+	const query = useQuery();
+	return { ...query, data: query.data[0] };
+}
+
+function SpreadInObjectExpression() {
+	const query = useQuery();
+	const result = { ...query, data: query.data[0] };
+	return result;
+}
+
+function StoredQueries() {
+	const queries = useQueries([]);
+	const suspenseQueries = useSuspenseQueries([]);
+	const { ...queriesRest } = queries;
+	return [...suspenseQueries, queriesRest];
+}
+
+```
+
+# Diagnostics
+```
+invalidHooks.js:12:16 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Rest destructuring of a TanStack Query result is not allowed.
+  
+    11 │ function Component() {
+  > 12 │ 	const { data, ...rest } = useQuery();
+       │ 	              ^^^^^^^
+    13 │ 	const { data: infiniteData, ...infiniteRest } = useInfiniteQuery();
+    14 │ 	const { data: suspenseData, ...suspenseRest } = useSuspenseQuery();
+  
+  i Reading every field of the result makes the component re-render whenever any of them changes.
+  
+  i Destructure only the fields you use.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidHooks.js:13:30 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Rest destructuring of a TanStack Query result is not allowed.
+  
+    11 │ function Component() {
+    12 │ 	const { data, ...rest } = useQuery();
+  > 13 │ 	const { data: infiniteData, ...infiniteRest } = useInfiniteQuery();
+       │ 	                            ^^^^^^^^^^^^^^^
+    14 │ 	const { data: suspenseData, ...suspenseRest } = useSuspenseQuery();
+    15 │ 	const { data: suspenseInfiniteData, ...suspenseInfiniteRest } = useSuspenseInfiniteQuery();
+  
+  i Reading every field of the result makes the component re-render whenever any of them changes.
+  
+  i Destructure only the fields you use.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidHooks.js:14:30 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Rest destructuring of a TanStack Query result is not allowed.
+  
+    12 │ 	const { data, ...rest } = useQuery();
+    13 │ 	const { data: infiniteData, ...infiniteRest } = useInfiniteQuery();
+  > 14 │ 	const { data: suspenseData, ...suspenseRest } = useSuspenseQuery();
+       │ 	                            ^^^^^^^^^^^^^^^
+    15 │ 	const { data: suspenseInfiniteData, ...suspenseInfiniteRest } = useSuspenseInfiniteQuery();
+    16 │ 	const [query1, { data: queriesData, ...queriesRest }] = useQueries([
+  
+  i Reading every field of the result makes the component re-render whenever any of them changes.
+  
+  i Destructure only the fields you use.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidHooks.js:15:38 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Rest destructuring of a TanStack Query result is not allowed.
+  
+    13 │ 	const { data: infiniteData, ...infiniteRest } = useInfiniteQuery();
+    14 │ 	const { data: suspenseData, ...suspenseRest } = useSuspenseQuery();
+  > 15 │ 	const { data: suspenseInfiniteData, ...suspenseInfiniteRest } = useSuspenseInfiniteQuery();
+       │ 	                                    ^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 	const [query1, { data: queriesData, ...queriesRest }] = useQueries([
+    17 │ 		{ queryKey: ["key1"], queryFn: () => {} },
+  
+  i Reading every field of the result makes the component re-render whenever any of them changes.
+  
+  i Destructure only the fields you use.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidHooks.js:16:38 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Rest destructuring of a TanStack Query result is not allowed.
+  
+    14 │ 	const { data: suspenseData, ...suspenseRest } = useSuspenseQuery();
+    15 │ 	const { data: suspenseInfiniteData, ...suspenseInfiniteRest } = useSuspenseInfiniteQuery();
+  > 16 │ 	const [query1, { data: queriesData, ...queriesRest }] = useQueries([
+       │ 	                                    ^^^^^^^^^^^^^^
+    17 │ 		{ queryKey: ["key1"], queryFn: () => {} },
+    18 │ 		{ queryKey: ["key2"], queryFn: () => {} },
+  
+  i Reading every field of the result makes the component re-render whenever any of them changes.
+  
+  i Destructure only the fields you use.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidHooks.js:20:54 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Rest destructuring of a TanStack Query result is not allowed.
+  
+    18 │ 		{ queryKey: ["key2"], queryFn: () => {} },
+    19 │ 	]);
+  > 20 │ 	const [suspenseQuery1, { data: suspenseQueriesData, ...suspenseQueriesRest }] = useSuspenseQueries([
+       │ 	                                                    ^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 		{ queryKey: ["key1"], queryFn: () => {} },
+    22 │ 		{ queryKey: ["key2"], queryFn: () => {} },
+  
+  i Reading every field of the result makes the component re-render whenever any of them changes.
+  
+  i Destructure only the fields you use.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidHooks.js:29:11 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a TanStack Query result is not allowed.
+  
+    27 │ function SpreadInReturn() {
+    28 │ 	const query = useQuery();
+  > 29 │ 	return { ...query, data: query.data[0] };
+       │ 	         ^^^^^^^^
+    30 │ }
+    31 │ 
+  
+  i Reading every field of the result makes the component re-render whenever any of them changes.
+  
+  i Destructure only the fields you use.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidHooks.js:34:19 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a TanStack Query result is not allowed.
+  
+    32 │ function SpreadInObjectExpression() {
+    33 │ 	const query = useQuery();
+  > 34 │ 	const result = { ...query, data: query.data[0] };
+       │ 	                 ^^^^^^^^
+    35 │ 	return result;
+    36 │ }
+  
+  i Reading every field of the result makes the component re-render whenever any of them changes.
+  
+  i Destructure only the fields you use.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidHooks.js:41:10 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Rest destructuring of a TanStack Query result is not allowed.
+  
+    39 │ 	const queries = useQueries([]);
+    40 │ 	const suspenseQueries = useSuspenseQueries([]);
+  > 41 │ 	const { ...queriesRest } = queries;
+       │ 	        ^^^^^^^^^^^^^^
+    42 │ 	return [...suspenseQueries, queriesRest];
+    43 │ }
+  
+  i Reading every field of the result makes the component re-render whenever any of them changes.
+  
+  i Destructure only the fields you use.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidHooks.js:42:10 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a TanStack Query result is not allowed.
+  
+    40 │ 	const suspenseQueries = useSuspenseQueries([]);
+    41 │ 	const { ...queriesRest } = queries;
+  > 42 │ 	return [...suspenseQueries, queriesRest];
+       │ 	        ^^^^^^^^^^^^^^^^^^
+    43 │ }
+    44 │ 
+  
+  i Reading every field of the result makes the component re-render whenever any of them changes.
+  
+  i Destructure only the fields you use.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

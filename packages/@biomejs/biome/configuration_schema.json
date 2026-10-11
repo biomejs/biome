@@ -6273,6 +6273,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoTanstackQueryRestDestructuringConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTanstackQueryRestDestructuringOptions" }
+			]
+		},
+		"NoTanstackQueryRestDestructuringOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoTemplateCurlyInStringConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7706,6 +7716,13 @@
 					"description": "Disallow Tailwind utilities that override the appearance of components.\nSee https://biomejs.dev/linter/rules/no-tailwind-restyled-components",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoTailwindRestyledComponentsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noTanstackQueryRestDestructuring": {
+					"description": "Disallow rest destructuring on the result of a TanStack Query hook.\nSee https://biomejs.dev/linter/rules/no-tanstack-query-rest-destructuring",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTanstackQueryRestDestructuringConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11626,6 +11643,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoTailwindRestyledComponentsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoTanstackQueryRestDestructuringOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTanstackQueryRestDestructuringOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

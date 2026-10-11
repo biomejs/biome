@@ -1,0 +1,55 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidStored.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { useQuery } from "@tanstack/react-query";
+
+const stored = useQuery({ queryKey: ["stored"], queryFn: fetchTodos });
+const { data: storedData, ...storedRest } = stored;
+const props = { ...stored };
+
+```
+
+# Diagnostics
+```
+invalidStored.js:5:27 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Rest destructuring of a TanStack Query result is not allowed.
+  
+    4 │ const stored = useQuery({ queryKey: ["stored"], queryFn: fetchTodos });
+  > 5 │ const { data: storedData, ...storedRest } = stored;
+      │                           ^^^^^^^^^^^^^
+    6 │ const props = { ...stored };
+    7 │ 
+  
+  i Reading every field of the result makes the component re-render whenever any of them changes.
+  
+  i Destructure only the fields you use.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidStored.js:6:17 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Spreading a TanStack Query result is not allowed.
+  
+    4 │ const stored = useQuery({ queryKey: ["stored"], queryFn: fetchTodos });
+    5 │ const { data: storedData, ...storedRest } = stored;
+  > 6 │ const props = { ...stored };
+      │                 ^^^^^^^^^
+    7 │ 
+  
+  i Reading every field of the result makes the component re-render whenever any of them changes.
+  
+  i Destructure only the fields you use.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

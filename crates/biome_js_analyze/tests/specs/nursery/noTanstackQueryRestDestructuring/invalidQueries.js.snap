@@ -1,0 +1,54 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidQueries.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { useQueries, useSuspenseQueries } from "@tanstack/react-query";
+
+const [{ data: first, ...firstRest }] = useQueries({ queries: [] });
+const [{ ...suspenseFirst }] = useSuspenseQueries({ queries: [] });
+
+```
+
+# Diagnostics
+```
+invalidQueries.js:4:23 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Rest destructuring of a TanStack Query result is not allowed.
+  
+    2 │ import { useQueries, useSuspenseQueries } from "@tanstack/react-query";
+    3 │ 
+  > 4 │ const [{ data: first, ...firstRest }] = useQueries({ queries: [] });
+      │                       ^^^^^^^^^^^^
+    5 │ const [{ ...suspenseFirst }] = useSuspenseQueries({ queries: [] });
+    6 │ 
+  
+  i Reading every field of the result makes the component re-render whenever any of them changes.
+  
+  i Destructure only the fields you use.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidQueries.js:5:10 lint/nursery/noTanstackQueryRestDestructuring ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Rest destructuring of a TanStack Query result is not allowed.
+  
+    4 │ const [{ data: first, ...firstRest }] = useQueries({ queries: [] });
+  > 5 │ const [{ ...suspenseFirst }] = useSuspenseQueries({ queries: [] });
+      │          ^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i Reading every field of the result makes the component re-render whenever any of them changes.
+  
+  i Destructure only the fields you use.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

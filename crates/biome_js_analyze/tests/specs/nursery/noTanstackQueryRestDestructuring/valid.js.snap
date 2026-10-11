@@ -1,0 +1,46 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery as useOtherQuery } from "other-library";
+
+// Destructuring without a rest element
+const { data, isPending } = useQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+
+// Result kept in a variable
+const query = useQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+
+// Hook not checked by the rule
+const { mutate, ...mutation } = useMutation({ mutationFn: updateTodo });
+
+// Hook imported from another package
+const { data: other, ...otherRest } = useOtherQuery({ queryKey: ["todos"] });
+
+// Array rest element
+const [first, ...others] = useQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+
+// Not imported
+const { data: local, ...localRest } = useLocalQuery({ queryKey: ["todos"] });
+
+// Shadowed hook
+function shadowed(useQuery) {
+	const { data: shadowedData, ...shadowedRest } = useQuery();
+}
+
+// Stored result without rest or spread
+const stored = useQuery({ queryKey: ["stored"], queryFn: fetchTodos });
+const { data: storedData } = stored;
+
+// Array destructuring of useQueries without object rest
+const [{ data: firstData }, ...others] = useQueries({ queries: [] });
+
+// Type-only imports are not hooks
+import type { useQuery as useTypedQuery } from "@tanstack/react-query";
+
+```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
