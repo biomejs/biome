@@ -2923,10 +2923,16 @@ fn format_js_with_embedded_css_with_interpolations() {
   width : ${({width})=>width}px;
   border-${side}:1px solid;
   ${truncate};
+  ${base}   ${hover};
   content: '${quote}';
   background:url(${image("logo.png")});
   ${Icon}:hover &{
     margin:-${gap}px;
+  }
+  ${mixin}
+  /* a comment */
+  div{
+    margin:0;
   }
   @media (min-width:${breakpoint}px){
     display:none;
@@ -2983,10 +2989,16 @@ fn format_js_with_embedded_css_with_interpolations() {
     	width: ${({ width }) => width}px;
     	border-${side}: 1px solid;
     	${truncate};
+    	${base} ${hover};
     	content: '${quote}';
     	background: url(${image("logo.png")});
     	${Icon}:hover & {
     		margin: -${gap}px;
+    	}
+    	${mixin}
+    	/* a comment */
+    	div {
+    		margin: 0;
     	}
     	@media (min-width: ${breakpoint}px) {
     		display: none;
@@ -3023,6 +3035,64 @@ fn format_js_with_embedded_css_with_interpolations() {
         result.as_code(),
         "Formatter is not idempotent"
     );
+}
+
+#[test]
+fn format_js_with_embedded_css_breaking_interpolations() {
+    const FILE_PATH: &str = "/project/file.js";
+    const FILE_CONTENT: &str = r#"const Title = styled.h1`
+  font-size: ${(props) => (props.large ? theme.typography.headline.large : theme.typography.headline.medium)};
+`;"#;
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(FILE_PATH), FILE_CONTENT);
+
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/");
+
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                javascript: Some(JsConfiguration {
+                    experimental_embedded_snippets_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(FILE_PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .format_file(FormatFileParams {
+            project_key,
+            path: Utf8PathBuf::from(FILE_PATH).into(),
+            inline_config: None,
+        })
+        .unwrap();
+
+    insta::assert_snapshot!(result.as_code(), @r"
+    const Title = styled.h1`
+    	font-size: ${(props) =>
+    		props.large
+    			? theme.typography.headline.large
+    			: theme.typography.headline.medium};
+    `;
+    ");
 }
 
 #[test]
