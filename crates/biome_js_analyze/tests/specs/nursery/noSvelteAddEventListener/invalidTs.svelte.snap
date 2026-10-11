@@ -1,0 +1,48 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidTs.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script lang="ts">
+	import { on } from 'svelte/events';
+
+	const handler = (ev: Event) => {
+		console.log(ev);
+	};
+
+	(window as any).addEventListener('message', handler);
+</script>
+
+```
+
+# Diagnostics
+```
+invalidTs.svelte:9:2 lint/nursery/noSvelteAddEventListener  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of addEventListener.
+  
+     7 │ 	};
+     8 │ 
+   > 9 │ 	(window as any).addEventListener('message', handler);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ </script>
+    11 │ 
+  
+  i Listeners attached with addEventListener bypass Svelte's event delegation, so they may not run in the expected order relative to other event handlers.
+  
+  i Use the on function from svelte/events instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use on from svelte/events instead.
+  
+    6 6 │     };
+    7 7 │   
+    8   │ - → (window·as·any).addEventListener('message',·handler);
+      8 │ + → on(window·as·any,·'message',·handler);
+    9 9 │   
+  
+
+```
