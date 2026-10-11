@@ -10,7 +10,7 @@ use crate::{
     run_cli_with_server_workspace,
 };
 use biome_console::{BufferConsole, LogLevel, MarkupBuf, markup};
-use biome_fs::{ErrorEntry, FileSystemExt, MemoryFileSystem, OsFileSystem};
+use biome_fs::{ErrorEntry, FileSystemExt, MemoryFileSystem, OsFileSystem, TemporaryFs};
 use camino::{Utf8Path, Utf8PathBuf};
 use std::env::temp_dir;
 use std::fs::{File, create_dir, create_dir_all, remove_dir_all};
@@ -2346,6 +2346,39 @@ fn check_stdin_ignores_unknown_file_path() {
         module_path!(),
         "check_stdin_ignores_unknown_file_path",
         fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn check_stdin_ignored_path_is_relative_to_the_working_directory() {
+    let mut console = BufferConsole::default();
+    let fs = TemporaryFs::new("check_stdin_ignored_path_is_relative");
+    console.in_buffer.push("int main() {}".into());
+
+    let result = run_cli_with_dyn_fs(
+        Box::new(fs.create_os()),
+        &mut console,
+        Args::from(
+            [
+                "check",
+                "--stdin-file-path=src/mock.cc",
+                "--files-ignore-unknown=true",
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli_with_dyn_fs returned {result:?}");
+    assert!(console.out_buffer.iter().any(|message| {
+        markup_to_string(markup! {{message.content}}).contains("the path `src/mock.cc` is ignored")
+    }));
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "check_stdin_ignored_path_is_relative_to_the_working_directory",
+        fs.create_mem(),
         console,
         result,
     ));
