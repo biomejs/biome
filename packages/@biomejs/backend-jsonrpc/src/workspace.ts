@@ -3304,6 +3304,11 @@ export interface Nursery {
 	 */
 	useLogicalProperties?: UseLogicalPropertiesConfiguration;
 	/**
+	 * Require function names to match the name of the variable or property they are assigned to.
+	 * See https://biomejs.dev/linter/rules/use-matching-function-name
+	 */
+	useMatchingFunctionName?: UseMatchingFunctionNameConfiguration;
+	/**
 	 * Use modern Math APIs for common mathematical operations.
 	 * See https://biomejs.dev/linter/rules/use-modern-math-apis
 	 */
@@ -5784,6 +5789,9 @@ export type UseLayeredStylesConfiguration =
 export type UseLogicalPropertiesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLogicalPropertiesOptions;
+export type UseMatchingFunctionNameConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseMatchingFunctionNameOptions;
 export type UseModernMathApisConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseModernMathApisOptions;
@@ -8323,6 +8331,10 @@ export interface RuleWithUseLogicalPropertiesOptions {
 	level: RulePlainConfiguration;
 	options?: UseLogicalPropertiesOptions;
 }
+export interface RuleWithUseMatchingFunctionNameOptions {
+	level: RulePlainConfiguration;
+	options?: UseMatchingFunctionNameOptions;
+}
 export interface RuleWithUseModernMathApisOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -10645,6 +10657,7 @@ export interface UseLogicalPropertiesOptions {
 	 */
 	direction?: UseLogicalPropertiesDirection;
 }
+export type UseMatchingFunctionNameOptions = {};
 export type UseModernMathApisOptions = {};
 export type UseNamedFunctionOptions = {};
 export type UseNamedLayerOptions = {};
@@ -12258,6 +12271,9 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLayeredStyles"
 	| "lint/nursery/useLogicalProperties"
+	| "lint/nursery/useMatchingFunctionName"
+	| "lint/nursery/useMathMinMax"
+	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useModernMathApis"
 	| "lint/nursery/useNamedCaptureGroup"
 	| "lint/nursery/useNamedFunction"

@@ -2291,6 +2291,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::use_lone_executable_definition::UseLoneExecutableDefinitionOptions,
         >(),
     ));
+    result.push(("nursery", "useMatchingFunctionName", TypeId::of::<biome_rule_options::use_matching_function_name::UseMatchingFunctionNameOptions>()));
     result.push((
         "complexity",
         "useMathMinMax",
