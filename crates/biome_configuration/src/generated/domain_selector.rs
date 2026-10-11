@@ -110,6 +110,7 @@ static REACTNATIVE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|
     vec![
         RuleFilter::Rule("correctness", "noReactNativeRawText"),
         RuleFilter::Rule("correctness", "useReactNativePlatformComponents"),
+        RuleFilter::Rule("nursery", "useReactNativeValidPlatformColors"),
         RuleFilter::Rule("style", "noReactNativeLiteralColors"),
         RuleFilter::Rule("suspicious", "noReactNativeDeepImports"),
     ]

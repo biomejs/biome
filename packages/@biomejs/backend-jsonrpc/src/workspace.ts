@@ -3334,6 +3334,11 @@ export interface Nursery {
 	 */
 	useReactNamingConvention?: UseReactNamingConventionConfiguration;
 	/**
+	 * Require PlatformColor() and DynamicColorIOS() calls to use values written directly in the call.
+	 * See https://biomejs.dev/linter/rules/use-react-native-valid-platform-colors
+	 */
+	useReactNativeValidPlatformColors?: UseReactNativeValidPlatformColorsConfiguration;
+	/**
 	 * Enforce RegExp#exec over String#match if no global flag is provided.
 	 * See https://biomejs.dev/linter/rules/use-regexp-exec
 	 */
@@ -5792,6 +5797,9 @@ export type UseReactFunctionComponentDefinitionConfiguration =
 export type UseReactNamingConventionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReactNamingConventionOptions;
+export type UseReactNativeValidPlatformColorsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseReactNativeValidPlatformColorsOptions;
 export type UseRegexpExecConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseRegexpExecOptions;
@@ -8339,6 +8347,10 @@ export interface RuleWithUseReactNamingConventionOptions {
 	level: RulePlainConfiguration;
 	options?: UseReactNamingConventionOptions;
 }
+export interface RuleWithUseReactNativeValidPlatformColorsOptions {
+	level: RulePlainConfiguration;
+	options?: UseReactNativeValidPlatformColorsOptions;
+}
 export interface RuleWithUseRegexpExecOptions {
 	level: RulePlainConfiguration;
 	options?: UseRegexpExecOptions;
@@ -10651,6 +10663,7 @@ export interface UseReactFunctionComponentDefinitionOptions {
 	namedComponents?: ComponentDefinitionStyle;
 }
 export type UseReactNamingConventionOptions = {};
+export type UseReactNativeValidPlatformColorsOptions = {};
 export type UseRegexpExecOptions = {};
 export interface UseSingleTopLevelHeadingOptions {
 	/**
@@ -12112,7 +12125,6 @@ export type Category =
 	| "lint/nursery/noNonScalableViewport"
 	| "lint/nursery/noObsoleteTags"
 	| "lint/nursery/noOctal"
-	| "lint/nursery/noProcessExit"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"
@@ -12123,6 +12135,7 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForNavigation"
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
+	| "lint/nursery/noProcessExit"
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
@@ -12154,10 +12167,10 @@ export type Category =
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
-	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRequiredPropWithDefault"
+	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueVHtml"
 	| "lint/nursery/noVueVOnNumberValues"
@@ -12198,15 +12211,16 @@ export type Category =
 	| "lint/nursery/useReactCompiler"
 	| "lint/nursery/useReactFunctionComponentDefinition"
 	| "lint/nursery/useReactNamingConvention"
+	| "lint/nursery/useReactNativeValidPlatformColors"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useSingleTopLevelHeading"
-	| "lint/nursery/useTailwindSortedClasses"
 	| "lint/nursery/useStrictBooleanExpressions"
 	| "lint/nursery/useStringStartsEndsWith"
 	| "lint/nursery/useSvelteKitResolve"
 	| "lint/nursery/useSvelteKitRuneImports"
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useTailwindShorthandClasses"
+	| "lint/nursery/useTailwindSortedClasses"
 	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useUnaryMinus"
 	| "lint/nursery/useUniqueArgumentNames"
