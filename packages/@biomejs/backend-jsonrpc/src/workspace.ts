@@ -3079,6 +3079,11 @@ export interface Nursery {
 	 */
 	noSvelteUnnecessaryStateWrap?: NoSvelteUnnecessaryStateWrapConfiguration;
 	/**
+	 * Disallow $derived.by() when $derived() is sufficient.
+	 * See https://biomejs.dev/linter/rules/no-svelte-useless-derived-by
+	 */
+	noSvelteUselessDerivedBy?: NoSvelteUselessDerivedByConfiguration;
+	/**
 	 * Disallow arbitrary values in Tailwind CSS utility classes.
 	 * See https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value
 	 */
@@ -5634,6 +5639,9 @@ export type NoSvelteObjectInTextMustachesConfiguration =
 export type NoSvelteUnnecessaryStateWrapConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteUnnecessaryStateWrapOptions;
+export type NoSvelteUselessDerivedByConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteUselessDerivedByOptions;
 export type NoTailwindArbitraryValueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTailwindArbitraryValueOptions;
@@ -8059,6 +8067,14 @@ export interface RuleWithNoSvelteUnnecessaryStateWrapOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteUnnecessaryStateWrapOptions;
 }
+export interface RuleWithNoSvelteUselessDerivedByOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoSvelteUselessDerivedByOptions;
+}
 export interface RuleWithNoTailwindArbitraryValueOptions {
 	level: RulePlainConfiguration;
 	options?: NoTailwindArbitraryValueOptions;
@@ -10434,6 +10450,7 @@ export interface NoSvelteUnnecessaryStateWrapOptions {
 	 */
 	allowReassign?: boolean;
 }
+export type NoSvelteUselessDerivedByOptions = {};
 export interface NoTailwindArbitraryValueOptions {
 	/**
 	 * Categories of utilities that may use arbitrary values. Defaults to an empty list.
@@ -12104,6 +12121,7 @@ export type Category =
 	| "lint/nursery/noSvelteLegacyConst"
 	| "lint/nursery/noSvelteObjectInTextMustaches"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
+	| "lint/nursery/noSvelteUselessDerivedBy"
 	| "lint/nursery/noTailwindArbitraryValue"
 	| "lint/nursery/noTailwindLegacyUtilities"
 	| "lint/nursery/noTailwindRawColors"

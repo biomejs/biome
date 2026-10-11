@@ -6179,6 +6179,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoSvelteUselessDerivedByConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSvelteUselessDerivedByOptions" }
+			]
+		},
+		"NoSvelteUselessDerivedByOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoSvgWithoutTitleConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7678,6 +7688,13 @@
 					"description": "Disallow unnecessary $state wrapping of reactive classes.\nSee https://biomejs.dev/linter/rules/no-svelte-unnecessary-state-wrap",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSvelteUnnecessaryStateWrapConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSvelteUselessDerivedBy": {
+					"description": "Disallow $derived.by() when $derived() is sufficient.\nSee https://biomejs.dev/linter/rules/no-svelte-useless-derived-by",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSvelteUselessDerivedByConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11555,6 +11572,19 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSvelteUnnecessaryStateWrapOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSvelteUselessDerivedByOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSvelteUselessDerivedByOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

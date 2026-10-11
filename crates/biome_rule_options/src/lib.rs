@@ -268,6 +268,7 @@ pub mod no_svelte_inspect;
 pub mod no_svelte_legacy_const;
 pub mod no_svelte_object_in_text_mustaches;
 pub mod no_svelte_unnecessary_state_wrap;
+pub mod no_svelte_useless_derived_by;
 pub mod no_svg_without_title;
 pub mod no_switch_declarations;
 pub mod no_sync_scripts;
