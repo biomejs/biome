@@ -3473,6 +3473,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoArraySortForMinMaxConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoArraySortForMinMaxOptions" }
+			]
+		},
+		"NoArraySortForMinMaxOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoAssignInExpressionsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7833,6 +7843,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noArraySortForMinMax": {
+					"description": "Disallow sorting an array only to read its smallest or largest value.\nSee https://biomejs.dev/linter/rules/no-array-sort-for-min-max",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoArraySortForMinMaxConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noAstroConflictingSetDirectives": {
 					"description": "Disallow conflicting content sources on Astro elements.\nSee https://biomejs.dev/linter/rules/no-astro-conflicting-set-directives",
 					"anyOf": [
@@ -9773,6 +9790,19 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoArrayIndexKeyOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoArraySortForMinMaxOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoArraySortForMinMaxOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
