@@ -1261,6 +1261,7 @@ export interface RuleDomains {
 	solid?: RuleDomainValue;
 	svelte?: RuleDomainValue;
 	tailwind?: RuleDomainValue;
+	tanstackQuery?: RuleDomainValue;
 	test?: RuleDomainValue;
 	turborepo?: RuleDomainValue;
 	types?: RuleDomainValue;
@@ -3098,6 +3099,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/no-tailwind-restyled-components
 	 */
 	noTailwindRestyledComponents?: NoTailwindRestyledComponentsConfiguration;
+	/**
+	 * Disallow rest destructuring and object spread on TanStack Query results.
+	 * See https://biomejs.dev/linter/rules/no-tanstack-query-rest-destructuring
+	 */
+	noTanstackQueryRestDestructuring?: NoTanstackQueryRestDestructuringConfiguration;
 	/**
 	 * Disallow this outside of classes.
 	 * See https://biomejs.dev/linter/rules/no-this-outside-of-class
@@ -5636,6 +5642,9 @@ export type NoTailwindRawColorsConfiguration =
 export type NoTailwindRestyledComponentsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTailwindRestyledComponentsOptions;
+export type NoTanstackQueryRestDestructuringConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTanstackQueryRestDestructuringOptions;
 export type NoThisOutsideOfClassConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoThisOutsideOfClassOptions;
@@ -8063,6 +8072,10 @@ export interface RuleWithNoTailwindRestyledComponentsOptions {
 	level: RulePlainConfiguration;
 	options?: NoTailwindRestyledComponentsOptions;
 }
+export interface RuleWithNoTanstackQueryRestDestructuringOptions {
+	level: RulePlainConfiguration;
+	options?: NoTanstackQueryRestDestructuringOptions;
+}
 export interface RuleWithNoThisOutsideOfClassOptions {
 	level: RulePlainConfiguration;
 	options?: NoThisOutsideOfClassOptions;
@@ -10433,6 +10446,7 @@ export interface NoTailwindRestyledComponentsOptions {
 	 */
 	allow?: TailwindComponentAllowance[];
 }
+export type NoTanstackQueryRestDestructuringOptions = {};
 export type NoThisOutsideOfClassOptions = {};
 /**
  * Options for the `noUndeclaredClasses` rule.
@@ -12082,6 +12096,7 @@ export type Category =
 	| "lint/nursery/noTailwindLegacyUtilities"
 	| "lint/nursery/noTailwindRawColors"
 	| "lint/nursery/noTailwindRestyledComponents"
+	| "lint/nursery/noTanstackQueryRestDestructuring"
 	| "lint/nursery/noThisOutsideOfClass"
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUndeclaredCustomProperties"
