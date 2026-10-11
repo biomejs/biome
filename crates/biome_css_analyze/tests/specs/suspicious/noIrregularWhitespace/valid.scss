@@ -1,0 +1,6 @@
+/* should not generate diagnostics */
+.foo {
+	content: '　';
+}
+
+$font: "Trickster　Font";

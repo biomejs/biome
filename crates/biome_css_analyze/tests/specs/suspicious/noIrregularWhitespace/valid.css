@@ -8,3 +8,12 @@
 	padding: 10px;
 }
 
+.string-with-irregular-whitespace::before {
+	content: '　';
+}
+
+.string-with-irregular-whitespace-2 {
+	font-family: "Trickster　Font";
+}
+
+

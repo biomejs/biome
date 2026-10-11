@@ -2,7 +2,7 @@ use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{AnyCssRule, CssSyntaxNode};
+use biome_css_syntax::{AnyCssRule, CssSyntaxKind, CssSyntaxNode};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, Direction, TextRange};
 use biome_rule_options::no_irregular_whitespace::NoIrregularWhitespaceOptions;
@@ -87,6 +87,13 @@ fn get_irregular_whitespace(syntax: &CssSyntaxNode) -> Vec<TextRange> {
 
     let mut results = vec![];
     for token in syntax.descendants_tokens(Direction::Next) {
+        if matches!(
+            token.kind(),
+            CssSyntaxKind::CSS_STRING_LITERAL | CssSyntaxKind::SCSS_STRING_CONTENT_LITERAL
+        ) {
+            continue;
+        }
+
         if !token.has_leading_comments()
             && !token.has_trailing_comments()
             && token.text().chars().any(is_irregular_whitespace)
