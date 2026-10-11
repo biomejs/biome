@@ -11,7 +11,7 @@ use biome_configuration::{self as biome_config};
 use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_diagnostics::Location;
-use biome_rule_options::{no_js_restricted_properties, no_restricted_globals};
+use biome_rule_options::{no_js_restricted_properties, no_restricted_globals, no_unused_variables};
 use indexmap::IndexMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 
@@ -555,7 +555,7 @@ impl eslint_eslint::FlatConfigData {
                         && !rules.is_empty()
                     {
                         override_pat.linter = Some(biome_config::OverrideLinterConfiguration {
-                            rules: Some(rules.into_biome_rules(options, &mut results)),
+                            rules: Some(rules.into_biome_rules(true, options, &mut results)),
                             ..Default::default()
                         });
                     }
@@ -568,7 +568,7 @@ impl eslint_eslint::FlatConfigData {
             global_config_object
         };
         let mut rules = if let Some(rules) = global_config_object.rules {
-            rules.into_biome_rules(options, &mut results)
+            rules.into_biome_rules(false, options, &mut results)
         } else {
             biome_config::Rules::default()
         };
@@ -609,7 +609,7 @@ impl eslint_eslint::LegacyConfigData {
             biome_config.javascript = Some(js_config)
         }
         let mut linter = biome_config::LinterConfiguration::default();
-        let mut rules = self.rules.into_biome_rules(options, &mut results);
+        let mut rules = self.rules.into_biome_rules(false, options, &mut results);
         rules.preset = Some(PresetConfig::None);
         linter.rules = Some(rules);
         let includes = to_biome_includes(&[] as &[&str], self.ignore_patterns.as_slice());
@@ -634,7 +634,11 @@ impl eslint_eslint::LegacyConfigData {
                     .then_some(biome_configuration::OverrideGlobs::Globs(includes.into()));
                 if !override_elt.rules.is_empty() {
                     override_pattern.linter = Some(biome_config::OverrideLinterConfiguration {
-                        rules: Some(override_elt.rules.into_biome_rules(options, &mut results)),
+                        rules: Some(override_elt.rules.into_biome_rules(
+                            true,
+                            options,
+                            &mut results,
+                        )),
                         ..Default::default()
                     });
                 }
@@ -648,8 +652,11 @@ impl eslint_eslint::LegacyConfigData {
 }
 
 impl eslint_eslint::Rules {
+    /// `is_override` is `true` when the rules apply on top of a base configuration,
+    /// such as the rules of an ESLint override or of a non-global flat config object.
     pub(crate) fn into_biome_rules(
         self,
+        is_override: bool,
         options: &MigrationOptions,
         results: &mut MigrationResults,
     ) -> biome_config::Rules {
@@ -660,6 +667,7 @@ impl eslint_eslint::Rules {
                 &mut rules,
                 &mut restricted_elements,
                 eslint_rule,
+                is_override,
                 options,
                 results,
             );
@@ -676,6 +684,7 @@ fn migrate_eslint_rule(
     rules: &mut biome_config::Rules,
     restricted_elements: &mut RestrictedElementsMigration,
     rule: eslint_eslint::Rule,
+    is_override: bool,
     opts: &MigrationOptions,
     results: &mut MigrationResults,
 ) {
@@ -824,6 +833,53 @@ fn migrate_eslint_rule(
                                 ),
                             },
                         ));
+                }
+            }
+        }
+        eslint_eslint::Rule::NoUnusedVars(conf)
+        | eslint_eslint::Rule::TypeScriptNoUnusedVars(conf)
+        | eslint_eslint::Rule::UnusedImportsNoUnusedVars(conf) => {
+            // A disabled rule must not change the options of an enabled one
+            // that migrates to the same Biome rule.
+            if !migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results)
+                || matches!(conf.severity(), eslint_eslint::Severity::Off)
+            {
+                return;
+            }
+            let rule_options = match conf {
+                eslint_eslint::RuleConf::Option(_, rule_options) => rule_options,
+                // Without an options object, an override keeps the options of its base configuration.
+                _ if is_override => return,
+                _ => eslint_eslint::NoUnusedVarsOptions::default(),
+            };
+            let rule_options: no_unused_variables::NoUnusedVariablesOptions = rule_options.into();
+            let group = rules.correctness.get_or_insert_with(Default::default);
+            if let SeverityOrGroup::Group(group) = group
+                && let Some(rule) = group.no_unused_variables.as_mut()
+            {
+                match rule {
+                    biome_config::RuleFixConfiguration::Plain(level) => {
+                        *rule = biome_config::RuleFixConfiguration::WithOptions(
+                            biome_config::RuleWithFixOptions {
+                                level: *level,
+                                fix: None,
+                                options: rule_options,
+                            },
+                        );
+                    }
+                    // Another enabled ESLint rule already migrated to this rule.
+                    // ESLint reports a variable if any of them reports it,
+                    // so a variable is ignored only if all of them ignore it.
+                    biome_config::RuleFixConfiguration::WithOptions(existing) => {
+                        let existing = &mut existing.options;
+                        existing.ignore_rest_siblings = Some(
+                            existing.ignore_rest_siblings() && rule_options.ignore_rest_siblings(),
+                        );
+                        existing.ignore_using_declarations = Some(
+                            existing.ignore_using_declarations()
+                                && rule_options.ignore_using_declarations(),
+                        );
+                    }
                 }
             }
         }

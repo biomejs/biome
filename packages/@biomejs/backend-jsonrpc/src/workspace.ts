@@ -10249,6 +10249,10 @@ export interface NoUnusedVariablesOptions {
 	 * Whether to ignore unused variables from an object destructuring with a spread.
 	 */
 	ignoreRestSiblings?: boolean;
+	/**
+	 * Whether to ignore unused variables declared with `using` or `await using`.
+	 */
+	ignoreUsingDeclarations?: boolean;
 }
 export type NoVoidElementsWithChildrenOptions = {};
 export type NoVoidTypeReturnOptions = {};

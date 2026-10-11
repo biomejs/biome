@@ -151,6 +151,41 @@ declare_lint_rule! {
     /// console.log(other);
     /// ```
     ///
+    /// ### `ignoreUsingDeclarations`
+    ///
+    /// Default: `false`
+    ///
+    /// Whether to ignore unused variables declared with `using` or `await using`.
+    ///
+    /// A `using` declaration cleans up its value automatically when the enclosing block ends,
+    /// so the variable can be useful even if the code never reads it.
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "ignoreUsingDeclarations": true
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// #### Invalid
+    ///
+    /// Variables declared with `const`, `let`, or `var` are still reported.
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// const unused = createResource();
+    /// ```
+    ///
+    /// #### Valid
+    ///
+    /// ```js,use_options
+    /// async function main() {
+    ///     using resource = createResource();
+    ///     await using connection = await openConnection();
+    /// }
+    /// main();
+    /// ```
+    ///
     /// ### `ignore`
     ///
     /// An object that allows excluding matching identifiers from this rule.
@@ -526,8 +561,13 @@ fn suggested_fix_if_unused(
         | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_) => {
             None
         }
-        node @ AnyJsBindingDeclaration::JsVariableDeclarator(_) => {
-            if is_in_ambient_context(node.syntax()) {
+        AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
+            if is_in_ambient_context(declarator.syntax())
+                || (options.ignore_using_declarations()
+                    && declarator
+                        .declaration()
+                        .is_some_and(|declaration| declaration.is_using()))
+            {
                 None
             } else {
                 suggestion_for_binding(binding)

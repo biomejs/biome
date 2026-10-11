@@ -1,0 +1,47 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: typescript_with_core_off.jsonc
+---
+## ESLint Config
+
+```json
+{
+	"rules": {
+		"@typescript-eslint/no-unused-vars": [
+			"error",
+			{ "ignoreRestSiblings": true, "ignoreUsingDeclarations": true }
+		],
+		"no-unused-vars": "off"
+	}
+}
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"preset": "none",
+			"correctness": {
+				"noUnusedVariables": {
+					"level": "error",
+					"options": {
+						"ignoreRestSiblings": true,
+						"ignoreUsingDeclarations": true
+					}
+				}
+			}
+		}
+	}
+}
+
+```
