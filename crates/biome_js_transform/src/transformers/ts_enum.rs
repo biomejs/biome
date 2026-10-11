@@ -18,7 +18,7 @@ use biome_js_syntax::{
     JsFunctionExpression, JsInitializerClause, JsLogicalExpression, JsModuleItemList,
     JsStatementList, JsSyntaxKind, JsVariableStatement, T, TsEnumDeclaration,
 };
-use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{AstNode, BatchMutationExt};
 
 declare_transformation! {
     /// Transform a TypeScript [TsEnumDeclaration]
@@ -113,11 +113,7 @@ fn make_variable(node: &TsEnumMembers) -> JsVariableStatement {
 
     let list = js_variable_declarator_list([binding], []);
     js_variable_statement(
-        js_variable_declaration(
-            token(T![var]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-            list,
-        )
-        .build(),
+        js_variable_declaration(token(T![var]).with_trailing_space(), list).build(),
     )
     .with_semicolon_token(token(T![;]))
     .build()

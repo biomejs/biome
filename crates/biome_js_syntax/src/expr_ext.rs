@@ -563,10 +563,9 @@ impl JsNumberLiteralExpression {
     ///
     /// ```
     /// use biome_js_factory::make;
-    /// use biome_rowan::TriviaPieceKind;
     ///
     /// let number = make::js_number_literal_expression(make::js_number_literal("1.23")
-    ///     .with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]));
+    ///     .with_trailing_space());
     /// assert_eq!(number.as_number().unwrap(), 1.23);
     /// ```
     pub fn as_number(&self) -> Option<f64> {
@@ -581,10 +580,9 @@ impl JsStringLiteralExpression {
     ///
     /// ```
     /// use biome_js_factory::make;
-    /// use biome_rowan::TriviaPieceKind;
     ///
     ///let string = make::js_string_literal_expression(make::js_string_literal("foo")
-    ///     .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]));
+    ///     .with_leading_space());
     /// assert_eq!(string.inner_string_text().unwrap().text(), "foo");
     /// ```
     pub fn inner_string_text(&self) -> SyntaxResult<TokenText> {
@@ -2324,10 +2322,9 @@ impl TsStringLiteralType {
     ///
     /// ```
     /// use biome_js_factory::make;
-    /// use biome_rowan::TriviaPieceKind;
     ///
     /// let string = make::ts_string_literal_type(make::js_string_literal("foo")
-    ///     .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]));
+    ///     .with_leading_space());
     /// assert_eq!(string.inner_string_text().unwrap().text(), "foo");
     /// ```
     pub fn inner_string_text(&self) -> SyntaxResult<TokenText> {

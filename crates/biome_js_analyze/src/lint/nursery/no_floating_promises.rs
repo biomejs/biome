@@ -7,7 +7,7 @@ use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsName, JsExpressionStatement, JsSyntaxKind, T,
 };
 use biome_module_graph::type_inference::TypeInferenceClassification;
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::no_floating_promises::NoFloatingPromisesOptions;
 
 use crate::{JsRuleAction, ast_utils::is_in_async_function, services::typed::Typed};
@@ -314,8 +314,7 @@ impl Rule for NoFloatingPromises {
 
                 let await_expression =
                     AnyJsExpression::JsAwaitExpression(make::js_await_expression(
-                        make::token(JsSyntaxKind::AWAIT_KW)
-                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                        make::token(JsSyntaxKind::AWAIT_KW).with_trailing_space(),
                         call_expression,
                     ));
 
@@ -330,8 +329,7 @@ impl Rule for NoFloatingPromises {
             NoFloatingPromisesState::UnhandledPromise => {
                 let await_expression =
                     AnyJsExpression::JsAwaitExpression(make::js_await_expression(
-                        make::token(JsSyntaxKind::AWAIT_KW)
-                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                        make::token(JsSyntaxKind::AWAIT_KW).with_trailing_space(),
                         expression.clone().trim_comments_and_trivia()?,
                     ));
 

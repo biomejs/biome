@@ -9,7 +9,7 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsObjectMember, AnyJsObjectMemberName, JsLanguage, T, inner_string_text,
 };
-use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_consistent_object_definitions::{
     ObjectPropertySyntax, UseConsistentObjectDefinitionsOptions,
 };
@@ -249,7 +249,7 @@ impl Rule for UseConsistentObjectDefinitions {
 
                 make::js_property_object_member(
                     make::js_literal_member_name(node.name().ok()?.value_token().ok()?).into(),
-                    make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                    make::token(T![:]).with_trailing_space(),
                     make::js_identifier_expression(node.name().ok()?).into(),
                 )
                 .with_leading_trivia_pieces(leading_trivia.pieces())?
@@ -261,8 +261,7 @@ impl Rule for UseConsistentObjectDefinitions {
 
                 let mut func_token = make::token(T![function]);
                 if node.star_token().is_none() {
-                    func_token =
-                        func_token.with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+                    func_token = func_token.with_trailing_space();
                 }
 
                 let mut func = make::js_function_expression(
@@ -277,9 +276,7 @@ impl Rule for UseConsistentObjectDefinitions {
 
                 if let Some(token) = node.star_token() {
                     // `*foo() {}` -> `foo: function* () {}`
-                    func = func.with_star_token(
-                        token.with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                    );
+                    func = func.with_star_token(token.with_trailing_space());
                 }
 
                 if let Some(type_params) = node.type_parameters() {
@@ -292,7 +289,7 @@ impl Rule for UseConsistentObjectDefinitions {
 
                 make::js_property_object_member(
                     node.name().ok()?,
-                    make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                    make::token(T![:]).with_trailing_space(),
                     func.build().into(),
                 )
                 .with_leading_trivia_pieces(leading_trivia.pieces())?

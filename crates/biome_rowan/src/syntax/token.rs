@@ -431,6 +431,30 @@ impl<L: Language> SyntaxToken<L> {
         ))
     }
 
+    /// Return a new version of this token with its leading trivia replaced with a single space.
+    #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
+    pub fn with_leading_space(&self) -> Self {
+        self.with_leading_trivia([(TriviaPieceKind::Whitespace, " ")])
+    }
+
+    /// Return a new version of this token with its trailing trivia replaced with a single space.
+    #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
+    pub fn with_trailing_space(&self) -> Self {
+        self.with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
+    }
+
+    /// Return a new version of this token with its leading and trailing trivia each replaced with a single space.
+    #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
+    pub fn with_surrounding_spaces(&self) -> Self {
+        self.with_leading_space().with_trailing_space()
+    }
+
+    /// Return a new version of this token with its leading trivia replaced with a single newline.
+    #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
+    pub fn with_leading_newline(&self) -> Self {
+        self.with_leading_trivia([(TriviaPieceKind::Newline, "\n")])
+    }
+
     /// Return whitespace that juxtapose the token until the first non-whitespace item.
     pub fn indentation_trivia_pieces(
         &self,

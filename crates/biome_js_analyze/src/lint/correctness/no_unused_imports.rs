@@ -28,7 +28,7 @@ use biome_languages::JsFileSource;
 use biome_languages::javascript::JsEmbeddingKind;
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedElement, AstSeparatedList, BatchMutationExt, Language,
-    NodeOrToken, SyntaxNode, TextRange, TriviaPieceKind, WalkEvent, declare_node_union,
+    NodeOrToken, SyntaxNode, TextRange, WalkEvent, declare_node_union,
 };
 use regex::Regex;
 use rustc_hash::FxHashSet;
@@ -158,18 +158,10 @@ impl Rule for NoUnusedImports {
             AnyJsImportClause::JsImportCombinedClause(clause) => {
                 let default_local_name = clause.default_specifier().ok()?.local_name().ok()?;
 
-                let is_default_import_unused = is_unused(
-                    ctx,
-                    embedded,
-                    &default_local_name,
-                );
+                let is_default_import_unused = is_unused(ctx, embedded, &default_local_name);
                 let (is_combined_unused, named_import_range) = match clause.specifier().ok()? {
                     AnyJsCombinedSpecifier::JsNamedImportSpecifiers(specifiers) => {
-                        match unused_named_specifiers(
-                            ctx,
-                            embedded,
-                            &specifiers,
-                        ) {
+                        match unused_named_specifiers(ctx, embedded, &specifiers) {
                             Some(Unused::AllImports(range) | Unused::EmptyStatement(range)) => {
                                 (true, range)
                             }
@@ -203,7 +195,8 @@ impl Rule for NoUnusedImports {
             }
             AnyJsImportClause::JsImportDefaultClause(clause) => {
                 let local_name = clause.default_specifier().ok()?.local_name().ok()?;
-                is_unused(ctx, embedded, &local_name).then_some(Unused::AllImports(local_name.range()))
+                is_unused(ctx, embedded, &local_name)
+                    .then_some(Unused::AllImports(local_name.range()))
             }
             AnyJsImportClause::JsImportNamedClause(clause) => {
                 // exception: allow type augmentation imports
@@ -215,15 +208,12 @@ impl Rule for NoUnusedImports {
                     return None;
                 }
 
-                unused_named_specifiers(
-                    ctx,
-                    embedded,
-                    &clause.named_specifiers().ok()?,
-                )
+                unused_named_specifiers(ctx, embedded, &clause.named_specifiers().ok()?)
             }
             AnyJsImportClause::JsImportNamespaceClause(clause) => {
                 let local_name = clause.namespace_specifier().ok()?.local_name().ok()?;
-                is_unused(ctx, embedded, &local_name).then_some(Unused::AllImports(local_name.range()))
+                is_unused(ctx, embedded, &local_name)
+                    .then_some(Unused::AllImports(local_name.range()))
             }
         }
     }
@@ -363,8 +353,7 @@ impl Rule for NoUnusedImports {
                     });
 
                 if needs_export_empty {
-                    let export_token = make::token(T![export])
-                        .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+                    let export_token = make::token(T![export]).with_trailing_space();
                     let export_empty = make::js_export(
                         make::js_decorator_list([]),
                         export_token,
@@ -424,8 +413,7 @@ impl Rule for NoUnusedImports {
                 let default_specifier = prev_clause.default_specifier().ok()?;
                 let local_name = default_specifier.local_name().ok()?;
                 let mut local_name = local_name.as_js_identifier_binding()?.name_token().ok()?;
-                local_name =
-                    local_name.with_trailing_trivia(vec![(TriviaPieceKind::Whitespace, " ")]);
+                local_name = local_name.with_trailing_space();
 
                 let new_clause = make::js_import_default_clause(
                     prev_clause.default_specifier().ok()?.with_local_name(
@@ -628,8 +616,6 @@ impl Phase for JsDocTypeServices {
         Phases::Semantic
     }
 }
-
-
 
 impl Queryable for NoUnusedImportsQuery {
     type Input = JsSyntaxNode;

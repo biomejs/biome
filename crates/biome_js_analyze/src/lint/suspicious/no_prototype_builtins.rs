@@ -10,7 +10,7 @@ use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, JsCallExpression, JsSyntaxKind, T,
     TextRange,
 };
-use biome_rowan::{AstNode, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::no_prototype_builtins::NoPrototypeBuiltinsOptions;
 
 declare_lint_rule! {
@@ -181,8 +181,7 @@ impl Rule for NoPrototypeBuiltins {
                         make::token(T!['(']),
                         make::js_call_argument_list(
                             [callee_arg.trim_trivia()?, existing_arg],
-                            [make::token(T![,])
-                                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])],
+                            [make::token(T![,]).with_trailing_space()],
                         ),
                         make::token(T![')']),
                     ),

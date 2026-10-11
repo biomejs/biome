@@ -709,4 +709,35 @@ mod tests {
         assert!(!root.has_comments_descendants());
         assert!(!root.has_skipped_descendants());
     }
+
+    #[test]
+    fn single_space_and_newline_trivia_helpers_replace_trivia() {
+        let token = SyntaxToken::<RawLanguage>::new_detached(
+            RawLanguageKind::LET_TOKEN,
+            "/*a*/let//b",
+            [TriviaPiece::multi_line_comment(5)],
+            [TriviaPiece::single_line_comment(3)],
+        );
+
+        assert_eq!(token.with_leading_space().text(), " let//b");
+        assert_eq!(token.with_trailing_space().text(), "/*a*/let ");
+        assert_eq!(token.with_surrounding_spaces().text(), " let ");
+        assert_eq!(token.with_leading_newline().text(), "\nlet//b");
+
+        let leading: Vec<_> = token
+            .with_leading_newline()
+            .leading_trivia()
+            .pieces()
+            .collect();
+        assert_eq!(leading.len(), 1);
+        assert!(leading[0].is_newline());
+
+        let trailing: Vec<_> = token
+            .with_trailing_space()
+            .trailing_trivia()
+            .pieces()
+            .collect();
+        assert_eq!(trailing.len(), 1);
+        assert!(trailing[0].is_whitespace());
+    }
 }

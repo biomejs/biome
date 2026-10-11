@@ -322,10 +322,9 @@ impl JsModuleSource {
     ///
     /// ```
     /// use biome_js_factory::make;
-    /// use biome_rowan::TriviaPieceKind;
     ///
     /// let source_token = make::js_string_literal("react")
-    ///     .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]);
+    ///     .with_leading_space();
     /// let source = make::js_module_source(source_token);
     ///
     /// assert_eq!(source.inner_string_text().unwrap().text(), "react");
