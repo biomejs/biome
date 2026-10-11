@@ -299,6 +299,7 @@ define_categories! {
     "lint/nursery/noZeroFractions": "https://biomejs.dev/linter/rules/no-zero-fractions",
     "lint/nursery/useAstroClientOnlyDirectiveValue": "https://biomejs.dev/linter/rules/use-astro-client-only-directive-value",
     "lint/nursery/useAwaitThenable": "https://biomejs.dev/linter/rules/use-await-thenable",
+    "lint/nursery/useBannerComment": "https://biomejs.dev/linter/rules/use-banner-comment",
     "lint/nursery/useBetterDomTraversing": "https://biomejs.dev/linter/rules/use-better-dom-traversing",
     "lint/nursery/useBigintLiterals": "https://biomejs.dev/linter/rules/use-bigint-literals",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",

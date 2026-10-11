@@ -1835,6 +1835,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_await_thenable::UseAwaitThenableOptions>(),
     ));
     result.push((
+        "nursery",
+        "useBannerComment",
+        TypeId::of::<biome_rule_options::use_banner_comment::UseBannerCommentOptions>(),
+    ));
+    result.push((
         "suspicious",
         "useBaseline",
         TypeId::of::<biome_rule_options::use_baseline::UseBaselineOptions>(),

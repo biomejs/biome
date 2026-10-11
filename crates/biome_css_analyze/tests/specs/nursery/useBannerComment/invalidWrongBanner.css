@@ -1,0 +1,3 @@
+/* Copyright 1999 Someone Else */
+.a { color: red; }
+/* should generate diagnostics */
