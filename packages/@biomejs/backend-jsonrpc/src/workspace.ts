@@ -2929,6 +2929,11 @@ export interface Nursery {
 	 */
 	noBunModules?: NoBunModulesConfiguration;
 	/**
+	 * Disallow leading and trailing spaces in console method arguments.
+	 * See https://biomejs.dev/linter/rules/no-console-spaces
+	 */
+	noConsoleSpaces?: NoConsoleSpacesConfiguration;
+	/**
 	 * Disallow two keys with the same name inside YAML maps.
 	 * See https://biomejs.dev/linter/rules/no-duplicate-map-keys
 	 */
@@ -5549,6 +5554,9 @@ export type NoBaseToStringConfiguration =
 export type NoBunModulesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBunModulesOptions;
+export type NoConsoleSpacesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoConsoleSpacesOptions;
 export type NoDuplicateMapKeysConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateMapKeysOptions;
@@ -7918,6 +7926,14 @@ export interface RuleWithNoBaseToStringOptions {
 export interface RuleWithNoBunModulesOptions {
 	level: RulePlainConfiguration;
 	options?: NoBunModulesOptions;
+}
+export interface RuleWithNoConsoleSpacesOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoConsoleSpacesOptions;
 }
 export interface RuleWithNoDuplicateMapKeysOptions {
 	level: RulePlainConfiguration;
@@ -10384,6 +10400,7 @@ export interface NoBaseToStringOptions {
 	ignoredTypeNames?: string[];
 }
 export type NoBunModulesOptions = {};
+export type NoConsoleSpacesOptions = {};
 export type NoDuplicateMapKeysOptions = {};
 export interface NoExcessiveStatementsPerFunctionOptions {
 	/**
@@ -12082,6 +12099,7 @@ export type Category =
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
+	| "lint/nursery/noConsoleSpaces"
 	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
