@@ -839,6 +839,7 @@ fn format_embedded(
                     // event handler, such as `@click="count++"`.
                     AnyJsRoot::JsExpressionTemplateRoot(_)
                     | AnyJsRoot::JsVueSlotPropsRoot(_)
+                    | AnyJsRoot::JsVueGenericRoot(_)
                     | AnyJsRoot::JsScript(_) => {}
                     _ if attribute_snippet.is_some() => return None,
                     _ => {}
@@ -1002,7 +1003,7 @@ fn format_attribute_value(root: &AnyJsRoot, document: Document) -> Option<Docume
             }
             _ => false,
         },
-        AnyJsRoot::JsScript(_) => false,
+        AnyJsRoot::JsScript(_) | AnyJsRoot::JsVueGenericRoot(_) => false,
         _ => true,
     };
 
