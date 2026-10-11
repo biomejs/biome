@@ -3034,6 +3034,11 @@ export interface Nursery {
 	 */
 	noProcessExit?: NoProcessExitConfiguration;
 	/**
+	 * Disallow returning values from the function passed to new Promise().
+	 * See https://biomejs.dev/linter/rules/no-promise-executor-return
+	 */
+	noPromiseExecutorReturn?: NoPromiseExecutorReturnConfiguration;
+	/**
 	 * Disallow array, object, and function values as default props in React components.
 	 * See https://biomejs.dev/linter/rules/no-react-object-type-as-default-prop
 	 */
@@ -5637,6 +5642,9 @@ export type NoOctalConfiguration =
 export type NoProcessExitConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoProcessExitOptions;
+export type NoPromiseExecutorReturnConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPromiseExecutorReturnOptions;
 export type NoReactObjectTypeAsDefaultPropConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoReactObjectTypeAsDefaultPropOptions;
@@ -8066,6 +8074,14 @@ export interface RuleWithNoOctalOptions {
 export interface RuleWithNoProcessExitOptions {
 	level: RulePlainConfiguration;
 	options?: NoProcessExitOptions;
+}
+export interface RuleWithNoPromiseExecutorReturnOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoPromiseExecutorReturnOptions;
 }
 export interface RuleWithNoReactObjectTypeAsDefaultPropOptions {
 	level: RulePlainConfiguration;
@@ -10510,6 +10526,7 @@ export type NoNonScalableViewportOptions = {};
 export type NoObsoleteTagsOptions = {};
 export type NoOctalOptions = {};
 export type NoProcessExitOptions = {};
+export type NoPromiseExecutorReturnOptions = {};
 export type NoReactObjectTypeAsDefaultPropOptions = {};
 export type NoRestrictedDependenciesOptions = {};
 export type NoReturnInFinallyOptions = {};
@@ -12237,6 +12254,7 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForNavigation"
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
+	| "lint/nursery/noPromiseExecutorReturn"
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
