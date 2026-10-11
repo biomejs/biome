@@ -1,12 +1,18 @@
+use crate::services::semantic::{SemanticModelBuilderVisitor, SemanticServices};
 use biome_analyze::{
     AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleDomain, RuleSource,
     ServiceBag, Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsLanguage, TextRange};
+use biome_js_semantic::{Binding, SemanticModel};
+use biome_js_syntax::{
+    AnyJsExpression, JsCallExpression, JsLanguage, JsSyntaxKind, TextRange, binding_ext::AnyJsBindingDeclaration,
+    unescape_js_identifier,
+};
 use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent};
 use biome_rule_options::no_duplicate_test_hooks::NoDuplicateTestHooksOptions;
+use rustc_hash::FxHashMap;
 
 declare_lint_rule! {
     /// A `describe` block should not contain duplicate hooks.
@@ -137,6 +143,7 @@ impl HooksContext {
 #[derive(Default)]
 struct DuplicateHooksVisitor {
     stack: Vec<HooksContext>,
+    local_functions: FxHashMap<TextRange, bool>,
 }
 
 impl Visitor for DuplicateHooksVisitor {
@@ -159,24 +166,37 @@ impl Visitor for DuplicateHooksVisitor {
                 }
 
                 if let Ok(AnyJsExpression::JsIdentifierExpression(identifier)) = node.callee() {
-                    identifier
-                        .name()
-                        .and_then(|name| name.value_token())
-                        .map_or((), |name| {
-                            if let Some(hooks_context) = self.stack.last_mut() {
-                                match name.text_trimmed() {
-                                    "beforeEach" | "beforeAll" | "afterEach" | "afterAll"
-                                    | "after" | "before" => {
-                                        let counter =
-                                            HooksContext::add(hooks_context, name.text_trimmed());
-                                        if counter > 1 {
-                                            ctx.match_query(DuplicateHooks(node.clone()));
-                                        }
-                                    }
-                                    _ => {}
-                                };
-                            };
-                        })
+                    let Ok(reference) = identifier.name() else {
+                        return;
+                    };
+                    let Ok(name) = reference.value_token() else {
+                        return;
+                    };
+                    if !matches!(
+                        name.text_trimmed(),
+                        "beforeEach" | "beforeAll" | "afterEach" | "afterAll" | "after" | "before"
+                    ) || self.stack.is_empty()
+                    {
+                        return;
+                    }
+                    let Some(model) = ctx.services.get_service::<SemanticModel>() else {
+                        return;
+                    };
+                    if model.binding(&reference).is_some_and(|binding| {
+                        *self
+                            .local_functions
+                            .entry(binding.range())
+                            .or_insert_with(|| Self::is_local_function(&binding, model))
+                    })
+                    {
+                        return;
+                    }
+                    if let Some(hooks_context) = self.stack.last_mut() {
+                        let counter = HooksContext::add(hooks_context, name.text_trimmed());
+                        if counter > 1 {
+                            ctx.match_query(DuplicateHooks(node.clone()));
+                        }
+                    }
                 }
             }
             WalkEvent::Leave(node) => {
@@ -193,6 +213,62 @@ impl Visitor for DuplicateHooksVisitor {
 }
 
 impl DuplicateHooksVisitor {
+    fn is_local_function(binding: &Binding, model: &SemanticModel) -> bool {
+        if binding.all_writes().next().is_some() {
+            return false;
+        }
+        let Ok(name) = binding.tree().name_token() else {
+            return false;
+        };
+        let name = unescape_js_identifier(name.text_trimmed());
+        let scope = model
+            .scope_hoisted_to(&binding.syntax())
+            .unwrap_or_else(|| binding.scope());
+        if scope.syntax().kind() == JsSyntaxKind::JS_FUNCTION_BODY
+            && scope
+                .parent()
+                .and_then(|parent| parent.get_binding(name.as_ref()))
+                .is_some_and(|other| {
+                    other.declaration_kind().declares_value()
+                        && !matches!(
+                            other.tree().declaration(),
+                            Some(AnyJsBindingDeclaration::JsFunctionExpression(_))
+                        )
+                })
+        {
+            return false;
+        }
+        if scope.bindings().any(|other| {
+            other.range() != binding.range()
+                && other.declaration_kind().declares_value()
+                && other
+                    .tree()
+                    .name_token()
+                    .is_ok_and(|token| unescape_js_identifier(token.text_trimmed()) == name)
+        }) {
+            return false;
+        }
+        match binding.tree().declaration() {
+            Some(
+                AnyJsBindingDeclaration::JsFunctionDeclaration(_)
+                | AnyJsBindingDeclaration::JsFunctionExpression(_)
+                | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_),
+            ) => true,
+            Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) => declarator
+                .initializer()
+                .and_then(|initializer| initializer.expression().ok())
+                .and_then(|expression| expression.inner_expression())
+                .is_some_and(|expression| {
+                    matches!(
+                        expression,
+                        AnyJsExpression::JsArrowFunctionExpression(_)
+                            | AnyJsExpression::JsFunctionExpression(_)
+                    )
+                }),
+            _ => false,
+        }
+    }
+
     /// Determines if a [call expression] is a `describe.` call by checking:
     /// 1. The node must be a test call expression
     ///    e.g. `it.only`, `describe.skip`, `test`
@@ -234,14 +310,14 @@ impl Queryable for DuplicateHooks {
     type Language = JsLanguage;
     // `Output` if the type that `ctx.query()` will return in the rule
     type Output = JsCallExpression;
-    type Services = ();
+    type Services = SemanticServices;
 
     fn build_visitor(
         analyzer: &mut impl AddVisitor<Self::Language>,
         _: &<Self::Language as Language>::Root,
     ) {
-        // Register our custom visitor to run in the `Syntax` phase
-        analyzer.add_visitor(Phases::Syntax, DuplicateHooksVisitor::default);
+        analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
+        analyzer.add_visitor(Phases::Semantic, DuplicateHooksVisitor::default);
     }
 
     // Extract the output object from the input type

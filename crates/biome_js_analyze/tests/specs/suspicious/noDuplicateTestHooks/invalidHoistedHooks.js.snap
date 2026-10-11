@@ -1,0 +1,108 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidHoistedHooks.js
+---
+# Input
+```js
+// should generate diagnostics
+import * as hooks from "vitest";
+
+describe("hoisted function and var", () => {
+    var beforeEach = hooks.beforeEach;
+    function beforeEach() {}
+    beforeEach(() => {});
+    beforeEach(() => {});
+});
+
+describe("parameter and var", () => {
+    (function (beforeEach) {
+        beforeEach(() => {});
+        beforeEach(() => {});
+        var beforeEach = () => {};
+    })(hooks.beforeEach);
+});
+
+describe("destructured parameter and var", () => {
+    (function ({ afterEach }) {
+        afterEach(() => {});
+        afterEach(() => {});
+        var afterEach = () => {};
+    })(hooks);
+});
+
+describe("parameter and function declaration", function (beforeEach) {
+    function beforeEach() {}
+    beforeEach();
+    beforeEach();
+});
+
+```
+
+# Diagnostics
+```
+invalidHoistedHooks.js:8:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate beforeEach hook found.
+  
+     6 │     function beforeEach() {}
+     7 │     beforeEach(() => {});
+   > 8 │     beforeEach(() => {});
+       │     ^^^^^^^^^^^^^^^^^^^^
+     9 │ });
+    10 │ 
+  
+  i Remove this duplicate hook or consolidate the logic into a single hook.
+  
+
+```
+
+```
+invalidHoistedHooks.js:14:9 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate beforeEach hook found.
+  
+    12 │     (function (beforeEach) {
+    13 │         beforeEach(() => {});
+  > 14 │         beforeEach(() => {});
+       │         ^^^^^^^^^^^^^^^^^^^^
+    15 │         var beforeEach = () => {};
+    16 │     })(hooks.beforeEach);
+  
+  i Remove this duplicate hook or consolidate the logic into a single hook.
+  
+
+```
+
+```
+invalidHoistedHooks.js:22:9 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate afterEach hook found.
+  
+    20 │     (function ({ afterEach }) {
+    21 │         afterEach(() => {});
+  > 22 │         afterEach(() => {});
+       │         ^^^^^^^^^^^^^^^^^^^
+    23 │         var afterEach = () => {};
+    24 │     })(hooks);
+  
+  i Remove this duplicate hook or consolidate the logic into a single hook.
+  
+
+```
+
+```
+invalidHoistedHooks.js:30:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate beforeEach hook found.
+  
+    28 │     function beforeEach() {}
+    29 │     beforeEach();
+  > 30 │     beforeEach();
+       │     ^^^^^^^^^^^^
+    31 │ });
+    32 │ 
+  
+  i Remove this duplicate hook or consolidate the logic into a single hook.
+  
+
+```

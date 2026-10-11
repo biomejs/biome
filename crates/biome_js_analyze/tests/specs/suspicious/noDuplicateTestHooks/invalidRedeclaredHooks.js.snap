@@ -1,0 +1,59 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidRedeclaredHooks.js
+---
+# Input
+```js
+// should generate diagnostics
+import * as hooks from "vitest";
+
+describe("redeclared hook", () => {
+    var beforeEach = hooks.beforeEach;
+    beforeEach(() => {});
+    beforeEach(() => {});
+    var beforeEach = () => {};
+});
+
+describe("escaped redeclaration", () => {
+    var afterEach = hooks.afterEach;
+    afterEach(() => {});
+    afterEach(() => {});
+    var aft\u0065rEach = () => {};
+});
+
+```
+
+# Diagnostics
+```
+invalidRedeclaredHooks.js:7:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate beforeEach hook found.
+  
+    5 │     var beforeEach = hooks.beforeEach;
+    6 │     beforeEach(() => {});
+  > 7 │     beforeEach(() => {});
+      │     ^^^^^^^^^^^^^^^^^^^^
+    8 │     var beforeEach = () => {};
+    9 │ });
+  
+  i Remove this duplicate hook or consolidate the logic into a single hook.
+  
+
+```
+
+```
+invalidRedeclaredHooks.js:14:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate afterEach hook found.
+  
+    12 │     var afterEach = hooks.afterEach;
+    13 │     afterEach(() => {});
+  > 14 │     afterEach(() => {});
+       │     ^^^^^^^^^^^^^^^^^^^
+    15 │     var aft\u0065rEach = () => {};
+    16 │ });
+  
+  i Remove this duplicate hook or consolidate the logic into a single hook.
+  
+
+```

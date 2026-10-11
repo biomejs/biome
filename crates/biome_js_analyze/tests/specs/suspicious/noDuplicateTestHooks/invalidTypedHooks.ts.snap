@@ -1,0 +1,127 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidTypedHooks.ts
+---
+# Input
+```ts
+// should generate diagnostics
+import { describe } from "vitest";
+import * as hooks from "vitest";
+
+describe("as assertion", () => {
+    const beforeEach = hooks.beforeEach as typeof hooks.beforeEach;
+    beforeEach(() => {});
+    beforeEach(() => {});
+});
+
+describe("satisfies assertion", () => {
+    const afterEach = hooks.afterEach satisfies typeof hooks.afterEach;
+    afterEach(() => {});
+    afterEach(() => {});
+});
+
+describe("non-null assertion", () => {
+    const beforeAll = hooks.beforeAll!;
+    beforeAll(() => {});
+    beforeAll(() => {});
+});
+
+describe("type assertion", () => {
+    const afterAll = <typeof hooks.afterAll>hooks.afterAll;
+    afterAll(() => {});
+    afterAll(() => {});
+});
+
+describe("asserted namespace", () => {
+    const beforeEach = (hooks as typeof hooks).beforeEach!;
+    beforeEach(() => {});
+    beforeEach(() => {});
+});
+
+```
+
+# Diagnostics
+```
+invalidTypedHooks.ts:8:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate beforeEach hook found.
+  
+     6 │     const beforeEach = hooks.beforeEach as typeof hooks.beforeEach;
+     7 │     beforeEach(() => {});
+   > 8 │     beforeEach(() => {});
+       │     ^^^^^^^^^^^^^^^^^^^^
+     9 │ });
+    10 │ 
+  
+  i Remove this duplicate hook or consolidate the logic into a single hook.
+  
+
+```
+
+```
+invalidTypedHooks.ts:14:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate afterEach hook found.
+  
+    12 │     const afterEach = hooks.afterEach satisfies typeof hooks.afterEach;
+    13 │     afterEach(() => {});
+  > 14 │     afterEach(() => {});
+       │     ^^^^^^^^^^^^^^^^^^^
+    15 │ });
+    16 │ 
+  
+  i Remove this duplicate hook or consolidate the logic into a single hook.
+  
+
+```
+
+```
+invalidTypedHooks.ts:20:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate beforeAll hook found.
+  
+    18 │     const beforeAll = hooks.beforeAll!;
+    19 │     beforeAll(() => {});
+  > 20 │     beforeAll(() => {});
+       │     ^^^^^^^^^^^^^^^^^^^
+    21 │ });
+    22 │ 
+  
+  i Remove this duplicate hook or consolidate the logic into a single hook.
+  
+
+```
+
+```
+invalidTypedHooks.ts:26:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate afterAll hook found.
+  
+    24 │     const afterAll = <typeof hooks.afterAll>hooks.afterAll;
+    25 │     afterAll(() => {});
+  > 26 │     afterAll(() => {});
+       │     ^^^^^^^^^^^^^^^^^^
+    27 │ });
+    28 │ 
+  
+  i Remove this duplicate hook or consolidate the logic into a single hook.
+  
+
+```
+
+```
+invalidTypedHooks.ts:32:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate beforeEach hook found.
+  
+    30 │     const beforeEach = (hooks as typeof hooks).beforeEach!;
+    31 │     beforeEach(() => {});
+  > 32 │     beforeEach(() => {});
+       │     ^^^^^^^^^^^^^^^^^^^^
+    33 │ });
+    34 │ 
+  
+  i Remove this duplicate hook or consolidate the logic into a single hook.
+  
+
+```

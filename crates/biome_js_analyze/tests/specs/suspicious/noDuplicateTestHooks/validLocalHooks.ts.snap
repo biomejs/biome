@@ -1,0 +1,70 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validLocalHooks.ts
+---
+# Input
+```ts
+// should not generate diagnostics
+import { describe, expect, it, beforeEach } from "vitest";
+
+describe("local function", () => {
+    const before = (n: number) => n + 1;
+    it("calls the helper twice", () => {
+        expect(before(1)).toBe(2);
+        expect(before(2)).toBe(3);
+        before?.(3);
+    });
+});
+
+describe("local declarations", () => {
+    function after() {}
+    const beforeAll = () => {};
+    after();
+    after();
+    beforeAll();
+    beforeAll();
+});
+
+describe("function parameter shadow", () => {
+    function beforeEach(beforeEach: unknown) {}
+    beforeEach(1);
+    beforeEach(2);
+});
+
+describe("shadowed import", () => {
+    beforeEach(() => {});
+    {
+        const beforeEach = () => {};
+        beforeEach();
+        beforeEach();
+    }
+});
+
+describe("function expression", () => {
+    const afterEach = function () {};
+    const afterAll = (() => {}) as () => void;
+    afterEach();
+    afterEach();
+    afterAll();
+    afterAll();
+});
+
+describe("lexical parameter shadow", () => {
+    (function (beforeEach: unknown) {
+        {
+            const beforeEach = () => {};
+            beforeEach();
+            beforeEach();
+        }
+    })(beforeEach);
+});
+
+describe("named expression shadow", () => {
+    const run = function beforeEach() {
+        var beforeEach = () => {};
+        beforeEach();
+        beforeEach();
+    };
+});
+
+```
