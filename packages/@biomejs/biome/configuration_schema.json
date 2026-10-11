@@ -3373,6 +3373,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoArgumentsCallerOrCalleeConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoArgumentsCallerOrCalleeOptions" }
+			]
+		},
+		"NoArgumentsCallerOrCalleeOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoArgumentsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7443,6 +7453,13 @@
 			"description": "Configures all rules in one lint group.",
 			"type": "object",
 			"properties": {
+				"noArgumentsCallerOrCallee": {
+					"description": "Disallow the use of arguments.caller and arguments.callee.\nSee https://biomejs.dev/linter/rules/no-arguments-caller-or-callee",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoArgumentsCallerOrCalleeConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noAstroConflictingSetDirectives": {
 					"description": "Disallow conflicting content sources on Astro elements.\nSee https://biomejs.dev/linter/rules/no-astro-conflicting-set-directives",
 					"anyOf": [
@@ -8923,6 +8940,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoApproximativeNumericConstantOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoArgumentsCallerOrCalleeOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoArgumentsCallerOrCalleeOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

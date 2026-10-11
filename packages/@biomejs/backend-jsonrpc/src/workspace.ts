@@ -2909,6 +2909,11 @@ export interface Correctness {
  */
 export interface Nursery {
 	/**
+	 * Disallow the use of arguments.caller and arguments.callee.
+	 * See https://biomejs.dev/linter/rules/no-arguments-caller-or-callee
+	 */
+	noArgumentsCallerOrCallee?: NoArgumentsCallerOrCalleeConfiguration;
+	/**
 	 * Disallow conflicting content sources on Astro elements.
 	 * See https://biomejs.dev/linter/rules/no-astro-conflicting-set-directives
 	 */
@@ -5527,6 +5532,9 @@ export type UseVueValidVTextConfiguration =
 export type UseYieldConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseYieldOptions;
+export type NoArgumentsCallerOrCalleeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoArgumentsCallerOrCalleeOptions;
 export type NoAstroConflictingSetDirectivesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAstroConflictingSetDirectivesOptions;
@@ -7886,6 +7894,10 @@ export interface RuleWithUseVueValidVTextOptions {
 export interface RuleWithUseYieldOptions {
 	level: RulePlainConfiguration;
 	options?: UseYieldOptions;
+}
+export interface RuleWithNoArgumentsCallerOrCalleeOptions {
+	level: RulePlainConfiguration;
+	options?: NoArgumentsCallerOrCalleeOptions;
 }
 export interface RuleWithNoAstroConflictingSetDirectivesOptions {
 	level: RulePlainConfiguration;
@@ -10354,6 +10366,7 @@ export type UseVueValidVOnceOptions = {};
 export type UseVueValidVPreOptions = {};
 export type UseVueValidVTextOptions = {};
 export type UseYieldOptions = {};
+export type NoArgumentsCallerOrCalleeOptions = {};
 export type NoAstroConflictingSetDirectivesOptions = {};
 export type NoAstroSetHtmlDirectiveOptions = {};
 export interface NoBaseToStringOptions {
@@ -12041,6 +12054,7 @@ export type Category =
 	| "lint/correctness/useVueValidVPre"
 	| "lint/correctness/useVueValidVText"
 	| "lint/correctness/useYield"
+	| "lint/nursery/noArgumentsCallerOrCallee"
 	| "lint/nursery/noAstroConflictingSetDirectives"
 	| "lint/nursery/noAstroSetHtmlDirective"
 	| "lint/nursery/noBaseToString"
