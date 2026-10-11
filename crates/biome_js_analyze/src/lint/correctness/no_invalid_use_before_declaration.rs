@@ -3,15 +3,15 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
-    AnyJsExportNamedSpecifier, AnyJsFunction, AnyJsIdentifierReference, JsClassDeclaration,
-    JsConstructorClassMember, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
-    JsMethodObjectMember, JsModule, JsScript, JsSetterClassMember, JsSetterObjectMember,
-    JsStaticInitializationBlockClassMember, JsVariableDeclarationClause, TsDeclareStatement,
-    TsModuleDeclaration, TsPropertySignatureTypeMember,
+    AnyJsExportNamedSpecifier, AnyJsFormalParameter, AnyJsFunction, AnyJsIdentifierReference,
+    AnyJsPropertyModifier, JsConstructorParameters, JsFunctionBody, JsInitializerClause, JsModule,
+    JsParameters, JsPropertyClassMember, JsScript, JsSyntaxKind, JsSyntaxNode,
+    JsVariableDeclarationClause, TsDeclareStatement, TsModuleDeclaration,
+    TsPropertySignatureTypeMember,
     binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding},
 };
 use biome_languages::JsFileSource;
-use biome_rowan::{AstNode, SyntaxNodeOptionExt, TextRange, declare_node_union};
+use biome_rowan::{AstNode, AstNodeList, SyntaxNodeOptionExt, TextRange, declare_node_union};
 use biome_rule_options::no_invalid_use_before_declaration::NoInvalidUseBeforeDeclarationOptions;
 
 declare_lint_rule! {
@@ -129,11 +129,7 @@ impl Rule for NoInvalidUseBeforeDeclaration {
         } else {
             declaration.range().end()
         };
-        let declaration_scope = declaration
-            .syntax()
-            .ancestors()
-            .skip(1)
-            .find(|ancestor| AnyJsVariableScope::can_cast(ancestor.kind()));
+        let declaration_scope = deferred_scope(declaration.syntax());
         let binding = model.as_binding(id);
         for reference in binding.all_references() {
             if reference.range_start() < declaration_end {
@@ -149,18 +145,8 @@ impl Rule for NoInvalidUseBeforeDeclaration {
                 if reference_syntax
                         .parent()
                         .kind().as_ref().is_none_or(|parent_kind| !AnyJsExportNamedSpecifier::can_cast(*parent_kind))
-                        // Don't report variables used in another control flow root (function, classes, ...)
-                        // For example:
-                        //
-                        // ```js
-                        // function f() { X; }
-                        // const X = 0;
-                        // ```
-                        && declaration_scope == reference_syntax
-                                .ancestors()
-                                .skip(1)
-                                .find(|ancestor| AnyJsVariableScope::can_cast(ancestor.kind())
-                        )
+                        // skip uses that only run later, e.g. `function f() { X; } const X = 0;`
+                        && declaration_scope == deferred_scope(&reference_syntax)
                         // ignore when used as a type.
                         // For example:
                         //
@@ -303,19 +289,48 @@ impl TryFrom<&AnyJsBindingDeclaration> for DeclarationKind {
 }
 
 declare_node_union! {
-    AnyJsVariableScope =
+    /// nodes whose code doesn't run together with the code around them
+    AnyJsDeferredScope =
         JsScript
         | JsModule
         | AnyJsFunction
-        | JsClassDeclaration
-        | JsConstructorClassMember
-        | JsGetterClassMember
-        | JsGetterObjectMember
-        | JsMethodClassMember
-        | JsMethodObjectMember
-        | JsSetterClassMember
-        | JsSetterObjectMember
-        | JsStaticInitializationBlockClassMember
+        | JsFunctionBody
+        | JsParameters
+        | JsConstructorParameters
         | TsModuleDeclaration
         | TsPropertySignatureTypeMember
+}
+
+/// closest ancestor whose code runs later than its surroundings, if any
+fn deferred_scope(node: &JsSyntaxNode) -> Option<JsSyntaxNode> {
+    node.ancestors().skip(1).find(is_deferred)
+}
+
+fn is_deferred(node: &JsSyntaxNode) -> bool {
+    if AnyJsDeferredScope::can_cast(node.kind()) {
+        return true;
+    }
+    let Some(parent) = node.parent() else {
+        return false;
+    };
+    match parent.kind() {
+        // a setter's lone param isn't wrapped in JsParameters
+        JsSyntaxKind::JS_SETTER_CLASS_MEMBER | JsSyntaxKind::JS_SETTER_OBJECT_MEMBER => {
+            AnyJsFormalParameter::can_cast(node.kind())
+        }
+        // instance field initializers only run on `new`, static ones run with the class body
+        JsSyntaxKind::JS_PROPERTY_CLASS_MEMBER => {
+            JsInitializerClause::can_cast(node.kind()) && !is_static_field(&parent)
+        }
+        _ => false,
+    }
+}
+
+fn is_static_field(node: &JsSyntaxNode) -> bool {
+    JsPropertyClassMember::cast_ref(node).is_some_and(|field| {
+        field
+            .modifiers()
+            .iter()
+            .any(|modifier| matches!(modifier, AnyJsPropertyModifier::JsStaticModifier(_)))
+    })
 }

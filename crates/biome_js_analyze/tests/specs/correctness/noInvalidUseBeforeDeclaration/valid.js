@@ -24,3 +24,54 @@ class classA {
 }
 class classB {}
 const C = 0;
+
+function run1() {
+	class A { m() { return B; } }
+	class B {}
+}
+
+function run2() {
+	class A { m(x = B) {} }
+	class B {}
+}
+
+function run3() {
+	class A { get g() { return B; } set s(v) { B; } }
+	class B {}
+}
+
+function run4() {
+	class A { constructor(x = B) { B; } }
+	class B {}
+}
+
+function run5() {
+	class A { p = B; }
+	const C = class { p = B; };
+	class B {}
+}
+
+function run6() {
+	class A { static f = () => B; }
+	class B {}
+}
+
+function run7() {
+	class A { m() { return class extends B {}; } }
+	class B {}
+}
+
+function run8() {
+	class B { static p = B; static { B; } }
+}
+
+function run9() {
+	const o = { m() { return B; }, get g() { return B; } };
+	class B {}
+}
+
+function run10() {
+	class A { set s(v = B) {} }
+	const o = { set s(v = B) {} };
+	class B {}
+}

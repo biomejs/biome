@@ -15,3 +15,8 @@ class Class {}
 
 x;
 import x = require("file");
+
+function run1() {
+	class A { @dec m() {} }
+	const dec = (target: any, key: string) => {};
+}
