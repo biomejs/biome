@@ -10,21 +10,57 @@ use crate::syntax::scss::{
     parse_scss_interpolated_query_feature, parse_scss_interpolation_or_identifier,
     parse_scss_variable,
 };
+use crate::syntax::value::function::is_nth_at_function;
 use crate::syntax::{
     CssSyntaxFeatures, is_at_any_value, is_at_dashed_identifier, is_at_identifier, parse_any_value,
     parse_dashed_identifier, parse_regular_identifier,
 };
 use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::{CssSyntaxKind, T, TextRange};
+use biome_css_syntax::{
+    AnyCssQueryFeatureName, AnyCssQueryFeatureValue, CssSyntaxKind, T, TextRange,
+};
 use biome_parser::diagnostic::{ParseDiagnostic, ToDiagnostic, expect_one_of};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{CompletedMarker, Marker, Parser, SyntaxFeature, TokenSet, token_set};
+use biome_rowan::{AstNode, SyntaxKind};
 
-/// Parses a CSS query feature used by `@media` and `@container`.
+/// Parses a query feature without computed SCSS names.
+///
+/// ```css
+/// @container (width > 40rem) {}
+/// ```
 #[inline]
 pub fn parse_any_query_feature(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_scss_interpolation(p) {
+    parse_query_feature(p, false)
+}
+
+/// Allows computed names in media features and CSS-import media queries.
+///
+/// ```scss
+/// @media ($bound + "-width": 40rem) {}
+/// ```
+#[inline]
+pub(crate) fn parse_media_query_feature(p: &mut CssParser) -> ParsedSyntax {
+    let is_computed_name_allowed = !p.state().is_in_if_media_test;
+    parse_query_feature(p, is_computed_name_allowed)
+}
+
+#[inline]
+fn parse_query_feature(p: &mut CssParser, is_computed_name_allowed: bool) -> ParsedSyntax {
+    if is_computed_name_allowed && is_at_scss_variable(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_variable_query_feature,
+            expected_scss_computed_query_feature,
+        )
+    } else if is_computed_name_allowed && is_at_scss_namespaced_variable(p) {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            |p| parse_value_prefixed_query_feature(p, true),
+            expected_scss_computed_query_feature,
+        )
+    } else if is_at_scss_interpolation(p) {
         CssSyntaxFeatures::Scss.parse_exclusive_syntax(
             p,
             parse_scss_interpolated_query_feature,
@@ -32,12 +68,14 @@ pub fn parse_any_query_feature(p: &mut CssParser) -> ParsedSyntax {
                 scss_only_syntax_error(p, "SCSS interpolated query features", marker.range(p))
             },
         )
-    } else if is_at_scss_namespaced_variable(p) {
-        parse_value_prefixed_query_feature(p)
+    } else if is_at_scss_namespaced_variable(p)
+        || (is_computed_name_allowed && is_nth_at_function(p, 0))
+    {
+        parse_value_prefixed_query_feature(p, is_computed_name_allowed)
     } else if is_at_query_feature_name(p) {
-        parse_named_query_feature(p)
+        parse_named_query_feature(p, is_computed_name_allowed)
     } else if is_at_any_query_feature_value(p) {
-        parse_value_prefixed_query_feature(p)
+        parse_value_prefixed_query_feature(p, is_computed_name_allowed)
     } else {
         Absent
     }
@@ -54,7 +92,7 @@ fn is_at_query_feature_name(p: &mut CssParser) -> bool {
 /// `(width: 500px)`, and name-first range features such as `(width <= 500px)`.
 /// Variables can also start reverse ranges and intervals such as `($min < width)`.
 #[inline]
-fn parse_named_query_feature(p: &mut CssParser) -> ParsedSyntax {
+fn parse_named_query_feature(p: &mut CssParser, is_computed_name_allowed: bool) -> ParsedSyntax {
     if !is_at_query_feature_name(p) {
         return Absent;
     }
@@ -64,6 +102,20 @@ fn parse_named_query_feature(p: &mut CssParser) -> ParsedSyntax {
         m.abandon(p);
         return Absent;
     };
+
+    if is_computed_name_allowed
+        && is_at_scss_binary_operator(p)
+        && !is_at_query_feature_range_comparison(p)
+        // `screen and (color)` must retain CSS media-condition recovery.
+        && (!p.at_ts(token_set![T![and], T![or]]) || CssSyntaxFeatures::Scss.is_supported(p))
+    {
+        m.abandon(p);
+        return CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            |p| parse_scss_query_feature_from_head(p, name),
+            expected_scss_computed_query_feature,
+        );
+    }
 
     if name.kind(p) != SCSS_VARIABLE {
         return parse_query_feature_from_name(p, m);
@@ -153,17 +205,189 @@ pub(crate) fn parse_query_feature_from_name(p: &mut CssParser, m: Marker) -> Par
 /// This covers reverse ranges such as `(500px <= width)` and interval ranges
 /// such as `(500px <= width <= 1000px)`.
 #[inline]
-fn parse_value_prefixed_query_feature(p: &mut CssParser) -> ParsedSyntax {
+fn parse_value_prefixed_query_feature(
+    p: &mut CssParser,
+    is_computed_name_allowed: bool,
+) -> ParsedSyntax {
     if !is_at_any_query_feature_value(p) {
         return Absent;
     }
 
     let m = p.start();
 
-    // Guarded by `is_at_any_query_feature_value` above.
-    parse_query_feature_value_until(p, QUERY_FEATURE_RANGE_VALUE_END_SET).ok();
+    let end_ts = if is_computed_name_allowed {
+        QUERY_FEATURE_HEAD_END_SET
+    } else {
+        QUERY_FEATURE_RANGE_VALUE_END_SET
+    };
+    if let Present(head) = parse_query_feature_value_until(p, end_ts)
+        && is_computed_name_allowed
+    {
+        if p.at_ts(token_set![T![:], T![')']]) {
+            return CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+                p,
+                |p| {
+                    complete_query_feature_name(p, head);
+                    parse_query_feature_from_name(p, m)
+                },
+                expected_scss_computed_query_feature,
+            );
+        }
+
+        if matches!(head.kind(p), CSS_STRING | SCSS_INTERPOLATED_STRING) {
+            return CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+                p,
+                |p| {
+                    let head = complete_scss_expression_from_item(p, head);
+                    parse_media_query_feature_range(p, m, head)
+                },
+                expected_scss_computed_query_feature,
+            );
+        }
+
+        if !AnyCssQueryFeatureValue::can_cast(head.kind(p)) && !head.kind(p).is_bogus() {
+            return parse_query_feature_after_value(p, m);
+        }
+
+        return parse_media_query_feature_range(p, m, head);
+    }
 
     parse_query_feature_after_value(p, m)
+}
+
+/// Parses a variable-led media feature without committing to a name or bound.
+///
+/// ```scss
+/// @media ($feature + "" >= 40rem) {}
+/// @media ($min + 1rem < width) {}
+/// ```
+fn parse_scss_variable_query_feature(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_scss_variable(p) {
+        return Absent;
+    }
+
+    parse_scss_variable(p).and_then(|head| parse_scss_query_feature_from_head(p, head))
+}
+
+/// Continues a computed media name or bound up to its query delimiter.
+///
+/// ```scss
+/// @media ($bound + "-width": 40rem) {}
+/// @media ($feature + "" >= 40rem) {}
+/// ```
+pub(crate) fn parse_scss_query_feature_from_head(
+    p: &mut CssParser,
+    head: CompletedMarker,
+) -> ParsedSyntax {
+    let head = if is_at_scss_binary_operator(p) && !is_at_query_feature_range_comparison(p) {
+        parse_scss_expression_from_head(
+            p,
+            head,
+            QUERY_FEATURE_HEAD_END_SET.union(token_set![T!['{']]),
+        )
+    } else {
+        Present(head)
+    };
+
+    head.and_then(|head| {
+        let m = head.clone().precede(p);
+        if !is_at_query_feature_range_comparison(p) {
+            complete_query_feature_name(p, head);
+            parse_query_feature_from_name(p, m)
+        } else {
+            parse_media_query_feature_range(p, m, head)
+        }
+    })
+}
+
+/// Chooses the range shape after both operands are parsed.
+///
+/// ```scss
+/// @media ($feature + "" >= 40rem) {}
+/// @media (20rem < $feature + "" <= 80rem) {}
+/// ```
+fn parse_media_query_feature_range(
+    p: &mut CssParser,
+    m: Marker,
+    left: CompletedMarker,
+) -> ParsedSyntax {
+    parse_query_feature_range_comparison(p)
+        .or_add_diagnostic(p, expected_query_feature_range_comparison);
+    let right = parse_query_feature_value_until(p, QUERY_FEATURE_HEAD_END_SET)
+        .or_add_diagnostic(p, expected_query_feature_value);
+    let Some(mut right) = right else {
+        return Present(m.complete(p, CSS_QUERY_FEATURE_RANGE));
+    };
+
+    let is_reverse = is_at_query_feature_range_comparison(p)
+        || !AnyCssQueryFeatureName::can_cast(left.kind(p))
+        || matches!(
+            right.kind(p),
+            CSS_IDENTIFIER | CSS_DASHED_IDENTIFIER | SCSS_INTERPOLATED_IDENTIFIER
+        );
+
+    let name = if is_reverse {
+        if !AnyCssQueryFeatureName::can_cast(right.kind(p))
+            && !matches!(
+                right.kind(p),
+                CSS_STRING | SCSS_INTERPOLATED_STRING | SCSS_INTERPOLATION
+            )
+            && !right.kind(p).is_bogus()
+        {
+            p.error(expected_identifier(p, right.range(p)));
+            right.change_to_bogus(p);
+        }
+        complete_query_feature_name(p, right)
+    } else {
+        if matches!(right.kind(p), CSS_STRING | SCSS_INTERPOLATED_STRING) {
+            complete_scss_expression_from_item(p, right);
+        } else if !AnyCssQueryFeatureValue::can_cast(right.kind(p)) && !right.kind(p).is_bogus() {
+            p.error(expected_query_feature_value(p, right.range(p)));
+            right.change_to_bogus(p);
+        }
+        // Dynamic operands cannot be evaluated here; retain the name-first shape.
+        left
+    };
+    let has_scss_name =
+        !matches!(name.kind(p), CSS_IDENTIFIER | CSS_DASHED_IDENTIFIER) && !name.kind(p).is_bogus();
+
+    if has_scss_name {
+        CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            |p| parse_query_feature_range_end(p, m, is_reverse),
+            expected_scss_computed_query_feature,
+        )
+    } else {
+        parse_query_feature_range_end(p, m, is_reverse)
+    }
+}
+
+fn parse_query_feature_range_end(p: &mut CssParser, m: Marker, is_reverse: bool) -> ParsedSyntax {
+    if is_reverse {
+        parse_query_feature_interval_end(p, m)
+    } else {
+        Present(m.complete(p, CSS_QUERY_FEATURE_RANGE))
+    }
+}
+
+/// Gives a computed operand the shared query-name shape.
+///
+/// ```scss
+/// @media (20rem < #{$feature} <= 80rem) {}
+/// ```
+fn complete_query_feature_name(p: &mut CssParser, value: CompletedMarker) -> CompletedMarker {
+    if AnyCssQueryFeatureName::can_cast(value.kind(p)) || value.kind(p).is_bogus() {
+        value
+    } else {
+        complete_scss_expression_from_item(p, value)
+    }
+}
+
+fn expected_scss_computed_query_feature(
+    p: &CssParser,
+    marker: &CompletedMarker,
+) -> ParseDiagnostic {
+    scss_only_syntax_error(p, "SCSS computed media features", marker.range(p))
 }
 
 /// Parses the comparison and feature name after a range's lower bound.
@@ -217,6 +441,8 @@ const QUERY_FEATURE_RANGE_COMPARISON_OPERATOR_SET: TokenSet<CssSyntaxKind> =
 const QUERY_FEATURE_VALUE_END_SET: TokenSet<CssSyntaxKind> = token_set![T![')']];
 const QUERY_FEATURE_RANGE_VALUE_END_SET: TokenSet<CssSyntaxKind> =
     QUERY_FEATURE_VALUE_END_SET.union(QUERY_FEATURE_RANGE_COMPARISON_OPERATOR_SET);
+const QUERY_FEATURE_HEAD_END_SET: TokenSet<CssSyntaxKind> =
+    QUERY_FEATURE_RANGE_VALUE_END_SET.union(token_set![T![:], T![,], T![;], T!['}']]);
 const QUERY_FEATURE_VALUE_MISSING_RHS_SET: TokenSet<CssSyntaxKind> =
     token_set![T![')'], T![']'], T!['}'], T![,], EOF];
 

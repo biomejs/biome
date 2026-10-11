@@ -265,6 +265,7 @@ fn parse_if_media_test(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T![media]);
     p.bump(T!['(']);
 
+    let is_nested_media_test = std::mem::replace(&mut p.state_mut().is_in_if_media_test, true);
     if is_at_any_media_condition(p) {
         parse_any_media_condition(p)
             .or_recover(p, &AnyInParensParseRecovery, expected_any_query_feature)
@@ -274,6 +275,7 @@ fn parse_if_media_test(p: &mut CssParser) -> ParsedSyntax {
             .or_recover(p, &AnyInParensParseRecovery, expected_any_query_feature)
             .ok();
     }
+    p.state_mut().is_in_if_media_test = is_nested_media_test;
 
     p.expect(T![')']);
 

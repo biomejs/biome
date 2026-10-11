@@ -8,9 +8,12 @@ impl FormatRule<AnyCssQueryFeatureName> for FormatAnyCssQueryFeatureName {
     type Context = CssFormatContext;
     fn fmt(&self, node: &AnyCssQueryFeatureName, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
+            AnyCssQueryFeatureName::AnyCssFunction(node) => node.format().fmt(f),
             AnyCssQueryFeatureName::CssDashedIdentifier(node) => node.format().fmt(f),
             AnyCssQueryFeatureName::CssIdentifier(node) => node.format().fmt(f),
+            AnyCssQueryFeatureName::ScssExpression(node) => node.format().fmt(f),
             AnyCssQueryFeatureName::ScssInterpolatedIdentifier(node) => node.format().fmt(f),
+            AnyCssQueryFeatureName::ScssInterpolation(node) => node.format().fmt(f),
             AnyCssQueryFeatureName::ScssVariable(node) => node.format().fmt(f),
         }
     }

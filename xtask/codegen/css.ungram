@@ -1661,11 +1661,18 @@ AnyCssQueryFeature =
 	| CssQueryFeatureReverseRange
 	| CssQueryFeatureRangeInterval
 
+// @media ($bound + "-width": 40rem) {}
+//         ^^^^^^^^^^^^^^^^^
+// @media (range-name() >= 40rem) {}
+//         ^^^^^^^^^^^^
 AnyCssQueryFeatureName =
 	CssIdentifier
 	| CssDashedIdentifier
+	| AnyCssFunction
 	| ScssInterpolatedIdentifier
 	| ScssVariable
+	| ScssExpression
+	| ScssInterpolation
 
 // @container (--responsive: true) {  }
 //             ^^^^^^^^^^^^^^^^^^

@@ -1024,24 +1024,20 @@ CssRoot {
                                     left_comparison: CssQueryFeatureRangeComparison {
                                         operator: L_ANGLE@587..588 "<" [] [],
                                     },
-                                    name: ScssInterpolatedIdentifier {
-                                        items: ScssInterpolatedIdentifierPartList [
-                                            ScssInterpolation {
-                                                hash_token: HASH@588..589 "#" [] [],
-                                                l_curly_token: L_CURLY@589..590 "{" [] [],
-                                                value: ScssExpression {
-                                                    items: ScssExpressionItemList [
-                                                        ScssVariable {
-                                                            dollar_token: DOLLAR@590..591 "$" [] [],
-                                                            name: CssIdentifier {
-                                                                value_token: IDENT@591..598 "feature" [] [],
-                                                            },
-                                                        },
-                                                    ],
+                                    name: ScssInterpolation {
+                                        hash_token: HASH@588..589 "#" [] [],
+                                        l_curly_token: L_CURLY@589..590 "{" [] [],
+                                        value: ScssExpression {
+                                            items: ScssExpressionItemList [
+                                                ScssVariable {
+                                                    dollar_token: DOLLAR@590..591 "$" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@591..598 "feature" [] [],
+                                                    },
                                                 },
-                                                r_curly_token: R_CURLY@598..599 "}" [] [],
-                                            },
-                                        ],
+                                            ],
+                                        },
+                                        r_curly_token: R_CURLY@598..599 "}" [] [],
                                     },
                                     right_comparison: CssQueryFeatureRangeComparison {
                                         operator: L_ANGLE@599..600 "<" [] [],
@@ -1850,18 +1846,16 @@ CssRoot {
                       0: IDENT@584..587 "min" [] []
                   1: CSS_QUERY_FEATURE_RANGE_COMPARISON@587..588
                     0: L_ANGLE@587..588 "<" [] []
-                  2: SCSS_INTERPOLATED_IDENTIFIER@588..599
-                    0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@588..599
-                      0: SCSS_INTERPOLATION@588..599
-                        0: HASH@588..589 "#" [] []
-                        1: L_CURLY@589..590 "{" [] []
-                        2: SCSS_EXPRESSION@590..598
-                          0: SCSS_EXPRESSION_ITEM_LIST@590..598
-                            0: SCSS_VARIABLE@590..598
-                              0: DOLLAR@590..591 "$" [] []
-                              1: CSS_IDENTIFIER@591..598
-                                0: IDENT@591..598 "feature" [] []
-                        3: R_CURLY@598..599 "}" [] []
+                  2: SCSS_INTERPOLATION@588..599
+                    0: HASH@588..589 "#" [] []
+                    1: L_CURLY@589..590 "{" [] []
+                    2: SCSS_EXPRESSION@590..598
+                      0: SCSS_EXPRESSION_ITEM_LIST@590..598
+                        0: SCSS_VARIABLE@590..598
+                          0: DOLLAR@590..591 "$" [] []
+                          1: CSS_IDENTIFIER@591..598
+                            0: IDENT@591..598 "feature" [] []
+                    3: R_CURLY@598..599 "}" [] []
                   3: CSS_QUERY_FEATURE_RANGE_COMPARISON@599..600
                     0: L_ANGLE@599..600 "<" [] []
                   4: SCSS_VARIABLE@600..604

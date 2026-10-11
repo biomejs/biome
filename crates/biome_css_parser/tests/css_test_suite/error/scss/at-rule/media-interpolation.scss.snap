@@ -40,42 +40,34 @@ CssRoot {
                                         L_PAREN@7..8 "(" [] [],
                                         CssBogus {
                                             items: [
-                                                CssBogusSupportsCondition {
+                                                CssBogus {
                                                     items: [
+                                                        HASH@8..9 "#" [] [],
+                                                        L_CURLY@9..10 "{" [] [],
                                                         CssBogus {
                                                             items: [
                                                                 CssBogus {
                                                                     items: [
-                                                                        HASH@8..9 "#" [] [],
-                                                                        L_CURLY@9..10 "{" [] [],
-                                                                        CssBogus {
+                                                                        ScssVariable {
+                                                                            dollar_token: DOLLAR@10..11 "$" [] [],
+                                                                            name: CssIdentifier {
+                                                                                value_token: IDENT@11..18 "feature" [] [],
+                                                                            },
+                                                                        },
+                                                                        CssBogusPropertyValue {
                                                                             items: [
-                                                                                CssBogus {
-                                                                                    items: [
-                                                                                        ScssVariable {
-                                                                                            dollar_token: DOLLAR@10..11 "$" [] [],
-                                                                                            name: CssIdentifier {
-                                                                                                value_token: IDENT@11..18 "feature" [] [],
-                                                                                            },
-                                                                                        },
-                                                                                        CssBogusPropertyValue {
-                                                                                            items: [
-                                                                                                COLON@18..20 ":" [] [Whitespace(" ")],
-                                                                                                HASH@20..21 "#" [] [],
-                                                                                                L_CURLY@21..22 "{" [] [],
-                                                                                                DOLLAR@22..23 "$" [] [],
-                                                                                                VALUE_KW@23..28 "value" [] [],
-                                                                                            ],
-                                                                                        },
-                                                                                    ],
-                                                                                },
+                                                                                COLON@18..20 ":" [] [Whitespace(" ")],
+                                                                                HASH@20..21 "#" [] [],
+                                                                                L_CURLY@21..22 "{" [] [],
+                                                                                DOLLAR@22..23 "$" [] [],
+                                                                                VALUE_KW@23..28 "value" [] [],
                                                                             ],
                                                                         },
-                                                                        R_CURLY@28..29 "}" [] [],
                                                                     ],
                                                                 },
                                                             ],
                                                         },
+                                                        R_CURLY@28..29 "}" [] [],
                                                     ],
                                                 },
                                             ],
@@ -264,24 +256,22 @@ CssRoot {
               0: CSS_BOGUS@7..31
                 0: L_PAREN@7..8 "(" [] []
                 1: CSS_BOGUS@8..29
-                  0: CSS_BOGUS_SUPPORTS_CONDITION@8..29
-                    0: CSS_BOGUS@8..29
-                      0: CSS_BOGUS@8..29
-                        0: HASH@8..9 "#" [] []
-                        1: L_CURLY@9..10 "{" [] []
-                        2: CSS_BOGUS@10..28
-                          0: CSS_BOGUS@10..28
-                            0: SCSS_VARIABLE@10..18
-                              0: DOLLAR@10..11 "$" [] []
-                              1: CSS_IDENTIFIER@11..18
-                                0: IDENT@11..18 "feature" [] []
-                            1: CSS_BOGUS_PROPERTY_VALUE@18..28
-                              0: COLON@18..20 ":" [] [Whitespace(" ")]
-                              1: HASH@20..21 "#" [] []
-                              2: L_CURLY@21..22 "{" [] []
-                              3: DOLLAR@22..23 "$" [] []
-                              4: VALUE_KW@23..28 "value" [] []
-                        3: R_CURLY@28..29 "}" [] []
+                  0: CSS_BOGUS@8..29
+                    0: HASH@8..9 "#" [] []
+                    1: L_CURLY@9..10 "{" [] []
+                    2: CSS_BOGUS@10..28
+                      0: CSS_BOGUS@10..28
+                        0: SCSS_VARIABLE@10..18
+                          0: DOLLAR@10..11 "$" [] []
+                          1: CSS_IDENTIFIER@11..18
+                            0: IDENT@11..18 "feature" [] []
+                        1: CSS_BOGUS_PROPERTY_VALUE@18..28
+                          0: COLON@18..20 ":" [] [Whitespace(" ")]
+                          1: HASH@20..21 "#" [] []
+                          2: L_CURLY@21..22 "{" [] []
+                          3: DOLLAR@22..23 "$" [] []
+                          4: VALUE_KW@23..28 "value" [] []
+                    3: R_CURLY@28..29 "}" [] []
                 2: R_PAREN@29..31 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@31..63
           0: L_CURLY@31..32 "{" [] []

@@ -34,13 +34,11 @@ CssRoot {
                                         L_PAREN@7..8 "(" [] [],
                                         CssBogus {
                                             items: [
-                                                CssBogusSupportsCondition {
-                                                    items: [
-                                                        DOLLAR@8..9 "$" [] [],
-                                                        CssIdentifier {
-                                                            value_token: IDENT@9..13 "min" [] [Whitespace(" ")],
-                                                        },
-                                                    ],
+                                                ScssVariable {
+                                                    dollar_token: DOLLAR@8..9 "$" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@9..13 "min" [] [Whitespace(" ")],
+                                                    },
                                                 },
                                                 CssQueryFeatureRangeComparison {
                                                     operator: L_ANGLE@13..15 "<" [] [Whitespace(" ")],
@@ -117,13 +115,11 @@ CssRoot {
                                         L_PAREN@58..59 "(" [] [],
                                         CssBogus {
                                             items: [
-                                                CssBogusSupportsCondition {
-                                                    items: [
-                                                        DOLLAR@59..60 "$" [] [],
-                                                        CssIdentifier {
-                                                            value_token: IDENT@60..64 "min" [] [Whitespace(" ")],
-                                                        },
-                                                    ],
+                                                ScssVariable {
+                                                    dollar_token: DOLLAR@59..60 "$" [] [],
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@60..64 "min" [] [Whitespace(" ")],
+                                                    },
                                                 },
                                                 CssQueryFeatureRangeComparison {
                                                     operator: L_ANGLE@64..66 "<" [] [Whitespace(" ")],
@@ -131,19 +127,22 @@ CssRoot {
                                                 CssIdentifier {
                                                     value_token: IDENT@66..72 "width" [] [Whitespace(" ")],
                                                 },
+                                                CssQueryFeatureRangeComparison {
+                                                    operator: L_ANGLE@72..74 "<" [] [Whitespace(" ")],
+                                                },
+                                                CssBogusSupportsCondition {
+                                                    items: [
+                                                        DOLLAR@74..75 "$" [] [],
+                                                        CssIdentifier {
+                                                            value_token: IDENT@75..78 "max" [] [],
+                                                        },
+                                                    ],
+                                                },
                                             ],
                                         },
+                                        R_PAREN@78..80 ")" [] [Whitespace(" ")],
                                     ],
                                 },
-                            ],
-                        },
-                        missing separator,
-                        CssBogusMediaQuery {
-                            items: [
-                                L_ANGLE@72..74 "<" [] [Whitespace(" ")],
-                                DOLLAR@74..75 "$" [] [],
-                                IDENT@75..78 "max" [] [],
-                                R_PAREN@78..80 ")" [] [Whitespace(" ")],
                             ],
                         },
                     ],
@@ -208,35 +207,62 @@ CssRoot {
                                         L_PAREN@117..118 "(" [] [],
                                         CssBogus {
                                             items: [
-                                                CssBogusSupportsCondition {
+                                                ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        ScssBinaryExpression {
+                                                            left: ScssVariable {
+                                                                dollar_token: DOLLAR@118..119 "$" [] [],
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@119..123 "min" [] [Whitespace(" ")],
+                                                                },
+                                                            },
+                                                            operator: PLUS@123..125 "+" [] [Whitespace(" ")],
+                                                            right: CssRegularDimension {
+                                                                value_token: CSS_NUMBER_LITERAL@125..126 "1" [] [],
+                                                                unit_token: IDENT@126..130 "rem" [] [Whitespace(" ")],
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                                CssQueryFeatureRangeComparison {
+                                                    operator: L_ANGLE@130..132 "<" [] [Whitespace(" ")],
+                                                },
+                                                CssIdentifier {
+                                                    value_token: IDENT@132..138 "width" [] [Whitespace(" ")],
+                                                },
+                                                CssQueryFeatureRangeComparison {
+                                                    operator: L_ANGLE@138..140 "<" [] [Whitespace(" ")],
+                                                },
+                                                CssBogus {
                                                     items: [
-                                                        DOLLAR@118..119 "$" [] [],
-                                                        CssIdentifier {
-                                                            value_token: IDENT@119..123 "min" [] [Whitespace(" ")],
+                                                        CssBogus {
+                                                            items: [
+                                                                CssBogus {
+                                                                    items: [
+                                                                        CssBogusSupportsCondition {
+                                                                            items: [
+                                                                                DOLLAR@140..141 "$" [] [],
+                                                                                CssIdentifier {
+                                                                                    value_token: IDENT@141..145 "max" [] [Whitespace(" ")],
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                        MINUS@145..147 "-" [] [Whitespace(" ")],
+                                                                        CssRegularDimension {
+                                                                            value_token: CSS_NUMBER_LITERAL@147..148 "1" [] [],
+                                                                            unit_token: IDENT@148..151 "rem" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                            ],
                                                         },
                                                     ],
                                                 },
                                             ],
                                         },
+                                        R_PAREN@151..153 ")" [] [Whitespace(" ")],
                                     ],
                                 },
-                            ],
-                        },
-                        missing separator,
-                        CssBogusMediaQuery {
-                            items: [
-                                PLUS@123..125 "+" [] [Whitespace(" ")],
-                                CSS_DIMENSION_VALUE@125..126 "1" [] [],
-                                REM_KW@126..130 "rem" [] [Whitespace(" ")],
-                                L_ANGLE@130..132 "<" [] [Whitespace(" ")],
-                                IDENT@132..138 "width" [] [Whitespace(" ")],
-                                L_ANGLE@138..140 "<" [] [Whitespace(" ")],
-                                DOLLAR@140..141 "$" [] [],
-                                IDENT@141..145 "max" [] [Whitespace(" ")],
-                                MINUS@145..147 "-" [] [Whitespace(" ")],
-                                CSS_DIMENSION_VALUE@147..148 "1" [] [],
-                                REM_KW@148..151 "rem" [] [],
-                                R_PAREN@151..153 ")" [] [Whitespace(" ")],
                             ],
                         },
                     ],
@@ -507,7 +533,7 @@ CssRoot {
               0: CSS_BOGUS@7..22
                 0: L_PAREN@7..8 "(" [] []
                 1: CSS_BOGUS@8..20
-                  0: CSS_BOGUS_SUPPORTS_CONDITION@8..13
+                  0: SCSS_VARIABLE@8..13
                     0: DOLLAR@8..9 "$" [] []
                     1: CSS_IDENTIFIER@9..13
                       0: IDENT@9..13 "min" [] [Whitespace(" ")]
@@ -551,11 +577,11 @@ CssRoot {
         0: CSS_MEDIA_AT_RULE_DECLARATOR@52..80
           0: MEDIA_KW@52..58 "media" [] [Whitespace(" ")]
           1: CSS_MEDIA_QUERY_LIST@58..80
-            0: CSS_BOGUS_MEDIA_QUERY@58..72
-              0: CSS_BOGUS@58..72
+            0: CSS_BOGUS_MEDIA_QUERY@58..80
+              0: CSS_BOGUS@58..80
                 0: L_PAREN@58..59 "(" [] []
-                1: CSS_BOGUS@59..72
-                  0: CSS_BOGUS_SUPPORTS_CONDITION@59..64
+                1: CSS_BOGUS@59..78
+                  0: SCSS_VARIABLE@59..64
                     0: DOLLAR@59..60 "$" [] []
                     1: CSS_IDENTIFIER@60..64
                       0: IDENT@60..64 "min" [] [Whitespace(" ")]
@@ -563,12 +589,13 @@ CssRoot {
                     0: L_ANGLE@64..66 "<" [] [Whitespace(" ")]
                   2: CSS_IDENTIFIER@66..72
                     0: IDENT@66..72 "width" [] [Whitespace(" ")]
-            1: (empty)
-            2: CSS_BOGUS_MEDIA_QUERY@72..80
-              0: L_ANGLE@72..74 "<" [] [Whitespace(" ")]
-              1: DOLLAR@74..75 "$" [] []
-              2: IDENT@75..78 "max" [] []
-              3: R_PAREN@78..80 ")" [] [Whitespace(" ")]
+                  3: CSS_QUERY_FEATURE_RANGE_COMPARISON@72..74
+                    0: L_ANGLE@72..74 "<" [] [Whitespace(" ")]
+                  4: CSS_BOGUS_SUPPORTS_CONDITION@74..78
+                    0: DOLLAR@74..75 "$" [] []
+                    1: CSS_IDENTIFIER@75..78
+                      0: IDENT@75..78 "max" [] []
+                2: R_PAREN@78..80 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@80..109
           0: L_CURLY@80..82 "{" [] [Whitespace(" ")]
           1: CSS_RULE_LIST@82..108
@@ -604,28 +631,39 @@ CssRoot {
         0: CSS_MEDIA_AT_RULE_DECLARATOR@111..153
           0: MEDIA_KW@111..117 "media" [] [Whitespace(" ")]
           1: CSS_MEDIA_QUERY_LIST@117..153
-            0: CSS_BOGUS_MEDIA_QUERY@117..123
-              0: CSS_BOGUS@117..123
+            0: CSS_BOGUS_MEDIA_QUERY@117..153
+              0: CSS_BOGUS@117..153
                 0: L_PAREN@117..118 "(" [] []
-                1: CSS_BOGUS@118..123
-                  0: CSS_BOGUS_SUPPORTS_CONDITION@118..123
-                    0: DOLLAR@118..119 "$" [] []
-                    1: CSS_IDENTIFIER@119..123
-                      0: IDENT@119..123 "min" [] [Whitespace(" ")]
-            1: (empty)
-            2: CSS_BOGUS_MEDIA_QUERY@123..153
-              0: PLUS@123..125 "+" [] [Whitespace(" ")]
-              1: CSS_DIMENSION_VALUE@125..126 "1" [] []
-              2: REM_KW@126..130 "rem" [] [Whitespace(" ")]
-              3: L_ANGLE@130..132 "<" [] [Whitespace(" ")]
-              4: IDENT@132..138 "width" [] [Whitespace(" ")]
-              5: L_ANGLE@138..140 "<" [] [Whitespace(" ")]
-              6: DOLLAR@140..141 "$" [] []
-              7: IDENT@141..145 "max" [] [Whitespace(" ")]
-              8: MINUS@145..147 "-" [] [Whitespace(" ")]
-              9: CSS_DIMENSION_VALUE@147..148 "1" [] []
-              10: REM_KW@148..151 "rem" [] []
-              11: R_PAREN@151..153 ")" [] [Whitespace(" ")]
+                1: CSS_BOGUS@118..151
+                  0: SCSS_EXPRESSION@118..130
+                    0: SCSS_EXPRESSION_ITEM_LIST@118..130
+                      0: SCSS_BINARY_EXPRESSION@118..130
+                        0: SCSS_VARIABLE@118..123
+                          0: DOLLAR@118..119 "$" [] []
+                          1: CSS_IDENTIFIER@119..123
+                            0: IDENT@119..123 "min" [] [Whitespace(" ")]
+                        1: PLUS@123..125 "+" [] [Whitespace(" ")]
+                        2: CSS_REGULAR_DIMENSION@125..130
+                          0: CSS_NUMBER_LITERAL@125..126 "1" [] []
+                          1: IDENT@126..130 "rem" [] [Whitespace(" ")]
+                  1: CSS_QUERY_FEATURE_RANGE_COMPARISON@130..132
+                    0: L_ANGLE@130..132 "<" [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@132..138
+                    0: IDENT@132..138 "width" [] [Whitespace(" ")]
+                  3: CSS_QUERY_FEATURE_RANGE_COMPARISON@138..140
+                    0: L_ANGLE@138..140 "<" [] [Whitespace(" ")]
+                  4: CSS_BOGUS@140..151
+                    0: CSS_BOGUS@140..151
+                      0: CSS_BOGUS@140..151
+                        0: CSS_BOGUS_SUPPORTS_CONDITION@140..145
+                          0: DOLLAR@140..141 "$" [] []
+                          1: CSS_IDENTIFIER@141..145
+                            0: IDENT@141..145 "max" [] [Whitespace(" ")]
+                        1: MINUS@145..147 "-" [] [Whitespace(" ")]
+                        2: CSS_REGULAR_DIMENSION@147..151
+                          0: CSS_NUMBER_LITERAL@147..148 "1" [] []
+                          1: IDENT@148..151 "rem" [] []
+                2: R_PAREN@151..153 ")" [] [Whitespace(" ")]
         1: CSS_RULE_BLOCK@153..184
           0: L_CURLY@153..155 "{" [] [Whitespace(" ")]
           1: CSS_RULE_LIST@155..183
@@ -779,67 +817,42 @@ CssRoot {
 ```
 c03-media-range-exclusive.css:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × SCSS variables are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  × SCSS computed media features are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
   > 1 │ @media ($min < width) { .reverse { color: red; } }
-      │         ^^^^
+      │         ^^^^^^^^^^^^
     2 │ @media ($min < width < $max) { .interval { color: red; } }
     3 │ @media ($min + 1rem < width < $max - 1rem) { .arithmetic { color: red; } }
   
 c03-media-range-exclusive.css:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × SCSS variables are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  × SCSS computed media features are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     1 │ @media ($min < width) { .reverse { color: red; } }
   > 2 │ @media ($min < width < $max) { .interval { color: red; } }
-      │         ^^^^
+      │         ^^^^^^^^^^^^^^^^^^^
     3 │ @media ($min + 1rem < width < $max - 1rem) { .arithmetic { color: red; } }
     4 │ @media (tokens.$min < width), (- $min < width), (#{$min} < width) { .other { color: red; } }
-  
-c03-media-range-exclusive.css:2:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `)` but instead found `<`
-  
-    1 │ @media ($min < width) { .reverse { color: red; } }
-  > 2 │ @media ($min < width < $max) { .interval { color: red; } }
-      │                      ^
-    3 │ @media ($min + 1rem < width < $max - 1rem) { .arithmetic { color: red; } }
-    4 │ @media (tokens.$min < width), (- $min < width), (#{$min} < width) { .other { color: red; } }
-  
-  i Remove <
   
 c03-media-range-exclusive.css:3:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × SCSS variables are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  × SCSS computed media features are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     1 │ @media ($min < width) { .reverse { color: red; } }
     2 │ @media ($min < width < $max) { .interval { color: red; } }
   > 3 │ @media ($min + 1rem < width < $max - 1rem) { .arithmetic { color: red; } }
-      │         ^^^^
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ @media (tokens.$min < width), (- $min < width), (#{$min} < width) { .other { color: red; } }
     5 │ .after { display: block; }
-  
-c03-media-range-exclusive.css:3:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `)` but instead found `+`
-  
-    1 │ @media ($min < width) { .reverse { color: red; } }
-    2 │ @media ($min < width < $max) { .interval { color: red; } }
-  > 3 │ @media ($min + 1rem < width < $max - 1rem) { .arithmetic { color: red; } }
-      │              ^
-    4 │ @media (tokens.$min < width), (- $min < width), (#{$min} < width) { .other { color: red; } }
-    5 │ .after { display: block; }
-  
-  i Remove +
   
 c03-media-range-exclusive.css:4:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × SCSS module member accesses are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  × SCSS computed media features are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
   
     2 │ @media ($min < width < $max) { .interval { color: red; } }
     3 │ @media ($min + 1rem < width < $max - 1rem) { .arithmetic { color: red; } }
   > 4 │ @media (tokens.$min < width), (- $min < width), (#{$min} < width) { .other { color: red; } }
-      │         ^^^^^^^^^^^
+      │         ^^^^^^^^^^^^^^^^^^^
     5 │ .after { display: block; }
     6 │ 
   
