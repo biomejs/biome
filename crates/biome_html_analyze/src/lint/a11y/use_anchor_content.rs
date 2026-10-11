@@ -5,8 +5,9 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_html_syntax::{AnyHtmlAttribute, AnyHtmlContent, AnyHtmlElement, HtmlElementList, T};
 use biome_languages::HtmlFileSource;
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt, TokenText};
 use biome_rule_options::use_anchor_content::UseAnchorContentOptions;
+use biome_string_case::StrOnlyExtension;
 
 use crate::HtmlRuleAction;
 use crate::a11y::{
@@ -126,9 +127,7 @@ impl Rule for UseAnchorContent {
         }
 
         // Check if the anchor has accessible content
-        let is_html = source_type.is_html();
-        let is_astro = source_type.is_astro();
-        if has_accessible_content(&html_element.children(), is_html, is_astro) {
+        if has_accessible_content(&html_element.children(), source_type) {
             return None;
         }
 
@@ -175,39 +174,28 @@ impl Rule for UseAnchorContent {
 }
 
 /// Checks if `HtmlElementList` contains accessible content (non-empty text or visible elements).
-fn has_accessible_content(
-    html_child_list: &HtmlElementList,
-    is_html: bool,
-    is_astro: bool,
-) -> bool {
+fn has_accessible_content(html_child_list: &HtmlElementList, source_type: &HtmlFileSource) -> bool {
     html_child_list.into_iter().any(|child| match &child {
         AnyHtmlElement::AnyHtmlContent(content) => is_accessible_text_content(content),
         // A fragment renders nothing itself, so its children carry the content.
         AnyHtmlElement::AstroFragment(fragment) => {
-            has_accessible_content(&fragment.children(), is_html, is_astro)
+            has_accessible_content(&fragment.children(), source_type)
         }
         AnyHtmlElement::HtmlElement(element) => {
             if html_element_has_truthy_aria_hidden(element) {
                 false
             } else {
-                // In component files (Vue/Svelte/Astro), PascalCase paired elements
-                // (e.g. <MyComponent></MyComponent>) are custom components that may
-                // render accessible content at runtime, so treat them as accessible.
-                // In plain HTML, all tags are case-insensitive so PascalCase has no
-                // special meaning and must not bypass the content check.
-                let tag_text = element
-                    .opening_element()
-                    .ok()
-                    .and_then(|o| o.name().ok())
-                    .and_then(|n| n.token_text_trimmed());
-                if !is_html
-                    && matches!(tag_text.as_ref().map(|t| t.as_ref()),
-                        Some(name) if name.starts_with(|c: char| c.is_uppercase()))
+                // In component files (Vue/Svelte/Astro), paired custom components
+                // may render accessible content at runtime, so treat them as accessible.
+                // In plain HTML, tag names are case-insensitive, so a PascalCase tag
+                // has no special meaning and must not bypass the content check.
+                if element
+                    .tag_name()
+                    .is_some_and(|name| is_custom_component(name, source_type))
                 {
-                    true
-                } else {
-                    has_accessible_content(&element.children(), is_html, is_astro)
+                    return true;
                 }
+                has_accessible_content(&element.children(), source_type)
             }
         }
         AnyHtmlElement::HtmlSelfClosingElement(element) => {
@@ -222,7 +210,7 @@ fn has_accessible_content(
             let tag_text = element.name().ok().and_then(|n| n.token_text_trimmed());
 
             match tag_text.as_ref().map(|t| t.as_ref()) {
-                Some(name) if name.eq_ignore_ascii_case("img") || (is_astro && name == "Image") => {
+                Some(name) if name.eq_ignore_ascii_case("img") || (source_type.is_astro() && name == "Image") => {
                     html_self_closing_element_has_non_empty_attribute(element, "alt")
                 }
                 Some(name)
@@ -255,6 +243,21 @@ fn has_accessible_content(
         | AnyHtmlElement::HtmlCdataSection(_)
         | AnyHtmlElement::HtmlProcessingInstruction(_) => true,
     })
+}
+
+/// Checks if an element with `element_name` as its tag name is a custom
+/// component rendered by a framework, rather than a plain HTML element.
+/// Same strategy as `noInlineStyles`'s `is_custom_component`.
+///
+/// In plain HTML files, tag names are case-insensitive, so the casing of the
+/// tag name has no special meaning. In component files (Vue, Svelte, Astro),
+/// tag names that are not fully lowercase are custom components.
+fn is_custom_component(element_name: TokenText, source_type: &HtmlFileSource) -> bool {
+    if source_type.is_html() {
+        return false;
+    }
+
+    element_name.text() != element_name.to_lowercase_cow()
 }
 
 /// Checks if the content node contains non-empty text.
