@@ -2037,6 +2037,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_expect::UseExpectOptions>(),
     ));
     result.push((
+        "nursery",
+        "useExpectToContain",
+        TypeId::of::<biome_rule_options::use_expect_to_contain::UseExpectToContainOptions>(),
+    ));
+    result.push((
         "style",
         "useExplicitLengthCheck",
         TypeId::of::<biome_rule_options::use_explicit_length_check::UseExplicitLengthCheckOptions>(

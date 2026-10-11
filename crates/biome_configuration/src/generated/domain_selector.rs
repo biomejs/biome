@@ -149,6 +149,7 @@ static TAILWIND_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
 static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("complexity", "noExcessiveNestedTestSuites"),
+        RuleFilter::Rule("nursery", "useExpectToContain"),
         RuleFilter::Rule("nursery", "useValidTestTitle"),
         RuleFilter::Rule("style", "useConsistentTestIt"),
         RuleFilter::Rule("style", "useTestHooksInOrder"),
