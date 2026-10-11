@@ -1,0 +1,144 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-html="content"></div>
+  <div v-html="'<p>' + text + '</p>'"></div>
+  <div v-html></div>
+  <div v-html:arg.mod="content"></div>
+  <div v-HTML="content"></div>
+  <MyComponent v-if="visible" v-html="content" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:8 lint/nursery/noVueVHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-html directive inserts its value into the page as HTML.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-html="content"></div>
+      │        ^^^^^^^^^^^^^^^^
+    4 │   <div v-html="'<p>' + text + '</p>'"></div>
+    5 │   <div v-html></div>
+  
+  i If the value contains text from users, an attacker can use it to run their own code on your page. This attack is called cross-site scripting (XSS).
+  
+  i To show the value as text, use {{ }} instead. If you need to render HTML, remove any dangerous tags from it before using v-html.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:8 lint/nursery/noVueVHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-html directive inserts its value into the page as HTML.
+  
+    2 │ <template>
+    3 │   <div v-html="content"></div>
+  > 4 │   <div v-html="'<p>' + text + '</p>'"></div>
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │   <div v-html></div>
+    6 │   <div v-html:arg.mod="content"></div>
+  
+  i If the value contains text from users, an attacker can use it to run their own code on your page. This attack is called cross-site scripting (XSS).
+  
+  i To show the value as text, use {{ }} instead. If you need to render HTML, remove any dangerous tags from it before using v-html.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:8 lint/nursery/noVueVHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-html directive inserts its value into the page as HTML.
+  
+    3 │   <div v-html="content"></div>
+    4 │   <div v-html="'<p>' + text + '</p>'"></div>
+  > 5 │   <div v-html></div>
+      │        ^^^^^^
+    6 │   <div v-html:arg.mod="content"></div>
+    7 │   <div v-HTML="content"></div>
+  
+  i If the value contains text from users, an attacker can use it to run their own code on your page. This attack is called cross-site scripting (XSS).
+  
+  i To show the value as text, use {{ }} instead. If you need to render HTML, remove any dangerous tags from it before using v-html.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:8 lint/nursery/noVueVHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-html directive inserts its value into the page as HTML.
+  
+    4 │   <div v-html="'<p>' + text + '</p>'"></div>
+    5 │   <div v-html></div>
+  > 6 │   <div v-html:arg.mod="content"></div>
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │   <div v-HTML="content"></div>
+    8 │   <MyComponent v-if="visible" v-html="content" />
+  
+  i If the value contains text from users, an attacker can use it to run their own code on your page. This attack is called cross-site scripting (XSS).
+  
+  i To show the value as text, use {{ }} instead. If you need to render HTML, remove any dangerous tags from it before using v-html.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:8 lint/nursery/noVueVHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-html directive inserts its value into the page as HTML.
+  
+    5 │   <div v-html></div>
+    6 │   <div v-html:arg.mod="content"></div>
+  > 7 │   <div v-HTML="content"></div>
+      │        ^^^^^^^^^^^^^^^^
+    8 │   <MyComponent v-if="visible" v-html="content" />
+    9 │ </template>
+  
+  i If the value contains text from users, an attacker can use it to run their own code on your page. This attack is called cross-site scripting (XSS).
+  
+  i To show the value as text, use {{ }} instead. If you need to render HTML, remove any dangerous tags from it before using v-html.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:31 lint/nursery/noVueVHtml ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-html directive inserts its value into the page as HTML.
+  
+     6 │   <div v-html:arg.mod="content"></div>
+     7 │   <div v-HTML="content"></div>
+   > 8 │   <MyComponent v-if="visible" v-html="content" />
+       │                               ^^^^^^^^^^^^^^^^
+     9 │ </template>
+    10 │ 
+  
+  i If the value contains text from users, an attacker can use it to run their own code on your page. This attack is called cross-site scripting (XSS).
+  
+  i To show the value as text, use {{ }} instead. If you need to render HTML, remove any dangerous tags from it before using v-html.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

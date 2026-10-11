@@ -5,6 +5,7 @@ use biome_markdown_syntax::{
     emphasis_ext::MdItalicFence,
 };
 use biome_rowan::AstNode;
+use biome_unicode_table::is_unicode_punctuation;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatMdInlineItalic {
@@ -12,23 +13,35 @@ pub(crate) struct FormatMdInlineItalic {
 }
 
 /// Determine the target delimiter for an italic node based on its context.
-/// Prefers `_` but uses `*` when adjacent to alphanumeric characters
-/// (per CommonMark spec: `a_b_c` won't parse as italic, but `a*b*c` will).
+/// Prefers `_` but keeps a `*` fence that touches a character that is neither
+/// whitespace nor punctuation. There, `_` can't open or close emphasis
+/// (CommonMark §6.2: `a_b_c` won't parse as italic, but `a*b*c` will).
+///
+/// An `_` fence is never switched to `*`: it already opens and closes in
+/// place, while a `*` could pair with another `*` run in the paragraph.
 fn resolve_target_kind(node: &MdInlineItalic) -> MarkdownSyntaxKind {
-    let prev_is_alphanum = node
+    if node
+        .fence()
+        .is_ok_and(|fence| fence == MdItalicFence::Underscore)
+    {
+        return MarkdownSyntaxKind::UNDERSCORE;
+    }
+
+    let is_word_character = |c: char| !c.is_whitespace() && !is_unicode_punctuation(c);
+    let prev_is_word_character = node
         .l_fence()
         .ok()
         .and_then(|f| f.prev_token())
         .and_then(|t| t.text_trimmed().chars().last())
-        .is_some_and(|c| c.is_alphanumeric());
-    let next_is_alphanum = node
+        .is_some_and(is_word_character);
+    let next_is_word_character = node
         .r_fence()
         .ok()
         .and_then(|f| f.next_token())
         .and_then(|t| t.text_trimmed().chars().next())
-        .is_some_and(|c| c.is_alphanumeric());
+        .is_some_and(is_word_character);
 
-    if prev_is_alphanum || next_is_alphanum {
+    if prev_is_word_character || next_is_word_character {
         MarkdownSyntaxKind::STAR
     } else {
         MarkdownSyntaxKind::UNDERSCORE
@@ -177,7 +190,7 @@ impl FormatNodeRule<MdInlineItalic> for FormatMdInlineItalic {
             }
         }
 
-        // Use `*` if inside another italic or near alphanumeric chars; otherwise `_`.
+        // Use `*` if inside another italic or next to a word character; otherwise `_`.
         let mut target_kind = if has_ancestor_italic(node) {
             MarkdownSyntaxKind::STAR
         } else {

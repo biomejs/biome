@@ -811,7 +811,12 @@ fn is_between_property_colon_and_value(
     comment_start >= colon.text_trimmed_range().end() && comment_start < value_start
 }
 
-/// Keeps `@custom-#{$name} /* note */ token;` comments in the prelude.
+/// Keeps comments before an interpolated name's prelude or embedded SCSS value.
+///
+/// ```scss
+/// @custom-#{$name} /* note */ token;
+/// @foo /* note */ "before #{"inner"} after";
+/// ```
 fn handle_scss_at_rule_name_comment(
     comment: DecoratedComment<CssLanguage>,
 ) -> CommentPlacement<CssLanguage> {
@@ -832,10 +837,12 @@ fn handle_scss_at_rule_name_comment(
         return CommentPlacement::Default(comment);
     };
     if name.as_css_identifier().is_some()
-        && components
-            .items()
-            .next()
-            .is_none_or(|part| part.kind() != CssSyntaxKind::SCSS_INTERPOLATION)
+        && components.items().next().is_none_or(|part| {
+            !matches!(
+                part.kind(),
+                CssSyntaxKind::SCSS_INTERPOLATION | CssSyntaxKind::SCSS_INTERPOLATED_STRING
+            )
+        })
     {
         return CommentPlacement::Default(comment);
     }

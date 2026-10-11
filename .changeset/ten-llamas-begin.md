@@ -32,6 +32,25 @@ title: Lorem ipsum
 ---
 ````
 
+The parser also comes with an opt-in option called `cjkFriendlyEmphasis`. When enabled, the parser follows the [CommonMark CJK-friendly amendments](https://github.com/tats-u/markdown-cjk-friendly/blob/main/specification.md) and recognizes emphasis markers, such as `**`, placed directly next to Chinese, Japanese, or Korean text. Enable it only when the tool that renders your Markdown supports the same amendments, because the option changes which text Biome formats and lints as emphasis:
+
+```json5
+// biome.json
+{
+  "markdown": {
+    "parser": {
+      "cjkFriendlyEmphasis": true
+    }
+  }
+}
+```
+
+With the option enabled, the following text is parsed as bold, instead of as literal `**`:
+
+```md
+**このアスタリスクは強調記号として認識されず、そのまま表示されます。**この文のせいで。
+```
+
 ##### Markdown formatter
 
 The formatter has great compatibility with Prettier formatting, more than 90% detected by our infrastructure. The formatter ships with

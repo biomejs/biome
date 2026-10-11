@@ -298,7 +298,7 @@ Expression "Intl.NumberFormat.supportedLocalesOf" => sync Function "supportedLoc
 
 Expression "Intl.NumberFormat.supportedLocalesOf([\"en\"])" => instanceof Array<string>
 
-Expression "[\"en\"]" => [string: en]
+Expression "[\"en\"]" => instanceof Array<string>
 
 Expression "\"en\"" => string: en
 

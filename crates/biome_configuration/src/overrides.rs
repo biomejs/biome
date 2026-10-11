@@ -1107,6 +1107,7 @@ mod tests {
             parser: Some(MarkdownParserConfiguration {
                 frontmatter: Some(false.into()),
                 gfm: None,
+                cjk_friendly_emphasis: None,
             }),
             linter: Some(MarkdownLinterConfiguration {
                 enabled: Some(true.into()),
@@ -1127,6 +1128,7 @@ mod tests {
                 parser: Some(MarkdownParserConfiguration {
                     frontmatter: Some(true.into()),
                     gfm: None,
+                    cjk_friendly_emphasis: None,
                 }),
                 linter: Some(MarkdownLinterConfiguration {
                     enabled: Some(false.into()),

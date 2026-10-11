@@ -25,6 +25,7 @@ salsa             = { workspace = true }
 [dev-dependencies]
 biome_css_parser = { path = "../biome_css_parser" }
 camino           = { workspace = true }
+insta            = { workspace = true }
 
 [lints]
 workspace = true

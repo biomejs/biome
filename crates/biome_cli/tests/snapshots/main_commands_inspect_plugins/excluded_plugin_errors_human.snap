@@ -53,35 +53,35 @@ biome inspect plugins --path=file.js
 ```block
 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × 1 rule resolved. Some plugin imports could not be resolved.
+  × 3 plugins in the configuration have errors.
   
-  Target path: file.js
+  The configuration enables 1 plugin rule for file.js.
   
   Local plugins
   
-  - before
+  - before.grit (rule name: before)
   
-  Unresolved imports
+  Plugins with errors
   
-  missing.grit
+  missing.grit (override includes: [**/*.test.js])
   
-  × Failed to read plugin file missing.grit
+  × Biome couldn't find the plugin file missing.grit.
   
-  × Cannot read file.
+  broken (override includes: [**/*.test.js])
   
-  × Biome can't read the following file, maybe for permissions reasons or it doesn't exist.
+  × The Biome manifest broken/biome-manifest.json is invalid.
   
-  broken
+  × Unsupported version 2.
   
-  × Cannot load Biome manifest broken/biome-manifest.json.
+  i Biome manifests must use version 1.
   
-  × version must be 1.
+  missing-package/presets/recommended (override includes: [**/*.test.js])
   
-  missing-package/presets/recommended
+  × Biome couldn't find the plugin package missing-package.
   
-  × Failed to resolve plugin package missing-package from 
+  i Make sure the package is installed. Biome looks for it in the node_modules directory of the working directory and of each parent directory.
   
-  × Could not resolve missing-package: module not found
+  i Plugins that don't apply to file.js are also reported, because Biome loads every plugin in the configuration.
   
 
 

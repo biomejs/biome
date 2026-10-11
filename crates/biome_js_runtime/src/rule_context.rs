@@ -134,6 +134,7 @@ fn embedding_kind(kind: &JsEmbeddingKind, context: &mut Context) -> JsValue {
             let embedding_kind = match embedding_kind {
                 SvelteEmbeddingKind::Source => js_string!("source"),
                 SvelteEmbeddingKind::Expression => js_string!("expression"),
+                SvelteEmbeddingKind::TextInterpolation => js_string!("textInterpolation"),
                 SvelteEmbeddingKind::SnippetSignature => js_string!("snippetSignature"),
                 SvelteEmbeddingKind::LegacyConst => js_string!("legacyConst"),
                 SvelteEmbeddingKind::Declaration => js_string!("declaration"),

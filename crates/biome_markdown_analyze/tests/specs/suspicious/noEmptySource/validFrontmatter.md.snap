@@ -1,0 +1,12 @@
+---
+source: crates/biome_markdown_analyze/tests/spec_tests.rs
+expression: validFrontmatter.md
+---
+# Input
+```md
+---
+title: Example
+---
+<!-- should not generate diagnostics -->
+
+```

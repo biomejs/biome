@@ -78,7 +78,7 @@ impl Rule for NoInvalidPositionAtImportRule {
         for item in node {
             let at_rule = match item {
                 AnyCssRootItem::AnyCssRule(AnyCssRule::CssAtRule(at_rule)) => at_rule.rule().ok(),
-                AnyCssRootItem::ScssVariableDeclaration(_) => continue,
+                AnyCssRootItem::ScssVariableDeclaration(_) | AnyCssRootItem::CssEmptyDeclaration(_) => continue,
                 _ => {
                     is_invalid_position = true;
                     continue;

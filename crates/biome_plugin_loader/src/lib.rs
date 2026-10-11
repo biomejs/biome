@@ -26,7 +26,7 @@ use std::sync::Arc;
 
 use biome_analyze::{AnalyzerPlugin, AnalyzerPluginVec};
 use biome_console::markup;
-use biome_fs::{FileSystemDiagnostic, FsErrorKind, ManifestName, normalize_path};
+use biome_fs::{ManifestName, normalize_path};
 use biome_glob::{CandidatePath, NormalizedGlob};
 use biome_manifest::{BiomeManifest, BiomeManifestError, ManifestEntry, ManifestPresets};
 use biome_resolver::{
@@ -91,7 +91,7 @@ impl From<BiomeManifestError> for PluginDiagnostic {
             BiomeManifestError::Invalid(error) => {
                 let (path, source) = error.into_parts();
                 Self::invalid_manifest(
-                    markup!("Cannot load Biome manifest "<Emphasis>{path}</Emphasis>"."),
+                    markup!("The Biome manifest "<Emphasis>{path}</Emphasis>" is invalid."),
                     source,
                 )
             }
@@ -321,20 +321,10 @@ fn validate_plugin_file(
     fs: &dyn FsWithResolverProxy,
     path: &Utf8Path,
 ) -> Result<(), PluginDiagnostic> {
-    fs.path_kind(path)
-        .and_then(|kind| {
-            if kind.is_file() {
-                Ok(())
-            } else {
-                Err(FileSystemDiagnostic {
-                    path: path.to_string(),
-                    severity: biome_diagnostics::Severity::Error,
-                    error_kind: FsErrorKind::CantReadFile,
-                    source: None,
-                })
-            }
-        })
-        .map_err(|source| PluginDiagnostic::cant_read_plugin_file(path.to_path_buf(), source))
+    match fs.path_kind(path) {
+        Ok(kind) if kind.is_file() => Ok(()),
+        _ => Err(PluginDiagnostic::plugin_file_not_found(path)),
+    }
 }
 
 struct ManifestRule {
@@ -604,10 +594,7 @@ fn find_biome_manifest(
             return Ok(manifest_path);
         }
     }
-    Err(PluginDiagnostic::cant_resolve(
-        plugin_path.to_path_buf(),
-        None,
-    ))
+    Err(PluginDiagnostic::missing_manifest(plugin_path))
 }
 
 fn resolve_package_manifest(
@@ -821,7 +808,7 @@ mod test {
         let root = Utf8Path::new(std::path::MAIN_SEPARATOR_STR);
         let error = resolve_plugin(&fs, "./missing.grit", Utf8Path::new("/"), None)
             .expect_err("direct plugin files must exist");
-        assert!(matches!(error, PluginDiagnostic::InvalidManifest(_)));
+        assert!(matches!(error, PluginDiagnostic::CantResolve(_)));
         assert!(
             error
                 .to_string()
@@ -847,7 +834,7 @@ mod test {
                 Some(selection),
             )
             .expect_err("selected plugin files must exist");
-            assert!(matches!(error, PluginDiagnostic::InvalidManifest(_)));
+            assert!(matches!(error, PluginDiagnostic::CantResolve(_)));
             assert!(
                 error
                     .to_string()
@@ -1742,6 +1729,19 @@ mod test {
     }
 
     #[test]
+    fn load_plugin_from_missing_package() {
+        let fs = Arc::new(MemoryFileSystem::default()) as Arc<dyn FsWithResolverProxy>;
+        let error = BiomePlugin::load(
+            fs,
+            "missing-package/presets/recommended",
+            Utf8Path::new("/project"),
+            None,
+        )
+        .expect_err("Plugin loading should've failed");
+        snap_diagnostic("load_plugin_from_missing_package", &[], error.into());
+    }
+
+    #[test]
     fn load_plugin_with_wrong_version() {
         let fs = MemoryFileSystem::default();
         let manifest = r#"{
@@ -1845,7 +1845,7 @@ mod test {
                 None,
             )
             .expect_err("direct JavaScript plugin files must exist");
-            assert!(matches!(error, PluginDiagnostic::InvalidManifest(_)));
+            assert!(matches!(error, PluginDiagnostic::CantResolve(_)));
         }
     }
 

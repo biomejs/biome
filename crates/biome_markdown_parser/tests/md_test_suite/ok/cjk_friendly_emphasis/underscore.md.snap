@@ -1,0 +1,264 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+__注意__：注意事項
+
+正體字。︁_Traditional._
+
+简体字 / 新字体。︀__Mainland China or Japan.__
+
+“︁Git”︁__Hub__
+
+漢_abc_
+
+_abc_漢
+
+_foo_bar_baz_
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdInlineEmphasis {
+                    l_fence: DOUBLE_UNDERSCORE@0..2 "__" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@2..8 "注意" [] [],
+                        },
+                    ],
+                    r_fence: DOUBLE_UNDERSCORE@8..10 "__" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@10..25 "：注意事項" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@25..26 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@26..27 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@27..42 "正體字。\u{fe01}" [] [],
+                },
+                MdInlineItalic {
+                    l_fence: UNDERSCORE@42..43 "_" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@43..55 "Traditional." [] [],
+                        },
+                    ],
+                    r_fence: UNDERSCORE@55..56 "_" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@56..57 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@57..58 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@58..85 "简体字 / 新字体。\u{fe00}" [] [],
+                },
+                MdInlineEmphasis {
+                    l_fence: DOUBLE_UNDERSCORE@85..87 "__" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@87..111 "Mainland China or Japan." [] [],
+                        },
+                    ],
+                    r_fence: DOUBLE_UNDERSCORE@111..113 "__" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@113..114 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@114..115 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@115..130 "“\u{fe01}Git”\u{fe01}" [] [],
+                },
+                MdInlineEmphasis {
+                    l_fence: DOUBLE_UNDERSCORE@130..132 "__" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@132..135 "Hub" [] [],
+                        },
+                    ],
+                    r_fence: DOUBLE_UNDERSCORE@135..137 "__" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@137..138 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@138..139 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@139..146 "漢_abc" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@146..147 "_" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@147..148 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@148..149 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@149..157 "_abc_漢" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@157..158 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@158..159 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdInlineItalic {
+                    l_fence: UNDERSCORE@159..160 "_" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@160..171 "foo_bar_baz" [] [],
+                        },
+                    ],
+                    r_fence: UNDERSCORE@171..172 "_" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@172..173 "\n" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@173..173 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..173
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..173
+    0: MD_PARAGRAPH@0..26
+      0: MD_INLINE_ITEM_LIST@0..26
+        0: MD_INLINE_EMPHASIS@0..10
+          0: DOUBLE_UNDERSCORE@0..2 "__" [] []
+          1: MD_INLINE_ITEM_LIST@2..8
+            0: MD_TEXTUAL@2..8
+              0: MD_TEXTUAL_LITERAL@2..8 "注意" [] []
+          2: DOUBLE_UNDERSCORE@8..10 "__" [] []
+        1: MD_TEXTUAL@10..25
+          0: MD_TEXTUAL_LITERAL@10..25 "：注意事項" [] []
+        2: MD_TEXTUAL@25..26
+          0: MD_TEXTUAL_LITERAL@25..26 "\n" [] []
+    1: MD_NEWLINE@26..27
+      0: NEWLINE@26..27 "\n" [] []
+    2: MD_PARAGRAPH@27..57
+      0: MD_INLINE_ITEM_LIST@27..57
+        0: MD_TEXTUAL@27..42
+          0: MD_TEXTUAL_LITERAL@27..42 "正體字。\u{fe01}" [] []
+        1: MD_INLINE_ITALIC@42..56
+          0: UNDERSCORE@42..43 "_" [] []
+          1: MD_INLINE_ITEM_LIST@43..55
+            0: MD_TEXTUAL@43..55
+              0: MD_TEXTUAL_LITERAL@43..55 "Traditional." [] []
+          2: UNDERSCORE@55..56 "_" [] []
+        2: MD_TEXTUAL@56..57
+          0: MD_TEXTUAL_LITERAL@56..57 "\n" [] []
+    3: MD_NEWLINE@57..58
+      0: NEWLINE@57..58 "\n" [] []
+    4: MD_PARAGRAPH@58..114
+      0: MD_INLINE_ITEM_LIST@58..114
+        0: MD_TEXTUAL@58..85
+          0: MD_TEXTUAL_LITERAL@58..85 "简体字 / 新字体。\u{fe00}" [] []
+        1: MD_INLINE_EMPHASIS@85..113
+          0: DOUBLE_UNDERSCORE@85..87 "__" [] []
+          1: MD_INLINE_ITEM_LIST@87..111
+            0: MD_TEXTUAL@87..111
+              0: MD_TEXTUAL_LITERAL@87..111 "Mainland China or Japan." [] []
+          2: DOUBLE_UNDERSCORE@111..113 "__" [] []
+        2: MD_TEXTUAL@113..114
+          0: MD_TEXTUAL_LITERAL@113..114 "\n" [] []
+    5: MD_NEWLINE@114..115
+      0: NEWLINE@114..115 "\n" [] []
+    6: MD_PARAGRAPH@115..138
+      0: MD_INLINE_ITEM_LIST@115..138
+        0: MD_TEXTUAL@115..130
+          0: MD_TEXTUAL_LITERAL@115..130 "“\u{fe01}Git”\u{fe01}" [] []
+        1: MD_INLINE_EMPHASIS@130..137
+          0: DOUBLE_UNDERSCORE@130..132 "__" [] []
+          1: MD_INLINE_ITEM_LIST@132..135
+            0: MD_TEXTUAL@132..135
+              0: MD_TEXTUAL_LITERAL@132..135 "Hub" [] []
+          2: DOUBLE_UNDERSCORE@135..137 "__" [] []
+        2: MD_TEXTUAL@137..138
+          0: MD_TEXTUAL_LITERAL@137..138 "\n" [] []
+    7: MD_NEWLINE@138..139
+      0: NEWLINE@138..139 "\n" [] []
+    8: MD_PARAGRAPH@139..148
+      0: MD_INLINE_ITEM_LIST@139..148
+        0: MD_TEXTUAL@139..146
+          0: MD_TEXTUAL_LITERAL@139..146 "漢_abc" [] []
+        1: MD_TEXTUAL@146..147
+          0: MD_TEXTUAL_LITERAL@146..147 "_" [] []
+        2: MD_TEXTUAL@147..148
+          0: MD_TEXTUAL_LITERAL@147..148 "\n" [] []
+    9: MD_NEWLINE@148..149
+      0: NEWLINE@148..149 "\n" [] []
+    10: MD_PARAGRAPH@149..158
+      0: MD_INLINE_ITEM_LIST@149..158
+        0: MD_TEXTUAL@149..157
+          0: MD_TEXTUAL_LITERAL@149..157 "_abc_漢" [] []
+        1: MD_TEXTUAL@157..158
+          0: MD_TEXTUAL_LITERAL@157..158 "\n" [] []
+    11: MD_NEWLINE@158..159
+      0: NEWLINE@158..159 "\n" [] []
+    12: MD_PARAGRAPH@159..173
+      0: MD_INLINE_ITEM_LIST@159..173
+        0: MD_INLINE_ITALIC@159..172
+          0: UNDERSCORE@159..160 "_" [] []
+          1: MD_INLINE_ITEM_LIST@160..171
+            0: MD_TEXTUAL@160..171
+              0: MD_TEXTUAL_LITERAL@160..171 "foo_bar_baz" [] []
+          2: UNDERSCORE@171..172 "_" [] []
+        1: MD_TEXTUAL@172..173
+          0: MD_TEXTUAL_LITERAL@172..173 "\n" [] []
+  3: EOF@173..173 "" [] []
+
+```

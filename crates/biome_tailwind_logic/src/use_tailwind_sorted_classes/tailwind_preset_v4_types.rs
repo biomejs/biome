@@ -311,3 +311,29 @@ pub enum Negative {
         arbitrary_branches: &'static [ArbitraryBranch],
     },
 }
+
+#[cfg(test)]
+mod tests {
+    use color::parse_color;
+
+    use super::super::tailwind_preset_v4::THEME_COLOR_VALUES;
+    use super::*;
+
+    #[test]
+    fn theme_color_values_match_parse_color() {
+        assert_eq!(THEME_COLOR_VALUES.len(), THEME_KEYS_COLOR.len());
+        for (key, source) in [
+            ("red-500", "oklch(63.7% 0.237 25.331)"),
+            ("neutral-950", "oklch(14.5% 0 none)"),
+            ("black", "#000"),
+        ] {
+            let generated = THEME_COLOR_VALUES.get(key).unwrap();
+            let parsed = parse_color(source).unwrap();
+            // `parse_color` also sets a private "named color space" flag, so
+            // compare the observable parts instead of the whole value.
+            assert_eq!(generated.cs, parsed.cs, "{key}");
+            assert_eq!(generated.flags.missing(), parsed.flags.missing(), "{key}");
+            assert_eq!(generated.components, parsed.components, "{key}");
+        }
+    }
+}

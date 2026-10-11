@@ -29,6 +29,7 @@ Promoted the following rules to the `suspicious` group:
 - [`noLoopFunc`](https://biomejs.dev/linter/rules/no-loop-func/)
 - [`noJsxLeakedDollar`](https://biomejs.dev/linter/rules/no-jsx-leaked-dollar/)
 - [`noReactStringRefs`](https://biomejs.dev/linter/rules/no-react-string-refs/) (recommended)
+- [`useScopedStyles`](https://biomejs.dev/linter/rules/use-scoped-styles/) (recommended)
 - [`noReactNativeDeepImports`](https://biomejs.dev/linter/rules/no-react-native-deep-imports/) (recommended, error severity)
 - [`noDrizzleDeleteWithoutWhere`](https://biomejs.dev/linter/rules/no-drizzle-delete-without-where/) (recommended, error severity)
 - [`noDrizzleUpdateWithoutWhere`](https://biomejs.dev/linter/rules/no-drizzle-update-without-where/) (recommended, error severity)
@@ -71,7 +72,6 @@ Promoted the following rules to the `style` group with information severity:
 
 - [`useVueConsistentDefinePropsDeclaration`](https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration/)
 - [`useVueNextTickPromise`](https://biomejs.dev/linter/rules/use-vue-next-tick-promise/) (recommended)
-- [`useScopedStyles`](https://biomejs.dev/linter/rules/use-scoped-styles/) (recommended)
 - [`noReactNativeLiteralColors`](https://biomejs.dev/linter/rules/no-react-native-literal-colors/)
 - [`useConsistentTestIt`](https://biomejs.dev/linter/rules/use-consistent-test-it/)
 - [`useTestHooksInOrder`](https://biomejs.dev/linter/rules/use-test-hooks-in-order/)

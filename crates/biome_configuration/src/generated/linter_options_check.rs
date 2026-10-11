@@ -868,6 +868,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_nested_switch::NoNestedSwitchOptions>(),
     ));
     result.push((
+        "nursery",
+        "noNestedTemplateLiterals",
+        TypeId::of::<
+            biome_rule_options::no_nested_template_literals::NoNestedTemplateLiteralsOptions,
+        >(),
+    ));
+    result.push((
         "style",
         "noNestedTernary",
         TypeId::of::<biome_rule_options::no_nested_ternary::NoNestedTernaryOptions>(),
@@ -1255,6 +1262,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noSvelteLegacyConst",
         TypeId::of::<biome_rule_options::no_svelte_legacy_const::NoSvelteLegacyConstOptions>(),
     ));
+    result.push(("nursery", "noSvelteObjectInTextMustaches", TypeId::of::<biome_rule_options::no_svelte_object_in_text_mustaches::NoSvelteObjectInTextMustachesOptions>()));
     result.push(("nursery", "noSvelteUnnecessaryStateWrap", TypeId::of::<biome_rule_options::no_svelte_unnecessary_state_wrap::NoSvelteUnnecessaryStateWrapOptions>()));
     result.push((
         "a11y",
@@ -1466,6 +1474,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "nursery",
         "noUnsafeTypeAssertion",
         TypeId::of::<biome_rule_options::no_unsafe_type_assertion::NoUnsafeTypeAssertionOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noUnsafeUnaryMinus",
+        TypeId::of::<biome_rule_options::no_unsafe_unary_minus::NoUnsafeUnaryMinusOptions>(),
     ));
     result.push((
         "suspicious",
@@ -1693,6 +1706,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noVueRefAsOperand",
         TypeId::of::<biome_rule_options::no_vue_ref_as_operand::NoVueRefAsOperandOptions>(),
     ));
+    result.push(("nursery", "noVueRequiredPropWithDefault", TypeId::of::<biome_rule_options::no_vue_required_prop_with_default::NoVueRequiredPropWithDefaultOptions>()));
     result.push((
         "correctness",
         "noVueReservedKeys",
@@ -1717,6 +1731,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
+        "nursery",
+        "noVueVHtml",
+        TypeId::of::<biome_rule_options::no_vue_v_html::NoVueVHtmlOptions>(),
+    ));
+    result.push((
         "correctness",
         "noVueVIfWithVFor",
         TypeId::of::<biome_rule_options::no_vue_v_if_with_v_for::NoVueVIfWithVForOptions>(),
@@ -1725,6 +1744,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "correctness",
         "noVueVOnNumberValues",
         TypeId::of::<biome_rule_options::no_vue_v_on_number_values::NoVueVOnNumberValuesOptions>(),
+    ));
+    result.push((
+        "nursery",
+        "noVueVText",
+        TypeId::of::<biome_rule_options::no_vue_v_text::NoVueVTextOptions>(),
     ));
     result.push((
         "suspicious",
@@ -1842,6 +1866,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_button_type::UseButtonTypeOptions>(),
     ));
     result.push((
+        "nursery",
+        "useCapitalizedConstructors",
+        TypeId::of::<
+            biome_rule_options::use_capitalized_constructors::UseCapitalizedConstructorsOptions,
+        >(),
+    ));
+    result.push((
         "style",
         "useCollapsedElseIf",
         TypeId::of::<biome_rule_options::use_collapsed_else_if::UseCollapsedElseIfOptions>(),
@@ -1893,6 +1924,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "useConsistentHeadingLevel",
         TypeId::of::<
             biome_rule_options::use_consistent_heading_level::UseConsistentHeadingLevelOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
+        "useConsistentJsonFileRead",
+        TypeId::of::<
+            biome_rule_options::use_consistent_json_file_read::UseConsistentJsonFileReadOptions,
         >(),
     ));
     result.push(("style", "useConsistentMemberAccessibility", TypeId::of::<biome_rule_options::use_consistent_member_accessibility::UseConsistentMemberAccessibilityOptions>()));
@@ -2268,6 +2306,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useNamedFunction",
+        TypeId::of::<biome_rule_options::use_named_function::UseNamedFunctionOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useNamedLayer",
         TypeId::of::<biome_rule_options::use_named_layer::UseNamedLayerOptions>(),
     ));
@@ -2414,7 +2457,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_required_scripts::UseRequiredScriptsOptions>(),
     ));
     result.push((
-        "style",
+        "suspicious",
         "useScopedStyles",
         TypeId::of::<biome_rule_options::use_scoped_styles::UseScopedStylesOptions>(),
     ));
@@ -2568,6 +2611,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_trim_start_end::UseTrimStartEndOptions>(),
     ));
     result.push((
+        "nursery",
+        "useUnaryMinus",
+        TypeId::of::<biome_rule_options::use_unary_minus::UseUnaryMinusOptions>(),
+    ));
+    result.push((
         "style",
         "useUnicodeRegex",
         TypeId::of::<biome_rule_options::use_unicode_regex::UseUnicodeRegexOptions>(),
@@ -2640,6 +2688,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_vue_base_import::UseVueBaseImportOptions>(),
     ));
     result.push(("style", "useVueConsistentDefinePropsDeclaration", TypeId::of::<biome_rule_options::use_vue_consistent_define_props_declaration::UseVueConsistentDefinePropsDeclarationOptions>()));
+    result.push(("nursery", "useVueConsistentEventHyphenation", TypeId::of::<biome_rule_options::use_vue_consistent_event_hyphenation::UseVueConsistentEventHyphenationOptions>()));
     result.push((
         "style",
         "useVueConsistentVBindStyle",

@@ -47,6 +47,28 @@ impl<'source> ConfigurationInspector<'source> {
         &self.serialized_configuration
     }
 
+    pub(crate) fn serialized_configuration_with_overrides(
+        &self,
+        matching_overrides: &[usize],
+    ) -> Result<Value, WorkspaceError> {
+        let base_configuration = self.configuration.clone();
+        let override_patterns = base_configuration
+            .overrides
+            .as_ref()
+            .map(|overrides| overrides.0.as_slice())
+            .unwrap_or_default();
+        let mut configuration = base_configuration.clone();
+
+        for &override_index in matching_overrides {
+            if let Some(pattern) = override_patterns.get(override_index) {
+                pattern.apply_to_configuration(&mut configuration, &base_configuration);
+            }
+        }
+
+        serde_json::to_value(configuration)
+            .map_err(|_| BiomeDiagnostic::new_serialization_error().into())
+    }
+
     pub(crate) fn configuration_paths(&self) -> impl Iterator<Item = &Utf8Path> {
         self.files.files.iter().map(|file| file.path)
     }

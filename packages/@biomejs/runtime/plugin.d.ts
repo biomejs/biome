@@ -82,6 +82,7 @@ export type JsEmbeddingKind =
 			readonly embeddingKind:
 				| "source"
 				| "expression"
+				| "textInterpolation"
 				| "snippetSignature"
 				| "legacyConst"
 				| "declaration";

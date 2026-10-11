@@ -138,7 +138,7 @@ fn test_infer_module_types_evaluates_array_element_expressions_on_build() {
     fs.insert(
         "/src/index.ts".into(),
         r#"
-            export const tuple = ["value", 1];
+            export const tuple = ["value", 1] as const;
             export const tupleFirst = tuple[0];
             export const numbers: number[] = [1, 2];
             export const arrayFirst = numbers[0];
@@ -182,6 +182,81 @@ fn test_infer_module_types_evaluates_array_element_expressions_on_build() {
 
     assert_inferred_type_snapshot(
         "test_infer_module_types_evaluates_array_element_expressions_on_build",
+        &db,
+        &fs,
+    );
+}
+
+#[test]
+fn test_infer_module_types_widens_array_expressions_on_build() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            declare const strings: string[];
+            declare const dir: "asc" | "desc";
+            declare const flag: boolean;
+            declare function pick(left: number, right: number): boolean;
+            declare function pick(...values: number[]): string;
+            const pair = [true, ...[1n]] as const;
+
+            export const numbers = [1, 2];
+            export const mixed = ["a", 1, true, `b`];
+            export const empty = [];
+            export const spread = [...strings, 1, ..."ab", ...pair];
+            export const nested = [[1], [2]];
+            export const holder = { items: [1, 2] };
+            export const items = holder.items;
+            export const constTuple = [1, 2] as const;
+            export const declared = [dir];
+            export const conditional = [flag ? 1 : 2];
+            export const negativeBigints = [-1n];
+            export const [first, second] = [1n, 2];
+            export const picked = pick(...[1, 2]);
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("module must exist");
+    let inferred = infer_module_types(&db, index_module).expect("types must be inferred");
+
+    for (name, expected) in [
+        ("numbers", "instanceof Array<number>"),
+        ("mixed", "instanceof Array<string | number | boolean>"),
+        ("empty", "instanceof Array<unknown>"),
+        (
+            "spread",
+            "instanceof Array<string | number | bool: true | bigint: 1n>",
+        ),
+        ("nested", "instanceof Array<instanceof Array<number>>"),
+        ("items", "instanceof Array<number>"),
+        ("declared", "instanceof Array<string: asc | string: desc>"),
+        ("conditional", "instanceof Array<number>"),
+        ("negativeBigints", "instanceof Array<BigInt>"),
+        ("first", "bigint: 1n"),
+        ("second", "number: 2"),
+        ("picked", "boolean"),
+    ] {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .expect("binding type must be inferred");
+        assert_eq!(
+            format_inferred_type(&db, inferred.resolve_type(&db, ty)),
+            expected,
+            "{name}"
+        );
+    }
+
+    let const_tuple_ty = inferred_binding_ty_by_name(&db, index_module, inferred, "constTuple")
+        .expect("constTuple binding type must be inferred");
+    assert!(matches!(
+        inferred.resolve_type(&db, const_tuple_ty),
+        InferredTypeData::TypeOperator(_) | InferredTypeData::Tuple(_)
+    ));
+
+    assert_inferred_type_snapshot(
+        "test_infer_module_types_widens_array_expressions_on_build",
         &db,
         &fs,
     );
@@ -820,7 +895,7 @@ fn test_infer_module_types_evaluates_destructuring_edge_expressions_on_build() {
             export const derived: Derived = {} as Derived;
             export const { inherited, ...instanceRest } = derived;
 
-            export const tuple = ["value", 1, true];
+            export const tuple = ["value", 1, true] as const;
             export const [first, ...tupleRest] = tuple;
         "#,
     );

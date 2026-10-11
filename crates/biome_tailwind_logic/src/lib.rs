@@ -1,3 +1,5 @@
+pub mod class_category;
+pub mod no_tailwind_arbitrary_value;
 pub mod no_tailwind_legacy_utilities;
 pub mod no_tailwind_raw_colors;
 pub mod no_tailwind_restyled_components;

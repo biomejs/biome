@@ -31,6 +31,10 @@ pub struct MarkdownParserOptions {
 
     /// Enables GitHub Flavored Markdown extensions.
     pub(crate) gfm: bool,
+
+    /// Applies the CommonMark CJK-friendly amendments to the emphasis and
+    /// strikethrough flanking rules.
+    pub(crate) cjk_friendly_emphasis: bool,
 }
 
 impl MarkdownParserOptions {
@@ -45,6 +49,15 @@ impl MarkdownParserOptions {
         self.gfm = gfm;
         self
     }
+
+    /// Controls whether `*`, `_`, and `~~` delimiter runs follow the
+    /// [CommonMark CJK-friendly amendments](https://github.com/tats-u/markdown-cjk-friendly/blob/main/specification.md).
+    ///
+    /// When disabled, flanking follows CommonMark exactly.
+    pub fn with_cjk_friendly_emphasis(mut self, cjk_friendly_emphasis: bool) -> Self {
+        self.cjk_friendly_emphasis = cjk_friendly_emphasis;
+        self
+    }
 }
 
 impl Default for MarkdownParserOptions {
@@ -53,6 +66,7 @@ impl Default for MarkdownParserOptions {
             max_nesting_depth: DEFAULT_MAX_NESTING_DEPTH,
             frontmatter: false,
             gfm: false,
+            cjk_friendly_emphasis: false,
         }
     }
 }
@@ -544,7 +558,7 @@ impl<'source> MarkdownParser<'source> {
     pub fn new(source: &'source str, options: MarkdownParserOptions) -> Self {
         Self {
             context: ParserContext::default(),
-            source: MarkdownTokenSource::from_str(source),
+            source: MarkdownTokenSource::from_str(source, &options),
             options,
             table_cell_inline: false,
             known_link_reference_definitions: None,
@@ -575,7 +589,7 @@ impl<'source> MarkdownParser<'source> {
 
         Some(Self {
             context: ParserContext::default(),
-            source: MarkdownTokenSource::from_range(source, range)?,
+            source: MarkdownTokenSource::from_range(source, range, &options)?,
             options,
             table_cell_inline,
             known_link_reference_definitions: Some(definitions),
@@ -602,7 +616,6 @@ impl<'source> MarkdownParser<'source> {
         col
     }
 
-    /// Returns parser options. Reserved for GFM extensions.
     pub(crate) fn options(&self) -> &MarkdownParserOptions {
         &self.options
     }

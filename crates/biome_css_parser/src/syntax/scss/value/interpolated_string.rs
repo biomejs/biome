@@ -49,8 +49,8 @@ pub(crate) fn parse_scss_interpolated_string(
     p.bump_with_context(SCSS_STRING_QUOTE, context);
     ScssInterpolatedStringPartList::new(quote).parse_list(p);
 
-    if p.at(SCSS_STRING_QUOTE) {
-        p.bump_with_context(SCSS_STRING_QUOTE, closing_context);
+    if !p.eat_with_context(SCSS_STRING_QUOTE, closing_context) {
+        p.error(expected_string(p, p.cur_range()));
     }
 
     Present(m.complete(p, SCSS_INTERPOLATED_STRING))
@@ -99,7 +99,8 @@ impl ParseNodeList for ScssInterpolatedStringPartList {
     ) -> RecoveryResult {
         parsed_element.or_recover_with_token_set(
             p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS, SCSS_INTERPOLATED_STRING_PART_LIST_RECOVERY_SET),
+            &ParseRecoveryTokenSet::new(CSS_BOGUS, SCSS_INTERPOLATED_STRING_PART_LIST_RECOVERY_SET)
+                .enable_recovery_on_line_break(),
             expected_scss_string_part,
         )
     }

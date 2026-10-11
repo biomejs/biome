@@ -98,6 +98,57 @@ fn plugin_inventory() {
 }
 
 #[test]
+fn package_rules_that_apply_only_to_matching_files() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+            "plugins": [
+                { "path": "@acme/testing/noFocusedTests", "includes": ["src/**/*.test.ts"] }
+            ],
+            "overrides": [{
+                "includes": ["**/*.test.ts"],
+                "plugins": ["@acme/testing/presets/recommended", "@acme/testing/noFakeTimers"]
+            }]
+        }"#,
+    );
+    let rules = insert_grit_rules(
+        &fs,
+        "node_modules/@acme/testing",
+        &["noFocusedTests", "noFakeTimers"],
+    );
+    insert_manifest_package(
+        &fs,
+        "node_modules/@acme/testing",
+        "@acme/testing",
+        &json!({
+            "version": 1,
+            "plugins": {
+                "rules": [rules],
+                "presets": { "recommended": ["noFocusedTests"] }
+            }
+        })
+        .to_string(),
+    );
+    let mut console = BufferConsole::default();
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["inspect", "plugins"].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "package_rules_that_apply_only_to_matching_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn local_extended_config_keeps_package_resolution_bases() {
     let fs = MemoryFileSystem::default();
     fs.insert(

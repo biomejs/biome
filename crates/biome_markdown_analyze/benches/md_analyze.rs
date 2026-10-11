@@ -1,6 +1,7 @@
 use biome_analyze::{
     ActionFilter, AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleCategoriesBuilder,
 };
+use biome_languages::MdFileSource;
 use biome_markdown_analyze::analyze;
 use biome_markdown_parser::{MarkdownParserOptions, parse_markdown};
 use criterion::{BenchmarkId, Criterion, Throughput, black_box, criterion_group, criterion_main};
@@ -47,11 +48,17 @@ fn bench_analyzer(criterion: &mut Criterion) {
             &code,
             |bencher, _| {
                 bencher.iter(|| {
-                    analyze(&parse.tree(), filter, &options, |event| {
-                        black_box(event.diagnostic());
-                        black_box(event.actions(ActionFilter::all()));
-                        ControlFlow::<Never>::Continue(())
-                    });
+                    analyze(
+                        &parse.tree(),
+                        filter,
+                        &options,
+                        MdFileSource::markdown(),
+                        |event| {
+                            black_box(event.diagnostic());
+                            black_box(event.actions(ActionFilter::all()));
+                            ControlFlow::<Never>::Continue(())
+                        },
+                    );
                 });
             },
         );

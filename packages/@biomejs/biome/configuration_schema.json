@@ -1992,6 +1992,20 @@
 			},
 			"additionalProperties": false
 		},
+		"EventHyphenation": {
+			"oneOf": [
+				{
+					"description": "Event names must be hyphenated, e.g. `custom-event`.",
+					"type": "string",
+					"const": "always"
+				},
+				{
+					"description": "Event names must not contain hyphens, e.g. `customEvent`.",
+					"type": "string",
+					"const": "never"
+				}
+			]
+		},
 		"Expand": {
 			"oneOf": [
 				{
@@ -2893,6 +2907,20 @@
 			},
 			"additionalProperties": false
 		},
+		"JsonFileReadAs": {
+			"oneOf": [
+				{
+					"description": "Read JSON files with the `'utf8'` encoding, so `JSON.parse()` receives a string.",
+					"type": "string",
+					"const": "string"
+				},
+				{
+					"description": "Read JSON files without an encoding, so `JSON.parse()` receives a `Buffer`.",
+					"type": "string",
+					"const": "buffer"
+				}
+			]
+		},
 		"JsonFormatterConfiguration": {
 			"type": "object",
 			"properties": {
@@ -3223,6 +3251,10 @@
 			"description": "Options that change how the Markdown parser behaves",
 			"type": "object",
 			"properties": {
+				"cjkFriendlyEmphasis": {
+					"description": "Recognizes bold, italic, and strikethrough markers placed directly next to Chinese, Japanese, or Korean text. Defaults to `false`.\n\nStandard Markdown doesn't treat `**テスト。**テスト` as bold text, because the closing `**`\nis between a punctuation mark and a letter with no space around it. Languages that don't\nput spaces between words run into this often. When enabled, Biome follows the\n[CommonMark CJK-friendly amendments](https://github.com/tats-u/markdown-cjk-friendly/blob/main/specification.md)\nand treats such text as bold or italic. The option applies to `*`, `_`, and `~~` markers.\nAfter a variation selector (an invisible character that picks a glyph style for the\ncharacter before it), Biome classifies a marker by the character before the selector.\n\nThe option can also change markers that aren't next to Chinese, Japanese, or Korean text,\nbecause a marker that can now open or close formatting can take another marker's partner\nin the same paragraph, heading, or table cell. For example, standard Markdown shows\n`**テスト。**テスト a**` with `テスト a` in bold. With the option enabled, `テスト。` is bold\nand the last `**` is shown as written.\n\nThe formatter and the linter both use this reading of the document. Enable the option only\nwhen the tool that renders your Markdown also supports these amendments. Otherwise, Biome\ntreats as bold some text that your renderer shows with literal `**`, and formatting can\nchange what your renderer shows. For example, the option makes `__` after a variation\nselector a bold marker, and the formatter rewrites it as `**`, which standard Markdown\nshows as bold even where it showed the original `__` as written.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				},
 				"frontmatter": {
 					"description": "Enables parsing frontmatter at the start of the file. Defaults to `false`.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -5226,6 +5258,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoNestedTemplateLiteralsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoNestedTemplateLiteralsOptions" }
+			]
+		},
+		"NoNestedTemplateLiteralsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoNestedTernaryConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6106,6 +6148,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoSvelteObjectInTextMustachesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSvelteObjectInTextMustachesOptions" }
+			]
+		},
+		"NoSvelteObjectInTextMustachesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoSvelteUnnecessaryStateWrapConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6162,6 +6214,18 @@
 		},
 		"NoTailwindArbitraryValueOptions": {
 			"type": "object",
+			"properties": {
+				"allowedCategories": {
+					"description": "Categories of utilities that may use arbitrary values. Defaults to an empty list.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/TailwindUtilityCategory" }
+				},
+				"allowedClasses": {
+					"description": "Classes that may use arbitrary values, such as `w-[320px]`. Defaults to an empty list.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoTailwindLegacyUtilitiesConfiguration": {
@@ -6636,6 +6700,16 @@
 			]
 		},
 		"NoUnsafeTypeAssertionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoUnsafeUnaryMinusConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnsafeUnaryMinusOptions" }
+			]
+		},
+		"NoUnsafeUnaryMinusOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -7182,6 +7256,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueRequiredPropWithDefaultConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueRequiredPropWithDefaultOptions" }
+			]
+		},
+		"NoVueRequiredPropWithDefaultOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueReservedKeysConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7236,6 +7320,13 @@
 			},
 			"additionalProperties": false
 		},
+		"NoVueVHtmlConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueVHtmlOptions" }
+			]
+		},
+		"NoVueVHtmlOptions": { "type": "object", "additionalProperties": false },
 		"NoVueVIfWithVForConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7256,6 +7347,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueVTextConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueVTextOptions" }
+			]
+		},
+		"NoVueVTextOptions": { "type": "object", "additionalProperties": false },
 		"NoWithConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7471,6 +7569,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noNestedTemplateLiterals": {
+					"description": "Disallow template literals inside other template literals.\nSee https://biomejs.dev/linter/rules/no-nested-template-literals",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoNestedTemplateLiteralsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noNonScalableViewport": {
 					"description": "Disallow disabling zoom with user-scalable=no in the \\<meta name=\"viewport\"> element.\nSee https://biomejs.dev/linter/rules/no-non-scalable-viewport",
 					"anyOf": [
@@ -7562,6 +7667,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noSvelteObjectInTextMustaches": {
+					"description": "Disallow objects, arrays, functions, and classes in Svelte text mustaches.\nSee https://biomejs.dev/linter/rules/no-svelte-object-in-text-mustaches",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSvelteObjectInTextMustachesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noSvelteUnnecessaryStateWrap": {
 					"description": "Disallow unnecessary $state wrapping of reactive classes.\nSee https://biomejs.dev/linter/rules/no-svelte-unnecessary-state-wrap",
 					"anyOf": [
@@ -7646,6 +7758,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnsafeUnaryMinus": {
+					"description": "Require the operand of unary - to be a number or a bigint.\nSee https://biomejs.dev/linter/rules/no-unsafe-unary-minus",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnsafeUnaryMinusConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnusedClasses": {
 					"description": "Reports CSS class selectors that are never referenced in any JSX or HTML file.\nSee https://biomejs.dev/linter/rules/no-unused-classes",
 					"anyOf": [
@@ -7674,6 +7793,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noVueRequiredPropWithDefault": {
+					"description": "Disallow props that are both required and have a default value.\nSee https://biomejs.dev/linter/rules/no-vue-required-prop-with-default",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueRequiredPropWithDefaultConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noVueRootVIf": {
 					"description": "Disallow v-if on the root element of a Vue component template.\nSee https://biomejs.dev/linter/rules/no-vue-root-v-if",
 					"anyOf": [
@@ -7685,6 +7811,20 @@
 					"description": "Disallow custom Vue directives that are not declared.\nSee https://biomejs.dev/linter/rules/no-vue-undeclared-directives",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueUndeclaredDirectivesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueVHtml": {
+					"description": "Disallow the use of Vue's v-html directive.\nSee https://biomejs.dev/linter/rules/no-vue-v-html",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueVHtmlConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueVText": {
+					"description": "Disallow the use of Vue's v-text directive.\nSee https://biomejs.dev/linter/rules/no-vue-v-text",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueVTextConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7730,6 +7870,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useCapitalizedConstructors": {
+					"description": "Require constructor names to begin with a capital letter.\nSee https://biomejs.dev/linter/rules/use-capitalized-constructors",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseCapitalizedConstructorsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentFunctionStyle": {
 					"description": "Enforce consistent use of function declarations or expressions assigned to variables.\nSee https://biomejs.dev/linter/rules/use-consistent-function-style",
 					"anyOf": [
@@ -7741,6 +7888,13 @@
 					"description": "Enforce that all heading levels are consistent and ordered.\nSee https://biomejs.dev/linter/rules/use-consistent-heading-level",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseConsistentHeadingLevelConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentJsonFileRead": {
+					"description": "Enforce a consistent way of reading JSON files before passing them to JSON.parse().\nSee https://biomejs.dev/linter/rules/use-consistent-json-file-read",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentJsonFileReadConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7825,6 +7979,13 @@
 					"description": "Use modern Math APIs for common mathematical operations.\nSee https://biomejs.dev/linter/rules/use-modern-math-apis",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseModernMathApisConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNamedFunction": {
+					"description": "Require function expressions to have a name.\nSee https://biomejs.dev/linter/rules/use-named-function",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseNamedFunctionConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7942,6 +8103,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useUnaryMinus": {
+					"description": "Enforce the use of the unary minus operator over multiplying or dividing by -1.\nSee https://biomejs.dev/linter/rules/use-unary-minus",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseUnaryMinusConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useValidTestTitle": {
 					"description": "Enforce valid titles for unit test cases and test suites.\nSee https://biomejs.dev/linter/rules/use-valid-test-title",
 					"anyOf": [
@@ -7953,6 +8121,13 @@
 					"description": "Enforce importing Vue's public entry point instead of internal Vue packages.\nSee https://biomejs.dev/linter/rules/use-vue-base-import",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueBaseImportConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueConsistentEventHyphenation": {
+					"description": "Enforce a consistent hyphenation style for event names in v-on directives on custom components.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-event-hyphenation",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueConsistentEventHyphenationConfiguration" },
 						{ "type": "null" }
 					]
 				}
@@ -10511,6 +10686,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoNestedTemplateLiteralsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoNestedTemplateLiteralsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoNestedTernaryOptions": {
 			"type": "object",
 			"properties": {
@@ -11353,6 +11537,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoSvelteObjectInTextMustachesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSvelteObjectInTextMustachesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoSvelteUnnecessaryStateWrapOptions": {
 			"type": "object",
 			"properties": {
@@ -11773,6 +11966,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnsafeTypeAssertionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnsafeUnaryMinusOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnsafeUnaryMinusOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12324,6 +12526,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoVueRequiredPropWithDefaultOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueRequiredPropWithDefaultOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoVueReservedKeysOptions": {
 			"type": "object",
 			"properties": {
@@ -12369,6 +12584,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoVueVHtmlOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueVHtmlOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoVueVIfWithVForOptions": {
 			"type": "object",
 			"properties": {
@@ -12383,6 +12607,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueVOnNumberValuesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueVTextOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueVTextOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12675,6 +12908,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseCapitalizedConstructorsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseCapitalizedConstructorsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseCollapsedElseIfOptions": {
 			"type": "object",
 			"properties": {
@@ -12796,6 +13038,19 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseConsistentHeadingLevelOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseConsistentJsonFileReadOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentJsonFileReadOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -13625,6 +13880,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseNamedFunctionOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseNamedFunctionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseNamedLayerOptions": {
 			"type": "object",
 			"properties": {
@@ -14327,6 +14591,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseUnaryMinusOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseUnaryMinusOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseUnicodeRegexOptions": {
 			"type": "object",
 			"properties": {
@@ -14488,6 +14765,19 @@
 				"options": {
 					"$ref": "#/$defs/UseVueConsistentDefinePropsDeclarationOptions"
 				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseVueConsistentEventHyphenationOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueConsistentEventHyphenationOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -15725,13 +16015,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useScopedStyles": {
-					"description": "Keep component styles scoped in Vue and Astro files.\nSee https://biomejs.dev/linter/rules/use-scoped-styles",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseScopedStylesConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useSelfClosingElements": {
 					"description": "Prevent extra closing tags for components without children.\nSee https://biomejs.dev/linter/rules/use-self-closing-elements",
 					"anyOf": [
@@ -16864,6 +17147,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useScopedStyles": {
+					"description": "Keep component styles scoped in Vue and Astro files.\nSee https://biomejs.dev/linter/rules/use-scoped-styles",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseScopedStylesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useStaticResponseMethods": {
 					"description": "Use static Response methods instead of new Response() constructor when possible.\nSee https://biomejs.dev/linter/rules/use-static-response-methods",
 					"anyOf": [
@@ -16887,17 +17177,17 @@
 				{ "type": "array", "items": { "type": "string" } }
 			]
 		},
-		"TailwindAppearanceCategory": {
-			"type": "string",
-			"enum": ["color", "typography", "spacing", "shape", "effects", "motion"]
-		},
 		"TailwindComponentAllowance": {
 			"type": "object",
 			"properties": {
+				"advice": {
+					"description": "Instructions on how to fix the problem, shown in diagnostics for the matching\ncomponents in place of the default advice.",
+					"type": ["string", "null"]
+				},
 				"categories": {
 					"description": "Categories allowed on the matching components. Defaults to an empty list.",
 					"type": "array",
-					"items": { "$ref": "#/$defs/TailwindAppearanceCategory" }
+					"items": { "$ref": "#/$defs/TailwindUtilityCategory" }
 				},
 				"classes": {
 					"description": "Exact classes, including variants and modifiers. Defaults to an empty list.",
@@ -16937,6 +17227,26 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"TailwindUtilityCategory": {
+			"oneOf": [
+				{
+					"type": "string",
+					"enum": [
+						"color",
+						"typography",
+						"spacing",
+						"shape",
+						"effects",
+						"motion"
+					]
+				},
+				{
+					"description": "Sizing, positioning, margins, and other utilities that don't set appearance.",
+					"type": "string",
+					"const": "layout"
+				}
+			]
 		},
 		"TestFunctionKind": {
 			"description": "The function to use for tests",
@@ -17196,6 +17506,16 @@
 			]
 		},
 		"UseButtonTypeOptions": { "type": "object", "additionalProperties": false },
+		"UseCapitalizedConstructorsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseCapitalizedConstructorsOptions" }
+			]
+		},
+		"UseCapitalizedConstructorsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseCollapsedElseIfConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -17383,6 +17703,22 @@
 		},
 		"UseConsistentHeadingLevelOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseConsistentJsonFileReadConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentJsonFileReadOptions" }
+			]
+		},
+		"UseConsistentJsonFileReadOptions": {
+			"type": "object",
+			"properties": {
+				"readAs": {
+					"description": "Whether JSON files should be read as strings or as `Buffer`s before they are passed to `JSON.parse()`.\n\nDefault: `\"string\"`",
+					"anyOf": [{ "$ref": "#/$defs/JsonFileReadAs" }, { "type": "null" }]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseConsistentMemberAccessibilityConfiguration": {
@@ -18362,6 +18698,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseNamedFunctionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseNamedFunctionOptions" }
+			]
+		},
+		"UseNamedFunctionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseNamedLayerConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -19233,6 +19579,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseUnaryMinusConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseUnaryMinusOptions" }
+			]
+		},
+		"UseUnaryMinusOptions": { "type": "object", "additionalProperties": false },
 		"UseUnicodeRegexConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -19423,6 +19776,32 @@
 			"properties": {
 				"style": {
 					"anyOf": [{ "$ref": "#/$defs/DeclarationStyle" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseVueConsistentEventHyphenationConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueConsistentEventHyphenationOptions" }
+			]
+		},
+		"UseVueConsistentEventHyphenationOptions": {
+			"type": "object",
+			"properties": {
+				"hyphenation": {
+					"description": "Whether event names in `v-on` directives must be hyphenated (`\"always\"`) or must not\ncontain hyphens (`\"never\"`). If omitted, hyphenated names are required.",
+					"anyOf": [{ "$ref": "#/$defs/EventHyphenation" }, { "type": "null" }]
+				},
+				"ignore": {
+					"description": "List of event names to exempt from the check.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"ignoreTags": {
+					"description": "List of tag names whose events should not be checked.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
 				}
 			},
 			"additionalProperties": false

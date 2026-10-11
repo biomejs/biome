@@ -9,7 +9,7 @@ expression: invalid.html
 <div class="text-[#555] bg-white"></div>
 <div class="max-h-[calc(100dvh-40px)]"></div>
 <div class="hover:w-[400px]"></div>
-<div class="text-red-500/[0.31]"></div>
+<div class="text-[#555]/[0.5]"></div>
 <div class="[color:red]"></div>
 <div CLASS="m-[2px]"></div>
 <div className="w-[400px]"></div>
@@ -68,7 +68,7 @@ invalid.html:4:19 lint/nursery/noTailwindArbitraryValue ━━━━━━━━
   > 4 │ <div class="max-h-[calc(100dvh-40px)]"></div>
       │                   ^^^^^^^^^^^^^^^^^^^
     5 │ <div class="hover:w-[400px]"></div>
-    6 │ <div class="text-red-500/[0.31]"></div>
+    6 │ <div class="text-[#555]/[0.5]"></div>
   
   i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
   
@@ -88,7 +88,7 @@ invalid.html:5:21 lint/nursery/noTailwindArbitraryValue ━━━━━━━━
     4 │ <div class="max-h-[calc(100dvh-40px)]"></div>
   > 5 │ <div class="hover:w-[400px]"></div>
       │                     ^^^^^^^
-    6 │ <div class="text-red-500/[0.31]"></div>
+    6 │ <div class="text-[#555]/[0.5]"></div>
     7 │ <div class="[color:red]"></div>
   
   i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
@@ -101,14 +101,14 @@ invalid.html:5:21 lint/nursery/noTailwindArbitraryValue ━━━━━━━━
 ```
 
 ```
-invalid.html:6:26 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.html:6:18 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i Found an arbitrary value in a Tailwind CSS class.
   
     4 │ <div class="max-h-[calc(100dvh-40px)]"></div>
     5 │ <div class="hover:w-[400px]"></div>
-  > 6 │ <div class="text-red-500/[0.31]"></div>
-      │                          ^^^^^^
+  > 6 │ <div class="text-[#555]/[0.5]"></div>
+      │                  ^^^^^^
     7 │ <div class="[color:red]"></div>
     8 │ <div CLASS="m-[2px]"></div>
   
@@ -127,7 +127,7 @@ invalid.html:7:13 lint/nursery/noTailwindArbitraryValue ━━━━━━━━
   i Found an arbitrary value in a Tailwind CSS class.
   
     5 │ <div class="hover:w-[400px]"></div>
-    6 │ <div class="text-red-500/[0.31]"></div>
+    6 │ <div class="text-[#555]/[0.5]"></div>
   > 7 │ <div class="[color:red]"></div>
       │             ^^^^^^^^^^^
     8 │ <div CLASS="m-[2px]"></div>
@@ -147,7 +147,7 @@ invalid.html:8:15 lint/nursery/noTailwindArbitraryValue ━━━━━━━━
 
   i Found an arbitrary value in a Tailwind CSS class.
   
-     6 │ <div class="text-red-500/[0.31]"></div>
+     6 │ <div class="text-[#555]/[0.5]"></div>
      7 │ <div class="[color:red]"></div>
    > 8 │ <div CLASS="m-[2px]"></div>
        │               ^^^^^

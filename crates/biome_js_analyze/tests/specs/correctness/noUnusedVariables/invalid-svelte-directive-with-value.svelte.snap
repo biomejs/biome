@@ -1,0 +1,67 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-svelte-directive-with-value.svelte
+---
+# Input
+```svelte
+<script>
+let active = $state(false);
+let color = $state("red");
+let enabled = $state(true);
+</script>
+
+<div class:active={enabled}></div>
+<div style:color={"blue"}></div>
+
+```
+
+# Diagnostics
+```
+invalid-svelte-directive-with-value.svelte:2:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━
+
+  ! This variable active is unused.
+  
+    1 │ <script>
+  > 2 │ let active = $state(false);
+      │     ^^^^^^
+    3 │ let color = $state("red");
+    4 │ let enabled = $state(true);
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend active with an underscore.
+  
+    1 1 │   
+    2   │ - let·active·=·$state(false);
+      2 │ + let·_active·=·$state(false);
+    3 3 │   let color = $state("red");
+    4 4 │   let enabled = $state(true);
+  
+
+```
+
+```
+invalid-svelte-directive-with-value.svelte:3:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━
+
+  ! This variable color is unused.
+  
+    1 │ <script>
+    2 │ let active = $state(false);
+  > 3 │ let color = $state("red");
+      │     ^^^^^
+    4 │ let enabled = $state(true);
+    5 │ </script>
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend color with an underscore.
+  
+    1 1 │   
+    2 2 │   let active = $state(false);
+    3   │ - let·color·=·$state("red");
+      3 │ + let·_color·=·$state("red");
+    4 4 │   let enabled = $state(true);
+    5 5 │   
+  
+
+```

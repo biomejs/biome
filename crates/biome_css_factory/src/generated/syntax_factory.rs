@@ -9630,7 +9630,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssIdentifier::can_cast(element.kind())
+                    && TwThemeOptionList::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -9650,6 +9650,46 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(TW_THEME_AT_RULE, children)
+            }
+            TW_THEME_PREFIX_OPTION => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && element.kind() == T![prefix]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['(']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && CssIdentifier::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![')']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        TW_THEME_PREFIX_OPTION.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(TW_THEME_PREFIX_OPTION, children)
             }
             TW_UTILITY_AT_RULE => {
                 let mut elements = (&children).into_iter();
@@ -10037,6 +10077,9 @@ impl SyntaxFactory for CssSyntaxFactory {
             }
             TW_APPLY_CLASS_LIST => {
                 Self::make_node_list_syntax(kind, children, CssIdentifier::can_cast)
+            }
+            TW_THEME_OPTION_LIST => {
+                Self::make_node_list_syntax(kind, children, AnyTwThemeOption::can_cast)
             }
             _ => unreachable!("Is {:?} a token?", kind),
         }

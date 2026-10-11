@@ -1279,6 +1279,7 @@ impl<'src> CssLexer<'src> {
             b"plugin" => PLUGIN_KW,
             b"slot" => SLOT_KW,
             b"inline" => INLINE_KW,
+            b"prefix" => PREFIX_KW,
             _ => IDENT,
         }
     }

@@ -14,6 +14,7 @@ use biome_analyze::{
     MetadataRegistry, RuleAction, RuleRegistry,
 };
 use biome_diagnostics::Error;
+use biome_languages::MdFileSource;
 use biome_markdown_syntax::MarkdownLanguage;
 use std::ops::Deref;
 use std::sync::LazyLock;
@@ -28,18 +29,20 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
 /// to selectively restrict analysis to specific rules / a specific source range,
-/// then call `emit_signal` when an analysis rule emits a diagnostic or action
+/// then call `emit_signal` when an analysis rule emits a diagnostic or action.
+/// Rules read `file_source` through `RuleContext::source_type`.
 pub fn analyze<'a, F, B>(
     root: &LanguageRoot<MarkdownLanguage>,
     filter: AnalysisFilter,
     options: &'a AnalyzerOptions,
+    file_source: MdFileSource,
     emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
     F: FnMut(&dyn AnalyzerSignal<MarkdownLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    analyze_with_inspect_matcher(root, filter, |_| {}, options, emit_signal)
+    analyze_with_inspect_matcher(root, filter, |_| {}, options, file_source, emit_signal)
 }
 
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
@@ -53,6 +56,7 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     filter: AnalysisFilter,
     inspect_matcher: V,
     options: &'a AnalyzerOptions,
+    file_source: MdFileSource,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
@@ -63,12 +67,14 @@ where
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);
 
-    let (registry, services, diagnostics, visitors) = registry.build();
+    let (registry, mut services, diagnostics, visitors) = registry.build();
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
         return (None, diagnostics);
     }
+
+    services.insert_service(file_source);
 
     let mut analyzer = biome_analyze::Analyzer::new(
         METADATA.deref(),
@@ -103,6 +109,7 @@ mod tests {
     use biome_console::{Markup, markup};
     use biome_diagnostics::termcolor::NoColor;
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
+    use biome_languages::MdFileSource;
     use biome_markdown_parser::{MarkdownParserOptions, parse_markdown};
     use biome_rowan::TextRange;
     use std::slice;
@@ -133,6 +140,7 @@ mod tests {
                 ..AnalysisFilter::default()
             },
             &options,
+            MdFileSource::markdown(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     error_ranges.push(diag.location().span.unwrap());

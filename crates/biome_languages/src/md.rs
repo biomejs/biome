@@ -15,15 +15,35 @@ enum MarkdownVariant {
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
+#[serde(rename_all = "camelCase")]
 pub struct MdFileSource {
     variant: MarkdownVariant,
+
+    /// Whether bold, italic, and strikethrough markers follow the
+    /// [CommonMark CJK-friendly amendments](https://github.com/tats-u/markdown-cjk-friendly/blob/main/specification.md).
+    /// Biome sets it from the `markdown.parser.cjkFriendlyEmphasis` configuration when it opens
+    /// the file, replacing any value sent by the client.
+    #[serde(default)]
+    cjk_friendly_emphasis: bool,
 }
 
 impl MdFileSource {
     pub fn markdown() -> Self {
         Self {
             variant: MarkdownVariant::Standard,
+            cjk_friendly_emphasis: false,
         }
+    }
+
+    /// Returns whether bold, italic, and strikethrough markers follow the CommonMark
+    /// CJK-friendly amendments. The amendments change the syntax tree, so the parser,
+    /// the formatter, and the analyzer read this flag from the same file source.
+    pub const fn cjk_friendly_emphasis(&self) -> bool {
+        self.cjk_friendly_emphasis
+    }
+
+    pub fn set_cjk_friendly_emphasis(&mut self, cjk_friendly_emphasis: bool) {
+        self.cjk_friendly_emphasis = cjk_friendly_emphasis;
     }
 
     /// Returns a possible file extension for this source without a leading dot.

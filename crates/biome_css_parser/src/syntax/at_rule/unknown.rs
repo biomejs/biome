@@ -1,10 +1,13 @@
+use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::block::parse_declaration_or_rule_list_block;
 use crate::syntax::scss::{
-    expect_scss_semicolon_at_rule, is_at_scss_interpolation,
+    expect_scss_semicolon_at_rule, is_at_scss_interpolated_string, is_at_scss_interpolation,
     is_nth_at_scss_interpolated_dashed_identifier, is_nth_at_scss_interpolation,
-    parse_scss_interpolated_at_rule_name, parse_scss_regular_interpolation,
+    parse_scss_interpolated_at_rule_name, parse_scss_interpolated_string,
+    parse_scss_interpolated_url_value, parse_scss_regular_interpolation,
 };
+use crate::syntax::value::function::is_nth_at_adjacent_l_paren;
 use crate::syntax::{CssSyntaxFeatures, is_at_identifier, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::T;
@@ -136,27 +139,49 @@ fn parse_unknown_at_rule_components_with(
 
 #[inline]
 fn consume_unknown_at_rule_component(p: &mut CssParser) -> bool {
-    if CssSyntaxFeatures::Scss.is_supported(p) && is_at_scss_interpolation(p) {
-        // `@unknown #{$value};`: keep interpolation structured inside the
-        // otherwise token-shaped generic prelude.
-        parse_scss_regular_interpolation(p).ok();
-        true
+    if CssSyntaxFeatures::Scss.is_supported(p) {
+        consume_scss_unknown_at_rule_component(p)
     } else {
         false
     }
 }
 
+/// Consumes embedded SCSS without exposing its delimiters to the prelude loop.
+///
+/// ```scss
+/// @foo "before #{"inner"} after";
+/// @foo #{";{}()"};
+/// ```
 #[inline]
 fn consume_scss_unknown_at_rule_component(p: &mut CssParser) -> bool {
-    if is_at_scss_interpolation(p) {
-        // `@#{$name} #{$value};`: this parser is called from the SCSS-exclusive
-        // at-rule name entrypoint, so interpolation stays structured even when
-        // SCSS is unsupported and the caller will report the exclusive syntax.
+    if is_at_scss_interpolated_string(p) {
+        parse_scss_interpolated_string(p, CssLexContext::Regular).ok();
+        true
+    } else if is_at_scss_interpolation(p) {
         parse_scss_regular_interpolation(p).ok();
         true
     } else {
-        false
+        consume_scss_unknown_at_rule_url(p)
     }
+}
+
+/// Keeps `//` inside `@foo url(https://#{$host}/);` out of comment trivia.
+/// Other URL bodies remain in the enclosing raw prelude loop.
+#[inline]
+fn consume_scss_unknown_at_rule_url(p: &mut CssParser) -> bool {
+    if !p.at(T![url]) || !is_nth_at_adjacent_l_paren(p, 1) {
+        return false;
+    }
+
+    p.bump(T![url]);
+    let context = p.source().url_body_lex_context(true);
+    if matches!(context, CssLexContext::ScssUrlValue { .. }) {
+        p.bump_with_context(T!['('], context);
+        parse_scss_interpolated_url_value(p, context).ok();
+        p.expect(T![')']);
+    }
+
+    true
 }
 
 /// Tracks nested delimiters inside an unknown at-rule prelude.

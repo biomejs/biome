@@ -1,0 +1,372 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```
+**このアスタリスクは強調記号として認識されず、そのまま表示されます。**この文のせいで。
+
+**该星号不会被识别，而是直接显示。**这是因为它没有被识别为强调符号。
+
+**이 별표는 강조 표시로 인식되지 않고 그대로 표시됩니다(이 괄호 때문에)**이 문장 때문에.
+
+カッコに注意**（太字にならない）**文が続く場合に要警戒。
+
+**[製品ほげ](./product-foo)**と**[製品ふが](./product-bar)**をお試しください
+
+*テスト。*テスト
+
+Non-CJK text is unchanged: a**"quote"**b.
+
+```
+
+
+## AST
+
+```
+MdRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    value: MdBlockList [
+        MdParagraph {
+            list: MdInlineItemList [
+                MdInlineEmphasis {
+                    l_fence: DOUBLE_STAR@0..2 "**" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@2..101 "このアスタリスクは強調記号として認識されず、そのまま表示されます。" [] [],
+                        },
+                    ],
+                    r_fence: DOUBLE_STAR@101..103 "**" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@103..127 "この文のせいで。" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@127..128 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@128..129 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdInlineEmphasis {
+                    l_fence: DOUBLE_STAR@129..131 "**" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@131..179 "该星号不会被识别，而是直接显示。" [] [],
+                        },
+                    ],
+                    r_fence: DOUBLE_STAR@179..181 "**" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@181..229 "这是因为它没有被识别为强调符号。" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@229..230 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@230..231 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdInlineEmphasis {
+                    l_fence: DOUBLE_STAR@231..233 "**" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@233..331 "이 별표는 강조 표시로 인식되지 않고 그대로 표시됩니다(이 괄호 때문에)" [] [],
+                        },
+                    ],
+                    r_fence: DOUBLE_STAR@331..333 "**" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@333..354 "이 문장 때문에." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@354..355 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@355..356 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@356..374 "カッコに注意" [] [],
+                },
+                MdInlineEmphasis {
+                    l_fence: DOUBLE_STAR@374..376 "**" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@376..403 "（太字にならない）" [] [],
+                        },
+                    ],
+                    r_fence: DOUBLE_STAR@403..405 "**" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@405..438 "文が続く場合に要警戒。" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@438..439 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@439..440 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdInlineEmphasis {
+                    l_fence: DOUBLE_STAR@440..442 "**" [] [],
+                    content: MdInlineItemList [
+                        MdInlineLink {
+                            l_brack_token: L_BRACK@442..443 "[" [] [],
+                            text: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@443..455 "製品ほげ" [] [],
+                                },
+                            ],
+                            r_brack_token: R_BRACK@455..456 "]" [] [],
+                            l_paren_token: L_PAREN@456..457 "(" [] [],
+                            destination: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@457..470 "./product-foo" [] [],
+                                },
+                            ],
+                            title: missing (optional),
+                            r_paren_token: R_PAREN@470..471 ")" [] [],
+                        },
+                    ],
+                    r_fence: DOUBLE_STAR@471..473 "**" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@473..476 "と" [] [],
+                },
+                MdInlineEmphasis {
+                    l_fence: DOUBLE_STAR@476..478 "**" [] [],
+                    content: MdInlineItemList [
+                        MdInlineLink {
+                            l_brack_token: L_BRACK@478..479 "[" [] [],
+                            text: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@479..491 "製品ふが" [] [],
+                                },
+                            ],
+                            r_brack_token: R_BRACK@491..492 "]" [] [],
+                            l_paren_token: L_PAREN@492..493 "(" [] [],
+                            destination: MdInlineItemList [
+                                MdTextual {
+                                    value_token: MD_TEXTUAL_LITERAL@493..506 "./product-bar" [] [],
+                                },
+                            ],
+                            title: missing (optional),
+                            r_paren_token: R_PAREN@506..507 ")" [] [],
+                        },
+                    ],
+                    r_fence: DOUBLE_STAR@507..509 "**" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@509..533 "をお試しください" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@533..534 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@534..535 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdInlineItalic {
+                    l_fence: STAR@535..536 "*" [] [],
+                    content: MdInlineItemList [
+                        MdTextual {
+                            value_token: MD_TEXTUAL_LITERAL@536..548 "テスト。" [] [],
+                        },
+                    ],
+                    r_fence: STAR@548..549 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@549..558 "テスト" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@558..559 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@559..560 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@560..588 "Non-CJK text is unchanged: a" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@588..589 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@589..597 "*\"quote\"" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@597..598 "*" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@598..601 "*b." [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@601..602 "\n" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@602..602 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_ROOT@0..602
+  0: (empty)
+  1: (empty)
+  2: MD_BLOCK_LIST@0..602
+    0: MD_PARAGRAPH@0..128
+      0: MD_INLINE_ITEM_LIST@0..128
+        0: MD_INLINE_EMPHASIS@0..103
+          0: DOUBLE_STAR@0..2 "**" [] []
+          1: MD_INLINE_ITEM_LIST@2..101
+            0: MD_TEXTUAL@2..101
+              0: MD_TEXTUAL_LITERAL@2..101 "このアスタリスクは強調記号として認識されず、そのまま表示されます。" [] []
+          2: DOUBLE_STAR@101..103 "**" [] []
+        1: MD_TEXTUAL@103..127
+          0: MD_TEXTUAL_LITERAL@103..127 "この文のせいで。" [] []
+        2: MD_TEXTUAL@127..128
+          0: MD_TEXTUAL_LITERAL@127..128 "\n" [] []
+    1: MD_NEWLINE@128..129
+      0: NEWLINE@128..129 "\n" [] []
+    2: MD_PARAGRAPH@129..230
+      0: MD_INLINE_ITEM_LIST@129..230
+        0: MD_INLINE_EMPHASIS@129..181
+          0: DOUBLE_STAR@129..131 "**" [] []
+          1: MD_INLINE_ITEM_LIST@131..179
+            0: MD_TEXTUAL@131..179
+              0: MD_TEXTUAL_LITERAL@131..179 "该星号不会被识别，而是直接显示。" [] []
+          2: DOUBLE_STAR@179..181 "**" [] []
+        1: MD_TEXTUAL@181..229
+          0: MD_TEXTUAL_LITERAL@181..229 "这是因为它没有被识别为强调符号。" [] []
+        2: MD_TEXTUAL@229..230
+          0: MD_TEXTUAL_LITERAL@229..230 "\n" [] []
+    3: MD_NEWLINE@230..231
+      0: NEWLINE@230..231 "\n" [] []
+    4: MD_PARAGRAPH@231..355
+      0: MD_INLINE_ITEM_LIST@231..355
+        0: MD_INLINE_EMPHASIS@231..333
+          0: DOUBLE_STAR@231..233 "**" [] []
+          1: MD_INLINE_ITEM_LIST@233..331
+            0: MD_TEXTUAL@233..331
+              0: MD_TEXTUAL_LITERAL@233..331 "이 별표는 강조 표시로 인식되지 않고 그대로 표시됩니다(이 괄호 때문에)" [] []
+          2: DOUBLE_STAR@331..333 "**" [] []
+        1: MD_TEXTUAL@333..354
+          0: MD_TEXTUAL_LITERAL@333..354 "이 문장 때문에." [] []
+        2: MD_TEXTUAL@354..355
+          0: MD_TEXTUAL_LITERAL@354..355 "\n" [] []
+    5: MD_NEWLINE@355..356
+      0: NEWLINE@355..356 "\n" [] []
+    6: MD_PARAGRAPH@356..439
+      0: MD_INLINE_ITEM_LIST@356..439
+        0: MD_TEXTUAL@356..374
+          0: MD_TEXTUAL_LITERAL@356..374 "カッコに注意" [] []
+        1: MD_INLINE_EMPHASIS@374..405
+          0: DOUBLE_STAR@374..376 "**" [] []
+          1: MD_INLINE_ITEM_LIST@376..403
+            0: MD_TEXTUAL@376..403
+              0: MD_TEXTUAL_LITERAL@376..403 "（太字にならない）" [] []
+          2: DOUBLE_STAR@403..405 "**" [] []
+        2: MD_TEXTUAL@405..438
+          0: MD_TEXTUAL_LITERAL@405..438 "文が続く場合に要警戒。" [] []
+        3: MD_TEXTUAL@438..439
+          0: MD_TEXTUAL_LITERAL@438..439 "\n" [] []
+    7: MD_NEWLINE@439..440
+      0: NEWLINE@439..440 "\n" [] []
+    8: MD_PARAGRAPH@440..534
+      0: MD_INLINE_ITEM_LIST@440..534
+        0: MD_INLINE_EMPHASIS@440..473
+          0: DOUBLE_STAR@440..442 "**" [] []
+          1: MD_INLINE_ITEM_LIST@442..471
+            0: MD_INLINE_LINK@442..471
+              0: L_BRACK@442..443 "[" [] []
+              1: MD_INLINE_ITEM_LIST@443..455
+                0: MD_TEXTUAL@443..455
+                  0: MD_TEXTUAL_LITERAL@443..455 "製品ほげ" [] []
+              2: R_BRACK@455..456 "]" [] []
+              3: L_PAREN@456..457 "(" [] []
+              4: MD_INLINE_ITEM_LIST@457..470
+                0: MD_TEXTUAL@457..470
+                  0: MD_TEXTUAL_LITERAL@457..470 "./product-foo" [] []
+              5: (empty)
+              6: R_PAREN@470..471 ")" [] []
+          2: DOUBLE_STAR@471..473 "**" [] []
+        1: MD_TEXTUAL@473..476
+          0: MD_TEXTUAL_LITERAL@473..476 "と" [] []
+        2: MD_INLINE_EMPHASIS@476..509
+          0: DOUBLE_STAR@476..478 "**" [] []
+          1: MD_INLINE_ITEM_LIST@478..507
+            0: MD_INLINE_LINK@478..507
+              0: L_BRACK@478..479 "[" [] []
+              1: MD_INLINE_ITEM_LIST@479..491
+                0: MD_TEXTUAL@479..491
+                  0: MD_TEXTUAL_LITERAL@479..491 "製品ふが" [] []
+              2: R_BRACK@491..492 "]" [] []
+              3: L_PAREN@492..493 "(" [] []
+              4: MD_INLINE_ITEM_LIST@493..506
+                0: MD_TEXTUAL@493..506
+                  0: MD_TEXTUAL_LITERAL@493..506 "./product-bar" [] []
+              5: (empty)
+              6: R_PAREN@506..507 ")" [] []
+          2: DOUBLE_STAR@507..509 "**" [] []
+        3: MD_TEXTUAL@509..533
+          0: MD_TEXTUAL_LITERAL@509..533 "をお試しください" [] []
+        4: MD_TEXTUAL@533..534
+          0: MD_TEXTUAL_LITERAL@533..534 "\n" [] []
+    9: MD_NEWLINE@534..535
+      0: NEWLINE@534..535 "\n" [] []
+    10: MD_PARAGRAPH@535..559
+      0: MD_INLINE_ITEM_LIST@535..559
+        0: MD_INLINE_ITALIC@535..549
+          0: STAR@535..536 "*" [] []
+          1: MD_INLINE_ITEM_LIST@536..548
+            0: MD_TEXTUAL@536..548
+              0: MD_TEXTUAL_LITERAL@536..548 "テスト。" [] []
+          2: STAR@548..549 "*" [] []
+        1: MD_TEXTUAL@549..558
+          0: MD_TEXTUAL_LITERAL@549..558 "テスト" [] []
+        2: MD_TEXTUAL@558..559
+          0: MD_TEXTUAL_LITERAL@558..559 "\n" [] []
+    11: MD_NEWLINE@559..560
+      0: NEWLINE@559..560 "\n" [] []
+    12: MD_PARAGRAPH@560..602
+      0: MD_INLINE_ITEM_LIST@560..602
+        0: MD_TEXTUAL@560..588
+          0: MD_TEXTUAL_LITERAL@560..588 "Non-CJK text is unchanged: a" [] []
+        1: MD_TEXTUAL@588..589
+          0: MD_TEXTUAL_LITERAL@588..589 "*" [] []
+        2: MD_TEXTUAL@589..597
+          0: MD_TEXTUAL_LITERAL@589..597 "*\"quote\"" [] []
+        3: MD_TEXTUAL@597..598
+          0: MD_TEXTUAL_LITERAL@597..598 "*" [] []
+        4: MD_TEXTUAL@598..601
+          0: MD_TEXTUAL_LITERAL@598..601 "*b." [] []
+        5: MD_TEXTUAL@601..602
+          0: MD_TEXTUAL_LITERAL@601..602 "\n" [] []
+  3: EOF@602..602 "" [] []
+
+```

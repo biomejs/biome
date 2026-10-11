@@ -1,0 +1,68 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/cjkFriendlyEmphasis/emphasis.md
+---
+
+# Input
+
+```md
+**このアスタリスクは強調記号として認識されず、そのまま表示されます。**この文のせいで。
+
+*テスト。*テスト
+
+「*テスト。*」と言った。
+
+__注意__：注意事項
+
+正體字。︁_Traditional._
+
+真~~（她~~
+
+正體字。︁__Hong Kong.__
+
+葛󠄀*（正式表記）*
+
+*a 正體字。︁_Traditional._
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "parser": {
+      "cjkFriendlyEmphasis": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+**このアスタリスクは強調記号として認識されず、そのまま表示されます。**この文のせいで。
+
+*テスト。*テスト
+
+「_テスト。_」と言った。
+
+**注意**：注意事項
+
+正體字。︁_Traditional._
+
+真~~（她~~
+
+正體字。︁**Hong Kong.**
+
+葛󠄀*（正式表記）*
+
+*a 正體字。︁_Traditional._
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: **このアスタリスクは強調記号として認識されず、そのまま表示されます。**この文のせいで。
+```

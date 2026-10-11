@@ -74,6 +74,7 @@ impl Rule for NoDuplicateSelectorsKeyframeBlock {
                     }
                 }
                 AnyCssKeyframesItem::CssAtRule(_) => {}
+                AnyCssKeyframesItem::CssEmptyDeclaration(_) => {}
                 AnyCssKeyframesItem::ScssKeyframesVariableDeclaration(_) => {}
                 AnyCssKeyframesItem::CssBogusKeyframesItem(_) => return None,
             }

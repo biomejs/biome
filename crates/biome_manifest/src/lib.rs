@@ -390,7 +390,7 @@ impl InvalidBiomeManifest {
 
         Self {
             message: MessageAndDescription::from(
-                markup!("Cannot load Biome manifest "<Emphasis>{path}</Emphasis>".").to_owned(),
+                markup!("The Biome manifest "<Emphasis>{path}</Emphasis>" is invalid.").to_owned(),
             ),
             path,
             source,
@@ -415,9 +415,12 @@ fn supported_version(
     } else {
         ctx.report(
             DeserializationDiagnostic::new(markup! {
-                <Emphasis>{name}</Emphasis>" must be 1."
+                "Unsupported "<Emphasis>{name}</Emphasis>" "<Emphasis>{value}</Emphasis>"."
             })
-            .with_range(range),
+            .with_range(range)
+            .with_note(markup! {
+                "Biome manifests must use "<Emphasis>{name}</Emphasis>" "<Emphasis>"1"</Emphasis>"."
+            }),
         );
         false
     }

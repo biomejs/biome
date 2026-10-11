@@ -1,3 +1,4 @@
+use crate::MarkdownParserOptions;
 use crate::lexer::{MarkdownLexContext, MarkdownLexer, MarkdownReLexContext, html_comment_len};
 use crate::syntax::TAB_STOP_SPACES;
 use biome_markdown_syntax::MarkdownSyntaxKind;
@@ -46,14 +47,18 @@ impl<'source> MarkdownTokenSource<'source> {
         }
     }
     /// Creates a new token source for the given string
-    pub fn from_str(source: &'source str) -> Self {
-        let lexer = MarkdownLexer::from_str(source);
+    pub fn from_str(source: &'source str, options: &MarkdownParserOptions) -> Self {
+        let lexer = MarkdownLexer::from_str(source).with_options(options);
 
         Self::from_lexer(lexer)
     }
 
-    pub fn from_range(source: &'source str, range: TextRange) -> Option<Self> {
-        let lexer = MarkdownLexer::from_range(source, range)?;
+    pub fn from_range(
+        source: &'source str,
+        range: TextRange,
+        options: &MarkdownParserOptions,
+    ) -> Option<Self> {
+        let lexer = MarkdownLexer::from_range(source, range)?.with_options(options);
 
         Some(Self::from_lexer(lexer))
     }

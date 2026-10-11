@@ -51,8 +51,10 @@ impl NodeVisitor for ContinueVisitor {
                         }
                     }
 
-                    (None, None) => Some(block),
-                    _ => None,
+                    // An unlabeled `continue` targets the innermost loop,
+                    // whether or not it has a label
+                    (_, None) => Some(block),
+                    (None, Some(_)) => None,
                 }
             })
             .ok_or(SyntaxError::MissingRequiredChild)?;

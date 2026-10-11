@@ -9,3 +9,4 @@ mod tailwind_preset_v4_types;
 
 pub use design_system::TailwindDesignSystem;
 pub use sort_v4::sort_class_list;
+pub use tailwind_preset_v4::THEME_COLOR_VALUES;
