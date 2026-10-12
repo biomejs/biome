@@ -2,7 +2,7 @@
 "@biomejs/biome": minor
 ---
 
-Added the new assist action [`useSortedVariables`](https://biomejs.dev/assist/actions/use-sorted-variables/), which sorts the variable definitions of GraphQL operations.
+Added the new assist action [`useGraphqlSortedVariables`](https://biomejs.dev/assist/actions/use-graphql-sorted-variables/), which sorts the variable definitions of GraphQL operations.
 
 **Invalid**:
 

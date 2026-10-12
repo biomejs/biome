@@ -43,7 +43,7 @@ query DirectiveArguments($c: Int @dir(x: 1), $a: Int @dir(y: [1, 2]), $b: Int) {
 
 # Diagnostics
 ```
-invalid.graphql:2:19 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:2:19 assist/source/useGraphqlSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The variables of this operation are not sorted.
   
@@ -65,7 +65,7 @@ invalid.graphql:2:19 assist/source/useSortedVariables  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.graphql:4:21 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:4:21 assist/source/useGraphqlSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The variables of this operation are not sorted.
   
@@ -89,7 +89,7 @@ invalid.graphql:4:21 assist/source/useSortedVariables  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.graphql:6:19 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:6:19 assist/source/useGraphqlSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The variables of this operation are not sorted.
   
@@ -113,7 +113,7 @@ invalid.graphql:6:19 assist/source/useSortedVariables  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.graphql:8:22 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:8:22 assist/source/useGraphqlSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The variables of this operation are not sorted.
   
@@ -145,7 +145,7 @@ invalid.graphql:8:22 assist/source/useSortedVariables  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.graphql:14:29 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:14:29 assist/source/useGraphqlSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The variables of this operation are not sorted.
   
@@ -175,7 +175,7 @@ invalid.graphql:14:29 assist/source/useSortedVariables  FIXABLE  ━━━━━
 ```
 
 ```
-invalid.graphql:19:18 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:19:18 assist/source/useGraphqlSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The variables of this operation are not sorted.
   
@@ -203,7 +203,7 @@ invalid.graphql:19:18 assist/source/useSortedVariables  FIXABLE  ━━━━━
 ```
 
 ```
-invalid.graphql:22:28 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:22:28 assist/source/useGraphqlSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The variables of this operation are not sorted.
   
@@ -227,7 +227,7 @@ invalid.graphql:22:28 assist/source/useSortedVariables  FIXABLE  ━━━━━
 ```
 
 ```
-invalid.graphql:24:19 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:24:19 assist/source/useGraphqlSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The variables of this operation are not sorted.
   
@@ -251,7 +251,7 @@ invalid.graphql:24:19 assist/source/useSortedVariables  FIXABLE  ━━━━━
 ```
 
 ```
-invalid.graphql:26:17 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:26:17 assist/source/useGraphqlSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The variables of this operation are not sorted.
   
@@ -275,7 +275,7 @@ invalid.graphql:26:17 assist/source/useSortedVariables  FIXABLE  ━━━━━
 ```
 
 ```
-invalid.graphql:28:7 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:28:7 assist/source/useGraphqlSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The variables of this operation are not sorted.
   
@@ -299,7 +299,7 @@ invalid.graphql:28:7 assist/source/useSortedVariables  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.graphql:30:18 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:30:18 assist/source/useGraphqlSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The variables of this operation are not sorted.
   
@@ -323,7 +323,7 @@ invalid.graphql:30:18 assist/source/useSortedVariables  FIXABLE  ━━━━━
 ```
 
 ```
-invalid.graphql:32:26 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:32:26 assist/source/useGraphqlSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The variables of this operation are not sorted.
   
@@ -347,7 +347,7 @@ invalid.graphql:32:26 assist/source/useSortedVariables  FIXABLE  ━━━━━
 ```
 
 ```
-invalid.graphql:34:25 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:34:25 assist/source/useGraphqlSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The variables of this operation are not sorted.
   

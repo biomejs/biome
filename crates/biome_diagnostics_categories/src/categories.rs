@@ -602,6 +602,7 @@ define_categories! {
     // start assist actions
     "assist/source/noDuplicateClasses": "https://biomejs.dev/assist/actions/no-duplicate-classes",
     "assist/source/organizeImports": "https://biomejs.dev/assist/actions/organize-imports",
+    "assist/source/useGraphqlSortedVariables": "https://biomejs.dev/assist/actions/use-graphql-sorted-variables",
     "assist/source/useSortedAttributes": "https://biomejs.dev/assist/actions/use-sorted-attributes",
     "assist/source/useSortedEnumMembers": "https://biomejs.dev/assist/actions/use-sorted-enum-members",
     "assist/source/useSortedInterfaceMembers": "https://biomejs.dev/assist/actions/use-sorted-interface-members",
@@ -610,7 +611,6 @@ define_categories! {
     "assist/source/useSortedProperties": "https://biomejs.dev/assist/actions/use-sorted-properties",
     "assist/source/useSortedSelectionSet": "https://biomejs.dev/assist/actions/use-sorted-selection-set",
     "assist/source/useSortedTypeFields": "https://biomejs.dev/assist/actions/use-sorted-type-fields",
-    "assist/source/useSortedVariables": "https://biomejs.dev/assist/actions/use-sorted-variables",
     // end assist actions
     ; // start syntax rules
     "syntax/correctness/noInvalidPropertySyntax",

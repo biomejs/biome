@@ -63,7 +63,7 @@ query CommentAfterParen( # variables
 
 # Diagnostics
 ```
-invalidComments.graphql:2:23 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidComments.graphql:2:23 assist/source/useGraphqlSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   i The variables of this operation are not sorted.
   
@@ -92,7 +92,7 @@ invalidComments.graphql:2:23 assist/source/useSortedVariables  FIXABLE  ━━�
 ```
 
 ```
-invalidComments.graphql:7:19 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidComments.graphql:7:19 assist/source/useGraphqlSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   i The variables of this operation are not sorted.
   
@@ -128,7 +128,7 @@ invalidComments.graphql:7:19 assist/source/useSortedVariables  FIXABLE  ━━�
 ```
 
 ```
-invalidComments.graphql:14:12 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidComments.graphql:14:12 assist/source/useGraphqlSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
 
   i The variables of this operation are not sorted.
   
@@ -164,7 +164,7 @@ invalidComments.graphql:14:12 assist/source/useSortedVariables  FIXABLE  ━━�
 ```
 
 ```
-invalidComments.graphql:22:27 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidComments.graphql:22:27 assist/source/useGraphqlSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
 
   i The variables of this operation are not sorted.
   
@@ -194,7 +194,7 @@ invalidComments.graphql:22:27 assist/source/useSortedVariables  FIXABLE  ━━�
 ```
 
 ```
-invalidComments.graphql:27:27 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidComments.graphql:27:27 assist/source/useGraphqlSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
 
   i The variables of this operation are not sorted.
   
@@ -226,7 +226,7 @@ invalidComments.graphql:27:27 assist/source/useSortedVariables  FIXABLE  ━━�
 ```
 
 ```
-invalidComments.graphql:34:34 assist/source/useSortedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidComments.graphql:34:34 assist/source/useGraphqlSortedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The variables of this operation are not sorted.
   
@@ -242,7 +242,7 @@ invalidComments.graphql:34:34 assist/source/useSortedVariables ━━━━━�
 ```
 
 ```
-invalidComments.graphql:38:31 assist/source/useSortedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidComments.graphql:38:31 assist/source/useGraphqlSortedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The variables of this operation are not sorted.
   
@@ -258,7 +258,7 @@ invalidComments.graphql:38:31 assist/source/useSortedVariables ━━━━━�
 ```
 
 ```
-invalidComments.graphql:42:33 assist/source/useSortedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidComments.graphql:42:33 assist/source/useGraphqlSortedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The variables of this operation are not sorted.
   
@@ -275,7 +275,7 @@ invalidComments.graphql:42:33 assist/source/useSortedVariables ━━━━━�
 ```
 
 ```
-invalidComments.graphql:47:32 assist/source/useSortedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidComments.graphql:47:32 assist/source/useGraphqlSortedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The variables of this operation are not sorted.
   
@@ -292,7 +292,7 @@ invalidComments.graphql:47:32 assist/source/useSortedVariables ━━━━━�
 ```
 
 ```
-invalidComments.graphql:51:24 assist/source/useSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidComments.graphql:51:24 assist/source/useGraphqlSortedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
 
   i The variables of this operation are not sorted.
   

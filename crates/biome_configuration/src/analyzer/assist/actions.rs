@@ -69,6 +69,7 @@ impl std::fmt::Display for RuleGroup {
 pub enum ActionName {
     NoDuplicateClasses,
     OrganizeImports,
+    UseGraphqlSortedVariables,
     UseSortedAttributes,
     UseSortedEnumMembers,
     UseSortedInterfaceMembers,
@@ -77,13 +78,13 @@ pub enum ActionName {
     UseSortedProperties,
     UseSortedSelectionSet,
     UseSortedTypeFields,
-    UseSortedVariables,
 }
 impl ActionName {
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::NoDuplicateClasses => "noDuplicateClasses",
             Self::OrganizeImports => "organizeImports",
+            Self::UseGraphqlSortedVariables => "useGraphqlSortedVariables",
             Self::UseSortedAttributes => "useSortedAttributes",
             Self::UseSortedEnumMembers => "useSortedEnumMembers",
             Self::UseSortedInterfaceMembers => "useSortedInterfaceMembers",
@@ -92,13 +93,13 @@ impl ActionName {
             Self::UseSortedProperties => "useSortedProperties",
             Self::UseSortedSelectionSet => "useSortedSelectionSet",
             Self::UseSortedTypeFields => "useSortedTypeFields",
-            Self::UseSortedVariables => "useSortedVariables",
         }
     }
     pub const fn group(self) -> RuleGroup {
         match self {
             Self::NoDuplicateClasses => RuleGroup::Source,
             Self::OrganizeImports => RuleGroup::Source,
+            Self::UseGraphqlSortedVariables => RuleGroup::Source,
             Self::UseSortedAttributes => RuleGroup::Source,
             Self::UseSortedEnumMembers => RuleGroup::Source,
             Self::UseSortedInterfaceMembers => RuleGroup::Source,
@@ -107,7 +108,6 @@ impl ActionName {
             Self::UseSortedProperties => RuleGroup::Source,
             Self::UseSortedSelectionSet => RuleGroup::Source,
             Self::UseSortedTypeFields => RuleGroup::Source,
-            Self::UseSortedVariables => RuleGroup::Source,
         }
     }
 }
@@ -117,6 +117,7 @@ impl std::str::FromStr for ActionName {
         match s {
             "noDuplicateClasses" => Ok(Self::NoDuplicateClasses),
             "organizeImports" => Ok(Self::OrganizeImports),
+            "useGraphqlSortedVariables" => Ok(Self::UseGraphqlSortedVariables),
             "useSortedAttributes" => Ok(Self::UseSortedAttributes),
             "useSortedEnumMembers" => Ok(Self::UseSortedEnumMembers),
             "useSortedInterfaceMembers" => Ok(Self::UseSortedInterfaceMembers),
@@ -125,7 +126,6 @@ impl std::str::FromStr for ActionName {
             "useSortedProperties" => Ok(Self::UseSortedProperties),
             "useSortedSelectionSet" => Ok(Self::UseSortedSelectionSet),
             "useSortedTypeFields" => Ok(Self::UseSortedTypeFields),
-            "useSortedVariables" => Ok(Self::UseSortedVariables),
             _ => Err("This rule name doesn't exist."),
         }
     }

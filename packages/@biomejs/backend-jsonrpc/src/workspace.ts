@@ -1509,6 +1509,11 @@ export interface Source {
 	 */
 	recommended?: boolean;
 	/**
+	 * Sort the variable definitions of GraphQL operations in natural order.
+	 * See https://biomejs.dev/assist/actions/use-graphql-sorted-variables
+	 */
+	useGraphqlSortedVariables?: UseGraphqlSortedVariablesConfiguration;
+	/**
 	 * Sort HTML attributes and framework directives into a consistent order.
 	 * See https://biomejs.dev/assist/actions/use-sorted-attributes
 	 */
@@ -1548,11 +1553,6 @@ export interface Source {
 	 * See https://biomejs.dev/assist/actions/use-sorted-type-fields
 	 */
 	useSortedTypeFields?: UseSortedTypeFieldsConfiguration;
-	/**
-	 * Sort the variable definitions of GraphQL operations in natural order.
-	 * See https://biomejs.dev/assist/actions/use-sorted-variables
-	 */
-	useSortedVariables?: UseSortedVariablesConfiguration;
 }
 export type QuoteStyle = "double" | "single";
 /**
@@ -1763,6 +1763,9 @@ export type NoDuplicateClassesConfiguration =
 export type OrganizeImportsConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithOrganizeImportsOptions;
+export type UseGraphqlSortedVariablesConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithUseGraphqlSortedVariablesOptions;
 export type UseSortedAttributesConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedAttributesOptions;
@@ -1787,9 +1790,6 @@ export type UseSortedSelectionSetConfiguration =
 export type UseSortedTypeFieldsConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedTypeFieldsOptions;
-export type UseSortedVariablesConfiguration =
-	| RuleAssistPlainConfiguration
-	| RuleAssistWithUseSortedVariablesOptions;
 export type GroupPlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 /**
  * Configures all rules in one lint group.
@@ -4772,6 +4772,10 @@ export interface RuleAssistWithOrganizeImportsOptions {
 	level: RuleAssistPlainConfiguration;
 	options: OrganizeImportsOptions;
 }
+export interface RuleAssistWithUseGraphqlSortedVariablesOptions {
+	level: RuleAssistPlainConfiguration;
+	options: UseGraphqlSortedVariablesOptions;
+}
 export interface RuleAssistWithUseSortedAttributesOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedAttributesOptions;
@@ -4803,10 +4807,6 @@ export interface RuleAssistWithUseSortedSelectionSetOptions {
 export interface RuleAssistWithUseSortedTypeFieldsOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedTypeFieldsOptions;
-}
-export interface RuleAssistWithUseSortedVariablesOptions {
-	level: RuleAssistPlainConfiguration;
-	options: UseSortedVariablesOptions;
 }
 export type NoAccessKeyConfiguration =
 	| RulePlainConfiguration
@@ -6536,6 +6536,7 @@ export interface OrganizeImportsOptions {
 	 */
 	sortBareImports?: boolean;
 }
+export type UseGraphqlSortedVariablesOptions = {};
 export interface UseSortedAttributesOptions {
 	/**
 	 * A list of attribute names that should be sorted before all other
@@ -6569,7 +6570,6 @@ export type UseSortedPackageJsonOptions = {};
 export type UseSortedPropertiesOptions = {};
 export type UseSortedSelectionSetOptions = {};
 export type UseSortedTypeFieldsOptions = {};
-export type UseSortedVariablesOptions = {};
 export type RulePlainConfiguration = "off" | "on" | "info" | "warn" | "error";
 export interface RuleWithNoAccessKeyOptions {
 	/**
@@ -12132,6 +12132,7 @@ export type Category =
 	| "lint/suspicious/useStrictMode"
 	| "assist/source/noDuplicateClasses"
 	| "assist/source/organizeImports"
+	| "assist/source/useGraphqlSortedVariables"
 	| "assist/source/useSortedAttributes"
 	| "assist/source/useSortedEnumMembers"
 	| "assist/source/useSortedInterfaceMembers"
@@ -12140,7 +12141,6 @@ export type Category =
 	| "assist/source/useSortedProperties"
 	| "assist/source/useSortedSelectionSet"
 	| "assist/source/useSortedTypeFields"
-	| "assist/source/useSortedVariables"
 	| "syntax/correctness/noInvalidPropertySyntax"
 	| "syntax/correctness/noTypeOnlyImportAttributes"
 	| "syntax/correctness/noSuperWithoutExtends"

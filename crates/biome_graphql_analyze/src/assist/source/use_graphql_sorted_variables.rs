@@ -11,7 +11,7 @@ use biome_graphql_syntax::{
 use biome_rowan::{
     AstNode, AstNodeList, BatchMutationExt, NodeOrToken, SyntaxNode, SyntaxTriviaPiece, TokenText,
 };
-use biome_rule_options::use_sorted_variables::UseSortedVariablesOptions;
+use biome_rule_options::use_graphql_sorted_variables::UseGraphqlSortedVariablesOptions;
 use biome_string_case::comparable_token::ComparableToken;
 use std::cmp::Ordering;
 
@@ -55,9 +55,9 @@ declare_source_rule! {
     /// because the comment would then hide that code or describe a different variable.
     /// Sort such variables manually, or put each variable on its own line.
     ///
-    pub UseSortedVariables {
+    pub UseGraphqlSortedVariables {
         version: "next",
-        name: "useSortedVariables",
+        name: "useGraphqlSortedVariables",
         language: "graphql",
         recommended: false,
         sources: &[RuleSource::EslintGraphql("alphabetize").inspired()],
@@ -65,11 +65,11 @@ declare_source_rule! {
     }
 }
 
-impl Rule for UseSortedVariables {
+impl Rule for UseGraphqlSortedVariables {
     type Query = Ast<GraphqlVariableDefinitions>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = UseSortedVariablesOptions;
+    type Options = UseGraphqlSortedVariablesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

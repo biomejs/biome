@@ -8486,6 +8486,15 @@
 			"additionalProperties": false,
 			"required": ["level", "options"]
 		},
+		"RuleAssistWithUseGraphqlSortedVariablesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseGraphqlSortedVariablesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level", "options"]
+		},
 		"RuleAssistWithUseSortedAttributesOptions": {
 			"type": "object",
 			"properties": {
@@ -8554,15 +8563,6 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseSortedTypeFieldsOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level", "options"]
-		},
-		"RuleAssistWithUseSortedVariablesOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
-				"options": { "$ref": "#/$defs/UseSortedVariablesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level", "options"]
@@ -14851,6 +14851,13 @@
 					"description": "Enables or disables the recommended actions in this group. The group's `preset`\nsetting takes precedence when both options are set.",
 					"type": ["boolean", "null"]
 				},
+				"useGraphqlSortedVariables": {
+					"description": "Sort the variable definitions of GraphQL operations in natural order.\nSee https://biomejs.dev/assist/actions/use-graphql-sorted-variables",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseGraphqlSortedVariablesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedAttributes": {
 					"description": "Sort HTML attributes and framework directives into a consistent order.\nSee https://biomejs.dev/assist/actions/use-sorted-attributes",
 					"anyOf": [
@@ -14904,13 +14911,6 @@
 					"description": "Sort fields in GraphQL type definitions by name.\nSee https://biomejs.dev/assist/actions/use-sorted-type-fields",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseSortedTypeFieldsConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useSortedVariables": {
-					"description": "Sort the variable definitions of GraphQL operations in natural order.\nSee https://biomejs.dev/assist/actions/use-sorted-variables",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseSortedVariablesConfiguration" },
 						{ "type": "null" }
 					]
 				}
@@ -17866,6 +17866,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseGraphqlSortedVariablesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithUseGraphqlSortedVariablesOptions" }
+			]
+		},
+		"UseGraphqlSortedVariablesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseGroupedAccessorPairsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -18918,16 +18928,6 @@
 			]
 		},
 		"UseSortedTypeFieldsOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
-		"UseSortedVariablesConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
-				{ "$ref": "#/$defs/RuleAssistWithUseSortedVariablesOptions" }
-			]
-		},
-		"UseSortedVariablesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
