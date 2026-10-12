@@ -10,7 +10,9 @@ use biome_json_factory::make;
 use biome_json_syntax::{
     AnyJsonValue, JsonLanguage, JsonMemberList, JsonObjectValue, T, TextRange,
 };
-use biome_rowan::{AstNode, BatchMutationExt, SyntaxResult, SyntaxToken};
+use biome_rowan::{
+    AstNode, BatchMutationExt, Direction, SyntaxResult, SyntaxToken, TriviaPieceKind,
+};
 use biome_rule_options::use_sorted_keys::{SortOrder, UseSortedKeysOptions};
 use biome_string_case::comparable_token::ComparableToken;
 use std::{cmp::Ordering, ops::Not};
@@ -293,6 +295,10 @@ impl Rule for UseSortedKeys {
             .ok()?
         };
 
+        if !is_safe_to_sort(list, &new_list) {
+            return None;
+        }
+
         let mut mutation = ctx.root().begin();
         mutation.replace_node_discard_trivia(list.clone(), new_list);
 
@@ -306,3 +312,55 @@ impl Rule for UseSortedKeys {
         ))
     }
 }
+
+/// Checks whether sorting the JSON member list is safe to apply as a safe fix.
+///
+/// It is unsafe if:
+/// 1. The original list started on a new line, but the sorted list does not (losing line indentation).
+/// 2. Any token in `new_list` has a trailing single-line comment without a subsequent newline
+///    before the next token, which would comment out subsequent code (issue #12057).
+fn is_safe_to_sort(list: &JsonMemberList, new_list: &JsonMemberList) -> bool {
+    // 1. If original list starts on a new line, the new sorted list must also start on a new line.
+    let starts_on_newline = list
+        .syntax()
+        .first_token()
+        .is_some_and(|t| t.has_leading_newline());
+    let new_starts_on_newline = new_list
+        .syntax()
+        .first_token()
+        .is_some_and(|t| t.has_leading_newline());
+    if starts_on_newline && !new_starts_on_newline {
+        return false;
+    }
+
+    // 2. No token in new_list can have a trailing single-line comment without a subsequent newline before the next token.
+    for token in new_list.syntax().descendants_tokens(Direction::Next) {
+        let mut has_single_line_comment = false;
+        let mut has_newline_after_comment = false;
+
+        for piece in token.trailing_trivia().pieces() {
+            if piece.kind() == TriviaPieceKind::SingleLineComment {
+                has_single_line_comment = true;
+                has_newline_after_comment = false;
+            } else if has_single_line_comment && piece.is_newline() {
+                has_newline_after_comment = true;
+            }
+        }
+
+        if has_single_line_comment && !has_newline_after_comment {
+            if let Some(next_token) = token.next_token() {
+                if !next_token.has_leading_newline() {
+                    return false;
+                }
+            } else if let Some(next_token) = list.syntax().last_token().and_then(|t| t.next_token()) {
+                // Last token in new_list: check the next token in the parent syntax tree (e.g. `}`).
+                if !next_token.has_leading_newline() {
+                    return false;
+                }
+            }
+        }
+    }
+
+    true
+}
+

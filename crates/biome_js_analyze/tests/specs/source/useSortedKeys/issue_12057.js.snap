@@ -1,0 +1,56 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: issue_12057.js
+---
+# Input
+```js
+const obj = {
+  c: 1, b: 2, a: 3, // first row
+  d: 4,
+};
+
+const singleLine = { c: 1, b: 2, a: 3 };
+
+
+```
+
+# Diagnostics
+```
+issue_12057.js:2:3 assist/source/useSortedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The object properties are not sorted by key.
+  
+    1 │ const obj = {
+  > 2 │   c: 1, b: 2, a: 3, // first row
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 3 │   d: 4,
+      │   ^^^^^
+    4 │ };
+    5 │ 
+  
+
+```
+
+```
+issue_12057.js:6:22 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The object properties are not sorted by key.
+  
+    4 │ };
+    5 │ 
+  > 6 │ const singleLine = { c: 1, b: 2, a: 3 };
+      │                      ^^^^^^^^^^^^^^^^
+    7 │ 
+  
+  i Safe fix: Sort the object properties by key.
+  
+    4 4 │   };
+    5 5 │   
+    6   │ - const·singleLine·=·{·c:·1,·b:·2,·a:·3·};
+      6 │ + const·singleLine·=·{·a:·3,·b:·2,·c:·1·};
+    7 7 │   
+    8 8 │   
+  
+
+```

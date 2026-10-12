@@ -1,0 +1,30 @@
+---
+source: crates/biome_json_analyze/tests/spec_tests.rs
+assertion_line: 100
+expression: issue_12057.jsonc
+---
+# Input
+```jsonc
+{
+  "c": 1, "b": 2, "a": 3, // first row
+  "d": 4
+}
+
+```
+
+# Diagnostics
+```
+issue_12057.jsonc:1:1 assist/source/useSortedKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The members are not sorted by key.
+  
+  > 1 │ {
+      │ ^
+  > 2 │   "c": 1, "b": 2, "a": 3, // first row
+  > 3 │   "d": 4
+  > 4 │ }
+      │ ^
+    5 │ 
+  
+
+```
