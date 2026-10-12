@@ -333,6 +333,7 @@ define_categories! {
     "lint/nursery/useBetterDomTraversing": "https://biomejs.dev/linter/rules/use-better-dom-traversing",
     "lint/nursery/useBigintLiterals": "https://biomejs.dev/linter/rules/use-bigint-literals",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
+    "lint/nursery/useBlockStatementOverIife": "https://biomejs.dev/linter/rules/use-block-statement-over-iife",
     "lint/nursery/useCapitalizedConstructors": "https://biomejs.dev/linter/rules/use-capitalized-constructors",
     "lint/nursery/useConsistentBlockLang": "https://biomejs.dev/linter/rules/use-consistent-block-lang",
     "lint/nursery/useConsistentFunctionStyle": "https://biomejs.dev/linter/rules/use-consistent-function-style",

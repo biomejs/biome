@@ -3352,6 +3352,11 @@ export interface Nursery {
 	 */
 	useBigintLiterals?: UseBigintLiteralsConfiguration;
 	/**
+	 * Prefer block statements over functions that are called immediately only to create a scope.
+	 * See https://biomejs.dev/linter/rules/use-block-statement-over-iife
+	 */
+	useBlockStatementOverIife?: UseBlockStatementOverIifeConfiguration;
+	/**
 	 * Require constructor names to begin with a capital letter.
 	 * See https://biomejs.dev/linter/rules/use-capitalized-constructors
 	 */
@@ -6000,6 +6005,9 @@ export type UseBetterDomTraversingConfiguration =
 export type UseBigintLiteralsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseBigintLiteralsOptions;
+export type UseBlockStatementOverIifeConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseBlockStatementOverIifeOptions;
 export type UseCapitalizedConstructorsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseCapitalizedConstructorsOptions;
@@ -8640,6 +8648,14 @@ export interface RuleWithUseBigintLiteralsOptions {
 	level: RulePlainConfiguration;
 	options?: UseBigintLiteralsOptions;
 }
+export interface RuleWithUseBlockStatementOverIifeOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseBlockStatementOverIifeOptions;
+}
 export interface RuleWithUseCapitalizedConstructorsOptions {
 	level: RulePlainConfiguration;
 	options?: UseCapitalizedConstructorsOptions;
@@ -11072,6 +11088,7 @@ export type UseAstroClientOnlyDirectiveValueOptions = {};
 export type UseAwaitThenableOptions = {};
 export type UseBetterDomTraversingOptions = {};
 export type UseBigintLiteralsOptions = {};
+export type UseBlockStatementOverIifeOptions = {};
 export type UseCapitalizedConstructorsOptions = {};
 export interface UseConsistentBlockLangOptions {
 	/**
@@ -12811,6 +12828,7 @@ export type Category =
 	| "lint/nursery/useBetterDomTraversing"
 	| "lint/nursery/useBigintLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useBlockStatementOverIife"
 	| "lint/nursery/useCapitalizedConstructors"
 	| "lint/nursery/useConsistentBlockLang"
 	| "lint/nursery/useConsistentFunctionStyle"
