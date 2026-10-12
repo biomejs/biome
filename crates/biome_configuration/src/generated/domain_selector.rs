@@ -156,6 +156,7 @@ static TAILWIND_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "useTailwindShorthandClasses"),
         RuleFilter::Rule("nursery", "useTailwindSortedClasses"),
         RuleFilter::Rule("nursery", "useTailwindStaticClassStrings"),
+        RuleFilter::Rule("nursery", "useTailwindVariablesShorthand"),
     ]
 });
 static TANSTACKQUERY_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
