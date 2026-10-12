@@ -4,8 +4,11 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make::js_variable_declarator_list;
-use biome_js_semantic::CanBeImportedExported;
-use biome_js_syntax::{JsLanguage, JsSyntaxToken, JsVariableDeclarator, JsVariableStatement};
+use biome_js_semantic::{Binding, CanBeImportedExported, Scope};
+use biome_js_syntax::{
+    AnyJsFunction, JsIdentifierBinding, JsLanguage, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+    JsVariableDeclarator, JsVariableStatement,
+};
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rowan::{SyntaxTriviaPiece, chain_trivia_pieces};
 use biome_rule_options::no_useless_undefined_initialization::NoUselessUndefinedInitializationOptions;
@@ -94,6 +97,8 @@ impl Rule for NoUselessUndefinedInitialization {
             return signals.into_boxed_slice();
         }
 
+        let is_var = node.is_var();
+
         for declarator in node.declarators() {
             let Ok(decl) = declarator else { continue };
 
@@ -110,17 +115,44 @@ impl Rule for NoUselessUndefinedInitialization {
             };
 
             if keyword.is_undefined() {
+                let id_binding = decl
+                    .id()
+                    .ok()
+                    .and_then(|id| id.as_any_js_binding()?.as_js_identifier_binding().cloned());
+
                 // Skip if the variable is exported.
                 // In frameworks like Svelte 4, exported variables with `undefined`
                 // initialization are used to declare optional props.
-                let is_exported = decl
-                    .id()
-                    .ok()
-                    .and_then(|id| id.as_any_js_binding()?.as_js_identifier_binding().cloned())
+                let is_exported = id_binding
+                    .as_ref()
                     .is_some_and(|binding| binding.is_exported(model));
 
                 if is_exported {
                     continue;
+                }
+
+                // For `var`, resetting to undefined inside loops or during redeclarations/reassignments
+                // is meaningful and removing `= undefined` would alter runtime behavior.
+                if is_var {
+                    let Some(binding) = id_binding.as_ref() else {
+                        continue;
+                    };
+                    let semantic_binding = model.as_binding(binding);
+                    let hoisted_scope = model
+                        .scope_hoisted_to(&semantic_binding.syntax())
+                        .unwrap_or_else(|| semantic_binding.scope());
+
+                    if is_var_in_loop(statement.syntax(), &hoisted_scope) {
+                        continue;
+                    }
+
+                    if is_var_redeclaration_or_reassigned(
+                        binding,
+                        &semantic_binding,
+                        &hoisted_scope,
+                    ) {
+                        continue;
+                    }
                 }
 
                 signals.push(decl);
@@ -220,3 +252,89 @@ impl Rule for NoUselessUndefinedInitialization {
         ))
     }
 }
+
+fn is_var_in_loop(node: &JsSyntaxNode, hoisted_scope: &Scope) -> bool {
+    let hoisted_syntax = hoisted_scope.syntax();
+    for ancestor in node.ancestors().skip(1) {
+        if ancestor == hoisted_syntax.clone()
+            || AnyJsFunction::can_cast(ancestor.kind())
+            || matches!(
+                ancestor.kind(),
+                JsSyntaxKind::JS_CLASS_DECLARATION
+                    | JsSyntaxKind::JS_CLASS_EXPRESSION
+                    | JsSyntaxKind::JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER
+                    | JsSyntaxKind::JS_METHOD_CLASS_MEMBER
+                    | JsSyntaxKind::JS_METHOD_OBJECT_MEMBER
+                    | JsSyntaxKind::JS_GETTER_CLASS_MEMBER
+                    | JsSyntaxKind::JS_GETTER_OBJECT_MEMBER
+                    | JsSyntaxKind::JS_SETTER_CLASS_MEMBER
+                    | JsSyntaxKind::JS_SETTER_OBJECT_MEMBER
+                    | JsSyntaxKind::JS_CONSTRUCTOR_CLASS_MEMBER
+            )
+        {
+            break;
+        }
+        if matches!(
+            ancestor.kind(),
+            JsSyntaxKind::JS_FOR_STATEMENT
+                | JsSyntaxKind::JS_FOR_IN_STATEMENT
+                | JsSyntaxKind::JS_FOR_OF_STATEMENT
+                | JsSyntaxKind::JS_WHILE_STATEMENT
+                | JsSyntaxKind::JS_DO_WHILE_STATEMENT
+        ) {
+            return true;
+        }
+    }
+    false
+}
+
+fn is_var_redeclaration_or_reassigned(
+    binding: &JsIdentifierBinding,
+    semantic_binding: &Binding,
+    hoisted_scope: &Scope,
+) -> bool {
+    let Ok(name_token) = binding.name_token() else {
+        return false;
+    };
+    let name = name_token.token_text_trimmed();
+
+    // Check if there are multiple bindings with the same name in the hoisted scope
+    let mut count = 0;
+    for b in hoisted_scope.bindings() {
+        let has_same_name = b
+            .tree()
+            .name_token()
+            .is_ok_and(|t| t.token_text_trimmed() == name);
+        if has_same_name {
+            count += 1;
+            if count > 1 {
+                return true;
+            }
+        }
+    }
+
+    // If hoisted scope is a function body, check parameter bindings in the function scope
+    if hoisted_scope.syntax().kind() == JsSyntaxKind::JS_FUNCTION_BODY
+        && let Some(parent_scope) = hoisted_scope.parent()
+    {
+        let matches_param = parent_scope.bindings().any(|b| {
+            b.tree()
+                .name_token()
+                .is_ok_and(|t| t.token_text_trimmed() == name)
+        });
+        if matches_param {
+            return true;
+        }
+    }
+
+    // Check if there are write references prior to this declaration in text order
+    let binding_start = binding.syntax().text_trimmed_range().start();
+    for write in semantic_binding.all_writes() {
+        if write.syntax().text_trimmed_range().start() < binding_start {
+            return true;
+        }
+    }
+
+    false
+}
+

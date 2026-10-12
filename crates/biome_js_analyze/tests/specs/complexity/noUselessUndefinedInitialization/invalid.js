@@ -13,5 +13,11 @@ let /* comment */d = undefined;
 
 let e = undefined/**/ ;
 let f = /**/undefined/**/ ;
-let g 
+let g
   /**/= /**/undefined/**/ ;
+
+for (let i = 0; i < 3; i++) {
+	function nested() {
+		var x = undefined;
+	}
+}
