@@ -1,0 +1,69 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome inspect plugins '--path=<TEMP_DIR>/config_relative_package_preset_does_not_match_target_in_extended_config_directory/shared/src/file.ts'
+```
+
+## `biome.json`
+
+```json
+{ "extends": ["./shared/base.json"] }
+```
+
+## `shared/base.json`
+
+```json
+{
+  "plugins": [
+    {
+      "path": "@shared/plugin/presets/recommended",
+      "resolutionKind": "config",
+      "includes": ["src/**", "!src/generated/**"]
+    }
+  ]
+}
+```
+
+## `shared/node_modules/@shared/plugin/biome-manifest.json`
+
+```json
+{
+  "version": 1,
+  "plugins": {
+    "rules": [{ "noAssign": "rules/noAssign.grit", "noKeys": "rules/noKeys.grit" }],
+    "presets": { "recommended": ["noAssign", "noKeys"] }
+  }
+}
+```
+
+## `shared/node_modules/@shared/plugin/package.json`
+
+```json
+{ "name": "@shared/plugin" }
+```
+
+## `shared/node_modules/@shared/plugin/rules/noAssign.grit`
+
+```grit
+`unterminated
+```
+
+## `shared/node_modules/@shared/plugin/rules/noKeys.grit`
+
+```grit
+`unterminated
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The configuration doesn't enable any plugin rules for shared/src/file.ts.
+  
+
+```
