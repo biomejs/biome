@@ -1,0 +1,438 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalid.graphql
+---
+# Input
+```graphql
+# should generate diagnostics
+query FieldArguments {
+  users(orderBy: NAME, first: 10, after: "x") { id }
+}
+
+query AliasedField {
+  alias: users(b: 1, a: 2) { id }
+}
+
+query NestedField {
+  user(id: 1) {
+    friends(last: 1, first: 2) { id }
+  }
+}
+
+query FieldDirective {
+  users @custom(b: 1, a: 2) { id }
+}
+
+query OperationDirective @custom(b: 1, a: 2) { id }
+
+query FragmentSpreadDirective {
+  ...Fragment @custom(b: 1, a: 2)
+}
+
+query ObjectValue {
+  # Only the arguments are sorted, not the fields of the object value.
+  users(where: { c: 1, b: 2 }, first: 1) { id }
+}
+
+query NaturalOrder {
+  users(b: 1, B: 1, a10: 1, a9: 1, A: 1, _z: 1) { id }
+}
+
+type FieldDefinition {
+  users(orderBy: Order, first: Int = 10 @deprecated, after: String): [User]
+}
+
+interface InterfaceFieldDefinition {
+  users(b: Int, a: Int): [User]
+}
+
+extend type TypeExtension {
+  users(b: Int, a: Int): [User]
+}
+
+type Described {
+  field(
+    "Description of c"
+    c: Int
+    """
+    Description of b
+    """
+    b: Int
+    a: Int
+  ): Int
+}
+
+directive @definition(b: Int, a: Int) on FIELD
+
+# Both the arguments of the field and the arguments of the directive are unsorted.
+type Nested {
+  field(b: Int @custom(y: 1, x: 2), a: Int): Int
+}
+
+```
+
+# Diagnostics
+```
+invalid.graphql:3:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the field users are not sorted.
+  
+    1 │ # should generate diagnostics
+    2 │ query FieldArguments {
+  > 3 │   users(orderBy: NAME, first: 10, after: "x") { id }
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ }
+    5 │ 
+  
+  i Safe fix: Sort the arguments.
+  
+     1  1 │   # should generate diagnostics
+     2  2 │   query FieldArguments {
+     3    │ - ··users(orderBy:·NAME,·first:·10,·after:·"x")·{·id·}
+        3 │ + ··users(after:·"x",·first:·10,·orderBy:·NAME)·{·id·}
+     4  4 │   }
+     5  5 │   
+  
+
+```
+
+```
+invalid.graphql:7:15 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the field users are not sorted.
+  
+    6 │ query AliasedField {
+  > 7 │   alias: users(b: 1, a: 2) { id }
+      │               ^^^^^^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i Safe fix: Sort the arguments.
+  
+     5  5 │   
+     6  6 │   query AliasedField {
+     7    │ - ··alias:·users(b:·1,·a:·2)·{·id·}
+        7 │ + ··alias:·users(a:·2,·b:·1)·{·id·}
+     8  8 │   }
+     9  9 │   
+  
+
+```
+
+```
+invalid.graphql:12:12 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the field friends are not sorted.
+  
+    10 │ query NestedField {
+    11 │   user(id: 1) {
+  > 12 │     friends(last: 1, first: 2) { id }
+       │            ^^^^^^^^^^^^^^^^^^^
+    13 │   }
+    14 │ }
+  
+  i Safe fix: Sort the arguments.
+  
+    10 10 │   query NestedField {
+    11 11 │     user(id: 1) {
+    12    │ - ····friends(last:·1,·first:·2)·{·id·}
+       12 │ + ····friends(first:·2,·last:·1)·{·id·}
+    13 13 │     }
+    14 14 │   }
+  
+
+```
+
+```
+invalid.graphql:17:16 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the directive @custom are not sorted.
+  
+    16 │ query FieldDirective {
+  > 17 │   users @custom(b: 1, a: 2) { id }
+       │                ^^^^^^^^^^^^
+    18 │ }
+    19 │ 
+  
+  i Safe fix: Sort the arguments.
+  
+    15 15 │   
+    16 16 │   query FieldDirective {
+    17    │ - ··users·@custom(b:·1,·a:·2)·{·id·}
+       17 │ + ··users·@custom(a:·2,·b:·1)·{·id·}
+    18 18 │   }
+    19 19 │   
+  
+
+```
+
+```
+invalid.graphql:20:33 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the directive @custom are not sorted.
+  
+    18 │ }
+    19 │ 
+  > 20 │ query OperationDirective @custom(b: 1, a: 2) { id }
+       │                                 ^^^^^^^^^^^^
+    21 │ 
+    22 │ query FragmentSpreadDirective {
+  
+  i Safe fix: Sort the arguments.
+  
+    18 18 │   }
+    19 19 │   
+    20    │ - query·OperationDirective·@custom(b:·1,·a:·2)·{·id·}
+       20 │ + query·OperationDirective·@custom(a:·2,·b:·1)·{·id·}
+    21 21 │   
+    22 22 │   query FragmentSpreadDirective {
+  
+
+```
+
+```
+invalid.graphql:23:22 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the directive @custom are not sorted.
+  
+    22 │ query FragmentSpreadDirective {
+  > 23 │   ...Fragment @custom(b: 1, a: 2)
+       │                      ^^^^^^^^^^^^
+    24 │ }
+    25 │ 
+  
+  i Safe fix: Sort the arguments.
+  
+    21 21 │   
+    22 22 │   query FragmentSpreadDirective {
+    23    │ - ··...Fragment·@custom(b:·1,·a:·2)
+       23 │ + ··...Fragment·@custom(a:·2,·b:·1)
+    24 24 │   }
+    25 25 │   
+  
+
+```
+
+```
+invalid.graphql:28:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the field users are not sorted.
+  
+    26 │ query ObjectValue {
+    27 │   # Only the arguments are sorted, not the fields of the object value.
+  > 28 │   users(where: { c: 1, b: 2 }, first: 1) { id }
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    29 │ }
+    30 │ 
+  
+  i Safe fix: Sort the arguments.
+  
+    26 26 │   query ObjectValue {
+    27 27 │     # Only the arguments are sorted, not the fields of the object value.
+    28    │ - ··users(where:·{·c:·1,·b:·2·},·first:·1)·{·id·}
+       28 │ + ··users(first:·1,·where:·{·c:·1,·b:·2·})·{·id·}
+    29 29 │   }
+    30 30 │   
+  
+
+```
+
+```
+invalid.graphql:32:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the field users are not sorted.
+  
+    31 │ query NaturalOrder {
+  > 32 │   users(b: 1, B: 1, a10: 1, a9: 1, A: 1, _z: 1) { id }
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    33 │ }
+    34 │ 
+  
+  i Safe fix: Sort the arguments.
+  
+    30 30 │   
+    31 31 │   query NaturalOrder {
+    32    │ - ··users(b:·1,·B:·1,·a10:·1,·a9:·1,·A:·1,·_z:·1)·{·id·}
+       32 │ + ··users(_z:·1,·A:·1,·a9:·1,·a10:·1,·B:·1,·b:·1)·{·id·}
+    33 33 │   }
+    34 34 │   
+  
+
+```
+
+```
+invalid.graphql:36:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the field users are not sorted.
+  
+    35 │ type FieldDefinition {
+  > 36 │   users(orderBy: Order, first: Int = 10 @deprecated, after: String): [User]
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ }
+    38 │ 
+  
+  i Safe fix: Sort the arguments.
+  
+    34 34 │   
+    35 35 │   type FieldDefinition {
+    36    │ - ··users(orderBy:·Order,·first:·Int·=·10·@deprecated,·after:·String):·[User]
+       36 │ + ··users(after:·String,·first:·Int·=·10·@deprecated,·orderBy:·Order):·[User]
+    37 37 │   }
+    38 38 │   
+  
+
+```
+
+```
+invalid.graphql:40:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the field users are not sorted.
+  
+    39 │ interface InterfaceFieldDefinition {
+  > 40 │   users(b: Int, a: Int): [User]
+       │        ^^^^^^^^^^^^^^^^
+    41 │ }
+    42 │ 
+  
+  i Safe fix: Sort the arguments.
+  
+    38 38 │   
+    39 39 │   interface InterfaceFieldDefinition {
+    40    │ - ··users(b:·Int,·a:·Int):·[User]
+       40 │ + ··users(a:·Int,·b:·Int):·[User]
+    41 41 │   }
+    42 42 │   
+  
+
+```
+
+```
+invalid.graphql:44:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the field users are not sorted.
+  
+    43 │ extend type TypeExtension {
+  > 44 │   users(b: Int, a: Int): [User]
+       │        ^^^^^^^^^^^^^^^^
+    45 │ }
+    46 │ 
+  
+  i Safe fix: Sort the arguments.
+  
+    42 42 │   
+    43 43 │   extend type TypeExtension {
+    44    │ - ··users(b:·Int,·a:·Int):·[User]
+       44 │ + ··users(a:·Int,·b:·Int):·[User]
+    45 45 │   }
+    46 46 │   
+  
+
+```
+
+```
+invalid.graphql:48:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the field field are not sorted.
+  
+    47 │ type Described {
+  > 48 │   field(
+       │        ^
+  > 49 │     "Description of c"
+        ...
+  > 55 │     a: Int
+  > 56 │   ): Int
+       │   ^
+    57 │ }
+    58 │ 
+  
+  i Safe fix: Sort the arguments.
+  
+    47 47 │   type Described {
+    48 48 │     field(
+    49    │ - ····"Description·of·c"
+    50    │ - ····c:·Int
+       49 │ + ····a:·Int
+    51 50 │       """
+    52 51 │       Description of b
+    53 52 │       """
+    54 53 │       b: Int
+    55    │ - ····a:·Int
+       54 │ + ····"Description·of·c"
+       55 │ + ····c:·Int
+    56 56 │     ): Int
+    57 57 │   }
+  
+
+```
+
+```
+invalid.graphql:59:22 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the directive @definition are not sorted.
+  
+    57 │ }
+    58 │ 
+  > 59 │ directive @definition(b: Int, a: Int) on FIELD
+       │                      ^^^^^^^^^^^^^^^^
+    60 │ 
+    61 │ # Both the arguments of the field and the arguments of the directive are unsorted.
+  
+  i Safe fix: Sort the arguments.
+  
+    57 57 │   }
+    58 58 │   
+    59    │ - directive·@definition(b:·Int,·a:·Int)·on·FIELD
+       59 │ + directive·@definition(a:·Int,·b:·Int)·on·FIELD
+    60 60 │   
+    61 61 │   # Both the arguments of the field and the arguments of the directive are unsorted.
+  
+
+```
+
+```
+invalid.graphql:63:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the field field are not sorted.
+  
+    61 │ # Both the arguments of the field and the arguments of the directive are unsorted.
+    62 │ type Nested {
+  > 63 │   field(b: Int @custom(y: 1, x: 2), a: Int): Int
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    64 │ }
+    65 │ 
+  
+  i Safe fix: Sort the arguments.
+  
+    61 61 │   # Both the arguments of the field and the arguments of the directive are unsorted.
+    62 62 │   type Nested {
+    63    │ - ··field(b:·Int·@custom(y:·1,·x:·2),·a:·Int):·Int
+       63 │ + ··field(a:·Int,·b:·Int·@custom(y:·1,·x:·2)):·Int
+    64 64 │   }
+    65 65 │   
+  
+
+```
+
+```
+invalid.graphql:63:23 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the directive @custom are not sorted.
+  
+    61 │ # Both the arguments of the field and the arguments of the directive are unsorted.
+    62 │ type Nested {
+  > 63 │   field(b: Int @custom(y: 1, x: 2), a: Int): Int
+       │                       ^^^^^^^^^^^^
+    64 │ }
+    65 │ 
+  
+  i Safe fix: Sort the arguments.
+  
+    61 61 │   # Both the arguments of the field and the arguments of the directive are unsorted.
+    62 62 │   type Nested {
+    63    │ - ··field(b:·Int·@custom(y:·1,·x:·2),·a:·Int):·Int
+       63 │ + ··field(b:·Int·@custom(x:·2,·y:·1),·a:·Int):·Int
+    64 64 │   }
+    65 65 │   
+  
+
+```

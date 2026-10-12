@@ -1,0 +1,64 @@
+# should generate diagnostics
+query FieldArguments {
+  users(orderBy: NAME, first: 10, after: "x") { id }
+}
+
+query AliasedField {
+  alias: users(b: 1, a: 2) { id }
+}
+
+query NestedField {
+  user(id: 1) {
+    friends(last: 1, first: 2) { id }
+  }
+}
+
+query FieldDirective {
+  users @custom(b: 1, a: 2) { id }
+}
+
+query OperationDirective @custom(b: 1, a: 2) { id }
+
+query FragmentSpreadDirective {
+  ...Fragment @custom(b: 1, a: 2)
+}
+
+query ObjectValue {
+  # Only the arguments are sorted, not the fields of the object value.
+  users(where: { c: 1, b: 2 }, first: 1) { id }
+}
+
+query NaturalOrder {
+  users(b: 1, B: 1, a10: 1, a9: 1, A: 1, _z: 1) { id }
+}
+
+type FieldDefinition {
+  users(orderBy: Order, first: Int = 10 @deprecated, after: String): [User]
+}
+
+interface InterfaceFieldDefinition {
+  users(b: Int, a: Int): [User]
+}
+
+extend type TypeExtension {
+  users(b: Int, a: Int): [User]
+}
+
+type Described {
+  field(
+    "Description of c"
+    c: Int
+    """
+    Description of b
+    """
+    b: Int
+    a: Int
+  ): Int
+}
+
+directive @definition(b: Int, a: Int) on FIELD
+
+# Both the arguments of the field and the arguments of the directive are unsorted.
+type Nested {
+  field(b: Int @custom(y: 1, x: 2), a: Int): Int
+}

@@ -545,6 +545,7 @@ pub mod use_single_js_doc_asterisk;
 pub mod use_single_top_level_heading;
 pub mod use_single_var_declarator;
 pub mod use_solid_for_component;
+pub mod use_sorted_arguments;
 pub mod use_sorted_attributes;
 pub mod use_sorted_enum_members;
 pub mod use_sorted_interface_members;

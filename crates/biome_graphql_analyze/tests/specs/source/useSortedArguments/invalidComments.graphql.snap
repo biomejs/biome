@@ -1,0 +1,266 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: invalidComments.graphql
+---
+# Input
+```graphql
+# should generate diagnostics
+query FieldCommaThenComment {
+  users(
+    first: 10, # first
+    after: "x" # after
+  ) { id }
+}
+
+query FieldCommentAbove {
+  users(
+    # about first
+    first: 10
+    # about after
+    after: "x"
+  ) { id }
+}
+
+type DefinitionMixed {
+  users(
+    # header for c
+    c: Int, # same c
+    b: Int # same b
+    # header for a
+    "Description of a"
+    a: Int, # same a
+  ): [User]
+}
+
+type DefinitionPlainIntoCommentSlot {
+  users(
+    c: Int, # c
+    a: Int,
+  ): [User]
+}
+
+# The comment of `a` would be followed by `b` on the same line, so no fix is offered.
+query CommentWouldSwallowArgument {
+  users(c: 1, b: 2, a: 3 # a
+  ) { id }
+}
+
+# The comment of `b` would be followed by `)` on the same line, so no fix is offered.
+type CommentWouldSwallowParen {
+  users(b: Int # b
+    a: Int): [User]
+}
+
+# The comment above `b` would follow `a` on the same line, so no fix is offered.
+type CommentAboveIntoInlineSlot {
+  users(a: Int, c: Int,
+    # about b
+    b: Int): [User]
+}
+
+# The comment above `a` would follow `(` on the same line, so no fix is offered.
+directive @commentAboveIntoFirstSlot(b: Int,
+  # about a
+  a: Int) on FIELD
+
+```
+
+# Diagnostics
+```
+invalidComments.graphql:3:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the field users are not sorted.
+  
+    1 │ # should generate diagnostics
+    2 │ query FieldCommaThenComment {
+  > 3 │   users(
+      │        ^
+  > 4 │     first: 10, # first
+  > 5 │     after: "x" # after
+  > 6 │   ) { id }
+      │   ^
+    7 │ }
+    8 │ 
+  
+  i Safe fix: Sort the arguments.
+  
+     2  2 │   query FieldCommaThenComment {
+     3  3 │     users(
+     4    │ - ····first:·10,·#·first
+     5    │ - ····after:·"x"·#·after
+        4 │ + ····after:·"x"·#·after
+        5 │ + ····first:·10,·#·first
+     6  6 │     ) { id }
+     7  7 │   }
+  
+
+```
+
+```
+invalidComments.graphql:10:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the field users are not sorted.
+  
+     9 │ query FieldCommentAbove {
+  > 10 │   users(
+       │        ^
+  > 11 │     # about first
+  > 12 │     first: 10
+  > 13 │     # about after
+  > 14 │     after: "x"
+  > 15 │   ) { id }
+       │   ^
+    16 │ }
+    17 │ 
+  
+  i Safe fix: Sort the arguments.
+  
+     9  9 │   query FieldCommentAbove {
+    10 10 │     users(
+    11    │ - ····#·about·first
+    12    │ - ····first:·10
+    13    │ - ····#·about·after
+    14    │ - ····after:·"x"
+       11 │ + ····#·about·after
+       12 │ + ····after:·"x"
+       13 │ + ····#·about·first
+       14 │ + ····first:·10
+    15 15 │     ) { id }
+    16 16 │   }
+  
+
+```
+
+```
+invalidComments.graphql:19:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the field users are not sorted.
+  
+    18 │ type DefinitionMixed {
+  > 19 │   users(
+       │        ^
+  > 20 │     # header for c
+        ...
+  > 25 │     a: Int, # same a
+  > 26 │   ): [User]
+       │   ^
+    27 │ }
+    28 │ 
+  
+  i Safe fix: Sort the arguments.
+  
+    18 18 │   type DefinitionMixed {
+    19 19 │     users(
+    20    │ - ····#·header·for·c
+    21    │ - ····c:·Int,·#·same·c
+       20 │ + ····#·header·for·a
+       21 │ + ····"Description·of·a"
+       22 │ + ····a:·Int,·#·same·a
+    22 23 │       b: Int # same b
+    23    │ - ····#·header·for·a
+    24    │ - ····"Description·of·a"
+    25    │ - ····a:·Int,·#·same·a
+       24 │ + ····#·header·for·c
+       25 │ + ····c:·Int,·#·same·c
+    26 26 │     ): [User]
+    27 27 │   }
+  
+
+```
+
+```
+invalidComments.graphql:30:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the field users are not sorted.
+  
+    29 │ type DefinitionPlainIntoCommentSlot {
+  > 30 │   users(
+       │        ^
+  > 31 │     c: Int, # c
+  > 32 │     a: Int,
+  > 33 │   ): [User]
+       │   ^
+    34 │ }
+    35 │ 
+  
+  i Safe fix: Sort the arguments.
+  
+    29 29 │   type DefinitionPlainIntoCommentSlot {
+    30 30 │     users(
+    31    │ - ····c:·Int,·#·c
+    32    │ - ····a:·Int,
+       31 │ + ····a:·Int
+       32 │ + ····c:·Int,·#·c
+    33 33 │     ): [User]
+    34 34 │   }
+  
+
+```
+
+```
+invalidComments.graphql:38:8 assist/source/useSortedArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the field users are not sorted.
+  
+    36 │ # The comment of `a` would be followed by `b` on the same line, so no fix is offered.
+    37 │ query CommentWouldSwallowArgument {
+  > 38 │   users(c: 1, b: 2, a: 3 # a
+       │        ^^^^^^^^^^^^^^^^^^^^^
+  > 39 │   ) { id }
+       │   ^
+    40 │ }
+    41 │ 
+  
+
+```
+
+```
+invalidComments.graphql:44:8 assist/source/useSortedArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the field users are not sorted.
+  
+    42 │ # The comment of `b` would be followed by `)` on the same line, so no fix is offered.
+    43 │ type CommentWouldSwallowParen {
+  > 44 │   users(b: Int # b
+       │        ^^^^^^^^^^^
+  > 45 │     a: Int): [User]
+       │     ^^^^^^^
+    46 │ }
+    47 │ 
+  
+
+```
+
+```
+invalidComments.graphql:50:8 assist/source/useSortedArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the field users are not sorted.
+  
+    48 │ # The comment above `b` would follow `a` on the same line, so no fix is offered.
+    49 │ type CommentAboveIntoInlineSlot {
+  > 50 │   users(a: Int, c: Int,
+       │        ^^^^^^^^^^^^^^^^
+  > 51 │     # about b
+  > 52 │     b: Int): [User]
+       │     ^^^^^^^
+    53 │ }
+    54 │ 
+  
+
+```
+
+```
+invalidComments.graphql:56:37 assist/source/useSortedArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the directive @commentAboveIntoFirstSlot are not sorted.
+  
+    55 │ # The comment above `a` would follow `(` on the same line, so no fix is offered.
+  > 56 │ directive @commentAboveIntoFirstSlot(b: Int,
+       │                                     ^^^^^^^^
+  > 57 │   # about a
+  > 58 │   a: Int) on FIELD
+       │   ^^^^^^^
+    59 │ 
+  
+
+```

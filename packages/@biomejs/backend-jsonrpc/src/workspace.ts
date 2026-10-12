@@ -1563,6 +1563,11 @@ export interface Source {
 	 */
 	useGraphqlSortedVariables?: UseGraphqlSortedVariablesConfiguration;
 	/**
+	 * Sort the arguments of GraphQL fields and directives in natural order.
+	 * See https://biomejs.dev/assist/actions/use-sorted-arguments
+	 */
+	useSortedArguments?: UseSortedArgumentsConfiguration;
+	/**
 	 * Sort HTML attributes and framework directives into a consistent order.
 	 * See https://biomejs.dev/assist/actions/use-sorted-attributes
 	 */
@@ -1815,6 +1820,9 @@ export type OrganizeImportsConfiguration =
 export type UseGraphqlSortedVariablesConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseGraphqlSortedVariablesOptions;
+export type UseSortedArgumentsConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithUseSortedArgumentsOptions;
 export type UseSortedAttributesConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedAttributesOptions;
@@ -5000,6 +5008,10 @@ export interface RuleAssistWithUseGraphqlSortedVariablesOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseGraphqlSortedVariablesOptions;
 }
+export interface RuleAssistWithUseSortedArgumentsOptions {
+	level: RuleAssistPlainConfiguration;
+	options: UseSortedArgumentsOptions;
+}
 export interface RuleAssistWithUseSortedAttributesOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedAttributesOptions;
@@ -6872,6 +6884,7 @@ export interface OrganizeImportsOptions {
 	sortBareImports?: boolean;
 }
 export type UseGraphqlSortedVariablesOptions = {};
+export type UseSortedArgumentsOptions = {};
 export interface UseSortedAttributesOptions {
 	/**
 	 * A list of attribute names that should be sorted before all other
@@ -12882,6 +12895,7 @@ export type Category =
 	| "assist/source/noDuplicateClasses"
 	| "assist/source/organizeImports"
 	| "assist/source/useGraphqlSortedVariables"
+	| "assist/source/useSortedArguments"
 	| "assist/source/useSortedAttributes"
 	| "assist/source/useSortedEnumMembers"
 	| "assist/source/useSortedInterfaceMembers"

@@ -9022,6 +9022,15 @@
 			"additionalProperties": false,
 			"required": ["level", "options"]
 		},
+		"RuleAssistWithUseSortedArgumentsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSortedArgumentsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level", "options"]
+		},
 		"RuleAssistWithUseSortedAttributesOptions": {
 			"type": "object",
 			"properties": {
@@ -15768,6 +15777,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSortedArguments": {
+					"description": "Sort the arguments of GraphQL fields and directives in natural order.\nSee https://biomejs.dev/assist/actions/use-sorted-arguments",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSortedArgumentsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedAttributes": {
 					"description": "Sort HTML attributes and framework directives into a consistent order.\nSee https://biomejs.dev/assist/actions/use-sorted-attributes",
 					"anyOf": [
@@ -19825,6 +19841,16 @@
 			]
 		},
 		"UseSolidForComponentOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseSortedArgumentsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithUseSortedArgumentsOptions" }
+			]
+		},
+		"UseSortedArgumentsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
