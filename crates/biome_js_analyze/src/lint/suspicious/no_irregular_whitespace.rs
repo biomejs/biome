@@ -40,6 +40,7 @@ declare_lint_rule! {
         sources: &[
             RuleSource::Eslint("no-irregular-whitespace").same(),
             RuleSource::EslintVueJs("no-irregular-whitespace").same(),
+            RuleSource::DenoLint("no-irregular-whitespace").same(),
         ],
         recommended: true,
         severity: Severity::Warning,
