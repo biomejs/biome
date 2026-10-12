@@ -96,6 +96,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[
             RuleSource::EslintTypeScript("adjacent-overload-signatures").same(),
+            RuleSource::DenoLint("adjacent-overload-signatures").same(),
         ],
         recommended: true,
         severity: Severity::Warning,

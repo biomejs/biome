@@ -91,6 +91,7 @@ declare_lint_rule! {
         sources: &[
             RuleSource::Eslint("prefer-const").same(),
             RuleSource::EslintSvelte("prefer-const").same(),
+            RuleSource::DenoLint("prefer-const").same(),
         ],
         recommended: true,
         severity: Severity::Warning,

@@ -210,6 +210,7 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(EslintJsxA11y("no-onchange"), Deprecated),
     UnsupportedRule(EslintMysticatea("block-scoped-var"), CoveredByRule("noVar")),
     UnsupportedRule(EslintN("no-hide-core-modules"), Deprecated),
+    UnsupportedRule(EslintN("shebang"), Deprecated),
     UnsupportedRule(EslintQwik("no-async-prevent-default"), Deprecated),
     UnsupportedRule(
         EslintQwik("unused-server"),
@@ -251,6 +252,8 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
         EslintSvelte("no-unused-svelte-ignore"),
         RequiresExternalTool,
     ),
+    // Svelte documentation recommends avoiding class directives.
+    UnsupportedRule(EslintSvelte("prefer-class-directive"), Legacy),
     UnsupportedRule(EslintSvelte("system"), NotApplicable),
     UnsupportedRule(EslintSvelte("valid-compile"), RequiresExternalTool),
     UnsupportedRule(EslintSvelte("valid-style-parse"), FormatterCovers),
@@ -524,6 +527,10 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
         EslintVueJs("template-curly-spacing"),
         FormatterOption("delimiterSpacing"),
     ),
+    // Keys on v-if/else branches are not required in Vue 3.
+    UnsupportedRule(EslintVueJs("v-if-else-key"), Legacy),
+    UnsupportedRule(EslintVueJs("valid-model-definition"), Deprecated),
+    UnsupportedRule(EslintVueJs("valid-v-bind-sync"), Deprecated),
     UnsupportedRule(HtmlEslint("attrs-newline"), FormatterCovers),
     UnsupportedRule(HtmlEslint("element-newline"), FormatterCovers),
     UnsupportedRule(HtmlEslint("indent"), FormatterOption("indentWidth")),

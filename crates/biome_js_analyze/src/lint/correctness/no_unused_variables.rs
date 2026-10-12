@@ -210,6 +210,7 @@ declare_lint_rule! {
             RuleSource::EslintTypeScript("no-unused-vars").same(),
             RuleSource::EslintUnusedImports("no-unused-vars").same(),
             RuleSource::EslintVueJs("no-unused-vars").same(),
+            RuleSource::DenoLint("no-unused-vars").same(),
         ],
         recommended: true,
         severity: Severity::Warning,

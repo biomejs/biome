@@ -42,7 +42,10 @@ declare_lint_rule! {
         version: "next",
         name: "noOctal",
         language: "js",
-        sources: &[RuleSource::Eslint("no-octal").same()],
+        sources: &[
+            RuleSource::Eslint("no-octal").same(),
+            RuleSource::DenoLint("no-octal").same(),
+        ],
         recommended: true,
         severity: Severity::Warning,
     }
