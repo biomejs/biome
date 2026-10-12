@@ -1,0 +1,514 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_issue_8185.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// https://github.com/biomejs/biome/issues/8185
+export class Foo {
+	#name = "foo";
+
+	constructor() {
+		this.#init();
+	}
+
+	#init() {
+		this.#name = "fooed";
+	}
+}
+
+class MultipleWrites {
+	#count = 0;
+
+	reset() {
+		this.#count = 0;
+	}
+
+	set(value: number) {
+		this.#count = value;
+	}
+}
+
+class UpdateExpressions {
+	#counter = 0;
+
+	increment() {
+		this.#counter++;
+	}
+
+	decrement() {
+		--this.#counter;
+	}
+}
+
+class NotInStatementList {
+	#flag = false;
+
+	toggle(condition: boolean) {
+		if (condition) this.#flag = true;
+		while (condition) this.#flag = false;
+	}
+}
+
+class SideEffect {
+	#value: number | undefined;
+
+	refresh() {
+		this.#value = compute();
+	}
+}
+
+class TsPrivate {
+	private name = "foo";
+
+	constructor() {
+		this.init();
+	}
+
+	private init() {
+		this.name = "fooed";
+	}
+}
+
+class ParameterProperty {
+	constructor(private counter = 0) {}
+
+	reset() {
+		this.counter = 0;
+	}
+}
+
+class NestedInMember {
+	#callback = () => {
+		this.#callback = () => {};
+	};
+}
+
+class StaticMember {
+	static #instances = 0;
+
+	static register() {
+		StaticMember.#instances = 1;
+	}
+}
+
+class KeepsReads {
+	#unused = 1;
+	#used = 2;
+
+	update() {
+		this.#unused = 3;
+		this.#used = 4;
+	}
+
+	get value() {
+		return this.#used;
+	}
+}
+
+class OtherReceiver {
+	private name = "";
+
+	apply(element: HTMLElement) {
+		element.name = "x";
+	}
+}
+
+class ParameterOtherReceiver {
+	constructor(private id: number) {}
+
+	apply(node: { id: number }) {
+		node.id = 5;
+	}
+}
+
+class TsStatic {
+	private static instance: TsStatic | undefined;
+
+	static create() {
+		TsStatic.instance = new TsStatic();
+	}
+}
+
+class NestedWrites {
+	#timer: ReturnType<typeof setTimeout> | null = null;
+
+	schedule(callback: () => void) {
+		this.#timer = setTimeout(() => {
+			this.#timer = null;
+			callback();
+		}, 100);
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid_issue_8185.ts:5:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    3 │ // https://github.com/biomejs/biome/issues/8185
+    4 │ export class Foo {
+  > 5 │ 	#name = "foo";
+      │ 	^^^^^
+    6 │ 
+    7 │ 	constructor() {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+      3   3 │   // https://github.com/biomejs/biome/issues/8185
+      4   4 │   export class Foo {
+      5     │ - → #name·=·"foo";
+      6   5 │   
+      7   6 │     constructor() {
+    ······· │ 
+     10   9 │   
+     11  10 │     #init() {
+     12     │ - → → this.#name·=·"fooed";
+     13  11 │     }
+     14  12 │   }
+  
+
+```
+
+```
+invalid_issue_8185.ts:17:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    16 │ class MultipleWrites {
+  > 17 │ 	#count = 0;
+       │ 	^^^^^^
+    18 │ 
+    19 │ 	reset() {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     15  15 │   
+     16  16 │   class MultipleWrites {
+     17     │ - → #count·=·0;
+     18  17 │   
+     19  18 │     reset() {
+     20     │ - → → this.#count·=·0;
+     21  19 │     }
+     22  20 │   
+     23  21 │     set(value: number) {
+     24     │ - → → this.#count·=·value;
+     25  22 │     }
+     26  23 │   }
+  
+
+```
+
+```
+invalid_issue_8185.ts:29:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    28 │ class UpdateExpressions {
+  > 29 │ 	#counter = 0;
+       │ 	^^^^^^^^
+    30 │ 
+    31 │ 	increment() {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     27  27 │   
+     28  28 │   class UpdateExpressions {
+     29     │ - → #counter·=·0;
+     30  29 │   
+     31  30 │     increment() {
+     32     │ - → → this.#counter++;
+     33  31 │     }
+     34  32 │   
+     35  33 │     decrement() {
+     36     │ - → → --this.#counter;
+     37  34 │     }
+     38  35 │   }
+  
+
+```
+
+```
+invalid_issue_8185.ts:41:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    40 │ class NotInStatementList {
+  > 41 │ 	#flag = false;
+       │ 	^^^^^
+    42 │ 
+    43 │ 	toggle(condition: boolean) {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     39  39 │   
+     40  40 │   class NotInStatementList {
+     41     │ - → #flag·=·false;
+     42  41 │   
+     43  42 │     toggle(condition: boolean) {
+     44     │ - → → if·(condition)·this.#flag·=·true;
+     45     │ - → → while·(condition)·this.#flag·=·false;
+         43 │ + → → if·(condition)·;
+         44 │ + → → while·(condition)·;
+     46  45 │     }
+     47  46 │   }
+  
+
+```
+
+```
+invalid_issue_8185.ts:50:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    49 │ class SideEffect {
+  > 50 │ 	#value: number | undefined;
+       │ 	^^^^^^
+    51 │ 
+    52 │ 	refresh() {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     48  48 │   
+     49  49 │   class SideEffect {
+     50     │ - → #value:·number·|·undefined;
+     51  50 │   
+     52  51 │     refresh() {
+     53     │ - → → this.#value·=·compute();
+     54  52 │     }
+     55  53 │   }
+  
+
+```
+
+```
+invalid_issue_8185.ts:58:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    57 │ class TsPrivate {
+  > 58 │ 	private name = "foo";
+       │ 	        ^^^^
+    59 │ 
+    60 │ 	constructor() {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     56  56 │   
+     57  57 │   class TsPrivate {
+     58     │ - → private·name·=·"foo";
+     59  58 │   
+     60  59 │     constructor() {
+    ······· │ 
+     63  62 │   
+     64  63 │     private init() {
+     65     │ - → → this.name·=·"fooed";
+     66  64 │     }
+     67  65 │   }
+  
+
+```
+
+```
+invalid_issue_8185.ts:70:22 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    69 │ class ParameterProperty {
+  > 70 │ 	constructor(private counter = 0) {}
+       │ 	                    ^^^^^^^^
+    71 │ 
+    72 │ 	reset() {
+  
+  i Unsafe fix: Remove private modifier
+  
+     68  68 │   
+     69  69 │   class ParameterProperty {
+     70     │ - → constructor(private·counter·=·0)·{}
+         70 │ + → constructor(_counter·=·0)·{}
+     71  71 │   
+     72  72 │     reset() {
+     73     │ - → → this.counter·=·0;
+     74  73 │     }
+     75  74 │   }
+  
+
+```
+
+```
+invalid_issue_8185.ts:78:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    77 │ class NestedInMember {
+  > 78 │ 	#callback = () => {
+       │ 	^^^^^^^^^
+    79 │ 		this.#callback = () => {};
+    80 │ 	};
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     76  76 │   
+     77  77 │   class NestedInMember {
+     78     │ - → #callback·=·()·=>·{
+     79     │ - → → this.#callback·=·()·=>·{};
+     80     │ - → };
+     81  78 │   }
+     82  79 │   
+  
+
+```
+
+```
+invalid_issue_8185.ts:84:9 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    83 │ class StaticMember {
+  > 84 │ 	static #instances = 0;
+       │ 	       ^^^^^^^^^^
+    85 │ 
+    86 │ 	static register() {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     82  82 │   
+     83  83 │   class StaticMember {
+     84     │ - → static·#instances·=·0;
+     85  84 │   
+     86  85 │     static register() {
+     87     │ - → → StaticMember.#instances·=·1;
+     88  86 │     }
+     89  87 │   }
+  
+
+```
+
+```
+invalid_issue_8185.ts:92:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    91 │ class KeepsReads {
+  > 92 │ 	#unused = 1;
+       │ 	^^^^^^^
+    93 │ 	#used = 2;
+    94 │ 
+  
+  i Unsafe fix: Remove unused declaration.
+  
+     90  90 │   
+     91  91 │   class KeepsReads {
+     92     │ - → #unused·=·1;
+     93  92 │     #used = 2;
+     94  93 │   
+     95  94 │     update() {
+     96     │ - → → this.#unused·=·3;
+     97  95 │       this.#used = 4;
+     98  96 │     }
+  
+
+```
+
+```
+invalid_issue_8185.ts:106:10 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    105 │ class OtherReceiver {
+  > 106 │ 	private name = "";
+        │ 	        ^^^^
+    107 │ 
+    108 │ 	apply(element: HTMLElement) {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    104 104 │   
+    105 105 │   class OtherReceiver {
+    106     │ - → private·name·=·"";
+    107 106 │   
+    108 107 │     apply(element: HTMLElement) {
+  
+
+```
+
+```
+invalid_issue_8185.ts:114:22 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    113 │ class ParameterOtherReceiver {
+  > 114 │ 	constructor(private id: number) {}
+        │ 	                    ^^
+    115 │ 
+    116 │ 	apply(node: { id: number }) {
+  
+  i Unsafe fix: Remove private modifier
+  
+    112 112 │   
+    113 113 │   class ParameterOtherReceiver {
+    114     │ - → constructor(private·id:·number)·{}
+        114 │ + → constructor(_id:·number)·{}
+    115 115 │   
+    116 116 │     apply(node: { id: number }) {
+  
+
+```
+
+```
+invalid_issue_8185.ts:122:17 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    121 │ class TsStatic {
+  > 122 │ 	private static instance: TsStatic | undefined;
+        │ 	               ^^^^^^^^
+    123 │ 
+    124 │ 	static create() {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    120 120 │   
+    121 121 │   class TsStatic {
+    122     │ - → private·static·instance:·TsStatic·|·undefined;
+    123 122 │   
+    124 123 │     static create() {
+    125     │ - → → TsStatic.instance·=·new·TsStatic();
+    126 124 │     }
+    127 125 │   }
+  
+
+```
+
+```
+invalid_issue_8185.ts:130:2 lint/correctness/noUnusedPrivateClassMembers  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  ! This private class member is defined but never used.
+  
+    129 │ class NestedWrites {
+  > 130 │ 	#timer: ReturnType<typeof setTimeout> | null = null;
+        │ 	^^^^^^
+    131 │ 
+    132 │ 	schedule(callback: () => void) {
+  
+  i Unsafe fix: Remove unused declaration.
+  
+    128 128 │   
+    129 129 │   class NestedWrites {
+    130     │ - → #timer:·ReturnType<typeof·setTimeout>·|·null·=·null;
+    131 130 │   
+    132 131 │     schedule(callback: () => void) {
+    133     │ - → → this.#timer·=·setTimeout(()·=>·{
+    134     │ - → → → this.#timer·=·null;
+    135     │ - → → → callback();
+    136     │ - → → },·100);
+    137 132 │     }
+    138 133 │   }
+  
+
+```
