@@ -6,8 +6,8 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsStatement, AnyJsSwitchClause, JsBlockStatement, JsLabeledStatement, JsStatementList,
-    JsSyntaxKind, JsVariableStatement,
+    AnyJsClass, AnyJsStatement, AnyJsSwitchClause, JsBlockStatement, JsFunctionBody,
+    JsLabeledStatement, JsScript, JsStatementList, JsSyntaxKind, JsSyntaxNode, JsVariableStatement,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
@@ -151,10 +151,42 @@ fn statement_has_block_level_declaration(
 ) -> bool {
     match statement {
         AnyJsStatement::JsVariableStatement(variable) => is_not_var_declaration(variable),
-        AnyJsStatement::JsFunctionDeclaration(_) => file_source.is_module(),
+        AnyJsStatement::JsFunctionDeclaration(_) => {
+            is_in_strict_mode(statement.syntax(), file_source)
+        }
         AnyJsStatement::JsClassDeclaration(_) => true,
         _ => false,
     }
+}
+
+fn is_in_strict_mode(node: &JsSyntaxNode, file_source: &JsFileSource) -> bool {
+    if file_source.is_module() || file_source.is_typescript() {
+        return true;
+    }
+
+    for ancestor in node.ancestors() {
+        if AnyJsClass::can_cast(ancestor.kind()) {
+            return true;
+        }
+
+        if let Some(function_body) = JsFunctionBody::cast_ref(&ancestor) {
+            for directive in function_body.directives() {
+                if directive.inner_string_text().is_ok_and(|t| t == "use strict") {
+                    return true;
+                }
+            }
+        }
+
+        if let Some(script) = JsScript::cast_ref(&ancestor) {
+            for directive in script.directives() {
+                if directive.inner_string_text().is_ok_and(|t| t == "use strict") {
+                    return true;
+                }
+            }
+        }
+    }
+
+    false
 }
 
 fn in_control_structure(block: &JsBlockStatement) -> bool {

@@ -102,3 +102,25 @@ function withCommentedCode() {
         // return x + y;
     }
 }
+
+// In strict mode (function "use strict" or class body), block-scoped functions make the block non-redundant
+function withStrictDirective() {
+    "use strict";
+    {
+        function strictNestedFn() {}
+    }
+}
+
+class ClassWithBlockScopedFn {
+    method() {
+        {
+            function strictMethodFn() {}
+        }
+    }
+    static {
+        {
+            function strictStaticFn() {}
+        }
+    }
+}
+
