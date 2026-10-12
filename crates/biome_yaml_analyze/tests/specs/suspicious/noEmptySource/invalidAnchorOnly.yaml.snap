@@ -1,0 +1,28 @@
+---
+source: crates/biome_yaml_analyze/tests/spec_tests.rs
+expression: invalidAnchorOnly.yaml
+---
+# Input
+```yaml
+# should generate diagnostics
+--- &config
+
+```
+
+# Diagnostics
+```
+invalidAnchorOnly.yaml:2:1 lint/suspicious/noEmptySource ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty document is not allowed.
+  
+    1 │ # should generate diagnostics
+  > 2 │ --- &config
+      │ ^^^^^^^^^^^
+    3 │ 
+  
+  i Tools that read this file get an empty value for this document, which is rarely intended.
+  
+  i Add content to the document, or remove it.
+  
+
+```

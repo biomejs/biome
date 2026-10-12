@@ -1047,11 +1047,13 @@ CssRoot {
                                                                         r_paren_token: R_PAREN@751..752 ")" [] [],
                                                                     },
                                                                     colon_token: COLON@752..754 ":" [] [Whitespace(" ")],
-                                                                    value: CssGenericComponentValueList [
-                                                                        CssIdentifier {
-                                                                            value_token: IDENT@754..757 "red" [] [],
-                                                                        },
-                                                                    ],
+                                                                    value: ScssExpression {
+                                                                        items: ScssExpressionItemList [
+                                                                            CssIdentifier {
+                                                                                value_token: IDENT@754..757 "red" [] [],
+                                                                            },
+                                                                        ],
+                                                                    },
                                                                 },
                                                                 SEMICOLON@757..759 ";" [] [Whitespace(" ")],
                                                                 CssIfBranch {
@@ -1059,11 +1061,13 @@ CssRoot {
                                                                         else_token: ELSE_KW@759..763 "else" [] [],
                                                                     },
                                                                     colon_token: COLON@763..765 ":" [] [Whitespace(" ")],
-                                                                    value: CssGenericComponentValueList [
-                                                                        CssIdentifier {
-                                                                            value_token: IDENT@765..769 "blue" [] [],
-                                                                        },
-                                                                    ],
+                                                                    value: ScssExpression {
+                                                                        items: ScssExpressionItemList [
+                                                                            CssIdentifier {
+                                                                                value_token: IDENT@765..769 "blue" [] [],
+                                                                            },
+                                                                        ],
+                                                                    },
                                                                 },
                                                             ],
                                                             r_paren_token: R_PAREN@769..770 ")" [] [],
@@ -2543,17 +2547,19 @@ CssRoot {
                                           0: IDENT@747..751 "true" [] []
                                     3: R_PAREN@751..752 ")" [] []
                                   1: COLON@752..754 ":" [] [Whitespace(" ")]
-                                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@754..757
-                                    0: CSS_IDENTIFIER@754..757
-                                      0: IDENT@754..757 "red" [] []
+                                  2: SCSS_EXPRESSION@754..757
+                                    0: SCSS_EXPRESSION_ITEM_LIST@754..757
+                                      0: CSS_IDENTIFIER@754..757
+                                        0: IDENT@754..757 "red" [] []
                                 1: SEMICOLON@757..759 ";" [] [Whitespace(" ")]
                                 2: CSS_IF_BRANCH@759..769
                                   0: CSS_ELSE_KEYWORD@759..763
                                     0: ELSE_KW@759..763 "else" [] []
                                   1: COLON@763..765 ":" [] [Whitespace(" ")]
-                                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@765..769
-                                    0: CSS_IDENTIFIER@765..769
-                                      0: IDENT@765..769 "blue" [] []
+                                  2: SCSS_EXPRESSION@765..769
+                                    0: SCSS_EXPRESSION_ITEM_LIST@765..769
+                                      0: CSS_IDENTIFIER@765..769
+                                        0: IDENT@765..769 "blue" [] []
                               3: R_PAREN@769..770 ")" [] []
                         3: COMMA@770..772 "," [] [Whitespace(" ")]
                         4: SCSS_EXPRESSION@772..776

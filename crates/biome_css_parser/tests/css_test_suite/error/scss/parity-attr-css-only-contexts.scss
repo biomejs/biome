@@ -1,0 +1,5 @@
+$name:data-width;$gap:2px;
+@container card attr($name){.a{color:red}}
+@container card attr(data-size px,$gap*2){.b{height:1px}}
+@container card unknown(attr(data-size px,$gap*2)){.c{color:green}}
+.after{display:block}

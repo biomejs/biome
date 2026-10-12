@@ -199,7 +199,6 @@ impl ServiceLanguage for CssLanguage {
                     })
                 })
                 .unwrap_or_default(),
-            grit_metavariables: false,
             tailwind_directives: language.tailwind_directives.unwrap_or_default().into(),
             report_scss_exclusive_syntax,
         };

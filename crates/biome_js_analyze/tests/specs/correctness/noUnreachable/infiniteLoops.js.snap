@@ -12,6 +12,10 @@ export function doWhileTruthy() { do {} while ("yes"); return 1; }
 export function parenthesized() { while ((true)) {} return 1; }
 export function innerBreak() { while (true) { while (true) { break; } } return 1; }
 export function continued() { do { continue; } while (true); return 1; }
+export function forTrue() { for (; true ;) {} return 1; }
+export function forTrueWithBreak() { for (; true ;) { break; } return 1; }
+export function forNoTest() { for (;;) {} return 1; }
+export function forFalse() { for (; false ;) {} return 1; }
 
 ```
 
@@ -144,7 +148,7 @@ infiniteLoops.js:7:73 lint/correctness/noUnreachable ━━━━━━━━━
   > 7 │ export function innerBreak() { while (true) { while (true) { break; } } return 1; }
       │                                                                         ^^^^^^^^^
     8 │ export function continued() { do { continue; } while (true); return 1; }
-    9 │ 
+    9 │ export function forTrue() { for (; true ;) {} return 1; }
   
   i ... because this statement will stop the flow of the code beforehand
   
@@ -153,7 +157,7 @@ infiniteLoops.js:7:73 lint/correctness/noUnreachable ━━━━━━━━━
   > 7 │ export function innerBreak() { while (true) { while (true) { break; } } return 1; }
       │                                       ^^^^
     8 │ export function continued() { do { continue; } while (true); return 1; }
-    9 │ 
+    9 │ export function forTrue() { for (; true ;) {} return 1; }
   
 
 ```
@@ -163,27 +167,69 @@ infiniteLoops.js:8:62 lint/correctness/noUnreachable ━━━━━━━━━
 
   × This code will never be reached ...
   
-    6 │ export function parenthesized() { while ((true)) {} return 1; }
-    7 │ export function innerBreak() { while (true) { while (true) { break; } } return 1; }
-  > 8 │ export function continued() { do { continue; } while (true); return 1; }
-      │                                                              ^^^^^^^^^
-    9 │ 
+     6 │ export function parenthesized() { while ((true)) {} return 1; }
+     7 │ export function innerBreak() { while (true) { while (true) { break; } } return 1; }
+   > 8 │ export function continued() { do { continue; } while (true); return 1; }
+       │                                                              ^^^^^^^^^
+     9 │ export function forTrue() { for (; true ;) {} return 1; }
+    10 │ export function forTrueWithBreak() { for (; true ;) { break; } return 1; }
   
   i ... because either this statement will continue the loop ...
   
-    6 │ export function parenthesized() { while ((true)) {} return 1; }
-    7 │ export function innerBreak() { while (true) { while (true) { break; } } return 1; }
-  > 8 │ export function continued() { do { continue; } while (true); return 1; }
-      │                                    ^^^^^^^^^
-    9 │ 
+     6 │ export function parenthesized() { while ((true)) {} return 1; }
+     7 │ export function innerBreak() { while (true) { while (true) { break; } } return 1; }
+   > 8 │ export function continued() { do { continue; } while (true); return 1; }
+       │                                    ^^^^^^^^^
+     9 │ export function forTrue() { for (; true ;) {} return 1; }
+    10 │ export function forTrueWithBreak() { for (; true ;) { break; } return 1; }
   
   i ... or this statement will stop the flow of the code beforehand
   
-    6 │ export function parenthesized() { while ((true)) {} return 1; }
-    7 │ export function innerBreak() { while (true) { while (true) { break; } } return 1; }
-  > 8 │ export function continued() { do { continue; } while (true); return 1; }
-      │                                                       ^^^^
-    9 │ 
+     6 │ export function parenthesized() { while ((true)) {} return 1; }
+     7 │ export function innerBreak() { while (true) { while (true) { break; } } return 1; }
+   > 8 │ export function continued() { do { continue; } while (true); return 1; }
+       │                                                       ^^^^
+     9 │ export function forTrue() { for (; true ;) {} return 1; }
+    10 │ export function forTrueWithBreak() { for (; true ;) { break; } return 1; }
+  
+
+```
+
+```
+infiniteLoops.js:9:47 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code will never be reached ...
+  
+     7 │ export function innerBreak() { while (true) { while (true) { break; } } return 1; }
+     8 │ export function continued() { do { continue; } while (true); return 1; }
+   > 9 │ export function forTrue() { for (; true ;) {} return 1; }
+       │                                               ^^^^^^^^^
+    10 │ export function forTrueWithBreak() { for (; true ;) { break; } return 1; }
+    11 │ export function forNoTest() { for (;;) {} return 1; }
+  
+  i ... because this statement will stop the flow of the code beforehand
+  
+     7 │ export function innerBreak() { while (true) { while (true) { break; } } return 1; }
+     8 │ export function continued() { do { continue; } while (true); return 1; }
+   > 9 │ export function forTrue() { for (; true ;) {} return 1; }
+       │                                    ^^^^
+    10 │ export function forTrueWithBreak() { for (; true ;) { break; } return 1; }
+    11 │ export function forNoTest() { for (;;) {} return 1; }
+  
+
+```
+
+```
+infiniteLoops.js:11:43 lint/correctness/noUnreachable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This code is unreachable
+  
+     9 │ export function forTrue() { for (; true ;) {} return 1; }
+    10 │ export function forTrueWithBreak() { for (; true ;) { break; } return 1; }
+  > 11 │ export function forNoTest() { for (;;) {} return 1; }
+       │                                           ^^^^^^^^^
+    12 │ export function forFalse() { for (; false ;) {} return 1; }
+    13 │ 
   
 
 ```

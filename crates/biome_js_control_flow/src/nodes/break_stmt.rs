@@ -47,6 +47,8 @@ impl NodeVisitor for BreakVisitor {
                 {
                     (visitor.label.as_ref(), visitor.break_block)
                 } else {
+                    // A labeled block is only targeted by a labeled `break`
+                    label.as_ref()?;
                     let visitor = state.try_downcast::<BlockVisitor>(*type_id, *index)?;
                     let (label, block) = visitor.break_block.as_ref()?;
                     (Some(label), *block)
@@ -61,8 +63,10 @@ impl NodeVisitor for BreakVisitor {
                         }
                     }
 
-                    (None, None) => Some(block),
-                    _ => None,
+                    // An unlabeled `break` targets the innermost loop or
+                    // `switch`, whether or not it has a label
+                    (_, None) => Some(block),
+                    (None, Some(_)) => None,
                 }
             })
             .ok_or(SyntaxError::MissingRequiredChild)?;

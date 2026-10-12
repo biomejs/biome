@@ -1,0 +1,134 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue12247Invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+let array = [];
+array.sort();
+array.toSorted();
+
+const obj = {
+	arr: [3, 1, 2],
+};
+obj.arr.sort();
+obj.arr.toSorted();
+
+[1, 2, 3, 10, 20, 30].sort();
+[1, 2, 3, 10, 20, 30].toSorted();
+
+```
+
+# Diagnostics
+```
+issue12247Invalid.ts:3:1 lint/suspicious/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare function missing.
+  
+    1 │ /* should generate diagnostics */
+    2 │ let array = [];
+  > 3 │ array.sort();
+      │ ^^^^^^^^^^^^
+    4 │ array.toSorted();
+    5 │ 
+  
+  i When called without a compare function, Array#sort() and Array#toSorted() converts all non-undefined array elements into strings and then compares said strings based off their UTF-16 code units.
+  
+  i Add a compare function to prevent unexpected sorting.
+  
+
+```
+
+```
+issue12247Invalid.ts:4:1 lint/suspicious/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare function missing.
+  
+    2 │ let array = [];
+    3 │ array.sort();
+  > 4 │ array.toSorted();
+      │ ^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ const obj = {
+  
+  i When called without a compare function, Array#sort() and Array#toSorted() converts all non-undefined array elements into strings and then compares said strings based off their UTF-16 code units.
+  
+  i Add a compare function to prevent unexpected sorting.
+  
+
+```
+
+```
+issue12247Invalid.ts:9:1 lint/suspicious/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare function missing.
+  
+     7 │ 	arr: [3, 1, 2],
+     8 │ };
+   > 9 │ obj.arr.sort();
+       │ ^^^^^^^^^^^^^^
+    10 │ obj.arr.toSorted();
+    11 │ 
+  
+  i When called without a compare function, Array#sort() and Array#toSorted() converts all non-undefined array elements into strings and then compares said strings based off their UTF-16 code units.
+  
+  i Add a compare function to prevent unexpected sorting.
+  
+
+```
+
+```
+issue12247Invalid.ts:10:1 lint/suspicious/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare function missing.
+  
+     8 │ };
+     9 │ obj.arr.sort();
+  > 10 │ obj.arr.toSorted();
+       │ ^^^^^^^^^^^^^^^^^^
+    11 │ 
+    12 │ [1, 2, 3, 10, 20, 30].sort();
+  
+  i When called without a compare function, Array#sort() and Array#toSorted() converts all non-undefined array elements into strings and then compares said strings based off their UTF-16 code units.
+  
+  i Add a compare function to prevent unexpected sorting.
+  
+
+```
+
+```
+issue12247Invalid.ts:12:1 lint/suspicious/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare function missing.
+  
+    10 │ obj.arr.toSorted();
+    11 │ 
+  > 12 │ [1, 2, 3, 10, 20, 30].sort();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ [1, 2, 3, 10, 20, 30].toSorted();
+    14 │ 
+  
+  i When called without a compare function, Array#sort() and Array#toSorted() converts all non-undefined array elements into strings and then compares said strings based off their UTF-16 code units.
+  
+  i Add a compare function to prevent unexpected sorting.
+  
+
+```
+
+```
+issue12247Invalid.ts:13:1 lint/suspicious/useArraySortCompare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Compare function missing.
+  
+    12 │ [1, 2, 3, 10, 20, 30].sort();
+  > 13 │ [1, 2, 3, 10, 20, 30].toSorted();
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+  
+  i When called without a compare function, Array#sort() and Array#toSorted() converts all non-undefined array elements into strings and then compares said strings based off their UTF-16 code units.
+  
+  i Add a compare function to prevent unexpected sorting.
+  
+
+```

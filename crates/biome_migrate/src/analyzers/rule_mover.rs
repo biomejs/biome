@@ -55,7 +55,8 @@ const RULE_RENAMING: &[(&str, RuleName)] = &[
     ("noFloatingClasses", RuleName::NoUnusedInstantiation),
     ("noMultiStr", RuleName::NoMultilineString),
     ("useFind", RuleName::UseArrayFind),
-    ("useSpread", RuleName::UseSpreadOverApply)
+    ("useSpread", RuleName::UseSpreadOverApply),
+    ("useSortedClasses", RuleName::UseTailwindSortedClasses)
 ];
 
 /// Assist actions that have been renamed.

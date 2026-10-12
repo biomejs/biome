@@ -82,6 +82,60 @@ fn infer_type_of_regex_with_flags() {
 }
 
 #[test]
+fn infer_type_of_template_literal() {
+    const CODE: &str = r#"`foo`"#;
+
+    let root = parse_ts(CODE);
+    let expr = get_expression(&root);
+    let mut resolver = TestTypeCollector::default();
+    let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+    assert_type_data_snapshot(CODE, &ty, &resolver, "infer_type_of_template_literal");
+}
+
+#[test]
+fn infer_type_of_empty_template_literal() {
+    const CODE: &str = r#"``"#;
+
+    let root = parse_ts(CODE);
+    let expr = get_expression(&root);
+    let mut resolver = TestTypeCollector::default();
+    let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+    assert_type_data_snapshot(CODE, &ty, &resolver, "infer_type_of_empty_template_literal");
+}
+
+#[test]
+fn infer_type_of_template_literal_with_substitution() {
+    const CODE: &str = r#"`foo ${bar}`"#;
+
+    let root = parse_ts(CODE);
+    let expr = get_expression(&root);
+    let mut resolver = TestTypeCollector::default();
+    let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+    assert_type_data_snapshot(
+        CODE,
+        &ty,
+        &resolver,
+        "infer_type_of_template_literal_with_substitution",
+    );
+}
+
+#[test]
+fn infer_type_of_tagged_template_literal() {
+    const CODE: &str = r#"tag`foo`"#;
+
+    let root = parse_ts(CODE);
+    let expr = get_expression(&root);
+    let mut resolver = TestTypeCollector::default();
+    let ty = TypeData::from_any_js_expression(&mut resolver, ScopeId::GLOBAL, &expr);
+    assert_type_data_snapshot(
+        CODE,
+        &ty,
+        &resolver,
+        "infer_type_of_tagged_template_literal",
+    );
+}
+
+#[test]
 fn infer_type_of_typeof_expression() {
     const CODE: &str = r#"typeof foo"#;
 

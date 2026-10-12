@@ -16,14 +16,6 @@ publish              = false
 harness = false
 name    = "js_analyzer"
 
-[[bench]]
-harness = false
-name    = "use_sorted_classes_parser"
-
-[[bench]]
-harness = false
-name    = "use_sorted_classes_v4"
-
 [dependencies]
 biome_analyze             = { workspace = true }
 biome_analyze_macros      = { workspace = true }
@@ -71,6 +63,7 @@ phf                       = { workspace = true }
 regex                     = { workspace = true }
 roaring                   = "0.11.3"
 rustc-hash                = { workspace = true }
+ryu-js                    = { workspace = true }
 schemars                  = { workspace = true, optional = true }
 serde                     = { workspace = true, features = ["derive"] }
 smallvec                  = { workspace = true }

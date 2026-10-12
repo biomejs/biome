@@ -1,3 +1,4 @@
+use crate::html::auxiliary::text_expression::FormatHtmlTextExpressionOptions;
 use crate::prelude::*;
 use biome_formatter::{FormatRuleWithOptions, write};
 use biome_html_syntax::{
@@ -27,7 +28,13 @@ impl FormatNodeRule<HtmlAttributeSingleTextExpression> for FormatHtmlAttributeSi
             let expression = expression.clone()?;
             format_removed(&l_curly_token).fmt(f)?;
             format_removed(&r_curly_token).fmt(f)?;
-            expression.format().with_options(self.compact).fmt(f)
+            expression
+                .format()
+                .with_options(FormatHtmlTextExpressionOptions {
+                    compact: self.compact,
+                    ..Default::default()
+                })
+                .fmt(f)
         } else {
             write!(
                 f,

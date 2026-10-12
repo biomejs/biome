@@ -1,0 +1,36 @@
+---
+source: crates/biome_cli/src/execute/migrate/eslint_to_biome.rs
+expression: numeric_option.jsonc
+---
+## ESLint Config
+
+```json
+{ "rules": { "max-statements": ["error", 20] } }
+
+```
+
+## Biome Config Before Migration
+
+```json
+{}
+
+```
+
+## Biome Config After Migration
+
+```json
+{
+	"linter": {
+		"rules": {
+			"preset": "none",
+			"nursery": {
+				"noExcessiveStatementsPerFunction": {
+					"level": "error",
+					"options": { "max": 20 }
+				}
+			}
+		}
+	}
+}
+
+```

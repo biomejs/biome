@@ -1,3 +1,4 @@
+use crate::TailwindParserOptions;
 use crate::token_source::{TailwindTokenSource, TailwindTokenSourceCheckpoint};
 use biome_parser::diagnostic::{ParseDiagnostic, merge_diagnostics};
 use biome_parser::event::Event;
@@ -16,10 +17,10 @@ pub(crate) struct TailwindParser<'source> {
 }
 
 impl<'source> TailwindParser<'source> {
-    pub fn new(source: &'source str) -> Self {
+    pub fn new(source: &'source str, options: TailwindParserOptions<'source>) -> Self {
         Self {
             context: ParserContext::default(),
-            source: TailwindTokenSource::from_str(source),
+            source: TailwindTokenSource::from_str(source, options),
         }
     }
 

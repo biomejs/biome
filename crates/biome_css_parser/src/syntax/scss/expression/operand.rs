@@ -36,6 +36,11 @@ pub(super) fn parse_scss_expression_operand(
     p: &mut CssParser,
     options: ScssExpressionOptions,
 ) -> ParsedSyntax {
+    // A caller-owned boundary can start with an otherwise valid identifier.
+    if options.boundary.is_some_and(|boundary| boundary(p)) {
+        return Absent;
+    }
+
     if is_at_scss_interpolation(p) {
         return parse_scss_interpolated_function_or_value_until(
             p,

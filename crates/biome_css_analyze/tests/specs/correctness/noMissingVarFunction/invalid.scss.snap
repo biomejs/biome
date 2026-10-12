@@ -1,0 +1,31 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+.themed {
+  --theme-color: red;
+  color: --theme-color;
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:4:10 lint/correctness/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × CSS variables '--theme-color' is used without the 'var()' function
+  
+    2 │ .themed {
+    3 │   --theme-color: red;
+  > 4 │   color: --theme-color;
+      │          ^^^^^^^^^^^^^
+    5 │ }
+    6 │ 
+  
+  i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
+  
+
+```

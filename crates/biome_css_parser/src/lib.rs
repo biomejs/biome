@@ -9,7 +9,7 @@ use biome_css_syntax::{AnyCssRoot, CssLanguage, CssSyntaxNode};
 use biome_languages::CssFileSource;
 pub use biome_parser::prelude::*;
 use biome_parser::{AnyParse, EmbeddedNodeParse, NodeParse};
-use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset, TextSize};
+use biome_rowan::{AstNode, NodeCache, SyntaxNodeWithOffset, TextRange, TextSize};
 pub use parser::{CssModulesKind, CssParserOptions};
 
 mod lexer;
@@ -37,7 +37,29 @@ pub fn parse_css_with_cache(
     cache: &mut NodeCache,
     options: CssParserOptions,
 ) -> CssParse {
-    let mut parser = CssParser::new(source, source_type, options);
+    parse_css_with_metavariables_and_cache(source, source_type, cache, options, &[])
+}
+
+/// Parses the provided string as CSS program, lexing the given source ranges
+/// as Grit metavariables.
+pub fn parse_css_with_metavariables(
+    source: &str,
+    source_type: CssFileSource,
+    options: CssParserOptions,
+    metavariables: &[TextRange],
+) -> CssParse {
+    let mut cache = NodeCache::default();
+    parse_css_with_metavariables_and_cache(source, source_type, &mut cache, options, metavariables)
+}
+
+fn parse_css_with_metavariables_and_cache(
+    source: &str,
+    source_type: CssFileSource,
+    cache: &mut NodeCache,
+    options: CssParserOptions,
+    metavariables: &[TextRange],
+) -> CssParse {
+    let mut parser = CssParser::new_with_metavariables(source, source_type, options, metavariables);
 
     parse_root(&mut parser);
 

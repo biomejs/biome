@@ -26,7 +26,7 @@ use std::sync::Arc;
 
 use biome_analyze::{AnalyzerPlugin, AnalyzerPluginVec};
 use biome_console::markup;
-use biome_fs::{FileSystemDiagnostic, FsErrorKind, ManifestName, normalize_path};
+use biome_fs::{ManifestName, normalize_path};
 use biome_glob::{CandidatePath, NormalizedGlob};
 use biome_manifest::{BiomeManifest, BiomeManifestError, ManifestEntry, ManifestPresets};
 use biome_resolver::{
@@ -91,7 +91,7 @@ impl From<BiomeManifestError> for PluginDiagnostic {
             BiomeManifestError::Invalid(error) => {
                 let (path, source) = error.into_parts();
                 Self::invalid_manifest(
-                    markup!("Cannot load Biome manifest "<Emphasis>{path}</Emphasis>"."),
+                    markup!("The Biome manifest "<Emphasis>{path}</Emphasis>" is invalid."),
                     source,
                 )
             }
@@ -142,9 +142,25 @@ impl BiomePlugin {
             ResolvedPluginKind::Manifest { rules, .. } => rules
                 .into_iter()
                 .map(|rule| {
-                    let plugin = AnalyzerGritPlugin::load(fs.as_ref(), &rule.path, includes)?
-                        .with_name(rule.name);
-                    Ok(Arc::new(Box::new(plugin) as Box<dyn AnalyzerPlugin>))
+                    let plugin: Box<dyn AnalyzerPlugin> = match rule.path.extension() {
+                        Some("grit") => Box::new(
+                            AnalyzerGritPlugin::load(fs.as_ref(), &rule.path, includes)?
+                                .with_name(rule.name),
+                        ),
+                        #[cfg(feature = "js_plugin")]
+                        Some(extension) if is_javascript_plugin_extension(extension) => Box::new(
+                            AnalyzerJsPlugin::load(fs.clone(), &rule.path, includes)?
+                                .with_name(rule.name),
+                        ),
+                        #[cfg(not(feature = "js_plugin"))]
+                        Some(extension) if is_javascript_plugin_extension(extension) => {
+                            return Err(PluginDiagnostic::unsupported_rule_format(markup!(
+                                "Unsupported rule format for plugin rule "<Emphasis>{rule.path.as_str()}</Emphasis>"."
+                            )));
+                        }
+                        _ => unreachable!("manifest rule extensions are validated during resolution"),
+                    };
+                    Ok(Arc::new(plugin))
                 })
                 .collect::<Result<_, PluginDiagnostic>>()?,
         };
@@ -183,7 +199,7 @@ pub fn resolve_plugin(
 
     if plugin_path
         .extension()
-        .is_some_and(|extension| matches!(extension, "js" | "mjs" | "ts" | "mts"))
+        .is_some_and(is_javascript_plugin_extension)
         && !fs.path_is_dir(&plugin_path)
     {
         validate_plugin_file(fs, &plugin_path)?;
@@ -297,24 +313,18 @@ pub fn resolve_plugin(
     })
 }
 
+fn is_javascript_plugin_extension(extension: &str) -> bool {
+    matches!(extension, "js" | "mjs" | "ts" | "mts")
+}
+
 fn validate_plugin_file(
     fs: &dyn FsWithResolverProxy,
     path: &Utf8Path,
 ) -> Result<(), PluginDiagnostic> {
-    fs.path_kind(path)
-        .and_then(|kind| {
-            if kind.is_file() {
-                Ok(())
-            } else {
-                Err(FileSystemDiagnostic {
-                    path: path.to_string(),
-                    severity: biome_diagnostics::Severity::Error,
-                    error_kind: FsErrorKind::CantReadFile,
-                    source: None,
-                })
-            }
-        })
-        .map_err(|source| PluginDiagnostic::cant_read_plugin_file(path.to_path_buf(), source))
+    match fs.path_kind(path) {
+        Ok(kind) if kind.is_file() => Ok(()),
+        _ => Err(PluginDiagnostic::plugin_file_not_found(path)),
+    }
 }
 
 struct ManifestRule {
@@ -584,10 +594,7 @@ fn find_biome_manifest(
             return Ok(manifest_path);
         }
     }
-    Err(PluginDiagnostic::cant_resolve(
-        plugin_path.to_path_buf(),
-        None,
-    ))
+    Err(PluginDiagnostic::missing_manifest(plugin_path))
 }
 
 fn resolve_package_manifest(
@@ -689,7 +696,10 @@ fn resolve_manifest_rule_path(
         rule.to_string()
     };
     let rule_path = Utf8Path::new(&rule);
-    if rule_path.extension() != Some("grit") {
+    if !rule_path
+        .extension()
+        .is_some_and(|extension| extension == "grit" || is_javascript_plugin_extension(extension))
+    {
         return Err(PluginDiagnostic::unsupported_rule_format(markup!(
             "Unsupported rule format for plugin rule "<Emphasis>{rule}</Emphasis>"."
         )));
@@ -798,7 +808,7 @@ mod test {
         let root = Utf8Path::new(std::path::MAIN_SEPARATOR_STR);
         let error = resolve_plugin(&fs, "./missing.grit", Utf8Path::new("/"), None)
             .expect_err("direct plugin files must exist");
-        assert!(matches!(error, PluginDiagnostic::InvalidManifest(_)));
+        assert!(matches!(error, PluginDiagnostic::CantResolve(_)));
         assert!(
             error
                 .to_string()
@@ -824,7 +834,7 @@ mod test {
                 Some(selection),
             )
             .expect_err("selected plugin files must exist");
-            assert!(matches!(error, PluginDiagnostic::InvalidManifest(_)));
+            assert!(matches!(error, PluginDiagnostic::CantResolve(_)));
             assert!(
                 error
                     .to_string()
@@ -1719,6 +1729,19 @@ mod test {
     }
 
     #[test]
+    fn load_plugin_from_missing_package() {
+        let fs = Arc::new(MemoryFileSystem::default()) as Arc<dyn FsWithResolverProxy>;
+        let error = BiomePlugin::load(
+            fs,
+            "missing-package/presets/recommended",
+            Utf8Path::new("/project"),
+            None,
+        )
+        .expect_err("Plugin loading should've failed");
+        snap_diagnostic("load_plugin_from_missing_package", &[], error.into());
+    }
+
+    #[test]
     fn load_plugin_with_wrong_version() {
         let fs = MemoryFileSystem::default();
         let manifest = r#"{
@@ -1746,7 +1769,7 @@ mod test {
         let manifest = r#"{
     "version": 1,
     "plugins": {
-        "rules": [{ "one": "rules/1.js" }],
+        "rules": [{ "one": "rules/1.txt" }],
         "presets": { "recommended": ["one"] }
     }
 }"#;
@@ -1822,7 +1845,7 @@ mod test {
                 None,
             )
             .expect_err("direct JavaScript plugin files must exist");
-            assert!(matches!(error, PluginDiagnostic::InvalidManifest(_)));
+            assert!(matches!(error, PluginDiagnostic::CantResolve(_)));
         }
     }
 

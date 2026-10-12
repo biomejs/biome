@@ -1,0 +1,178 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --only=nursery/useTailwindSortedClasses '<TEMP_DIR>/use_tailwind_sorted_classes_reads_tailwind_stylesheet'
+```
+
+## `biome.json`
+
+```json
+{
+  "tailwind": { "stylesheet": "./src/app.css" },
+  "linter": { "rules": { "nursery": { "useTailwindSortedClasses": "error" } } }
+}
+```
+
+## `src/App.jsx`
+
+```jsx
+export const sorted = <div className="flex bg-brand" />;
+export const theme = <div className="bg-brand flex" />;
+export const utility = <div className="btn-primary flex" />;
+export const variant = <div className="theme-midnight:flex hover:flex flex" />;
+export const breakpoint = <div className="3xl:flex 2xl:flex" />;
+
+```
+
+## `src/app.css`
+
+```css
+@import "tailwindcss";
+@import "./theme.css";
+
+@utility btn-primary {
+    color: white;
+    background-color: blue;
+}
+
+@custom-variant theme-midnight (&:where([data-theme=midnight] *));
+```
+
+## `src/theme.css`
+
+```css
+@theme {
+    --color-brand: #00f;
+    --breakpoint-3xl: 120rem;
+}
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+src/App.jsx:2:37 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × These CSS classes should be sorted.
+  
+    1 │ export const sorted = <div className="flex bg-brand" />;
+  > 2 │ export const theme = <div className="bg-brand flex" />;
+      │                                     ^^^^^^^^^^^^^^^
+    3 │ export const utility = <div className="btn-primary flex" />;
+    4 │ export const variant = <div className="theme-midnight:flex hover:flex flex" />;
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+    1 1 │   export const sorted = <div className="flex bg-brand" />;
+    2   │ - export·const·theme·=·<div·className="bg-brand·flex"·/>;
+      2 │ + export·const·theme·=·<div·className="flex·bg-brand"·/>;
+    3 3 │   export const utility = <div className="btn-primary flex" />;
+    4 4 │   export const variant = <div className="theme-midnight:flex hover:flex flex" />;
+  
+
+```
+
+```block
+src/App.jsx:3:39 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × These CSS classes should be sorted.
+  
+    1 │ export const sorted = <div className="flex bg-brand" />;
+    2 │ export const theme = <div className="bg-brand flex" />;
+  > 3 │ export const utility = <div className="btn-primary flex" />;
+      │                                       ^^^^^^^^^^^^^^^^^^
+    4 │ export const variant = <div className="theme-midnight:flex hover:flex flex" />;
+    5 │ export const breakpoint = <div className="3xl:flex 2xl:flex" />;
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+    1 1 │   export const sorted = <div className="flex bg-brand" />;
+    2 2 │   export const theme = <div className="bg-brand flex" />;
+    3   │ - export·const·utility·=·<div·className="btn-primary·flex"·/>;
+      3 │ + export·const·utility·=·<div·className="flex·btn-primary"·/>;
+    4 4 │   export const variant = <div className="theme-midnight:flex hover:flex flex" />;
+    5 5 │   export const breakpoint = <div className="3xl:flex 2xl:flex" />;
+  
+
+```
+
+```block
+src/App.jsx:4:39 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × These CSS classes should be sorted.
+  
+    2 │ export const theme = <div className="bg-brand flex" />;
+    3 │ export const utility = <div className="btn-primary flex" />;
+  > 4 │ export const variant = <div className="theme-midnight:flex hover:flex flex" />;
+      │                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ export const breakpoint = <div className="3xl:flex 2xl:flex" />;
+    6 │ 
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+    2 2 │   export const theme = <div className="bg-brand flex" />;
+    3 3 │   export const utility = <div className="btn-primary flex" />;
+    4   │ - export·const·variant·=·<div·className="theme-midnight:flex·hover:flex·flex"·/>;
+      4 │ + export·const·variant·=·<div·className="flex·hover:flex·theme-midnight:flex"·/>;
+    5 5 │   export const breakpoint = <div className="3xl:flex 2xl:flex" />;
+    6 6 │   
+  
+
+```
+
+```block
+src/App.jsx:5:42 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × These CSS classes should be sorted.
+  
+    3 │ export const utility = <div className="btn-primary flex" />;
+    4 │ export const variant = <div className="theme-midnight:flex hover:flex flex" />;
+  > 5 │ export const breakpoint = <div className="3xl:flex 2xl:flex" />;
+      │                                          ^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+    3 3 │   export const utility = <div className="btn-primary flex" />;
+    4 4 │   export const variant = <div className="theme-midnight:flex hover:flex flex" />;
+    5   │ - export·const·breakpoint·=·<div·className="3xl:flex·2xl:flex"·/>;
+      5 │ + export·const·breakpoint·=·<div·className="2xl:flex·3xl:flex"·/>;
+    6 6 │   
+  
+
+```
+
+```block
+Checked 4 files in <TIME>. No fixes applied.
+Found 4 errors.
+```

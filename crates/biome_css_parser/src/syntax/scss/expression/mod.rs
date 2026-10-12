@@ -8,6 +8,7 @@ mod regular_expression_operand;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::{Parser, TokenSet, token_set};
 
+use crate::parser::CssParser;
 use crate::syntax::FunctionCallContext;
 
 use super::is_at_scss_variable_modifier;
@@ -22,7 +23,7 @@ pub(crate) use list::{
     parse_required_scss_value_until, parse_scss_expression, parse_scss_expression_from_head,
     parse_scss_expression_in_args_until, parse_scss_expression_in_variable_value_until,
     parse_scss_expression_until, parse_scss_inner_expression_in_string_until,
-    parse_scss_optional_value_until,
+    parse_scss_optional_value_until, parse_scss_optional_value_until_with_boundary,
 };
 pub(crate) use precedence::{
     SCSS_UNARY_OPERATOR_TOKEN_SET, is_at_scss_binary_operator, is_at_scss_unary_operator,
@@ -37,6 +38,7 @@ pub(crate) use precedence::{
 pub(super) struct ScssExpressionOptions {
     function_call_context: FunctionCallContext,
     end_ts: TokenSet<CssSyntaxKind>,
+    boundary: Option<fn(&mut CssParser) -> bool>,
     allows_empty_value: bool,
     allows_keyword_arguments: bool,
     allows_ellipsis: bool,
@@ -49,6 +51,7 @@ impl ScssExpressionOptions {
         Self {
             function_call_context: FunctionCallContext::SourceTight,
             end_ts,
+            boundary: None,
             allows_empty_value: false,
             allows_keyword_arguments: false,
             allows_ellipsis: false,
@@ -61,6 +64,7 @@ impl ScssExpressionOptions {
         Self {
             function_call_context: FunctionCallContext::SourceTight,
             end_ts,
+            boundary: None,
             allows_empty_value: true,
             allows_keyword_arguments: false,
             allows_ellipsis: false,
@@ -73,6 +77,7 @@ impl ScssExpressionOptions {
         Self {
             function_call_context: FunctionCallContext::SourceTight,
             end_ts,
+            boundary: None,
             allows_empty_value: false,
             allows_keyword_arguments: true,
             allows_ellipsis: true,
@@ -85,6 +90,7 @@ impl ScssExpressionOptions {
         Self {
             function_call_context: FunctionCallContext::SourceTight,
             end_ts,
+            boundary: None,
             allows_empty_value: false,
             allows_keyword_arguments: false,
             allows_ellipsis: false,
@@ -101,12 +107,30 @@ impl ScssExpressionOptions {
         }
     }
 
-    /// Changes only the delimiter set for a nested expression.
+    /// Adds a caller-owned boundary for the outer expression.
+    pub(super) fn with_boundary(mut self, boundary: fn(&mut CssParser) -> bool) -> Self {
+        self.boundary = Some(boundary);
+        self
+    }
+
+    /// Changes the delimiter set for a nested expression and clears the outer boundary.
     ///
     /// A parenthesized list item stops at `)`, but keeps the parent expression
     /// context so `@include foo(a (...))` remains strict inside nested values.
-    pub(super) fn with_end_ts(self, end_ts: TokenSet<CssSyntaxKind>) -> Self {
-        Self { end_ts, ..self }
+    /// Caller-owned semicolons and closing braces remain recovery boundaries
+    /// when a nested closing parenthesis is missing.
+    pub(super) fn with_end_ts(self, mut end_ts: TokenSet<CssSyntaxKind>) -> Self {
+        for boundary in [T![;], T!['}']] {
+            if self.end_ts.contains(boundary) {
+                end_ts = end_ts.union(TokenSet::singleton(boundary));
+            }
+        }
+
+        Self {
+            end_ts,
+            boundary: None,
+            ..self
+        }
     }
 
     /// Changes the delimiter set and requires expression content.
@@ -115,13 +139,11 @@ impl ScssExpressionOptions {
     /// when the outer declaration value may be empty.
     pub(super) fn with_required_end_ts(self, end_ts: TokenSet<CssSyntaxKind>) -> Self {
         Self {
-            function_call_context: self.function_call_context,
-            end_ts,
             allows_empty_value: false,
             allows_keyword_arguments: false,
             allows_ellipsis: false,
             stops_before_variable_modifiers: false,
-            stops_at_string_quote: self.stops_at_string_quote,
+            ..self.with_end_ts(end_ts)
         }
     }
 
@@ -150,5 +172,6 @@ pub(super) fn is_at_scss_expression_end(
 ) -> bool {
     p.at_ts(options.end_ts)
         || p.at(T![')'])
+        || options.boundary.is_some_and(|boundary| boundary(p))
         || (options.stops_before_variable_modifiers && is_at_scss_variable_modifier(p))
 }

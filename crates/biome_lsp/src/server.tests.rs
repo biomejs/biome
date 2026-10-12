@@ -4478,6 +4478,206 @@ export function bar() {
 }
 
 #[tokio::test]
+async fn watcher_updates_tailwind_stylesheet() -> Result<()> {
+    const THEME_WITH_BRAND: &str = "@theme {\n    --color-brand: #00f;\n}\n";
+    const THEME_WITHOUT_BRAND: &str = "@theme {\n}\n";
+
+    // ARRANGE: `bg-brand` is only known through the theme that `app.css`
+    // imports, so the class list is only unsorted while the theme defines it.
+    let mut fs = TemporaryFs::new("watcher_updates_tailwind_stylesheet");
+    fs.create_file(
+        "app.css",
+        "@import \"tailwindcss\";\n@import \"./theme.css\";\n",
+    );
+    fs.create_file("theme.css", THEME_WITH_BRAND);
+    fs.create_file(
+        "App.jsx",
+        "export const a = <div className=\"bg-brand flex\" />;\n",
+    );
+
+    let (watcher, instruction_channel) = Watcher::new(WatcherOptions::default())?;
+    let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
+    let workspace = factory.workspace();
+    let db_state = factory.db_state();
+    spawn_blocking(move || {
+        workspace.start_watcher(&db_state, watcher);
+    });
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+    server.initialize().await?;
+
+    let OpenProjectResult { project_key } = server
+        .request(
+            "biome/open_project",
+            "open_project",
+            OpenProjectParams {
+                path: fs.working_directory.clone().into(),
+                open_uninitialized: true,
+            },
+        )
+        .await?
+        .expect("open_project returned an error");
+
+    // These tests don't load `biome.json`, so the settings are sent directly.
+    let _: biome_service::workspace::UpdateSettingsResult = server
+        .request(
+            "biome/update_settings",
+            "update_settings",
+            biome_service::workspace::UpdateSettingsParams {
+                project_key,
+                configuration: Configuration {
+                    tailwind: Some(biome_configuration::TailwindConfiguration {
+                        stylesheet: Some("./app.css".into()),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+                workspace_directory: Some(fs.working_directory.clone().into()),
+                extended_configurations: Vec::new(),
+                module_graph_resolution_kind: Default::default(),
+            },
+        )
+        .await?
+        .expect("update_settings returned an error");
+
+    let result: ScanProjectResult = server
+        .request(
+            "biome/scan_project",
+            "scan_project",
+            ScanProjectParams {
+                project_key,
+                watch: true,
+                force: false,
+                scan_kind: ScanKind::Project,
+                verbose: false,
+            },
+        )
+        .await?
+        .expect("scan_project returned an error");
+    assert_eq!(result.diagnostics.len(), 0);
+
+    let _: OpenFileResult = server
+        .request(
+            "biome/open_file",
+            "open_file",
+            OpenFileParams {
+                project_key,
+                path: fs.working_directory.join("App.jsx").into(),
+                content: FileContent::FromServer,
+                document_file_source: None,
+                persist_node_cache: false,
+                inline_config: None,
+                editor_features: None,
+            },
+        )
+        .await?
+        .expect("open_file returned an error");
+
+    // ACT: Pull diagnostics.
+    let result: PullDiagnosticsResult = server
+        .request(
+            "biome/pull_diagnostics",
+            "pull_diagnostics",
+            PullDiagnosticsParams {
+                project_key,
+                path: fs.working_directory.join("App.jsx").into(),
+                categories: RuleCategories::all(),
+                only: Vec::new(),
+                skip: Vec::new(),
+                enabled_rules: vec![
+                    RuleSelector::Rule("nursery", "useTailwindSortedClasses").into(),
+                ],
+                include_code_fix: false,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
+            },
+        )
+        .await?
+        .expect("pull_diagnostics returned an error");
+
+    // ASSERT: `bg-brand` is a known color, so it sorts after `flex`.
+    assert_eq!(result.diagnostics.len(), 1);
+    assert_eq!(
+        PrintDescription(&result.diagnostics[0]).to_string(),
+        "These CSS classes should be sorted."
+    );
+
+    // ARRANGE: Remove `--color-brand` from the imported theme.
+    clear_notifications!(factory.service_rx);
+    fs.create_file("theme.css", THEME_WITHOUT_BRAND);
+    await_notification!(factory.service_rx);
+
+    // ACT: Pull diagnostics.
+    let result: PullDiagnosticsResult = server
+        .request(
+            "biome/pull_diagnostics",
+            "pull_diagnostics",
+            PullDiagnosticsParams {
+                project_key,
+                path: fs.working_directory.join("App.jsx").into(),
+                categories: RuleCategories::all(),
+                only: Vec::new(),
+                skip: Vec::new(),
+                enabled_rules: vec![
+                    RuleSelector::Rule("nursery", "useTailwindSortedClasses").into(),
+                ],
+                include_code_fix: false,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
+            },
+        )
+        .await?
+        .expect("pull_diagnostics returned an error");
+
+    // ASSERT: `bg-brand` is unknown now, so it keeps its place in front.
+    assert_eq!(result.diagnostics.len(), 0);
+
+    // ARRANGE: Restore `--color-brand`.
+    clear_notifications!(factory.service_rx);
+    fs.create_file("theme.css", THEME_WITH_BRAND);
+    await_notification!(factory.service_rx);
+
+    // ACT: Pull diagnostics.
+    let result: PullDiagnosticsResult = server
+        .request(
+            "biome/pull_diagnostics",
+            "pull_diagnostics",
+            PullDiagnosticsParams {
+                project_key,
+                path: fs.working_directory.join("App.jsx").into(),
+                categories: RuleCategories::all(),
+                only: Vec::new(),
+                skip: Vec::new(),
+                enabled_rules: vec![
+                    RuleSelector::Rule("nursery", "useTailwindSortedClasses").into(),
+                ],
+                include_code_fix: false,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: biome_diagnostics::Severity::Hint,
+                enforce_assist: false,
+            },
+        )
+        .await?
+        .expect("pull_diagnostics returned an error");
+
+    // ASSERT: The diagnostic is expected to reappear.
+    assert_eq!(result.diagnostics.len(), 1);
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 #[ignore]
 async fn watcher_updates_module_graph_with_directories() -> Result<()> {
     const FOO_CONTENT: &str = r#"import { bar } from "./utils/bar.ts";

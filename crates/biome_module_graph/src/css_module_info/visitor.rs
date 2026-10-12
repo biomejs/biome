@@ -1,6 +1,11 @@
-use crate::css_module_info::{CssImport, CssImports, CssModuleInfo};
+use crate::css_module_info::{
+    CssImport, CssImports, CssModuleInfo, TailwindImport, TailwindStylesheet,
+};
 use biome_css_syntax::selector_ext::AnyCssPseudoClassFunctionSelector;
-use biome_css_syntax::{AnyCssImportUrl, AnyCssRoot, CssClassSelector};
+use biome_css_syntax::{
+    AnyCssImportUrl, AnyCssRoot, CssClassSelector, CssImportAtRule, TwCustomVariantAtRule,
+    TwThemeAtRule, TwUtilityAtRule,
+};
 use biome_rowan::{AstNode, Text, TextRange, TokenText, WalkEvent};
 use indexmap::IndexMap;
 
@@ -16,6 +21,8 @@ impl CssModuleVisitor {
     pub(crate) fn visit(mut self) -> CssModuleInfo {
         let mut imports = CssImports::default();
         let mut classes: IndexMap<TextRange, TokenText> = IndexMap::default();
+        let mut tailwind = TailwindStylesheet::default();
+        let mut tailwind_imports = Vec::new();
         // Tracks nesting depth inside `:global(...)` pseudo-class selectors.
         // Class selectors inside `:global()` are globally scoped and cannot be
         // statically traced to specific `class="..."` references, so we skip them.
@@ -27,6 +34,26 @@ impl CssModuleVisitor {
                 WalkEvent::Enter(node) => {
                     if let Some(node) = AnyCssImportUrl::cast(node.clone()) {
                         self.visit_any_css_import_url(node, &mut imports);
+                    } else if let Some(import) = CssImportAtRule::cast_ref(&node) {
+                        // Tailwind CSS inlines `@import "./theme.css"`, but not
+                        // `@import url("./theme.css")`.
+                        if let Ok(AnyCssImportUrl::CssString(url)) = import.url()
+                            && let Ok(specifier) = url.inner_string_text()
+                        {
+                            tailwind_imports.push(TailwindImport {
+                                import: CssImport {
+                                    range: url.range(),
+                                    specifier: specifier.into(),
+                                },
+                                position: tailwind.end(),
+                            });
+                        }
+                    } else if let Some(theme) = TwThemeAtRule::cast_ref(&node) {
+                        tailwind.visit_theme(&theme);
+                    } else if let Some(utility) = TwUtilityAtRule::cast_ref(&node) {
+                        tailwind.visit_utility(&utility);
+                    } else if let Some(variant) = TwCustomVariantAtRule::cast_ref(&node) {
+                        tailwind.visit_custom_variant(&variant);
                     } else if let Some(pseudo_fn) =
                         AnyCssPseudoClassFunctionSelector::cast(node.clone())
                     {
@@ -49,7 +76,12 @@ impl CssModuleVisitor {
             }
         }
 
-        CssModuleInfo::new(imports, classes)
+        CssModuleInfo::new(
+            imports,
+            classes,
+            tailwind,
+            tailwind_imports.into_boxed_slice(),
+        )
     }
 
     /// Extracts the class name from a `CssClassSelector` and inserts the

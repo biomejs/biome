@@ -1,0 +1,74 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+const a = Foo<string>();
+const b = new foo<string>();
+const c = obj!.Foo();
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:11 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function name starts with an uppercase letter, but it's called without new.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const a = Foo<string>();
+      │           ^^^
+    3 │ const b = new foo<string>();
+    4 │ const c = obj!.Foo();
+  
+  i By convention, names starting with an uppercase letter are reserved for constructors, which usually must be called with new.
+  
+  i Add new if this is a constructor, or rename the function so that it starts with a lowercase letter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:15 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This constructor name starts with a lowercase letter.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const a = Foo<string>();
+  > 3 │ const b = new foo<string>();
+      │               ^^^
+    4 │ const c = obj!.Foo();
+    5 │ 
+  
+  i By convention, only constructors start with an uppercase letter, so a lowercase name suggests a regular function that isn't meant to be called with new.
+  
+  i Rename the constructor so that it starts with an uppercase letter, or remove new if this is a regular function.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:16 lint/nursery/useCapitalizedConstructors ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This function name starts with an uppercase letter, but it's called without new.
+  
+    2 │ const a = Foo<string>();
+    3 │ const b = new foo<string>();
+  > 4 │ const c = obj!.Foo();
+      │                ^^^
+    5 │ 
+  
+  i By convention, names starting with an uppercase letter are reserved for constructors, which usually must be called with new.
+  
+  i Add new if this is a constructor, or rename the function so that it starts with a lowercase letter.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

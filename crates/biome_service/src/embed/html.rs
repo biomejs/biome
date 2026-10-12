@@ -84,6 +84,9 @@ pub(crate) enum EmbedCandidate {
 #[derive(Debug, Default)]
 pub(crate) enum EmbedBlockKind {
     Svelte(SvelteBlockKind),
+    /// A Svelte mustache whose value is rendered as text.
+    /// See [HtmlTextExpression::is_svelte_text_interpolation](biome_html_syntax::HtmlTextExpression::is_svelte_text_interpolation).
+    SvelteTextInterpolation,
     #[default]
     Neutral,
 }

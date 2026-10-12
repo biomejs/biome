@@ -1,14 +1,15 @@
 use biome_css_syntax::{
-    AnyCssRoot, AnyCssSelector, CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector,
+    AnyCssRoot, CssComplexSelector, CssComposesPropertyValue, CssCompoundSelector,
     CssContainerAtRule, CssCustomPropertyValue, CssDashedIdentifier, CssDeclaration,
     CssGenericComponentValueList, CssIdentifier, CssLegacyFilterValue, CssMediaAtRule,
     CssNestedQualifiedRule, CssQualifiedRule, CssScopeAtRule, CssStartingStyleAtRule,
-    CssSupportsAtRule, CssSyntaxKind, CssSyntaxNode, CssSyntaxToken, ScssExpression,
-    ScssPartialCombinatorSelector, decode_css_identifier, property_syntax::PropertySyntaxResult,
+    CssSupportsAtRule, CssSyntaxKind, CssSyntaxNode, CssSyntaxToken, ScssAtRootAtRule,
+    ScssExpression, ScssPartialCombinatorSelector, decode_css_identifier,
+    property_syntax::PropertySyntaxResult,
 };
 use biome_rowan::{
-    AstNode, AstNodeList, AstPtr, Direction, SendNode, SyntaxKind, SyntaxResult, TextRange,
-    TextSize, TokenText, declare_node_union,
+    AstNode, AstPtr, Direction, SendNode, SyntaxKind, SyntaxResult, TextRange, TextSize, TokenText,
+    declare_node_union,
 };
 use biome_string_case::StrOnlyExtension;
 use rustc_hash::FxHashMap;
@@ -116,7 +117,7 @@ impl SemanticModel {
         Some(Rule::new(self.data.clone(), rule))
     }
 
-    fn all_rules(&self) -> Vec<Rule> {
+    pub(crate) fn all_rules(&self) -> Vec<Rule> {
         self.data
             .all_rules
             .iter()
@@ -348,7 +349,7 @@ impl Rule {
 }
 
 declare_node_union! {
-    pub AnyRuleStart = CssQualifiedRule | CssNestedQualifiedRule | CssContainerAtRule | CssMediaAtRule | CssScopeAtRule | CssStartingStyleAtRule | CssSupportsAtRule
+    pub AnyRuleStart = CssQualifiedRule | CssNestedQualifiedRule | CssContainerAtRule | CssMediaAtRule | CssScopeAtRule | CssStartingStyleAtRule | CssSupportsAtRule | ScssAtRootAtRule
 }
 
 impl AnyRuleStart {
@@ -361,39 +362,13 @@ impl AnyRuleStart {
             Self::CssScopeAtRule(node) => node.syntax().text_trimmed_range(),
             Self::CssStartingStyleAtRule(node) => node.syntax().text_trimmed_range(),
             Self::CssSupportsAtRule(node) => node.syntax().text_trimmed_range(),
+            Self::ScssAtRootAtRule(node) => node.syntax().text_trimmed_range(),
         }
     }
 }
 
 declare_node_union! {
     pub AnyCssSelectorLike = CssCompoundSelector | CssComplexSelector | ScssPartialCombinatorSelector
-}
-
-impl AnyCssSelectorLike {
-    pub fn has_nesting_selectors(&self) -> bool {
-        self.nesting_level() > 0
-    }
-
-    pub fn nesting_level(&self) -> usize {
-        match self {
-            Self::CssCompoundSelector(node) => node.nesting_selectors().len(),
-            Self::CssComplexSelector(node) => node.nesting_level(),
-            Self::ScssPartialCombinatorSelector(node) => {
-                node.left().as_ref().map_or(0, selector_nesting_level)
-            }
-        }
-    }
-}
-
-fn selector_nesting_level(selector: &AnyCssSelector) -> usize {
-    match selector {
-        AnyCssSelector::CssCompoundSelector(node) => node.nesting_selectors().len(),
-        AnyCssSelector::CssComplexSelector(node) => node.nesting_level(),
-        AnyCssSelector::ScssPartialCombinatorSelector(node) => {
-            node.left().as_ref().map_or(0, selector_nesting_level)
-        }
-        AnyCssSelector::CssBogusSelector(_) | AnyCssSelector::CssMetavariable(_) => 0,
-    }
 }
 
 /// A resolved CSS selector represented as an ordered sequence of `(kind, text)` pairs.
@@ -1059,6 +1034,8 @@ pub(crate) struct CssPropertyAtRuleData {
     pub(crate) syntax: PropertySyntaxResult,
     /// The `inherits` descriptor when its value is `true` or `false`.
     pub(crate) inherits: Option<bool>,
+    /// Whether SCSS evaluation is required to determine the `inherits` descriptor.
+    pub(crate) inherits_requires_evaluation: bool,
     /// The `initial-value` descriptor when a value node is present.
     pub(crate) initial_value: Option<CssPropertyInitialValueKind>,
     /// The absolute source range of the complete rule.
@@ -1080,26 +1057,32 @@ impl CssGlobalCustomVariableData {
 impl CssPropertyAtRuleData {
     /// Returns whether the rule's descriptors form a registration candidate.
     pub(crate) fn is_registration_candidate(&self, root: &AnyCssRoot) -> bool {
-        let Some(syntax) = self.syntax.as_valid() else {
-            return false;
-        };
-        if self.inherits.is_none() {
+        if self.inherits.is_none() && !self.inherits_requires_evaluation {
             return false;
         }
+        let syntax = match &self.syntax {
+            PropertySyntaxResult::Dynamic => return true,
+            PropertySyntaxResult::Value(syntax) => syntax,
+            PropertySyntaxResult::Missing | PropertySyntaxResult::Error(_) => return false,
+        };
         if syntax.is_universal() {
             return true;
         }
-        let Some(CssPropertyInitialValueKind::GenericComponent(initial_value)) =
-            &self.initial_value
-        else {
-            return false;
-        };
-        syntax.matches_initial_value(&initial_value.to_node(root.syntax()))
+        match &self.initial_value {
+            Some(CssPropertyInitialValueKind::GenericComponent(initial_value)) => {
+                syntax.matches_initial_value(&initial_value.to_node(root.syntax()))
+            }
+            Some(CssPropertyInitialValueKind::ScssExpression(initial_value)) => syntax
+                .matches_scss_initial_value(&initial_value.to_node(root.syntax()))
+                .unwrap_or(true),
+            _ => false,
+        }
     }
 
     fn semantic_eq(&self, other: &Self, self_root: &AnyCssRoot, other_root: &AnyCssRoot) -> bool {
         self.name == other.name
             && self.inherits == other.inherits
+            && self.inherits_requires_evaluation == other.inherits_requires_evaluation
             && match (&self.initial_value, &other.initial_value) {
                 (Some(this), Some(other)) => this.semantic_eq(other, self_root, other_root),
                 (None, None) => true,

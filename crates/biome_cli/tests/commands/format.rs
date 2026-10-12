@@ -7,7 +7,6 @@ use crate::snap_test::{SnapshotPayload, assert_file_contents, markup_to_string};
 use crate::{
     CUSTOM_FORMAT_BEFORE, FORMATTED, LINT_ERROR, UNFORMATTED, assert_cli_snapshot, run_cli,
 };
-use biome_cli::CliDiagnostic;
 use biome_console::{BufferConsole, MarkupBuf, markup};
 use biome_fs::{FileSystemExt, MemoryFileSystem};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -4109,20 +4108,30 @@ fn harness_scss_format() {
     let mut console = BufferConsole::default();
 
     let file_path = Utf8Path::new("format.scss");
-    fs.insert(file_path.into(), "$fff".as_bytes());
-
-    let (_, result) = run_cli(
-        fs,
-        &mut console,
-        Args::from(["format", file_path.as_str()].as_slice()),
+    fs.insert(
+        file_path.into(),
+        "$color:red;.element{color:$color}".as_bytes(),
     );
 
-    let result = result.expect_err("This test will fail once SCSS support is officially added");
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["format", "--write", file_path.as_str()].as_slice()),
+    );
 
-    assert!(
-        matches!(result, CliDiagnostic::NoFilesWereProcessed(_)),
-        "Found: {result:?}"
-    )
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_file_contents(
+        &fs,
+        file_path,
+        "$color: red;\n.element {\n\tcolor: $color;\n}\n",
+    );
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "scss_format",
+        fs,
+        console,
+        result,
+    ));
 }
 
 #[test]
@@ -4130,18 +4139,24 @@ fn harness_scss_lint() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let file_path = Utf8Path::new("format.scss");
-    fs.insert(file_path.into(), "$fff".as_bytes());
+    let file_path = Utf8Path::new("lint.scss");
+    fs.insert(
+        file_path.into(),
+        "$color: red;\n.element { transform: unknown(1); color: $color; }".as_bytes(),
+    );
 
-    let (_, result) = run_cli(
+    let (fs, result) = run_cli(
         fs,
         &mut console,
         Args::from(["lint", file_path.as_str()].as_slice()),
     );
-    let result = result.expect_err("This test will fail once SCSS support is officially added");
 
-    assert!(
-        matches!(result, CliDiagnostic::NoFilesWereProcessed(_)),
-        "Found: {result:?}"
-    )
+    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "scss_lint",
+        fs,
+        console,
+        result,
+    ));
 }

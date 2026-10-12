@@ -1,0 +1,7 @@
+/* should not generate diagnostics */
+@keyframes fade {
+  $opacity: 1;
+  to {
+    opacity: $opacity;
+  }
+}

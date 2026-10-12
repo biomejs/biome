@@ -1,0 +1,53 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-with-defaults-inline.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+const props = withDefaults(
+  defineProps<{
+    name: string;
+    age?: number;
+  }>(),
+  {
+    name: "World",
+  },
+);
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-with-defaults-inline.vue:5:5 lint/nursery/noVueRequiredPropWithDefault  FIXABLE  ━━━━━━━━━━━
+
+  ! The prop name is required, but it also has a default value.
+  
+    3 │ const props = withDefaults(
+    4 │   defineProps<{
+  > 5 │     name: string;
+      │     ^^^^^^^^^^^^^
+    6 │     age?: number;
+    7 │   }>(),
+  
+  i The default value is declared here.
+  
+     7 │   }>(),
+     8 │   {
+   > 9 │     name: "World",
+       │     ^^^^^^^^^^^^^
+    10 │   },
+    11 │ );
+  
+  i Parent components are expected to always pass a required prop, so its default value should never be needed.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Make the prop optional.
+  
+    4 │ ····name?:·string;
+      │         +         
+
+```

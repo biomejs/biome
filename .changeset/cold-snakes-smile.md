@@ -2,4 +2,4 @@
 "@biomejs/biome": minor
 ---
 
-Added support for [`useSortedClasses`](https://biomejs.dev/linter/rules/use-sorted-classes/) rule in HTML-ish files.
+Added support for [`useTailwindSortedClasses`](https://biomejs.dev/linter/rules/use-tailwind-sorted-classes/) rule in HTML-ish files.

@@ -151,7 +151,6 @@ biome.json:5:17 deserialize ━━━━━━━━━━━━━━━━━�
   - useReactFunctionComponents
   - useReadonlyClassProperties
   - useReduceTypeParameter
-  - useScopedStyles
   - useSelfClosingElements
   - useShorthandAssign
   - useShorthandFunctionType

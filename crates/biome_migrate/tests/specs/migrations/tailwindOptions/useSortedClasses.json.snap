@@ -1,0 +1,61 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: useSortedClasses.json
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useSortedClasses": {
+          "level": "warn",
+          "options": {
+            "attributes": ["classList"],
+            "functions": ["clsx", "cva", "tw", "tw.*"]
+          }
+        }
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+useSortedClasses.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The attributes and functions options of this rule moved to the top-level tailwind configuration.
+  
+    3 │     "rules": {
+    4 │       "nursery": {
+  > 5 │         "useSortedClasses": {
+      │         ^^^^^^^^^^^^^^^^^^
+    6 │           "level": "warn",
+    7 │           "options": {
+  
+  i Safe fix: Move the options to the tailwind configuration.
+  
+     4  4 │         "nursery": {
+     5  5 │           "useSortedClasses": {
+     6    │ - ··········"level":·"warn",
+     7    │ - ··········"options":·{
+     8    │ - ············"attributes":·["classList"],
+     9    │ - ············"functions":·["clsx",·"cva",·"tw",·"tw.*"]
+    10    │ - ··········}
+    11    │ - ········}
+    12    │ - ······}
+    13    │ - ····}
+    14    │ - ··}
+        6 │ + ··········"level":·"warn"
+        7 │ + ········}
+        8 │ + ······}
+        9 │ + ····}
+       10 │ + ··},
+       11 │ + ··"tailwind":·{·"attributes":·["class",·"className",·"classList"],·"mergeFunctions":·["clsx",·"tw"],·"variantFunctions":·["cva"]·}
+    15 12 │   }
+    16 13 │   
+  
+
+```

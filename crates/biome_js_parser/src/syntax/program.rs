@@ -185,18 +185,14 @@ fn parse_vue_event_handler(p: &mut JsParser, m: Marker) -> CompletedMarker {
     let checkpoint = p.checkpoint();
     let expr_marker = p.start();
     let expr_result = parse_expression(p, ExpressionContext::default());
-    let has_expression = !expr_result.is_absent();
 
-    if !has_expression {
-        p.error(js_parse_error::template_expression_expected_expression(
-            p,
-            p.cur_range(),
-        ));
-        expr_marker.complete(p, JS_BOGUS_EXPRESSION);
-        return m.complete(p, JS_EXPRESSION_TEMPLATE_ROOT);
-    }
+    // A handler can also start with a statement, such as `if (ok) save()`.
+    let ParsedSyntax::Present(expression) = expr_result else {
+        expr_marker.abandon(p);
+        p.rewind(checkpoint);
+        return parse_vue_event_handler_statements(p, m);
+    };
 
-    let expression = expr_result.unwrap();
     let expression_kind = expression.kind(p);
 
     if p.at(EOF) && VUE_EXPRESSION_HANDLER_SET.contains(expression_kind) {
@@ -220,6 +216,10 @@ fn parse_vue_event_handler(p: &mut JsParser, m: Marker) -> CompletedMarker {
 
     expr_marker.abandon(p);
     p.rewind(checkpoint);
+    parse_vue_event_handler_statements(p, m)
+}
+
+fn parse_vue_event_handler_statements(p: &mut JsParser, m: Marker) -> CompletedMarker {
     let (statement_list, strict_snapshot) = parse_directives(p);
     parse_statements(p, false, statement_list);
 

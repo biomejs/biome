@@ -1,0 +1,21 @@
+---
+source: crates/biome_plugin_loader/src/lib.rs
+expression: content
+---
+# Plugin
+
+No plugin source was loaded.
+
+# Input
+
+No input was analyzed.
+
+# Diagnostics
+
+```block
+plugin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Biome couldn't find the plugin package missing-package.
+  
+  i Make sure the package is installed. Biome looks for it in the node_modules directory of /project and of each parent directory.
+```

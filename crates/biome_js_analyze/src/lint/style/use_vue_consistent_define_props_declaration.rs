@@ -1,15 +1,18 @@
 use std::ops::Not;
 
 use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_js_syntax::JsCallExpression;
 use biome_languages::JsFileSource;
-use biome_rowan::{AstNode, TokenText};
+use biome_rowan::AstNode;
 use biome_rule_options::use_vue_consistent_define_props_declaration::{
     DeclarationStyle, UseVueConsistentDefinePropsDeclarationOptions,
 };
+
+use crate::frameworks::vue::vue_call::is_vue_compiler_macro_call;
+use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
     /// Enforce a consistent declaration style for Vue's `defineProps` macro.
@@ -81,7 +84,7 @@ declare_lint_rule! {
 }
 
 impl Rule for UseVueConsistentDefinePropsDeclaration {
-    type Query = Ast<JsCallExpression>;
+    type Query = Semantic<JsCallExpression>;
     type State = DeclarationError;
     type Signals = Option<Self::State>;
     type Options = UseVueConsistentDefinePropsDeclarationOptions;
@@ -97,9 +100,7 @@ impl Rule for UseVueConsistentDefinePropsDeclaration {
         }
 
         let node = ctx.query();
-        if let Some(callee_name) = get_callee_name(node)
-            && callee_name != "defineProps"
-        {
+        if !is_vue_compiler_macro_call(node, ctx.model(), "defineProps") {
             return None;
         }
 
@@ -154,12 +155,6 @@ impl Rule for UseVueConsistentDefinePropsDeclaration {
 pub enum DeclarationError {
     WrongStyle,
     InvalidDeclaration,
-}
-
-fn get_callee_name(expr: &JsCallExpression) -> Option<TokenText> {
-    let callee = expr.callee().ok()?;
-    let name = callee.get_callee_object_name()?.token_text_trimmed();
-    Some(name)
 }
 
 fn is_type_declaration(node: &JsCallExpression) -> bool {

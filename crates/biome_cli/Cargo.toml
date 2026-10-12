@@ -115,8 +115,7 @@ tokio = { workspace = true, features = ["process"] }
 mimalloc = { workspace = true }
 
 [features]
-docgen    = ["bpaf/docgen"]
-js_plugin = ["biome_service/js_plugin"]
+docgen = ["bpaf/docgen"]
 
 [lints]
 workspace = true

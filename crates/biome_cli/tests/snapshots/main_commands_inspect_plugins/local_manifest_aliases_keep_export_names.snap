@@ -36,15 +36,15 @@ biome inspect plugins
 ```block
 configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i 2 rules resolved.
+  i The configuration enables 2 plugin rules.
   
   Local plugins
   
-  - foo
+  - rules/foo.grit (rule name: foo)
   
-  Rules with include globs
+  Rules that apply only to matching files
   
-  - rules/foo.grit: alias (includes: [**/*.ts])
+  - rules/foo.grit (rule name: alias), for files matching includes: [**/*.ts]
   
 
 ```

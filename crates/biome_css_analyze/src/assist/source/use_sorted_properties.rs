@@ -294,6 +294,9 @@ impl RecessOrderMember {
                             AnyCssDeclarationName::TwValueThemeReference(_) => {
                                 NodeKindOrder::Declaration
                             }
+                            AnyCssDeclarationName::CssMetavariable(_) => {
+                                NodeKindOrder::UnknownKind
+                            }
                         }
                     }
                 }

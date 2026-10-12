@@ -3,6 +3,7 @@ use biome_analyze::{
     Rule, RuleDomain, RuleFilter, RuleGroup,
 };
 use biome_diagnostics::{Diagnostic, advice::CodeSuggestionAdvice};
+use biome_languages::MdFileSource;
 use biome_markdown_parser::{MarkdownParserOptions, parse_markdown};
 use biome_markdown_syntax::{MarkdownLanguage, MdRoot};
 use biome_rowan::AstNode;
@@ -155,11 +156,27 @@ pub(crate) fn analyze_and_snap(
 
     let needs_module_graph = NeedsModuleGraph::new(filter.enabled_rules).compute();
 
-    let (_, errors) = biome_markdown_analyze::analyze(&root, filter, &options, |event| {
-        if let Some(mut diag) = event.diagnostic() {
-            for action in event.actions(ActionFilter::all()) {
-                if check_action_type.is_suppression() {
-                    if action.is_suppression() {
+    let (_, errors) = biome_markdown_analyze::analyze(
+        &root,
+        filter,
+        &options,
+        MdFileSource::markdown(),
+        |event| {
+            if let Some(mut diag) = event.diagnostic() {
+                for action in event.actions(ActionFilter::all()) {
+                    if check_action_type.is_suppression() {
+                        if action.is_suppression() {
+                            check_code_action(
+                                input_file,
+                                input_code,
+                                &action,
+                                &parser_options,
+                                filter,
+                                &options,
+                            );
+                            diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
+                        }
+                    } else if !action.is_suppression() {
                         check_code_action(
                             input_file,
                             input_code,
@@ -170,26 +187,26 @@ pub(crate) fn analyze_and_snap(
                         );
                         diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                     }
-                } else if !action.is_suppression() {
-                    check_code_action(
-                        input_file,
-                        input_code,
-                        &action,
-                        &parser_options,
-                        filter,
-                        &options,
-                    );
-                    diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
                 }
+
+                diagnostics.push(diagnostic_to_string(file_name, input_code, diag.into()));
+                return ControlFlow::Continue(());
             }
 
-            diagnostics.push(diagnostic_to_string(file_name, input_code, diag.into()));
-            return ControlFlow::Continue(());
-        }
-
-        for action in event.actions(ActionFilter::all()) {
-            if check_action_type.is_suppression() {
-                if action.category.matches("quickfix.suppressRule") {
+            for action in event.actions(ActionFilter::all()) {
+                if check_action_type.is_suppression() {
+                    if action.category.matches("quickfix.suppressRule") {
+                        check_code_action(
+                            input_file,
+                            input_code,
+                            &action,
+                            &parser_options,
+                            filter,
+                            &options,
+                        );
+                        code_fixes.push(code_fix_to_string(input_code, action));
+                    }
+                } else if !action.category.matches("quickfix.suppressRule") {
                     check_code_action(
                         input_file,
                         input_code,
@@ -200,21 +217,11 @@ pub(crate) fn analyze_and_snap(
                     );
                     code_fixes.push(code_fix_to_string(input_code, action));
                 }
-            } else if !action.category.matches("quickfix.suppressRule") {
-                check_code_action(
-                    input_file,
-                    input_code,
-                    &action,
-                    &parser_options,
-                    filter,
-                    &options,
-                );
-                code_fixes.push(code_fix_to_string(input_code, action));
             }
-        }
 
-        ControlFlow::<Never>::Continue(())
-    });
+            ControlFlow::<Never>::Continue(())
+        },
+    );
 
     for error in errors {
         diagnostics.push(diagnostic_to_string(file_name, input_code, error));
@@ -276,16 +283,22 @@ fn check_code_action(
     if action.is_suppression() {
         let count_diagnostics = |root: &MdRoot| {
             let mut count = 0;
-            biome_markdown_analyze::analyze(root, filter, options, |event| {
-                if event
-                    .diagnostic()
-                    .and_then(|diagnostic| diagnostic.category())
-                    .is_some_and(|category| category.name().starts_with("lint/"))
-                {
-                    count += 1;
-                }
-                ControlFlow::<Never>::Continue(())
-            });
+            biome_markdown_analyze::analyze(
+                root,
+                filter,
+                options,
+                MdFileSource::markdown(),
+                |event| {
+                    if event
+                        .diagnostic()
+                        .and_then(|diagnostic| diagnostic.category())
+                        .is_some_and(|category| category.name().starts_with("lint/"))
+                    {
+                        count += 1;
+                    }
+                    ControlFlow::<Never>::Continue(())
+                },
+            );
             count
         };
         let remaining = count_diagnostics(&re_parse.tree());

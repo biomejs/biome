@@ -1,0 +1,1053 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+let topLevel = "used";
+console.log(topLevel);
+topLevel = "unused";
+
+function overwrittenAtEnd() {
+	let v = "used";
+	console.log(v);
+	v = "unused";
+}
+
+function overwrittenBeforeReturn() {
+	let v = "used";
+	if (condition) {
+		v = "unused";
+		return;
+	}
+	console.log(v);
+}
+
+function overwrittenInElse() {
+	let v = "used";
+	if (condition) {
+		console.log(v);
+	} else {
+		v = "unused";
+	}
+}
+
+const functionExpression = function () {
+	let v = "used";
+	console.log(v);
+	v = "unused";
+};
+
+const arrowFunction = () => {
+	let v = "used";
+	console.log(v);
+	v = "unused";
+};
+
+class StaticBlock {
+	static {
+		let v = "used";
+		console.log(v);
+		v = "unused";
+	}
+}
+
+function overwrittenInitializer() {
+	let v = "unused";
+	if (condition) {
+		v = "used";
+		console.log(v);
+		return;
+	}
+}
+
+function consecutiveWrites() {
+	let v = "used";
+	console.log(v);
+	v = "unused";
+	v = "used";
+	console.log(v);
+}
+
+function overwrittenInBothBranches() {
+	let v = "unused";
+	if (condition) {
+		if (condition2) {
+			v = "used-2";
+		} else {
+			v = "used-3";
+		}
+	} else {
+		v = "used-4";
+	}
+	console.log(v);
+}
+
+function overwrittenAfterBranch() {
+	let v;
+	if (condition) {
+		v = "unused";
+	}
+	if (condition2) {
+		v = "used-1";
+	} else {
+		v = "used-2";
+	}
+	console.log(v);
+}
+
+function update() {
+	let a = 42;
+	console.log(a);
+	a++;
+	--a;
+}
+
+function compoundAssignment() {
+	let a = 42;
+	console.log(a);
+	a += 1;
+}
+
+function logicalAssignment() {
+	let a = getValue();
+	console.log(a);
+	a ??= "default";
+}
+
+function destructuringAssignment() {
+	let a = "used", b = "used", c = "used", d = "used";
+	console.log(a, b, c, d);
+	({ a, arr: [b, c, , ...d] } = fn());
+	console.log(c);
+}
+
+function destructuringAssignmentWithDefault() {
+	let a = "used", b = "used", c = "used";
+	console.log(a, b, c);
+	({ a = "unused", foo: b, ...c } = fn());
+}
+
+function shadowed() {
+	let v = "used";
+	if (condition) {
+		let v = "used";
+		console.log(v);
+		v = "unused";
+	}
+	console.log(v);
+	v = "unused";
+}
+
+function readAfterReturn() {
+	let v = "used";
+	console.log(v);
+	v = "unused";
+	return;
+	console.log(v);
+}
+
+function readAfterThrow() {
+	let v = "used";
+	console.log(v);
+	v = "unused";
+	throw new Error();
+	console.log(v);
+}
+
+function readAfterContinue() {
+	let v = "used";
+	console.log(v);
+	for (let i = 0; i < 10; i++) {
+		v = "unused";
+		continue;
+		console.log(v);
+	}
+}
+
+function readAfterBreak() {
+	let v = "used";
+	console.log(v);
+	for (let i = 0; i < 10; i++) {
+		if (condition) {
+			v = "unused";
+			break;
+		}
+		console.log(v);
+	}
+}
+
+function overwrittenInTryAndCatch() {
+	let message = "unused";
+	try {
+		const result = call();
+		message = result.message;
+	} catch (e) {
+		message = "used";
+	}
+	console.log(message);
+}
+
+function readInTryOnly() {
+	let message = "unused";
+	try {
+		message = "used";
+		console.log(message);
+	} catch (e) {}
+}
+
+function overwrittenInFinally() {
+	let done = false;
+	try {
+		work();
+	} finally {
+		done = true;
+		console.log(done);
+	}
+}
+
+function readAfterFinallyReturn() {
+	let outcome = "unknown";
+	try {
+		bar();
+	} catch (err) {
+		outcome = "exception";
+	} finally {
+		return;
+		console.log(outcome);
+	}
+}
+
+function* generator() {
+	let done = false;
+	yield 1;
+	done = true;
+	console.log(done);
+}
+
+function selfUpdate() {
+	var x = 1;
+	x = x + 1;
+	x = 5;
+	f(x);
+}
+
+function writeInSwitch() {
+	let v = "unused";
+	switch (kind) {
+		case 1:
+			v = "one";
+			break;
+		default:
+			v = "other";
+	}
+	console.log(v);
+}
+
+function writeInWhile() {
+	let v = 0;
+	while (condition) {
+		v = next();
+		v = other();
+		console.log(v);
+	}
+}
+
+function conditionalExpressionWrite() {
+	let v = "used";
+	console.log(v);
+	condition ? (v = "unused") : (v = "unused too");
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:4:1 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to topLevel is never read.
+  
+    2 │ let topLevel = "used";
+    3 │ console.log(topLevel);
+  > 4 │ topLevel = "unused";
+      │ ^^^^^^^^
+    5 │ 
+    6 │ function overwrittenAtEnd() {
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:2 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to v is never read.
+  
+     7 │ 	let v = "used";
+     8 │ 	console.log(v);
+   > 9 │ 	v = "unused";
+       │ 	^
+    10 │ }
+    11 │ 
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:15:3 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to v is never read.
+  
+    13 │ 	let v = "used";
+    14 │ 	if (condition) {
+  > 15 │ 		v = "unused";
+       │ 		^
+    16 │ 		return;
+    17 │ 	}
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:26:3 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to v is never read.
+  
+    24 │ 		console.log(v);
+    25 │ 	} else {
+  > 26 │ 		v = "unused";
+       │ 		^
+    27 │ 	}
+    28 │ }
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:33:2 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to v is never read.
+  
+    31 │ 	let v = "used";
+    32 │ 	console.log(v);
+  > 33 │ 	v = "unused";
+       │ 	^
+    34 │ };
+    35 │ 
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:2 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to v is never read.
+  
+    37 │ 	let v = "used";
+    38 │ 	console.log(v);
+  > 39 │ 	v = "unused";
+       │ 	^
+    40 │ };
+    41 │ 
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:46:3 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to v is never read.
+  
+    44 │ 		let v = "used";
+    45 │ 		console.log(v);
+  > 46 │ 		v = "unused";
+       │ 		^
+    47 │ 	}
+    48 │ }
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:51:6 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to v is never read.
+  
+    50 │ function overwrittenInitializer() {
+  > 51 │ 	let v = "unused";
+       │ 	    ^
+    52 │ 	if (condition) {
+    53 │ 		v = "used";
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:62:2 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to v is never read.
+  
+    60 │ 	let v = "used";
+    61 │ 	console.log(v);
+  > 62 │ 	v = "unused";
+       │ 	^
+    63 │ 	v = "used";
+    64 │ 	console.log(v);
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:68:6 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to v is never read.
+  
+    67 │ function overwrittenInBothBranches() {
+  > 68 │ 	let v = "unused";
+       │ 	    ^
+    69 │ 	if (condition) {
+    70 │ 		if (condition2) {
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:84:3 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to v is never read.
+  
+    82 │ 	let v;
+    83 │ 	if (condition) {
+  > 84 │ 		v = "unused";
+       │ 		^
+    85 │ 	}
+    86 │ 	if (condition2) {
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:98:4 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to a is never read.
+  
+     96 │ 	console.log(a);
+     97 │ 	a++;
+   > 98 │ 	--a;
+        │ 	  ^
+     99 │ }
+    100 │ 
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:104:2 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to a is never read.
+  
+    102 │ 	let a = 42;
+    103 │ 	console.log(a);
+  > 104 │ 	a += 1;
+        │ 	^
+    105 │ }
+    106 │ 
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:110:2 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to a is never read.
+  
+    108 │ 	let a = getValue();
+    109 │ 	console.log(a);
+  > 110 │ 	a ??= "default";
+        │ 	^
+    111 │ }
+    112 │ 
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:116:5 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to a is never read.
+  
+    114 │ 	let a = "used", b = "used", c = "used", d = "used";
+    115 │ 	console.log(a, b, c, d);
+  > 116 │ 	({ a, arr: [b, c, , ...d] } = fn());
+        │ 	   ^
+    117 │ 	console.log(c);
+    118 │ }
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:116:14 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to b is never read.
+  
+    114 │ 	let a = "used", b = "used", c = "used", d = "used";
+    115 │ 	console.log(a, b, c, d);
+  > 116 │ 	({ a, arr: [b, c, , ...d] } = fn());
+        │ 	            ^
+    117 │ 	console.log(c);
+    118 │ }
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:116:25 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to d is never read.
+  
+    114 │ 	let a = "used", b = "used", c = "used", d = "used";
+    115 │ 	console.log(a, b, c, d);
+  > 116 │ 	({ a, arr: [b, c, , ...d] } = fn());
+        │ 	                       ^
+    117 │ 	console.log(c);
+    118 │ }
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:123:5 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to a is never read.
+  
+    121 │ 	let a = "used", b = "used", c = "used";
+    122 │ 	console.log(a, b, c);
+  > 123 │ 	({ a = "unused", foo: b, ...c } = fn());
+        │ 	   ^
+    124 │ }
+    125 │ 
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:123:24 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to b is never read.
+  
+    121 │ 	let a = "used", b = "used", c = "used";
+    122 │ 	console.log(a, b, c);
+  > 123 │ 	({ a = "unused", foo: b, ...c } = fn());
+        │ 	                      ^
+    124 │ }
+    125 │ 
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:123:30 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to c is never read.
+  
+    121 │ 	let a = "used", b = "used", c = "used";
+    122 │ 	console.log(a, b, c);
+  > 123 │ 	({ a = "unused", foo: b, ...c } = fn());
+        │ 	                            ^
+    124 │ }
+    125 │ 
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:131:3 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to v is never read.
+  
+    129 │ 		let v = "used";
+    130 │ 		console.log(v);
+  > 131 │ 		v = "unused";
+        │ 		^
+    132 │ 	}
+    133 │ 	console.log(v);
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:134:2 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to v is never read.
+  
+    132 │ 	}
+    133 │ 	console.log(v);
+  > 134 │ 	v = "unused";
+        │ 	^
+    135 │ }
+    136 │ 
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:140:2 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to v is never read.
+  
+    138 │ 	let v = "used";
+    139 │ 	console.log(v);
+  > 140 │ 	v = "unused";
+        │ 	^
+    141 │ 	return;
+    142 │ 	console.log(v);
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:148:2 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to v is never read.
+  
+    146 │ 	let v = "used";
+    147 │ 	console.log(v);
+  > 148 │ 	v = "unused";
+        │ 	^
+    149 │ 	throw new Error();
+    150 │ 	console.log(v);
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:157:3 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to v is never read.
+  
+    155 │ 	console.log(v);
+    156 │ 	for (let i = 0; i < 10; i++) {
+  > 157 │ 		v = "unused";
+        │ 		^
+    158 │ 		continue;
+    159 │ 		console.log(v);
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:168:4 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to v is never read.
+  
+    166 │ 	for (let i = 0; i < 10; i++) {
+    167 │ 		if (condition) {
+  > 168 │ 			v = "unused";
+        │ 			^
+    169 │ 			break;
+    170 │ 		}
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:176:6 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to message is never read.
+  
+    175 │ function overwrittenInTryAndCatch() {
+  > 176 │ 	let message = "unused";
+        │ 	    ^^^^^^^
+    177 │ 	try {
+    178 │ 		const result = call();
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:187:6 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to message is never read.
+  
+    186 │ function readInTryOnly() {
+  > 187 │ 	let message = "unused";
+        │ 	    ^^^^^^^
+    188 │ 	try {
+    189 │ 		message = "used";
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:195:6 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to done is never read.
+  
+    194 │ function overwrittenInFinally() {
+  > 195 │ 	let done = false;
+        │ 	    ^^^^
+    196 │ 	try {
+    197 │ 		work();
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:205:6 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to outcome is never read.
+  
+    204 │ function readAfterFinallyReturn() {
+  > 205 │ 	let outcome = "unknown";
+        │ 	    ^^^^^^^
+    206 │ 	try {
+    207 │ 		bar();
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:209:3 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to outcome is never read.
+  
+    207 │ 		bar();
+    208 │ 	} catch (err) {
+  > 209 │ 		outcome = "exception";
+        │ 		^^^^^^^
+    210 │ 	} finally {
+    211 │ 		return;
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:217:6 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to done is never read.
+  
+    216 │ function* generator() {
+  > 217 │ 	let done = false;
+        │ 	    ^^^^
+    218 │ 	yield 1;
+    219 │ 	done = true;
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:225:2 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to x is never read.
+  
+    223 │ function selfUpdate() {
+    224 │ 	var x = 1;
+  > 225 │ 	x = x + 1;
+        │ 	^
+    226 │ 	x = 5;
+    227 │ 	f(x);
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:231:6 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to v is never read.
+  
+    230 │ function writeInSwitch() {
+  > 231 │ 	let v = "unused";
+        │ 	    ^
+    232 │ 	switch (kind) {
+    233 │ 		case 1:
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:243:6 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to v is never read.
+  
+    242 │ function writeInWhile() {
+  > 243 │ 	let v = 0;
+        │ 	    ^
+    244 │ 	while (condition) {
+    245 │ 		v = next();
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:245:3 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to v is never read.
+  
+    243 │ 	let v = 0;
+    244 │ 	while (condition) {
+  > 245 │ 		v = next();
+        │ 		^
+    246 │ 		v = other();
+    247 │ 		console.log(v);
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:254:15 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to v is never read.
+  
+    252 │ 	let v = "used";
+    253 │ 	console.log(v);
+  > 254 │ 	condition ? (v = "unused") : (v = "unused too");
+        │ 	             ^
+    255 │ }
+    256 │ 
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:254:32 lint/nursery/noUselessAssignment ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The value assigned to v is never read.
+  
+    252 │ 	let v = "used";
+    253 │ 	console.log(v);
+  > 254 │ 	condition ? (v = "unused") : (v = "unused too");
+        │ 	                              ^
+    255 │ }
+    256 │ 
+  
+  i After this assignment, the variable is either assigned again or not read anymore, so this value is thrown away.
+  
+  i Remove the assignment if it's unnecessary. Otherwise, check whether the value should be used, or assigned to a different variable.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

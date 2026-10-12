@@ -31,8 +31,6 @@ use biome_unicode_table::{
 
 use enumflags2::{BitFlags, bitflags, make_bitflags};
 
-use crate::JsParserOptions;
-
 // The first utf8 byte of every valid unicode whitespace char, used for short circuiting whitespace checks
 const UNICODE_WHITESPACE_STARTS: [u8; 5] = [
     // NBSP
@@ -171,7 +169,8 @@ pub(crate) struct JsLexer<'src> {
 
     diagnostics: Vec<ParseDiagnostic>,
 
-    options: JsParserOptions,
+    /// Ranges of the Grit metavariables in the source.
+    metavariables: &'src [TextRange],
 }
 
 impl<'src> Lexer<'src> for JsLexer<'src> {
@@ -184,6 +183,10 @@ impl<'src> Lexer<'src> for JsLexer<'src> {
 
     fn source(&self) -> &'src str {
         self.source
+    }
+
+    fn metavariable_ranges(&self) -> &[TextRange] {
+        self.metavariables
     }
 
     fn current(&self) -> Self::Kind {
@@ -357,12 +360,16 @@ impl<'src> JsLexer<'src> {
             current_flags: TokenFlags::empty(),
             position: 0,
             diagnostics: vec![],
-            options: JsParserOptions::default(),
+            metavariables: &[],
         }
     }
 
-    pub(crate) fn with_options(self, options: JsParserOptions) -> Self {
-        Self { options, ..self }
+    /// Lexes the given source ranges as Grit metavariables.
+    pub(crate) fn with_metavariables(self, metavariables: &'src [TextRange]) -> Self {
+        Self {
+            metavariables,
+            ..self
+        }
     }
 
     fn re_lex_binary_operator(&mut self) -> JsSyntaxKind {
@@ -569,9 +576,7 @@ impl<'src> JsLexer<'src> {
             b'<' => self.eat_byte(T![<]),
             // `{`: empty jsx text, directly followed by an expression
             b'{' => self.eat_byte(T!['{']),
-            _ if self.options.should_parse_metavariables() && self.is_metavariable_start() => {
-                self.consume_metavariable(GRIT_METAVARIABLE)
-            }
+            _ if self.is_metavariable_start() => self.consume_metavariable(GRIT_METAVARIABLE),
             _ => {
                 while let Some(chr) = self.current_byte() {
                     // but not one of: { or < or > or }
@@ -2068,6 +2073,10 @@ impl<'src> JsLexer<'src> {
         // to do more aggressive optimizations on the match regarding how to map it to instructions
         let dispatched = lookup_byte(byte);
 
+        if self.is_metavariable_start() {
+            return self.consume_metavariable(GRIT_METAVARIABLE);
+        }
+
         match dispatched {
             WHS => {
                 let kind = self.consume_newline_or_whitespaces();
@@ -2165,10 +2174,6 @@ impl<'src> JsLexer<'src> {
                 {
                     self.unicode_bom_length = bom_size;
                     return bom;
-                }
-
-                if self.options.should_parse_metavariables() && self.is_metavariable_start() {
-                    return self.consume_metavariable(GRIT_METAVARIABLE);
                 }
 
                 let chr = self.current_char_unchecked();

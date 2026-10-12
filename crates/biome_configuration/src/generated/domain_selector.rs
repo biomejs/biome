@@ -57,6 +57,7 @@ static PROJECT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noSelfImport"),
         RuleFilter::Rule("nursery", "noUndeclaredClasses"),
         RuleFilter::Rule("nursery", "noUndeclaredCustomProperties"),
+        RuleFilter::Rule("nursery", "useTailwindSortedClasses"),
         RuleFilter::Rule("suspicious", "noDeprecatedImports"),
         RuleFilter::Rule("suspicious", "noImportCycles"),
     ]
@@ -128,7 +129,10 @@ static SVELTE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noSvelteExportLet"),
         RuleFilter::Rule("nursery", "noSvelteInspect"),
         RuleFilter::Rule("nursery", "noSvelteLegacyConst"),
+        RuleFilter::Rule("nursery", "noSvelteObjectInTextMustaches"),
         RuleFilter::Rule("nursery", "noSvelteUnnecessaryStateWrap"),
+        RuleFilter::Rule("nursery", "useConsistentBlockLang"),
+        RuleFilter::Rule("nursery", "useSvelteKitResolve"),
         RuleFilter::Rule("nursery", "useSvelteKitRuneImports"),
         RuleFilter::Rule("nursery", "useSvelteRequireEachKey"),
     ]
@@ -136,9 +140,11 @@ static SVELTE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
 static TAILWIND_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("nursery", "noTailwindArbitraryValue"),
+        RuleFilter::Rule("nursery", "noTailwindLegacyUtilities"),
         RuleFilter::Rule("nursery", "noTailwindRawColors"),
         RuleFilter::Rule("nursery", "noTailwindRestyledComponents"),
         RuleFilter::Rule("nursery", "useTailwindShorthandClasses"),
+        RuleFilter::Rule("nursery", "useTailwindSortedClasses"),
     ]
 });
 static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
@@ -168,6 +174,7 @@ static TYPES_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noMisleadingReturnType"),
         RuleFilter::Rule("nursery", "noMisusedPromises"),
         RuleFilter::Rule("nursery", "noUnsafePlusOperands"),
+        RuleFilter::Rule("nursery", "noUnsafeUnaryMinus"),
         RuleFilter::Rule("nursery", "noUselessTypeConversion"),
         RuleFilter::Rule("nursery", "useAwaitThenable"),
         RuleFilter::Rule("nursery", "useDisposables"),
@@ -208,11 +215,16 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("correctness", "useVueValidVText"),
         RuleFilter::Rule("nursery", "noVueBooleanDefault"),
         RuleFilter::Rule("nursery", "noVueDeprecatedScopedSlots"),
+        RuleFilter::Rule("nursery", "noVueRequiredPropWithDefault"),
+        RuleFilter::Rule("nursery", "noVueRootVIf"),
         RuleFilter::Rule("nursery", "noVueUndeclaredDirectives"),
+        RuleFilter::Rule("nursery", "noVueVHtml"),
+        RuleFilter::Rule("nursery", "noVueVText"),
+        RuleFilter::Rule("nursery", "useConsistentBlockLang"),
         RuleFilter::Rule("nursery", "useVueBaseImport"),
+        RuleFilter::Rule("nursery", "useVueConsistentEventHyphenation"),
         RuleFilter::Rule("performance", "useVueVapor"),
         RuleFilter::Rule("style", "noVueOptionsApi"),
-        RuleFilter::Rule("style", "useScopedStyles"),
         RuleFilter::Rule("style", "useVueConsistentDefinePropsDeclaration"),
         RuleFilter::Rule("style", "useVueConsistentVBindStyle"),
         RuleFilter::Rule("style", "useVueConsistentVOnStyle"),
@@ -221,6 +233,7 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("style", "useVueMultiWordComponentNames"),
         RuleFilter::Rule("style", "useVueNextTickPromise"),
         RuleFilter::Rule("suspicious", "noVueArrowFuncInWatch"),
+        RuleFilter::Rule("suspicious", "useScopedStyles"),
     ]
 });
 impl DomainSelector {

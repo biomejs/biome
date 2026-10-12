@@ -1,0 +1,162 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_allowed_categories.jsx
+---
+# Input
+```jsx
+/* should generate diagnostics */
+<div className="bg-[#333]" />;
+<div className="text-[13px]" />;
+<div className="rounded-[10px]" />;
+<div className="border-[3px]" />;
+<div className="shadow-[0_1px_2px_black]" />;
+<div className="duration-[250ms]" />;
+<div className="[color:red]" />;
+
+```
+
+# Diagnostics
+```
+invalid_allowed_categories.jsx:2:20 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found an arbitrary value in a Tailwind CSS class.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ <div className="bg-[#333]" />;
+      │                    ^^^^^^
+    3 │ <div className="text-[13px]" />;
+    4 │ <div className="rounded-[10px]" />;
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
+  i Use a named utility from your Tailwind configuration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allowed_categories.jsx:3:22 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found an arbitrary value in a Tailwind CSS class.
+  
+    1 │ /* should generate diagnostics */
+    2 │ <div className="bg-[#333]" />;
+  > 3 │ <div className="text-[13px]" />;
+      │                      ^^^^^^
+    4 │ <div className="rounded-[10px]" />;
+    5 │ <div className="border-[3px]" />;
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
+  i Use a named utility from your Tailwind configuration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allowed_categories.jsx:4:25 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found an arbitrary value in a Tailwind CSS class.
+  
+    2 │ <div className="bg-[#333]" />;
+    3 │ <div className="text-[13px]" />;
+  > 4 │ <div className="rounded-[10px]" />;
+      │                         ^^^^^^
+    5 │ <div className="border-[3px]" />;
+    6 │ <div className="shadow-[0_1px_2px_black]" />;
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
+  i Use a named utility from your Tailwind configuration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allowed_categories.jsx:5:24 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found an arbitrary value in a Tailwind CSS class.
+  
+    3 │ <div className="text-[13px]" />;
+    4 │ <div className="rounded-[10px]" />;
+  > 5 │ <div className="border-[3px]" />;
+      │                        ^^^^^
+    6 │ <div className="shadow-[0_1px_2px_black]" />;
+    7 │ <div className="duration-[250ms]" />;
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
+  i Use a named utility from your Tailwind configuration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allowed_categories.jsx:6:24 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found an arbitrary value in a Tailwind CSS class.
+  
+    4 │ <div className="rounded-[10px]" />;
+    5 │ <div className="border-[3px]" />;
+  > 6 │ <div className="shadow-[0_1px_2px_black]" />;
+      │                        ^^^^^^^^^^^^^^^^^
+    7 │ <div className="duration-[250ms]" />;
+    8 │ <div className="[color:red]" />;
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
+  i Use a named utility from your Tailwind configuration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allowed_categories.jsx:7:26 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found an arbitrary value in a Tailwind CSS class.
+  
+    5 │ <div className="border-[3px]" />;
+    6 │ <div className="shadow-[0_1px_2px_black]" />;
+  > 7 │ <div className="duration-[250ms]" />;
+      │                          ^^^^^^^
+    8 │ <div className="[color:red]" />;
+    9 │ 
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
+  i Use a named utility from your Tailwind configuration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid_allowed_categories.jsx:8:17 lint/nursery/noTailwindArbitraryValue ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Found an arbitrary value in a Tailwind CSS class.
+  
+    6 │ <div className="shadow-[0_1px_2px_black]" />;
+    7 │ <div className="duration-[250ms]" />;
+  > 8 │ <div className="[color:red]" />;
+      │                 ^^^^^^^^^^^
+    9 │ 
+  
+  i Arbitrary values bypass Tailwind's theme configuration, defeating design-system consistency and making styles harder to refactor.
+  
+  i Use a named utility from your Tailwind configuration instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

@@ -262,7 +262,7 @@ where
     /// Formats the node without comments. Ignores any suppression comments.
     fn fmt_node(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
         if f.context().should_delegate_fmt_embedded_nodes() {
-            let range = node.range();
+            let range = self.embedded_range(node);
             if f.context().is_embedded_node_range(range) {
                 let mut buffer = VecBuffer::new(f.state_mut());
                 write!(buffer, [format_with(|f| self.fmt_fields(node, f))])?;
@@ -274,6 +274,16 @@ where
             }
         }
         self.fmt_fields(node, f)
+    }
+
+    /// Returns the range of the embedded snippet, if applicable.
+    ///
+    /// This is useful in situations where the range the actual expression lives is smaller than the node itself,
+    /// like in Vue, where expressions are contained in attribute values, inside the quotes.
+    ///
+    /// Override this method when the code doesn't start and end with the node.
+    fn embedded_range(&self, node: &N) -> TextRange {
+        node.range()
     }
 
     /// Writes `embedded`, a piece of code written in another language, such as

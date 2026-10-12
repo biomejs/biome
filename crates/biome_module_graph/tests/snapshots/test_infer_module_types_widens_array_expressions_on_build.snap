@@ -1,0 +1,262 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+declare const strings: string[];
+declare const dir: "asc" | "desc";
+declare const flag: boolean;
+declare function pick(left: number, right: number): boolean;
+declare function pick(...values: number[]): string;
+const pair = [true, ...[1n]] as const;
+
+export const numbers = [1, 2];
+export const mixed = ["a", 1, true, `b`];
+export const empty = [];
+export const spread = [...strings, 1, ..."ab", ...pair];
+export const nested = [[1], [2]];
+export const holder = { items: [1, 2] };
+export const items = holder.items;
+export const constTuple = [1, 2] as const;
+export const declared = [dir];
+export const conditional = [flag ? 1 : 2];
+export const negativeBigints = [-1n];
+export const [first, second] = [1n, 2];
+export const picked = pick(...[1, 2]);
+```
+
+## Inferred types
+
+```
+Binding strings "strings" => instanceof Array<string>
+
+Binding dir "dir" => string: asc | string: desc
+
+Binding flag "flag" => instanceof boolean
+
+Binding pick "pick" => sync Function "pick" {
+  accepts: {
+    params: [
+      required left: number
+      required right: number
+    ]
+    type_args: []
+  }
+  returns: boolean
+}
+
+Binding left "left" => number
+
+Binding right "right" => number
+
+Binding pick "pick" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "pick" {
+        accepts: {
+          params: [
+            required left: number
+            required right: number
+          ]
+          type_args: []
+        }
+        returns: boolean
+      }
+    ,
+    ():
+      sync Function "pick" {
+        accepts: {
+          params: [
+            required ...values: instanceof Array<number>
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+  ]
+}
+
+Binding values "values" => instanceof Array<number>
+
+Binding pair "pair" => [bool: true,
+...[bigint: 1n]]
+
+Expression "[true, ...[1n]]" => instanceof Array<boolean | BigInt>
+
+Expression "[true, ...[1n]] as const" => [bool: true,
+...[bigint: 1n]]
+
+Expression "true" => bool: true
+
+Expression "[1n]" => instanceof Array<BigInt>
+
+Expression "1n" => bigint: 1n
+
+Binding numbers "numbers" => instanceof Array<number>
+
+Expression "[1, 2]" => instanceof Array<number>
+
+Expression "1" => number: 1
+
+Expression "2" => number: 2
+
+Binding mixed "mixed" => instanceof Array<string | number | boolean>
+
+Expression "[\"a\", 1, true, `b`]" => instanceof Array<string | number | boolean>
+
+Expression "\"a\"" => string: a
+
+Expression "1" => number: 1
+
+Expression "true" => bool: true
+
+Expression "`b`" => string: b
+
+Binding empty "empty" => instanceof Array<unknown>
+
+Expression "[]" => instanceof Array<unknown>
+
+Binding spread "spread" => instanceof Array<string | number | bool: true | bigint: 1n>
+
+Expression "[...strings, 1, ...\"ab\", ...pair]" => instanceof Array<string | number | bool: true | bigint: 1n>
+
+Expression "strings" => instanceof Array<string>
+
+Expression "1" => number: 1
+
+Expression "\"ab\"" => string: ab
+
+Expression "pair" => [bool: true,
+...[bigint: 1n]]
+
+Binding nested "nested" => instanceof Array<instanceof Array<number>>
+
+Expression "[[1], [2]]" => instanceof Array<instanceof Array<number>>
+
+Expression "[1]" => instanceof Array<number>
+
+Expression "1" => number: 1
+
+Expression "[2]" => instanceof Array<number>
+
+Expression "2" => number: 2
+
+Binding holder "holder" => Object {
+  prototype: No prototype
+  members: ["items": instanceof Array<number>]
+}
+
+Expression "{ items: [1, 2] }" => Object {
+  prototype: No prototype
+  members: ["items": instanceof Array<number>]
+}
+
+Expression "[1, 2]" => instanceof Array<number>
+
+Expression "1" => number: 1
+
+Expression "2" => number: 2
+
+Binding items "items" => instanceof Array<number>
+
+Expression "holder" => Object {
+  prototype: No prototype
+  members: ["items": instanceof Array<number>]
+}
+
+Expression "holder.items" => instanceof Array<number>
+
+Binding constTuple "constTuple" => [number: 1,
+number: 2]
+
+Expression "[1, 2]" => instanceof Array<number>
+
+Expression "[1, 2] as const" => [number: 1,
+number: 2]
+
+Expression "1" => number: 1
+
+Expression "2" => number: 2
+
+Binding declared "declared" => instanceof Array<string: asc | string: desc>
+
+Expression "[dir]" => instanceof Array<string: asc | string: desc>
+
+Expression "dir" => string: asc | string: desc
+
+Binding conditional "conditional" => instanceof Array<number>
+
+Expression "[flag ? 1 : 2]" => instanceof Array<number>
+
+Expression "flag" => instanceof boolean
+
+Expression "flag ? 1 : 2" => number: 1 | number: 2
+
+Expression "1" => number: 1
+
+Expression "2" => number: 2
+
+Binding negativeBigints "negativeBigints" => instanceof Array<BigInt>
+
+Expression "[-1n]" => instanceof Array<BigInt>
+
+Expression "-1n" => BigInt
+
+Expression "1n" => bigint: 1n
+
+Binding first "first" => bigint: 1n
+
+Binding second "second" => number: 2
+
+Expression "[1n, 2]" => [bigint: 1n,
+number: 2]
+
+Expression "1n" => bigint: 1n
+
+Expression "2" => number: 2
+
+Binding picked "picked" => boolean
+
+Expression "pick" => Object {
+  prototype: No prototype
+  members: [
+    ():
+      sync Function "pick" {
+        accepts: {
+          params: [
+            required left: number
+            required right: number
+          ]
+          type_args: []
+        }
+        returns: boolean
+      }
+    ,
+    ():
+      sync Function "pick" {
+        accepts: {
+          params: [
+            required ...values: instanceof Array<number>
+          ]
+          type_args: []
+        }
+        returns: string
+      }
+  ]
+}
+
+Expression "pick(...[1, 2])" => boolean
+
+Expression "[1, 2]" => [number: 1,
+number: 2]
+
+Expression "1" => number: 1
+
+Expression "2" => number: 2
+```

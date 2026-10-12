@@ -1,0 +1,42 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: renamedUseSortedClasses.json
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useSortedClasses": "error"
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+renamedUseSortedClasses.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This lint rule has been renamed to useTailwindSortedClasses.
+  
+    3 │     "rules": {
+    4 │       "nursery": {
+  > 5 │         "useSortedClasses": "error"
+      │         ^^^^^^^^^^^^^^^^^^
+    6 │       }
+    7 │     }
+  
+  i Safe fix: Rename the lint rule.
+  
+     3  3 │       "rules": {
+     4  4 │         "nursery": {
+     5    │ - ········"useSortedClasses":·"error"
+        5 │ + ········"useTailwindSortedClasses":·"error"
+     6  6 │         }
+     7  7 │       }
+  
+
+```

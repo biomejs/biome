@@ -53,6 +53,7 @@ mod rules_via_dependencies;
 mod stdin_full_support;
 mod suppressions;
 mod tailwind_directives;
+mod tailwind_stylesheet;
 mod unknown_files;
 mod vcs_ignored_files;
 mod vue_cross_language_rules;

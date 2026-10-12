@@ -144,7 +144,6 @@ impl OverridePattern {
             javascript.resolver = None;
             javascript.experimental_embedded_snippets_enabled = None;
             if let Some(parser) = javascript.parser.as_mut() {
-                parser.grit_metavariables = None;
                 parser.jsx_everywhere = None;
             }
             if javascript
@@ -1108,6 +1107,7 @@ mod tests {
             parser: Some(MarkdownParserConfiguration {
                 frontmatter: Some(false.into()),
                 gfm: None,
+                cjk_friendly_emphasis: None,
             }),
             linter: Some(MarkdownLinterConfiguration {
                 enabled: Some(true.into()),
@@ -1128,6 +1128,7 @@ mod tests {
                 parser: Some(MarkdownParserConfiguration {
                     frontmatter: Some(true.into()),
                     gfm: None,
+                    cjk_friendly_emphasis: None,
                 }),
                 linter: Some(MarkdownLinterConfiguration {
                     enabled: Some(false.into()),

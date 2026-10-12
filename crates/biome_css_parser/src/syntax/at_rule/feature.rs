@@ -3,9 +3,10 @@ use crate::syntax::parse_error::expected_component_value;
 use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::parse_error::scss_only_syntax_error;
 use crate::syntax::scss::{
-    complete_scss_expression_from_item, is_at_scss_binary_operator, is_at_scss_interpolation,
-    is_at_scss_namespaced_variable, is_at_scss_variable, is_nth_at_scss_interpolation,
-    parse_scss_expression_from_head, parse_scss_expression_until, parse_scss_interpolated_name,
+    complete_scss_expression_from_item, complete_scss_interpolated_identifier,
+    is_at_scss_binary_operator, is_at_scss_interpolation, is_at_scss_namespaced_variable,
+    is_at_scss_variable, is_nth_at_scss_interpolation, parse_scss_expression_from_head,
+    parse_scss_expression_until, parse_scss_interpolated_name,
     parse_scss_interpolated_query_feature, parse_scss_interpolation_or_identifier,
     parse_scss_variable,
 };
@@ -31,9 +32,7 @@ pub fn parse_any_query_feature(p: &mut CssParser) -> ParsedSyntax {
                 scss_only_syntax_error(p, "SCSS interpolated query features", marker.range(p))
             },
         )
-    } else if is_at_scss_namespaced_variable(p)
-        && p.nth_at_ts(4, QUERY_FEATURE_RANGE_COMPARISON_OPERATOR_SET)
-    {
+    } else if is_at_scss_namespaced_variable(p) {
         parse_value_prefixed_query_feature(p)
     } else if is_at_query_feature_name(p) {
         parse_named_query_feature(p)
@@ -49,10 +48,11 @@ fn is_at_query_feature_name(p: &mut CssParser) -> bool {
     is_at_scss_variable(p) || is_at_identifier(p) || is_at_scss_interpolation(p)
 }
 
-/// Parses a query feature that starts with a feature name.
+/// Parses a query feature that starts with an identifier or variable.
 ///
 /// This covers boolean features such as `color`, plain features such as
 /// `(width: 500px)`, and name-first range features such as `(width <= 500px)`.
+/// Variables can also start reverse ranges and intervals such as `($min < width)`.
 #[inline]
 fn parse_named_query_feature(p: &mut CssParser) -> ParsedSyntax {
     if !is_at_query_feature_name(p) {
@@ -60,9 +60,45 @@ fn parse_named_query_feature(p: &mut CssParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    parse_query_feature_name(p).or_add_diagnostic(p, expected_identifier);
+    let Present(name) = parse_query_feature_name(p) else {
+        m.abandon(p);
+        return Absent;
+    };
 
-    parse_query_feature_from_name(p, m)
+    if name.kind(p) != SCSS_VARIABLE {
+        return parse_query_feature_from_name(p, m);
+    }
+
+    if !is_at_query_feature_range_comparison(p) {
+        if !is_at_scss_binary_operator(p) {
+            return parse_query_feature_from_name(p, m);
+        }
+
+        parse_query_feature_expression_from_head(p, name, QUERY_FEATURE_RANGE_VALUE_END_SET).ok();
+        return parse_query_feature_after_value(p, m);
+    }
+
+    // The non-comparison branch returns above, so this always returns `Present`.
+    parse_query_feature_range_comparison(p).ok();
+    let value = parse_query_feature_value_until(p, QUERY_FEATURE_RANGE_VALUE_END_SET)
+        .or_add_diagnostic(p, expected_query_feature_value);
+    if let Some(value) = value {
+        match value.kind(p) {
+            CSS_IDENTIFIER | SCSS_INTERPOLATED_IDENTIFIER => {
+                return parse_query_feature_interval_end(p, m);
+            }
+            SCSS_VARIABLE | SCSS_INTERPOLATION if is_at_query_feature_range_comparison(p) => {
+                if value.kind(p) == SCSS_INTERPOLATION {
+                    complete_scss_interpolated_identifier(p, value);
+                }
+                return parse_query_feature_interval_end(p, m);
+            }
+            _ => {}
+        }
+    }
+
+    // Two variables alone remain ambiguous, so retain the name-first shape.
+    Present(m.complete(p, CSS_QUERY_FEATURE_RANGE))
 }
 
 #[inline]
@@ -98,7 +134,8 @@ pub(crate) fn parse_query_feature_from_name(p: &mut CssParser, m: Marker) -> Par
     let kind = if is_at_query_feature_range_comparison(p) {
         // Checked by `is_at_query_feature_range_comparison` above.
         parse_query_feature_range_comparison(p).ok();
-        parse_query_feature_value(p).or_add_diagnostic(p, expected_query_feature_value);
+        parse_query_feature_value_until(p, QUERY_FEATURE_RANGE_VALUE_END_SET)
+            .or_add_diagnostic(p, expected_query_feature_value);
         CSS_QUERY_FEATURE_RANGE
     } else if p.at(T![:]) {
         p.bump(T![:]);
@@ -125,6 +162,13 @@ fn parse_value_prefixed_query_feature(p: &mut CssParser) -> ParsedSyntax {
 
     // Guarded by `is_at_any_query_feature_value` above.
     parse_query_feature_value_until(p, QUERY_FEATURE_RANGE_VALUE_END_SET).ok();
+
+    parse_query_feature_after_value(p, m)
+}
+
+/// Parses the comparison and feature name after a range's lower bound.
+#[inline]
+fn parse_query_feature_after_value(p: &mut CssParser, m: Marker) -> ParsedSyntax {
     parse_query_feature_range_comparison(p)
         .or_add_diagnostic(p, expected_query_feature_range_comparison);
     parse_query_feature_name(p).or_add_diagnostic(p, expected_identifier);
@@ -141,7 +185,8 @@ pub(crate) fn parse_query_feature_interval_end(p: &mut CssParser, m: Marker) -> 
     if is_at_query_feature_range_comparison(p) {
         // Checked by `is_at_query_feature_range_comparison` above.
         parse_query_feature_range_comparison(p).ok();
-        parse_query_feature_value(p).or_add_diagnostic(p, expected_query_feature_value);
+        parse_query_feature_value_until(p, QUERY_FEATURE_RANGE_VALUE_END_SET)
+            .or_add_diagnostic(p, expected_query_feature_value);
 
         Present(m.complete(p, CSS_QUERY_FEATURE_RANGE_INTERVAL))
     } else {
@@ -180,7 +225,7 @@ const QUERY_FEATURE_VALUE_MISSING_RHS_SET: TokenSet<CssSyntaxKind> =
 /// Example: `$breakpoint` in `@media (max-width: $breakpoint) {}`.
 #[inline]
 pub(crate) fn is_at_any_query_feature_value(p: &mut CssParser) -> bool {
-    is_at_scss_interpolation(p) || is_at_any_value(p)
+    is_at_scss_interpolation(p) || is_at_any_value(p) || p.at_ts(token_set![T![+], T![-]])
 }
 
 /// Parses the CSS-compatible head of a query-feature value.
@@ -232,7 +277,7 @@ fn parse_query_feature_value_until(
         );
     }
 
-    if p.at_ts(token_set![T![+], T![-]]) && !is_at_any_query_feature_value(p) {
+    if p.at_ts(token_set![T![+], T![-]]) && !is_at_any_value(p) {
         return CssSyntaxFeatures::Scss.parse_exclusive_syntax(
             p,
             |p| {
@@ -259,6 +304,16 @@ fn parse_query_feature_value_until(
         return Present(head);
     }
 
+    parse_query_feature_expression_from_head(p, head, end_ts)
+}
+
+/// Continues a query value as a Sass expression up to the caller's delimiters.
+#[inline]
+fn parse_query_feature_expression_from_head(
+    p: &mut CssParser,
+    head: CompletedMarker,
+    end_ts: TokenSet<CssSyntaxKind>,
+) -> ParsedSyntax {
     CssSyntaxFeatures::Scss.parse_exclusive_syntax(
         p,
         |p| parse_scss_expression_from_head(p, head, end_ts.union(token_set![T!['{']])),

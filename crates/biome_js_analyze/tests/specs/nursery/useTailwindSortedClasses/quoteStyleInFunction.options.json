@@ -1,0 +1,16 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "tailwind": {
+    "mergeFunctions": [],
+    "variantFunctions": [
+      "tw"
+    ]
+  },
+  "linter": {
+    "rules": {
+      "nursery": {
+        "useTailwindSortedClasses": "error"
+      }
+    }
+  }
+}

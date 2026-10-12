@@ -1,0 +1,13 @@
+/* should not generate diagnostics */
+@property --theme-color {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: red;
+}
+
+$syntax: "<color>";
+@property --dynamic-theme-color {
+  syntax: $syntax;
+  inherits: false;
+  initial-value: red;
+}

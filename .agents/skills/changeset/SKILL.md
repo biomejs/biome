@@ -51,7 +51,7 @@ Use `####` or `#####` for headings inside a longer entry. Other heading levels i
 - Describe user-visible behavior, not implementation.
 - Use one to three sentences unless the impact genuinely needs an example.
 - Use past tense for the contribution and present tense for resulting Biome behavior.
-- Start bug fixes with the linked issue when one exists.
+- Start bug fixes with the linked issue when one exists. If a link doesn't exist, start with a verb.
 - Link rule and assist names to their Biome website pages.
 - End every sentence with a full stop.
 

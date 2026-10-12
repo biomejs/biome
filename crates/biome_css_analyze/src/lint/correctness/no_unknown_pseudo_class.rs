@@ -33,6 +33,11 @@ declare_lint_rule! {
     /// in `:hover` or `:first-child`. Vendor-prefixed pseudo-classes are allowed. See
     /// [MDN's pseudo-class reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes).
     ///
+    /// ## SCSS limitations
+    ///
+    /// Pseudo-class names containing SCSS interpolation are ignored because the emitted name cannot
+    /// be determined statically.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -247,7 +252,7 @@ impl AnyPseudoLike {
 }
 
 fn css_selector_identifier_token(name: AnyCssSelectorIdentifier) -> Option<CssSyntaxToken> {
-    // `:foo-#{$name}` cannot be validated before Sass interpolation is resolved.
+    // `:foo-#{$name}` cannot be validated before SCSS interpolation is resolved.
     name.as_css_identifier()?.value_token().ok()
 }
 

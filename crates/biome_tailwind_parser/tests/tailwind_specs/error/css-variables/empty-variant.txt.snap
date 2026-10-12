@@ -1,0 +1,98 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+min-():flex
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [
+                TwVariantExpression {
+                    segments: TwVariantSegmentList [
+                        TwNamedVariantSegment {
+                            value_token: TW_VARIANT_SEGMENT@0..3 "min" [] [],
+                        },
+                        DASH@3..4 "-" [] [],
+                        TwCssVariableVariantSegment {
+                            l_paren_token: L_PAREN@4..5 "(" [] [],
+                            value: CssParameterList [],
+                            r_paren_token: R_PAREN@5..6 ")" [] [],
+                        },
+                    ],
+                    glued_value: missing (optional),
+                    modifier: missing (optional),
+                },
+                COLON@6..7 ":" [] [],
+            ],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwStaticCandidate {
+                base_token: TW_BASE@7..11 "flex" [] [],
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@11..11 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..11
+  0: (empty)
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..11
+    0: TW_FULL_CANDIDATE@0..11
+      0: TW_VARIANT_LIST@0..7
+        0: TW_VARIANT_EXPRESSION@0..6
+          0: TW_VARIANT_SEGMENT_LIST@0..6
+            0: TW_NAMED_VARIANT_SEGMENT@0..3
+              0: TW_VARIANT_SEGMENT@0..3 "min" [] []
+            1: DASH@3..4 "-" [] []
+            2: TW_CSS_VARIABLE_VARIANT_SEGMENT@4..6
+              0: L_PAREN@4..5 "(" [] []
+              1: CSS_PARAMETER_LIST@5..5
+              2: R_PAREN@5..6 ")" [] []
+          1: (empty)
+          2: (empty)
+        1: COLON@6..7 ":" [] []
+      1: (empty)
+      2: (empty)
+      3: TW_STATIC_CANDIDATE@7..11
+        0: TW_BASE@7..11 "flex" [] []
+        1: (empty)
+      4: (empty)
+  3: EOF@11..11 "" [] []
+
+```
+
+## Diagnostics
+
+```
+empty-variant.txt:1:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a value but instead found ')'.
+  
+  > 1 │ min-():flex
+      │      ^
+  
+  i Expected a value here.
+  
+  > 1 │ min-():flex
+      │      ^
+  
+```

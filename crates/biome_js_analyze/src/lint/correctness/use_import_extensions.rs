@@ -163,7 +163,7 @@ impl Rule for UseImportExtensions {
         let force_js_extensions = ctx.options().force_js_extensions();
 
         let node = ctx.query();
-        let resolved = match owner.kind(ctx.db()) {
+        let mut resolved = match owner.kind(ctx.db()) {
             ModuleInfoKind::Js(module_info) => module_info
                 .get_import_path_by_js_node(node)?
                 .resolve_js(ctx.db(), owner),
@@ -181,6 +181,32 @@ impl Rule for UseImportExtensions {
             }
             ModuleInfoKind::Css(_) => return None,
         };
+        if resolved.path().as_path().is_none() {
+            let specifier = node.inner_string_text()?;
+            let path = Utf8Path::new(specifier.text());
+            if !matches!(
+                path.components().next()?,
+                Utf8Component::CurDir | Utf8Component::ParentDir
+            ) {
+                return None;
+            }
+            let extension = path.extension()?;
+            let mapped_extension = if force_js_extensions {
+                "js"
+            } else {
+                ctx.options().extension_mappings.as_ref()?.get(extension)?
+            };
+            let mode = match owner.kind(ctx.db()) {
+                ModuleInfoKind::Html(_) => ResolutionMode::HtmlScript,
+                _ => ResolutionMode::JavaScript,
+            };
+            resolved = resolve_module_import(
+                ctx.db(),
+                owner,
+                path.with_extension(mapped_extension).as_str(),
+                mode,
+            );
+        }
         let resolved_path = resolved.path().as_path()?;
 
         get_extensionless_import(

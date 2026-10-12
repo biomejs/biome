@@ -106,6 +106,26 @@ fn parse_exclusive_scss_interpolated_block_item(
     )
 }
 
+/// Parses a block item that starts with a Grit metavariable.
+///
+/// The metavariable is a standalone item unless it starts a complete nested
+/// qualified rule:
+///
+/// ```css
+/// .parent {
+///     µselector {}
+///     µitem
+/// }
+/// ```
+#[inline]
+fn parse_metavariable_block_item(p: &mut CssParser, end_kind: CssSyntaxKind) -> ParsedSyntax {
+    if let Ok(rule) = try_parse_nested_qualified_rule_without_selector_recovery(p, end_kind) {
+        return rule;
+    }
+
+    parse_metavariable(p)
+}
+
 struct DeclarationOrRuleListParseRecovery {
     end_kind: CssSyntaxKind,
 }
@@ -295,10 +315,10 @@ impl ParseNodeList for DeclarationOrRuleList {
             // fall back to parsing the block as a declaration,
             // because declaration error is more relevant.
             parse_any_declaration_with_semicolon(p)
+        } else if is_at_metavariable(p) {
+            parse_metavariable_block_item(p, self.end_kind)
         } else if is_at_nested_qualified_rule(p) {
             parse_nested_qualified_rule(p)
-        } else if is_at_metavariable(p) {
-            parse_metavariable(p)
         } else {
             Absent
         }

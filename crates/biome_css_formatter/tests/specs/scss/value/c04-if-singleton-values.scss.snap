@@ -1,0 +1,28 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/value/c04-if-singleton-values.scss
+---
+
+# Input
+
+```scss
+@use "sass:meta";
+$bare:if(sass(true):1,;else:2,);
+$grouped:if(sass(false):(3,);else:(4,));
+.singleton{bare:meta.inspect($bare);grouped:meta.inspect($grouped)}
+
+```
+
+
+# Formatted
+
+```scss
+@use "sass:meta";
+$bare: if(sass(true): 1; else: 2);
+$grouped: if(sass(false): (3); else: (4));
+.singleton {
+	bare: meta.inspect($bare);
+	grouped: meta.inspect($grouped);
+}
+
+```

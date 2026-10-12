@@ -1,0 +1,153 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint --only=nursery/useTailwindSortedClasses '<TEMP_DIR>/nested_configs_resolve_tailwind_stylesheet'
+```
+
+## `admin/biome.json`
+
+```json
+{ "root": false, "extends": "//", "tailwind": { "stylesheet": "./admin.css" } }
+```
+
+## `biome.json`
+
+```json
+{
+  "root": true,
+  "tailwind": { "stylesheet": "./web/app.css" },
+  "linter": { "rules": { "nursery": { "useTailwindSortedClasses": "error" } } }
+}
+```
+
+## `web/biome.json`
+
+```json
+{ "root": false, "extends": "//" }
+```
+
+## `admin/App.jsx`
+
+```jsx
+export const a = <div className="bg-admin flex" />;
+export const b = <div className="bg-brand flex" />;
+
+```
+
+## `admin/admin.css`
+
+```css
+@import "tailwindcss";
+@theme { --color-admin: #f00; }
+```
+
+## `plain/App.jsx`
+
+```jsx
+export const a = <div className="bg-brand flex" />;
+
+```
+
+## `web/App.jsx`
+
+```jsx
+export const a = <div className="bg-brand flex" />;
+
+```
+
+## `web/app.css`
+
+```css
+@import "tailwindcss";
+@theme { --color-brand: #00f; }
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+admin/App.jsx:1:33 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × These CSS classes should be sorted.
+  
+  > 1 │ export const a = <div className="bg-admin flex" />;
+      │                                 ^^^^^^^^^^^^^^^
+    2 │ export const b = <div className="bg-brand flex" />;
+    3 │ 
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+    1   │ - export·const·a·=·<div·className="bg-admin·flex"·/>;
+      1 │ + export·const·a·=·<div·className="flex·bg-admin"·/>;
+    2 2 │   export const b = <div className="bg-brand flex" />;
+    3 3 │   
+  
+
+```
+
+```block
+plain/App.jsx:1:33 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × These CSS classes should be sorted.
+  
+  > 1 │ export const a = <div className="bg-brand flex" />;
+      │                                 ^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+    1   │ - export·const·a·=·<div·className="bg-brand·flex"·/>;
+      1 │ + export·const·a·=·<div·className="flex·bg-brand"·/>;
+    2 2 │   
+  
+
+```
+
+```block
+web/App.jsx:1:33 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × These CSS classes should be sorted.
+  
+  > 1 │ export const a = <div className="bg-brand flex" />;
+      │                                 ^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Sort the classes.
+  
+    1   │ - export·const·a·=·<div·className="bg-brand·flex"·/>;
+      1 │ + export·const·a·=·<div·className="flex·bg-brand"·/>;
+    2 2 │   
+  
+
+```
+
+```block
+Checked 8 files in <TIME>. No fixes applied.
+Found 3 errors.
+```

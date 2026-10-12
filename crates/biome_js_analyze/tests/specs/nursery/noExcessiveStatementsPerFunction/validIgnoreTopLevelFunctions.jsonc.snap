@@ -1,0 +1,33 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validIgnoreTopLevelFunctions.jsonc
+---
+# Input
+```cjs
+/* should not generate diagnostics */ (function() { var bar = 1; return function () { return 42; }; })()
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */ function foo() { var bar = 1; var baz = 2; }
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */ define(['foo', 'qux'], function(foo, qux) { var bar = 1; var baz = 2; })
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */ function top_level() { 1; class C { static { one; two; three; { four; five; six; } } } 3; }
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */ function top_level() { 1; 2; } class C { static { one; two; three; { four; five; six; } } }
+```
+
+# Input
+```cjs
+/* should not generate diagnostics */ class C { static { one; two; three; { four; five; six; } } } function top_level() { 1; 2; }
+```

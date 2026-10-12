@@ -137,7 +137,9 @@ fn parse_scss_map_expression_pair_list(
                 p,
                 &ParseRecoveryTokenSet::new(
                     CSS_BOGUS_PROPERTY_VALUE,
-                    SCSS_MAP_EXPRESSION_VALUE_END_TOKEN_SET,
+                    options
+                        .with_required_end_ts(SCSS_MAP_EXPRESSION_VALUE_END_TOKEN_SET)
+                        .recovery_end_ts(),
                 )
                 .enable_recovery_on_line_break(),
                 expected_scss_expression,

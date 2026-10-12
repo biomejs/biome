@@ -1,0 +1,33 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/at_rule/parity-unknown-prelude-strings.css
+---
+
+# Input
+
+```css
+@foo   "plain ;{}() string";
+@foo "literal #{'inner'} after";
+@foo 'literal #{"inner"} after';
+@foo "escaped \"quote\""{.item{color:red;}}
+.following{color:green;}
+
+```
+
+
+# Formatted
+
+```css
+@foo "plain ;{}() string";
+@foo "literal #{'inner'} after";
+@foo 'literal #{"inner"} after';
+@foo "escaped \"quote\"" {
+	.item {
+		color: red;
+	}
+}
+.following {
+	color: green;
+}
+
+```

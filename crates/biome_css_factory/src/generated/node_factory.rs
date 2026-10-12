@@ -29,7 +29,7 @@ pub fn css_at_rule_declarator(
 }
 pub fn css_attr_fallback_value(
     comma_token: SyntaxToken,
-    value: CssGenericComponentValueList,
+    value: AnyCssAttrFallbackValue,
 ) -> CssAttrFallbackValue {
     CssAttrFallbackValue::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_ATTR_FALLBACK_VALUE,
@@ -1219,7 +1219,7 @@ pub fn css_identifier(value_token: SyntaxToken) -> CssIdentifier {
 pub fn css_if_branch(
     condition: AnyCssIfCondition,
     colon_token: SyntaxToken,
-    value: CssGenericComponentValueList,
+    value: AnyCssIfBranchValue,
 ) -> CssIfBranch {
     CssIfBranch::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_IF_BRANCH,
@@ -3400,7 +3400,7 @@ impl ScssDebugAtRuleBuilder {
 pub fn scss_each_at_rule(
     each_token: SyntaxToken,
     header: ScssEachHeader,
-    block: CssDeclarationOrRuleBlock,
+    block: AnyCssControlBlock,
 ) -> ScssEachAtRule {
     ScssEachAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_EACH_AT_RULE,
@@ -3536,7 +3536,7 @@ pub fn scss_for_at_rule(
     lower_bound: ScssExpression,
     operator_token: SyntaxToken,
     upper_bound: ScssExpression,
-    block: CssDeclarationOrRuleBlock,
+    block: AnyCssControlBlock,
 ) -> ScssForAtRule {
     ScssForAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_FOR_AT_RULE,
@@ -3672,7 +3672,7 @@ pub fn scss_hide_clause(hide_token: SyntaxToken, members: ScssModuleMemberList) 
 pub fn scss_if_at_rule(
     if_token: SyntaxToken,
     condition: ScssExpression,
-    block: CssDeclarationOrRuleBlock,
+    block: AnyCssControlBlock,
 ) -> ScssIfAtRuleBuilder {
     ScssIfAtRuleBuilder {
         if_token,
@@ -3684,7 +3684,7 @@ pub fn scss_if_at_rule(
 pub struct ScssIfAtRuleBuilder {
     if_token: SyntaxToken,
     condition: ScssExpression,
-    block: CssDeclarationOrRuleBlock,
+    block: AnyCssControlBlock,
     else_clause: Option<ScssElseClause>,
 }
 impl ScssIfAtRuleBuilder {
@@ -4748,7 +4748,7 @@ impl ScssWarnAtRuleBuilder {
 pub fn scss_while_at_rule(
     while_token: SyntaxToken,
     condition: ScssExpression,
-    block: CssDeclarationOrRuleBlock,
+    block: AnyCssControlBlock,
 ) -> ScssWhileAtRule {
     ScssWhileAtRule::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_WHILE_AT_RULE,
@@ -4974,35 +4974,33 @@ pub fn tw_source_inline(
 }
 pub fn tw_theme_at_rule(
     theme_token: SyntaxToken,
+    options: TwThemeOptionList,
     block: AnyCssDeclarationOrRuleBlock,
-) -> TwThemeAtRuleBuilder {
-    TwThemeAtRuleBuilder {
-        theme_token,
-        block,
-        name: None,
-    }
+) -> TwThemeAtRule {
+    TwThemeAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_THEME_AT_RULE,
+        [
+            Some(SyntaxElement::Token(theme_token)),
+            Some(SyntaxElement::Node(options.into_syntax())),
+            Some(SyntaxElement::Node(block.into_syntax())),
+        ],
+    ))
 }
-pub struct TwThemeAtRuleBuilder {
-    theme_token: SyntaxToken,
-    block: AnyCssDeclarationOrRuleBlock,
-    name: Option<CssIdentifier>,
-}
-impl TwThemeAtRuleBuilder {
-    pub fn with_name(mut self, name: CssIdentifier) -> Self {
-        self.name = Some(name);
-        self
-    }
-    pub fn build(self) -> TwThemeAtRule {
-        TwThemeAtRule::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::TW_THEME_AT_RULE,
-            [
-                Some(SyntaxElement::Token(self.theme_token)),
-                self.name
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Node(self.block.into_syntax())),
-            ],
-        ))
-    }
+pub fn tw_theme_prefix_option(
+    prefix_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    name: CssIdentifier,
+    r_paren_token: SyntaxToken,
+) -> TwThemePrefixOption {
+    TwThemePrefixOption::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_THEME_PREFIX_OPTION,
+        [
+            Some(SyntaxElement::Token(prefix_token)),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
 }
 pub fn tw_utility_at_rule(
     utility_token: SyntaxToken,
@@ -6001,6 +5999,18 @@ where
 {
     TwApplyClassList::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::TW_APPLY_CLASS_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn tw_theme_option_list<I>(items: I) -> TwThemeOptionList
+where
+    I: IntoIterator<Item = AnyTwThemeOption>,
+    I::IntoIter: ExactSizeIterator,
+{
+    TwThemeOptionList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::TW_THEME_OPTION_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),

@@ -158,6 +158,9 @@ const c = "b";
   <button @click="async $event => foo($event)"></button>
   <button @click="function($event) { foo($event) }"></button>
   <button v-on:click="counter++; counter++;"></button>
+  <button @click="if (counter) foo(); else bar()"></button>
+  <button @click="const next = counter + 1; foo(next)"></button>
+  <button @click="if (counter) { foo() }"></button>
 </template>
 "#;
 

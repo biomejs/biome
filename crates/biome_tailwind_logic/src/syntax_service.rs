@@ -2,6 +2,7 @@ use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::panic::AssertUnwindSafe;
 use std::rc::Rc;
+use std::sync::Arc;
 
 use biome_analyze::{
     AddVisitor, DiagnosticSignal, FromServices, Phase, Phases, QueryMatch, Queryable, RuleCategory,
@@ -28,9 +29,11 @@ use biome_rowan::{
     AstNode, Language, NodeCache, SyntaxKindSet, SyntaxNode, TextLen, TextRange, TextSize,
     TokenText, WalkEvent,
 };
-use biome_tailwind_parser::{TailwindParse, parse_tailwind_with_cache};
+use biome_tailwind_parser::{TailwindParse, TailwindParserOptions, parse_tailwind_with_options};
 use biome_tailwind_syntax::{TailwindLanguage, TwRoot};
 use rustc_hash::FxHashMap;
+
+use crate::use_tailwind_sorted_classes::TailwindDesignSystem;
 
 #[derive(Clone, Debug)]
 pub struct SyntaxService<L> {
@@ -91,6 +94,21 @@ pub struct TailwindClassString {
     pub text: TokenText,
     /// The range of `text` in the host source file.
     pub inner_range: TextRange,
+    /// The ranges of `text`, relative to its start, that hold only part of a
+    /// class, such as `bar-` in `` `bar-${color}` ``. Parse errors are
+    /// expected there, so they aren't reported.
+    pub partial_classes: [Option<TextRange>; 2],
+}
+
+impl TailwindClassString {
+    /// Whether `range`, relative to the start of `text`, touches part of a
+    /// class.
+    fn touches_partial_class(&self, range: TextRange) -> bool {
+        self.partial_classes
+            .iter()
+            .flatten()
+            .any(|partial| partial.intersect(range).is_some())
+    }
 }
 
 pub struct ParsedTailwindSyntax {
@@ -134,15 +152,20 @@ impl TwSyntaxService {
             .clone()
     }
 
-    pub fn parse_for_visitor(&self, class_string: &TailwindClassString) -> ParsedTailwindSyntax {
+    pub fn parse_for_visitor(
+        &self,
+        class_string: &TailwindClassString,
+        options: TailwindParserOptions,
+    ) -> ParsedTailwindSyntax {
         let mut inner = self.inner.borrow_mut();
-        parse_with_inner(&mut inner, class_string)
+        parse_with_inner(&mut inner, class_string, options)
     }
 }
 
 fn parse_with_inner(
     inner: &mut SyntaxServiceInner<TailwindLanguage>,
     class_string: &TailwindClassString,
+    options: TailwindParserOptions,
 ) -> ParsedTailwindSyntax {
     if let Some(parse) = inner.parsed.get(&class_string.key) {
         return ParsedTailwindSyntax {
@@ -155,7 +178,7 @@ fn parse_with_inner(
     let mut panic_diagnostic = None;
     // Convert parser panics into diagnostics tied to the host class string.
     let parse = match catch_unwind(AssertUnwindSafe(|| {
-        parse_tailwind_with_cache(class_string.text.text(), &mut inner.node_cache)
+        parse_tailwind_with_options(class_string.text.text(), &mut inner.node_cache, options)
     })) {
         Ok(parse) => Rc::new(parse),
         Err(error) => {
@@ -164,7 +187,11 @@ fn parse_with_inner(
                 class_string.inner_range,
                 message,
             ));
-            Rc::new(parse_tailwind_with_cache("", &mut inner.node_cache))
+            Rc::new(parse_tailwind_with_options(
+                "",
+                &mut inner.node_cache,
+                options,
+            ))
         }
     };
     inner.parsed.insert(class_string.key, parse.clone());
@@ -345,7 +372,12 @@ where
         let Some(service) = ctx.services.get_service::<TwSyntaxService>() else {
             return;
         };
-        let parsed = service.parse_for_visitor(&class_string);
+        let design = ctx.services.get_service::<Arc<TailwindDesignSystem>>();
+        let options = design.map_or_else(
+            || TailwindDesignSystem::default_ref().parser_options(),
+            |design| design.parser_options(),
+        );
+        let parsed = service.parse_for_visitor(&class_string, options);
         if let Some(diagnostic) = parsed.panic_diagnostic {
             let text_range = diagnostic.span;
             ctx.push_signal(SignalEntry {
@@ -372,12 +404,17 @@ fn emit_parse_diagnostics<L: Language>(
     diagnostics: &[ParseDiagnostic],
 ) {
     for diagnostic in diagnostics {
-        let text_range = diagnostic
-            .location()
-            .span
-            .map_or(class_string.inner_range, |span| {
-                span + class_string.inner_range.start()
-            });
+        let span = diagnostic.location().span;
+        let touches_partial_class = span.map_or_else(
+            || class_string.partial_classes.iter().any(Option::is_some),
+            |span| class_string.touches_partial_class(span),
+        );
+        if touches_partial_class {
+            continue;
+        }
+        let text_range = span.map_or(class_string.inner_range, |span| {
+            span + class_string.inner_range.start()
+        });
         let mut diagnostic = diagnostic.clone();
         diagnostic.set_location_offset(class_string.inner_range.start());
         ctx.push_signal(SignalEntry {
@@ -716,6 +753,7 @@ fn tailwind_class_string(
         key: TailwindSyntaxCacheKey::new(inner_range, kind),
         text,
         inner_range,
+        partial_classes: [None, None],
     }
 }
 
@@ -789,11 +827,35 @@ impl TailwindClassStringHost for JsTemplateChunkElement {
             return None;
         }
         let token = self.template_chunk_token().ok()?;
-        Some(tailwind_class_string(
-            token.token_text(),
-            token.text_trimmed_range().start(),
-            ClassStringHostKind::JsTemplateChunkElement,
-        ))
+        let text = token.text_trimmed();
+        // A class touching an interpolation, as in `` `bar-${color}` ``, continues
+        // past this chunk.
+        let syntax = self.syntax();
+        let is_whitespace = |c: char| c.is_ascii_whitespace();
+        let leading = syntax
+            .prev_sibling()
+            .is_some_and(|sibling| JsTemplateElement::can_cast(sibling.kind()))
+            .then(|| {
+                let end = text.find(is_whitespace).unwrap_or(text.len());
+                TextRange::up_to(TextSize::of(&text[..end]))
+            })
+            .filter(|range| !range.is_empty());
+        let trailing = syntax
+            .next_sibling()
+            .is_some_and(|sibling| JsTemplateElement::can_cast(sibling.kind()))
+            .then(|| {
+                let start = text.rfind(is_whitespace).map_or(0, |index| index + 1);
+                TextRange::new(TextSize::of(&text[..start]), TextSize::of(text))
+            })
+            .filter(|range| !range.is_empty());
+        Some(TailwindClassString {
+            partial_classes: [leading, trailing],
+            ..tailwind_class_string(
+                token.token_text(),
+                token.text_trimmed_range().start(),
+                ClassStringHostKind::JsTemplateChunkElement,
+            )
+        })
     }
 }
 

@@ -1,0 +1,266 @@
+---
+source: crates/biome_tailwind_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```text
+bg-(color:--a) bg-(image:--a,var(--b)) bg-(url:--a) text-(family-name:--a)
+```
+
+
+## AST
+
+```
+TwRoot {
+    bom_token: missing (optional),
+    leading_whitespace_token: missing (optional),
+    candidates: TwCandidateList [
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@0..2 "bg" [] [],
+                minus_token: DASH@2..3 "-" [] [],
+                value: TwCssVariableValue {
+                    l_paren_token: L_PAREN@3..4 "(" [] [],
+                    type_hint: TwTypeHint {
+                        name_token: TW_VALUE@4..9 "color" [] [],
+                        colon_token: COLON@9..10 ":" [] [],
+                    },
+                    value: CssParameterList [
+                        CssListOfComponentValuesExpression {
+                            css_component_value_list: CssComponentValueList [
+                                CssDashedIdentifier {
+                                    ident_token: IDENT@10..13 "--a" [] [],
+                                },
+                            ],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@13..14 ")" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@14..15 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@15..17 "bg" [] [],
+                minus_token: DASH@17..18 "-" [] [],
+                value: TwCssVariableValue {
+                    l_paren_token: L_PAREN@18..19 "(" [] [],
+                    type_hint: TwTypeHint {
+                        name_token: TW_VALUE@19..24 "image" [] [],
+                        colon_token: COLON@24..25 ":" [] [],
+                    },
+                    value: CssParameterList [
+                        CssListOfComponentValuesExpression {
+                            css_component_value_list: CssComponentValueList [
+                                CssDashedIdentifier {
+                                    ident_token: IDENT@25..28 "--a" [] [],
+                                },
+                            ],
+                        },
+                        COMMA@28..29 "," [] [],
+                        CssListOfComponentValuesExpression {
+                            css_component_value_list: CssComponentValueList [
+                                CssFunction {
+                                    name: CssIdentifier {
+                                        ident_token: IDENT@29..32 "var" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@32..33 "(" [] [],
+                                    parameters: CssParameterList [
+                                        CssListOfComponentValuesExpression {
+                                            css_component_value_list: CssComponentValueList [
+                                                CssDashedIdentifier {
+                                                    ident_token: IDENT@33..36 "--b" [] [],
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                    r_paren_token: R_PAREN@36..37 ")" [] [],
+                                },
+                            ],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@37..38 ")" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@38..39 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@39..41 "bg" [] [],
+                minus_token: DASH@41..42 "-" [] [],
+                value: TwCssVariableValue {
+                    l_paren_token: L_PAREN@42..43 "(" [] [],
+                    type_hint: TwTypeHint {
+                        name_token: TW_VALUE@43..46 "url" [] [],
+                        colon_token: COLON@46..47 ":" [] [],
+                    },
+                    value: CssParameterList [
+                        CssListOfComponentValuesExpression {
+                            css_component_value_list: CssComponentValueList [
+                                CssDashedIdentifier {
+                                    ident_token: IDENT@47..50 "--a" [] [],
+                                },
+                            ],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@50..51 ")" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+        WHITESPACE@51..52 " " [] [],
+        TwFullCandidate {
+            variants: TwVariantList [],
+            legacy_important_token: missing (optional),
+            negative_token: missing (optional),
+            candidate: TwFunctionalCandidate {
+                base_token: TW_BASE@52..56 "text" [] [],
+                minus_token: DASH@56..57 "-" [] [],
+                value: TwCssVariableValue {
+                    l_paren_token: L_PAREN@57..58 "(" [] [],
+                    type_hint: TwTypeHint {
+                        name_token: TW_VALUE@58..69 "family-name" [] [],
+                        colon_token: COLON@69..70 ":" [] [],
+                    },
+                    value: CssParameterList [
+                        CssListOfComponentValuesExpression {
+                            css_component_value_list: CssComponentValueList [
+                                CssDashedIdentifier {
+                                    ident_token: IDENT@70..73 "--a" [] [],
+                                },
+                            ],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@73..74 ")" [] [],
+                },
+                modifier: missing (optional),
+            },
+            excl_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@74..74 "" [] [],
+}
+```
+
+## CST
+
+```
+0: TW_ROOT@0..74
+  0: (empty)
+  1: (empty)
+  2: TW_CANDIDATE_LIST@0..74
+    0: TW_FULL_CANDIDATE@0..14
+      0: TW_VARIANT_LIST@0..0
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@0..14
+        0: TW_BASE@0..2 "bg" [] []
+        1: DASH@2..3 "-" [] []
+        2: TW_CSS_VARIABLE_VALUE@3..14
+          0: L_PAREN@3..4 "(" [] []
+          1: TW_TYPE_HINT@4..10
+            0: TW_VALUE@4..9 "color" [] []
+            1: COLON@9..10 ":" [] []
+          2: CSS_PARAMETER_LIST@10..13
+            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@10..13
+              0: CSS_COMPONENT_VALUE_LIST@10..13
+                0: CSS_DASHED_IDENTIFIER@10..13
+                  0: IDENT@10..13 "--a" [] []
+          3: R_PAREN@13..14 ")" [] []
+        3: (empty)
+      4: (empty)
+    1: WHITESPACE@14..15 " " [] []
+    2: TW_FULL_CANDIDATE@15..38
+      0: TW_VARIANT_LIST@15..15
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@15..38
+        0: TW_BASE@15..17 "bg" [] []
+        1: DASH@17..18 "-" [] []
+        2: TW_CSS_VARIABLE_VALUE@18..38
+          0: L_PAREN@18..19 "(" [] []
+          1: TW_TYPE_HINT@19..25
+            0: TW_VALUE@19..24 "image" [] []
+            1: COLON@24..25 ":" [] []
+          2: CSS_PARAMETER_LIST@25..37
+            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@25..28
+              0: CSS_COMPONENT_VALUE_LIST@25..28
+                0: CSS_DASHED_IDENTIFIER@25..28
+                  0: IDENT@25..28 "--a" [] []
+            1: COMMA@28..29 "," [] []
+            2: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@29..37
+              0: CSS_COMPONENT_VALUE_LIST@29..37
+                0: CSS_FUNCTION@29..37
+                  0: CSS_IDENTIFIER@29..32
+                    0: IDENT@29..32 "var" [] []
+                  1: L_PAREN@32..33 "(" [] []
+                  2: CSS_PARAMETER_LIST@33..36
+                    0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@33..36
+                      0: CSS_COMPONENT_VALUE_LIST@33..36
+                        0: CSS_DASHED_IDENTIFIER@33..36
+                          0: IDENT@33..36 "--b" [] []
+                  3: R_PAREN@36..37 ")" [] []
+          3: R_PAREN@37..38 ")" [] []
+        3: (empty)
+      4: (empty)
+    3: WHITESPACE@38..39 " " [] []
+    4: TW_FULL_CANDIDATE@39..51
+      0: TW_VARIANT_LIST@39..39
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@39..51
+        0: TW_BASE@39..41 "bg" [] []
+        1: DASH@41..42 "-" [] []
+        2: TW_CSS_VARIABLE_VALUE@42..51
+          0: L_PAREN@42..43 "(" [] []
+          1: TW_TYPE_HINT@43..47
+            0: TW_VALUE@43..46 "url" [] []
+            1: COLON@46..47 ":" [] []
+          2: CSS_PARAMETER_LIST@47..50
+            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@47..50
+              0: CSS_COMPONENT_VALUE_LIST@47..50
+                0: CSS_DASHED_IDENTIFIER@47..50
+                  0: IDENT@47..50 "--a" [] []
+          3: R_PAREN@50..51 ")" [] []
+        3: (empty)
+      4: (empty)
+    5: WHITESPACE@51..52 " " [] []
+    6: TW_FULL_CANDIDATE@52..74
+      0: TW_VARIANT_LIST@52..52
+      1: (empty)
+      2: (empty)
+      3: TW_FUNCTIONAL_CANDIDATE@52..74
+        0: TW_BASE@52..56 "text" [] []
+        1: DASH@56..57 "-" [] []
+        2: TW_CSS_VARIABLE_VALUE@57..74
+          0: L_PAREN@57..58 "(" [] []
+          1: TW_TYPE_HINT@58..70
+            0: TW_VALUE@58..69 "family-name" [] []
+            1: COLON@69..70 ":" [] []
+          2: CSS_PARAMETER_LIST@70..73
+            0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@70..73
+              0: CSS_COMPONENT_VALUE_LIST@70..73
+                0: CSS_DASHED_IDENTIFIER@70..73
+                  0: IDENT@70..73 "--a" [] []
+          3: R_PAREN@73..74 ")" [] []
+        3: (empty)
+      4: (empty)
+  3: EOF@74..74 "" [] []
+
+```

@@ -139,6 +139,7 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(Eslint("no-extra-parens"), FormatterCovers),
     UnsupportedRule(Eslint("no-extra-semi"), FormatterCovers),
     UnsupportedRule(Eslint("no-floating-decimal"), FormatterCovers),
+    UnsupportedRule(Eslint("no-iterator"), Legacy),
     UnsupportedRule(Eslint("no-mixed-operators"), Stylistic),
     UnsupportedRule(
         Eslint("no-mixed-spaces-and-tabs"),
@@ -246,8 +247,12 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
         FormatterCovers,
     ),
     UnsupportedRule(EslintSvelte("no-trailing-spaces"), FormatterCovers),
+    UnsupportedRule(
+        EslintSvelte("no-unused-svelte-ignore"),
+        RequiresExternalTool,
+    ),
     UnsupportedRule(EslintSvelte("system"), NotApplicable),
-    UnsupportedRule(EslintSvelte("valid-compile"), NotApplicable),
+    UnsupportedRule(EslintSvelte("valid-compile"), RequiresExternalTool),
     UnsupportedRule(EslintSvelte("valid-style-parse"), FormatterCovers),
     UnsupportedRule(EslintStylistic("array-bracket-newline"), FormatterCovers),
     UnsupportedRule(
@@ -405,6 +410,7 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(EslintStylistic("wrap-iife"), Stylistic),
     UnsupportedRule(EslintStylistic("wrap-regex"), Stylistic),
     UnsupportedRule(EslintStylistic("yield-star-spacing"), FormatterCovers),
+    UnsupportedRule(EslintTailwindcss("important-modifier-suffix"), Deprecated),
     UnsupportedRule(EslintTypeScript("brace-style"), Stylistic),
     UnsupportedRule(EslintTypeScript("comma-dangle"), Stylistic),
     UnsupportedRule(EslintTypeScript("comma-spacing"), FormatterCovers),
@@ -419,6 +425,7 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     UnsupportedRule(EslintTypeScript("space-before-blocks"), FormatterCovers),
     UnsupportedRule(EslintTypeScript("space-before-function-paren"), Stylistic),
     UnsupportedRule(EslintTypeScript("space-infix-ops"), FormatterCovers),
+    UnsupportedRule(EslintTypeScript("typedef"), Deprecated),
     UnsupportedRule(EslintUnicorn("comma-spacing"), FormatterCovers),
     UnsupportedRule(EslintUnicorn("empty-brace-spaces"), FormatterCovers),
     UnsupportedRule(
@@ -531,13 +538,14 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
         Stylistic,
     ),
     UnsupportedRule(EslintMarkdown("no-space-in-emphasis"), FormatterCovers),
+    UnsupportedRule(EslintYml("flow-mapping-curly-newline"), FormatterCovers),
     UnsupportedRule(EslintYml("indent"), FormatterOption("indentWidth")),
     UnsupportedRule(EslintYml("no-tab-indent"), FormatterCovers),
     UnsupportedRule(EslintYml("no-trailing-spaces"), FormatterCovers),
     UnsupportedRule(EslintYml("quotes"), FormatterOption("quoteStyle")),
     UnsupportedRule(EslintAstro("no-omitted-end-tags"), Deprecated),
     UnsupportedRule(EslintAstro("semi"), FormatterOption("semicolons")),
-    UnsupportedRule(EslintAstro("valid-compile"), NotApplicable),
+    UnsupportedRule(EslintAstro("valid-compile"), RequiresExternalTool),
 ];
 
 #[cfg(test)]

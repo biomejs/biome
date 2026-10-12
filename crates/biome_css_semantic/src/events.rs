@@ -1,14 +1,17 @@
 use biome_css_syntax::{
-    AnyCssDashedIdentifier, AnyCssDeclarationName, AnyCssGenericComponentValue,
+    AnyCssDashedIdentifier, AnyCssDeclarationName, AnyCssFunction, AnyCssGenericComponentValue,
     AnyCssGenericPropertyValueOrExpression, AnyCssProperty, AnyCssRelativeSelector, AnyCssSelector,
-    AnyCssValue, CssDashedIdentifier, CssDeclaration, CssPropertyAtRule,
+    AnyCssValue, CssDashedIdentifier, CssDeclaration, CssLanguage, CssNestedQualifiedRule,
+    CssPropertyAtRule, CssQualifiedRule, CssString,
     CssSyntaxKind::*,
-    decode_css_identifier,
+    ScssAtRootSelector, ScssBinaryExpression, ScssExpression, ScssInterpolation,
+    ScssUnaryExpression, ScssVariable, decode_css_identifier,
     property_syntax::{
         PropertySyntaxErrorKind, PropertySyntaxParseDiagnostic, PropertySyntaxResult, encode,
     },
+    single_expression_item,
 };
-use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxNodeOptionExt, TextRange};
+use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, TextRange};
 use std::collections::VecDeque;
 
 use crate::model::{AnyCssSelectorLike, AnyRuleStart};
@@ -21,6 +24,16 @@ use crate::{
 };
 
 const ROOT_SELECTOR: &str = ":root";
+
+const RELATIVE_SELECTOR_LIST_PARENT_KINDS: SyntaxKindSet<CssLanguage> =
+    CssQualifiedRule::KIND_SET.union(CssNestedQualifiedRule::KIND_SET);
+const SELECTOR_LIST_PARENT_KINDS: SyntaxKindSet<CssLanguage> =
+    RELATIVE_SELECTOR_LIST_PARENT_KINDS.union(ScssAtRootSelector::KIND_SET);
+const SCSS_REQUIRES_EVALUATION_KINDS: SyntaxKindSet<CssLanguage> = ScssVariable::KIND_SET
+    .union(ScssInterpolation::KIND_SET)
+    .union(ScssBinaryExpression::KIND_SET)
+    .union(ScssUnaryExpression::KIND_SET)
+    .union(AnyCssFunction::KIND_SET);
 
 #[derive(Debug)]
 pub enum SemanticEvent {
@@ -45,6 +58,7 @@ pub enum SemanticEvent {
         initial_value: Option<CssPropertyInitialValueKind>,
         syntax: PropertySyntaxResult,
         inherits: Option<bool>,
+        inherits_requires_evaluation: bool,
         range: TextRange,
     },
 }
@@ -69,23 +83,16 @@ impl SemanticEventExtractor {
             //
             // Each rule start is pushed onto a stack to maintain parent-child relationships,
             // allowing for proper scoping and inheritance of styles.
-            kind if kind == CSS_QUALIFIED_RULE
-                || kind == CSS_NESTED_QUALIFIED_RULE
-                || kind == CSS_CONTAINER_AT_RULE
-                || kind == CSS_MEDIA_AT_RULE
-                || kind == CSS_SCOPE_AT_RULE
-                || kind == CSS_STARTING_STYLE_AT_RULE
-                || kind == CSS_SUPPORTS_AT_RULE =>
-            {
+            kind if AnyRuleStart::can_cast(kind) => {
                 if let Some(start) = AnyRuleStart::cast(node.clone()) {
                     self.stash.push_back(SemanticEvent::RuleStart(start));
                 }
             }
             CSS_SELECTOR_LIST => {
-                if !matches!(
-                    node.parent().kind(),
-                    Some(CSS_QUALIFIED_RULE | CSS_NESTED_QUALIFIED_RULE)
-                ) {
+                if !node
+                    .parent()
+                    .is_some_and(|parent| SELECTOR_LIST_PARENT_KINDS.matches(parent.kind()))
+                {
                     return;
                 };
                 node.children()
@@ -93,10 +100,9 @@ impl SemanticEventExtractor {
                     .for_each(|s| self.process_selector(s));
             }
             CSS_RELATIVE_SELECTOR_LIST => {
-                if !matches!(
-                    node.parent().kind(),
-                    Some(CSS_QUALIFIED_RULE | CSS_NESTED_QUALIFIED_RULE)
-                ) {
+                if !node.parent().is_some_and(|parent| {
+                    RELATIVE_SELECTOR_LIST_PARENT_KINDS.matches(parent.kind())
+                }) {
                     return;
                 };
                 node.children()
@@ -114,7 +120,10 @@ impl SemanticEventExtractor {
                     });
             }
             CSS_DECLARATION => {
-                if matches!(node.parent().kind(), Some(CSS_SUPPORTS_FEATURE_DECLARATION)) {
+                if node
+                    .parent()
+                    .is_some_and(|parent| parent.kind() == CSS_SUPPORTS_FEATURE_DECLARATION)
+                {
                     return;
                 }
                 // SAFETY: checked by the previous match
@@ -163,7 +172,8 @@ impl SemanticEventExtractor {
                                 AnyCssDeclarationName::AnyCssDashedIdentifier(
                                     AnyCssDashedIdentifier::ScssInterpolatedDashedIdentifier(_),
                                 )
-                                | AnyCssDeclarationName::ScssInterpolatedIdentifier(_) => {
+                                | AnyCssDeclarationName::ScssInterpolatedIdentifier(_)
+                                | AnyCssDeclarationName::CssMetavariable(_) => {
                                     return;
                                 }
                                 AnyCssDeclarationName::CssIdentifier(name) => {
@@ -253,6 +263,7 @@ impl SemanticEventExtractor {
         let mut initial_value = None;
         let mut syntax = PropertySyntaxResult::Missing;
         let mut inherits = None;
+        let mut inherits_requires_evaluation = false;
 
         for declaration in decls.declarations().into_iter().filter_map(|d| {
             d.as_css_declaration_with_semicolon()
@@ -288,14 +299,18 @@ impl SemanticEventExtractor {
                     let Ok(value) = prop.value() else {
                         continue;
                     };
-                    let value = value.to_trimmed_string();
-                    inherits = if value.eq_ignore_ascii_case("true") {
+                    let value_text = value.to_trimmed_string();
+                    inherits = if value_text.eq_ignore_ascii_case("true") {
                         Some(true)
-                    } else if value.eq_ignore_ascii_case("false") {
+                    } else if value_text.eq_ignore_ascii_case("false") {
                         Some(false)
                     } else {
                         None
                     };
+                    inherits_requires_evaluation = inherits.is_none()
+                        && value
+                            .as_scss_expression()
+                            .is_some_and(scss_expression_requires_evaluation);
                 }
             }
         }
@@ -305,6 +320,7 @@ impl SemanticEventExtractor {
             initial_value,
             syntax,
             inherits,
+            inherits_requires_evaluation,
             range: node.range(),
         });
     }
@@ -315,16 +331,7 @@ impl SemanticEventExtractor {
     }
 
     pub fn leave(&mut self, node: &biome_css_syntax::CssSyntaxNode) {
-        if matches!(
-            node.kind(),
-            CSS_QUALIFIED_RULE
-                | CSS_NESTED_QUALIFIED_RULE
-                | CSS_CONTAINER_AT_RULE
-                | CSS_MEDIA_AT_RULE
-                | CSS_SCOPE_AT_RULE
-                | CSS_STARTING_STYLE_AT_RULE
-                | CSS_SUPPORTS_AT_RULE
-        ) {
+        if AnyRuleStart::can_cast(node.kind()) {
             self.stash.push_back(SemanticEvent::RuleEnd);
             if self.is_in_root_selector {
                 self.stash.push_back(SemanticEvent::RootSelectorEnd);
@@ -340,19 +347,46 @@ impl SemanticEventExtractor {
 
 fn parse_property_syntax(value: AnyCssGenericPropertyValueOrExpression) -> PropertySyntaxResult {
     let range = value.range();
-    let Some(list) = value.as_css_generic_component_value_list() else {
-        return invalid_property_syntax(range);
+    let string = match value {
+        AnyCssGenericPropertyValueOrExpression::CssGenericComponentValueList(list) => {
+            let mut components = list.iter();
+            let Some(AnyCssGenericComponentValue::AnyCssValue(AnyCssValue::CssString(string))) =
+                components.next()
+            else {
+                return invalid_property_syntax(range);
+            };
+            if components.next().is_some() {
+                return invalid_property_syntax(range);
+            }
+            string
+        }
+        AnyCssGenericPropertyValueOrExpression::ScssExpression(expression) => {
+            let Some(string) = scss_expression_string(&expression) else {
+                return if scss_expression_requires_evaluation(&expression) {
+                    PropertySyntaxResult::Dynamic
+                } else {
+                    invalid_property_syntax(range)
+                };
+            };
+            string
+        }
+        _ => return invalid_property_syntax(range),
     };
-    let mut components = list.iter();
-    let Some(AnyCssGenericComponentValue::AnyCssValue(AnyCssValue::CssString(string))) =
-        components.next()
-    else {
-        return invalid_property_syntax(range);
-    };
-    if components.next().is_some() {
-        return invalid_property_syntax(range);
-    }
     encode(&string)
+}
+
+fn scss_expression_string(expression: &ScssExpression) -> Option<CssString> {
+    single_expression_item(expression)?
+        .as_any_css_value()?
+        .as_css_string()
+        .cloned()
+}
+
+fn scss_expression_requires_evaluation(expression: &ScssExpression) -> bool {
+    expression
+        .syntax()
+        .descendants()
+        .any(|node| SCSS_REQUIRES_EVALUATION_KINDS.matches(node.kind()))
 }
 
 fn invalid_property_syntax(range: TextRange) -> PropertySyntaxResult {

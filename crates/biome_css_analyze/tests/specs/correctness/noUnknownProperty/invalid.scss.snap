@@ -1,0 +1,237 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+.typo {
+  colr: blue;
+}
+
+@mixin declarations {
+  .mixin-branch {
+    colr: blue;
+  }
+}
+@include declarations;
+
+@mixin with-content {
+  @content;
+}
+@include with-content {
+  .include-branch {
+    colr: blue;
+  }
+}
+
+@at-root {
+  .at-root-branch {
+    colr: blue;
+  }
+}
+
+$condition: true;
+@if $condition {
+  .if-branch {
+    colr: blue;
+  }
+} @else {
+  .else-branch {
+    colr: blue;
+  }
+}
+
+@for $index from 1 through 2 {
+  .for-#{$index} {
+    colr: blue;
+  }
+}
+
+@each $name in first, second {
+  .each-#{$name} {
+    colr: blue;
+  }
+}
+
+$count: 0;
+@while $count < 1 {
+  .while-#{$count} {
+    colr: blue;
+  }
+  $count: $count + 1;
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:3:3 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown property is not allowed.
+  
+    1 │ /* should generate diagnostics */
+    2 │ .typo {
+  > 3 │   colr: blue;
+      │   ^^^^
+    4 │ }
+    5 │ 
+  
+  i See CSS Specifications and browser specific properties for more details.
+  
+  i To resolve this issue, replace the unknown property with a valid CSS property.
+  
+
+```
+
+```
+invalid.scss:8:5 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown property is not allowed.
+  
+     6 │ @mixin declarations {
+     7 │   .mixin-branch {
+   > 8 │     colr: blue;
+       │     ^^^^
+     9 │   }
+    10 │ }
+  
+  i See CSS Specifications and browser specific properties for more details.
+  
+  i To resolve this issue, replace the unknown property with a valid CSS property.
+  
+
+```
+
+```
+invalid.scss:18:5 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown property is not allowed.
+  
+    16 │ @include with-content {
+    17 │   .include-branch {
+  > 18 │     colr: blue;
+       │     ^^^^
+    19 │   }
+    20 │ }
+  
+  i See CSS Specifications and browser specific properties for more details.
+  
+  i To resolve this issue, replace the unknown property with a valid CSS property.
+  
+
+```
+
+```
+invalid.scss:24:5 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown property is not allowed.
+  
+    22 │ @at-root {
+    23 │   .at-root-branch {
+  > 24 │     colr: blue;
+       │     ^^^^
+    25 │   }
+    26 │ }
+  
+  i See CSS Specifications and browser specific properties for more details.
+  
+  i To resolve this issue, replace the unknown property with a valid CSS property.
+  
+
+```
+
+```
+invalid.scss:31:5 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown property is not allowed.
+  
+    29 │ @if $condition {
+    30 │   .if-branch {
+  > 31 │     colr: blue;
+       │     ^^^^
+    32 │   }
+    33 │ } @else {
+  
+  i See CSS Specifications and browser specific properties for more details.
+  
+  i To resolve this issue, replace the unknown property with a valid CSS property.
+  
+
+```
+
+```
+invalid.scss:35:5 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown property is not allowed.
+  
+    33 │ } @else {
+    34 │   .else-branch {
+  > 35 │     colr: blue;
+       │     ^^^^
+    36 │   }
+    37 │ }
+  
+  i See CSS Specifications and browser specific properties for more details.
+  
+  i To resolve this issue, replace the unknown property with a valid CSS property.
+  
+
+```
+
+```
+invalid.scss:41:5 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown property is not allowed.
+  
+    39 │ @for $index from 1 through 2 {
+    40 │   .for-#{$index} {
+  > 41 │     colr: blue;
+       │     ^^^^
+    42 │   }
+    43 │ }
+  
+  i See CSS Specifications and browser specific properties for more details.
+  
+  i To resolve this issue, replace the unknown property with a valid CSS property.
+  
+
+```
+
+```
+invalid.scss:47:5 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown property is not allowed.
+  
+    45 │ @each $name in first, second {
+    46 │   .each-#{$name} {
+  > 47 │     colr: blue;
+       │     ^^^^
+    48 │   }
+    49 │ }
+  
+  i See CSS Specifications and browser specific properties for more details.
+  
+  i To resolve this issue, replace the unknown property with a valid CSS property.
+  
+
+```
+
+```
+invalid.scss:54:5 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unknown property is not allowed.
+  
+    52 │ @while $count < 1 {
+    53 │   .while-#{$count} {
+  > 54 │     colr: blue;
+       │     ^^^^
+    55 │   }
+    56 │   $count: $count + 1;
+  
+  i See CSS Specifications and browser specific properties for more details.
+  
+  i To resolve this issue, replace the unknown property with a valid CSS property.
+  
+
+```

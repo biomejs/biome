@@ -1,0 +1,9 @@
+/* should generate diagnostics */
+.outer {
+  @at-root .direct-parent .direct-target, .direct-target {}
+
+  @at-root .direct-root {
+    .nested-parent .nested-target {}
+    .nested-target {}
+  }
+}

@@ -30,7 +30,43 @@ use biome_css_syntax::CssSyntaxKind::EOF;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
-use biome_parser::{TokenSet, token_set};
+use biome_parser::{CompletedMarker, TokenSet, token_set};
+
+#[derive(Clone, Copy)]
+pub(crate) struct ScssBlockParser {
+    parse_block: for<'source> fn(&mut CssParser<'source>) -> CompletedMarker,
+    additional_header_end_ts: TokenSet<CssSyntaxKind>,
+}
+
+impl ScssBlockParser {
+    pub(crate) const fn new(
+        parse_block: for<'source> fn(&mut CssParser<'source>) -> CompletedMarker,
+    ) -> Self {
+        Self {
+            parse_block,
+            additional_header_end_ts: TokenSet::EMPTY,
+        }
+    }
+
+    pub(crate) const fn with_additional_header_end_ts(
+        mut self,
+        additional_header_end_ts: TokenSet<CssSyntaxKind>,
+    ) -> Self {
+        self.additional_header_end_ts = additional_header_end_ts;
+        self
+    }
+
+    pub(crate) const fn header_end_ts(
+        self,
+        end_ts: TokenSet<CssSyntaxKind>,
+    ) -> TokenSet<CssSyntaxKind> {
+        end_ts.union(self.additional_header_end_ts)
+    }
+
+    pub(crate) fn parse(self, p: &mut CssParser) -> CompletedMarker {
+        (self.parse_block)(p)
+    }
+}
 
 pub(crate) use at_root_at_rule::parse_scss_at_root_at_rule;
 pub(crate) use container::{
@@ -39,14 +75,14 @@ pub(crate) use container::{
 };
 pub(crate) use content_at_rule::parse_scss_content_at_rule;
 pub(crate) use debug::parse_scss_debug_at_rule;
-pub(crate) use each_at_rule::parse_scss_each_at_rule;
+pub(crate) use each_at_rule::{parse_scss_each_at_rule, parse_scss_each_at_rule_with_block};
 pub(crate) use else_clause::parse_bogus_scss_else_at_rule;
 pub(crate) use error::parse_scss_error_at_rule;
 pub(crate) use extend_at_rule::parse_scss_extend_at_rule;
-pub(crate) use for_at_rule::parse_scss_for_at_rule;
+pub(crate) use for_at_rule::{parse_scss_for_at_rule, parse_scss_for_at_rule_with_block};
 pub(crate) use forward_at_rule::parse_scss_forward_at_rule;
 pub(crate) use function_at_rule::parse_scss_function_at_rule;
-pub(crate) use if_at_rule::parse_scss_if_at_rule;
+pub(crate) use if_at_rule::{parse_scss_if_at_rule, parse_scss_if_at_rule_with_block};
 pub(crate) use import_at_rule::parse_scss_import_at_rule;
 pub(crate) use include_at_rule::parse_scss_include_at_rule;
 pub(crate) use keyframes::{
@@ -66,7 +102,7 @@ pub(crate) use supports::{
 };
 pub(crate) use use_at_rule::parse_scss_use_at_rule;
 pub(crate) use warn::parse_scss_warn_at_rule;
-pub(crate) use while_at_rule::parse_scss_while_at_rule;
+pub(crate) use while_at_rule::{parse_scss_while_at_rule, parse_scss_while_at_rule_with_block};
 
 const SCSS_STATEMENT_AT_RULE_VALUE_END_SET: TokenSet<CssSyntaxKind> = token_set![T![;], T!['}']];
 

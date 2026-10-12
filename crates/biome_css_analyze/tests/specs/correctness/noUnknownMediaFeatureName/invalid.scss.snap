@@ -6,6 +6,10 @@ expression: invalid.scss
 ```css
 @media (#{$dyn}) and (unknown-feature) {}
 
+@media ($min < unknown-feature) {}
+@media ($min < width) and ($min < unknown-feature < $max) {}
+@media (#{$feature}) and ($min + 1rem < unknown-feature < $max - 1rem) {}
+
 ```
 
 # Diagnostics
@@ -17,6 +21,62 @@ invalid.scss:1:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━�
   > 1 │ @media (#{$dyn}) and (unknown-feature) {}
       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ 
+    3 │ @media ($min < unknown-feature) {}
+  
+  i Unexpected unknown media feature name.
+  
+  i You should use media feature names defined in the CSS Specifications.
+  
+
+```
+
+```
+invalid.scss:3:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't use unknown media feature names.
+  
+    1 │ @media (#{$dyn}) and (unknown-feature) {}
+    2 │ 
+  > 3 │ @media ($min < unknown-feature) {}
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ @media ($min < width) and ($min < unknown-feature < $max) {}
+    5 │ @media (#{$feature}) and ($min + 1rem < unknown-feature < $max - 1rem) {}
+  
+  i Unexpected unknown media feature name.
+  
+  i You should use media feature names defined in the CSS Specifications.
+  
+
+```
+
+```
+invalid.scss:4:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't use unknown media feature names.
+  
+    3 │ @media ($min < unknown-feature) {}
+  > 4 │ @media ($min < width) and ($min < unknown-feature < $max) {}
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ @media (#{$feature}) and ($min + 1rem < unknown-feature < $max - 1rem) {}
+    6 │ 
+  
+  i Unexpected unknown media feature name.
+  
+  i You should use media feature names defined in the CSS Specifications.
+  
+
+```
+
+```
+invalid.scss:5:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't use unknown media feature names.
+  
+    3 │ @media ($min < unknown-feature) {}
+    4 │ @media ($min < width) and ($min < unknown-feature < $max) {}
+  > 5 │ @media (#{$feature}) and ($min + 1rem < unknown-feature < $max - 1rem) {}
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
   
   i Unexpected unknown media feature name.
   

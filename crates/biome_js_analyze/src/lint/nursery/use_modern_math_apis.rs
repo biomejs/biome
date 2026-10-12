@@ -11,7 +11,7 @@ use biome_js_syntax::{
     JsBinaryExpression, JsBinaryOperator, JsCallExpression, T, global_identifier,
     numbers::canonicalize_js_bigint_literal, unescape_js_string,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, Direction};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use biome_rule_options::use_modern_math_apis::UseModernMathApisOptions;
 
 declare_lint_rule! {
@@ -113,7 +113,7 @@ impl Rule for UseModernMathApis {
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        if has_inner_comments(&state.expression) {
+        if state.expression.syntax().has_inner_comments() {
             return None;
         }
 
@@ -548,26 +548,4 @@ fn collect_square_bases(
     }
 
     Some(())
-}
-
-fn has_inner_comments(expression: &AnyJsExpression) -> bool {
-    let mut tokens = expression
-        .syntax()
-        .descendants_tokens(Direction::Next)
-        .peekable();
-    let Some(first) = tokens.next() else {
-        return false;
-    };
-    if first.has_trailing_comments() {
-        return true;
-    }
-    while let Some(token) = tokens.next() {
-        if token.has_leading_comments() {
-            return true;
-        }
-        if tokens.peek().is_some() && token.has_trailing_comments() {
-            return true;
-        }
-    }
-    false
 }

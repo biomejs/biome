@@ -12,11 +12,14 @@ use crate::syntax::parse_error::{
     expected_component_value, expected_identifier, scss_only_syntax_error,
 };
 use crate::syntax::property::parse_generic_component_value;
-use crate::syntax::scss::parse_scss_interpolated_attribute_name;
+use crate::syntax::scss::{
+    is_at_scss_interpolated_function_or_value, is_at_scss_variable,
+    parse_scss_interpolated_attribute_name, parse_scss_optional_value_until, parse_scss_variable,
+};
 use crate::syntax::value::dimension::is_nth_at_unit;
 use crate::syntax::value::r#type::is_at_type_function;
 use crate::syntax::value::r#type::parse_type_function;
-use crate::syntax::{CssSyntaxFeatures, is_at_identifier};
+use crate::syntax::{CssSyntaxFeatures, ValueParsingContext, is_at_identifier};
 
 #[inline]
 pub(crate) fn is_at_attr_function(p: &mut CssParser) -> bool {
@@ -58,7 +61,7 @@ pub(crate) fn is_at_attr_function(p: &mut CssParser) -> bool {
 ///   <attr-type> = type( <syntax> ) | raw-string | number | <attr-unit>
 /// ```
 #[inline]
-pub(crate) fn parse_attr_function(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_attr_function(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyntax {
     if !is_at_attr_function(p) {
         return Absent;
     }
@@ -67,9 +70,9 @@ pub(crate) fn parse_attr_function(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T![attr]);
     p.bump(T!['(']);
 
-    AttrNameList.parse_list(p);
+    AttrNameList { context }.parse_list(p);
     parse_attr_type(p).ok();
-    parse_attr_fallback_value(p).ok();
+    parse_attr_fallback_value(p, context).ok();
 
     p.expect(T![')']);
 
@@ -146,7 +149,7 @@ fn is_at_attr_fallback_value(p: &mut CssParser) -> bool {
 }
 
 #[inline]
-fn parse_attr_fallback_value(p: &mut CssParser) -> ParsedSyntax {
+fn parse_attr_fallback_value(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyntax {
     if !is_at_attr_fallback_value(p) {
         return Absent;
     }
@@ -154,7 +157,18 @@ fn parse_attr_fallback_value(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![,]);
-    AttrFallbackValueList.parse_list(p);
+    // Interpolation-led fallbacks retain CSS adjacency rules for suffixes such as `#{$fn}0(1)`.
+    let scss_value = if context.is_full_scss_parsing_allowed()
+        && !is_at_scss_interpolated_function_or_value(p)
+    {
+        parse_scss_optional_value_until(p, token_set!(T![')'], T![;], T!['}']))
+    } else {
+        Absent
+    };
+
+    if scss_value.is_absent() {
+        AttrFallbackValueList.parse_list(p);
+    }
 
     Present(m.complete(p, CSS_ATTR_FALLBACK_VALUE))
 }
@@ -204,7 +218,9 @@ impl ParseRecovery for AttrNameListParseRecovery {
     }
 }
 
-struct AttrNameList;
+struct AttrNameList {
+    context: ValueParsingContext,
+}
 
 impl ParseSeparatedList for AttrNameList {
     type Kind = CssSyntaxKind;
@@ -212,7 +228,7 @@ impl ParseSeparatedList for AttrNameList {
     const LIST_KIND: Self::Kind = CSS_ATTR_NAME_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_attr_name(p)
+        parse_attr_name(p, self.context)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -236,16 +252,26 @@ impl ParseSeparatedList for AttrNameList {
     }
 }
 
-/// Parses a plain or SCSS-interpolated attribute name.
+/// Parses a plain, SCSS-interpolated, or Sass variable attribute name.
 ///
 /// ```scss
 /// .a::after {
+///   content: attr($name);
 ///   content: attr(#{$name});
 ///   content: attr(data-#{$name});
 /// }
 /// ```
 #[inline]
-fn parse_attr_name(p: &mut CssParser) -> ParsedSyntax {
+fn parse_attr_name(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyntax {
+    if context.is_scss_exclusive_syntax_allowed() && is_at_scss_variable(p) {
+        return CssSyntaxFeatures::Scss.parse_exclusive_syntax_with_kind(
+            p,
+            parse_scss_variable,
+            |p, marker| scss_only_syntax_error(p, "SCSS variable attribute names", marker.range(p)),
+            Some(CSS_BOGUS_ATTR_NAME),
+        );
+    }
+
     let Present(name) = parse_scss_interpolated_attribute_name(p) else {
         return Absent;
     };

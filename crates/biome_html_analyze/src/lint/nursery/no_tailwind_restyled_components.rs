@@ -5,10 +5,10 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_embeds::components::component_name_segments;
 use biome_html_syntax::{HtmlAttribute, element_ext::AnyHtmlTagElement};
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::AstNode;
 use biome_rule_options::no_tailwind_restyled_components::NoTailwindRestyledComponentsOptions;
 use biome_tailwind_logic::no_tailwind_restyled_components::{
-    matches_component_name, restyled_component_ranges,
+    RestyledUtility, component_allowances, matches_component_name, restyled_component_ranges,
 };
 use biome_tailwind_logic::syntax_service::TailwindSyntax;
 
@@ -69,6 +69,9 @@ declare_lint_rule! {
     /// - `components`: a component name, an array of names, or `"*"` for all components.
     /// - `categories`: any of `color`, `typography`, `spacing`, `shape`, `effects`, or `motion`. Default: `[]`.
     /// - `classes`: exact classes, including variants and modifiers. Default: `[]`.
+    /// - `advice`: instructions on how to fix the problem, shown in diagnostics for the
+    ///   matching components in place of the default advice. If several matching entries
+    ///   have `advice`, the first one is shown. Default: none.
     ///
     /// A name matches any segment of a member name, so both `Card` and `Root` match
     /// `Card.Root`. Dotted names such as `Card.Root` match consecutive segments.
@@ -88,6 +91,25 @@ declare_lint_rule! {
     /// <MyButton class="rounded-none hover:shadow-lg"></MyButton>
     /// ```
     ///
+    /// An entry can tell users how to change the appearance of a component:
+    ///
+    /// ```json,options
+    /// {
+    ///   "options": {
+    ///     "allow": [
+    ///       {
+    ///         "components": "my-button",
+    ///         "advice": "Use the `variant` prop of `my-button` to change its appearance."
+    ///       }
+    ///     ]
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```html,expect_diagnostic,use_options
+    /// <my-button class="rounded-none"></my-button>
+    /// ```
+    ///
     pub NoTailwindRestyledComponents {
         version: "next",
         name: "noTailwindRestyledComponents",
@@ -101,7 +123,7 @@ declare_lint_rule! {
 
 impl Rule for NoTailwindRestyledComponents {
     type Query = TailwindSyntax<HtmlAttribute>;
-    type State = TextRange;
+    type State = RestyledUtility;
     type Signals = Vec<Self::State>;
     type Options = NoTailwindRestyledComponentsOptions;
 
@@ -121,28 +143,32 @@ impl Rule for NoTailwindRestyledComponents {
         let Some(segments) = component_name_segments(&element) else {
             return vec![];
         };
-        let allowances: Vec<_> = ctx
-            .options()
-            .allow()
-            .iter()
-            .filter(|allow| {
-                allow
-                    .components
-                    .matches(|name| matches_component_name(&segments, name))
-            })
-            .collect();
+        let (allowances, advice_index) = component_allowances(ctx.options().allow(), |name| {
+            matches_component_name(&segments, name)
+        });
         restyled_component_ranges(&ctx.query().tailwind_root().candidates(), &allowances)
+            .into_iter()
+            .map(|range| RestyledUtility {
+                range,
+                advice_index,
+            })
+            .collect()
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                host_range(ctx.query().node(), *range)?,
-                markup! { "This Tailwind utility restyles a component." },
-            )
-            .note(markup! { "The design system should manage the component's appearance." })
-            .note(markup! { "Use a supported component variant or move this style into the component's definition." }),
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let diagnostic = RuleDiagnostic::new(
+            rule_category!(),
+            host_range(ctx.query().node(), state.range)?,
+            markup! { "This Tailwind utility restyles a component." },
         )
+        .note(markup! { "The design system should manage the component's appearance." });
+        let allow = ctx.options().allow();
+        let advice = state
+            .advice_index
+            .and_then(|index| allow.get(index)?.advice.as_deref());
+        Some(match advice {
+            Some(advice) => diagnostic.note(markup! { {advice} }),
+            None => diagnostic.note(markup! { "Use a supported component variant or move this style into the component's definition." }),
+        })
     }
 }

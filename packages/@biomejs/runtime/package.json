@@ -1,7 +1,6 @@
 {
-  "private": true,
   "name": "@biomejs/runtime",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "JavaScript APIs for Biome JS plugins",
   "scripts": {
     "test:types": "tsc --project tsconfig.json"

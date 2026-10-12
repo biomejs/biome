@@ -1,0 +1,34 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+.grid {
+  grid-template-areas:
+    "a a"
+    "b b b";
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:3:23 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Inconsistent cell count in grid areas are not allowed.
+  
+    1 │ /* should generate diagnostics */
+    2 │ .grid {
+  > 3 │   grid-template-areas:
+      │                       
+  > 4 │     "a a"
+      │     ^^^^^
+    5 │     "b b b";
+    6 │ }
+  
+  i Consider adding the same number of cell tokens in each string.
+  
+
+```

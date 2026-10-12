@@ -52,10 +52,12 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             .unwrap_or_default();
         let frontmatter = parser.frontmatter.unwrap_or_default().into();
         let gfm = parser.gfm.unwrap_or_default().into();
+        let cjk_friendly_emphasis = parser.cjk_friendly_emphasis.unwrap_or_default().into();
 
         MarkdownParserOptions::default()
             .with_frontmatter(frontmatter)
             .with_gfm(gfm)
+            .with_cjk_friendly_emphasis(cjk_friendly_emphasis)
     } else {
         MarkdownParserOptions::default()
     };

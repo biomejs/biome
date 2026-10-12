@@ -1,0 +1,26 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: scss-contexts.valid.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+$condition: true;
+@if $condition {
+  .conditional {}
+} @else {
+  .conditional {}
+}
+
+@mixin conditional-output {
+  .external-selector {}
+}
+.external-selector {}
+
+%placeholder {}
+%placeholder {}
+
+#{$dynamic-selector} {}
+#{$dynamic-selector} {}
+
+```

@@ -10,21 +10,22 @@ mod token_sets;
 mod value;
 
 pub(crate) use at_rule::{
-    expect_scss_semicolon_at_rule, is_at_scss_container_interpolated_query,
+    ScssBlockParser, expect_scss_semicolon_at_rule, is_at_scss_container_interpolated_query,
     is_at_scss_container_name_or_query, is_at_scss_interpolated_media_in_parens,
     is_at_scss_keyframes_name, is_at_scss_keyframes_selector, is_at_scss_media_condition,
     is_at_scss_media_query, is_at_scss_supports_interpolated_condition,
     parse_bogus_scss_else_at_rule, parse_scss_at_root_at_rule,
     parse_scss_container_interpolated_query, parse_scss_container_name_or_query,
     parse_scss_content_at_rule, parse_scss_debug_at_rule, parse_scss_each_at_rule,
-    parse_scss_error_at_rule, parse_scss_extend_at_rule, parse_scss_for_at_rule,
-    parse_scss_forward_at_rule, parse_scss_function_at_rule, parse_scss_if_at_rule,
+    parse_scss_each_at_rule_with_block, parse_scss_error_at_rule, parse_scss_extend_at_rule,
+    parse_scss_for_at_rule, parse_scss_for_at_rule_with_block, parse_scss_forward_at_rule,
+    parse_scss_function_at_rule, parse_scss_if_at_rule, parse_scss_if_at_rule_with_block,
     parse_scss_import_at_rule, parse_scss_include_at_rule, parse_scss_interpolated_media_in_parens,
     parse_scss_interpolated_query_feature, parse_scss_keyframes_name,
     parse_scss_keyframes_selector, parse_scss_media_condition,
     parse_scss_media_condition_from_query, parse_scss_media_query, parse_scss_mixin_at_rule,
     parse_scss_return_at_rule, parse_scss_supports_interpolated_condition, parse_scss_use_at_rule,
-    parse_scss_warn_at_rule, parse_scss_while_at_rule,
+    parse_scss_warn_at_rule, parse_scss_while_at_rule, parse_scss_while_at_rule_with_block,
 };
 pub(crate) use declaration::{
     is_at_scss_nesting_declaration, is_at_scss_variable_declaration, is_at_scss_variable_modifier,
@@ -39,7 +40,7 @@ pub(crate) use expression::{
     parse_scss_expression, parse_scss_expression_from_head, parse_scss_expression_in_args_until,
     parse_scss_expression_in_variable_value_until, parse_scss_expression_until,
     parse_scss_interpolation_with_context, parse_scss_optional_value_until,
-    parse_scss_regular_interpolation,
+    parse_scss_optional_value_until_with_boundary, parse_scss_regular_interpolation,
 };
 pub(crate) use function_name::{
     add_scss_variable_member_function_name_diagnostic, parse_scss_function_name,
@@ -51,11 +52,12 @@ pub(crate) use identifiers::{
     is_nth_at_scss_hyphen_interpolated_identifier, is_nth_at_scss_interpolated_dashed_identifier,
     is_nth_at_scss_interpolated_identifier, is_nth_at_scss_interpolated_selector_identifier,
     is_nth_at_scss_module_member_access, is_nth_source_tight,
-    parse_scss_hyphen_interpolated_identifier, parse_scss_interpolated_attribute_name,
-    parse_scss_interpolated_dashed_identifier, parse_scss_interpolated_identifier,
-    parse_scss_interpolated_name, parse_scss_interpolation_or_identifier,
-    parse_scss_module_member_access, parse_scss_namespaced_variable,
-    parse_scss_selector_custom_identifier, parse_scss_selector_identifier, parse_scss_variable,
+    parse_scss_hyphen_interpolated_identifier, parse_scss_interpolated_at_rule_name,
+    parse_scss_interpolated_attribute_name, parse_scss_interpolated_dashed_identifier,
+    parse_scss_interpolated_identifier, parse_scss_interpolated_name,
+    parse_scss_interpolation_or_identifier, parse_scss_module_member_access,
+    parse_scss_namespaced_variable, parse_scss_selector_custom_identifier,
+    parse_scss_selector_identifier, parse_scss_variable,
 };
 pub(crate) use parse_error::{
     expected_scss_expression, expected_scss_variable_modifier, scss_ellipsis_not_allowed,

@@ -1,0 +1,4 @@
+.outer { ;; color: red;; .inner { color: blue }; @media screen { ; width: 1px;; }; }
+@font-face { ;; font-family: Example; src: url(example.woff2);; }
+@keyframes pulse { from { ;; opacity: 0;; } to { ; opacity: 1; } }
+@font-feature-values Example { @styleset { ;; compact: 1;; } }

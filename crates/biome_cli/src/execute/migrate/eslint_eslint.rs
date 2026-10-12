@@ -555,6 +555,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::MaxNestedCallbacks(conf));
                             }
                         }
+                        "max-statements" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::MaxStatements(conf));
+                            }
+                        }
                         "no-console" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::NoConsole(conf));
@@ -621,6 +626,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::TypeScriptSwitchExhaustivenessCheck(conf));
                             }
                         }
+                        "svelte/block-lang" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::SvelteBlockLang(conf));
+                            }
+                        }
                         "svelte/no-restricted-html-elements" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::SvelteNoRestrictedHtmlElements(conf));
@@ -631,9 +641,19 @@ impl Deserializable for Rules {
                                 result.insert(Rule::SvelteNoUnnecessaryStateWrap(conf));
                             }
                         }
+                        "vue/block-lang" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::VueBlockLang(conf));
+                            }
+                        }
                         "vue/no-restricted-html-elements" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::VueNoRestrictedHtmlElements(conf));
+                            }
+                        }
+                        "unicorn/consistent-json-file-read" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::UnicornConsistentJsonFileRead(conf));
                             }
                         }
                         "unicorn/filename-case" => {
@@ -744,6 +764,62 @@ impl From<MaxNestedCallbacksOptions>
                     .max
                     .unwrap_or(MaxNestedCallbacksOptions::ESLINT_DEFAULT_MAX),
             ),
+        }
+    }
+}
+
+#[derive(Debug, Default)]
+pub(crate) struct MaxStatementsOptions {
+    max: Option<u16>,
+}
+
+impl Deserializable for MaxStatementsOptions {
+    fn deserialize(
+        ctx: &mut dyn DeserializationContext,
+        value: &impl DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        if value.visitable_type()? == DeserializableType::Number {
+            return Some(Self {
+                max: Deserializable::deserialize(ctx, value, name),
+            });
+        }
+
+        MaxStatementsObjectOptions::deserialize(ctx, value, name).map(Into::into)
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct MaxStatementsObjectOptions {
+    max: Option<u16>,
+    maximum: Option<u16>,
+}
+
+impl From<MaxStatementsObjectOptions> for MaxStatementsOptions {
+    fn from(value: MaxStatementsObjectOptions) -> Self {
+        // ESLint gives precedence to the deprecated `maximum` option.
+        Self {
+            max: value.maximum.or(value.max),
+        }
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+pub(crate) struct MaxStatementsTopLevelOptions {
+    #[deserializable(rename = "ignoreTopLevelFunctions")]
+    ignore_top_level_functions: Option<bool>,
+}
+
+impl MaxStatementsOptions {
+    pub(crate) fn into_biome_options(
+        self,
+        top_level_options: Option<MaxStatementsTopLevelOptions>,
+    ) -> biome_rule_options::no_excessive_statements_per_function::NoExcessiveStatementsPerFunctionOptions
+    {
+        biome_rule_options::no_excessive_statements_per_function::NoExcessiveStatementsPerFunctionOptions {
+            max: self.max,
+            ignore_top_level_functions: top_level_options
+                .and_then(|options| options.ignore_top_level_functions),
         }
     }
 }
@@ -888,6 +964,7 @@ pub(crate) enum Rule {
     ClassMethodsUseThis(RuleConf<ClassMethodsUseThisOptions>),
     FuncStyle(RuleConf<FunctionStyle, FuncStyleOptions>),
     MaxNestedCallbacks(RuleConf<MaxNestedCallbacksOptions>),
+    MaxStatements(RuleConf<MaxStatementsOptions, MaxStatementsTopLevelOptions>),
     NoConsole(RuleConf<Box<NoConsoleOptions>>),
     NoRestrictedProperties(RuleConf<Box<NoRestrictedPropertyOption>>),
     NoRestrictedGlobals(RuleConf<Box<NoRestrictedGlobal>>),
@@ -906,10 +983,13 @@ pub(crate) enum Rule {
     TypeScriptSwitchExhaustivenessCheck(
         RuleConf<eslint_typescript::SwitchExhaustivenessCheckOptions>,
     ),
+    SvelteBlockLang(RuleConf<eslint_svelte::BlockLangOptions>),
     SvelteNoRestrictedHtmlElements(RuleConf<eslint_svelte::RestrictedHtmlElement>),
     SvelteNoUnnecessaryStateWrap(RuleConf<SvelteNoUnnecessaryStateWrapOptions>),
+    UnicornConsistentJsonFileRead(RuleConf<eslint_unicorn::ConsistentJsonFileReadOption>),
     UnicornFilenameCase(RuleConf<eslint_unicorn::FilenameCaseOptions>),
     UnicornNumericSeparatorsStyle(RuleConf<eslint_unicorn::NumericSeparatorsStyleOptions>),
+    VueBlockLang(RuleConf<eslint_vue::BlockLangOptions>),
     VueNoRestrictedHtmlElements(RuleConf<eslint_vue::RestrictedHtmlElement>),
     // If you add new variants, don't forget to update [Rules::deserialize].
 }
@@ -921,6 +1001,7 @@ impl Rule {
             Self::ClassMethodsUseThis(_) => Cow::Borrowed("class-methods-use-this"),
             Self::FuncStyle(_) => Cow::Borrowed("func-style"),
             Self::MaxNestedCallbacks(_) => Cow::Borrowed("max-nested-callbacks"),
+            Self::MaxStatements(_) => Cow::Borrowed("max-statements"),
             Self::NoConsole(_) => Cow::Borrowed("no-console"),
             Self::NoRestrictedProperties(_) => Cow::Borrowed("no-restricted-properties"),
             Self::NoRestrictedGlobals(_) => Cow::Borrowed("no-restricted-globals"),
@@ -944,12 +1025,17 @@ impl Rule {
             Self::TypeScriptSwitchExhaustivenessCheck(_) => {
                 Cow::Borrowed("@typescript-eslint/switch-exhaustiveness-check")
             }
+            Self::SvelteBlockLang(_) => Cow::Borrowed("svelte/block-lang"),
             Self::SvelteNoRestrictedHtmlElements(_) => {
                 Cow::Borrowed("svelte/no-restricted-html-elements")
             }
             Self::SvelteNoUnnecessaryStateWrap(_) => {
                 Cow::Borrowed("svelte/no-unnecessary-state-wrap")
             }
+            Self::UnicornConsistentJsonFileRead(_) => {
+                Cow::Borrowed("unicorn/consistent-json-file-read")
+            }
+            Self::VueBlockLang(_) => Cow::Borrowed("vue/block-lang"),
             Self::UnicornFilenameCase(_) => Cow::Borrowed("unicorn/filename-case"),
             Self::UnicornNumericSeparatorsStyle(_) => {
                 Cow::Borrowed("unicorn/numeric-separators-style")
@@ -988,6 +1074,23 @@ impl From<SvelteNoUnnecessaryStateWrapOptions>
             additional_reactive_classes: (!value.additional_reactive_classes.is_empty())
                 .then_some(value.additional_reactive_classes),
             allow_reassign: value.allow_reassign,
+        }
+    }
+}
+
+/// A value that is either a single item or an array of items.
+#[derive(Debug)]
+pub(crate) struct OneOrMany<T>(pub(crate) Vec<T>);
+impl<T: Deserializable> Deserializable for OneOrMany<T> {
+    fn deserialize(
+        ctx: &mut dyn DeserializationContext,
+        value: &impl DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        if value.visitable_type()? == DeserializableType::Array {
+            Vec::deserialize(ctx, value, name).map(Self)
+        } else {
+            T::deserialize(ctx, value, name).map(|item| Self(vec![item]))
         }
     }
 }

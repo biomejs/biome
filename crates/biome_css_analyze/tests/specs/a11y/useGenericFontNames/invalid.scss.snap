@@ -1,0 +1,62 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+.element {
+  font-family: Arial;
+  font: normal 14px/32px Arial;
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:3:16 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Generic font family missing.
+  
+    1 │ /* should generate diagnostics */
+    2 │ .element {
+  > 3 │   font-family: Arial;
+      │                ^^^^^
+    4 │   font: normal 14px/32px Arial;
+    5 │ }
+  
+  i Consider adding a generic font family as a fallback.
+  
+  i For examples and more information, see the MDN Web Docs
+  
+  - serif
+  - sans-serif
+  - monospace
+  - etc.
+  
+
+```
+
+```
+invalid.scss:4:26 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Generic font family missing.
+  
+    2 │ .element {
+    3 │   font-family: Arial;
+  > 4 │   font: normal 14px/32px Arial;
+      │                          ^^^^^
+    5 │ }
+    6 │ 
+  
+  i Consider adding a generic font family as a fallback.
+  
+  i For examples and more information, see the MDN Web Docs
+  
+  - serif
+  - sans-serif
+  - monospace
+  - etc.
+  
+
+```

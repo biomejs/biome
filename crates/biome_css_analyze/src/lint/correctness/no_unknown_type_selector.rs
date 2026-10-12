@@ -50,6 +50,11 @@ declare_lint_rule! {
     /// [SVG](https://developer.mozilla.org/en-US/docs/Web/SVG/Element), and
     /// [MathML](https://developer.mozilla.org/en-US/docs/Web/MathML/Element).
     ///
+    /// ## SCSS limitations
+    ///
+    /// Type selector names containing SCSS interpolation are ignored because the emitted name cannot
+    /// be determined statically.
+    ///
     /// ## Examples
     ///
     /// ### Invalid

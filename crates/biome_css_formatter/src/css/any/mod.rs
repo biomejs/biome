@@ -2,6 +2,7 @@
 
 pub(crate) mod at_rule;
 pub(crate) mod at_rule_declarator;
+pub(crate) mod attr_fallback_value;
 pub(crate) mod attr_name;
 pub(crate) mod attr_type;
 pub(crate) mod attr_unit;
@@ -25,6 +26,7 @@ pub(crate) mod container_style_and_combinable_query;
 pub(crate) mod container_style_in_parens;
 pub(crate) mod container_style_or_combinable_query;
 pub(crate) mod container_style_query;
+pub(crate) mod control_block;
 pub(crate) mod custom_identifier;
 pub(crate) mod custom_media_query;
 pub(crate) mod custom_property_component;
@@ -49,6 +51,7 @@ pub(crate) mod function_parameter;
 pub(crate) mod generic_component_value;
 pub(crate) mod generic_property_value_or_expression;
 pub(crate) mod if_branch;
+pub(crate) mod if_branch_value;
 pub(crate) mod if_condition;
 pub(crate) mod if_media_test_query;
 pub(crate) mod if_supports_test_condition;

@@ -1,3 +1,4 @@
+pub use crate::shared::tailwind_utility_category::TailwindUtilityCategory;
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
 };
@@ -30,10 +31,14 @@ pub struct TailwindComponentAllowance {
     pub components: TailwindAllowedComponents,
     /// Categories allowed on the matching components. Defaults to an empty list.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub categories: Vec<TailwindAppearanceCategory>,
+    pub categories: Vec<TailwindUtilityCategory>,
     /// Exact classes, including variants and modifiers. Defaults to an empty list.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub classes: Vec<Box<str>>,
+    /// Instructions on how to fix the problem, shown in diagnostics for the matching
+    /// components in place of the default advice.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub advice: Option<Box<str>>,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -71,16 +76,4 @@ impl TailwindAllowedComponents {
             Self::Names(names) => names.iter().any(|name| matches_name(name)),
         }
     }
-}
-
-#[derive(Clone, Copy, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase")]
-pub enum TailwindAppearanceCategory {
-    Color,
-    Typography,
-    Spacing,
-    Shape,
-    Effects,
-    Motion,
 }

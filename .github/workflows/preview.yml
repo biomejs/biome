@@ -76,7 +76,7 @@ jobs:
 
       # Build the CLI binary
       - name: Build binaries
-        run: cargo build -p biome_cli --release --target=${{ matrix.target }} --features=js_plugin
+        run: cargo build -p biome_cli --release --target=${{ matrix.target }}
         env:
           # Strip all debug symbols from the resulting binaries
           RUSTFLAGS: '-C strip=symbols -C codegen-units=1'
@@ -132,7 +132,7 @@ jobs:
 
       # Build the CLI binary
       - name: Build binaries
-        run: cargo build -p biome_cli --release --target=${{ matrix.target }} --features=js_plugin
+        run: cargo build -p biome_cli --release --target=${{ matrix.target }}
         env:
           # Strip all debug symbols from the resulting binaries
           RUSTFLAGS: '-C strip=symbols -C codegen-units=1'
@@ -233,6 +233,7 @@ jobs:
           pnpx pkg-pr-new publish --compact \
           './packages/@biomejs/biome' \
           './packages/@biomejs/cli-*' \
+          './packages/@biomejs/runtime' \
           './packages/@biomejs/wasm-*' \
           --json output.json --comment=off
 

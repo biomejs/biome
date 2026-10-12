@@ -519,6 +519,20 @@ export interface TailwindConfiguration {
 	 */
 	mergeFunctions?: string[];
 	/**
+	 * The CSS file that holds your Tailwind CSS configuration, such as
+	 * `"./src/app.css"`. A relative path starts from the folder of the Biome
+	 * configuration file.
+	 *
+	 * Biome reads the `@theme`, `@utility`, and `@custom-variant` rules in
+	 * this file and in the files it imports with `@import`, so that the
+	 * Tailwind rules know your theme values, utilities, and variants.
+	 *
+	 * To read the file, Biome scans your project when a Tailwind rule is
+	 * enabled. Setting this option also turns on `css.parser.tailwindDirectives`,
+	 * unless you set that option yourself.
+	 */
+	stylesheet?: string;
+	/**
 	 * Functions that describe a component's styles with an object, such as
 	 * `cva` and `tv`.
 	 *
@@ -702,7 +716,7 @@ export interface CssParserConfiguration {
 	/**
 	 * Enables CSS Modules-specific syntax such as `:local`, `:global`, `composes`, and `@value`.
 	 * When unset, Biome enables this syntax automatically for files whose names end in
-	 * `.module.css`; otherwise, it defaults to `false`. Enable it explicitly when CSS Module files
+	 * `.module.css` or `.module.scss; otherwise, it defaults to `false`. Enable it explicitly when CSS Module files
 	 * use another naming convention.
 	 */
 	cssModules?: Bool;
@@ -1101,10 +1115,6 @@ export interface JsLinterConfiguration {
  */
 export interface JsParserConfiguration {
 	/**
-	 * Enables parsing Grit metavariables in JavaScript and TypeScript syntax. Defaults to `false`.
-	 */
-	gritMetavariables?: Bool;
-	/**
 	 * Controls whether `.js`, `.mjs`, and `.cjs` files may contain JSX syntax. Disabling this
 	 * option causes JSX in those files to raise a diagnostic. Defaults to `true`.
 	 */
@@ -1338,6 +1348,31 @@ export interface MarkdownLinterConfiguration {
  * Options that change how the Markdown parser behaves
  */
 export interface MarkdownParserConfiguration {
+	/**
+	 * Recognizes bold, italic, and strikethrough markers placed directly next to Chinese, Japanese, or Korean text. Defaults to `false`.
+	 *
+	 * Standard Markdown doesn't treat `**テスト。**テスト` as bold text, because the closing `**`
+	 * is between a punctuation mark and a letter with no space around it. Languages that don't
+	 * put spaces between words run into this often. When enabled, Biome follows the
+	 * [CommonMark CJK-friendly amendments](https://github.com/tats-u/markdown-cjk-friendly/blob/main/specification.md)
+	 * and treats such text as bold or italic. The option applies to `*`, `_`, and `~~` markers.
+	 * After a variation selector (an invisible character that picks a glyph style for the
+	 * character before it), Biome classifies a marker by the character before the selector.
+	 *
+	 * The option can also change markers that aren't next to Chinese, Japanese, or Korean text,
+	 * because a marker that can now open or close formatting can take another marker's partner
+	 * in the same paragraph, heading, or table cell. For example, standard Markdown shows
+	 * `**テスト。**テスト a**` with `テスト a` in bold. With the option enabled, `テスト。` is bold
+	 * and the last `**` is shown as written.
+	 *
+	 * The formatter and the linter both use this reading of the document. Enable the option only
+	 * when the tool that renders your Markdown also supports these amendments. Otherwise, Biome
+	 * treats as bold some text that your renderer shows with literal `**`, and formatting can
+	 * change what your renderer shows. For example, the option makes `__` after a variation
+	 * selector a bold marker, and the formatter rewrites it as `**`, which standard Markdown
+	 * shows as bold even where it showed the original `__` as written.
+	 */
+	cjkFriendlyEmphasis?: Bool;
 	/**
 	 * Enables parsing frontmatter at the start of the file. Defaults to `false`.
 	 */
@@ -2899,6 +2934,11 @@ export interface Nursery {
 	 */
 	noDuplicateMapKeys?: NoDuplicateMapKeysConfiguration;
 	/**
+	 * Enforce a maximum number of statements allowed in a function.
+	 * See https://biomejs.dev/linter/rules/no-excessive-statements-per-function
+	 */
+	noExcessiveStatementsPerFunction?: NoExcessiveStatementsPerFunctionConfiguration;
+	/**
 	 * Disallow extending the prototype of built-in objects.
 	 * See https://biomejs.dev/linter/rules/no-extend-native
 	 */
@@ -2959,6 +2999,16 @@ export interface Nursery {
 	 */
 	noNegationInEqualityCheck?: NoNegationInEqualityCheckConfiguration;
 	/**
+	 * Disallow switch statements inside other switch statements.
+	 * See https://biomejs.dev/linter/rules/no-nested-switch
+	 */
+	noNestedSwitch?: NoNestedSwitchConfiguration;
+	/**
+	 * Disallow template literals inside other template literals.
+	 * See https://biomejs.dev/linter/rules/no-nested-template-literals
+	 */
+	noNestedTemplateLiterals?: NoNestedTemplateLiteralsConfiguration;
+	/**
 	 * Disallow disabling zoom with user-scalable=no in the \<meta name="viewport"> element.
 	 * See https://biomejs.dev/linter/rules/no-non-scalable-viewport
 	 */
@@ -2968,6 +3018,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/no-obsolete-tags
 	 */
 	noObsoleteTags?: NoObsoleteTagsConfiguration;
+	/**
+	 * Disallow numbers written with an extra leading zero.
+	 * See https://biomejs.dev/linter/rules/no-octal
+	 */
+	noOctal?: NoOctalConfiguration;
 	/**
 	 * Disallow the use of process.exit().
 	 * See https://biomejs.dev/linter/rules/no-process-exit
@@ -3019,6 +3074,11 @@ export interface Nursery {
 	 */
 	noSvelteLegacyConst?: NoSvelteLegacyConstConfiguration;
 	/**
+	 * Disallow objects, arrays, functions, and classes in Svelte text mustaches.
+	 * See https://biomejs.dev/linter/rules/no-svelte-object-in-text-mustaches
+	 */
+	noSvelteObjectInTextMustaches?: NoSvelteObjectInTextMustachesConfiguration;
+	/**
 	 * Disallow unnecessary $state wrapping of reactive classes.
 	 * See https://biomejs.dev/linter/rules/no-svelte-unnecessary-state-wrap
 	 */
@@ -3028,6 +3088,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value
 	 */
 	noTailwindArbitraryValue?: NoTailwindArbitraryValueConfiguration;
+	/**
+	 * Disallow Tailwind CSS utility classes that Tailwind CSS only keeps for backward compatibility.
+	 * See https://biomejs.dev/linter/rules/no-tailwind-legacy-utilities
+	 */
+	noTailwindLegacyUtilities?: NoTailwindLegacyUtilitiesConfiguration;
 	/**
 	 * Disallow Tailwind CSS utility classes that use raw palette colors.
 	 * See https://biomejs.dev/linter/rules/no-tailwind-raw-colors
@@ -3074,10 +3139,20 @@ export interface Nursery {
 	 */
 	noUnsafeTypeAssertion?: NoUnsafeTypeAssertionConfiguration;
 	/**
+	 * Require the operand of unary - to be a number or a bigint.
+	 * See https://biomejs.dev/linter/rules/no-unsafe-unary-minus
+	 */
+	noUnsafeUnaryMinus?: NoUnsafeUnaryMinusConfiguration;
+	/**
 	 * Reports CSS class selectors that are never referenced in any JSX or HTML file.
 	 * See https://biomejs.dev/linter/rules/no-unused-classes
 	 */
 	noUnusedClasses?: NoUnusedClassesConfiguration;
+	/**
+	 * Disallow assignments whose value is never read.
+	 * See https://biomejs.dev/linter/rules/no-useless-assignment
+	 */
+	noUselessAssignment?: NoUselessAssignmentConfiguration;
 	/**
 	 * Disallow type conversions that do not change the type of an expression.
 	 * See https://biomejs.dev/linter/rules/no-useless-type-conversion
@@ -3094,10 +3169,30 @@ export interface Nursery {
 	 */
 	noVueDeprecatedScopedSlots?: NoVueDeprecatedScopedSlotsConfiguration;
 	/**
+	 * Disallow props that are both required and have a default value.
+	 * See https://biomejs.dev/linter/rules/no-vue-required-prop-with-default
+	 */
+	noVueRequiredPropWithDefault?: NoVueRequiredPropWithDefaultConfiguration;
+	/**
+	 * Disallow v-if on the root element of a Vue component template.
+	 * See https://biomejs.dev/linter/rules/no-vue-root-v-if
+	 */
+	noVueRootVIf?: NoVueRootVIfConfiguration;
+	/**
 	 * Disallow custom Vue directives that are not declared.
 	 * See https://biomejs.dev/linter/rules/no-vue-undeclared-directives
 	 */
 	noVueUndeclaredDirectives?: NoVueUndeclaredDirectivesConfiguration;
+	/**
+	 * Disallow the use of Vue's v-html directive.
+	 * See https://biomejs.dev/linter/rules/no-vue-v-html
+	 */
+	noVueVHtml?: NoVueVHtmlConfiguration;
+	/**
+	 * Disallow the use of Vue's v-text directive.
+	 * See https://biomejs.dev/linter/rules/no-vue-v-text
+	 */
+	noVueVText?: NoVueVTextConfiguration;
 	/**
 	 * Disallow the bitwise XOR operator where exponentiation was likely intended.
 	 * See https://biomejs.dev/linter/rules/no-xor-as-exponentiation
@@ -3134,6 +3229,16 @@ export interface Nursery {
 	 */
 	useBigintLiterals?: UseBigintLiteralsConfiguration;
 	/**
+	 * Require constructor names to begin with a capital letter.
+	 * See https://biomejs.dev/linter/rules/use-capitalized-constructors
+	 */
+	useCapitalizedConstructors?: UseCapitalizedConstructorsConfiguration;
+	/**
+	 * Enforce which languages the top-level blocks of Vue and Svelte components use.
+	 * See https://biomejs.dev/linter/rules/use-consistent-block-lang
+	 */
+	useConsistentBlockLang?: UseConsistentBlockLangConfiguration;
+	/**
 	 * Enforce consistent use of function declarations or expressions assigned to variables.
 	 * See https://biomejs.dev/linter/rules/use-consistent-function-style
 	 */
@@ -3143,6 +3248,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/use-consistent-heading-level
 	 */
 	useConsistentHeadingLevel?: UseConsistentHeadingLevelConfiguration;
+	/**
+	 * Enforce a consistent way of reading JSON files before passing them to JSON.parse().
+	 * See https://biomejs.dev/linter/rules/use-consistent-json-file-read
+	 */
+	useConsistentJsonFileRead?: UseConsistentJsonFileReadConfiguration;
 	/**
 	 * Enforce JSON keys with consistent Unicode representation.
 	 * See https://biomejs.dev/linter/rules/use-consistent-object-keys
@@ -3204,6 +3314,11 @@ export interface Nursery {
 	 */
 	useModernMathApis?: UseModernMathApisConfiguration;
 	/**
+	 * Require function expressions to have a name.
+	 * See https://biomejs.dev/linter/rules/use-named-function
+	 */
+	useNamedFunction?: UseNamedFunctionConfiguration;
+	/**
 	 * Disallow anonymous cascade layers.
 	 * See https://biomejs.dev/linter/rules/use-named-layer
 	 */
@@ -3244,11 +3359,6 @@ export interface Nursery {
 	 */
 	useSingleTopLevelHeading?: UseSingleTopLevelHeadingConfiguration;
 	/**
-	 * Enforce the sorting of CSS utility classes.
-	 * See https://biomejs.dev/linter/rules/use-sorted-classes
-	 */
-	useSortedClasses?: UseSortedClassesConfiguration;
-	/**
 	 * Require unambiguous boolean expressions in conditions.
 	 * See https://biomejs.dev/linter/rules/use-strict-boolean-expressions
 	 */
@@ -3258,6 +3368,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/use-string-starts-ends-with
 	 */
 	useStringStartsEndsWith?: UseStringStartsEndsWithConfiguration;
+	/**
+	 * Require internal navigation in SvelteKit apps to use paths built with resolve().
+	 * See https://biomejs.dev/linter/rules/use-svelte-kit-resolve
+	 */
+	useSvelteKitResolve?: UseSvelteKitResolveConfiguration;
 	/**
 	 * Require importing SvelteKit's app state from $app/state instead of $app/stores.
 	 * See https://biomejs.dev/linter/rules/use-svelte-kit-rune-imports
@@ -3274,10 +3389,20 @@ export interface Nursery {
 	 */
 	useTailwindShorthandClasses?: UseTailwindShorthandClassesConfiguration;
 	/**
+	 * Enforce the sorting of Tailwind CSS classes.
+	 * See https://biomejs.dev/linter/rules/use-tailwind-sorted-classes
+	 */
+	useTailwindSortedClasses?: UseTailwindSortedClassesConfiguration;
+	/**
 	 * Require Markdown documents to start with a top-level heading.
 	 * See https://biomejs.dev/linter/rules/use-top-level-heading
 	 */
 	useTopLevelHeading?: UseTopLevelHeadingConfiguration;
+	/**
+	 * Enforce the use of the unary minus operator over multiplying or dividing by -1.
+	 * See https://biomejs.dev/linter/rules/use-unary-minus
+	 */
+	useUnaryMinus?: UseUnaryMinusConfiguration;
 	/**
 	 * Enforce valid titles for unit test cases and test suites.
 	 * See https://biomejs.dev/linter/rules/use-valid-test-title
@@ -3288,6 +3413,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/use-vue-base-import
 	 */
 	useVueBaseImport?: UseVueBaseImportConfiguration;
+	/**
+	 * Enforce a consistent hyphenation style for event names in v-on directives on custom components.
+	 * See https://biomejs.dev/linter/rules/use-vue-consistent-event-hyphenation
+	 */
+	useVueConsistentEventHyphenation?: UseVueConsistentEventHyphenationConfiguration;
 }
 /**
  * Configures all rules in one lint group.
@@ -3924,11 +4054,6 @@ export interface Style {
 	 * See https://biomejs.dev/linter/rules/use-reduce-type-parameter
 	 */
 	useReduceTypeParameter?: UseReduceTypeParameterConfiguration;
-	/**
-	 * Keep component styles scoped in Vue and Astro files.
-	 * See https://biomejs.dev/linter/rules/use-scoped-styles
-	 */
-	useScopedStyles?: UseScopedStylesConfiguration;
 	/**
 	 * Prevent extra closing tags for components without children.
 	 * See https://biomejs.dev/linter/rules/use-self-closing-elements
@@ -4742,6 +4867,11 @@ export interface Suspicious {
 	 */
 	useRequiredScripts?: UseRequiredScriptsConfiguration;
 	/**
+	 * Keep component styles scoped in Vue and Astro files.
+	 * See https://biomejs.dev/linter/rules/use-scoped-styles
+	 */
+	useScopedStyles?: UseScopedStylesConfiguration;
+	/**
 	 * Use static Response methods instead of new Response() constructor when possible.
 	 * See https://biomejs.dev/linter/rules/use-static-response-methods
 	 */
@@ -5437,6 +5567,9 @@ export type NoBunModulesConfiguration =
 export type NoDuplicateMapKeysConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateMapKeysOptions;
+export type NoExcessiveStatementsPerFunctionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoExcessiveStatementsPerFunctionOptions;
 export type NoExtendNativeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExtendNativeOptions;
@@ -5473,12 +5606,21 @@ export type NoMisusedPromisesConfiguration =
 export type NoNegationInEqualityCheckConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNegationInEqualityCheckOptions;
+export type NoNestedSwitchConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoNestedSwitchOptions;
+export type NoNestedTemplateLiteralsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoNestedTemplateLiteralsOptions;
 export type NoNonScalableViewportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNonScalableViewportOptions;
 export type NoObsoleteTagsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoObsoleteTagsOptions;
+export type NoOctalConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoOctalOptions;
 export type NoProcessExitConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoProcessExitOptions;
@@ -5509,12 +5651,18 @@ export type NoSvelteInspectConfiguration =
 export type NoSvelteLegacyConstConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteLegacyConstOptions;
+export type NoSvelteObjectInTextMustachesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteObjectInTextMustachesOptions;
 export type NoSvelteUnnecessaryStateWrapConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteUnnecessaryStateWrapOptions;
 export type NoTailwindArbitraryValueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTailwindArbitraryValueOptions;
+export type NoTailwindLegacyUtilitiesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoTailwindLegacyUtilitiesOptions;
 export type NoTailwindRawColorsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoTailwindRawColorsOptions;
@@ -5542,9 +5690,15 @@ export type NoUnsafePlusOperandsConfiguration =
 export type NoUnsafeTypeAssertionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnsafeTypeAssertionOptions;
+export type NoUnsafeUnaryMinusConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnsafeUnaryMinusOptions;
 export type NoUnusedClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnusedClassesOptions;
+export type NoUselessAssignmentConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessAssignmentOptions;
 export type NoUselessTypeConversionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessTypeConversionOptions;
@@ -5554,9 +5708,21 @@ export type NoVueBooleanDefaultConfiguration =
 export type NoVueDeprecatedScopedSlotsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedScopedSlotsOptions;
+export type NoVueRequiredPropWithDefaultConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueRequiredPropWithDefaultOptions;
+export type NoVueRootVIfConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueRootVIfOptions;
 export type NoVueUndeclaredDirectivesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUndeclaredDirectivesOptions;
+export type NoVueVHtmlConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueVHtmlOptions;
+export type NoVueVTextConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueVTextOptions;
 export type NoXorAsExponentiationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoXorAsExponentiationOptions;
@@ -5578,12 +5744,21 @@ export type UseBetterDomTraversingConfiguration =
 export type UseBigintLiteralsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseBigintLiteralsOptions;
+export type UseCapitalizedConstructorsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseCapitalizedConstructorsOptions;
+export type UseConsistentBlockLangConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentBlockLangOptions;
 export type UseConsistentFunctionStyleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentFunctionStyleOptions;
 export type UseConsistentHeadingLevelConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentHeadingLevelOptions;
+export type UseConsistentJsonFileReadConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentJsonFileReadOptions;
 export type UseConsistentObjectKeysConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentObjectKeysOptions;
@@ -5620,6 +5795,9 @@ export type UseLogicalPropertiesConfiguration =
 export type UseModernMathApisConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseModernMathApisOptions;
+export type UseNamedFunctionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseNamedFunctionOptions;
 export type UseNamedLayerConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNamedLayerOptions;
@@ -5644,15 +5822,15 @@ export type UseRegexpExecConfiguration =
 export type UseSingleTopLevelHeadingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSingleTopLevelHeadingOptions;
-export type UseSortedClassesConfiguration =
-	| RulePlainConfiguration
-	| RuleWithUseSortedClassesOptions;
 export type UseStrictBooleanExpressionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStrictBooleanExpressionsOptions;
 export type UseStringStartsEndsWithConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStringStartsEndsWithOptions;
+export type UseSvelteKitResolveConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseSvelteKitResolveOptions;
 export type UseSvelteKitRuneImportsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSvelteKitRuneImportsOptions;
@@ -5662,15 +5840,24 @@ export type UseSvelteRequireEachKeyConfiguration =
 export type UseTailwindShorthandClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTailwindShorthandClassesOptions;
+export type UseTailwindSortedClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTailwindSortedClassesOptions;
 export type UseTopLevelHeadingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTopLevelHeadingOptions;
+export type UseUnaryMinusConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseUnaryMinusOptions;
 export type UseValidTestTitleConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseValidTestTitleOptions;
 export type UseVueBaseImportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueBaseImportOptions;
+export type UseVueConsistentEventHyphenationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueConsistentEventHyphenationOptions;
 export type NoAccumulatingSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAccumulatingSpreadOptions;
@@ -6022,9 +6209,6 @@ export type UseReadonlyClassPropertiesConfiguration =
 export type UseReduceTypeParameterConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseReduceTypeParameterOptions;
-export type UseScopedStylesConfiguration =
-	| RulePlainConfiguration
-	| RuleWithUseScopedStylesOptions;
 export type UseSelfClosingElementsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSelfClosingElementsOptions;
@@ -6500,19 +6684,28 @@ export type UseNumberToFixedDigitsArgumentConfiguration =
 export type UseRequiredScriptsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseRequiredScriptsOptions;
+export type UseScopedStylesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseScopedStylesOptions;
 export type UseStaticResponseMethodsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStaticResponseMethodsOptions;
 export type UseStrictModeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseStrictModeOptions;
+/**
+ * Options for the `noDuplicateClasses` assist action.
+ *
+ * Controls which JSX attributes and utility functions are checked for duplicate classes.
+ */
 export interface NoDuplicateClassesOptions {
 	/**
-	 * Additional attributes that will be sorted.
+	 * Additional attributes whose classes are checked for duplicates.
 	 */
 	attributes?: string[];
 	/**
-	 * Names of the functions or tagged templates that will be sorted.
+	 * Names of the functions or tagged templates whose classes are checked for
+	 * duplicates.
 	 */
 	functions?: string[];
 }
@@ -7754,6 +7947,10 @@ export interface RuleWithNoDuplicateMapKeysOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateMapKeysOptions;
 }
+export interface RuleWithNoExcessiveStatementsPerFunctionOptions {
+	level: RulePlainConfiguration;
+	options?: NoExcessiveStatementsPerFunctionOptions;
+}
 export interface RuleWithNoExtendNativeOptions {
 	level: RulePlainConfiguration;
 	options?: NoExtendNativeOptions;
@@ -7822,6 +8019,14 @@ export interface RuleWithNoNegationInEqualityCheckOptions {
 	level: RulePlainConfiguration;
 	options?: NoNegationInEqualityCheckOptions;
 }
+export interface RuleWithNoNestedSwitchOptions {
+	level: RulePlainConfiguration;
+	options?: NoNestedSwitchOptions;
+}
+export interface RuleWithNoNestedTemplateLiteralsOptions {
+	level: RulePlainConfiguration;
+	options?: NoNestedTemplateLiteralsOptions;
+}
 export interface RuleWithNoNonScalableViewportOptions {
 	level: RulePlainConfiguration;
 	options?: NoNonScalableViewportOptions;
@@ -7829,6 +8034,10 @@ export interface RuleWithNoNonScalableViewportOptions {
 export interface RuleWithNoObsoleteTagsOptions {
 	level: RulePlainConfiguration;
 	options?: NoObsoleteTagsOptions;
+}
+export interface RuleWithNoOctalOptions {
+	level: RulePlainConfiguration;
+	options?: NoOctalOptions;
 }
 export interface RuleWithNoProcessExitOptions {
 	level: RulePlainConfiguration;
@@ -7874,6 +8083,10 @@ export interface RuleWithNoSvelteLegacyConstOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteLegacyConstOptions;
 }
+export interface RuleWithNoSvelteObjectInTextMustachesOptions {
+	level: RulePlainConfiguration;
+	options?: NoSvelteObjectInTextMustachesOptions;
+}
 export interface RuleWithNoSvelteUnnecessaryStateWrapOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -7885,6 +8098,14 @@ export interface RuleWithNoSvelteUnnecessaryStateWrapOptions {
 export interface RuleWithNoTailwindArbitraryValueOptions {
 	level: RulePlainConfiguration;
 	options?: NoTailwindArbitraryValueOptions;
+}
+export interface RuleWithNoTailwindLegacyUtilitiesOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoTailwindLegacyUtilitiesOptions;
 }
 export interface RuleWithNoTailwindRawColorsOptions {
 	level: RulePlainConfiguration;
@@ -7922,9 +8143,17 @@ export interface RuleWithNoUnsafeTypeAssertionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnsafeTypeAssertionOptions;
 }
+export interface RuleWithNoUnsafeUnaryMinusOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnsafeUnaryMinusOptions;
+}
 export interface RuleWithNoUnusedClassesOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnusedClassesOptions;
+}
+export interface RuleWithNoUselessAssignmentOptions {
+	level: RulePlainConfiguration;
+	options?: NoUselessAssignmentOptions;
 }
 export interface RuleWithNoUselessTypeConversionOptions {
 	level: RulePlainConfiguration;
@@ -7942,9 +8171,29 @@ export interface RuleWithNoVueDeprecatedScopedSlotsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedScopedSlotsOptions;
 }
+export interface RuleWithNoVueRequiredPropWithDefaultOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoVueRequiredPropWithDefaultOptions;
+}
+export interface RuleWithNoVueRootVIfOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueRootVIfOptions;
+}
 export interface RuleWithNoVueUndeclaredDirectivesOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUndeclaredDirectivesOptions;
+}
+export interface RuleWithNoVueVHtmlOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueVHtmlOptions;
+}
+export interface RuleWithNoVueVTextOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueVTextOptions;
 }
 export interface RuleWithNoXorAsExponentiationOptions {
 	/**
@@ -7994,6 +8243,18 @@ export interface RuleWithUseBigintLiteralsOptions {
 	level: RulePlainConfiguration;
 	options?: UseBigintLiteralsOptions;
 }
+export interface RuleWithUseCapitalizedConstructorsOptions {
+	level: RulePlainConfiguration;
+	options?: UseCapitalizedConstructorsOptions;
+}
+export interface RuleWithUseConsistentBlockLangOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseConsistentBlockLangOptions;
+}
 export interface RuleWithUseConsistentFunctionStyleOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentFunctionStyleOptions;
@@ -8001,6 +8262,14 @@ export interface RuleWithUseConsistentFunctionStyleOptions {
 export interface RuleWithUseConsistentHeadingLevelOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentHeadingLevelOptions;
+}
+export interface RuleWithUseConsistentJsonFileReadOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseConsistentJsonFileReadOptions;
 }
 export interface RuleWithUseConsistentObjectKeysOptions {
 	/**
@@ -8078,6 +8347,10 @@ export interface RuleWithUseModernMathApisOptions {
 	level: RulePlainConfiguration;
 	options?: UseModernMathApisOptions;
 }
+export interface RuleWithUseNamedFunctionOptions {
+	level: RulePlainConfiguration;
+	options?: UseNamedFunctionOptions;
+}
 export interface RuleWithUseNamedLayerOptions {
 	level: RulePlainConfiguration;
 	options?: UseNamedLayerOptions;
@@ -8118,14 +8391,6 @@ export interface RuleWithUseSingleTopLevelHeadingOptions {
 	level: RulePlainConfiguration;
 	options?: UseSingleTopLevelHeadingOptions;
 }
-export interface RuleWithUseSortedClassesOptions {
-	/**
-	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
-	 */
-	fix?: FixKind;
-	level: RulePlainConfiguration;
-	options?: UseSortedClassesOptions;
-}
 export interface RuleWithUseStrictBooleanExpressionsOptions {
 	level: RulePlainConfiguration;
 	options?: UseStrictBooleanExpressionsOptions;
@@ -8137,6 +8402,10 @@ export interface RuleWithUseStringStartsEndsWithOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseStringStartsEndsWithOptions;
+}
+export interface RuleWithUseSvelteKitResolveOptions {
+	level: RulePlainConfiguration;
+	options?: UseSvelteKitResolveOptions;
 }
 export interface RuleWithUseSvelteKitRuneImportsOptions {
 	level: RulePlainConfiguration;
@@ -8154,9 +8423,25 @@ export interface RuleWithUseTailwindShorthandClassesOptions {
 	level: RulePlainConfiguration;
 	options?: UseTailwindShorthandClassesOptions;
 }
+export interface RuleWithUseTailwindSortedClassesOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseTailwindSortedClassesOptions;
+}
 export interface RuleWithUseTopLevelHeadingOptions {
 	level: RulePlainConfiguration;
 	options?: UseTopLevelHeadingOptions;
+}
+export interface RuleWithUseUnaryMinusOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseUnaryMinusOptions;
 }
 export interface RuleWithUseValidTestTitleOptions {
 	/**
@@ -8173,6 +8458,14 @@ export interface RuleWithUseVueBaseImportOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseVueBaseImportOptions;
+}
+export interface RuleWithUseVueConsistentEventHyphenationOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueConsistentEventHyphenationOptions;
 }
 export interface RuleWithNoAccumulatingSpreadOptions {
 	level: RulePlainConfiguration;
@@ -8837,14 +9130,6 @@ export interface RuleWithUseReduceTypeParameterOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: UseReduceTypeParameterOptions;
-}
-export interface RuleWithUseScopedStylesOptions {
-	/**
-	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
-	 */
-	fix?: FixKind;
-	level: RulePlainConfiguration;
-	options?: UseScopedStylesOptions;
 }
 export interface RuleWithUseSelfClosingElementsOptions {
 	/**
@@ -9682,6 +9967,14 @@ export interface RuleWithUseRequiredScriptsOptions {
 	level: RulePlainConfiguration;
 	options?: UseRequiredScriptsOptions;
 }
+export interface RuleWithUseScopedStylesOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseScopedStylesOptions;
+}
 export interface RuleWithUseStaticResponseMethodsOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -10136,6 +10429,17 @@ export interface NoBaseToStringOptions {
 }
 export type NoBunModulesOptions = {};
 export type NoDuplicateMapKeysOptions = {};
+export interface NoExcessiveStatementsPerFunctionOptions {
+	/**
+	 * When this option is set to `true`, a function that isn't nested in another function is
+	 * not checked, as long as it's the only such function in the file (default: false).
+	 */
+	ignoreTopLevelFunctions?: boolean;
+	/**
+	 * The maximum number of statements allowed in a function (default: 10).
+	 */
+	max?: number;
+}
 /**
  * Options for the `noExtendNative` rule.
  */
@@ -10171,8 +10475,11 @@ export type NoMisleadingReturnTypeOptions = {};
 export type NoMisplacedListElementsOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoNegationInEqualityCheckOptions = {};
+export type NoNestedSwitchOptions = {};
+export type NoNestedTemplateLiteralsOptions = {};
 export type NoNonScalableViewportOptions = {};
 export type NoObsoleteTagsOptions = {};
+export type NoOctalOptions = {};
 export type NoProcessExitOptions = {};
 export type NoReactObjectTypeAsDefaultPropOptions = {};
 export type NoRestrictedDependenciesOptions = {};
@@ -10183,6 +10490,7 @@ export type NoSvelteAtHtmlTagsOptions = {};
 export type NoSvelteExportLetOptions = {};
 export type NoSvelteInspectOptions = {};
 export type NoSvelteLegacyConstOptions = {};
+export type NoSvelteObjectInTextMustachesOptions = {};
 export interface NoSvelteUnnecessaryStateWrapOptions {
 	/**
 	 * Additional class names to treat as already reactive (beyond the built-in `svelte/reactivity` classes).
@@ -10193,7 +10501,17 @@ export interface NoSvelteUnnecessaryStateWrapOptions {
 	 */
 	allowReassign?: boolean;
 }
-export type NoTailwindArbitraryValueOptions = {};
+export interface NoTailwindArbitraryValueOptions {
+	/**
+	 * Categories of utilities that may use arbitrary values. Defaults to an empty list.
+	 */
+	allowedCategories?: TailwindUtilityCategory[];
+	/**
+	 * Classes that may use arbitrary values, such as `w-[320px]`. Defaults to an empty list.
+	 */
+	allowedClasses?: string[];
+}
+export type NoTailwindLegacyUtilitiesOptions = {};
 export interface NoTailwindRawColorsOptions {
 	/**
 	 * Exact palette colors to allow, such as `slate-950` or `pink-500`. Defaults to none.
@@ -10216,10 +10534,14 @@ export type NoUnmodifiedLoopConditionOptions = {};
 export type NoUnsafeIframeSandboxOptions = {};
 export type NoUnsafePlusOperandsOptions = {};
 export type NoUnsafeTypeAssertionOptions = {};
+export type NoUnsafeUnaryMinusOptions = {};
 export type NoUnusedClassesOptions = {};
+export type NoUselessAssignmentOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueBooleanDefaultOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
+export type NoVueRequiredPropWithDefaultOptions = {};
+export type NoVueRootVIfOptions = {};
 export interface NoVueUndeclaredDirectivesOptions {
 	/**
 	 * Names of directives registered globally with `app.directive(...)`,
@@ -10228,6 +10550,8 @@ export interface NoVueUndeclaredDirectivesOptions {
 	 */
 	globals?: string[];
 }
+export type NoVueVHtmlOptions = {};
+export type NoVueVTextOptions = {};
 export type NoXorAsExponentiationOptions = {};
 export type NoZeroFractionsOptions = {};
 export type UseAstroClientOnlyDirectiveValueOptions = {};
@@ -10243,6 +10567,18 @@ export interface UseBannerCommentOptions {
 }
 export type UseBetterDomTraversingOptions = {};
 export type UseBigintLiteralsOptions = {};
+export type UseCapitalizedConstructorsOptions = {};
+export interface UseConsistentBlockLangOptions {
+	/**
+	 * The top-level blocks to check in Vue and Svelte components.
+	 *
+	 * Each key is the tag name of a block, without angle brackets, such as
+	 * `script`, `style`, or a Vue custom block like `i18n`. Blocks that aren't
+	 * listed aren't checked. When this option is omitted, the rule doesn't
+	 * check anything.
+	 */
+	blocks?: Record<string, BlockLangOptions>;
+}
 /**
  * Configures the required function style and whether declaration mode permits arrow functions.
  */
@@ -10257,6 +10593,14 @@ export interface UseConsistentFunctionStyleOptions {
 	style?: FunctionStyle;
 }
 export type UseConsistentHeadingLevelOptions = {};
+export interface UseConsistentJsonFileReadOptions {
+	/**
+	 * Whether JSON files should be read as strings or as `Buffer`s before they are passed to `JSON.parse()`.
+	 *
+	 * Default: `"string"`
+	 */
+	readAs?: JsonFileReadAs;
+}
 export interface UseConsistentObjectKeysOptions {
 	/**
 	 * The Unicode normalization form that every object key must use so equivalent characters share one encoding. Defaults to `NFC`.
@@ -10327,6 +10671,7 @@ export interface UseLogicalPropertiesOptions {
 	direction?: UseLogicalPropertiesDirection;
 }
 export type UseModernMathApisOptions = {};
+export type UseNamedFunctionOptions = {};
 export type UseNamedLayerOptions = {};
 /**
  * Options for the `useNullishCoalescing` rule.
@@ -10378,22 +10723,32 @@ export interface UseSingleTopLevelHeadingOptions {
 	 */
 	level?: number;
 }
-export interface UseSortedClassesOptions {
-	/**
-	 * Additional attributes that will be sorted.
-	 */
-	attributes?: string[];
-	/**
-	 * Names of the functions or tagged templates that will be sorted.
-	 */
-	functions?: string[];
-}
 export type UseStrictBooleanExpressionsOptions = {};
 export type UseStringStartsEndsWithOptions = {};
+export interface UseSvelteKitResolveOptions {
+	/**
+	 * Whether to ignore all `goto()` calls. Default: `false`.
+	 */
+	ignoreGoto?: boolean;
+	/**
+	 * Whether to ignore all `<a>` elements. Default: `false`.
+	 */
+	ignoreLinks?: boolean;
+	/**
+	 * Whether to ignore all `pushState()` calls. Default: `false`.
+	 */
+	ignorePushState?: boolean;
+	/**
+	 * Whether to ignore all `replaceState()` calls. Default: `false`.
+	 */
+	ignoreReplaceState?: boolean;
+}
 export type UseSvelteKitRuneImportsOptions = {};
 export type UseSvelteRequireEachKeyOptions = {};
 export type UseTailwindShorthandClassesOptions = {};
+export type UseTailwindSortedClassesOptions = {};
 export type UseTopLevelHeadingOptions = {};
+export type UseUnaryMinusOptions = {};
 export interface UseValidTestTitleOptions {
 	/**
 	 * A list of words that are disallowed in test titles.
@@ -10401,6 +10756,21 @@ export interface UseValidTestTitleOptions {
 	disallowedWords?: string[];
 }
 export type UseVueBaseImportOptions = {};
+export interface UseVueConsistentEventHyphenationOptions {
+	/**
+	 * Whether event names in `v-on` directives must be hyphenated (`"always"`) or must not
+	 * contain hyphens (`"never"`). If omitted, hyphenated names are required.
+	 */
+	hyphenation?: EventHyphenation;
+	/**
+	 * List of event names to exempt from the check.
+	 */
+	ignore?: string[];
+	/**
+	 * List of tag names whose events should not be checked.
+	 */
+	ignoreTags?: string[];
+}
 export type NoAccumulatingSpreadOptions = {};
 export type NoAwaitInLoopsOptions = {};
 export type NoBarrelFileOptions = {};
@@ -10748,7 +11118,6 @@ export interface UseReadonlyClassPropertiesOptions {
 	checkAllProperties?: boolean;
 }
 export type UseReduceTypeParameterOptions = {};
-export type UseScopedStylesOptions = {};
 export interface UseSelfClosingElementsOptions {
 	ignoreHtmlElements?: boolean;
 }
@@ -11149,6 +11518,7 @@ export interface UseRequiredScriptsOptions {
 	 */
 	requiredScripts?: string[];
 }
+export type UseScopedStylesOptions = {};
 export type UseStaticResponseMethodsOptions = {};
 export type UseStrictModeOptions = {};
 export type ImportGroup = null | GroupMatcher | GroupMatcher[];
@@ -11249,11 +11619,24 @@ export interface RestrictedPropertyEntry {
 	 */
 	property?: string;
 }
+export type TailwindUtilityCategory =
+	| "color"
+	| "typography"
+	| "spacing"
+	| "shape"
+	| "effects"
+	| "motion"
+	| "layout";
 export interface TailwindComponentAllowance {
+	/**
+	 * Instructions on how to fix the problem, shown in diagnostics for the matching
+	 * components in place of the default advice.
+	 */
+	advice?: string;
 	/**
 	 * Categories allowed on the matching components. Defaults to an empty list.
 	 */
-	categories?: TailwindAppearanceCategory[];
+	categories?: TailwindUtilityCategory[];
 	/**
 	 * Exact classes, including variants and modifiers. Defaults to an empty list.
 	 */
@@ -11265,9 +11648,36 @@ export interface TailwindComponentAllowance {
 }
 export type BannerContent = string | string[];
 /**
+ * The checks for one top-level block.
+ */
+export interface BlockLangOptions {
+	/**
+	 * When `true`, the block may also omit the `lang` attribute.
+	 *
+	 * Only applies when `lang` is set. Defaults to `false`.
+	 */
+	allowNoLang?: boolean;
+	/**
+	 * The values allowed for the `lang` attribute of the block, such as `["ts"]`.
+	 *
+	 * When set, it must contain at least one value. Values must match exactly,
+	 * so `"ts"` doesn't allow `lang="TS"`. When omitted, the `lang` attribute
+	 * of the block isn't checked.
+	 */
+	lang?: string[];
+	/**
+	 * When `true`, every component must contain at least one block with this
+	 * tag name.
+	 *
+	 * Works with or without `lang`. Defaults to `false`.
+	 */
+	required?: boolean;
+}
+/**
  * The required form for function definitions: `"expression"` or `"declaration"`.
  */
 export type FunctionStyle = "expression" | "declaration";
+export type JsonFileReadAs = "string" | "buffer";
 export type NormalizationForm = "NFC" | "NFD" | "NFKC" | "NFKD";
 export type UseLogicalPropertiesDirection = "ltr" | "rtl";
 export type IgnorePrimitives =
@@ -11281,6 +11691,7 @@ export type ComponentDefinitionStyle =
 	| "functionDeclaration"
 	| "functionExpression"
 	| "arrowFunction";
+export type EventHyphenation = "always" | "never";
 /**
  * Specifies whether property assignments on function parameters are allowed or denied.
  */
@@ -11359,13 +11770,6 @@ export type VueDirectiveStyle2 = "shorthand" | "longhand";
 export type AvailabilityTarget = AvailabilityNamed | number;
 export type GroupMatcher = ImportMatcher | SourceMatcher;
 export type StableHookResult = boolean | number[] | string[];
-export type TailwindAppearanceCategory =
-	| "color"
-	| "typography"
-	| "spacing"
-	| "shape"
-	| "effects"
-	| "motion";
 export type TailwindAllowedComponents = string | string[];
 export interface PathOptions {
 	/**
@@ -11771,6 +12175,16 @@ export type Category =
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noDuplicateMapKeys"
+	| "lint/nursery/noComponentHookFactories"
+	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noDrizzleDeleteWithoutWhere"
+	| "lint/nursery/noDrizzleUpdateWithoutWhere"
+	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateSelectors"
+	| "lint/nursery/noEmptyObjectKeys"
+	| "lint/nursery/noExcessiveNestedCallbacks"
+	| "lint/nursery/noExcessiveSelectorClasses"
+	| "lint/nursery/noExcessiveStatementsPerFunction"
 	| "lint/nursery/noExtendNative"
 	| "lint/nursery/noFloatingPromises"
 	| "lint/nursery/noImplicitCoercion"
@@ -11785,9 +12199,25 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNegationInEqualityCheck"
+	| "lint/nursery/noNestedSwitch"
+	| "lint/nursery/noNestedTemplateLiterals"
 	| "lint/nursery/noNonScalableViewport"
 	| "lint/nursery/noObsoleteTags"
+	| "lint/nursery/noOctal"
 	| "lint/nursery/noProcessExit"
+	| "lint/nursery/noPlaywrightElementHandle"
+	| "lint/nursery/noPlaywrightEval"
+	| "lint/nursery/noPlaywrightForceOption"
+	| "lint/nursery/noPlaywrightMissingAwait"
+	| "lint/nursery/noPlaywrightNetworkidle"
+	| "lint/nursery/noPlaywrightPagePause"
+	| "lint/nursery/noPlaywrightUselessAwait"
+	| "lint/nursery/noPlaywrightWaitForNavigation"
+	| "lint/nursery/noPlaywrightWaitForSelector"
+	| "lint/nursery/noPlaywrightWaitForTimeout"
+	| "lint/nursery/noReactNativeDeepImports"
+	| "lint/nursery/noReactNativeLiteralColors"
+	| "lint/nursery/noReactNativeRawText"
 	| "lint/nursery/noReactObjectTypeAsDefaultProp"
 	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noReturnInFinally"
@@ -11797,8 +12227,10 @@ export type Category =
 	| "lint/nursery/noSvelteExportLet"
 	| "lint/nursery/noSvelteInspect"
 	| "lint/nursery/noSvelteLegacyConst"
+	| "lint/nursery/noSvelteObjectInTextMustaches"
 	| "lint/nursery/noSvelteUnnecessaryStateWrap"
 	| "lint/nursery/noTailwindArbitraryValue"
+	| "lint/nursery/noTailwindLegacyUtilities"
 	| "lint/nursery/noTailwindRawColors"
 	| "lint/nursery/noTailwindRestyledComponents"
 	| "lint/nursery/noThisOutsideOfClass"
@@ -11808,12 +12240,22 @@ export type Category =
 	| "lint/nursery/noUnsafeIframeSandbox"
 	| "lint/nursery/noUnsafePlusOperands"
 	| "lint/nursery/noUnsafeTypeAssertion"
+	| "lint/nursery/noUnsafeUnaryMinus"
 	| "lint/nursery/noUnusedClasses"
+	| "lint/nursery/noUnwantedPolyfillio"
+	| "lint/nursery/noUselessAssignment"
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
+	| "lint/nursery/noVueRootVIf"
+	| "lint/nursery/noVueImportCompilerMacros"
+	| "lint/nursery/noVueRefAsOperand"
+	| "lint/nursery/noVueRequiredPropWithDefault"
 	| "lint/nursery/noVueUndeclaredDirectives"
+	| "lint/nursery/noVueVHtml"
+	| "lint/nursery/noVueVOnNumberValues"
+	| "lint/nursery/noVueVText"
 	| "lint/nursery/noXorAsExponentiation"
 	| "lint/nursery/noZeroFractions"
 	| "lint/nursery/useAstroClientOnlyDirectiveValue"
@@ -11822,8 +12264,11 @@ export type Category =
 	| "lint/nursery/useBetterDomTraversing"
 	| "lint/nursery/useBigintLiterals"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useCapitalizedConstructors"
+	| "lint/nursery/useConsistentBlockLang"
 	| "lint/nursery/useConsistentFunctionStyle"
 	| "lint/nursery/useConsistentHeadingLevel"
+	| "lint/nursery/useConsistentJsonFileRead"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentObjectKeys"
 	| "lint/nursery/useControlLabel"
@@ -11841,6 +12286,8 @@ export type Category =
 	| "lint/nursery/useLayeredStyles"
 	| "lint/nursery/useLogicalProperties"
 	| "lint/nursery/useModernMathApis"
+	| "lint/nursery/useNamedCaptureGroup"
+	| "lint/nursery/useNamedFunction"
 	| "lint/nursery/useNamedLayer"
 	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/usePromiseRejectErrors"
@@ -11849,13 +12296,15 @@ export type Category =
 	| "lint/nursery/useReactNamingConvention"
 	| "lint/nursery/useRegexpExec"
 	| "lint/nursery/useSingleTopLevelHeading"
-	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useTailwindSortedClasses"
 	| "lint/nursery/useStrictBooleanExpressions"
 	| "lint/nursery/useStringStartsEndsWith"
+	| "lint/nursery/useSvelteKitResolve"
 	| "lint/nursery/useSvelteKitRuneImports"
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useTailwindShorthandClasses"
 	| "lint/nursery/useTopLevelHeading"
+	| "lint/nursery/useUnaryMinus"
 	| "lint/nursery/useUniqueArgumentNames"
 	| "lint/nursery/useUniqueFieldDefinitionNames"
 	| "lint/nursery/useUniqueGraphqlOperationName"
@@ -11863,6 +12312,10 @@ export type Category =
 	| "lint/nursery/useUniqueVariableNames"
 	| "lint/nursery/useValidTestTitle"
 	| "lint/nursery/useVueBaseImport"
+	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
+	| "lint/nursery/useVueConsistentEventHyphenation"
+	| "lint/nursery/useVueNextTickPromise"
+	| "lint/nursery/useVueValidVFor"
 	| "lint/nursery/useVueValidVModel"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
@@ -11981,7 +12434,6 @@ export type Category =
 	| "lint/style/useReactFunctionComponents"
 	| "lint/style/useReadonlyClassProperties"
 	| "lint/style/useReduceTypeParameter"
-	| "lint/style/useScopedStyles"
 	| "lint/style/useSelfClosingElements"
 	| "lint/style/useShorthandAssign"
 	| "lint/style/useShorthandFunctionType"
@@ -12142,6 +12594,7 @@ export type Category =
 	| "lint/suspicious/useNamespaceKeyword"
 	| "lint/suspicious/useNumberToFixedDigitsArgument"
 	| "lint/suspicious/useRequiredScripts"
+	| "lint/suspicious/useScopedStyles"
 	| "lint/suspicious/useStaticResponseMethods"
 	| "lint/suspicious/useStrictMode"
 	| "assist/source/noDuplicateClasses"
@@ -12446,6 +12899,13 @@ export interface GritFileSource {
 	variant: GritVariant;
 }
 export interface MdFileSource {
+	/**
+	 * Whether bold, italic, and strikethrough markers follow the
+	 * [CommonMark CJK-friendly amendments](https://github.com/tats-u/markdown-cjk-friendly/blob/main/specification.md).
+	 * Biome sets it from the `markdown.parser.cjkFriendlyEmphasis` configuration when it opens
+	 * the file, replacing any value sent by the client.
+	 */
+	cjkFriendlyEmphasis?: boolean;
 	variant: MarkdownVariant;
 }
 export type YamlFileSource = {};
@@ -12579,6 +13039,7 @@ export type MarkdownVariant = "Standard";
 export type SvelteEmbeddingKind =
 	| "Source"
 	| "Expression"
+	| "TextInterpolation"
 	| "SnippetSignature"
 	| "LegacyConst"
 	| "Declaration";

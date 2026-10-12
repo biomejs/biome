@@ -2,7 +2,9 @@ use super::{document::Document, *};
 use crate::Watcher;
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
 use crate::db::{DbReadGuard, DbState, WorkspaceDb};
-use crate::diagnostics::{FileTooLarge, NoIgnoreFileFound, VcsDiagnostic};
+use crate::diagnostics::{
+    FileTooLarge, NoIgnoreFileFound, TailwindStylesheetNotFound, VcsDiagnostic,
+};
 use crate::embed::EmbedContent;
 #[cfg(feature = "lang_js")]
 use crate::file_handlers::AstroFileHandler;
@@ -872,6 +874,20 @@ impl WorkspaceServerWithDb<'_> {
             }
         }
 
+        #[cfg(feature = "lang_md")]
+        if let DocumentFileSource::Markdown(markdown) = &mut source {
+            markdown.set_cjk_friendly_emphasis(
+                settings
+                    .as_ref()
+                    .languages
+                    .markdown
+                    .parser
+                    .cjk_friendly_emphasis
+                    .unwrap_or_default()
+                    .into(),
+            );
+        }
+
         let (content, version) = match content {
             FileContent::FromClient { content, version } => (content, Some(version)),
             FileContent::FromServer => (self.fs.read_file_from_path(&path)?, None),
@@ -1417,8 +1433,8 @@ impl WorkspaceServerWithDb<'_> {
                 } else {
                     Vec::new()
                 }
-            },
-            _ => biome_analyze::AnalyzerPluginVec::new()
+            }
+            _ => biome_analyze::AnalyzerPluginVec::new(),
         };
         let settings =
             self.settings_handle_with_query(&settings, EditorFeatures::default(), query_context);
@@ -1509,8 +1525,12 @@ impl WorkspaceServerWithDb<'_> {
                                 // reindent_embedded_code — so byte offsets match.
                                 let trimmed = new_code.trim();
                                 match document_file_source {
-                                    DocumentFileSource::Js(_) => crate::file_handlers::html::js_verbatim_ranges(trimmed),
-                                    DocumentFileSource::Css(_) => crate::file_handlers::html::css_verbatim_ranges(trimmed),
+                                    DocumentFileSource::Js(_) => {
+                                        crate::file_handlers::html::js_verbatim_ranges(trimmed)
+                                    }
+                                    DocumentFileSource::Css(_) => {
+                                        crate::file_handlers::html::css_verbatim_ranges(trimmed)
+                                    }
                                     _ => vec![],
                                 }
                             } else {
@@ -1686,8 +1706,8 @@ impl WorkspaceServerWithDb<'_> {
                     } else {
                         Vec::new()
                     }
-                },
-                _ => Vec::new()
+                }
+                _ => Vec::new(),
             };
             let settings = self.settings_handle_with_query(
                 &settings,
@@ -1849,12 +1869,16 @@ impl WorkspaceServerWithDb<'_> {
             // If the path is a dependency of an indexed file, we accept them
             // under the following conditions:
             // - If the path is inside `node_modules`, we only care about
-            //   `package.json` and type declarations, to avoid accidentally
-            //   indexing minified files.
+            //   `package.json`, type declarations, and imported stylesheets.
+            //   Runtime JavaScript may be minified and isn't indexed.
             // - The path shouldn't be indexed yet, to avoid double indexing.
             IndexRequestKind::Dependency(_) => {
                 let path = BiomePath::new(path);
-                if path.is_dependency() && !path.is_package_json() && !path.is_type_declaration() {
+                if path.is_dependency()
+                    && !path.is_package_json()
+                    && !path.is_type_declaration()
+                    && path.extension() != Some("css")
+                {
                     return Ok(true);
                 }
 
@@ -2856,6 +2880,21 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             configuration
         };
 
+        // Resolve the stylesheet from the configuration that declares it. Nested
+        // configurations that extend this one then inherit the absolute path.
+        let mut configuration = configuration;
+        if let Some(stylesheet) = configuration
+            .tailwind
+            .as_mut()
+            .and_then(|tailwind| tailwind.stylesheet.as_mut())
+        {
+            let base = workspace_directory
+                .clone()
+                .or_else(|| self.project_get_path(project_key))
+                .unwrap_or_default();
+            *stylesheet = normalize_path(&base.join(stylesheet.as_str())).into_string();
+        }
+
         settings.merge_with_configuration(
             configuration,
             workspace_directory.clone(),
@@ -2864,6 +2903,16 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 .map(|(path, config)| (path.into(), config))
                 .collect(),
         )?;
+
+        if let Some(stylesheet) = settings.tailwind.stylesheet()
+            && !self.fs.path_is_file(stylesheet)
+        {
+            diagnostics.push(biome_diagnostics::serde::Diagnostic::new(
+                TailwindStylesheetNotFound {
+                    path: stylesheet.to_string(),
+                },
+            ));
+        }
 
         #[cfg(feature = "plugins")]
         {
@@ -3640,8 +3689,8 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                     } else {
                         Vec::new()
                     }
-                },
-                _ => Vec::new()
+                }
+                _ => Vec::new(),
             };
             let handle = self.settings_handle_with_query(
                 &settings,
@@ -3759,15 +3808,19 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             feature = "plugins" => {
                 if categories.contains(biome_analyze::RuleCategory::Lint) {
                     self.get_analyzer_plugins_for_project(
-                        settings.as_ref().source_path().unwrap_or_default().as_path(),
+                        settings
+                            .as_ref()
+                            .source_path()
+                            .unwrap_or_default()
+                            .as_path(),
                         &settings.as_ref().get_plugins_for_path(&path),
                     )
                     .map_err(WorkspaceError::plugin_errors)?
                 } else {
                     Vec::new()
                 }
-            },
-            _ => biome_analyze::AnalyzerPluginVec::new()
+            }
+            _ => biome_analyze::AnalyzerPluginVec::new(),
         };
 
         let mut result = code_actions(CodeActionsParams {

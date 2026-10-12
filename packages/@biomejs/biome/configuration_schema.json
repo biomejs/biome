@@ -488,6 +488,27 @@
 				}
 			]
 		},
+		"BlockLangOptions": {
+			"description": "The checks for one top-level block.",
+			"type": "object",
+			"properties": {
+				"allowNoLang": {
+					"description": "When `true`, the block may also omit the `lang` attribute.\n\nOnly applies when `lang` is set. Defaults to `false`.",
+					"type": ["boolean", "null"]
+				},
+				"lang": {
+					"description": "The values allowed for the `lang` attribute of the block, such as `[\"ts\"]`.\n\nWhen set, it must contain at least one value. Values must match exactly,\nso `\"ts\"` doesn't allow `lang=\"TS\"`. When omitted, the `lang` attribute\nof the block isn't checked.",
+					"type": ["array", "null"],
+					"items": { "type": "string" },
+					"minItems": 1
+				},
+				"required": {
+					"description": "When `true`, every component must contain at least one block with this\ntag name.\n\nWorks with or without `lang`. Defaults to `false`.",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"Bool": { "type": "boolean" },
 		"BracketSameLine": {
 			"description": "Controls the placement of the closing bracket for multiline HTML and JSX opening tags. Biome\nplaces the bracket at the end of the last attribute line when enabled and on its own line after\nthe last attribute when disabled. This option also affects self-closing HTML elements, but\nself-closing JSX elements are unaffected.",
@@ -1932,7 +1953,7 @@
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"cssModules": {
-					"description": "Enables CSS Modules-specific syntax such as `:local`, `:global`, `composes`, and `@value`.\nWhen unset, Biome enables this syntax automatically for files whose names end in\n`.module.css`; otherwise, it defaults to `false`. Enable it explicitly when CSS Module files\nuse another naming convention.",
+					"description": "Enables CSS Modules-specific syntax such as `:local`, `:global`, `composes`, and `@value`.\nWhen unset, Biome enables this syntax automatically for files whose names end in\n`.module.css` or `.module.scss; otherwise, it defaults to `false`. Enable it explicitly when CSS Module files\nuse another naming convention.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"tailwindDirectives": {
@@ -2002,6 +2023,20 @@
 				"object": { "type": ["boolean", "null"] }
 			},
 			"additionalProperties": false
+		},
+		"EventHyphenation": {
+			"oneOf": [
+				{
+					"description": "Event names must be hyphenated, e.g. `custom-event`.",
+					"type": "string",
+					"const": "always"
+				},
+				{
+					"description": "Event names must not contain hyphens, e.g. `customEvent`.",
+					"type": "string",
+					"const": "never"
+				}
+			]
 		},
 		"Expand": {
 			"oneOf": [
@@ -2831,10 +2866,6 @@
 			"description": "Options that change how the JavaScript parser behaves.",
 			"type": "object",
 			"properties": {
-				"gritMetavariables": {
-					"description": "Enables parsing Grit metavariables in JavaScript and TypeScript syntax. Defaults to `false`.",
-					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
-				},
 				"jsxEverywhere": {
 					"description": "Controls whether `.js`, `.mjs`, and `.cjs` files may contain JSX syntax. Disabling this\noption causes JSX in those files to raise a diagnostic. Defaults to `true`.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -2907,6 +2938,20 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"JsonFileReadAs": {
+			"oneOf": [
+				{
+					"description": "Read JSON files with the `'utf8'` encoding, so `JSON.parse()` receives a string.",
+					"type": "string",
+					"const": "string"
+				},
+				{
+					"description": "Read JSON files without an encoding, so `JSON.parse()` receives a `Buffer`.",
+					"type": "string",
+					"const": "buffer"
+				}
+			]
 		},
 		"JsonFormatterConfiguration": {
 			"type": "object",
@@ -3238,6 +3283,10 @@
 			"description": "Options that change how the Markdown parser behaves",
 			"type": "object",
 			"properties": {
+				"cjkFriendlyEmphasis": {
+					"description": "Recognizes bold, italic, and strikethrough markers placed directly next to Chinese, Japanese, or Korean text. Defaults to `false`.\n\nStandard Markdown doesn't treat `**テスト。**テスト` as bold text, because the closing `**`\nis between a punctuation mark and a letter with no space around it. Languages that don't\nput spaces between words run into this often. When enabled, Biome follows the\n[CommonMark CJK-friendly amendments](https://github.com/tats-u/markdown-cjk-friendly/blob/main/specification.md)\nand treats such text as bold or italic. The option applies to `*`, `_`, and `~~` markers.\nAfter a variation selector (an invisible character that picks a glyph style for the\ncharacter before it), Biome classifies a marker by the character before the selector.\n\nThe option can also change markers that aren't next to Chinese, Japanese, or Korean text,\nbecause a marker that can now open or close formatting can take another marker's partner\nin the same paragraph, heading, or table cell. For example, standard Markdown shows\n`**テスト。**テスト a**` with `テスト a` in bold. With the option enabled, `テスト。` is bold\nand the last `**` is shown as written.\n\nThe formatter and the linter both use this reading of the document. Enable the option only\nwhen the tool that renders your Markdown also supports these amendments. Otherwise, Biome\ntreats as bold some text that your renderer shows with literal `**`, and formatting can\nchange what your renderer shows. For example, the option makes `__` after a variation\nselector a bold marker, and the formatter rewrites it as `**`, which standard Markdown\nshows as bold even where it showed the original `__` as written.",
+					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
+				},
 				"frontmatter": {
 					"description": "Enables parsing frontmatter at the start of the file. Defaults to `false`.",
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
@@ -3977,15 +4026,16 @@
 			]
 		},
 		"NoDuplicateClassesOptions": {
+			"description": "Options for the `noDuplicateClasses` assist action.\n\nControls which JSX attributes and utility functions are checked for duplicate classes.",
 			"type": "object",
 			"properties": {
 				"attributes": {
-					"description": "Additional attributes that will be sorted.",
+					"description": "Additional attributes whose classes are checked for duplicates.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
 				"functions": {
-					"description": "Names of the functions or tagged templates that will be sorted.",
+					"description": "Names of the functions or tagged templates whose classes are checked for\nduplicates.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				}
@@ -4440,6 +4490,29 @@
 			"properties": {
 				"maxClasses": {
 					"description": "The maximum number of class selectors allowed in a single selector.\n\nThis option is required to enable the rule.\nUse `0` to disallow class selectors entirely.",
+					"type": ["integer", "null"],
+					"format": "uint16",
+					"maximum": 65535,
+					"minimum": 0
+				}
+			},
+			"additionalProperties": false
+		},
+		"NoExcessiveStatementsPerFunctionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoExcessiveStatementsPerFunctionOptions" }
+			]
+		},
+		"NoExcessiveStatementsPerFunctionOptions": {
+			"type": "object",
+			"properties": {
+				"ignoreTopLevelFunctions": {
+					"description": "When this option is set to `true`, a function that isn't nested in another function is\nnot checked, as long as it's the only such function in the file (default: false).",
+					"type": ["boolean", "null"]
+				},
+				"max": {
+					"description": "The maximum number of statements allowed in a function (default: 10).",
 					"type": ["integer", "null"],
 					"format": "uint16",
 					"maximum": 65535,
@@ -5230,6 +5303,26 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoNestedSwitchConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoNestedSwitchOptions" }
+			]
+		},
+		"NoNestedSwitchOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoNestedTemplateLiteralsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoNestedTemplateLiteralsOptions" }
+			]
+		},
+		"NoNestedTemplateLiteralsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoNestedTernaryConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5342,6 +5435,12 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoOctalConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoOctalOptions" }
+			]
+		},
 		"NoOctalEscapeConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -5349,6 +5448,7 @@
 			]
 		},
 		"NoOctalEscapeOptions": { "type": "object", "additionalProperties": false },
+		"NoOctalOptions": { "type": "object", "additionalProperties": false },
 		"NoParameterAssignConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6103,6 +6203,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoSvelteObjectInTextMustachesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSvelteObjectInTextMustachesOptions" }
+			]
+		},
+		"NoSvelteObjectInTextMustachesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoSvelteUnnecessaryStateWrapConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6158,6 +6268,28 @@
 			]
 		},
 		"NoTailwindArbitraryValueOptions": {
+			"type": "object",
+			"properties": {
+				"allowedCategories": {
+					"description": "Categories of utilities that may use arbitrary values. Defaults to an empty list.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/TailwindUtilityCategory" }
+				},
+				"allowedClasses": {
+					"description": "Classes that may use arbitrary values, such as `w-[320px]`. Defaults to an empty list.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
+		"NoTailwindLegacyUtilitiesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTailwindLegacyUtilitiesOptions" }
+			]
+		},
+		"NoTailwindLegacyUtilitiesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -6626,6 +6758,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnsafeUnaryMinusConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnsafeUnaryMinusOptions" }
+			]
+		},
+		"NoUnsafeUnaryMinusOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUntrustedLicensesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6817,6 +6959,16 @@
 			]
 		},
 		"NoUnwantedPolyfillioOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"NoUselessAssignmentConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUselessAssignmentOptions" }
+			]
+		},
+		"NoUselessAssignmentOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -7169,6 +7321,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueRequiredPropWithDefaultConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueRequiredPropWithDefaultOptions" }
+			]
+		},
+		"NoVueRequiredPropWithDefaultOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueReservedKeysConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7189,6 +7351,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueRootVIfConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueRootVIfOptions" }
+			]
+		},
+		"NoVueRootVIfOptions": { "type": "object", "additionalProperties": false },
 		"NoVueSetupPropsReactivityLossConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7216,6 +7385,13 @@
 			},
 			"additionalProperties": false
 		},
+		"NoVueVHtmlConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueVHtmlOptions" }
+			]
+		},
+		"NoVueVHtmlOptions": { "type": "object", "additionalProperties": false },
 		"NoVueVIfWithVForConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7236,6 +7412,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueVTextConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueVTextOptions" }
+			]
+		},
+		"NoVueVTextOptions": { "type": "object", "additionalProperties": false },
 		"NoWithConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7360,6 +7543,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noExcessiveStatementsPerFunction": {
+					"description": "Enforce a maximum number of statements allowed in a function.\nSee https://biomejs.dev/linter/rules/no-excessive-statements-per-function",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoExcessiveStatementsPerFunctionConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noExtendNative": {
 					"description": "Disallow extending the prototype of built-in objects.\nSee https://biomejs.dev/linter/rules/no-extend-native",
 					"anyOf": [
@@ -7444,6 +7634,20 @@
 						{ "type": "null" }
 					]
 				},
+				"noNestedSwitch": {
+					"description": "Disallow switch statements inside other switch statements.\nSee https://biomejs.dev/linter/rules/no-nested-switch",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoNestedSwitchConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noNestedTemplateLiterals": {
+					"description": "Disallow template literals inside other template literals.\nSee https://biomejs.dev/linter/rules/no-nested-template-literals",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoNestedTemplateLiteralsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noNonScalableViewport": {
 					"description": "Disallow disabling zoom with user-scalable=no in the \\<meta name=\"viewport\"> element.\nSee https://biomejs.dev/linter/rules/no-non-scalable-viewport",
 					"anyOf": [
@@ -7455,6 +7659,13 @@
 					"description": "Disallow obsolete HTML elements.\nSee https://biomejs.dev/linter/rules/no-obsolete-tags",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoObsoleteTagsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noOctal": {
+					"description": "Disallow numbers written with an extra leading zero.\nSee https://biomejs.dev/linter/rules/no-octal",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoOctalConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7528,6 +7739,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noSvelteObjectInTextMustaches": {
+					"description": "Disallow objects, arrays, functions, and classes in Svelte text mustaches.\nSee https://biomejs.dev/linter/rules/no-svelte-object-in-text-mustaches",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSvelteObjectInTextMustachesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noSvelteUnnecessaryStateWrap": {
 					"description": "Disallow unnecessary $state wrapping of reactive classes.\nSee https://biomejs.dev/linter/rules/no-svelte-unnecessary-state-wrap",
 					"anyOf": [
@@ -7539,6 +7757,13 @@
 					"description": "Disallow arbitrary values in Tailwind CSS utility classes.\nSee https://biomejs.dev/linter/rules/no-tailwind-arbitrary-value",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoTailwindArbitraryValueConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noTailwindLegacyUtilities": {
+					"description": "Disallow Tailwind CSS utility classes that Tailwind CSS only keeps for backward compatibility.\nSee https://biomejs.dev/linter/rules/no-tailwind-legacy-utilities",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTailwindLegacyUtilitiesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7605,10 +7830,24 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnsafeUnaryMinus": {
+					"description": "Require the operand of unary - to be a number or a bigint.\nSee https://biomejs.dev/linter/rules/no-unsafe-unary-minus",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnsafeUnaryMinusConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnusedClasses": {
 					"description": "Reports CSS class selectors that are never referenced in any JSX or HTML file.\nSee https://biomejs.dev/linter/rules/no-unused-classes",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnusedClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessAssignment": {
+					"description": "Disallow assignments whose value is never read.\nSee https://biomejs.dev/linter/rules/no-useless-assignment",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUselessAssignmentConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7633,10 +7872,38 @@
 						{ "type": "null" }
 					]
 				},
+				"noVueRequiredPropWithDefault": {
+					"description": "Disallow props that are both required and have a default value.\nSee https://biomejs.dev/linter/rules/no-vue-required-prop-with-default",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueRequiredPropWithDefaultConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueRootVIf": {
+					"description": "Disallow v-if on the root element of a Vue component template.\nSee https://biomejs.dev/linter/rules/no-vue-root-v-if",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueRootVIfConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noVueUndeclaredDirectives": {
 					"description": "Disallow custom Vue directives that are not declared.\nSee https://biomejs.dev/linter/rules/no-vue-undeclared-directives",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueUndeclaredDirectivesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueVHtml": {
+					"description": "Disallow the use of Vue's v-html directive.\nSee https://biomejs.dev/linter/rules/no-vue-v-html",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueVHtmlConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueVText": {
+					"description": "Disallow the use of Vue's v-text directive.\nSee https://biomejs.dev/linter/rules/no-vue-v-text",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueVTextConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7689,6 +7956,20 @@
 						{ "type": "null" }
 					]
 				},
+				"useCapitalizedConstructors": {
+					"description": "Require constructor names to begin with a capital letter.\nSee https://biomejs.dev/linter/rules/use-capitalized-constructors",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseCapitalizedConstructorsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentBlockLang": {
+					"description": "Enforce which languages the top-level blocks of Vue and Svelte components use.\nSee https://biomejs.dev/linter/rules/use-consistent-block-lang",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentBlockLangConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentFunctionStyle": {
 					"description": "Enforce consistent use of function declarations or expressions assigned to variables.\nSee https://biomejs.dev/linter/rules/use-consistent-function-style",
 					"anyOf": [
@@ -7700,6 +7981,13 @@
 					"description": "Enforce that all heading levels are consistent and ordered.\nSee https://biomejs.dev/linter/rules/use-consistent-heading-level",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseConsistentHeadingLevelConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentJsonFileRead": {
+					"description": "Enforce a consistent way of reading JSON files before passing them to JSON.parse().\nSee https://biomejs.dev/linter/rules/use-consistent-json-file-read",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentJsonFileReadConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7787,6 +8075,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useNamedFunction": {
+					"description": "Require function expressions to have a name.\nSee https://biomejs.dev/linter/rules/use-named-function",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseNamedFunctionConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useNamedLayer": {
 					"description": "Disallow anonymous cascade layers.\nSee https://biomejs.dev/linter/rules/use-named-layer",
 					"anyOf": [
@@ -7845,13 +8140,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useSortedClasses": {
-					"description": "Enforce the sorting of CSS utility classes.\nSee https://biomejs.dev/linter/rules/use-sorted-classes",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseSortedClassesConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useStrictBooleanExpressions": {
 					"description": "Require unambiguous boolean expressions in conditions.\nSee https://biomejs.dev/linter/rules/use-strict-boolean-expressions",
 					"anyOf": [
@@ -7863,6 +8151,13 @@
 					"description": "Prefer String#startsWith() and String#endsWith() over verbose prefix and suffix checks.\nSee https://biomejs.dev/linter/rules/use-string-starts-ends-with",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseStringStartsEndsWithConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useSvelteKitResolve": {
+					"description": "Require internal navigation in SvelteKit apps to use paths built with resolve().\nSee https://biomejs.dev/linter/rules/use-svelte-kit-resolve",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSvelteKitResolveConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7887,10 +8182,24 @@
 						{ "type": "null" }
 					]
 				},
+				"useTailwindSortedClasses": {
+					"description": "Enforce the sorting of Tailwind CSS classes.\nSee https://biomejs.dev/linter/rules/use-tailwind-sorted-classes",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseTailwindSortedClassesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useTopLevelHeading": {
 					"description": "Require Markdown documents to start with a top-level heading.\nSee https://biomejs.dev/linter/rules/use-top-level-heading",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseTopLevelHeadingConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useUnaryMinus": {
+					"description": "Enforce the use of the unary minus operator over multiplying or dividing by -1.\nSee https://biomejs.dev/linter/rules/use-unary-minus",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseUnaryMinusConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -7905,6 +8214,13 @@
 					"description": "Enforce importing Vue's public entry point instead of internal Vue packages.\nSee https://biomejs.dev/linter/rules/use-vue-base-import",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseVueBaseImportConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useVueConsistentEventHyphenation": {
+					"description": "Enforce a consistent hyphenation style for event names in v-on directives on custom components.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-event-hyphenation",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueConsistentEventHyphenationConfiguration" },
 						{ "type": "null" }
 					]
 				}
@@ -9679,6 +9995,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoExcessiveStatementsPerFunctionOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoExcessiveStatementsPerFunctionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoExplicitAnyOptions": {
 			"type": "object",
 			"properties": {
@@ -10454,6 +10779,24 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoNestedSwitchOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoNestedSwitchOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoNestedTemplateLiteralsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoNestedTemplateLiteralsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoNestedTernaryOptions": {
 			"type": "object",
 			"properties": {
@@ -10582,6 +10925,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoOctalEscapeOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoOctalOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoOctalOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -11287,6 +11639,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoSvelteObjectInTextMustachesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSvelteObjectInTextMustachesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoSvelteUnnecessaryStateWrapOptions": {
 			"type": "object",
 			"properties": {
@@ -11336,6 +11697,19 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoTailwindArbitraryValueOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoTailwindLegacyUtilitiesOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTailwindLegacyUtilitiesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -11698,6 +12072,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoUnsafeUnaryMinusOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnsafeUnaryMinusOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoUntrustedLicensesOptions": {
 			"type": "object",
 			"properties": {
@@ -11817,6 +12200,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnwantedPolyfillioOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUselessAssignmentOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUselessAssignmentOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12245,6 +12637,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoVueRequiredPropWithDefaultOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueRequiredPropWithDefaultOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoVueReservedKeysOptions": {
 			"type": "object",
 			"properties": {
@@ -12259,6 +12664,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueReservedPropsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueRootVIfOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueRootVIfOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12281,6 +12695,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoVueVHtmlOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueVHtmlOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoVueVIfWithVForOptions": {
 			"type": "object",
 			"properties": {
@@ -12295,6 +12718,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueVOnNumberValuesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueVTextOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueVTextOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12600,6 +13032,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseCapitalizedConstructorsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseCapitalizedConstructorsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseCollapsedElseIfOptions": {
 			"type": "object",
 			"properties": {
@@ -12657,6 +13098,19 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseConsistentArrowReturnOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseConsistentBlockLangOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentBlockLangOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -12721,6 +13175,19 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseConsistentHeadingLevelOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseConsistentJsonFileReadOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentJsonFileReadOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -13550,6 +14017,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseNamedFunctionOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseNamedFunctionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseNamedLayerOptions": {
 			"type": "object",
 			"properties": {
@@ -14036,19 +14512,6 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
-		"RuleWithUseSortedClassesOptions": {
-			"type": "object",
-			"properties": {
-				"fix": {
-					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
-					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
-				},
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/UseSortedClassesOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
 		"RuleWithUseSpreadOverApplyOptions": {
 			"type": "object",
 			"properties": {
@@ -14110,6 +14573,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseSvelteKitResolveOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSvelteKitResolveOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseSvelteKitRuneImportsOptions": {
 			"type": "object",
 			"properties": {
@@ -14146,6 +14618,19 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseTailwindShorthandClassesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseTailwindSortedClassesOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseTailwindSortedClassesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -14239,6 +14724,19 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseTrimStartEndOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseUnaryMinusOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseUnaryMinusOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -14404,6 +14902,19 @@
 				"options": {
 					"$ref": "#/$defs/UseVueConsistentDefinePropsDeclarationOptions"
 				}
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithUseVueConsistentEventHyphenationOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueConsistentEventHyphenationOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
@@ -15641,13 +16152,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useScopedStyles": {
-					"description": "Keep component styles scoped in Vue and Astro files.\nSee https://biomejs.dev/linter/rules/use-scoped-styles",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseScopedStylesConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useSelfClosingElements": {
 					"description": "Prevent extra closing tags for components without children.\nSee https://biomejs.dev/linter/rules/use-self-closing-elements",
 					"anyOf": [
@@ -16780,6 +17284,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useScopedStyles": {
+					"description": "Keep component styles scoped in Vue and Astro files.\nSee https://biomejs.dev/linter/rules/use-scoped-styles",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseScopedStylesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useStaticResponseMethods": {
 					"description": "Use static Response methods instead of new Response() constructor when possible.\nSee https://biomejs.dev/linter/rules/use-static-response-methods",
 					"anyOf": [
@@ -16803,17 +17314,17 @@
 				{ "type": "array", "items": { "type": "string" } }
 			]
 		},
-		"TailwindAppearanceCategory": {
-			"type": "string",
-			"enum": ["color", "typography", "spacing", "shape", "effects", "motion"]
-		},
 		"TailwindComponentAllowance": {
 			"type": "object",
 			"properties": {
+				"advice": {
+					"description": "Instructions on how to fix the problem, shown in diagnostics for the matching\ncomponents in place of the default advice.",
+					"type": ["string", "null"]
+				},
 				"categories": {
 					"description": "Categories allowed on the matching components. Defaults to an empty list.",
 					"type": "array",
-					"items": { "$ref": "#/$defs/TailwindAppearanceCategory" }
+					"items": { "$ref": "#/$defs/TailwindUtilityCategory" }
 				},
 				"classes": {
 					"description": "Exact classes, including variants and modifiers. Defaults to an empty list.",
@@ -16842,6 +17353,10 @@
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
+				"stylesheet": {
+					"description": "The CSS file that holds your Tailwind CSS configuration, such as\n`\"./src/app.css\"`. A relative path starts from the folder of the Biome\nconfiguration file.\n\nBiome reads the `@theme`, `@utility`, and `@custom-variant` rules in\nthis file and in the files it imports with `@import`, so that the\nTailwind rules know your theme values, utilities, and variants.\n\nTo read the file, Biome scans your project when a Tailwind rule is\nenabled. Setting this option also turns on `css.parser.tailwindDirectives`,\nunless you set that option yourself.",
+					"type": ["string", "null"]
+				},
 				"variantFunctions": {
 					"description": "Functions that describe a component's styles with an object, such as\n`cva` and `tv`.\n\nBiome checks every string passed directly to these functions. In an\nobject passed to them, Biome checks the classes under these properties:\n\n- `base`, `class`, and `className`: classes that always apply.\n- `variants`: classes for each version of the component, such as each\n  button size.\n- `slots`: classes for each part of the component, such as its icon.\n- `compoundVariants` and `compoundSlots`: only the `class` and\n  `className` of each entry.\n\nOther properties, such as `defaultVariants`, hold names rather than\nclasses, so Biome skips them. For example, Biome checks `\"rounded\"`,\n`\"px-2\"`, and `\"px-4\"` here, but not `\"small\"`:\n\n```js\ncva(\"rounded\", {\n    variants: {\n        size: { small: \"px-2\", large: \"px-4\" },\n    },\n    defaultVariants: { size: \"small\" },\n});\n```\n\nDefaults to `cva` and `tv`.",
 					"type": ["array", "null"],
@@ -16849,6 +17364,26 @@
 				}
 			},
 			"additionalProperties": false
+		},
+		"TailwindUtilityCategory": {
+			"oneOf": [
+				{
+					"type": "string",
+					"enum": [
+						"color",
+						"typography",
+						"spacing",
+						"shape",
+						"effects",
+						"motion"
+					]
+				},
+				{
+					"description": "Sizing, positioning, margins, and other utilities that don't set appearance.",
+					"type": "string",
+					"const": "layout"
+				}
+			]
 		},
 		"TestFunctionKind": {
 			"description": "The function to use for tests",
@@ -17124,6 +17659,16 @@
 			]
 		},
 		"UseButtonTypeOptions": { "type": "object", "additionalProperties": false },
+		"UseCapitalizedConstructorsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseCapitalizedConstructorsOptions" }
+			]
+		},
+		"UseCapitalizedConstructorsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseCollapsedElseIfConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -17227,6 +17772,23 @@
 				}
 			]
 		},
+		"UseConsistentBlockLangConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentBlockLangOptions" }
+			]
+		},
+		"UseConsistentBlockLangOptions": {
+			"type": "object",
+			"properties": {
+				"blocks": {
+					"description": "The top-level blocks to check in Vue and Svelte components.\n\nEach key is the tag name of a block, without angle brackets, such as\n`script`, `style`, or a Vue custom block like `i18n`. Blocks that aren't\nlisted aren't checked. When this option is omitted, the rule doesn't\ncheck anything.",
+					"type": ["object", "null"],
+					"additionalProperties": { "$ref": "#/$defs/BlockLangOptions" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseConsistentBuiltinInstantiationConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -17311,6 +17873,22 @@
 		},
 		"UseConsistentHeadingLevelOptions": {
 			"type": "object",
+			"additionalProperties": false
+		},
+		"UseConsistentJsonFileReadConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentJsonFileReadOptions" }
+			]
+		},
+		"UseConsistentJsonFileReadOptions": {
+			"type": "object",
+			"properties": {
+				"readAs": {
+					"description": "Whether JSON files should be read as strings or as `Buffer`s before they are passed to `JSON.parse()`.\n\nDefault: `\"string\"`",
+					"anyOf": [{ "$ref": "#/$defs/JsonFileReadAs" }, { "type": "null" }]
+				}
+			},
 			"additionalProperties": false
 		},
 		"UseConsistentMemberAccessibilityConfiguration": {
@@ -18290,6 +18868,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseNamedFunctionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseNamedFunctionOptions" }
+			]
+		},
+		"UseNamedFunctionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseNamedLayerConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -18845,28 +19433,6 @@
 			},
 			"additionalProperties": false
 		},
-		"UseSortedClassesConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithUseSortedClassesOptions" }
-			]
-		},
-		"UseSortedClassesOptions": {
-			"type": "object",
-			"properties": {
-				"attributes": {
-					"description": "Additional attributes that will be sorted.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				},
-				"functions": {
-					"description": "Names of the functions or tagged templates that will be sorted.",
-					"type": ["array", "null"],
-					"items": { "type": "string" }
-				}
-			},
-			"additionalProperties": false
-		},
 		"UseSortedEnumMembersConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
@@ -18999,6 +19565,34 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseSvelteKitResolveConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseSvelteKitResolveOptions" }
+			]
+		},
+		"UseSvelteKitResolveOptions": {
+			"type": "object",
+			"properties": {
+				"ignoreGoto": {
+					"description": "Whether to ignore all `goto()` calls. Default: `false`.",
+					"type": ["boolean", "null"]
+				},
+				"ignoreLinks": {
+					"description": "Whether to ignore all `<a>` elements. Default: `false`.",
+					"type": ["boolean", "null"]
+				},
+				"ignorePushState": {
+					"description": "Whether to ignore all `pushState()` calls. Default: `false`.",
+					"type": ["boolean", "null"]
+				},
+				"ignoreReplaceState": {
+					"description": "Whether to ignore all `replaceState()` calls. Default: `false`.",
+					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseSvelteKitRuneImportsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -19036,6 +19630,16 @@
 			]
 		},
 		"UseTailwindShorthandClassesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseTailwindSortedClassesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseTailwindSortedClassesOptions" }
+			]
+		},
+		"UseTailwindSortedClassesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
@@ -19145,6 +19749,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseUnaryMinusConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseUnaryMinusOptions" }
+			]
+		},
+		"UseUnaryMinusOptions": { "type": "object", "additionalProperties": false },
 		"UseUnicodeRegexConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -19335,6 +19946,32 @@
 			"properties": {
 				"style": {
 					"anyOf": [{ "$ref": "#/$defs/DeclarationStyle" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseVueConsistentEventHyphenationConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueConsistentEventHyphenationOptions" }
+			]
+		},
+		"UseVueConsistentEventHyphenationOptions": {
+			"type": "object",
+			"properties": {
+				"hyphenation": {
+					"description": "Whether event names in `v-on` directives must be hyphenated (`\"always\"`) or must not\ncontain hyphens (`\"never\"`). If omitted, hyphenated names are required.",
+					"anyOf": [{ "$ref": "#/$defs/EventHyphenation" }, { "type": "null" }]
+				},
+				"ignore": {
+					"description": "List of event names to exempt from the check.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				},
+				"ignoreTags": {
+					"description": "List of tag names whose events should not be checked.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
 				}
 			},
 			"additionalProperties": false

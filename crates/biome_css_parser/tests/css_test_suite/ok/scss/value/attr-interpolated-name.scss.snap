@@ -241,11 +241,13 @@ CssRoot {
                                             },
                                             fallback_value: CssAttrFallbackValue {
                                                 comma_token: COMMA@154..156 "," [] [Whitespace(" ")],
-                                                value: CssGenericComponentValueList [
-                                                    CssNumber {
-                                                        value_token: CSS_NUMBER_LITERAL@156..157 "0" [] [],
-                                                    },
-                                                ],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssNumber {
+                                                            value_token: CSS_NUMBER_LITERAL@156..157 "0" [] [],
+                                                        },
+                                                    ],
+                                                },
                                             },
                                             r_paren_token: R_PAREN@157..158 ")" [] [],
                                         },
@@ -300,12 +302,14 @@ CssRoot {
                                             },
                                             fallback_value: CssAttrFallbackValue {
                                                 comma_token: COMMA@194..196 "," [] [Whitespace(" ")],
-                                                value: CssGenericComponentValueList [
-                                                    CssRegularDimension {
-                                                        value_token: CSS_NUMBER_LITERAL@196..198 "10" [] [],
-                                                        unit_token: IDENT@198..200 "px" [] [],
-                                                    },
-                                                ],
+                                                value: ScssExpression {
+                                                    items: ScssExpressionItemList [
+                                                        CssRegularDimension {
+                                                            value_token: CSS_NUMBER_LITERAL@196..198 "10" [] [],
+                                                            unit_token: IDENT@198..200 "px" [] [],
+                                                        },
+                                                    ],
+                                                },
                                             },
                                             r_paren_token: R_PAREN@200..201 ")" [] [],
                                         },
@@ -479,9 +483,10 @@ CssRoot {
                         3: R_PAREN@153..154 ")" [] []
                       4: CSS_ATTR_FALLBACK_VALUE@154..157
                         0: COMMA@154..156 "," [] [Whitespace(" ")]
-                        1: CSS_GENERIC_COMPONENT_VALUE_LIST@156..157
-                          0: CSS_NUMBER@156..157
-                            0: CSS_NUMBER_LITERAL@156..157 "0" [] []
+                        1: SCSS_EXPRESSION@156..157
+                          0: SCSS_EXPRESSION_ITEM_LIST@156..157
+                            0: CSS_NUMBER@156..157
+                              0: CSS_NUMBER_LITERAL@156..157 "0" [] []
                       5: R_PAREN@157..158 ")" [] []
               1: (empty)
             1: SEMICOLON@158..159 ";" [] []
@@ -517,10 +522,11 @@ CssRoot {
                         0: IDENT@192..194 "px" [] []
                       4: CSS_ATTR_FALLBACK_VALUE@194..200
                         0: COMMA@194..196 "," [] [Whitespace(" ")]
-                        1: CSS_GENERIC_COMPONENT_VALUE_LIST@196..200
-                          0: CSS_REGULAR_DIMENSION@196..200
-                            0: CSS_NUMBER_LITERAL@196..198 "10" [] []
-                            1: IDENT@198..200 "px" [] []
+                        1: SCSS_EXPRESSION@196..200
+                          0: SCSS_EXPRESSION_ITEM_LIST@196..200
+                            0: CSS_REGULAR_DIMENSION@196..200
+                              0: CSS_NUMBER_LITERAL@196..198 "10" [] []
+                              1: IDENT@198..200 "px" [] []
                       5: R_PAREN@200..201 ")" [] []
               1: (empty)
             1: SEMICOLON@201..202 ";" [] []

@@ -1,0 +1,31 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@property --theme-color {
+  syntax: "";
+  inherits: false;
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:3:12 syntax/correctness/noInvalidPropertySyntax ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The property syntax cannot be empty.
+  
+    1 │ /* should generate diagnostics */
+    2 │ @property --theme-color {
+  > 3 │   syntax: "";
+      │            
+    4 │   inherits: false;
+    5 │ }
+  
+  i Add a syntax component, such as <length>, or use * to accept any value.
+  
+
+```

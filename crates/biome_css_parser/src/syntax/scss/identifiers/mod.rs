@@ -20,8 +20,9 @@ pub(crate) use interpolated_identifier::{
 };
 pub(crate) use interpolated_regular::{
     is_nth_at_scss_hyphen_interpolated_identifier, parse_scss_hyphen_interpolated_identifier,
-    parse_scss_interpolated_attribute_name, parse_scss_interpolated_identifier,
-    parse_scss_interpolated_name, parse_scss_interpolation_or_identifier,
+    parse_scss_interpolated_at_rule_name, parse_scss_interpolated_attribute_name,
+    parse_scss_interpolated_identifier, parse_scss_interpolated_name,
+    parse_scss_interpolation_or_identifier,
 };
 pub(crate) use interpolated_selector::{
     is_at_scss_interpolated_selector_identifier, is_nth_at_scss_interpolated_selector_identifier,

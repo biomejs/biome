@@ -99,7 +99,7 @@ fn test_normalize_type_projections() {
         ("optionalElement", "string: A | string: B | undefined"),
         ("arrayElement", "string: A | string: B"),
         ("emptyElement", "never"),
-        ("mutableElement", "unknown"),
+        ("mutableElement", "string"),
         ("unknownElement", "unknown"),
         ("anyElement", "any"),
         ("restElement", "unknown"),

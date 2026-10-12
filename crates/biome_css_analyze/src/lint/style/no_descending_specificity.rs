@@ -2,15 +2,34 @@ use rustc_hash::{FxHashMap, FxHashSet};
 
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_css_semantic::model::{AnyRuleStart, Rule as CssSemanticRule, RuleId, Specificity};
-use biome_css_syntax::{AnyCssRoot, AnyCssSelector, CssLayerAtRule};
+use biome_css_semantic::model::{Rule as CssSemanticRule, RuleId, Specificity};
+use biome_css_syntax::{
+    AnyCssRoot, AnyCssSelector, CssContainerAtRule, CssLanguage, CssLayerAtRule, CssMediaAtRule,
+    CssScopeAtRule, CssStartingStyleAtRule, CssSupportsAtRule, ScssAtRootAtRule, ScssEachAtRule,
+    ScssElseClause, ScssForAtRule, ScssFunctionAtRule, ScssIfAtRule, ScssIncludeAtRule,
+    ScssMixinAtRule, ScssWhileAtRule,
+};
 use biome_diagnostics::Severity;
-use biome_rowan::TextRange;
-
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, SyntaxKindSet, TextRange};
 use biome_rule_options::no_descending_specificity::NoDescendingSpecificityOptions;
 
 use crate::services::semantic::Semantic;
+
+const INDEPENDENT_AT_RULE_KINDS: SyntaxKindSet<CssLanguage> = CssContainerAtRule::KIND_SET
+    .union(CssMediaAtRule::KIND_SET)
+    .union(CssScopeAtRule::KIND_SET)
+    .union(CssStartingStyleAtRule::KIND_SET)
+    .union(CssSupportsAtRule::KIND_SET);
+
+const SCSS_SELECTOR_CONTEXT_KINDS: SyntaxKindSet<CssLanguage> = ScssAtRootAtRule::KIND_SET
+    .union(ScssEachAtRule::KIND_SET)
+    .union(ScssElseClause::KIND_SET)
+    .union(ScssForAtRule::KIND_SET)
+    .union(ScssFunctionAtRule::KIND_SET)
+    .union(ScssIfAtRule::KIND_SET)
+    .union(ScssIncludeAtRule::KIND_SET)
+    .union(ScssMixinAtRule::KIND_SET)
+    .union(ScssWhileAtRule::KIND_SET);
 
 declare_lint_rule! {
     /// Disallow lower-specificity selectors after higher-specificity selectors.
@@ -26,6 +45,13 @@ declare_lint_rule! {
     /// The rule reports likely conflicts between selectors that end with the same target under the
     /// same surrounding rules, such as `@media` or `@layer`. It cannot determine every case where
     /// two selectors match the same element.
+    ///
+    /// ## SCSS limitations
+    ///
+    /// This rule does not evaluate SCSS. It compares statically written selectors within the same
+    /// SCSS block, but not selectors across mixin or include boundaries, or across mutually exclusive
+    /// control-flow branches. Selectors containing interpolation or placeholders are ignored because
+    /// their emitted selector and specificity depend on SCSS evaluation.
     ///
     /// ## Examples
     ///
@@ -162,18 +188,22 @@ impl Rule for NoDescendingSpecificity {
                         .ancestors()
                         .find_map(CssLayerAtRule::cast)
                         .map(|layer| layer.range()),
+                    scss: rule_node
+                        .syntax()
+                        .ancestors()
+                        .find(|ancestor| SCSS_SELECTOR_CONTEXT_KINDS.matches(ancestor.kind()))
+                        .map(|ancestor| ancestor.text_trimmed_range()),
                 },
                 &mut visited_selectors,
                 &mut descending_selectors,
             );
 
-            let child_at_rule_context = match rule_node {
-                AnyRuleStart::CssContainerAtRule(_)
-                | AnyRuleStart::CssMediaAtRule(_)
-                | AnyRuleStart::CssScopeAtRule(_)
-                | AnyRuleStart::CssStartingStyleAtRule(_)
-                | AnyRuleStart::CssSupportsAtRule(_) => Some(rule.id()),
-                _ => at_rule_context,
+            let child_at_rule_context = if INDEPENDENT_AT_RULE_KINDS
+                .matches(rule_node.syntax().kind())
+            {
+                Some(rule.id())
+            } else {
+                at_rule_context
             };
             for child_id in rule.child_ids().iter().rev() {
                 if let Some(child_rule) = model.get_rule_by_id(child_id) {
@@ -215,6 +245,8 @@ struct SelectorContext {
     at_rule: Option<RuleId>,
     /// The range of the nearest enclosing `@layer` block, or `None` for unlayered selectors.
     layer: Option<TextRange>,
+    /// The nearest enclosing SCSS block whose emitted position requires evaluation.
+    scss: Option<TextRange>,
 }
 
 type SelectorContexts = FxHashMap<SelectorContext, FxHashMap<String, (TextRange, Specificity)>>;
@@ -260,6 +292,11 @@ fn find_descending_selector(
     let visited_selectors = visited_selectors.entry(context).or_default();
 
     for selector in rule.selectors() {
+        let resolved_selector = selector.resolved().to_string();
+        // SCSS placeholders may not emit CSS, and interpolation prevents static specificity.
+        if resolved_selector.contains('%') || resolved_selector.contains("#{") {
+            continue;
+        }
         let Some(casted_selector) = AnyCssSelector::cast(selector.node().syntax().clone()) else {
             continue;
         };

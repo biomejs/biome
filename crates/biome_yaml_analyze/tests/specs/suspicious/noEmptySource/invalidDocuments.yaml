@@ -1,0 +1,13 @@
+# should generate diagnostics
+...
+---
+...
+%YAML 1.2
+---
+...
+---
+# Comment
+---
+--- # Comment
+---
+--- !!map

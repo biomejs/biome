@@ -121,6 +121,18 @@ fn decide_void_type_context(node: &JsSyntaxNode) -> Option<VoidTypeContext> {
     for parent in node.parent()?.ancestors() {
         match parent.kind() {
             JsSyntaxKind::TS_UNION_TYPE_VARIANT_LIST => {
+                // void | never
+                // `never` is the only type that can be mixed with `void` without changing its meaning
+                if parent.children().all(|child| {
+                    AnyTsType::cast(child).is_some_and(|ty| {
+                        matches!(
+                            ty.omit_parentheses(),
+                            AnyTsType::TsVoidType(_) | AnyTsType::TsNeverType(_)
+                        )
+                    })
+                }) {
+                    return None;
+                }
                 // checks if the union type contains a generic type has a void type as argument
                 for child in parent.descendants() {
                     if child.kind() == JsSyntaxKind::TS_TYPE_ARGUMENT_LIST {
