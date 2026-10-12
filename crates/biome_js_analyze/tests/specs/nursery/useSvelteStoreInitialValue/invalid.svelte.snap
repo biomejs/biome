@@ -1,0 +1,81 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+	import { writable, readable, derived } from "svelte/store";
+	const w = writable();
+	const r = readable();
+	const d = derived([a, b], () => {});
+</script>
+
+<p>{$w} {$r} {$d}</p>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:4:12 lint/nursery/useSvelteStoreInitialValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This writable() store is created without an initial value.
+  
+    2 │ <script>
+    3 │ 	import { writable, readable, derived } from "svelte/store";
+  > 4 │ 	const w = writable();
+      │ 	          ^^^^^^^^
+    5 │ 	const r = readable();
+    6 │ 	const d = derived([a, b], () => {});
+  
+  i Without an initial value, the store holds undefined until it is set for the first time, which code that reads the store may not expect.
+  
+  i Pass the initial value as the first argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:5:12 lint/nursery/useSvelteStoreInitialValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This readable() store is created without an initial value.
+  
+    3 │ 	import { writable, readable, derived } from "svelte/store";
+    4 │ 	const w = writable();
+  > 5 │ 	const r = readable();
+      │ 	          ^^^^^^^^
+    6 │ 	const d = derived([a, b], () => {});
+    7 │ </script>
+  
+  i Without an initial value, the store holds undefined until it is set for the first time, which code that reads the store may not expect.
+  
+  i Pass the initial value as the first argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:6:12 lint/nursery/useSvelteStoreInitialValue ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This derived() store is created without an initial value.
+  
+    4 │ 	const w = writable();
+    5 │ 	const r = readable();
+  > 6 │ 	const d = derived([a, b], () => {});
+      │ 	          ^^^^^^^
+    7 │ </script>
+    8 │ 
+  
+  i Without an initial value, the store holds undefined until its callback sets a value, which code that reads the store may not expect.
+  
+  i Pass the initial value as the third argument.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

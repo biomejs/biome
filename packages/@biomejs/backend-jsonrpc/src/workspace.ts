@@ -3998,6 +3998,11 @@ export interface Nursery {
 	 */
 	useSvelteShorthandDirective?: UseSvelteShorthandDirectiveConfiguration;
 	/**
+	 * Require Svelte stores to be created with an initial value.
+	 * See https://biomejs.dev/linter/rules/use-svelte-store-initial-value
+	 */
+	useSvelteStoreInitialValue?: UseSvelteStoreInitialValueConfiguration;
+	/**
 	 * Enforce using fewer Tailwind utilities instead of multiple utilities that are functionally the same.
 	 * See https://biomejs.dev/linter/rules/use-tailwind-shorthand-classes
 	 */
@@ -7038,6 +7043,9 @@ export type UseSvelteRequireEachKeyConfiguration =
 export type UseSvelteShorthandDirectiveConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSvelteShorthandDirectiveOptions;
+export type UseSvelteStoreInitialValueConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseSvelteStoreInitialValueOptions;
 export type UseTailwindShorthandClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTailwindShorthandClassesOptions;
@@ -10377,6 +10385,10 @@ export interface RuleWithUseSvelteShorthandDirectiveOptions {
 	level: RulePlainConfiguration;
 	options?: UseSvelteShorthandDirectiveOptions;
 }
+export interface RuleWithUseSvelteStoreInitialValueOptions {
+	level: RulePlainConfiguration;
+	options?: UseSvelteStoreInitialValueOptions;
+}
 export interface RuleWithUseTailwindShorthandClassesOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -13193,6 +13205,7 @@ export type UseSvelteKitRuneImportsOptions = {};
 export type UseSvelteReactiveClassesOptions = {};
 export type UseSvelteRequireEachKeyOptions = {};
 export type UseSvelteShorthandDirectiveOptions = {};
+export type UseSvelteStoreInitialValueOptions = {};
 export type UseTailwindShorthandClassesOptions = {};
 export type UseTailwindSortedClassesOptions = {};
 export type UseTailwindStaticClassStringsOptions = {};
@@ -15065,6 +15078,7 @@ export type Category =
 	| "lint/nursery/useSvelteReactiveClasses"
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useSvelteShorthandDirective"
+	| "lint/nursery/useSvelteStoreInitialValue"
 	| "lint/nursery/useTailwindShorthandClasses"
 	| "lint/nursery/useTailwindSortedClasses"
 	| "lint/nursery/useTailwindStaticClassStrings"
