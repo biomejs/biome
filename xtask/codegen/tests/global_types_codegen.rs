@@ -17,8 +17,8 @@ use xtask_codegen::generate_global_types::{
     collect::{CollectorOutput, CoverageOutcome, collect},
     compare::compare_lowered_globals,
     lower::{
-        LoweredGlobalTypes, LoweredMemberKind, LoweredTypeData, LoweredTypeReference,
-        lower_global_types,
+        LoweredGlobal, LoweredGlobalTypes, LoweredMemberKind, LoweredTypeData,
+        LoweredTypeReference, lower_global_types,
     },
     manifest::{GlobalDeclarationRole, GlobalManifest, build_global_manifest},
     source::{
@@ -676,6 +676,17 @@ fn lowered_from_fixture(dts_name: &str) -> Result<LoweredGlobalTypes> {
     lower_global_types(&manifest, &source_files)
 }
 
+/// Returns the entry of `global`'s local type table that `reference` points at.
+fn local_type<'a>(
+    global: &'a LoweredGlobal,
+    reference: &LoweredTypeReference,
+) -> &'a LoweredTypeData {
+    let LoweredTypeReference::Local(index) = reference else {
+        panic!("expected a local reference, got {reference:?}");
+    };
+    &global.local_types()[*index]
+}
+
 /// Asserts that every expected fragment appears somewhere in an error chain.
 #[cfg(unix)]
 fn expect_error_chain_contains_all<T>(result: Result<T>, expected: &[&str]) -> Result<()> {
@@ -1219,6 +1230,65 @@ mod tests {
             .global("Error.call")
             .expect("Error call helper should be lowered");
         assert_eq!(call.id_constant(), "ERROR_CALL_ID_GLOBAL_TYPE_ID");
+
+        Ok(())
+    }
+
+    #[test]
+    fn lowerer_lowers_every_array_member_from_declarations() -> Result<()> {
+        let lowered = lowered_from_fixture("manifest.disposables.d.ts")?;
+
+        let array = lowered.global("Array").expect("Array should be lowered");
+        assert_eq!(array.id_constant(), "ARRAY_ID_GLOBAL_TYPE_ID");
+        // Without `declare var Array`, the declaration only names a type.
+        let LoweredTypeData::Interface(interface) = array.data() else {
+            bail!("Array should lower to interface data");
+        };
+        assert_eq!(
+            interface
+                .members()
+                .iter()
+                .map(|member| member.name())
+                .collect::<Vec<_>>(),
+            ["length", "entries", "filter", "forEach", "map"]
+        );
+        let [element] = interface.type_parameters() else {
+            bail!("Array should declare one type parameter");
+        };
+
+        let entries = interface
+            .member("entries")
+            .expect("Array.entries should be lowered");
+        let LoweredTypeData::Function(entries) = local_type(array, entries.type_reference()) else {
+            bail!("Array.entries should lower to function data");
+        };
+        let LoweredTypeData::InstanceOf {
+            ty,
+            type_parameters,
+        } = local_type(array, entries.return_type())
+        else {
+            bail!("Array.entries should return an ArrayIterator instance");
+        };
+        assert_eq!(
+            ty,
+            &LoweredTypeReference::Global("GLOBAL_ARRAY_ITERATOR_ID".into())
+        );
+        let [entry] = type_parameters.as_ref() else {
+            bail!("ArrayIterator should receive one type argument");
+        };
+        let LoweredTypeData::Tuple(entry) = local_type(array, entry) else {
+            bail!("Array.entries should iterate tuples");
+        };
+        assert_eq!(
+            entry
+                .iter()
+                .map(|element| element.ty().clone())
+                .collect::<Vec<_>>(),
+            [
+                LoweredTypeReference::Predefined("GLOBAL_NUMBER_KEYWORD_ID"),
+                element.clone()
+            ]
+        );
 
         Ok(())
     }

@@ -5,7 +5,7 @@ use biome_string_case::StrLikeExtension;
 use super::lower::{
     LoweredClass, LoweredConstructor, LoweredFunction, LoweredFunctionParameter,
     LoweredFunctionParameterBinding, LoweredGlobal, LoweredGlobalTypes, LoweredInterface,
-    LoweredMemberKind, LoweredTypeData, LoweredTypeMember, LoweredTypeReference,
+    LoweredMemberKind, LoweredReturnKind, LoweredTypeData, LoweredTypeMember, LoweredTypeReference,
 };
 
 /// Relative path of the generated global types module from the workspace root.
@@ -351,13 +351,28 @@ fn render_function(function: &LoweredFunction) -> String {
             type_parameters: {type_parameters},
             name: {name},
             parameters: Box::new([{parameters}]),
-            return_type: crate::ReturnType::Type({return_type}),
+            return_type: {return_type},
         }}))",
         is_async = function.is_async(),
         type_parameters = render_type_references(function.type_parameters()),
         parameters = render_function_parameters(function.parameters()),
-        return_type = render_type_reference(function.return_type()),
+        return_type = render_return_type(function),
     )
+}
+
+/// Builds the `ReturnType` expression of a function.
+fn render_return_type(function: &LoweredFunction) -> String {
+    let ty = render_type_reference(function.return_type());
+    match function.return_kind() {
+        LoweredReturnKind::Type => format!("crate::ReturnType::Type({ty})"),
+        LoweredReturnKind::Predicate { parameter_name } => format!(
+            "crate::ReturnType::Predicate(Box::new(crate::PredicateReturnType {{
+                parameter_name: biome_rowan::Text::new_static({}),
+                ty: {ty},
+            }}))",
+            rust_string_literal(parameter_name.text())
+        ),
+    }
 }
 
 /// Builds the class member expression list.

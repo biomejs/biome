@@ -1104,8 +1104,13 @@ impl<'db> InferredType<'db> {
             .is_some_and(|function| function.type_parameters(self.db).is_empty())
     }
 
-    pub fn function_returns_conditional(self) -> bool {
-        self.function_return_matches(|ty| matches!(ty, TypeData::Conditional))
+    /// Returns whether this callable is a type guard, such as
+    /// `(value: unknown) => value is string`.
+    pub fn function_returns_type_predicate(self) -> bool {
+        let data = self.data.expand_canonical_global(self.db);
+        data.callable_function(self.db).is_some_and(|function| {
+            matches!(function.return_type(self.db), ReturnType::Predicate(_))
+        })
     }
 
     pub fn function_returns_void(self) -> bool {
