@@ -79,6 +79,13 @@ pub(crate) enum HtmlLexContext {
     ///
     /// When the parser has encounters the sequence `<!DOCTYPE`, it switches to this context. It will remain in this context until the next `>` token is encountered.
     Doctype,
+    /// Lexes the target and attributes of a processing instruction, between
+    /// `<?` and `?>`.
+    ///
+    /// A name ends before `?>`, so the `?` of `<?xml?>` or `<?foo bar?>` starts
+    /// the closing `?>` rather than joining the name. Framework syntax, such as
+    /// Vue directives or Astro expressions, is not recognized.
+    ProcessingInstruction,
     /// Treat everything as text until the closing tag is encountered.
     EmbeddedLanguage(HtmlEmbeddedLanguage),
     /// CDATA Sections are treated as text until the closing CDATA token is encountered.
