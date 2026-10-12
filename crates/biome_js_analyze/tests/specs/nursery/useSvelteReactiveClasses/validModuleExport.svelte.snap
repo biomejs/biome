@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validModuleExport.svelte
+---
+# Input
+```svelte
+<!-- should not generate diagnostics -->
+<script module>
+	export const cache = new Map();
+</script>
+
+```

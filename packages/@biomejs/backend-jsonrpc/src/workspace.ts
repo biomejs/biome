@@ -3448,6 +3448,11 @@ export interface Nursery {
 	 */
 	useSvelteKitRuneImports?: UseSvelteKitRuneImportsConfiguration;
 	/**
+	 * Require the reactive classes from svelte/reactivity instead of built-in objects that are modified.
+	 * See https://biomejs.dev/linter/rules/use-svelte-reactive-classes
+	 */
+	useSvelteReactiveClasses?: UseSvelteReactiveClassesConfiguration;
+	/**
 	 * Require keyed {#each} blocks in Svelte templates.
 	 * See https://biomejs.dev/linter/rules/use-svelte-require-each-key
 	 */
@@ -5951,6 +5956,9 @@ export type UseSvelteKitResolveConfiguration =
 export type UseSvelteKitRuneImportsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSvelteKitRuneImportsOptions;
+export type UseSvelteReactiveClassesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseSvelteReactiveClassesOptions;
 export type UseSvelteRequireEachKeyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSvelteRequireEachKeyOptions;
@@ -8613,6 +8621,10 @@ export interface RuleWithUseSvelteKitRuneImportsOptions {
 	level: RulePlainConfiguration;
 	options?: UseSvelteKitRuneImportsOptions;
 }
+export interface RuleWithUseSvelteReactiveClassesOptions {
+	level: RulePlainConfiguration;
+	options?: UseSvelteReactiveClassesOptions;
+}
 export interface RuleWithUseSvelteRequireEachKeyOptions {
 	level: RulePlainConfiguration;
 	options?: UseSvelteRequireEachKeyOptions;
@@ -10978,6 +10990,7 @@ export interface UseSvelteKitResolveOptions {
 	ignoreReplaceState?: boolean;
 }
 export type UseSvelteKitRuneImportsOptions = {};
+export type UseSvelteReactiveClassesOptions = {};
 export type UseSvelteRequireEachKeyOptions = {};
 export type UseSvelteShorthandDirectiveOptions = {};
 export type UseTailwindShorthandClassesOptions = {};
@@ -12553,6 +12566,7 @@ export type Category =
 	| "lint/nursery/useStringStartsEndsWith"
 	| "lint/nursery/useSvelteKitResolve"
 	| "lint/nursery/useSvelteKitRuneImports"
+	| "lint/nursery/useSvelteReactiveClasses"
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useSvelteShorthandDirective"
 	| "lint/nursery/useTailwindShorthandClasses"
