@@ -2993,6 +2993,11 @@ export interface Nursery {
 	 */
 	noInvalidPropertyInitValue?: NoInvalidPropertyInitValueConfiguration;
 	/**
+	 * Disallow this in places where it is undefined.
+	 * See https://biomejs.dev/linter/rules/no-invalid-this
+	 */
+	noInvalidThis?: NoInvalidThisConfiguration;
+	/**
 	 * Disallow specific object properties.
 	 * See https://biomejs.dev/linter/rules/no-js-restricted-properties
 	 */
@@ -5648,6 +5653,9 @@ export type NoInvalidFileInputAcceptConfiguration =
 export type NoInvalidPropertyInitValueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoInvalidPropertyInitValueOptions;
+export type NoInvalidThisConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoInvalidThisOptions;
 export type NoJsRestrictedPropertiesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsRestrictedPropertiesOptions;
@@ -8076,6 +8084,10 @@ export interface RuleWithNoInvalidFileInputAcceptOptions {
 export interface RuleWithNoInvalidPropertyInitValueOptions {
 	level: RulePlainConfiguration;
 	options?: NoInvalidPropertyInitValueOptions;
+}
+export interface RuleWithNoInvalidThisOptions {
+	level: RulePlainConfiguration;
+	options?: NoInvalidThisOptions;
 }
 export interface RuleWithNoJsRestrictedPropertiesOptions {
 	level: RulePlainConfiguration;
@@ -10591,6 +10603,7 @@ export type NoFloatingPromisesOptions = {};
 export type NoImpliedEvalOptions = {};
 export type NoInvalidFileInputAcceptOptions = {};
 export type NoInvalidPropertyInitValueOptions = {};
+export type NoInvalidThisOptions = {};
 export interface NoJsRestrictedPropertiesOptions {
 	/**
 	 * Restriction entries for object/property access.
@@ -12327,6 +12340,8 @@ export type Category =
 	| "lint/nursery/noImpliedEval"
 	| "lint/nursery/noInvalidFileInputAccept"
 	| "lint/nursery/noInvalidPropertyInitValue"
+	| "lint/nursery/noInvalidThis"
+	| "lint/nursery/noIteratorProperty"
 	| "lint/nursery/noJsRestrictedProperties"
 	| "lint/nursery/noJsonUnsafeValues"
 	| "lint/nursery/noMeaninglessVoidOperator"
