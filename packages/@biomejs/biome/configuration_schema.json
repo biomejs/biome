@@ -7524,6 +7524,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoYamlBooleanKeysConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoYamlBooleanKeysOptions" }
+			]
+		},
+		"NoYamlBooleanKeysOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoYodaExpressionConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8062,6 +8072,13 @@
 					"description": "Disallow the bitwise XOR operator where exponentiation was likely intended.\nSee https://biomejs.dev/linter/rules/no-xor-as-exponentiation",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoXorAsExponentiationConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noYamlBooleanKeys": {
+					"description": "Disallow boolean values as keys in YAML.\nSee https://biomejs.dev/linter/rules/no-yaml-boolean-keys",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoYamlBooleanKeysConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13051,6 +13068,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoXorAsExponentiationOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoYamlBooleanKeysOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoYamlBooleanKeysOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
