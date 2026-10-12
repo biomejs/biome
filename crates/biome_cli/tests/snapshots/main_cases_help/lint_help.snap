@@ -152,6 +152,9 @@ Available options:
                               applying rule fixes.
         --reason=STRING       Adds an explanation to suppressions created by `--suppress`. This flag
                               requires `--suppress`.
+        --md-analyze-embeds=<true|false>  Runs the linter and assist actions on the code inside the
+                              fenced code blocks, frontmatter, and HTML blocks of Markdown files.
+                              Defaults to `false`.
         --only=<GROUP|RULE|DOMAIN|PLUGIN>  Runs only the given lint rule, rule group, or domain. If
                               a rule's severity is `off`, Biome sets it to `error` for a recommended
                               rule or `warn` otherwise. The `plugin` group runs only analyzer

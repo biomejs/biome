@@ -1183,6 +1183,7 @@ impl From<biome_configuration::MarkdownConfiguration>
         if let Some(linter) = markdown.linter {
             language_setting.linter.enabled = linter.enabled;
         }
+        language_setting.linter.analyze_embeds = markdown.analyze_embeds;
 
         language_setting
     }
@@ -2652,6 +2653,7 @@ fn to_markdown_language_settings(
 
     let linter = conf.linter.take().unwrap_or_default();
     language_setting.linter.enabled = linter.enabled;
+    language_setting.linter.analyze_embeds = conf.analyze_embeds;
 
     language_setting
 }

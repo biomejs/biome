@@ -17,22 +17,34 @@ pub(crate) use crate::context::MarkdownFormatContext;
 use crate::prelude::{format_bogus_node, format_suppressed_node};
 pub(crate) use crate::trivia::*;
 use crate::{context::MdFormatOptions, cst::FormatMdSyntaxToken};
+use biome_formatter::VecBuffer;
+use biome_formatter::format_element::Interned;
+use biome_formatter::format_element::tag::Tag::{EndEmbedded, StartEmbedded};
 use biome_formatter::{
     FormatContext, FormatLanguage, FormatResult, Formatted, TransformSourceMap, prelude::*, write,
 };
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode};
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, TextRange};
 
 pub(crate) type MarkdownFormatter<'buf> = Formatter<'buf, MarkdownFormatContext>;
 
 #[derive(Debug, Clone, Default)]
 pub struct MdFormatLanguage {
     options: MdFormatOptions,
+    embedded_node_ranges: Vec<TextRange>,
 }
 
 impl MdFormatLanguage {
     pub fn new(options: MdFormatOptions) -> Self {
-        Self { options }
+        Self {
+            options,
+            embedded_node_ranges: Vec::new(),
+        }
+    }
+
+    pub fn with_embedded_node_ranges(mut self, embedded_node_ranges: Vec<TextRange>) -> Self {
+        self.embedded_node_ranges = embedded_node_ranges;
+        self
     }
 }
 
@@ -47,7 +59,8 @@ impl FormatLanguage for MdFormatLanguage {
         source_map: Option<TransformSourceMap>,
         _delegate_fmt_embedded_nodes: bool,
     ) -> MarkdownFormatContext {
-        MarkdownFormatContext::new(self.options.clone(), root, source_map)
+        MarkdownFormatContext::new(self.options, root, source_map)
+            .with_embedded_node_ranges(self.embedded_node_ranges)
     }
 
     fn options(&self) -> &<Self::Context as FormatContext>::Options {
@@ -257,9 +270,61 @@ where
 }
 
 /// Main entry point for formatting a Markdown file
+///
+/// `embedded_node_ranges` contains the content ranges of the embedded snippets
+/// whose formatting is delegated to the formatter of their language. The nodes
+/// holding these snippets are emitted as embedded tags, which the caller fills
+/// with [Formatted::format_embedded]. With no ranges, embedded content is
+/// printed as it's written.
 pub fn format_node(
     options: MdFormatOptions,
     root: &MarkdownSyntaxNode,
+    embedded_node_ranges: Vec<TextRange>,
 ) -> FormatResult<Formatted<MarkdownFormatContext>> {
-    biome_formatter::format_node(root, MdFormatLanguage::new(options), false)
+    let delegate_fmt_embedded_nodes = !embedded_node_ranges.is_empty();
+    biome_formatter::format_node(
+        root,
+        MdFormatLanguage::new(options).with_embedded_node_ranges(embedded_node_ranges),
+        delegate_fmt_embedded_nodes,
+    )
+}
+
+/// The code of a snippet that is formatted by the formatter of another
+/// language, such as the code inside a fenced code block.
+///
+/// It's printed as `content`, the snippet's own formatting, unless the caller
+/// of [format_node] replaces it with [Formatted::format_embedded]. The
+/// replacement doesn't end with a line break when the formatter of the
+/// snippet's language doesn't add a trailing newline, so the node that writes
+/// this element must end the snippet's last line itself.
+pub(crate) struct FormatEmbedded {
+    range: TextRange,
+    content: Interned,
+}
+
+impl FormatEmbedded {
+    /// Formats `content` into an embedded element for the snippet whose content
+    /// spans `range`.
+    pub(crate) fn new(
+        range: TextRange,
+        content: &dyn Format<MarkdownFormatContext>,
+        f: &mut MarkdownFormatter,
+    ) -> FormatResult<Self> {
+        let mut buffer = VecBuffer::new(f.state_mut());
+        write!(buffer, [content])?;
+        Ok(Self {
+            range,
+            content: Interned::new(buffer.into_vec()),
+        })
+    }
+}
+
+impl Format<MarkdownFormatContext> for FormatEmbedded {
+    fn fmt(&self, f: &mut MarkdownFormatter) -> FormatResult<()> {
+        f.write_elements([
+            FormatElement::Tag(StartEmbedded(self.range)),
+            FormatElement::Interned(self.content.clone()),
+            FormatElement::Tag(EndEmbedded),
+        ])
+    }
 }

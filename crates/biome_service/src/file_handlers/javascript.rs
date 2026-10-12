@@ -1270,7 +1270,13 @@ pub(super) fn lint_with_inspector(
         for snippet in params
             .parsed_source
             .snippets(&params.workspace_db)
-            .for_analysis(&params.parsed_source, params.language, &params.workspace_db)
+            .for_analysis(
+                &params.parsed_source,
+                params.language,
+                params.settings.as_ref(),
+                params.path,
+                &params.workspace_db,
+            )
         {
             let Some(language) = snippet.file_source(&params.workspace_db) else {
                 continue;

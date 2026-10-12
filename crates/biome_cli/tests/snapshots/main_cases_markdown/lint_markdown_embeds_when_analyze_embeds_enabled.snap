@@ -1,0 +1,220 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome lint file.md
+```
+
+## `biome.json`
+
+```json
+{
+  "markdown": {
+    "parser": {
+      "frontmatter": true
+    },
+    "analyzeEmbeds": true
+  },
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noDuplicateMapKeys": "error"
+      }
+    }
+  }
+}
+```
+
+## `file.md`
+
+```md
+---
+title: Biome
+title: Duplicate
+---
+
+# Embeds
+
+```js
+debugger;
+```
+
+```js
+function () {}
+```
+
+```css
+a {
+  color: red;
+  color: blue;
+}
+```
+
+```html
+<img src="code-block.png">
+```
+
+<img src="html-block.png">
+
+<!-- biome-ignore-start lint/suspicious/noDebugger: example -->
+
+```js
+debugger;
+```
+
+<!-- biome-ignore-end lint/suspicious/noDebugger: example -->
+
+```js
+// biome-ignore lint/suspicious/noDebugger: example
+debugger;
+```
+
+```
+
+# Termination Message
+
+```block
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+file.md:2:1 lint/nursery/noDuplicateMapKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key title was already declared.
+  
+    1 │ ---
+  > 2 │ title: Biome
+      │ ^^^^^
+    3 │ title: Duplicate
+    4 │ ---
+  
+  i This is where a duplicated key was declared again.
+  
+    1 │ ---
+    2 │ title: Biome
+  > 3 │ title: Duplicate
+      │ ^^^^^
+    4 │ ---
+    5 │ 
+  
+  i Duplicate keys make the mapping ambiguous, and tools disagree on which value wins.
+  
+  i Remove or rename the duplicate keys.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```block
+file.md:9:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This is an unexpected use of the debugger statement.
+  
+     8 │ ```js
+   > 9 │ debugger;
+       │ ^^^^^^^^^
+    10 │ ```
+    11 │ 
+  
+  i Unsafe fix: Remove debugger statement
+  
+    1   │ - 
+    2   │ - debugger;
+      1 │ + 
+    3 2 │   
+  
+
+```
+
+```block
+file.md:13:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected a name for the function in a function declaration, but found none
+  
+    12 │ ```js
+  > 13 │ function () {}
+       │          ^
+    14 │ ```
+    15 │ 
+  
+
+```
+
+```block
+file.md:19:3 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    17 │ a {
+    18 │   color: red;
+  > 19 │   color: blue;
+       │   ^^^^^
+    20 │ }
+    21 │ ```
+  
+  i color is already defined here.
+  
+    16 │ ```css
+    17 │ a {
+  > 18 │   color: red;
+       │   ^^^^^
+    19 │   color: blue;
+    20 │ }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
+
+```block
+file.md:24:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a text alternative through the alt, aria-label, or aria-labelledby attribute.
+  
+    23 │ ```html
+  > 24 │ <img src="code-block.png">
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ ```
+    26 │ 
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
+
+```
+
+```block
+file.md:27:1 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Provide a text alternative through the alt, aria-label, or aria-labelledby attribute.
+  
+    25 │ ```
+    26 │ 
+  > 27 │ <img src="html-block.png">
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ 
+    29 │ <!-- biome-ignore-start lint/suspicious/noDebugger: example -->
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 6 errors.
+```

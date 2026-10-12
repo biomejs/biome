@@ -2,9 +2,10 @@ use super::{eslint_eslint::ShorthandVec, node};
 use crate::CliDiagnostic;
 use crate::diagnostics::MigrationDiagnostic;
 use anyhow::{Context, Error};
-use biome_configuration::HtmlConfiguration;
 use biome_configuration::html::HtmlFormatterConfiguration;
 use biome_configuration::javascript::JsFormatterConfiguration;
+use biome_configuration::markdown::MarkdownFormatterConfiguration;
+use biome_configuration::{HtmlConfiguration, MarkdownConfiguration};
 use biome_console::{Console, ConsoleExt, markup};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize_macros::Deserializable;
@@ -63,6 +64,8 @@ pub(crate) struct PrettierConfiguration {
     object_wrap: ObjectWrap,
     /// https://prettier.io/docs/options#vue-files-script-and-style-tags-indentation
     vue_indent_script_and_style: bool,
+    /// https://prettier.io/docs/options#embedded-language-formatting
+    embedded_language_formatting: Option<EmbeddedLanguageFormatting>,
     /// https://prettier.io/docs/en/configuration.html#configuration-overrides
     overrides: Vec<Override>,
 }
@@ -84,6 +87,7 @@ impl Default for PrettierConfiguration {
             end_of_line: EndOfLine::default(),
             object_wrap: ObjectWrap::default(),
             vue_indent_script_and_style: false,
+            embedded_language_formatting: None,
             overrides: vec![],
         }
     }
@@ -124,6 +128,8 @@ pub(crate) struct OverrideOptions {
     end_of_line: Option<EndOfLine>,
     /// https://prettier.io/docs/options#object-wrap
     object_wrap: ObjectWrap,
+    /// https://prettier.io/docs/options#embedded-language-formatting
+    embedded_language_formatting: Option<EmbeddedLanguageFormatting>,
 }
 
 #[derive(Clone, Debug, Default, Deserializable, Eq, PartialEq)]
@@ -163,6 +169,26 @@ enum ObjectWrap {
     #[default]
     Preserve,
     Collapse,
+}
+
+#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, PartialEq)]
+enum EmbeddedLanguageFormatting {
+    #[default]
+    Auto,
+    Off,
+}
+
+impl From<EmbeddedLanguageFormatting> for MarkdownConfiguration {
+    fn from(value: EmbeddedLanguageFormatting) -> Self {
+        let format_embeds = matches!(value, EmbeddedLanguageFormatting::Auto);
+        Self {
+            formatter: Some(MarkdownFormatterConfiguration {
+                format_embeds: Some(format_embeds.into()),
+                ..Default::default()
+            }),
+            ..Default::default()
+        }
+    }
 }
 
 impl From<PrettierTrailingComma> for TrailingCommas {
@@ -300,6 +326,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::Configuration {
 
         result.javascript = Some(js_config);
         result.html = Some(html_config);
+        result.markdown = value.embedded_language_formatting.map(Into::into);
         if !value.overrides.is_empty() {
             let mut overrides = biome_configuration::Overrides::default();
             for override_elt in value.overrides {
@@ -361,6 +388,7 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
             };
             result.formatter = Some(formatter);
         }
+        result.markdown = options.embedded_language_formatting.map(Into::into);
         if options.semi.is_none()
             && options.single_quote.is_none()
             && options.jsx_single_quote.is_none()
@@ -552,7 +580,9 @@ fn load_config(
 
 #[cfg(test)]
 mod tests {
-    use crate::execute::migrate::prettier::{PrettierConfiguration, PrettierTrailingComma};
+    use crate::execute::migrate::prettier::{
+        EmbeddedLanguageFormatting, PrettierConfiguration, PrettierTrailingComma,
+    };
     use biome_deserialize::json::deserialize_from_json_str;
     use biome_json_parser::JsonParserOptions;
 
@@ -570,6 +600,22 @@ mod tests {
             configuration,
             PrettierConfiguration { use_tabs: true, .. }
         ))
+    }
+
+    #[test]
+    fn embedded_language_formatting() {
+        let configuration = deserialize_from_json_str::<PrettierConfiguration>(
+            r#"{ "embeddedLanguageFormatting": "off" }"#,
+            JsonParserOptions::default(),
+            "",
+        )
+        .into_deserialized()
+        .unwrap();
+
+        assert_eq!(
+            configuration.embedded_language_formatting,
+            Some(EmbeddedLanguageFormatting::Off)
+        );
     }
 
     #[test]

@@ -473,6 +473,11 @@ export interface LinterConfiguration {
  */
 export interface MarkdownConfiguration {
 	/**
+	 * Runs the linter and assist actions on the code inside fenced code blocks, frontmatter, and
+	 * HTML blocks, with the rules and actions of the code's language. Defaults to `false`.
+	 */
+	analyzeEmbeds?: Bool;
+	/**
 	 * Formatter options
 	 */
 	formatter?: MarkdownFormatterConfiguration;
@@ -1298,6 +1303,15 @@ export interface MarkdownFormatterConfiguration {
 	 * Control the formatter for Markdown (and its super languages) files.
 	 */
 	enabled?: Bool;
+	/**
+	 * Formats the code inside fenced code blocks, frontmatter, and HTML blocks with the formatter
+	 * of the code's language. Defaults to `true`.
+	 *
+	 * A block with a syntax error stays as written, and Biome still formats the rest of the file.
+	 *
+	 * When this option is `false`, Biome keeps every block as written.
+	 */
+	formatEmbeds?: Bool;
 	/**
 	 * The indent style applied to Markdown files.
 	 */
@@ -13022,6 +13036,10 @@ export interface GraphqlFileSource {
 	variant: GraphqlVariant;
 }
 export interface HtmlFileSource {
+	/**
+	 * Marks HTML embedded inside another language. This affects the formatting.
+	 */
+	embedding_kind: HtmlEmbeddingKind;
 	variant: HtmlVariant;
 }
 export interface GritFileSource {
@@ -13151,6 +13169,10 @@ export type CssVariant = "standard" | "cssModules" | "tailwindCss";
  * The style of GraphQL contained in the file.
  */
 export type GraphqlVariant = "standard";
+/**
+ * The language that embeds an HTML source.
+ */
+export type HtmlEmbeddingKind = "None" | "MarkdownBlock";
 export type HtmlVariant =
 	| { Standard: HtmlTextExpressions }
 	| "Astro"
