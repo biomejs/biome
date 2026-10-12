@@ -189,8 +189,7 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
                 return false;
             }
 
-            paired_tag_has_accessible_content(element, is_astro)
-                .unwrap_or_else(|| has_accessible_content(&element.children(), is_astro))
+            html_element_has_accessible_content(element, is_astro).unwrap_or(true)
         }
         AnyHtmlElement::HtmlSelfClosingElement(element) => {
             if html_self_closing_element_has_truthy_aria_hidden(element) {
@@ -239,35 +238,38 @@ fn has_accessible_content(html_child_list: &HtmlElementList, is_astro: bool) -> 
     })
 }
 
-/// Decides from the opening tag of a paired element whether it counts as content.
+/// Attributes that give Astro's `Image` an accessible name.
+const IMAGE_NAME_ATTRIBUTES: &[&str] = &["aria-label", "aria-labelledby", "title", "alt"];
+
+/// Checks if an element counts as accessible content.
 ///
-/// Returns `Some(_)` for Astro's `Image`, which is decided by its attributes,
-/// `Some(true)` for custom components, and `None` when the element's children
-/// have to be checked, including when the opening tag can't be parsed.
-fn paired_tag_has_accessible_content(element: &HtmlElement, is_astro: bool) -> Option<bool> {
+/// Custom components may render accessible content, as in the JSX rule.
+/// Astro's `Image` is the exception: it renders an `img` and ignores its children,
+/// so only its accessible name attributes count, as in the self-closing spelling.
+/// Any other element counts when its children do.
+fn html_element_has_accessible_content(element: &HtmlElement, is_astro: bool) -> Option<bool> {
     let tag_element = AnyHtmlTagElement::from(element.opening_element().ok()?);
-    let tag_name = tag_element.name().ok()?;
 
-    // Astro's `Image` renders an `img` and ignores its children,
-    // so it gets the same checks as the self-closing spelling
-    if is_astro
-        && tag_name
-            .token_text_trimmed()
-            .is_some_and(|text| text.as_ref() == "Image")
-    {
-        return Some(
-            ["aria-label", "aria-labelledby", "title", "alt"]
-                .into_iter()
-                .any(|name| has_non_empty_attribute(&tag_element, name)),
-        );
-    }
-
-    // Custom components may render accessible content, as in the JSX rule
     if tag_element.is_custom_component() {
+        let is_astro_image = is_astro
+            && tag_element
+                .name()
+                .ok()?
+                .token_text_trimmed()
+                .is_some_and(|text| text == "Image");
+
+        if is_astro_image {
+            return Some(
+                IMAGE_NAME_ATTRIBUTES
+                    .iter()
+                    .any(|name| has_non_empty_attribute(&tag_element, name)),
+            );
+        }
+
         return Some(true);
     }
 
-    None
+    Some(has_accessible_content(&element.children(), is_astro))
 }
 
 /// Checks if the content node contains non-empty text.
