@@ -1,0 +1,22 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-options-api.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+export default {
+  emits: ["count", "foo"],
+  methods: {
+    setCount() {
+      this.$emit("count", newCount);
+    },
+    setFoo() {
+      this.$emit("foo", newFoo);
+    },
+  },
+};
+</script>
+
+```

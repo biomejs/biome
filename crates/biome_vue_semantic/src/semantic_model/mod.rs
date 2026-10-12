@@ -27,6 +27,11 @@ use references::{
 ///
 /// `js` must be the semantic model of `root`, and `source` must describe how
 /// `root` was parsed.
+///
+/// When `source` is a script block of a single-file component, the rest of
+/// the file is not seen. Its template may use any declaration, so
+/// [`Symbol::has_complete_uses`] is then `false` for every declaration. Use
+/// [`sfc_model`] to read the whole file.
 pub fn component_model(
     root: &AnyJsRoot,
     js: &JsSemanticModel,
@@ -44,6 +49,11 @@ pub fn component_model(
     };
     let output = collect_components(&mut builder, &input);
     collect_script_references(&mut builder, &input, &output.components);
+    if source.as_embedding_kind().is_vue() {
+        for component in output.components {
+            builder.open_all_uses(component);
+        }
+    }
     builder.finish()
 }
 
@@ -112,6 +122,19 @@ pub fn sfc_model(host: &HtmlRoot, snippets: &[SfcSnippet]) -> VueSemanticModel {
             builder.component_mut(component).has_template = true;
             if setup.is_some() {
                 builder.component_mut(component).merged = merged;
+                if let Some(merged) = merged {
+                    builder.component_mut(merged).merged_into = Some(component);
+                    // Each block was read before the two were linked, so
+                    // share what either recorded about uses the model cannot
+                    // follow.
+                    for namespace in 0..Namespace::COUNT {
+                        let is_open = builder.data.components[component.index()].uses_open
+                            [namespace]
+                            || builder.data.components[merged.index()].uses_open[namespace];
+                        builder.component_mut(component).uses_open[namespace] = is_open;
+                        builder.component_mut(merged).uses_open[namespace] = is_open;
+                    }
+                }
             }
             // A `<script src>` block declares things the model cannot read.
             if has_external_script {
@@ -119,6 +142,19 @@ pub fn sfc_model(host: &HtmlRoot, snippets: &[SfcSnippet]) -> VueSemanticModel {
             }
         }
         None => builder.has_unread_script = has_external_script,
+    }
+    // A template kept in another file, or written in a language other than
+    // HTML, is not read, and it may use any declaration.
+    let has_unread_template = builder.data.blocks.iter().any(|block| {
+        block.kind == BlockKind::Template
+            && (block.has_src
+                || block
+                    .lang
+                    .as_ref()
+                    .is_some_and(|lang| lang.text() != "html"))
+    });
+    if has_unread_template && let Some(component) = template_component {
+        builder.open_all_uses(component);
     }
 
     // The scope chain outside the template. With `<script setup>` the

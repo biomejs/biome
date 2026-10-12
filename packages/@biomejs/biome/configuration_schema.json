@@ -7540,6 +7540,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoVueUnusedEmitDeclarationsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueUnusedEmitDeclarationsOptions" }
+			]
+		},
+		"NoVueUnusedEmitDeclarationsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueVHtmlConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8157,6 +8167,13 @@
 					"description": "Disallow custom Vue directives that are not declared.\nSee https://biomejs.dev/linter/rules/no-vue-undeclared-directives",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueUndeclaredDirectivesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueUnusedEmitDeclarations": {
+					"description": "Disallow declaring events that a Vue component never emits.\nSee https://biomejs.dev/linter/rules/no-vue-unused-emit-declarations",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueUnusedEmitDeclarationsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13224,6 +13241,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueUndeclaredDirectivesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueUnusedEmitDeclarationsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueUnusedEmitDeclarationsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

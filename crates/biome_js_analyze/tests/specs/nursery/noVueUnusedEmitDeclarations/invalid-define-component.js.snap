@@ -1,0 +1,278 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-component.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { defineComponent, h } from "vue";
+
+// `$emit` of another object is not the component's own.
+export const OtherObject = defineComponent({
+  emits: ["foo"],
+  methods: {
+    setFoo() {
+      custom.$emit("foo", newFoo);
+    },
+  },
+});
+
+export const OtherObjectInSetup = defineComponent({
+  emits: ["foo"],
+  setup() {
+    const setFoo = () => foo.$emit("foo");
+    return { setFoo };
+  },
+});
+
+export const RenamedEmit = defineComponent({
+  emits: ["foo", "bar"],
+  setup(_, { emit: customName }) {
+    const setFoo = () => customName("foo");
+    return { setFoo };
+  },
+});
+
+export const SetupContext = defineComponent({
+  emits: ["foo", "bar"],
+  setup(_, context) {
+    const setFoo = () => {
+      context.emit("foo", newFoo);
+    };
+    return { setFoo };
+  },
+});
+
+export const SetupAndMethods = defineComponent({
+  emits: ["foo", "bar", "baz"],
+  setup(_, { emit }) {
+    const emitBar = () => {
+      emit("bar", newBar);
+    };
+    return { emitBar };
+  },
+  methods: {
+    setFoo() {
+      this.$emit("foo", newFoo);
+    },
+  },
+});
+
+export const UnusedContext = defineComponent({
+  emits: ["foo"],
+  setup(_, ctx) {
+    return () => h("button");
+  },
+});
+
+export const OptionalChain = defineComponent({
+  emits: ["foo", "bar"],
+  methods: {
+    click() {
+      this?.$emit?.("foo");
+    },
+  },
+});
+
+// A function with its own `this` does not emit on the component.
+export const NestedFunction = defineComponent({
+  emits: ["foo"],
+  methods: {
+    click() {
+      return function () {
+        this.$emit("foo");
+      };
+    },
+  },
+});
+
+// The names that can be read are still checked.
+export const PartlyReadable = defineComponent({
+  emits: ["foo", ...others],
+});
+
+```
+
+# Diagnostics
+```
+invalid-define-component.js:6:11 lint/nursery/noVueUnusedEmitDeclarations ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event foo is declared but never emitted.
+  
+    4 │ // `$emit` of another object is not the component's own.
+    5 │ export const OtherObject = defineComponent({
+  > 6 │   emits: ["foo"],
+      │           ^^^^^
+    7 │   methods: {
+    8 │     setFoo() {
+  
+  i Other components can listen for this event, but their listeners are never called.
+  
+  i Remove the declaration, or emit the event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:15:11 lint/nursery/noVueUnusedEmitDeclarations ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event foo is declared but never emitted.
+  
+    14 │ export const OtherObjectInSetup = defineComponent({
+  > 15 │   emits: ["foo"],
+       │           ^^^^^
+    16 │   setup() {
+    17 │     const setFoo = () => foo.$emit("foo");
+  
+  i Other components can listen for this event, but their listeners are never called.
+  
+  i Remove the declaration, or emit the event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:23:18 lint/nursery/noVueUnusedEmitDeclarations ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event bar is declared but never emitted.
+  
+    22 │ export const RenamedEmit = defineComponent({
+  > 23 │   emits: ["foo", "bar"],
+       │                  ^^^^^
+    24 │   setup(_, { emit: customName }) {
+    25 │     const setFoo = () => customName("foo");
+  
+  i Other components can listen for this event, but their listeners are never called.
+  
+  i Remove the declaration, or emit the event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:31:18 lint/nursery/noVueUnusedEmitDeclarations ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event bar is declared but never emitted.
+  
+    30 │ export const SetupContext = defineComponent({
+  > 31 │   emits: ["foo", "bar"],
+       │                  ^^^^^
+    32 │   setup(_, context) {
+    33 │     const setFoo = () => {
+  
+  i Other components can listen for this event, but their listeners are never called.
+  
+  i Remove the declaration, or emit the event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:41:25 lint/nursery/noVueUnusedEmitDeclarations ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event baz is declared but never emitted.
+  
+    40 │ export const SetupAndMethods = defineComponent({
+  > 41 │   emits: ["foo", "bar", "baz"],
+       │                         ^^^^^
+    42 │   setup(_, { emit }) {
+    43 │     const emitBar = () => {
+  
+  i Other components can listen for this event, but their listeners are never called.
+  
+  i Remove the declaration, or emit the event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:56:11 lint/nursery/noVueUnusedEmitDeclarations ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event foo is declared but never emitted.
+  
+    55 │ export const UnusedContext = defineComponent({
+  > 56 │   emits: ["foo"],
+       │           ^^^^^
+    57 │   setup(_, ctx) {
+    58 │     return () => h("button");
+  
+  i Other components can listen for this event, but their listeners are never called.
+  
+  i Remove the declaration, or emit the event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:63:18 lint/nursery/noVueUnusedEmitDeclarations ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event bar is declared but never emitted.
+  
+    62 │ export const OptionalChain = defineComponent({
+  > 63 │   emits: ["foo", "bar"],
+       │                  ^^^^^
+    64 │   methods: {
+    65 │     click() {
+  
+  i Other components can listen for this event, but their listeners are never called.
+  
+  i Remove the declaration, or emit the event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:73:11 lint/nursery/noVueUnusedEmitDeclarations ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event foo is declared but never emitted.
+  
+    71 │ // A function with its own `this` does not emit on the component.
+    72 │ export const NestedFunction = defineComponent({
+  > 73 │   emits: ["foo"],
+       │           ^^^^^
+    74 │   methods: {
+    75 │     click() {
+  
+  i Other components can listen for this event, but their listeners are never called.
+  
+  i Remove the declaration, or emit the event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:85:11 lint/nursery/noVueUnusedEmitDeclarations ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event foo is declared but never emitted.
+  
+    83 │ // The names that can be read are still checked.
+    84 │ export const PartlyReadable = defineComponent({
+  > 85 │   emits: ["foo", ...others],
+       │           ^^^^^
+    86 │ });
+    87 │ 
+  
+  i Other components can listen for this event, but their listeners are never called.
+  
+  i Remove the declaration, or emit the event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
