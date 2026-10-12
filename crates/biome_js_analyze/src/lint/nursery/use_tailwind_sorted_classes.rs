@@ -3,7 +3,9 @@ mod sort;
 use self::sort::{get_sort_class_name_range, get_template_literal_space_context, sort_classes};
 use crate::JsRuleAction;
 use crate::tailwind::{AnyTailwindClassString, apply_fixed_class_string};
-use biome_analyze::{FixKind, Rule, RuleDiagnostic, RuleDomain, context::RuleContext, declare_lint_rule};
+use biome_analyze::{
+    FixKind, Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
+};
 use biome_console::markup;
 use biome_rowan::{AstNode, BatchMutationExt};
 use biome_rule_options::use_tailwind_sorted_classes::UseTailwindSortedClassesOptions;
@@ -65,6 +67,10 @@ declare_lint_rule! {
         version: "1.6.0",
         name: "useTailwindSortedClasses",
         language: "js",
+        sources: &[
+            RuleSource::EslintBetterTailwindcss("enforce-consistent-class-order").inspired(),
+            RuleSource::EslintTailwindcss("classnames-order").inspired(),
+        ],
         recommended: false,
         domains: &[RuleDomain::Tailwind, RuleDomain::Project],
         fix_kind: FixKind::Unsafe,
