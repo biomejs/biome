@@ -135,7 +135,7 @@ pub enum RuleSource<'a> {
     EslintNext(&'a str),
     /// Rules from [Eslint Plugin No Secrets](https://github.com/nickdeis/eslint-plugin-no-secrets)
     EslintNoSecrets(&'a str),
-    /// Rules from [Eslint Plugin Package.json](https://github.com/JoshuaKGoldberg/eslint-plugin-package-json)
+    /// Rules from [Eslint Plugin Package.json](https://github.com/michaelfaith/eslint-plugin-package-json)
     EslintPackageJson(&'a str),
     /// Rules from [Eslint Plugin Package.json Dependencies](https://github.com/idan-at/eslint-plugin-package-json-dependencies)
     EslintPackageJsonDependencies(&'a str),
@@ -487,7 +487,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintN(rule_name) => format!("https://github.com/eslint-community/eslint-plugin-n/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintNext(rule_name) => format!("https://nextjs.org/docs/messages/{rule_name}"),
             Self::EslintNoSecrets(_) => "https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/README.md".to_string(),
-            Self::EslintPackageJson(rule_name) => format!("https://github.com/JoshuaKGoldberg/eslint-plugin-package-json/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintPackageJson(rule_name) => format!("https://eslint-plugin-package-json.dev/rules/{rule_name}"),
             Self::EslintPackageJsonDependencies(rule_name) => format!("https://github.com/idan-at/eslint-plugin-package-json-dependencies/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintPerfectionist(rule_name) => format!("https://perfectionist.dev/rules/{rule_name}"),
             Self::EslintPromise(rule_name) => format!("https://github.com/eslint-community/eslint-plugin-promise/blob/main/docs/rules/{rule_name}.md"),
