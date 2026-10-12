@@ -559,6 +559,7 @@ pub mod use_svelte_require_each_key;
 pub mod use_symbol_description;
 pub mod use_tailwind_shorthand_classes;
 pub mod use_tailwind_sorted_classes;
+pub mod use_tailwind_variables_shorthand;
 pub mod use_template;
 pub mod use_test_hooks_in_order;
 pub mod use_test_hooks_on_top;

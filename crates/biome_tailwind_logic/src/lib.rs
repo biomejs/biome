@@ -6,3 +6,4 @@ pub mod no_tailwind_restyled_components;
 pub mod syntax_service;
 pub mod use_tailwind_shorthand_classes;
 pub mod use_tailwind_sorted_classes;
+pub mod use_tailwind_variables_shorthand;
