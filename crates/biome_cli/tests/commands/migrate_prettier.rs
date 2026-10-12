@@ -515,6 +515,8 @@ fn prettier_migrate_embedded_language_formatting() {
 
     let configuration = r#"{ "formatter": { "enabled": true } }"#;
     let prettier = r#"{
+        "semi": true,
+        "singleQuote": false,
         "embeddedLanguageFormatting": "off",
         "overrides": [{
             "files": ["docs/**/*.md"],
