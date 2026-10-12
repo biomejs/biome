@@ -6113,6 +6113,24 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoShortTimeValuesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoShortTimeValuesOptions" }
+			]
+		},
+		"NoShortTimeValuesOptions": {
+			"type": "object",
+			"properties": {
+				"minimum": {
+					"description": "The shortest time allowed for animations and transitions, as a whole number of milliseconds.\n\nThis option is required to enable the rule.",
+					"type": ["integer", "null"],
+					"format": "uint32",
+					"minimum": 0
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoShorthandPropertyOverridesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7868,6 +7886,13 @@
 					"description": "Forbid a module from importing itself.\nSee https://biomejs.dev/linter/rules/no-self-import",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSelfImportConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noShortTimeValues": {
+					"description": "Disallow animation and transition times that are shorter than a configured minimum.\nSee https://biomejs.dev/linter/rules/no-short-time-values",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoShortTimeValuesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11831,6 +11856,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoShadowRestrictedNamesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoShortTimeValuesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoShortTimeValuesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

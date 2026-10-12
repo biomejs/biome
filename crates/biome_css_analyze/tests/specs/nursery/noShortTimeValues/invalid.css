@@ -1,0 +1,52 @@
+/* should generate diagnostics */
+a { transition-delay: 0.006s; }
+a { -webkit-transition-delay: 0.006s; }
+a { tRaNsItIoN-dElAy: 0.006s; }
+a { TRANSITION-DELAY: 0.006s; }
+a { transition-delay: 0.006S; }
+a { transition-delay: 3ms; }
+a { transition-delay: 3MS; }
+a { transition-duration: 0.009s; }
+a { -moz-transition-duration: 0.009s; }
+a { transition-duration: 80ms; }
+a { transition-duration: 99.9ms; }
+a { transition-duration: .05s; }
+a { transition-duration: +5ms; }
+a { transition-duration: 1e1ms; }
+a { transition-duration: 80ms !important; }
+a { transition: foo 0.008s linear; }
+a { -webkit-transition: foo 0.008s linear; }
+a { TRANSITION: foo 0.008s linear; }
+a { transition: foo 0.8s ease-in-out 20ms; }
+a { transition: foo 0.8s ease 200ms, bar 0.8s ease 20ms; }
+a { transition: foo 0.8s ease, bar 30ms ease; }
+a { animation-delay: 0.006s; }
+a { -webkit-animation-delay: 3ms; }
+a { animation-duration: 0.009s; }
+a { -o-animation-duration: 80ms; }
+a { -ms-transition: foo 80ms; }
+a { animation: foo 0.008s linear; }
+a { -webkit-animation: foo 0.008s linear; }
+a { animation: foo 0.8s ease-in-out 20ms; }
+a { animation: foo 0.8s ease 0.1s, bar 0.8s ease 0.01s; }
+
+/* Each short time is reported separately. */
+a { animation: foo 0.01s ease 0.8s, bar 0.8s ease 0.02s; }
+a { transition-duration: 10ms, 200ms, 20ms; }
+
+/* Times inside functions are checked as written. */
+a { transition-duration: calc(10ms * 20); }
+a { transition-duration: var(--duration, 10ms); }
+a { animation: foo max(10ms, var(--duration)); }
+
+@keyframes slide {
+	from { animation-duration: 50ms; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	a {
+		transition:
+			opacity 50ms,
+			transform 0.3s;
+	}
+}

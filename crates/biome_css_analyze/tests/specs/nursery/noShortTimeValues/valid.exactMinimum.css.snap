@@ -1,0 +1,12 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.exactMinimum.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+a { transition-duration: 1.001s; }
+a { transition-duration: 1001ms; }
+a { animation: foo 1.001s linear; }
+
+```

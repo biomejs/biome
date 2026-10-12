@@ -1,0 +1,388 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+// should generate diagnostics
+a { transition-duration: 80ms; }
+a { transition: foo 0.008s linear; }
+a { animation: foo 0.8s ease, bar 20ms ease; }
+a { transition-duration: 10ms, 200ms; }
+
+.card {
+	&:hover {
+		transition-delay: 0.05s;
+	}
+}
+
+@mixin fade {
+	animation: fade 50ms linear;
+}
+
+// Times that are part of a calculation are checked as written.
+a { transition-duration: 10ms * 20; }
+a { transition-duration: (10ms); }
+a { transition-duration: $duration + 10ms; }
+a { transition-duration: #{10ms}; }
+a { transition-duration: math.div(10ms, 2); }
+
+// Nested properties
+a { transition: opacity 50ms { delay: 5ms; } }
+a { transition: { duration: 10ms; delay: 20ms; } }
+a { -webkit-animation: { delay: 30ms; } }
+a { ANIMATION: { Duration: 40ms; } }
+
+```
+
+# Diagnostics
+```
+invalid.scss:2:26 lint/nursery/noShortTimeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This time is shorter than the configured minimum of 100ms.
+  
+    1 │ // should generate diagnostics
+  > 2 │ a { transition-duration: 80ms; }
+      │                          ^^^^
+    3 │ a { transition: foo 0.008s linear; }
+    4 │ a { animation: foo 0.8s ease, bar 20ms ease; }
+  
+  i Times this short are hard to notice, and an animation or transition that is too short can look like flickering.
+  
+  i Use a time of at least 100ms.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:3:21 lint/nursery/noShortTimeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This time is shorter than the configured minimum of 100ms.
+  
+    1 │ // should generate diagnostics
+    2 │ a { transition-duration: 80ms; }
+  > 3 │ a { transition: foo 0.008s linear; }
+      │                     ^^^^^^
+    4 │ a { animation: foo 0.8s ease, bar 20ms ease; }
+    5 │ a { transition-duration: 10ms, 200ms; }
+  
+  i Times this short are hard to notice, and an animation or transition that is too short can look like flickering.
+  
+  i Use a time of at least 100ms.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:4:35 lint/nursery/noShortTimeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This time is shorter than the configured minimum of 100ms.
+  
+    2 │ a { transition-duration: 80ms; }
+    3 │ a { transition: foo 0.008s linear; }
+  > 4 │ a { animation: foo 0.8s ease, bar 20ms ease; }
+      │                                   ^^^^
+    5 │ a { transition-duration: 10ms, 200ms; }
+    6 │ 
+  
+  i Times this short are hard to notice, and an animation or transition that is too short can look like flickering.
+  
+  i Use a time of at least 100ms.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:5:26 lint/nursery/noShortTimeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This time is shorter than the configured minimum of 100ms.
+  
+    3 │ a { transition: foo 0.008s linear; }
+    4 │ a { animation: foo 0.8s ease, bar 20ms ease; }
+  > 5 │ a { transition-duration: 10ms, 200ms; }
+      │                          ^^^^
+    6 │ 
+    7 │ .card {
+  
+  i Times this short are hard to notice, and an animation or transition that is too short can look like flickering.
+  
+  i Use a time of at least 100ms.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:9:21 lint/nursery/noShortTimeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This time is shorter than the configured minimum of 100ms.
+  
+     7 │ .card {
+     8 │ 	&:hover {
+   > 9 │ 		transition-delay: 0.05s;
+       │ 		                  ^^^^^
+    10 │ 	}
+    11 │ }
+  
+  i Times this short are hard to notice, and an animation or transition that is too short can look like flickering.
+  
+  i Use a time of at least 100ms.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:14:18 lint/nursery/noShortTimeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This time is shorter than the configured minimum of 100ms.
+  
+    13 │ @mixin fade {
+  > 14 │ 	animation: fade 50ms linear;
+       │ 	                ^^^^
+    15 │ }
+    16 │ 
+  
+  i Times this short are hard to notice, and an animation or transition that is too short can look like flickering.
+  
+  i Use a time of at least 100ms.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:18:26 lint/nursery/noShortTimeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This time is shorter than the configured minimum of 100ms.
+  
+    17 │ // Times that are part of a calculation are checked as written.
+  > 18 │ a { transition-duration: 10ms * 20; }
+       │                          ^^^^
+    19 │ a { transition-duration: (10ms); }
+    20 │ a { transition-duration: $duration + 10ms; }
+  
+  i Times this short are hard to notice, and an animation or transition that is too short can look like flickering.
+  
+  i Use a time of at least 100ms.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:19:27 lint/nursery/noShortTimeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This time is shorter than the configured minimum of 100ms.
+  
+    17 │ // Times that are part of a calculation are checked as written.
+    18 │ a { transition-duration: 10ms * 20; }
+  > 19 │ a { transition-duration: (10ms); }
+       │                           ^^^^
+    20 │ a { transition-duration: $duration + 10ms; }
+    21 │ a { transition-duration: #{10ms}; }
+  
+  i Times this short are hard to notice, and an animation or transition that is too short can look like flickering.
+  
+  i Use a time of at least 100ms.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:20:38 lint/nursery/noShortTimeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This time is shorter than the configured minimum of 100ms.
+  
+    18 │ a { transition-duration: 10ms * 20; }
+    19 │ a { transition-duration: (10ms); }
+  > 20 │ a { transition-duration: $duration + 10ms; }
+       │                                      ^^^^
+    21 │ a { transition-duration: #{10ms}; }
+    22 │ a { transition-duration: math.div(10ms, 2); }
+  
+  i Times this short are hard to notice, and an animation or transition that is too short can look like flickering.
+  
+  i Use a time of at least 100ms.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:21:28 lint/nursery/noShortTimeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This time is shorter than the configured minimum of 100ms.
+  
+    19 │ a { transition-duration: (10ms); }
+    20 │ a { transition-duration: $duration + 10ms; }
+  > 21 │ a { transition-duration: #{10ms}; }
+       │                            ^^^^
+    22 │ a { transition-duration: math.div(10ms, 2); }
+    23 │ 
+  
+  i Times this short are hard to notice, and an animation or transition that is too short can look like flickering.
+  
+  i Use a time of at least 100ms.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:22:35 lint/nursery/noShortTimeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This time is shorter than the configured minimum of 100ms.
+  
+    20 │ a { transition-duration: $duration + 10ms; }
+    21 │ a { transition-duration: #{10ms}; }
+  > 22 │ a { transition-duration: math.div(10ms, 2); }
+       │                                   ^^^^
+    23 │ 
+    24 │ // Nested properties
+  
+  i Times this short are hard to notice, and an animation or transition that is too short can look like flickering.
+  
+  i Use a time of at least 100ms.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:25:25 lint/nursery/noShortTimeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This time is shorter than the configured minimum of 100ms.
+  
+    24 │ // Nested properties
+  > 25 │ a { transition: opacity 50ms { delay: 5ms; } }
+       │                         ^^^^
+    26 │ a { transition: { duration: 10ms; delay: 20ms; } }
+    27 │ a { -webkit-animation: { delay: 30ms; } }
+  
+  i Times this short are hard to notice, and an animation or transition that is too short can look like flickering.
+  
+  i Use a time of at least 100ms.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:25:39 lint/nursery/noShortTimeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This time is shorter than the configured minimum of 100ms.
+  
+    24 │ // Nested properties
+  > 25 │ a { transition: opacity 50ms { delay: 5ms; } }
+       │                                       ^^^
+    26 │ a { transition: { duration: 10ms; delay: 20ms; } }
+    27 │ a { -webkit-animation: { delay: 30ms; } }
+  
+  i Times this short are hard to notice, and an animation or transition that is too short can look like flickering.
+  
+  i Use a time of at least 100ms.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:26:29 lint/nursery/noShortTimeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This time is shorter than the configured minimum of 100ms.
+  
+    24 │ // Nested properties
+    25 │ a { transition: opacity 50ms { delay: 5ms; } }
+  > 26 │ a { transition: { duration: 10ms; delay: 20ms; } }
+       │                             ^^^^
+    27 │ a { -webkit-animation: { delay: 30ms; } }
+    28 │ a { ANIMATION: { Duration: 40ms; } }
+  
+  i Times this short are hard to notice, and an animation or transition that is too short can look like flickering.
+  
+  i Use a time of at least 100ms.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:26:42 lint/nursery/noShortTimeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This time is shorter than the configured minimum of 100ms.
+  
+    24 │ // Nested properties
+    25 │ a { transition: opacity 50ms { delay: 5ms; } }
+  > 26 │ a { transition: { duration: 10ms; delay: 20ms; } }
+       │                                          ^^^^
+    27 │ a { -webkit-animation: { delay: 30ms; } }
+    28 │ a { ANIMATION: { Duration: 40ms; } }
+  
+  i Times this short are hard to notice, and an animation or transition that is too short can look like flickering.
+  
+  i Use a time of at least 100ms.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:27:33 lint/nursery/noShortTimeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This time is shorter than the configured minimum of 100ms.
+  
+    25 │ a { transition: opacity 50ms { delay: 5ms; } }
+    26 │ a { transition: { duration: 10ms; delay: 20ms; } }
+  > 27 │ a { -webkit-animation: { delay: 30ms; } }
+       │                                 ^^^^
+    28 │ a { ANIMATION: { Duration: 40ms; } }
+    29 │ 
+  
+  i Times this short are hard to notice, and an animation or transition that is too short can look like flickering.
+  
+  i Use a time of at least 100ms.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:28:28 lint/nursery/noShortTimeValues ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This time is shorter than the configured minimum of 100ms.
+  
+    26 │ a { transition: { duration: 10ms; delay: 20ms; } }
+    27 │ a { -webkit-animation: { delay: 30ms; } }
+  > 28 │ a { ANIMATION: { Duration: 40ms; } }
+       │                            ^^^^
+    29 │ 
+  
+  i Times this short are hard to notice, and an animation or transition that is too short can look like flickering.
+  
+  i Use a time of at least 100ms.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

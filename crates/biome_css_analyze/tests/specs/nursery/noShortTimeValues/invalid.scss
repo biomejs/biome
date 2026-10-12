@@ -1,0 +1,28 @@
+// should generate diagnostics
+a { transition-duration: 80ms; }
+a { transition: foo 0.008s linear; }
+a { animation: foo 0.8s ease, bar 20ms ease; }
+a { transition-duration: 10ms, 200ms; }
+
+.card {
+	&:hover {
+		transition-delay: 0.05s;
+	}
+}
+
+@mixin fade {
+	animation: fade 50ms linear;
+}
+
+// Times that are part of a calculation are checked as written.
+a { transition-duration: 10ms * 20; }
+a { transition-duration: (10ms); }
+a { transition-duration: $duration + 10ms; }
+a { transition-duration: #{10ms}; }
+a { transition-duration: math.div(10ms, 2); }
+
+// Nested properties
+a { transition: opacity 50ms { delay: 5ms; } }
+a { transition: { duration: 10ms; delay: 20ms; } }
+a { -webkit-animation: { delay: 30ms; } }
+a { ANIMATION: { Duration: 40ms; } }
