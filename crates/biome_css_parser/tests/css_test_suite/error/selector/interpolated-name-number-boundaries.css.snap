@@ -170,7 +170,7 @@ CssRoot {
                 CssBogusSelector {
                     items: [
                         CssNestedSelectorList [],
-                        CssBogus {
+                        CssBogusSubSelector {
                             items: [
                                 PERCENT@45..48 "%" [Newline("\n"), Newline("\n")] [],
                                 CssBogusSupportsCondition {
@@ -496,7 +496,7 @@ CssRoot {
       0: CSS_SELECTOR_LIST@45..65
         0: CSS_BOGUS_SELECTOR@45..65
           0: CSS_NESTED_SELECTOR_LIST@45..45
-          1: CSS_BOGUS@45..65
+          1: CSS_BOGUS_SUB_SELECTOR@45..65
             0: PERCENT@45..48 "%" [Newline("\n"), Newline("\n")] []
             1: CSS_BOGUS_SUPPORTS_CONDITION@48..65
               0: SCSS_INTERPOLATED_IDENTIFIER_PART_LIST@48..65

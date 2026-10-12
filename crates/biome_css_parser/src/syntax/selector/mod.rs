@@ -565,7 +565,7 @@ fn parse_namespace_prefix(p: &mut CssParser) -> ParsedSyntax {
 pub(crate) struct SubSelectorList;
 impl SubSelectorList {
     pub(crate) const START_SET: TokenSet<CssSyntaxKind> =
-        token_set![T![#], T![.], T![:], T![::], T!['['], T![&]];
+        token_set![T![#], T![.], T![:], T![::], T!['['], T![&], T![%]];
 }
 impl ParseNodeList for SubSelectorList {
     type Kind = CssSyntaxKind;
@@ -597,6 +597,7 @@ impl ParseNodeList for SubSelectorList {
 /// for class selectors, ID selectors, attribute selectors, pseudo-classes, pseudo-elements,
 /// and the nesting selector (`&`), e.g. the trailing `&` in `h1&`.
 /// In SCSS, an interpolation can follow a completed component, as in `.card[data-state]#{$suffix}`.
+/// Placeholders can also follow other components, as in `%a%b` or `.card%a`.
 #[inline]
 fn parse_sub_selector(p: &mut CssParser) -> ParsedSyntax {
     match p.cur() {
@@ -613,6 +614,11 @@ fn parse_sub_selector(p: &mut CssParser) -> ParsedSyntax {
         T![:] => parse_pseudo_class_selector(p),
         T![::] => parse_pseudo_element_selector(p),
         T![&] => parse_nested_selector_as_sub_selector(p),
+        T![%] => CssSyntaxFeatures::Scss.parse_exclusive_syntax(
+            p,
+            parse_scss_placeholder_selector,
+            |p, marker| scss_only_syntax_error(p, "SCSS placeholder selectors", marker.range(p)),
+        ),
         _ => Absent,
     }
 }
