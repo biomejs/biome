@@ -2963,6 +2963,11 @@ export interface Nursery {
 	 */
 	noDuplicateMapKeys?: NoDuplicateMapKeysConfiguration;
 	/**
+	 * Disallow .map() and .filter() calls in the header of for...of loops.
+	 * See https://biomejs.dev/linter/rules/no-eager-array-methods-in-loops
+	 */
+	noEagerArrayMethodsInLoops?: NoEagerArrayMethodsInLoopsConfiguration;
+	/**
 	 * Enforce a maximum number of statements allowed in a function.
 	 * See https://biomejs.dev/linter/rules/no-excessive-statements-per-function
 	 */
@@ -5660,6 +5665,9 @@ export type NoDoubleComparisonConfiguration =
 export type NoDuplicateMapKeysConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateMapKeysOptions;
+export type NoEagerArrayMethodsInLoopsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoEagerArrayMethodsInLoopsOptions;
 export type NoExcessiveStatementsPerFunctionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoExcessiveStatementsPerFunctionOptions;
@@ -8092,6 +8100,10 @@ export interface RuleWithNoDoubleComparisonOptions {
 export interface RuleWithNoDuplicateMapKeysOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateMapKeysOptions;
+}
+export interface RuleWithNoEagerArrayMethodsInLoopsOptions {
+	level: RulePlainConfiguration;
+	options?: NoEagerArrayMethodsInLoopsOptions;
 }
 export interface RuleWithNoExcessiveStatementsPerFunctionOptions {
 	level: RulePlainConfiguration;
@@ -10658,6 +10670,7 @@ export interface NoBaseToStringOptions {
 export type NoBunModulesOptions = {};
 export type NoDoubleComparisonOptions = {};
 export type NoDuplicateMapKeysOptions = {};
+export type NoEagerArrayMethodsInLoopsOptions = {};
 export interface NoExcessiveStatementsPerFunctionOptions {
 	/**
 	 * When this option is set to `true`, a function that isn't nested in another function is
@@ -12420,6 +12433,7 @@ export type Category =
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
 	| "lint/nursery/noDuplicateSelectors"
+	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
 	| "lint/nursery/noExcessiveNestedCallbacks"
 	| "lint/nursery/noExcessiveSelectorClasses"

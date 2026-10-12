@@ -4279,6 +4279,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoEagerArrayMethodsInLoopsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoEagerArrayMethodsInLoopsOptions" }
+			]
+		},
+		"NoEagerArrayMethodsInLoopsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoEmptyBlockConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7652,6 +7662,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noEagerArrayMethodsInLoops": {
+					"description": "Disallow .map() and .filter() calls in the header of for...of loops.\nSee https://biomejs.dev/linter/rules/no-eager-array-methods-in-loops",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoEagerArrayMethodsInLoopsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noExcessiveStatementsPerFunction": {
 					"description": "Enforce a maximum number of statements allowed in a function.\nSee https://biomejs.dev/linter/rules/no-excessive-statements-per-function",
 					"anyOf": [
@@ -10042,6 +10059,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoDynamicNamespaceImportAccessOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoEagerArrayMethodsInLoopsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoEagerArrayMethodsInLoopsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
