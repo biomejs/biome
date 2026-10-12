@@ -30,7 +30,7 @@ declare_source_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```graphql,expect_diagnostic
+    /// ```graphql,expect_diff
     /// query GetUser($userId: ID!, $includePosts: Boolean = false, $after: String) {
     ///   user(id: $userId) {
     ///     name
