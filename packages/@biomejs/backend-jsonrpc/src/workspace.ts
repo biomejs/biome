@@ -3443,6 +3443,11 @@ export interface Nursery {
 	 */
 	useSvelteRequireEachKey?: UseSvelteRequireEachKeyConfiguration;
 	/**
+	 * Enforce the shorthand syntax for Svelte bind:, class:, and style: directives.
+	 * See https://biomejs.dev/linter/rules/use-svelte-shorthand-directive
+	 */
+	useSvelteShorthandDirective?: UseSvelteShorthandDirectiveConfiguration;
+	/**
 	 * Enforce using fewer Tailwind utilities instead of multiple utilities that are functionally the same.
 	 * See https://biomejs.dev/linter/rules/use-tailwind-shorthand-classes
 	 */
@@ -5933,6 +5938,9 @@ export type UseSvelteKitRuneImportsConfiguration =
 export type UseSvelteRequireEachKeyConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSvelteRequireEachKeyOptions;
+export type UseSvelteShorthandDirectiveConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseSvelteShorthandDirectiveOptions;
 export type UseTailwindShorthandClassesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTailwindShorthandClassesOptions;
@@ -8577,6 +8585,14 @@ export interface RuleWithUseSvelteRequireEachKeyOptions {
 	level: RulePlainConfiguration;
 	options?: UseSvelteRequireEachKeyOptions;
 }
+export interface RuleWithUseSvelteShorthandDirectiveOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseSvelteShorthandDirectiveOptions;
+}
 export interface RuleWithUseTailwindShorthandClassesOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -10924,6 +10940,7 @@ export interface UseSvelteKitResolveOptions {
 }
 export type UseSvelteKitRuneImportsOptions = {};
 export type UseSvelteRequireEachKeyOptions = {};
+export type UseSvelteShorthandDirectiveOptions = {};
 export type UseTailwindShorthandClassesOptions = {};
 export type UseTailwindSortedClassesOptions = {};
 export type UseTailwindStaticClassStringsOptions = {};
@@ -12494,6 +12511,7 @@ export type Category =
 	| "lint/nursery/useSvelteKitResolve"
 	| "lint/nursery/useSvelteKitRuneImports"
 	| "lint/nursery/useSvelteRequireEachKey"
+	| "lint/nursery/useSvelteShorthandDirective"
 	| "lint/nursery/useTailwindShorthandClasses"
 	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTopLevelHeading"
