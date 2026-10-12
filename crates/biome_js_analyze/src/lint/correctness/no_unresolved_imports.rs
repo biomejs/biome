@@ -144,6 +144,12 @@ impl Rule for NoUnresolvedImports {
             return Vec::new();
         };
 
+        // Non-JavaScript modules (e.g. CSS modules, HTML) do not declare static
+        // JS export symbols; their export shapes are synthesized by bundlers.
+        if !matches!(target_info.kind(ctx.db()), ModuleInfoKind::Js(_)) {
+            return Vec::new();
+        }
+
         let options = GetUnresolvedImportsOptions {
             module_db: ctx.db(),
             specifier,

@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
 expression: valid.js
 ---
 # Input
@@ -8,6 +9,7 @@ expression: valid.js
 import { foo } from "./foo.js";
 import bar from "./bar";
 import { image } from "./image.svg";
+import styles from "./style.module.css";
 
 // Node.js built-in modules with the `node:` prefix must never be flagged.
 import fs from "node:fs";

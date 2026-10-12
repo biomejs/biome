@@ -2,6 +2,7 @@
 import { foo } from "./foo.js";
 import bar from "./bar";
 import { image } from "./image.svg";
+import styles from "./style.module.css";
 
 // Node.js built-in modules with the `node:` prefix must never be flagged.
 import fs from "node:fs";
