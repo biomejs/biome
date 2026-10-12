@@ -346,6 +346,7 @@ define_categories! {
     "lint/nursery/useLayeredStyles": "https://biomejs.dev/linter/rules/use-layered-styles",
     "lint/nursery/useLogicalProperties": "https://biomejs.dev/linter/rules/use-logical-properties",
     "lint/nursery/useMatchingFunctionName": "https://biomejs.dev/linter/rules/use-matching-function-name",
+    "lint/nursery/useMathAbs": "https://biomejs.dev/linter/rules/use-math-abs",
     "lint/nursery/useMathMinMax": "https://biomejs.dev/linter/rules/use-math-min-max",
     "lint/nursery/useMaxParams": "https://biomejs.dev/linter/rules/use-max-params",
     "lint/nursery/useModernMathApis": "https://biomejs.dev/linter/rules/use-modern-math-apis",
