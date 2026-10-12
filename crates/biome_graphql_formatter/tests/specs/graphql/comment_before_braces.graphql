@@ -1,0 +1,29 @@
+type Type
+# leading the first field
+# and a second line
+{ a: a }
+
+type Implementor implements A & B
+# leading the first field
+{ a: a }
+
+interface Interface
+# leading the first field
+{ a: a }
+
+input Input
+# leading the first field
+{ a: Int }
+
+enum Enum
+# leading the first value
+{ A B }
+
+schema
+# leading the first root operation type
+{ query: Query }
+
+type Before { x: Int }
+
+# between two definitions, stays where it is
+type After { y: Int }

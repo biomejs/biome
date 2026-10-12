@@ -1,0 +1,87 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 249
+info: graphql/comment_before_braces.graphql
+---
+
+# Input
+
+```graphql
+type Type
+# leading the first field
+# and a second line
+{ a: a }
+
+type Implementor implements A & B
+# leading the first field
+{ a: a }
+
+interface Interface
+# leading the first field
+{ a: a }
+
+input Input
+# leading the first field
+{ a: Int }
+
+enum Enum
+# leading the first value
+{ A B }
+
+schema
+# leading the first root operation type
+{ query: Query }
+
+type Before { x: Int }
+
+# between two definitions, stays where it is
+type After { y: Int }
+
+```
+
+
+# Formatted
+
+```graphql
+type Type {
+	# leading the first field
+	# and a second line
+	a: a
+}
+
+type Implementor implements A & B {
+	# leading the first field
+	a: a
+}
+
+interface Interface {
+	# leading the first field
+	a: a
+}
+
+input Input {
+	# leading the first field
+	a: Int
+}
+
+enum Enum {
+	# leading the first value
+	A
+	B
+}
+
+schema {
+	# leading the first root operation type
+	query: Query
+}
+
+type Before {
+	x: Int
+}
+
+# between two definitions, stays where it is
+type After {
+	y: Int
+}
+
+```
