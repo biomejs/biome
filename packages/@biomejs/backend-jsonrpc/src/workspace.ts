@@ -3029,6 +3029,11 @@ export interface Nursery {
 	 */
 	noNonScalableViewport?: NoNonScalableViewportConfiguration;
 	/**
+	 * Disallow calling Object without arguments to create an empty object.
+	 * See https://biomejs.dev/linter/rules/no-object-constructor
+	 */
+	noObjectConstructor?: NoObjectConstructorConfiguration;
+	/**
 	 * Disallow obsolete HTML elements.
 	 * See https://biomejs.dev/linter/rules/no-obsolete-tags
 	 */
@@ -5654,6 +5659,9 @@ export type NoNestedTemplateLiteralsConfiguration =
 export type NoNonScalableViewportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoNonScalableViewportOptions;
+export type NoObjectConstructorConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoObjectConstructorOptions;
 export type NoObsoleteTagsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoObsoleteTagsOptions;
@@ -8098,6 +8106,14 @@ export interface RuleWithNoNestedTemplateLiteralsOptions {
 export interface RuleWithNoNonScalableViewportOptions {
 	level: RulePlainConfiguration;
 	options?: NoNonScalableViewportOptions;
+}
+export interface RuleWithNoObjectConstructorOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoObjectConstructorOptions;
 }
 export interface RuleWithNoObsoleteTagsOptions {
 	level: RulePlainConfiguration;
@@ -10569,6 +10585,7 @@ export type NoNegationInEqualityCheckOptions = {};
 export type NoNestedSwitchOptions = {};
 export type NoNestedTemplateLiteralsOptions = {};
 export type NoNonScalableViewportOptions = {};
+export type NoObjectConstructorOptions = {};
 export type NoObsoleteTagsOptions = {};
 export type NoOctalOptions = {};
 export type NoProcessExitOptions = {};
@@ -12290,6 +12307,7 @@ export type Category =
 	| "lint/nursery/noNestedSwitch"
 	| "lint/nursery/noNestedTemplateLiterals"
 	| "lint/nursery/noNonScalableViewport"
+	| "lint/nursery/noObjectConstructor"
 	| "lint/nursery/noObsoleteTags"
 	| "lint/nursery/noOctal"
 	| "lint/nursery/noProcessExit"
