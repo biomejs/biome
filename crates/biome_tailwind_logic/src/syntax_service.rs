@@ -1,3 +1,7 @@
+use crate::class_context::{
+    TailwindClassContextNode, get_root_name, is_class_configuration_key,
+    is_compound_configuration_key, is_merge_function, is_variant_function,
+};
 use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::panic::AssertUnwindSafe;
@@ -427,67 +431,6 @@ fn emit_parse_diagnostics<L: Language>(
     }
 }
 
-const DEFAULT_MERGE_FUNCTIONS: [&str; 8] =
-    ["clsx", "tw", "twMerge", "twJoin", "cn", "cc", "cnb", "ctl"];
-
-const DEFAULT_VARIANT_FUNCTIONS: [&str; 2] = ["cva", "tv"];
-
-fn is_merge_function(options: &TailwindOptions, name: &str) -> bool {
-    options.merge_functions().map_or_else(
-        || DEFAULT_MERGE_FUNCTIONS.contains(&name),
-        |functions| functions.iter().any(|function| function.as_ref() == name),
-    )
-}
-
-fn is_variant_function(options: &TailwindOptions, name: &str) -> bool {
-    options.variant_functions().map_or_else(
-        || DEFAULT_VARIANT_FUNCTIONS.contains(&name),
-        |functions| functions.iter().any(|function| function.as_ref() == name),
-    )
-}
-
-/// Returns the identifier a callee or template tag is rooted at, so both `tw`
-/// and `tw.div.span` yield `tw`.
-fn get_root_name(expression: AnyJsExpression) -> Option<TokenText> {
-    let mut current = expression;
-    loop {
-        match current {
-            AnyJsExpression::JsIdentifierExpression(identifier) => {
-                return identifier.name().ok()?.name().ok();
-            }
-            AnyJsExpression::JsStaticMemberExpression(member) => {
-                current = member.object().ok()?;
-            }
-            _ => return None,
-        }
-    }
-}
-
-fn get_jsx_attribute_name(attribute: &JsxAttribute) -> Option<TokenText> {
-    Some(
-        attribute
-            .name()
-            .ok()?
-            .as_jsx_name()?
-            .value_token()
-            .ok()?
-            .token_text_trimmed(),
-    )
-}
-
-const DEFAULT_ATTRIBUTES: [&str; 2] = ["class", "className"];
-
-fn is_configured_attribute(options: &TailwindOptions, name: &str) -> bool {
-    options.attributes().map_or_else(
-        || DEFAULT_ATTRIBUTES.contains(&name),
-        |attributes| {
-            attributes
-                .iter()
-                .any(|attribute| attribute.as_ref() == name)
-        },
-    )
-}
-
 const CLASS_CONFIGURATION_WRAPPER_KINDS: SyntaxKindSet<JsLanguage> = JsObjectMemberList::KIND_SET
     .union(JsArrayElementList::KIND_SET)
     .union(JsCallArguments::KIND_SET)
@@ -582,12 +525,14 @@ fn is_class_configuration_value(
                 // `path` lists keys from `member` outwards, so the first key of the
                 // configuration object comes last.
                 let mut keys = path.iter().rev();
-                return Some(match keys.next()?.text() {
-                    "base" | "slots" | "class" | "className" | "variants" => true,
-                    "compoundVariants" | "compoundSlots" => keys
-                        .next()
-                        .is_some_and(|key| matches!(key.text(), "class" | "className")),
-                    _ => false,
+                let key = keys.next()?;
+                return Some(if is_class_configuration_key(key.text()) {
+                    true
+                } else if is_compound_configuration_key(key.text()) {
+                    keys.next()
+                        .is_some_and(|key| matches!(key.text(), "class" | "className"))
+                } else {
+                    false
                 });
             }
             JsSyntaxKind::JS_ARRAY_EXPRESSION | JsSyntaxKind::JS_OBJECT_EXPRESSION => {
@@ -690,10 +635,7 @@ fn inspect_string_literal(
             }
             JsSyntaxKind::JSX_ATTRIBUTE => {
                 let attribute = JsxAttribute::cast_ref(&ancestor)?;
-                return Some(is_configured_attribute(
-                    options,
-                    get_jsx_attribute_name(&attribute)?.text(),
-                ));
+                return Some(attribute.is_tailwind_class_context(options));
             }
             JsSyntaxKind::JS_CALL_EXPRESSION => {
                 let call = JsCallExpression::cast_ref(&ancestor)?;
@@ -804,8 +746,7 @@ impl TailwindClassStringHost for JsxString {
             .ancestors()
             .skip(1)
             .find_map(JsxAttribute::cast)?;
-        let name = get_jsx_attribute_name(&jsx_attribute)?;
-        if !is_configured_attribute(options, name.text()) {
+        if !jsx_attribute.is_tailwind_class_context(options) {
             return None;
         }
         tailwind_class_string(
@@ -865,20 +806,7 @@ impl TailwindClassStringHost for HtmlAttribute {
         options: &TailwindOptions,
         _is_class_attribute: bool,
     ) -> Option<TailwindClassString> {
-        let name = self.name().ok()?.value_token().ok()?;
-        let is_tailwind_attribute = options.attributes().map_or_else(
-            || {
-                DEFAULT_ATTRIBUTES
-                    .iter()
-                    .any(|attribute| attribute.eq_ignore_ascii_case(name.text_trimmed()))
-            },
-            |attributes| {
-                attributes
-                    .iter()
-                    .any(|attribute| attribute.as_ref().eq_ignore_ascii_case(name.text_trimmed()))
-            },
-        );
-        if !is_tailwind_attribute {
+        if !self.is_tailwind_class_context(options) {
             return None;
         }
         let html_string = self.html_string()?;
