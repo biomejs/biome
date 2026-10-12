@@ -3239,6 +3239,11 @@ export interface Nursery {
 	 */
 	noZeroFractions?: NoZeroFractionsConfiguration;
 	/**
+	 * Disallow units on zero lengths.
+	 * See https://biomejs.dev/linter/rules/no-zero-length-unit
+	 */
+	noZeroLengthUnit?: NoZeroLengthUnitConfiguration;
+	/**
 	 * Require a value for Astro's client:only directive.
 	 * See https://biomejs.dev/linter/rules/use-astro-client-only-directive-value
 	 */
@@ -5785,6 +5790,9 @@ export type NoXorAsExponentiationConfiguration =
 export type NoZeroFractionsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoZeroFractionsOptions;
+export type NoZeroLengthUnitConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoZeroLengthUnitOptions;
 export type UseAstroClientOnlyDirectiveValueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseAstroClientOnlyDirectiveValueOptions;
@@ -8319,6 +8327,14 @@ export interface RuleWithNoZeroFractionsOptions {
 	level: RulePlainConfiguration;
 	options?: NoZeroFractionsOptions;
 }
+export interface RuleWithNoZeroLengthUnitOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoZeroLengthUnitOptions;
+}
 export interface RuleWithUseAstroClientOnlyDirectiveValueOptions {
 	level: RulePlainConfiguration;
 	options?: UseAstroClientOnlyDirectiveValueOptions;
@@ -10665,6 +10681,7 @@ export type NoVueVHtmlOptions = {};
 export type NoVueVTextOptions = {};
 export type NoXorAsExponentiationOptions = {};
 export type NoZeroFractionsOptions = {};
+export type NoZeroLengthUnitOptions = {};
 export type UseAstroClientOnlyDirectiveValueOptions = {};
 export type UseAwaitThenableOptions = {};
 export type UseBetterDomTraversingOptions = {};
@@ -12367,6 +12384,7 @@ export type Category =
 	| "lint/nursery/noVueVText"
 	| "lint/nursery/noXorAsExponentiation"
 	| "lint/nursery/noZeroFractions"
+	| "lint/nursery/noZeroLengthUnit"
 	| "lint/nursery/useAstroClientOnlyDirectiveValue"
 	| "lint/nursery/useAwaitThenable"
 	| "lint/nursery/useBetterDomTraversing"
