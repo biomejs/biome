@@ -1,0 +1,56 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<div class="bg-[var(--brand)] p-4"></div>
+<div class='hover:bg-red-500/[var(--opacity)]'></div>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:2:16 lint/nursery/useTailwindVariablesShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS value reads a CSS variable with [var()] instead of the shorthand.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div class="bg-[var(--brand)] p-4"></div>
+      │                ^^^^^^^^^^^^^^
+    3 │ <div class='hover:bg-red-500/[var(--opacity)]'></div>
+    4 │ 
+  
+  i Tailwind CSS adds var() to a variable written in parentheses, so the shorthand is shorter and generates the same CSS.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the CSS variable shorthand.
+  
+    2 │ <div·class="bg-[var(--brand)]·p-4"></div>
+      │                ----         -            
+
+```
+
+```
+invalid.svelte:3:30 lint/nursery/useTailwindVariablesShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS value reads a CSS variable with [var()] instead of the shorthand.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div class="bg-[var(--brand)] p-4"></div>
+  > 3 │ <div class='hover:bg-red-500/[var(--opacity)]'></div>
+      │                              ^^^^^^^^^^^^^^^^
+    4 │ 
+  
+  i Tailwind CSS adds var() to a variable written in parentheses, so the shorthand is shorter and generates the same CSS.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the CSS variable shorthand.
+  
+    3 │ <div·class='hover:bg-red-500/[var(--opacity)]'></div>
+      │                              ----           -        
+
+```

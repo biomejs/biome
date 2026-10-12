@@ -1,0 +1,222 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.html
+---
+# Input
+```html
+<!-- should generate diagnostics -->
+<div class="bg-[var(--brand)]"></div>
+<div class='text-red-500 hover:bg-[var(--brand)]! p-4'></div>
+<div CLASS="bg-[__var(--brand)__] bg-[var(--brand,_#000)]"></div>
+<div class="bg-red-500/[var(--opacity)] bg-[var(--brand)]/[var(--opacity)]"></div>
+<div title="é" class="
+  -mt-[var(--gap)]
+  h-[var(--header,calc(100%_-_1rem))]"></div>
+
+```
+
+# Diagnostics
+```
+invalid.html:2:16 lint/nursery/useTailwindVariablesShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS value reads a CSS variable with [var()] instead of the shorthand.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <div class="bg-[var(--brand)]"></div>
+      │                ^^^^^^^^^^^^^^
+    3 │ <div class='text-red-500 hover:bg-[var(--brand)]! p-4'></div>
+    4 │ <div CLASS="bg-[__var(--brand)__] bg-[var(--brand,_#000)]"></div>
+  
+  i Tailwind CSS adds var() to a variable written in parentheses, so the shorthand is shorter and generates the same CSS.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the CSS variable shorthand.
+  
+    2 │ <div·class="bg-[var(--brand)]"></div>
+      │                ----         -        
+
+```
+
+```
+invalid.html:3:35 lint/nursery/useTailwindVariablesShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS value reads a CSS variable with [var()] instead of the shorthand.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <div class="bg-[var(--brand)]"></div>
+  > 3 │ <div class='text-red-500 hover:bg-[var(--brand)]! p-4'></div>
+      │                                   ^^^^^^^^^^^^^^
+    4 │ <div CLASS="bg-[__var(--brand)__] bg-[var(--brand,_#000)]"></div>
+    5 │ <div class="bg-red-500/[var(--opacity)] bg-[var(--brand)]/[var(--opacity)]"></div>
+  
+  i Tailwind CSS adds var() to a variable written in parentheses, so the shorthand is shorter and generates the same CSS.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the CSS variable shorthand.
+  
+    3 │ <div·class='text-red-500·hover:bg-[var(--brand)]!·p-4'></div>
+      │                                   ----         -             
+
+```
+
+```
+invalid.html:4:16 lint/nursery/useTailwindVariablesShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS value reads a CSS variable with [var()] instead of the shorthand.
+  
+    2 │ <div class="bg-[var(--brand)]"></div>
+    3 │ <div class='text-red-500 hover:bg-[var(--brand)]! p-4'></div>
+  > 4 │ <div CLASS="bg-[__var(--brand)__] bg-[var(--brand,_#000)]"></div>
+      │                ^^^^^^^^^^^^^^^^^^
+    5 │ <div class="bg-red-500/[var(--opacity)] bg-[var(--brand)]/[var(--opacity)]"></div>
+    6 │ <div title="é" class="
+  
+  i Tailwind CSS adds var() to a variable written in parentheses, so the shorthand is shorter and generates the same CSS.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the CSS variable shorthand.
+  
+    4 │ <div·CLASS="bg-[__var(--brand)__]·bg-[var(--brand,_#000)]"></div>
+      │                ------         ---                                
+
+```
+
+```
+invalid.html:4:38 lint/nursery/useTailwindVariablesShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS value reads a CSS variable with [var()] instead of the shorthand.
+  
+    2 │ <div class="bg-[var(--brand)]"></div>
+    3 │ <div class='text-red-500 hover:bg-[var(--brand)]! p-4'></div>
+  > 4 │ <div CLASS="bg-[__var(--brand)__] bg-[var(--brand,_#000)]"></div>
+      │                                      ^^^^^^^^^^^^^^^^^^^^
+    5 │ <div class="bg-red-500/[var(--opacity)] bg-[var(--brand)]/[var(--opacity)]"></div>
+    6 │ <div title="é" class="
+  
+  i Tailwind CSS adds var() to a variable written in parentheses, so the shorthand is shorter and generates the same CSS.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the CSS variable shorthand.
+  
+    4 │ <div·CLASS="bg-[__var(--brand)__]·bg-[var(--brand,_#000)]"></div>
+      │                                      ----               -        
+
+```
+
+```
+invalid.html:5:24 lint/nursery/useTailwindVariablesShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS value reads a CSS variable with [var()] instead of the shorthand.
+  
+    3 │ <div class='text-red-500 hover:bg-[var(--brand)]! p-4'></div>
+    4 │ <div CLASS="bg-[__var(--brand)__] bg-[var(--brand,_#000)]"></div>
+  > 5 │ <div class="bg-red-500/[var(--opacity)] bg-[var(--brand)]/[var(--opacity)]"></div>
+      │                        ^^^^^^^^^^^^^^^^
+    6 │ <div title="é" class="
+    7 │   -mt-[var(--gap)]
+  
+  i Tailwind CSS adds var() to a variable written in parentheses, so the shorthand is shorter and generates the same CSS.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the CSS variable shorthand.
+  
+    5 │ <div·class="bg-red-500/[var(--opacity)]·bg-[var(--brand)]/[var(--opacity)]"></div>
+      │                        ----           -                                           
+
+```
+
+```
+invalid.html:5:44 lint/nursery/useTailwindVariablesShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS value reads a CSS variable with [var()] instead of the shorthand.
+  
+    3 │ <div class='text-red-500 hover:bg-[var(--brand)]! p-4'></div>
+    4 │ <div CLASS="bg-[__var(--brand)__] bg-[var(--brand,_#000)]"></div>
+  > 5 │ <div class="bg-red-500/[var(--opacity)] bg-[var(--brand)]/[var(--opacity)]"></div>
+      │                                            ^^^^^^^^^^^^^^
+    6 │ <div title="é" class="
+    7 │   -mt-[var(--gap)]
+  
+  i Tailwind CSS adds var() to a variable written in parentheses, so the shorthand is shorter and generates the same CSS.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the CSS variable shorthand.
+  
+    5 │ <div·class="bg-red-500/[var(--opacity)]·bg-[var(--brand)]/[var(--opacity)]"></div>
+      │                                            ----         -                         
+
+```
+
+```
+invalid.html:5:59 lint/nursery/useTailwindVariablesShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS value reads a CSS variable with [var()] instead of the shorthand.
+  
+    3 │ <div class='text-red-500 hover:bg-[var(--brand)]! p-4'></div>
+    4 │ <div CLASS="bg-[__var(--brand)__] bg-[var(--brand,_#000)]"></div>
+  > 5 │ <div class="bg-red-500/[var(--opacity)] bg-[var(--brand)]/[var(--opacity)]"></div>
+      │                                                           ^^^^^^^^^^^^^^^^
+    6 │ <div title="é" class="
+    7 │   -mt-[var(--gap)]
+  
+  i Tailwind CSS adds var() to a variable written in parentheses, so the shorthand is shorter and generates the same CSS.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the CSS variable shorthand.
+  
+    5 │ <div·class="bg-red-500/[var(--opacity)]·bg-[var(--brand)]/[var(--opacity)]"></div>
+      │                                                           ----           -        
+
+```
+
+```
+invalid.html:7:7 lint/nursery/useTailwindVariablesShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS value reads a CSS variable with [var()] instead of the shorthand.
+  
+    5 │ <div class="bg-red-500/[var(--opacity)] bg-[var(--brand)]/[var(--opacity)]"></div>
+    6 │ <div title="é" class="
+  > 7 │   -mt-[var(--gap)]
+      │       ^^^^^^^^^^^^
+    8 │   h-[var(--header,calc(100%_-_1rem))]"></div>
+    9 │ 
+  
+  i Tailwind CSS adds var() to a variable written in parentheses, so the shorthand is shorter and generates the same CSS.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the CSS variable shorthand.
+  
+    7 │ ··-mt-[var(--gap)]
+      │       ----       -
+
+```
+
+```
+invalid.html:8:5 lint/nursery/useTailwindVariablesShorthand  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This Tailwind CSS value reads a CSS variable with [var()] instead of the shorthand.
+  
+    6 │ <div title="é" class="
+    7 │   -mt-[var(--gap)]
+  > 8 │   h-[var(--header,calc(100%_-_1rem))]"></div>
+      │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    9 │ 
+  
+  i Tailwind CSS adds var() to a variable written in parentheses, so the shorthand is shorter and generates the same CSS.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use the CSS variable shorthand.
+  
+    8 │ ··h-[var(--header,calc(100%_-_1rem))]"></div>
+      │     ----                            -        
+
+```

@@ -8297,6 +8297,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useTailwindVariablesShorthand": {
+					"description": "Enforce the shorthand syntax for CSS variables in Tailwind CSS classes.\nSee https://biomejs.dev/linter/rules/use-tailwind-variables-shorthand",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseTailwindVariablesShorthandConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useTopLevelHeading": {
 					"description": "Require Markdown documents to start with a top-level heading.\nSee https://biomejs.dev/linter/rules/use-top-level-heading",
 					"anyOf": [
@@ -14826,6 +14833,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseTailwindVariablesShorthandOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseTailwindVariablesShorthandOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseTemplateOptions": {
 			"type": "object",
 			"properties": {
@@ -19825,6 +19845,16 @@
 			]
 		},
 		"UseTailwindSortedClassesOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseTailwindVariablesShorthandConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseTailwindVariablesShorthandOptions" }
+			]
+		},
+		"UseTailwindVariablesShorthandOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
