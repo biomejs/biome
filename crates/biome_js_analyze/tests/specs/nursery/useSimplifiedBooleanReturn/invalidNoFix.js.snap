@@ -1,0 +1,133 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNoFix.js
+---
+# Input
+```js
+/* should generate diagnostics */
+function commentInElse() { if (test) { return true; } else { return false; /* comment */ } }
+
+function commentInIf() { if (test) { return true; /* comment */ } else { return false; } }
+
+function commentInTest() { if (/* comment */ test) { return true; } return false; }
+
+function commentBetween() {
+	if (test) {
+		return true;
+	}
+
+	// comment
+	return false;
+}
+
+function commentAfterIf() {
+	if (test) {
+		return true;
+	} // comment
+	return false;
+}
+
+```
+
+# Diagnostics
+```
+invalidNoFix.js:2:28 lint/nursery/useSimplifiedBooleanReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ function commentInElse() { if (test) { return true; } else { return false; /* comment */ } }
+      │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ function commentInIf() { if (test) { return true; /* comment */ } else { return false; } }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:4:26 lint/nursery/useSimplifiedBooleanReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    2 │ function commentInElse() { if (test) { return true; } else { return false; /* comment */ } }
+    3 │ 
+  > 4 │ function commentInIf() { if (test) { return true; /* comment */ } else { return false; } }
+      │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 
+    6 │ function commentInTest() { if (/* comment */ test) { return true; } return false; }
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:6:28 lint/nursery/useSimplifiedBooleanReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    4 │ function commentInIf() { if (test) { return true; /* comment */ } else { return false; } }
+    5 │ 
+  > 6 │ function commentInTest() { if (/* comment */ test) { return true; } return false; }
+      │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 
+    8 │ function commentBetween() {
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:9:2 lint/nursery/useSimplifiedBooleanReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+     8 │ function commentBetween() {
+   > 9 │ 	if (test) {
+       │ 	^^^^^^^^^^^
+  > 10 │ 		return true;
+  > 11 │ 	}
+  > 12 │ 
+  > 13 │ 	// comment
+  > 14 │ 	return false;
+       │ 	^^^^^^^^^^^^^
+    15 │ }
+    16 │ 
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidNoFix.js:18:2 lint/nursery/useSimplifiedBooleanReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This if statement only returns true or false.
+  
+    17 │ function commentAfterIf() {
+  > 18 │ 	if (test) {
+       │ 	^^^^^^^^^^^
+  > 19 │ 		return true;
+  > 20 │ 	} // comment
+  > 21 │ 	return false;
+       │ 	^^^^^^^^^^^^^
+    22 │ }
+    23 │ 
+  
+  i Returning the condition directly is shorter and easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

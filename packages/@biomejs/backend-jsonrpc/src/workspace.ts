@@ -3413,6 +3413,11 @@ export interface Nursery {
 	 */
 	useRegexpExec?: UseRegexpExecConfiguration;
 	/**
+	 * Return conditions directly instead of using if statements that only return true or false.
+	 * See https://biomejs.dev/linter/rules/use-simplified-boolean-return
+	 */
+	useSimplifiedBooleanReturn?: UseSimplifiedBooleanReturnConfiguration;
+	/**
 	 * Enforce that a Markdown document has a single top-level heading.
 	 * See https://biomejs.dev/linter/rules/use-single-top-level-heading
 	 */
@@ -5920,6 +5925,9 @@ export type UseReactNamingConventionConfiguration =
 export type UseRegexpExecConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseRegexpExecOptions;
+export type UseSimplifiedBooleanReturnConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseSimplifiedBooleanReturnOptions;
 export type UseSingleTopLevelHeadingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseSingleTopLevelHeadingOptions;
@@ -8557,6 +8565,14 @@ export interface RuleWithUseRegexpExecOptions {
 	level: RulePlainConfiguration;
 	options?: UseRegexpExecOptions;
 }
+export interface RuleWithUseSimplifiedBooleanReturnOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseSimplifiedBooleanReturnOptions;
+}
 export interface RuleWithUseSingleTopLevelHeadingOptions {
 	level: RulePlainConfiguration;
 	options?: UseSingleTopLevelHeadingOptions;
@@ -10912,6 +10928,7 @@ export interface UseReactFunctionComponentDefinitionOptions {
 }
 export type UseReactNamingConventionOptions = {};
 export type UseRegexpExecOptions = {};
+export type UseSimplifiedBooleanReturnOptions = {};
 export interface UseSingleTopLevelHeadingOptions {
 	/**
 	 * The heading level that is treated as the document's top-level heading.
@@ -12504,6 +12521,9 @@ export type Category =
 	| "lint/nursery/useReactFunctionComponentDefinition"
 	| "lint/nursery/useReactNamingConvention"
 	| "lint/nursery/useRegexpExec"
+	| "lint/nursery/useRegexpTest"
+	| "lint/nursery/useScopedStyles"
+	| "lint/nursery/useSimplifiedBooleanReturn"
 	| "lint/nursery/useSingleTopLevelHeading"
 	| "lint/nursery/useTailwindSortedClasses"
 	| "lint/nursery/useStrictBooleanExpressions"
