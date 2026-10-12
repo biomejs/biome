@@ -1309,7 +1309,7 @@ export interface MarkdownFormatterConfiguration {
 	 *
 	 * A block with a syntax error stays as written, and Biome still formats the rest of the file.
 	 *
-	 * When this option is `false`, Biome keeps every block is written as is.
+	 * When this option is `false`, Biome keeps every block as written.
 	 */
 	formatEmbeds?: Bool;
 	/**
