@@ -687,6 +687,9 @@ pub(crate) struct ComponentData {
     /// For a `<script setup>` component, the component defined by the default
     /// export of the plain `<script>` block of the same file.
     pub(crate) merged: Option<ComponentId>,
+    /// For the component defined by the default export of the plain
+    /// `<script>` block, the `<script setup>` component it is merged into.
+    pub(crate) merged_into: Option<ComponentId>,
     pub(crate) symbols: Vec<SymbolId>,
 }
 
@@ -1555,7 +1558,8 @@ impl Symbol {
     /// Whether [`Self::uses`] lists every use.
     ///
     /// It does not when the component uses names of this namespace in a way
-    /// the model cannot follow, such as `$refs[key]` or `emit(eventName)`.
+    /// the model cannot follow, such as `$refs[key]` or `emit(eventName)`, or
+    /// when the model could not read the template of the component.
     pub fn has_complete_uses(&self) -> bool {
         self.row().component.is_none_or(|component| {
             !self.data.components[component.index()].uses_open[self.row().namespace.index()]
@@ -1873,6 +1877,16 @@ impl Component {
     /// template can also use what it declares.
     pub fn plain_block_component(&self) -> Option<Self> {
         self.row().merged.map(|id| Self {
+            data: self.data.clone(),
+            id,
+        })
+    }
+
+    /// For the component defined by the default export of the plain
+    /// `<script>` block, the `<script setup>` component of the same file
+    /// that Vue merges it into.
+    pub fn setup_block_component(&self) -> Option<Self> {
+        self.row().merged_into.map(|id| Self {
             data: self.data.clone(),
             id,
         })

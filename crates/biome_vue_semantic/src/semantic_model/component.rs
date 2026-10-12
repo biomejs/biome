@@ -513,6 +513,9 @@ impl Collector<'_, '_> {
                 "setup" => self.collect_setup_function(member_function(&member), component),
                 "name" | "inheritAttrs" => self.collect_scalar_option(&member, component),
                 "extends" | "mixins" => self.builder.open_all(component, OpenReason::Extends),
+                // The template is a string the model does not read, and it
+                // may use any declaration.
+                "template" => self.builder.open_all_uses(component),
                 other => {
                     if LIFECYCLE_OPTIONS.contains(&other) {
                         self.add_instance_symbol(
@@ -1329,10 +1332,12 @@ impl Collector<'_, '_> {
         function: Option<AnyFunctionLike>,
         component: ComponentId,
     ) {
-        // `setup: sharedSetup` exposes bindings the model cannot list.
+        // `setup: sharedSetup` exposes bindings the model cannot list, and
+        // uses declarations in code the model does not read.
         let Some(function) = function else {
             self.builder
                 .open(component, Namespace::Binding, OpenReason::NonLiteral);
+            self.builder.open_all_uses(component);
             return;
         };
 

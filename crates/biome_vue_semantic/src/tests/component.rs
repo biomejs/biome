@@ -282,3 +282,94 @@ fn method_signature_in_props_type_is_a_function_prop() {
     assert!(prop.types() == PropType::Function);
     assert!(component.is_complete(Namespace::Binding));
 }
+
+/// Returns the name of each emit of each component, the number of its uses,
+/// and whether those are all of its uses.
+fn emit_uses(code: &str, source: JsFileSource) -> Vec<(String, usize, bool)> {
+    js_model(code, source)
+        .components()
+        .flat_map(|component| {
+            component
+                .emits()
+                .map(|emit| {
+                    (
+                        emit.name().to_string(),
+                        emit.uses().count(),
+                        emit.has_complete_uses(),
+                    )
+                })
+                .collect::<Vec<_>>()
+        })
+        .collect()
+}
+
+#[test]
+fn emit_calls_are_uses_of_the_event() {
+    let uses = emit_uses(
+        r#"import { defineComponent } from "vue";
+defineComponent({
+  emits: ["a", "b", "c", "d"],
+  setup(props, context) { context.emit("a"); },
+  methods: { go() { this.$emit("b"); other.$emit("c"); } },
+});
+defineComponent({
+  emits: ["a", "b"],
+  setup(props, { emit: send }) { send?.("a"); },
+});"#,
+        JsFileSource::js_module(),
+    );
+    assert_eq!(
+        uses,
+        [
+            ("a".into(), 1, true),
+            ("b".into(), 1, true),
+            ("c".into(), 0, true),
+            ("d".into(), 0, true),
+            ("a".into(), 1, true),
+            ("b".into(), 0, true),
+        ]
+    );
+}
+
+#[test]
+fn emit_function_used_without_a_call_opens_the_uses() {
+    for setup in [
+        "setup(props, { emit }) { return { notify: enabled ? emit : noop }; }",
+        "setup(props, { emit }) { register(() => emit); }",
+        "setup(props, { emit }) { register(emit); }",
+        "setup(props, context) { register(() => context); }",
+        "setup(props, context) { register(context.emit); }",
+        "mounted() { register(() => this.$emit); }",
+        "mounted() { const vm = this; vm.$emit('a'); }",
+        "mounted() { this.$emit(name); }",
+        "setup: sharedSetup",
+    ] {
+        let code = format!(
+            r#"import {{ defineComponent }} from "vue";
+defineComponent({{ emits: ["a"], {setup} }});"#
+        );
+        assert_eq!(
+            emit_uses(&code, JsFileSource::js_module()),
+            [("a".into(), 0, false)],
+            "{setup}"
+        );
+    }
+}
+
+#[test]
+fn template_option_opens_the_uses() {
+    let uses = emit_uses(
+        r#"import { defineComponent } from "vue";
+defineComponent({ emits: ["a"], template: `<button @click="$emit('a')" />` });"#,
+        JsFileSource::js_module(),
+    );
+    assert_eq!(uses, [("a".into(), 0, false)]);
+}
+
+#[test]
+fn script_block_read_without_its_file_has_open_uses() {
+    let uses = emit_uses(r#"defineEmits(["a"])"#, setup_ts());
+    assert_eq!(uses, [("a".into(), 0, false)]);
+    let uses = emit_uses(r#"export default { emits: ["a"] }"#, JsFileSource::vue());
+    assert_eq!(uses, [("a".into(), 0, false)]);
+}

@@ -3139,6 +3139,11 @@ export interface Nursery {
 	 */
 	noVueUndeclaredDirectives?: NoVueUndeclaredDirectivesConfiguration;
 	/**
+	 * Disallow declaring events that a Vue component never emits.
+	 * See https://biomejs.dev/linter/rules/no-vue-unused-emit-declarations
+	 */
+	noVueUnusedEmitDeclarations?: NoVueUnusedEmitDeclarationsConfiguration;
+	/**
 	 * Disallow the bitwise XOR operator where exponentiation was likely intended.
 	 * See https://biomejs.dev/linter/rules/no-xor-as-exponentiation
 	 */
@@ -5625,6 +5630,9 @@ export type NoVueRootVIfConfiguration =
 export type NoVueUndeclaredDirectivesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUndeclaredDirectivesOptions;
+export type NoVueUnusedEmitDeclarationsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueUnusedEmitDeclarationsOptions;
 export type NoXorAsExponentiationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoXorAsExponentiationOptions;
@@ -8058,6 +8066,10 @@ export interface RuleWithNoVueUndeclaredDirectivesOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUndeclaredDirectivesOptions;
 }
+export interface RuleWithNoVueUnusedEmitDeclarationsOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueUnusedEmitDeclarationsOptions;
+}
 export interface RuleWithNoXorAsExponentiationOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -10363,6 +10375,7 @@ export interface NoVueUndeclaredDirectivesOptions {
 	 */
 	globals?: string[];
 }
+export type NoVueUnusedEmitDeclarationsOptions = {};
 export type NoXorAsExponentiationOptions = {};
 export type NoZeroFractionsOptions = {};
 export type UseAstroClientOnlyDirectiveValueOptions = {};
@@ -11992,6 +12005,7 @@ export type Category =
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRequiredPropWithDefault"
 	| "lint/nursery/noVueUndeclaredDirectives"
+	| "lint/nursery/noVueUnusedEmitDeclarations"
 	| "lint/nursery/noXorAsExponentiation"
 	| "lint/nursery/noZeroFractions"
 	| "lint/nursery/useAstroClientOnlyDirectiveValue"

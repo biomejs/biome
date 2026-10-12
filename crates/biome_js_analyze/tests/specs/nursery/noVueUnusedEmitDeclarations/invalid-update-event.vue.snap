@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-update-event.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+defineEmits(["update:foo"]);
+const bar = defineModel("bar");
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-update-event.vue:3:14 lint/nursery/noVueUnusedEmitDeclarations ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The event update:foo is declared but never emitted.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup>
+  > 3 │ defineEmits(["update:foo"]);
+      │              ^^^^^^^^^^^^
+    4 │ const bar = defineModel("bar");
+    5 │ </script>
+  
+  i Other components can listen for this event, but their listeners are never called.
+  
+  i Remove the declaration, or emit the event.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

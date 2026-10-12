@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-dynamic-name.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <button @click="emit(name)">Send</button>
+</template>
+
+<script setup>
+const emit = defineEmits(["foo", "bar"]);
+const name = "foo";
+</script>
+
+```

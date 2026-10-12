@@ -395,14 +395,10 @@ impl Walker<'_> {
     }
 
     fn mark_uses_open(&mut self, component: Option<ComponentId>, namespace: Namespace) {
-        let Some(component) = component else {
-            return;
-        };
-        // The use may also reach what the merged plain-block component
-        // declares.
-        let merged = self.builder.data.components[component.index()].merged;
-        for id in std::iter::once(component).chain(merged) {
-            self.builder.component_mut(id).uses_open[namespace.index()] = true;
+        // The use may also reach what the component Vue combines with this
+        // one declares.
+        if let Some(component) = component {
+            self.builder.open_uses(component, namespace);
         }
     }
 
@@ -555,11 +551,9 @@ impl Walker<'_> {
                 Some(call) if usage.path.is_empty() => {
                     self.add_event_reference(component, via, call, scope);
                 }
-                _ => {
-                    if usage.access == Access::Escape {
-                        self.mark_uses_open(component, Namespace::Emit);
-                    }
-                }
+                // Any other use can hand the function to code that emits
+                // events the model does not see.
+                _ => self.mark_uses_open(component, Namespace::Emit),
             },
             Origin::SetupContext => {
                 if usage.path.first().is_some_and(|name| name.text() == "emit") {
@@ -569,11 +563,37 @@ impl Walker<'_> {
                         }
                         _ => self.mark_uses_open(component, Namespace::Emit),
                     }
-                } else if usage.path.is_empty() && usage.access == Access::Escape {
+                } else if usage.path.is_empty() {
+                    // The context is used whole, so its `emit` may be reached
+                    // through it.
                     self.mark_uses_open(component, Namespace::Emit);
                 }
             }
             _ => {}
+        }
+    }
+
+    /// Records what an expression does with the component instance it
+    /// reaches through `this`.
+    fn add_this_reference(
+        &mut self,
+        component: Option<ComponentId>,
+        usage: &Usage,
+        scope: Option<ScopeId>,
+    ) {
+        let Some(name) = usage.path.first() else {
+            // The instance is used whole, so any member may be reached
+            // through it, `$emit` included.
+            if usage.path_open || usage.access != Access::Read {
+                self.mark_uses_open(component, Namespace::Binding);
+                self.mark_uses_open(component, Namespace::Emit);
+            }
+            return;
+        };
+        if name.text().starts_with('$') {
+            self.project_builtin(component, RefBase::This, usage, 1, name.text(), scope);
+        } else {
+            self.add_member_reference(component, RefBase::This, usage, 0, &[], scope);
         }
     }
 
@@ -593,11 +613,7 @@ impl Walker<'_> {
                 Some(call) if usage.path.len() == skip => {
                     self.add_event_reference(component, base, call, scope);
                 }
-                _ => {
-                    if usage.access == Access::Escape {
-                        self.mark_uses_open(component, Namespace::Emit);
-                    }
-                }
+                _ => self.mark_uses_open(component, Namespace::Emit),
             },
             "$props" => self.add_member_reference(
                 component,
@@ -823,6 +839,12 @@ pub(crate) fn collect_template_references(
                 );
             }
         }
+        // `this` in a template expression is the component instance.
+        for node in snippet.root.syntax().descendants() {
+            if JsThisExpression::can_cast(node.kind()) {
+                walker.add_this_reference(scopes.component, &usage_of(&node), Some(scope));
+            }
+        }
     }
 }
 
@@ -958,25 +980,7 @@ pub(crate) fn collect_script_references(
             if !is_instance_this(&node, definition, input.offset) {
                 continue;
             }
-            let usage = usage_of(&node);
-            let Some(name) = usage.path.first().cloned() else {
-                if usage.path_open || usage.access != Access::Read {
-                    walker.mark_uses_open(Some(component), Namespace::Binding);
-                }
-                continue;
-            };
-            if name.text().starts_with('$') {
-                walker.project_builtin(
-                    Some(component),
-                    RefBase::This,
-                    &usage,
-                    1,
-                    name.text(),
-                    None,
-                );
-            } else {
-                walker.add_member_reference(Some(component), RefBase::This, &usage, 0, &[], None);
-            }
+            walker.add_this_reference(Some(component), &usage_of(&node), None);
         } else if let Some(call) = JsCallExpression::cast_ref(&node) {
             collect_use_template_ref(&mut walker, input, &call, components);
         }

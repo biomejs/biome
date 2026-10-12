@@ -103,6 +103,7 @@ impl ModelBuilder {
             uses_open: [false; Namespace::COUNT],
             macro_conflict: false,
             merged: None,
+            merged_into: None,
             symbols: Vec::new(),
         });
         id
@@ -112,6 +113,14 @@ impl ModelBuilder {
     /// any.
     fn with_merged(&self, component: ComponentId) -> impl Iterator<Item = ComponentId> {
         std::iter::once(component).chain(self.data.components[component.index()].merged)
+    }
+
+    /// Returns the component Vue combines with `component` into one
+    /// instance, if any: the default export of the plain `<script>` block
+    /// for a `<script setup>` component, and the reverse.
+    fn paired(&self, component: ComponentId) -> Option<ComponentId> {
+        let component = &self.data.components[component.index()];
+        component.merged.or(component.merged_into)
     }
 
     /// Returns whether the declarations `component` makes in `namespace` may
@@ -147,7 +156,14 @@ impl ModelBuilder {
                 .map_or(Resolution::Unresolved, Resolution::Symbol);
         } else {
             component.and_then(|component| {
-                self.with_merged(component).find_map(|id| {
+                // Both script blocks of a file emit on the same instance, so
+                // an event is looked up in either of them. Other names are
+                // only looked up in the direction Vue merges the blocks.
+                let other = match namespace {
+                    Namespace::Emit => self.paired(component),
+                    _ => self.data.components[component.index()].merged,
+                };
+                std::iter::once(component).chain(other).find_map(|id| {
                     self.data.components[id.index()]
                         .symbols
                         .iter()
@@ -176,6 +192,22 @@ impl ModelBuilder {
     pub(crate) fn open_all(&mut self, component: ComponentId, why: OpenReason) {
         for reasons in &mut self.component_mut(component).decl_open {
             reasons.insert(why);
+        }
+    }
+
+    /// Marks the uses of `namespace` as possibly incomplete for `component`
+    /// and for the component Vue combines with it.
+    pub(crate) fn open_uses(&mut self, component: ComponentId, namespace: Namespace) {
+        for id in std::iter::once(component).chain(self.paired(component)) {
+            self.component_mut(id).uses_open[namespace.index()] = true;
+        }
+    }
+
+    /// Marks the uses of every namespace as possibly incomplete for
+    /// `component` and for the component Vue combines with it.
+    pub(crate) fn open_all_uses(&mut self, component: ComponentId) {
+        for id in std::iter::once(component).chain(self.paired(component)) {
+            self.component_mut(id).uses_open = [true; Namespace::COUNT];
         }
     }
 
