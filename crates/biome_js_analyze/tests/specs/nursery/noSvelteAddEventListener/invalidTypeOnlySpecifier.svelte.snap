@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidTypeOnlySpecifier.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script lang="ts">
+	// `on` is a type-only import, which is erased at runtime: no fix.
+	import { type on } from 'svelte/events';
+
+	window.addEventListener('message', handler);
+</script>
+
+```
+
+# Diagnostics
+```
+invalidTypeOnlySpecifier.svelte:6:2 lint/nursery/noSvelteAddEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of addEventListener.
+  
+    4 │ 	import { type on } from 'svelte/events';
+    5 │ 
+  > 6 │ 	window.addEventListener('message', handler);
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ </script>
+    8 │ 
+  
+  i Listeners attached with addEventListener bypass Svelte's event delegation, so they may not run in the expected order relative to other event handlers.
+  
+  i Use the on function from svelte/events instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

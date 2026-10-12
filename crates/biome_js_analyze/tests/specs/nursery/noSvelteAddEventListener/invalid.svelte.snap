@@ -1,0 +1,284 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script>
+	const handler = (ev) => {
+		console.log(ev);
+	};
+
+	function onClick(event) {
+		const target = event.currentTarget;
+		const deepObj = { deep: { obj: { target } } };
+
+		target.addEventListener('focus', handler);
+		deepObj.deep.obj.target.addEventListener('focus', handler);
+	}
+
+	addEventListener('message', handler);
+	window.addEventListener('message', handler);
+	document.addEventListener('visibilitychange', handler);
+	window?.addEventListener('message', handler);
+	window.addEventListener?.('message', handler);
+	window.addEventListener    ('message', handler);
+	window.addEventListener/* foo */('message', handler);
+	window.addEventListener('message', handler, { once: true });
+	window.addEventListener(...params);
+</script>
+
+<button onclick={() => window.addEventListener('message', handler)}>Hello</button>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:11:3 lint/nursery/noSvelteAddEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of addEventListener.
+  
+     9 │ 		const deepObj = { deep: { obj: { target } } };
+    10 │ 
+  > 11 │ 		target.addEventListener('focus', handler);
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 		deepObj.deep.obj.target.addEventListener('focus', handler);
+    13 │ 	}
+  
+  i Listeners attached with addEventListener bypass Svelte's event delegation, so they may not run in the expected order relative to other event handlers.
+  
+  i Use the on function from svelte/events instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:12:3 lint/nursery/noSvelteAddEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of addEventListener.
+  
+    11 │ 		target.addEventListener('focus', handler);
+  > 12 │ 		deepObj.deep.obj.target.addEventListener('focus', handler);
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 	}
+    14 │ 
+  
+  i Listeners attached with addEventListener bypass Svelte's event delegation, so they may not run in the expected order relative to other event handlers.
+  
+  i Use the on function from svelte/events instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:15:2 lint/nursery/noSvelteAddEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of addEventListener.
+  
+    13 │ 	}
+    14 │ 
+  > 15 │ 	addEventListener('message', handler);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 	window.addEventListener('message', handler);
+    17 │ 	document.addEventListener('visibilitychange', handler);
+  
+  i Listeners attached with addEventListener bypass Svelte's event delegation, so they may not run in the expected order relative to other event handlers.
+  
+  i Use the on function from svelte/events instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:16:2 lint/nursery/noSvelteAddEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of addEventListener.
+  
+    15 │ 	addEventListener('message', handler);
+  > 16 │ 	window.addEventListener('message', handler);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ 	document.addEventListener('visibilitychange', handler);
+    18 │ 	window?.addEventListener('message', handler);
+  
+  i Listeners attached with addEventListener bypass Svelte's event delegation, so they may not run in the expected order relative to other event handlers.
+  
+  i Use the on function from svelte/events instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:17:2 lint/nursery/noSvelteAddEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of addEventListener.
+  
+    15 │ 	addEventListener('message', handler);
+    16 │ 	window.addEventListener('message', handler);
+  > 17 │ 	document.addEventListener('visibilitychange', handler);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 	window?.addEventListener('message', handler);
+    19 │ 	window.addEventListener?.('message', handler);
+  
+  i Listeners attached with addEventListener bypass Svelte's event delegation, so they may not run in the expected order relative to other event handlers.
+  
+  i Use the on function from svelte/events instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:18:2 lint/nursery/noSvelteAddEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of addEventListener.
+  
+    16 │ 	window.addEventListener('message', handler);
+    17 │ 	document.addEventListener('visibilitychange', handler);
+  > 18 │ 	window?.addEventListener('message', handler);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ 	window.addEventListener?.('message', handler);
+    20 │ 	window.addEventListener    ('message', handler);
+  
+  i Listeners attached with addEventListener bypass Svelte's event delegation, so they may not run in the expected order relative to other event handlers.
+  
+  i Use the on function from svelte/events instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:19:2 lint/nursery/noSvelteAddEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of addEventListener.
+  
+    17 │ 	document.addEventListener('visibilitychange', handler);
+    18 │ 	window?.addEventListener('message', handler);
+  > 19 │ 	window.addEventListener?.('message', handler);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ 	window.addEventListener    ('message', handler);
+    21 │ 	window.addEventListener/* foo */('message', handler);
+  
+  i Listeners attached with addEventListener bypass Svelte's event delegation, so they may not run in the expected order relative to other event handlers.
+  
+  i Use the on function from svelte/events instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:20:2 lint/nursery/noSvelteAddEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of addEventListener.
+  
+    18 │ 	window?.addEventListener('message', handler);
+    19 │ 	window.addEventListener?.('message', handler);
+  > 20 │ 	window.addEventListener    ('message', handler);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 	window.addEventListener/* foo */('message', handler);
+    22 │ 	window.addEventListener('message', handler, { once: true });
+  
+  i Listeners attached with addEventListener bypass Svelte's event delegation, so they may not run in the expected order relative to other event handlers.
+  
+  i Use the on function from svelte/events instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:21:2 lint/nursery/noSvelteAddEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of addEventListener.
+  
+    19 │ 	window.addEventListener?.('message', handler);
+    20 │ 	window.addEventListener    ('message', handler);
+  > 21 │ 	window.addEventListener/* foo */('message', handler);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ 	window.addEventListener('message', handler, { once: true });
+    23 │ 	window.addEventListener(...params);
+  
+  i Listeners attached with addEventListener bypass Svelte's event delegation, so they may not run in the expected order relative to other event handlers.
+  
+  i Use the on function from svelte/events instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:22:2 lint/nursery/noSvelteAddEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of addEventListener.
+  
+    20 │ 	window.addEventListener    ('message', handler);
+    21 │ 	window.addEventListener/* foo */('message', handler);
+  > 22 │ 	window.addEventListener('message', handler, { once: true });
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ 	window.addEventListener(...params);
+    24 │ </script>
+  
+  i Listeners attached with addEventListener bypass Svelte's event delegation, so they may not run in the expected order relative to other event handlers.
+  
+  i Use the on function from svelte/events instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:23:2 lint/nursery/noSvelteAddEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of addEventListener.
+  
+    21 │ 	window.addEventListener/* foo */('message', handler);
+    22 │ 	window.addEventListener('message', handler, { once: true });
+  > 23 │ 	window.addEventListener(...params);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ </script>
+    25 │ 
+  
+  i Listeners attached with addEventListener bypass Svelte's event delegation, so they may not run in the expected order relative to other event handlers.
+  
+  i Use the on function from svelte/events instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:26:24 lint/nursery/noSvelteAddEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of addEventListener.
+  
+    24 │ </script>
+    25 │ 
+  > 26 │ <button onclick={() => window.addEventListener('message', handler)}>Hello</button>
+       │                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 
+  
+  i Listeners attached with addEventListener bypass Svelte's event delegation, so they may not run in the expected order relative to other event handlers.
+  
+  i Use the on function from svelte/events instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

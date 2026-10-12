@@ -1,0 +1,30 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidModule.svelte.js
+---
+# Input
+```js
+/* should generate diagnostics */
+window.addEventListener('message', handler);
+
+```
+
+# Diagnostics
+```
+invalidModule.svelte.js:2:1 lint/nursery/noSvelteAddEventListener ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Unexpected use of addEventListener.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ window.addEventListener('message', handler);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Listeners attached with addEventListener bypass Svelte's event delegation, so they may not run in the expected order relative to other event handlers.
+  
+  i Use the on function from svelte/events instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
