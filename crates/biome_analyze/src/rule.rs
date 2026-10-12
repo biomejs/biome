@@ -728,7 +728,7 @@ impl RuleDomain {
             Self::Svelte => &[&("svelte", ">=3.0.0")],
             Self::Vue => &[&("vue", ">=3.0.0")],
             Self::Project => &[],
-            Self::Tailwind => &[&("tailwindcss", ">=3.0.0")],
+            Self::Tailwind => &[&("tailwindcss", ">=4.0.0")],
             Self::Turborepo => &[&("turbo", ">=1.0.0")],
             Self::Playwright => &[&("@playwright/test", ">=1.0.0")],
             Self::Types => &[],

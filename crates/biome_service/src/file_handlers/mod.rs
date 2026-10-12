@@ -2705,7 +2705,7 @@ mod tests {
     #[cfg(feature = "lang_js")]
     use crate::settings::Settings;
     #[cfg(feature = "lang_js")]
-    use biome_analyze::RuleFilter;
+    use biome_analyze::{RuleDomain, RuleFilter};
     #[cfg(feature = "lang_js")]
     use biome_package::{Dependencies, PackageJson};
     use camino::Utf8Path;
@@ -2731,6 +2731,26 @@ mod tests {
                 .iter()
                 .any(|global| global.as_ref() == "test")
         );
+    }
+
+    #[cfg(feature = "lang_js")]
+    #[test]
+    fn tailwind_domain_requires_tailwind_4() {
+        let activates_tailwind_domain = |version: &str| {
+            let manifest = PackageJson {
+                dependencies: Dependencies(
+                    vec![("tailwindcss".into(), version.into())].into_boxed_slice(),
+                ),
+                ..PackageJson::default()
+            };
+            RuleDomain::Tailwind
+                .manifest_dependencies()
+                .iter()
+                .any(|(dependency, range)| manifest.matches_dependency(dependency, range))
+        };
+
+        assert!(activates_tailwind_domain("^4.0.0"));
+        assert!(!activates_tailwind_domain("^3.4.17"));
     }
 
     #[cfg(feature = "lang_js")]
