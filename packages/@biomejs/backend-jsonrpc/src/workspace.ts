@@ -3477,6 +3477,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/use-vue-consistent-event-hyphenation
 	 */
 	useVueConsistentEventHyphenation?: UseVueConsistentEventHyphenationConfiguration;
+	/**
+	 * Enforce that the name of a Vue component matches its file name.
+	 * See https://biomejs.dev/linter/rules/use-vue-matching-component-file-name
+	 */
+	useVueMatchingComponentFileName?: UseVueMatchingComponentFileNameConfiguration;
 }
 /**
  * Configures all rules in one lint group.
@@ -5944,6 +5949,9 @@ export type UseVueBaseImportConfiguration =
 export type UseVueConsistentEventHyphenationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentEventHyphenationOptions;
+export type UseVueMatchingComponentFileNameConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueMatchingComponentFileNameOptions;
 export type NoAccumulatingSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAccumulatingSpreadOptions;
@@ -8609,6 +8617,14 @@ export interface RuleWithUseVueConsistentEventHyphenationOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentEventHyphenationOptions;
 }
+export interface RuleWithUseVueMatchingComponentFileNameOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVueMatchingComponentFileNameOptions;
+}
 export interface RuleWithNoAccumulatingSpreadOptions {
 	level: RulePlainConfiguration;
 	options?: NoAccumulatingSpreadOptions;
@@ -10918,6 +10934,7 @@ export interface UseVueConsistentEventHyphenationOptions {
 	 */
 	ignoreTags?: string[];
 }
+export type UseVueMatchingComponentFileNameOptions = {};
 export type NoAccumulatingSpreadOptions = {};
 export type NoAwaitInLoopsOptions = {};
 export type NoBarrelFileOptions = {};
@@ -12472,6 +12489,7 @@ export type Category =
 	| "lint/nursery/useVueBaseImport"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentEventHyphenation"
+	| "lint/nursery/useVueMatchingComponentFileName"
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVueValidVFor"
 	| "lint/nursery/useVueValidVModel"
