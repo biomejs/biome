@@ -1549,8 +1549,8 @@ export interface Source {
 	 */
 	useSortedTypeFields?: UseSortedTypeFieldsConfiguration;
 	/**
-	* Sort the variable definitions of GraphQL operations in natural order.
-See https://biomejs.dev/assist/actions/use-sorted-variables 
+	 * Sort the variable definitions of GraphQL operations in natural order.
+	 * See https://biomejs.dev/assist/actions/use-sorted-variables
 	 */
 	useSortedVariables?: UseSortedVariablesConfiguration;
 }

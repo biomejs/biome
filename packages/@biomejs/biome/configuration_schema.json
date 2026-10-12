@@ -8564,6 +8564,7 @@
 				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseSortedVariablesOptions" }
 			},
+			"additionalProperties": false,
 			"required": ["level", "options"]
 		},
 		"RuleDomainValue": {
