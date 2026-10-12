@@ -1,0 +1,53 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: computed-media-ranges.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@media ($feature + "" >= 40rem) {}
+@media (40rem <= $feature + "") {}
+@media (20rem < range-name() <= 80rem) {}
+@import "wide-layout.css" screen and (range-name() >= 40rem);
+@media ($min + 1rem < unknown) {}
+@media ($min + 1rem < unknown <= $max - 1rem) {}
+
+```
+
+# Diagnostics
+```
+computed-media-ranges.scss:6:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't use unknown media feature names.
+  
+    4 │ @media (20rem < range-name() <= 80rem) {}
+    5 │ @import "wide-layout.css" screen and (range-name() >= 40rem);
+  > 6 │ @media ($min + 1rem < unknown) {}
+      │        ^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ @media ($min + 1rem < unknown <= $max - 1rem) {}
+    8 │ 
+  
+  i Unexpected unknown media feature name.
+  
+  i You should use media feature names defined in the CSS Specifications.
+  
+
+```
+
+```
+computed-media-ranges.scss:7:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Don't use unknown media feature names.
+  
+    5 │ @import "wide-layout.css" screen and (range-name() >= 40rem);
+    6 │ @media ($min + 1rem < unknown) {}
+  > 7 │ @media ($min + 1rem < unknown <= $max - 1rem) {}
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i Unexpected unknown media feature name.
+  
+  i You should use media feature names defined in the CSS Specifications.
+  
+
+```

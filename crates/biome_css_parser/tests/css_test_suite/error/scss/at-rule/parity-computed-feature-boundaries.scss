@@ -1,0 +1,6 @@
+$bound: min;
+@container ($bound + "-width": 30rem) {}
+.control { width: if(media($bound + "-width": 30rem): 1px; else: 2px); }
+@media (width: foo bar) {}
+@media ([width] < 30rem) {}
+.following { color: green; }

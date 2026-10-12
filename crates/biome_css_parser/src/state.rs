@@ -30,6 +30,13 @@ pub(crate) struct CssParserState {
     /// This distinction is critical for correctly interpreting and parsing different sections of a CSS document.
     pub(crate) is_nesting_block: bool,
 
+    /// Keeps computed-name extensions out of CSS `if()` media tests.
+    ///
+    /// ```scss
+    /// a { color: if(media(width > 40rem): red; else: blue); }
+    /// ```
+    pub(crate) is_in_if_media_test: bool,
+
     /// Indicates whether the parser encountered an `if()` function during speculative parsing.
     ///
     /// This flag is used to handle a conflict between speculative parsing and `if()` function parsing.
@@ -53,6 +60,7 @@ impl CssParserState {
         Self {
             speculative_parsing: false,
             is_nesting_block: false,
+            is_in_if_media_test: false,
             encountered_if_function: false,
             if_function_kinds: None,
         }

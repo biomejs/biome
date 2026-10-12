@@ -1,0 +1,12 @@
+$feature: width;
+@function range-name() { @return width; }
+@media ($feature + "" >=) { .missing-value {} }
+.after-value { color: green; }
+@media (20rem < $feature + <= 80rem) { .missing-operand {} }
+.after-operand { color: green; }
+@media ($feature + "" >= 40rem { .missing-close {} }
+.after-close { color: green; }
+@import "wide-layout.css" screen and (20rem < range-name() <=);
+.after-import { color: green; }
+@media (20rem < [width] <= 80rem) {}
+.after-brackets { color: green; }

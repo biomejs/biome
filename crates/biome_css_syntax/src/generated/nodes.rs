@@ -16958,12 +16958,21 @@ impl AnyCssQueryFeature {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssQueryFeatureName {
+    AnyCssFunction(AnyCssFunction),
     CssDashedIdentifier(CssDashedIdentifier),
     CssIdentifier(CssIdentifier),
+    ScssExpression(ScssExpression),
     ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
+    ScssInterpolation(ScssInterpolation),
     ScssVariable(ScssVariable),
 }
 impl AnyCssQueryFeatureName {
+    pub fn as_any_css_function(&self) -> Option<&AnyCssFunction> {
+        match &self {
+            Self::AnyCssFunction(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_css_dashed_identifier(&self) -> Option<&CssDashedIdentifier> {
         match &self {
             Self::CssDashedIdentifier(item) => Some(item),
@@ -16976,9 +16985,21 @@ impl AnyCssQueryFeatureName {
             _ => None,
         }
     }
+    pub fn as_scss_expression(&self) -> Option<&ScssExpression> {
+        match &self {
+            Self::ScssExpression(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_scss_interpolated_identifier(&self) -> Option<&ScssInterpolatedIdentifier> {
         match &self {
             Self::ScssInterpolatedIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolation(&self) -> Option<&ScssInterpolation> {
+        match &self {
+            Self::ScssInterpolation(item) => Some(item),
             _ => None,
         }
     }
@@ -43921,9 +43942,19 @@ impl From<CssIdentifier> for AnyCssQueryFeatureName {
         Self::CssIdentifier(node)
     }
 }
+impl From<ScssExpression> for AnyCssQueryFeatureName {
+    fn from(node: ScssExpression) -> Self {
+        Self::ScssExpression(node)
+    }
+}
 impl From<ScssInterpolatedIdentifier> for AnyCssQueryFeatureName {
     fn from(node: ScssInterpolatedIdentifier) -> Self {
         Self::ScssInterpolatedIdentifier(node)
+    }
+}
+impl From<ScssInterpolation> for AnyCssQueryFeatureName {
+    fn from(node: ScssInterpolation) -> Self {
+        Self::ScssInterpolation(node)
     }
 }
 impl From<ScssVariable> for AnyCssQueryFeatureName {
@@ -43933,25 +43964,41 @@ impl From<ScssVariable> for AnyCssQueryFeatureName {
 }
 impl AstNode for AnyCssQueryFeatureName {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssDashedIdentifier::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssFunction::KIND_SET
+        .union(CssDashedIdentifier::KIND_SET)
         .union(CssIdentifier::KIND_SET)
+        .union(ScssExpression::KIND_SET)
         .union(ScssInterpolatedIdentifier::KIND_SET)
+        .union(ScssInterpolation::KIND_SET)
         .union(ScssVariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            CSS_DASHED_IDENTIFIER | CSS_IDENTIFIER | SCSS_INTERPOLATED_IDENTIFIER | SCSS_VARIABLE
-        )
+        match kind {
+            CSS_DASHED_IDENTIFIER
+            | CSS_IDENTIFIER
+            | SCSS_EXPRESSION
+            | SCSS_INTERPOLATED_IDENTIFIER
+            | SCSS_INTERPOLATION
+            | SCSS_VARIABLE => true,
+            k if AnyCssFunction::can_cast(k) => true,
+            _ => false,
+        }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_DASHED_IDENTIFIER => Self::CssDashedIdentifier(CssDashedIdentifier { syntax }),
             CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
+            SCSS_EXPRESSION => Self::ScssExpression(ScssExpression { syntax }),
             SCSS_INTERPOLATED_IDENTIFIER => {
                 Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
             }
+            SCSS_INTERPOLATION => Self::ScssInterpolation(ScssInterpolation { syntax }),
             SCSS_VARIABLE => Self::ScssVariable(ScssVariable { syntax }),
-            _ => return None,
+            _ => {
+                if let Some(any_css_function) = AnyCssFunction::cast(syntax) {
+                    return Some(Self::AnyCssFunction(any_css_function));
+                }
+                return None;
+            }
         };
         Some(res)
     }
@@ -43959,25 +44006,34 @@ impl AstNode for AnyCssQueryFeatureName {
         match self {
             Self::CssDashedIdentifier(it) => it.syntax(),
             Self::CssIdentifier(it) => it.syntax(),
+            Self::ScssExpression(it) => it.syntax(),
             Self::ScssInterpolatedIdentifier(it) => it.syntax(),
+            Self::ScssInterpolation(it) => it.syntax(),
             Self::ScssVariable(it) => it.syntax(),
+            Self::AnyCssFunction(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssDashedIdentifier(it) => it.into_syntax(),
             Self::CssIdentifier(it) => it.into_syntax(),
+            Self::ScssExpression(it) => it.into_syntax(),
             Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+            Self::ScssInterpolation(it) => it.into_syntax(),
             Self::ScssVariable(it) => it.into_syntax(),
+            Self::AnyCssFunction(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyCssQueryFeatureName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::AnyCssFunction(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDashedIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolation(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssVariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -43985,9 +44041,12 @@ impl std::fmt::Debug for AnyCssQueryFeatureName {
 impl From<AnyCssQueryFeatureName> for SyntaxNode {
     fn from(n: AnyCssQueryFeatureName) -> Self {
         match n {
+            AnyCssQueryFeatureName::AnyCssFunction(it) => it.into_syntax(),
             AnyCssQueryFeatureName::CssDashedIdentifier(it) => it.into_syntax(),
             AnyCssQueryFeatureName::CssIdentifier(it) => it.into_syntax(),
+            AnyCssQueryFeatureName::ScssExpression(it) => it.into_syntax(),
             AnyCssQueryFeatureName::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+            AnyCssQueryFeatureName::ScssInterpolation(it) => it.into_syntax(),
             AnyCssQueryFeatureName::ScssVariable(it) => it.into_syntax(),
         }
     }
