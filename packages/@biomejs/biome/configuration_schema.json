@@ -8198,6 +8198,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useIteratorZip": {
+					"description": "Prefer Iterator.zip() over reading several arrays with the same index.\nSee https://biomejs.dev/linter/rules/use-iterator-zip",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseIteratorZipConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useLayeredStyles": {
 					"description": "Enforce style rules to be defined within a cascade layer.\nSee https://biomejs.dev/linter/rules/use-layered-styles",
 					"anyOf": [
@@ -14123,6 +14130,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseIteratorZipOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseIteratorZipOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseJsonImportAttributesOptions": {
 			"type": "object",
 			"properties": {
@@ -18961,6 +18977,16 @@
 					"type": ["boolean", "null"]
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseIteratorZipConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseIteratorZipOptions" }
+			]
+		},
+		"UseIteratorZipOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseJsonImportAttributesConfiguration": {

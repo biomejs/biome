@@ -342,6 +342,7 @@ define_categories! {
     "lint/nursery/useFlatMathMinMax": "https://biomejs.dev/linter/rules/use-flat-math-min-max",
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",
     "lint/nursery/useIncludes": "https://biomejs.dev/linter/rules/use-includes",
+    "lint/nursery/useIteratorZip": "https://biomejs.dev/linter/rules/use-iterator-zip",
     "lint/nursery/useJsxCurlyBraceConvention": "https://biomejs.dev/linter/rules/use-jsx-curly-brace-convention",
     "lint/nursery/useLayeredStyles": "https://biomejs.dev/linter/rules/use-layered-styles",
     "lint/nursery/useLogicalProperties": "https://biomejs.dev/linter/rules/use-logical-properties",

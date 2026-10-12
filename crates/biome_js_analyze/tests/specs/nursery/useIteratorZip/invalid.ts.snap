@@ -1,0 +1,217 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+function annotatedArrays(names: readonly string[], scores: number[]) {
+	for (let index = 0; index < Math.min(names.length, scores.length); index++) {
+		save(names[index], scores[index]);
+	}
+}
+
+function annotatedTypedArrays(names: Uint8Array, scores: Float64Array) {
+	for (let index = 0; index < Math.min(names.length, scores.length); index++) {
+		save(names[index], scores[index]);
+	}
+}
+
+declare const declaredNames: string[];
+declare const declaredScores: readonly number[];
+for (let index = 0; index < Math.min(declaredNames.length, declaredScores.length); index++) {
+	save(declaredNames[index], declaredScores[index]);
+}
+
+// Type syntax around a read doesn't change what is read.
+for (let index = 0; index < Math.min(names.length, scores.length); index++) {
+	save(names[index]!, scores[index] as number);
+}
+
+for (let index = 0; index < Math.min(names.length, scores.length); index++) {
+	save(<string>names[index], scores[index] satisfies number);
+}
+
+for (let index = 0; index < Math.min(names.length, scores.length); index++) {
+	save(names[index]<string>, scores[index]);
+}
+
+function cachedWithAnnotation() {
+	const length: number = Math.min(names.length, scores.length);
+	for (let index = 0; index < length; index++) {
+		save(names[index], scores[index]);
+	}
+}
+
+for (let index: number = 0; index < Math.min(names.length, scores.length); index++) {
+	save(names[index], scores[index]);
+}
+
+```
+
+# Diagnostics
+```
+invalid.ts:4:2 lint/nursery/useIteratorZip ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for loop only uses its index to read the same position from several arrays.
+  
+    3 │ function annotatedArrays(names: readonly string[], scores: number[]) {
+  > 4 │ 	for (let index = 0; index < Math.min(names.length, scores.length); index++) {
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 		save(names[index], scores[index]);
+    6 │ 	}
+  
+  i Iterator.zip() returns the elements at the same position together and stops at the end of the shortest array, so the loop needs neither an index nor a length check.
+  
+  i Use a for...of loop over Iterator.zip() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:10:2 lint/nursery/useIteratorZip ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for loop only uses its index to read the same position from several arrays.
+  
+     9 │ function annotatedTypedArrays(names: Uint8Array, scores: Float64Array) {
+  > 10 │ 	for (let index = 0; index < Math.min(names.length, scores.length); index++) {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 		save(names[index], scores[index]);
+    12 │ 	}
+  
+  i Iterator.zip() returns the elements at the same position together and stops at the end of the shortest array, so the loop needs neither an index nor a length check.
+  
+  i Use a for...of loop over Iterator.zip() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:17:1 lint/nursery/useIteratorZip ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for loop only uses its index to read the same position from several arrays.
+  
+    15 │ declare const declaredNames: string[];
+    16 │ declare const declaredScores: readonly number[];
+  > 17 │ for (let index = 0; index < Math.min(declaredNames.length, declaredScores.length); index++) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    18 │ 	save(declaredNames[index], declaredScores[index]);
+    19 │ }
+  
+  i Iterator.zip() returns the elements at the same position together and stops at the end of the shortest array, so the loop needs neither an index nor a length check.
+  
+  i Use a for...of loop over Iterator.zip() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:22:1 lint/nursery/useIteratorZip ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for loop only uses its index to read the same position from several arrays.
+  
+    21 │ // Type syntax around a read doesn't change what is read.
+  > 22 │ for (let index = 0; index < Math.min(names.length, scores.length); index++) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ 	save(names[index]!, scores[index] as number);
+    24 │ }
+  
+  i Iterator.zip() returns the elements at the same position together and stops at the end of the shortest array, so the loop needs neither an index nor a length check.
+  
+  i Use a for...of loop over Iterator.zip() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:26:1 lint/nursery/useIteratorZip ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for loop only uses its index to read the same position from several arrays.
+  
+    24 │ }
+    25 │ 
+  > 26 │ for (let index = 0; index < Math.min(names.length, scores.length); index++) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 	save(<string>names[index], scores[index] satisfies number);
+    28 │ }
+  
+  i Iterator.zip() returns the elements at the same position together and stops at the end of the shortest array, so the loop needs neither an index nor a length check.
+  
+  i Use a for...of loop over Iterator.zip() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:30:1 lint/nursery/useIteratorZip ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for loop only uses its index to read the same position from several arrays.
+  
+    28 │ }
+    29 │ 
+  > 30 │ for (let index = 0; index < Math.min(names.length, scores.length); index++) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ 	save(names[index]<string>, scores[index]);
+    32 │ }
+  
+  i Iterator.zip() returns the elements at the same position together and stops at the end of the shortest array, so the loop needs neither an index nor a length check.
+  
+  i Use a for...of loop over Iterator.zip() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:36:2 lint/nursery/useIteratorZip ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for loop only uses its index to read the same position from several arrays.
+  
+    34 │ function cachedWithAnnotation() {
+    35 │ 	const length: number = Math.min(names.length, scores.length);
+  > 36 │ 	for (let index = 0; index < length; index++) {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    37 │ 		save(names[index], scores[index]);
+    38 │ 	}
+  
+  i Iterator.zip() returns the elements at the same position together and stops at the end of the shortest array, so the loop needs neither an index nor a length check.
+  
+  i Use a for...of loop over Iterator.zip() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:41:1 lint/nursery/useIteratorZip ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This for loop only uses its index to read the same position from several arrays.
+  
+    39 │ }
+    40 │ 
+  > 41 │ for (let index: number = 0; index < Math.min(names.length, scores.length); index++) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    42 │ 	save(names[index], scores[index]);
+    43 │ }
+  
+  i Iterator.zip() returns the elements at the same position together and stops at the end of the shortest array, so the loop needs neither an index nor a length check.
+  
+  i Use a for...of loop over Iterator.zip() instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
