@@ -257,6 +257,26 @@ impl TailwindDesignSystem {
         }
     }
 
+    /// The colors the stylesheet defines, with their values, such as `brand`
+    /// and `#00f` for `--color-brand: #00f`. The order is unspecified.
+    pub fn stylesheet_colors(&self) -> impl Iterator<Item = (&str, &str)> {
+        self.theme
+            .get(&ThemeNamespace::Color)
+            .into_iter()
+            .flat_map(|colors| &colors.values)
+            .map(|(name, value)| (name.as_ref(), value.as_ref()))
+    }
+
+    /// The value the stylesheet gives the color `name`, such as `#00f` for
+    /// `brand` with `--color-brand: #00f`.
+    pub fn stylesheet_color(&self, name: &str) -> Option<&str> {
+        self.theme
+            .get(&ThemeNamespace::Color)?
+            .values
+            .get(name)
+            .map(AsRef::as_ref)
+    }
+
     pub(super) fn utility(&self, name: &str) -> Option<&CustomUtility> {
         self.utilities.get(name)
     }
