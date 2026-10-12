@@ -257,6 +257,7 @@ pub mod no_self_import;
 pub mod no_setter_return;
 pub mod no_shadow;
 pub mod no_shadow_restricted_names;
+pub mod no_short_time_values;
 pub mod no_shorthand_property_overrides;
 pub mod no_shouty_constants;
 pub mod no_skipped_tests;
