@@ -9,7 +9,8 @@ use biome_rowan::{AstNode, Text, TokenText};
 /// Returns whether `left` and `right` read the same value: the same variable, property,
 /// `this`, `super`, or literal.
 ///
-/// Parentheses and TypeScript type assertions are ignored. Properties are compared by name,
+/// Parentheses and the TypeScript syntax removed by [`AnyJsExpression::omit_type_wrappers`]
+/// are ignored, so `f<T>` matches `f`. Properties are compared by name,
 /// so `a.b`, `a["b"]`, and ``a[`b`]`` match, and so do `a[0]` and `a["0"]`. Optional
 /// chaining (`?.`) must appear at the same places on both sides.
 ///
@@ -21,8 +22,8 @@ pub(crate) fn is_same_reference(left: AnyJsExpression, right: AnyJsExpression) -
     let mut expressions = vec![(left, right)];
 
     while let Some((left, right)) = expressions.pop() {
-        let left = omit_type_wrappers(left)?;
-        let right = omit_type_wrappers(right)?;
+        let left = left.omit_type_wrappers()?;
+        let right = right.omit_type_wrappers()?;
 
         match (&left, &right) {
             (
@@ -75,26 +76,6 @@ pub(crate) fn is_same_reference(left: AnyJsExpression, right: AnyJsExpression) -
     Some(true)
 }
 
-/// Removes parentheses and TypeScript type assertions (`as`, `satisfies`, `<T>`, and `!`),
-/// which don't change the value at runtime.
-///
-/// Returns `None` if the syntax tree is incomplete.
-pub(crate) fn omit_type_wrappers(mut expression: AnyJsExpression) -> Option<AnyJsExpression> {
-    loop {
-        expression = match expression.omit_parentheses() {
-            AnyJsExpression::TsAsExpression(expression) => expression.expression().ok()?,
-            AnyJsExpression::TsSatisfiesExpression(expression) => expression.expression().ok()?,
-            AnyJsExpression::TsTypeAssertionExpression(expression) => {
-                expression.expression().ok()?
-            }
-            AnyJsExpression::TsNonNullAssertionExpression(expression) => {
-                expression.expression().ok()?
-            }
-            expression => return Some(expression),
-        };
-    }
-}
-
 /// The property that a member expression reads.
 enum MemberKey {
     /// A property whose name is known without running the code, such as `b` in `a.b`,
@@ -120,7 +101,7 @@ fn member_key(member: &AnyJsMemberExpression) -> Option<MemberKey> {
             AnyJsName::JsMetavariable(_) => return None,
         },
         AnyJsMemberExpression::JsComputedMemberExpression(member) => {
-            let property = omit_type_wrappers(member.member().ok()?)?;
+            let property = member.member().ok()?.omit_type_wrappers()?;
             match static_property_name(&property) {
                 Some(name) => MemberKey::Static(name),
                 None => MemberKey::Computed(property),

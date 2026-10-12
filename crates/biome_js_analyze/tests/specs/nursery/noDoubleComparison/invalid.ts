@@ -5,3 +5,7 @@ x! === y || x! < y;
 (<number>x) === y || x < y;
 x === y as number || x < y;
 x === "a" satisfies string || x < "a";
+(f<string>) === g || (f<string>) < g;
+f<string> <= g && f<string> !== g;
+f<string> !== g && g <= f<string>;
+f<string> === g || g < f<string>;

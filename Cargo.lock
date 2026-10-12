@@ -1242,6 +1242,7 @@ dependencies = [
  "biome_aria_metadata",
  "biome_js_factory",
  "biome_js_parser",
+ "biome_languages",
  "biome_rowan",
  "biome_string_case",
  "camino",

@@ -1,7 +1,7 @@
 use crate::{
     JsRuleAction,
     services::semantic::Semantic,
-    utils::same_reference::{is_same_reference, omit_type_wrappers},
+    utils::same_reference::is_same_reference,
 };
 use biome_analyze::{
     FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
@@ -186,8 +186,14 @@ impl Rule for NoDoubleComparison {
                 make::token(T![')']),
             ));
         }
+        let mut first = first.trim_trailing_trivia()?;
+        // TypeScript doesn't allow `<` or `>` directly after a type argument list, so
+        // `f<T> < x` and `f<T> >= x` don't parse.
+        if matches!(first, AnyJsExpression::TsInstantiationExpression(_)) {
+            first = make::parenthesized(first.trim_leading_trivia()?).into();
+        }
         let replacement = make::js_binary_expression(
-            first.trim_trailing_trivia()?,
+            first,
             make::token_decorated_with_space(combined.token_kind()),
             second,
         );
@@ -405,10 +411,10 @@ const fn combine_uncached(
     })
 }
 
-/// Returns the comparison inside `expression`, looking through parentheses and TypeScript
-/// type assertions.
+/// Returns the comparison inside `expression`, looking through parentheses and the
+/// TypeScript syntax removed by [`AnyJsExpression::omit_type_wrappers`].
 fn as_comparison(expression: AnyJsExpression) -> Option<JsBinaryExpression> {
-    match omit_type_wrappers(expression)? {
+    match expression.omit_type_wrappers()? {
         AnyJsExpression::JsBinaryExpression(binary) => Some(binary),
         _ => None,
     }
@@ -432,7 +438,7 @@ fn is_const_regex(model: &SemanticModel, expression: &AnyJsExpression) -> bool {
     let mut visited = Vec::new();
     loop {
         let Some(AnyJsExpression::JsIdentifierExpression(identifier)) =
-            omit_type_wrappers(expression)
+            expression.omit_type_wrappers()
         else {
             return false;
         };
@@ -455,7 +461,7 @@ fn is_const_regex(model: &SemanticModel, expression: &AnyJsExpression) -> bool {
         let Some(initializer) = declarator
             .initializer()
             .and_then(|initializer| initializer.expression().ok())
-            .and_then(omit_type_wrappers)
+            .and_then(AnyJsExpression::omit_type_wrappers)
         else {
             return false;
         };
