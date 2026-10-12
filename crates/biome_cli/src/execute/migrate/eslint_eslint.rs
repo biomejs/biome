@@ -575,6 +575,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::NoRestrictedGlobals(conf));
                             }
                         }
+                        "no-unused-vars" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::NoUnusedVars(conf));
+                            }
+                        }
                         // Eslint plugin rules with options that we handle
                         "jest/consistent-test-it" | "vitest/consistent-test-it" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
@@ -614,6 +619,11 @@ impl Deserializable for Rules {
                         "@typescript-eslint/no-shadow" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::TypeScriptNoShadow(conf));
+                            }
+                        }
+                        "@typescript-eslint/no-unused-vars" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::TypeScriptNoUnusedVars(conf));
                             }
                         }
                         "@typescript-eslint/no-base-to-string" => {
@@ -661,6 +671,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::UnicornFilenameCase(conf));
                             }
                         }
+                        "unused-imports/no-unused-vars" => {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
+                                result.insert(Rule::UnusedImportsNoUnusedVars(conf));
+                            }
+                        }
                         "unicorn/numeric-separators-style" => {
                             if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::UnicornNumericSeparatorsStyle(conf));
@@ -693,6 +708,143 @@ impl From<NoConsoleOptions> for biome_rule_options::no_console::NoConsoleOptions
     fn from(val: NoConsoleOptions) -> Self {
         Self {
             allow: (!val.allow.is_empty()).then_some(val.allow),
+        }
+    }
+}
+
+/// Options of `no-unused-vars`, shared by `@typescript-eslint/no-unused-vars`
+/// and `unused-imports/no-unused-vars`.
+///
+/// Only the options with a Biome equivalent are kept.
+/// The `*IgnorePattern` options are regular expressions,
+/// whereas Biome's `ignore` option only matches exact names.
+#[derive(Clone, Copy, Debug, Default)]
+pub(crate) struct NoUnusedVarsOptions {
+    pub(crate) ignore_rest_siblings: Option<bool>,
+    pub(crate) ignore_using_declarations: Option<bool>,
+}
+
+/// How a base configuration configures one of the `no-unused-vars` rules.
+#[derive(Clone, Copy, Debug, Default)]
+pub(crate) struct BaseNoUnusedVarsRule {
+    /// Whether the base configuration enables the rule.
+    pub(crate) is_enabled: bool,
+    /// The options that the base configuration provides for the rule, even if it disables it.
+    pub(crate) options: Option<NoUnusedVarsOptions>,
+}
+
+impl BaseNoUnusedVarsRule {
+    fn new(conf: &RuleConf<NoUnusedVarsOptions>) -> Self {
+        Self {
+            is_enabled: !matches!(conf.severity(), Severity::Off),
+            options: match conf {
+                RuleConf::Option(_, options) => Some(*options),
+                _ => None,
+            },
+        }
+    }
+}
+
+/// How a base configuration configures each of the `no-unused-vars` rules.
+///
+/// ESLint keeps the options of a rule when a configuration that applies on top of the base one
+/// only sets the severity of that rule.
+/// The options of the other rules are not inherited, even if they migrate to the same Biome rule.
+#[derive(Clone, Copy, Debug, Default)]
+pub(crate) struct BaseNoUnusedVarsRules {
+    eslint: BaseNoUnusedVarsRule,
+    typescript: BaseNoUnusedVarsRule,
+    unused_imports: BaseNoUnusedVarsRule,
+}
+
+impl BaseNoUnusedVarsRules {
+    /// Returns how the base configuration configures the ESLint rule `eslint_name`.
+    pub(crate) fn get(&self, eslint_name: &str) -> BaseNoUnusedVarsRule {
+        match eslint_name {
+            "no-unused-vars" => self.eslint,
+            "@typescript-eslint/no-unused-vars" => self.typescript,
+            "unused-imports/no-unused-vars" => self.unused_imports,
+            _ => BaseNoUnusedVarsRule::default(),
+        }
+    }
+}
+
+impl Rules {
+    /// Returns how these rules configure each of the `no-unused-vars` rules.
+    pub(crate) fn base_no_unused_vars_rules(&self) -> BaseNoUnusedVarsRules {
+        let mut result = BaseNoUnusedVarsRules::default();
+        for rule in &self.0 {
+            match rule {
+                Rule::NoUnusedVars(conf) => result.eslint = BaseNoUnusedVarsRule::new(conf),
+                Rule::TypeScriptNoUnusedVars(conf) => {
+                    result.typescript = BaseNoUnusedVarsRule::new(conf);
+                }
+                Rule::UnusedImportsNoUnusedVars(conf) => {
+                    result.unused_imports = BaseNoUnusedVarsRule::new(conf);
+                }
+                _ => {}
+            }
+        }
+        result
+    }
+}
+
+impl NoUnusedVarsOptions {
+    const ESLINT_DEFAULT_IGNORE_REST_SIBLINGS: bool = false;
+    const ESLINT_DEFAULT_IGNORE_USING_DECLARATIONS: bool = false;
+}
+
+impl Deserializable for NoUnusedVarsOptions {
+    fn deserialize(
+        ctx: &mut dyn DeserializationContext,
+        value: &impl DeserializableValue,
+        name: &str,
+    ) -> Option<Self> {
+        // The string form (`"all"` or `"local"`) only sets `vars`, which has no Biome equivalent.
+        if value.visitable_type()? == DeserializableType::Str {
+            return Some(Self::default());
+        }
+
+        NoUnusedVarsObjectOptions::deserialize(ctx, value, name).map(Into::into)
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+#[deserializable(unknown_fields = "allow")]
+pub(crate) struct NoUnusedVarsObjectOptions {
+    ignore_rest_siblings: Option<bool>,
+    ignore_using_declarations: Option<bool>,
+}
+
+impl From<NoUnusedVarsObjectOptions> for NoUnusedVarsOptions {
+    fn from(value: NoUnusedVarsObjectOptions) -> Self {
+        Self {
+            ignore_rest_siblings: value.ignore_rest_siblings,
+            ignore_using_declarations: value.ignore_using_declarations,
+        }
+    }
+}
+
+/// ESLint replaces all the options of a rule when a configuration provides an options object,
+/// and applies its own defaults to the omitted ones.
+/// Every option is set explicitly, so Biome neither applies its own defaults
+/// nor inherits values from a base configuration.
+impl From<NoUnusedVarsOptions>
+    for biome_rule_options::no_unused_variables::NoUnusedVariablesOptions
+{
+    fn from(value: NoUnusedVarsOptions) -> Self {
+        Self {
+            ignore_rest_siblings: Some(
+                value
+                    .ignore_rest_siblings
+                    .unwrap_or(NoUnusedVarsOptions::ESLINT_DEFAULT_IGNORE_REST_SIBLINGS),
+            ),
+            ignore_using_declarations: Some(
+                value
+                    .ignore_using_declarations
+                    .unwrap_or(NoUnusedVarsOptions::ESLINT_DEFAULT_IGNORE_USING_DECLARATIONS),
+            ),
+            ignore: None,
         }
     }
 }
@@ -968,6 +1120,7 @@ pub(crate) enum Rule {
     NoConsole(RuleConf<Box<NoConsoleOptions>>),
     NoRestrictedProperties(RuleConf<Box<NoRestrictedPropertyOption>>),
     NoRestrictedGlobals(RuleConf<Box<NoRestrictedGlobal>>),
+    NoUnusedVars(RuleConf<NoUnusedVarsOptions>),
     // Eslint plugins
     JestConsistentTestIt(RuleConf<eslint_jest::ConsistentTestItOptions>),
     Jsxa11yArioaRoles(RuleConf<Box<eslint_jsxa11y::AriaRoleOptions>>),
@@ -980,6 +1133,7 @@ pub(crate) enum Rule {
     TypeScriptNoBaseToString(RuleConf<eslint_typescript::NoBaseToStringOptions>),
     TypeScriptNamingConvention(RuleConf<Box<eslint_typescript::NamingConventionSelection>>),
     TypeScriptNoShadow(RuleConf<eslint_typescript::NoShadowOptions>),
+    TypeScriptNoUnusedVars(RuleConf<NoUnusedVarsOptions>),
     TypeScriptSwitchExhaustivenessCheck(
         RuleConf<eslint_typescript::SwitchExhaustivenessCheckOptions>,
     ),
@@ -989,6 +1143,7 @@ pub(crate) enum Rule {
     UnicornConsistentJsonFileRead(RuleConf<eslint_unicorn::ConsistentJsonFileReadOption>),
     UnicornFilenameCase(RuleConf<eslint_unicorn::FilenameCaseOptions>),
     UnicornNumericSeparatorsStyle(RuleConf<eslint_unicorn::NumericSeparatorsStyleOptions>),
+    UnusedImportsNoUnusedVars(RuleConf<NoUnusedVarsOptions>),
     VueBlockLang(RuleConf<eslint_vue::BlockLangOptions>),
     VueNoRestrictedHtmlElements(RuleConf<eslint_vue::RestrictedHtmlElement>),
     // If you add new variants, don't forget to update [Rules::deserialize].
@@ -1005,6 +1160,7 @@ impl Rule {
             Self::NoConsole(_) => Cow::Borrowed("no-console"),
             Self::NoRestrictedProperties(_) => Cow::Borrowed("no-restricted-properties"),
             Self::NoRestrictedGlobals(_) => Cow::Borrowed("no-restricted-globals"),
+            Self::NoUnusedVars(_) => Cow::Borrowed("no-unused-vars"),
             Self::JestConsistentTestIt(_) => Cow::Borrowed("jest/consistent-test-it"),
             Self::Jsxa11yArioaRoles(_) => Cow::Borrowed("jsx-a11y/aria-role"),
             Self::ReactForbidElements(_) => Cow::Borrowed("react/forbid-elements"),
@@ -1022,6 +1178,7 @@ impl Rule {
                 Cow::Borrowed("@typescript-eslint/naming-convention")
             }
             Self::TypeScriptNoShadow(_) => Cow::Borrowed("@typescript-eslint/no-shadow"),
+            Self::TypeScriptNoUnusedVars(_) => Cow::Borrowed("@typescript-eslint/no-unused-vars"),
             Self::TypeScriptSwitchExhaustivenessCheck(_) => {
                 Cow::Borrowed("@typescript-eslint/switch-exhaustiveness-check")
             }
@@ -1040,6 +1197,7 @@ impl Rule {
             Self::UnicornNumericSeparatorsStyle(_) => {
                 Cow::Borrowed("unicorn/numeric-separators-style")
             }
+            Self::UnusedImportsNoUnusedVars(_) => Cow::Borrowed("unused-imports/no-unused-vars"),
             Self::VueNoRestrictedHtmlElements(_) => {
                 Cow::Borrowed("vue/no-restricted-html-elements")
             }
