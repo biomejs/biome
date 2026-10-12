@@ -9013,20 +9013,20 @@
 			"additionalProperties": false,
 			"required": ["level", "options"]
 		},
+		"RuleAssistWithUseGraphqlSortedArgumentsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseGraphqlSortedArgumentsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level", "options"]
+		},
 		"RuleAssistWithUseGraphqlSortedVariablesOptions": {
 			"type": "object",
 			"properties": {
 				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
 				"options": { "$ref": "#/$defs/UseGraphqlSortedVariablesOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level", "options"]
-		},
-		"RuleAssistWithUseSortedArgumentsOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
-				"options": { "$ref": "#/$defs/UseSortedArgumentsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level", "options"]
@@ -15770,17 +15770,17 @@
 					"description": "Enables or disables the recommended actions in this group. The group's `preset`\nsetting takes precedence when both options are set.",
 					"type": ["boolean", "null"]
 				},
+				"useGraphqlSortedArguments": {
+					"description": "Sort the arguments of GraphQL fields and directives in natural order.\nSee https://biomejs.dev/assist/actions/use-graphql-sorted-arguments",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseGraphqlSortedArgumentsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGraphqlSortedVariables": {
 					"description": "Sort the variable definitions of GraphQL operations in natural order.\nSee https://biomejs.dev/assist/actions/use-graphql-sorted-variables",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseGraphqlSortedVariablesConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useSortedArguments": {
-					"description": "Sort the arguments of GraphQL fields and directives in natural order.\nSee https://biomejs.dev/assist/actions/use-sorted-arguments",
-					"anyOf": [
-						{ "$ref": "#/$defs/UseSortedArgumentsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -18859,6 +18859,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"UseGraphqlSortedArgumentsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithUseGraphqlSortedArgumentsOptions" }
+			]
+		},
+		"UseGraphqlSortedArgumentsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseGraphqlSortedVariablesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
@@ -19841,16 +19851,6 @@
 			]
 		},
 		"UseSolidForComponentOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
-		"UseSortedArgumentsConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
-				{ "$ref": "#/$defs/RuleAssistWithUseSortedArgumentsOptions" }
-			]
-		},
-		"UseSortedArgumentsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

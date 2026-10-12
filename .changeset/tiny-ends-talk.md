@@ -2,7 +2,7 @@
 "@biomejs/biome": minor
 ---
 
-Added the new assist action [`useSortedArguments`](https://biomejs.dev/assist/actions/use-sorted-arguments/), which sorts the arguments of GraphQL fields and directives, and the arguments declared by field and directive definitions.
+Added the new assist action [`useGraphqlSortedArguments`](https://biomejs.dev/assist/actions/use-graphql-sorted-arguments/), which sorts the arguments of GraphQL fields and directives, and the arguments declared by field and directive definitions.
 
 **Invalid**:
 

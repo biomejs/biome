@@ -67,7 +67,7 @@ directive @commentAboveIntoFirstSlot(b: Int,
 
 # Diagnostics
 ```
-invalidComments.graphql:3:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidComments.graphql:3:8 assist/source/useGraphqlSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━
 
   i The arguments of the field users are not sorted.
   
@@ -97,7 +97,7 @@ invalidComments.graphql:3:8 assist/source/useSortedArguments  FIXABLE  ━━━
 ```
 
 ```
-invalidComments.graphql:10:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidComments.graphql:10:8 assist/source/useGraphqlSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   i The arguments of the field users are not sorted.
   
@@ -132,7 +132,7 @@ invalidComments.graphql:10:8 assist/source/useSortedArguments  FIXABLE  ━━�
 ```
 
 ```
-invalidComments.graphql:19:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidComments.graphql:19:8 assist/source/useGraphqlSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   i The arguments of the field users are not sorted.
   
@@ -169,7 +169,7 @@ invalidComments.graphql:19:8 assist/source/useSortedArguments  FIXABLE  ━━�
 ```
 
 ```
-invalidComments.graphql:30:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidComments.graphql:30:8 assist/source/useGraphqlSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
 
   i The arguments of the field users are not sorted.
   
@@ -198,7 +198,7 @@ invalidComments.graphql:30:8 assist/source/useSortedArguments  FIXABLE  ━━�
 ```
 
 ```
-invalidComments.graphql:38:8 assist/source/useSortedArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidComments.graphql:38:8 assist/source/useGraphqlSortedArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The arguments of the field users are not sorted.
   
@@ -215,7 +215,7 @@ invalidComments.graphql:38:8 assist/source/useSortedArguments ━━━━━━
 ```
 
 ```
-invalidComments.graphql:44:8 assist/source/useSortedArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidComments.graphql:44:8 assist/source/useGraphqlSortedArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The arguments of the field users are not sorted.
   
@@ -232,7 +232,7 @@ invalidComments.graphql:44:8 assist/source/useSortedArguments ━━━━━━
 ```
 
 ```
-invalidComments.graphql:50:8 assist/source/useSortedArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidComments.graphql:50:8 assist/source/useGraphqlSortedArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The arguments of the field users are not sorted.
   
@@ -250,7 +250,7 @@ invalidComments.graphql:50:8 assist/source/useSortedArguments ━━━━━━
 ```
 
 ```
-invalidComments.graphql:56:37 assist/source/useSortedArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidComments.graphql:56:37 assist/source/useGraphqlSortedArguments ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The arguments of the directive @commentAboveIntoFirstSlot are not sorted.
   

@@ -10,7 +10,7 @@ use biome_graphql_syntax::{
     GraphqlDirectiveDefinition, GraphqlField, GraphqlFieldDefinition, GraphqlInputValueDefinition,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TokenText, declare_node_union};
-use biome_rule_options::use_sorted_arguments::UseSortedArgumentsOptions;
+use biome_rule_options::use_graphql_sorted_arguments::UseGraphqlSortedArgumentsOptions;
 
 declare_source_rule! {
     /// Sort the arguments of GraphQL fields and directives in natural order.
@@ -63,9 +63,9 @@ declare_source_rule! {
     /// because the comment would then hide that code or describe a different argument.
     /// Sort such arguments manually, or put each argument on its own line.
     ///
-    pub UseSortedArguments {
+    pub UseGraphqlSortedArguments {
         version: "next",
-        name: "useSortedArguments",
+        name: "useGraphqlSortedArguments",
         language: "graphql",
         recommended: false,
         sources: &[RuleSource::EslintGraphql("alphabetize").inspired()],
@@ -73,11 +73,11 @@ declare_source_rule! {
     }
 }
 
-impl Rule for UseSortedArguments {
+impl Rule for UseGraphqlSortedArguments {
     type Query = Ast<AnyGraphqlArguments>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = UseSortedArgumentsOptions;
+    type Options = UseGraphqlSortedArgumentsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let is_sorted = match ctx.query() {

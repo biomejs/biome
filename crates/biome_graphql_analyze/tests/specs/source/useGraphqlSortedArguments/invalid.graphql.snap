@@ -73,7 +73,7 @@ type Nested {
 
 # Diagnostics
 ```
-invalid.graphql:3:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:3:8 assist/source/useGraphqlSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The arguments of the field users are not sorted.
   
@@ -97,7 +97,7 @@ invalid.graphql:3:8 assist/source/useSortedArguments  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.graphql:7:15 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:7:15 assist/source/useGraphqlSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The arguments of the field users are not sorted.
   
@@ -120,7 +120,7 @@ invalid.graphql:7:15 assist/source/useSortedArguments  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.graphql:12:12 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:12:12 assist/source/useGraphqlSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The arguments of the field friends are not sorted.
   
@@ -144,7 +144,7 @@ invalid.graphql:12:12 assist/source/useSortedArguments  FIXABLE  ━━━━━
 ```
 
 ```
-invalid.graphql:17:16 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:17:16 assist/source/useGraphqlSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The arguments of the directive @custom are not sorted.
   
@@ -167,7 +167,7 @@ invalid.graphql:17:16 assist/source/useSortedArguments  FIXABLE  ━━━━━
 ```
 
 ```
-invalid.graphql:20:33 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:20:33 assist/source/useGraphqlSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The arguments of the directive @custom are not sorted.
   
@@ -191,7 +191,7 @@ invalid.graphql:20:33 assist/source/useSortedArguments  FIXABLE  ━━━━━
 ```
 
 ```
-invalid.graphql:23:22 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:23:22 assist/source/useGraphqlSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The arguments of the directive @custom are not sorted.
   
@@ -214,7 +214,7 @@ invalid.graphql:23:22 assist/source/useSortedArguments  FIXABLE  ━━━━━
 ```
 
 ```
-invalid.graphql:28:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:28:8 assist/source/useGraphqlSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The arguments of the field users are not sorted.
   
@@ -238,7 +238,7 @@ invalid.graphql:28:8 assist/source/useSortedArguments  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.graphql:32:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:32:8 assist/source/useGraphqlSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The arguments of the field users are not sorted.
   
@@ -261,7 +261,7 @@ invalid.graphql:32:8 assist/source/useSortedArguments  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.graphql:36:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:36:8 assist/source/useGraphqlSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The arguments of the field users are not sorted.
   
@@ -284,7 +284,7 @@ invalid.graphql:36:8 assist/source/useSortedArguments  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.graphql:40:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:40:8 assist/source/useGraphqlSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The arguments of the field users are not sorted.
   
@@ -307,7 +307,7 @@ invalid.graphql:40:8 assist/source/useSortedArguments  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.graphql:44:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:44:8 assist/source/useGraphqlSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The arguments of the field users are not sorted.
   
@@ -330,7 +330,7 @@ invalid.graphql:44:8 assist/source/useSortedArguments  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.graphql:48:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:48:8 assist/source/useGraphqlSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The arguments of the field field are not sorted.
   
@@ -366,7 +366,7 @@ invalid.graphql:48:8 assist/source/useSortedArguments  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.graphql:59:22 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:59:22 assist/source/useGraphqlSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The arguments of the directive @definition are not sorted.
   
@@ -390,7 +390,7 @@ invalid.graphql:59:22 assist/source/useSortedArguments  FIXABLE  ━━━━━
 ```
 
 ```
-invalid.graphql:63:8 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:63:8 assist/source/useGraphqlSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The arguments of the field field are not sorted.
   
@@ -414,7 +414,7 @@ invalid.graphql:63:8 assist/source/useSortedArguments  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.graphql:63:23 assist/source/useSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:63:23 assist/source/useGraphqlSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The arguments of the directive @custom are not sorted.
   
