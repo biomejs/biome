@@ -8347,6 +8347,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSvelteStoreInitialValue": {
+					"description": "Require Svelte stores to be created with an initial value.\nSee https://biomejs.dev/linter/rules/use-svelte-store-initial-value",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseSvelteStoreInitialValueConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useTailwindShorthandClasses": {
 					"description": "Enforce using fewer Tailwind utilities instead of multiple utilities that are functionally the same.\nSee https://biomejs.dev/linter/rules/use-tailwind-shorthand-classes",
 					"anyOf": [
@@ -14930,6 +14937,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseSvelteStoreInitialValueOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseSvelteStoreInitialValueOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseSymbolDescriptionOptions": {
 			"type": "object",
 			"properties": {
@@ -19993,6 +20009,16 @@
 			]
 		},
 		"UseSvelteShorthandDirectiveOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseSvelteStoreInitialValueConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseSvelteStoreInitialValueOptions" }
+			]
+		},
+		"UseSvelteStoreInitialValueOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

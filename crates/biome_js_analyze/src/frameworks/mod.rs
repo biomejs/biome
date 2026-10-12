@@ -1,7 +1,7 @@
 use biome_js_semantic::{Binding, SemanticModel};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsMemberExpression, AnyJsNamedImportSpecifier, JsIdentifierBinding,
-    JsImport,
+    JsImport, JsSyntaxToken, binding_ext::AnyJsBindingDeclaration,
 };
 use biome_rowan::AstNode;
 
@@ -88,4 +88,49 @@ pub(crate) fn is_named_framework_lib_export(
         .source_text()
         .ok()
         .map(|import_name| package_names.contains(&import_name.text()))
+}
+
+/// Returns the name that `expression` imports from `module`.
+///
+/// This supports named imports, such as `goto` in `import { goto } from "$app/navigation"`,
+/// and members of namespace imports, such as `navigation.goto` in
+/// `import * as navigation from "$app/navigation"`.
+pub(crate) fn imported_member_name(
+    expression: &AnyJsExpression,
+    model: &SemanticModel,
+    module: &str,
+) -> Option<JsSyntaxToken> {
+    match expression {
+        AnyJsExpression::JsIdentifierExpression(identifier) => {
+            let binding = model.binding(&identifier.name().ok()?)?;
+            named_import_name(&binding, module)
+        }
+        AnyJsExpression::JsStaticMemberExpression(member) => {
+            let object = member.object().ok()?.omit_parentheses();
+            let binding = model.binding(&object.as_js_reference_identifier()?)?;
+            let Some(AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_)) =
+                binding.tree().declaration()
+            else {
+                return None;
+            };
+            if !is_framework_lib_export(&binding, &[module]) {
+                return None;
+            }
+            member.member().ok()?.as_js_name()?.value_token().ok()
+        }
+        _ => None,
+    }
+}
+
+/// Returns the imported name of `binding` if it's a named import from `module`.
+pub(crate) fn named_import_name(binding: &Binding, module: &str) -> Option<JsSyntaxToken> {
+    let specifier: AnyJsNamedImportSpecifier = match binding.tree().declaration()? {
+        AnyJsBindingDeclaration::JsNamedImportSpecifier(specifier) => specifier.into(),
+        AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(specifier) => specifier.into(),
+        _ => return None,
+    };
+    if !is_framework_lib_export(binding, &[module]) {
+        return None;
+    }
+    specifier.imported_name()
 }

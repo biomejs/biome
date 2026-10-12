@@ -139,6 +139,7 @@ static SVELTE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "useSvelteKitRuneImports"),
         RuleFilter::Rule("nursery", "useSvelteRequireEachKey"),
         RuleFilter::Rule("nursery", "useSvelteShorthandDirective"),
+        RuleFilter::Rule("nursery", "useSvelteStoreInitialValue"),
     ]
 });
 static TAILWIND_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
