@@ -181,7 +181,7 @@ pub struct MarkdownFormatterConfiguration {
     ///
     /// A block with a syntax error stays as written, and Biome still formats the rest of the file.
     ///
-    /// When this option is `false`, Biome keeps every block is written as is.
+    /// When this option is `false`, Biome keeps every block as written.
     #[cfg_attr(
         feature = "cli",
         bpaf(long("md-formatter-format-embeds"), argument("true|false"))

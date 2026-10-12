@@ -260,7 +260,7 @@ Options that change how the Markdown formatter behaves
                               language. Defaults to `true`.
                               A block with a syntax error stays as written, and Biome still formats
                               the rest of the file.
-                              When this option is `false`, Biome keeps every block is written as is.
+                              When this option is `false`, Biome keeps every block as written.
 
 Options that change how the Yaml formatter behaves
         --yaml-formatter-enabled=<true|false>  Control the formatter for Yaml (and its super

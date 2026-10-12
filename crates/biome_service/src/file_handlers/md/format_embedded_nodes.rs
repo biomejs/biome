@@ -10,7 +10,7 @@ use biome_css_formatter::CssFormatLanguage;
 use biome_formatter::prelude::{Document, Formatter, literal_line_break_without_parent, text};
 use biome_formatter::{
     Buffer, Format, FormatContext, FormatLanguage, FormatResult, Printed, SimpleFormatContext,
-    TrailingNewline, write,
+    TrailingNewline, normalize_newlines, write,
 };
 use biome_fs::BiomePath;
 use biome_graphql_formatter::GraphqlFormatLanguage;
@@ -281,12 +281,15 @@ fn printed_document(code: &str) -> Option<Document> {
 ///
 /// The lines are joined with literal line breaks, which the Markdown printer
 /// writes with the line ending of the Markdown file and without adding
-/// indentation, so the snippet keeps its own indentation.
+/// indentation, so the snippet keeps its own indentation. The code can use any
+/// line ending, because the formatter of its language prints it with its own
+/// `lineEnding` option.
 struct PrintedCode<'a>(&'a str);
 
 impl<Context: FormatContext> Format<Context> for PrintedCode<'_> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
-        for (index, line) in self.0.lines().enumerate() {
+        let code = normalize_newlines(self.0, ['\r']);
+        for (index, line) in code.lines().enumerate() {
             if index > 0 {
                 write!(f, [literal_line_break_without_parent()])?;
             }
