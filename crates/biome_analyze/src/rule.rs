@@ -487,7 +487,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintN(rule_name) => format!("https://github.com/eslint-community/eslint-plugin-n/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintNext(rule_name) => format!("https://nextjs.org/docs/messages/{rule_name}"),
             Self::EslintNoSecrets(_) => "https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/README.md".to_string(),
-            Self::EslintPackageJson(rule_name) => format!("https://eslint-plugin-package-json.dev/rules/{rule_name}"),
+            Self::EslintPackageJson(rule_name) => format!("https://eslint-plugin-package-json.dev/rules/{}{rule_name}", eslint_package_json_rule_directory(rule_name)),
             Self::EslintPackageJsonDependencies(rule_name) => format!("https://github.com/idan-at/eslint-plugin-package-json-dependencies/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintPerfectionist(rule_name) => format!("https://perfectionist.dev/rules/{rule_name}"),
             Self::EslintPromise(rule_name) => format!("https://github.com/eslint-community/eslint-plugin-promise/blob/main/docs/rules/{rule_name}.md"),
@@ -593,6 +593,28 @@ impl RuleSource<'static> {
             kind: RuleSourceKind::Inspired,
             source: self,
         }
+    }
+}
+
+/// Returns the directory that holds the documentation page of the
+/// `eslint-plugin-package-json` rule `rule_name`, relative to
+/// <https://eslint-plugin-package-json.dev/rules/>.
+///
+/// The site groups the rules named `require-<property>` and `valid-<property>`
+/// under `require-properties/` and `valid-properties/`. The returned directory
+/// ends with a slash. It is empty for the rules that the site keeps directly
+/// in `rules/`.
+fn eslint_package_json_rule_directory(rule_name: &str) -> &'static str {
+    match rule_name {
+        // These rules share a prefix with the grouped rules, but the site
+        // doesn't group them.
+        "require-attribution"
+        | "require-package-json-export"
+        | "valid-peerDependenciesMeta-relationship"
+        | "valid-repository-directory" => "",
+        _ if rule_name.starts_with("require-") => "require-properties/",
+        _ if rule_name.starts_with("valid-") => "valid-properties/",
+        _ => "",
     }
 }
 
