@@ -18145,6 +18145,7 @@ impl AnyScssElseClauseBody {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyScssExpression {
     AnyCssValue(AnyCssValue),
+    CssDeclarationImportant(CssDeclarationImportant),
     ScssBinaryExpression(ScssBinaryExpression),
     ScssExpression(ScssExpression),
     ScssInterpolation(ScssInterpolation),
@@ -18157,6 +18158,12 @@ impl AnyScssExpression {
     pub fn as_any_css_value(&self) -> Option<&AnyCssValue> {
         match &self {
             Self::AnyCssValue(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_declaration_important(&self) -> Option<&CssDeclarationImportant> {
+        match &self {
+            Self::CssDeclarationImportant(item) => Some(item),
             _ => None,
         }
     }
@@ -47131,6 +47138,11 @@ impl From<AnyScssElseClauseBody> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssDeclarationImportant> for AnyScssExpression {
+    fn from(node: CssDeclarationImportant) -> Self {
+        Self::CssDeclarationImportant(node)
+    }
+}
 impl From<ScssBinaryExpression> for AnyScssExpression {
     fn from(node: ScssBinaryExpression) -> Self {
         Self::ScssBinaryExpression(node)
@@ -47169,6 +47181,7 @@ impl From<ScssUnaryExpression> for AnyScssExpression {
 impl AstNode for AnyScssExpression {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssValue::KIND_SET
+        .union(CssDeclarationImportant::KIND_SET)
         .union(ScssBinaryExpression::KIND_SET)
         .union(ScssExpression::KIND_SET)
         .union(ScssInterpolation::KIND_SET)
@@ -47178,7 +47191,8 @@ impl AstNode for AnyScssExpression {
         .union(ScssUnaryExpression::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            SCSS_BINARY_EXPRESSION
+            CSS_DECLARATION_IMPORTANT
+            | SCSS_BINARY_EXPRESSION
             | SCSS_EXPRESSION
             | SCSS_INTERPOLATION
             | SCSS_LIST_EXPRESSION
@@ -47191,6 +47205,9 @@ impl AstNode for AnyScssExpression {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            CSS_DECLARATION_IMPORTANT => {
+                Self::CssDeclarationImportant(CssDeclarationImportant { syntax })
+            }
             SCSS_BINARY_EXPRESSION => Self::ScssBinaryExpression(ScssBinaryExpression { syntax }),
             SCSS_EXPRESSION => Self::ScssExpression(ScssExpression { syntax }),
             SCSS_INTERPOLATION => Self::ScssInterpolation(ScssInterpolation { syntax }),
@@ -47211,6 +47228,7 @@ impl AstNode for AnyScssExpression {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::CssDeclarationImportant(it) => it.syntax(),
             Self::ScssBinaryExpression(it) => it.syntax(),
             Self::ScssExpression(it) => it.syntax(),
             Self::ScssInterpolation(it) => it.syntax(),
@@ -47223,6 +47241,7 @@ impl AstNode for AnyScssExpression {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::CssDeclarationImportant(it) => it.into_syntax(),
             Self::ScssBinaryExpression(it) => it.into_syntax(),
             Self::ScssExpression(it) => it.into_syntax(),
             Self::ScssInterpolation(it) => it.into_syntax(),
@@ -47238,6 +47257,7 @@ impl std::fmt::Debug for AnyScssExpression {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AnyCssValue(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssDeclarationImportant(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssBinaryExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssExpression(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolation(it) => std::fmt::Debug::fmt(it, f),
@@ -47252,6 +47272,7 @@ impl From<AnyScssExpression> for SyntaxNode {
     fn from(n: AnyScssExpression) -> Self {
         match n {
             AnyScssExpression::AnyCssValue(it) => it.into_syntax(),
+            AnyScssExpression::CssDeclarationImportant(it) => it.into_syntax(),
             AnyScssExpression::ScssBinaryExpression(it) => it.into_syntax(),
             AnyScssExpression::ScssExpression(it) => it.into_syntax(),
             AnyScssExpression::ScssInterpolation(it) => it.into_syntax(),

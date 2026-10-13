@@ -3603,6 +3603,7 @@ ScssMapExpressionPair =
 //        ^^
 AnyScssExpression =
 	ScssExpression
+	| CssDeclarationImportant
 	| ScssBinaryExpression
 	| ScssInterpolation
 	| ScssUnaryExpression

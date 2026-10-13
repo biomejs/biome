@@ -7,7 +7,7 @@ use crate::syntax::at_rule::supports::error::{
     expected_any_supports_condition, expected_any_supports_condition_in_parens,
 };
 use crate::syntax::block::parse_conditional_block;
-use crate::syntax::declaration::parse_declaration_important;
+use crate::syntax::declaration::{is_at_declaration_important, parse_declaration_important};
 use crate::syntax::parse_error::{
     expected_component_value, expected_declaration, expected_selector, scss_only_syntax_error,
 };
@@ -612,11 +612,18 @@ pub(crate) fn parse_import_supports_condition(p: &mut CssParser) -> ParsedSyntax
     }
 }
 
+/// Recognizes Sass name operands without claiming supports groups.
+///
+/// ```scss
+/// @supports (!important: a) {}
+/// ```
 fn is_at_scss_supports_name_head(p: &mut CssParser) -> bool {
     !is_at_supports_not_condition(p)
         && !is_at_supports_feature_selector(p)
         && !p.at(T!['('])
-        && (is_at_any_value(p) || p.at_ts(token_set![T![+], T![-]]))
+        && (is_at_any_value(p)
+            || is_at_declaration_important(p)
+            || p.at_ts(token_set![T![+], T![-]]))
 }
 
 /// Recognizes a Sass expression continuation without consuming logical groups.
@@ -632,7 +639,10 @@ fn is_at_scss_supports_name_tail(p: &mut CssParser) -> bool {
     if p.at_ts(SCSS_SUPPORTS_NAME_END_SET.union(SCSS_SUPPORTS_AMBIGUOUS_TAIL_SET)) {
         return false;
     }
-    p.at(T![,]) || is_at_scss_binary_operator(p) || is_at_any_value(p)
+    p.at(T![,])
+        || is_at_scss_binary_operator(p)
+        || is_at_any_value(p)
+        || is_at_declaration_important(p)
 }
 
 const SCSS_SUPPORTS_NAME_END_SET: TokenSet<CssSyntaxKind> =
@@ -648,11 +658,14 @@ const SCSS_SUPPORTS_AMBIGUOUS_TAIL_SET: TokenSet<CssSyntaxKind> =
 /// ```scss
 /// @use "sass:map";
 /// @supports (map.get((property: overflow-x), property): clip) {}
+/// @supports (!important: a) {}
 /// @supports (font-tech(color-COLRv1)) {}
 /// ```
 fn parse_scss_supports_declaration_or_condition(p: &mut CssParser) -> ParsedSyntax {
     let checkpoint = p.checkpoint();
-    let head = if p.at_ts(token_set![T![+], T![-]]) && !is_at_any_value(p) {
+    let head = if is_at_declaration_important(p)
+        || (p.at_ts(token_set![T![+], T![-]]) && !is_at_any_value(p))
+    {
         parse_scss_expression_until(p, SCSS_SUPPORTS_NAME_END_SET)
     } else {
         parse_any_value_with_context(
@@ -734,11 +747,7 @@ fn parse_scss_supports_declaration_from_head(
     p: &mut CssParser,
     head: CompletedMarker,
 ) -> ParsedSyntax {
-    let name = if !p.at_ts(SCSS_SUPPORTS_NAME_END_SET)
-        && (p.at_ts(token_set![T![,], T!['(']])
-            || is_at_scss_binary_operator(p)
-            || is_at_any_value(p))
-    {
+    let name = if is_at_scss_supports_name_tail(p) || p.at_ts(SCSS_SUPPORTS_AMBIGUOUS_TAIL_SET) {
         parse_scss_expression_from_head(p, head, SCSS_SUPPORTS_NAME_END_SET)
     } else {
         Present(head)
