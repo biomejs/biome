@@ -2423,6 +2423,12 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_optional_chain::UseOptionalChainOptions>(),
     ));
     result.push((
+        "nursery",
+        "usePackageJsonValidCpu",
+        TypeId::of::<biome_rule_options::use_package_json_valid_cpu::UsePackageJsonValidCpuOptions>(
+        ),
+    ));
+    result.push((
         "correctness",
         "useParseIntRadix",
         TypeId::of::<biome_rule_options::use_parse_int_radix::UseParseIntRadixOptions>(),
