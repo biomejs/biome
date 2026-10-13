@@ -7389,6 +7389,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueLifecycleAfterAwaitConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueLifecycleAfterAwaitOptions" }
+			]
+		},
+		"NoVueLifecycleAfterAwaitOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueOptionsApiConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8030,6 +8040,13 @@
 					"description": "Disallow the deprecated Vue $scopedSlots API.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-scoped-slots",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueDeprecatedScopedSlotsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueLifecycleAfterAwait": {
+					"description": "Disallow registering Vue lifecycle hooks after an await in setup().\nSee https://biomejs.dev/linter/rules/no-vue-lifecycle-after-await",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueLifecycleAfterAwaitConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12943,6 +12960,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueImportCompilerMacrosOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueLifecycleAfterAwaitOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueLifecycleAfterAwaitOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

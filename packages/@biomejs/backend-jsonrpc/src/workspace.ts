@@ -3236,6 +3236,11 @@ export interface Nursery {
 	 */
 	noVueDeprecatedScopedSlots?: NoVueDeprecatedScopedSlotsConfiguration;
 	/**
+	 * Disallow registering Vue lifecycle hooks after an await in setup().
+	 * See https://biomejs.dev/linter/rules/no-vue-lifecycle-after-await
+	 */
+	noVueLifecycleAfterAwait?: NoVueLifecycleAfterAwaitConfiguration;
+	/**
 	 * Disallow props that are both required and have a default value.
 	 * See https://biomejs.dev/linter/rules/no-vue-required-prop-with-default
 	 */
@@ -5841,6 +5846,9 @@ export type NoVueBooleanDefaultConfiguration =
 export type NoVueDeprecatedScopedSlotsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedScopedSlotsOptions;
+export type NoVueLifecycleAfterAwaitConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueLifecycleAfterAwaitOptions;
 export type NoVueRequiredPropWithDefaultConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueRequiredPropWithDefaultOptions;
@@ -8390,6 +8398,10 @@ export interface RuleWithNoVueDeprecatedScopedSlotsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedScopedSlotsOptions;
 }
+export interface RuleWithNoVueLifecycleAfterAwaitOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueLifecycleAfterAwaitOptions;
+}
 export interface RuleWithNoVueRequiredPropWithDefaultOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -10812,6 +10824,7 @@ export type NoUselessDateGetTimeOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueBooleanDefaultOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
+export type NoVueLifecycleAfterAwaitOptions = {};
 export type NoVueRequiredPropWithDefaultOptions = {};
 export type NoVueRootVIfOptions = {};
 export type NoVueShadowNativeEventsOptions = {};
@@ -12485,7 +12498,6 @@ export type Category =
 	| "lint/nursery/noObjectConstructor"
 	| "lint/nursery/noObsoleteTags"
 	| "lint/nursery/noOctal"
-	| "lint/nursery/noProcessExit"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"
@@ -12497,6 +12509,7 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
 	| "lint/nursery/noPromiseExecutorReturn"
+	| "lint/nursery/noProcessExit"
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
@@ -12533,6 +12546,7 @@ export type Category =
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
+	| "lint/nursery/noVueLifecycleAfterAwait"
 	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"
@@ -12588,7 +12602,6 @@ export type Category =
 	| "lint/nursery/useScopedStyles"
 	| "lint/nursery/useSimplifiedBooleanReturn"
 	| "lint/nursery/useSingleTopLevelHeading"
-	| "lint/nursery/useTailwindSortedClasses"
 	| "lint/nursery/useStrictBooleanExpressions"
 	| "lint/nursery/useStringStartsEndsWith"
 	| "lint/nursery/useSvelteKitResolve"
@@ -12598,6 +12611,7 @@ export type Category =
 	| "lint/nursery/useSvelteShorthandDirective"
 	| "lint/nursery/useTailwindShorthandClasses"
 	| "lint/nursery/useTailwindStaticClassStrings"
+	| "lint/nursery/useTailwindSortedClasses"
 	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useUnaryMinus"
 	| "lint/nursery/useUniqueArgumentNames"
