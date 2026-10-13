@@ -153,6 +153,12 @@ static TAILWIND_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "useTailwindStaticClassStrings"),
     ]
 });
+static TANSTACKQUERY_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
+    vec![RuleFilter::Rule(
+        "nursery",
+        "noTanstackQueryRestDestructuring",
+    )]
+});
 static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
     vec![
         RuleFilter::Rule("complexity", "noExcessiveNestedTestSuites"),
@@ -258,6 +264,7 @@ impl DomainSelector {
             "solid" => SOLID_FILTERS.clone(),
             "svelte" => SVELTE_FILTERS.clone(),
             "tailwind" => TAILWIND_FILTERS.clone(),
+            "tanstackQuery" => TANSTACKQUERY_FILTERS.clone(),
             "test" => TEST_FILTERS.clone(),
             "turborepo" => TURBOREPO_FILTERS.clone(),
             "types" => TYPES_FILTERS.clone(),
@@ -304,6 +311,9 @@ impl DomainSelector {
                 .iter()
                 .any(|filter| filter.match_rule_name(group_name, rule_name)),
             "tailwind" => TAILWIND_FILTERS
+                .iter()
+                .any(|filter| filter.match_rule_name(group_name, rule_name)),
+            "tanstackQuery" => TANSTACKQUERY_FILTERS
                 .iter()
                 .any(|filter| filter.match_rule_name(group_name, rule_name)),
             "test" => TEST_FILTERS

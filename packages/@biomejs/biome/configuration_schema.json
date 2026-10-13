@@ -6402,6 +6402,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoTanstackQueryRestDestructuringConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoTanstackQueryRestDestructuringOptions" }
+			]
+		},
+		"NoTanstackQueryRestDestructuringOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoTemplateCurlyInStringConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7925,6 +7935,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noTanstackQueryRestDestructuring": {
+					"description": "Disallow rest destructuring and object spread on TanStack Query results.\nSee https://biomejs.dev/linter/rules/no-tanstack-query-rest-destructuring",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoTanstackQueryRestDestructuringConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noThisOutsideOfClass": {
 					"description": "Disallow this outside of classes.\nSee https://biomejs.dev/linter/rules/no-this-outside-of-class",
 					"anyOf": [
@@ -9118,6 +9135,7 @@
 				"solid": { "$ref": "#/$defs/RuleDomainValue" },
 				"svelte": { "$ref": "#/$defs/RuleDomainValue" },
 				"tailwind": { "$ref": "#/$defs/RuleDomainValue" },
+				"tanstackQuery": { "$ref": "#/$defs/RuleDomainValue" },
 				"test": { "$ref": "#/$defs/RuleDomainValue" },
 				"turborepo": { "$ref": "#/$defs/RuleDomainValue" },
 				"types": { "$ref": "#/$defs/RuleDomainValue" },
@@ -12017,6 +12035,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoTailwindRestyledComponentsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoTanstackQueryRestDestructuringOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoTanstackQueryRestDestructuringOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

@@ -284,6 +284,7 @@ pub mod no_tailwind_arbitrary_value;
 pub mod no_tailwind_legacy_utilities;
 pub mod no_tailwind_raw_colors;
 pub mod no_tailwind_restyled_components;
+pub mod no_tanstack_query_rest_destructuring;
 pub mod no_template_curly_in_string;
 pub mod no_ternary;
 pub mod no_then_property;
