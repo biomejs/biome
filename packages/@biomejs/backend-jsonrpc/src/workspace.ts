@@ -1558,6 +1558,11 @@ export interface Source {
 	 */
 	recommended?: boolean;
 	/**
+	 * Sort the variable definitions of GraphQL operations in natural order.
+	 * See https://biomejs.dev/assist/actions/use-graphql-sorted-variables
+	 */
+	useGraphqlSortedVariables?: UseGraphqlSortedVariablesConfiguration;
+	/**
 	 * Sort HTML attributes and framework directives into a consistent order.
 	 * See https://biomejs.dev/assist/actions/use-sorted-attributes
 	 */
@@ -1807,6 +1812,9 @@ export type NoDuplicateClassesConfiguration =
 export type OrganizeImportsConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithOrganizeImportsOptions;
+export type UseGraphqlSortedVariablesConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithUseGraphqlSortedVariablesOptions;
 export type UseSortedAttributesConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseSortedAttributesOptions;
@@ -4988,6 +4996,10 @@ export interface RuleAssistWithOrganizeImportsOptions {
 	level: RuleAssistPlainConfiguration;
 	options: OrganizeImportsOptions;
 }
+export interface RuleAssistWithUseGraphqlSortedVariablesOptions {
+	level: RuleAssistPlainConfiguration;
+	options: UseGraphqlSortedVariablesOptions;
+}
 export interface RuleAssistWithUseSortedAttributesOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseSortedAttributesOptions;
@@ -6859,6 +6871,7 @@ export interface OrganizeImportsOptions {
 	 */
 	sortBareImports?: boolean;
 }
+export type UseGraphqlSortedVariablesOptions = {};
 export interface UseSortedAttributesOptions {
 	/**
 	 * A list of attribute names that should be sorted before all other
@@ -12868,6 +12881,7 @@ export type Category =
 	| "lint/suspicious/useStrictMode"
 	| "assist/source/noDuplicateClasses"
 	| "assist/source/organizeImports"
+	| "assist/source/useGraphqlSortedVariables"
 	| "assist/source/useSortedAttributes"
 	| "assist/source/useSortedEnumMembers"
 	| "assist/source/useSortedInterfaceMembers"

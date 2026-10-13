@@ -69,6 +69,7 @@ impl std::fmt::Display for RuleGroup {
 pub enum ActionName {
     NoDuplicateClasses,
     OrganizeImports,
+    UseGraphqlSortedVariables,
     UseSortedAttributes,
     UseSortedEnumMembers,
     UseSortedInterfaceMembers,
@@ -83,6 +84,7 @@ impl ActionName {
         match self {
             Self::NoDuplicateClasses => "noDuplicateClasses",
             Self::OrganizeImports => "organizeImports",
+            Self::UseGraphqlSortedVariables => "useGraphqlSortedVariables",
             Self::UseSortedAttributes => "useSortedAttributes",
             Self::UseSortedEnumMembers => "useSortedEnumMembers",
             Self::UseSortedInterfaceMembers => "useSortedInterfaceMembers",
@@ -97,6 +99,7 @@ impl ActionName {
         match self {
             Self::NoDuplicateClasses => RuleGroup::Source,
             Self::OrganizeImports => RuleGroup::Source,
+            Self::UseGraphqlSortedVariables => RuleGroup::Source,
             Self::UseSortedAttributes => RuleGroup::Source,
             Self::UseSortedEnumMembers => RuleGroup::Source,
             Self::UseSortedInterfaceMembers => RuleGroup::Source,
@@ -114,6 +117,7 @@ impl std::str::FromStr for ActionName {
         match s {
             "noDuplicateClasses" => Ok(Self::NoDuplicateClasses),
             "organizeImports" => Ok(Self::OrganizeImports),
+            "useGraphqlSortedVariables" => Ok(Self::UseGraphqlSortedVariables),
             "useSortedAttributes" => Ok(Self::UseSortedAttributes),
             "useSortedEnumMembers" => Ok(Self::UseSortedEnumMembers),
             "useSortedInterfaceMembers" => Ok(Self::UseSortedInterfaceMembers),
