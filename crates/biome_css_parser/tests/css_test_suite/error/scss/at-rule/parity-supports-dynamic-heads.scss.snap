@@ -312,21 +312,23 @@ CssRoot {
                     supports_token: SUPPORTS_KW@284..293 "supports" [] [Whitespace(" ")],
                     condition: ScssSupportsFeatureDeclaration {
                         l_paren_token: L_PAREN@293..294 "(" [] [],
-                        name: ScssVariable {
-                            dollar_token: DOLLAR@294..295 "$" [] [],
-                            name: CssIdentifier {
-                                value_token: IDENT@295..303 "property" [] [],
-                            },
-                        },
-                        colon_token: COLON@303..305 ":" [] [Whitespace(" ")],
-                        value: ScssExpression {
-                            items: ScssExpressionItemList [
-                                CssIdentifier {
-                                    value_token: IDENT@305..310 "grid" [] [Whitespace(" ")],
+                        declaration: ScssSupportsDeclaration {
+                            name: ScssVariable {
+                                dollar_token: DOLLAR@294..295 "$" [] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@295..303 "property" [] [],
                                 },
-                            ],
+                            },
+                            colon_token: COLON@303..305 ":" [] [Whitespace(" ")],
+                            value: ScssExpression {
+                                items: ScssExpressionItemList [
+                                    CssIdentifier {
+                                        value_token: IDENT@305..310 "grid" [] [Whitespace(" ")],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
                         },
-                        important: missing (optional),
                         r_paren_token: missing (required),
                     },
                 },
@@ -603,17 +605,18 @@ CssRoot {
           0: SUPPORTS_KW@284..293 "supports" [] [Whitespace(" ")]
           1: SCSS_SUPPORTS_FEATURE_DECLARATION@293..310
             0: L_PAREN@293..294 "(" [] []
-            1: SCSS_VARIABLE@294..303
-              0: DOLLAR@294..295 "$" [] []
-              1: CSS_IDENTIFIER@295..303
-                0: IDENT@295..303 "property" [] []
-            2: COLON@303..305 ":" [] [Whitespace(" ")]
-            3: SCSS_EXPRESSION@305..310
-              0: SCSS_EXPRESSION_ITEM_LIST@305..310
-                0: CSS_IDENTIFIER@305..310
-                  0: IDENT@305..310 "grid" [] [Whitespace(" ")]
-            4: (empty)
-            5: (empty)
+            1: SCSS_SUPPORTS_DECLARATION@294..310
+              0: SCSS_VARIABLE@294..303
+                0: DOLLAR@294..295 "$" [] []
+                1: CSS_IDENTIFIER@295..303
+                  0: IDENT@295..303 "property" [] []
+              1: COLON@303..305 ":" [] [Whitespace(" ")]
+              2: SCSS_EXPRESSION@305..310
+                0: SCSS_EXPRESSION_ITEM_LIST@305..310
+                  0: CSS_IDENTIFIER@305..310
+                    0: IDENT@305..310 "grid" [] [Whitespace(" ")]
+              3: (empty)
+            2: (empty)
         1: CSS_RULE_BLOCK@310..361
           0: L_CURLY@310..311 "{" [] []
           1: CSS_RULE_LIST@311..359

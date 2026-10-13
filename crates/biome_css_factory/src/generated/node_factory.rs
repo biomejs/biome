@@ -4522,49 +4522,55 @@ pub fn scss_string_text(value_token: SyntaxToken) -> ScssStringText {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn scss_supports_feature_declaration(
-    l_paren_token: SyntaxToken,
-    name: ScssVariable,
+pub fn scss_supports_declaration(
+    name: AnyScssSupportsDeclarationName,
     colon_token: SyntaxToken,
     value: AnyCssGenericPropertyValueOrExpression,
-    r_paren_token: SyntaxToken,
-) -> ScssSupportsFeatureDeclarationBuilder {
-    ScssSupportsFeatureDeclarationBuilder {
-        l_paren_token,
+) -> ScssSupportsDeclarationBuilder {
+    ScssSupportsDeclarationBuilder {
         name,
         colon_token,
         value,
-        r_paren_token,
         important: None,
     }
 }
-pub struct ScssSupportsFeatureDeclarationBuilder {
-    l_paren_token: SyntaxToken,
-    name: ScssVariable,
+pub struct ScssSupportsDeclarationBuilder {
+    name: AnyScssSupportsDeclarationName,
     colon_token: SyntaxToken,
     value: AnyCssGenericPropertyValueOrExpression,
-    r_paren_token: SyntaxToken,
     important: Option<CssDeclarationImportant>,
 }
-impl ScssSupportsFeatureDeclarationBuilder {
+impl ScssSupportsDeclarationBuilder {
     pub fn with_important(mut self, important: CssDeclarationImportant) -> Self {
         self.important = Some(important);
         self
     }
-    pub fn build(self) -> ScssSupportsFeatureDeclaration {
-        ScssSupportsFeatureDeclaration::unwrap_cast(SyntaxNode::new_detached(
-            CssSyntaxKind::SCSS_SUPPORTS_FEATURE_DECLARATION,
+    pub fn build(self) -> ScssSupportsDeclaration {
+        ScssSupportsDeclaration::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::SCSS_SUPPORTS_DECLARATION,
             [
-                Some(SyntaxElement::Token(self.l_paren_token)),
                 Some(SyntaxElement::Node(self.name.into_syntax())),
                 Some(SyntaxElement::Token(self.colon_token)),
                 Some(SyntaxElement::Node(self.value.into_syntax())),
                 self.important
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
-                Some(SyntaxElement::Token(self.r_paren_token)),
             ],
         ))
     }
+}
+pub fn scss_supports_feature_declaration(
+    l_paren_token: SyntaxToken,
+    declaration: ScssSupportsDeclaration,
+    r_paren_token: SyntaxToken,
+) -> ScssSupportsFeatureDeclaration {
+    ScssSupportsFeatureDeclaration::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_SUPPORTS_FEATURE_DECLARATION,
+        [
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(declaration.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
 }
 pub fn scss_supports_interpolated_condition(
     condition: ScssInterpolation,

@@ -1956,11 +1956,22 @@ CssSupportsFeatureDeclaration =
 //           ^^^^^^^^^^^^^^^
 ScssSupportsFeatureDeclaration =
 	'('
-	name: ScssVariable
+	declaration: ScssSupportsDeclaration
+	')'
+
+// @supports ($prefix + $axis: clip) {}
+//            ^^^^^^^^^^^^^^^^^^^^^
+// @import "theme.css" supports($prefix + $axis: clip);
+//                              ^^^^^^^^^^^^^^^^^^^^
+ScssSupportsDeclaration =
+	name: AnyScssSupportsDeclarationName
 	':'
 	value: AnyCssGenericPropertyValueOrExpression
 	important: CssDeclarationImportant?
-	')'
+
+AnyScssSupportsDeclarationName =
+	ScssVariable
+	| ScssExpression
 
 // @supports selector(:focus-visible) { }
 // 				   ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2055,6 +2066,7 @@ CssImportSupports =
 AnyCssImportSupportsCondition =
 	AnyCssSupportsCondition
 	| CssDeclaration
+	| ScssSupportsDeclaration
 
 // https://drafts.csswg.org/css-namespaces/#declaration
 // @namespace = @namespace <namespace-prefix>? [ <string> | <url> ] ;

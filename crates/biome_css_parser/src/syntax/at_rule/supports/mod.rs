@@ -1,7 +1,7 @@
 pub(crate) mod error;
 
 use crate::lexer::{CssCustomPropertyCommentMode, CssLexContext};
-use crate::parser::CssParser;
+use crate::parser::{CssParser, CssParserCheckpoint};
 use crate::syntax::at_rule::error::{AnyInParensChainParseRecovery, AnyInParensParseRecovery};
 use crate::syntax::at_rule::supports::error::{
     expected_any_supports_condition, expected_any_supports_condition_in_parens,
@@ -17,14 +17,20 @@ use crate::syntax::property::{
     parse_property_value_with_end_set, parse_supports_custom_property_value,
 };
 use crate::syntax::scss::{
-    complete_scss_interpolated_identifier, is_at_scss_interpolated_property_name,
-    is_at_scss_interpolation, is_at_scss_supports_interpolated_condition,
-    is_nth_at_scss_interpolated_property_name, parse_scss_interpolated_property_name,
+    complete_scss_expression_from_item, complete_scss_interpolated_identifier,
+    is_at_scss_binary_operator, is_at_scss_interpolated_property_name, is_at_scss_interpolation,
+    is_at_scss_supports_interpolated_condition, is_nth_at_scss_interpolated_property_name,
+    parse_scss_expression_from_head, parse_scss_expression_until,
+    parse_scss_function_call_from_name, parse_scss_interpolated_property_name,
     parse_scss_interpolation_or_identifier, parse_scss_supports_interpolated_condition,
     parse_scss_variable,
 };
 use crate::syntax::selector::parse_selector;
-use crate::syntax::{CssSyntaxFeatures, is_nth_at_identifier, parse_any_css_value};
+use crate::syntax::value::function::is_nth_at_adjacent_l_paren;
+use crate::syntax::{
+    CssSyntaxFeatures, FunctionCallContext, ValueParsingContext, ValueParsingMode, is_at_any_value,
+    is_nth_at_identifier, parse_any_css_value, parse_any_value_with_context,
+};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_recovery::ParseRecovery;
@@ -32,6 +38,19 @@ use biome_parser::parsed_syntax::ParsedSyntax::Present;
 use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::prelude::*;
 use biome_parser::{TokenSet, token_set};
+
+/// Distinguishes Sass-evaluated supports names from raw CSS `if()` tests.
+#[derive(Clone, Copy)]
+pub(crate) enum SupportsContext {
+    AtRule,
+    CssIf,
+}
+
+impl SupportsContext {
+    fn allows_computed_names(self, p: &CssParser) -> bool {
+        matches!(self, Self::AtRule) && CssSyntaxFeatures::Scss.is_supported(p)
+    }
+}
 
 /// Checks if the current token in the parser is an `@supports` at-rule.
 #[inline]
@@ -97,7 +116,7 @@ pub(crate) fn parse_supports_at_rule_declarator(p: &mut CssParser) -> ParsedSynt
     let m = p.start();
     p.bump(T![supports]);
 
-    parse_any_supports_condition(p)
+    parse_any_supports_condition(p, SupportsContext::AtRule)
         .or_recover(
             p,
             &AnySupportsConditionParseRecovery,
@@ -130,12 +149,15 @@ impl ParseRecovery for AnySupportsConditionParseRecovery {
 }
 
 #[inline]
-pub(crate) fn parse_any_supports_condition(p: &mut CssParser) -> ParsedSyntax {
+pub(crate) fn parse_any_supports_condition(
+    p: &mut CssParser,
+    context: SupportsContext,
+) -> ParsedSyntax {
     if is_at_supports_not_condition(p) {
-        parse_supports_not_condition(p)
+        parse_supports_not_condition(p, context)
     } else {
-        parse_any_supports_condition_in_parens(p, None)
-            .map(|lhs| parse_supports_condition_from_head(p, lhs))
+        parse_any_supports_condition_in_parens(p, None, context)
+            .map(|lhs| parse_supports_condition_from_head(p, lhs, context))
     }
 }
 
@@ -145,16 +167,24 @@ pub(crate) fn parse_any_supports_condition(p: &mut CssParser) -> ParsedSyntax {
 /// @supports (#{$condition} and (color: red)) {}
 /// ```
 #[inline]
-fn parse_supports_condition_from_head(p: &mut CssParser, head: CompletedMarker) -> CompletedMarker {
+fn parse_supports_condition_from_head(
+    p: &mut CssParser,
+    head: CompletedMarker,
+    context: SupportsContext,
+) -> CompletedMarker {
     match p.cur() {
-        T![and] => parse_supports_and_condition(p, head),
-        T![or] => parse_supports_or_condition(p, head),
+        T![and] => parse_supports_and_condition(p, head, context),
+        T![or] => parse_supports_or_condition(p, head, context),
         _ => head,
     }
 }
 
 #[inline]
-fn parse_supports_and_condition(p: &mut CssParser, lhs: CompletedMarker) -> CompletedMarker {
+fn parse_supports_and_condition(
+    p: &mut CssParser,
+    lhs: CompletedMarker,
+    context: SupportsContext,
+) -> CompletedMarker {
     if !p.at(T![and]) {
         return lhs;
     }
@@ -162,13 +192,13 @@ fn parse_supports_and_condition(p: &mut CssParser, lhs: CompletedMarker) -> Comp
     let m = lhs.precede(p);
     p.bump(T![and]);
 
-    let recovery_result = parse_any_supports_condition_in_parens(p, Some(T![and]))
+    let recovery_result = parse_any_supports_condition_in_parens(p, Some(T![and]), context)
         .or_recover(
             p,
             &AnyInParensChainParseRecovery::new(T![and]),
             expected_any_supports_condition_in_parens,
         )
-        .map(|rhs| parse_supports_and_condition(p, rhs));
+        .map(|rhs| parse_supports_and_condition(p, rhs, context));
 
     if recovery_result.is_err() && p.at(T![and]) {
         // If we're here, it seems that we have
@@ -177,14 +207,18 @@ fn parse_supports_and_condition(p: &mut CssParser, lhs: CompletedMarker) -> Comp
         // but the parser is already at a recovered position.
         let m = p.start();
         let rhs = m.complete(p, CSS_BOGUS);
-        parse_supports_and_condition(p, rhs);
+        parse_supports_and_condition(p, rhs, context);
     }
 
     m.complete(p, CSS_SUPPORTS_AND_CONDITION)
 }
 
 #[inline]
-fn parse_supports_or_condition(p: &mut CssParser, lhs: CompletedMarker) -> CompletedMarker {
+fn parse_supports_or_condition(
+    p: &mut CssParser,
+    lhs: CompletedMarker,
+    context: SupportsContext,
+) -> CompletedMarker {
     if !p.at(T![or]) {
         return lhs;
     }
@@ -192,13 +226,13 @@ fn parse_supports_or_condition(p: &mut CssParser, lhs: CompletedMarker) -> Compl
     let m = lhs.precede(p);
     p.bump(T![or]);
 
-    let recovery_result = parse_any_supports_condition_in_parens(p, Some(T![or]))
+    let recovery_result = parse_any_supports_condition_in_parens(p, Some(T![or]), context)
         .or_recover(
             p,
             &AnyInParensChainParseRecovery::new(T![or]),
             expected_any_supports_condition_in_parens,
         )
-        .map(|rhs| parse_supports_or_condition(p, rhs));
+        .map(|rhs| parse_supports_or_condition(p, rhs, context));
 
     if recovery_result.is_err() && p.at(T![or]) {
         // If we're here, it seems that we have
@@ -207,7 +241,7 @@ fn parse_supports_or_condition(p: &mut CssParser, lhs: CompletedMarker) -> Compl
         // but the parser is already at a recovered position.
         let m = p.start();
         let rhs = m.complete(p, CSS_BOGUS);
-        parse_supports_or_condition(p, rhs);
+        parse_supports_or_condition(p, rhs, context);
     }
 
     m.complete(p, CSS_SUPPORTS_OR_CONDITION)
@@ -218,7 +252,7 @@ pub(crate) fn is_at_supports_not_condition(p: &mut CssParser) -> bool {
     p.at(T![not])
 }
 #[inline]
-fn parse_supports_not_condition(p: &mut CssParser) -> ParsedSyntax {
+fn parse_supports_not_condition(p: &mut CssParser, context: SupportsContext) -> ParsedSyntax {
     if !is_at_supports_not_condition(p) {
         return Absent;
     }
@@ -226,7 +260,7 @@ fn parse_supports_not_condition(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![not]);
-    parse_any_supports_condition_in_parens(p, None)
+    parse_any_supports_condition_in_parens(p, None, context)
         .or_recover(
             p,
             &AnyInParensParseRecovery,
@@ -241,13 +275,14 @@ fn parse_supports_not_condition(p: &mut CssParser) -> ParsedSyntax {
 fn parse_any_supports_condition_in_parens(
     p: &mut CssParser,
     chain_token: Option<CssSyntaxKind>,
+    context: SupportsContext,
 ) -> ParsedSyntax {
     if is_at_supports_feature_selector(p) {
         parse_supports_feature_selector(p)
     } else if is_at_scss_supports_feature_declaration(p) {
         CssSyntaxFeatures::Scss.parse_exclusive_syntax(
             p,
-            parse_scss_supports_feature_declaration,
+            |p| parse_scss_supports_feature_declaration(p, context),
             |p, marker| {
                 scss_only_syntax_error(
                     p,
@@ -257,11 +292,11 @@ fn parse_any_supports_condition_in_parens(
             },
         )
     } else if is_at_scss_interpolated_supports_in_parens(p) {
-        parse_scss_interpolated_supports_in_parens(p)
+        parse_scss_interpolated_supports_in_parens(p, context)
     } else if is_at_supports_feature_declaration(p) {
         parse_supports_feature_declaration(p)
     } else if is_at_supports_condition_in_parens(p) {
-        parse_supports_condition_in_parens(p)
+        parse_supports_condition_in_parens(p, context)
     } else if is_at_scss_supports_interpolated_condition(p) {
         CssSyntaxFeatures::Scss.parse_exclusive_syntax(
             p,
@@ -298,7 +333,7 @@ fn is_at_supports_condition_in_parens(p: &mut CssParser) -> bool {
 }
 
 #[inline]
-fn parse_supports_condition_in_parens(p: &mut CssParser) -> ParsedSyntax {
+fn parse_supports_condition_in_parens(p: &mut CssParser, context: SupportsContext) -> ParsedSyntax {
     if !is_at_supports_condition_in_parens(p) {
         return Absent;
     }
@@ -306,16 +341,26 @@ fn parse_supports_condition_in_parens(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T!['(']);
-    parse_any_supports_condition(p)
-        .or_recover(
-            p,
-            &AnyInParensParseRecovery,
-            expected_any_supports_condition,
-        )
-        .ok();
+    let condition = if context.allows_computed_names(p)
+        && (is_at_scss_supports_name_head(p) || is_at_supports_feature_selector(p))
+    {
+        parse_scss_supports_declaration_or_condition(p)
+    } else {
+        parse_any_supports_condition(p, context)
+    };
+    let condition = condition.or_recover(
+        p,
+        &AnyInParensParseRecovery,
+        expected_any_supports_condition,
+    );
+    let kind = if condition.is_ok_and(|condition| condition.kind(p) == SCSS_SUPPORTS_DECLARATION) {
+        SCSS_SUPPORTS_FEATURE_DECLARATION
+    } else {
+        CSS_SUPPORTS_CONDITION_IN_PARENS
+    };
     p.expect(T![')']);
 
-    Present(m.complete(p, CSS_SUPPORTS_CONDITION_IN_PARENS))
+    Present(m.complete(p, kind))
 }
 
 #[inline]
@@ -365,36 +410,63 @@ fn is_at_scss_interpolated_supports_in_parens(p: &mut CssParser) -> bool {
 /// @supports (#{$property}: grid) {}
 /// ```
 #[inline]
-fn parse_scss_interpolated_supports_in_parens(p: &mut CssParser) -> ParsedSyntax {
+fn parse_scss_interpolated_supports_in_parens(
+    p: &mut CssParser,
+    context: SupportsContext,
+) -> ParsedSyntax {
     if !is_at_scss_interpolated_supports_in_parens(p) {
         return Absent;
     }
 
     let branch = p.start();
     p.bump(T!['(']);
+    let checkpoint = p.checkpoint();
 
     let Some(head) = CssSyntaxFeatures::Scss
-        .parse_exclusive_syntax(p, parse_scss_interpolated_supports_head, |p, marker| {
-            let feature = if p.at(T![:]) {
-                "SCSS interpolated property names"
-            } else if marker.kind(p) == SCSS_SUPPORTS_INTERPOLATED_CONDITION {
-                "SCSS interpolated supports conditions"
-            } else {
-                "SCSS interpolated supports values"
-            };
-            scss_only_syntax_error(p, feature, marker.range(p))
-        })
+        .parse_exclusive_syntax(
+            p,
+            |p| parse_scss_interpolated_supports_head(p, context),
+            |p, marker| {
+                let feature = if p.at(T![:]) {
+                    "SCSS interpolated property names"
+                } else if marker.kind(p) == SCSS_SUPPORTS_INTERPOLATED_CONDITION {
+                    "SCSS interpolated supports conditions"
+                } else {
+                    "SCSS interpolated supports values"
+                };
+                scss_only_syntax_error(p, feature, marker.range(p))
+            },
+        )
         .or_add_diagnostic(p, expected_any_supports_condition)
     else {
         p.expect(T![')']);
         return Present(branch.complete(p, CSS_SUPPORTS_CONDITION_IN_PARENS));
     };
 
-    let kind = if p.at(T![:]) {
+    let kind = if head.kind(p) == CSS_FUNCTION {
+        let condition = parse_scss_supports_declaration_or_condition_from_head(p, head, checkpoint);
+        if matches!(condition, Present(condition) if condition.kind(p) == SCSS_SUPPORTS_DECLARATION)
+        {
+            SCSS_SUPPORTS_FEATURE_DECLARATION
+        } else {
+            CSS_SUPPORTS_CONDITION_IN_PARENS
+        }
+    } else if p.at(T![:]) {
         complete_supports_declaration_from_name(p, head, false);
         CSS_SUPPORTS_FEATURE_DECLARATION
+    } else if context.allows_computed_names(p) && is_at_scss_supports_name_tail(p) {
+        parse_scss_supports_declaration_from_head(p, head).ok();
+        SCSS_SUPPORTS_FEATURE_DECLARATION
+    } else if context.allows_computed_names(p) && p.at_ts(SCSS_SUPPORTS_AMBIGUOUS_TAIL_SET) {
+        let condition = parse_scss_supports_ambiguous_tail(p, head, checkpoint);
+        if matches!(condition, Present(condition) if condition.kind(p) == SCSS_SUPPORTS_DECLARATION)
+        {
+            SCSS_SUPPORTS_FEATURE_DECLARATION
+        } else {
+            CSS_SUPPORTS_CONDITION_IN_PARENS
+        }
     } else {
-        parse_supports_condition_from_head(p, head);
+        parse_supports_condition_from_head(p, head, context);
         CSS_SUPPORTS_CONDITION_IN_PARENS
     };
 
@@ -410,7 +482,10 @@ fn parse_scss_interpolated_supports_in_parens(p: &mut CssParser) -> ParsedSyntax
 /// @supports (#{$condition} and (color: red)) {}
 /// ```
 #[inline]
-fn parse_scss_interpolated_supports_head(p: &mut CssParser) -> ParsedSyntax {
+fn parse_scss_interpolated_supports_head(
+    p: &mut CssParser,
+    context: SupportsContext,
+) -> ParsedSyntax {
     // Bare interpolation must keep its value shape until `:` selects a name.
     // Other heads use the property parser to preserve dashed custom properties.
     let head = if is_at_scss_interpolation(p) {
@@ -418,11 +493,23 @@ fn parse_scss_interpolated_supports_head(p: &mut CssParser) -> ParsedSyntax {
     } else {
         parse_scss_interpolated_property_name(p)
     };
-    let Present(head) = head else {
+    let Present(mut head) = head else {
         return Absent;
     };
 
-    if head.kind(p) != SCSS_INTERPOLATION {
+    if context.allows_computed_names(p) && is_nth_at_adjacent_l_paren(p, 0) {
+        if head.kind(p) == SCSS_INTERPOLATION {
+            head = complete_scss_interpolated_identifier(p, head);
+        } else if head.kind(p) == SCSS_INTERPOLATED_DASHED_IDENTIFIER {
+            head.change_kind(p, SCSS_INTERPOLATED_IDENTIFIER);
+        }
+        return parse_scss_function_call_from_name(p, head);
+    }
+
+    if head.kind(p) != SCSS_INTERPOLATION
+        || (context.allows_computed_names(p)
+            && (is_at_scss_supports_name_tail(p) || p.at_ts(SCSS_SUPPORTS_AMBIGUOUS_TAIL_SET)))
+    {
         return Present(head);
     }
 
@@ -459,7 +546,10 @@ fn is_at_scss_supports_feature_declaration(p: &mut CssParser) -> bool {
 }
 
 #[inline]
-fn parse_scss_supports_feature_declaration(p: &mut CssParser) -> ParsedSyntax {
+fn parse_scss_supports_feature_declaration(
+    p: &mut CssParser,
+    context: SupportsContext,
+) -> ParsedSyntax {
     if !is_at_scss_supports_feature_declaration(p) {
         return Absent;
     }
@@ -467,8 +557,212 @@ fn parse_scss_supports_feature_declaration(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T!['(']);
-    // The entry predicate already matched `$` followed by an identifier.
-    parse_scss_variable(p).ok();
+    if let Present(head) = parse_scss_variable(p) {
+        if context.allows_computed_names(p) {
+            parse_scss_supports_declaration_from_head(p, head).ok();
+        } else {
+            complete_scss_supports_declaration(p, head);
+        }
+    }
+    p.expect(T![')']);
+
+    Present(m.complete(p, SCSS_SUPPORTS_FEATURE_DECLARATION))
+}
+
+#[inline]
+pub(crate) fn is_at_supports_property(p: &mut CssParser) -> bool {
+    is_at_generic_property(p)
+}
+
+/// Parses an import condition, including a bare Sass declaration body.
+///
+/// [Plain CSS imports](https://sass-lang.com/documentation/at-rules/import/#plain-css-imports)
+/// evaluate computed names in both bare and parenthesized declarations.
+/// Source-tight, unqualified functions remain raw supports conditions in bare
+/// imports; parentheses are required to use them as declaration names.
+///
+/// ```scss
+/// $prefix: overflow-;
+/// $axis: x;
+/// @import "a.css" supports($prefix + $axis: clip);
+/// @import "b.css" supports(($prefix + $axis: clip));
+/// ```
+pub(crate) fn parse_import_supports_condition(p: &mut CssParser) -> ParsedSyntax {
+    if is_at_supports_property(p) {
+        let is_legacy = is_at_legacy_ie_filter_property(p);
+        let Present(name) = parse_generic_property_name(p) else {
+            return Absent;
+        };
+        if SupportsContext::AtRule.allows_computed_names(p)
+            && (is_at_scss_supports_name_tail(p)
+                || p.at_ts(token_set![T![and], T![or]])
+                || (p.at(T!['(']) && !is_nth_at_adjacent_l_paren(p, 0)))
+        {
+            parse_scss_supports_declaration_from_head(p, name)
+        } else {
+            Present(complete_supports_declaration_from_name(p, name, is_legacy))
+        }
+    } else if SupportsContext::AtRule.allows_computed_names(p)
+        && is_at_scss_supports_name_head(p)
+        && !(is_nth_at_identifier(p, 0) && is_nth_at_adjacent_l_paren(p, 1))
+    {
+        parse_scss_supports_declaration_or_condition(p)
+    } else {
+        parse_any_supports_condition(p, SupportsContext::AtRule)
+    }
+}
+
+fn is_at_scss_supports_name_head(p: &mut CssParser) -> bool {
+    !is_at_supports_not_condition(p)
+        && !is_at_supports_feature_selector(p)
+        && !p.at(T!['('])
+        && (is_at_any_value(p) || p.at_ts(token_set![T![+], T![-]]))
+}
+
+/// Recognizes a Sass expression continuation without consuming logical groups.
+///
+/// ```scss
+/// $axis: x;
+/// @supports (overflow- + $axis: clip) {}
+/// @supports (font-tech(color-COLRv1) and (display: grid)) {}
+/// ```
+///
+/// Sass permits expressions as [supports declaration names](https://sass-lang.com/documentation/at-rules/css/#supports).
+fn is_at_scss_supports_name_tail(p: &mut CssParser) -> bool {
+    if p.at_ts(SCSS_SUPPORTS_NAME_END_SET.union(SCSS_SUPPORTS_AMBIGUOUS_TAIL_SET)) {
+        return false;
+    }
+    p.at(T![,]) || is_at_scss_binary_operator(p) || is_at_any_value(p)
+}
+
+const SCSS_SUPPORTS_NAME_END_SET: TokenSet<CssSyntaxKind> =
+    token_set![T![:], T![')'], T!['{'], T!['}'], T![;]];
+const SCSS_SUPPORTS_AMBIGUOUS_TAIL_SET: TokenSet<CssSyntaxKind> =
+    token_set![T![and], T![or], T!['(']];
+
+/// Selects a [Sass declaration name](https://sass-lang.com/documentation/at-rules/css/#supports)
+/// when a colon or expression tail follows a value. Nested function and map
+/// delimiters belong to the expression parser. Otherwise the head is reparsed
+/// with CSS-only value rules to preserve general-enclosed syntax and recovery.
+///
+/// ```scss
+/// @use "sass:map";
+/// @supports (map.get((property: overflow-x), property): clip) {}
+/// @supports (font-tech(color-COLRv1)) {}
+/// ```
+fn parse_scss_supports_declaration_or_condition(p: &mut CssParser) -> ParsedSyntax {
+    let checkpoint = p.checkpoint();
+    let head = if p.at_ts(token_set![T![+], T![-]]) && !is_at_any_value(p) {
+        parse_scss_expression_until(p, SCSS_SUPPORTS_NAME_END_SET)
+    } else {
+        parse_any_value_with_context(
+            p,
+            ValueParsingContext::new(p, ValueParsingMode::ScssAware)
+                .with_function_call_context(FunctionCallContext::SourceTight),
+        )
+    };
+    head.and_then(|head| {
+        parse_scss_supports_declaration_or_condition_from_head(p, head, checkpoint)
+    })
+}
+
+/// Selects a declaration or condition after parsing a possible name operand.
+/// The checkpoint must precede the head so a colonless function can retain its
+/// existing condition grammar and diagnostics.
+///
+/// ```scss
+/// @supports (#{fn}(x): clip) {}
+/// @supports (selector(overflow-x)) {}
+/// ```
+///
+/// Sass permits function results as [supports names](https://sass-lang.com/documentation/at-rules/css/#supports).
+fn parse_scss_supports_declaration_or_condition_from_head(
+    p: &mut CssParser,
+    head: CompletedMarker,
+    checkpoint: CssParserCheckpoint,
+) -> ParsedSyntax {
+    if p.at(T![:]) || is_at_scss_supports_name_tail(p) || head.kind(p) == SCSS_VARIABLE {
+        parse_scss_supports_declaration_from_head(p, head)
+    } else if p.at_ts(SCSS_SUPPORTS_AMBIGUOUS_TAIL_SET) {
+        parse_scss_supports_ambiguous_tail(p, head, checkpoint)
+    } else {
+        p.rewind(checkpoint);
+        parse_any_supports_condition(p, SupportsContext::AtRule)
+    }
+}
+
+/// Resolves logical operators and parenthesized tails shared by name expressions
+/// and conditions.
+/// A top-level colon selects a [Sass name expression](https://sass-lang.com/documentation/at-rules/css/#supports);
+/// otherwise the existing supports-condition parser owns the logical chain.
+///
+/// ```scss
+/// @supports (foo and bar: baz) {}
+/// @supports (foo and bar) {}
+/// @supports (foo (bar): baz) {}
+/// @supports (foo (bar)) {}
+/// ```
+///
+/// These forms cannot be distinguished by the next operand or its nested colons.
+/// Only this ambiguous tail is attempted as an expression; rewinding before its
+/// head also discards expression diagnostics and marker-parent links.
+/// The checkpoint must precede the parsed head.
+fn parse_scss_supports_ambiguous_tail(
+    p: &mut CssParser,
+    head: CompletedMarker,
+    checkpoint: CssParserCheckpoint,
+) -> ParsedSyntax {
+    let name = parse_scss_expression_from_head(p, head, SCSS_SUPPORTS_NAME_END_SET);
+    if p.at(T![:]) {
+        return name.map(|name| complete_scss_supports_declaration(p, name));
+    }
+    p.rewind(checkpoint);
+    parse_any_supports_condition(p, SupportsContext::AtRule)
+}
+
+/// Continues a computed name to its top-level colon without reparsing the head.
+///
+/// ```scss
+/// $prefix: overflow-;
+/// $axis: x;
+/// @supports ($prefix + $axis: clip) {}
+/// ```
+///
+/// The expression preserves [Sass string operator](https://sass-lang.com/documentation/operators/string/)
+/// semantics, including quoted property names.
+fn parse_scss_supports_declaration_from_head(
+    p: &mut CssParser,
+    head: CompletedMarker,
+) -> ParsedSyntax {
+    let name = if !p.at_ts(SCSS_SUPPORTS_NAME_END_SET)
+        && (p.at_ts(token_set![T![,], T!['(']])
+            || is_at_scss_binary_operator(p)
+            || is_at_any_value(p))
+    {
+        parse_scss_expression_from_head(p, head, SCSS_SUPPORTS_NAME_END_SET)
+    } else {
+        Present(head)
+    };
+    name.map(|name| complete_scss_supports_declaration(p, name))
+}
+
+/// Completes an evaluated name and its value without claiming outer parentheses.
+/// Literal custom-property names use the native declaration path so their values
+/// retain [Sass custom-property semantics](https://sass-lang.com/documentation/breaking-changes/css-vars/).
+///
+/// ```scss
+/// $property: --space;
+/// $gap: 2px;
+/// @supports ($property: $gap) {}
+/// @supports (--space: $gap) {}
+/// ```
+fn complete_scss_supports_declaration(p: &mut CssParser, name: CompletedMarker) -> CompletedMarker {
+    let name = if matches!(name.kind(p), SCSS_VARIABLE | SCSS_EXPRESSION) {
+        name
+    } else {
+        complete_scss_expression_from_item(p, name)
+    };
+    let declaration = name.precede(p);
     p.expect(T![:]);
     parse_property_value_with_end_set(
         p,
@@ -478,14 +772,7 @@ fn parse_scss_supports_feature_declaration(p: &mut CssParser) -> ParsedSyntax {
         END_OF_PROPERTY_VALUE_TOKEN_SET,
     );
     parse_declaration_important(p).ok();
-    p.expect(T![')']);
-
-    Present(m.complete(p, SCSS_SUPPORTS_FEATURE_DECLARATION))
-}
-
-#[inline]
-pub(crate) fn is_at_supports_property(p: &mut CssParser) -> bool {
-    is_at_generic_property(p)
+    declaration.complete(p, SCSS_SUPPORTS_DECLARATION)
 }
 
 #[inline]

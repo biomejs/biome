@@ -12614,6 +12614,56 @@ pub struct ScssStringTextFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssSupportsDeclaration {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssSupportsDeclaration {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssSupportsDeclarationFields {
+        ScssSupportsDeclarationFields {
+            name: self.name(),
+            colon_token: self.colon_token(),
+            value: self.value(),
+            important: self.important(),
+        }
+    }
+    pub fn name(&self) -> SyntaxResult<AnyScssSupportsDeclarationName> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn value(&self) -> SyntaxResult<AnyCssGenericPropertyValueOrExpression> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn important(&self) -> Option<CssDeclarationImportant> {
+        support::node(&self.syntax, 3usize)
+    }
+}
+impl Serialize for ScssSupportsDeclaration {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssSupportsDeclarationFields {
+    pub name: SyntaxResult<AnyScssSupportsDeclarationName>,
+    pub colon_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<AnyCssGenericPropertyValueOrExpression>,
+    pub important: Option<CssDeclarationImportant>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssSupportsFeatureDeclaration {
     pub(crate) syntax: SyntaxNode,
 }
@@ -12630,30 +12680,18 @@ impl ScssSupportsFeatureDeclaration {
     pub fn as_fields(&self) -> ScssSupportsFeatureDeclarationFields {
         ScssSupportsFeatureDeclarationFields {
             l_paren_token: self.l_paren_token(),
-            name: self.name(),
-            colon_token: self.colon_token(),
-            value: self.value(),
-            important: self.important(),
+            declaration: self.declaration(),
             r_paren_token: self.r_paren_token(),
         }
     }
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<ScssVariable> {
+    pub fn declaration(&self) -> SyntaxResult<ScssSupportsDeclaration> {
         support::required_node(&self.syntax, 1usize)
     }
-    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-    pub fn value(&self) -> SyntaxResult<AnyCssGenericPropertyValueOrExpression> {
-        support::required_node(&self.syntax, 3usize)
-    }
-    pub fn important(&self) -> Option<CssDeclarationImportant> {
-        support::node(&self.syntax, 4usize)
-    }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 5usize)
+        support::required_token(&self.syntax, 2usize)
     }
 }
 impl Serialize for ScssSupportsFeatureDeclaration {
@@ -12667,10 +12705,7 @@ impl Serialize for ScssSupportsFeatureDeclaration {
 #[derive(Serialize)]
 pub struct ScssSupportsFeatureDeclarationFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<ScssVariable>,
-    pub colon_token: SyntaxResult<SyntaxToken>,
-    pub value: SyntaxResult<AnyCssGenericPropertyValueOrExpression>,
-    pub important: Option<CssDeclarationImportant>,
+    pub declaration: SyntaxResult<ScssSupportsDeclaration>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -15966,6 +16001,7 @@ impl AnyCssImportLayer {
 pub enum AnyCssImportSupportsCondition {
     AnyCssSupportsCondition(AnyCssSupportsCondition),
     CssDeclaration(CssDeclaration),
+    ScssSupportsDeclaration(ScssSupportsDeclaration),
 }
 impl AnyCssImportSupportsCondition {
     pub fn as_any_css_supports_condition(&self) -> Option<&AnyCssSupportsCondition> {
@@ -15977,6 +16013,12 @@ impl AnyCssImportSupportsCondition {
     pub fn as_css_declaration(&self) -> Option<&CssDeclaration> {
         match &self {
             Self::CssDeclaration(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_supports_declaration(&self) -> Option<&ScssSupportsDeclaration> {
+        match &self {
+            Self::ScssSupportsDeclaration(item) => Some(item),
             _ => None,
         }
     }
@@ -18624,6 +18666,25 @@ impl AnyScssParentSelectorSuffixPart {
     pub fn as_scss_parent_selector_suffix_hyphen(&self) -> Option<&ScssParentSelectorSuffixHyphen> {
         match &self {
             Self::ScssParentSelectorSuffixHyphen(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyScssSupportsDeclarationName {
+    ScssExpression(ScssExpression),
+    ScssVariable(ScssVariable),
+}
+impl AnyScssSupportsDeclarationName {
+    pub fn as_scss_expression(&self) -> Option<&ScssExpression> {
+        match &self {
+            Self::ScssExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_variable(&self) -> Option<&ScssVariable> {
+        match &self {
+            Self::ScssVariable(item) => Some(item),
             _ => None,
         }
     }
@@ -34092,6 +34153,62 @@ impl From<ScssStringText> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for ScssSupportsDeclaration {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_SUPPORTS_DECLARATION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_SUPPORTS_DECLARATION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssSupportsDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssSupportsDeclaration")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "colon_token",
+                    &support::DebugSyntaxResult(self.colon_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .field(
+                    "important",
+                    &support::DebugOptionalElement(self.important()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("ScssSupportsDeclaration").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssSupportsDeclaration> for SyntaxNode {
+    fn from(n: ScssSupportsDeclaration) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssSupportsDeclaration> for SyntaxElement {
+    fn from(n: ScssSupportsDeclaration) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for ScssSupportsFeatureDeclaration {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -34124,15 +34241,9 @@ impl std::fmt::Debug for ScssSupportsFeatureDeclaration {
                     "l_paren_token",
                     &support::DebugSyntaxResult(self.l_paren_token()),
                 )
-                .field("name", &support::DebugSyntaxResult(self.name()))
                 .field(
-                    "colon_token",
-                    &support::DebugSyntaxResult(self.colon_token()),
-                )
-                .field("value", &support::DebugSyntaxResult(self.value()))
-                .field(
-                    "important",
-                    &support::DebugOptionalElement(self.important()),
+                    "declaration",
+                    &support::DebugSyntaxResult(self.declaration()),
                 )
                 .field(
                     "r_paren_token",
@@ -41148,13 +41259,19 @@ impl From<CssDeclaration> for AnyCssImportSupportsCondition {
         Self::CssDeclaration(node)
     }
 }
+impl From<ScssSupportsDeclaration> for AnyCssImportSupportsCondition {
+    fn from(node: ScssSupportsDeclaration) -> Self {
+        Self::ScssSupportsDeclaration(node)
+    }
+}
 impl AstNode for AnyCssImportSupportsCondition {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        AnyCssSupportsCondition::KIND_SET.union(CssDeclaration::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssSupportsCondition::KIND_SET
+        .union(CssDeclaration::KIND_SET)
+        .union(ScssSupportsDeclaration::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_DECLARATION => true,
+            CSS_DECLARATION | SCSS_SUPPORTS_DECLARATION => true,
             k if AnyCssSupportsCondition::can_cast(k) => true,
             _ => false,
         }
@@ -41162,6 +41279,9 @@ impl AstNode for AnyCssImportSupportsCondition {
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_DECLARATION => Self::CssDeclaration(CssDeclaration { syntax }),
+            SCSS_SUPPORTS_DECLARATION => {
+                Self::ScssSupportsDeclaration(ScssSupportsDeclaration { syntax })
+            }
             _ => {
                 if let Some(any_css_supports_condition) = AnyCssSupportsCondition::cast(syntax) {
                     return Some(Self::AnyCssSupportsCondition(any_css_supports_condition));
@@ -41174,12 +41294,14 @@ impl AstNode for AnyCssImportSupportsCondition {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssDeclaration(it) => it.syntax(),
+            Self::ScssSupportsDeclaration(it) => it.syntax(),
             Self::AnyCssSupportsCondition(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssDeclaration(it) => it.into_syntax(),
+            Self::ScssSupportsDeclaration(it) => it.into_syntax(),
             Self::AnyCssSupportsCondition(it) => it.into_syntax(),
         }
     }
@@ -41189,6 +41311,7 @@ impl std::fmt::Debug for AnyCssImportSupportsCondition {
         match self {
             Self::AnyCssSupportsCondition(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDeclaration(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssSupportsDeclaration(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -41197,6 +41320,7 @@ impl From<AnyCssImportSupportsCondition> for SyntaxNode {
         match n {
             AnyCssImportSupportsCondition::AnyCssSupportsCondition(it) => it.into_syntax(),
             AnyCssImportSupportsCondition::CssDeclaration(it) => it.into_syntax(),
+            AnyCssImportSupportsCondition::ScssSupportsDeclaration(it) => it.into_syntax(),
         }
     }
 }
@@ -48429,6 +48553,66 @@ impl From<AnyScssParentSelectorSuffixPart> for SyntaxElement {
         node.into()
     }
 }
+impl From<ScssExpression> for AnyScssSupportsDeclarationName {
+    fn from(node: ScssExpression) -> Self {
+        Self::ScssExpression(node)
+    }
+}
+impl From<ScssVariable> for AnyScssSupportsDeclarationName {
+    fn from(node: ScssVariable) -> Self {
+        Self::ScssVariable(node)
+    }
+}
+impl AstNode for AnyScssSupportsDeclarationName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        ScssExpression::KIND_SET.union(ScssVariable::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, SCSS_EXPRESSION | SCSS_VARIABLE)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            SCSS_EXPRESSION => Self::ScssExpression(ScssExpression { syntax }),
+            SCSS_VARIABLE => Self::ScssVariable(ScssVariable { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::ScssExpression(it) => it.syntax(),
+            Self::ScssVariable(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::ScssExpression(it) => it.into_syntax(),
+            Self::ScssVariable(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyScssSupportsDeclarationName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::ScssExpression(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssVariable(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyScssSupportsDeclarationName> for SyntaxNode {
+    fn from(n: AnyScssSupportsDeclarationName) -> Self {
+        match n {
+            AnyScssSupportsDeclarationName::ScssExpression(it) => it.into_syntax(),
+            AnyScssSupportsDeclarationName::ScssVariable(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyScssSupportsDeclarationName> for SyntaxElement {
+    fn from(n: AnyScssSupportsDeclarationName) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssIdentifier> for AnyScssUseNamespace {
     fn from(node: CssIdentifier) -> Self {
         Self::CssIdentifier(node)
@@ -49594,6 +49778,11 @@ impl std::fmt::Display for AnyScssParameter {
     }
 }
 impl std::fmt::Display for AnyScssParentSelectorSuffixPart {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyScssSupportsDeclarationName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -51119,6 +51308,11 @@ impl std::fmt::Display for ScssShowClause {
     }
 }
 impl std::fmt::Display for ScssStringText {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssSupportsDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
