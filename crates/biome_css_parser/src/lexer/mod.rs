@@ -48,6 +48,15 @@ pub(crate) struct UrlRawValueScan {
     pub(crate) terminated: bool,
 }
 
+/// Source range of the identifier body in an SCSS hash string.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub(crate) struct ScssHashValueScan {
+    /// Absolute byte position immediately after the leading `#`.
+    pub(crate) start: usize,
+    /// Absolute byte position immediately after the identifier body.
+    pub(crate) end: usize,
+}
+
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub enum CssLexContext {
     /// Default context: no particular rules are applied to the lexer logic.
@@ -84,6 +93,13 @@ pub enum CssLexContext {
     /// support #000 #000f #ffffff #ffffffff
     /// https://drafts.csswg.org/css-color/#typedef-hex-color
     Color,
+
+    /// Commits a classified SCSS hash-string body without rescanning it.
+    ///
+    /// ```scss
+    /// $selector: #ABCG;
+    /// ```
+    ScssHashValue(ScssHashValueScan),
 
     /// Applied when lexing CSS unicode range.
     /// Starting from U+ or u+
@@ -244,6 +260,9 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
                     self.consume_scss_url_value_token(current, start)
                 }
                 CssLexContext::Color => self.consume_color_token(current),
+                CssLexContext::ScssHashValue(scan) => {
+                    self.consume_scss_hash_value_token(current, scan)
+                }
                 CssLexContext::UnicodeRange => self.consume_unicode_range_token(current),
                 CssLexContext::ScssString(quote) => self.lex_scss_string_chunk_token(quote),
                 CssLexContext::CustomPropertyValue(comment_mode) => {
@@ -602,6 +621,19 @@ impl<'src> CssLexer<'src> {
             b'0'..=b'9' | b'a'..=b'f' | b'A'..=b'F' => self.consume_color(),
             _ => self.consume_token(current),
         }
+    }
+
+    fn consume_scss_hash_value_token(
+        &mut self,
+        current: u8,
+        scan: ScssHashValueScan,
+    ) -> CssSyntaxKind {
+        if self.position() != scan.start {
+            return self.consume_token(current);
+        }
+
+        self.set_position(scan.end);
+        IDENT
     }
 
     fn consume_color(&mut self) -> CssSyntaxKind {
@@ -1722,6 +1754,52 @@ impl<'src> ReLexer<'src> for CssLexer<'src> {
 }
 
 impl<'src> CssLexer<'src> {
+    /// Classifies the complete identifier after `#` before color lexing begins.
+    ///
+    /// Returns its source range when the body is a Sass string, including a
+    /// hexadecimal-looking head immediately followed by interpolation. Returns
+    /// `None` for numeric starts, missing identifiers, and decoded identifiers
+    /// that select Sass's raw hexadecimal-color parsing. Escape spellings are
+    /// retained in the returned range, including an escape's terminating space.
+    /// This structural scan does not enable SCSS syntax for its caller.
+    ///
+    /// ```scss
+    /// $selector: #ABCG;
+    /// $interpolated: #ABC#{G};
+    /// $escaped: #\61 pp;
+    /// $color: #ABC;
+    /// ```
+    ///
+    /// See [Sass unquoted strings](https://sass-lang.com/documentation/values/strings/#other-unquoted-strings)
+    /// and [interpolation](https://sass-lang.com/documentation/interpolation/).
+    pub(crate) fn scss_hash_value_scan(&self, start: usize) -> Option<ScssHashValueScan> {
+        let mut cursor = self.scan_cursor_at(start);
+        let bytes = self.source().as_bytes();
+        let has_hyphen_prefix = bytes.get(start) == Some(&b'-')
+            && (bytes.get(start + 1) == Some(&b'-')
+                || (bytes.get(start + 1) == Some(&b'#') && bytes.get(start + 2) == Some(&b'{')));
+        if !cursor.is_ident_start() && !has_hyphen_prefix {
+            return None;
+        }
+
+        let mut decoded = [0; 9];
+        let scan = cursor.consume_ident_sequence(&mut decoded);
+        // Sass retains a digit escape at identifier start, so its normalized
+        // spelling cannot select hexadecimal-color parsing.
+        let escaped_digit_start = bytes.get(start) == Some(&b'\\') && decoded[0].is_ascii_digit();
+        let is_color = scan.only_ascii_used
+            && matches!(scan.count, 3 | 4 | 6 | 8)
+            && decoded[..scan.count].iter().all(u8::is_ascii_hexdigit);
+        if is_color && !escaped_digit_start && !cursor.is_at_scss_interpolation() {
+            return None;
+        }
+
+        Some(ScssHashValueScan {
+            start,
+            end: scan.position,
+        })
+    }
+
     pub(crate) fn has_pending_scss_string_start(&self) -> bool {
         self.pending_scss_string_start.is_some()
     }

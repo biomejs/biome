@@ -8226,6 +8226,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssFunctionAtRule {
         )
     }
 }
+impl FormatRule<biome_css_syntax::ScssHashValue>
+    for crate::scss::value::hash_value::FormatScssHashValue
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssHashValue,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssHashValue>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssHashValue {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssHashValue,
+        crate::scss::value::hash_value::FormatScssHashValue,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::value::hash_value::FormatScssHashValue::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssHashValue {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssHashValue,
+        crate::scss::value::hash_value::FormatScssHashValue,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::value::hash_value::FormatScssHashValue::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::ScssHideClause>
     for crate::scss::auxiliary::hide_clause::FormatScssHideClause
 {

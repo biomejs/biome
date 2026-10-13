@@ -85,7 +85,7 @@ pub(crate) use value::{
     is_at_scss_interpolated_value_head, is_at_scss_parent_selector_value,
     is_at_scss_suffixed_interpolated_value, is_nth_at_scss_function,
     parse_any_scss_value_with_context, parse_scss_bracketed_value_expression_item,
-    parse_scss_function, parse_scss_function_call_from_name,
+    parse_scss_function, parse_scss_function_call_from_name, parse_scss_hash_value_or_color,
     parse_scss_interpolated_function_or_value, parse_scss_interpolated_function_or_value_until,
     parse_scss_interpolated_string, parse_scss_interpolated_url_value,
     parse_scss_interpolated_value, parse_scss_parent_selector_value,

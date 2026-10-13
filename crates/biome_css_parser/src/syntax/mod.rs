@@ -27,7 +27,7 @@ use crate::syntax::scss::{
     is_at_scss_interpolated_string, is_at_scss_module_member_access,
     is_at_scss_parent_selector_value, is_at_scss_suffixed_interpolated_value, is_at_scss_variable,
     is_at_scss_variable_declaration, parse_scss_bracketed_value_expression_item,
-    parse_scss_expression_from_head, parse_scss_function,
+    parse_scss_expression_from_head, parse_scss_function, parse_scss_hash_value_or_color,
     parse_scss_interpolated_dashed_identifier, parse_scss_interpolated_function_or_value,
     parse_scss_interpolated_string, parse_scss_module_member_access,
     parse_scss_parent_selector_value, parse_scss_suffixed_interpolated_value_until,
@@ -612,6 +612,8 @@ pub(crate) fn parse_any_value_with_context(
 ) -> ParsedSyntax {
     if is_at_exclusive_scss_value_with_context(p, context) {
         parse_any_exclusive_scss_value(p)
+    } else if context.is_full_scss_parsing_allowed() && is_at_color(p) {
+        parse_scss_hash_value_or_color(p)
     } else if is_at_any_function_with_context(p, context) {
         parse_any_function_with_context(p, context)
     } else {

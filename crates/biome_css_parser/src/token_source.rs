@@ -1,6 +1,7 @@
 use crate::CssParserOptions;
 use crate::lexer::{
     CssCustomPropertyCommentMode, CssLexContext, CssLexer, CssReLexContext, CssStringQuote,
+    ScssHashValueScan,
 };
 use biome_css_syntax::CssSyntaxKind::EOF;
 use biome_css_syntax::{CssSyntaxKind, TextRange};
@@ -95,6 +96,13 @@ impl<'src> CssTokenSource<'src> {
 
     pub fn re_lex(&mut self, mode: CssReLexContext) -> CssSyntaxKind {
         self.lexer.re_lex(mode)
+    }
+
+    /// Classifies the identifier immediately after the current `#`, using the
+    /// current buffered token's end even when lexer lookahead has advanced.
+    pub(crate) fn scss_hash_value_scan(&self) -> Option<ScssHashValueScan> {
+        let start = usize::from(self.current_range().end());
+        self.lexer.lexer().scss_hash_value_scan(start)
     }
 
     pub(crate) fn current_has_pending_scss_string_start(&self) -> bool {
