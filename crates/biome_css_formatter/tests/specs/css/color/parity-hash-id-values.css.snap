@@ -1,0 +1,41 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/color/parity-hash-id-values.css
+---
+
+# Input
+
+```css
+#app, #Brand, #ABCG { color: #ABC; }
+.colors {
+  three: #ABC;
+  four: #ABCD;
+  six: #ABCDEF;
+  eight: #ABCDEF12;
+  quoted: "#app" "#ABCG";
+  --raw: #ABC;
+  fragment: url(#app);
+}
+
+```
+
+
+# Formatted
+
+```css
+#app,
+#Brand,
+#ABCG {
+	color: #abc;
+}
+.colors {
+	three: #abc;
+	four: #abcd;
+	six: #abcdef;
+	eight: #abcdef12;
+	quoted: "#app" "#ABCG";
+	--raw: #abc;
+	fragment: url(#app);
+}
+
+```

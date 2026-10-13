@@ -1,0 +1,11 @@
+/* should generate diagnostics */
+@property --hash-string {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #ABCG;
+}
+@property --short-string {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #ab;
+}

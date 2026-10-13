@@ -1,0 +1,24 @@
+.numeric {
+  five: #12345;
+  after-five: #ABC;
+  seven: #1234567;
+  after-seven: #ABCD;
+  unit: #12px;
+  after-unit: red;
+  bare: #;
+  after-bare: #ABCDEF;
+  spaced: # app;
+  after-spaced: #ABCDEF12;
+  escaped-color: #\61 bc;
+  after-escaped-color: #ABCG;
+  escaped-color-middle: #a\62 c;
+  after-escaped-color-middle: #Brand;
+}
+
+@container card if(style(--enabled: true): #app; else: #ABC) {
+  .css-only { color: red; }
+}
+@container card if(style(--enabled: true): #ABCG; else: #ABC) {
+  .css-only-prefix { color: red; }
+}
+.after { display: block; color: #ABC; }

@@ -341,6 +341,7 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "ScssForwardAsClause" => lang::ScssForwardAsClause::KIND_SET.iter().next(),
         "ScssForwardAtRule" => lang::ScssForwardAtRule::KIND_SET.iter().next(),
         "ScssFunctionAtRule" => lang::ScssFunctionAtRule::KIND_SET.iter().next(),
+        "ScssHashValue" => lang::ScssHashValue::KIND_SET.iter().next(),
         "ScssHideClause" => lang::ScssHideClause::KIND_SET.iter().next(),
         "ScssIfAtRule" => lang::ScssIfAtRule::KIND_SET.iter().next(),
         "ScssImportAtRule" => lang::ScssImportAtRule::KIND_SET.iter().next(),

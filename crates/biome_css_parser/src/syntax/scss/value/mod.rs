@@ -1,5 +1,6 @@
 mod any;
 mod function;
+mod hash_value;
 mod interpolated_string;
 mod interpolated_url;
 mod interpolated_value;
@@ -23,6 +24,7 @@ pub(crate) use function::{
     is_at_scss_function, is_nth_at_scss_function, parse_scss_function,
     parse_scss_function_call_from_name,
 };
+pub(crate) use hash_value::parse_scss_hash_value_or_color;
 pub(crate) use interpolated_string::{
     is_at_scss_interpolated_string, parse_scss_interpolated_string,
 };

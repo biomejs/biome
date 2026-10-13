@@ -3660,6 +3660,15 @@ impl ScssFunctionAtRuleBuilder {
         ))
     }
 }
+pub fn scss_hash_value(hash_token: SyntaxToken, value_token: SyntaxToken) -> ScssHashValue {
+    ScssHashValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_HASH_VALUE,
+        [
+            Some(SyntaxElement::Token(hash_token)),
+            Some(SyntaxElement::Token(value_token)),
+        ],
+    ))
+}
 pub fn scss_hide_clause(hide_token: SyntaxToken, members: ScssModuleMemberList) -> ScssHideClause {
     ScssHideClause::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_HIDE_CLAUSE,

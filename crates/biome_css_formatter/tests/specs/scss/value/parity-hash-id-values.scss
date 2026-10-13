@@ -1,0 +1,69 @@
+@use   "sass:map";
+@use "sass:meta";
+
+$targets: (app: #app, brand: #Brand);
+$prefix: (foo: foo, bar: #bar);
+$id:   #ABCG;
+
+#{map.get($targets, app)} { min-height: 100vh; }
+#{map.get($targets, brand)} { font-weight: 700; }
+#{map.get($prefix, foo)} { color: red; }
+#{map.get($prefix, bar)} { color: red; }
+#{map.get($prefix, foo)} .baz { color: red; }
+#{map.get($prefix, bar)} .baz { color: red; }
+#{$id} { color: red; }
+
+@function echo($value: #Brand) { @return $value; }
+@function hash-value() { @return #ABCG; }
+@function remainder($rhs) { @return #ABC#{G}1%$rhs; }
+
+.values{
+  type: meta.type-of($id);
+  text: meta.inspect($id);
+  argument: echo(#ABCG);
+  keyword: echo($value: #Brand);
+  default: echo();
+  returned: hash-value();
+  strings: #app #Brand #BAR #ABCG #a #ab #abcde #abcdefg #-app #_app #and;
+  two: #ab;
+  five: #abcde;
+  seven: #abcdefa;
+  nine: #abcdefabc;
+  nonhex-three: #axc;
+  nonhex-four: #axcd;
+  nonhex-six: #abcxde;
+  nonhex-eight: #abcxdefa;
+  color-types: meta.type-of(#ABC) meta.type-of(#ABCD) meta.type-of(#ABCDEF) meta.type-of(#ABCDEF12);
+  colors: #abc #abcd #abcdef #abcdef12;
+  quoted: "#app" '#Brand' "#ABCG" "#ABC";
+  interpolation: #{foo};
+  adjacent: #app#{foo};
+  adjacent-hex: #ABC#{G};
+  numeric-tails: #ABC#{G}1e0 #ABC#{G}1PX #ABC#{G}01PX #ABC#{G}-1PX;
+  repeated-tail: #ABC#{G}1PX#{foo};
+  tail-number-boundary: #ABC#{G}1.0;
+  tail-percent-boundary: #ABC#{G}1%;
+  double-hyphen: #--;
+  adjacent-hyphen: #-#{app};
+  adjacent-double-hyphen: #--#{app};
+  adjacent-hex-type: meta.type-of(#ABC#{G});
+  escaped: #\61 pp;
+  escaped-digit: #\31 23;
+  escaped-digit-adjacent: #\31 23#{g};
+  escaped-boundary: #\61 pp #Brand;
+  escaped-terminator: #\61 pp/**/ #BAR;
+  raw-prefix-list: meta.type-of(#ABC\31);
+  raw-prefix-list-letter: meta.type-of(#ABC\44);
+  comment: #ABCG/* boundary */ #Brand;
+  line-comment: #Brand // boundary
+    #BAR;
+  --raw: #app #ABCG #12px;
+  fragment: url(#app);
+}
+
+#app,
+#Brand,
+#ABCG { color: #abc; }
+
+/* biome-ignore format: Preserve the authored hash spelling. */
+.keep {value: #ABCG;colors: #abc;}

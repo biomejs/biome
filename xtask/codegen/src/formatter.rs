@@ -833,6 +833,7 @@ fn get_node_concept(
                         | "Color"
                         | "Length"
                         | "UrlValueRaw"
+                        | "HashValue"
                 ) || name.ends_with("Dimension")
                     || name.ends_with("Identifier") =>
                 {

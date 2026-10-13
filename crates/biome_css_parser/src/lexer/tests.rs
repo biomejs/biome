@@ -173,6 +173,169 @@ fn custom_property_context_preserves_unknown_delimiters() {
 }
 
 #[test]
+fn scss_hash_values_preserve_complete_identifier_ranges() {
+    for (source, body) in [
+        ("#app;", "app"),
+        ("#Brand;", "Brand"),
+        ("#BAR;", "BAR"),
+        ("#ABCG;", "ABCG"),
+        ("#a;", "a"),
+        ("#ab;", "ab"),
+        ("#abcde;", "abcde"),
+        ("#abcdefg;", "abcdefg"),
+        ("#abcdefabc;", "abcdefabc"),
+        ("#-app;", "-app"),
+        ("#_app;", "_app"),
+        ("#and;", "and"),
+        ("#éclair;", "éclair"),
+        ("#--;", "--"),
+        ("#-#{app};", "-"),
+        ("#--#{app};", "--"),
+        ("#ABC#{G};", "ABC"),
+        ("#app#{foo};", "app"),
+        (r"#\61 pp;", r"\61 pp"),
+        (r"#\31 23;", r"\31 23"),
+        (r"#ABC\47;", r"ABC\47"),
+        (r"#\41 BCG;", r"\41 BCG"),
+        ("#app rest;", "app"),
+        ("#app/**/#{foo};", "app"),
+        ("#app,rest;", "app"),
+        (r"#\61 pp rest;", r"\61 pp"),
+        (r"#app\ ;", r"app\ "),
+    ] {
+        let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
+        assert_eq!(lexer.next_token(CssLexContext::Regular), T![#]);
+        let scan = lexer.scss_hash_value_scan(lexer.position()).unwrap();
+        assert_eq!(lexer.position(), 1, "{source}");
+        assert_eq!(scan.start, 1, "{source}");
+        assert_eq!(scan.end, 1 + body.len(), "{source}");
+        assert_eq!(
+            lexer.next_token(CssLexContext::ScssHashValue(scan)),
+            CssSyntaxKind::IDENT,
+            "{source}",
+        );
+        assert_eq!(&source[lexer.current_range()], body, "{source}");
+        assert_eq!(
+            lexer.current_range(),
+            TextRange::new(TextSize::from(1), TextSize::from(scan.end as u32)),
+            "{source}",
+        );
+
+        let mut reconstructed = format!("#{body}");
+        while lexer.next_token(CssLexContext::Regular) != EOF {
+            reconstructed.push_str(&source[lexer.current_range()]);
+        }
+        assert_eq!(reconstructed, source);
+        assert_eq!(lexer.position(), source.len());
+        assert!(lexer.finish().is_empty(), "{source}");
+    }
+}
+
+#[test]
+fn scss_hash_values_leave_color_and_invalid_starts_to_color_lexing() {
+    for source in [
+        "#ABC;",
+        "#ABCD;",
+        "#ABCDEF;",
+        "#ABCDEF12;",
+        r"#\61 bc;",
+        r"#a\62 c;",
+        r"#ABC\31;",
+        r"#ABC\44;",
+        r"#abc\64 ef;",
+        "#ABC/**/#{G};",
+        "#ABC #{G};",
+        "#12345;",
+        "#1234567;",
+        "#12px;",
+        "#;",
+        "# app;",
+        "#/**/app;",
+        "#{foo};",
+        "#-;",
+    ] {
+        let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
+        assert_eq!(lexer.next_token(CssLexContext::Regular), T![#]);
+        assert_eq!(lexer.scss_hash_value_scan(lexer.position()), None, "{source}");
+        assert_eq!(lexer.position(), 1);
+        assert!(lexer.finish().is_empty(), "{source}");
+    }
+
+    for (source, color, diagnostic_count) in [
+        ("#ABC;", "ABC", 0),
+        ("#ABCD;", "ABCD", 0),
+        ("#ABCDEF;", "ABCDEF", 0),
+        ("#ABCDEF12;", "ABCDEF12", 0),
+        ("#12345;", "12345", 1),
+        ("#1234567;", "1234567", 1),
+        ("#12px;", "12", 1),
+        (r"#ABC\44;", "ABC", 0),
+    ] {
+        let mut lexer = CssLexer::from_str(source).with_source_type(CssFileSource::scss());
+        assert_eq!(lexer.next_token(CssLexContext::Regular), T![#]);
+        assert_eq!(lexer.next_token(CssLexContext::Color), CssSyntaxKind::CSS_COLOR_LITERAL);
+        assert_eq!(&source[lexer.current_range()], color, "{source}");
+        let mut reconstructed = format!("#{color}");
+        while lexer.next_token(CssLexContext::Regular) != EOF {
+            reconstructed.push_str(&source[lexer.current_range()]);
+        }
+        assert_eq!(reconstructed, source);
+        assert_eq!(lexer.position(), source.len());
+        assert_eq!(lexer.finish().len(), diagnostic_count, "{source}");
+    }
+}
+
+#[test]
+fn scss_hash_value_context_replaces_buffered_regular_tokens() {
+    let mut source = CssTokenSource::from_str(
+        "#--#{app};",
+        CssParserOptions::default(),
+        CssFileSource::scss(),
+        &[],
+    );
+    assert_eq!(source.current(), T![#]);
+    assert_eq!(source.nth(1), T![-]);
+    assert_eq!(source.nth(2), T![-]);
+    assert_eq!(source.nth(3), T![#]);
+
+    let checkpoint = source.checkpoint();
+    let scan = source.scss_hash_value_scan().unwrap();
+    assert_eq!(scan.start, 1);
+    assert_eq!(scan.end, 3);
+    source.bump_with_context(CssLexContext::ScssHashValue(scan));
+    assert_eq!(source.current(), CssSyntaxKind::IDENT);
+    assert_eq!(source.current_range(), TextRange::new(TextSize::from(1), TextSize::from(3)));
+    assert_eq!(&source.text()[source.current_range()], "--");
+    source.bump();
+    assert_eq!(source.current(), T![#]);
+    assert_eq!(source.nth(1), T!['{']);
+
+    source.rewind(checkpoint);
+    assert_eq!(source.current(), T![#]);
+    assert_eq!(source.scss_hash_value_scan(), Some(scan));
+    source.bump_with_context(CssLexContext::ScssHashValue(scan));
+    assert_eq!(source.current(), CssSyntaxKind::IDENT);
+    while source.current() != EOF {
+        source.bump();
+    }
+    assert_eq!(source.current_range().end(), TextSize::from(10));
+    assert!(source.finish().1.is_empty());
+}
+
+#[test]
+fn regular_css_hash_tokenization_remains_contextual() {
+    let mut lexer = CssLexer::from_str("#ABCG;");
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T![#]);
+    assert_eq!(lexer.next_token(CssLexContext::Color), CssSyntaxKind::CSS_COLOR_LITERAL);
+    assert_eq!(&lexer.source()[lexer.current_range()], "ABC");
+    assert_eq!(lexer.next_token(CssLexContext::Regular), CssSyntaxKind::IDENT);
+    assert_eq!(&lexer.source()[lexer.current_range()], "G");
+    assert_eq!(lexer.next_token(CssLexContext::Regular), T![;]);
+    assert_eq!(lexer.next_token(CssLexContext::Regular), EOF);
+    assert!(lexer.finish().is_empty());
+}
+
+#[test]
 fn url_body_classification_emits_raw_url_value() {
     let mut lexer = CssLexer::from_str("url(foo.css)");
 

@@ -884,7 +884,7 @@ AnyCssGenericComponentValue =
 //                                ^
 // }
 CssGenericDelimiter =
-	value: (',' | '/')
+	value: (',' | '/' | '%')
 
 CssComponentValueList = AnyCssValue*
 
@@ -2319,6 +2319,7 @@ AnyCssValue =
 	| ScssVariable
 	| ScssInterpolatedIdentifier
 	| ScssInterpolatedValue
+	| ScssHashValue
 	| ScssModuleMemberAccess
 	| ScssParentSelectorValue
 	| CssString
@@ -3355,6 +3356,10 @@ AnyScssInterpolatedIdentifierPart =
 	| ScssInterpolatedIdentifierHyphen
 	| ScssInterpolation
 
+ScssHashValue =
+	'#'
+	value: 'ident'
+
 ScssInterpolatedValue =
 	items: ScssInterpolatedValuePartList
 
@@ -3362,6 +3367,8 @@ ScssInterpolatedValuePartList = AnyScssInterpolatedValuePart*
 
 AnyScssInterpolatedValuePart =
 	ScssVariable
+	| ScssHashValue
+	| CssGenericDelimiter
 	| ScssNamespacedVariable
 	| ScssInterpolation
 	| CssNumber
