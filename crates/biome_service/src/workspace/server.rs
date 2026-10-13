@@ -818,7 +818,11 @@ impl WorkspaceServerWithDb<'_> {
         } = params;
         let path: Utf8PathBuf = biome_path.clone().into();
 
-        if document_file_source.is_none() && !DocumentFileSource::can_read(path.as_path()) {
+        // Detecting the source of a path is costly enough that this function
+        // does it at most once without and once with full HTML support.
+        let default_path_source = DocumentFileSource::from_path(&path, false);
+
+        if document_file_source.is_none() && !default_path_source.is_readable() {
             if reason.is_index()
                 && path
                     .file_name()
@@ -840,11 +844,14 @@ impl WorkspaceServerWithDb<'_> {
         let settings =
             self.settings_handle_with_query(&settings, editor_features.unwrap_or_default(), query);
 
+        let html_ish_supported = settings.as_ref().experimental_full_html_support_enabled();
+        let path_source = if html_ish_supported {
+            DocumentFileSource::from_path(&path, true)
+        } else {
+            default_path_source
+        };
+
         let mut source = if let Some(document_file_source) = document_file_source {
-            let path_source = DocumentFileSource::from_path(
-                &path,
-                settings.as_ref().experimental_full_html_support_enabled(),
-            );
             // LSP language ids cannot encode path-specific framework variants like
             // `.svelte.ts` / `.svelte.js`, and HTML full support can also upgrade
             // JS-like hints to HTML. Prefer the path-derived source only when it
@@ -855,10 +862,7 @@ impl WorkspaceServerWithDb<'_> {
                 document_file_source
             }
         } else {
-            DocumentFileSource::from_path(
-                &path,
-                settings.as_ref().experimental_full_html_support_enabled(),
-            )
+            path_source
         };
 
         #[cfg(feature = "lang_js")]
@@ -943,7 +947,7 @@ impl WorkspaceServerWithDb<'_> {
 
         let parsed = if size > limit {
             Err(FileTooLarge { size, limit })
-        } else if document_file_source.is_none() && !DocumentFileSource::can_parse(path.as_path()) {
+        } else if document_file_source.is_none() && !default_path_source.is_parsable() {
             Ok(None)
         } else {
             let mut node_cache = NodeCache::default();
@@ -966,25 +970,22 @@ impl WorkspaceServerWithDb<'_> {
                     .insert(path.clone(), node_cache);
             }
 
-            let html_ish_supported = settings.as_ref().experimental_full_html_support_enabled();
-
             // Second-pass parsing for HTML files with embedded JavaScript and CSS content.
             let mut node_cache = NodeCache::default();
-            let embedded_snippets =
-                if DocumentFileSource::can_contain_embeds(path.as_path(), html_ish_supported) {
-                    self.parse_embedded_language_snippets(
-                        &biome_path,
-                        &source,
-                        &any_parse,
-                        &mut node_cache,
-                        &settings,
-                    )?
-                } else {
-                    Default::default()
-                }
-                .into_iter()
-                .map(|(parse, content, source)| (parse, content, self.db_add_source(source)))
-                .collect();
+            let embedded_snippets = if path_source.may_contain_embeds() {
+                self.parse_embedded_language_snippets(
+                    &biome_path,
+                    &source,
+                    &any_parse,
+                    &mut node_cache,
+                    &settings,
+                )?
+            } else {
+                Default::default()
+            }
+            .into_iter()
+            .map(|(parse, content, source)| (parse, content, self.db_add_source(source)))
+            .collect();
 
             Ok(Some((any_parse, file_source_index, embedded_snippets)))
         };
@@ -2546,10 +2547,7 @@ impl WorkspaceServerWithDb<'_> {
             .and_then(|parsed_source| {
                 db.source_from_index(parsed_source.document_source_index(&*db))
             })
-            .unwrap_or(DocumentFileSource::from_path(
-                path,
-                experimental_full_html_support,
-            ))
+            .unwrap_or_else(|| DocumentFileSource::from_path(path, experimental_full_html_support))
     }
 
     #[cfg(test)]
