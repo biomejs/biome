@@ -501,7 +501,7 @@ CssRoot {
                                     COLON@403..405 ":" [] [Whitespace(" ")],
                                     CssBogus {
                                         items: [
-                                            CssBogus {
+                                            CssBogusIfTestBooleanExpr {
                                                 items: [
                                                     HASH@405..406 "#" [] [],
                                                     L_CURLY@406..407 "{" [] [],
@@ -1528,7 +1528,7 @@ CssRoot {
                                                 CssQueryFeatureRangeComparison {
                                                     operator: LTEQ@1375..1378 "<=" [] [Whitespace(" ")],
                                                 },
-                                                CssBogus {
+                                                CssBogusIfTestBooleanExpr {
                                                     items: [
                                                         HASH@1378..1379 "#" [] [],
                                                         L_CURLY@1379..1380 "{" [] [],
@@ -2108,7 +2108,7 @@ CssRoot {
                   0: IDENT@390..403 "interpolation" [] []
                 1: COLON@403..405 ":" [] [Whitespace(" ")]
                 2: CSS_BOGUS@405..414
-                  0: CSS_BOGUS@405..414
+                  0: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@405..414
                     0: HASH@405..406 "#" [] []
                     1: L_CURLY@406..407 "{" [] []
                     2: SCSS_EXPRESSION@407..413
@@ -2730,7 +2730,7 @@ CssRoot {
                     0: IDENT@1369..1375 "width" [] [Whitespace(" ")]
                   3: CSS_QUERY_FEATURE_RANGE_COMPARISON@1375..1378
                     0: LTEQ@1375..1378 "<=" [] [Whitespace(" ")]
-                  4: CSS_BOGUS@1378..1385
+                  4: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@1378..1385
                     0: HASH@1378..1379 "#" [] []
                     1: L_CURLY@1379..1380 "{" [] []
                     2: SCSS_EXPRESSION@1380..1384

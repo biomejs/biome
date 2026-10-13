@@ -40,7 +40,7 @@ CssRoot {
                                         L_PAREN@7..8 "(" [] [],
                                         CssBogus {
                                             items: [
-                                                CssBogus {
+                                                CssBogusIfTestBooleanExpr {
                                                     items: [
                                                         HASH@8..9 "#" [] [],
                                                         L_CURLY@9..10 "{" [] [],
@@ -144,7 +144,7 @@ CssRoot {
                                                 items: [
                                                     CssBogus {
                                                         items: [
-                                                            CssBogus {
+                                                            CssBogusIfTestBooleanExpr {
                                                                 items: [
                                                                     HASH@77..78 "#" [] [],
                                                                     L_CURLY@78..79 "{" [] [],
@@ -256,7 +256,7 @@ CssRoot {
               0: CSS_BOGUS@7..31
                 0: L_PAREN@7..8 "(" [] []
                 1: CSS_BOGUS@8..29
-                  0: CSS_BOGUS@8..29
+                  0: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@8..29
                     0: HASH@8..9 "#" [] []
                     1: L_CURLY@9..10 "{" [] []
                     2: CSS_BOGUS@10..28
@@ -313,7 +313,7 @@ CssRoot {
             1: CSS_BOGUS@77..98
               0: CSS_BOGUS_SUPPORTS_CONDITION@77..98
                 0: CSS_BOGUS@77..98
-                  0: CSS_BOGUS@77..98
+                  0: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@77..98
                     0: HASH@77..78 "#" [] []
                     1: L_CURLY@78..79 "{" [] []
                     2: CSS_BOGUS@79..97
