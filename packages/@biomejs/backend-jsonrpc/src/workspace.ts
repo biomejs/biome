@@ -1563,6 +1563,11 @@ export interface Source {
 	 */
 	useGraphqlSortedArguments?: UseGraphqlSortedArgumentsConfiguration;
 	/**
+	 * Sort the named definitions in a GraphQL document.
+	 * See https://biomejs.dev/assist/actions/use-graphql-sorted-definitions
+	 */
+	useGraphqlSortedDefinitions?: UseGraphqlSortedDefinitionsConfiguration;
+	/**
 	 * Sort the variable definitions of GraphQL operations in natural order.
 	 * See https://biomejs.dev/assist/actions/use-graphql-sorted-variables
 	 */
@@ -1820,6 +1825,9 @@ export type OrganizeImportsConfiguration =
 export type UseGraphqlSortedArgumentsConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseGraphqlSortedArgumentsOptions;
+export type UseGraphqlSortedDefinitionsConfiguration =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithUseGraphqlSortedDefinitionsOptions;
 export type UseGraphqlSortedVariablesConfiguration =
 	| RuleAssistPlainConfiguration
 	| RuleAssistWithUseGraphqlSortedVariablesOptions;
@@ -5023,6 +5031,10 @@ export interface RuleAssistWithUseGraphqlSortedArgumentsOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseGraphqlSortedArgumentsOptions;
 }
+export interface RuleAssistWithUseGraphqlSortedDefinitionsOptions {
+	level: RuleAssistPlainConfiguration;
+	options: UseGraphqlSortedDefinitionsOptions;
+}
 export interface RuleAssistWithUseGraphqlSortedVariablesOptions {
 	level: RuleAssistPlainConfiguration;
 	options: UseGraphqlSortedVariablesOptions;
@@ -6908,6 +6920,7 @@ export interface OrganizeImportsOptions {
 	sortBareImports?: boolean;
 }
 export type UseGraphqlSortedArgumentsOptions = {};
+export type UseGraphqlSortedDefinitionsOptions = {};
 export type UseGraphqlSortedVariablesOptions = {};
 export interface UseSortedAttributesOptions {
 	/**
@@ -12937,6 +12950,7 @@ export type Category =
 	| "assist/source/noDuplicateClasses"
 	| "assist/source/organizeImports"
 	| "assist/source/useGraphqlSortedArguments"
+	| "assist/source/useGraphqlSortedDefinitions"
 	| "assist/source/useGraphqlSortedVariables"
 	| "assist/source/useSortedAttributes"
 	| "assist/source/useSortedEnumMembers"
