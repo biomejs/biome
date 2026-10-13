@@ -8577,6 +8577,13 @@
 						{ "type": "null" }
 					]
 				},
+				"usePackageJsonEngines": {
+					"description": "Require the engines field in package.json.\nSee https://biomejs.dev/linter/rules/use-package-json-engines",
+					"anyOf": [
+						{ "$ref": "#/$defs/UsePackageJsonEnginesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"usePackageJsonValidCpu": {
 					"description": "Require the cpu field in package.json to be a valid list of processor types.\nSee https://biomejs.dev/linter/rules/use-package-json-valid-cpu",
 					"anyOf": [
@@ -15096,6 +15103,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUsePackageJsonEnginesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UsePackageJsonEnginesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUsePackageJsonValidCpuOptions": {
 			"type": "object",
 			"properties": {
@@ -20204,6 +20220,16 @@
 			]
 		},
 		"UseOptionalChainOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UsePackageJsonEnginesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUsePackageJsonEnginesOptions" }
+			]
+		},
+		"UsePackageJsonEnginesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
