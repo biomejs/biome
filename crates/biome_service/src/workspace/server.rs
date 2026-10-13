@@ -303,6 +303,30 @@ impl ProcessFileState {
                 .any(|snippet| snippet.has_errors(&self.db))
     }
 
+    /// Returns `true` when parsing the formatted document can report
+    /// diagnostics, for the document or for one of the snippets whose syntax
+    /// errors stop formatting the document.
+    ///
+    /// Formatting doesn't add syntax errors to code that has none, so this is
+    /// the case when the parser already reported a diagnostic of any severity.
+    /// JSON is the exception: its formatter prints trailing commas when
+    /// `json.formatter.trailingCommas` is `all`, and the parser rejects them
+    /// unless its options allow them. A JSON document or snippet therefore
+    /// always counts.
+    fn can_have_parse_diagnostics_after_formatting(&self) -> bool {
+        matches!(self.file_source, DocumentFileSource::Json(_))
+            || !self.parsed.diagnostics(&self.db).is_empty()
+            || self
+                .iter_snippets()
+                .blocking_formatting(self.file_source)
+                .any(|snippet| {
+                    !snippet.diagnostics(&self.db).is_empty()
+                        || snippet
+                            .file_source(&self.db)
+                            .is_none_or(|source| matches!(source, DocumentFileSource::Json(_)))
+                })
+    }
+
     /// Counts the syntax errors of the document and of the snippets whose errors
     /// count for it: the snippets that stop formatting the document, and when
     /// `analyzed` is `true`, the snippets that the linter analyzes.
@@ -3555,13 +3579,20 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 let file_source = state.file_source;
                 let input = fixed_source.as_deref().unwrap_or(source);
                 let formatted = Self::reconstruct_legacy_file(&path, file_source, input, formatted);
-                state = self.parse_process_file_state(
-                    &path,
-                    &formatted,
-                    file_source,
-                    &settings_handle,
-                    settings.experimental_full_html_support_enabled(),
-                )?;
+                // Only the analyzer reads the syntax tree of the formatted code.
+                // Without it, the state only supplies parser diagnostics.
+                if categories.is_lint()
+                    || categories.is_assist()
+                    || state.can_have_parse_diagnostics_after_formatting()
+                {
+                    state = self.parse_process_file_state(
+                        &path,
+                        &formatted,
+                        file_source,
+                        &settings_handle,
+                        settings.experimental_full_html_support_enabled(),
+                    )?;
+                }
                 output = Some(formatted);
             } else if applied_fixes > 0
                 && let Some(fixed) = fixed_source

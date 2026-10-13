@@ -1491,6 +1491,247 @@ fn process_file_preserves_embedded_content_after_formatting() {
 }
 
 #[test]
+fn process_file_reports_syntax_errors_for_formatted_output() {
+    const PATH: &str = "/project/file.js";
+    const SOURCE: &str = "let    a    =    1;\nlet b = ;\nlet c = 3;\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), SOURCE.as_bytes());
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                formatter: Some(FormatterConfiguration {
+                    format_with_errors: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::from_client(SOURCE),
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .process_file(ProcessFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromServer,
+            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            fix_file_mode: None,
+            suppression_reason: None,
+            format: true,
+            write: true,
+            include_code_fix: false,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+            skip_parse_errors: false,
+        })
+        .unwrap();
+
+    let output = result.output.unwrap();
+    assert_eq!(output, "let a = 1;\nlet b = ;\nlet c = 3;\n");
+    assert_eq!(result.parse_errors, 1);
+    assert_eq!(result.diagnostics.len(), 1);
+    let span = result.diagnostics[0].location().span.unwrap();
+    assert_eq!(span.start(), TextSize::from(19));
+    assert_eq!(&output[span], ";");
+}
+
+#[test]
+fn process_file_reports_syntax_errors_added_by_formatting() {
+    const PATH: &str = "/project/file.json";
+    const SOURCE: &str = "{\n\"a\": 1\n}\n";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), SOURCE.as_bytes());
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                json: Some(JsonConfiguration {
+                    formatter: Some(JsonFormatterConfiguration {
+                        trailing_commas: Some(TrailingCommas::All),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::from_client(SOURCE),
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let result = workspace
+        .process_file(ProcessFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromServer,
+            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            fix_file_mode: None,
+            suppression_reason: None,
+            format: true,
+            write: true,
+            include_code_fix: false,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+            skip_parse_errors: false,
+        })
+        .unwrap();
+
+    let output = result.output.unwrap();
+    assert_eq!(output, "{\n\t\"a\": 1,\n}\n");
+    assert_eq!(result.parse_errors, 1);
+    assert_eq!(result.diagnostics.len(), 1);
+    let span = result.diagnostics[0].location().span.unwrap();
+    assert_eq!(&output[span], "}");
+}
+
+/// Formats and writes an HTML document with full HTML support enabled,
+/// requesting only syntax diagnostics.
+fn process_html_file_with_syntax_category(
+    source: &str,
+    configuration: Configuration,
+) -> ProcessFileResult {
+    const PATH: &str = "/project/file.html";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), source.as_bytes());
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                html: Some(HtmlConfiguration {
+                    experimental_full_support_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..configuration
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::from_client(source),
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    workspace
+        .process_file(ProcessFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromServer,
+            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            only: vec![],
+            skip: vec![],
+            enabled_rules: vec![],
+            fix_file_mode: None,
+            suppression_reason: None,
+            format: true,
+            write: true,
+            include_code_fix: false,
+            max_diagnostics: None,
+            diagnostic_level: Severity::Hint,
+            enforce_assist: false,
+            skip_parse_errors: false,
+        })
+        .unwrap()
+}
+
+#[test]
+fn process_file_reports_snippet_syntax_errors_for_formatted_output() {
+    let result = process_html_file_with_syntax_category(
+        "<div>\n\n\n</div>\n<script>let b = ;</script>\n",
+        Configuration {
+            formatter: Some(FormatterConfiguration {
+                format_with_errors: Some(true.into()),
+                ..Default::default()
+            }),
+            ..Default::default()
+        },
+    );
+
+    let output = result.output.unwrap();
+    assert_eq!(output, "<div></div>\n<script>\nlet b = ;\n</script>\n");
+    assert_eq!(result.parse_errors, 1);
+    assert_eq!(result.diagnostics.len(), 1);
+    let span = result.diagnostics[0].location().span.unwrap();
+    assert_eq!(span.start(), TextSize::from(29));
+    assert_eq!(&output[span], ";");
+}
+
+#[test]
+fn process_file_reports_snippet_syntax_errors_added_by_formatting() {
+    let result = process_html_file_with_syntax_category(
+        "<script type=\"application/json\">{\n\"a\": 1\n}</script>\n",
+        Configuration {
+            json: Some(JsonConfiguration {
+                formatter: Some(JsonFormatterConfiguration {
+                    trailing_commas: Some(TrailingCommas::All),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
+            ..Default::default()
+        },
+    );
+
+    let output = result.output.unwrap();
+    assert_eq!(
+        output,
+        "<script type=\"application/json\">\n{\n\t\"a\": 1,\n}\n</script>\n"
+    );
+    assert_eq!(result.parse_errors, 1);
+    assert_eq!(result.diagnostics.len(), 1);
+    let span = result.diagnostics[0].location().span.unwrap();
+    assert_eq!(&output[span], "}");
+}
+
+#[test]
 fn change_file_resumes_module_update_after_cancellation() {
     const BASE_PATH: &str = "/project/base.ts";
     const INDEX_PATH: &str = "/project/index.ts";
