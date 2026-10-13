@@ -1,5 +1,5 @@
 use biome_graphql_syntax::{GraphqlLanguage, GraphqlSyntaxToken};
-use biome_rowan::{AstNode, AstNodeList, NodeOrToken, SyntaxNode, SyntaxTriviaPiece, TokenText};
+use biome_rowan::{AstNode, AstNodeList, SyntaxTriviaPiece, TokenText};
 use biome_string_case::comparable_token::ComparableToken;
 use std::cmp::Ordering;
 
@@ -87,8 +87,8 @@ impl<N: AstNode<Language = GraphqlLanguage>> ItemTrivia<N> {
     }
 }
 
-/// Returns a copy of `list` sorted by the name returned by `name`, or `None` when the sorted
-/// list can't be built without placing a moved comment on the same line as other code.
+/// Returns the items of `list` sorted by the name returned by `name`, or `None` when they can't
+/// be sorted without placing a moved comment on the same line as other code.
 ///
 /// `r_paren` is the token that closes the list. The end-of-line comment of the item that ends up
 /// last must not be followed by `r_paren` on the same line.
@@ -99,9 +99,9 @@ pub(crate) fn sort_list<L, N>(
     list: &L,
     r_paren: &GraphqlSyntaxToken,
     name: impl Fn(&N) -> Option<TokenText>,
-) -> Option<L>
+) -> Option<Vec<N>>
 where
-    L: AstNodeList<Language = GraphqlLanguage, Node = N> + AstNode<Language = GraphqlLanguage>,
+    L: AstNodeList<Language = GraphqlLanguage, Node = N>,
     N: AstNode<Language = GraphqlLanguage>,
 {
     let r_paren_on_new_line = r_paren
@@ -155,10 +155,5 @@ where
         nodes.push(node);
     }
 
-    L::cast(SyntaxNode::new_detached(
-        list.syntax().kind(),
-        nodes
-            .into_iter()
-            .map(|node| Some(NodeOrToken::Node(node.into_syntax()))),
-    ))
+    Some(nodes)
 }

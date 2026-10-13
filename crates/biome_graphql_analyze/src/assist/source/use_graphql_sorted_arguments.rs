@@ -5,6 +5,7 @@ use biome_analyze::{
     declare_source_rule,
 };
 use biome_console::markup;
+use biome_graphql_factory::make;
 use biome_graphql_syntax::{
     GraphqlArgument, GraphqlArguments, GraphqlArgumentsDefinition, GraphqlDirective,
     GraphqlDirectiveDefinition, GraphqlField, GraphqlFieldDefinition, GraphqlInputValueDefinition,
@@ -123,12 +124,14 @@ impl Rule for UseGraphqlSortedArguments {
             AnyGraphqlArguments::GraphqlArguments(node) => {
                 let list = node.arguments();
                 let sorted = sort_list(&list, &node.r_paren_token().ok()?, argument_name)?;
+                let sorted = make::graphql_argument_list(sorted);
                 mutation.replace_node_discard_trivia(list, sorted);
             }
             AnyGraphqlArguments::GraphqlArgumentsDefinition(node) => {
                 let list = node.arguments();
                 let sorted =
                     sort_list(&list, &node.r_paren_token().ok()?, argument_definition_name)?;
+                let sorted = make::graphql_argument_definition_list(sorted);
                 mutation.replace_node_discard_trivia(list, sorted);
             }
         }
