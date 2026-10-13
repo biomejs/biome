@@ -319,13 +319,16 @@ fn is_at_if_test_boolean_expr_group(p: &mut CssParser) -> bool {
 }
 
 #[inline]
-fn parse_any_if_test_boolean_expr_group(p: &mut CssParser) -> ParsedSyntax {
+fn parse_any_if_test_boolean_expr_group(
+    p: &mut CssParser,
+    context: ValueParsingContext,
+) -> ParsedSyntax {
     // ( <boolean-expr> )
     if p.at(T!['(']) {
         let m = p.start();
         p.bump(T!['(']);
 
-        parse_any_if_test_boolean_expr(p)
+        parse_any_if_test_boolean_expr(p, context)
             .or_recover_with_token_set(
                 p,
                 &ParseRecoveryTokenSet::new(CSS_BOGUS_IF_TEST_BOOLEAN_EXPR, token_set![T![')']]),
@@ -353,7 +356,7 @@ fn is_at_if_test_boolean_not_expr(p: &mut CssParser) -> bool {
 /// not style(--color: green)
 /// ```
 #[inline]
-fn parse_if_test_boolean_not_expr(p: &mut CssParser) -> ParsedSyntax {
+fn parse_if_test_boolean_not_expr(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyntax {
     if !is_at_if_test_boolean_not_expr(p) {
         return Absent;
     }
@@ -362,7 +365,7 @@ fn parse_if_test_boolean_not_expr(p: &mut CssParser) -> ParsedSyntax {
 
     p.bump(T![not]);
 
-    parse_any_if_test_boolean_expr_group(p)
+    parse_any_if_test_boolean_expr_group(p, context)
         .or_recover_with_token_set(
             p,
             &ParseRecoveryTokenSet::new(CSS_BOGUS_IF_TEST_BOOLEAN_EXPR, token_set![T![')'], T![:]]),
@@ -386,7 +389,11 @@ fn is_at_if_test_boolean_and_expr(p: &mut CssParser) -> bool {
 /// style(--color: green) and style(--color: yellow)
 /// ```
 #[inline]
-fn parse_if_test_boolean_and_expr(p: &mut CssParser, lhs: CompletedMarker) -> CompletedMarker {
+fn parse_if_test_boolean_and_expr(
+    p: &mut CssParser,
+    lhs: CompletedMarker,
+    context: ValueParsingContext,
+) -> CompletedMarker {
     if !is_at_if_test_boolean_and_expr(p) {
         return lhs;
     }
@@ -394,13 +401,13 @@ fn parse_if_test_boolean_and_expr(p: &mut CssParser, lhs: CompletedMarker) -> Co
     let m = lhs.precede(p);
     p.bump(T![and]);
 
-    let recovery_result = parse_any_if_test_boolean_expr_group(p)
+    let recovery_result = parse_any_if_test_boolean_expr_group(p, context)
         .or_recover(
             p,
             &AnyIfTestBooleanExprChainParseRecovery,
             expected_if_test_boolean_expr_group,
         )
-        .map(|rhs| parse_if_test_boolean_and_expr(p, rhs));
+        .map(|rhs| parse_if_test_boolean_and_expr(p, rhs, context));
 
     if recovery_result.is_err() && p.at(T![and]) {
         // If we're here, it seems that we have
@@ -409,7 +416,7 @@ fn parse_if_test_boolean_and_expr(p: &mut CssParser, lhs: CompletedMarker) -> Co
         // but the parser is already at a recovered position.
         let m = p.start();
         let rhs = m.complete(p, CSS_BOGUS_IF_TEST_BOOLEAN_EXPR);
-        parse_if_test_boolean_and_expr(p, rhs);
+        parse_if_test_boolean_and_expr(p, rhs, context);
     }
 
     m.complete(p, CSS_IF_TEST_BOOLEAN_AND_EXPR)
@@ -428,7 +435,11 @@ fn is_at_if_test_boolean_or_expr(p: &mut CssParser) -> bool {
 /// style(--color: green) or style(--color: yellow)
 /// ```
 #[inline]
-fn parse_if_test_boolean_or_expr(p: &mut CssParser, lhs: CompletedMarker) -> CompletedMarker {
+fn parse_if_test_boolean_or_expr(
+    p: &mut CssParser,
+    lhs: CompletedMarker,
+    context: ValueParsingContext,
+) -> CompletedMarker {
     if !is_at_if_test_boolean_or_expr(p) {
         return lhs;
     }
@@ -436,13 +447,13 @@ fn parse_if_test_boolean_or_expr(p: &mut CssParser, lhs: CompletedMarker) -> Com
     let m = lhs.precede(p);
     p.bump(T![or]);
 
-    let recovery_result = parse_any_if_test_boolean_expr_group(p)
+    let recovery_result = parse_any_if_test_boolean_expr_group(p, context)
         .or_recover(
             p,
             &AnyIfTestBooleanExprChainParseRecovery,
             expected_if_test_boolean_expr_group,
         )
-        .map(|rhs| parse_if_test_boolean_or_expr(p, rhs));
+        .map(|rhs| parse_if_test_boolean_or_expr(p, rhs, context));
 
     if recovery_result.is_err() && p.at(T![or]) {
         // If we're here, it seems that we have
@@ -451,21 +462,21 @@ fn parse_if_test_boolean_or_expr(p: &mut CssParser, lhs: CompletedMarker) -> Com
         // but the parser is already at a recovered position.
         let m = p.start();
         let rhs = m.complete(p, CSS_BOGUS_IF_TEST_BOOLEAN_EXPR);
-        parse_if_test_boolean_or_expr(p, rhs);
+        parse_if_test_boolean_or_expr(p, rhs, context);
     }
 
     m.complete(p, CSS_IF_TEST_BOOLEAN_OR_EXPR)
 }
 
 #[inline]
-fn parse_any_if_test_boolean_expr(p: &mut CssParser) -> ParsedSyntax {
+fn parse_any_if_test_boolean_expr(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyntax {
     if is_at_if_test_boolean_not_expr(p) {
-        return parse_if_test_boolean_not_expr(p);
+        return parse_if_test_boolean_not_expr(p, context);
     }
 
-    parse_any_if_test_boolean_expr_group(p).map(|lhs| match p.cur() {
-        T![and] => parse_if_test_boolean_and_expr(p, lhs),
-        T![or] => parse_if_test_boolean_or_expr(p, lhs),
+    parse_any_if_test_boolean_expr_group(p, context).map(|lhs| match p.cur() {
+        T![and] => parse_if_test_boolean_and_expr(p, lhs, context),
+        T![or] => parse_if_test_boolean_or_expr(p, lhs, context),
         _ => lhs,
     })
 }
@@ -476,14 +487,14 @@ fn is_at_any_if_condition(p: &mut CssParser) -> bool {
 }
 
 #[inline]
-fn parse_any_if_condition(p: &mut CssParser) -> ParsedSyntax {
+fn parse_any_if_condition(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyntax {
     if p.at(T![else]) {
         let m = p.start();
         p.bump(T![else]);
         return Present(m.complete(p, CSS_ELSE_KEYWORD));
     }
 
-    parse_any_if_test_boolean_expr(p)
+    parse_any_if_test_boolean_expr(p, context)
 }
 
 #[inline]
@@ -494,7 +505,7 @@ fn parse_if_branch(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyn
 
     let m = p.start();
 
-    parse_any_if_condition(p)
+    parse_any_if_condition(p, context)
         .or_recover_with_token_set(
             p,
             &ParseRecoveryTokenSet::new(
