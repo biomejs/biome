@@ -62,3 +62,13 @@ directive @definition(b: Int, a: Int) on FIELD
 type Nested {
   field(b: Int @custom(y: 1, x: 2), a: Int): Int
 }
+
+# The arguments have no trivia between them, so a space is added to keep them apart.
+query NoSeparator {
+  users(b: "x"a: ENUM) { id }
+  numbers(b:1a:2) { id }
+}
+
+type NoSeparatorDefinition {
+  users(b: Int"Description of a"a: Int): [User]
+}

@@ -69,6 +69,16 @@ type Nested {
   field(b: Int @custom(y: 1, x: 2), a: Int): Int
 }
 
+# The arguments have no trivia between them, so a space is added to keep them apart.
+query NoSeparator {
+  users(b: "x"a: ENUM) { id }
+  numbers(b:1a:2) { id }
+}
+
+type NoSeparatorDefinition {
+  users(b: Int"Description of a"a: Int): [User]
+}
+
 ```
 
 # Diagnostics
@@ -433,6 +443,77 @@ invalid.graphql:63:23 assist/source/useGraphqlSortedArguments  FIXABLE  ━━�
        63 │ + ··field(b:·Int·@custom(x:·2,·y:·1),·a:·Int):·Int
     64 64 │   }
     65 65 │   
+  
+
+```
+
+```
+invalid.graphql:68:8 assist/source/useGraphqlSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the field users are not sorted.
+  
+    66 │ # The arguments have no trivia between them, so a space is added to keep them apart.
+    67 │ query NoSeparator {
+  > 68 │   users(b: "x"a: ENUM) { id }
+       │        ^^^^^^^^^^^^^^^
+    69 │   numbers(b:1a:2) { id }
+    70 │ }
+  
+  i Safe fix: Sort the arguments.
+  
+    66 66 │   # The arguments have no trivia between them, so a space is added to keep them apart.
+    67 67 │   query NoSeparator {
+    68    │ - ··users(b:·"x"a:·ENUM)·{·id·}
+       68 │ + ··users(a:·ENUM·b:·"x")·{·id·}
+    69 69 │     numbers(b:1a:2) { id }
+    70 70 │   }
+  
+
+```
+
+```
+invalid.graphql:69:10 assist/source/useGraphqlSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the field numbers are not sorted.
+  
+    67 │ query NoSeparator {
+    68 │   users(b: "x"a: ENUM) { id }
+  > 69 │   numbers(b:1a:2) { id }
+       │          ^^^^^^^^
+    70 │ }
+    71 │ 
+  
+  i Safe fix: Sort the arguments.
+  
+    67 67 │   query NoSeparator {
+    68 68 │     users(b: "x"a: ENUM) { id }
+    69    │ - ··numbers(b:1a:2)·{·id·}
+       69 │ + ··numbers(a:2·b:1)·{·id·}
+    70 70 │   }
+    71 71 │   
+  
+
+```
+
+```
+invalid.graphql:73:8 assist/source/useGraphqlSortedArguments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The arguments of the field users are not sorted.
+  
+    72 │ type NoSeparatorDefinition {
+  > 73 │   users(b: Int"Description of a"a: Int): [User]
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    74 │ }
+    75 │ 
+  
+  i Safe fix: Sort the arguments.
+  
+    71 71 │   
+    72 72 │   type NoSeparatorDefinition {
+    73    │ - ··users(b:·Int"Description·of·a"a:·Int):·[User]
+       73 │ + ··users("Description·of·a"a:·Int·b:·Int):·[User]
+    74 74 │   }
+    75 75 │   
   
 
 ```

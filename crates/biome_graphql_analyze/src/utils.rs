@@ -1,5 +1,7 @@
 use biome_graphql_syntax::{GraphqlLanguage, GraphqlSyntaxToken};
-use biome_rowan::{AstNode, AstNodeList, SyntaxTriviaPiece, TokenText, chain_trivia_pieces};
+use biome_rowan::{
+    AstNode, AstNodeList, SyntaxTriviaPiece, TokenText, TriviaPieceKind, chain_trivia_pieces,
+};
 use biome_string_case::comparable_token::ComparableToken;
 use std::cmp::Ordering;
 
@@ -170,6 +172,23 @@ where
             node.with_trailing_trivia_pieces([])?
         } else {
             node.with_trailing_trivia_pieces(slot.last_token.trailing_trivia().pieces())?
+        };
+
+        // Items can be written without trivia between them, as in `f(b: "x"a: ENUM)`. After
+        // sorting, such a pair can become `ENUM` followed by `b`, which would merge into a single
+        // name, so a space keeps them apart.
+        let next_is_separated = items
+            .get(position + 1)
+            .is_none_or(|next| next.position_leading_len > 0);
+        let last_token = node.syntax().last_token()?;
+        let node = if !next_is_separated && last_token.trailing_trivia().pieces().len() == 0 {
+            let spaced = last_token.with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+            N::cast(
+                node.into_syntax()
+                    .replace_child(last_token.into(), spaced.into())?,
+            )?
+        } else {
+            node
         };
         nodes.push(node);
     }
