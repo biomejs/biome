@@ -3393,6 +3393,11 @@ export interface Nursery {
 	 */
 	useNullishCoalescing?: UseNullishCoalescingConfiguration;
 	/**
+	 * Require the cpu field in package.json.
+	 * See https://biomejs.dev/linter/rules/use-package-json-cpu
+	 */
+	usePackageJsonCpu?: UsePackageJsonCpuConfiguration;
+	/**
 	 * Require Error objects as Promise rejection reasons.
 	 * See https://biomejs.dev/linter/rules/use-promise-reject-errors
 	 */
@@ -5923,6 +5928,9 @@ export type UseNamedLayerConfiguration =
 export type UseNullishCoalescingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNullishCoalescingOptions;
+export type UsePackageJsonCpuConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUsePackageJsonCpuOptions;
 export type UsePromiseRejectErrorsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUsePromiseRejectErrorsOptions;
@@ -8565,6 +8573,10 @@ export interface RuleWithUseNullishCoalescingOptions {
 	level: RulePlainConfiguration;
 	options?: UseNullishCoalescingOptions;
 }
+export interface RuleWithUsePackageJsonCpuOptions {
+	level: RulePlainConfiguration;
+	options?: UsePackageJsonCpuOptions;
+}
 export interface RuleWithUsePromiseRejectErrorsOptions {
 	level: RulePlainConfiguration;
 	options?: UsePromiseRejectErrorsOptions;
@@ -10947,6 +10959,7 @@ export interface UseNullishCoalescingOptions {
 	 */
 	ignoreTernaryTests?: boolean;
 }
+export type UsePackageJsonCpuOptions = {};
 export type UsePromiseRejectErrorsOptions = {};
 export interface UseReactCompilerOptions {
 	/**
@@ -12552,6 +12565,7 @@ export type Category =
 	| "lint/nursery/useNamedFunction"
 	| "lint/nursery/useNamedLayer"
 	| "lint/nursery/useNullishCoalescing"
+	| "lint/nursery/usePackageJsonCpu"
 	| "lint/nursery/usePromiseRejectErrors"
 	| "lint/nursery/useReactCompiler"
 	| "lint/nursery/useReactFunctionComponentDefinition"
