@@ -71,8 +71,8 @@ pub use crate::visitor::{
 };
 use biome_diagnostics::{Diagnostic, DiagnosticExt, category};
 use biome_rowan::{
-    AstNode, BatchMutation, Direction, Language, SyntaxKind as _, SyntaxToken, TextRange, TextSize,
-    TokenAtOffset, TriviaPieceKind,
+    AstNode, BatchMutation, BorrowedToken, Language, SyntaxKind as _, SyntaxToken, TextRange,
+    TextSize, TokenAtOffset, TriviaPieceKind,
 };
 use biome_suppression::{Suppression as ParsedSuppression, SuppressionKind};
 use rustc_hash::FxHashSet;
@@ -371,9 +371,8 @@ where
     /// Runs phase 0 over nodes and tokens to process line breaks and
     /// suppression comments
     fn run_first_phase(mut self) -> ControlFlow<Break> {
-        let iter = self.root.syntax().preorder_tokens(Direction::Next);
         // Iterate to evaluate suppressions
-        for token in iter {
+        for token in self.root.syntax().borrowed_tokens() {
             self.handle_token(token)?;
         }
         // Emit any validation diagnostics from finalizing
@@ -436,9 +435,9 @@ where
 
     /// Registers native and embedded suppression comments in source order while
     /// tracking line breaks in the original token and trivia.
-    fn handle_token(&mut self, token: SyntaxToken<L>) -> ControlFlow<Break> {
+    fn handle_token(&mut self, token: BorrowedToken<'_, L>) -> ControlFlow<Break> {
         // Process the content of the token for comments and newline
-        for piece in token.leading_trivia().pieces() {
+        for piece in token.leading_trivia_pieces() {
             if matches!(
                 piece.kind(),
                 TriviaPieceKind::Newline
@@ -448,9 +447,9 @@ where
                 self.bump_line_index(piece.text(), piece.text_range());
             }
 
-            if let Some(comment) = piece.as_comments() {
+            if piece.kind().is_comment() {
                 let range = piece.text_range();
-                let suppressions = self.suppression.parse_comment(comment.text(), range);
+                let suppressions = self.suppression.parse_comment(piece.text(), range);
                 self.handle_comment(SuppressionComment {
                     range,
                     suppressions,
@@ -483,7 +482,7 @@ where
             self.deny_top_level_suppressions = !token.kind().is_allowed_before_suppressions();
         }
 
-        for piece in token.trailing_trivia().pieces() {
+        for piece in token.trailing_trivia_pieces() {
             if matches!(
                 piece.kind(),
                 TriviaPieceKind::Newline
@@ -493,9 +492,9 @@ where
                 self.bump_line_index(piece.text(), piece.text_range());
             }
 
-            if let Some(comment) = piece.as_comments() {
+            if piece.kind().is_comment() {
                 let range = piece.text_range();
-                let suppressions = self.suppression.parse_comment(comment.text(), range);
+                let suppressions = self.suppression.parse_comment(piece.text(), range);
                 self.handle_comment(SuppressionComment {
                     range,
                     suppressions,

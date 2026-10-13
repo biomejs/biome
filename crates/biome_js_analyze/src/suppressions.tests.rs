@@ -989,6 +989,60 @@ console.log("should be suppressed");"#;
     assert!(diagnostic_found, "must have diagnostics");
 }
 
+#[test]
+fn line_suppression_follows_line_breaks_in_tokens_and_comments() {
+    const SOURCE: &str = "// biome-ignore lint/suspicious/noDoubleEquals: template spans two lines
+a1 == `
+` + (b1 == c1);
+d1 == e1; // biome-ignore lint/suspicious/noDoubleEquals: trailing comment
+f1 == g1;
+h1 == /* biome-ignore lint/suspicious/noDoubleEquals: comment spans two lines
+*/ i1;
+j1 == k1;
+";
+
+    let parsed = parse(
+        SOURCE,
+        JsFileSource::js_module(),
+        JsParserOptions::default(),
+    );
+
+    let filter = AnalysisFilter {
+        categories: RuleCategoriesBuilder::default().with_lint().build(),
+        enabled_rules: Some(&[RuleFilter::Rule("suspicious", "noDoubleEquals")]),
+        ..AnalysisFilter::default()
+    };
+
+    let mut reported = Vec::new();
+    let options = AnalyzerOptions::default();
+    analyze(
+        &parsed.tree(),
+        filter,
+        &options,
+        &[],
+        JsAnalyzerServices::default(),
+        |signal| {
+            if let Some(diag) = signal.diagnostic() {
+                let code = diag.category().unwrap();
+                if code != category!("lint/suspicious/noDoubleEquals") {
+                    panic!("unexpected diagnostic {code:?}");
+                }
+                let range = diag.get_span().unwrap();
+                reported.push(&SOURCE[..usize::from(range.start())]);
+            }
+
+            ControlFlow::<Never>::Continue(())
+        },
+    );
+
+    // Each comment suppresses the line after the one it ends on, and only that line.
+    let reported: Vec<_> = reported
+        .into_iter()
+        .map(|before| before.rsplit(['\n', '(']).next().unwrap().trim_end())
+        .collect();
+    assert_eq!(reported, ["b1", "d1", "h1"]);
+}
+
 fn project_layout_with_top_level_dependencies(dependencies: Dependencies) -> Arc<ProjectLayout> {
     let manifest = PackageJson::default().with_dependencies(dependencies);
 
