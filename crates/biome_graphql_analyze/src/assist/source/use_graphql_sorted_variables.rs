@@ -6,10 +6,12 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_graphql_factory::make;
 use biome_graphql_syntax::{
-    GraphqlLanguage, GraphqlVariableDefinition, GraphqlVariableDefinitionList,
+    GraphqlLanguage, GraphqlSyntaxToken, GraphqlVariableDefinition, GraphqlVariableDefinitionList,
     GraphqlVariableDefinitions,
 };
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxTriviaPiece, TokenText};
+use biome_rowan::{
+    AstNode, AstNodeList, BatchMutationExt, SyntaxTriviaPiece, TokenText, chain_trivia_pieces,
+};
 use biome_rule_options::use_graphql_sorted_variables::UseGraphqlSortedVariablesOptions;
 use biome_string_case::comparable_token::ComparableToken;
 use std::cmp::Ordering;
@@ -115,49 +117,63 @@ impl Rule for UseGraphqlSortedVariables {
     }
 }
 
-type TriviaPieces = Vec<SyntaxTriviaPiece<GraphqlLanguage>>;
-
 /// The trivia around a variable definition, split between the trivia that moves with the
 /// variable and the trivia that stays at its position in the list.
 struct VariableTrivia {
     node: GraphqlVariableDefinition,
-    /// The newlines and whitespace before the first comment of the leading trivia.
-    position_leading: TriviaPieces,
-    /// The leading trivia from its first comment onward.
-    attached_leading: TriviaPieces,
-    trailing: TriviaPieces,
-    /// Whether `trailing` contains an end-of-line comment, in which case the whole trailing
-    /// trivia moves with the variable instead of staying in place.
+    name: Option<TokenText>,
+    first_token: GraphqlSyntaxToken,
+    /// The number of leading trivia pieces of `first_token` before the first comment.
+    position_leading_len: usize,
+    last_token: GraphqlSyntaxToken,
+    /// Whether the trailing trivia of `last_token` contains an end-of-line comment, in which
+    /// case the whole trailing trivia moves with the variable instead of staying in place.
     trailing_is_attached: bool,
 }
 
 impl VariableTrivia {
-    fn new(node: GraphqlVariableDefinition) -> Self {
+    fn new(node: GraphqlVariableDefinition) -> Option<Self> {
         let syntax = node.syntax();
-        let leading: TriviaPieces = syntax
-            .first_token()
-            .map(|token| token.leading_trivia().pieces().collect())
-            .unwrap_or_default();
-        let trailing: TriviaPieces = syntax
-            .last_token()
-            .map(|token| token.trailing_trivia().pieces().collect())
-            .unwrap_or_default();
-
-        let first_comment = leading
-            .iter()
+        let first_token = syntax.first_token()?;
+        let last_token = syntax.last_token()?;
+        let leading = first_token.leading_trivia();
+        let position_leading_len = leading
+            .pieces()
             .position(|piece| piece.is_comments())
-            .unwrap_or(leading.len());
-        let mut position_leading = leading;
-        let attached_leading = position_leading.split_off(first_comment);
-        let trailing_is_attached = trailing.iter().any(|piece| piece.is_comments());
+            .unwrap_or(leading.pieces().len());
+        let trailing_is_attached = last_token
+            .trailing_trivia()
+            .pieces()
+            .any(|piece| piece.is_comments());
 
-        Self {
+        Some(Self {
+            name: variable_name(&node),
             node,
-            position_leading,
-            attached_leading,
-            trailing,
+            first_token,
+            position_leading_len,
+            last_token,
             trailing_is_attached,
-        }
+        })
+    }
+
+    /// The leading trivia before its first comment. It stays at the position of the variable.
+    fn position_leading(&self) -> impl ExactSizeIterator<Item = SyntaxTriviaPiece<GraphqlLanguage>> {
+        self.first_token
+            .leading_trivia()
+            .pieces()
+            .take(self.position_leading_len)
+    }
+
+    /// The leading trivia from its first comment onward. It moves with the variable.
+    fn attached_leading(&self) -> impl ExactSizeIterator<Item = SyntaxTriviaPiece<GraphqlLanguage>> {
+        self.first_token
+            .leading_trivia()
+            .pieces()
+            .skip(self.position_leading_len)
+    }
+
+    fn has_attached_leading(&self) -> bool {
+        self.position_leading_len < self.first_token.leading_trivia().pieces().len()
     }
 
     /// Whether this position in the list starts on a new line.
@@ -165,8 +181,8 @@ impl VariableTrivia {
     /// Leading trivia is either empty or starts with a newline, because the trivia up to the
     /// end of a line belongs to the trailing trivia of the previous token.
     fn position_on_new_line(&self) -> bool {
-        self.position_leading
-            .first()
+        self.position_leading()
+            .next()
             .is_some_and(|piece| piece.is_newline())
     }
 }
@@ -177,10 +193,13 @@ fn sort_variable_list(
     list: &GraphqlVariableDefinitionList,
     r_paren_on_new_line: bool,
 ) -> Option<GraphqlVariableDefinitionList> {
-    let variables: Vec<VariableTrivia> = list.iter().map(VariableTrivia::new).collect();
+    let variables = list
+        .iter()
+        .map(VariableTrivia::new)
+        .collect::<Option<Vec<_>>>()?;
 
     let mut order: Vec<usize> = (0..variables.len()).collect();
-    order.sort_by(|&a, &b| compare_variables(&variables[a].node, &variables[b].node));
+    order.sort_by(|&a, &b| compare_names(variables[a].name.clone(), variables[b].name.clone()));
 
     let mut nodes = Vec::with_capacity(variables.len());
     for (position, &index) in order.iter().enumerate() {
@@ -189,11 +208,18 @@ fn sort_variable_list(
 
         // A comment above the variable must stay on its own line. Otherwise it would follow
         // the previous token and describe a different variable.
-        if !variable.attached_leading.is_empty() && !slot.position_on_new_line() {
+        if variable.has_attached_leading() && !slot.position_on_new_line() {
             return None;
         }
 
-        let trailing = if variable.trailing_is_attached {
+        let node = variable
+            .node
+            .clone()
+            .with_leading_trivia_pieces(chain_trivia_pieces(
+                slot.position_leading(),
+                variable.attached_leading(),
+            ))?;
+        let node = if variable.trailing_is_attached {
             // A line comment runs until the end of the line, so the code after it must start
             // on a new line. Otherwise the comment would swallow that code.
             let next_on_new_line = variables
@@ -202,24 +228,12 @@ fn sort_variable_list(
             if !next_on_new_line {
                 return None;
             }
-            variable.trailing.clone()
+            node.with_trailing_trivia_pieces(variable.last_token.trailing_trivia().pieces())?
         } else if slot.trailing_is_attached {
-            Vec::new()
+            node.with_trailing_trivia_pieces([])?
         } else {
-            slot.trailing.clone()
+            node.with_trailing_trivia_pieces(slot.last_token.trailing_trivia().pieces())?
         };
-
-        let leading: TriviaPieces = slot
-            .position_leading
-            .iter()
-            .chain(&variable.attached_leading)
-            .cloned()
-            .collect();
-        let node = variable
-            .node
-            .clone()
-            .with_leading_trivia_pieces(leading)?
-            .with_trailing_trivia_pieces(trailing)?;
         nodes.push(node);
     }
 
@@ -236,8 +250,9 @@ fn variable_name(node: &GraphqlVariableDefinition) -> Option<TokenText> {
         .map(|token| token.token_text_trimmed())
 }
 
-fn compare_variables(a: &GraphqlVariableDefinition, b: &GraphqlVariableDefinition) -> Ordering {
-    match (variable_name(a), variable_name(b)) {
+/// Compares two names in natural order. A missing name sorts after every present name.
+fn compare_names(a: Option<TokenText>, b: Option<TokenText>) -> Ordering {
+    match (a, b) {
         (Some(a), Some(b)) => ComparableToken::new(a).ascii_nat_cmp(&ComparableToken::new(b)),
         (None, Some(_)) => Ordering::Greater,
         (Some(_), None) => Ordering::Less,
@@ -248,10 +263,9 @@ fn compare_variables(a: &GraphqlVariableDefinition, b: &GraphqlVariableDefinitio
 fn is_variable_list_sorted(list: &GraphqlVariableDefinitionList) -> bool {
     let mut previous: Option<GraphqlVariableDefinition> = None;
     for variable in list {
-        if previous
-            .as_ref()
-            .is_some_and(|previous| compare_variables(previous, &variable) == Ordering::Greater)
-        {
+        if previous.as_ref().is_some_and(|previous| {
+            compare_names(variable_name(previous), variable_name(&variable)) == Ordering::Greater
+        }) {
             return false;
         }
         previous = Some(variable);
