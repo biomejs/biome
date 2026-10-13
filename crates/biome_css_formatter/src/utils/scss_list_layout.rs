@@ -34,13 +34,15 @@ impl<'a> ScssListLayout<'a> {
             return self.fmt_include_list(&elements, f);
         }
 
+        let trailing_comma = (!has_required_trailing_comma(&elements)).then_some(token(","));
+
         if is_module_configuration_parenthesized_list_value(self.node) {
             return write!(
                 f,
                 [group(&format_args![
                     soft_line_break(),
                     elements.format(),
-                    token(",")
+                    trailing_comma
                 ])
                 .should_expand(true)]
             );
@@ -53,7 +55,7 @@ impl<'a> ScssListLayout<'a> {
                 f,
                 [group(&format_args![
                     elements.format(),
-                    if_group_breaks(&token(","))
+                    if_group_breaks(&trailing_comma)
                 ])
                 .should_expand(true)]
             );
@@ -66,7 +68,7 @@ impl<'a> ScssListLayout<'a> {
                 f,
                 [group(&format_args![
                     elements.format(),
-                    if_group_breaks(&token(","))
+                    if_group_breaks(&trailing_comma)
                 ])]
             );
         }
@@ -114,7 +116,9 @@ impl<'a> ScssListLayout<'a> {
         let should_force_trailing_comma = self.should_force_include_trailing_comma(elements, f);
         let is_scalar_include_parentheses = self.is_scalar_include_parentheses(elements);
         let trailing_comma = format_with(|f| {
-            if should_force_trailing_comma {
+            if has_required_trailing_comma(elements) {
+                Ok(())
+            } else if should_force_trailing_comma {
                 write!(f, [token(",")])
             } else if is_scalar_include_parentheses {
                 // Do not turn `2 * ($bar)` into `2 * ($bar,)`.
@@ -347,6 +351,15 @@ pub(crate) fn has_scss_list_shape(node: &ScssListExpression) -> bool {
 
 fn has_list_shape(elements: &ScssListExpressionElementList) -> bool {
     elements.len() > 1 || elements.trailing_separator().is_some()
+}
+
+/// Returns whether the comma is required to preserve a single-element list.
+///
+/// ```scss
+/// $single: (1px 2px,);
+/// ```
+pub(crate) fn has_required_trailing_comma(elements: &ScssListExpressionElementList) -> bool {
+    elements.len() == 1 && elements.trailing_separator().is_some()
 }
 
 /// Checks whether `"save" 50px` has multiple values.
