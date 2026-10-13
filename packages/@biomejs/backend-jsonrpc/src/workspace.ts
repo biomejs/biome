@@ -3978,6 +3978,11 @@ export interface Nursery {
 	 */
 	usePackageJsonCpu?: UsePackageJsonCpuConfiguration;
 	/**
+	 * Require the engines field in package.json.
+	 * See https://biomejs.dev/linter/rules/use-package-json-engines
+	 */
+	usePackageJsonEngines?: UsePackageJsonEnginesConfiguration;
+	/**
 	 * Require the cpu field in package.json to be a valid list of processor types.
 	 * See https://biomejs.dev/linter/rules/use-package-json-valid-cpu
 	 */
@@ -7111,6 +7116,9 @@ export type UseObjectFromEntriesConfiguration =
 export type UsePackageJsonCpuConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUsePackageJsonCpuOptions;
+export type UsePackageJsonEnginesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUsePackageJsonEnginesOptions;
 export type UsePackageJsonValidCpuConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUsePackageJsonValidCpuOptions;
@@ -10493,6 +10501,10 @@ export interface RuleWithUsePackageJsonCpuOptions {
 	level: RulePlainConfiguration;
 	options?: UsePackageJsonCpuOptions;
 }
+export interface RuleWithUsePackageJsonEnginesOptions {
+	level: RulePlainConfiguration;
+	options?: UsePackageJsonEnginesOptions;
+}
 export interface RuleWithUsePackageJsonValidCpuOptions {
 	level: RulePlainConfiguration;
 	options?: UsePackageJsonValidCpuOptions;
@@ -13390,6 +13402,7 @@ export interface UseObjectFromEntriesOptions {
 	functions?: string[];
 }
 export type UsePackageJsonCpuOptions = {};
+export type UsePackageJsonEnginesOptions = {};
 export type UsePackageJsonValidCpuOptions = {};
 export type UsePackageJsonValidEnginesOptions = {};
 export type UsePromiseRejectErrorsOptions = {};
@@ -15308,6 +15321,7 @@ export type Category =
 	| "lint/nursery/useNextScriptForGoogleAnalytics"
 	| "lint/nursery/useNullishCoalescing"
 	| "lint/nursery/usePackageJsonCpu"
+	| "lint/nursery/usePackageJsonEngines"
 	| "lint/nursery/useObjectFromEntries"
 	| "lint/nursery/usePackageJsonValidCpu"
 	| "lint/nursery/usePackageJsonValidEngines"
