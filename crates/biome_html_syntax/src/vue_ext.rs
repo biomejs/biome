@@ -65,6 +65,12 @@ impl VueDirective {
         self.name_token()
             .is_ok_and(|t| t.text_trimmed().eq_ignore_ascii_case("v-if"))
     }
+
+    #[inline]
+    pub fn is_show(&self) -> bool {
+        self.name_token()
+            .is_ok_and(|t| t.text_trimmed().eq_ignore_ascii_case("v-show"))
+    }
 }
 
 #[test]

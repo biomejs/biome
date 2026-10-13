@@ -8801,6 +8801,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueToggleInsideTransition": {
+					"description": "Require the element inside a Vue \\<Transition> to be shown and hidden with v-if or v-show.\nSee https://biomejs.dev/linter/rules/use-vue-toggle-inside-transition",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueToggleInsideTransitionConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueTypedRef": {
 					"description": "Require a type for refs created with ref() or shallowRef() in TypeScript.\nSee https://biomejs.dev/linter/rules/use-vue-typed-ref",
 					"anyOf": [
@@ -16053,6 +16060,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueToggleInsideTransitionOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueToggleInsideTransitionOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueTypedRefOptions": {
 			"type": "object",
 			"properties": {
@@ -21373,6 +21389,16 @@
 			]
 		},
 		"UseVueNextTickPromiseOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueToggleInsideTransitionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueToggleInsideTransitionOptions" }
+			]
+		},
+		"UseVueToggleInsideTransitionOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
