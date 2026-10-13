@@ -1,8 +1,8 @@
 use crate::lexer::{CssLexContext, CssReLexContext};
 use crate::parser::CssParser;
-use crate::syntax::parse_regular_identifier;
 use crate::syntax::property::color::{is_at_color, parse_color};
 use crate::syntax::scss::{is_at_scss_interpolation, parse_scss_regular_interpolation};
+use crate::syntax::{is_at_identifier, parse_regular_identifier};
 use biome_css_syntax::CssSyntaxKind::{
     CSS_GENERIC_DELIMITER, SCSS_HASH_VALUE, SCSS_INTERPOLATED_VALUE,
     SCSS_INTERPOLATED_VALUE_PART_LIST,
@@ -47,14 +47,13 @@ pub(crate) fn parse_scss_hash_value_or_color(p: &mut CssParser) -> ParsedSyntax 
     p.bump(T![ident]);
     let head = m.complete(p, SCSS_HASH_VALUE);
 
-    let has_gap = |p: &mut CssParser| p.last_end() != Some(p.cur_range().start());
-    if has_gap(p) || !is_at_scss_interpolation(p) {
+    if p.last_end() != Some(p.cur_range().start()) || !is_at_scss_interpolation(p) {
         return Present(head);
     }
 
     let list = head.precede(p);
     let mut progress = ParserProgress::default();
-    while !has_gap(p) {
+    while p.last_end() == Some(p.cur_range().start()) {
         progress.assert_progressing(p);
         if is_at_scss_interpolation(p) {
             parse_scss_regular_interpolation(p).ok();
@@ -79,13 +78,17 @@ pub(crate) fn parse_scss_hash_value_or_color(p: &mut CssParser) -> ParsedSyntax 
             p.bump(T![%]);
             delimiter.complete(p, CSS_GENERIC_DELIMITER);
             break;
-        } else {
+        } else if is_at_identifier(p) {
+            parse_regular_identifier(p).ok();
+        } else if matches!(p.cur_text().as_bytes().first(), Some(b'0'..=b'9' | b'-')) {
             // Hash-string tails are identifier text even when regular lexing
             // produces a number or dimension, as in `#ABC#{G}1PX`.
             p.re_lex(CssReLexContext::ScssIdentifierContinuation);
             if parse_regular_identifier(p).is_absent() {
                 break;
             }
+        } else {
+            break;
         }
     }
 

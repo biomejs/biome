@@ -22,3 +22,7 @@
   .css-only-prefix { color: red; }
 }
 .after { display: block; color: #ABC; }
+
+$unclosed-double: "#{#ABC#{G}"; .after-double { color: red; }
+
+$unclosed-single: '#{#Brand#{G}1PX'; .after-single { color: blue; }

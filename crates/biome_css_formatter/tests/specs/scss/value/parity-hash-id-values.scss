@@ -67,3 +67,5 @@ $id:   #ABCG;
 
 /* biome-ignore format: Preserve the authored hash spelling. */
 .keep {value: #ABCG;colors: #abc;}
+
+.quoted-hash{value:"#{#ABC#{G}}";tail:"#{#ABC#{G}1PX}";}
