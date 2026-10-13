@@ -1,0 +1,194 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<script lang="ts">
+	import { createEventDispatcher, createEventDispatcher as createDispatcher } from 'svelte';
+	import * as svelte from 'svelte';
+
+	const dispatch = createEventDispatcher();
+	const aliased = createDispatcher();
+	const namespaced = svelte.createEventDispatcher();
+	const computed = svelte['createEventDispatcher']();
+	const parenthesized = (createEventDispatcher)();
+	const optional = createEventDispatcher?.();
+	const casted = createEventDispatcher() as (name: string) => void;
+
+	function setup() {
+		return createEventDispatcher();
+	}
+</script>
+
+<button onclick={() => dispatch('save')}>Save</button>
+
+```
+
+# Diagnostics
+```
+invalid.svelte:6:19 lint/nursery/useSvelteEventDispatcherTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This createEventDispatcher call doesn't declare the types of its events.
+  
+    4 │ 	import * as svelte from 'svelte';
+    5 │ 
+  > 6 │ 	const dispatch = createEventDispatcher();
+      │ 	                 ^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ 	const aliased = createDispatcher();
+    8 │ 	const namespaced = svelte.createEventDispatcher();
+  
+  i Without them, TypeScript accepts any event name with any data, so mistakes in the events this component sends aren't reported.
+  
+  i Describe the events between angle brackets, for example createEventDispatcher<{ save: string }>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:7:18 lint/nursery/useSvelteEventDispatcherTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This createEventDispatcher call doesn't declare the types of its events.
+  
+    6 │ 	const dispatch = createEventDispatcher();
+  > 7 │ 	const aliased = createDispatcher();
+      │ 	                ^^^^^^^^^^^^^^^^^^
+    8 │ 	const namespaced = svelte.createEventDispatcher();
+    9 │ 	const computed = svelte['createEventDispatcher']();
+  
+  i Without them, TypeScript accepts any event name with any data, so mistakes in the events this component sends aren't reported.
+  
+  i Describe the events between angle brackets, for example createEventDispatcher<{ save: string }>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:8:21 lint/nursery/useSvelteEventDispatcherTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This createEventDispatcher call doesn't declare the types of its events.
+  
+     6 │ 	const dispatch = createEventDispatcher();
+     7 │ 	const aliased = createDispatcher();
+   > 8 │ 	const namespaced = svelte.createEventDispatcher();
+       │ 	                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ 	const computed = svelte['createEventDispatcher']();
+    10 │ 	const parenthesized = (createEventDispatcher)();
+  
+  i Without them, TypeScript accepts any event name with any data, so mistakes in the events this component sends aren't reported.
+  
+  i Describe the events between angle brackets, for example createEventDispatcher<{ save: string }>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:9:19 lint/nursery/useSvelteEventDispatcherTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This createEventDispatcher call doesn't declare the types of its events.
+  
+     7 │ 	const aliased = createDispatcher();
+     8 │ 	const namespaced = svelte.createEventDispatcher();
+   > 9 │ 	const computed = svelte['createEventDispatcher']();
+       │ 	                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 	const parenthesized = (createEventDispatcher)();
+    11 │ 	const optional = createEventDispatcher?.();
+  
+  i Without them, TypeScript accepts any event name with any data, so mistakes in the events this component sends aren't reported.
+  
+  i Describe the events between angle brackets, for example createEventDispatcher<{ save: string }>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:10:24 lint/nursery/useSvelteEventDispatcherTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This createEventDispatcher call doesn't declare the types of its events.
+  
+     8 │ 	const namespaced = svelte.createEventDispatcher();
+     9 │ 	const computed = svelte['createEventDispatcher']();
+  > 10 │ 	const parenthesized = (createEventDispatcher)();
+       │ 	                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ 	const optional = createEventDispatcher?.();
+    12 │ 	const casted = createEventDispatcher() as (name: string) => void;
+  
+  i Without them, TypeScript accepts any event name with any data, so mistakes in the events this component sends aren't reported.
+  
+  i Describe the events between angle brackets, for example createEventDispatcher<{ save: string }>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:11:19 lint/nursery/useSvelteEventDispatcherTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This createEventDispatcher call doesn't declare the types of its events.
+  
+     9 │ 	const computed = svelte['createEventDispatcher']();
+    10 │ 	const parenthesized = (createEventDispatcher)();
+  > 11 │ 	const optional = createEventDispatcher?.();
+       │ 	                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 	const casted = createEventDispatcher() as (name: string) => void;
+    13 │ 
+  
+  i Without them, TypeScript accepts any event name with any data, so mistakes in the events this component sends aren't reported.
+  
+  i Describe the events between angle brackets, for example createEventDispatcher<{ save: string }>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:12:17 lint/nursery/useSvelteEventDispatcherTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This createEventDispatcher call doesn't declare the types of its events.
+  
+    10 │ 	const parenthesized = (createEventDispatcher)();
+    11 │ 	const optional = createEventDispatcher?.();
+  > 12 │ 	const casted = createEventDispatcher() as (name: string) => void;
+       │ 	               ^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ 
+    14 │ 	function setup() {
+  
+  i Without them, TypeScript accepts any event name with any data, so mistakes in the events this component sends aren't reported.
+  
+  i Describe the events between angle brackets, for example createEventDispatcher<{ save: string }>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:15:10 lint/nursery/useSvelteEventDispatcherTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This createEventDispatcher call doesn't declare the types of its events.
+  
+    14 │ 	function setup() {
+  > 15 │ 		return createEventDispatcher();
+       │ 		       ^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 	}
+    17 │ </script>
+  
+  i Without them, TypeScript accepts any event name with any data, so mistakes in the events this component sends aren't reported.
+  
+  i Describe the events between angle brackets, for example createEventDispatcher<{ save: string }>().
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
