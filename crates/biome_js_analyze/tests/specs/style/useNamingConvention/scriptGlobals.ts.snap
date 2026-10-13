@@ -1,0 +1,384 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: scriptGlobals.ts
+---
+# Input
+```ts
+// should generate diagnostics
+namespace Global_NS {
+    export const v = 1;
+    const local_value = 2;
+    console.log(local_value);
+}
+import global_namespace = Global_NS;
+function my_global_fn(BAD_PARAM: number) {
+    const local_value = BAD_PARAM;
+    return local_value;
+}
+const Global_Const = 1;
+let global_let = 2;
+var global_var = 3;
+class global_class {}
+interface global_interface {}
+type global_type = number;
+enum global_enum { Value }
+const { value: global_alias } = { value: 1 };
+const [global_element] = [1];
+const functionExpression = function inner_fn() { return inner_fn; };
+const classExpression = class inner_class {};
+{
+    var hoisted_global = 1;
+    let block_local = 2;
+    console.log(block_local);
+}
+console.log(Global_NS.v, my_global_fn(Global_Const), global_let, global_var,
+    global_class, global_enum.Value, global_alias, global_element, hoisted_global);
+
+```
+
+# Diagnostics
+```
+scriptGlobals.ts:2:11 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This namespace name should be in camelCase or PascalCase.
+  
+    1 │ // should generate diagnostics
+  > 2 │ namespace Global_NS {
+      │           ^^^^^^^^^
+    3 │     export const v = 1;
+    4 │     const local_value = 2;
+  
+
+```
+
+```
+scriptGlobals.ts:4:11 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This global const name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+    2 │ namespace Global_NS {
+    3 │     export const v = 1;
+  > 4 │     const local_value = 2;
+      │           ^^^^^^^^^^^
+    5 │     console.log(local_value);
+    6 │ }
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+     2  2 │   namespace Global_NS {
+     3  3 │       export const v = 1;
+     4    │ - ····const·local_value·=·2;
+     5    │ - ····console.log(local_value);
+        4 │ + ····const·localValue·=·2;
+        5 │ + ····console.log(localValue);
+     6  6 │   }
+     7  7 │   import global_namespace = Global_NS;
+  
+
+```
+
+```
+scriptGlobals.ts:7:8 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This import alias name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+    5 │     console.log(local_value);
+    6 │ }
+  > 7 │ import global_namespace = Global_NS;
+      │        ^^^^^^^^^^^^^^^^
+    8 │ function my_global_fn(BAD_PARAM: number) {
+    9 │     const local_value = BAD_PARAM;
+  
+
+```
+
+```
+scriptGlobals.ts:8:10 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This global function name should be in camelCase or PascalCase or UPPERCASE.
+  
+     6 │ }
+     7 │ import global_namespace = Global_NS;
+   > 8 │ function my_global_fn(BAD_PARAM: number) {
+       │          ^^^^^^^^^^^^
+     9 │     const local_value = BAD_PARAM;
+    10 │     return local_value;
+  
+
+```
+
+```
+scriptGlobals.ts:8:23 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This function parameter name should be in camelCase or PascalCase.
+  
+     6 │ }
+     7 │ import global_namespace = Global_NS;
+   > 8 │ function my_global_fn(BAD_PARAM: number) {
+       │                       ^^^^^^^^^
+     9 │     const local_value = BAD_PARAM;
+    10 │     return local_value;
+  
+  i Safe fix: Rename this symbol in PascalCase.
+  
+     6  6 │   }
+     7  7 │   import global_namespace = Global_NS;
+     8    │ - function·my_global_fn(BAD_PARAM:·number)·{
+     9    │ - ····const·local_value·=·BAD_PARAM;
+        8 │ + function·my_global_fn(BadParam:·number)·{
+        9 │ + ····const·local_value·=·BadParam;
+    10 10 │       return local_value;
+    11 11 │   }
+  
+
+```
+
+```
+scriptGlobals.ts:9:11 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This const name should be in camelCase or PascalCase.
+  
+     7 │ import global_namespace = Global_NS;
+     8 │ function my_global_fn(BAD_PARAM: number) {
+   > 9 │     const local_value = BAD_PARAM;
+       │           ^^^^^^^^^^^
+    10 │     return local_value;
+    11 │ }
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+     7  7 │   import global_namespace = Global_NS;
+     8  8 │   function my_global_fn(BAD_PARAM: number) {
+     9    │ - ····const·local_value·=·BAD_PARAM;
+    10    │ - ····return·local_value;
+        9 │ + ····const·localValue·=·BAD_PARAM;
+       10 │ + ····return·localValue;
+    11 11 │   }
+    12 12 │   const Global_Const = 1;
+  
+
+```
+
+```
+scriptGlobals.ts:12:7 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This global const name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+    10 │     return local_value;
+    11 │ }
+  > 12 │ const Global_Const = 1;
+       │       ^^^^^^^^^^^^
+    13 │ let global_let = 2;
+    14 │ var global_var = 3;
+  
+
+```
+
+```
+scriptGlobals.ts:13:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This let name should be in camelCase or PascalCase.
+  
+    11 │ }
+    12 │ const Global_Const = 1;
+  > 13 │ let global_let = 2;
+       │     ^^^^^^^^^^
+    14 │ var global_var = 3;
+    15 │ class global_class {}
+  
+
+```
+
+```
+scriptGlobals.ts:14:5 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This global var name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+    12 │ const Global_Const = 1;
+    13 │ let global_let = 2;
+  > 14 │ var global_var = 3;
+       │     ^^^^^^^^^^
+    15 │ class global_class {}
+    16 │ interface global_interface {}
+  
+
+```
+
+```
+scriptGlobals.ts:15:7 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class name should be in PascalCase.
+  
+    13 │ let global_let = 2;
+    14 │ var global_var = 3;
+  > 15 │ class global_class {}
+       │       ^^^^^^^^^^^^
+    16 │ interface global_interface {}
+    17 │ type global_type = number;
+  
+
+```
+
+```
+scriptGlobals.ts:16:11 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This interface name should be in PascalCase.
+  
+    14 │ var global_var = 3;
+    15 │ class global_class {}
+  > 16 │ interface global_interface {}
+       │           ^^^^^^^^^^^^^^^^
+    17 │ type global_type = number;
+    18 │ enum global_enum { Value }
+  
+
+```
+
+```
+scriptGlobals.ts:17:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This type alias name should be in PascalCase.
+  
+    15 │ class global_class {}
+    16 │ interface global_interface {}
+  > 17 │ type global_type = number;
+       │      ^^^^^^^^^^^
+    18 │ enum global_enum { Value }
+    19 │ const { value: global_alias } = { value: 1 };
+  
+
+```
+
+```
+scriptGlobals.ts:18:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This enum name should be in PascalCase.
+  
+    16 │ interface global_interface {}
+    17 │ type global_type = number;
+  > 18 │ enum global_enum { Value }
+       │      ^^^^^^^^^^^
+    19 │ const { value: global_alias } = { value: 1 };
+    20 │ const [global_element] = [1];
+  
+
+```
+
+```
+scriptGlobals.ts:19:16 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This global const name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+    17 │ type global_type = number;
+    18 │ enum global_enum { Value }
+  > 19 │ const { value: global_alias } = { value: 1 };
+       │                ^^^^^^^^^^^^
+    20 │ const [global_element] = [1];
+    21 │ const functionExpression = function inner_fn() { return inner_fn; };
+  
+
+```
+
+```
+scriptGlobals.ts:20:8 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This global const name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+    18 │ enum global_enum { Value }
+    19 │ const { value: global_alias } = { value: 1 };
+  > 20 │ const [global_element] = [1];
+       │        ^^^^^^^^^^^^^^
+    21 │ const functionExpression = function inner_fn() { return inner_fn; };
+    22 │ const classExpression = class inner_class {};
+  
+
+```
+
+```
+scriptGlobals.ts:21:37 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This global function name should be in camelCase or PascalCase or UPPERCASE.
+  
+    19 │ const { value: global_alias } = { value: 1 };
+    20 │ const [global_element] = [1];
+  > 21 │ const functionExpression = function inner_fn() { return inner_fn; };
+       │                                     ^^^^^^^^
+    22 │ const classExpression = class inner_class {};
+    23 │ {
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+    19 19 │   const { value: global_alias } = { value: 1 };
+    20 20 │   const [global_element] = [1];
+    21    │ - const·functionExpression·=·function·inner_fn()·{·return·inner_fn;·};
+       21 │ + const·functionExpression·=·function·innerFn()·{·return·innerFn;·};
+    22 22 │   const classExpression = class inner_class {};
+    23 23 │   {
+  
+
+```
+
+```
+scriptGlobals.ts:22:31 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This class name should be in PascalCase.
+  
+    20 │ const [global_element] = [1];
+    21 │ const functionExpression = function inner_fn() { return inner_fn; };
+  > 22 │ const classExpression = class inner_class {};
+       │                               ^^^^^^^^^^^
+    23 │ {
+    24 │     var hoisted_global = 1;
+  
+  i Safe fix: Rename this symbol in PascalCase.
+  
+    20 20 │   const [global_element] = [1];
+    21 21 │   const functionExpression = function inner_fn() { return inner_fn; };
+    22    │ - const·classExpression·=·class·inner_class·{};
+       22 │ + const·classExpression·=·class·InnerClass·{};
+    23 23 │   {
+    24 24 │       var hoisted_global = 1;
+  
+
+```
+
+```
+scriptGlobals.ts:24:9 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This global var name should be in camelCase or PascalCase or CONSTANT_CASE.
+  
+    22 │ const classExpression = class inner_class {};
+    23 │ {
+  > 24 │     var hoisted_global = 1;
+       │         ^^^^^^^^^^^^^^
+    25 │     let block_local = 2;
+    26 │     console.log(block_local);
+  
+
+```
+
+```
+scriptGlobals.ts:25:9 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This let name should be in camelCase or PascalCase.
+  
+    23 │ {
+    24 │     var hoisted_global = 1;
+  > 25 │     let block_local = 2;
+       │         ^^^^^^^^^^^
+    26 │     console.log(block_local);
+    27 │ }
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+    23 23 │   {
+    24 24 │       var hoisted_global = 1;
+    25    │ - ····let·block_local·=·2;
+    26    │ - ····console.log(block_local);
+       25 │ + ····let·blockLocal·=·2;
+       26 │ + ····console.log(blockLocal);
+    27 27 │   }
+    28 28 │   console.log(Global_NS.v, my_global_fn(Global_Const), global_let, global_var,
+  
+
+```
