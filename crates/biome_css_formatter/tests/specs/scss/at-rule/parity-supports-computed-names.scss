@@ -1,0 +1,98 @@
+@use "sass:string";
+@use "sass:map";
+$prefix:overflow-;$axis:x;$property:overflow-x;$condition:"(display: grid)";
+
+@mixin when-supported( $axis ){$prefix:overflow-;@supports( $prefix + $axis:clip ){overflow-#{$axis}:clip}}
+.scroller-x{@include when-supported(x)}
+.scroller-y{@include when-supported(y)}
+
+@supports(overflow- + $axis:clip){.literal{overflow-x:clip}}
+@supports(string.unquote( "overflow-x" ):clip){.function{overflow-x:clip}}
+@supports(map.get( (property:overflow-x),property ):clip){.nested-map{overflow-x:clip}}
+@supports('overflow-' + $axis:clip){.quoted{overflow-x:clip}}
+@supports (1 + 1: b) {@c}
+@supports (calc(0): a) {@d}
+
+@import "a.css" supports( $prefix + $axis:clip );
+@import "b.css" supports( ( $prefix + $axis:clip ) );
+@import "literal.css" supports(overflow- + $axis:clip);
+@import "function.css" supports(string.unquote( "overflow-x" ):clip);
+@import "map.css" supports(map.get((property:overflow-x),property):clip);
+@import "variable.css" supports( $property:clip );
+@import "interpolated.css" supports( overflow-#{$axis}:clip );
+
+@supports( $property:clip ){.variable{overflow-x:clip}}
+@supports( overflow-#{$axis}:clip ){.interpolated{overflow-x:clip}}
+@supports(( $prefix + $axis:clip ) and (display:grid)){.grouped{display:grid}}
+@supports not( $prefix + $axis:clip ){.negated{overflow-x:hidden}}
+@supports( $prefix + $axis:clip ) or (display:flex){.or{display:flex}}
+@supports selector(:is(.scroller-x, .scroller-y)){.selector{display:grid}}
+@supports #{$condition}{.whole-condition{display:grid}}
+@supports(#{$condition} and (display:grid)){.interpolated-condition{display:grid}}
+
+@supports( --literal: $axis + 1){.custom-property{color:red}}
+@supports( --theme-#{$axis}: $axis + 1){.interpolated-custom-property{color:red}}
+@import "custom.css" supports(--literal: $axis + 1);
+@import "custom-interpolated.css" supports(--theme-#{$axis}: $axis + 1);
+
+@supports/* before parentheses */(
+/* before name */$prefix/* before operator */ + /* after operator */$axis
+/* before colon */:/* after colon */clip/* before closing parenthesis */
+)/* after parentheses */{.commented{overflow-x:clip}}
+
+@import "comments.css" supports(/* before name */$prefix/* before operator */ +
+/* after operator */$axis/* before colon */:/* after colon */clip/* before close */);
+
+.nested{@supports(
+string.unquote("a-very-long-overflow-property-name-with-multiple-parts-") +
+string.unquote("another-long-part-") + $axis:clip){overflow-x:clip}}
+
+/* biome-ignore format: Preserve the authored condition spacing. */
+@supports ( $prefix  +  $axis :  clip ) { .suppressed { overflow-x:clip; } }
+
+.ordinary-if{color:if(supports(display: grid):green;else:red)}
+
+@supports(foo and bar:baz){.boolean-name{color:red}}
+@supports(foo and bar){.raw-logical{color:red}}
+@supports(#{$condition} and #{$condition}){.interpolated-chain{display:grid}}
+@supports(font-tech(color-COLRv1) and font-tech(color-SVG)){.function-chain{display:grid}}
+@import "boolean-name.css" supports(foo and bar:baz);
+@import "boolean-interpolation.css" supports(#{$prefix} and $axis:clip);
+
+@supports(overflow-x,overflow-y:clip){.literal-list-name{overflow-x:clip}}
+@supports( $property,overflow-y:clip ){.variable-list-name{overflow-x:clip}}
+@supports(#{$property},overflow-y:clip){.interpolated-list-name{overflow-x:clip}}
+@import "literal-list.css" supports(overflow-x,overflow-y:clip);
+@import "variable-list.css" supports( $property,overflow-y:clip );
+@import "interpolated-list.css" supports(#{$property},overflow-y:clip);
+@import "grouped-literal-list.css" supports( (overflow-x,overflow-y:clip) );
+@import "grouped-variable-list.css" supports(($property,overflow-y:clip));
+
+@supports(selector(overflow-x):clip){.selector-function-name{overflow-x:clip}}
+@supports( #{fn}(x):clip ){.interpolated-function-name{overflow-x:clip}}
+@supports(fn-#{$axis}(x):clip){.suffixed-function-name{overflow-x:clip}}
+@supports(--#{fn}(x):$axis){.dashed-function-name{overflow-x:clip}}
+@import "grouped-selector-function.css" supports( (selector(overflow-x):clip) );
+@import "grouped-interpolated-function.css" supports((#{fn}(x):clip));
+@import "grouped-suffixed-function.css" supports((fn-#{$axis}(x):clip));
+@import "grouped-dashed-function.css" supports((--#{fn}(x):$axis));
+
+@supports selector(overflow-x){.native-selector-condition{overflow-x:clip}}
+@supports(selector(overflow-x)){.grouped-selector-condition{overflow-x:clip}}
+@import "selector-condition.css" supports(selector(overflow-x));
+@import "grouped-selector-condition.css" supports((selector(overflow-x)));
+
+@supports(foo (bar):baz){.spaced-literal-name{color:red}}
+@supports( #{fn} (x):clip ){.spaced-interpolation-name{overflow-x:clip}}
+@supports(#{fn}/**/(x):clip){.comment-separated-name{overflow-x:clip}}
+@import "spaced-literal-name.css" supports(foo (bar):baz);
+@import "spaced-interpolation-name.css" supports(#{fn} (x):clip);
+@import "comment-separated-name.css" supports(#{fn}/**/(x):clip);
+
+@supports( $prefix (x):clip ){.variable-parenthesized-name{overflow-x:clip}}
+@import "variable-parenthesized-name.css" supports($prefix (x):clip);
+@import "grouped-variable-parenthesized-name.css" supports( ($prefix (x):clip) );
+
+@import "grouped-calc-function.css" supports( (calc(0):a) );
+@import "grouped-foo-function.css" supports((foo(x):clip));
+@import "grouped-abs-function.css" supports( (abs(1):clip) );

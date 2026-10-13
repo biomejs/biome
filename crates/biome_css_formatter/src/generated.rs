@@ -9958,6 +9958,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssStringText {
         )
     }
 }
+impl FormatRule<biome_css_syntax::ScssSupportsDeclaration>
+    for crate::scss::auxiliary::supports_declaration::FormatScssSupportsDeclaration
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssSupportsDeclaration,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssSupportsDeclaration>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssSupportsDeclaration {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssSupportsDeclaration,
+        crate::scss::auxiliary::supports_declaration::FormatScssSupportsDeclaration,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::auxiliary::supports_declaration::FormatScssSupportsDeclaration::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssSupportsDeclaration {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssSupportsDeclaration,
+        crate::scss::auxiliary::supports_declaration::FormatScssSupportsDeclaration,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::auxiliary::supports_declaration::FormatScssSupportsDeclaration::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::ScssSupportsFeatureDeclaration>
     for crate::scss::auxiliary::supports_feature_declaration::FormatScssSupportsFeatureDeclaration
 {
@@ -16836,6 +16874,25 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyScssParentSelectorSuf
     >;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: scss :: any :: parent_selector_suffix_part :: FormatAnyScssParentSelectorSuffixPart :: default ())
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyScssSupportsDeclarationName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyScssSupportsDeclarationName,
+        crate::scss::any::supports_declaration_name::FormatAnyScssSupportsDeclarationName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: scss :: any :: supports_declaration_name :: FormatAnyScssSupportsDeclarationName :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyScssSupportsDeclarationName {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyScssSupportsDeclarationName,
+        crate::scss::any::supports_declaration_name::FormatAnyScssSupportsDeclarationName,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: scss :: any :: supports_declaration_name :: FormatAnyScssSupportsDeclarationName :: default ())
     }
 }
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyScssUseNamespace {

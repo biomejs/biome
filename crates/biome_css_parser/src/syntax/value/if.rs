@@ -21,7 +21,9 @@ use crate::syntax::at_rule::media::is_at_any_media_condition;
 use crate::syntax::at_rule::media::parse_any_media_condition;
 use crate::syntax::at_rule::supports::AnySupportsConditionParseRecovery;
 use crate::syntax::at_rule::supports::error::expected_any_supports_condition;
-use crate::syntax::at_rule::supports::{parse_any_supports_condition, parse_supports_declaration};
+use crate::syntax::at_rule::supports::{
+    SupportsContext, parse_any_supports_condition, parse_supports_declaration,
+};
 use crate::syntax::is_at_declaration;
 use crate::syntax::parse_error::scss_only_syntax_error;
 use crate::syntax::property::{
@@ -159,7 +161,7 @@ fn parse_if_supports_test(p: &mut CssParser) -> ParsedSyntax {
     if is_at_declaration(p) {
         parse_supports_declaration(p).ok();
     } else {
-        parse_any_supports_condition(p)
+        parse_any_supports_condition(p, SupportsContext::CssIf)
             .or_recover(
                 p,
                 &AnySupportsConditionParseRecovery,

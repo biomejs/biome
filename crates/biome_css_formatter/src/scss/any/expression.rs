@@ -9,6 +9,7 @@ impl FormatRule<AnyScssExpression> for FormatAnyScssExpression {
     fn fmt(&self, node: &AnyScssExpression, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyScssExpression::AnyCssValue(node) => node.format().fmt(f),
+            AnyScssExpression::CssDeclarationImportant(node) => node.format().fmt(f),
             AnyScssExpression::ScssBinaryExpression(node) => node.format().fmt(f),
             AnyScssExpression::ScssExpression(node) => node.format().fmt(f),
             AnyScssExpression::ScssInterpolation(node) => node.format().fmt(f),

@@ -1,0 +1,47 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: scss-computed-supports.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@import "fonts.css" supports("font-family": Arial);
+
+@supports ("font-family": Arial) {
+  .valid {
+    font-family: Arial, sans-serif;
+  }
+}
+
+@supports (font-family: Arial) {
+  .invalid {
+    font-family: Arial;
+  }
+}
+
+```
+
+# Diagnostics
+```
+scss-computed-supports.scss:12:18 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Generic font family missing.
+  
+    10 │ @supports (font-family: Arial) {
+    11 │   .invalid {
+  > 12 │     font-family: Arial;
+       │                  ^^^^^
+    13 │   }
+    14 │ }
+  
+  i Consider adding a generic font family as a fallback.
+  
+  i For examples and more information, see the MDN Web Docs
+  
+  - serif
+  - sans-serif
+  - monospace
+  - etc.
+  
+
+```
