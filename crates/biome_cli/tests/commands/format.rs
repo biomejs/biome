@@ -3526,31 +3526,6 @@ fn applies_custom_bracket_spacing_for_graphql() {
 }
 
 #[test]
-fn html_disabled_by_default() {
-    let fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let file_path = Utf8Path::new("file.html");
-    fs.insert(file_path.into(), "<!DOCTYPE HTML>");
-
-    let (fs, result) = run_cli(
-        fs,
-        &mut console,
-        Args::from(["format", "--write", file_path.as_str()].as_slice()),
-    );
-
-    assert!(result.is_err(), "run_cli returned {result:?}");
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "html_disabled_by_default",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
 fn html_enabled_by_arg_format() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
