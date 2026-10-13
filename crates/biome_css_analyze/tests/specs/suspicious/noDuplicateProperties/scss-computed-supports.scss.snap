@@ -1,0 +1,49 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: scss-computed-supports.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+.valid {
+  color: red;
+  @supports ("color": blue) and ("color": green) {
+    color: blue;
+  }
+}
+
+@supports ("color": green) {
+  .invalid {
+    color: red;
+    color: blue;
+  }
+}
+
+```
+
+# Diagnostics
+```
+scss-computed-supports.scss:12:5 lint/suspicious/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
+  
+    10 │   .invalid {
+    11 │     color: red;
+  > 12 │     color: blue;
+       │     ^^^^^
+    13 │   }
+    14 │ }
+  
+  i color is already defined here.
+  
+     9 │ @supports ("color": green) {
+    10 │   .invalid {
+  > 11 │     color: red;
+       │     ^^^^^
+    12 │     color: blue;
+    13 │   }
+  
+  i Remove or rename the duplicate property to ensure consistent styling.
+  
+
+```
