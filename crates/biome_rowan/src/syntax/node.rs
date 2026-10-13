@@ -272,6 +272,15 @@ impl<L: Language> SyntaxNode<L> {
         }
     }
 
+    /// Returns the slot at `index`, or [None] if this node has no slot with that index.
+    ///
+    /// Use it to read a single slot. Unlike `slots().nth(index)`, it doesn't create an
+    /// iterator that holds another reference to this node.
+    #[inline]
+    pub fn slot(&self, index: usize) -> Option<SyntaxSlot<L>> {
+        self.raw.slot(index).map(SyntaxSlot::from)
+    }
+
     /// Returns an iterator over all the slots of this syntax node.
     pub fn slots(&self) -> SyntaxSlots<L> {
         SyntaxSlots {
@@ -1159,6 +1168,7 @@ impl<L: Language> SyntaxSlot<L> {
 }
 
 impl<L: Language> From<cursor::SyntaxSlot> for SyntaxSlot<L> {
+    #[inline]
     fn from(raw: cursor::SyntaxSlot) -> Self {
         match raw {
             cursor::SyntaxSlot::Node(node) => Self::Node(node.into()),

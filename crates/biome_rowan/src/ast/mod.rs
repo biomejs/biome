@@ -968,7 +968,7 @@ pub mod support {
         parent: &SyntaxNode<L>,
         slot_index: usize,
     ) -> Option<N> {
-        match parent.slots().nth(slot_index)? {
+        match parent.slot(slot_index)? {
             SyntaxSlot::Empty { .. } => None,
             SyntaxSlot::Node(node) => Some(N::unwrap_cast(node)),
             SyntaxSlot::Token(token) => {
@@ -997,7 +997,7 @@ pub mod support {
     }
 
     pub fn token<L: Language>(parent: &SyntaxNode<L>, slot_index: usize) -> Option<SyntaxToken<L>> {
-        match parent.slots().nth(slot_index)? {
+        match parent.slot(slot_index)? {
             SyntaxSlot::Empty { .. } => None,
             SyntaxSlot::Token(token) => Some(token),
             SyntaxSlot::Node(node) => {
