@@ -31,8 +31,8 @@ use crate::syntax::property::{
     GenericComponentValueList,
 };
 use crate::syntax::scss::{
-    expected_scss_expression, parse_scss_expression_until,
-    parse_scss_optional_value_until_with_boundary,
+    expected_scss_expression, is_at_scss_interpolation, parse_scss_expression_until,
+    parse_scss_optional_value_until_with_boundary, parse_scss_regular_interpolation,
 };
 use crate::syntax::value::parse_error::expected_if_branch;
 use crate::syntax::value::parse_error::expected_if_test_boolean_expr_group;
@@ -315,9 +315,21 @@ fn parse_if_test(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_if_test_boolean_expr_group(p: &mut CssParser) -> bool {
-    p.at(T!['(']) || is_at_if_test(p)
+    p.at(T!['(']) || is_at_if_test(p) || is_at_scss_interpolation(p)
 }
 
+/// Parses one condition operand, preserving interpolation as opaque Sass syntax.
+///
+/// The value context controls whether interpolation may be parsed, including
+/// unsupported-syntax recovery in CSS files. Parentheses remain part of the
+/// condition because interpolated text can itself contain logical operators:
+///
+/// ```scss
+/// $condition: "style(--ready: true) or media(print)";
+/// .card { color: if((#{$condition}) and style(--enabled: true): red; else: blue); }
+/// ```
+///
+/// See [Sass special functions](https://sass-lang.com/documentation/syntax/special-functions/#if).
 #[inline]
 fn parse_any_if_test_boolean_expr_group(
     p: &mut CssParser,
@@ -338,6 +350,15 @@ fn parse_any_if_test_boolean_expr_group(
 
         p.expect(T![')']);
         return Present(m.complete(p, CSS_IF_TEST_BOOLEAN_EXPR_IN_PARENS));
+    }
+
+    if context.is_scss_exclusive_syntax_allowed() && is_at_scss_interpolation(p) {
+        return CssSyntaxFeatures::Scss.parse_exclusive_syntax_with_kind(
+            p,
+            parse_scss_regular_interpolation,
+            |p, marker| scss_only_syntax_error(p, "SCSS interpolation", marker.range(p)),
+            Some(CSS_BOGUS_IF_TEST),
+        );
     }
 
     // <if-test>

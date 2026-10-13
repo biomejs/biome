@@ -3,7 +3,8 @@ use crate::state::IfFunctionKind;
 use crate::syntax::css_modules::v_bind_not_allowed;
 use crate::syntax::parse_error::{expected_identifier, scss_only_syntax_error};
 use crate::syntax::scss::{
-    is_at_scss_module_member_access, is_nth_at_scss_module_member_access, parse_scss_function_name,
+    is_at_scss_module_member_access, is_nth_at_scss_interpolation,
+    is_nth_at_scss_module_member_access, parse_scss_function_name,
 };
 use crate::syntax::value::attr::{is_at_attr_function, parse_attr_function};
 use crate::syntax::value::r#if::{is_at_if_function, parse_if_function};
@@ -88,8 +89,8 @@ pub(crate) fn is_at_css_if_function_in_context(
 
     // CSS if() branches can only start with supported condition syntax:
     // `style(...)`, `media(...)`, `supports(...)`, `sass(...)`, `not`, `else`, or a
-    // parenthesized boolean expression. Anything else remains a regular
-    // function call in SCSS-aware mode, such as Sass `if($cond, a, b)`.
+    // parenthesized boolean expression or interpolation. Complete-parse selection
+    // still distinguishes modern branches from legacy Sass arguments.
     p.nth_at(2, T![style])
         || p.nth_at(2, T![media])
         || p.nth_at(2, T![supports])
@@ -97,6 +98,7 @@ pub(crate) fn is_at_css_if_function_in_context(
         || p.nth_at(2, T![not])
         || p.nth_at(2, T![else])
         || p.nth_at(2, T!['('])
+        || is_nth_at_scss_interpolation(p, 2)
 }
 
 /// Parses an SCSS `if()` call, preferring complete modern branches over legacy

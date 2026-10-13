@@ -133,6 +133,10 @@ impl biome_rowan::SyntaxKind for CssSyntaxKind {
 
     fn to_bogus(&self) -> Self {
         match self {
+            // Interpolation is shared by condition and value grammars, so an
+            // if() union must not determine its recovery kind in every context.
+            // Callers choose context-specific recovery kinds.
+            SCSS_INTERPOLATION => CSS_BOGUS,
             kind if AnyCssSubSelector::can_cast(*kind) => CSS_BOGUS_SUB_SELECTOR,
             kind if AnyCssSelector::can_cast(*kind) => CSS_BOGUS_SELECTOR,
             kind if AnyCssRule::can_cast(*kind) => CSS_BOGUS_RULE,
@@ -231,4 +235,33 @@ pub fn inner_string_text(token: &CssSyntaxToken) -> TokenText {
         text = text.slice(range);
     }
     text
+}
+
+#[cfg(test)]
+mod tests {
+    use super::CssSyntaxKind::*;
+    use biome_rowan::SyntaxKind;
+
+    #[test]
+    fn interpolation_keeps_context_independent_bogus_kind() {
+        assert_eq!(SCSS_INTERPOLATION.to_bogus(), CSS_BOGUS);
+
+        for kind in [
+            CSS_IF_SUPPORTS_TEST,
+            CSS_IF_MEDIA_TEST,
+            CSS_IF_SASS_TEST,
+            CSS_IF_STYLE_TEST,
+        ] {
+            assert_eq!(kind.to_bogus(), CSS_BOGUS_IF_TEST);
+        }
+
+        for kind in [
+            CSS_IF_TEST_BOOLEAN_EXPR_IN_PARENS,
+            CSS_IF_TEST_BOOLEAN_NOT_EXPR,
+            CSS_IF_TEST_BOOLEAN_AND_EXPR,
+            CSS_IF_TEST_BOOLEAN_OR_EXPR,
+        ] {
+            assert_eq!(kind.to_bogus(), CSS_BOGUS_IF_TEST_BOOLEAN_EXPR);
+        }
+    }
 }

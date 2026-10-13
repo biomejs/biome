@@ -2520,10 +2520,11 @@ CssIfTestBooleanOrExpr =
 	'or'
 	right: AnyCssIfTestBooleanOrCombinableExpr
 
-// <boolean-expr-group> = <if-test> | ( <boolean-expr> )
+// <boolean-expr-group> = <if-test> | ( <boolean-expr> ) | <sass-interpolation>
 AnyCssIfTestBooleanExprGroup =
 	AnyCssIfTest
 	| CssIfTestBooleanExprInParens
+	| ScssInterpolation
 
 // ( <boolean-expr> )
 //
