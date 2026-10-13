@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: eol-comment-last-property.js
+---
+# Input
+```js
+const obj = {
+  d: 4,
+  c: 1, b: 2, a: 3, // last row
+};
+console.log(obj);
+
+```
+
+# Diagnostics
+```
+eol-comment-last-property.js:2:3 assist/source/useSortedKeys  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The object properties are not sorted by key.
+  
+    1 │ const obj = {
+  > 2 │   d: 4,
+      │   ^^^^^
+  > 3 │   c: 1, b: 2, a: 3, // last row
+      │   ^^^^^^^^^^^^^^^^^
+    4 │ };
+    5 │ console.log(obj);
+  
+  i Safe fix: Sort the object properties by key.
+  
+    1   │ - const·obj·=·{
+    2   │ - ··d:·4,
+    3   │ - ··c:·1,·b:·2,·a:·3,·//·last·row
+      1 │ + const·obj·=·{a:·3,·//·last·row
+      2 │ + b:·2,·
+      3 │ + ··c:·1,·
+      4 │ + ··d:·4,
+    4 5 │   };
+    5 6 │   console.log(obj);
+  
+
+```
