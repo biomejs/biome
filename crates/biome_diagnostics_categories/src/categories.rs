@@ -674,6 +674,7 @@ define_categories! {
     // start assist actions
     "assist/source/noDuplicateClasses": "https://biomejs.dev/assist/actions/no-duplicate-classes",
     "assist/source/organizeImports": "https://biomejs.dev/assist/actions/organize-imports",
+    "assist/source/useGraphqlSortedArguments": "https://biomejs.dev/assist/actions/use-graphql-sorted-arguments",
     "assist/source/useGraphqlSortedVariables": "https://biomejs.dev/assist/actions/use-graphql-sorted-variables",
     "assist/source/useSortedAttributes": "https://biomejs.dev/assist/actions/use-sorted-attributes",
     "assist/source/useSortedEnumMembers": "https://biomejs.dev/assist/actions/use-sorted-enum-members",
