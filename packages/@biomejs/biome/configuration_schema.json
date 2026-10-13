@@ -8254,6 +8254,13 @@
 						{ "type": "null" }
 					]
 				},
+				"usePackageJsonEngines": {
+					"description": "Require the engines field in package.json.\nSee https://biomejs.dev/linter/rules/use-package-json-engines",
+					"anyOf": [
+						{ "$ref": "#/$defs/UsePackageJsonEnginesConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"usePromiseRejectErrors": {
 					"description": "Require Error objects as Promise rejection reasons.\nSee https://biomejs.dev/linter/rules/use-promise-reject-errors",
 					"anyOf": [
@@ -14489,6 +14496,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUsePackageJsonEnginesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UsePackageJsonEnginesOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseParseIntRadixOptions": {
 			"type": "object",
 			"properties": {
@@ -19444,6 +19460,16 @@
 			]
 		},
 		"UseOptionalChainOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UsePackageJsonEnginesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUsePackageJsonEnginesOptions" }
+			]
+		},
+		"UsePackageJsonEnginesOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
