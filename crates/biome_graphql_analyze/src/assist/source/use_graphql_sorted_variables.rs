@@ -4,13 +4,12 @@ use biome_analyze::{
     declare_source_rule,
 };
 use biome_console::markup;
+use biome_graphql_factory::make;
 use biome_graphql_syntax::{
     GraphqlLanguage, GraphqlVariableDefinition, GraphqlVariableDefinitionList,
     GraphqlVariableDefinitions,
 };
-use biome_rowan::{
-    AstNode, AstNodeList, BatchMutationExt, NodeOrToken, SyntaxNode, SyntaxTriviaPiece, TokenText,
-};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, SyntaxTriviaPiece, TokenText};
 use biome_rule_options::use_graphql_sorted_variables::UseGraphqlSortedVariablesOptions;
 use biome_string_case::comparable_token::ComparableToken;
 use std::cmp::Ordering;
@@ -224,12 +223,7 @@ fn sort_variable_list(
         nodes.push(node);
     }
 
-    GraphqlVariableDefinitionList::cast(SyntaxNode::new_detached(
-        list.syntax().kind(),
-        nodes
-            .into_iter()
-            .map(|node| Some(NodeOrToken::Node(node.into_syntax()))),
-    ))
+    Some(make::graphql_variable_definition_list(nodes))
 }
 
 fn variable_name(node: &GraphqlVariableDefinition) -> Option<TokenText> {
