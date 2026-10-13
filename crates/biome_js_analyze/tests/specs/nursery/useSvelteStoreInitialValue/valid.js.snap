@@ -1,0 +1,64 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+import { writable, readable, derived, get } from "svelte/store";
+import { writable as createWritable } from "svelte/store";
+import * as store from "svelte/store";
+import defaultStore from "svelte/store";
+import { writable as otherWritable, readable as otherReadable } from "./unknown";
+import * as other from "./unknown";
+
+export const w = writable(false);
+export const r = readable({});
+export const d = derived([a, b], () => {}, false);
+
+// An explicit `undefined` is still an initial value
+const explicit = writable(undefined);
+
+// More arguments than required
+const withStart = writable(0, () => {});
+const withExtra = derived(a, ($a) => $a, 0, extra);
+
+// Aliased and namespace imports
+const aliased = createWritable(0);
+const ns1 = store.writable(0);
+const ns2 = store.readable(0);
+const ns3 = store.derived(a, ($a) => $a * 2, 0);
+
+// Spread arguments can include the initial value
+const args = [[a, b], () => {}, false];
+const spread1 = derived(...args);
+const spread2 = derived(a, ...rest);
+const spread3 = writable(...rest);
+const spread4 = store.readable(...rest);
+
+// Other functions from `svelte/store`
+get(w);
+store.get(w);
+
+// Functions that aren't imported from `svelte/store`
+otherWritable();
+otherReadable();
+other.writable();
+other.derived(a, () => {});
+defaultStore.writable();
+window.writable();
+unknownGlobal.derived();
+
+function local() {
+	function writable() {}
+	const readable = () => {};
+	writable();
+	readable();
+}
+
+function shadowed(writable, derived) {
+	writable();
+	derived(a, () => {});
+}
+
+```

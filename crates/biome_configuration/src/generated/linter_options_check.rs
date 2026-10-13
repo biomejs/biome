@@ -2629,6 +2629,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         >(),
     ));
     result.push((
+        "nursery",
+        "useSvelteStoreInitialValue",
+        TypeId::of::<
+            biome_rule_options::use_svelte_store_initial_value::UseSvelteStoreInitialValueOptions,
+        >(),
+    ));
+    result.push((
         "style",
         "useSymbolDescription",
         TypeId::of::<biome_rule_options::use_symbol_description::UseSymbolDescriptionOptions>(),

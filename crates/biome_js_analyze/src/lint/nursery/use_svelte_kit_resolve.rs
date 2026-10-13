@@ -1,13 +1,13 @@
+use crate::frameworks::{imported_member_name, named_import_name};
 use crate::services::semantic::Semantic;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_js_semantic::{Binding, SemanticModel};
+use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsNamedImportSpecifier,
-    AnyTsName, AnyTsType, AnyTsVariableAnnotation, JsCallExpression, JsImport, JsSyntaxNode,
-    JsSyntaxToken, TsTypeAnnotation, binding_ext::AnyJsBindingDeclaration,
+    AnyJsCallArgument, AnyJsExpression, AnyTsName, AnyTsType, AnyTsVariableAnnotation,
+    JsCallExpression, TsTypeAnnotation, binding_ext::AnyJsBindingDeclaration,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use biome_rule_options::use_svelte_kit_resolve::UseSvelteKitResolveOptions;
@@ -355,56 +355,4 @@ fn is_resolved_pathname_annotation(annotation: &TsTypeAnnotation, model: &Semant
         .binding(&name)
         .and_then(|binding| named_import_name(&binding, APP_TYPES))
         .is_some_and(|name| name.text_trimmed() == "ResolvedPathname")
-}
-
-/// Returns the name that `expression` imports from `module`.
-///
-/// This supports named imports, such as `goto` in `import { goto } from "$app/navigation"`,
-/// and members of namespace imports, such as `navigation.goto` in
-/// `import * as navigation from "$app/navigation"`.
-fn imported_member_name(
-    expression: &AnyJsExpression,
-    model: &SemanticModel,
-    module: &str,
-) -> Option<JsSyntaxToken> {
-    match expression {
-        AnyJsExpression::JsIdentifierExpression(identifier) => {
-            let binding = model.binding(&identifier.name().ok()?)?;
-            named_import_name(&binding, module)
-        }
-        AnyJsExpression::JsStaticMemberExpression(member) => {
-            let object = member.object().ok()?.omit_parentheses();
-            let binding = model.binding(&object.as_js_reference_identifier()?)?;
-            let Some(AnyJsBindingDeclaration::JsNamespaceImportSpecifier(specifier)) =
-                binding.tree().declaration()
-            else {
-                return None;
-            };
-            if !is_imported_from(specifier.syntax(), module) {
-                return None;
-            }
-            member.member().ok()?.as_js_name()?.value_token().ok()
-        }
-        _ => None,
-    }
-}
-
-/// Returns the imported name of `binding` if it's a named import from `module`.
-fn named_import_name(binding: &Binding, module: &str) -> Option<JsSyntaxToken> {
-    let specifier: AnyJsNamedImportSpecifier = match binding.tree().declaration()? {
-        AnyJsBindingDeclaration::JsNamedImportSpecifier(specifier) => specifier.into(),
-        AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(specifier) => specifier.into(),
-        _ => return None,
-    };
-    if !is_imported_from(specifier.syntax(), module) {
-        return None;
-    }
-    specifier.imported_name()
-}
-
-fn is_imported_from(specifier: &JsSyntaxNode, module: &str) -> bool {
-    specifier
-        .ancestors()
-        .find_map(|ancestor| JsImport::cast(ancestor)?.source_text().ok())
-        .is_some_and(|source| source.text() == module)
 }
