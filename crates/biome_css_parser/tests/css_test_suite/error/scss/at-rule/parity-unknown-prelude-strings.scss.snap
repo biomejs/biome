@@ -94,7 +94,7 @@ CssRoot {
                                         ScssStringText {
                                             value_token: SCSS_STRING_CONTENT_LITERAL@51..58 "before " [] [],
                                         },
-                                        CssBogus {
+                                        CssBogusIfTestBooleanExpr {
                                             items: [
                                                 HASH@58..59 "#" [] [],
                                                 L_CURLY@59..60 "{" [] [],
@@ -343,7 +343,7 @@ CssRoot {
             1: CSS_BOGUS@51..66
               0: SCSS_STRING_TEXT@51..58
                 0: SCSS_STRING_CONTENT_LITERAL@51..58 "before " [] []
-              1: CSS_BOGUS@58..66
+              1: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@58..66
                 0: HASH@58..59 "#" [] []
                 1: L_CURLY@59..60 "{" [] []
                 2: CSS_BOGUS@60..66

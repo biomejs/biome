@@ -152,7 +152,7 @@ CssRoot {
                                                                 CssIdentifier {
                                                                     value_token: IDENT@109..115 "print-" [] [],
                                                                 },
-                                                                CssBogus {
+                                                                CssBogusIfTestBooleanExpr {
                                                                     items: [
                                                                         HASH@115..116 "#" [] [],
                                                                         L_CURLY@116..117 "{" [] [],
@@ -291,7 +291,7 @@ CssRoot {
                     0: CSS_BOGUS@109..127
                       0: CSS_IDENTIFIER@109..115
                         0: IDENT@109..115 "print-" [] []
-                      1: CSS_BOGUS@115..127
+                      1: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@115..127
                         0: HASH@115..116 "#" [] []
                         1: L_CURLY@116..117 "{" [] []
                         2: CSS_BOGUS@117..126

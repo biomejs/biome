@@ -186,7 +186,7 @@ CssRoot {
                                     L_PAREN@99..100 "(" [] [],
                                     CssBogus {
                                         items: [
-                                            CssBogus {
+                                            CssBogusIfTestBooleanExpr {
                                                 items: [
                                                     HASH@100..101 "#" [] [],
                                                     L_CURLY@101..102 "{" [] [],
@@ -666,7 +666,7 @@ CssRoot {
                   0: IDENT@95..99 "lang" [] []
                 1: L_PAREN@99..100 "(" [] []
                 2: CSS_BOGUS@100..110
-                  0: CSS_BOGUS@100..110
+                  0: CSS_BOGUS_IF_TEST_BOOLEAN_EXPR@100..110
                     0: HASH@100..101 "#" [] []
                     1: L_CURLY@101..102 "{" [] []
                     2: SCSS_EXPRESSION@102..109

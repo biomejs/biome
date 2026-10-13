@@ -15944,6 +15944,7 @@ impl AnyCssIfTestBooleanExpr {
 pub enum AnyCssIfTestBooleanExprGroup {
     AnyCssIfTest(AnyCssIfTest),
     CssIfTestBooleanExprInParens(CssIfTestBooleanExprInParens),
+    ScssInterpolation(ScssInterpolation),
 }
 impl AnyCssIfTestBooleanExprGroup {
     pub fn as_any_css_if_test(&self) -> Option<&AnyCssIfTest> {
@@ -15955,6 +15956,12 @@ impl AnyCssIfTestBooleanExprGroup {
     pub fn as_css_if_test_boolean_expr_in_parens(&self) -> Option<&CssIfTestBooleanExprInParens> {
         match &self {
             Self::CssIfTestBooleanExprInParens(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolation(&self) -> Option<&ScssInterpolation> {
+        match &self {
+            Self::ScssInterpolation(item) => Some(item),
             _ => None,
         }
     }
@@ -41068,13 +41075,19 @@ impl From<CssIfTestBooleanExprInParens> for AnyCssIfTestBooleanExprGroup {
         Self::CssIfTestBooleanExprInParens(node)
     }
 }
+impl From<ScssInterpolation> for AnyCssIfTestBooleanExprGroup {
+    fn from(node: ScssInterpolation) -> Self {
+        Self::ScssInterpolation(node)
+    }
+}
 impl AstNode for AnyCssIfTestBooleanExprGroup {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        AnyCssIfTest::KIND_SET.union(CssIfTestBooleanExprInParens::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = AnyCssIfTest::KIND_SET
+        .union(CssIfTestBooleanExprInParens::KIND_SET)
+        .union(ScssInterpolation::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_IF_TEST_BOOLEAN_EXPR_IN_PARENS => true,
+            CSS_IF_TEST_BOOLEAN_EXPR_IN_PARENS | SCSS_INTERPOLATION => true,
             k if AnyCssIfTest::can_cast(k) => true,
             _ => false,
         }
@@ -41084,6 +41097,7 @@ impl AstNode for AnyCssIfTestBooleanExprGroup {
             CSS_IF_TEST_BOOLEAN_EXPR_IN_PARENS => {
                 Self::CssIfTestBooleanExprInParens(CssIfTestBooleanExprInParens { syntax })
             }
+            SCSS_INTERPOLATION => Self::ScssInterpolation(ScssInterpolation { syntax }),
             _ => {
                 if let Some(any_css_if_test) = AnyCssIfTest::cast(syntax) {
                     return Some(Self::AnyCssIfTest(any_css_if_test));
@@ -41096,12 +41110,14 @@ impl AstNode for AnyCssIfTestBooleanExprGroup {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             Self::CssIfTestBooleanExprInParens(it) => it.syntax(),
+            Self::ScssInterpolation(it) => it.syntax(),
             Self::AnyCssIfTest(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssIfTestBooleanExprInParens(it) => it.into_syntax(),
+            Self::ScssInterpolation(it) => it.into_syntax(),
             Self::AnyCssIfTest(it) => it.into_syntax(),
         }
     }
@@ -41111,6 +41127,7 @@ impl std::fmt::Debug for AnyCssIfTestBooleanExprGroup {
         match self {
             Self::AnyCssIfTest(it) => std::fmt::Debug::fmt(it, f),
             Self::CssIfTestBooleanExprInParens(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolation(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -41119,6 +41136,7 @@ impl From<AnyCssIfTestBooleanExprGroup> for SyntaxNode {
         match n {
             AnyCssIfTestBooleanExprGroup::AnyCssIfTest(it) => it.into_syntax(),
             AnyCssIfTestBooleanExprGroup::CssIfTestBooleanExprInParens(it) => it.into_syntax(),
+            AnyCssIfTestBooleanExprGroup::ScssInterpolation(it) => it.into_syntax(),
         }
     }
 }
