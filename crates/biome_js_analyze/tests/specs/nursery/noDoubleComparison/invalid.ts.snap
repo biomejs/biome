@@ -11,6 +11,10 @@ x! === y || x! < y;
 (<number>x) === y || x < y;
 x === y as number || x < y;
 x === "a" satisfies string || x < "a";
+(f<string>) === g || (f<string>) < g;
+f<string> <= g && f<string> !== g;
+f<string> !== g && g <= f<string>;
+f<string> === g || g < f<string>;
 
 ```
 
@@ -32,11 +36,11 @@ invalid.ts:2:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━�
   
   i Unsafe fix: Combine them into a single comparison.
   
-    1 1 │   /* should generate diagnostics */
-    2   │ - (x·as·number)·===·y·||·(x·as·number)·<·y;
-      2 │ + (x·as·number)·<=·y;
-    3 3 │   x! === y || x! < y;
-    4 4 │   (x satisfies number) === y || (x satisfies number) < y;
+     1  1 │   /* should generate diagnostics */
+     2    │ - (x·as·number)·===·y·||·(x·as·number)·<·y;
+        2 │ + (x·as·number)·<=·y;
+     3  3 │   x! === y || x! < y;
+     4  4 │   (x satisfies number) === y || (x satisfies number) < y;
   
 
 ```
@@ -59,12 +63,12 @@ invalid.ts:3:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━�
   
   i Unsafe fix: Combine them into a single comparison.
   
-    1 1 │   /* should generate diagnostics */
-    2 2 │   (x as number) === y || (x as number) < y;
-    3   │ - x!·===·y·||·x!·<·y;
-      3 │ + x!·<=·y;
-    4 4 │   (x satisfies number) === y || (x satisfies number) < y;
-    5 5 │   (<number>x) === y || x < y;
+     1  1 │   /* should generate diagnostics */
+     2  2 │   (x as number) === y || (x as number) < y;
+     3    │ - x!·===·y·||·x!·<·y;
+        3 │ + x!·<=·y;
+     4  4 │   (x satisfies number) === y || (x satisfies number) < y;
+     5  5 │   (<number>x) === y || x < y;
   
 
 ```
@@ -87,12 +91,12 @@ invalid.ts:4:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━�
   
   i Unsafe fix: Combine them into a single comparison.
   
-    2 2 │   (x as number) === y || (x as number) < y;
-    3 3 │   x! === y || x! < y;
-    4   │ - (x·satisfies·number)·===·y·||·(x·satisfies·number)·<·y;
-      4 │ + (x·satisfies·number)·<=·y;
-    5 5 │   (<number>x) === y || x < y;
-    6 6 │   x === y as number || x < y;
+     2  2 │   (x as number) === y || (x as number) < y;
+     3  3 │   x! === y || x! < y;
+     4    │ - (x·satisfies·number)·===·y·||·(x·satisfies·number)·<·y;
+        4 │ + (x·satisfies·number)·<=·y;
+     5  5 │   (<number>x) === y || x < y;
+     6  6 │   x === y as number || x < y;
   
 
 ```
@@ -115,12 +119,12 @@ invalid.ts:5:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━�
   
   i Unsafe fix: Combine them into a single comparison.
   
-    3 3 │   x! === y || x! < y;
-    4 4 │   (x satisfies number) === y || (x satisfies number) < y;
-    5   │ - (<number>x)·===·y·||·x·<·y;
-      5 │ + (<number>x)·<=·y;
-    6 6 │   x === y as number || x < y;
-    7 7 │   x === "a" satisfies string || x < "a";
+     3  3 │   x! === y || x! < y;
+     4  4 │   (x satisfies number) === y || (x satisfies number) < y;
+     5    │ - (<number>x)·===·y·||·x·<·y;
+        5 │ + (<number>x)·<=·y;
+     6  6 │   x === y as number || x < y;
+     7  7 │   x === "a" satisfies string || x < "a";
   
 
 ```
@@ -135,7 +139,7 @@ invalid.ts:6:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━�
   > 6 │ x === y as number || x < y;
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
     7 │ x === "a" satisfies string || x < "a";
-    8 │ 
+    8 │ (f<string>) === g || (f<string>) < g;
   
   i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
   
@@ -143,12 +147,12 @@ invalid.ts:6:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━�
   
   i Unsafe fix: Combine them into a single comparison.
   
-    4 4 │   (x satisfies number) === y || (x satisfies number) < y;
-    5 5 │   (<number>x) === y || x < y;
-    6   │ - x·===·y·as·number·||·x·<·y;
-      6 │ + x·<=·(y·as·number);
-    7 7 │   x === "a" satisfies string || x < "a";
-    8 8 │   
+     4  4 │   (x satisfies number) === y || (x satisfies number) < y;
+     5  5 │   (<number>x) === y || x < y;
+     6    │ - x·===·y·as·number·||·x·<·y;
+        6 │ + x·<=·(y·as·number);
+     7  7 │   x === "a" satisfies string || x < "a";
+     8  8 │   (f<string>) === g || (f<string>) < g;
   
 
 ```
@@ -162,7 +166,8 @@ invalid.ts:7:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━�
     6 │ x === y as number || x < y;
   > 7 │ x === "a" satisfies string || x < "a";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    8 │ 
+    8 │ (f<string>) === g || (f<string>) < g;
+    9 │ f<string> <= g && f<string> !== g;
   
   i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
   
@@ -170,11 +175,122 @@ invalid.ts:7:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━�
   
   i Unsafe fix: Combine them into a single comparison.
   
-    5 5 │   (<number>x) === y || x < y;
-    6 6 │   x === y as number || x < y;
-    7   │ - x·===·"a"·satisfies·string·||·x·<·"a";
-      7 │ + x·<=·("a"·satisfies·string);
-    8 8 │   
+     5  5 │   (<number>x) === y || x < y;
+     6  6 │   x === y as number || x < y;
+     7    │ - x·===·"a"·satisfies·string·||·x·<·"a";
+        7 │ + x·<=·("a"·satisfies·string);
+     8  8 │   (f<string>) === g || (f<string>) < g;
+     9  9 │   f<string> <= g && f<string> !== g;
+  
+
+```
+
+```
+invalid.ts:8:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into (f<string>) <= g.
+  
+     6 │ x === y as number || x < y;
+     7 │ x === "a" satisfies string || x < "a";
+   > 8 │ (f<string>) === g || (f<string>) < g;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ f<string> <= g && f<string> !== g;
+    10 │ f<string> !== g && g <= f<string>;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+     6  6 │   x === y as number || x < y;
+     7  7 │   x === "a" satisfies string || x < "a";
+     8    │ - (f<string>)·===·g·||·(f<string>)·<·g;
+        8 │ + (f<string>)·<=·g;
+     9  9 │   f<string> <= g && f<string> !== g;
+    10 10 │   f<string> !== g && g <= f<string>;
+  
+
+```
+
+```
+invalid.ts:9:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into f<string> < g.
+  
+     7 │ x === "a" satisfies string || x < "a";
+     8 │ (f<string>) === g || (f<string>) < g;
+   > 9 │ f<string> <= g && f<string> !== g;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ f<string> !== g && g <= f<string>;
+    11 │ f<string> === g || g < f<string>;
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+     7  7 │   x === "a" satisfies string || x < "a";
+     8  8 │   (f<string>) === g || (f<string>) < g;
+     9    │ - f<string>·<=·g·&&·f<string>·!==·g;
+        9 │ + (f<string>)·<·g;
+    10 10 │   f<string> !== g && g <= f<string>;
+    11 11 │   f<string> === g || g < f<string>;
+  
+
+```
+
+```
+invalid.ts:10:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into f<string> > g.
+  
+     8 │ (f<string>) === g || (f<string>) < g;
+     9 │ f<string> <= g && f<string> !== g;
+  > 10 │ f<string> !== g && g <= f<string>;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ f<string> === g || g < f<string>;
+    12 │ 
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+     8  8 │   (f<string>) === g || (f<string>) < g;
+     9  9 │   f<string> <= g && f<string> !== g;
+    10    │ - f<string>·!==·g·&&·g·<=·f<string>;
+       10 │ + (f<string>)·>·g;
+    11 11 │   f<string> === g || g < f<string>;
+    12 12 │   
+  
+
+```
+
+```
+invalid.ts:11:1 lint/nursery/noDoubleComparison  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These two comparisons can be combined into f<string> >= g.
+  
+     9 │ f<string> <= g && f<string> !== g;
+    10 │ f<string> !== g && g <= f<string>;
+  > 11 │ f<string> === g || g < f<string>;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+  
+  i Both comparisons check the same two values, so a single comparison usually means the same thing with less code.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Combine them into a single comparison.
+  
+     9  9 │   f<string> <= g && f<string> !== g;
+    10 10 │   f<string> !== g && g <= f<string>;
+    11    │ - f<string>·===·g·||·g·<·f<string>;
+       11 │ + (f<string>)·>=·g;
+    12 12 │   
   
 
 ```

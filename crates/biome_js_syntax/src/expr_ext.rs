@@ -1414,20 +1414,43 @@ impl AnyJsExpression {
         }
     }
 
-    /// Returns the innermost expression, ignoring any parenthesized expressions or type assertions.
+    /// Removes parentheses and the TypeScript syntax that only affects types: `as`,
+    /// `satisfies`, `<T>value`, `value!`, and `value<T>`.
+    ///
+    /// The returned expression evaluates to the same value as `self`, with the same side
+    /// effects. Use [`Self::inner_expression`] to also look through sequence expressions.
+    ///
+    /// Returns `None` if the syntax tree is incomplete.
+    pub fn omit_type_wrappers(mut self) -> Option<Self> {
+        loop {
+            self = match self {
+                Self::JsParenthesizedExpression(expression) => expression.expression().ok()?,
+                Self::TsAsExpression(expression) => expression.expression().ok()?,
+                Self::TsSatisfiesExpression(expression) => expression.expression().ok()?,
+                Self::TsNonNullAssertionExpression(expression) => expression.expression().ok()?,
+                Self::TsTypeAssertionExpression(expression) => expression.expression().ok()?,
+                Self::TsInstantiationExpression(expression) => expression.expression().ok()?,
+                expression => return Some(expression),
+            };
+        }
+    }
+
+    /// Returns the expression that produces the value of `self`, looking through everything
+    /// that [`Self::omit_type_wrappers`] removes and through sequence expressions.
+    ///
+    /// A sequence expression evaluates to its last expression, so `(a, b)` returns `b`. The
+    /// expressions before the last one still run and can have side effects, so the result
+    /// isn't a safe replacement for `self` in a code fix.
+    ///
+    /// Returns `None` if the syntax tree is incomplete.
     pub fn inner_expression(&self) -> Option<Self> {
-        (match self {
-            Self::JsParenthesizedExpression(expression) => expression.expression().ok(),
-            Self::TsAsExpression(expression) => expression.expression().ok(),
-            Self::TsSatisfiesExpression(expression) => expression.expression().ok(),
-            Self::TsNonNullAssertionExpression(expression) => expression.expression().ok(),
-            Self::TsTypeAssertionExpression(expression) => expression.expression().ok(),
-            Self::TsInstantiationExpression(expression) => expression.expression().ok(),
-            Self::JsSequenceExpression(expression) => expression.right().ok(),
-            _ => return Some(self.clone()),
-        })
-        .as_ref()
-        .and_then(Self::inner_expression)
+        let mut expression = self.clone();
+        loop {
+            expression = match expression.omit_type_wrappers()? {
+                Self::JsSequenceExpression(sequence) => sequence.right().ok()?,
+                expression => return Some(expression),
+            };
+        }
     }
 
     /// Returns the outermost expression, ignoring any parenthesized expressions or type assertions.
@@ -2410,10 +2433,11 @@ pub fn is_in_boolean_context(node: &JsSyntaxNode) -> Option<bool> {
 
 #[cfg(test)]
 mod test {
-    use biome_js_factory::syntax::{JsCallExpression, JsTemplateExpression};
+    use biome_js_factory::syntax::{AnyJsExpression, JsCallExpression, JsTemplateExpression};
     use biome_js_parser::JsParserOptions;
-    use biome_js_parser::parse_module;
-    use biome_rowan::AstNodeList;
+    use biome_js_parser::{parse, parse_module};
+    use biome_languages::JsFileSource;
+    use biome_rowan::{AstNode, AstNodeList};
 
     fn extract_call_expression(src: &str) -> JsCallExpression {
         let result = parse_module(src, JsParserOptions::default());
@@ -2445,6 +2469,25 @@ mod test {
             .as_js_template_expression()
             .unwrap()
             .clone()
+    }
+
+    fn extract_ts_expression(src: &str) -> AnyJsExpression {
+        let result = parse(src, JsFileSource::ts(), JsParserOptions::default());
+        let module = result
+            .tree()
+            .as_js_module()
+            .unwrap()
+            .items()
+            .first()
+            .unwrap();
+
+        module
+            .as_any_js_statement()
+            .unwrap()
+            .as_js_expression_statement()
+            .unwrap()
+            .expression()
+            .unwrap()
     }
 
     #[test]
@@ -2792,6 +2835,52 @@ mod test {
                     .contains_only_each_pattern(),
                 Ok(false),
                 "Expected this case to be invalid: {invalid_case}"
+            );
+        }
+    }
+
+    #[test]
+    fn omit_type_wrappers() {
+        const CASES: &[(&str, &str)] = &[
+            ("a;", "a"),
+            ("((a));", "a"),
+            ("(a as T);", "a"),
+            ("(a satisfies T);", "a"),
+            ("(<T>a);", "a"),
+            ("a!;", "a"),
+            ("(f<string>);", "f"),
+            ("((<T>(a as U)!) satisfies V);", "a"),
+            ("(a as T).b;", "(a as T).b"),
+            ("(a, b);", "a, b"),
+            ("((a, b) as T);", "a, b"),
+        ];
+        for (source, expected) in CASES {
+            let expression = extract_ts_expression(source).omit_type_wrappers().unwrap();
+            assert_eq!(
+                expression.syntax().text_trimmed(),
+                *expected,
+                "Unexpected result for: {source}"
+            );
+        }
+    }
+
+    #[test]
+    fn inner_expression() {
+        const CASES: &[(&str, &str)] = &[
+            ("a;", "a"),
+            ("((a as T)!);", "a"),
+            ("(f<string>);", "f"),
+            ("(a, b);", "b"),
+            ("((a, (b as T)) satisfies U);", "b"),
+            ("(a, (b, c!));", "c"),
+            ("((a, b), c).d;", "((a, b), c).d"),
+        ];
+        for (source, expected) in CASES {
+            let expression = extract_ts_expression(source).inner_expression().unwrap();
+            assert_eq!(
+                expression.syntax().text_trimmed(),
+                *expected,
+                "Unexpected result for: {source}"
             );
         }
     }
