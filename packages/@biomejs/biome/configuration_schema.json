@@ -6810,6 +6810,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnreadableForOfExpressionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnreadableForOfExpressionOptions" }
+			]
+		},
+		"NoUnreadableForOfExpressionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUnresolvedImportsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8080,6 +8090,13 @@
 					"description": "Disallow loop conditions whose variables are never modified in the loop.\nSee https://biomejs.dev/linter/rules/no-unmodified-loop-condition",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnmodifiedLoopConditionConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnreadableForOfExpression": {
+					"description": "Disallow complex expressions as the value that a for...of loop goes through.\nSee https://biomejs.dev/linter/rules/no-unreadable-for-of-expression",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnreadableForOfExpressionConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12539,6 +12556,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnreachableSuperOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnreadableForOfExpressionOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnreadableForOfExpressionOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
