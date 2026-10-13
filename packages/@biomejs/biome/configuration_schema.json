@@ -7050,6 +7050,13 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUselessCallConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUselessCallOptions" }
+			]
+		},
+		"NoUselessCallOptions": { "type": "object", "additionalProperties": false },
 		"NoUselessCatchBindingConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8012,6 +8019,13 @@
 					"description": "Disallow assignments whose value is never read.\nSee https://biomejs.dev/linter/rules/no-useless-assignment",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUselessAssignmentConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessCall": {
+					"description": "Disallow unnecessary .call() and .apply().\nSee https://biomejs.dev/linter/rules/no-useless-call",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUselessCallConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12550,6 +12564,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUselessAssignmentOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUselessCallOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUselessCallOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

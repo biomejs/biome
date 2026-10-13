@@ -3224,6 +3224,11 @@ export interface Nursery {
 	 */
 	noUselessAssignment?: NoUselessAssignmentConfiguration;
 	/**
+	 * Disallow unnecessary .call() and .apply().
+	 * See https://biomejs.dev/linter/rules/no-useless-call
+	 */
+	noUselessCall?: NoUselessCallConfiguration;
+	/**
 	 * Disallow calling .getTime() on a date before passing it to the Date constructor.
 	 * See https://biomejs.dev/linter/rules/no-useless-date-get-time
 	 */
@@ -5846,6 +5851,9 @@ export type NoUnusedClassesConfiguration =
 export type NoUselessAssignmentConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessAssignmentOptions;
+export type NoUselessCallConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessCallOptions;
 export type NoUselessDateGetTimeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessDateGetTimeOptions;
@@ -8387,6 +8395,10 @@ export interface RuleWithNoUselessAssignmentOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessAssignmentOptions;
 }
+export interface RuleWithNoUselessCallOptions {
+	level: RulePlainConfiguration;
+	options?: NoUselessCallOptions;
+}
 export interface RuleWithNoUselessDateGetTimeOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -10833,6 +10845,7 @@ export type NoUnsafeTypeAssertionOptions = {};
 export type NoUnsafeUnaryMinusOptions = {};
 export type NoUnusedClassesOptions = {};
 export type NoUselessAssignmentOptions = {};
+export type NoUselessCallOptions = {};
 export type NoUselessDateGetTimeOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueBooleanDefaultOptions = {};
@@ -12555,6 +12568,7 @@ export type Category =
 	| "lint/nursery/noUnwantedPolyfillio"
 	| "lint/nursery/noUselessAssignment"
 	| "lint/nursery/noUselessBackrefInRegex"
+	| "lint/nursery/noUselessCall"
 	| "lint/nursery/noUselessDateGetTime"
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
