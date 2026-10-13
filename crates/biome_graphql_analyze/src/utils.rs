@@ -1,5 +1,5 @@
 use biome_graphql_syntax::{GraphqlLanguage, GraphqlSyntaxToken};
-use biome_rowan::{AstNode, AstNodeList, SyntaxTriviaPiece, TokenText};
+use biome_rowan::{AstNode, AstNodeList, SyntaxTriviaPiece, TokenText, chain_trivia_pieces};
 use biome_string_case::comparable_token::ComparableToken;
 use std::cmp::Ordering;
 
@@ -31,49 +31,67 @@ where
     true
 }
 
-type TriviaPieces = Vec<SyntaxTriviaPiece<GraphqlLanguage>>;
-
 /// The trivia around an item of a list, split between the trivia that moves with the item
 /// and the trivia that stays at its position in the list.
 struct ItemTrivia<N> {
     node: N,
-    /// The leading trivia before its first comment. It stays at the position of the item.
-    position_leading: TriviaPieces,
-    /// The leading trivia from its first comment onward. It moves with the item.
-    attached_leading: TriviaPieces,
-    trailing: TriviaPieces,
-    /// Whether `trailing` contains an end-of-line comment, in which case the whole trailing
-    /// trivia moves with the item instead of staying in place.
+    name: Option<TokenText>,
+    first_token: GraphqlSyntaxToken,
+    /// The number of leading trivia pieces of `first_token` before the first comment.
+    position_leading_len: usize,
+    last_token: GraphqlSyntaxToken,
+    /// Whether the trailing trivia of `last_token` contains an end-of-line comment, in which
+    /// case the whole trailing trivia moves with the item instead of staying in place.
     trailing_is_attached: bool,
 }
 
 impl<N: AstNode<Language = GraphqlLanguage>> ItemTrivia<N> {
-    fn new(node: N) -> Self {
+    fn new(node: N, name: Option<TokenText>) -> Option<Self> {
         let syntax = node.syntax();
-        let leading: TriviaPieces = syntax
-            .first_token()
-            .map(|token| token.leading_trivia().pieces().collect())
-            .unwrap_or_default();
-        let trailing: TriviaPieces = syntax
-            .last_token()
-            .map(|token| token.trailing_trivia().pieces().collect())
-            .unwrap_or_default();
-
-        let first_comment = leading
-            .iter()
+        let first_token = syntax.first_token()?;
+        let last_token = syntax.last_token()?;
+        let leading = first_token.leading_trivia();
+        let position_leading_len = leading
+            .pieces()
             .position(|piece| piece.is_comments())
-            .unwrap_or(leading.len());
-        let mut position_leading = leading;
-        let attached_leading = position_leading.split_off(first_comment);
-        let trailing_is_attached = trailing.iter().any(|piece| piece.is_comments());
+            .unwrap_or(leading.pieces().len());
+        let trailing_is_attached = last_token
+            .trailing_trivia()
+            .pieces()
+            .any(|piece| piece.is_comments());
 
-        Self {
+        Some(Self {
             node,
-            position_leading,
-            attached_leading,
-            trailing,
+            name,
+            first_token,
+            position_leading_len,
+            last_token,
             trailing_is_attached,
-        }
+        })
+    }
+
+    /// The leading trivia before its first comment. It stays at the position of the item.
+    fn position_leading(
+        &self,
+    ) -> impl ExactSizeIterator<Item = SyntaxTriviaPiece<GraphqlLanguage>> {
+        self.first_token
+            .leading_trivia()
+            .pieces()
+            .take(self.position_leading_len)
+    }
+
+    /// The leading trivia from its first comment onward. It moves with the item.
+    fn attached_leading(
+        &self,
+    ) -> impl ExactSizeIterator<Item = SyntaxTriviaPiece<GraphqlLanguage>> {
+        self.first_token
+            .leading_trivia()
+            .pieces()
+            .skip(self.position_leading_len)
+    }
+
+    fn has_attached_leading(&self) -> bool {
+        self.position_leading_len < self.first_token.leading_trivia().pieces().len()
     }
 
     /// Whether this position in the list starts on a new line.
@@ -81,8 +99,8 @@ impl<N: AstNode<Language = GraphqlLanguage>> ItemTrivia<N> {
     /// Leading trivia is either empty or starts with a newline, because the trivia up to the
     /// end of a line belongs to the trailing trivia of the previous token.
     fn position_on_new_line(&self) -> bool {
-        self.position_leading
-            .first()
+        self.position_leading()
+            .next()
             .is_some_and(|piece| piece.is_newline())
     }
 }
@@ -109,10 +127,16 @@ where
         .pieces()
         .next()
         .is_some_and(|piece| piece.is_newline());
-    let items: Vec<ItemTrivia<N>> = list.iter().map(ItemTrivia::new).collect();
+    let items = list
+        .iter()
+        .map(|node| {
+            let name = name(&node);
+            ItemTrivia::new(node, name)
+        })
+        .collect::<Option<Vec<_>>>()?;
 
     let mut order: Vec<usize> = (0..items.len()).collect();
-    order.sort_by(|&a, &b| compare_names(name(&items[a].node), name(&items[b].node)));
+    order.sort_by(|&a, &b| compare_names(items[a].name.clone(), items[b].name.clone()));
 
     let mut nodes = Vec::with_capacity(items.len());
     for (position, &index) in order.iter().enumerate() {
@@ -121,11 +145,18 @@ where
 
         // A comment above the item must stay on its own line. Otherwise it would follow
         // the previous token and describe a different item.
-        if !item.attached_leading.is_empty() && !slot.position_on_new_line() {
+        if item.has_attached_leading() && !slot.position_on_new_line() {
             return None;
         }
 
-        let trailing = if item.trailing_is_attached {
+        let node = item
+            .node
+            .clone()
+            .with_leading_trivia_pieces(chain_trivia_pieces(
+                slot.position_leading(),
+                item.attached_leading(),
+            ))?;
+        let node = if item.trailing_is_attached {
             // A line comment runs until the end of the line, so the code after it must start
             // on a new line. Otherwise the comment would swallow that code.
             let next_on_new_line = items
@@ -134,24 +165,12 @@ where
             if !next_on_new_line {
                 return None;
             }
-            item.trailing.clone()
+            node.with_trailing_trivia_pieces(item.last_token.trailing_trivia().pieces())?
         } else if slot.trailing_is_attached {
-            Vec::new()
+            node.with_trailing_trivia_pieces([])?
         } else {
-            slot.trailing.clone()
+            node.with_trailing_trivia_pieces(slot.last_token.trailing_trivia().pieces())?
         };
-
-        let leading: TriviaPieces = slot
-            .position_leading
-            .iter()
-            .chain(&item.attached_leading)
-            .cloned()
-            .collect();
-        let node = item
-            .node
-            .clone()
-            .with_leading_trivia_pieces(leading)?
-            .with_trailing_trivia_pieces(trailing)?;
         nodes.push(node);
     }
 
