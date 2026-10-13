@@ -1,0 +1,245 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```angular
+<?xml version="1.0" encoding="UTF-8"?>
+<svg [attr.viewBox]="box">
+	<?foo bar?>
+	<circle cx="5" cy="5" r="4" />
+</svg>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    frontmatter: missing (optional),
+    processing_instruction: HtmlProcessingInstruction {
+        start_token: PI_START@0..2 "<?" [] [],
+        target: HtmlTagName {
+            value_token: HTML_LITERAL@2..6 "xml" [] [Whitespace(" ")],
+        },
+        attributes: HtmlAttributeList [
+            HtmlAttribute {
+                name: HtmlAttributeName {
+                    value_token: HTML_LITERAL@6..13 "version" [] [],
+                },
+                initializer: HtmlAttributeInitializerClause {
+                    eq_token: EQ@13..14 "=" [] [],
+                    value: HtmlString {
+                        value_token: HTML_STRING_LITERAL@14..20 "\"1.0\"" [] [Whitespace(" ")],
+                    },
+                },
+            },
+            HtmlAttribute {
+                name: HtmlAttributeName {
+                    value_token: HTML_LITERAL@20..28 "encoding" [] [],
+                },
+                initializer: HtmlAttributeInitializerClause {
+                    eq_token: EQ@28..29 "=" [] [],
+                    value: HtmlString {
+                        value_token: HTML_STRING_LITERAL@29..36 "\"UTF-8\"" [] [],
+                    },
+                },
+            },
+        ],
+        end_token: PI_END@36..38 "?>" [] [],
+    },
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@38..40 "<" [Newline("\n")] [],
+                name: HtmlTagName {
+                    value_token: SVG_KW@40..44 "svg" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    AngularPropertyBinding {
+                        l_brack_token: L_BRACKET@44..45 "[" [] [],
+                        name: AngularBindingName {
+                            value_token: HTML_LITERAL@45..57 "attr.viewBox" [] [],
+                        },
+                        r_brack_token: R_BRACKET@57..58 "]" [] [],
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@58..59 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@59..64 "\"box\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@64..65 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlProcessingInstruction {
+                    start_token: PI_START@65..69 "<?" [Newline("\n"), Whitespace("\t")] [],
+                    target: HtmlTagName {
+                        value_token: HTML_LITERAL@69..73 "foo" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@73..76 "bar" [] [],
+                            },
+                            initializer: missing (optional),
+                        },
+                    ],
+                    end_token: PI_END@76..78 "?>" [] [],
+                },
+                HtmlSelfClosingElement {
+                    l_angle_token: L_ANGLE@78..81 "<" [Newline("\n"), Whitespace("\t")] [],
+                    name: HtmlTagName {
+                        value_token: CIRCLE_KW@81..88 "circle" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@88..90 "cx" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@90..91 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@91..95 "\"5\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@95..97 "cy" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@97..98 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@98..102 "\"5\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                        HtmlAttribute {
+                            name: HtmlAttributeName {
+                                value_token: HTML_LITERAL@102..103 "r" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@103..104 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@104..108 "\"4\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    ],
+                    slash_token: SLASH@108..109 "/" [] [],
+                    r_angle_token: R_ANGLE@109..110 ">" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@110..112 "<" [Newline("\n")] [],
+                slash_token: SLASH@112..113 "/" [] [],
+                name: HtmlTagName {
+                    value_token: HTML_LITERAL@113..116 "svg" [] [],
+                },
+                r_angle_token: R_ANGLE@116..117 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@117..118 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..118
+  0: (empty)
+  1: (empty)
+  2: HTML_PROCESSING_INSTRUCTION@0..38
+    0: PI_START@0..2 "<?" [] []
+    1: HTML_TAG_NAME@2..6
+      0: HTML_LITERAL@2..6 "xml" [] [Whitespace(" ")]
+    2: HTML_ATTRIBUTE_LIST@6..36
+      0: HTML_ATTRIBUTE@6..20
+        0: HTML_ATTRIBUTE_NAME@6..13
+          0: HTML_LITERAL@6..13 "version" [] []
+        1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@13..20
+          0: EQ@13..14 "=" [] []
+          1: HTML_STRING@14..20
+            0: HTML_STRING_LITERAL@14..20 "\"1.0\"" [] [Whitespace(" ")]
+      1: HTML_ATTRIBUTE@20..36
+        0: HTML_ATTRIBUTE_NAME@20..28
+          0: HTML_LITERAL@20..28 "encoding" [] []
+        1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@28..36
+          0: EQ@28..29 "=" [] []
+          1: HTML_STRING@29..36
+            0: HTML_STRING_LITERAL@29..36 "\"UTF-8\"" [] []
+    3: PI_END@36..38 "?>" [] []
+  3: (empty)
+  4: HTML_ELEMENT_LIST@38..117
+    0: HTML_ELEMENT@38..117
+      0: HTML_OPENING_ELEMENT@38..65
+        0: L_ANGLE@38..40 "<" [Newline("\n")] []
+        1: HTML_TAG_NAME@40..44
+          0: SVG_KW@40..44 "svg" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@44..64
+          0: ANGULAR_PROPERTY_BINDING@44..64
+            0: L_BRACKET@44..45 "[" [] []
+            1: ANGULAR_BINDING_NAME@45..57
+              0: HTML_LITERAL@45..57 "attr.viewBox" [] []
+            2: R_BRACKET@57..58 "]" [] []
+            3: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@58..64
+              0: EQ@58..59 "=" [] []
+              1: HTML_STRING@59..64
+                0: HTML_STRING_LITERAL@59..64 "\"box\"" [] []
+        3: R_ANGLE@64..65 ">" [] []
+      1: HTML_ELEMENT_LIST@65..110
+        0: HTML_PROCESSING_INSTRUCTION@65..78
+          0: PI_START@65..69 "<?" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TAG_NAME@69..73
+            0: HTML_LITERAL@69..73 "foo" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@73..76
+            0: HTML_ATTRIBUTE@73..76
+              0: HTML_ATTRIBUTE_NAME@73..76
+                0: HTML_LITERAL@73..76 "bar" [] []
+              1: (empty)
+          3: PI_END@76..78 "?>" [] []
+        1: HTML_SELF_CLOSING_ELEMENT@78..110
+          0: L_ANGLE@78..81 "<" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_TAG_NAME@81..88
+            0: CIRCLE_KW@81..88 "circle" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@88..108
+            0: HTML_ATTRIBUTE@88..95
+              0: HTML_ATTRIBUTE_NAME@88..90
+                0: HTML_LITERAL@88..90 "cx" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@90..95
+                0: EQ@90..91 "=" [] []
+                1: HTML_STRING@91..95
+                  0: HTML_STRING_LITERAL@91..95 "\"5\"" [] [Whitespace(" ")]
+            1: HTML_ATTRIBUTE@95..102
+              0: HTML_ATTRIBUTE_NAME@95..97
+                0: HTML_LITERAL@95..97 "cy" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@97..102
+                0: EQ@97..98 "=" [] []
+                1: HTML_STRING@98..102
+                  0: HTML_STRING_LITERAL@98..102 "\"5\"" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE@102..108
+              0: HTML_ATTRIBUTE_NAME@102..103
+                0: HTML_LITERAL@102..103 "r" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@103..108
+                0: EQ@103..104 "=" [] []
+                1: HTML_STRING@104..108
+                  0: HTML_STRING_LITERAL@104..108 "\"4\"" [] [Whitespace(" ")]
+          3: SLASH@108..109 "/" [] []
+          4: R_ANGLE@109..110 ">" [] []
+      2: HTML_CLOSING_ELEMENT@110..117
+        0: L_ANGLE@110..112 "<" [Newline("\n")] []
+        1: SLASH@112..113 "/" [] []
+        2: HTML_TAG_NAME@113..116
+          0: HTML_LITERAL@113..116 "svg" [] []
+        3: R_ANGLE@116..117 ">" [] []
+  5: EOF@117..118 "" [Newline("\n")] []
+
+```

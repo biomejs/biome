@@ -125,7 +125,6 @@ impl<'src> HtmlLexer<'src> {
 
         match dispatched {
             WHS => self.consume_newline_or_whitespaces(),
-            QST if self.at_pi_end() => self.consume_pi_end(),
             LSS => self.consume_l_angle(),
             MOR => self.consume_byte(T![>]),
             SLH => self.consume_byte(T![/]),
@@ -603,6 +602,39 @@ impl<'src> HtmlLexer<'src> {
             }
             _ => self.consume_unexpected_character(),
         }
+    }
+
+    /// Consume a token in the [HtmlLexContext::ProcessingInstruction] context.
+    fn consume_token_processing_instruction(&mut self, current: u8) -> HtmlSyntaxKind {
+        let dispatched = lookup_byte(current);
+
+        match dispatched {
+            WHS => self.consume_newline_or_whitespaces(),
+            QST if self.at_pi_end() => self.consume_pi_end(),
+            // A `<` or `>` ends an instruction whose `?>` is missing.
+            LSS => self.consume_l_angle(),
+            MOR => self.consume_byte(T![>]),
+            EQL => self.consume_byte(T![=]),
+            QOT => self.consume_string_literal(current),
+            _ if is_attribute_name_byte(current) => self.consume_processing_instruction_name(),
+            _ => self.consume_unexpected_character(),
+        }
+    }
+
+    /// Consumes a name inside a processing instruction as `HTML_LITERAL`. The
+    /// parser reads it as the target, an attribute name, or an unquoted value.
+    ///
+    /// The name accepts the same bytes as an attribute name, `?` included, but
+    /// ends before `?>`: `<?foo a?b?>` has the name `a?b`.
+    fn consume_processing_instruction_name(&mut self) -> HtmlSyntaxKind {
+        while let Some(byte) = self.current_byte() {
+            if !is_attribute_name_byte(byte) || self.at_pi_end() {
+                break;
+            }
+            self.advance(1);
+        }
+
+        HTML_LITERAL
     }
 
     /// Whether the lexer sits at the closing tag `</name>`, ignoring case the
@@ -1377,7 +1409,7 @@ impl<'src> HtmlLexer<'src> {
         T![<?]
     }
 
-    /// Consumes `<?`
+    /// Consumes `?>`
     fn consume_pi_end(&mut self) -> HtmlSyntaxKind {
         self.assert_byte(b'?');
 
@@ -1787,6 +1819,9 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                         self.consume_token_svelte_template_chunk(current, quote)
                     }
                     HtmlLexContext::Doctype => self.consume_token_doctype(current),
+                    HtmlLexContext::ProcessingInstruction => {
+                        self.consume_token_processing_instruction(current)
+                    }
                     HtmlLexContext::EmbeddedLanguage(lang) => {
                         self.consume_token_embedded_language(current, lang)
                     }
