@@ -385,6 +385,15 @@ impl DocumentFileSource {
         matches!(self, Self::Css(_))
     }
 
+    /// Whether the document is HTML or one of its dialects, such as Vue,
+    /// Svelte, or Astro.
+    pub const fn is_html_like(&self) -> bool {
+        #[cfg(feature = "lang_html")]
+        return matches!(self, Self::Html(_));
+        #[cfg(not(feature = "lang_html"))]
+        false
+    }
+
     #[cfg(feature = "lang_js")]
     pub fn to_js_file_source(&self) -> Option<JsFileSource> {
         match self {

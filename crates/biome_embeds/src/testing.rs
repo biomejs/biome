@@ -81,6 +81,25 @@ pub(crate) fn parse_vue_source(db: &TestDb, source: &str) -> Utf8PathBuf {
     path
 }
 
+/// Stores a JavaScript module that is its own host document, with the given
+/// embedded snippets.
+pub(crate) fn parse_js_source(
+    db: &TestDb,
+    source: &str,
+    snippets: Vec<ParsedSnippet>,
+) -> Utf8PathBuf {
+    let path = Utf8PathBuf::from("src/file.js");
+    let parsed = biome_js_parser::parse(
+        source,
+        JsFileSource::js_module(),
+        JsParserOptions::default(),
+    )
+    .into();
+    let file = ParsedSource::new(db, path.clone(), parsed, 3, snippets);
+    db.insert_file(path.clone(), file);
+    path
+}
+
 pub(crate) fn parse_html_source_with_js_snippet(db: &TestDb, html: &str, js: &str) -> Utf8PathBuf {
     let path = Utf8PathBuf::from("src/file.html");
     let parsed = parse_html(html, HtmlParserOptions::default()).into();
