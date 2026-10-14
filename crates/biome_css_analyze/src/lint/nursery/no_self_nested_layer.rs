@@ -84,22 +84,13 @@ impl Rule for NoSelfNestedLayer {
             Ok(AnyCssLayer::CssLayerReference(reference)) => reference.references(),
             _ => return Box::default(),
         };
-        let enclosing: Vec<_> = enclosing_layer_names(node).collect();
-        if enclosing.is_empty() {
-            return Box::default();
-        }
-
         names
             .iter()
             .flatten()
             .filter_map(|name| {
-                let enclosing = enclosing
-                    .iter()
+                let enclosing = enclosing_layer_names(node)
                     .find(|enclosing| starts_with_layer_name(&name, enclosing))?;
-                Some(RuleState {
-                    name,
-                    enclosing: enclosing.clone(),
-                })
+                Some(RuleState { name, enclosing })
             })
             .collect()
     }
