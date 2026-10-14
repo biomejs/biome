@@ -17,25 +17,30 @@ enum A {
 
 # Diagnostics
 ```
-invalid.graphql:4:7 lint/correctness/noDuplicateEnumValueNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:3:2 lint/correctness/noDuplicateEnumValueNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate enum value name.
+  × The enum value name "TEST" is used more than once.
   
+    1 │ # should generate diagnostics
     2 │ enum A {
+  > 3 │ 	TEST
+      │ 	^^^^
+    4 │ 	OTHER
+    5 │ 	TesT
+  
+  i This value matches "TEST" ignoring letter case.
+  
     3 │ 	TEST
-  > 4 │ 	OTHER
-      │ 	     
+    4 │ 	OTHER
   > 5 │ 	TesT
       │ 	^^^^
     6 │ 	ANOTHER
     7 │ 	Test
   
-  i Another duplicate enum value.
+  i This value matches "TEST" ignoring letter case.
   
-    4 │ 	OTHER
     5 │ 	TesT
-  > 6 │ 	ANOTHER
-      │ 	       
+    6 │ 	ANOTHER
   > 7 │ 	Test
       │ 	^^^^
     8 │ }
