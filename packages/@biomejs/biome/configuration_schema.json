@@ -9070,6 +9070,15 @@
 			"additionalProperties": false,
 			"required": ["level", "options"]
 		},
+		"RuleAssistWithUseGraphqlSortedDefinitionsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseGraphqlSortedDefinitionsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level", "options"]
+		},
 		"RuleAssistWithUseGraphqlSortedVariablesOptions": {
 			"type": "object",
 			"properties": {
@@ -15852,6 +15861,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useGraphqlSortedDefinitions": {
+					"description": "Sort the named definitions in a GraphQL document.\nSee https://biomejs.dev/assist/actions/use-graphql-sorted-definitions",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseGraphqlSortedDefinitionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGraphqlSortedVariables": {
 					"description": "Sort the variable definitions of GraphQL operations in natural order.\nSee https://biomejs.dev/assist/actions/use-graphql-sorted-variables",
 					"anyOf": [
@@ -18941,6 +18957,16 @@
 			]
 		},
 		"UseGraphqlSortedArgumentsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseGraphqlSortedDefinitionsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/$defs/RuleAssistWithUseGraphqlSortedDefinitionsOptions" }
+			]
+		},
+		"UseGraphqlSortedDefinitionsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
