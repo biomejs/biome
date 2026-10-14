@@ -1064,6 +1064,53 @@ pub fn validate_eof_token<L: Language>(syntax: SyntaxNode<L>) {
     );
 }
 
+/// Validator to run in our parser's spec tests to make sure that
+/// [SyntaxNode::text_trimmed_range] agrees, for every node of the tree, with
+/// a reference that walks the tokens: it skips tokens with empty text from
+/// the node's first token forward and from its last token backward, leaving
+/// the node's bounds if it has to.
+pub fn validate_text_trimmed_ranges<L: Language>(syntax: &SyntaxNode<L>) {
+    for node in syntax.descendants() {
+        assert_eq!(
+            node.text_trimmed_range(),
+            text_trimmed_range_from_tokens(&node),
+            "wrong trimmed range for {node:#?}"
+        );
+    }
+}
+
+fn text_trimmed_range_from_tokens<L: Language>(node: &SyntaxNode<L>) -> TextRange {
+    let range = node.text_range_with_trivia();
+
+    let mut start = range.start();
+    let mut token = node.first_token();
+    while let Some(current) = token {
+        let trimmed = current.text_trimmed_range();
+        if trimmed.is_empty() {
+            start = current.text_range().end();
+            token = current.next_token();
+        } else {
+            start = trimmed.start();
+            break;
+        }
+    }
+
+    let mut end = range.end();
+    let mut token = node.last_token();
+    while let Some(current) = token {
+        let trimmed = current.text_trimmed_range();
+        if trimmed.is_empty() {
+            end = current.text_range().start();
+            token = current.prev_token();
+        } else {
+            end = trimmed.end();
+            break;
+        }
+    }
+
+    TextRange::new(start, end.max(start))
+}
+
 /// Asserts whether test files containing comments:
 /// - `should not generate diagnostics` emit no diagnostics
 /// - `should generate diagnostics` emit diagnostics
