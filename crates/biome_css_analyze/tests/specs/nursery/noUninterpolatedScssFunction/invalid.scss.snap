@@ -22,6 +22,12 @@ expression: invalid.scss
 	--bare-condition: style(--a: 1);
 }
 
+@container style(--c: double(1px)) {
+	a {
+		color: red;
+	}
+}
+
 @supports (--raw: double(1px)) {
 	a {
 		color: red;
@@ -199,16 +205,37 @@ invalid.scss:16:20 lint/nursery/noUninterpolatedScssFunction ━━━━━━�
 ```
 
 ```
-invalid.scss:19:19 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:19:23 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The function double() isn't interpolated, so Sass outputs it unchanged.
   
     17 │ }
     18 │ 
-  > 19 │ @supports (--raw: double(1px)) {
-       │                   ^^^^^^
+  > 19 │ @container style(--c: double(1px)) {
+       │                       ^^^^^^
     20 │ 	a {
     21 │ 		color: red;
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:25:19 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function double() isn't interpolated, so Sass outputs it unchanged.
+  
+    23 │ }
+    24 │ 
+  > 25 │ @supports (--raw: double(1px)) {
+       │                   ^^^^^^
+    26 │ 	a {
+    27 │ 		color: red;
   
   i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
   

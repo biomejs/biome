@@ -15,6 +15,7 @@ $gap: 8px;
 	--dollar-space: $ gap;
 	--price: 5$;
 	--name-#{$gap}: 1px;
+	--url-text: url(https://cdn.example/a$b.svg);
 }
 
 a {

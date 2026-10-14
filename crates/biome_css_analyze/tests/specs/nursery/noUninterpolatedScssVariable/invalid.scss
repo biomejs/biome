@@ -12,6 +12,13 @@ $path: "a.png";
 	--url: url($path);
 	--list: $gap $gap;
 	--braced: {a: $gap};
+	--commented:
+		/* before */ $gap /* after */;
+	--own-line:
+		math.$pi;
+	--url-module: url(t.$path);
+	--sass-call: darken($gap, 10%);
+	--module-call: math.max($gap, 1px);
 }
 
 @supports (--raw: $gap) {
