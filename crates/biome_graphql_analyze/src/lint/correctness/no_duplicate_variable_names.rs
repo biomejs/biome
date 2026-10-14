@@ -1,13 +1,13 @@
 use biome_diagnostics::Severity;
-use std::collections::HashSet;
-
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_graphql_syntax::GraphqlVariableDefinitions;
-use biome_rowan::{AstNode, TokenText};
+use biome_rowan::AstNode;
 use biome_rule_options::no_duplicate_variable_names::NoDuplicateVariableNamesOptions;
+
+use crate::utils::{DuplicateName, collect_duplicate_names};
 
 declare_lint_rule! {
     /// Require all variable definitions to be unique.
@@ -44,44 +44,44 @@ declare_lint_rule! {
 
 impl Rule for NoDuplicateVariableNames {
     type Query = Ast<GraphqlVariableDefinitions>;
-    type State = ();
-    type Signals = Option<Self::State>;
+    type State = DuplicateName;
+    type Signals = Box<[Self::State]>;
     type Options = NoDuplicateVariableNamesOptions;
 
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        let node = ctx.query();
-        let mut found: HashSet<TokenText> = HashSet::new();
-
-        for element in node.elements() {
-            if let Some(variable) = element.variable().ok()
-                && let Some(name) = variable.name().ok()
-                && let Some(value_token) = name.value_token().ok()
-            {
-                let string = value_token.token_text();
-                if found.contains(&string) {
-                    return Some(());
-                } else {
-                    found.insert(string);
-                }
-            }
-        }
-
-        None
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        collect_duplicate_names(ctx.query().elements().into_iter().filter_map(|element| {
+            let variable = element.variable().ok()?;
+            let name = variable.name().ok()?.value_token().ok()?.token_text_trimmed();
+            Some((name.clone(), name, variable.range()))
+        }))
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        let span = ctx.query().range();
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                span,
+    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let DuplicateName {
+            name,
+            first,
+            duplicates,
+        } = state;
+        let name = name.text();
+        let mut diagnostic = RuleDiagnostic::new(
+            rule_category!(),
+            first,
+            markup! {
+                "The variable name \""<Emphasis>"$"{name}</Emphasis>"\" is used more than once."
+            },
+        );
+
+        for range in duplicates {
+            diagnostic = diagnostic.detail(
+                range,
                 markup! {
-                    "Duplicate variable name."
+                    "The variable \""<Emphasis>"$"{name}</Emphasis>"\" is repeated here."
                 },
-            )
-            .note(markup! {
-                "A GraphQL operation is only valid if all its variables are uniquely named. Make sure to name every variable differently."
-            }),
-        )
+            );
+        }
+
+        Some(diagnostic.note(markup! {
+            "A GraphQL operation is only valid if all its variables are uniquely named. Make sure to name every variable differently."
+        }))
     }
 }

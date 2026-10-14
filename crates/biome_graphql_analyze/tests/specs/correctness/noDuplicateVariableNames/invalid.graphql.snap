@@ -8,18 +8,35 @@ expression: invalid.graphql
 query A($x: Int, $x: Int, $x: String) { __typename }
 query B($x: String, $x: Int) { __typename }
 query C($x: Int, $x: Int) { __typename }
+query D($x: Int, $y: Int, $x: Int, $y: Int) { __typename }
 
 ```
 
 # Diagnostics
 ```
-invalid.graphql:2:8 lint/correctness/noDuplicateVariableNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:2:9 lint/correctness/noDuplicateVariableNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate variable name.
+  × The variable name "$x" is used more than once.
   
     1 │ # should generate diagnostics
   > 2 │ query A($x: Int, $x: Int, $x: String) { __typename }
-      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │         ^^
+    3 │ query B($x: String, $x: Int) { __typename }
+    4 │ query C($x: Int, $x: Int) { __typename }
+  
+  i The variable "$x" is repeated here.
+  
+    1 │ # should generate diagnostics
+  > 2 │ query A($x: Int, $x: Int, $x: String) { __typename }
+      │                  ^^
+    3 │ query B($x: String, $x: Int) { __typename }
+    4 │ query C($x: Int, $x: Int) { __typename }
+  
+  i The variable "$x" is repeated here.
+  
+    1 │ # should generate diagnostics
+  > 2 │ query A($x: Int, $x: Int, $x: String) { __typename }
+      │                           ^^
     3 │ query B($x: String, $x: Int) { __typename }
     4 │ query C($x: Int, $x: Int) { __typename }
   
@@ -29,16 +46,25 @@ invalid.graphql:2:8 lint/correctness/noDuplicateVariableNames ━━━━━━
 ```
 
 ```
-invalid.graphql:3:8 lint/correctness/noDuplicateVariableNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:3:9 lint/correctness/noDuplicateVariableNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate variable name.
+  × The variable name "$x" is used more than once.
   
     1 │ # should generate diagnostics
     2 │ query A($x: Int, $x: Int, $x: String) { __typename }
   > 3 │ query B($x: String, $x: Int) { __typename }
-      │        ^^^^^^^^^^^^^^^^^^^^^
+      │         ^^
     4 │ query C($x: Int, $x: Int) { __typename }
-    5 │ 
+    5 │ query D($x: Int, $y: Int, $x: Int, $y: Int) { __typename }
+  
+  i The variable "$x" is repeated here.
+  
+    1 │ # should generate diagnostics
+    2 │ query A($x: Int, $x: Int, $x: String) { __typename }
+  > 3 │ query B($x: String, $x: Int) { __typename }
+      │                     ^^
+    4 │ query C($x: Int, $x: Int) { __typename }
+    5 │ query D($x: Int, $y: Int, $x: Int, $y: Int) { __typename }
   
   i A GraphQL operation is only valid if all its variables are uniquely named. Make sure to name every variable differently.
   
@@ -46,15 +72,73 @@ invalid.graphql:3:8 lint/correctness/noDuplicateVariableNames ━━━━━━
 ```
 
 ```
-invalid.graphql:4:8 lint/correctness/noDuplicateVariableNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:4:9 lint/correctness/noDuplicateVariableNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Duplicate variable name.
+  × The variable name "$x" is used more than once.
   
     2 │ query A($x: Int, $x: Int, $x: String) { __typename }
     3 │ query B($x: String, $x: Int) { __typename }
   > 4 │ query C($x: Int, $x: Int) { __typename }
-      │        ^^^^^^^^^^^^^^^^^^
-    5 │ 
+      │         ^^
+    5 │ query D($x: Int, $y: Int, $x: Int, $y: Int) { __typename }
+    6 │ 
+  
+  i The variable "$x" is repeated here.
+  
+    2 │ query A($x: Int, $x: Int, $x: String) { __typename }
+    3 │ query B($x: String, $x: Int) { __typename }
+  > 4 │ query C($x: Int, $x: Int) { __typename }
+      │                  ^^
+    5 │ query D($x: Int, $y: Int, $x: Int, $y: Int) { __typename }
+    6 │ 
+  
+  i A GraphQL operation is only valid if all its variables are uniquely named. Make sure to name every variable differently.
+  
+
+```
+
+```
+invalid.graphql:5:9 lint/correctness/noDuplicateVariableNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable name "$x" is used more than once.
+  
+    3 │ query B($x: String, $x: Int) { __typename }
+    4 │ query C($x: Int, $x: Int) { __typename }
+  > 5 │ query D($x: Int, $y: Int, $x: Int, $y: Int) { __typename }
+      │         ^^
+    6 │ 
+  
+  i The variable "$x" is repeated here.
+  
+    3 │ query B($x: String, $x: Int) { __typename }
+    4 │ query C($x: Int, $x: Int) { __typename }
+  > 5 │ query D($x: Int, $y: Int, $x: Int, $y: Int) { __typename }
+      │                           ^^
+    6 │ 
+  
+  i A GraphQL operation is only valid if all its variables are uniquely named. Make sure to name every variable differently.
+  
+
+```
+
+```
+invalid.graphql:5:18 lint/correctness/noDuplicateVariableNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The variable name "$y" is used more than once.
+  
+    3 │ query B($x: String, $x: Int) { __typename }
+    4 │ query C($x: Int, $x: Int) { __typename }
+  > 5 │ query D($x: Int, $y: Int, $x: Int, $y: Int) { __typename }
+      │                  ^^
+    6 │ 
+  
+  i The variable "$y" is repeated here.
+  
+    3 │ query B($x: String, $x: Int) { __typename }
+    4 │ query C($x: Int, $x: Int) { __typename }
+  > 5 │ query D($x: Int, $y: Int, $x: Int, $y: Int) { __typename }
+      │                                    ^^
+    6 │ 
   
   i A GraphQL operation is only valid if all its variables are uniquely named. Make sure to name every variable differently.
   
