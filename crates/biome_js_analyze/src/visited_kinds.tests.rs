@@ -3,12 +3,17 @@
 
 use super::*;
 use biome_analyze::options::JsxRuntime;
-use biome_analyze::{ActionFilter, AnalyzerConfiguration, AnalyzerOptions, Never, RuleFilter};
+use biome_analyze::{
+    ActionFilter, AnalyzerConfiguration, AnalyzerOptions, AnalyzerPluginSlice, AnalyzerPluginVec,
+    Never, RuleFilter,
+};
 use biome_db::ParsedSource;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, print_diagnostic_to_string};
+use biome_fs::OsFileSystem;
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{TextRange, TextSize};
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
+use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::AstNode;
 use camino::{Utf8Path, Utf8PathBuf};
 use salsa::Storage;
@@ -50,6 +55,8 @@ const VISITOR_RULES: &[RuleFilter<'static>] = &[
     RuleFilter::Rule("correctness", "noUnusedVariables"),
     RuleFilter::Rule("correctness", "useHookAtTopLevel"),
     RuleFilter::Rule("correctness", "useYield"),
+    RuleFilter::Rule("nursery", "useReactCompiler"),
+    RuleFilter::Rule("nursery", "useTailwindStaticClassStrings"),
     RuleFilter::Rule("style", "useFilenamingConvention"),
     RuleFilter::Rule("style", "useReadonlyClassProperties"),
     RuleFilter::Rule("suspicious", "noClassAssign"),
@@ -88,6 +95,7 @@ fn signals(
     path: &Utf8Path,
     filter: AnalysisFilter,
     walk_every_node: bool,
+    plugins: AnalyzerPluginSlice,
 ) -> Vec<String> {
     let mut options = AnalyzerOptions::default()
         .with_file_path(path)
@@ -114,7 +122,7 @@ fn signals(
         .with_language_db(Rc::new(db))
         .with_parsed_source(parsed.into());
     let mut signals = Vec::new();
-    let (_, errors) = analyze(root, filter, &options, &[], services, |signal| {
+    let (_, errors) = analyze(root, filter, &options, plugins, services, |signal| {
         if let Some(diagnostic) = signal.diagnostic() {
             let span = diagnostic.location().span;
             let printed = print_diagnostic_to_string(&diagnostic.with_file_path(path.as_str()));
@@ -148,6 +156,19 @@ fn kind_filtered_walk_emits_the_signals_of_a_full_walk() {
     );
     assert!(analyzer_sources.len() > 1000 && parser_sources.len() > 500);
 
+    let plugin_dir = manifest.join("tests/plugin");
+    let mut plugins = AnalyzerPluginVec::new();
+    for entry in std::fs::read_dir(&plugin_dir).unwrap() {
+        let path = Utf8PathBuf::try_from(entry.unwrap().path()).unwrap();
+        if path.extension() == Some("grit") {
+            let fs = OsFileSystem::new(plugin_dir.clone());
+            let plugin = AnalyzerGritPlugin::load(&fs, &path, None).unwrap();
+            plugins.push(Arc::new(Box::new(plugin)));
+        }
+    }
+    assert!(!plugins.is_empty());
+    let plugins = plugins.as_slice();
+
     let fixtures: Vec<_> = analyzer_sources
         .iter()
         .map(|path| (path.as_path(), false))
@@ -166,7 +187,7 @@ fn kind_filtered_walk_emits_the_signals_of_a_full_walk() {
                         chunk
                             .iter()
                             .map(|&(path, is_parser_fixture)| {
-                                compare_walks(path, is_parser_fixture)
+                                compare_walks(path, is_parser_fixture, plugins)
                             })
                             .sum::<usize>()
                     })
@@ -183,7 +204,7 @@ fn kind_filtered_walk_emits_the_signals_of_a_full_walk() {
 
 /// Compares the walks on the file at `path` for several rule sets, and returns
 /// the number of signals compared.
-fn compare_walks(path: &Utf8Path, is_parser_fixture: bool) -> usize {
+fn compare_walks(path: &Utf8Path, is_parser_fixture: bool, plugins: AnalyzerPluginSlice) -> usize {
     let Ok(source_type) = JsFileSource::try_from(path) else {
         return 0;
     };
@@ -221,13 +242,21 @@ fn compare_walks(path: &Utf8Path, is_parser_fixture: bool) -> usize {
             range,
             ..AnalysisFilter::default()
         };
-        let filtered = signals(&root, source_type, path, filter, false);
-        let full = signals(&root, source_type, path, filter, true);
+        let filtered = signals(&root, source_type, path, filter, false, &[]);
+        let full = signals(&root, source_type, path, filter, true, &[]);
         assert_eq!(
             filtered, full,
             "{path} with rules {enabled_rules:?} and range {range:?}"
         );
         compared += full.len();
     }
-    compared
+
+    let filter = AnalysisFilter {
+        enabled_rules: Some(&only_debugger),
+        ..AnalysisFilter::default()
+    };
+    let filtered = signals(&root, source_type, path, filter, false, plugins);
+    let full = signals(&root, source_type, path, filter, true, plugins);
+    assert_eq!(filtered, full, "{path} with plugins");
+    compared + full.len()
 }
