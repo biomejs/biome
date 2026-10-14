@@ -1,3 +1,4 @@
+mod borrowed_token;
 mod element;
 mod node;
 mod rewriter;
@@ -5,6 +6,9 @@ mod token;
 mod trivia;
 
 use crate::{AstNode, RawSyntaxKind};
+pub use borrowed_token::{
+    BorrowedToken, BorrowedTokensIterator, BorrowedTriviaPiece, BorrowedTriviaPiecesIterator,
+};
 pub use element::{SyntaxElement, SyntaxElementKey};
 pub use node::{
     AnySyntaxNode, EmbeddedSendNode, Preorder, PreorderWithTokens, SendNode, SyntaxElementChildren,
