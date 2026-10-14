@@ -6,6 +6,11 @@ $name: base;
 	}
 }
 
+@layer #{$name} {
+	@layer #{$name} {
+	}
+}
+
 @layer base {
 	.a {
 		&:hover {

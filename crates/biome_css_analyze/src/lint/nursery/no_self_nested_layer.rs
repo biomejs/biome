@@ -16,6 +16,9 @@ declare_lint_rule! {
     /// The rule also reports names that start with an enclosing layer's name, such as `@layer base.reset`
     /// inside `@layer base`, which creates `base.base.reset` instead of `base.reset`.
     ///
+    /// In SCSS, a name that uses interpolation only matches the same interpolation, such as
+    /// `@layer #{$name}` inside `@layer #{$name}`.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -144,9 +147,10 @@ fn enclosing_layer_names(node: &CssLayerAtRule) -> impl Iterator<Item = CssLayer
 
 /// Whether the dot-separated segments of `enclosing` are a prefix of those of `name`.
 ///
-/// A segment that uses Sass interpolation never matches, because its value is only known after
-/// compilation. Segments after the compared prefix don't affect the result, so `base.#{$x}`
-/// still starts with `base`.
+/// A segment that uses Sass interpolation only matches the same interpolation text, such as
+/// `#{$name}` in both names, because its value is only known after compilation. That assumes the
+/// variable keeps its value between the two layers. Segments after the compared prefix don't
+/// affect the result, so `base.#{$x}` still starts with `base`.
 fn starts_with_layer_name(name: &CssLayerNameList, enclosing: &CssLayerNameList) -> bool {
     if enclosing.len() > name.len() {
         return false;
@@ -162,6 +166,10 @@ fn starts_with_layer_name(name: &CssLayerNameList, enclosing: &CssLayerNameList)
                 (Ok(enclosing), Ok(name)) => enclosing.text_trimmed() == name.text_trimmed(),
                 _ => false,
             },
+            (
+                Ok(AnyCssLayerName::ScssInterpolatedIdentifier(enclosing)),
+                Ok(AnyCssLayerName::ScssInterpolatedIdentifier(name)),
+            ) => enclosing.syntax().text_trimmed() == name.syntax().text_trimmed(),
             _ => false,
         })
 }

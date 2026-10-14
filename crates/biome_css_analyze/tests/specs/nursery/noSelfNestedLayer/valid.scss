@@ -1,8 +1,9 @@
 /* should not generate diagnostics */
 $name: base;
+$other: theme;
 
 @layer #{$name} {
-	@layer #{$name} {
+	@layer #{$other} {
 	}
 
 	@layer base {
