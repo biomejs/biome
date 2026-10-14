@@ -1,0 +1,43 @@
+/* should generate diagnostics */
+@layer base {
+	@layer base {
+		a {
+			color: red;
+		}
+	}
+}
+
+@layer base {
+	@layer base, theme;
+}
+
+@layer base {
+	@layer base.reset {
+	}
+}
+
+@layer components {
+	@layer button {
+		@layer components {
+		}
+	}
+}
+
+@layer base {
+	@media (min-width: 1px) {
+		@layer base {
+		}
+	}
+}
+
+@layer a.b {
+	@layer a.b {
+	}
+}
+
+@layer base {
+	@layer {
+		@layer base {
+		}
+	}
+}

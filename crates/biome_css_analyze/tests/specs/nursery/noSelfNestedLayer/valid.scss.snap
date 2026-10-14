@@ -1,0 +1,23 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+$name: base;
+
+@layer #{$name} {
+	@layer #{$name} {
+	}
+
+	@layer base {
+	}
+}
+
+@layer base {
+	@layer #{$name} {
+	}
+}
+
+```

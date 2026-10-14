@@ -1,0 +1,196 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+/* should generate diagnostics */
+@layer base {
+	@layer base {
+		a {
+			color: red;
+		}
+	}
+}
+
+@layer base {
+	@layer base, theme;
+}
+
+@layer base {
+	@layer base.reset {
+	}
+}
+
+@layer components {
+	@layer button {
+		@layer components {
+		}
+	}
+}
+
+@layer base {
+	@media (min-width: 1px) {
+		@layer base {
+		}
+	}
+}
+
+@layer a.b {
+	@layer a.b {
+	}
+}
+
+@layer base {
+	@layer {
+		@layer base {
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.css:3:9 lint/nursery/noSelfNestedLayer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The layer base repeats the name of the enclosing layer base.
+  
+    1 │ /* should generate diagnostics */
+    2 │ @layer base {
+  > 3 │ 	@layer base {
+      │ 	       ^^^^
+    4 │ 		a {
+    5 │ 			color: red;
+  
+  i Layer names inside a layer block are relative to it, so this creates the sublayer base.base. A sublayer has its own place in the cascade order.
+  
+  i Rename the layer so it doesn't repeat base, or remove the nested @layer if you didn't mean to create a sublayer.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:11:9 lint/nursery/noSelfNestedLayer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The layer base repeats the name of the enclosing layer base.
+  
+    10 │ @layer base {
+  > 11 │ 	@layer base, theme;
+       │ 	       ^^^^
+    12 │ }
+    13 │ 
+  
+  i Layer names inside a layer block are relative to it, so this creates the sublayer base.base. A sublayer has its own place in the cascade order.
+  
+  i Rename the layer so it doesn't repeat base, or remove the nested @layer if you didn't mean to create a sublayer.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:15:9 lint/nursery/noSelfNestedLayer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The layer base.reset repeats the name of the enclosing layer base.
+  
+    14 │ @layer base {
+  > 15 │ 	@layer base.reset {
+       │ 	       ^^^^^^^^^^
+    16 │ 	}
+    17 │ }
+  
+  i Layer names inside a layer block are relative to it, so this creates the sublayer base.base.reset. A sublayer has its own place in the cascade order.
+  
+  i Rename the layer so it doesn't repeat base, or remove the nested @layer if you didn't mean to create a sublayer.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:21:10 lint/nursery/noSelfNestedLayer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The layer components repeats the name of the enclosing layer components.
+  
+    19 │ @layer components {
+    20 │ 	@layer button {
+  > 21 │ 		@layer components {
+       │ 		       ^^^^^^^^^^
+    22 │ 		}
+    23 │ 	}
+  
+  i Layer names inside a layer block are relative to it, so this creates the sublayer components.button.components. A sublayer has its own place in the cascade order.
+  
+  i Rename the layer so it doesn't repeat components, or remove the nested @layer if you didn't mean to create a sublayer.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:28:10 lint/nursery/noSelfNestedLayer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The layer base repeats the name of the enclosing layer base.
+  
+    26 │ @layer base {
+    27 │ 	@media (min-width: 1px) {
+  > 28 │ 		@layer base {
+       │ 		       ^^^^
+    29 │ 		}
+    30 │ 	}
+  
+  i Layer names inside a layer block are relative to it, so this creates the sublayer base.base. A sublayer has its own place in the cascade order.
+  
+  i Rename the layer so it doesn't repeat base, or remove the nested @layer if you didn't mean to create a sublayer.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:34:9 lint/nursery/noSelfNestedLayer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The layer a.b repeats the name of the enclosing layer a.b.
+  
+    33 │ @layer a.b {
+  > 34 │ 	@layer a.b {
+       │ 	       ^^^
+    35 │ 	}
+    36 │ }
+  
+  i Layer names inside a layer block are relative to it, so this creates the sublayer a.b.a.b. A sublayer has its own place in the cascade order.
+  
+  i Rename the layer so it doesn't repeat a.b, or remove the nested @layer if you didn't mean to create a sublayer.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:40:10 lint/nursery/noSelfNestedLayer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The layer base repeats the name of the enclosing layer base.
+  
+    38 │ @layer base {
+    39 │ 	@layer {
+  > 40 │ 		@layer base {
+       │ 		       ^^^^
+    41 │ 		}
+    42 │ 	}
+  
+  i Layer names inside a layer block are relative to it, so this creates a new sublayer. A sublayer has its own place in the cascade order.
+  
+  i Rename the layer so it doesn't repeat base, or remove the nested @layer if you didn't mean to create a sublayer.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

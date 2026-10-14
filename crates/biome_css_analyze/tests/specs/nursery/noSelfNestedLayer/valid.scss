@@ -1,0 +1,15 @@
+/* should not generate diagnostics */
+$name: base;
+
+@layer #{$name} {
+	@layer #{$name} {
+	}
+
+	@layer base {
+	}
+}
+
+@layer base {
+	@layer #{$name} {
+	}
+}

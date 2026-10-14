@@ -1,0 +1,67 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+$name: base;
+
+@layer base {
+	@layer base.#{$name} {
+	}
+}
+
+@layer base {
+	.a {
+		&:hover {
+			@layer base {
+				color: red;
+			}
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:5:9 lint/nursery/noSelfNestedLayer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The layer base.#{$name} repeats the name of the enclosing layer base.
+  
+    4 │ @layer base {
+  > 5 │ 	@layer base.#{$name} {
+      │ 	       ^^^^^^^^^^^^^
+    6 │ 	}
+    7 │ }
+  
+  i Layer names inside a layer block are relative to it, so this creates the sublayer base.base.#{$name}. A sublayer has its own place in the cascade order.
+  
+  i Rename the layer so it doesn't repeat base, or remove the nested @layer if you didn't mean to create a sublayer.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:12:11 lint/nursery/noSelfNestedLayer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The layer base repeats the name of the enclosing layer base.
+  
+    10 │ 	.a {
+    11 │ 		&:hover {
+  > 12 │ 			@layer base {
+       │ 			       ^^^^
+    13 │ 				color: red;
+    14 │ 			}
+  
+  i Layer names inside a layer block are relative to it, so this creates the sublayer base.base. A sublayer has its own place in the cascade order.
+  
+  i Rename the layer so it doesn't repeat base, or remove the nested @layer if you didn't mean to create a sublayer.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

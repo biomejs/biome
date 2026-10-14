@@ -6073,6 +6073,16 @@
 			]
 		},
 		"NoSelfImportOptions": { "type": "object", "additionalProperties": false },
+		"NoSelfNestedLayerConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoSelfNestedLayerOptions" }
+			]
+		},
+		"NoSelfNestedLayerOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoSetterReturnConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7868,6 +7878,13 @@
 					"description": "Forbid a module from importing itself.\nSee https://biomejs.dev/linter/rules/no-self-import",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoSelfImportConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSelfNestedLayer": {
+					"description": "Disallow nesting a cascade layer inside a layer with the same name.\nSee https://biomejs.dev/linter/rules/no-self-nested-layer",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoSelfNestedLayerConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11804,6 +11821,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoSelfImportOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoSelfNestedLayerOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoSelfNestedLayerOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
