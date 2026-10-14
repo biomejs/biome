@@ -3846,7 +3846,7 @@ impl ScssAtRootQueryClause {
     }
 }
 impl ScssAtRootSelector {
-    pub fn with_selector(self, element: CssSelectorList) -> Self {
+    pub fn with_selector(self, element: AnyScssAtRootSelectorList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),

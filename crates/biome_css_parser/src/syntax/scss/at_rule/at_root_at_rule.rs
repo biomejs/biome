@@ -1,4 +1,5 @@
 use crate::parser::CssParser;
+use crate::syntax::at_rule::keyframes::parse_scss_template_keyframes_selector_list;
 use crate::syntax::block::{expected_block, parse_declaration_or_rule_list_block};
 use crate::syntax::scss::{expected_scss_expression, parse_scss_expression_until};
 use crate::syntax::selector::SelectorList;
@@ -105,14 +106,16 @@ fn is_at_scss_at_root_query(p: &mut CssParser) -> bool {
     p.at(T!['('])
 }
 
-/// Parses the selector shorthand used by `@at-root <selector> { ... }`.
+/// Parses style or keyframe selectors in `@at-root` shorthand.
 ///
 /// # Example
 ///
 /// ```scss
 /// @at-root .root-only, .another-root {
-///          ^^^^^^^^^^^^^^^^^^^^^^^^^
 ///   color: red;
+/// }
+/// @keyframes fade {
+///   @at-root 50%, to { opacity: 1; }
 /// }
 /// ```
 ///
@@ -121,10 +124,12 @@ fn is_at_scss_at_root_query(p: &mut CssParser) -> bool {
 fn parse_scss_at_root_selector(p: &mut CssParser) -> CompletedMarker {
     let m = p.start();
 
-    SelectorList::default()
-        .with_end_kind_ts(SCSS_AT_ROOT_SELECTOR_END_SET)
-        .with_recovery_ts(SCSS_AT_ROOT_SELECTOR_END_SET)
-        .parse_list(p);
+    if parse_scss_template_keyframes_selector_list(p).is_absent() {
+        SelectorList::default()
+            .with_end_kind_ts(SCSS_AT_ROOT_SELECTOR_END_SET)
+            .with_recovery_ts(SCSS_AT_ROOT_SELECTOR_END_SET)
+            .parse_list(p);
+    }
 
     m.complete(p, SCSS_AT_ROOT_SELECTOR)
 }

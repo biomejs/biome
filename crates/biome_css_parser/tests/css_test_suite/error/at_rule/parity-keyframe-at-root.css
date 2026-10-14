@@ -7,3 +7,11 @@
 }
 
 .after { color: red; }
+
+@keyframes percentages {
+  @at-root 50% { opacity: 0.5; }
+  @at-root #{$step}% { opacity: 0.75; }
+  to { opacity: 1; }
+}
+
+.after-percentage { color: blue; }

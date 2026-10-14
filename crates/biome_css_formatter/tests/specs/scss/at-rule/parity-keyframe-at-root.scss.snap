@@ -38,6 +38,25 @@ to{opacity:1;}
 
 .after{color:red;}
 
+@keyframes percentages{
+@at-root /* selectors */ 25% ,75% /* body */{opacity:0.25;}
+@at-root from,50%,to{opacity:0.5;}
+@at-root #{25+25}%{opacity:1;}
+@at-root(with:keyframes){@at-root 60%{opacity:0.6;}}
+}
+
+@mixin step($position){@at-root #{$position}%{opacity:0.5;}}
+@keyframes reusable{@include step(50);}
+
+@at-root from .ordinary{color:red;}
+@at-root from,.ordinary{color:blue;}
+$selector:".interpolated";
+@at-root #{$selector}{color:green;}
+
+@at-root #{"div"}%from{color:red;}
+@at-root from,#{"span"}%to{color:blue;}
+.extended{@extend %from;@extend %to;}
+
 ```
 
 
@@ -102,6 +121,54 @@ $query: "without: all";
 
 .after {
 	color: red;
+}
+
+@keyframes percentages {
+	@at-root /* selectors */ 25%, 75% /* body */ {
+		opacity: 0.25;
+	}
+	@at-root from, 50%, to {
+		opacity: 0.5;
+	}
+	@at-root #{25 + 25}% {
+		opacity: 1;
+	}
+	@at-root (with: keyframes) {
+		@at-root 60% {
+			opacity: 0.6;
+		}
+	}
+}
+
+@mixin step($position) {
+	@at-root #{$position}% {
+		opacity: 0.5;
+	}
+}
+@keyframes reusable {
+	@include step(50);
+}
+
+@at-root from .ordinary {
+	color: red;
+}
+@at-root from, .ordinary {
+	color: blue;
+}
+$selector: ".interpolated";
+@at-root #{$selector} {
+	color: green;
+}
+
+@at-root #{"div"}%from {
+	color: red;
+}
+@at-root from, #{"span"}%to {
+	color: blue;
+}
+.extended {
+	@extend %from;
+	@extend %to;
 }
 
 ```

@@ -49,3 +49,18 @@
 }
 
 .after-shorthand-statement { color: blue; }
+
+@keyframes missing-percentage-block {
+  @at-root 50%;
+  to { opacity: 1; }
+}
+
+.after-percentage { color: green; }
+
+@keyframes missing-percentage-before-statement {
+  @at-root #{50}%
+  @include frames;
+  to { opacity: 1; }
+}
+
+.after-percentage-statement { color: blue; }

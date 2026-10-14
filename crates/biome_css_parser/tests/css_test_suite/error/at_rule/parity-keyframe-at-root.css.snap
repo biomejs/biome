@@ -16,6 +16,14 @@ expression: snapshot
 
 .after { color: red; }
 
+@keyframes percentages {
+  @at-root 50% { opacity: 0.5; }
+  @at-root #{$step}% { opacity: 0.75; }
+  to { opacity: 1; }
+}
+
+.after-percentage { color: blue; }
+
 ```
 
 
@@ -221,17 +229,197 @@ CssRoot {
                 r_curly_token: R_CURLY@166..167 "}" [] [],
             },
         },
+        CssAtRule {
+            at_token: AT@167..170 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@170..180 "keyframes" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@180..192 "percentages" [] [Whitespace(" ")],
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@192..193 "{" [] [],
+                    items: CssKeyframesItemList [
+                        CssBogusKeyframesItem {
+                            items: [
+                                AT@193..197 "@" [Newline("\n"), Whitespace("  ")] [],
+                                ScssAtRootAtRule {
+                                    at_root_token: AT_ROOT_KW@197..205 "at-root" [] [Whitespace(" ")],
+                                    query: missing (optional),
+                                    selector: ScssAtRootSelector {
+                                        selector: CssKeyframesSelectorList [
+                                            CssKeyframesPercentageSelector {
+                                                selector: CssPercentage {
+                                                    value_token: CSS_NUMBER_LITERAL@205..207 "50" [] [],
+                                                    percent_token: PERCENT@207..209 "%" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                    block: CssDeclarationOrRuleBlock {
+                                        l_curly_token: L_CURLY@209..211 "{" [] [Whitespace(" ")],
+                                        items: CssDeclarationOrRuleList [
+                                            CssDeclarationWithSemicolon {
+                                                declaration: CssDeclaration {
+                                                    property: CssGenericProperty {
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@211..218 "opacity" [] [],
+                                                        },
+                                                        colon_token: COLON@218..220 ":" [] [Whitespace(" ")],
+                                                        value: CssGenericComponentValueList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@220..223 "0.5" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                    important: missing (optional),
+                                                },
+                                                semicolon_token: SEMICOLON@223..225 ";" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        r_curly_token: R_CURLY@225..226 "}" [] [],
+                                    },
+                                },
+                            ],
+                        },
+                        CssBogusKeyframesItem {
+                            items: [
+                                AT@226..230 "@" [Newline("\n"), Whitespace("  ")] [],
+                                ScssAtRootAtRule {
+                                    at_root_token: AT_ROOT_KW@230..238 "at-root" [] [Whitespace(" ")],
+                                    query: missing (optional),
+                                    selector: ScssAtRootSelector {
+                                        selector: CssKeyframesSelectorList [
+                                            ScssKeyframesSelector {
+                                                selector: ScssInterpolation {
+                                                    hash_token: HASH@238..239 "#" [] [],
+                                                    l_curly_token: L_CURLY@239..240 "{" [] [],
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            ScssVariable {
+                                                                dollar_token: DOLLAR@240..241 "$" [] [],
+                                                                name: CssIdentifier {
+                                                                    value_token: IDENT@241..245 "step" [] [],
+                                                                },
+                                                            },
+                                                        ],
+                                                    },
+                                                    r_curly_token: R_CURLY@245..246 "}" [] [],
+                                                },
+                                                percent_token: PERCENT@246..248 "%" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                    },
+                                    block: CssDeclarationOrRuleBlock {
+                                        l_curly_token: L_CURLY@248..250 "{" [] [Whitespace(" ")],
+                                        items: CssDeclarationOrRuleList [
+                                            CssDeclarationWithSemicolon {
+                                                declaration: CssDeclaration {
+                                                    property: CssGenericProperty {
+                                                        name: CssIdentifier {
+                                                            value_token: IDENT@250..257 "opacity" [] [],
+                                                        },
+                                                        colon_token: COLON@257..259 ":" [] [Whitespace(" ")],
+                                                        value: CssGenericComponentValueList [
+                                                            CssNumber {
+                                                                value_token: CSS_NUMBER_LITERAL@259..263 "0.75" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                    important: missing (optional),
+                                                },
+                                                semicolon_token: SEMICOLON@263..265 ";" [] [Whitespace(" ")],
+                                            },
+                                        ],
+                                        r_curly_token: R_CURLY@265..266 "}" [] [],
+                                    },
+                                },
+                            ],
+                        },
+                        CssKeyframesItem {
+                            selectors: CssKeyframesSelectorList [
+                                CssKeyframesIdentSelector {
+                                    selector: TO_KW@266..272 "to" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                },
+                            ],
+                            block: CssDeclarationBlock {
+                                l_curly_token: L_CURLY@272..274 "{" [] [Whitespace(" ")],
+                                declarations: CssDeclarationList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@274..281 "opacity" [] [],
+                                                },
+                                                colon_token: COLON@281..283 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@283..284 "1" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@284..286 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@286..287 "}" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@287..289 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@289..292 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@292..309 "after-percentage" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@309..311 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@311..316 "color" [] [],
+                                },
+                                colon_token: COLON@316..318 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@318..322 "blue" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@322..324 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@324..325 "}" [] [],
+            },
+        },
     ],
-    eof_token: EOF@167..168 "" [Newline("\n")] [],
+    eof_token: EOF@325..326 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..168
+0: CSS_ROOT@0..326
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..167
+  1: CSS_ROOT_ITEM_LIST@0..325
     0: CSS_AT_RULE@0..143
       0: AT@0..1 "@" [] []
       1: CSS_KEYFRAMES_AT_RULE@1..143
@@ -357,7 +545,121 @@ CssRoot {
               1: (empty)
             1: SEMICOLON@164..166 ";" [] [Whitespace(" ")]
         2: R_CURLY@166..167 "}" [] []
-  2: EOF@167..168 "" [Newline("\n")] []
+    2: CSS_AT_RULE@167..289
+      0: AT@167..170 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_KEYFRAMES_AT_RULE@170..289
+        0: KEYFRAMES_KW@170..180 "keyframes" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@180..192
+          0: IDENT@180..192 "percentages" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@192..289
+          0: L_CURLY@192..193 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@193..287
+            0: CSS_BOGUS_KEYFRAMES_ITEM@193..226
+              0: AT@193..197 "@" [Newline("\n"), Whitespace("  ")] []
+              1: SCSS_AT_ROOT_AT_RULE@197..226
+                0: AT_ROOT_KW@197..205 "at-root" [] [Whitespace(" ")]
+                1: (empty)
+                2: SCSS_AT_ROOT_SELECTOR@205..209
+                  0: CSS_KEYFRAMES_SELECTOR_LIST@205..209
+                    0: CSS_KEYFRAMES_PERCENTAGE_SELECTOR@205..209
+                      0: CSS_PERCENTAGE@205..209
+                        0: CSS_NUMBER_LITERAL@205..207 "50" [] []
+                        1: PERCENT@207..209 "%" [] [Whitespace(" ")]
+                3: CSS_DECLARATION_OR_RULE_BLOCK@209..226
+                  0: L_CURLY@209..211 "{" [] [Whitespace(" ")]
+                  1: CSS_DECLARATION_OR_RULE_LIST@211..225
+                    0: CSS_DECLARATION_WITH_SEMICOLON@211..225
+                      0: CSS_DECLARATION@211..223
+                        0: CSS_GENERIC_PROPERTY@211..223
+                          0: CSS_IDENTIFIER@211..218
+                            0: IDENT@211..218 "opacity" [] []
+                          1: COLON@218..220 ":" [] [Whitespace(" ")]
+                          2: CSS_GENERIC_COMPONENT_VALUE_LIST@220..223
+                            0: CSS_NUMBER@220..223
+                              0: CSS_NUMBER_LITERAL@220..223 "0.5" [] []
+                        1: (empty)
+                      1: SEMICOLON@223..225 ";" [] [Whitespace(" ")]
+                  2: R_CURLY@225..226 "}" [] []
+            1: CSS_BOGUS_KEYFRAMES_ITEM@226..266
+              0: AT@226..230 "@" [Newline("\n"), Whitespace("  ")] []
+              1: SCSS_AT_ROOT_AT_RULE@230..266
+                0: AT_ROOT_KW@230..238 "at-root" [] [Whitespace(" ")]
+                1: (empty)
+                2: SCSS_AT_ROOT_SELECTOR@238..248
+                  0: CSS_KEYFRAMES_SELECTOR_LIST@238..248
+                    0: SCSS_KEYFRAMES_SELECTOR@238..248
+                      0: SCSS_INTERPOLATION@238..246
+                        0: HASH@238..239 "#" [] []
+                        1: L_CURLY@239..240 "{" [] []
+                        2: SCSS_EXPRESSION@240..245
+                          0: SCSS_EXPRESSION_ITEM_LIST@240..245
+                            0: SCSS_VARIABLE@240..245
+                              0: DOLLAR@240..241 "$" [] []
+                              1: CSS_IDENTIFIER@241..245
+                                0: IDENT@241..245 "step" [] []
+                        3: R_CURLY@245..246 "}" [] []
+                      1: PERCENT@246..248 "%" [] [Whitespace(" ")]
+                3: CSS_DECLARATION_OR_RULE_BLOCK@248..266
+                  0: L_CURLY@248..250 "{" [] [Whitespace(" ")]
+                  1: CSS_DECLARATION_OR_RULE_LIST@250..265
+                    0: CSS_DECLARATION_WITH_SEMICOLON@250..265
+                      0: CSS_DECLARATION@250..263
+                        0: CSS_GENERIC_PROPERTY@250..263
+                          0: CSS_IDENTIFIER@250..257
+                            0: IDENT@250..257 "opacity" [] []
+                          1: COLON@257..259 ":" [] [Whitespace(" ")]
+                          2: CSS_GENERIC_COMPONENT_VALUE_LIST@259..263
+                            0: CSS_NUMBER@259..263
+                              0: CSS_NUMBER_LITERAL@259..263 "0.75" [] []
+                        1: (empty)
+                      1: SEMICOLON@263..265 ";" [] [Whitespace(" ")]
+                  2: R_CURLY@265..266 "}" [] []
+            2: CSS_KEYFRAMES_ITEM@266..287
+              0: CSS_KEYFRAMES_SELECTOR_LIST@266..272
+                0: CSS_KEYFRAMES_IDENT_SELECTOR@266..272
+                  0: TO_KW@266..272 "to" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+              1: CSS_DECLARATION_BLOCK@272..287
+                0: L_CURLY@272..274 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_LIST@274..286
+                  0: CSS_DECLARATION_WITH_SEMICOLON@274..286
+                    0: CSS_DECLARATION@274..284
+                      0: CSS_GENERIC_PROPERTY@274..284
+                        0: CSS_IDENTIFIER@274..281
+                          0: IDENT@274..281 "opacity" [] []
+                        1: COLON@281..283 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@283..284
+                          0: CSS_NUMBER@283..284
+                            0: CSS_NUMBER_LITERAL@283..284 "1" [] []
+                      1: (empty)
+                    1: SEMICOLON@284..286 ";" [] [Whitespace(" ")]
+                2: R_CURLY@286..287 "}" [] []
+          2: R_CURLY@287..289 "}" [Newline("\n")] []
+    3: CSS_QUALIFIED_RULE@289..325
+      0: CSS_SELECTOR_LIST@289..309
+        0: CSS_COMPOUND_SELECTOR@289..309
+          0: CSS_NESTED_SELECTOR_LIST@289..289
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@289..309
+            0: CSS_CLASS_SELECTOR@289..309
+              0: DOT@289..292 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@292..309
+                0: IDENT@292..309 "after-percentage" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@309..325
+        0: L_CURLY@309..311 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@311..324
+          0: CSS_DECLARATION_WITH_SEMICOLON@311..324
+            0: CSS_DECLARATION@311..322
+              0: CSS_GENERIC_PROPERTY@311..322
+                0: CSS_IDENTIFIER@311..316
+                  0: IDENT@311..316 "color" [] []
+                1: COLON@316..318 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@318..322
+                  0: CSS_IDENTIFIER@318..322
+                    0: IDENT@318..322 "blue" [] []
+              1: (empty)
+            1: SEMICOLON@322..324 ";" [] [Whitespace(" ")]
+        2: R_CURLY@324..325 "}" [] []
+  2: EOF@325..326 "" [Newline("\n")] []
 
 ```
 
@@ -377,5 +679,26 @@ parity-keyframe-at-root.css:3:3 parse ━━━━━━━━━━━━━━
       │   ^
     6 │   to { opacity: 1; }
     7 │ }
+  
+parity-keyframe-at-root.css:12:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS statements in keyframes are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    11 │ @keyframes percentages {
+  > 12 │   @at-root 50% { opacity: 0.5; }
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │   @at-root #{$step}% { opacity: 0.75; }
+    14 │   to { opacity: 1; }
+  
+parity-keyframe-at-root.css:13:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS statements in keyframes are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    11 │ @keyframes percentages {
+    12 │   @at-root 50% { opacity: 0.5; }
+  > 13 │   @at-root #{$step}% { opacity: 0.75; }
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │   to { opacity: 1; }
+    15 │ }
   
 ```
