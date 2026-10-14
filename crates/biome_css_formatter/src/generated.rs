@@ -16591,6 +16591,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyScssAtRootQuery {
         )
     }
 }
+impl AsFormat<CssFormatContext> for biome_css_syntax::AnyScssAtRootSelectorList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::AnyScssAtRootSelectorList,
+        crate::scss::any::at_root_selector_list::FormatAnyScssAtRootSelectorList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::any::at_root_selector_list::FormatAnyScssAtRootSelectorList::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::AnyScssAtRootSelectorList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::AnyScssAtRootSelectorList,
+        crate::scss::any::at_root_selector_list::FormatAnyScssAtRootSelectorList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::any::at_root_selector_list::FormatAnyScssAtRootSelectorList::default(),
+        )
+    }
+}
 impl AsFormat<CssFormatContext> for biome_css_syntax::AnyScssElseClauseBody {
     type Format<'a> = FormatRefWithRule<
         'a,

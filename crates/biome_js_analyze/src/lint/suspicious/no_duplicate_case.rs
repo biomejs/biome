@@ -1,6 +1,7 @@
 use crate::utils::is_node_equal;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleSource, declare_lint_rule};
+use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyJsExpression, AnyJsSwitchClause, JsSwitchStatement};
 use biome_rowan::{AstNode, TextRange};
@@ -123,7 +124,13 @@ impl Rule for NoDuplicateCase {
         let (first_label_range, label_range) = state;
         Some(
             RuleDiagnostic::new(rule_category!(), label_range, "Duplicate case label.")
-                .detail(first_label_range, "The first similar label is here:"),
+                .detail(first_label_range, "The first similar label is here:")
+                .note(markup! {
+                    "Only the first matching "<Emphasis>"case"</Emphasis>" is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake."
+                })
+                .note(markup! {
+                    "Remove the duplicate "<Emphasis>"case"</Emphasis>", or change its value to the one you meant."
+                }),
         )
     }
 }

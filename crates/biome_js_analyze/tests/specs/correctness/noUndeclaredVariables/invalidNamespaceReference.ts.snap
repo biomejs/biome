@@ -23,6 +23,10 @@ invalidNamespaceReference.ts:2:18 lint/correctness/noUndeclaredVariables ━━�
     3 │ 
     4 │ import type * as Ns2 from "";
   
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
@@ -37,6 +41,10 @@ invalidNamespaceReference.ts:5:18 lint/correctness/noUndeclaredVariables ━━�
     4 │ import type * as Ns2 from "";
   > 5 │ export type T2 = Ns2;  // This doesn't reference the import namespace `Ns1`
       │                  ^^^
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
   
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.

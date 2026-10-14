@@ -13,5 +13,9 @@ invalidMatchExtension.INVALID.js lint/style/useFilenamingConvention ━━━━
 
   i The file extension should be in camelCase.
   
+  i File extensions in mixed case are not recognized the same way by every tool and file system.
+  
+  i Rename the file so that its extension uses one of the allowed cases.
+  
 
 ```

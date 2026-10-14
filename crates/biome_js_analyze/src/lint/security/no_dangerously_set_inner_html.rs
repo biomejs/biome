@@ -127,7 +127,10 @@ impl Rule for NoDangerouslySetInnerHtml {
                 .to_owned(),
         ).warning(
             "Setting content using code can expose users to cross-site scripting (XSS) attacks",
-        );
+        )
+        .note(markup! {
+            "Pass the content as JSX children instead. If you must render HTML, sanitize it first."
+        });
         Some(diagnostic)
     }
 }

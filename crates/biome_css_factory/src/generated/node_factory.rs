@@ -3303,7 +3303,7 @@ pub fn scss_at_root_query_clause(
         ],
     ))
 }
-pub fn scss_at_root_selector(selector: CssSelectorList) -> ScssAtRootSelector {
+pub fn scss_at_root_selector(selector: AnyScssAtRootSelectorList) -> ScssAtRootSelector {
     ScssAtRootSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::SCSS_AT_ROOT_SELECTOR,
         [Some(SyntaxElement::Node(selector.into_syntax()))],

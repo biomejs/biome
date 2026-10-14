@@ -9716,8 +9716,8 @@ impl ScssAtRootSelector {
             selector: self.selector(),
         }
     }
-    pub fn selector(&self) -> CssSelectorList {
-        support::list(&self.syntax, 0usize)
+    pub fn selector(&self) -> SyntaxResult<AnyScssAtRootSelectorList> {
+        support::required_node(&self.syntax, 0usize)
     }
 }
 impl Serialize for ScssAtRootSelector {
@@ -9730,7 +9730,7 @@ impl Serialize for ScssAtRootSelector {
 }
 #[derive(Serialize)]
 pub struct ScssAtRootSelectorFields {
-    pub selector: CssSelectorList,
+    pub selector: SyntaxResult<AnyScssAtRootSelectorList>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssBinaryExpression {
@@ -18253,6 +18253,25 @@ impl AnyScssAtRootQuery {
     pub fn as_scss_expression(&self) -> Option<&ScssExpression> {
         match &self {
             Self::ScssExpression(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyScssAtRootSelectorList {
+    CssKeyframesSelectorList(CssKeyframesSelectorList),
+    CssSelectorList(CssSelectorList),
+}
+impl AnyScssAtRootSelectorList {
+    pub fn as_css_keyframes_selector_list(&self) -> Option<&CssKeyframesSelectorList> {
+        match &self {
+            Self::CssKeyframesSelectorList(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_selector_list(&self) -> Option<&CssSelectorList> {
+        match &self {
+            Self::CssSelectorList(item) => Some(item),
             _ => None,
         }
     }
@@ -30782,7 +30801,7 @@ impl std::fmt::Debug for ScssAtRootSelector {
         let result = if current_depth < 16 {
             DEPTH.set(current_depth + 1);
             f.debug_struct("ScssAtRootSelector")
-                .field("selector", &self.selector())
+                .field("selector", &support::DebugSyntaxResult(self.selector()))
                 .finish()
         } else {
             f.debug_struct("ScssAtRootSelector").finish()
@@ -47543,6 +47562,68 @@ impl From<AnyScssAtRootQuery> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssKeyframesSelectorList> for AnyScssAtRootSelectorList {
+    fn from(node: CssKeyframesSelectorList) -> Self {
+        Self::CssKeyframesSelectorList(node)
+    }
+}
+impl From<CssSelectorList> for AnyScssAtRootSelectorList {
+    fn from(node: CssSelectorList) -> Self {
+        Self::CssSelectorList(node)
+    }
+}
+impl AstNode for AnyScssAtRootSelectorList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        CssKeyframesSelectorList::KIND_SET.union(CssSelectorList::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, CSS_KEYFRAMES_SELECTOR_LIST | CSS_SELECTOR_LIST)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_KEYFRAMES_SELECTOR_LIST => {
+                Self::CssKeyframesSelectorList(CssKeyframesSelectorList::cast(syntax)?)
+            }
+            CSS_SELECTOR_LIST => Self::CssSelectorList(CssSelectorList::cast(syntax)?),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssKeyframesSelectorList(it) => it.syntax(),
+            Self::CssSelectorList(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssKeyframesSelectorList(it) => it.into_syntax(),
+            Self::CssSelectorList(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyScssAtRootSelectorList {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssKeyframesSelectorList(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssSelectorList(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyScssAtRootSelectorList> for SyntaxNode {
+    fn from(n: AnyScssAtRootSelectorList) -> Self {
+        match n {
+            AnyScssAtRootSelectorList::CssKeyframesSelectorList(it) => it.into_syntax(),
+            AnyScssAtRootSelectorList::CssSelectorList(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyScssAtRootSelectorList> for SyntaxElement {
+    fn from(n: AnyScssAtRootSelectorList) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssDeclarationOrRuleBlock> for AnyScssElseClauseBody {
     fn from(node: CssDeclarationOrRuleBlock) -> Self {
         Self::CssDeclarationOrRuleBlock(node)
@@ -50229,6 +50310,11 @@ impl std::fmt::Display for AnyCssValueAtRuleProperty {
     }
 }
 impl std::fmt::Display for AnyScssAtRootQuery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyScssAtRootSelectorList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

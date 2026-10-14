@@ -1,0 +1,14 @@
+/* should generate diagnostics */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  @at-root (without: all) {
+    .fade-in {
+      animation: fade-in 200ms ease !important;
+    }
+  }
+  to {
+    opacity: 1 !important;
+  }
+}

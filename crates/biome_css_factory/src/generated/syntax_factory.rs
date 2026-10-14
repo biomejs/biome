@@ -6832,7 +6832,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && CssSelectorList::can_cast(element.kind())
+                    && AnyScssAtRootSelectorList::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();

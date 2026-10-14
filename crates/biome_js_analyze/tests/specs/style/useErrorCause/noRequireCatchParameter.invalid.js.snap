@@ -42,7 +42,7 @@ try {
 ```
 noRequireCatchParameter.invalid.js:6:3 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
+  i The original error is not passed to the new `Error` object.
   
     4 │   throw new Error("Original error");
     5 │ } catch (err) {
@@ -51,13 +51,17 @@ noRequireCatchParameter.invalid.js:6:3 lint/style/useErrorCause ━━━━━�
     7 │ }
     8 │ 
   
+  i Without the original error as its `cause`, the stack trace and context of the first failure are lost. This makes the failure harder to trace.
+  
+  i Pass the original error in the `cause` option, for example `new Error("message", { cause: error })`.
+  
 
 ```
 
 ```
 noRequireCatchParameter.invalid.js:13:3 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The original error is not being passed to the new `Error` object.Include the original error in the `cause` property to preserve it.
+  i The original error is not passed to the new `Error` object.
   
     11 │   throw new Error("Original error");
     12 │ } catch (err) {
@@ -66,13 +70,17 @@ noRequireCatchParameter.invalid.js:13:3 lint/style/useErrorCause ━━━━━
     14 │ }
     15 │ 
   
+  i Without the original error as its `cause`, the stack trace and context of the first failure are lost. This makes the failure harder to trace.
+  
+  i Pass the original error in the `cause` option, for example `new Error("message", { cause: error })`.
+  
 
 ```
 
 ```
 noRequireCatchParameter.invalid.js:29:10 lint/style/useErrorCause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Destructuring the error in a `catch` clause is not recommended, as it can lead to losing important information from the error object, such as the stack trace.Use a single variable to catch the error, and then access its properties.
+  i The error is destructured in the `catch` clause.
   
     27 │ try {
     28 │   throw new Error("Original error");
@@ -80,6 +88,10 @@ noRequireCatchParameter.invalid.js:29:10 lint/style/useErrorCause ━━━━�
        │          ^^^^^^^^^^^
     30 │   throw new Error(message);
     31 │ }
+  
+  i Destructuring can lose information from the error object, such as the stack trace. The original error also cannot be passed as the `cause`.
+  
+  i Catch the error in a single variable, read its properties from that variable, and pass the variable as the `cause`.
   
 
 ```

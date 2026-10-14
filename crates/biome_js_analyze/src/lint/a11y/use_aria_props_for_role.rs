@@ -120,7 +120,10 @@ impl Rule for UseAriaPropsForRole {
                 "The element with the "<Emphasis>{role_name}</Emphasis>" ARIA role does not have the required ARIA attributes."
                 },
             )
-            .footer_list(markup! { "Missing ARIA prop(s):" }, &state.missing_aria_props)
+            .note(markup! {
+                "Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element."
+            })
+            .footer_list(markup! { "Add the missing ARIA attribute(s):" }, &state.missing_aria_props)
         })
     }
 }
