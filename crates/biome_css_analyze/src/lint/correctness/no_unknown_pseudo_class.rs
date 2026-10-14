@@ -240,7 +240,9 @@ impl AnyPseudoLike {
                 return css_selector_identifier_token(ident.name().ok()?);
             }
             Self::ScssInterpolatedPseudoClassFunction(_) => return None,
-            Self::CssPageSelectorPseudo(page_pseudo) => page_pseudo.selector(),
+            Self::CssPageSelectorPseudo(page_pseudo) => {
+                return css_selector_identifier_token(page_pseudo.selector().ok()?);
+            }
         };
 
         ident.ok()?.value_token().ok()
