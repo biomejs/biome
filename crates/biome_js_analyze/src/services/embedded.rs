@@ -23,6 +23,7 @@ pub struct EmbeddedService {
 
 #[derive(Clone)]
 enum EmbeddedSource {
+    Empty,
     Workspace {
         db: Rc<dyn LanguageDb>,
         path: Utf8PathBuf,
@@ -32,8 +33,13 @@ enum EmbeddedSource {
 
 impl EmbeddedService {
     pub(crate) fn new(db: Rc<dyn LanguageDb>, path: Utf8PathBuf, snippet_offset: TextSize) -> Self {
+        let source = if db.has_embedded_content(&path) {
+            EmbeddedSource::Workspace { db, path }
+        } else {
+            EmbeddedSource::Empty
+        };
         Self {
-            source: EmbeddedSource::Workspace { db, path },
+            source,
             snippet_offset,
         }
     }
@@ -47,6 +53,7 @@ impl EmbeddedService {
 
     pub(crate) fn contains_binding(&self, binding: TokenText) -> bool {
         match &self.source {
+            EmbeddedSource::Empty => false,
             EmbeddedSource::Workspace { db, path } => get_binding_by_name(
                 db.as_ref(),
                 InternedBindingTokenText::new(db.as_ref(), path.clone(), binding),
@@ -58,6 +65,7 @@ impl EmbeddedService {
 
     pub(crate) fn contains_binding_text(&self, binding: &str) -> bool {
         match &self.source {
+            EmbeddedSource::Empty => false,
             EmbeddedSource::Workspace { db, path } => get_binding_by_text(
                 db.as_ref(),
                 InternedBindingText::new(db.as_ref(), path.clone(), binding.to_string()),
@@ -69,6 +77,7 @@ impl EmbeddedService {
 
     pub(crate) fn is_used_as_value(&self, identifier: TokenText) -> bool {
         match &self.source {
+            EmbeddedSource::Empty => false,
             EmbeddedSource::Workspace { db, path } => is_value_reference_used(
                 db.as_ref(),
                 InternedReference::new(db.as_ref(), path.clone(), identifier),
@@ -79,6 +88,7 @@ impl EmbeddedService {
 
     pub(crate) fn is_used_as_type(&self, identifier: TokenText) -> bool {
         match &self.source {
+            EmbeddedSource::Empty => false,
             EmbeddedSource::Workspace { db, path } => is_type_reference_used(
                 db.as_ref(),
                 InternedReference::new(db.as_ref(), path.clone(), identifier),
@@ -89,6 +99,7 @@ impl EmbeddedService {
 
     pub(crate) fn is_used(&self, identifier: TokenText) -> bool {
         match &self.source {
+            EmbeddedSource::Empty => false,
             EmbeddedSource::Workspace { db, path } => is_reference_used(
                 db.as_ref(),
                 InternedReference::new(db.as_ref(), path.clone(), identifier),
@@ -102,6 +113,7 @@ impl EmbeddedService {
     /// See also: https://svelte.dev/docs/svelte/stores
     pub(crate) fn is_svelte_store_used(&self, identifier: TokenText) -> bool {
         match &self.source {
+            EmbeddedSource::Empty => false,
             EmbeddedSource::Workspace { db, path } => is_svelte_store_reference_used(
                 db.as_ref(),
                 InternedReference::new(db.as_ref(), path.clone(), identifier),
@@ -117,6 +129,7 @@ impl EmbeddedService {
     /// See also: https://vuejs.org/guide/reusability/custom-directives.html
     pub(crate) fn is_vue_directive_used(&self, identifier: TokenText) -> bool {
         match &self.source {
+            EmbeddedSource::Empty => false,
             EmbeddedSource::Workspace { db, path } => is_vue_directive_reference_used(
                 db.as_ref(),
                 InternedReference::new(db.as_ref(), path.clone(), identifier),
@@ -134,6 +147,7 @@ impl EmbeddedService {
     pub(crate) fn component_at(&self, range: TextRange) -> Option<ComponentNameSegments> {
         let range = range + self.snippet_offset;
         match &self.source {
+            EmbeddedSource::Empty => None,
             EmbeddedSource::Workspace { db, path } => component_at(db.as_ref(), path, range),
             EmbeddedSource::Interned(data) => data.component_at(range).cloned(),
         }
@@ -157,5 +171,126 @@ impl FromServices for EmbeddedService {
             .ok_or_else(|| ServicesDiagnostic::new(rule_key.rule_name(), &["EmbeddedService"]))?;
 
         Ok(service.clone())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_db::testing::Events;
+    use biome_db::{ParsedSnippet, ParsedSource};
+    use biome_js_parser::{JsParserOptions, parse};
+    use biome_languages::{DocumentFileSource, JsFileSource};
+    use biome_rowan::RawSyntaxKind;
+    use camino::Utf8Path;
+    use salsa::{EventKind, Storage};
+
+    #[salsa::db]
+    struct TestDb {
+        parsed: Option<ParsedSource>,
+        storage: Storage<Self>,
+    }
+
+    impl TestDb {
+        fn new(events: Events) -> Self {
+            Self {
+                parsed: None,
+                storage: Storage::new(Some(Box::new(move |event| {
+                    events.0.lock().unwrap().push(event)
+                }))),
+            }
+        }
+    }
+
+    #[salsa::db]
+    impl LanguageDb for TestDb {
+        fn source_from_index(&self, _index: usize) -> Option<DocumentFileSource> {
+            Some(DocumentFileSource::Js(JsFileSource::js_module()))
+        }
+    }
+
+    #[salsa::db]
+    impl biome_db::Db for TestDb {
+        fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<ParsedSource> {
+            self.parsed
+        }
+    }
+
+    #[salsa::db]
+    impl salsa::Database for TestDb {}
+
+    /// Builds the service for a JavaScript module and returns it with the
+    /// event log of its database. Each entry of `snippets` becomes an embedded
+    /// snippet at its last occurrence in `source`.
+    fn service_for(source: &str, snippets: &[&str]) -> (EmbeddedService, Events) {
+        let events = Events::default();
+        let mut db = TestDb::new(events.clone());
+        let snippets = snippets
+            .iter()
+            .map(|snippet| {
+                let start = TextSize::from(source.rfind(snippet).unwrap() as u32);
+                let range = TextRange::at(start, TextSize::of(*snippet));
+                let parsed = parse(
+                    snippet,
+                    JsFileSource::js_module(),
+                    JsParserOptions::default(),
+                )
+                .into();
+                ParsedSnippet::new(&db, parsed, range, range, start, 0)
+            })
+            .collect();
+        let path = Utf8PathBuf::from("src/file.js");
+        let parsed = parse(
+            source,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        )
+        .into();
+        db.parsed = Some(ParsedSource::new(&db, path.clone(), parsed, 0, snippets));
+
+        let service = EmbeddedService::new(Rc::new(db), path, TextSize::default());
+        (service, events)
+    }
+
+    fn token_text(text: &str) -> TokenText {
+        TokenText::new_raw(RawSyntaxKind(0), text)
+    }
+
+    #[test]
+    fn document_without_embedded_content_answers_without_the_database() {
+        let source = "const used = 1; used;";
+        let (service, events) = service_for(source, &[]);
+        events.0.lock().unwrap().clear();
+
+        assert!(!service.contains_binding(token_text("used")));
+        assert!(!service.contains_binding_text("used"));
+        assert!(!service.is_used(token_text("used")));
+        assert!(!service.is_used_as_value(token_text("used")));
+        assert!(!service.is_used_as_type(token_text("used")));
+        assert!(!service.is_svelte_store_used(token_text("used")));
+        assert!(!service.is_vue_directive_used(token_text("vUsed")));
+        assert!(
+            service
+                .component_at(TextRange::up_to(TextSize::of(source)))
+                .is_none()
+        );
+
+        let events = events.0.lock().unwrap();
+        let database_work = events.iter().find(|event| {
+            matches!(
+                event.kind,
+                EventKind::WillExecute { .. } | EventKind::DidInternValue { .. }
+            )
+        });
+        assert!(database_work.is_none(), "{database_work:?}");
+    }
+
+    #[test]
+    fn document_with_a_snippet_finds_its_references() {
+        let (service, _) = service_for("const used = 1; html`${used}`;", &["used"]);
+
+        assert!(service.is_used(token_text("used")));
+        assert!(service.is_used_as_value(token_text("used")));
+        assert!(!service.is_used(token_text("missing")));
     }
 }
