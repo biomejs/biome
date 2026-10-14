@@ -1,0 +1,24 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+$gap: 8px;
+
+:root {
+	--gap: #{$gap};
+	--calc: calc(#{$gap} * 2);
+	--label: "$gap";
+	--interpolated-string: "gap-#{$gap}";
+	--dollar-space: $ gap;
+	--price: 5$;
+	--name-#{$gap}: 1px;
+}
+
+a {
+	margin: $gap;
+}
+
+```

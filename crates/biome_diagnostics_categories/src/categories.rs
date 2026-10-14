@@ -307,6 +307,8 @@ define_categories! {
     "lint/nursery/noThisOutsideOfClass": "https://biomejs.dev/linter/rules/no-this-outside-of-class",
     "lint/nursery/noUndeclaredClasses": "https://biomejs.dev/linter/rules/no-undeclared-classes",
     "lint/nursery/noUndeclaredCustomProperties": "https://biomejs.dev/linter/rules/no-undeclared-custom-properties",
+    "lint/nursery/noUninterpolatedScssFunction": "https://biomejs.dev/linter/rules/no-uninterpolated-scss-function",
+    "lint/nursery/noUninterpolatedScssVariable": "https://biomejs.dev/linter/rules/no-uninterpolated-scss-variable",
     "lint/nursery/noUnmodifiedLoopCondition": "https://biomejs.dev/linter/rules/no-unmodified-loop-condition",
     "lint/nursery/noUnreadableForOfExpression": "https://biomejs.dev/linter/rules/no-unreadable-for-of-expression",
     "lint/nursery/noUnsafeIframeSandbox": "https://biomejs.dev/linter/rules/no-unsafe-iframe-sandbox",

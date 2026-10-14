@@ -1442,6 +1442,8 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noUndeclaredVariables",
         TypeId::of::<biome_rule_options::no_undeclared_variables::NoUndeclaredVariablesOptions>(),
     ));
+    result.push(("nursery", "noUninterpolatedScssFunction", TypeId::of::<biome_rule_options::no_uninterpolated_scss_function::NoUninterpolatedScssFunctionOptions>()));
+    result.push(("nursery", "noUninterpolatedScssVariable", TypeId::of::<biome_rule_options::no_uninterpolated_scss_variable::NoUninterpolatedScssVariableOptions>()));
     result.push((
         "suspicious",
         "noUnknownAtRules",

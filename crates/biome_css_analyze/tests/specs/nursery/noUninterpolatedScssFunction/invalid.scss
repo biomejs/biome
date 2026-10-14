@@ -1,0 +1,23 @@
+/* should generate diagnostics */
+@use "sass:math";
+
+@function double($x) {
+	@return $x * 2;
+}
+
+:root {
+	--module: math.div(8px, 2);
+	--own: double(3px);
+	--built-in: darken(#fff, 10%);
+	--inside-calc: calc(double(3px) + 1px);
+	--outer-only: darken(lighten(#000, 10%), 5%);
+	--imported: bpx(3);
+	--if-branch: if(style(--a: 1): darken(#fff, 10%); else: 3);
+	--bare-condition: style(--a: 1);
+}
+
+@supports (--raw: double(1px)) {
+	a {
+		color: red;
+	}
+}
