@@ -12,7 +12,6 @@ Improved the diagnostics of the following lint rules. Their diagnostics now expl
 - [`noUndeclaredVariables`](https://biomejs.dev/linter/rules/no-undeclared-variables/)
 - [`useValidForDirection`](https://biomejs.dev/linter/rules/use-valid-for-direction/)
 - [`useYield`](https://biomejs.dev/linter/rules/use-yield/)
-- [`useReactCompiler`](https://biomejs.dev/linter/rules/use-react-compiler/)
 - [`noBarrelFile`](https://biomejs.dev/linter/rules/no-barrel-file/)
 - [`noDangerouslySetInnerHtml`](https://biomejs.dev/linter/rules/no-dangerously-set-inner-html/)
 - [`noRestrictedImports`](https://biomejs.dev/linter/rules/no-restricted-imports/)
