@@ -1,0 +1,13 @@
+/* should not generate diagnostics */
+.a:is(.b, .c)::before {}
+.a:where(.b)::after {}
+.a:not(.b)::marker {}
+.a:has(> .b)::before {}
+.a:is(:hover, :focus-visible) {}
+.a::before:is(:hover) {}
+.a:nth-child(2 of .b)::before {}
+.a::part(label):not(:hover) {}
+.a:before {}
+.a:is(:slotted) {}
+.a:host(::before) {}
+.a::slotted(::before) {}
