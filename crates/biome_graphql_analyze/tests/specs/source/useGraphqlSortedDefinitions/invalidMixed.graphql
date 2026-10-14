@@ -1,0 +1,41 @@
+# should generate diagnostics
+query Second {
+  user {
+    id
+  }
+}
+
+type User {
+  id: ID!
+}
+
+schema {
+  query: Query
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+extend type Account {
+  id: ID!
+}
+
+fragment Fields on User {
+  id
+}
+
+directive @auth on FIELD_DEFINITION
+
+scalar Date
+
+union Result = User | Account
+
+interface Node {
+  id: ID!
+}
+
+input UserInput {
+  id: ID!
+}

@@ -11,3 +11,6 @@ query C {
 query D {
 	field @directive(arg1: "value", arg1: "value", arg1: "value")
 }
+query E {
+	field(a: 1, b: 2, a: 3, b: 4)
+}

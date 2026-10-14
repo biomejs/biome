@@ -1,9 +1,52 @@
 use biome_graphql_syntax::{GraphqlLanguage, GraphqlSyntaxToken};
 use biome_rowan::{
-    AstNode, AstNodeList, SyntaxTriviaPiece, TokenText, TriviaPieceKind, chain_trivia_pieces,
+    AstNode, AstNodeList, SyntaxTriviaPiece, TextRange, TokenText, TriviaPieceKind,
+    chain_trivia_pieces,
 };
 use biome_string_case::comparable_token::ComparableToken;
+use rustc_hash::FxHashMap;
 use std::cmp::Ordering;
+use std::hash::Hash;
+
+/// A name that is defined more than once in the same list.
+#[derive(Debug)]
+pub struct DuplicateName {
+    /// The name as written at its first occurrence.
+    pub(crate) name: TokenText,
+    /// The first occurrence of the name.
+    pub(crate) first: TextRange,
+    /// Every later occurrence of the name, in source order. Never empty.
+    pub(crate) duplicates: Vec<TextRange>,
+}
+
+/// Groups `items` by key and returns one [DuplicateName] per key that appears more than once.
+///
+/// Each item is a `(key, name, range)` tuple. The result is ordered by the first occurrence of each key.
+pub(crate) fn collect_duplicate_names<K: Hash + Eq>(
+    items: impl IntoIterator<Item = (K, TokenText, TextRange)>,
+) -> Box<[DuplicateName]> {
+    let mut indexes: FxHashMap<K, usize> = FxHashMap::default();
+    let mut groups: Vec<DuplicateName> = Vec::new();
+
+    for (key, name, range) in items {
+        match indexes.get(&key) {
+            Some(&index) => groups[index].duplicates.push(range),
+            None => {
+                indexes.insert(key, groups.len());
+                groups.push(DuplicateName {
+                    name,
+                    first: range,
+                    duplicates: Vec::new(),
+                });
+            }
+        }
+    }
+
+    groups
+        .into_iter()
+        .filter(|group| !group.duplicates.is_empty())
+        .collect()
+}
 
 /// Compares two names in natural order. A missing name sorts after every present name.
 fn compare_names(a: Option<TokenText>, b: Option<TokenText>) -> Ordering {

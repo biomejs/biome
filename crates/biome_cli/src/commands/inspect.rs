@@ -16,7 +16,8 @@ use biome_configuration::BiomeDiagnostic;
 use biome_console::{Console, ConsoleExt, MarkupBuf, markup};
 use biome_deserialize::TextRange;
 use biome_diagnostics::{
-    Advices, CodeFrameAdvice, Diagnostic, Error, LogCategory, PrintDiagnostic, Visit,
+    Advices, CodeFrameAdvice, Diagnostic, Error, LogCategory, MessageAndDescription,
+    PrintDiagnostic, Visit,
 };
 use biome_service::{WorkspaceError, configuration::load_configuration, settings::Settings};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -235,7 +236,8 @@ impl<'app, 'options> ConfigInspectionCommand<'app, 'options> {
 #[diagnostic(category = "configuration", severity = Information)]
 struct InspectionDiagnostic {
     #[message]
-    message: MarkupBuf,
+    #[description]
+    message: MessageAndDescription,
     #[location(resource)]
     path: Option<String>,
     #[location(span)]
@@ -273,8 +275,10 @@ impl InspectionDiagnostic {
             ));
         }
         Self {
-            message: markup! { "Resolved configuration from "<Emphasis>{path_text}</Emphasis>"." }
-                .to_owned(),
+            message: MessageAndDescription::from(
+                markup! { "Resolved configuration from "<Emphasis>{path_text}</Emphasis>"." }
+                    .to_owned(),
+            ),
             path: path.map(|path| display_path(path).into_owned()),
             span: None,
             source_code: None,
@@ -284,7 +288,9 @@ impl InspectionDiagnostic {
 
     fn absent(key: String) -> Self {
         Self {
-            message: markup! { "The key "<Emphasis>{key}</Emphasis>" doesn't exist." }.to_owned(),
+            message: MessageAndDescription::from(
+                markup! { "The key "<Emphasis>{key}</Emphasis>" doesn't exist." }.to_owned(),
+            ),
             path: None,
             span: None,
             source_code: None,
@@ -307,10 +313,12 @@ impl InspectionDiagnostic {
         });
         let advice = Self::source_advices(sources, root_path);
         Self {
-            message: markup! {
-                "The key "<Emphasis>{key}</Emphasis>" has the following value."
-            }
-            .to_owned(),
+            message: MessageAndDescription::from(
+                markup! {
+                    "The key "<Emphasis>{key}</Emphasis>" has the following value."
+                }
+                .to_owned(),
+            ),
             path: location.as_ref().map(|(path, _, _)| path.clone()),
             span: location.as_ref().and_then(|(_, span, _)| *span),
             source_code: location.map(|(_, _, source)| source),

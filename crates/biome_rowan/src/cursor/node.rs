@@ -84,6 +84,13 @@ impl SyntaxNode {
         SyntaxSlots::new(self.clone())
     }
 
+    /// Returns the slot at `slot_index`, or [None] if this node has no slot with that index.
+    #[inline]
+    pub(crate) fn slot(&self, slot_index: usize) -> Option<SyntaxSlot> {
+        let slot = self.green().slice().get(slot_index)?;
+        Some(SyntaxSlot::new(self, slot, slot_index as u32))
+    }
+
     #[inline]
     pub fn text_range(&self) -> TextRange {
         self.data().text_range()
@@ -755,6 +762,28 @@ impl From<SyntaxElement> for SyntaxSlot {
 
 impl SyntaxSlot {
     #[inline]
+    fn new(parent: &SyntaxNode, slot: &Slot, slot_index: u32) -> Self {
+        match slot {
+            Slot::Empty { .. } => Self::Empty {
+                parent: parent.clone(),
+                index: slot_index,
+            },
+            Slot::Token { rel_offset, token } => Self::Token(SyntaxToken::new(
+                token,
+                parent.clone(),
+                slot_index,
+                parent.offset() + rel_offset,
+            )),
+            Slot::Node { rel_offset, node } => Self::Node(SyntaxNode::new_child(
+                node,
+                parent.clone(),
+                slot_index,
+                parent.offset() + rel_offset,
+            )),
+        }
+    }
+
+    #[inline]
     pub fn map<F, R>(self, mapper: F) -> Option<R>
     where
         F: FnOnce(SyntaxElement) -> R,
@@ -803,24 +832,7 @@ impl SyntaxSlots {
     }
 
     fn map_slot(&self, slot: &Slot, slot_index: u32) -> SyntaxSlot {
-        match slot {
-            Slot::Empty { .. } => SyntaxSlot::Empty {
-                parent: self.parent.clone(),
-                index: slot_index,
-            },
-            Slot::Token { rel_offset, token } => SyntaxSlot::Token(SyntaxToken::new(
-                token,
-                self.parent.clone(),
-                slot_index,
-                self.parent.offset() + rel_offset,
-            )),
-            Slot::Node { rel_offset, node } => SyntaxSlot::Node(SyntaxNode::new_child(
-                node,
-                self.parent.clone(),
-                slot_index,
-                self.parent.offset() + rel_offset,
-            )),
-        }
+        SyntaxSlot::new(&self.parent, slot, slot_index)
     }
 }
 
@@ -996,7 +1008,7 @@ impl<'a> Siblings<'a> {
 #[cfg(test)]
 mod tests {
     use crate::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
-    use crate::{SyntaxNode, TextRange, TextSize, TokenAtOffset, TriviaPiece};
+    use crate::{SyntaxNode, SyntaxSlot, TextRange, TextSize, TokenAtOffset, TriviaPiece};
 
     fn token_texts_at_offset(node: &SyntaxNode<RawLanguage>, offset: u32) -> Vec<String> {
         node.token_at_offset(TextSize::from(offset))
@@ -1049,6 +1061,46 @@ mod tests {
                 .as_deref(),
             Some("3")
         );
+    }
+
+    #[test]
+    fn slot_returns_the_element_at_the_index() {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.token(RawLanguageKind::STRING_TOKEN, "a");
+        builder.start_node(RawLanguageKind::CONDITION);
+        builder.token(RawLanguageKind::L_PAREN_TOKEN, "(");
+        builder.token(RawLanguageKind::R_PAREN_TOKEN, ")");
+        builder.finish_node();
+        builder.finish_node();
+        let root = builder.finish();
+
+        let condition = root.slot(1).and_then(SyntaxSlot::into_node).unwrap();
+        assert_eq!(condition.kind(), RawLanguageKind::CONDITION);
+        assert_eq!(condition.index(), 1);
+        assert_eq!(condition.parent(), Some(root.clone()));
+        assert_eq!(
+            condition.text_range_with_trivia(),
+            TextRange::new(1.into(), 3.into())
+        );
+
+        let r_paren = condition.slot(2).and_then(SyntaxSlot::into_token).unwrap();
+        assert_eq!(r_paren.kind(), RawLanguageKind::R_PAREN_TOKEN);
+        assert_eq!(r_paren.index(), 2);
+        assert_eq!(r_paren.parent(), Some(condition.clone()));
+        assert_eq!(r_paren.text_range(), TextRange::new(2.into(), 3.into()));
+
+        assert!(matches!(
+            condition.slot(1),
+            Some(SyntaxSlot::Empty { index: 1 })
+        ));
+        assert!(condition.slot(3).is_none());
+
+        for (index, expected) in condition.slots().enumerate() {
+            let actual = condition.slot(index).unwrap();
+            assert_eq!(actual.kind(), expected.kind());
+            assert_eq!(actual.into_syntax_element(), expected.into_syntax_element());
+        }
     }
 
     #[test]

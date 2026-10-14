@@ -178,6 +178,7 @@ pub struct CheckError {
     category: &'static Category,
 
     #[message]
+    #[description]
     message: MessageAndDescription,
 }
 
@@ -565,6 +566,17 @@ impl Diagnostic for StdinDiagnostic {
         match self {
             Self::NotFormatted => Severity::Error,
             Self::NoExtension => Severity::Warning,
+        }
+    }
+
+    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::NotFormatted => {
+                fmt.write_str("The contents aren't fixed. Use the `--write` flag to fix them.")
+            }
+            Self::NoExtension => fmt.write_str(
+                "The file passed via --stdin-file-path doesn't have an extension. Biome needs a file extension to know how to handle the file.",
+            ),
         }
     }
 

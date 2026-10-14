@@ -416,6 +416,16 @@ impl Diagnostic for FileTooLarge {
         Severity::Warning
     }
 
+    fn description(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
+        write!(
+            fmt,
+            "The size of the file is {}, which exceeds the configured maximum of {} for this project.
+Use the `files.maxSize` configuration to change the maximum size of files processed, or `files.includes` to ignore the file.",
+            Bytes(self.size),
+            Bytes(self.limit)
+        )
+    }
+
     fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
         fmt.write_markup(
             markup!{
@@ -439,7 +449,10 @@ Use the `files.maxSize` configuration to change the maximum size of files proces
 pub struct NoProject;
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
-#[diagnostic(category = "project")]
+#[diagnostic(
+    category = "project",
+    message = "Biome can't update the settings of a nested configuration because no workspace directory was provided."
+)]
 pub struct NoWorkspaceDirectory;
 
 #[derive(Debug, Serialize, Deserialize)]
