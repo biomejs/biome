@@ -1,0 +1,16 @@
+.values {
+  --raw: « » «name name» a«b «» -« --« £;
+  after-raw: red;
+  start: «;
+  after-start: red;
+  continuation: a«b;
+  after-continuation: café;
+  hyphen: -«;
+  after-hyphen: 𐐀;
+  double-hyphen: --«;
+  after-double-hyphen: blue;
+  unit: 1«;
+  after-unit: 1px;
+  other: £;
+  after-other: green;
+}

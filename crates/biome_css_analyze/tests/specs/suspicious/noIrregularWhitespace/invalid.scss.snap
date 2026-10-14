@@ -11,17 +11,15 @@ expression: invalid.scss
 
 ```
 
-_Note: The parser emitted 2 diagnostics which are not shown here._
-
 # Diagnostics
 ```
-invalid.scss:2:9 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:2:2 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
   
     1 │ /* should generate diagnostics */
   > 2 │ .element␠.child {
-      │         ^
+      │  ^^^^^^^^
     3 │   color: red;
     4 │ }
   

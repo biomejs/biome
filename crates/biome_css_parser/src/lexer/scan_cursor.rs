@@ -169,6 +169,20 @@ impl<'src> CssScanCursor<'src> {
         decode_escaped_code_point(hex)
     }
 
+    /// Returns whether the character is a non-ASCII identifier character in
+    /// the current language mode. Sass accepts every character at or above
+    /// U+0080; CSS uses its non-ASCII identifier predicate.
+    ///
+    /// See [Sass character classification](https://github.com/sass/dart-sass/blob/1.105.1/lib/src/util/character.dart).
+    #[inline]
+    fn is_non_ascii_ident_character(&self, character: char) -> bool {
+        if self.is_scss {
+            character >= '\u{0080}'
+        } else {
+            is_css_non_ascii(character)
+        }
+    }
+
     /// Returns true when `position + offset` can start a CSS identifier.
     pub(crate) fn is_ident_start_at(self, offset: usize) -> bool {
         let Some(current) = self.byte_at(offset) else {
@@ -189,20 +203,22 @@ impl<'src> CssScanCursor<'src> {
 
                         match lookup_byte(next) {
                             IDT | MIN | DIG | ZER => true,
-                            UNI => is_css_non_ascii(self.char_at_boundary(offset + 2)),
+                            UNI => {
+                                self.is_non_ascii_ident_character(self.char_at_boundary(offset + 2))
+                            }
                             BSL => self.is_valid_escape_at(offset + 3),
                             MUL => true,
                             _ => false,
                         }
                     }
                     IDT => true,
-                    UNI => is_css_non_ascii(self.char_at_boundary(offset + 1)),
+                    UNI => self.is_non_ascii_ident_character(self.char_at_boundary(offset + 1)),
                     BSL => self.is_valid_escape_at(offset + 2),
                     _ => false,
                 }
             }
             IDT => true,
-            UNI => is_css_non_ascii(self.char_at_boundary(offset)),
+            UNI => self.is_non_ascii_ident_character(self.char_at_boundary(offset)),
             BSL => self.is_valid_escape_at(offset + 1),
             _ => false,
         }
@@ -228,7 +244,7 @@ impl<'src> CssScanCursor<'src> {
             }
             UNI => {
                 let chr = self.current_char_at_boundary();
-                if is_css_non_ascii(chr) {
+                if self.is_non_ascii_ident_character(chr) {
                     self.advance(chr.len_utf8());
                     Some(chr)
                 } else {
