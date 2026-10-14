@@ -298,6 +298,8 @@ pub mod no_undeclared_custom_properties;
 pub mod no_undeclared_dependencies;
 pub mod no_undeclared_env_vars;
 pub mod no_undeclared_variables;
+pub mod no_uninterpolated_scss_function;
+pub mod no_uninterpolated_scss_variable;
 pub mod no_unknown_at_rules;
 pub mod no_unknown_attribute;
 pub mod no_unknown_function;

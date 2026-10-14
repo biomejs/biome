@@ -1,0 +1,245 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@use "sass:math";
+
+$gap: 8px;
+$path: "a.png";
+
+:root {
+	--gap: $gap;
+	--pi: math.$pi;
+	--calc: calc($gap * 2);
+	--fallback: var(--x, $gap);
+	--url: url($path);
+	--list: $gap $gap;
+	--braced: {a: $gap};
+}
+
+@supports (--raw: $gap) {
+	a {
+		color: red;
+	}
+}
+
+@container style(--c: $gap) {
+	a {
+		color: red;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:8:9 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+     7 │ :root {
+   > 8 │ 	--gap: $gap;
+       │ 	       ^^^^
+     9 │ 	--pi: math.$pi;
+    10 │ 	--calc: calc($gap * 2);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i Wrap the variable in interpolation: #{$gap}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:9:8 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable math.$pi isn't interpolated, so Sass outputs it unchanged.
+  
+     7 │ :root {
+     8 │ 	--gap: $gap;
+   > 9 │ 	--pi: math.$pi;
+       │ 	      ^^^^^^^^
+    10 │ 	--calc: calc($gap * 2);
+    11 │ 	--fallback: var(--x, $gap);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text math.$pi instead of the variable's value.
+  
+  i Wrap the variable in interpolation: #{math.$pi}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:10:15 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+     8 │ 	--gap: $gap;
+     9 │ 	--pi: math.$pi;
+  > 10 │ 	--calc: calc($gap * 2);
+       │ 	             ^^^^
+    11 │ 	--fallback: var(--x, $gap);
+    12 │ 	--url: url($path);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i Wrap the variable in interpolation: #{$gap}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:11:23 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+     9 │ 	--pi: math.$pi;
+    10 │ 	--calc: calc($gap * 2);
+  > 11 │ 	--fallback: var(--x, $gap);
+       │ 	                     ^^^^
+    12 │ 	--url: url($path);
+    13 │ 	--list: $gap $gap;
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i Wrap the variable in interpolation: #{$gap}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:12:13 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $path isn't interpolated, so Sass outputs it unchanged.
+  
+    10 │ 	--calc: calc($gap * 2);
+    11 │ 	--fallback: var(--x, $gap);
+  > 12 │ 	--url: url($path);
+       │ 	           ^^^^^
+    13 │ 	--list: $gap $gap;
+    14 │ 	--braced: {a: $gap};
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $path instead of the variable's value.
+  
+  i Wrap the variable in interpolation: #{$path}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:13:10 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+    11 │ 	--fallback: var(--x, $gap);
+    12 │ 	--url: url($path);
+  > 13 │ 	--list: $gap $gap;
+       │ 	        ^^^^
+    14 │ 	--braced: {a: $gap};
+    15 │ }
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i Wrap the variable in interpolation: #{$gap}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:13:15 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+    11 │ 	--fallback: var(--x, $gap);
+    12 │ 	--url: url($path);
+  > 13 │ 	--list: $gap $gap;
+       │ 	             ^^^^
+    14 │ 	--braced: {a: $gap};
+    15 │ }
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i Wrap the variable in interpolation: #{$gap}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:14:16 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+    12 │ 	--url: url($path);
+    13 │ 	--list: $gap $gap;
+  > 14 │ 	--braced: {a: $gap};
+       │ 	              ^^^^
+    15 │ }
+    16 │ 
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i Wrap the variable in interpolation: #{$gap}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:17:19 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+    15 │ }
+    16 │ 
+  > 17 │ @supports (--raw: $gap) {
+       │                   ^^^^
+    18 │ 	a {
+    19 │ 		color: red;
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i Wrap the variable in interpolation: #{$gap}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:23:23 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+    21 │ }
+    22 │ 
+  > 23 │ @container style(--c: $gap) {
+       │                       ^^^^
+    24 │ 	a {
+    25 │ 		color: red;
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i Wrap the variable in interpolation: #{$gap}.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
