@@ -3132,6 +3132,11 @@ export interface Nursery {
 	 */
 	noSvelteAtHtmlTags?: NoSvelteAtHtmlTagsConfiguration;
 	/**
+	 * Disallow Svelte's class: directive.
+	 * See https://biomejs.dev/linter/rules/no-svelte-class-directive
+	 */
+	noSvelteClassDirective?: NoSvelteClassDirectiveConfiguration;
+	/**
 	 * Disallow declaring Svelte component props with export let.
 	 * See https://biomejs.dev/linter/rules/no-svelte-export-let
 	 */
@@ -5803,6 +5808,9 @@ export type NoSvelteAtDebugTagsConfiguration =
 export type NoSvelteAtHtmlTagsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteAtHtmlTagsOptions;
+export type NoSvelteClassDirectiveConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSvelteClassDirectiveOptions;
 export type NoSvelteExportLetConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteExportLetOptions;
@@ -8316,6 +8324,10 @@ export interface RuleWithNoSvelteAtHtmlTagsOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteAtHtmlTagsOptions;
 }
+export interface RuleWithNoSvelteClassDirectiveOptions {
+	level: RulePlainConfiguration;
+	options?: NoSvelteClassDirectiveOptions;
+}
 export interface RuleWithNoSvelteExportLetOptions {
 	level: RulePlainConfiguration;
 	options?: NoSvelteExportLetOptions;
@@ -10807,6 +10819,7 @@ export type NoSelfImportOptions = {};
 export type NoSvelteAddEventListenerOptions = {};
 export type NoSvelteAtDebugTagsOptions = {};
 export type NoSvelteAtHtmlTagsOptions = {};
+export type NoSvelteClassDirectiveOptions = {};
 export type NoSvelteExportLetOptions = {};
 export type NoSvelteInspectOptions = {};
 export type NoSvelteLegacyConstOptions = {};
@@ -12559,6 +12572,7 @@ export type Category =
 	| "lint/nursery/noSvelteAddEventListener"
 	| "lint/nursery/noSvelteAtDebugTags"
 	| "lint/nursery/noSvelteAtHtmlTags"
+	| "lint/nursery/noSvelteClassDirective"
 	| "lint/nursery/noSvelteExportLet"
 	| "lint/nursery/noSvelteInspect"
 	| "lint/nursery/noSvelteLegacyConst"
