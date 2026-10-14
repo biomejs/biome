@@ -121,13 +121,21 @@ impl Rule for UseLiteralEnumMembers {
         _: &RuleContext<Self>,
         initializer_range: &Self::State,
     ) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            initializer_range,
-            markup! {
-                "The enum member should be initialized with a literal value such as a number or a string."
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                initializer_range,
+                markup! {
+                    "The enum member should be initialized with a literal value such as a number or a string."
+                },
+            )
+            .note(markup! {
+                "Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs."
+            })
+            .note(markup! {
+                "Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed."
+            }),
+        )
     }
 }
 

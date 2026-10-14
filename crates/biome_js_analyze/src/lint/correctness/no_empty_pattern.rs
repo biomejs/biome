@@ -84,13 +84,21 @@ impl Rule for NoEmptyPattern {
             JsAnyBindPatternLike::JsObjectBindingPattern(_) => "object",
         };
 
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            node.range(),
-            markup! {
-                "Unexpected empty "{node_type}" pattern."
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup! {
+                    "Unexpected empty "{node_type}" pattern."
+                },
+            )
+            .note(markup! {
+                "An empty pattern does not create any variables, but it can still throw an error for an invalid value."
+            })
+            .note(markup! {
+                "Add the names you want to extract, or remove the pattern."
+            }),
+        )
     }
 }
 

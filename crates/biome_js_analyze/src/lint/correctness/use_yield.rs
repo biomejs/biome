@@ -138,10 +138,18 @@ impl Rule for UseYield {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            ctx.query().range(),
-            markup! {"This generator function doesn't contain "<Emphasis>"yield"</Emphasis>"."},
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                ctx.query().range(),
+                markup! {"This generator function doesn't contain "<Emphasis>"yield"</Emphasis>"."},
+            )
+            .note(markup! {
+                "A generator without "<Emphasis>"yield"</Emphasis>" never produces a value. This often means that a "<Emphasis>"yield"</Emphasis>" is missing."
+            })
+            .note(markup! {
+                "Add a "<Emphasis>"yield"</Emphasis>" expression, or remove the "<Emphasis>"*"</Emphasis>" to turn the function into a regular function."
+            }),
+        )
     }
 }

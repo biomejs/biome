@@ -127,13 +127,21 @@ impl Rule for NoDuplicateElseIf {
     }
 
     fn diagnostic(_: &RuleContext<Self>, text_range: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            text_range,
-            markup! {
-                "This branch can never execute. Its condition is a duplicate or covered by previous conditions in the if-else-if chain."
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                text_range,
+                markup! {
+                    "This condition is a duplicate of, or is covered by, previous conditions in the if-else-if chain."
+                },
+            )
+            .note(markup! {
+                "An earlier branch already handles every case this condition matches, so this branch can never execute."
+            })
+            .note(markup! {
+                "Remove this branch, or change its condition to the one you meant."
+            }),
+        )
     }
 }
 

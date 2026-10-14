@@ -1,5 +1,6 @@
 use biome_analyze::RuleSource;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
+use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsClassMemberName, JsClassMemberList, JsGetterClassMember, JsMethodClassMember,
@@ -150,11 +151,16 @@ impl Rule for NoDuplicateClassMembers {
         let diagnostic = RuleDiagnostic::new(
             rule_category!(),
             state.range(),
-            format!(
-                "Duplicate class member name {:?}",
-                get_member_name(&state.name()?)?.text()
-            ),
-        );
+            markup! {
+                "Duplicate class member name "<Emphasis>{get_member_name(&state.name()?)?.text()}</Emphasis>"."
+            },
+        )
+        .note(markup! {
+            "The last declaration silently overwrites the earlier ones, which can cause unexpected behavior."
+        })
+        .note(markup! {
+            "Remove the duplicate member, or rename it if you meant a different member."
+        });
 
         Some(diagnostic)
     }
