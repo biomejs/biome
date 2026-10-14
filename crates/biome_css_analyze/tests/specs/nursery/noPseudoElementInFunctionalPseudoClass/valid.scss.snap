@@ -11,6 +11,10 @@ $fn: is;
 	color: red;
 }
 
+.a:is(.b:#{$fn}(::before)) {
+	color: red;
+}
+
 .a {
 	&:is(.b, .c)::before {
 		content: "";

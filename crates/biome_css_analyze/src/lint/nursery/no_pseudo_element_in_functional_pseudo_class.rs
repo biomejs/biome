@@ -1,7 +1,7 @@
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_syntax::{
-    AnyCssPseudoClass, CssIdentifier, CssPseudoClassFunctionRelativeSelectorList,
+    AnyCssPseudoClass, AnyCssPseudoElement, CssIdentifier, CssPseudoClassFunctionRelativeSelectorList,
     CssPseudoClassFunctionSelectorList, CssPseudoClassSelector, CssPseudoElementSelector,
 };
 use biome_diagnostics::Severity;
@@ -73,10 +73,19 @@ impl Rule for NoPseudoElementInFunctionalPseudoClass {
         {
             return None;
         }
-        node.syntax()
-            .ancestors()
-            .skip(1)
-            .find_map(AnyFunctionalPseudoClass::cast)
+        for ancestor in node.syntax().ancestors().skip(1) {
+            if AnyFunctionalPseudoClass::can_cast(ancestor.kind()) {
+                return AnyFunctionalPseudoClass::cast(ancestor);
+            }
+            // Other functional pseudo-classes and pseudo-elements, such as `:host()` and
+            // `::slotted()`, aren't checked, even when they are inside `:is()`.
+            if AnyCssPseudoClass::can_cast(ancestor.kind())
+                || AnyCssPseudoElement::can_cast(ancestor.kind())
+            {
+                return None;
+            }
+        }
+        None
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
