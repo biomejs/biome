@@ -17,7 +17,7 @@ use biome_analyze::{
     AddVisitor, AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerPluginSlice,
     AnalyzerSignal, BatchPluginVisitor, ControlFlow, EmbeddedSignalInspector, InspectMatcher,
     LanguageRoot, MatchQueryParams, MetadataRegistry, Phases, PluginTargetLanguage, RuleAction,
-    RuleRegistry, SnippetAnalyzer,
+    RuleRegistryCache, SnippetAnalyzer,
 };
 use biome_aria::AriaRoles;
 use biome_db::AnyParsedSource;
@@ -188,6 +188,10 @@ where
     )
 }
 
+thread_local! {
+    static REGISTRY_CACHE: RuleRegistryCache<JsLanguage> = const { RuleRegistryCache::new() };
+}
+
 fn analyze_with_inspect_matcher_and_inspector<'a, V, F, B, Output>(
     params: AnalyzerParams<'a, '_, '_, '_, '_, B, Output>,
     inspect_matcher: V,
@@ -207,9 +211,6 @@ where
         snippet_inspector,
         snippets,
     } = params;
-    let mut registry = RuleRegistry::builder(&filter, root);
-    visit_registry(&mut registry);
-
     let JsAnalyzerServices {
         module_db,
         language_db: embedded_db,
@@ -220,7 +221,8 @@ where
         source_type,
     } = services;
 
-    let (registry, mut services, diagnostics, mut visitors) = registry.build();
+    let (registry, mut services, diagnostics, mut visitors) =
+        REGISTRY_CACHE.with(|cache| cache.build(&filter, root, visit_registry));
 
     let plugins: Vec<_> = plugins
         .iter()

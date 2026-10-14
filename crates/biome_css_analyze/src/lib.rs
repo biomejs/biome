@@ -19,7 +19,7 @@ use crate::suppression_action::CssSuppressionAction;
 use biome_analyze::{
     AddVisitor, AnalysisFilter, AnalyzerOptions, AnalyzerPluginSlice, AnalyzerSignal,
     BatchPluginVisitor, ControlFlow, EmbeddedSignalInspector, LanguageRoot, MatchQueryParams,
-    MetadataRegistry, Phases, PluginTargetLanguage, RuleAction, RuleRegistry,
+    MetadataRegistry, Phases, PluginTargetLanguage, RuleAction, RuleRegistryCache,
 };
 use biome_css_syntax::CssLanguage;
 use biome_db::AnyParsedSource;
@@ -202,6 +202,10 @@ where
     )
 }
 
+thread_local! {
+    static REGISTRY_CACHE: RuleRegistryCache<CssLanguage> = const { RuleRegistryCache::new() };
+}
+
 fn analyze_with_inspect_matcher_and_inspector<'a, V, F, B>(
     params: AnalyzerParams<'a, '_, '_>,
     inspect_matcher: V,
@@ -220,10 +224,8 @@ where
         plugins,
         snippet_inspector,
     } = params;
-    let mut registry = RuleRegistry::builder(&filter, root);
-    visit_registry(&mut registry);
-
-    let (registry, mut services, diagnostics, mut visitors) = registry.build();
+    let (registry, mut services, diagnostics, mut visitors) =
+        REGISTRY_CACHE.with(|cache| cache.build(&filter, root, visit_registry));
 
     let css_plugins: Vec<_> = plugins
         .iter()

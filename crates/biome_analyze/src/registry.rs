@@ -1,6 +1,6 @@
 use crate::{
-    AddVisitor, AnalysisFilter, GroupCategory, QueryMatcher, Rule, RuleGroup, RuleKey,
-    RuleMetadata, ServiceBag, SignalEntry, Visitor,
+    AddVisitor, AnalysisFilter, GroupCategory, QueryMatcher, Rule, RuleCategories, RuleFilter,
+    RuleGroup, RuleKey, RuleMetadata, ServiceBag, SignalEntry, Visitor,
     context::RuleContext,
     matcher::{GroupKey, MatchQueryParams},
     query::{QueryKey, Queryable},
@@ -12,7 +12,9 @@ use rustc_hash::{FxHashMap, FxHashSet};
 use std::{
     any::TypeId,
     borrow,
+    cell::RefCell,
     collections::{BTreeMap, BTreeSet},
+    sync::Arc,
 };
 
 /// Defines all the phases that the [RuleRegistry] supports.
@@ -102,8 +104,12 @@ impl<L: Language> RegistryVisitor<L> for MetadataRegistry {
 /// - Semantic Phase: Offers the semantic model, thus these rules can only run
 ///   after the "SemanticModel" is ready, which demands a whole transverse of the parsed tree.
 pub struct RuleRegistry<L: Language> {
-    /// Holds a collection of rules for each phase.
-    phase_rules: [PhaseRules<L>; 2],
+    /// Which rules run on which query matches. Only depends on the
+    /// [AnalysisFilter], so a [RuleRegistryCache] can share it between runs.
+    rules: Arc<RegistryRules<L>>,
+    /// Holds a state for every rule in [RegistryRules], indexed by
+    /// [RegistryRule::state_index]
+    rule_states: Vec<RuleState<L>>,
 }
 
 impl<L: Language + Default> RuleRegistry<L> {
@@ -114,14 +120,23 @@ impl<L: Language + Default> RuleRegistry<L> {
         RuleRegistryBuilder {
             filter,
             root,
-            registry: Self {
-                phase_rules: Default::default(),
-            },
-            visitors: BTreeMap::default(),
+            rules: RegistryRules::default(),
             services: ServiceBag::default(),
             diagnostics: Vec::new(),
         }
     }
+}
+
+/// The part of a [RuleRegistry] that does not depend on the analyzed file.
+#[derive(Default)]
+struct RegistryRules<L: Language> {
+    /// Holds a collection of rules for each phase.
+    phase_rules: [PhaseRules<L>; 2],
+    /// Number of rules in all phases.
+    rule_count: usize,
+    /// Registers the visitors of each rule's query, in the order the rules
+    /// were recorded.
+    visitor_builders: Vec<VisitorBuilder<L>>,
 }
 
 /// Holds a collection of rules for each phase.
@@ -131,8 +146,6 @@ struct PhaseRules<L: Language> {
     type_rules: FxHashMap<TypeId, TypeRules<L>>,
     /// Union of the kinds of all the [QueryKey::Syntax] rules in this phase
     syntax_kinds: SyntaxKindSet<L>,
-    /// Holds a list of states for all the rules in this phase
-    rule_states: Vec<RuleState<L>>,
 }
 
 enum TypeRules<L: Language> {
@@ -140,13 +153,23 @@ enum TypeRules<L: Language> {
     TypeRules { rules: Vec<RegistryRule<L>> },
 }
 
+type VisitorMap<L> = BTreeMap<(Phases, TypeId), Box<dyn Visitor<Language = L>>>;
+
+type VisitorBuilder<L> = fn(&mut VisitorMap<L>, &LanguageRoot<L>);
+
+fn build_query_visitor<Q: Queryable>(
+    visitors: &mut VisitorMap<Q::Language>,
+    root: &LanguageRoot<Q::Language>,
+) where
+    Q::Language: 'static,
+{
+    Q::build_visitor(visitors, root);
+}
+
 pub struct RuleRegistryBuilder<'a, L: Language> {
     filter: &'a AnalysisFilter<'a>,
     root: &'a L::Root,
-    // Rule Registry
-    registry: RuleRegistry<L>,
-    // Analyzer Visitors
-    visitors: BTreeMap<(Phases, TypeId), Box<dyn Visitor<Language = L>>>,
+    rules: RegistryRules<L>,
     // Service Bag
     services: ServiceBag,
     diagnostics: Vec<Error>,
@@ -174,15 +197,13 @@ impl<L: Language + Default + 'static> RegistryVisitor<L> for RuleRegistryBuilder
             return;
         }
 
-        let phase = R::phase() as usize;
-        let phase = &mut self.registry.phase_rules[phase];
-
-        phase.insert_rule(
+        let rules = &mut self.rules;
+        rules.phase_rules[R::phase() as usize].insert_rule(
             <R::Query as Queryable>::key(),
-            RegistryRule::new::<R>(phase.rule_states.len()),
+            RegistryRule::new::<R>(rules.rule_count),
         );
-
-        <R::Query as Queryable>::build_visitor(&mut self.visitors, self.root);
+        rules.rule_count += 1;
+        rules.visitor_builders.push(build_query_visitor::<R::Query>);
     }
 }
 
@@ -234,12 +255,10 @@ impl<L: Language + Default + 'static> PhaseRules<L> {
                 rules.push(rule);
             }
         }
-
-        self.rule_states.push(RuleState::default());
     }
 }
 
-impl<L: Language> AddVisitor<L> for BTreeMap<(Phases, TypeId), Box<dyn Visitor<Language = L>>> {
+impl<L: Language> AddVisitor<L> for VisitorMap<L> {
     fn add_visitor<F, V>(&mut self, phase: Phases, visitor: F)
     where
         F: FnOnce() -> V,
@@ -250,27 +269,174 @@ impl<L: Language> AddVisitor<L> for BTreeMap<(Phases, TypeId), Box<dyn Visitor<L
     }
 }
 
-type BuilderResult<L> = (
-    RuleRegistry<L>,
-    ServiceBag,
-    Vec<Error>,
-    BTreeMap<(Phases, TypeId), Box<dyn Visitor<Language = L>>>,
-);
+type BuilderResult<L> = (RuleRegistry<L>, ServiceBag, Vec<Error>, VisitorMap<L>);
 
-impl<L: Language> RuleRegistryBuilder<'_, L> {
+impl<L: Language + Default> RuleRegistryBuilder<'_, L> {
     pub fn build(self) -> BuilderResult<L> {
-        (
-            self.registry,
-            self.services,
-            self.diagnostics,
-            self.visitors,
-        )
+        let (registry, visitors) = RuleRegistry::from_rules(Arc::new(self.rules), self.root);
+        (registry, self.services, self.diagnostics, visitors)
+    }
+}
+
+impl<L: Language + Default> RuleRegistry<L> {
+    /// Creates a registry for one analyzer run over `root`, with fresh rule
+    /// states and the visitors of every rule's query.
+    fn from_rules(rules: Arc<RegistryRules<L>>, root: &L::Root) -> (Self, VisitorMap<L>) {
+        let mut visitors = VisitorMap::default();
+        for build_visitor in &rules.visitor_builders {
+            build_visitor(&mut visitors, root);
+        }
+
+        let rule_states = std::iter::repeat_with(RuleState::default)
+            .take(rules.rule_count)
+            .collect();
+
+        (Self { rules, rule_states }, visitors)
+    }
+}
+
+/// Reuses the file-independent part of a [RuleRegistry] across analyzer runs
+/// whose [AnalysisFilter] selects the same rules.
+///
+/// Which rules a registry holds depends on the categories, enabled rules and
+/// disabled rules of the filter, and on the rules a language's
+/// `visit_registry` function records. A cache must therefore only ever be
+/// used with one `visit_registry` function. The filter's range, the analyzed
+/// file, and the analyzer options are not part of the key: rule states and
+/// query visitors are created anew for every run, and rules read their
+/// options when they run.
+pub struct RuleRegistryCache<L: Language> {
+    /// Most recently used entry first.
+    entries: RefCell<Vec<RegistryCacheEntry<L>>>,
+}
+
+struct RegistryCacheEntry<L: Language> {
+    categories: RuleCategories,
+    enabled_rules: Option<Box<[OwnedRuleFilter]>>,
+    disabled_rules: Box<[OwnedRuleFilter]>,
+    rules: Arc<RegistryRules<L>>,
+}
+
+impl<L: Language> RegistryCacheEntry<L> {
+    fn matches(&self, filter: &AnalysisFilter) -> bool {
+        self.categories == filter.categories
+            && match (&self.enabled_rules, filter.enabled_rules) {
+                (Some(cached), Some(enabled)) => OwnedRuleFilter::slice_eq(cached, enabled),
+                (None, None) => true,
+                _ => false,
+            }
+            && OwnedRuleFilter::slice_eq(&self.disabled_rules, filter.disabled_rules)
+    }
+}
+
+#[derive(Debug)]
+enum OwnedRuleFilter {
+    Group(Box<str>),
+    Rule(Box<str>, Box<str>),
+}
+
+impl OwnedRuleFilter {
+    fn from_filters(filters: &[RuleFilter]) -> Box<[Self]> {
+        filters
+            .iter()
+            .map(|filter| match *filter {
+                RuleFilter::Group(group) => Self::Group(group.into()),
+                RuleFilter::Rule(group, rule) => Self::Rule(group.into(), rule.into()),
+            })
+            .collect()
+    }
+
+    fn slice_eq(owned: &[Self], filters: &[RuleFilter]) -> bool {
+        owned.len() == filters.len()
+            && owned
+                .iter()
+                .zip(filters)
+                .all(|(owned, filter)| match (owned, *filter) {
+                    (Self::Group(a), RuleFilter::Group(b)) => **a == *b,
+                    (Self::Rule(a_group, a_rule), RuleFilter::Rule(b_group, b_rule)) => {
+                        **a_rule == *b_rule && **a_group == *b_group
+                    }
+                    _ => false,
+                })
+    }
+}
+
+impl<L: Language> RuleRegistryCache<L> {
+    /// Number of filters remembered at once. An analyzer typically sees one
+    /// filter per kind of request (lint, fix, code actions), plus one per
+    /// override that changes the rule set.
+    const CAPACITY: usize = 8;
+
+    pub const fn new() -> Self {
+        Self {
+            entries: RefCell::new(Vec::new()),
+        }
+    }
+}
+
+impl<L: Language + Default> RuleRegistryCache<L> {
+    /// Returns the same result as calling `visit_registry` on
+    /// [RuleRegistry::builder] and then [RuleRegistryBuilder::build], but only
+    /// calls `visit_registry` when no remembered entry has an equal filter.
+    pub fn build<'a>(
+        &self,
+        filter: &'a AnalysisFilter<'a>,
+        root: &'a L::Root,
+        visit_registry: impl FnOnce(&mut RuleRegistryBuilder<'a, L>),
+    ) -> BuilderResult<L> {
+        let cached = {
+            let mut entries = self.entries.borrow_mut();
+            entries
+                .iter()
+                .position(|entry| entry.matches(filter))
+                .map(|index| {
+                    entries[..=index].rotate_right(1);
+                    entries[0].rules.clone()
+                })
+        };
+
+        if let Some(rules) = cached {
+            let (registry, visitors) = RuleRegistry::from_rules(rules, root);
+            return (registry, ServiceBag::default(), Vec::new(), visitors);
+        }
+
+        let mut builder = RuleRegistry::builder(filter, root);
+        visit_registry(&mut builder);
+        let RuleRegistryBuilder {
+            rules,
+            services,
+            diagnostics,
+            ..
+        } = builder;
+        let rules = Arc::new(rules);
+
+        let mut entries = self.entries.borrow_mut();
+        entries.truncate(Self::CAPACITY - 1);
+        entries.insert(
+            0,
+            RegistryCacheEntry {
+                categories: filter.categories,
+                enabled_rules: filter.enabled_rules.map(OwnedRuleFilter::from_filters),
+                disabled_rules: OwnedRuleFilter::from_filters(filter.disabled_rules),
+                rules: rules.clone(),
+            },
+        );
+        drop(entries);
+
+        let (registry, visitors) = RuleRegistry::from_rules(rules, root);
+        (registry, services, diagnostics, visitors)
+    }
+}
+
+impl<L: Language> Default for RuleRegistryCache<L> {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
 impl<L: Language + 'static> QueryMatcher<L> for RuleRegistry<L> {
     fn match_query(&mut self, mut params: MatchQueryParams<L>) {
-        let phase = &mut self.phase_rules[params.phase as usize];
+        let phase = &self.rules.phase_rules[params.phase as usize];
 
         let query_type = params.query.type_id();
         let Some(rules) = phase.type_rules.get(&query_type) else {
@@ -297,14 +463,14 @@ impl<L: Language + 'static> QueryMatcher<L> for RuleRegistry<L> {
 
         // Run all the rules registered to this QueryMatch
         for rule in rules {
-            let state = &mut phase.rule_states[rule.state_index];
+            let state = &mut self.rule_states[rule.state_index];
             // TODO: #3394 track error in the signal queue
             let _ = (rule.run)(&mut params, state);
         }
     }
 
     fn syntax_query_kinds(&self, phase: Phases) -> Option<SyntaxKindSet<L>> {
-        Some(self.phase_rules[phase as usize].syntax_kinds)
+        Some(self.rules.phase_rules[phase as usize].syntax_kinds)
     }
 }
 

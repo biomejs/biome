@@ -11,7 +11,7 @@ pub use crate::suppression::YamlSuppression;
 use crate::suppression_action::YamlSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, EmbeddedSignalInspector,
-    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
+    LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistryCache,
 };
 use biome_diagnostics::Error;
 use biome_yaml_syntax::YamlLanguage;
@@ -93,6 +93,10 @@ where
     )
 }
 
+thread_local! {
+    static REGISTRY_CACHE: RuleRegistryCache<YamlLanguage> = const { RuleRegistryCache::new() };
+}
+
 fn analyze_with_inspect_matcher_and_inspector<'a, V, F, B>(
     root: &LanguageRoot<YamlLanguage>,
     filter: AnalysisFilter,
@@ -106,10 +110,8 @@ where
     F: FnMut(&dyn AnalyzerSignal<YamlLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    let mut registry = RuleRegistry::builder(&filter, root);
-    visit_registry(&mut registry);
-
-    let (registry, services, diagnostics, visitors) = registry.build();
+    let (registry, services, diagnostics, visitors) =
+        REGISTRY_CACHE.with(|cache| cache.build(&filter, root, visit_registry));
 
     // Bail if we can't parse a rule option
     if !diagnostics.is_empty() {
