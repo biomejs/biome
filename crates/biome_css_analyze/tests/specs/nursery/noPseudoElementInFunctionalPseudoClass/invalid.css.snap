@@ -14,6 +14,7 @@ expression: invalid.css
 .a:IS(::part(label)) {}
 .a:is(.b:not(::before)) {}
 .a:is(.b, .c::-webkit-scrollbar) {}
+.a:is(::slotted(::before)) {}
 
 ```
 
@@ -257,7 +258,7 @@ invalid.css:9:14 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━�
    > 9 │ .a:is(.b:not(::before)) {}
        │              ^^^^^^^^
     10 │ .a:is(.b, .c::-webkit-scrollbar) {}
-    11 │ 
+    11 │ .a:is(::slotted(::before)) {}
   
   i Pseudo-elements aren't valid inside :is(), :where(), :not() or :has(). Browsers drop the invalid selector, so these styles never apply to the pseudo-element.
   
@@ -277,7 +278,28 @@ invalid.css:10:13 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━�
      9 │ .a:is(.b:not(::before)) {}
   > 10 │ .a:is(.b, .c::-webkit-scrollbar) {}
        │             ^^^^^^^^^^^^^^^^^^^
-    11 │ 
+    11 │ .a:is(::slotted(::before)) {}
+    12 │ 
+  
+  i Pseudo-elements aren't valid inside :is(), :where(), :not() or :has(). Browsers drop the invalid selector, so these styles never apply to the pseudo-element.
+  
+  i To style the pseudo-element, put it at the end of the selector, outside the pseudo-class, for example .card:is(.featured, .pinned)::before.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:11:7 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The pseudo-element ::slotted(::before) can't be used inside :is().
+  
+     9 │ .a:is(.b:not(::before)) {}
+    10 │ .a:is(.b, .c::-webkit-scrollbar) {}
+  > 11 │ .a:is(::slotted(::before)) {}
+       │       ^^^^^^^^^^^^^^^^^^^
+    12 │ 
   
   i Pseudo-elements aren't valid inside :is(), :where(), :not() or :has(). Browsers drop the invalid selector, so these styles never apply to the pseudo-element.
   

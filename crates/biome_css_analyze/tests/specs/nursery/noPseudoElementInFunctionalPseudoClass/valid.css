@@ -11,3 +11,6 @@
 .a:is(:slotted) {}
 .a:host(::before) {}
 .a::slotted(::before) {}
+.a:nth-child(2 of .b::before) {}
+.a:is(:host(.b::before)) {}
+.a:not(:nth-child(2 of .b::before)) {}

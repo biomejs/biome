@@ -8,3 +8,4 @@
 .a:IS(::part(label)) {}
 .a:is(.b:not(::before)) {}
 .a:is(.b, .c::-webkit-scrollbar) {}
+.a:is(::slotted(::before)) {}
