@@ -1,0 +1,194 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: narrowing.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+function optionalAfterGuard(value: { name: string } | null) {
+	if (value == null) return;
+	return value?.name;
+}
+
+function coalescingAfterTypeof(value: string | undefined) {
+	if (typeof value === "string") {
+		return value ?? "fallback";
+	}
+}
+
+function repeatedTruthiness(value: "ready" | null) {
+	if (value) {
+		if (value) {}
+	} else {
+		if (value) {}
+	}
+}
+
+function strictLiteral(value: 0 | 1) {
+	if (value === 0) {
+		if (value) {}
+	}
+}
+
+function logicalOperand(value: { name: string } | null) {
+	return value !== null && value?.name;
+}
+
+function conditionalOperand(value: { name: string } | null) {
+	return value !== null ? value?.name : null;
+}
+
+```
+
+# Diagnostics
+```
+narrowing.ts:5:9 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    3 │ function optionalAfterGuard(value: { name: string } | null) {
+    4 │ 	if (value == null) return;
+  > 5 │ 	return value?.name;
+      │ 	       ^^^^^
+    6 │ }
+    7 │ 
+  
+  i Replace ?. with ..
+  
+    3 │ function optionalAfterGuard(value: { name: string } | null) {
+    4 │ 	if (value == null) return;
+  > 5 │ 	return value?.name;
+      │ 	            ^^
+    6 │ }
+    7 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+narrowing.ts:10:10 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary nullish coalescing.
+  
+     8 │ function coalescingAfterTypeof(value: string | undefined) {
+     9 │ 	if (typeof value === "string") {
+  > 10 │ 		return value ?? "fallback";
+       │ 		       ^^^^^
+    11 │ 	}
+    12 │ }
+  
+  i Drop ?? and the fallback expression.
+  
+     8 │ function coalescingAfterTypeof(value: string | undefined) {
+     9 │ 	if (typeof value === "string") {
+  > 10 │ 		return value ?? "fallback";
+       │ 		             ^^
+    11 │ 	}
+    12 │ }
+  
+  i The left-hand side is guaranteed to be non-nullish, so the fallback is unreachable.
+  
+
+```
+
+```
+narrowing.ts:16:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always truthy.
+  
+    14 │ function repeatedTruthiness(value: "ready" | null) {
+    15 │ 	if (value) {
+  > 16 │ 		if (value) {}
+       │ 		    ^^^^^
+    17 │ 	} else {
+    18 │ 		if (value) {}
+  
+  i The value's type can never be falsy, so this check is redundant.
+  
+
+```
+
+```
+narrowing.ts:18:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    16 │ 		if (value) {}
+    17 │ 	} else {
+  > 18 │ 		if (value) {}
+       │ 		    ^^^^^
+    19 │ 	}
+    20 │ }
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+
+```
+
+```
+narrowing.ts:24:7 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This condition is always falsy.
+  
+    22 │ function strictLiteral(value: 0 | 1) {
+    23 │ 	if (value === 0) {
+  > 24 │ 		if (value) {}
+       │ 		    ^^^^^
+    25 │ 	}
+    26 │ }
+  
+  i The value's type can never be truthy, so this check is redundant.
+  
+
+```
+
+```
+narrowing.ts:29:27 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    28 │ function logicalOperand(value: { name: string } | null) {
+  > 29 │ 	return value !== null && value?.name;
+       │ 	                         ^^^^^
+    30 │ }
+    31 │ 
+  
+  i Replace ?. with ..
+  
+    28 │ function logicalOperand(value: { name: string } | null) {
+  > 29 │ 	return value !== null && value?.name;
+       │ 	                              ^^
+    30 │ }
+    31 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```
+
+```
+narrowing.ts:33:26 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unnecessary optional chaining.
+  
+    32 │ function conditionalOperand(value: { name: string } | null) {
+  > 33 │ 	return value !== null ? value?.name : null;
+       │ 	                        ^^^^^
+    34 │ }
+    35 │ 
+  
+  i Replace ?. with ..
+  
+    32 │ function conditionalOperand(value: { name: string } | null) {
+  > 33 │ 	return value !== null ? value?.name : null;
+       │ 	                             ^^
+    34 │ }
+    35 │ 
+  
+  i The receiver is guaranteed to be non-nullish.
+  
+
+```

@@ -854,23 +854,6 @@ invalid.js:128:8 lint/suspicious/noUnnecessaryConditions ━━━━━━━�
 ```
 
 ```
-invalid.js:135:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This condition is always truthy.
-  
-    133 │ // Object property access with constants
-    134 │ const obj = {};
-  > 135 │ if (obj) {  // Object literal is always truthy
-        │     ^^^
-    136 │   console.log("always runs");
-    137 │ }
-  
-  i The value's type can never be falsy, so this check is redundant.
-  
-
-```
-
-```
 invalid.js:141:5 lint/suspicious/noUnnecessaryConditions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This condition is always truthy.

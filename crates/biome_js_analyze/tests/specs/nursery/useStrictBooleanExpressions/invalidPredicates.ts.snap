@@ -47,27 +47,6 @@ invalidPredicates.ts:3:13 lint/nursery/useStrictBooleanExpressions ━━━━�
 ```
 
 ```
-invalidPredicates.ts:4:14 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This array predicate returns an always-truthy value.
-  
-    2 │ const values = [1, 2, 3];
-    3 │ values.some(() => null);
-  > 4 │ values.every(() => ({}));
-      │              ^^^^^^^^^^
-    5 │ values.filter((): string | undefined => undefined);
-    6 │ values.find((): boolean | undefined => undefined);
-  
-  i Objects, functions, and symbols are always truthy.
-  
-  i Return a boolean that expresses the intended condition.
-  
-  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
-  
-
-```
-
-```
 invalidPredicates.ts:5:15 lint/nursery/useStrictBooleanExpressions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This array predicate returns a nullable string.
