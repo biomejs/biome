@@ -160,12 +160,20 @@ impl Rule for UseAdjacentOverloadSignatures {
             diagnostic = diagnostic.detail(
                 text_range.1,
                 markup! {
-                    "All "{text_range.0.text()}" signatures must be adjacent."
+                    "Another "{text_range.0.text()}" signature is declared here."
                 },
             );
         }
 
-        Some(diagnostic)
+        Some(
+            diagnostic
+                .note(markup! {
+                    "Overload signatures that are not next to each other are easy to miss. They can be mistaken for unrelated declarations."
+                })
+                .note(markup! {
+                    "Move the signatures so that they are directly next to each other."
+                }),
+        )
     }
 }
 

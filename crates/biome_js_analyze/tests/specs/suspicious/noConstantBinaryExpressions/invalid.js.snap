@@ -273,6 +273,10 @@ invalid.js:1:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━━
     2 │ [] || greeting;
     3 │ [] ?? greeting;
   
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -294,6 +298,10 @@ invalid.js:2:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━━
       │ ^^
     3 │ [] ?? greeting;
     4 │ [] == true;
+  
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -319,6 +327,10 @@ invalid.js:3:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━━
     4 │ [] == true;
     5 │ true == [];
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -333,6 +345,10 @@ invalid.js:4:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━━
       │ ^^^^^^^^^^
     5 │ true == [];
     6 │ [] != true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -349,6 +365,10 @@ invalid.js:5:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━━
     6 │ [] != true;
     7 │ [] === true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -363,6 +383,10 @@ invalid.js:6:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━━
       │ ^^^^^^^^^^
     7 │ [] === true;
     8 │ [] !== true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -379,6 +403,10 @@ invalid.js:7:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━━
     8 │ [] !== true;
     9 │ 
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -394,6 +422,10 @@ invalid.js:8:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━━
      9 │ 
     10 │ !foo == null;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -408,6 +440,10 @@ invalid.js:10:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^^^^^
     11 │ !foo ?? bar;
     12 │ (a + b) / 2 ?? bar;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -430,6 +466,10 @@ invalid.js:11:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^
     12 │ (a + b) / 2 ?? bar;
     13 │ String(foo.bar) ?? baz;
+  
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -455,6 +495,10 @@ invalid.js:12:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     13 │ String(foo.bar) ?? baz;
     14 │ "hello" + name ?? "";
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -478,6 +522,10 @@ invalid.js:13:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^^^^^^^^
     14 │ "hello" + name ?? "";
     15 │ [foo?.bar ?? ""] ?? [];
+  
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -503,6 +551,10 @@ invalid.js:14:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     15 │ [foo?.bar ?? ""] ?? [];
     16 │ 
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -527,6 +579,10 @@ invalid.js:15:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     16 │ 
     17 │ // Logical expression with constant truthiness
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -548,6 +604,10 @@ invalid.js:18:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^
     19 │ true || hello;
     20 │ true && foo;
+  
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -573,6 +633,10 @@ invalid.js:19:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     20 │ true && foo;
     21 │ '' && foo;
   
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -596,6 +660,10 @@ invalid.js:20:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^
     21 │ '' && foo;
     22 │ 100 && foo;
+  
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -621,6 +689,10 @@ invalid.js:21:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     22 │ 100 && foo;
     23 │ +100 && foo;
   
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -644,6 +716,10 @@ invalid.js:22:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^
     23 │ +100 && foo;
     24 │ -100 && foo;
+  
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -669,6 +745,10 @@ invalid.js:23:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     24 │ -100 && foo;
     25 │ ~100 && foo;
   
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -692,6 +772,10 @@ invalid.js:24:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^
     25 │ ~100 && foo;
     26 │ /[a-z]/ && foo;
+  
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -717,6 +801,10 @@ invalid.js:25:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     26 │ /[a-z]/ && foo;
     27 │ Boolean([]) && foo;
   
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -740,6 +828,10 @@ invalid.js:26:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^
     27 │ Boolean([]) && foo;
     28 │ Boolean() && foo;
+  
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -765,6 +857,10 @@ invalid.js:27:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     28 │ Boolean() && foo;
     29 │ Boolean([], n) && foo;
   
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -788,6 +884,10 @@ invalid.js:28:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^^
     29 │ Boolean([], n) && foo;
     30 │ ({}) && foo;
+  
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -813,6 +913,10 @@ invalid.js:29:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     30 │ ({}) && foo;
     31 │ [] && foo;
   
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -836,6 +940,10 @@ invalid.js:30:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^
     31 │ [] && foo;
     32 │ (() => {}) && foo;
+  
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -861,6 +969,10 @@ invalid.js:31:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     32 │ (() => {}) && foo;
     33 │ (function() {}) && foo;
   
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -884,6 +996,10 @@ invalid.js:32:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^^^
     33 │ (function() {}) && foo;
     34 │ (class {}) && foo;
+  
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -909,6 +1025,10 @@ invalid.js:33:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     34 │ (class {}) && foo;
     35 │ (class { valueOf() { return x; } }) && foo;
   
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -932,6 +1052,10 @@ invalid.js:34:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^^^
     35 │ (class { valueOf() { return x; } }) && foo;
     36 │ (class { [x]() { return x; } }) && foo;
+  
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -957,6 +1081,10 @@ invalid.js:35:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     36 │ (class { [x]() { return x; } }) && foo;
     37 │ new Foo() && foo;
   
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -980,6 +1108,10 @@ invalid.js:36:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     37 │ new Foo() && foo;
     38 │ 
+  
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -1005,6 +1137,10 @@ invalid.js:37:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     38 │ 
     39 │ // (boxed values are always truthy)
   
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -1026,6 +1162,10 @@ invalid.js:40:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^
     41 │ (bar = false) && foo;
     42 │ (bar.baz = false) && foo;
+  
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -1051,6 +1191,10 @@ invalid.js:41:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     42 │ (bar.baz = false) && foo;
     43 │ (bar[0] = false) && foo;
   
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -1074,6 +1218,10 @@ invalid.js:42:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^^^^^^^^^^
     43 │ (bar[0] = false) && foo;
     44 │ `hello ${hello}` && foo;
+  
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -1099,6 +1247,10 @@ invalid.js:43:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     44 │ `hello ${hello}` && foo;
     45 │ void bar && foo;
   
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -1122,6 +1274,10 @@ invalid.js:44:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^^^^^^^^^
     45 │ void bar && foo;
     46 │ !true && foo;
+  
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -1147,6 +1303,10 @@ invalid.js:45:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     46 │ !true && foo;
     47 │ typeof bar && foo;
   
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -1170,6 +1330,10 @@ invalid.js:46:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^
     47 │ typeof bar && foo;
     48 │ (bar, baz, true) && foo;
+  
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -1195,6 +1359,10 @@ invalid.js:47:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     48 │ (bar, baz, true) && foo;
     49 │ undefined && foo;
   
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -1218,6 +1386,10 @@ invalid.js:48:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^^^^^^^^^
     49 │ undefined && foo;
     50 │ 
+  
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -1243,6 +1415,10 @@ invalid.js:49:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     50 │ 
     51 │ // Logical expression with constant nullishness
   
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -1264,6 +1440,10 @@ invalid.js:52:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^
     53 │ ([]) ?? foo;
     54 │ (() => {}) ?? foo;
+  
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -1289,6 +1469,10 @@ invalid.js:53:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     54 │ (() => {}) ?? foo;
     55 │ (function() {}) ?? foo;
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -1312,6 +1496,10 @@ invalid.js:54:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^^^
     55 │ (function() {}) ?? foo;
     56 │ (class {}) ?? foo;
+  
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -1337,6 +1525,10 @@ invalid.js:55:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     56 │ (class {}) ?? foo;
     57 │ new Foo() ?? foo;
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -1360,6 +1552,10 @@ invalid.js:56:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^^^
     57 │ new Foo() ?? foo;
     58 │ 1 ?? foo;
+  
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -1385,6 +1581,10 @@ invalid.js:57:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     58 │ 1 ?? foo;
     59 │ /[a-z]/ ?? foo;
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -1408,6 +1608,10 @@ invalid.js:58:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^
     59 │ /[a-z]/ ?? foo;
     60 │ `${''}` ?? foo;
+  
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -1433,6 +1637,10 @@ invalid.js:59:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     60 │ `${''}` ?? foo;
     61 │ (a = true) ?? foo;
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -1456,6 +1664,10 @@ invalid.js:60:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^
     61 │ (a = true) ?? foo;
     62 │ (a += 1) ?? foo;
+  
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -1481,6 +1693,10 @@ invalid.js:61:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     62 │ (a += 1) ?? foo;
     63 │ (a -= 1) ?? foo;
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -1504,6 +1720,10 @@ invalid.js:62:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^
     63 │ (a -= 1) ?? foo;
     64 │ (a *= 1) ?? foo;
+  
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -1529,6 +1749,10 @@ invalid.js:63:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     64 │ (a *= 1) ?? foo;
     65 │ (a /= 1) ?? foo;
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -1552,6 +1776,10 @@ invalid.js:64:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^
     65 │ (a /= 1) ?? foo;
     66 │ (a %= 1) ?? foo;
+  
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -1577,6 +1805,10 @@ invalid.js:65:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     66 │ (a %= 1) ?? foo;
     67 │ (a <<= 1) ?? foo;
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -1600,6 +1832,10 @@ invalid.js:66:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^
     67 │ (a <<= 1) ?? foo;
     68 │ (a >>= 1) ?? foo;
+  
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -1625,6 +1861,10 @@ invalid.js:67:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     68 │ (a >>= 1) ?? foo;
     69 │ (a >>>= 1) ?? foo;
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -1648,6 +1888,10 @@ invalid.js:68:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^^
     69 │ (a >>>= 1) ?? foo;
     70 │ (a |= 1) ?? foo;
+  
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -1673,6 +1917,10 @@ invalid.js:69:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     70 │ (a |= 1) ?? foo;
     71 │ (a ^= 1) ?? foo;
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -1696,6 +1944,10 @@ invalid.js:70:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^
     71 │ (a ^= 1) ?? foo;
     72 │ (a &= 1) ?? foo;
+  
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -1721,6 +1973,10 @@ invalid.js:71:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     72 │ (a &= 1) ?? foo;
     73 │ undefined ?? foo;
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -1744,6 +2000,10 @@ invalid.js:72:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^
     73 │ undefined ?? foo;
     74 │ !bar ?? foo;
+  
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -1769,6 +2029,10 @@ invalid.js:73:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     74 │ !bar ?? foo;
     75 │ void bar ?? foo;
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -1792,6 +2056,10 @@ invalid.js:74:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^
     75 │ void bar ?? foo;
     76 │ typeof bar ?? foo;
+  
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -1817,6 +2085,10 @@ invalid.js:75:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     76 │ typeof bar ?? foo;
     77 │ +bar ?? foo;
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -1840,6 +2112,10 @@ invalid.js:76:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^^^
     77 │ +bar ?? foo;
     78 │ -bar ?? foo;
+  
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -1865,6 +2141,10 @@ invalid.js:77:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     78 │ -bar ?? foo;
     79 │ ~bar ?? foo;
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -1888,6 +2168,10 @@ invalid.js:78:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^
     79 │ ~bar ?? foo;
     80 │ ++bar ?? foo;
+  
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -1913,6 +2197,10 @@ invalid.js:79:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     80 │ ++bar ?? foo;
     81 │ bar++ ?? foo;
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -1936,6 +2224,10 @@ invalid.js:80:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^
     81 │ bar++ ?? foo;
     82 │ --bar ?? foo;
+  
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -1961,6 +2253,10 @@ invalid.js:81:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     82 │ --bar ?? foo;
     83 │ bar-- ?? foo;
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -1984,6 +2280,10 @@ invalid.js:82:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^
     83 │ bar-- ?? foo;
     84 │ (x == y) ?? foo;
+  
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -2009,6 +2309,10 @@ invalid.js:83:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     84 │ (x == y) ?? foo;
     85 │ (x + y) ?? foo;
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -2032,6 +2336,10 @@ invalid.js:84:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^
     85 │ (x + y) ?? foo;
     86 │ (x / y) ?? foo;
+  
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -2057,6 +2365,10 @@ invalid.js:85:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     86 │ (x / y) ?? foo;
     87 │ (x instanceof String) ?? foo;
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -2080,6 +2392,10 @@ invalid.js:86:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^
     87 │ (x instanceof String) ?? foo;
     88 │ (x in y) ?? foo;
+  
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -2105,6 +2421,10 @@ invalid.js:87:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     88 │ (x in y) ?? foo;
     89 │ Boolean(x) ?? foo;
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -2128,6 +2448,10 @@ invalid.js:88:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^
     89 │ Boolean(x) ?? foo;
     90 │ String(x) ?? foo;
+  
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -2153,6 +2477,10 @@ invalid.js:89:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     90 │ String(x) ?? foo;
     91 │ Number(x) ?? foo;
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -2176,6 +2504,10 @@ invalid.js:90:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^^
     91 │ Number(x) ?? foo;
     92 │ 
+  
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```
@@ -2201,6 +2533,10 @@ invalid.js:91:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     92 │ 
     93 │ // Binary expression with comparison to null
   
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -2214,6 +2550,10 @@ invalid.js:94:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^^^^^
     95 │ ({}) == null;
     96 │ null == ({});
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2230,6 +2570,10 @@ invalid.js:95:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     96 │ null == ({});
     97 │ ({}) == undefined;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2244,6 +2588,10 @@ invalid.js:96:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
        │ ^^^^^^^^^^^^
     97 │ ({}) == undefined;
     98 │ undefined == ({});
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2260,6 +2608,10 @@ invalid.js:97:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     98 │ undefined == ({});
     99 │ 
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2275,6 +2627,10 @@ invalid.js:98:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
      99 │ 
     100 │ // Binary expression with loose comparison to boolean
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2288,6 +2644,10 @@ invalid.js:101:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^
     102 │ ({}) == true;
     103 │ ([]) == true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2304,6 +2664,10 @@ invalid.js:102:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     103 │ ([]) == true;
     104 │ ([a, b]) == true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2318,6 +2682,10 @@ invalid.js:103:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^
     104 │ ([a, b]) == true;
     105 │ (() => {}) == true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2334,6 +2702,10 @@ invalid.js:104:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     105 │ (() => {}) == true;
     106 │ (function() {}) == true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2348,6 +2720,10 @@ invalid.js:105:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^^
     106 │ (function() {}) == true;
     107 │ void foo == true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2364,6 +2740,10 @@ invalid.js:106:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     107 │ void foo == true;
     108 │ typeof foo == true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2378,6 +2758,10 @@ invalid.js:107:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^
     108 │ typeof foo == true;
     109 │ ![] == true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2394,6 +2778,10 @@ invalid.js:108:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     109 │ ![] == true;
     110 │ true == class {};
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2408,6 +2796,10 @@ invalid.js:109:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^
     110 │ true == class {};
     111 │ true == 1;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2424,6 +2816,10 @@ invalid.js:110:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     111 │ true == 1;
     112 │ undefined == true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2438,6 +2834,10 @@ invalid.js:111:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^
     112 │ undefined == true;
     113 │ true == undefined;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2454,6 +2854,10 @@ invalid.js:112:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     113 │ true == undefined;
     114 │ `hello` == true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2468,6 +2872,10 @@ invalid.js:113:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^
     114 │ `hello` == true;
     115 │ /[a-z]/ == true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2484,6 +2892,10 @@ invalid.js:114:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     115 │ /[a-z]/ == true;
     116 │ ({}) == Boolean({});
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2498,6 +2910,10 @@ invalid.js:115:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^
     116 │ ({}) == Boolean({});
     117 │ ({}) == Boolean();
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2514,6 +2930,10 @@ invalid.js:116:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     117 │ ({}) == Boolean();
     118 │ ({}) == Boolean(() => {}, foo);
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2528,6 +2948,10 @@ invalid.js:117:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^
     118 │ ({}) == Boolean(() => {}, foo);
     119 │ 
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2544,6 +2968,10 @@ invalid.js:118:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     119 │ 
     120 │ // Binary expression with strict comparison to boolean
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2557,6 +2985,10 @@ invalid.js:121:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^
     122 │ ({}) == !({});
     123 │ ({}) === true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2573,6 +3005,10 @@ invalid.js:122:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     123 │ ({}) === true;
     124 │ ([]) === true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2587,6 +3023,10 @@ invalid.js:123:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^
     124 │ ([]) === true;
     125 │ (function() {}) === true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2603,6 +3043,10 @@ invalid.js:124:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     125 │ (function() {}) === true;
     126 │ (() => {}) === true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2617,6 +3061,10 @@ invalid.js:125:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^^^^^^^^
     126 │ (() => {}) === true;
     127 │ !{} === true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2633,6 +3081,10 @@ invalid.js:126:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     127 │ !{} === true;
     128 │ typeof n === true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2647,6 +3099,10 @@ invalid.js:127:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^
     128 │ typeof n === true;
     129 │ void n === true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2663,6 +3119,10 @@ invalid.js:128:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     129 │ void n === true;
     130 │ +n === true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2677,6 +3137,10 @@ invalid.js:129:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^
     130 │ +n === true;
     131 │ -n === true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2693,6 +3157,10 @@ invalid.js:130:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     131 │ -n === true;
     132 │ ~n === true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2707,6 +3175,10 @@ invalid.js:131:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^
     132 │ ~n === true;
     133 │ true === true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2723,6 +3195,10 @@ invalid.js:132:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     133 │ true === true;
     134 │ 1 === true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2737,6 +3213,10 @@ invalid.js:133:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^
     134 │ 1 === true;
     135 │ 'hello' === true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2753,6 +3233,10 @@ invalid.js:134:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     135 │ 'hello' === true;
     136 │ /[a-z]/ === true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2767,6 +3251,10 @@ invalid.js:135:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^
     136 │ /[a-z]/ === true;
     137 │ undefined === true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2783,6 +3271,10 @@ invalid.js:136:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     137 │ undefined === true;
     138 │ (a = {}) === true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2797,6 +3289,10 @@ invalid.js:137:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^^
     138 │ (a = {}) === true;
     139 │ (a += 1) === true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2813,6 +3309,10 @@ invalid.js:138:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     139 │ (a += 1) === true;
     140 │ (a -= 1) === true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2827,6 +3327,10 @@ invalid.js:139:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^
     140 │ (a -= 1) === true;
     141 │ (a *= 1) === true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2843,6 +3347,10 @@ invalid.js:140:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     141 │ (a *= 1) === true;
     142 │ (a %= 1) === true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2857,6 +3365,10 @@ invalid.js:141:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^
     142 │ (a %= 1) === true;
     143 │ (a ** b) === true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2873,6 +3385,10 @@ invalid.js:142:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     143 │ (a ** b) === true;
     144 │ (a << b) === true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2887,6 +3403,10 @@ invalid.js:143:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^
     144 │ (a << b) === true;
     145 │ (a >> b) === true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2903,6 +3423,10 @@ invalid.js:144:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     145 │ (a >> b) === true;
     146 │ (a >>> b) === true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2917,6 +3441,10 @@ invalid.js:145:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^
     146 │ (a >>> b) === true;
     147 │ --a === true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2933,6 +3461,10 @@ invalid.js:146:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     147 │ --a === true;
     148 │ a-- === true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2947,6 +3479,10 @@ invalid.js:147:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^
     148 │ a-- === true;
     149 │ ++a === true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2963,6 +3499,10 @@ invalid.js:148:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     149 │ ++a === true;
     150 │ a++ === true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -2977,6 +3517,10 @@ invalid.js:149:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^
     150 │ a++ === true;
     151 │ (a + b) === true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -2993,6 +3537,10 @@ invalid.js:150:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     151 │ (a + b) === true;
     152 │ (a - b) === true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3007,6 +3555,10 @@ invalid.js:151:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^
     152 │ (a - b) === true;
     153 │ (a * b) === true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3023,6 +3575,10 @@ invalid.js:152:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     153 │ (a * b) === true;
     154 │ (a / b) === true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3037,6 +3593,10 @@ invalid.js:153:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^
     154 │ (a / b) === true;
     155 │ (a % b) === true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3053,6 +3613,10 @@ invalid.js:154:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     155 │ (a % b) === true;
     156 │ (a | b) === true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3067,6 +3631,10 @@ invalid.js:155:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^
     156 │ (a | b) === true;
     157 │ (a ^ b) === true;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3083,6 +3651,10 @@ invalid.js:156:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     157 │ (a ^ b) === true;
     158 │ (a & b) === true;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3097,6 +3669,10 @@ invalid.js:157:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^
     158 │ (a & b) === true;
     159 │ Boolean(0) === Boolean(1);
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3113,6 +3689,10 @@ invalid.js:158:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     159 │ Boolean(0) === Boolean(1);
     160 │ true === String(x);
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3127,6 +3707,10 @@ invalid.js:159:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^^^^^^^^^
     160 │ true === String(x);
     161 │ true === Number(x);
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3143,6 +3727,10 @@ invalid.js:160:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     161 │ true === Number(x);
     162 │ Boolean(0) == !({});
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3157,6 +3745,10 @@ invalid.js:161:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^^
     162 │ Boolean(0) == !({});
     163 │ 
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3173,6 +3765,10 @@ invalid.js:162:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     163 │ 
     164 │ // Binary expression with strict comparison to null
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3186,6 +3782,10 @@ invalid.js:165:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^
     166 │ ({}) === null;
     167 │ ([]) === null;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3202,6 +3802,10 @@ invalid.js:166:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     167 │ ([]) === null;
     168 │ (() => {}) === null;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3216,6 +3820,10 @@ invalid.js:167:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^
     168 │ (() => {}) === null;
     169 │ (function() {}) === null;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3232,6 +3840,10 @@ invalid.js:168:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     169 │ (function() {}) === null;
     170 │ (class {}) === null;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3246,6 +3858,10 @@ invalid.js:169:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^^^^^^^^
     170 │ (class {}) === null;
     171 │ new Foo() === null;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3262,6 +3878,10 @@ invalid.js:170:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     171 │ new Foo() === null;
     172 │ `` === null;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3276,6 +3896,10 @@ invalid.js:171:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^^
     172 │ `` === null;
     173 │ 1 === null;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3292,6 +3916,10 @@ invalid.js:172:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     173 │ 1 === null;
     174 │ 'hello' === null;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3306,6 +3934,10 @@ invalid.js:173:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^
     174 │ 'hello' === null;
     175 │ /[a-z]/ === null;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3322,6 +3954,10 @@ invalid.js:174:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     175 │ /[a-z]/ === null;
     176 │ true === null;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3336,6 +3972,10 @@ invalid.js:175:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^
     176 │ true === null;
     177 │ null === null;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3352,6 +3992,10 @@ invalid.js:176:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     177 │ null === null;
     178 │ a++ === null;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3366,6 +4010,10 @@ invalid.js:177:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^
     178 │ a++ === null;
     179 │ ++a === null;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3382,6 +4030,10 @@ invalid.js:178:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     179 │ ++a === null;
     180 │ --a === null;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3396,6 +4048,10 @@ invalid.js:179:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^
     180 │ --a === null;
     181 │ a-- === null;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3412,6 +4068,10 @@ invalid.js:180:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     181 │ a-- === null;
     182 │ !a === null;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3426,6 +4086,10 @@ invalid.js:181:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^
     182 │ !a === null;
     183 │ typeof a === null;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3442,6 +4106,10 @@ invalid.js:182:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     183 │ typeof a === null;
     184 │ delete a.b === null;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3456,6 +4124,10 @@ invalid.js:183:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^
     184 │ delete a.b === null;
     185 │ void a === null;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3472,6 +4144,10 @@ invalid.js:184:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     185 │ void a === null;
     186 │ undefined === null;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3486,6 +4162,10 @@ invalid.js:185:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^
     186 │ undefined === null;
     187 │ (x = {}) === null;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3502,6 +4182,10 @@ invalid.js:186:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     187 │ (x = {}) === null;
     188 │ (x += y) === null;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3516,6 +4200,10 @@ invalid.js:187:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^
     188 │ (x += y) === null;
     189 │ (x -= y) === null;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3532,6 +4220,10 @@ invalid.js:188:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     189 │ (x -= y) === null;
     190 │ (a, b, {}) === null;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3546,6 +4238,10 @@ invalid.js:189:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^
     190 │ (a, b, {}) === null;
     191 │ 
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3562,6 +4258,10 @@ invalid.js:190:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     191 │ 
     192 │ // Binary expression with strict comparison to undefined
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3575,6 +4275,10 @@ invalid.js:193:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^^
     194 │ ({}) === undefined;
     195 │ ([]) === undefined;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3591,6 +4295,10 @@ invalid.js:194:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     195 │ ([]) === undefined;
     196 │ (() => {}) === undefined;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3605,6 +4313,10 @@ invalid.js:195:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^^
     196 │ (() => {}) === undefined;
     197 │ (function() {}) === undefined;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3621,6 +4333,10 @@ invalid.js:196:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     197 │ (function() {}) === undefined;
     198 │ (class {}) === undefined;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3635,6 +4351,10 @@ invalid.js:197:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     198 │ (class {}) === undefined;
     199 │ new Foo() === undefined;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3651,6 +4371,10 @@ invalid.js:198:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     199 │ new Foo() === undefined;
     200 │ `` === undefined;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3665,6 +4389,10 @@ invalid.js:199:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^^^^^^^
     200 │ `` === undefined;
     201 │ 1 === undefined;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3681,6 +4409,10 @@ invalid.js:200:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     201 │ 1 === undefined;
     202 │ 'hello' === undefined;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3695,6 +4427,10 @@ invalid.js:201:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^
     202 │ 'hello' === undefined;
     203 │ /[a-z]/ === undefined;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3711,6 +4447,10 @@ invalid.js:202:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     203 │ /[a-z]/ === undefined;
     204 │ true === undefined;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3725,6 +4465,10 @@ invalid.js:203:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^^^^^
     204 │ true === undefined;
     205 │ null === undefined;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3741,6 +4485,10 @@ invalid.js:204:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     205 │ null === undefined;
     206 │ a++ === undefined;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3755,6 +4503,10 @@ invalid.js:205:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^^
     206 │ a++ === undefined;
     207 │ ++a === undefined;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3771,6 +4523,10 @@ invalid.js:206:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     207 │ ++a === undefined;
     208 │ --a === undefined;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3785,6 +4541,10 @@ invalid.js:207:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^
     208 │ --a === undefined;
     209 │ a-- === undefined;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3801,6 +4561,10 @@ invalid.js:208:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     209 │ a-- === undefined;
     210 │ !a === undefined;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3815,6 +4579,10 @@ invalid.js:209:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^
     210 │ !a === undefined;
     211 │ typeof a === undefined;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3831,6 +4599,10 @@ invalid.js:210:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     211 │ typeof a === undefined;
     212 │ delete a.b === undefined;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3845,6 +4617,10 @@ invalid.js:211:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^^^^^^
     212 │ delete a.b === undefined;
     213 │ void a === undefined;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3861,6 +4637,10 @@ invalid.js:212:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     213 │ void a === undefined;
     214 │ undefined === undefined;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3875,6 +4655,10 @@ invalid.js:213:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^^^^
     214 │ undefined === undefined;
     215 │ (x = {}) === undefined;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3891,6 +4675,10 @@ invalid.js:214:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     215 │ (x = {}) === undefined;
     216 │ (x += y) === undefined;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3905,6 +4693,10 @@ invalid.js:215:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^^^^^^
     216 │ (x += y) === undefined;
     217 │ (x -= y) === undefined;
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3921,6 +4713,10 @@ invalid.js:216:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     217 │ (x -= y) === undefined;
     218 │ (a, b, {}) === undefined;
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3935,6 +4731,10 @@ invalid.js:217:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^^^^^^^^^^^^^
     218 │ (a, b, {}) === undefined;
     219 │ 
+  
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
   
 
 ```
@@ -3951,6 +4751,10 @@ invalid.js:218:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     219 │ 
     220 │ /*
   
+  i One operand always has the same type or nullishness, so the comparison always gives the same answer.
+  
+  i Remove the comparison, or compare against the value you meant.
+  
 
 ```
 
@@ -3965,6 +4769,10 @@ invalid.js:224:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^
     225 │ [a] != [a];
     226 │ ({}) == [];
+  
+  i Objects are compared by reference, so two newly created objects are never equal.
+  
+  i Compare the values you care about, such as their properties, instead of the objects themselves.
   
 
 ```
@@ -3981,6 +4789,10 @@ invalid.js:225:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     226 │ ({}) == [];
     227 │ 
   
+  i Objects are compared by reference, so two newly created objects are never equal.
+  
+  i Compare the values you care about, such as their properties, instead of the objects themselves.
+  
 
 ```
 
@@ -3995,6 +4807,10 @@ invalid.js:226:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │ ^^^^^^^^^^
     227 │ 
     228 │ // Comparing to always new objects
+  
+  i Objects are compared by reference, so two newly created objects are never equal.
+  
+  i Compare the values you care about, such as their properties, instead of the objects themselves.
   
 
 ```
@@ -4017,6 +4833,10 @@ invalid.js:229:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │       ^^
     230 │ x !== {};
     231 │ x === [];
+  
+  i Objects are compared by reference, so a newly created object is never equal to any other value.
+  
+  i Compare a property of the object, or store the object in a variable first and compare that variable.
   
 
 ```
@@ -4042,6 +4862,10 @@ invalid.js:230:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     231 │ x === [];
     232 │ x === (() => {});
   
+  i Objects are compared by reference, so a newly created object is never equal to any other value.
+  
+  i Compare a property of the object, or store the object in a variable first and compare that variable.
+  
 
 ```
 
@@ -4065,6 +4889,10 @@ invalid.js:231:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │       ^^
     232 │ x === (() => {});
     233 │ x === (function() {});
+  
+  i Objects are compared by reference, so a newly created object is never equal to any other value.
+  
+  i Compare a property of the object, or store the object in a variable first and compare that variable.
   
 
 ```
@@ -4090,6 +4918,10 @@ invalid.js:232:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     233 │ x === (function() {});
     234 │ x === (class {});
   
+  i Objects are compared by reference, so a newly created object is never equal to any other value.
+  
+  i Compare a property of the object, or store the object in a variable first and compare that variable.
+  
 
 ```
 
@@ -4113,6 +4945,10 @@ invalid.js:233:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │       ^^^^^^^^^^^^^^^
     234 │ x === (class {});
     235 │ x === new Boolean();
+  
+  i Objects are compared by reference, so a newly created object is never equal to any other value.
+  
+  i Compare a property of the object, or store the object in a variable first and compare that variable.
   
 
 ```
@@ -4138,6 +4974,10 @@ invalid.js:234:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     235 │ x === new Boolean();
     236 │ x === new Promise();
   
+  i Objects are compared by reference, so a newly created object is never equal to any other value.
+  
+  i Compare a property of the object, or store the object in a variable first and compare that variable.
+  
 
 ```
 
@@ -4161,6 +5001,10 @@ invalid.js:235:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │       ^^^^^^^^^^^^^
     236 │ x === new Promise();
     237 │ x === new WeakSet();
+  
+  i Objects are compared by reference, so a newly created object is never equal to any other value.
+  
+  i Compare a property of the object, or store the object in a variable first and compare that variable.
   
 
 ```
@@ -4186,6 +5030,10 @@ invalid.js:236:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     237 │ x === new WeakSet();
     238 │ x === (foo, {});
   
+  i Objects are compared by reference, so a newly created object is never equal to any other value.
+  
+  i Compare a property of the object, or store the object in a variable first and compare that variable.
+  
 
 ```
 
@@ -4209,6 +5057,10 @@ invalid.js:237:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │       ^^^^^^^^^^^^^
     238 │ x === (foo, {});
     239 │ x === (y = {});
+  
+  i Objects are compared by reference, so a newly created object is never equal to any other value.
+  
+  i Compare a property of the object, or store the object in a variable first and compare that variable.
   
 
 ```
@@ -4234,6 +5086,10 @@ invalid.js:240:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     241 │ x === /[a-z]/;
     242 │ 
   
+  i Objects are compared by reference, so a newly created object is never equal to any other value.
+  
+  i Compare a property of the object, or store the object in a variable first and compare that variable.
+  
 
 ```
 
@@ -4257,6 +5113,10 @@ invalid.js:241:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
         │       ^^^^^^^
     242 │ 
     243 │ // It's not obvious what this does, but it compares the old value of `x` to the new object.
+  
+  i Objects are compared by reference, so a newly created object is never equal to any other value.
+  
+  i Compare a property of the object, or store the object in a variable first and compare that variable.
   
 
 ```
@@ -4282,6 +5142,10 @@ invalid.js:246:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     247 │ window.abc || true || anything;
     248 │ window.abc ?? 'non-nullish' ?? anything;
   
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -4304,6 +5168,10 @@ invalid.js:247:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
     248 │ window.abc ?? 'non-nullish' ?? anything;
     249 │ 
   
+  i Because the left operand always has the same truthiness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
+  
 
 ```
 
@@ -4325,6 +5193,10 @@ invalid.js:248:1 lint/suspicious/noConstantBinaryExpressions ━━━━━━�
   > 248 │ window.abc ?? 'non-nullish' ?? anything;
         │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     249 │ 
+  
+  i Because the left operand always has the same nullishness, the expression can be simplified, and its form is misleading.
+  
+  i Replace the expression with the value it always produces, or fix the operand that is constant.
   
 
 ```

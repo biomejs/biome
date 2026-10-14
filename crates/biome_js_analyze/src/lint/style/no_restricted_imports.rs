@@ -501,6 +501,9 @@ impl Rule for NoRestrictedImports {
                 {message}
             },
         );
+        rule_diagnostic = rule_diagnostic.note(markup! {
+            "This import is restricted by the "<Emphasis>"paths"</Emphasis>" or "<Emphasis>"patterns"</Emphasis>" options in your configuration. Use an allowed import, or update the configuration if this import should be allowed."
+        });
         if !allowed_import_names.is_empty() {
             let mut sorted = allowed_import_names.to_vec();
             sorted.sort();

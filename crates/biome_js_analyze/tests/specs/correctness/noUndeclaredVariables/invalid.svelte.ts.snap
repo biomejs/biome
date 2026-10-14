@@ -29,6 +29,10 @@ invalid.svelte.ts:3:12 lint/correctness/noUndeclaredVariables ━━━━━━
     4 │     text = $unknown();
     5 │ 
   
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
+  
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
@@ -46,6 +50,10 @@ invalid.svelte.ts:4:12 lint/correctness/noUndeclaredVariables ━━━━━━
       │            ^^^^^^^^
     5 │ 
     6 │     constructor(text) {
+  
+  i Using an undeclared variable at runtime can throw a ReferenceError. It often points to a typo or a missing import.
+  
+  i Declare or import the variable, or fix its name.
   
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.

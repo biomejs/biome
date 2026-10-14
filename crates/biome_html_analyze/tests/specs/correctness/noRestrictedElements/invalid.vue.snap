@@ -30,6 +30,8 @@ invalid.vue:3:2 lint/correctness/noRestrictedElements ━━━━━━━━�
   
   i Use CSS animations instead.
   
+  i Replace the element with an allowed alternative, or update the elements option if the element should be allowed.
+  
 
 ```
 
@@ -46,6 +48,8 @@ invalid.vue:4:2 lint/correctness/noRestrictedElements ━━━━━━━━�
     6 │ <Ui.Dialog open />
   
   i Use the Button component instead.
+  
+  i Replace the element with an allowed alternative, or update the elements option if the element should be allowed.
   
 
 ```
@@ -64,6 +68,8 @@ invalid.vue:5:2 lint/correctness/noRestrictedElements ━━━━━━━━�
   
   i Use NuxtLink instead.
   
+  i Replace the element with an allowed alternative, or update the elements option if the element should be allowed.
+  
 
 ```
 
@@ -81,6 +87,8 @@ invalid.vue:6:2 lint/correctness/noRestrictedElements ━━━━━━━━�
   
   i Use the Modal component instead.
   
+  i Replace the element with an allowed alternative, or update the elements option if the element should be allowed.
+  
 
 ```
 
@@ -97,6 +105,8 @@ invalid.vue:7:2 lint/correctness/noRestrictedElements ━━━━━━━━�
     9 │ 
   
   i Use the new widget instead.
+  
+  i Replace the element with an allowed alternative, or update the elements option if the element should be allowed.
   
 
 ```

@@ -40,7 +40,9 @@ invalid.svelte:2:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
     3 │ <span role="combobox" aria-controls="true"></span>
     4 │ <span role="heading"></span>
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-checked
   
@@ -59,7 +61,9 @@ invalid.svelte:3:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
     4 │ <span role="heading"></span>
     5 │ <span role="menuitemcheckbox"></span>
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-expanded
   
@@ -78,7 +82,9 @@ invalid.svelte:4:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
     5 │ <span role="menuitemcheckbox"></span>
     6 │ <span role="menuitemradio"></span>
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-level
   
@@ -97,7 +103,9 @@ invalid.svelte:5:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
     6 │ <span role="menuitemradio"></span>
     7 │ <span role="meter"></span>
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-checked
   
@@ -116,7 +124,9 @@ invalid.svelte:6:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
     7 │ <span role="meter"></span>
     8 │ <span role="radio"></span>
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-checked
   
@@ -135,7 +145,9 @@ invalid.svelte:7:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
     8 │ <span role="radio"></span>
     9 │ <span role="scrollbar" aria-valuemin="0"></span>
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-valuenow
   
@@ -154,7 +166,9 @@ invalid.svelte:8:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
      9 │ <span role="scrollbar" aria-valuemin="0"></span>
     10 │ <span role="scrollbar" aria-controls="123"></span>
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-checked
   
@@ -173,7 +187,9 @@ invalid.svelte:9:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━�
     10 │ <span role="scrollbar" aria-controls="123"></span>
     11 │ <span role="scrollbar" aria-valuemin="0" aria-valuenow="100"></span>
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-controls
   - aria-valuenow
@@ -193,7 +209,9 @@ invalid.svelte:10:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━
     11 │ <span role="scrollbar" aria-valuemin="0" aria-valuenow="100"></span>
     12 │ <span
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-valuenow
   
@@ -212,7 +230,9 @@ invalid.svelte:11:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━
     12 │ <span
     13 │ 	role="scrollbar"
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-controls
   
@@ -231,7 +251,9 @@ invalid.svelte:13:2 lint/a11y/useAriaPropsForRole ━━━━━━━━━━
     14 │ 	aria-valuemin="0"
     15 │ 	aria-valuemax="100"
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-controls
   - aria-valuenow
@@ -251,7 +273,9 @@ invalid.svelte:18:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━
     19 │ <span role="slider" aria-valuemax="100"></span>
     20 │ <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-valuenow
   
@@ -270,7 +294,9 @@ invalid.svelte:19:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━
     20 │ <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>
     21 │ <span role="switch"></span>
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-valuenow
   
@@ -289,7 +315,9 @@ invalid.svelte:20:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━
     21 │ <span role="switch"></span>
     22 │ 
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-valuenow
   
@@ -307,7 +335,9 @@ invalid.svelte:21:7 lint/a11y/useAriaPropsForRole ━━━━━━━━━━
        │       ^^^^^^^^^^^^^
     22 │ 
   
-  i Missing ARIA prop(s):
+  i Assistive technologies expect an element with this role to provide these attributes. Without them, screen reader users may not understand the element.
+  
+  i Add the missing ARIA attribute(s):
   
   - aria-checked
   

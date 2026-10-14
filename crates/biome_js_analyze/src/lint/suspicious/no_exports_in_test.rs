@@ -66,13 +66,21 @@ impl Rule for NoExportsInTest {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            ctx.query().range(),
-            markup! {
-                "Do not export from a test file."
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                ctx.query().range(),
+                markup! {
+                    "Do not export from a test file."
+                },
+            )
+            .note(markup! {
+                "Importing a test file runs all of its tests again in the importing file. This causes duplicate test runs."
+            })
+            .note(markup! {
+                "Move the exported code into a separate file and import it from the tests that need it."
+            }),
+        )
     }
 }
 
