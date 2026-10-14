@@ -96,7 +96,34 @@ impl SyntaxNode {
         self.data().text_range()
     }
 
+    /// Returns the range of this node's text without the leading trivia of
+    /// its first token and the trailing trivia of its last token.
+    ///
+    /// Tokens whose text without trivia is empty, such as the EOF token, are
+    /// skipped over. When every token of the node is empty, the search
+    /// continues past the node's bounds, so the range can lie outside the
+    /// node's own range.
     pub fn text_trimmed_range(&self) -> TextRange {
+        let green = self.green();
+
+        match (
+            trimmed_start_in_subtree(green),
+            trimmed_end_in_subtree(green),
+        ) {
+            (Some(start), Some(end)) => {
+                let offset = self.offset();
+                TextRange::new(offset + start, offset + end)
+            }
+            _ => self.text_trimmed_range_from_tokens(),
+        }
+    }
+
+    /// Computes [Self::text_trimmed_range] by walking red tokens, which can
+    /// leave this node. Handles the cases the green-tree search gives up on:
+    /// nodes without a token with non-empty text, and nodes where such a
+    /// token comes after a child node whose text is all trivia.
+    #[cold]
+    fn text_trimmed_range_from_tokens(&self) -> TextRange {
         let range = self.text_range();
         let mut start = range.start();
         let mut end = range.end();
@@ -494,6 +521,70 @@ impl SyntaxNode {
         Some(Self {
             ptr: self.ptr.replace_child(prev_elem, next_elem)?,
         })
+    }
+}
+
+/// Returns the offset, relative to `node`, at which the text of the first
+/// token with non-empty text starts, leading trivia excluded.
+///
+/// Descends into the first child node with a non-zero length without
+/// remembering the siblings that follow it, so the search runs in constant
+/// memory on deep trees. Returns `None` when the text of that child is all
+/// trivia, as well as when the subtree has no token with non-empty text.
+fn trimmed_start_in_subtree(mut node: &GreenNodeData) -> Option<TextSize> {
+    let mut offset = TextSize::from(0);
+
+    'descend: loop {
+        for child in node.children() {
+            match child.element() {
+                NodeOrToken::Token(token) => {
+                    let (leading_len, trailing_len, total_len) = token.leading_trailing_total_len();
+                    if total_len > leading_len + trailing_len {
+                        return Some(offset + child.rel_offset() + leading_len);
+                    }
+                }
+                NodeOrToken::Node(child_node) => {
+                    // A node without text only holds empty tokens.
+                    if child_node.text_len() > TextSize::from(0) {
+                        offset += child.rel_offset();
+                        node = child_node;
+                        continue 'descend;
+                    }
+                }
+            }
+        }
+
+        return None;
+    }
+}
+
+/// Returns the offset, relative to `node`, at which the text of the last
+/// token with non-empty text ends, trailing trivia excluded.
+///
+/// The mirror image of [trimmed_start_in_subtree], with the same limits.
+fn trimmed_end_in_subtree(mut node: &GreenNodeData) -> Option<TextSize> {
+    let mut offset = TextSize::from(0);
+
+    'descend: loop {
+        for child in node.children().rev() {
+            match child.element() {
+                NodeOrToken::Token(token) => {
+                    let (leading_len, trailing_len, total_len) = token.leading_trailing_total_len();
+                    if total_len > leading_len + trailing_len {
+                        return Some(offset + child.rel_offset() + total_len - trailing_len);
+                    }
+                }
+                NodeOrToken::Node(child_node) => {
+                    if child_node.text_len() > TextSize::from(0) {
+                        offset += child.rel_offset();
+                        node = child_node;
+                        continue 'descend;
+                    }
+                }
+            }
+        }
+
+        return None;
     }
 }
 

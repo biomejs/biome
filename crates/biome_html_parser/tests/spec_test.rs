@@ -5,7 +5,9 @@ use biome_html_parser::{HtmlParserOptions, parse_html};
 use biome_languages::HtmlFileSource;
 use biome_languages::html::HtmlVariant;
 use biome_rowan::SyntaxKind;
-use biome_test_utils::{has_bogus_nodes_or_empty_slots, validate_eof_token};
+use biome_test_utils::{
+    has_bogus_nodes_or_empty_slots, validate_eof_token, validate_text_trimmed_ranges,
+};
 use camino::Utf8Path;
 use std::fmt::Write;
 use std::fs;
@@ -50,6 +52,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let parser_options = HtmlParserOptions::from(&file_source);
     let parsed = parse_html(&content, parser_options);
     validate_eof_token(parsed.syntax());
+    validate_text_trimmed_ranges(&parsed.syntax());
 
     let formatted_ast = format!("{:#?}", parsed.tree());
 
