@@ -112,6 +112,12 @@ impl Rule for UseValidAutocomplete {
             )
             .note(markup! {
                 "The autocomplete attribute only accepts a certain number of specific fixed values."
+        })
+        .note(markup! {
+            "Browsers and assistive technologies cannot recognize the purpose of a field with an invalid value, so they cannot fill it in automatically."
+        })
+        .note(markup! {
+            "Use a valid value, such as "<Emphasis>"email"</Emphasis>" or "<Emphasis>"username"</Emphasis>"."
         }).note(markup!{
             "Follow the links for more information,
   "<Hyperlink href="https://www.w3.org/WAI/WCAG21/Understanding/identify-input-purpose">"WCAG 1.3.5"</Hyperlink>"

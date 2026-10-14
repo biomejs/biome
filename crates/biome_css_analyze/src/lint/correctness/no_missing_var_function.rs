@@ -230,6 +230,9 @@ impl Rule for NoMissingVarFunction {
             )
             .note(markup! {
                     "CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility."
+            })
+            .note(markup! {
+                    "Wrap the variable in 'var()', for example "<Emphasis>"var("{custom_variable_name}")"</Emphasis>"."
             }),
         )
     }

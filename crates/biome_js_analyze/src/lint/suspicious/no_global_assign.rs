@@ -101,6 +101,9 @@ impl Rule for NoGlobalAssign {
             )
             .note(markup! {
                 "Assigning to a global variable can override essential functionality."
+            })
+            .note(markup! {
+                "Remove the assignment, or declare a local variable with a different name and assign to that instead."
             }),
         )
     }

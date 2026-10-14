@@ -197,13 +197,18 @@ impl Rule for UseUnifiedTypeSignatures {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            state.signature_to_remove.overload_range(),
-            markup! {
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                state.signature_to_remove.overload_range(),
+                markup! {
+                    "This overload signature can be combined with a similar one."
+                },
+            )
+            .note(markup! {
                 "Multiple similar overload signatures are hard to read and maintain."
-            },
-        ))
+            }),
+        )
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleAction<JsLanguage>> {

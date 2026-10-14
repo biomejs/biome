@@ -120,13 +120,18 @@ impl Rule for NoRedundantRoles {
         let role_attribute = binding.text();
         let element_name = ctx.query().name().ok()?.as_jsx_name()?.value_token().ok()?;
         let element_name = element_name.text_trimmed();
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            state.redundant_attribute_value.range(),
-            markup! {
-                "Using the role attribute '"{role_attribute}"' on the '"{element_name}"' element is redundant, because it is implied by its semantic."
-            },
-        ))
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                state.redundant_attribute_value.range(),
+                markup! {
+                    "Using the role attribute '"{role_attribute}"' on the '"{element_name}"' element is redundant."
+                },
+            )
+            .note(markup! {
+                "The element already has this role because of its semantics, so the attribute has no effect."
+            }),
+        )
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {

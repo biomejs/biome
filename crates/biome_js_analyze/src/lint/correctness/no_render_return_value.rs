@@ -74,6 +74,9 @@ impl Rule for NoRenderReturnValue {
 Check the "<Hyperlink href="https://facebook.github.io/react/docs/react-dom.html#render">"React documentation"</Hyperlink>" for more information."
 
         })
+        .note(markup! {
+            "Do not use the returned value. To get a reference to the rendered component, use a callback ref instead."
+        })
         )
     }
 }

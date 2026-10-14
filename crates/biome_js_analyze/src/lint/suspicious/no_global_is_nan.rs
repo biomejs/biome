@@ -64,9 +64,12 @@ impl Rule for NoGlobalIsNan {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    <Emphasis>"isNaN"</Emphasis>" is unsafe. It attempts a type coercion. Use "<Emphasis>"Number.isNaN"</Emphasis>" instead."
+                    "Use "<Emphasis>"Number.isNaN"</Emphasis>" instead of the global "<Emphasis>"isNaN"</Emphasis>"."
                 },
             )
+            .note(markup! {
+                "The global "<Emphasis>"isNaN"</Emphasis>" converts its argument to a number first, so a non-numeric value such as "<Emphasis>"\"foo\""</Emphasis>" is converted to "<Emphasis>"NaN"</Emphasis>" and the function returns "<Emphasis>"true"</Emphasis>"."
+            })
             .note(markup! {
                 "See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/isNaN#description">"the MDN documentation"</Hyperlink>" for more details."
             }),
