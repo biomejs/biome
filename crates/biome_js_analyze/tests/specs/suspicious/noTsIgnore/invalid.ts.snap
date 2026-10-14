@@ -25,6 +25,17 @@ let bar;
 // @ts-ignore Some other comment
 let someTextAfter;
 
+/* @ts-ignore */ let inBlockComment;
+
+// @ts-ignore twice in one comment @ts-ignore
+let twiceInOneComment;
+
+// @ts-ignore
+// @ts-ignore
+let twoComments;
+
+// @ts-ignore at the end of the file
+
 ```
 
 # Diagnostics
@@ -143,6 +154,7 @@ invalid.ts:19:4 lint/suspicious/noTsIgnore  FIXABLE  ━━━━━━━━━
   > 20 │ let someTextAfter;
        │ ^^^
     21 │ 
+    22 │ /* @ts-ignore */ let inBlockComment;
   
   i The @ts-ignore directive suppresses any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself.
   
@@ -154,6 +166,178 @@ invalid.ts:19:4 lint/suspicious/noTsIgnore  FIXABLE  ━━━━━━━━━
        19 │ + //·@ts-expect-error·Some·other·comment
     20 20 │   let someTextAfter;
     21 21 │   
+  
+
+```
+
+```
+invalid.ts:22:4 lint/suspicious/noTsIgnore  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe use of the @ts-ignore directive found in this comment.
+  
+    20 │ let someTextAfter;
+    21 │ 
+  > 22 │ /* @ts-ignore */ let inBlockComment;
+       │    ^^^^^^^^^^
+    23 │ 
+    24 │ // @ts-ignore twice in one comment @ts-ignore
+  
+  i The directive is applied to this line.
+  
+    20 │ let someTextAfter;
+    21 │ 
+  > 22 │ /* @ts-ignore */ let inBlockComment;
+       │                  ^^^
+    23 │ 
+    24 │ // @ts-ignore twice in one comment @ts-ignore
+  
+  i The @ts-ignore directive suppresses any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself.
+  
+  i Safe fix: Use the @ts-expect-error directive instead.
+  
+    20 20 │   let someTextAfter;
+    21 21 │   
+    22    │ - /*·@ts-ignore·*/·let·inBlockComment;
+       22 │ + /*·@ts-expect-error·*/·let·inBlockComment;
+    23 23 │   
+    24 24 │   // @ts-ignore twice in one comment @ts-ignore
+  
+
+```
+
+```
+invalid.ts:24:4 lint/suspicious/noTsIgnore  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe use of the @ts-ignore directive found in this comment.
+  
+    22 │ /* @ts-ignore */ let inBlockComment;
+    23 │ 
+  > 24 │ // @ts-ignore twice in one comment @ts-ignore
+       │    ^^^^^^^^^^
+    25 │ let twiceInOneComment;
+    26 │ 
+  
+  i The directive is applied to this line.
+  
+    24 │ // @ts-ignore twice in one comment @ts-ignore
+  > 25 │ let twiceInOneComment;
+       │ ^^^
+    26 │ 
+    27 │ // @ts-ignore
+  
+  i The @ts-ignore directive suppresses any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself.
+  
+  i Safe fix: Use the @ts-expect-error directive instead.
+  
+    22 22 │   /* @ts-ignore */ let inBlockComment;
+    23 23 │   
+    24    │ - //·@ts-ignore·twice·in·one·comment·@ts-ignore
+       24 │ + //·@ts-expect-error·twice·in·one·comment·@ts-expect-error
+    25 25 │   let twiceInOneComment;
+    26 26 │   
+  
+
+```
+
+```
+invalid.ts:27:4 lint/suspicious/noTsIgnore  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe use of the @ts-ignore directive found in this comment.
+  
+    25 │ let twiceInOneComment;
+    26 │ 
+  > 27 │ // @ts-ignore
+       │    ^^^^^^^^^^
+    28 │ // @ts-ignore
+    29 │ let twoComments;
+  
+  i The directive is applied to this line.
+  
+    27 │ // @ts-ignore
+    28 │ // @ts-ignore
+  > 29 │ let twoComments;
+       │ ^^^
+    30 │ 
+    31 │ // @ts-ignore at the end of the file
+  
+  i The @ts-ignore directive suppresses any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself.
+  
+  i Safe fix: Use the @ts-expect-error directive instead.
+  
+    25 25 │   let twiceInOneComment;
+    26 26 │   
+    27    │ - //·@ts-ignore
+    28    │ - //·@ts-ignore
+       27 │ + //·@ts-expect-error
+       28 │ + //·@ts-expect-error
+    29 29 │   let twoComments;
+    30 30 │   
+  
+
+```
+
+```
+invalid.ts:28:4 lint/suspicious/noTsIgnore  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe use of the @ts-ignore directive found in this comment.
+  
+    27 │ // @ts-ignore
+  > 28 │ // @ts-ignore
+       │    ^^^^^^^^^^
+    29 │ let twoComments;
+    30 │ 
+  
+  i The directive is applied to this line.
+  
+    27 │ // @ts-ignore
+    28 │ // @ts-ignore
+  > 29 │ let twoComments;
+       │ ^^^
+    30 │ 
+    31 │ // @ts-ignore at the end of the file
+  
+  i The @ts-ignore directive suppresses any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself.
+  
+  i Safe fix: Use the @ts-expect-error directive instead.
+  
+    25 25 │   let twiceInOneComment;
+    26 26 │   
+    27    │ - //·@ts-ignore
+    28    │ - //·@ts-ignore
+       27 │ + //·@ts-expect-error
+       28 │ + //·@ts-expect-error
+    29 29 │   let twoComments;
+    30 30 │   
+  
+
+```
+
+```
+invalid.ts:31:4 lint/suspicious/noTsIgnore  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unsafe use of the @ts-ignore directive found in this comment.
+  
+    29 │ let twoComments;
+    30 │ 
+  > 31 │ // @ts-ignore at the end of the file
+       │    ^^^^^^^^^^
+    32 │ 
+  
+  i The directive is applied to this line.
+  
+    31 │ // @ts-ignore at the end of the file
+  > 32 │ 
+       │ 
+  
+  i The @ts-ignore directive suppresses any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself.
+  
+  i Safe fix: Use the @ts-expect-error directive instead.
+  
+    29 29 │   let twoComments;
+    30 30 │   
+    31    │ - //·@ts-ignore·at·the·end·of·the·file
+       31 │ + //·@ts-expect-error·at·the·end·of·the·file
+    32 32 │   
   
 
 ```

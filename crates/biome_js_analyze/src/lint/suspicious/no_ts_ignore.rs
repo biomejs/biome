@@ -5,7 +5,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{JsModule, JsSyntaxToken, TextLen};
-use biome_rowan::{AstNode, BatchMutationExt, Direction, TextRange, TextSize, TriviaPiece};
+use biome_rowan::{AstNode, BatchMutationExt, TextRange, TextSize, TriviaPiece};
 use biome_rule_options::no_ts_ignore::NoTsIgnoreOptions;
 
 declare_lint_rule! {
@@ -55,19 +55,28 @@ impl Rule for NoTsIgnore {
     type Options = NoTsIgnoreOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let module = ctx.query();
+        const TS_IGNORE_DIRECTIVE: &str = "@ts-ignore";
+        let module = ctx.query().syntax();
 
         let mut tokens = vec![];
-        for token in module.syntax().descendants_tokens(Direction::Next) {
-            let comments = token.leading_trivia().pieces().filter_map(|trivia| {
-                const TS_IGNORE_DIRECTIVE: &str = "@ts-ignore";
-                let comment = trivia.as_comments()?;
-                let (index, _) = comment.text().match_indices(TS_IGNORE_DIRECTIVE).next()?;
-                let start = comment.text_range().start() + TextSize::from(index as u32);
-                let len = TextSize::from(TS_IGNORE_DIRECTIVE.len() as u32);
-                Some((token.clone(), TextRange::new(start, start + len)))
-            });
-            tokens.extend(comments);
+        // Borrowed tokens avoid allocating a cursor for each token of the
+        // file; the token for the state is looked up only for a match.
+        for token in module.borrowed_tokens() {
+            for trivia in token.leading_trivia_pieces() {
+                if !trivia.kind().is_comment() {
+                    continue;
+                }
+                let Some(index) = trivia.text().find(TS_IGNORE_DIRECTIVE) else {
+                    continue;
+                };
+                let start = trivia.text_range().start() + TextSize::from(index as u32);
+                let range = TextRange::at(start, TS_IGNORE_DIRECTIVE.text_len());
+                // The range lies inside the token's leading trivia, so the
+                // token is the deepest element that covers it.
+                if let Some(token) = module.covering_element(range).into_token() {
+                    tokens.push((token, range));
+                }
+            }
         }
 
         tokens
