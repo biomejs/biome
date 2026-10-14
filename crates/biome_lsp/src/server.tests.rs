@@ -5175,6 +5175,63 @@ async fn pull_diagnostics_monorepo() -> Result<()> {
 }
 
 #[tokio::test]
+async fn scan_project_describes_nested_root_configuration() -> Result<()> {
+    let mut fs = TemporaryFs::new("scan_project_describes_nested_root_configuration");
+    fs.create_file("biome.json", r#"{ "root": true }"#);
+    fs.create_file("packages/lib/biome.json", r#"{ "root": true }"#);
+
+    let (_watcher, instruction_channel) = Watcher::new(WatcherOptions::default())?;
+    let factory = ServerFactory::new(true, instruction_channel.sender.clone());
+    let (service, client) = factory.create().into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+
+    let OpenProjectResult { project_key } = server
+        .request(
+            "biome/open_project",
+            "open_project",
+            OpenProjectParams {
+                path: fs.working_directory.clone().into(),
+                open_uninitialized: true,
+            },
+        )
+        .await?
+        .expect("open_project returned an error");
+
+    let result: ScanProjectResult = server
+        .request(
+            "biome/scan_project",
+            "scan_project",
+            ScanProjectParams {
+                project_key,
+                watch: false,
+                force: false,
+                scan_kind: ScanKind::Project,
+                verbose: false,
+            },
+        )
+        .await?
+        .expect("scan_project returned an error");
+
+    // The language server logs these diagnostics to the client using their description.
+    assert_eq!(result.diagnostics.len(), 1);
+    assert_eq!(
+        PrintDescription(&result.diagnostics[0]).to_string(),
+        "Found a nested root configuration, but there's already a root configuration."
+    );
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn should_correctly_fix_all_astro_files() -> Result<()> {
     let factory = ServerFactory::default();
     let (service, client) = factory.create().into_inner();

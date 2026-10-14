@@ -160,6 +160,10 @@ impl Diagnostic for InspectFileDiagnostic {
         Severity::Information
     }
 
+    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.write_str("Below the information requested.")
+    }
+
     fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
         fmt.write_str("Below the information requested.")
     }
