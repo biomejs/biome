@@ -3,8 +3,9 @@ use crate::utils::is_custom_function;
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_syntax::{
-    CssCustomIdentifier, CssCustomPropertyDelimiter, CssCustomPropertyFunction,
-    CssCustomPropertyValue, CssSyntaxNode, ScssInterpolatedString, ScssInterpolation, T,
+    CssCustomIdentifier, CssCustomPropertyComponentList, CssCustomPropertyDelimiter,
+    CssCustomPropertyFunction, CssCustomPropertyParenthesizedBlock, CssCustomPropertyValue,
+    CssSyntaxNode, ScssInterpolatedString, ScssInterpolation, T,
 };
 use biome_diagnostics::Severity;
 use biome_languages::CssFileSource;
@@ -29,8 +30,12 @@ declare_lint_rule! {
     /// `@container style()` conditions. The rule only checks SCSS files.
     ///
     /// :::note
-    /// A CSS function that Biome doesn't know yet is reported too. Suppress the diagnostic for
-    /// that call if this happens.
+    /// Sass functions that share their name with a CSS function, such as `saturate()`, `invert()`,
+    /// `min()` and `max()`, aren't reported, because the rule can't tell the two apart. Call them
+    /// through their module, such as `math.max()`, so the rule can check them.
+    ///
+    /// A CSS function that Biome doesn't know yet is reported. Suppress the diagnostic for that
+    /// call if this happens.
     /// :::
     ///
     /// ## Examples
@@ -118,12 +123,17 @@ impl Rule for NoUninterpolatedScssFunction {
                     walk.skip_subtree();
                     continue;
                 }
+                // The arguments of an `if()` condition are condition syntax, such as
+                // `selector(:has(a))` or `font-tech(color-COLRv1)`, not values.
+                if is_if_condition(&function, text) {
+                    walk.skip_subtree();
+                    continue;
+                }
                 // CSS `if()` is parsed as its own node in regular values, so it isn't in the
                 // list of known functions.
                 if is_custom_function(text)
                     || is_function_keyword(text)
                     || text.eq_ignore_ascii_case("if")
-                    || is_if_condition(&function, text)
                 {
                     continue;
                 }
@@ -146,20 +156,18 @@ impl Rule for NoUninterpolatedScssFunction {
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let name = state.name.value_token().ok()?;
-        let function = match &state.namespace {
-            Some(namespace) => format!(
-                "{}.{}()",
-                namespace.value_token().ok()?.text_trimmed(),
-                name.text_trimmed()
-            ),
-            None => format!("{}()", name.text_trimmed()),
+        let namespace = match &state.namespace {
+            Some(namespace) => Some(namespace.value_token().ok()?),
+            None => None,
         };
+        let namespace = namespace.as_ref().map_or("", |token| token.text_trimmed());
+        let dot = if namespace.is_empty() { "" } else { "." };
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 state.range,
                 markup! {
-                    "The function "<Emphasis>{function}</Emphasis>" isn't interpolated, so Sass outputs it unchanged."
+                    "The function "<Emphasis>{namespace}{dot}{name.text_trimmed()}"()"</Emphasis>" isn't interpolated, so Sass outputs it unchanged."
                 },
             )
             .note(markup! {
@@ -172,14 +180,22 @@ impl Rule for NoUninterpolatedScssFunction {
     }
 }
 
-/// Whether `function` is a `style()`, `media()` or `supports()` condition directly inside CSS `if()`.
+/// Whether `function` is a `style()`, `media()` or `supports()` condition of CSS `if()`.
+///
+/// Conditions can be grouped in parentheses, as in `if(not (style(--a: 1)): x; else: y)`, so
+/// parenthesized blocks between the condition and `if()` are skipped.
 fn is_if_condition(function: &CssCustomPropertyFunction, name: &str) -> bool {
     ["style", "media", "supports"]
         .iter()
         .any(|condition| name.eq_ignore_ascii_case(condition))
         && function
             .syntax()
-            .grand_parent()
+            .ancestors()
+            .skip(1)
+            .find(|node| {
+                !CssCustomPropertyComponentList::can_cast(node.kind())
+                    && !CssCustomPropertyParenthesizedBlock::can_cast(node.kind())
+            })
             .and_then(CssCustomPropertyFunction::cast)
             .and_then(|parent| parent.name().ok()?.value_token().ok())
             .is_some_and(|parent| parent.text_trimmed().eq_ignore_ascii_case("if"))

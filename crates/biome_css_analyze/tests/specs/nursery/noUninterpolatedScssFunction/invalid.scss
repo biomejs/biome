@@ -16,6 +16,12 @@
 	--bare-condition: style(--a: 1);
 }
 
+@container style(--c: double(1px)) {
+	a {
+		color: red;
+	}
+}
+
 @supports (--raw: double(1px)) {
 	a {
 		color: red;

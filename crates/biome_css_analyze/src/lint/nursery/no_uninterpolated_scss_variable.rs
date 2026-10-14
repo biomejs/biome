@@ -1,4 +1,6 @@
 use crate::CssRuleAction;
+use crate::fonts::is_function_keyword;
+use crate::utils::is_custom_function;
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule,
 };
@@ -7,7 +9,8 @@ use biome_css_factory::make;
 use biome_css_syntax::{
     AnyCssCustomPropertyComponent, AnyCssValue, AnyScssExpression, AnyScssExpressionItem,
     AnyScssModuleMember, CssCustomIdentifier, CssCustomPropertyComponentList,
-    CssCustomPropertyDelimiter, CssCustomPropertyValue, CssSyntaxNode, CssSyntaxToken,
+    CssCustomPropertyDelimiter, CssCustomPropertyFunction, CssCustomPropertyValue, CssSyntaxNode,
+    CssSyntaxToken,
     ScssInterpolatedString, ScssInterpolation, T,
 };
 use biome_diagnostics::Severity;
@@ -25,6 +28,13 @@ declare_lint_rule! {
     ///
     /// This applies wherever custom properties appear, including `@supports` and
     /// `@container style()` conditions. The rule only checks SCSS files.
+    ///
+    /// Inside `url()`, only a variable at the start of the URL is reported, such as `url($path)`. A
+    /// `$` elsewhere in a URL is treated as part of the address.
+    ///
+    /// The fix wraps the variable in `#{}`. It isn't offered when the variable is an argument of a
+    /// Sass function, such as `darken($base, 10%)`, because Sass would still output the call
+    /// unchanged. Wrap the whole call in `#{}` instead.
     ///
     /// ## Examples
     ///
@@ -138,35 +148,47 @@ impl Rule for NoUninterpolatedScssVariable {
             else {
                 continue;
             };
-            signals.push(RuleState {
+            let state = RuleState {
                 namespace: module_namespace(&dollar),
                 dollar,
                 name,
-            });
+            };
+            // A `$` in the middle of a URL, as in `url(https://example.com/a$b.svg)`, is part
+            // of the address, so only a variable that starts the URL is reported.
+            if is_url_body(&state.dollar) && state.first_node().prev_sibling().is_some() {
+                continue;
+            }
+            signals.push(state);
         }
         signals.into_boxed_slice()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let variable = variable_text(state)?;
+        let name = state.name.value_token().ok()?;
+        let namespace = match &state.namespace {
+            Some((namespace, _)) => Some(namespace.value_token().ok()?),
+            None => None,
+        };
+        let namespace = namespace.as_ref().map_or("", |token| token.text_trimmed());
+        let dot = if namespace.is_empty() { "" } else { "." };
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 state.range(),
                 markup! {
-                    "The Sass variable "<Emphasis>{variable}</Emphasis>" isn't interpolated, so Sass outputs it unchanged."
+                    "The Sass variable "<Emphasis>{namespace}{dot}"$"{name.text_trimmed()}</Emphasis>" isn't interpolated, so Sass outputs it unchanged."
                 },
             )
             .note(markup! {
-                "Sass only evaluates "<Emphasis>"#{...}"</Emphasis>" inside custom property values, so the browser receives the text "<Emphasis>{variable}</Emphasis>" instead of the variable's value."
-            })
-            .note(markup! {
-                "Wrap the variable in interpolation: "<Emphasis>"#{"{variable}"}"</Emphasis>"."
+                "Sass only evaluates "<Emphasis>"#{...}"</Emphasis>" inside custom property values, so the browser receives the text "<Emphasis>{namespace}{dot}"$"{name.text_trimmed()}</Emphasis>" instead of the variable's value."
             }),
         )
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<CssRuleAction> {
+        if is_sass_call_argument(&state.dollar) {
+            return None;
+        }
         let list = state
             .dollar
             .syntax()
@@ -198,18 +220,6 @@ impl Rule for NoUninterpolatedScssVariable {
             mutation,
         ))
     }
-}
-
-fn variable_text(state: &RuleState) -> Option<String> {
-    let name = state.name.value_token().ok()?;
-    Some(match &state.namespace {
-        Some((namespace, _)) => format!(
-            "{}.${}",
-            namespace.value_token().ok()?.text_trimmed(),
-            name.text_trimmed()
-        ),
-        None => format!("${}", name.text_trimmed()),
-    })
 }
 
 /// Builds `#{$name}` or `#{ns.$name}`, keeping the trivia that surrounded the variable.
@@ -262,6 +272,46 @@ fn module_namespace(
         .and_then(CssCustomIdentifier::cast)
         .filter(|namespace| are_adjacent(namespace.syntax(), dot.syntax()))?;
     Some((namespace, dot))
+}
+
+/// Whether `dollar` is inside a call that Sass outputs unchanged, such as `darken($base, 10%)`
+/// or `math.max($a, 1)`.
+fn is_sass_call_argument(dollar: &CssCustomPropertyDelimiter) -> bool {
+    dollar
+        .syntax()
+        .ancestors()
+        .take_while(|node| !CssCustomPropertyValue::can_cast(node.kind()))
+        .filter_map(CssCustomPropertyFunction::cast)
+        .any(|function| {
+            let is_module_call = function
+                .syntax()
+                .prev_sibling()
+                .and_then(CssCustomPropertyDelimiter::cast)
+                .is_some_and(|dot| {
+                    dot.value().is_ok_and(|token| token.kind() == T![.])
+                        && are_adjacent(dot.syntax(), function.syntax())
+                });
+            let Some(name) = function.name().ok().and_then(|name| name.value_token().ok()) else {
+                return false;
+            };
+            let name = name.text_trimmed();
+            is_module_call
+                || !(is_custom_function(name)
+                    || is_function_keyword(name)
+                    || ["if", "style", "media", "supports"]
+                        .iter()
+                        .any(|css| name.eq_ignore_ascii_case(css)))
+        })
+}
+
+/// Whether `dollar` is directly inside the parentheses of `url()`.
+fn is_url_body(dollar: &CssCustomPropertyDelimiter) -> bool {
+    dollar
+        .syntax()
+        .grand_parent()
+        .and_then(CssCustomPropertyFunction::cast)
+        .and_then(|function| function.name().ok()?.value_token().ok())
+        .is_some_and(|name| name.text_trimmed().eq_ignore_ascii_case("url"))
 }
 
 /// Whether `right` starts where `left` ends, with no whitespace or comments in between.
