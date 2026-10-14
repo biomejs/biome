@@ -3283,6 +3283,16 @@ export interface Nursery {
 	 */
 	noUndeclaredCustomProperties?: NoUndeclaredCustomPropertiesConfiguration;
 	/**
+	 * Disallow Sass function calls in custom property values without #{} interpolation.
+	 * See https://biomejs.dev/linter/rules/no-uninterpolated-scss-function
+	 */
+	noUninterpolatedScssFunction?: NoUninterpolatedScssFunctionConfiguration;
+	/**
+	 * Disallow Sass variables in custom property values without #{} interpolation.
+	 * See https://biomejs.dev/linter/rules/no-uninterpolated-scss-variable
+	 */
+	noUninterpolatedScssVariable?: NoUninterpolatedScssVariableConfiguration;
+	/**
 	 * Disallow loop conditions whose variables are never modified in the loop.
 	 * See https://biomejs.dev/linter/rules/no-unmodified-loop-condition
 	 */
@@ -6219,6 +6229,12 @@ export type NoUndeclaredClassesConfiguration =
 export type NoUndeclaredCustomPropertiesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUndeclaredCustomPropertiesOptions;
+export type NoUninterpolatedScssFunctionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUninterpolatedScssFunctionOptions;
+export type NoUninterpolatedScssVariableConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUninterpolatedScssVariableOptions;
 export type NoUnmodifiedLoopConditionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnmodifiedLoopConditionOptions;
@@ -8989,6 +9005,14 @@ export interface RuleWithNoUndeclaredCustomPropertiesOptions {
 	level: RulePlainConfiguration;
 	options?: NoUndeclaredCustomPropertiesOptions;
 }
+export interface RuleWithNoUninterpolatedScssFunctionOptions {
+	level: RulePlainConfiguration;
+	options?: NoUninterpolatedScssFunctionOptions;
+}
+export interface RuleWithNoUninterpolatedScssVariableOptions {
+	level: RulePlainConfiguration;
+	options?: NoUninterpolatedScssVariableOptions;
+}
 export interface RuleWithNoUnmodifiedLoopConditionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnmodifiedLoopConditionOptions;
@@ -11720,6 +11744,8 @@ export type NoThisOutsideOfClassOptions = {};
  */
 export type NoUndeclaredClassesOptions = {};
 export type NoUndeclaredCustomPropertiesOptions = {};
+export type NoUninterpolatedScssFunctionOptions = {};
+export type NoUninterpolatedScssVariableOptions = {};
 export type NoUnmodifiedLoopConditionOptions = {};
 export type NoUnreadableForOfExpressionOptions = {};
 export type NoUnreadableIifeOptions = {};
@@ -13532,6 +13558,8 @@ export type Category =
 	| "lint/nursery/noThisOutsideOfClass"
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUndeclaredCustomProperties"
+	| "lint/nursery/noUninterpolatedScssFunction"
+	| "lint/nursery/noUninterpolatedScssVariable"
 	| "lint/nursery/noUnmodifiedLoopCondition"
 	| "lint/nursery/noUnreadableForOfExpression"
 	| "lint/nursery/noUnreadableIife"

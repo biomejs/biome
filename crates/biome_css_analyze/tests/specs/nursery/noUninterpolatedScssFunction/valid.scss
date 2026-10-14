@@ -1,0 +1,20 @@
+/* should not generate diagnostics */
+@use "sass:math";
+
+:root {
+	--interpolated: #{math.div(8px, 2)};
+	--calc: calc(100% - var(--gutter));
+	--color: rgb(0 0 0 / 50%);
+	--mix: color-mix(in srgb, red, blue);
+	--custom: --my-function(1);
+	--if: if(style(--a: 1): 2; else: 3);
+	--url: url(foo(bar).svg);
+	--prefixed: -webkit-gradient(linear, left top, left bottom);
+	--string: "darken(#fff, 10%)";
+	--interpolated-string: "#{math.div(8px, 2)}";
+	--upper: CALC(1px + 2px);
+}
+
+a {
+	width: math.div(8px, 2);
+}
