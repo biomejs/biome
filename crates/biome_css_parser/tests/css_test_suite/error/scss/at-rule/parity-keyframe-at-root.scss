@@ -1,0 +1,51 @@
+@keyframes malformed-query {
+  from { opacity: 0; }
+  @at-root (without:) {
+    .escaped { color: red; }
+  }
+  to { opacity: 1; }
+}
+
+.after-query { color: blue; }
+
+@keyframes missing-block {
+  from { opacity: 0; }
+  @at-root (without: all)
+}
+
+.after-block { color: green; }
+
+@keyframes missing-block-semicolon {
+  @at-root (without: all);
+  to { opacity: 1; }
+}
+
+.after-semicolon { color: blue; }
+
+@keyframes missing-block-before-step {
+  @at-root (without: all)
+  to { opacity: 1; }
+}
+
+.after-step { color: green; }
+
+@keyframes missing-shorthand-block {
+  @at-root .escaped;
+  to { opacity: 1; }
+}
+
+.after-shorthand { color: blue; }
+
+@keyframes missing-shorthand-before-close {
+  @at-root .escaped
+}
+
+.after-shorthand-close { color: green; }
+
+@keyframes missing-shorthand-before-statement {
+  @at-root .escaped
+  @include frames;
+  to { opacity: 1; }
+}
+
+.after-shorthand-statement { color: blue; }

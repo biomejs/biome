@@ -1,0 +1,9 @@
+@keyframes rejected {
+  from { opacity: 0; }
+  @at-root (without: all) {
+    .escaped { animation: rejected 200ms; }
+  }
+  to { opacity: 1; }
+}
+
+.after { color: red; }

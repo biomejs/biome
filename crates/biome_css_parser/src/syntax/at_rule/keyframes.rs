@@ -18,7 +18,7 @@ use crate::syntax::parse_error::{
 };
 use crate::syntax::scss::{
     ScssBlockParser, is_at_scss_keyframes_name, is_at_scss_keyframes_selector,
-    is_at_scss_variable_declaration, parse_scss_content_at_rule,
+    is_at_scss_variable_declaration, parse_scss_at_root_at_rule, parse_scss_content_at_rule,
     parse_scss_each_at_rule_with_block, parse_scss_for_at_rule_with_block,
     parse_scss_if_at_rule_with_block, parse_scss_include_at_rule, parse_scss_keyframes_name,
     parse_scss_keyframes_selector, parse_scss_variable_declaration,
@@ -297,6 +297,7 @@ fn parse_any_keyframes_item(p: &mut CssParser) -> ParsedSyntax {
 }
 
 const SCSS_KEYFRAMES_STATEMENT_SET: TokenSet<CssSyntaxKind> = token_set!(
+    T![at_root],
     T![include],
     T![content],
     T![if],
@@ -323,6 +324,7 @@ fn parse_scss_keyframes_statement(p: &mut CssParser) -> ParsedSyntax {
         .with_additional_header_end_ts(SCSS_KEYFRAMES_CONTROL_HEADER_END_SET);
 
     match p.cur() {
+        T![at_root] => parse_scss_at_root_at_rule(p),
         T![include] => parse_scss_include_at_rule(p),
         T![content] => parse_scss_content_at_rule(p),
         T![if] => parse_scss_if_at_rule_with_block(p, parse_block),

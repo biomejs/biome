@@ -1,0 +1,381 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@keyframes rejected {
+  from { opacity: 0; }
+  @at-root (without: all) {
+    .escaped { animation: rejected 200ms; }
+  }
+  to { opacity: 1; }
+}
+
+.after { color: red; }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssKeyframesAtRule {
+                keyframes_token: KEYFRAMES_KW@1..11 "keyframes" [] [Whitespace(" ")],
+                name: CssCustomIdentifier {
+                    value_token: IDENT@11..20 "rejected" [] [Whitespace(" ")],
+                },
+                block: CssKeyframesBlock {
+                    l_curly_token: L_CURLY@20..21 "{" [] [],
+                    items: CssKeyframesItemList [
+                        CssKeyframesItem {
+                            selectors: CssKeyframesSelectorList [
+                                CssKeyframesIdentSelector {
+                                    selector: FROM_KW@21..29 "from" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                },
+                            ],
+                            block: CssDeclarationBlock {
+                                l_curly_token: L_CURLY@29..31 "{" [] [Whitespace(" ")],
+                                declarations: CssDeclarationList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@31..38 "opacity" [] [],
+                                                },
+                                                colon_token: COLON@38..40 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@40..41 "0" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@41..43 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@43..44 "}" [] [],
+                            },
+                        },
+                        CssBogusKeyframesItem {
+                            items: [
+                                AT@44..48 "@" [Newline("\n"), Whitespace("  ")] [],
+                                ScssAtRootAtRule {
+                                    at_root_token: AT_ROOT_KW@48..56 "at-root" [] [Whitespace(" ")],
+                                    query: ScssAtRootQuery {
+                                        l_paren_token: L_PAREN@56..57 "(" [] [],
+                                        query: ScssAtRootQueryClause {
+                                            modifier: ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@57..64 "without" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            colon_token: COLON@64..66 ":" [] [Whitespace(" ")],
+                                            rules: ScssExpression {
+                                                items: ScssExpressionItemList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@66..69 "all" [] [],
+                                                    },
+                                                ],
+                                            },
+                                        },
+                                        r_paren_token: R_PAREN@69..71 ")" [] [Whitespace(" ")],
+                                    },
+                                    selector: missing (optional),
+                                    block: CssDeclarationOrRuleBlock {
+                                        l_curly_token: L_CURLY@71..72 "{" [] [],
+                                        items: CssDeclarationOrRuleList [
+                                            CssNestedQualifiedRule {
+                                                prelude: CssRelativeSelectorList [
+                                                    CssRelativeSelector {
+                                                        combinator: missing (optional),
+                                                        selector: CssCompoundSelector {
+                                                            nesting_selectors: CssNestedSelectorList [],
+                                                            simple_selector: missing (optional),
+                                                            sub_selectors: CssSubSelectorList [
+                                                                CssClassSelector {
+                                                                    dot_token: DOT@72..78 "." [Newline("\n"), Whitespace("    ")] [],
+                                                                    name: CssCustomIdentifier {
+                                                                        value_token: IDENT@78..86 "escaped" [] [Whitespace(" ")],
+                                                                    },
+                                                                },
+                                                            ],
+                                                        },
+                                                    },
+                                                ],
+                                                block: CssDeclarationOrRuleBlock {
+                                                    l_curly_token: L_CURLY@86..88 "{" [] [Whitespace(" ")],
+                                                    items: CssDeclarationOrRuleList [
+                                                        CssDeclarationWithSemicolon {
+                                                            declaration: CssDeclaration {
+                                                                property: CssGenericProperty {
+                                                                    name: CssIdentifier {
+                                                                        value_token: IDENT@88..97 "animation" [] [],
+                                                                    },
+                                                                    colon_token: COLON@97..99 ":" [] [Whitespace(" ")],
+                                                                    value: CssGenericComponentValueList [
+                                                                        CssIdentifier {
+                                                                            value_token: IDENT@99..108 "rejected" [] [Whitespace(" ")],
+                                                                        },
+                                                                        CssRegularDimension {
+                                                                            value_token: CSS_NUMBER_LITERAL@108..111 "200" [] [],
+                                                                            unit_token: IDENT@111..113 "ms" [] [],
+                                                                        },
+                                                                    ],
+                                                                },
+                                                                important: missing (optional),
+                                                            },
+                                                            semicolon_token: SEMICOLON@113..115 ";" [] [Whitespace(" ")],
+                                                        },
+                                                    ],
+                                                    r_curly_token: R_CURLY@115..116 "}" [] [],
+                                                },
+                                            },
+                                        ],
+                                        r_curly_token: R_CURLY@116..120 "}" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                },
+                            ],
+                        },
+                        CssKeyframesItem {
+                            selectors: CssKeyframesSelectorList [
+                                CssKeyframesIdentSelector {
+                                    selector: TO_KW@120..126 "to" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                },
+                            ],
+                            block: CssDeclarationBlock {
+                                l_curly_token: L_CURLY@126..128 "{" [] [Whitespace(" ")],
+                                declarations: CssDeclarationList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@128..135 "opacity" [] [],
+                                                },
+                                                colon_token: COLON@135..137 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssNumber {
+                                                        value_token: CSS_NUMBER_LITERAL@137..138 "1" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@138..140 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@140..141 "}" [] [],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@141..143 "}" [Newline("\n")] [],
+                },
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@143..146 "." [Newline("\n"), Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@146..152 "after" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@152..154 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@154..159 "color" [] [],
+                                },
+                                colon_token: COLON@159..161 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@161..164 "red" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@164..166 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@166..167 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@167..168 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..168
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..167
+    0: CSS_AT_RULE@0..143
+      0: AT@0..1 "@" [] []
+      1: CSS_KEYFRAMES_AT_RULE@1..143
+        0: KEYFRAMES_KW@1..11 "keyframes" [] [Whitespace(" ")]
+        1: CSS_CUSTOM_IDENTIFIER@11..20
+          0: IDENT@11..20 "rejected" [] [Whitespace(" ")]
+        2: CSS_KEYFRAMES_BLOCK@20..143
+          0: L_CURLY@20..21 "{" [] []
+          1: CSS_KEYFRAMES_ITEM_LIST@21..141
+            0: CSS_KEYFRAMES_ITEM@21..44
+              0: CSS_KEYFRAMES_SELECTOR_LIST@21..29
+                0: CSS_KEYFRAMES_IDENT_SELECTOR@21..29
+                  0: FROM_KW@21..29 "from" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+              1: CSS_DECLARATION_BLOCK@29..44
+                0: L_CURLY@29..31 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_LIST@31..43
+                  0: CSS_DECLARATION_WITH_SEMICOLON@31..43
+                    0: CSS_DECLARATION@31..41
+                      0: CSS_GENERIC_PROPERTY@31..41
+                        0: CSS_IDENTIFIER@31..38
+                          0: IDENT@31..38 "opacity" [] []
+                        1: COLON@38..40 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@40..41
+                          0: CSS_NUMBER@40..41
+                            0: CSS_NUMBER_LITERAL@40..41 "0" [] []
+                      1: (empty)
+                    1: SEMICOLON@41..43 ";" [] [Whitespace(" ")]
+                2: R_CURLY@43..44 "}" [] []
+            1: CSS_BOGUS_KEYFRAMES_ITEM@44..120
+              0: AT@44..48 "@" [Newline("\n"), Whitespace("  ")] []
+              1: SCSS_AT_ROOT_AT_RULE@48..120
+                0: AT_ROOT_KW@48..56 "at-root" [] [Whitespace(" ")]
+                1: SCSS_AT_ROOT_QUERY@56..71
+                  0: L_PAREN@56..57 "(" [] []
+                  1: SCSS_AT_ROOT_QUERY_CLAUSE@57..69
+                    0: SCSS_EXPRESSION@57..64
+                      0: SCSS_EXPRESSION_ITEM_LIST@57..64
+                        0: CSS_IDENTIFIER@57..64
+                          0: IDENT@57..64 "without" [] []
+                    1: COLON@64..66 ":" [] [Whitespace(" ")]
+                    2: SCSS_EXPRESSION@66..69
+                      0: SCSS_EXPRESSION_ITEM_LIST@66..69
+                        0: CSS_IDENTIFIER@66..69
+                          0: IDENT@66..69 "all" [] []
+                  2: R_PAREN@69..71 ")" [] [Whitespace(" ")]
+                2: (empty)
+                3: CSS_DECLARATION_OR_RULE_BLOCK@71..120
+                  0: L_CURLY@71..72 "{" [] []
+                  1: CSS_DECLARATION_OR_RULE_LIST@72..116
+                    0: CSS_NESTED_QUALIFIED_RULE@72..116
+                      0: CSS_RELATIVE_SELECTOR_LIST@72..86
+                        0: CSS_RELATIVE_SELECTOR@72..86
+                          0: (empty)
+                          1: CSS_COMPOUND_SELECTOR@72..86
+                            0: CSS_NESTED_SELECTOR_LIST@72..72
+                            1: (empty)
+                            2: CSS_SUB_SELECTOR_LIST@72..86
+                              0: CSS_CLASS_SELECTOR@72..86
+                                0: DOT@72..78 "." [Newline("\n"), Whitespace("    ")] []
+                                1: CSS_CUSTOM_IDENTIFIER@78..86
+                                  0: IDENT@78..86 "escaped" [] [Whitespace(" ")]
+                      1: CSS_DECLARATION_OR_RULE_BLOCK@86..116
+                        0: L_CURLY@86..88 "{" [] [Whitespace(" ")]
+                        1: CSS_DECLARATION_OR_RULE_LIST@88..115
+                          0: CSS_DECLARATION_WITH_SEMICOLON@88..115
+                            0: CSS_DECLARATION@88..113
+                              0: CSS_GENERIC_PROPERTY@88..113
+                                0: CSS_IDENTIFIER@88..97
+                                  0: IDENT@88..97 "animation" [] []
+                                1: COLON@97..99 ":" [] [Whitespace(" ")]
+                                2: CSS_GENERIC_COMPONENT_VALUE_LIST@99..113
+                                  0: CSS_IDENTIFIER@99..108
+                                    0: IDENT@99..108 "rejected" [] [Whitespace(" ")]
+                                  1: CSS_REGULAR_DIMENSION@108..113
+                                    0: CSS_NUMBER_LITERAL@108..111 "200" [] []
+                                    1: IDENT@111..113 "ms" [] []
+                              1: (empty)
+                            1: SEMICOLON@113..115 ";" [] [Whitespace(" ")]
+                        2: R_CURLY@115..116 "}" [] []
+                  2: R_CURLY@116..120 "}" [Newline("\n"), Whitespace("  ")] []
+            2: CSS_KEYFRAMES_ITEM@120..141
+              0: CSS_KEYFRAMES_SELECTOR_LIST@120..126
+                0: CSS_KEYFRAMES_IDENT_SELECTOR@120..126
+                  0: TO_KW@120..126 "to" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+              1: CSS_DECLARATION_BLOCK@126..141
+                0: L_CURLY@126..128 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_LIST@128..140
+                  0: CSS_DECLARATION_WITH_SEMICOLON@128..140
+                    0: CSS_DECLARATION@128..138
+                      0: CSS_GENERIC_PROPERTY@128..138
+                        0: CSS_IDENTIFIER@128..135
+                          0: IDENT@128..135 "opacity" [] []
+                        1: COLON@135..137 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@137..138
+                          0: CSS_NUMBER@137..138
+                            0: CSS_NUMBER_LITERAL@137..138 "1" [] []
+                      1: (empty)
+                    1: SEMICOLON@138..140 ";" [] [Whitespace(" ")]
+                2: R_CURLY@140..141 "}" [] []
+          2: R_CURLY@141..143 "}" [Newline("\n")] []
+    1: CSS_QUALIFIED_RULE@143..167
+      0: CSS_SELECTOR_LIST@143..152
+        0: CSS_COMPOUND_SELECTOR@143..152
+          0: CSS_NESTED_SELECTOR_LIST@143..143
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@143..152
+            0: CSS_CLASS_SELECTOR@143..152
+              0: DOT@143..146 "." [Newline("\n"), Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@146..152
+                0: IDENT@146..152 "after" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@152..167
+        0: L_CURLY@152..154 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@154..166
+          0: CSS_DECLARATION_WITH_SEMICOLON@154..166
+            0: CSS_DECLARATION@154..164
+              0: CSS_GENERIC_PROPERTY@154..164
+                0: CSS_IDENTIFIER@154..159
+                  0: IDENT@154..159 "color" [] []
+                1: COLON@159..161 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@161..164
+                  0: CSS_IDENTIFIER@161..164
+                    0: IDENT@161..164 "red" [] []
+              1: (empty)
+            1: SEMICOLON@164..166 ";" [] [Whitespace(" ")]
+        2: R_CURLY@166..167 "}" [] []
+  2: EOF@167..168 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+parity-keyframe-at-root.css:3:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × SCSS statements in keyframes are an SCSS only feature. Convert your file to an SCSS file or remove the syntax.
+  
+    1 │ @keyframes rejected {
+    2 │   from { opacity: 0; }
+  > 3 │   @at-root (without: all) {
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 4 │     .escaped { animation: rejected 200ms; }
+  > 5 │   }
+      │   ^
+    6 │   to { opacity: 1; }
+    7 │ }
+  
+```

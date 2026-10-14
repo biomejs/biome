@@ -1,0 +1,45 @@
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+
+  @at-root (without: all) {
+    .fade-in {
+      animation: fade-in 200ms ease;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .fade-in {
+        animation: none;
+      }
+    }
+  }
+}
+
+@keyframes a {
+  @at-root (without: all) {
+    b { c: d }
+  }
+}
+
+$query: "without: all";
+@keyframes between-steps {
+  from { opacity: 0; }
+  // Before the escaped rule.
+  @at-root (/* query */ $query /* before close */) /* before body */ {
+    /* inside body */
+    .between-steps { animation: between-steps 200ms; }
+    /* end body */
+  } // After the escaped rule.
+  to { opacity: 1; }
+}
+
+@keyframes shorthand {
+  @at-root /* before selector */ from, to /* before body */ { opacity: 0; }
+  50% { opacity: 0.5; }
+}
+
+.after { color: red; }
