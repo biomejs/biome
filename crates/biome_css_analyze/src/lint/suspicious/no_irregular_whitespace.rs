@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_css_syntax::{AnyCssRule, CssSyntaxNode};
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, Direction, TextRange};
+use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_irregular_whitespace::NoIrregularWhitespaceOptions;
 
 declare_lint_rule! {
@@ -80,19 +80,13 @@ fn is_irregular_whitespace(c: char) -> bool {
 }
 
 fn get_irregular_whitespace(syntax: &CssSyntaxNode) -> Vec<TextRange> {
-    if !syntax
-        .text_with_trivia()
-        .chars()
-        .any(is_irregular_whitespace)
-    {
-        return vec![];
-    }
-
     let mut results = vec![];
-    for token in syntax.descendants_tokens(Direction::Next) {
-        if !token.has_leading_comments()
-            && !token.has_trailing_comments()
-            && token.text().chars().any(is_irregular_whitespace)
+    for token in syntax.borrowed_tokens() {
+        if token.text().chars().any(is_irregular_whitespace)
+            && !token
+                .leading_trivia_pieces()
+                .chain(token.trailing_trivia_pieces())
+                .any(|piece| piece.kind().is_comment())
         {
             results.push(token.text_range());
         }
