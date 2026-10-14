@@ -1,0 +1,27 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: parity-keyframe-at-root.valid.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  @at-root (without: all) {
+    .fade-in {
+      animation: fade-in 200ms ease !important;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .fade-in {
+        animation: none !important;
+      }
+    }
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+```

@@ -3226,10 +3226,20 @@ ScssAtRootQueryClause =
 	':'
 	rules: ScssExpression
 
-// .root-only, .another-root
-// ^^^^^^^^^^^^^^^^^^^^^^^^^
+// @at-root .root-only, .another-root { color: red; }
+//          ^^^^^^^^^^^^^^^^^^^^^^^^^
+// @keyframes fade { @at-root 50%, to { opacity: 1; } }
+//                            ^^^^^^^
 ScssAtRootSelector =
-	selector: CssSelectorList
+	selector: AnyScssAtRootSelectorList
+
+// @at-root .root-only { color: red; }
+//          ^^^^^^^^^^
+// @keyframes fade { @at-root 50%, to { opacity: 1; } }
+//                            ^^^^^^^
+AnyScssAtRootSelectorList =
+	CssSelectorList
+	| CssKeyframesSelectorList
 
 // !optional
 // ^^^^^^^^^

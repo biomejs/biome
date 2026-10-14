@@ -18,7 +18,7 @@ use crate::syntax::parse_error::{
 };
 use crate::syntax::scss::{
     ScssBlockParser, is_at_scss_keyframes_name, is_at_scss_keyframes_selector,
-    is_at_scss_variable_declaration, parse_scss_content_at_rule,
+    is_at_scss_variable_declaration, parse_scss_at_root_at_rule, parse_scss_content_at_rule,
     parse_scss_each_at_rule_with_block, parse_scss_for_at_rule_with_block,
     parse_scss_if_at_rule_with_block, parse_scss_include_at_rule, parse_scss_keyframes_name,
     parse_scss_keyframes_selector, parse_scss_variable_declaration,
@@ -297,6 +297,7 @@ fn parse_any_keyframes_item(p: &mut CssParser) -> ParsedSyntax {
 }
 
 const SCSS_KEYFRAMES_STATEMENT_SET: TokenSet<CssSyntaxKind> = token_set!(
+    T![at_root],
     T![include],
     T![content],
     T![if],
@@ -323,6 +324,7 @@ fn parse_scss_keyframes_statement(p: &mut CssParser) -> ParsedSyntax {
         .with_additional_header_end_ts(SCSS_KEYFRAMES_CONTROL_HEADER_END_SET);
 
     match p.cur() {
+        T![at_root] => parse_scss_at_root_at_rule(p),
         T![include] => parse_scss_include_at_rule(p),
         T![content] => parse_scss_content_at_rule(p),
         T![if] => parse_scss_if_at_rule_with_block(p, parse_block),
@@ -378,34 +380,10 @@ pub(crate) fn parse_scss_template_keyframes_item(p: &mut CssParser) -> ParsedSyn
         return Absent;
     }
 
-    let marker = if is_at_percentage_dimension(p) {
-        let marker = p.start();
-        KeyframesSelectorList {
-            template: true,
-            has_explicit_percentage: false,
-        }
-        .parse_list(p);
-        marker
-    } else {
-        // An interpolation or `from` can also start an ordinary selector template.
-        let Ok(marker) = try_parse(p, |p| {
-            let marker = p.start();
-            let mut selectors = KeyframesSelectorList {
-                template: true,
-                has_explicit_percentage: false,
-            };
-            selectors.parse_list(p);
-            if selectors.has_explicit_percentage && p.at(T!['{']) {
-                Ok(marker)
-            } else {
-                marker.abandon(p);
-                Err(())
-            }
-        }) else {
-            return Absent;
-        };
-        marker
+    let Present(selectors) = parse_scss_template_keyframes_selector_list(p) else {
+        return Absent;
     };
+    let marker = selectors.precede(p);
 
     if !p.at(T!['{']) {
         p.expect(T!['{']);
@@ -414,6 +392,46 @@ pub(crate) fn parse_scss_template_keyframes_item(p: &mut CssParser) -> ParsedSyn
 
     parse_declaration_or_statement_block(p);
     Present(marker.complete(p, CSS_KEYFRAMES_ITEM))
+}
+
+/// Parses a percentage-bearing header, leaving ordinary selectors unconsumed.
+/// Callers must gate the enclosing SCSS construct.
+///
+/// ```scss
+/// @mixin step($position) {
+///   @at-root from, #{$position}%, to { opacity: 0.5; }
+/// }
+/// ```
+pub(crate) fn parse_scss_template_keyframes_selector_list(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_keyframes_item_selector(p) {
+        return Absent;
+    }
+
+    let mut selectors = KeyframesSelectorList {
+        template: true,
+        has_explicit_percentage: false,
+    };
+    if is_at_percentage_dimension(p) {
+        return Present(selectors.parse_list(p));
+    }
+
+    // `%` can also introduce a placeholder: `@at-root #{"div"}%from {}`.
+    let Ok(selector_list) = try_parse(p, |p| {
+        let diagnostics = p.context().diagnostics().len();
+        let selector_list = selectors.parse_list(p);
+        if selectors.has_explicit_percentage
+            && p.at(T!['{'])
+            && p.context().diagnostics().len() == diagnostics
+        {
+            Ok(selector_list)
+        } else {
+            Err(())
+        }
+    }) else {
+        return Absent;
+    };
+
+    Present(selector_list)
 }
 
 struct KeyframesSelectorListParseRecovery {
@@ -464,7 +482,11 @@ impl ParseSeparatedList for KeyframesSelectorList {
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         // CSS recovery changes the selector's kind, so identify interpolation before parsing.
         let starts_with_interpolation = is_at_scss_keyframes_selector(p);
-        let selector = parse_keyframes_item_selector(p);
+        let selector = if self.template && starts_with_interpolation {
+            parse_scss_keyframes_selector(p)
+        } else {
+            parse_keyframes_item_selector(p)
+        };
         if let Present(ref selector) = selector {
             let is_literal_percentage = selector.kind(p) == CSS_KEYFRAMES_PERCENTAGE_SELECTOR;
             let has_interpolated_percentage_suffix =
