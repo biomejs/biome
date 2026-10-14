@@ -216,6 +216,10 @@ invalid.js:5:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━━
     4 │ 		break;
     5 │ 	case 1:
   
+  i Only the first matching case is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake.
+  
+  i Remove the duplicate case, or change its value to the one you meant.
+  
 
 ```
 
@@ -239,6 +243,10 @@ invalid.js:16:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
        │ 	     ^^^
     15 │ 		break;
     16 │ 	case "1":
+  
+  i Only the first matching case is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake.
+  
+  i Remove the duplicate case, or change its value to the one you meant.
   
 
 ```
@@ -264,6 +272,10 @@ invalid.js:28:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
     27 │ 		break;
     28 │ 	case one:
   
+  i Only the first matching case is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake.
+  
+  i Remove the duplicate case, or change its value to the one you meant.
+  
 
 ```
 
@@ -287,6 +299,10 @@ invalid.js:40:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
        │ 	     ^^^^^^
     39 │ 		break;
     40 │ 	case p.p.p1:
+  
+  i Only the first matching case is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake.
+  
+  i Remove the duplicate case, or change its value to the one you meant.
   
 
 ```
@@ -312,6 +328,10 @@ invalid.js:52:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
     51 │ 		break;
     52 │ 	case f(true).p1:
   
+  i Only the first matching case is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake.
+  
+  i Remove the duplicate case, or change its value to the one you meant.
+  
 
 ```
 
@@ -335,6 +355,10 @@ invalid.js:64:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
        │ 	     ^^^^^^^^^^^
     63 │ 		break;
     64 │ 	case f(a + 1).p1:
+  
+  i Only the first matching case is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake.
+  
+  i Remove the duplicate case, or change its value to the one you meant.
   
 
 ```
@@ -360,6 +384,10 @@ invalid.js:76:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
     75 │ 		break;
     76 │ 	case f(a === 1 ? 2 : 3).p1:
   
+  i Only the first matching case is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake.
+  
+  i Remove the duplicate case, or change its value to the one you meant.
+  
 
 ```
 
@@ -383,6 +411,10 @@ invalid.js:88:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
        │ 	     ^^^^^^^
     87 │ 		break;
     88 │ 	case f1().p1:
+  
+  i Only the first matching case is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake.
+  
+  i Remove the duplicate case, or change its value to the one you meant.
   
 
 ```
@@ -408,6 +440,10 @@ invalid.js:97:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
     96 │ 		break;
     97 │ 	case [1, 2].toString():
   
+  i Only the first matching case is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake.
+  
+  i Remove the duplicate case, or change its value to the one you meant.
+  
 
 ```
 
@@ -431,6 +467,10 @@ invalid.js:104:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
         │ 	     ^
     104 │ 	case a:
     105 │ }
+  
+  i Only the first matching case is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake.
+  
+  i Remove the duplicate case, or change its value to the one you meant.
   
 
 ```
@@ -456,6 +496,10 @@ invalid.js:111:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
     108 │ 		break;
     109 │ 	case b:
   
+  i Only the first matching case is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake.
+  
+  i Remove the duplicate case, or change its value to the one you meant.
+  
 
 ```
 
@@ -479,6 +523,10 @@ invalid.js:115:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
         │ 	     ^
     108 │ 		break;
     109 │ 	case b:
+  
+  i Only the first matching case is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake.
+  
+  i Remove the duplicate case, or change its value to the one you meant.
   
 
 ```
@@ -504,6 +552,10 @@ invalid.js:123:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
     122 │ 		break;
     123 │ 	case p.p.p1: // comment\n
   
+  i Only the first matching case is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake.
+  
+  i Remove the duplicate case, or change its value to the one you meant.
+  
 
 ```
 
@@ -527,6 +579,10 @@ invalid.js:134:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
         │ 	^^^^^^
     133 │ 		break;
     134 │ 	case p.p.p1:
+  
+  i Only the first matching case is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake.
+  
+  i Remove the duplicate case, or change its value to the one you meant.
   
 
 ```
@@ -552,6 +608,10 @@ invalid.js:144:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
     143 │ 		break;
     144 │ 	case p.p.p1: // comment
   
+  i Only the first matching case is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake.
+  
+  i Remove the duplicate case, or change its value to the one you meant.
+  
 
 ```
 
@@ -575,6 +635,10 @@ invalid.js:154:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
         │ 	     ^^^^^^
     153 │ 		break;
     154 │ 	case p.p.p1: // comment
+  
+  i Only the first matching case is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake.
+  
+  i Remove the duplicate case, or change its value to the one you meant.
   
 
 ```
@@ -600,6 +664,10 @@ invalid.js:157:2 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
     153 │ 		break;
     154 │ 	case p.p.p1: // comment
   
+  i Only the first matching case is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake.
+  
+  i Remove the duplicate case, or change its value to the one you meant.
+  
 
 ```
 
@@ -623,6 +691,10 @@ invalid.js:169:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
         │ 	     ^^^^^^^^^^^
     168 │ 		break;
     169 │ 	case f(a + 1).p1:
+  
+  i Only the first matching case is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake.
+  
+  i Remove the duplicate case, or change its value to the one you meant.
   
 
 ```
@@ -650,6 +722,10 @@ invalid.js:183:7 lint/suspicious/noDuplicateCase ━━━━━━━━━━�
         │ 	^^^^
     182 │ 		break;
     183 │ 	case f(a + 1).p1:
+  
+  i Only the first matching case is selected. If it does not break or return, execution can fall through to this duplicate's body. It is probably a copy-paste mistake.
+  
+  i Remove the duplicate case, or change its value to the one you meant.
   
 
 ```

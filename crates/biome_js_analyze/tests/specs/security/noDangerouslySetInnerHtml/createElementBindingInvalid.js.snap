@@ -29,6 +29,8 @@ createElementBindingInvalid.js:4:5 lint/security/noDangerouslySetInnerHtml ‚îÅ‚î
   
   ! Setting content using code can expose users to cross-site scripting (XSS) attacks
   
+  i Pass the content as JSX children instead. If you must render HTML, sanitize it first.
+  
 
 ```
 
@@ -43,6 +45,8 @@ createElementBindingInvalid.js:8:5 lint/security/noDangerouslySetInnerHtml ‚îÅ‚î
     9 ‚îÇ });
   
   ! Setting content using code can expose users to cross-site scripting (XSS) attacks
+  
+  i Pass the content as JSX children instead. If you must render HTML, sanitize it first.
   
 
 ```

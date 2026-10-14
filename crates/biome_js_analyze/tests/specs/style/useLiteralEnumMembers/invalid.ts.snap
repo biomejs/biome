@@ -75,6 +75,10 @@ invalid.ts:2:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
     3 │   B = [],
     4 │   C = true,
   
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
+  
 
 ```
 
@@ -89,6 +93,10 @@ invalid.ts:3:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
       │       ^^
     4 │   C = true,
     5 │   D = 1n,
+  
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
   
 
 ```
@@ -105,6 +113,10 @@ invalid.ts:4:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
     5 │   D = 1n,
     6 │ }
   
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
+  
 
 ```
 
@@ -120,6 +132,10 @@ invalid.ts:5:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
     6 │ }
     7 │ 
   
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
+  
 
 ```
 
@@ -133,6 +149,10 @@ invalid.ts:9:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
        │       ^^^^^^^^^^
     10 │ }
     11 │ 
+  
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
   
 
 ```
@@ -148,6 +168,10 @@ invalid.ts:13:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
     14 │ }
     15 │ 
   
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
+  
 
 ```
 
@@ -161,6 +185,10 @@ invalid.ts:17:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
        │       ^^^^^^^^
     18 │   B = -a,
     19 │   C = void 2,
+  
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
   
 
 ```
@@ -177,6 +205,10 @@ invalid.ts:18:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
     19 │   C = void 2,
     20 │   D = !0,
   
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
+  
 
 ```
 
@@ -191,6 +223,10 @@ invalid.ts:19:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
        │       ^^^^^^
     20 │   D = !0,
     21 │ }
+  
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
   
 
 ```
@@ -207,6 +243,10 @@ invalid.ts:20:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
     21 │ }
     22 │ 
   
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
+  
 
 ```
 
@@ -221,6 +261,10 @@ invalid.ts:26:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
        │       ^^^^^^^^
     27 │ }
     28 │ 
+  
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
   
 
 ```
@@ -237,6 +281,10 @@ invalid.ts:33:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
     34 │ }
     35 │ 
   
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
+  
 
 ```
 
@@ -251,6 +299,10 @@ invalid.ts:38:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
        │       ^^^^^^
     39 │   B = x >> 0,
     40 │   C = x >>> 0,
+  
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
   
 
 ```
@@ -267,6 +319,10 @@ invalid.ts:39:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
     40 │   C = x >>> 0,
     41 │   D = x | 0,
   
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
+  
 
 ```
 
@@ -281,6 +337,10 @@ invalid.ts:40:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
        │       ^^^^^^^
     41 │   D = x | 0,
     42 │   E = x & 0,
+  
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
   
 
 ```
@@ -297,6 +357,10 @@ invalid.ts:41:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
     42 │   E = x & 0,
     43 │   F = x ^ 0,
   
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
+  
 
 ```
 
@@ -311,6 +375,10 @@ invalid.ts:42:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
        │       ^^^^^
     43 │   F = x ^ 0,
     44 │   G = ~x,
+  
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
   
 
 ```
@@ -327,6 +395,10 @@ invalid.ts:43:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
     44 │   G = ~x,
     45 │ }
   
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
+  
 
 ```
 
@@ -342,6 +414,10 @@ invalid.ts:44:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
     45 │ }
     46 │ 
   
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
+  
 
 ```
 
@@ -355,6 +431,10 @@ invalid.ts:48:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
        │       ^
     49 │   B = InvalidRef.B,
     50 │   C = InvalidRef["C"],
+  
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
   
 
 ```
@@ -371,6 +451,10 @@ invalid.ts:49:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
     50 │   C = InvalidRef["C"],
     51 │   D = E,
   
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
+  
 
 ```
 
@@ -385,6 +469,10 @@ invalid.ts:50:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
        │       ^^^^^^^^^^^^^^^
     51 │   D = E,
     52 │   E = InvalidRef.F,
+  
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
   
 
 ```
@@ -401,6 +489,10 @@ invalid.ts:51:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
     52 │   E = InvalidRef.F,
     53 │   F = InvalidRef["G"],
   
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
+  
 
 ```
 
@@ -416,6 +508,10 @@ invalid.ts:52:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
     53 │   F = InvalidRef["G"],
     54 │   G
   
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
+  
 
 ```
 
@@ -430,6 +526,10 @@ invalid.ts:53:7 lint/style/useLiteralEnumMembers ━━━━━━━━━━�
        │       ^^^^^^^^^^^^^^^
     54 │   G
     55 │ }
+  
+  i Enum members initialized with computed values are error-prone and confusing, because their value is only known when the code runs.
+  
+  i Replace the initializer with a literal number or string. Numeric and bitwise expressions, and references to previous members of the same enum, are also allowed.
   
 
 ```
