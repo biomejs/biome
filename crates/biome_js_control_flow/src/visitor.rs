@@ -6,7 +6,9 @@ use biome_js_syntax::{
     JsSetterObjectMember, JsStaticInitializationBlockClassMember, JsSyntaxNode,
     TsModuleDeclaration, TsPropertySignatureTypeMember,
 };
-use biome_rowan::{AstNode, SyntaxError, SyntaxResult, WalkEvent, declare_node_union};
+use biome_rowan::{
+    AstNode, SyntaxError, SyntaxKindSet, SyntaxResult, WalkEvent, declare_node_union,
+};
 
 use crate::JsControlFlowGraph;
 
@@ -23,6 +25,17 @@ macro_rules! declare_visitor {
         }
 
         impl $name {
+            /// Kinds of the nodes [Self::visit] acts on. Events for nodes of any
+            /// other kind leave the visitor unchanged.
+            pub(crate) const VISITED_KINDS: SyntaxKindSet<JsLanguage> = AnyJsControlFlowRoot::KIND_SET
+                $( .union(<<$visitor as NodeVisitor>::Node as AstNode>::KIND_SET) )*;
+
+            #[cfg(test)]
+            pub(crate) fn acts_on(kind: biome_js_syntax::JsSyntaxKind) -> bool {
+                AnyJsControlFlowRoot::can_cast(kind)
+                    $( || <<$visitor as NodeVisitor>::Node as AstNode>::can_cast(kind) )*
+            }
+
             pub(crate) fn new() -> Self {
                 Self {
                     stack: Vec::new(),

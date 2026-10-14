@@ -86,7 +86,12 @@ where
 
     /// Returns true if `kind` is contained in this set
     pub fn matches(self, kind: L::Kind) -> bool {
-        let RawSyntaxKind(kind) = kind.to_raw();
+        self.matches_raw(kind.to_raw())
+    }
+
+    /// Returns true if the raw `kind` is contained in this set
+    pub(crate) fn matches_raw(self, kind: RawSyntaxKind) -> bool {
+        let RawSyntaxKind(kind) = kind;
 
         let index = kind as usize / u128::BITS as usize;
         let shift = kind % u128::BITS as u16;
