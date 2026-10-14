@@ -15,6 +15,8 @@ const SCSS_AT_ROOT_QUERY_MODIFIER_END_SET: TokenSet<CssSyntaxKind> =
     token_set![T![:], T![')'], T!['{'], T!['}'], T![;]];
 const SCSS_AT_ROOT_QUERY_RULES_END_SET: TokenSet<CssSyntaxKind> =
     token_set![T![')'], T!['{'], T!['}'], T![;]];
+const SCSS_AT_ROOT_SELECTOR_END_SET: TokenSet<CssSyntaxKind> =
+    token_set![T!['{'], T!['}'], T![;], T![@]];
 
 /// Parses the SCSS `@at-root` at-rule.
 ///
@@ -40,17 +42,16 @@ pub(crate) fn parse_scss_at_root_at_rule(p: &mut CssParser) -> ParsedSyntax {
     p.bump(T![at_root]);
     let query = parse_scss_at_root_query(p);
 
-    if query.is_present() && (p.at(T!['}']) || p.at(CssSyntaxKind::EOF)) {
+    if query.is_absent() && !p.at(T!['{']) {
+        parse_scss_at_root_selector(p);
+    }
+
+    if !p.at(T!['{']) {
         p.error(expected_block(p, p.cur_range()));
         return Present(m.complete(p, SCSS_AT_ROOT_AT_RULE));
     }
 
-    if query.is_present() || p.at(T!['{']) {
-        parse_declaration_or_rule_list_block(p);
-    } else {
-        parse_scss_at_root_selector(p);
-        parse_declaration_or_rule_list_block(p);
-    }
+    parse_declaration_or_rule_list_block(p);
 
     Present(m.complete(p, SCSS_AT_ROOT_AT_RULE))
 }
@@ -120,7 +121,10 @@ fn is_at_scss_at_root_query(p: &mut CssParser) -> bool {
 fn parse_scss_at_root_selector(p: &mut CssParser) -> CompletedMarker {
     let m = p.start();
 
-    SelectorList::default().parse_list(p);
+    SelectorList::default()
+        .with_end_kind_ts(SCSS_AT_ROOT_SELECTOR_END_SET)
+        .with_recovery_ts(SCSS_AT_ROOT_SELECTOR_END_SET)
+        .parse_list(p);
 
     m.complete(p, SCSS_AT_ROOT_SELECTOR)
 }
