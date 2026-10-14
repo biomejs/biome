@@ -22,9 +22,13 @@ declare_source_rule! {
     /// Keeping them sorted makes growing documents easier to scan and review.
     /// The order of definitions doesn't affect how a document is executed or how a schema is built.
     ///
+    /// Definitions are sorted by name in a [Natural order](https://en.wikipedia.org/wiki/Natural_sort_order),
+    /// meaning that uppercase letters come before lowercase letters (e.g. `A` < `a` < `B` < `b`)
+    /// and numbers are compared to their numerical value (e.g. `9` < `10`).
+    ///
     /// Definitions without a name, such as `schema` definitions, anonymous operations, and
     /// shorthand queries, are placed after the named definitions.
-    /// Definitions with the same name keep their relative order.
+    /// Definitions with the same name aren't sorted.
     ///
     /// ## Examples
     ///
@@ -61,12 +65,20 @@ declare_source_rule! {
     /// ## Caveats
     ///
     /// Comments above a definition and comments at the end of its last line move with that definition.
-    /// No fix is offered when a moved comment would end up on the same line as other code,
-    /// because the comment would then hide that code or describe a different definition.
-    /// Sort such definitions manually, or put each definition on its own line.
+    /// Because moving a comment can change which definition it describes or hide code, the action
+    /// offers no fix in these cases:
     ///
-    /// The same applies when a definition with a comment above it is, or would become, the first
-    /// definition of the document.
+    /// - A moved end-of-line comment would share a line with the next definition. Since a `#`
+    ///   comment continues to the end of its line, it would hide that definition. For example,
+    ///   sorting this input would move `Apple` before `Zebra`, but the comment would hide `Zebra`:
+    ///
+    ///   ```graphql,ignore
+    ///   type Zebra { id: ID! } type Apple { id: ID! } # Keep Apple
+    ///   ```
+    ///
+    /// - A definition with a comment above it is, or would become, the first definition in the document.
+    ///
+    /// Sort such definitions manually, or put each definition on its own line.
     ///
     pub UseGraphqlSortedDefinitions {
         version: "next",
