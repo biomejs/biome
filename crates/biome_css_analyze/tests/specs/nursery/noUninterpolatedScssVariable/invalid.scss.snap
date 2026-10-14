@@ -36,7 +36,7 @@ $path: "a.png";
 
 # Diagnostics
 ```
-invalid.scss:8:9 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:8:9 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
   
@@ -52,11 +52,15 @@ invalid.scss:8:9 lint/nursery/noUninterpolatedScssVariable ━━━━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    8 │ → --gap:·#{$gap};
+      │          ++    + 
 
 ```
 
 ```
-invalid.scss:9:8 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:9:8 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The Sass variable math.$pi isn't interpolated, so Sass outputs it unchanged.
   
@@ -73,11 +77,15 @@ invalid.scss:9:8 lint/nursery/noUninterpolatedScssVariable ━━━━━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    9 │ → --pi:·#{math.$pi};
+      │         ++        + 
 
 ```
 
 ```
-invalid.scss:10:15 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:10:15 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
   
@@ -94,11 +102,15 @@ invalid.scss:10:15 lint/nursery/noUninterpolatedScssVariable ━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    10 │ → --calc:·calc(#{$gap}·*·2);
+       │                ++    +      
 
 ```
 
 ```
-invalid.scss:11:23 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:11:23 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
   
@@ -115,11 +127,15 @@ invalid.scss:11:23 lint/nursery/noUninterpolatedScssVariable ━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    11 │ → --fallback:·var(--x,·#{$gap});
+       │                        ++    +  
 
 ```
 
 ```
-invalid.scss:12:13 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:12:13 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The Sass variable $path isn't interpolated, so Sass outputs it unchanged.
   
@@ -136,11 +152,15 @@ invalid.scss:12:13 lint/nursery/noUninterpolatedScssVariable ━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    12 │ → --url:·url(#{$path});
+       │              ++     +  
 
 ```
 
 ```
-invalid.scss:13:10 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:13:10 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
   
@@ -157,11 +177,15 @@ invalid.scss:13:10 lint/nursery/noUninterpolatedScssVariable ━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    13 │ → --list:·#{$gap}·$gap;
+       │           ++    +      
 
 ```
 
 ```
-invalid.scss:13:15 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:13:15 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
   
@@ -178,11 +202,15 @@ invalid.scss:13:15 lint/nursery/noUninterpolatedScssVariable ━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    13 │ → --list:·$gap·#{$gap};
+       │                ++    + 
 
 ```
 
 ```
-invalid.scss:14:16 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:14:16 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
   
@@ -199,11 +227,15 @@ invalid.scss:14:16 lint/nursery/noUninterpolatedScssVariable ━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    14 │ → --braced:·{a:·#{$gap}};
+       │                 ++    +  
 
 ```
 
 ```
-invalid.scss:17:19 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:17:19 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
   
@@ -220,11 +252,15 @@ invalid.scss:17:19 lint/nursery/noUninterpolatedScssVariable ━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    17 │ @supports·(--raw:·#{$gap})·{
+       │                   ++    +   
 
 ```
 
 ```
-invalid.scss:23:23 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:23:23 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
   
@@ -241,5 +277,9 @@ invalid.scss:23:23 lint/nursery/noUninterpolatedScssVariable ━━━━━━�
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    23 │ @container·style(--c:·#{$gap})·{
+       │                       ++    +   
 
 ```
