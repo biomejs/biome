@@ -6,7 +6,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyFunctionLike, JsLanguage, JsYieldExpression, TextRange, WalkEvent};
-use biome_rowan::{AstNode, AstNodeList, Language, SyntaxNode, TextSize};
+use biome_rowan::{AstNode, AstNodeList, Language, SyntaxKindSet, SyntaxNode, TextSize};
 use biome_rule_options::use_yield::UseYieldOptions;
 
 declare_lint_rule! {
@@ -57,6 +57,13 @@ struct MissingYieldVisitor {
 
 impl Visitor for MissingYieldVisitor {
     type Language = JsLanguage;
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(AnyFunctionLike::KIND_SET.union(JsYieldExpression::KIND_SET))
+    }
 
     fn visit(
         &mut self,

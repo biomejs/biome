@@ -117,6 +117,12 @@ where
     }
 }
 
+impl<L: Language> Default for SyntaxKindSet<L> {
+    fn default() -> Self {
+        Self::EMPTY
+    }
+}
+
 /// The main trait to go from untyped `SyntaxNode` to a typed ast. The
 /// conversion itself has zero runtime cost: ast and syntax nodes have exactly
 /// the same representation: a pointer to the tree root and a pointer to the

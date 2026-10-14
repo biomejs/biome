@@ -8,7 +8,7 @@ use biome_css_semantic::{db::css_semantic_model, semantic_model};
 use biome_css_syntax::{AnyCssRoot, CssLanguage, CssSyntaxNode, TextRange};
 use biome_db::AnyParsedSource;
 use biome_languages::LanguageDb;
-use biome_rowan::{AstNode, WalkEvent};
+use biome_rowan::{AstNode, SyntaxKindSet, WalkEvent};
 use std::rc::Rc;
 
 /// ## Warning
@@ -95,6 +95,13 @@ impl Visitor for SemanticModelBuilderVisitor {
     }
 
     fn visit(&mut self, _: &WalkEvent<CssSyntaxNode>, _: VisitorContext<CssLanguage>) {}
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<CssLanguage>>,
+    ) -> Option<SyntaxKindSet<CssLanguage>> {
+        Some(SyntaxKindSet::EMPTY)
+    }
 }
 
 pub struct SemanticModelVisitor;
@@ -124,6 +131,13 @@ impl Visitor for SemanticModelVisitor {
 
         let text_range = root.text_range_with_trivia();
         ctx.match_query(SemanticModelEvent(text_range));
+    }
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<CssLanguage>>,
+    ) -> Option<SyntaxKindSet<CssLanguage>> {
+        Some(AnyCssRoot::KIND_SET)
     }
 }
 
