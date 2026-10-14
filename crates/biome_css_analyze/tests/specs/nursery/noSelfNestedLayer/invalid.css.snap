@@ -48,6 +48,16 @@ expression: invalid.css
 	}
 }
 
+@layer base {
+	@layer \62 ase {
+	}
+}
+
+@layer \62 ase {
+	@layer base {
+	}
+}
+
 ```
 
 # Diagnostics
@@ -189,6 +199,46 @@ invalid.css:40:10 lint/nursery/noSelfNestedLayer ━━━━━━━━━━�
   i Layer names inside a layer block are relative to it, so this creates a new sublayer. A sublayer has its own place in the cascade order.
   
   i Rename the layer so it doesn't repeat base, or remove the nested @layer if you didn't mean to create a sublayer.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:46:9 lint/nursery/noSelfNestedLayer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The layer \62 ase repeats the name of the enclosing layer base.
+  
+    45 │ @layer base {
+  > 46 │ 	@layer \62 ase {
+       │ 	       ^^^^^^^
+    47 │ 	}
+    48 │ }
+  
+  i Layer names inside a layer block are relative to it, so this creates the sublayer base.\62 ase. A sublayer has its own place in the cascade order.
+  
+  i Rename the layer so it doesn't repeat base, or remove the nested @layer if you didn't mean to create a sublayer.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.css:51:9 lint/nursery/noSelfNestedLayer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The layer base repeats the name of the enclosing layer \62 ase.
+  
+    50 │ @layer \62 ase {
+  > 51 │ 	@layer base {
+       │ 	       ^^^^
+    52 │ 	}
+    53 │ }
+  
+  i Layer names inside a layer block are relative to it, so this creates the sublayer \62 ase.base. A sublayer has its own place in the cascade order.
+  
+  i Rename the layer so it doesn't repeat \62 ase, or remove the nested @layer if you didn't mean to create a sublayer.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

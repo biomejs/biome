@@ -1,6 +1,8 @@
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_css_syntax::{AnyCssLayer, AnyCssLayerName, CssLayerAtRule, CssLayerNameList};
+use biome_css_syntax::{
+    AnyCssLayer, AnyCssLayerName, CssLayerAtRule, CssLayerNameList, decode_css_identifier,
+};
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, AstSeparatedList};
 use biome_rule_options::no_self_nested_layer::NoSelfNestedLayerOptions;
@@ -163,7 +165,10 @@ fn starts_with_layer_name(name: &CssLayerNameList, enclosing: &CssLayerNameList)
                 Ok(AnyCssLayerName::CssIdentifier(enclosing)),
                 Ok(AnyCssLayerName::CssIdentifier(name)),
             ) => match (enclosing.value_token(), name.value_token()) {
-                (Ok(enclosing), Ok(name)) => enclosing.text_trimmed() == name.text_trimmed(),
+                (Ok(enclosing), Ok(name)) => {
+                    decode_css_identifier(enclosing.text_trimmed())
+                        == decode_css_identifier(name.text_trimmed())
+                }
                 _ => false,
             },
             (
