@@ -30,14 +30,14 @@ YamlRoot {
                                 key: YamlFlowYamlNode {
                                     properties: YamlPropertyList [],
                                     content: YamlPlainScalar {
-                                        value_token: PLAIN_LITERAL@6..12 "key\n  " [] [],
+                                        value_token: PLAIN_LITERAL@6..9 "key" [] [],
                                     },
                                 },
-                                colon_token: COLON@12..14 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@9..14 ":" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
                                 value: YamlFlowYamlNode {
                                     properties: YamlPropertyList [],
                                     content: YamlPlainScalar {
-                                        value_token: PLAIN_LITERAL@14..20 "value " [] [],
+                                        value_token: PLAIN_LITERAL@14..20 "value" [] [Whitespace(" ")],
                                     },
                                 },
                             },
@@ -71,15 +71,15 @@ YamlRoot {
             0: L_BRACK@4..6 "[" [] [Whitespace(" ")]
             1: YAML_FLOW_SEQUENCE_ENTRY_LIST@6..20
               0: YAML_FLOW_MAP_IMPLICIT_ENTRY@6..20
-                0: YAML_FLOW_YAML_NODE@6..12
+                0: YAML_FLOW_YAML_NODE@6..9
                   0: YAML_PROPERTY_LIST@6..6
-                  1: YAML_PLAIN_SCALAR@6..12
-                    0: PLAIN_LITERAL@6..12 "key\n  " [] []
-                1: COLON@12..14 ":" [] [Whitespace(" ")]
+                  1: YAML_PLAIN_SCALAR@6..9
+                    0: PLAIN_LITERAL@6..9 "key" [] []
+                1: COLON@9..14 ":" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
                 2: YAML_FLOW_YAML_NODE@14..20
                   0: YAML_PROPERTY_LIST@14..14
                   1: YAML_PLAIN_SCALAR@14..20
-                    0: PLAIN_LITERAL@14..20 "value " [] []
+                    0: PLAIN_LITERAL@14..20 "value" [] [Whitespace(" ")]
             2: R_BRACK@20..21 "]" [] []
         2: FLOW_END@21..21 "" [] []
       4: (empty)
