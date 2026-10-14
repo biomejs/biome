@@ -11,11 +11,12 @@ use crate::utils::scss_include_comments::{
     place_separated_list_comment,
 };
 use biome_css_syntax::{
-    AnyCssAtRule, AnyCssControlBlock, AnyCssDeclarationName, AnyCssMediaQuery, AnyCssProperty,
-    AnyCssPseudoClass, AnyCssPseudoElement, AnyCssSelector, AnyCssSelectorIdentifier,
-    AnyCssUnknownAtRuleName, CssComplexSelector, CssDeclaration, CssDeclarationImportant,
-    CssDeclarationOrRuleBlock, CssFunction, CssGenericComponentValueList, CssGenericProperty,
-    CssIdentifier, CssIfBranch, CssLanguage, CssMediaQueryList, CssNestedQualifiedRule,
+    AnyCssAtRule, AnyCssAtRuleCustomName, AnyCssControlBlock, AnyCssDeclarationName,
+    AnyCssMediaQuery, AnyCssNamespacePrefixName, AnyCssProperty, AnyCssPseudoClass,
+    AnyCssPseudoElement, AnyCssSelector, AnyCssSelectorIdentifier, AnyCssUnknownAtRuleName,
+    CssComplexSelector, CssDeclaration, CssDeclarationImportant, CssDeclarationOrRuleBlock,
+    CssFunction, CssGenericComponentValueList, CssGenericProperty, CssIdentifier, CssIfBranch,
+    CssLanguage, CssMediaQueryList, CssNamespaceAtRule, CssNestedQualifiedRule, CssPageSelector,
     CssPseudoElementFunction, CssQualifiedRule, CssSyntaxKind, CssSyntaxNode, CssSyntaxToken,
     ScssAtRootAtRule, ScssAtRootQueryClause, ScssAtRootSelector, ScssEachHeader, ScssEachValueList,
     ScssExpression, ScssExpressionItemList, ScssIfAtRule, ScssInterpolatedPseudoClassFunction,
@@ -134,6 +135,7 @@ impl CommentStyle for CssCommentStyle {
             .or_else(handle_component_value_boundary_comment)
             .or_else(handle_generic_property_comment)
             .or_else(handle_scss_at_rule_name_comment)
+            .or_else(handle_at_rule_prelude_name_comment)
             .or_else(handle_declaration_name_comment)
             .or_else(handle_selector_block_comment)
             .or_else(handle_complex_selector_comment)
@@ -852,6 +854,37 @@ fn handle_scss_at_rule_name_comment(
         && range.end() <= components.syntax().text_trimmed_range().start()
     {
         CommentPlacement::leading(components.into_syntax(), comment)
+    } else {
+        CommentPlacement::Default(comment)
+    }
+}
+
+/// Keeps comments after page names and namespace prefixes.
+///
+/// ```scss
+/// @page report /* note */ :first {}
+/// @namespace ns-#{$name} /* note */ url("http://example.com");
+/// ```
+fn handle_at_rule_prelude_name_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let (Some(name), Some(following)) = (comment.preceding_node(), comment.following_node()) else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let is_prelude_name = AnyCssAtRuleCustomName::cast_ref(name)
+        .is_some_and(|name| name.parent::<CssPageSelector>().is_some())
+        || AnyCssNamespacePrefixName::cast_ref(name)
+            .is_some_and(|name| name.parent::<CssNamespaceAtRule>().is_some());
+    if !is_prelude_name {
+        return CommentPlacement::Default(comment);
+    }
+
+    let range = comment.piece().text_range();
+    if range.start() >= name.text_trimmed_range().end()
+        && range.end() <= following.text_trimmed_range().start()
+    {
+        CommentPlacement::leading(following.clone(), comment)
     } else {
         CommentPlacement::Default(comment)
     }
