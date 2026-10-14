@@ -9010,6 +9010,10 @@ export interface RuleWithNoUninterpolatedScssFunctionOptions {
 	options?: NoUninterpolatedScssFunctionOptions;
 }
 export interface RuleWithNoUninterpolatedScssVariableOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoUninterpolatedScssVariableOptions;
 }
