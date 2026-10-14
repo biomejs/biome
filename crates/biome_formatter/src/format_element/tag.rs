@@ -170,6 +170,7 @@ impl GroupMode {
 pub struct Group {
     id: Option<GroupId>,
     mode: Cell<GroupMode>,
+    boundary: bool,
 }
 
 impl Group {
@@ -177,7 +178,19 @@ impl Group {
         Self {
             id: None,
             mode: Cell::new(GroupMode::Flat),
+            boundary: false,
         }
+    }
+
+    /// Makes the group stop the expansion of its content from reaching it
+    /// and the groups around it, see [crate::builders::boundary_group]
+    pub fn with_boundary(mut self, boundary: bool) -> Self {
+        self.boundary = boundary;
+        self
+    }
+
+    pub fn is_boundary(&self) -> bool {
+        self.boundary
     }
 
     pub fn with_id(mut self, id: Option<GroupId>) -> Self {

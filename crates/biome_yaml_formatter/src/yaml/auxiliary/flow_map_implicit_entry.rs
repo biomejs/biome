@@ -44,11 +44,12 @@ impl FormatNodeRule<YamlFlowMapImplicitEntry> for FormatYamlFlowMapImplicitEntry
 
         if let (Some(entry_key), Some(colon_token), Some(entry_value)) =
             (&key, &colon_token, &value)
-            && entry_key.is_flow_collection()
+            && (entry_key.is_flow_collection()
+                || f.comments().has_trailing_comments(entry_key.syntax()))
         {
             return write!(
                 f,
-                [FormatCollectionKeyEntry {
+                [FormatBreakableKeyEntry {
                     key: entry_key,
                     colon_token,
                     value: entry_value.clone().into(),
@@ -68,11 +69,11 @@ impl FormatNodeRule<YamlFlowMapImplicitEntry> for FormatYamlFlowMapImplicitEntry
     }
 }
 
-/// Formats a `key: value` entry whose key is a flow collection.
+/// Formats a `key: value` entry whose key may break: a flow collection, or
+/// a key followed by a comment.
 ///
-/// A collection key that breaks across multiple lines is only a valid
-/// mapping key in the explicit `? key : value` form, so a `?` is
-/// synthesized for such a key:
+/// A key that breaks across multiple lines is only a valid mapping key in
+/// the explicit `? key : value` form, so a `?` is synthesized for such a key:
 ///
 /// ```yaml
 /// {
@@ -83,15 +84,24 @@ impl FormatNodeRule<YamlFlowMapImplicitEntry> for FormatYamlFlowMapImplicitEntry
 ///
 /// Whether the key breaks is the printer's decision: the key gets a group
 /// of its own, and conditional content on that group picks between the
-/// implicit and the explicit form. A comment inside the key expands the
-/// group, so it picks the explicit form as well.
-pub(crate) struct FormatCollectionKeyEntry<'a> {
+/// implicit and the explicit form. A comment inside the key or after it
+/// expands the group, so it picks the explicit form as well:
+///
+/// ```yaml
+/// { ? key # comment
+///   : value }
+/// ```
+///
+/// The entry is a boundary group, where Prettier uses a single-state
+/// `conditionalGroup`: its line breaks don't expand the enclosing collection,
+/// which stays on one line if the content up to the first line break fits.
+pub(crate) struct FormatBreakableKeyEntry<'a> {
     pub(crate) key: &'a AnyYamlMappingImplicitKey,
     pub(crate) colon_token: &'a YamlSyntaxToken,
     pub(crate) value: AnyYamlEntryValue,
 }
 
-impl Format<YamlFormatContext> for FormatCollectionKeyEntry<'_> {
+impl Format<YamlFormatContext> for FormatBreakableKeyEntry<'_> {
     fn fmt(&self, f: &mut YamlFormatter) -> FormatResult<()> {
         let group_id = f.group_id("collection_key");
         let key_format = self.key.format().memoized();
@@ -106,18 +116,13 @@ impl Format<YamlFormatContext> for FormatCollectionKeyEntry<'_> {
 
         write!(
             f,
-            [
+            [boundary_group(&format_args![
                 group(&format_args![
                     if_group_breaks(&format_args![text("?", None), space()]),
                     group(&align("  ", &key_format)).with_group_id(Some(group_id)),
                 ]),
                 if_group_breaks(&format_args![
-                    // A hard line break would mark the enclosing groups as
-                    // expanded even though this content is only printed when
-                    // the key group breaks. A soft line break prints the same
-                    // line break here, since a broken key implies that the
-                    // enclosing groups are already expanded
-                    soft_line_break(),
+                    hard_line_break(),
                     colon_format,
                     space(),
                     align("  ", &value_format)
@@ -158,7 +163,7 @@ impl Format<YamlFormatContext> for FormatCollectionKeyEntry<'_> {
                     }
                 }))
                 .with_group_id(Some(group_id)),
-            ]
+            ])]
         )
     }
 }

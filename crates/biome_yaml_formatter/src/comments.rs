@@ -627,21 +627,36 @@ fn handle_document_comment(
     CommentPlacement::Default(comment)
 }
 
-/// Handles comments between the key and the `:` of an explicit flow mapping
-/// entry (`? key : value`). They are made dangling comments of the entry so
-/// its format rule can print them on their own lines before the `:`, where
-/// they attach the same way when reparsed.
+/// Handles comments between the key and the value of an explicit flow
+/// mapping entry (`? key : value`). A comment on the line of the key trails
+/// the key, as it does in an implicit entry, and one on the line of the `:`
+/// leads the value. The other comments before the `:` are made dangling
+/// comments of the entry so its format rule can print them on their own
+/// lines before the `:`, where they attach the same way when reparsed.
 fn handle_flow_map_explicit_entry_comment(
     comment: DecoratedComment<YamlLanguage>,
 ) -> CommentPlacement<YamlLanguage> {
     let Some(entry) = YamlFlowMapExplicitEntry::cast_ref(comment.enclosing_node()) else {
         return CommentPlacement::Default(comment);
     };
+    let Some(colon) = entry.colon_token() else {
+        return CommentPlacement::Default(comment);
+    };
+    let comment_start = comment.piece().text_range().start();
+    let is_end_of_line = comment.text_position() == CommentTextPosition::EndOfLine;
 
-    if let Some(colon) = entry.colon_token()
-        && comment.piece().text_range().start() < colon.text_trimmed_range().start()
-    {
+    if comment_start < colon.text_trimmed_range().start() {
+        if is_end_of_line && let Some(key) = comment.preceding_node() {
+            return CommentPlacement::trailing(key.clone(), comment);
+        }
         return CommentPlacement::dangling(entry.syntax().clone(), comment);
+    }
+
+    if is_end_of_line
+        && let Some(value) = entry.value()
+        && comment_start < value.range().start()
+    {
+        return CommentPlacement::leading(value.syntax().clone(), comment);
     }
 
     CommentPlacement::Default(comment)
