@@ -90,7 +90,7 @@ invalid.ts:1:12 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━
   
   i Function expressions that don't use this can be turned into arrow functions.
   
-  i Safe fix: Use an arrow function instead.
+  i Unsafe fix: Use an arrow function instead.
   
      1    │ - const·f1·=·async·function<T>·(x:·T):·Promise<T>·{
      2    │ - ····return·x;
@@ -119,7 +119,7 @@ invalid.ts:5:12 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━
   
   i Function expressions that don't use this can be turned into arrow functions.
   
-  i Safe fix: Use an arrow function instead.
+  i Unsafe fix: Use an arrow function instead.
   
      3  3 │   }
      4  4 │   
@@ -150,7 +150,7 @@ invalid.ts:9:18 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━━
   
   i Function expressions that don't use this can be turned into arrow functions.
   
-  i Safe fix: Use an arrow function instead.
+  i Unsafe fix: Use an arrow function instead.
   
      7  7 │   }
      8  8 │   
@@ -181,7 +181,7 @@ invalid.ts:13:12 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   
   i Function expressions that don't use this can be turned into arrow functions.
   
-  i Safe fix: Use an arrow function instead.
+  i Unsafe fix: Use an arrow function instead.
   
     11 11 │   } /* end */
     12 12 │   
@@ -212,7 +212,7 @@ invalid.ts:17:12 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   
   i Function expressions that don't use this can be turned into arrow functions.
   
-  i Safe fix: Use an arrow function instead.
+  i Unsafe fix: Use an arrow function instead.
   
     15 15 │   } // Trailing comment
     16 16 │   
@@ -244,7 +244,7 @@ invalid.ts:21:12 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   
   i Function expressions that don't use this can be turned into arrow functions.
   
-  i Safe fix: Use an arrow function instead.
+  i Unsafe fix: Use an arrow function instead.
   
     19 19 │   }
     20 20 │   
@@ -275,7 +275,7 @@ invalid.ts:30:12 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   
   i Function expressions that don't use this can be turned into arrow functions.
   
-  i Safe fix: Use an arrow function instead.
+  i Unsafe fix: Use an arrow function instead.
   
     28 28 │   function f7() {
     29 29 │       const self = this;
@@ -304,7 +304,7 @@ invalid.ts:39:13 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   
   i Function expressions that don't use this can be turned into arrow functions.
   
-  i Safe fix: Use an arrow function instead.
+  i Unsafe fix: Use an arrow function instead.
   
     37 37 │   }
     38 38 │   
@@ -332,7 +332,7 @@ invalid.ts:43:12 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   
   i Function expressions that don't use this can be turned into arrow functions.
   
-  i Safe fix: Use an arrow function instead.
+  i Unsafe fix: Use an arrow function instead.
   
     41 41 │   }
     42 42 │   
@@ -357,7 +357,7 @@ invalid.ts:44:19 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   
   i Function expressions that don't use this can be turned into arrow functions.
   
-  i Safe fix: Use an arrow function instead.
+  i Unsafe fix: Use an arrow function instead.
   
     42 42 │   
     43 43 │   const as = function () {} as () => void;
@@ -383,7 +383,7 @@ invalid.ts:45:16 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   
   i Function expressions that don't use this can be turned into arrow functions.
   
-  i Safe fix: Use an arrow function instead.
+  i Unsafe fix: Use an arrow function instead.
   
     43 43 │   const as = function () {} as () => void;
     44 44 │   const satisfies = function () {} satisfies () => void;
@@ -409,7 +409,7 @@ invalid.ts:46:25 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   
   i Function expressions that don't use this can be turned into arrow functions.
   
-  i Safe fix: Use an arrow function instead.
+  i Unsafe fix: Use an arrow function instead.
   
     44 44 │   const satisfies = function () {} satisfies () => void;
     45 45 │   const unary = +function () {};
@@ -435,7 +435,7 @@ invalid.ts:48:28 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   
   i Function expressions that don't use this can be turned into arrow functions.
   
-  i Safe fix: Use an arrow function instead.
+  i Unsafe fix: Use an arrow function instead.
   
     46 46 │   const conditionalTest = function () {} ? true : false;
     47 47 │   class ExtendsClause extends function() {} {};
@@ -461,7 +461,7 @@ invalid.ts:49:14 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   
   i Function expressions that don't use this can be turned into arrow functions.
   
-  i Safe fix: Use an arrow function instead.
+  i Unsafe fix: Use an arrow function instead.
   
     47 47 │   class ExtendsClause extends function() {} {};
     48 48 │   const non_null_assertion = function () {}!;
@@ -487,7 +487,7 @@ invalid.ts:50:22 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   
   i Function expressions that don't use this can be turned into arrow functions.
   
-  i Safe fix: Use an arrow function instead.
+  i Unsafe fix: Use an arrow function instead.
   
     48 48 │   const non_null_assertion = function () {}!;
     49 49 │   const call = function () {}();
@@ -513,7 +513,7 @@ invalid.ts:51:24 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   
   i Function expressions that don't use this can be turned into arrow functions.
   
-  i Safe fix: Use an arrow function instead.
+  i Unsafe fix: Use an arrow function instead.
   
     49 49 │   const call = function () {}();
     50 50 │   const staticMember = function(a) {}.bind(null, 0);
@@ -539,7 +539,7 @@ invalid.ts:52:26 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   
   i Function expressions that don't use this can be turned into arrow functions.
   
-  i Safe fix: Use an arrow function instead.
+  i Unsafe fix: Use an arrow function instead.
   
     50 50 │   const staticMember = function(a) {}.bind(null, 0);
     51 51 │   const computedMember = function(a) {}["bind"](null, 0);
@@ -565,7 +565,7 @@ invalid.ts:53:24 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   
   i Function expressions that don't use this can be turned into arrow functions.
   
-  i Safe fix: Use an arrow function instead.
+  i Unsafe fix: Use an arrow function instead.
   
     51 51 │   const computedMember = function(a) {}["bind"](null, 0);
     52 52 │   const logical = false || function () {};
@@ -595,7 +595,7 @@ invalid.ts:55:23 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   
   i Function expressions that don't use this can be turned into arrow functions.
   
-  i Safe fix: Use an arrow function instead.
+  i Unsafe fix: Use an arrow function instead.
   
     53 53 │   const binary = false + function () {};
     54 54 │   
@@ -623,7 +623,7 @@ invalid.ts:61:27 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   
   i Function expressions that don't use this can be turned into arrow functions.
   
-  i Safe fix: Use an arrow function instead.
+  i Unsafe fix: Use an arrow function instead.
   
     59 59 │   
     60 60 │   // https://github.com/biomejs/biome/issues/4967
@@ -653,7 +653,7 @@ invalid.ts:65:27 lint/complexity/useArrowFunction  FIXABLE  ━━━━━━�
   
   i Function expressions that don't use this can be turned into arrow functions.
   
-  i Safe fix: Use an arrow function instead.
+  i Unsafe fix: Use an arrow function instead.
   
     63 63 │   }
     64 64 │   

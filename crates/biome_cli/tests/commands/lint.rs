@@ -3206,6 +3206,47 @@ fn lint_only_write() {
 }
 
 #[test]
+fn lint_only_write_unsafe() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let config = r#"{}"#;
+    let content = r#"
+    export const z = function (array) {
+        array.map((sentence) => sentence.split(" ")).flat();
+        return 0;
+    };
+    "#;
+
+    let file_path = Utf8Path::new("check.js");
+    fs.insert(file_path.into(), content.as_bytes());
+    let config_path = Utf8Path::new("biome.json");
+    fs.insert(config_path.into(), config.as_bytes());
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--write",
+                "--unsafe",
+                "--only=complexity/useArrowFunction",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_only_write_unsafe",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn lint_skip_rule() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

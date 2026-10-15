@@ -27,6 +27,10 @@ declare_lint_rule! {
     /// with an important distinction:
     /// `this` is not bound to the arrow function. It inherits `this` from its parent scope.
     ///
+    /// The code action is unsafe. A `function` expression has a `prototype` property
+    /// and an arrow function does not, so applying the fix can change the behavior of
+    /// code that reads that property.
+    ///
     /// This rule proposes turning all function expressions that are not generators (`function*`) and don't use `this` into arrow functions.
     ///
     /// This rule does not modify top-level function declarations ([discuss here](https://github.com/biomejs/biome/discussions/7108)).
@@ -93,7 +97,8 @@ declare_lint_rule! {
         sources: &[RuleSource::Eslint("prefer-arrow-callback").inspired()],
         recommended: true,
         severity: Severity::Warning,
-        fix_kind: FixKind::Safe,
+        // A function expression has a `prototype`; an arrow function does not.
+        fix_kind: FixKind::Unsafe,
     }
 }
 
