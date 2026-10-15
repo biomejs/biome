@@ -552,7 +552,7 @@ fn clean_interned(
                     | FormatElement::Tag(
                         Tag::StartConditionalContent(_) | Tag::EndConditionalContent,
                     )
-                    | FormatElement::BestFitting(_) => {
+                    | FormatElement::BestFitting(..) => {
                         let mut cleaned = Vec::new();
                         cleaned.extend_from_slice(&interned[..index]);
                         Some((cleaned, &interned[index..]))
@@ -606,7 +606,7 @@ fn clean_interned(
                                 }
                                 // Since this buffer aims to simulate infinite print width, we don't need to retain the best fitting.
                                 // Just extract the flattest variant and then handle elements within it.
-                                FormatElement::BestFitting(best_fitting) => {
+                                FormatElement::BestFitting(best_fitting, _) => {
                                     let most_flat = best_fitting.most_flat();
                                     most_flat
                                         .iter()
@@ -658,7 +658,7 @@ impl<Context> Buffer for RemoveSoftLinesBuffer<'_, Context> {
                 }
                 // Since this buffer aims to simulate infinite print width, we don't need to retain the best fitting.
                 // Just extract the flattest variant and then handle elements within it.
-                FormatElement::BestFitting(best_fitting) => {
+                FormatElement::BestFitting(best_fitting, _) => {
                     let most_flat = best_fitting.most_flat();
                     most_flat
                         .iter()

@@ -9,7 +9,11 @@ use crate::prelude::*;
 use crate::utils::function_body::FunctionBodyCacheMode;
 use crate::utils::member_chain::SimpleArgument;
 use crate::utils::{is_long_curried_call, write_arguments_multi_line};
-use biome_formatter::{VecBuffer, format_args, format_element::BestFittingVariants, write};
+use biome_formatter::{
+    VecBuffer, format_args,
+    format_element::{BestFittingMode, BestFittingVariants},
+    write,
+};
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsStatement,
     AnyTsReturnType, AnyTsType, JsBinaryExpressionFields, JsCallArgumentList, JsCallArguments,
@@ -681,6 +685,7 @@ fn write_grouped_arguments(
     unsafe {
         f.write_element(FormatElement::BestFitting(
             BestFittingVariants::from_vec_unchecked(variants),
+            BestFittingMode::FirstLine,
         ))
     }
 }

@@ -1,5 +1,5 @@
-use crate::format_element::PrintMode;
 use crate::format_element::tag::TagKind;
+use crate::format_element::{BestFittingMode, PrintMode};
 use crate::prelude::AlignedStr;
 use crate::printer::Indention;
 use crate::printer::stack::{Stack, StackedStack};
@@ -27,6 +27,42 @@ pub(super) struct StackFrame {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub(super) struct PrintElementArgs {
     mode: PrintMode,
+    measure_mode: MeasureMode,
+}
+
+/// How the printer tests if content fits.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub(super) enum MeasureMode {
+    /// See [BestFittingMode::FirstLine].
+    FirstLine,
+
+    /// See [BestFittingMode::AllLines].
+    AllLines,
+
+    /// Like [MeasureMode::AllLines], but text may exceed the print width.
+    /// See [crate::builders::allow_overflow].
+    AllLinesAllowOverflow,
+}
+
+impl MeasureMode {
+    /// Returns `true` if line breaks don't end the measurement.
+    pub(super) const fn measures_all_lines(self) -> bool {
+        matches!(self, Self::AllLines | Self::AllLinesAllowOverflow)
+    }
+
+    /// Returns `true` if text may exceed the print width.
+    pub(super) const fn allows_overflow(self) -> bool {
+        matches!(self, Self::AllLinesAllowOverflow)
+    }
+}
+
+impl From<BestFittingMode> for MeasureMode {
+    fn from(mode: BestFittingMode) -> Self {
+        match mode {
+            BestFittingMode::FirstLine => Self::FirstLine,
+            BestFittingMode::AllLines => Self::AllLines,
+        }
+    }
 }
 
 impl PrintElementArgs {
@@ -42,12 +78,22 @@ impl PrintElementArgs {
         self.mode = mode;
         self
     }
+
+    pub(super) fn measure_mode(&self) -> MeasureMode {
+        self.measure_mode
+    }
+
+    pub(super) fn with_measure_mode(mut self, measure_mode: MeasureMode) -> Self {
+        self.measure_mode = measure_mode;
+        self
+    }
 }
 
 impl Default for PrintElementArgs {
     fn default() -> Self {
         Self {
             mode: PrintMode::Expanded,
+            measure_mode: MeasureMode::FirstLine,
         }
     }
 }

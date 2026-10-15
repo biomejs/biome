@@ -712,6 +712,90 @@ impl<Context> Format<Context> for LineSuffixBoundary {
     }
 }
 
+/// Marks content whose lines may exceed the print width when the printer tests
+/// if the surrounding content fits.
+///
+/// When a test of whether content fits reaches `content`, the printer measures
+/// every line of `content`, even when the test otherwise ends at the first line
+/// break, and text inside `content` may exceed the print width. A test that
+/// starts inside `content`, such as the test of a group inside `content`,
+/// measures as usual. Content that follows
+/// `content` on its last line is measured from the end of `content`, so the
+/// test fails if that line is already too wide. The printer prints `content`
+/// the same as without the marker.
+///
+/// When the printer tests if a [`fill`](Formatter::fill) entry fits, which
+/// requires the entry to fit on a single line, line breaks inside `content`
+/// end the test as they do without the marker.
+///
+/// Use it with [`BestFittingMode::AllLines`] to exempt the lines of `content`
+/// from the width check, while every other line of a
+/// [`best_fitting!`](crate::best_fitting) variant must still fit. Place a line
+/// break right after `content` so that later content doesn't continue its last
+/// line.
+///
+/// # Examples
+///
+/// The first variant is printed because its last line fits, although its
+/// first line exceeds the print width.
+///
+/// ```
+/// use biome_formatter::{format, format_args, LineWidth, SimpleFormatOptions};
+/// use biome_formatter::prelude::*;
+///
+/// # fn main() -> FormatResult<()> {
+/// let context = SimpleFormatContext::new(SimpleFormatOptions {
+///     line_width: LineWidth::try_from(10).unwrap(),
+///     ..SimpleFormatOptions::default()
+/// });
+///
+/// let formatted = format!(context, [
+///     best_fitting!(
+///         format_args![
+///             allow_overflow(&token("aaaaaaaaaaaaaaa")),
+///             hard_line_break(),
+///             token("b")
+///         ],
+///         token("c")
+///     )
+///     .with_mode(BestFittingMode::AllLines)
+/// ])?;
+///
+/// assert_eq!("aaaaaaaaaaaaaaa\nb", formatted.print()?.as_code());
+/// # Ok(())
+/// # }
+/// ```
+#[inline]
+pub fn allow_overflow<Content, Context>(content: &Content) -> AllowOverflow<'_, Context>
+where
+    Content: Format<Context>,
+{
+    AllowOverflow {
+        content: Argument::new(content),
+    }
+}
+
+#[derive(Copy, Clone)]
+pub struct AllowOverflow<'a, Context> {
+    content: Argument<'a, Context>,
+}
+
+impl<Context> Format<Context> for AllowOverflow<'_, Context> {
+    fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+        f.write_element(FormatElement::Tag(StartAllowOverflow))?;
+        Arguments::from(&self.content).fmt(f)?;
+        f.write_element(FormatElement::Tag(EndAllowOverflow))
+    }
+}
+
+impl<Context> std::fmt::Debug for AllowOverflow<'_, Context> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("AllowOverflow")
+            .field(&"{{content}}")
+            .finish()
+    }
+}
+
 /// Marks some content with a label.
 ///
 /// This does not directly influence how this content will be printed, but some
@@ -2918,6 +3002,7 @@ impl<'a, 'buf, Context> FillBuilder<'a, 'buf, Context> {
 #[derive(Copy, Clone)]
 pub struct BestFitting<'a, Context> {
     variants: Arguments<'a, Context>,
+    mode: BestFittingMode,
 }
 
 impl<'a, Context> BestFitting<'a, Context> {
@@ -2941,7 +3026,17 @@ impl<'a, Context> BestFitting<'a, Context> {
             "Requires at least the least expanded and most expanded variants"
         );
 
-        Self { variants }
+        Self {
+            variants,
+            mode: BestFittingMode::default(),
+        }
+    }
+
+    /// Changes how the printer tests whether a variant fits. Defaults to
+    /// [BestFittingMode::FirstLine]. See [BestFittingMode].
+    pub fn with_mode(mut self, mode: BestFittingMode) -> Self {
+        self.mode = mode;
+        self
     }
 }
 
@@ -2960,7 +3055,10 @@ impl<Context> Format<Context> for BestFitting<'_, Context> {
         // SAFETY: The constructor guarantees that there are always at least two variants. It's, therefore,
         // safe to call into the unsafe `from_vec_unchecked` function
         let element = unsafe {
-            FormatElement::BestFitting(BestFittingVariants::from_vec_unchecked(buffer.into_vec()))
+            FormatElement::BestFitting(
+                BestFittingVariants::from_vec_unchecked(buffer.into_vec()),
+                self.mode,
+            )
         };
 
         f.write_element(element)
