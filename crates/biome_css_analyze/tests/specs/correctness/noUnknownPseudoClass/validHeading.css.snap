@@ -1,0 +1,31 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: validHeading.css
+---
+# Input
+```css
+/* should not generate diagnostics */
+:heading {}
+:HEADING {}
+:h\65 ading {}
+:\68 eading {}
+:\000048 EADING {}
+:heading(1) {}
+:heading(1, 2, 3) {}
+:heading(0, -1, +7, 99999) {}
+:HeAdInG(1, 2) {}
+:h\65 ading(1, 2) {}
+:\68 eading(1) {}
+:\000048 EADING(1) {}
+:heading(/* before */ 1 /* first */, /* second */ 2 /* after */) {}
+.article :heading(1, 2) {}
+:is(:heading(1, 2), h3) {}
+:where(:heading(1, 2)) {}
+@supports selector(:heading(1, 2)) {
+  :heading(1, 2) {}
+}
+:lang(en, "fr") {}
+:nth-child(2n+1) {}
+:nth-of-type(odd) {}
+
+```

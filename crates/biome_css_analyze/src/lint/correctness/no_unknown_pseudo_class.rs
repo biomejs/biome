@@ -14,10 +14,11 @@ use biome_console::markup;
 use biome_css_syntax::{
     AnyCssSelectorIdentifier, CssBogusPseudoClass, CssPageSelectorPseudo,
     CssPseudoClassFunctionCompoundSelector, CssPseudoClassFunctionCompoundSelectorList,
-    CssPseudoClassFunctionIdentifier, CssPseudoClassFunctionNth,
+    CssPseudoClassFunctionHeading, CssPseudoClassFunctionIdentifier, CssPseudoClassFunctionNth,
     CssPseudoClassFunctionRelativeSelectorList, CssPseudoClassFunctionSelector,
     CssPseudoClassFunctionSelectorList, CssPseudoClassFunctionValueList, CssPseudoClassIdentifier,
     CssPseudoElementSelector, CssSyntaxToken, ScssInterpolatedPseudoClassFunction,
+    decode_css_identifier,
     keywords::{WEBKIT_SCROLLBAR_PSEUDO_CLASSES, WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS},
 };
 use biome_diagnostics::Severity;
@@ -109,6 +110,7 @@ declare_node_union! {
   pub AnyPseudoLike =
       CssPseudoClassFunctionCompoundSelector
       | CssPseudoClassFunctionCompoundSelectorList
+      | CssPseudoClassFunctionHeading
       | CssPseudoClassFunctionIdentifier
       | CssPseudoClassFunctionNth
       | CssPseudoClassFunctionRelativeSelectorList
@@ -157,7 +159,18 @@ impl Rule for NoUnknownPseudoClass {
             }
         };
 
-        let lower_name = name.text_trimmed().to_ascii_lowercase_cow();
+        let decoded_name = match pseudo_class {
+            AnyPseudoLike::CssPseudoClassFunctionHeading(_) => {
+                decode_css_identifier(name.text_trimmed())
+            }
+            AnyPseudoLike::CssPseudoClassIdentifier(_)
+                if decode_css_identifier(name.text_trimmed()).eq_ignore_ascii_case("heading") =>
+            {
+                "heading".into()
+            }
+            _ => name.text_trimmed().into(),
+        };
+        let lower_name = decoded_name.to_ascii_lowercase_cow();
         let lower_name = lower_name.as_ref();
 
         let is_valid_class = match pseudo_type {
@@ -236,6 +249,7 @@ impl AnyPseudoLike {
             Self::CssBogusPseudoClass(_) => return None,
             Self::CssPseudoClassFunctionCompoundSelector(selector) => selector.name(),
             Self::CssPseudoClassFunctionCompoundSelectorList(selector_list) => selector_list.name(),
+            Self::CssPseudoClassFunctionHeading(heading) => heading.name(),
             Self::CssPseudoClassFunctionIdentifier(ident) => ident.name(),
             Self::CssPseudoClassFunctionNth(func_nth) => func_nth.name(),
             Self::CssPseudoClassFunctionRelativeSelectorList(selector_list) => selector_list.name(),

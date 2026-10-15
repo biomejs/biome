@@ -945,7 +945,7 @@ pub const RESOURCE_STATE_PSEUDO_CLASSES: [&str; 7] = [
     "volume-locked",
 ];
 
-pub const OTHER_PSEUDO_CLASSES: [&str; 57] = [
+pub const OTHER_PSEUDO_CLASSES: [&str; 58] = [
     "active",
     "active-view-transition",
     "active-view-transition-type",
@@ -968,6 +968,7 @@ pub const OTHER_PSEUDO_CLASSES: [&str; 57] = [
     "fullscreen-ancestor",
     "future",
     "has-slotted",
+    "heading",
     "host",
     "host-context",
     "hover",
