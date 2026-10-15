@@ -3,9 +3,10 @@ use biome_console::markup;
 use biome_css_syntax::{
     AnyCssPseudoClass, AnyCssPseudoElement, CssIdentifier, CssPseudoClassFunctionRelativeSelectorList,
     CssPseudoClassFunctionSelectorList, CssPseudoClassSelector, CssPseudoElementSelector,
+    CssSyntaxToken,
 };
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, SyntaxResult, declare_node_union};
+use biome_rowan::{AstNode, SyntaxResult, TextRange, declare_node_union};
 use biome_rule_options::no_pseudo_element_in_functional_pseudo_class::NoPseudoElementInFunctionalPseudoClassOptions;
 
 declare_lint_rule! {
@@ -62,7 +63,7 @@ declare_lint_rule! {
 
 impl Rule for NoPseudoElementInFunctionalPseudoClass {
     type Query = Ast<AnyPseudoElementLike>;
-    type State = AnyFunctionalPseudoClass;
+    type State = (TextRange, CssSyntaxToken);
     type Signals = Option<Self::State>;
     type Options = NoPseudoElementInFunctionalPseudoClassOptions;
 
@@ -74,8 +75,8 @@ impl Rule for NoPseudoElementInFunctionalPseudoClass {
             return None;
         }
         for ancestor in node.syntax().ancestors().skip(1) {
-            if AnyFunctionalPseudoClass::can_cast(ancestor.kind()) {
-                return AnyFunctionalPseudoClass::cast(ancestor);
+            if let Some(pseudo_class) = AnyFunctionalPseudoClass::cast_ref(&ancestor) {
+                return Some((node.range(), pseudo_class.name().ok()?.value_token().ok()?));
             }
             // Other functional pseudo-classes and pseudo-elements, such as `:host()` and
             // `::slotted()`, aren't checked, even when they are inside `:is()`.
@@ -88,17 +89,13 @@ impl Rule for NoPseudoElementInFunctionalPseudoClass {
         None
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
-        let pseudo_element = node.to_trimmed_string();
-        let name = state.name().ok()?;
-        let name = name.value_token().ok()?;
+    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                node.range(),
+                state.0,
                 markup! {
-                    "The pseudo-element "<Emphasis>{pseudo_element}</Emphasis>" can't be used inside "<Emphasis>":"{name.text_trimmed()}"()"</Emphasis>"."
+                    "This pseudo-element can't be used inside :"{state.1.text_trimmed()}"()."
                 },
             )
             .note(markup! {

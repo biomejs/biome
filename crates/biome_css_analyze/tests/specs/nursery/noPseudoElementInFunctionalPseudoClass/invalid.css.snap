@@ -22,7 +22,7 @@ expression: invalid.css
 ```
 invalid.css:2:7 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The pseudo-element ::before can't be used inside :is().
+  × This pseudo-element can't be used inside :is().
   
     1 │ /* should generate diagnostics */
   > 2 │ .a:is(::before, ::after) {}
@@ -42,7 +42,7 @@ invalid.css:2:7 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━━
 ```
 invalid.css:2:17 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The pseudo-element ::after can't be used inside :is().
+  × This pseudo-element can't be used inside :is().
   
     1 │ /* should generate diagnostics */
   > 2 │ .a:is(::before, ::after) {}
@@ -62,7 +62,7 @@ invalid.css:2:17 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━�
 ```
 invalid.css:3:12 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The pseudo-element ::before can't be used inside :where().
+  × This pseudo-element can't be used inside :where().
   
     1 │ /* should generate diagnostics */
     2 │ .a:is(::before, ::after) {}
@@ -83,7 +83,7 @@ invalid.css:3:12 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━�
 ```
 invalid.css:4:8 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The pseudo-element ::marker can't be used inside :not().
+  × This pseudo-element can't be used inside :not().
   
     2 │ .a:is(::before, ::after) {}
     3 │ .a:where(.b::before) {}
@@ -104,7 +104,7 @@ invalid.css:4:8 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━━
 ```
 invalid.css:5:10 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The pseudo-element ::before can't be used inside :has().
+  × This pseudo-element can't be used inside :has().
   
     3 │ .a:where(.b::before) {}
     4 │ .a:not(::marker) {}
@@ -125,7 +125,7 @@ invalid.css:5:10 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━�
 ```
 invalid.css:6:12 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The pseudo-element ::selection can't be used inside :matches().
+  × This pseudo-element can't be used inside :matches().
   
     4 │ .a:not(::marker) {}
     5 │ .a:has(> ::before) {}
@@ -146,7 +146,7 @@ invalid.css:6:12 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━�
 ```
 invalid.css:7:7 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The pseudo-element :before can't be used inside :is().
+  × This pseudo-element can't be used inside :is().
   
     5 │ .a:has(> ::before) {}
     6 │ .a:matches(::selection) {}
@@ -167,7 +167,7 @@ invalid.css:7:7 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━━
 ```
 invalid.css:7:16 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The pseudo-element :AFTER can't be used inside :is().
+  × This pseudo-element can't be used inside :is().
   
     5 │ .a:has(> ::before) {}
     6 │ .a:matches(::selection) {}
@@ -188,7 +188,7 @@ invalid.css:7:16 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━�
 ```
 invalid.css:7:24 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The pseudo-element :first-line can't be used inside :is().
+  × This pseudo-element can't be used inside :is().
   
     5 │ .a:has(> ::before) {}
     6 │ .a:matches(::selection) {}
@@ -209,7 +209,7 @@ invalid.css:7:24 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━�
 ```
 invalid.css:7:37 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The pseudo-element :first-letter can't be used inside :is().
+  × This pseudo-element can't be used inside :is().
   
     5 │ .a:has(> ::before) {}
     6 │ .a:matches(::selection) {}
@@ -230,7 +230,7 @@ invalid.css:7:37 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━�
 ```
 invalid.css:8:7 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The pseudo-element ::part(label) can't be used inside :IS().
+  × This pseudo-element can't be used inside :IS().
   
      6 │ .a:matches(::selection) {}
      7 │ .a:is(:before, :AFTER, :first-line, :first-letter) {}
@@ -251,7 +251,7 @@ invalid.css:8:7 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━━
 ```
 invalid.css:9:14 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The pseudo-element ::before can't be used inside :not().
+  × This pseudo-element can't be used inside :not().
   
      7 │ .a:is(:before, :AFTER, :first-line, :first-letter) {}
      8 │ .a:IS(::part(label)) {}
@@ -272,7 +272,7 @@ invalid.css:9:14 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━�
 ```
 invalid.css:10:13 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The pseudo-element ::-webkit-scrollbar can't be used inside :is().
+  × This pseudo-element can't be used inside :is().
   
      8 │ .a:IS(::part(label)) {}
      9 │ .a:is(.b:not(::before)) {}
@@ -293,7 +293,7 @@ invalid.css:10:13 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━�
 ```
 invalid.css:11:7 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The pseudo-element ::slotted(::before) can't be used inside :is().
+  × This pseudo-element can't be used inside :is().
   
      9 │ .a:is(.b:not(::before)) {}
     10 │ .a:is(.b, .c::-webkit-scrollbar) {}
