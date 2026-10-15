@@ -136,12 +136,10 @@ impl Rule for UseConsistentBuiltinInstantiation {
             .note(match state.creation_rule {
                 BuiltinCreationRule::MustUseNew => markup! {
                     "Using "<Emphasis>"new"</Emphasis>" for builtins keeps the code consistent with other constructors."
-                }
-                .to_owned(),
+                },
                 BuiltinCreationRule::MustNotUseNew => markup! {
                     "Using "<Emphasis>"new"</Emphasis>" with this builtin creates a wrapper object instead of a primitive value."
-                }
-                .to_owned(),
+                },
             }),
         )
     }
