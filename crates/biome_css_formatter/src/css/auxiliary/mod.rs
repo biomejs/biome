@@ -123,6 +123,7 @@ pub(crate) mod snippet_root;
 pub(crate) mod starting_style_at_rule_declarator;
 pub(crate) mod supports_and_condition;
 pub(crate) mod supports_at_rule_declarator;
+pub(crate) mod supports_at_rule_fallback;
 pub(crate) mod supports_condition_in_parens;
 pub(crate) mod supports_feature_declaration;
 pub(crate) mod supports_not_condition;

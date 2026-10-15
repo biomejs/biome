@@ -1,4 +1,7 @@
+mod supports;
 mod url;
+
+pub(crate) use supports::SupportsAtRuleScanCache;
 
 use super::{CssStringQuote, source_cursor::SourceCursor};
 use biome_css_syntax::{TextRange, TextSize, is_css_newline_byte, is_css_whitespace_byte};

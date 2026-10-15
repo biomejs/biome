@@ -8,7 +8,7 @@ use biome_formatter::trivia::{
 };
 use biome_formatter::{
     Buffer, CstFormatContext, Format, FormatContext, FormatElement, FormatError, FormatResult,
-    FormatWithRule, LINE_TERMINATORS, normalize_newlines,
+    FormatWithRule, normalize_newlines,
 };
 #[cfg(debug_assertions)]
 use biome_rowan::SyntaxElement;
@@ -31,6 +31,20 @@ pub fn format_css_verbatim_node(node: &CssSyntaxNode) -> FormatCssVerbatimNode<'
             length: node.text_range_with_trivia().len(),
         },
         format_comments: true,
+    }
+}
+
+/// Preserves opaque fields, normalizing CR and CRLF line endings.
+/// The enclosing node rule formats outer comments.
+///
+/// ```scss
+/// .icon { --image: url(icons/logo.svg); }
+/// ```
+pub(crate) fn format_css_verbatim_fields(node: &CssSyntaxNode) -> FormatCssVerbatimNode<'_> {
+    FormatCssVerbatimNode {
+        node,
+        kind: VerbatimKind::Skipped,
+        format_comments: false,
     }
 }
 
@@ -138,7 +152,7 @@ impl Format<CssFormatContext> for FormatCssVerbatimNode<'_> {
                 .map_or_else(|| range, |source_map| source_map.source_range(range))
         }
 
-        let preserve_outer_trivia = self.node.parent().is_none();
+        let preserve_outer_trivia = self.format_comments && self.node.parent().is_none();
 
         #[cfg(debug_assertions)]
         for element in self.node.descendants_with_tokens(Direction::Next) {
@@ -219,11 +233,9 @@ impl Format<CssFormatContext> for FormatCssVerbatimNode<'_> {
             },
         );
 
-        text(
-            &normalize_newlines(&original_source, LINE_TERMINATORS),
-            Some(verbatim_text_start),
-        )
-        .fmt(f)?;
+        // Unicode separators are literal data in CSS, including suppressed strings.
+        let normalized_source = normalize_newlines(&original_source, ['\r']);
+        text(&normalized_source, Some(verbatim_text_start)).fmt(f)?;
 
         for comment in f.context().comments().dangling_comments(self.node) {
             comment.mark_formatted();

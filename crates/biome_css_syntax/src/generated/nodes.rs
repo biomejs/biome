@@ -8120,6 +8120,56 @@ pub struct CssSupportsAtRuleDeclaratorFields {
     pub condition: SyntaxResult<AnyCssSupportsCondition>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssSupportsAtRuleFallback {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssSupportsAtRuleFallback {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssSupportsAtRuleFallbackFields {
+        CssSupportsAtRuleFallbackFields {
+            name: self.name(),
+            l_paren_token: self.l_paren_token(),
+            value: self.value(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn name(&self) -> SyntaxResult<CssCustomIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn value(&self) -> SyntaxResult<CssSupportsAtRuleFallbackValue> {
+        support::required_node(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for CssSupportsAtRuleFallback {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssSupportsAtRuleFallbackFields {
+    pub name: SyntaxResult<CssCustomIdentifier>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub value: SyntaxResult<CssSupportsAtRuleFallbackValue>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssSupportsConditionInParens {
     pub(crate) syntax: SyntaxNode,
 }
@@ -8162,6 +8212,61 @@ impl Serialize for CssSupportsConditionInParens {
 pub struct CssSupportsConditionInParensFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub condition: SyntaxResult<AnyCssSupportsCondition>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssSupportsFeatureAtRule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssSupportsFeatureAtRule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssSupportsFeatureAtRuleFields {
+        CssSupportsFeatureAtRuleFields {
+            name: self.name(),
+            l_paren_token: self.l_paren_token(),
+            at_token: self.at_token(),
+            at_rule: self.at_rule(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn name(&self) -> SyntaxResult<CssCustomIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn at_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+    pub fn at_rule(&self) -> SyntaxResult<CssCustomIdentifier> {
+        support::required_node(&self.syntax, 3usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 4usize)
+    }
+}
+impl Serialize for CssSupportsFeatureAtRule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssSupportsFeatureAtRuleFields {
+    pub name: SyntaxResult<CssCustomIdentifier>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub at_token: SyntaxResult<SyntaxToken>,
+    pub at_rule: SyntaxResult<CssCustomIdentifier>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -17691,7 +17796,9 @@ impl AnyCssSupportsCondition {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssSupportsInParens {
     AnyCssValue(AnyCssValue),
+    CssSupportsAtRuleFallback(CssSupportsAtRuleFallback),
     CssSupportsConditionInParens(CssSupportsConditionInParens),
+    CssSupportsFeatureAtRule(CssSupportsFeatureAtRule),
     CssSupportsFeatureDeclaration(CssSupportsFeatureDeclaration),
     CssSupportsFeatureSelector(CssSupportsFeatureSelector),
     ScssSupportsFeatureDeclaration(ScssSupportsFeatureDeclaration),
@@ -17704,9 +17811,21 @@ impl AnyCssSupportsInParens {
             _ => None,
         }
     }
+    pub fn as_css_supports_at_rule_fallback(&self) -> Option<&CssSupportsAtRuleFallback> {
+        match &self {
+            Self::CssSupportsAtRuleFallback(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_css_supports_condition_in_parens(&self) -> Option<&CssSupportsConditionInParens> {
         match &self {
             Self::CssSupportsConditionInParens(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_supports_feature_at_rule(&self) -> Option<&CssSupportsFeatureAtRule> {
+        match &self {
+            Self::CssSupportsFeatureAtRule(item) => Some(item),
             _ => None,
         }
     }
@@ -28825,6 +28944,62 @@ impl From<CssSupportsAtRuleDeclarator> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssSupportsAtRuleFallback {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SUPPORTS_AT_RULE_FALLBACK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_SUPPORTS_AT_RULE_FALLBACK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssSupportsAtRuleFallback {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssSupportsAtRuleFallback")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("value", &support::DebugSyntaxResult(self.value()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssSupportsAtRuleFallback").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssSupportsAtRuleFallback> for SyntaxNode {
+    fn from(n: CssSupportsAtRuleFallback) -> Self {
+        n.syntax
+    }
+}
+impl From<CssSupportsAtRuleFallback> for SyntaxElement {
+    fn from(n: CssSupportsAtRuleFallback) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssSupportsConditionInParens {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -28877,6 +29052,63 @@ impl From<CssSupportsConditionInParens> for SyntaxNode {
 }
 impl From<CssSupportsConditionInParens> for SyntaxElement {
     fn from(n: CssSupportsConditionInParens) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssSupportsFeatureAtRule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SUPPORTS_FEATURE_AT_RULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_SUPPORTS_FEATURE_AT_RULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssSupportsFeatureAtRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssSupportsFeatureAtRule")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("at_token", &support::DebugSyntaxResult(self.at_token()))
+                .field("at_rule", &support::DebugSyntaxResult(self.at_rule()))
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssSupportsFeatureAtRule").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssSupportsFeatureAtRule> for SyntaxNode {
+    fn from(n: CssSupportsFeatureAtRule) -> Self {
+        n.syntax
+    }
+}
+impl From<CssSupportsFeatureAtRule> for SyntaxElement {
+    fn from(n: CssSupportsFeatureAtRule) -> Self {
         n.syntax.into()
     }
 }
@@ -46027,9 +46259,19 @@ impl From<AnyCssSupportsCondition> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssSupportsAtRuleFallback> for AnyCssSupportsInParens {
+    fn from(node: CssSupportsAtRuleFallback) -> Self {
+        Self::CssSupportsAtRuleFallback(node)
+    }
+}
 impl From<CssSupportsConditionInParens> for AnyCssSupportsInParens {
     fn from(node: CssSupportsConditionInParens) -> Self {
         Self::CssSupportsConditionInParens(node)
+    }
+}
+impl From<CssSupportsFeatureAtRule> for AnyCssSupportsInParens {
+    fn from(node: CssSupportsFeatureAtRule) -> Self {
+        Self::CssSupportsFeatureAtRule(node)
     }
 }
 impl From<CssSupportsFeatureDeclaration> for AnyCssSupportsInParens {
@@ -46055,14 +46297,18 @@ impl From<ScssSupportsInterpolatedCondition> for AnyCssSupportsInParens {
 impl AstNode for AnyCssSupportsInParens {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssValue::KIND_SET
+        .union(CssSupportsAtRuleFallback::KIND_SET)
         .union(CssSupportsConditionInParens::KIND_SET)
+        .union(CssSupportsFeatureAtRule::KIND_SET)
         .union(CssSupportsFeatureDeclaration::KIND_SET)
         .union(CssSupportsFeatureSelector::KIND_SET)
         .union(ScssSupportsFeatureDeclaration::KIND_SET)
         .union(ScssSupportsInterpolatedCondition::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_SUPPORTS_CONDITION_IN_PARENS
+            CSS_SUPPORTS_AT_RULE_FALLBACK
+            | CSS_SUPPORTS_CONDITION_IN_PARENS
+            | CSS_SUPPORTS_FEATURE_AT_RULE
             | CSS_SUPPORTS_FEATURE_DECLARATION
             | CSS_SUPPORTS_FEATURE_SELECTOR
             | SCSS_SUPPORTS_FEATURE_DECLARATION
@@ -46073,8 +46319,14 @@ impl AstNode for AnyCssSupportsInParens {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            CSS_SUPPORTS_AT_RULE_FALLBACK => {
+                Self::CssSupportsAtRuleFallback(CssSupportsAtRuleFallback { syntax })
+            }
             CSS_SUPPORTS_CONDITION_IN_PARENS => {
                 Self::CssSupportsConditionInParens(CssSupportsConditionInParens { syntax })
+            }
+            CSS_SUPPORTS_FEATURE_AT_RULE => {
+                Self::CssSupportsFeatureAtRule(CssSupportsFeatureAtRule { syntax })
             }
             CSS_SUPPORTS_FEATURE_DECLARATION => {
                 Self::CssSupportsFeatureDeclaration(CssSupportsFeatureDeclaration { syntax })
@@ -46101,7 +46353,9 @@ impl AstNode for AnyCssSupportsInParens {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::CssSupportsAtRuleFallback(it) => it.syntax(),
             Self::CssSupportsConditionInParens(it) => it.syntax(),
+            Self::CssSupportsFeatureAtRule(it) => it.syntax(),
             Self::CssSupportsFeatureDeclaration(it) => it.syntax(),
             Self::CssSupportsFeatureSelector(it) => it.syntax(),
             Self::ScssSupportsFeatureDeclaration(it) => it.syntax(),
@@ -46111,7 +46365,9 @@ impl AstNode for AnyCssSupportsInParens {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::CssSupportsAtRuleFallback(it) => it.into_syntax(),
             Self::CssSupportsConditionInParens(it) => it.into_syntax(),
+            Self::CssSupportsFeatureAtRule(it) => it.into_syntax(),
             Self::CssSupportsFeatureDeclaration(it) => it.into_syntax(),
             Self::CssSupportsFeatureSelector(it) => it.into_syntax(),
             Self::ScssSupportsFeatureDeclaration(it) => it.into_syntax(),
@@ -46124,7 +46380,9 @@ impl std::fmt::Debug for AnyCssSupportsInParens {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AnyCssValue(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssSupportsAtRuleFallback(it) => std::fmt::Debug::fmt(it, f),
             Self::CssSupportsConditionInParens(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssSupportsFeatureAtRule(it) => std::fmt::Debug::fmt(it, f),
             Self::CssSupportsFeatureDeclaration(it) => std::fmt::Debug::fmt(it, f),
             Self::CssSupportsFeatureSelector(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssSupportsFeatureDeclaration(it) => std::fmt::Debug::fmt(it, f),
@@ -46136,7 +46394,9 @@ impl From<AnyCssSupportsInParens> for SyntaxNode {
     fn from(n: AnyCssSupportsInParens) -> Self {
         match n {
             AnyCssSupportsInParens::AnyCssValue(it) => it.into_syntax(),
+            AnyCssSupportsInParens::CssSupportsAtRuleFallback(it) => it.into_syntax(),
             AnyCssSupportsInParens::CssSupportsConditionInParens(it) => it.into_syntax(),
+            AnyCssSupportsInParens::CssSupportsFeatureAtRule(it) => it.into_syntax(),
             AnyCssSupportsInParens::CssSupportsFeatureDeclaration(it) => it.into_syntax(),
             AnyCssSupportsInParens::CssSupportsFeatureSelector(it) => it.into_syntax(),
             AnyCssSupportsInParens::ScssSupportsFeatureDeclaration(it) => it.into_syntax(),
@@ -51404,7 +51664,17 @@ impl std::fmt::Display for CssSupportsAtRuleDeclarator {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssSupportsAtRuleFallback {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssSupportsConditionInParens {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssSupportsFeatureAtRule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -53882,6 +54152,62 @@ impl From<CssBogusUrlModifier> for SyntaxElement {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub struct CssSupportsAtRuleFallbackValue {
+    syntax: SyntaxNode,
+}
+impl CssSupportsAtRuleFallbackValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn items(&self) -> SyntaxElementChildren {
+        support::elements(&self.syntax)
+    }
+}
+impl AstNode for CssSupportsAtRuleFallbackValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SUPPORTS_AT_RULE_FALLBACK_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_SUPPORTS_AT_RULE_FALLBACK_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssSupportsAtRuleFallbackValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssSupportsAtRuleFallbackValue")
+            .field("items", &DebugSyntaxElementChildren(self.items()))
+            .finish()
+    }
+}
+impl From<CssSupportsAtRuleFallbackValue> for SyntaxNode {
+    fn from(n: CssSupportsAtRuleFallbackValue) -> Self {
+        n.syntax
+    }
+}
+impl From<CssSupportsAtRuleFallbackValue> for SyntaxElement {
+    fn from(n: CssSupportsAtRuleFallbackValue) -> Self {
+        n.syntax.into()
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct CssUnknownAtRuleComponentList {
     syntax: SyntaxNode,
 }
@@ -53993,7 +54319,7 @@ impl From<CssValueAtRuleGenericValue> for SyntaxElement {
         n.syntax.into()
     }
 }
-biome_rowan::declare_node_union! { pub AnyCssBogusNode = CssBogus | CssBogusAtRule | CssBogusAttrName | CssBogusBlock | CssBogusCustomIdentifier | CssBogusDeclaration | CssBogusDocumentMatcher | CssBogusFontFamilyName | CssBogusFontFeatureValuesItem | CssBogusFunctionParameter | CssBogusIfBranch | CssBogusIfTest | CssBogusIfTestBooleanExpr | CssBogusKeyframesItem | CssBogusKeyframesName | CssBogusLayer | CssBogusMediaQuery | CssBogusPageSelectorPseudo | CssBogusParameter | CssBogusProperty | CssBogusPropertyValue | CssBogusPseudoClass | CssBogusPseudoElement | CssBogusRule | CssBogusScopeRange | CssBogusSelector | CssBogusSubSelector | CssBogusSupportsCondition | CssBogusSyntax | CssBogusSyntaxSingleComponent | CssBogusUnicodeRangeValue | CssBogusUrlModifier | CssUnknownAtRuleComponentList | CssValueAtRuleGenericValue }
+biome_rowan::declare_node_union! { pub AnyCssBogusNode = CssBogus | CssBogusAtRule | CssBogusAttrName | CssBogusBlock | CssBogusCustomIdentifier | CssBogusDeclaration | CssBogusDocumentMatcher | CssBogusFontFamilyName | CssBogusFontFeatureValuesItem | CssBogusFunctionParameter | CssBogusIfBranch | CssBogusIfTest | CssBogusIfTestBooleanExpr | CssBogusKeyframesItem | CssBogusKeyframesName | CssBogusLayer | CssBogusMediaQuery | CssBogusPageSelectorPseudo | CssBogusParameter | CssBogusProperty | CssBogusPropertyValue | CssBogusPseudoClass | CssBogusPseudoElement | CssBogusRule | CssBogusScopeRange | CssBogusSelector | CssBogusSubSelector | CssBogusSupportsCondition | CssBogusSyntax | CssBogusSyntaxSingleComponent | CssBogusUnicodeRangeValue | CssBogusUrlModifier | CssSupportsAtRuleFallbackValue | CssUnknownAtRuleComponentList | CssValueAtRuleGenericValue }
 #[derive(Clone, Eq, PartialEq, Hash)]
 pub struct CssAttrNameList {
     syntax_list: SyntaxList,

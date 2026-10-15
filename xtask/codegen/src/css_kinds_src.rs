@@ -314,6 +314,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_CUSTOM_IDENTIFIER",
         "CSS_SPACE_LITERAL",
         "CSS_URL_VALUE_RAW_LITERAL",
+        "CSS_SUPPORTS_AT_RULE_FALLBACK_LITERAL",
         "CSS_COLOR_LITERAL",
         "CSS_DELIM_LITERAL",
         // Special literal token to represent a number that is _immediately_
@@ -593,6 +594,9 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_SUPPORTS_CONDITION_IN_PARENS",
         "CSS_SUPPORTS_FEATURE_DECLARATION",
         "CSS_SUPPORTS_FEATURE_SELECTOR",
+        "CSS_SUPPORTS_FEATURE_AT_RULE",
+        "CSS_SUPPORTS_AT_RULE_FALLBACK",
+        "CSS_SUPPORTS_AT_RULE_FALLBACK_VALUE",
         "CSS_SCOPE_AT_RULE",
         "CSS_SCOPE_RANGE_START",
         "CSS_SCOPE_RANGE_END",

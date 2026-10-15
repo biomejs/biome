@@ -1,0 +1,6 @@
+/* biome-ignore format: preserve literal separators */
+@supports not at-rule(@future "a b") { .line { color: green; } }
+/* biome-ignore format: preserve literal separators */
+@supports not at-rule(@future "a b") { .paragraph { color: green; } }
+/* biome-ignore format: preserve literal separators */
+.control { content: "a b c"; }

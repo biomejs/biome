@@ -1,0 +1,10 @@
+@supports at-rule(@property src(x])) { .invalid {} }
+@supports at-rule(@property url (x])) { .invalid {} }
+@supports at-rule(@property #fffurl(x])) { .invalid {} }
+@supports at-rule(@property U+1url(x])) { .invalid {} }
+.after { color: green; }
+@supports at-rule(url(x y)) { .invalid {} }
+@supports at-rule(url(x(y))) { .invalid {} }
+.after-url { color: green; }
+@supports at-rule("broken) { .invalid {} }
+.after-string { color: green; }

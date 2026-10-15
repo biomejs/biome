@@ -35,7 +35,7 @@ use biome_formatter::prelude::*;
 use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule,
-    FormatRuleWithTextCase, TransformSourceMap, write,
+    FormatRuleWithTextCase, TransformSourceMap, normalize_newlines, write,
 };
 use biome_formatter::{Formatted, Printed};
 use biome_rowan::{AstNode, SyntaxNode, TextRange};
@@ -345,7 +345,15 @@ impl FormatRule<CssSyntaxToken> for FormatCssSyntaxToken {
             crate::utils::case::record_auto_contextual_token(token, f);
         }
 
-        if self.case == CssCase::Lowercase {
+        if let Cow::Owned(mut normalized) = normalize_newlines(token.text_trimmed(), ['\r']) {
+            if self.case == CssCase::Lowercase {
+                normalized.make_ascii_lowercase();
+            }
+            write!(
+                f,
+                [text(&normalized, Some(token.text_trimmed_range().start()))]
+            )
+        } else if self.case == CssCase::Lowercase {
             let original = token.text_trimmed();
             match original.to_ascii_lowercase_cow() {
                 Cow::Borrowed(_) => self.format_trimmed_token_trivia(token, f),

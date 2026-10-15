@@ -1,0 +1,667 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@supports at-rule(@property src(x])) { .invalid {} }
+@supports at-rule(@property url (x])) { .invalid {} }
+@supports at-rule(@property #fffurl(x])) { .invalid {} }
+.after { color: green; }
+@supports at-rule("broken) { .invalid {} }
+.after-string { color: green; }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssSupportsAtRule {
+                declarator: CssSupportsAtRuleDeclarator {
+                    supports_token: SUPPORTS_KW@1..10 "supports" [] [Whitespace(" ")],
+                    condition: CssSupportsAtRuleFallback {
+                        name: CssCustomIdentifier {
+                            value_token: IDENT@10..17 "at-rule" [] [],
+                        },
+                        l_paren_token: L_PAREN@17..18 "(" [] [],
+                        value: CssSupportsAtRuleFallbackValue {
+                            items: [
+                                CssBogus {
+                                    items: [
+                                        AT@18..19 "@" [] [],
+                                        PROPERTY_KW@19..28 "property" [] [Whitespace(" ")],
+                                        SRC_KW@28..31 "src" [] [],
+                                        L_PAREN@31..32 "(" [] [],
+                                        X_KW@32..33 "x" [] [],
+                                    ],
+                                },
+                            ],
+                        },
+                        r_paren_token: missing (required),
+                    },
+                },
+                block: CssBogusBlock {
+                    items: [],
+                },
+            },
+        },
+        CssBogusRule {
+            items: [
+                R_BRACK@33..34 "]" [] [],
+                R_PAREN@34..35 ")" [] [],
+                R_PAREN@35..37 ")" [] [Whitespace(" ")],
+                L_CURLY@37..39 "{" [] [Whitespace(" ")],
+            ],
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@39..40 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@40..48 "invalid" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@48..49 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@49..51 "}" [] [Whitespace(" ")],
+            },
+        },
+        CssBogusRule {
+            items: [
+                R_CURLY@51..52 "}" [] [],
+            ],
+        },
+        CssAtRule {
+            at_token: AT@52..54 "@" [Newline("\n")] [],
+            rule: CssSupportsAtRule {
+                declarator: CssSupportsAtRuleDeclarator {
+                    supports_token: SUPPORTS_KW@54..63 "supports" [] [Whitespace(" ")],
+                    condition: CssSupportsAtRuleFallback {
+                        name: CssCustomIdentifier {
+                            value_token: IDENT@63..70 "at-rule" [] [],
+                        },
+                        l_paren_token: L_PAREN@70..71 "(" [] [],
+                        value: CssSupportsAtRuleFallbackValue {
+                            items: [
+                                CssBogus {
+                                    items: [
+                                        AT@71..72 "@" [] [],
+                                        PROPERTY_KW@72..81 "property" [] [Whitespace(" ")],
+                                        URL_KW@81..85 "url" [] [Whitespace(" ")],
+                                        L_PAREN@85..86 "(" [] [],
+                                        X_KW@86..87 "x" [] [],
+                                    ],
+                                },
+                            ],
+                        },
+                        r_paren_token: missing (required),
+                    },
+                },
+                block: CssBogusBlock {
+                    items: [],
+                },
+            },
+        },
+        CssBogusRule {
+            items: [
+                R_BRACK@87..88 "]" [] [],
+                R_PAREN@88..89 ")" [] [],
+                R_PAREN@89..91 ")" [] [Whitespace(" ")],
+                L_CURLY@91..93 "{" [] [Whitespace(" ")],
+            ],
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@93..94 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@94..102 "invalid" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@102..103 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@103..105 "}" [] [Whitespace(" ")],
+            },
+        },
+        CssBogusRule {
+            items: [
+                R_CURLY@105..106 "}" [] [],
+            ],
+        },
+        CssAtRule {
+            at_token: AT@106..108 "@" [Newline("\n")] [],
+            rule: CssSupportsAtRule {
+                declarator: CssSupportsAtRuleDeclarator {
+                    supports_token: SUPPORTS_KW@108..117 "supports" [] [Whitespace(" ")],
+                    condition: CssSupportsAtRuleFallback {
+                        name: CssCustomIdentifier {
+                            value_token: IDENT@117..124 "at-rule" [] [],
+                        },
+                        l_paren_token: L_PAREN@124..125 "(" [] [],
+                        value: CssSupportsAtRuleFallbackValue {
+                            items: [
+                                CssBogus {
+                                    items: [
+                                        AT@125..126 "@" [] [],
+                                        PROPERTY_KW@126..135 "property" [] [Whitespace(" ")],
+                                        HASH@135..136 "#" [] [],
+                                        IDENT@136..142 "fffurl" [] [],
+                                        L_PAREN@142..143 "(" [] [],
+                                        X_KW@143..144 "x" [] [],
+                                    ],
+                                },
+                            ],
+                        },
+                        r_paren_token: missing (required),
+                    },
+                },
+                block: CssBogusBlock {
+                    items: [],
+                },
+            },
+        },
+        CssBogusRule {
+            items: [
+                R_BRACK@144..145 "]" [] [],
+                R_PAREN@145..146 ")" [] [],
+                R_PAREN@146..148 ")" [] [Whitespace(" ")],
+                L_CURLY@148..150 "{" [] [Whitespace(" ")],
+            ],
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@150..151 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@151..159 "invalid" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@159..160 "{" [] [],
+                items: CssDeclarationOrRuleList [],
+                r_curly_token: R_CURLY@160..162 "}" [] [Whitespace(" ")],
+            },
+        },
+        CssBogusRule {
+            items: [
+                R_CURLY@162..163 "}" [] [],
+            ],
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@163..165 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@165..171 "after" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@171..173 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@173..178 "color" [] [],
+                                },
+                                colon_token: COLON@178..180 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@180..185 "green" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@185..187 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@187..188 "}" [] [],
+            },
+        },
+        CssAtRule {
+            at_token: AT@188..190 "@" [Newline("\n")] [],
+            rule: CssSupportsAtRule {
+                declarator: CssSupportsAtRuleDeclarator {
+                    supports_token: SUPPORTS_KW@190..199 "supports" [] [Whitespace(" ")],
+                    condition: CssSupportsAtRuleFallback {
+                        name: CssCustomIdentifier {
+                            value_token: IDENT@199..206 "at-rule" [] [],
+                        },
+                        l_paren_token: L_PAREN@206..207 "(" [] [],
+                        value: CssSupportsAtRuleFallbackValue {
+                            items: [
+                                CssBogus {
+                                    items: [
+                                        ERROR_TOKEN@207..231 "\"broken) { .invalid {} }" [] [],
+                                    ],
+                                },
+                            ],
+                        },
+                        r_paren_token: missing (required),
+                    },
+                },
+                block: CssBogusBlock {
+                    items: [
+                        CssRuleList [
+                            CssQualifiedRule {
+                                prelude: CssSelectorList [
+                                    CssCompoundSelector {
+                                        nesting_selectors: CssNestedSelectorList [],
+                                        simple_selector: missing (optional),
+                                        sub_selectors: CssSubSelectorList [
+                                            CssClassSelector {
+                                                dot_token: DOT@231..233 "." [Newline("\n")] [],
+                                                name: CssCustomIdentifier {
+                                                    value_token: IDENT@233..246 "after-string" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                ],
+                                block: CssDeclarationOrRuleBlock {
+                                    l_curly_token: L_CURLY@246..248 "{" [] [Whitespace(" ")],
+                                    items: CssDeclarationOrRuleList [
+                                        CssDeclarationWithSemicolon {
+                                            declaration: CssDeclaration {
+                                                property: CssGenericProperty {
+                                                    name: CssIdentifier {
+                                                        value_token: IDENT@248..253 "color" [] [],
+                                                    },
+                                                    colon_token: COLON@253..255 ":" [] [Whitespace(" ")],
+                                                    value: ScssExpression {
+                                                        items: ScssExpressionItemList [
+                                                            CssIdentifier {
+                                                                value_token: IDENT@255..260 "green" [] [],
+                                                            },
+                                                        ],
+                                                    },
+                                                },
+                                                important: missing (optional),
+                                            },
+                                            semicolon_token: SEMICOLON@260..262 ";" [] [Whitespace(" ")],
+                                        },
+                                    ],
+                                    r_curly_token: R_CURLY@262..263 "}" [] [],
+                                },
+                            },
+                        ],
+                    ],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@263..264 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..264
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..263
+    0: CSS_AT_RULE@0..33
+      0: AT@0..1 "@" [] []
+      1: CSS_SUPPORTS_AT_RULE@1..33
+        0: CSS_SUPPORTS_AT_RULE_DECLARATOR@1..33
+          0: SUPPORTS_KW@1..10 "supports" [] [Whitespace(" ")]
+          1: CSS_SUPPORTS_AT_RULE_FALLBACK@10..33
+            0: CSS_CUSTOM_IDENTIFIER@10..17
+              0: IDENT@10..17 "at-rule" [] []
+            1: L_PAREN@17..18 "(" [] []
+            2: CSS_SUPPORTS_AT_RULE_FALLBACK_VALUE@18..33
+              0: CSS_BOGUS@18..33
+                0: AT@18..19 "@" [] []
+                1: PROPERTY_KW@19..28 "property" [] [Whitespace(" ")]
+                2: SRC_KW@28..31 "src" [] []
+                3: L_PAREN@31..32 "(" [] []
+                4: X_KW@32..33 "x" [] []
+            3: (empty)
+        1: CSS_BOGUS_BLOCK@33..33
+    1: CSS_BOGUS_RULE@33..39
+      0: R_BRACK@33..34 "]" [] []
+      1: R_PAREN@34..35 ")" [] []
+      2: R_PAREN@35..37 ")" [] [Whitespace(" ")]
+      3: L_CURLY@37..39 "{" [] [Whitespace(" ")]
+    2: CSS_QUALIFIED_RULE@39..51
+      0: CSS_SELECTOR_LIST@39..48
+        0: CSS_COMPOUND_SELECTOR@39..48
+          0: CSS_NESTED_SELECTOR_LIST@39..39
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@39..48
+            0: CSS_CLASS_SELECTOR@39..48
+              0: DOT@39..40 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@40..48
+                0: IDENT@40..48 "invalid" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@48..51
+        0: L_CURLY@48..49 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@49..49
+        2: R_CURLY@49..51 "}" [] [Whitespace(" ")]
+    3: CSS_BOGUS_RULE@51..52
+      0: R_CURLY@51..52 "}" [] []
+    4: CSS_AT_RULE@52..87
+      0: AT@52..54 "@" [Newline("\n")] []
+      1: CSS_SUPPORTS_AT_RULE@54..87
+        0: CSS_SUPPORTS_AT_RULE_DECLARATOR@54..87
+          0: SUPPORTS_KW@54..63 "supports" [] [Whitespace(" ")]
+          1: CSS_SUPPORTS_AT_RULE_FALLBACK@63..87
+            0: CSS_CUSTOM_IDENTIFIER@63..70
+              0: IDENT@63..70 "at-rule" [] []
+            1: L_PAREN@70..71 "(" [] []
+            2: CSS_SUPPORTS_AT_RULE_FALLBACK_VALUE@71..87
+              0: CSS_BOGUS@71..87
+                0: AT@71..72 "@" [] []
+                1: PROPERTY_KW@72..81 "property" [] [Whitespace(" ")]
+                2: URL_KW@81..85 "url" [] [Whitespace(" ")]
+                3: L_PAREN@85..86 "(" [] []
+                4: X_KW@86..87 "x" [] []
+            3: (empty)
+        1: CSS_BOGUS_BLOCK@87..87
+    5: CSS_BOGUS_RULE@87..93
+      0: R_BRACK@87..88 "]" [] []
+      1: R_PAREN@88..89 ")" [] []
+      2: R_PAREN@89..91 ")" [] [Whitespace(" ")]
+      3: L_CURLY@91..93 "{" [] [Whitespace(" ")]
+    6: CSS_QUALIFIED_RULE@93..105
+      0: CSS_SELECTOR_LIST@93..102
+        0: CSS_COMPOUND_SELECTOR@93..102
+          0: CSS_NESTED_SELECTOR_LIST@93..93
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@93..102
+            0: CSS_CLASS_SELECTOR@93..102
+              0: DOT@93..94 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@94..102
+                0: IDENT@94..102 "invalid" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@102..105
+        0: L_CURLY@102..103 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@103..103
+        2: R_CURLY@103..105 "}" [] [Whitespace(" ")]
+    7: CSS_BOGUS_RULE@105..106
+      0: R_CURLY@105..106 "}" [] []
+    8: CSS_AT_RULE@106..144
+      0: AT@106..108 "@" [Newline("\n")] []
+      1: CSS_SUPPORTS_AT_RULE@108..144
+        0: CSS_SUPPORTS_AT_RULE_DECLARATOR@108..144
+          0: SUPPORTS_KW@108..117 "supports" [] [Whitespace(" ")]
+          1: CSS_SUPPORTS_AT_RULE_FALLBACK@117..144
+            0: CSS_CUSTOM_IDENTIFIER@117..124
+              0: IDENT@117..124 "at-rule" [] []
+            1: L_PAREN@124..125 "(" [] []
+            2: CSS_SUPPORTS_AT_RULE_FALLBACK_VALUE@125..144
+              0: CSS_BOGUS@125..144
+                0: AT@125..126 "@" [] []
+                1: PROPERTY_KW@126..135 "property" [] [Whitespace(" ")]
+                2: HASH@135..136 "#" [] []
+                3: IDENT@136..142 "fffurl" [] []
+                4: L_PAREN@142..143 "(" [] []
+                5: X_KW@143..144 "x" [] []
+            3: (empty)
+        1: CSS_BOGUS_BLOCK@144..144
+    9: CSS_BOGUS_RULE@144..150
+      0: R_BRACK@144..145 "]" [] []
+      1: R_PAREN@145..146 ")" [] []
+      2: R_PAREN@146..148 ")" [] [Whitespace(" ")]
+      3: L_CURLY@148..150 "{" [] [Whitespace(" ")]
+    10: CSS_QUALIFIED_RULE@150..162
+      0: CSS_SELECTOR_LIST@150..159
+        0: CSS_COMPOUND_SELECTOR@150..159
+          0: CSS_NESTED_SELECTOR_LIST@150..150
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@150..159
+            0: CSS_CLASS_SELECTOR@150..159
+              0: DOT@150..151 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@151..159
+                0: IDENT@151..159 "invalid" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@159..162
+        0: L_CURLY@159..160 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@160..160
+        2: R_CURLY@160..162 "}" [] [Whitespace(" ")]
+    11: CSS_BOGUS_RULE@162..163
+      0: R_CURLY@162..163 "}" [] []
+    12: CSS_QUALIFIED_RULE@163..188
+      0: CSS_SELECTOR_LIST@163..171
+        0: CSS_COMPOUND_SELECTOR@163..171
+          0: CSS_NESTED_SELECTOR_LIST@163..163
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@163..171
+            0: CSS_CLASS_SELECTOR@163..171
+              0: DOT@163..165 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@165..171
+                0: IDENT@165..171 "after" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@171..188
+        0: L_CURLY@171..173 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@173..187
+          0: CSS_DECLARATION_WITH_SEMICOLON@173..187
+            0: CSS_DECLARATION@173..185
+              0: CSS_GENERIC_PROPERTY@173..185
+                0: CSS_IDENTIFIER@173..178
+                  0: IDENT@173..178 "color" [] []
+                1: COLON@178..180 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@180..185
+                  0: SCSS_EXPRESSION_ITEM_LIST@180..185
+                    0: CSS_IDENTIFIER@180..185
+                      0: IDENT@180..185 "green" [] []
+              1: (empty)
+            1: SEMICOLON@185..187 ";" [] [Whitespace(" ")]
+        2: R_CURLY@187..188 "}" [] []
+    13: CSS_AT_RULE@188..263
+      0: AT@188..190 "@" [Newline("\n")] []
+      1: CSS_SUPPORTS_AT_RULE@190..263
+        0: CSS_SUPPORTS_AT_RULE_DECLARATOR@190..231
+          0: SUPPORTS_KW@190..199 "supports" [] [Whitespace(" ")]
+          1: CSS_SUPPORTS_AT_RULE_FALLBACK@199..231
+            0: CSS_CUSTOM_IDENTIFIER@199..206
+              0: IDENT@199..206 "at-rule" [] []
+            1: L_PAREN@206..207 "(" [] []
+            2: CSS_SUPPORTS_AT_RULE_FALLBACK_VALUE@207..231
+              0: CSS_BOGUS@207..231
+                0: ERROR_TOKEN@207..231 "\"broken) { .invalid {} }" [] []
+            3: (empty)
+        1: CSS_BOGUS_BLOCK@231..263
+          0: CSS_RULE_LIST@231..263
+            0: CSS_QUALIFIED_RULE@231..263
+              0: CSS_SELECTOR_LIST@231..246
+                0: CSS_COMPOUND_SELECTOR@231..246
+                  0: CSS_NESTED_SELECTOR_LIST@231..231
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@231..246
+                    0: CSS_CLASS_SELECTOR@231..246
+                      0: DOT@231..233 "." [Newline("\n")] []
+                      1: CSS_CUSTOM_IDENTIFIER@233..246
+                        0: IDENT@233..246 "after-string" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@246..263
+                0: L_CURLY@246..248 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_OR_RULE_LIST@248..262
+                  0: CSS_DECLARATION_WITH_SEMICOLON@248..262
+                    0: CSS_DECLARATION@248..260
+                      0: CSS_GENERIC_PROPERTY@248..260
+                        0: CSS_IDENTIFIER@248..253
+                          0: IDENT@248..253 "color" [] []
+                        1: COLON@253..255 ":" [] [Whitespace(" ")]
+                        2: SCSS_EXPRESSION@255..260
+                          0: SCSS_EXPRESSION_ITEM_LIST@255..260
+                            0: CSS_IDENTIFIER@255..260
+                              0: IDENT@255..260 "green" [] []
+                      1: (empty)
+                    1: SEMICOLON@260..262 ";" [] [Whitespace(" ")]
+                2: R_CURLY@262..263 "}" [] []
+  2: EOF@263..264 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+supports-at-rule-token-boundaries.scss:1:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `]`
+  
+  > 1 │ @supports at-rule(@property src(x])) { .invalid {} }
+      │                                  ^
+    2 │ @supports at-rule(@property url (x])) { .invalid {} }
+    3 │ @supports at-rule(@property #fffurl(x])) { .invalid {} }
+  
+  i Remove ]
+  
+supports-at-rule-token-boundaries.scss:1:52 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a qualified rule, or an at rule but instead found '}'.
+  
+  > 1 │ @supports at-rule(@property src(x])) { .invalid {} }
+      │                                                    ^
+    2 │ @supports at-rule(@property url (x])) { .invalid {} }
+    3 │ @supports at-rule(@property #fffurl(x])) { .invalid {} }
+  
+  i Expected a qualified rule, or an at rule here.
+  
+  > 1 │ @supports at-rule(@property src(x])) { .invalid {} }
+      │                                                    ^
+    2 │ @supports at-rule(@property url (x])) { .invalid {} }
+    3 │ @supports at-rule(@property #fffurl(x])) { .invalid {} }
+  
+supports-at-rule-token-boundaries.scss:2:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `]`
+  
+    1 │ @supports at-rule(@property src(x])) { .invalid {} }
+  > 2 │ @supports at-rule(@property url (x])) { .invalid {} }
+      │                                   ^
+    3 │ @supports at-rule(@property #fffurl(x])) { .invalid {} }
+    4 │ .after { color: green; }
+  
+  i Remove ]
+  
+supports-at-rule-token-boundaries.scss:2:53 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a qualified rule, or an at rule but instead found '}'.
+  
+    1 │ @supports at-rule(@property src(x])) { .invalid {} }
+  > 2 │ @supports at-rule(@property url (x])) { .invalid {} }
+      │                                                     ^
+    3 │ @supports at-rule(@property #fffurl(x])) { .invalid {} }
+    4 │ .after { color: green; }
+  
+  i Expected a qualified rule, or an at rule here.
+  
+    1 │ @supports at-rule(@property src(x])) { .invalid {} }
+  > 2 │ @supports at-rule(@property url (x])) { .invalid {} }
+      │                                                     ^
+    3 │ @supports at-rule(@property #fffurl(x])) { .invalid {} }
+    4 │ .after { color: green; }
+  
+supports-at-rule-token-boundaries.scss:3:38 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `]`
+  
+    1 │ @supports at-rule(@property src(x])) { .invalid {} }
+    2 │ @supports at-rule(@property url (x])) { .invalid {} }
+  > 3 │ @supports at-rule(@property #fffurl(x])) { .invalid {} }
+      │                                      ^
+    4 │ .after { color: green; }
+    5 │ @supports at-rule("broken) { .invalid {} }
+  
+  i Remove ]
+  
+supports-at-rule-token-boundaries.scss:3:56 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a qualified rule, or an at rule but instead found '}'.
+  
+    1 │ @supports at-rule(@property src(x])) { .invalid {} }
+    2 │ @supports at-rule(@property url (x])) { .invalid {} }
+  > 3 │ @supports at-rule(@property #fffurl(x])) { .invalid {} }
+      │                                                        ^
+    4 │ .after { color: green; }
+    5 │ @supports at-rule("broken) { .invalid {} }
+  
+  i Expected a qualified rule, or an at rule here.
+  
+    1 │ @supports at-rule(@property src(x])) { .invalid {} }
+    2 │ @supports at-rule(@property url (x])) { .invalid {} }
+  > 3 │ @supports at-rule(@property #fffurl(x])) { .invalid {} }
+      │                                                        ^
+    4 │ .after { color: green; }
+    5 │ @supports at-rule("broken) { .invalid {} }
+  
+supports-at-rule-token-boundaries.scss:5:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+    3 │ @supports at-rule(@property #fffurl(x])) { .invalid {} }
+    4 │ .after { color: green; }
+  > 5 │ @supports at-rule("broken) { .invalid {} }
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ .after-string { color: green; }
+    7 │ 
+  
+  i The closing quote must be on the same line.
+  
+supports-at-rule-token-boundaries.scss:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `)` but instead found `.`
+  
+    4 │ .after { color: green; }
+    5 │ @supports at-rule("broken) { .invalid {} }
+  > 6 │ .after-string { color: green; }
+      │ ^
+    7 │ 
+  
+  i Remove .
+  
+supports-at-rule-token-boundaries.scss:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+    5 │ @supports at-rule("broken) { .invalid {} }
+    6 │ .after-string { color: green; }
+  > 7 │ 
+      │ 
+  
+  i the file ends here
+  
+    5 │ @supports at-rule("broken) { .invalid {} }
+    6 │ .after-string { color: green; }
+  > 7 │ 
+      │ 
+  
+```

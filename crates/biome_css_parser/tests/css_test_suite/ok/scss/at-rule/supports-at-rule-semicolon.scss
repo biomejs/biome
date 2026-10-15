@@ -1,0 +1,3 @@
+@supports not at-rule(@property; extra) { .fallback { color: green; } }
+@import "fallback.css" supports(not at-rule(@property; extra));
+.value { color: if(supports(not at-rule(@property; extra)): green; else: red); }

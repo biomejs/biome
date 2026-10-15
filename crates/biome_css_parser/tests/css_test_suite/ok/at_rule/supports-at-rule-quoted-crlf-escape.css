@@ -1,0 +1,4 @@
+@supports at-rule(@future "\31
+x") { .quoted { color: green; } }
+.control { content: "\31
+x"; }

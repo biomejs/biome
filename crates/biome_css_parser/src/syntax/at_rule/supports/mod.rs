@@ -1,8 +1,12 @@
+mod at_rule;
 pub(crate) mod error;
 
 use crate::lexer::{CssCustomPropertyCommentMode, CssLexContext};
 use crate::parser::{CssParser, CssParserCheckpoint};
 use crate::syntax::at_rule::error::{AnyInParensChainParseRecovery, AnyInParensParseRecovery};
+use crate::syntax::at_rule::supports::at_rule::{
+    is_at_supports_at_rule_function, parse_supports_at_rule_function,
+};
 use crate::syntax::at_rule::supports::error::{
     expected_any_supports_condition, expected_any_supports_condition_in_parens,
 };
@@ -279,6 +283,8 @@ fn parse_any_supports_condition_in_parens(
 ) -> ParsedSyntax {
     if is_at_supports_feature_selector(p) {
         parse_supports_feature_selector(p)
+    } else if is_at_supports_at_rule_function(p) {
+        parse_supports_at_rule_function(p)
     } else if is_at_scss_supports_feature_declaration(p) {
         CssSyntaxFeatures::Scss.parse_exclusive_syntax(
             p,
@@ -620,6 +626,7 @@ pub(crate) fn parse_import_supports_condition(p: &mut CssParser) -> ParsedSyntax
 fn is_at_scss_supports_name_head(p: &mut CssParser) -> bool {
     !is_at_supports_not_condition(p)
         && !is_at_supports_feature_selector(p)
+        && !(is_at_supports_at_rule_function(p) && p.nth_at(2, T![@]))
         && !p.at(T!['('])
         && (is_at_any_value(p)
             || is_at_declaration_important(p)

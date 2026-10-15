@@ -1,0 +1,61 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/atrule/supports-at-rule-line-endings/crlf/quoted.css
+---
+
+# Input
+
+```css
+@supports at-rule(@future "\31
+x") { .quoted {color:green} }
+.control { content: "\31
+x"; }
+@supports at-rule(@\70
+roperty) { .escaped-name { color: red; } }
+@supports \61
+t-rule(@property) { .escaped-function { color: blue; } }
+
+```
+
+
+# Options
+
+```json
+{
+  "formatter": {
+    "lineEnding": "crlf"
+  }
+}
+```
+
+# Formatted
+
+```css
+@supports at-rule(@future "\31<CRLF>
+x") {<CRLF>
+	.quoted {<CRLF>
+		color: green;<CRLF>
+	}<CRLF>
+}<CRLF>
+.control {<CRLF>
+	content: "\31<CRLF>
+x";<CRLF>
+}<CRLF>
+@supports at-rule(<CRLF>
+		@\70<CRLF>
+roperty<CRLF>
+	) {<CRLF>
+	.escaped-name {<CRLF>
+		color: red;<CRLF>
+	}<CRLF>
+}<CRLF>
+@supports \61<CRLF>
+t-rule(<CRLF>
+		@property<CRLF>
+	) {<CRLF>
+	.escaped-function {<CRLF>
+		color: blue;<CRLF>
+	}<CRLF>
+}<CRLF>
+
+```

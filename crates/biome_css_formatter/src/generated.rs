@@ -6332,6 +6332,38 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssSupportsAtRuleDeclara
         FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: supports_at_rule_declarator :: FormatCssSupportsAtRuleDeclarator :: default ())
     }
 }
+impl FormatRule<biome_css_syntax::CssSupportsAtRuleFallback>
+    for crate::css::auxiliary::supports_at_rule_fallback::FormatCssSupportsAtRuleFallback
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssSupportsAtRuleFallback,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssSupportsAtRuleFallback>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssSupportsAtRuleFallback {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssSupportsAtRuleFallback,
+        crate::css::auxiliary::supports_at_rule_fallback::FormatCssSupportsAtRuleFallback,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: supports_at_rule_fallback :: FormatCssSupportsAtRuleFallback :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssSupportsAtRuleFallback {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssSupportsAtRuleFallback,
+        crate::css::auxiliary::supports_at_rule_fallback::FormatCssSupportsAtRuleFallback,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: supports_at_rule_fallback :: FormatCssSupportsAtRuleFallback :: default ())
+    }
+}
 impl FormatRule<biome_css_syntax::CssSupportsConditionInParens>
     for crate::css::auxiliary::supports_condition_in_parens::FormatCssSupportsConditionInParens
 {
@@ -6362,6 +6394,38 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssSupportsConditionInPa
     >;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: supports_condition_in_parens :: FormatCssSupportsConditionInParens :: default ())
+    }
+}
+impl FormatRule<biome_css_syntax::CssSupportsFeatureAtRule>
+    for crate::css::statements::supports_feature_at_rule::FormatCssSupportsFeatureAtRule
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssSupportsFeatureAtRule,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssSupportsFeatureAtRule>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssSupportsFeatureAtRule {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssSupportsFeatureAtRule,
+        crate::css::statements::supports_feature_at_rule::FormatCssSupportsFeatureAtRule,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: statements :: supports_feature_at_rule :: FormatCssSupportsFeatureAtRule :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssSupportsFeatureAtRule {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssSupportsFeatureAtRule,
+        crate::css::statements::supports_feature_at_rule::FormatCssSupportsFeatureAtRule,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: statements :: supports_feature_at_rule :: FormatCssSupportsFeatureAtRule :: default ())
     }
 }
 impl FormatRule<biome_css_syntax::CssSupportsFeatureDeclaration>
@@ -13483,6 +13547,38 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssBogusUrlModifier {
             self,
             crate::css::bogus::bogus_url_modifier::FormatCssBogusUrlModifier::default(),
         )
+    }
+}
+impl FormatRule<biome_css_syntax::CssSupportsAtRuleFallbackValue>
+    for crate::css::bogus::supports_at_rule_fallback_value::FormatCssSupportsAtRuleFallbackValue
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssSupportsAtRuleFallbackValue,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatBogusNodeRule::<biome_css_syntax::CssSupportsAtRuleFallbackValue>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssSupportsAtRuleFallbackValue {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssSupportsAtRuleFallbackValue,
+        crate::css::bogus::supports_at_rule_fallback_value::FormatCssSupportsAtRuleFallbackValue,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: bogus :: supports_at_rule_fallback_value :: FormatCssSupportsAtRuleFallbackValue :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssSupportsAtRuleFallbackValue {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssSupportsAtRuleFallbackValue,
+        crate::css::bogus::supports_at_rule_fallback_value::FormatCssSupportsAtRuleFallbackValue,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: bogus :: supports_at_rule_fallback_value :: FormatCssSupportsAtRuleFallbackValue :: default ())
     }
 }
 impl FormatRule<biome_css_syntax::CssUnknownAtRuleComponentList>

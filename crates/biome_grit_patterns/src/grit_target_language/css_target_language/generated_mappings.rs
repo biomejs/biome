@@ -267,9 +267,11 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssSupportsAndCondition" => lang::CssSupportsAndCondition::KIND_SET.iter().next(),
         "CssSupportsAtRule" => lang::CssSupportsAtRule::KIND_SET.iter().next(),
         "CssSupportsAtRuleDeclarator" => lang::CssSupportsAtRuleDeclarator::KIND_SET.iter().next(),
+        "CssSupportsAtRuleFallback" => lang::CssSupportsAtRuleFallback::KIND_SET.iter().next(),
         "CssSupportsConditionInParens" => {
             lang::CssSupportsConditionInParens::KIND_SET.iter().next()
         }
+        "CssSupportsFeatureAtRule" => lang::CssSupportsFeatureAtRule::KIND_SET.iter().next(),
         "CssSupportsFeatureDeclaration" => {
             lang::CssSupportsFeatureDeclaration::KIND_SET.iter().next()
         }
@@ -645,7 +647,9 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "CssSupportsAndCondition" => &[("left", 0), ("right", 2)],
         "CssSupportsAtRule" => &[("declarator", 0), ("block", 1)],
         "CssSupportsAtRuleDeclarator" => &[("condition", 1)],
+        "CssSupportsAtRuleFallback" => &[("name", 0), ("value", 2)],
         "CssSupportsConditionInParens" => &[("condition", 1)],
+        "CssSupportsFeatureAtRule" => &[("name", 0), ("at_rule", 3)],
         "CssSupportsFeatureDeclaration" => &[("declaration", 1)],
         "CssSupportsFeatureSelector" => &[("selector", 2)],
         "CssSupportsNotCondition" => &[("query", 1)],

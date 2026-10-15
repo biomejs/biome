@@ -1,0 +1,33 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/atrule/supports-at-rule-line-endings/lf/fallback.css
+---
+
+# Input
+
+```css
+/* before */ @supports at-rule(foo
+bar) { .plain {color:green} }
+@supports at-rule(url(\31
+x)) /* after query */ { .escaped {color:green} }
+
+```
+
+
+# Formatted
+
+```css
+/* before */ @supports at-rule(foo
+bar) {
+	.plain {
+		color: green;
+	}
+}
+@supports at-rule(url(\31
+x)) /* after query */ {
+	.escaped {
+		color: green;
+	}
+}
+
+```

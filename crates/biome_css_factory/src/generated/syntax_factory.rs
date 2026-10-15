@@ -46,6 +46,7 @@ impl SyntaxFactory for CssSyntaxFactory {
             | CSS_BOGUS_SYNTAX_SINGLE_COMPONENT
             | CSS_BOGUS_UNICODE_RANGE_VALUE
             | CSS_BOGUS_URL_MODIFIER
+            | CSS_SUPPORTS_AT_RULE_FALLBACK_VALUE
             | CSS_UNKNOWN_AT_RULE_COMPONENT_LIST
             | CSS_VALUE_AT_RULE_GENERIC_VALUE => {
                 RawSyntaxNode::new(kind, children.into_iter().map(Some))
@@ -5755,6 +5756,46 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_SUPPORTS_AT_RULE_DECLARATOR, children)
             }
+            CSS_SUPPORTS_AT_RULE_FALLBACK => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && CssCustomIdentifier::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['(']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && CssSupportsAtRuleFallbackValue::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![')']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_SUPPORTS_AT_RULE_FALLBACK.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_SUPPORTS_AT_RULE_FALLBACK, children)
+            }
             CSS_SUPPORTS_CONDITION_IN_PARENS => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
@@ -5787,6 +5828,53 @@ impl SyntaxFactory for CssSyntaxFactory {
                     );
                 }
                 slots.into_node(CSS_SUPPORTS_CONDITION_IN_PARENS, children)
+            }
+            CSS_SUPPORTS_FEATURE_AT_RULE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && CssCustomIdentifier::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T!['(']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T ! [@]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && CssCustomIdentifier::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![')']
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_SUPPORTS_FEATURE_AT_RULE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_SUPPORTS_FEATURE_AT_RULE, children)
             }
             CSS_SUPPORTS_FEATURE_DECLARATION => {
                 let mut elements = (&children).into_iter();

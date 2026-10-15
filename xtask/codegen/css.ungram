@@ -1956,6 +1956,8 @@ AnyCssSupportsInParens =
 	CssSupportsConditionInParens
 	| CssSupportsFeatureDeclaration
 	| CssSupportsFeatureSelector
+	| CssSupportsFeatureAtRule
+	| CssSupportsAtRuleFallback
 	| ScssSupportsFeatureDeclaration
 	| ScssSupportsInterpolatedCondition
 	| AnyCssValue // general-enclosed
@@ -2007,6 +2009,29 @@ CssSupportsFeatureSelector =
 	'('
 	selector: AnyCssSelector
 	')'
+
+// @supports at-rule(@media) {}
+//           ^^^^^^^^^^^^^^^
+CssSupportsFeatureAtRule =
+	name: CssCustomIdentifier
+	'('
+	'@'
+	at_rule: CssCustomIdentifier
+	')'
+
+// @supports at-rule(@media (width: 10px)) {}
+//           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+CssSupportsAtRuleFallback =
+	name: CssCustomIdentifier
+	'('
+	value: CssSupportsAtRuleFallbackValue
+	')'
+
+// General-enclosed contents of an at-rule() function whose arguments do not
+// match an at-keyword feature query.
+// @supports at-rule(@media (width: 10px)) {}
+//                   ^^^^^^^^^^^^^^^^^^
+CssSupportsAtRuleFallbackValue = SyntaxElement*
 
 // https://drafts.csswg.org/css-cascade-6/#at-ruledef-scope
 // @scope [(<scope-start>)]? [to (<scope-end>)]? {

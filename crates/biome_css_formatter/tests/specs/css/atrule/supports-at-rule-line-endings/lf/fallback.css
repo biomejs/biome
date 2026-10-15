@@ -1,0 +1,4 @@
+/* before */ @supports at-rule(foo
+bar) { .plain {color:green} }
+@supports at-rule(url(\31
+x)) /* after query */ { .escaped {color:green} }

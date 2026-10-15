@@ -1,0 +1,69 @@
+@import "enhanced.css" supports(at-rule(@function));
+
+.card { padding: 12px; }
+@supports at-rule(@function) {
+  @function --double(--value <length>) {
+    result: calc(var(--value) * 2);
+  }
+  .card { padding: --double(8px); }
+}
+
+@supports at-rule(@property) { .property { color: green; } }
+@supports at-rule(@future-rule) { .unknown { color: green; } }
+@supports at-rule(@initial) { .css-wide { color: green; } }
+@supports (at-rule(@property)) { .parenthesized { color: green; } }
+@supports not at-rule(@function) { .negated { padding: 12px; } }
+@supports at-rule(@property) and (display: grid) { .and { display: grid; } }
+@supports at-rule(@function) or (at-rule(@property) and (display: flex)) { .or { display: flex; } }
+@SUPPORTS AT-RULE(@PROPERTY) { .case { color: green; } }
+@supports at-rule(@\70roperty) { .escaped { color: green; } }
+@supports at-\72 ule(@property) { .escaped-function { color: green; } }
+@supports at-rule(/* before */ @property /* after */) { .comments { color: green; } }
+@supports at-rule(@--) { .bare-dashes { color: green; } }
+@supports AT-RULE(@--) { .bare-dashes-case { color: green; } }
+@supports at-rule(/* before dashes */ @-- /* after dashes */) { .bare-dashes-comments { color: green; } }
+@supports at-rule(@\2d-) { .escaped-dashes { color: green; } }
+@supports at-rule(@ --) { .spaced-dashes { color: red; } }
+@supports at-rule(@/**/--) { .comment-split-dashes { color: red; } }
+
+@supports at-rule() { .empty { color: red; } }
+@supports at-rule(function) { .bare-name { color: red; } }
+@supports at-rule(@ property) { .spaced { color: red; } }
+@supports at-rule(@/**/property) { .split-comment { color: red; } }
+@supports at-rule(@property @function) { .extra-argument { color: red; } }
+@supports at-rule(fn(@property)) { .nested-function { color: red; } }
+@supports at-rule((@property)) { .nested-parentheses { color: red; } }
+@supports at-rule([@property]) { .nested-brackets { color: red; } }
+@supports at-rule({@property}) { .nested-braces { color: red; } }
+@supports at-rule(@property nested([@future-rule], { token: value })) { .nested-tokens { color: red; } }
+@supports at-rule("property") { .string { color: red; } }
+@supports at-rule(url("http://example.test/file")) { .quoted-url { color: red; } }
+@supports at-rule(url(http://example.test/file)) { .url { color: red; } }
+@supports at-rule(src(http://example.test/file)) { .src-url { color: red; } }
+@supports at-rule(U+4??) { .unicode-range { color: red; } }
+@supports at-rule({url("x")}) { .braced-quoted-url { color: red; } }
+@supports at-rule(@property url("x")) { .at-keyword-quoted-url { color: red; } }
+@supports at-rule({url(http://example.test/x)}) { .braced-raw-url { color: red; } }
+@supports at-rule(@property url(http://example.test/x)) { .at-keyword-raw-url { color: red; } }
+@supports at-rule([{@property url("x")}]) { .nested-quoted-url { color: red; } }
+@supports at-rule({[url(http://example.test/x)]}) { .nested-raw-url { color: red; } }
+@supports at-rule(@property U+4??) { .at-keyword-unicode-range { color: red; } }
+@supports at-rule(src(var(--asset))) { .src-variable { color: red; } }
+@supports at-rule(@property src(var(--asset))) { .at-keyword-src-variable { color: red; } }
+@supports at-rule(@property url(http://example.test/x\)y)) { .escaped-url-close { color: red; } }
+@supports at-rule(U+1url(http://example.test/x)) { .unicode-prefix-url-scheme { color: red; } }
+@supports at-rule(#fffurl(http://example.test/x)) { .hash-prefix-url-scheme { color: red; } }
+@supports at-rule(url("x" 1)) { .url-extra-value { color: red; } }
+@supports at-rule(U+) { .unicode-prefix-only { color: red; } }
+@supports at-rule(@url(x y(z))) { .tight-url-at-keyword { color: red; } }
+@supports at-rule(@u\72l(x y(z))) { .escaped-url-at-keyword { color: red; } }
+@supports at-rule(@ url(x])) { .spaced-url-name { color: red; } }
+@supports at-rule(@/**/url(x])) { .comment-split-url-name { color: red; } }
+@supports at-rule(#url(x y(z))) { .hash-url-name { color: red; } }
+
+@supports selector(:focus-visible) and font-tech(color-COLRv1) and font-format(woff2) and (display: grid) {
+  .controls { display: grid; }
+}
+.conditional-value {
+  color: if(supports(at-rule(@property)): green; else: red);
+}

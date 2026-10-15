@@ -2760,6 +2760,22 @@ pub fn css_supports_at_rule_declarator(
         ],
     ))
 }
+pub fn css_supports_at_rule_fallback(
+    name: CssCustomIdentifier,
+    l_paren_token: SyntaxToken,
+    value: CssSupportsAtRuleFallbackValue,
+    r_paren_token: SyntaxToken,
+) -> CssSupportsAtRuleFallback {
+    CssSupportsAtRuleFallback::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SUPPORTS_AT_RULE_FALLBACK,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
 pub fn css_supports_condition_in_parens(
     l_paren_token: SyntaxToken,
     condition: AnyCssSupportsCondition,
@@ -2770,6 +2786,24 @@ pub fn css_supports_condition_in_parens(
         [
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(condition.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn css_supports_feature_at_rule(
+    name: CssCustomIdentifier,
+    l_paren_token: SyntaxToken,
+    at_token: SyntaxToken,
+    at_rule: CssCustomIdentifier,
+    r_paren_token: SyntaxToken,
+) -> CssSupportsFeatureAtRule {
+    CssSupportsFeatureAtRule::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SUPPORTS_FEATURE_AT_RULE,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Token(at_token)),
+            Some(SyntaxElement::Node(at_rule.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
         ],
     ))
@@ -6345,6 +6379,16 @@ where
 {
     CssBogusUrlModifier::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_URL_MODIFIER,
+        slots,
+    ))
+}
+pub fn css_supports_at_rule_fallback_value<I>(slots: I) -> CssSupportsAtRuleFallbackValue
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssSupportsAtRuleFallbackValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SUPPORTS_AT_RULE_FALLBACK_VALUE,
         slots,
     ))
 }

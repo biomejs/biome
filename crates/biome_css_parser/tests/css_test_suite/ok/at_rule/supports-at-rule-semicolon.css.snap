@@ -1,0 +1,337 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@supports not at-rule(@property; extra) { .fallback { color: green; } }
+@import "fallback.css" supports(not at-rule(@property; extra));
+.value { color: if(supports(not at-rule(@property; extra)): green; else: red); }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssSupportsAtRule {
+                declarator: CssSupportsAtRuleDeclarator {
+                    supports_token: SUPPORTS_KW@1..10 "supports" [] [Whitespace(" ")],
+                    condition: CssSupportsNotCondition {
+                        not_token: NOT_KW@10..14 "not" [] [Whitespace(" ")],
+                        query: CssSupportsAtRuleFallback {
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@14..21 "at-rule" [] [],
+                            },
+                            l_paren_token: L_PAREN@21..22 "(" [] [],
+                            value: CssSupportsAtRuleFallbackValue {
+                                items: [
+                                    CSS_SUPPORTS_AT_RULE_FALLBACK_LITERAL@22..38 "@property; extra" [] [],
+                                ],
+                            },
+                            r_paren_token: R_PAREN@38..40 ")" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@40..42 "{" [] [Whitespace(" ")],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssClassSelector {
+                                            dot_token: DOT@42..43 "." [] [],
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@43..52 "fallback" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@52..54 "{" [] [Whitespace(" ")],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@54..59 "color" [] [],
+                                                },
+                                                colon_token: COLON@59..61 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@61..66 "green" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@66..68 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@68..70 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@70..71 "}" [] [],
+                },
+            },
+        },
+        CssAtRule {
+            at_token: AT@71..73 "@" [Newline("\n")] [],
+            rule: CssImportAtRule {
+                import_token: IMPORT_KW@73..80 "import" [] [Whitespace(" ")],
+                url: CssString {
+                    value_token: CSS_STRING_LITERAL@80..95 "\"fallback.css\"" [] [Whitespace(" ")],
+                },
+                layer: missing (optional),
+                supports: CssImportSupports {
+                    supports_token: SUPPORTS_KW@95..103 "supports" [] [],
+                    l_paren_token: L_PAREN@103..104 "(" [] [],
+                    condition: CssSupportsNotCondition {
+                        not_token: NOT_KW@104..108 "not" [] [Whitespace(" ")],
+                        query: CssSupportsAtRuleFallback {
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@108..115 "at-rule" [] [],
+                            },
+                            l_paren_token: L_PAREN@115..116 "(" [] [],
+                            value: CssSupportsAtRuleFallbackValue {
+                                items: [
+                                    CSS_SUPPORTS_AT_RULE_FALLBACK_LITERAL@116..132 "@property; extra" [] [],
+                                ],
+                            },
+                            r_paren_token: R_PAREN@132..133 ")" [] [],
+                        },
+                    },
+                    r_paren_token: R_PAREN@133..134 ")" [] [],
+                },
+                media: CssMediaQueryList [],
+                semicolon_token: SEMICOLON@134..135 ";" [] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@135..137 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@137..143 "value" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@143..145 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@145..150 "color" [] [],
+                                },
+                                colon_token: COLON@150..152 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIfFunction {
+                                        if_token: IF_KW@152..154 "if" [] [],
+                                        l_paren_token: L_PAREN@154..155 "(" [] [],
+                                        css_if_branch_list: CssIfBranchList [
+                                            CssIfBranch {
+                                                condition: CssIfSupportsTest {
+                                                    supports_token: SUPPORTS_KW@155..163 "supports" [] [],
+                                                    l_paren_token: L_PAREN@163..164 "(" [] [],
+                                                    test: CssSupportsNotCondition {
+                                                        not_token: NOT_KW@164..168 "not" [] [Whitespace(" ")],
+                                                        query: CssSupportsAtRuleFallback {
+                                                            name: CssCustomIdentifier {
+                                                                value_token: IDENT@168..175 "at-rule" [] [],
+                                                            },
+                                                            l_paren_token: L_PAREN@175..176 "(" [] [],
+                                                            value: CssSupportsAtRuleFallbackValue {
+                                                                items: [
+                                                                    CSS_SUPPORTS_AT_RULE_FALLBACK_LITERAL@176..192 "@property; extra" [] [],
+                                                                ],
+                                                            },
+                                                            r_paren_token: R_PAREN@192..193 ")" [] [],
+                                                        },
+                                                    },
+                                                    r_paren_token: R_PAREN@193..194 ")" [] [],
+                                                },
+                                                colon_token: COLON@194..196 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@196..201 "green" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            SEMICOLON@201..203 ";" [] [Whitespace(" ")],
+                                            CssIfBranch {
+                                                condition: CssElseKeyword {
+                                                    else_token: ELSE_KW@203..207 "else" [] [],
+                                                },
+                                                colon_token: COLON@207..209 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@209..212 "red" [] [],
+                                                    },
+                                                ],
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@212..213 ")" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@213..215 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@215..216 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@216..217 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..217
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..216
+    0: CSS_AT_RULE@0..71
+      0: AT@0..1 "@" [] []
+      1: CSS_SUPPORTS_AT_RULE@1..71
+        0: CSS_SUPPORTS_AT_RULE_DECLARATOR@1..40
+          0: SUPPORTS_KW@1..10 "supports" [] [Whitespace(" ")]
+          1: CSS_SUPPORTS_NOT_CONDITION@10..40
+            0: NOT_KW@10..14 "not" [] [Whitespace(" ")]
+            1: CSS_SUPPORTS_AT_RULE_FALLBACK@14..40
+              0: CSS_CUSTOM_IDENTIFIER@14..21
+                0: IDENT@14..21 "at-rule" [] []
+              1: L_PAREN@21..22 "(" [] []
+              2: CSS_SUPPORTS_AT_RULE_FALLBACK_VALUE@22..38
+                0: CSS_SUPPORTS_AT_RULE_FALLBACK_LITERAL@22..38 "@property; extra" [] []
+              3: R_PAREN@38..40 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@40..71
+          0: L_CURLY@40..42 "{" [] [Whitespace(" ")]
+          1: CSS_RULE_LIST@42..70
+            0: CSS_QUALIFIED_RULE@42..70
+              0: CSS_SELECTOR_LIST@42..52
+                0: CSS_COMPOUND_SELECTOR@42..52
+                  0: CSS_NESTED_SELECTOR_LIST@42..42
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@42..52
+                    0: CSS_CLASS_SELECTOR@42..52
+                      0: DOT@42..43 "." [] []
+                      1: CSS_CUSTOM_IDENTIFIER@43..52
+                        0: IDENT@43..52 "fallback" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@52..70
+                0: L_CURLY@52..54 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_OR_RULE_LIST@54..68
+                  0: CSS_DECLARATION_WITH_SEMICOLON@54..68
+                    0: CSS_DECLARATION@54..66
+                      0: CSS_GENERIC_PROPERTY@54..66
+                        0: CSS_IDENTIFIER@54..59
+                          0: IDENT@54..59 "color" [] []
+                        1: COLON@59..61 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@61..66
+                          0: CSS_IDENTIFIER@61..66
+                            0: IDENT@61..66 "green" [] []
+                      1: (empty)
+                    1: SEMICOLON@66..68 ";" [] [Whitespace(" ")]
+                2: R_CURLY@68..70 "}" [] [Whitespace(" ")]
+          2: R_CURLY@70..71 "}" [] []
+    1: CSS_AT_RULE@71..135
+      0: AT@71..73 "@" [Newline("\n")] []
+      1: CSS_IMPORT_AT_RULE@73..135
+        0: IMPORT_KW@73..80 "import" [] [Whitespace(" ")]
+        1: CSS_STRING@80..95
+          0: CSS_STRING_LITERAL@80..95 "\"fallback.css\"" [] [Whitespace(" ")]
+        2: (empty)
+        3: CSS_IMPORT_SUPPORTS@95..134
+          0: SUPPORTS_KW@95..103 "supports" [] []
+          1: L_PAREN@103..104 "(" [] []
+          2: CSS_SUPPORTS_NOT_CONDITION@104..133
+            0: NOT_KW@104..108 "not" [] [Whitespace(" ")]
+            1: CSS_SUPPORTS_AT_RULE_FALLBACK@108..133
+              0: CSS_CUSTOM_IDENTIFIER@108..115
+                0: IDENT@108..115 "at-rule" [] []
+              1: L_PAREN@115..116 "(" [] []
+              2: CSS_SUPPORTS_AT_RULE_FALLBACK_VALUE@116..132
+                0: CSS_SUPPORTS_AT_RULE_FALLBACK_LITERAL@116..132 "@property; extra" [] []
+              3: R_PAREN@132..133 ")" [] []
+          3: R_PAREN@133..134 ")" [] []
+        4: CSS_MEDIA_QUERY_LIST@134..134
+        5: SEMICOLON@134..135 ";" [] []
+    2: CSS_QUALIFIED_RULE@135..216
+      0: CSS_SELECTOR_LIST@135..143
+        0: CSS_COMPOUND_SELECTOR@135..143
+          0: CSS_NESTED_SELECTOR_LIST@135..135
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@135..143
+            0: CSS_CLASS_SELECTOR@135..143
+              0: DOT@135..137 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@137..143
+                0: IDENT@137..143 "value" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@143..216
+        0: L_CURLY@143..145 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@145..215
+          0: CSS_DECLARATION_WITH_SEMICOLON@145..215
+            0: CSS_DECLARATION@145..213
+              0: CSS_GENERIC_PROPERTY@145..213
+                0: CSS_IDENTIFIER@145..150
+                  0: IDENT@145..150 "color" [] []
+                1: COLON@150..152 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@152..213
+                  0: CSS_IF_FUNCTION@152..213
+                    0: IF_KW@152..154 "if" [] []
+                    1: L_PAREN@154..155 "(" [] []
+                    2: CSS_IF_BRANCH_LIST@155..212
+                      0: CSS_IF_BRANCH@155..201
+                        0: CSS_IF_SUPPORTS_TEST@155..194
+                          0: SUPPORTS_KW@155..163 "supports" [] []
+                          1: L_PAREN@163..164 "(" [] []
+                          2: CSS_SUPPORTS_NOT_CONDITION@164..193
+                            0: NOT_KW@164..168 "not" [] [Whitespace(" ")]
+                            1: CSS_SUPPORTS_AT_RULE_FALLBACK@168..193
+                              0: CSS_CUSTOM_IDENTIFIER@168..175
+                                0: IDENT@168..175 "at-rule" [] []
+                              1: L_PAREN@175..176 "(" [] []
+                              2: CSS_SUPPORTS_AT_RULE_FALLBACK_VALUE@176..192
+                                0: CSS_SUPPORTS_AT_RULE_FALLBACK_LITERAL@176..192 "@property; extra" [] []
+                              3: R_PAREN@192..193 ")" [] []
+                          3: R_PAREN@193..194 ")" [] []
+                        1: COLON@194..196 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@196..201
+                          0: CSS_IDENTIFIER@196..201
+                            0: IDENT@196..201 "green" [] []
+                      1: SEMICOLON@201..203 ";" [] [Whitespace(" ")]
+                      2: CSS_IF_BRANCH@203..212
+                        0: CSS_ELSE_KEYWORD@203..207
+                          0: ELSE_KW@203..207 "else" [] []
+                        1: COLON@207..209 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@209..212
+                          0: CSS_IDENTIFIER@209..212
+                            0: IDENT@209..212 "red" [] []
+                    3: R_PAREN@212..213 ")" [] []
+              1: (empty)
+            1: SEMICOLON@213..215 ";" [] [Whitespace(" ")]
+        2: R_CURLY@215..216 "}" [] []
+  2: EOF@216..217 "" [Newline("\n")] []
+
+```

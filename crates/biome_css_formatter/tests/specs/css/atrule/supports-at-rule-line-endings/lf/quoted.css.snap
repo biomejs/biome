@@ -1,0 +1,51 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/atrule/supports-at-rule-line-endings/lf/quoted.css
+---
+
+# Input
+
+```css
+@supports at-rule(@future "\31
+x") { .quoted {color:green} }
+.control { content: "\31
+x"; }
+@supports at-rule(@\70
+roperty) { .escaped-name { color: red; } }
+@supports \61
+t-rule(@property) { .escaped-function { color: blue; } }
+
+```
+
+
+# Formatted
+
+```css
+@supports at-rule(@future "\31
+x") {
+	.quoted {
+		color: green;
+	}
+}
+.control {
+	content: "\31
+x";
+}
+@supports at-rule(
+		@\70
+roperty
+	) {
+	.escaped-name {
+		color: red;
+	}
+}
+@supports \61
+t-rule(
+		@property
+	) {
+	.escaped-function {
+		color: blue;
+	}
+}
+
+```

@@ -33,5 +33,6 @@ pub(crate) mod bogus_syntax;
 pub(crate) mod bogus_syntax_single_component;
 pub(crate) mod bogus_unicode_range_value;
 pub(crate) mod bogus_url_modifier;
+pub(crate) mod supports_at_rule_fallback_value;
 pub(crate) mod unknown_at_rule_component_list;
 pub(crate) mod value_at_rule_generic_value;

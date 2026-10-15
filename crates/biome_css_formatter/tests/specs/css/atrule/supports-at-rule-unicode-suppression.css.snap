@@ -1,0 +1,29 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/atrule/supports-at-rule-unicode-suppression.css
+---
+
+# Input
+
+```css
+/* biome-ignore format: preserve literal separators */
+@supports not at-rule(@future "a b") { .line { color: green; } }
+/* biome-ignore format: preserve literal separators */
+@supports not at-rule(@future "a b") { .paragraph { color: green; } }
+/* biome-ignore format: preserve literal separators */
+.control { content: "a b c"; }
+
+```
+
+
+# Formatted
+
+```css
+/* biome-ignore format: preserve literal separators */
+@supports not at-rule(@future "a b") { .line { color: green; } }
+/* biome-ignore format: preserve literal separators */
+@supports not at-rule(@future "a b") { .paragraph { color: green; } }
+/* biome-ignore format: preserve literal separators */
+.control { content: "a b c"; }
+
+```

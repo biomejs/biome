@@ -4,6 +4,7 @@ mod tests;
 mod scan_cursor;
 mod source_cursor;
 
+pub(crate) use self::scan_cursor::SupportsAtRuleScanCache;
 use self::scan_cursor::{CssScanCursor, StringBodyScan, StringBodyScanStop};
 use self::source_cursor::SourceCursor;
 use crate::CssParserOptions;
@@ -77,6 +78,15 @@ pub enum CssLexContext {
     /// url(images/logo.png)
     /// ```
     UrlRawValue(UrlRawValueScan),
+    /// Commits a balanced `at-rule()` fallback body as one token, including
+    /// all interior trivia, without applying property-value grammar.
+    SupportsAtRuleFallback {
+        /// Absolute position of the closing `)` found by the fallback scan.
+        end: usize,
+    },
+    /// Accepts the bare `--` identifier in an at-keyword without changing
+    /// ordinary minus-token lexing.
+    SupportsAtRuleName,
     /// Emits regular trivia until the segmented SCSS URL body starts, then
     /// lexes its text and interpolation boundaries.
     ///
@@ -256,6 +266,19 @@ impl<'src> Lexer<'src> for CssLexer<'src> {
                 CssLexContext::Selector => self.consume_selector_token(current),
                 CssLexContext::PseudoNthSelector => self.consume_pseudo_nth_selector_token(current),
                 CssLexContext::UrlRawValue(scan) => self.consume_url_raw_value_token(current, scan),
+                CssLexContext::SupportsAtRuleFallback { end } => {
+                    self.consume_supports_at_rule_fallback_token(current, end)
+                }
+                CssLexContext::SupportsAtRuleName => {
+                    if current == b'-' && self.peek_byte() == Some(b'-') {
+                        let mut cursor = self.scan_cursor();
+                        cursor.advance_ident_sequence();
+                        self.set_position(cursor.position());
+                        IDENT
+                    } else {
+                        self.consume_token(current)
+                    }
+                }
                 CssLexContext::ScssUrlValue { start } => {
                     self.consume_scss_url_value_token(current, start)
                 }
@@ -735,6 +758,20 @@ impl<'src> CssLexer<'src> {
         }
 
         CSS_URL_VALUE_RAW_LITERAL
+    }
+
+    fn consume_supports_at_rule_fallback_token(
+        &mut self,
+        current: u8,
+        end: usize,
+    ) -> CssSyntaxKind {
+        if self.position() >= end {
+            return self.consume_token(current);
+        }
+
+        debug_assert_eq!(self.source().as_bytes().get(end), Some(&b')'));
+        self.set_position(end);
+        CSS_SUPPORTS_AT_RULE_FALLBACK_LITERAL
     }
 
     /// Emits `images/`, `#`, or `.png` from `url(images/#{$name}.png)`.
@@ -1863,6 +1900,17 @@ impl<'src> CssLexer<'src> {
     ) -> CssLexContext {
         self.scan_cursor_at(start)
             .url_body_lex_context(scss_exclusive_syntax_allowed)
+    }
+
+    /// Returns the matching `)` position for an `at-rule()` body at `start`
+    /// without advancing lexer state, or `None` for an unbalanced body.
+    pub(crate) fn supports_at_rule_fallback_end(
+        &self,
+        start: usize,
+        cache: &mut SupportsAtRuleScanCache,
+    ) -> Option<usize> {
+        self.scan_cursor_at(start)
+            .scan_supports_at_rule_fallback_end(cache)
     }
 }
 

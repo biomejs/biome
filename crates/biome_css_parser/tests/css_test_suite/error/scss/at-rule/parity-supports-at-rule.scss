@@ -1,0 +1,47 @@
+@supports at-rule(@function {
+  .inside-missing-close { color: red; }
+}
+.after-missing-close { color: green; background: url(http://example.test/file); }
+
+@supports (at-rule(@property) and) {
+  .inside-incomplete-and { display: block; }
+}
+.after-incomplete-and { display: grid; }
+
+@supports at-rule(@property) or {
+  .inside-incomplete-or { color: red; }
+}
+.after-incomplete-or { color: green; }
+
+.nested-recovery {
+  @supports at-rule(@property {
+    color: red;
+  }
+  border-width: 17px;
+}
+.after-nested-recovery { outline-width: 19px; }
+
+@import "missing-close.css" supports(at-rule(@function);
+.after-import-recovery { margin-top: 23px; }
+
+@supports at-rule(@url(x])) {
+  .inside-tight-url-mismatch { color: red; }
+}
+.after-tight-url-mismatch { margin-bottom: 29px; }
+
+@supports at-rule(@u\72l(x])) {
+  .inside-escaped-url-mismatch { color: red; }
+}
+.after-escaped-url-mismatch { padding-top: 31px; }
+
+@supports at-rule(#url(x])) {
+  .inside-hash-url-mismatch { color: red; }
+}
+.after-hash-url-mismatch { padding-bottom: 37px; }
+
+@supports at-rule(@-- { .inside-first-dashes-close { color: red; } }
+.after-first-dashes-close { left: 41px; }
+@supports at-rule(@-- { .inside-second-dashes-close { color: red; } }
+.after-second-dashes-close { right: 43px; }
+@supports at-rule(@ --) { .fallback-after-missing-closes { bottom: 47px; } }
+.after-repeated-dashes-recovery { top: 53px; }

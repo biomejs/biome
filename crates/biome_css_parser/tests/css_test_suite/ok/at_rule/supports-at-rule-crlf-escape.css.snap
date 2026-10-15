@@ -1,0 +1,140 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@supports at-rule(url(\31
+x)) { .escaped { color: green; } }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssSupportsAtRule {
+                declarator: CssSupportsAtRuleDeclarator {
+                    supports_token: SUPPORTS_KW@1..10 "supports" [] [Whitespace(" ")],
+                    condition: CssSupportsAtRuleFallback {
+                        name: CssCustomIdentifier {
+                            value_token: IDENT@10..17 "at-rule" [] [],
+                        },
+                        l_paren_token: L_PAREN@17..18 "(" [] [],
+                        value: CssSupportsAtRuleFallbackValue {
+                            items: [
+                                CSS_SUPPORTS_AT_RULE_FALLBACK_LITERAL@18..29 "url(\\31\r\nx)" [] [],
+                            ],
+                        },
+                        r_paren_token: R_PAREN@29..31 ")" [] [Whitespace(" ")],
+                    },
+                },
+                block: CssRuleBlock {
+                    l_curly_token: L_CURLY@31..33 "{" [] [Whitespace(" ")],
+                    rules: CssRuleList [
+                        CssQualifiedRule {
+                            prelude: CssSelectorList [
+                                CssCompoundSelector {
+                                    nesting_selectors: CssNestedSelectorList [],
+                                    simple_selector: missing (optional),
+                                    sub_selectors: CssSubSelectorList [
+                                        CssClassSelector {
+                                            dot_token: DOT@33..34 "." [] [],
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@34..42 "escaped" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                            block: CssDeclarationOrRuleBlock {
+                                l_curly_token: L_CURLY@42..44 "{" [] [Whitespace(" ")],
+                                items: CssDeclarationOrRuleList [
+                                    CssDeclarationWithSemicolon {
+                                        declaration: CssDeclaration {
+                                            property: CssGenericProperty {
+                                                name: CssIdentifier {
+                                                    value_token: IDENT@44..49 "color" [] [],
+                                                },
+                                                colon_token: COLON@49..51 ":" [] [Whitespace(" ")],
+                                                value: CssGenericComponentValueList [
+                                                    CssIdentifier {
+                                                        value_token: IDENT@51..56 "green" [] [],
+                                                    },
+                                                ],
+                                            },
+                                            important: missing (optional),
+                                        },
+                                        semicolon_token: SEMICOLON@56..58 ";" [] [Whitespace(" ")],
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@58..60 "}" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                    r_curly_token: R_CURLY@60..61 "}" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@61..63 "" [Newline("\r\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..63
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..61
+    0: CSS_AT_RULE@0..61
+      0: AT@0..1 "@" [] []
+      1: CSS_SUPPORTS_AT_RULE@1..61
+        0: CSS_SUPPORTS_AT_RULE_DECLARATOR@1..31
+          0: SUPPORTS_KW@1..10 "supports" [] [Whitespace(" ")]
+          1: CSS_SUPPORTS_AT_RULE_FALLBACK@10..31
+            0: CSS_CUSTOM_IDENTIFIER@10..17
+              0: IDENT@10..17 "at-rule" [] []
+            1: L_PAREN@17..18 "(" [] []
+            2: CSS_SUPPORTS_AT_RULE_FALLBACK_VALUE@18..29
+              0: CSS_SUPPORTS_AT_RULE_FALLBACK_LITERAL@18..29 "url(\\31\r\nx)" [] []
+            3: R_PAREN@29..31 ")" [] [Whitespace(" ")]
+        1: CSS_RULE_BLOCK@31..61
+          0: L_CURLY@31..33 "{" [] [Whitespace(" ")]
+          1: CSS_RULE_LIST@33..60
+            0: CSS_QUALIFIED_RULE@33..60
+              0: CSS_SELECTOR_LIST@33..42
+                0: CSS_COMPOUND_SELECTOR@33..42
+                  0: CSS_NESTED_SELECTOR_LIST@33..33
+                  1: (empty)
+                  2: CSS_SUB_SELECTOR_LIST@33..42
+                    0: CSS_CLASS_SELECTOR@33..42
+                      0: DOT@33..34 "." [] []
+                      1: CSS_CUSTOM_IDENTIFIER@34..42
+                        0: IDENT@34..42 "escaped" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_OR_RULE_BLOCK@42..60
+                0: L_CURLY@42..44 "{" [] [Whitespace(" ")]
+                1: CSS_DECLARATION_OR_RULE_LIST@44..58
+                  0: CSS_DECLARATION_WITH_SEMICOLON@44..58
+                    0: CSS_DECLARATION@44..56
+                      0: CSS_GENERIC_PROPERTY@44..56
+                        0: CSS_IDENTIFIER@44..49
+                          0: IDENT@44..49 "color" [] []
+                        1: COLON@49..51 ":" [] [Whitespace(" ")]
+                        2: CSS_GENERIC_COMPONENT_VALUE_LIST@51..56
+                          0: CSS_IDENTIFIER@51..56
+                            0: IDENT@51..56 "green" [] []
+                      1: (empty)
+                    1: SEMICOLON@56..58 ";" [] [Whitespace(" ")]
+                2: R_CURLY@58..60 "}" [] [Whitespace(" ")]
+          2: R_CURLY@60..61 "}" [] []
+  2: EOF@61..63 "" [Newline("\r\n")] []
+
+```

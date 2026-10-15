@@ -1,0 +1,3 @@
+@supports (not at-rule(@property)) { .fallback { color:red; } }
+@supports (not (display:grid)) { .fallback { display:block; } }
+@supports (at-rule(@property)) { .supported { color:green; } }

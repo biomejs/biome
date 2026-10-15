@@ -1,0 +1,29 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/atrule/supports-at-rule-token-prefixes.css
+---
+
+# Input
+
+```css
+@supports not at-rule(<!--url(x])){.cdo{color:green}}
+@supports not at-rule(-->url(x])){.cdc{color:green}}
+
+```
+
+
+# Formatted
+
+```css
+@supports not at-rule(<!--url(x])) {
+	.cdo {
+		color: green;
+	}
+}
+@supports not at-rule(-->url(x])) {
+	.cdc {
+		color: green;
+	}
+}
+
+```

@@ -1,0 +1,2 @@
+@supports at-rule(url(\31
+x)) { .escaped { color: green; } }
