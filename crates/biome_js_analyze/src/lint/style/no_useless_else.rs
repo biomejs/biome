@@ -141,9 +141,12 @@ impl Rule for NoUselessElse {
             rule_category!(),
             else_clause.range(),
             markup! {
-                "This "<Emphasis>"else"</Emphasis>" clause can be omitted because previous branches break early."
+                "This "<Emphasis>"else"</Emphasis>" clause is unnecessary."
             },
-        ))
+        )
+        .note(markup! {
+            "The previous branches break early, so the code in the "<Emphasis>"else"</Emphasis>" clause only runs when none of them matched. The clause adds a level of nesting without changing behavior."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, if_stmt: &Self::State) -> Option<JsRuleAction> {

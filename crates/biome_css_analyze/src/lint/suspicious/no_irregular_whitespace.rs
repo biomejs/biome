@@ -62,7 +62,10 @@ impl Rule for NoIrregularWhitespace {
                 },
             )
             .note(markup! {
-                    "Replace the irregular whitespace with normal whitespaces."
+                "Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find."
+            })
+            .note(markup! {
+                "Replace the irregular whitespace with normal whitespaces."
             }),
         )
     }

@@ -24,7 +24,9 @@ invalid.scss:3:31 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     4 │ }
     5 │ 
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a keyword starting with to.
   
   i See MDN web docs for more details.
   

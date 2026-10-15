@@ -158,7 +158,9 @@ impl Rule for UseConst {
             }
         }
 
-        Some(diag)
+        Some(diag.note(markup! {
+            "A variable that is never reassigned is clearer as "<Emphasis>"const"</Emphasis>", because it prevents the binding from being reassigned."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {

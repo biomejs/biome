@@ -20,6 +20,8 @@ invalid.scss:2:14 lint/suspicious/noEmptyBlock ━━━━━━━━━━━
       │              ^^
     3 │ 
   
+  i An empty block has no effect. It often means that styles were forgotten or removed.
+  
   i Consider removing the empty block or adding styles inside it.
   
 

@@ -81,7 +81,10 @@ impl Rule for NoEmptyInterface {
             rule_category!(),
             ctx.query().range(),
             markup! { "An "<Emphasis>"empty interface"</Emphasis>" is equivalent to "<Emphasis>"{}"</Emphasis>"." },
-        ))
+        )
+        .note(markup! {
+            "An empty interface has no members, so when "<Emphasis>"strictNullChecks"</Emphasis>" is enabled, any value other than "<Emphasis>"null"</Emphasis>" or "<Emphasis>"undefined"</Emphasis>" can be assigned to it. This is rarely what is intended."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

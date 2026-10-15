@@ -136,7 +136,9 @@ impl Rule for NoLabelWithoutControl {
             markup! {
                 "A form label must be associated with an input."
             },
-        );
+        ).note(markup! {
+            "Assistive technologies rely on a label being associated with a control to announce it. Without the association, screen reader users cannot tell what the control is for."
+        });
 
         if !state.has_text_content {
             diagnostic = diagnostic.note(

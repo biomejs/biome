@@ -112,6 +112,8 @@ issue4623.js:2:2 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
       │  ^^
     3 │ }
   
+  i In JSX children, text that starts with // or /* is rendered as text. It is not treated as a comment.
+  
   i Unsafe fix: Wrap the comments with braces
   
     2 │ ·{/*··*/}

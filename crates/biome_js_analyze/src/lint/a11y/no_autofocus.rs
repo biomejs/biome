@@ -109,7 +109,10 @@ impl Rule for NoAutofocus {
             markup! {
                 "Avoid the "<Emphasis>"autoFocus"</Emphasis>" attribute."
             },
-        ))
+        )
+        .note(markup! {
+            "Autofocus moves keyboard focus without the user asking for it. This can disorient screen reader users and people who navigate with a keyboard."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, attr: &Self::State) -> Option<JsRuleAction> {

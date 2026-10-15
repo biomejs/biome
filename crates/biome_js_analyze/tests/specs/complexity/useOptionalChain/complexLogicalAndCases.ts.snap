@@ -30,6 +30,8 @@ complexLogicalAndCases.ts:2:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     3 │ foo && foo[1 + 2] && foo[1 + 2].baz;
     4 │ foo && foo[typeof bar] && foo[typeof bar].baz;
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
      1  1 │   // currently do not handle complex computed properties
@@ -52,6 +54,8 @@ complexLogicalAndCases.ts:3:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
       │ ^^^^^^^^^^^^^^^^^
     4 │ foo && foo[typeof bar] && foo[typeof bar].baz;
     5 │ 
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -77,6 +81,8 @@ complexLogicalAndCases.ts:4:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     5 │ 
     6 │ // https://github.com/biomejs/biome/issues/1925
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
      2  2 │   foo && foo[bar as string] && foo[bar as string].baz;
@@ -100,6 +106,8 @@ complexLogicalAndCases.ts:7:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
     8 │ 
     9 │ foo?.bar.baz?.qux && foo.bar.baz.qux.zoo;
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     7 │ foo?.bar·&&·foo.bar?.baz·&&·foo.bar?.qux;
@@ -118,6 +126,8 @@ complexLogicalAndCases.ts:9:1 lint/complexity/useOptionalChain  FIXABLE  ━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     10 │ 
     11 │ foo && foo.bar.baz?.qux && foo.bar.baz.qux.zoo;
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -141,6 +151,8 @@ complexLogicalAndCases.ts:11:1 lint/complexity/useOptionalChain  FIXABLE  ━━
   > 11 │ foo && foo.bar.baz?.qux && foo.bar.baz.qux.zoo;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     12 │ 
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   

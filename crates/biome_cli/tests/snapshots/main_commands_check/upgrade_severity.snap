@@ -75,6 +75,8 @@ file.js:1:1 lint/style/noNegationElse  FIXABLE  ━━━━━━━━━━�
   > 1 │ if(!cond) { exprA(); } else { exprB() }
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
+  i A negated condition with an else branch makes the reader reverse the logic twice. Swapping the blocks removes the negation.
+  
   i Safe fix: Invert the condition and the blocks.
   
   - if(!cond)·{·exprA();·}·else·{·exprB()·}

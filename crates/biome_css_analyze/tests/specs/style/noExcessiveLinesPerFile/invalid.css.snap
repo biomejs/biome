@@ -25,6 +25,8 @@ invalid.css:1:1 lint/style/noExcessiveLinesPerFile ━━━━━━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^
     5 │ 
   
+  i Long files are harder to read, navigate, and maintain.
+  
   i Consider splitting this file into smaller files.
   
 

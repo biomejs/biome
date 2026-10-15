@@ -51,6 +51,8 @@ invalid.js:1:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
     2 │ BigInt64Array()
     3 │ BigUint64Array()
   
+  i Calling this builtin the wrong way throws a TypeError at runtime.
+  
   i Unsafe fix: Add new keyword.
   
     1 │ new·ArrayBuffer()
@@ -68,6 +70,8 @@ invalid.js:2:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
       │ ^^^^^^^^^^^^^^^
     3 │ BigUint64Array()
     4 │ DataView()
+  
+  i Calling this builtin the wrong way throws a TypeError at runtime.
   
   i Unsafe fix: Add new keyword.
   
@@ -88,6 +92,8 @@ invalid.js:3:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
     4 │ DataView()
     5 │ Float32Array()
   
+  i Calling this builtin the wrong way throws a TypeError at runtime.
+  
   i Unsafe fix: Add new keyword.
   
     3 │ new·BigUint64Array()
@@ -106,6 +112,8 @@ invalid.js:4:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
       │ ^^^^^^^^^^
     5 │ Float32Array()
     6 │ Float64Array()
+  
+  i Calling this builtin the wrong way throws a TypeError at runtime.
   
   i Unsafe fix: Add new keyword.
   
@@ -126,6 +134,8 @@ invalid.js:5:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
     6 │ Float64Array()
     7 │ Int16Array()
   
+  i Calling this builtin the wrong way throws a TypeError at runtime.
+  
   i Unsafe fix: Add new keyword.
   
     5 │ new·Float32Array()
@@ -144,6 +154,8 @@ invalid.js:6:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
       │ ^^^^^^^^^^^^^^
     7 │ Int16Array()
     8 │ Int32Array()
+  
+  i Calling this builtin the wrong way throws a TypeError at runtime.
   
   i Unsafe fix: Add new keyword.
   
@@ -164,6 +176,8 @@ invalid.js:7:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
     8 │ Int32Array()
     9 │ Int8Array()
   
+  i Calling this builtin the wrong way throws a TypeError at runtime.
+  
   i Unsafe fix: Add new keyword.
   
     7 │ new·Int16Array()
@@ -182,6 +196,8 @@ invalid.js:8:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
        │ ^^^^^^^^^^^^
      9 │ Int8Array()
     10 │ Map()
+  
+  i Calling this builtin the wrong way throws a TypeError at runtime.
   
   i Unsafe fix: Add new keyword.
   
@@ -202,6 +218,8 @@ invalid.js:9:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
     10 │ Map()
     11 │ Proxy()
   
+  i Calling this builtin the wrong way throws a TypeError at runtime.
+  
   i Unsafe fix: Add new keyword.
   
     9 │ new·Int8Array()
@@ -220,6 +238,8 @@ invalid.js:10:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
        │ ^^^^^
     11 │ Proxy()
     12 │ Set()
+  
+  i Calling this builtin the wrong way throws a TypeError at runtime.
   
   i Unsafe fix: Add new keyword.
   
@@ -240,6 +260,8 @@ invalid.js:11:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
     12 │ Set()
     13 │ SharedArrayBuffer()
   
+  i Calling this builtin the wrong way throws a TypeError at runtime.
+  
   i Unsafe fix: Add new keyword.
   
     11 │ new·Proxy()
@@ -258,6 +280,8 @@ invalid.js:12:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
        │ ^^^^^
     13 │ SharedArrayBuffer()
     14 │ Uint16Array()
+  
+  i Calling this builtin the wrong way throws a TypeError at runtime.
   
   i Unsafe fix: Add new keyword.
   
@@ -278,6 +302,8 @@ invalid.js:13:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
     14 │ Uint16Array()
     15 │ Uint32Array()
   
+  i Calling this builtin the wrong way throws a TypeError at runtime.
+  
   i Unsafe fix: Add new keyword.
   
     13 │ new·SharedArrayBuffer()
@@ -296,6 +322,8 @@ invalid.js:14:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
        │ ^^^^^^^^^^^^^
     15 │ Uint32Array()
     16 │ Uint8Array()
+  
+  i Calling this builtin the wrong way throws a TypeError at runtime.
   
   i Unsafe fix: Add new keyword.
   
@@ -316,6 +344,8 @@ invalid.js:15:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
     16 │ Uint8Array()
     17 │ Uint8ClampedArray()
   
+  i Calling this builtin the wrong way throws a TypeError at runtime.
+  
   i Unsafe fix: Add new keyword.
   
     15 │ new·Uint32Array()
@@ -334,6 +364,8 @@ invalid.js:16:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
        │ ^^^^^^^^^^^^
     17 │ Uint8ClampedArray()
     18 │ WeakMap()
+  
+  i Calling this builtin the wrong way throws a TypeError at runtime.
   
   i Unsafe fix: Add new keyword.
   
@@ -354,6 +386,8 @@ invalid.js:17:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
     18 │ WeakMap()
     19 │ WeakSet()
   
+  i Calling this builtin the wrong way throws a TypeError at runtime.
+  
   i Unsafe fix: Add new keyword.
   
     17 │ new·Uint8ClampedArray()
@@ -372,6 +406,8 @@ invalid.js:18:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
        │ ^^^^^^^^^
     19 │ WeakSet()
     20 │ WeakRef()
+  
+  i Calling this builtin the wrong way throws a TypeError at runtime.
   
   i Unsafe fix: Add new keyword.
   
@@ -392,6 +428,8 @@ invalid.js:19:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
     20 │ WeakRef()
     21 │ FinalizationRegistry()
   
+  i Calling this builtin the wrong way throws a TypeError at runtime.
+  
   i Unsafe fix: Add new keyword.
   
     19 │ new·WeakSet()
@@ -410,6 +448,8 @@ invalid.js:20:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
        │ ^^^^^^^^^
     21 │ FinalizationRegistry()
     22 │ window.Map()
+  
+  i Calling this builtin the wrong way throws a TypeError at runtime.
   
   i Unsafe fix: Add new keyword.
   
@@ -430,6 +470,8 @@ invalid.js:21:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
     22 │ window.Map()
     23 │ globalThis.Map()
   
+  i Calling this builtin the wrong way throws a TypeError at runtime.
+  
   i Unsafe fix: Add new keyword.
   
     21 │ new·FinalizationRegistry()
@@ -448,6 +490,8 @@ invalid.js:22:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
        │ ^^^^^^^^^^^^
     23 │ globalThis.Map()
     24 │ function foo() {
+  
+  i Calling this builtin the wrong way throws a TypeError at runtime.
   
   i Unsafe fix: Add new keyword.
   
@@ -468,6 +512,8 @@ invalid.js:23:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
     24 │ function foo() {
     25 │     return /** Start */ globalThis.Map([]) /** End */
   
+  i Calling this builtin the wrong way throws a TypeError at runtime.
+  
   i Unsafe fix: Add new keyword.
   
     23 │ new·globalThis.Map()
@@ -486,6 +532,8 @@ invalid.js:25:25 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━
        │                         ^^^^^^^^^^^^^^^^^^
     26 │ }
     27 │ 
+  
+  i Calling this builtin the wrong way throws a TypeError at runtime.
   
   i Unsafe fix: Add new keyword.
   
@@ -506,6 +554,8 @@ invalid.js:28:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
     29 │ new Symbol()
     30 │ new window.BigInt(123)
   
+  i Calling this builtin the wrong way throws a TypeError at runtime.
+  
   i Unsafe fix: Remove new keyword.
   
     28 │ new·BigInt(123)
@@ -523,6 +573,8 @@ invalid.js:29:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
        │ ^^^^^^^^^^^^
     30 │ new window.BigInt(123)
     31 │ new globalThis.BigInt(123)
+  
+  i Calling this builtin the wrong way throws a TypeError at runtime.
   
   i Unsafe fix: Remove new keyword.
   
@@ -543,6 +595,8 @@ invalid.js:30:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
     31 │ new globalThis.BigInt(123)
     32 │ function foo() {
   
+  i Calling this builtin the wrong way throws a TypeError at runtime.
+  
   i Unsafe fix: Remove new keyword.
   
     30 │ new·window.BigInt(123)
@@ -562,6 +616,8 @@ invalid.js:31:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━�
     32 │ function foo() {
     33 │     return /** Start */ new globalThis.BigInt(123) /** End */
   
+  i Calling this builtin the wrong way throws a TypeError at runtime.
+  
   i Unsafe fix: Remove new keyword.
   
     31 │ new·globalThis.BigInt(123)
@@ -579,6 +635,8 @@ invalid.js:33:25 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━
   > 33 │     return /** Start */ new globalThis.BigInt(123) /** End */
        │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
     34 │ }
+  
+  i Calling this builtin the wrong way throws a TypeError at runtime.
   
   i Unsafe fix: Remove new keyword.
   

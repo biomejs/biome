@@ -236,6 +236,9 @@ impl Rule for NoUnknownFunction {
                 },
             )
             .note(markup! {
+                "Browsers ignore a declaration that contains an unknown function, so the style is not applied."
+            })
+            .note(markup! {
                 "Use a known function instead."
             })
             .note(markup! {

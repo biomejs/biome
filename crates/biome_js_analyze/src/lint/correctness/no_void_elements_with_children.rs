@@ -200,7 +200,10 @@ impl Rule for NoVoidElementsWithChildren {
             rule_category!(),
             range,
             state.diagnostic_message(),
-        ))
+        )
+        .note(markup! {
+            "React throws an error when it renders a void element that has children or sets "<Emphasis>"dangerouslySetInnerHTML"</Emphasis>"."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {

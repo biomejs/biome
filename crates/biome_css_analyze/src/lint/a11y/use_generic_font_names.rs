@@ -152,7 +152,10 @@ impl Rule for UseGenericFontNames {
                 },
             )
             .note(markup! {
-                    "Consider adding a generic font family as a fallback."
+                "If none of the listed font families is available, the browser falls back to its default font, which can look very different from the intended design."
+            })
+            .note(markup! {
+                "Consider adding a generic font family as a fallback."
             })
             .footer_list(
                 markup! {

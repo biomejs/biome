@@ -364,20 +364,21 @@ impl Rule for NoImplicitCoercions {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            node.range(),
-            markup! {
-                {
-                    // TODO: probably should update this eventually to be more illustrative/precise
-                    if matches!(state, RuleState::ExpressionToMinusOneComparison(_)) {
-                        "Using binary operations instead of comparisons is harder to read and understand."
-                    } else {
-                        "Implicit type conversions are hard to read and understand."
-                    }
-                }
-            },
-        ))
+        let (message, reason) = if matches!(state, RuleState::ExpressionToMinusOneComparison(_)) {
+            (
+                "Use a comparison instead of a binary operation.",
+                "Using binary operations instead of comparisons is harder to read and understand.",
+            )
+        } else {
+            (
+                "Use an explicit type conversion.",
+                "Implicit type conversions are hard to read and understand.",
+            )
+        };
+        Some(
+            RuleDiagnostic::new(rule_category!(), node.range(), markup! { {message} })
+                .note(markup! { {reason} }),
+        )
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleAction<JsLanguage>> {

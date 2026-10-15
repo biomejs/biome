@@ -25,6 +25,8 @@ invalid.astro:3:12 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
     4 │ 
     5 │ <div class="hover:focus:m-2 foo hover:px-2 p-4"></div>
   
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
+  
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9181 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -51,6 +53,8 @@ invalid.astro:5:12 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━�
   > 5 │ <div class="hover:focus:m-2 foo hover:px-2 p-4"></div>
       │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ 
+  
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/9181 for more information or to report possible bugs.
   

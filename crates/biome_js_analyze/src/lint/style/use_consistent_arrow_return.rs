@@ -153,14 +153,20 @@ impl Rule for UseConsistentArrowReturn {
                 markup! {
                     "This arrow function body should be a block statement."
                 },
-            ),
+            )
+            .note(markup! {
+                "Using a block body consistently makes the function easier to extend later with more statements."
+            }),
             State::RemoveBraces(_) => RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
                 markup! {
                     "The body of this arrow function contains a single "<Emphasis>"return"</Emphasis>" statement."
                 },
-            ),
+            )
+            .note(markup! {
+                "When the body only returns a value, the braces and the "<Emphasis>"return"</Emphasis>" keyword can be left out, which makes the function shorter."
+            }),
         };
         Some(diagnostic)
     }

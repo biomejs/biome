@@ -29,6 +29,8 @@ invalid.js:3:10 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━
     4 │ 
     5 │ debugger;
   
+  i A debugger statement pauses the program when a debugger is open. It is meant for debugging only, and it should not be left in code that is shipped.
+  
   i Unsafe fix: Remove debugger statement
   
      1  1 │   const test = { debugger: 1 }; test.debugger;
@@ -53,6 +55,8 @@ invalid.js:5:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━�
     6 │ 
     7 │ function test() {
   
+  i A debugger statement pauses the program when a debugger is open. It is meant for debugging only, and it should not be left in code that is shipped.
+  
   i Unsafe fix: Remove debugger statement
   
      2 2 │   
@@ -75,6 +79,8 @@ invalid.js:9:3 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━�
    > 9 │   debugger;
        │   ^^^^^^^^^
     10 │ }
+  
+  i A debugger statement pauses the program when a debugger is open. It is meant for debugging only, and it should not be left in code that is shipped.
   
   i Unsafe fix: Remove debugger statement
   

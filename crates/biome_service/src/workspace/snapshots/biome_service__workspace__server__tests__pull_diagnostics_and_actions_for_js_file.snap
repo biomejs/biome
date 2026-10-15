@@ -18,7 +18,12 @@ PullDiagnosticsAndActionsResult {
                 description: "This is an unexpected use of the debugger statement.",
                 message: "This is an unexpected use of the "<Emphasis>"debugger"</Emphasis>" statement.",
                 advices: Advices {
-                    advices: [],
+                    advices: [
+                        Log(
+                            Info,
+                            "A "<Emphasis>"debugger"</Emphasis>" statement pauses the program when a debugger is open. It is meant for debugging only, and it should not be left in code that is shipped.",
+                        ),
+                    ],
                 },
                 verbose_advices: Advices {
                     advices: [],

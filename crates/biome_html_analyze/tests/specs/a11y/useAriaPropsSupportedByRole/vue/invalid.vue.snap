@@ -46,7 +46,9 @@ invalid.vue:3:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
     4 │ <a href="#" aria-checked />
     5 │ <area href="#" aria-checked="true" />
   
-  i Ensure that ARIA attributes are valid for the role of the element.
+  i Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user.
+  
+  i Remove the attribute, or use a role that supports it.
   
 
 ```
@@ -63,7 +65,9 @@ invalid.vue:4:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
     5 │ <area href="#" aria-checked="true" />
     6 │ <img alt="foobar" aria-checked="true" />
   
-  i Ensure that ARIA attributes are valid for the role of the element.
+  i Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user.
+  
+  i Remove the attribute, or use a role that supports it.
   
 
 ```
@@ -80,7 +84,9 @@ invalid.vue:5:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
     6 │ <img alt="foobar" aria-checked="true" />
     7 │ <menu type="toolbar" aria-checked="true" />
   
-  i Ensure that ARIA attributes are valid for the role of the element.
+  i Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user.
+  
+  i Remove the attribute, or use a role that supports it.
   
 
 ```
@@ -97,7 +103,9 @@ invalid.vue:6:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
     7 │ <menu type="toolbar" aria-checked="true" />
     8 │ <aside aria-checked="true" />
   
-  i Ensure that ARIA attributes are valid for the role of the element.
+  i Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user.
+  
+  i Remove the attribute, or use a role that supports it.
   
 
 ```
@@ -114,7 +122,9 @@ invalid.vue:7:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
     8 │ <aside aria-checked="true" />
     9 │ <ul aria-expanded="true" />
   
-  i Ensure that ARIA attributes are valid for the role of the element.
+  i Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user.
+  
+  i Remove the attribute, or use a role that supports it.
   
 
 ```
@@ -131,7 +141,9 @@ invalid.vue:8:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
      9 │ <ul aria-expanded="true" />
     10 │ <details aria-expanded="true" />
   
-  i Ensure that ARIA attributes are valid for the role of the element.
+  i Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user.
+  
+  i Remove the attribute, or use a role that supports it.
   
 
 ```
@@ -148,7 +160,9 @@ invalid.vue:9:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
     10 │ <details aria-expanded="true" />
     11 │ <dialog aria-expanded="true" />
   
-  i Ensure that ARIA attributes are valid for the role of the element.
+  i Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user.
+  
+  i Remove the attribute, or use a role that supports it.
   
 
 ```
@@ -165,7 +179,9 @@ invalid.vue:10:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
     11 │ <dialog aria-expanded="true" />
     12 │ <aside aria-expanded="true" />
   
-  i Ensure that ARIA attributes are valid for the role of the element.
+  i Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user.
+  
+  i Remove the attribute, or use a role that supports it.
   
 
 ```
@@ -182,7 +198,9 @@ invalid.vue:11:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
     12 │ <aside aria-expanded="true" />
     13 │ <article aria-expanded="true" />
   
-  i Ensure that ARIA attributes are valid for the role of the element.
+  i Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user.
+  
+  i Remove the attribute, or use a role that supports it.
   
 
 ```
@@ -199,7 +217,9 @@ invalid.vue:12:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
     13 │ <article aria-expanded="true" />
     14 │ <li aria-expanded="true" />
   
-  i Ensure that ARIA attributes are valid for the role of the element.
+  i Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user.
+  
+  i Remove the attribute, or use a role that supports it.
   
 
 ```
@@ -216,7 +236,9 @@ invalid.vue:13:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
     14 │ <li aria-expanded="true" />
     15 │ <nav aria-expanded="true" />
   
-  i Ensure that ARIA attributes are valid for the role of the element.
+  i Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user.
+  
+  i Remove the attribute, or use a role that supports it.
   
 
 ```
@@ -233,7 +255,9 @@ invalid.vue:14:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
     15 │ <nav aria-expanded="true" />
     16 │ <ol aria-expanded="true" />
   
-  i Ensure that ARIA attributes are valid for the role of the element.
+  i Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user.
+  
+  i Remove the attribute, or use a role that supports it.
   
 
 ```
@@ -250,7 +274,9 @@ invalid.vue:15:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
     16 │ <ol aria-expanded="true" />
     17 │ <output aria-expanded="true" />
   
-  i Ensure that ARIA attributes are valid for the role of the element.
+  i Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user.
+  
+  i Remove the attribute, or use a role that supports it.
   
 
 ```
@@ -267,7 +293,9 @@ invalid.vue:16:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
     17 │ <output aria-expanded="true" />
     18 │ <tbody aria-expanded="true" />
   
-  i Ensure that ARIA attributes are valid for the role of the element.
+  i Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user.
+  
+  i Remove the attribute, or use a role that supports it.
   
 
 ```
@@ -284,7 +312,9 @@ invalid.vue:17:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
     18 │ <tbody aria-expanded="true" />
     19 │ <tfoot aria-expanded="true" />
   
-  i Ensure that ARIA attributes are valid for the role of the element.
+  i Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user.
+  
+  i Remove the attribute, or use a role that supports it.
   
 
 ```
@@ -301,7 +331,9 @@ invalid.vue:18:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
     19 │ <tfoot aria-expanded="true" />
     20 │ <thead aria-expanded="true" />
   
-  i Ensure that ARIA attributes are valid for the role of the element.
+  i Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user.
+  
+  i Remove the attribute, or use a role that supports it.
   
 
 ```
@@ -318,7 +350,9 @@ invalid.vue:19:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
     20 │ <thead aria-expanded="true" />
     21 │ <input type="radio" aria-selected="true" />
   
-  i Ensure that ARIA attributes are valid for the role of the element.
+  i Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user.
+  
+  i Remove the attribute, or use a role that supports it.
   
 
 ```
@@ -335,7 +369,9 @@ invalid.vue:20:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
     21 │ <input type="radio" aria-selected="true" />
     22 │ <menu type="toolbar" aria-expanded="true" />
   
-  i Ensure that ARIA attributes are valid for the role of the element.
+  i Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user.
+  
+  i Remove the attribute, or use a role that supports it.
   
 
 ```
@@ -352,7 +388,9 @@ invalid.vue:21:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
     22 │ <menu type="toolbar" aria-expanded="true" />
     23 │ <!-- static Vue href bindings still resolve element role; aria-checked is unsupported for link role -->
   
-  i Ensure that ARIA attributes are valid for the role of the element.
+  i Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user.
+  
+  i Remove the attribute, or use a role that supports it.
   
 
 ```
@@ -369,7 +407,9 @@ invalid.vue:22:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
     23 │ <!-- static Vue href bindings still resolve element role; aria-checked is unsupported for link role -->
     24 │ <a :href="'#'" aria-checked="true" />
   
-  i Ensure that ARIA attributes are valid for the role of the element.
+  i Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user.
+  
+  i Remove the attribute, or use a role that supports it.
   
 
 ```
@@ -386,7 +426,9 @@ invalid.vue:24:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
     25 │ <a v-bind:href="'http://x.y.z'" aria-checked="true" />
     26 │ </template>
   
-  i Ensure that ARIA attributes are valid for the role of the element.
+  i Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user.
+  
+  i Remove the attribute, or use a role that supports it.
   
 
 ```
@@ -403,7 +445,9 @@ invalid.vue:25:1 lint/a11y/useAriaPropsSupportedByRole ━━━━━━━━�
     26 │ </template>
     27 │ 
   
-  i Ensure that ARIA attributes are valid for the role of the element.
+  i Assistive technologies may ignore an ARIA attribute that the role of the element does not support, or report incorrect information to the user.
+  
+  i Remove the attribute, or use a role that supports it.
   
 
 ```
