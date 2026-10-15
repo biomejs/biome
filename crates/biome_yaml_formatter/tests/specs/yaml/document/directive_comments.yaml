@@ -1,0 +1,22 @@
+%YAML 1.2 # on the first directive's line
+# between the directives
+%TAG ! tag:example.com,2000: # on the last directive's line
+# after the directives
+
+---
+first
+...
+%YAML 1.2
+
+# separated by blank lines
+
+%TAG ! tag:example.com,2000:
+
+---
+second
+...
+%YAML 1.2
+
+# after a blank line, in the last document
+---
+third
