@@ -1,0 +1,56 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/supports-at-rule-narrow/import.scss
+---
+
+# Input
+
+```scss
+@import "fallback.css" supports(not at-rule(@property; extra));
+@import "enhanced.css" supports(at-rule(@a-long-future-rule-name));
+@import "fallback.css" supports(not (display:grid));
+@import "grid.css" supports((display:grid));
+@supports (not at-rule(@a-long-future-rule-name)) { .fallback { color: red; } }
+@supports (not (display:grid)) { .fallback { display:block; } }
+
+```
+
+
+# Options
+
+```json
+{
+  "formatter": {
+    "lineWidth": 40
+  }
+}
+```
+
+# Formatted
+
+```scss
+@import "fallback.css"
+	supports(
+		not at-rule(@property; extra));
+@import "enhanced.css"
+	supports(
+		at-rule(@a-long-future-rule-name));
+@import "fallback.css"
+	supports(not (display: grid));
+@import "grid.css"
+	supports((display: grid));
+@supports (
+		not at-rule(
+			@a-long-future-rule-name
+		)) {
+	.fallback {
+		color: red;
+	}
+}
+@supports (not (display: grid)) {
+	.fallback {
+		display: block;
+	}
+}
+
+```

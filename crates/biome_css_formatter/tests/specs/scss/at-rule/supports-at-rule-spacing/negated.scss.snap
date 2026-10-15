@@ -1,0 +1,49 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/supports-at-rule-spacing/negated.scss
+---
+
+# Input
+
+```scss
+@supports (not at-rule(@property)) { .fallback { color:red; } }
+@supports (not (display:grid)) { .fallback { display:block; } }
+@supports (at-rule(@property)) { .supported { color:green; } }
+@supports (not at-rule(@property /* boundary */)) { .comment { color:blue; } }
+
+```
+
+
+# Options
+
+```json
+{
+  "css": { "formatter": { "delimiterSpacing": true } }
+}
+```
+
+# Formatted
+
+```scss
+@supports ( not at-rule( @property )) {
+	.fallback {
+		color: red;
+	}
+}
+@supports ( not ( display: grid )) {
+	.fallback {
+		display: block;
+	}
+}
+@supports ( at-rule( @property ) ) {
+	.supported {
+		color: green;
+	}
+}
+@supports ( not at-rule( @property /* boundary */ )) {
+	.comment {
+		color: blue;
+	}
+}
+
+```
