@@ -1,10 +1,8 @@
 use crate::prelude::*;
-use crate::utils::{FormatLiteralStringToken, StringLiteralParentKind};
+use crate::utils::object::{literal_member_name_needs_quotes, write_literal_member_name_value};
 
-use biome_formatter::token::number::NumberFormatOptions;
-use biome_formatter::write;
+use biome_js_syntax::JsLiteralMemberName;
 use biome_js_syntax::JsLiteralMemberNameFields;
-use biome_js_syntax::{JsLiteralMemberName, JsSyntaxKind};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsLiteralMemberName;
@@ -14,23 +12,9 @@ impl FormatNodeRule<JsLiteralMemberName> for FormatJsLiteralMemberName {
         let JsLiteralMemberNameFields { value } = node.as_fields();
 
         let value = value?;
+        let needs_quotes = literal_member_name_needs_quotes(node, f);
+        write_literal_member_name_value(&value, needs_quotes, f)?;
 
-        match value.kind() {
-            JsSyntaxKind::JS_STRING_LITERAL => {
-                write![
-                    f,
-                    [FormatLiteralStringToken::new(
-                        &value,
-                        StringLiteralParentKind::Member
-                    )]
-                ]
-            }
-            JsSyntaxKind::JS_NUMBER_LITERAL => format_number_token(
-                &value,
-                NumberFormatOptions::default().keep_one_trailing_decimal_zero(),
-            )
-            .fmt(f),
-            _ => write![f, [value.format()]],
-        }
+        Ok(())
     }
 }

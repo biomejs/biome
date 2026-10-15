@@ -1,0 +1,46 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: ts/quoteProperties/consistent.ts
+---
+
+# Input
+
+```ts
+interface Members {
+  "prop-1": number;
+  method(): void;
+  get value(): number;
+  set value(value: number);
+}
+
+type Literal = { "a-b": number; c: string };
+
+```
+
+
+# Options
+
+```json
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "quoteProperties": "consistent"
+    }
+  }
+}
+```
+
+# Formatted
+
+```ts
+interface Members {
+	"prop-1": number;
+	method(): void;
+	get value(): number;
+	set value(value: number);
+}
+
+type Literal = { "a-b": number; "c": string };
+
+```

@@ -8,7 +8,7 @@ use biome_formatter::{
     FormatContext, FormatElement, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
     QuoteStyle, TrailingNewline, TransformSourceMap,
 };
-use biome_js_syntax::{AnyJsFunctionBody, JsLanguage};
+use biome_js_syntax::{AnyJsFunctionBody, JsLanguage, JsSyntaxNode};
 use biome_languages::JsFileSource;
 use biome_rowan::TextRange;
 use std::fmt;
@@ -52,6 +52,28 @@ pub struct JsFormatContext {
     /// language. Formatting them is delegated to the corresponding language
     /// formatter, see [crate::format_node].
     embedded_node_ranges: Vec<TextRange>,
+
+    /// The member list currently being formatted together with whether
+    /// `quoteProperties: consistent` forces all of its keys to be quoted.
+    ///
+    /// Member names only apply the decision when they belong to the stored
+    /// list, so it does not leak into nested classes, patterns, or other
+    /// member-name lists formatted as part of a value.
+    consistent_quote_properties: Option<ConsistentQuoteProperties>,
+}
+
+/// The member list being formatted under `quoteProperties: consistent`,
+/// together with whether it forces all of its keys to be quoted.
+#[derive(Debug, Clone)]
+pub(crate) struct ConsistentQuoteProperties {
+    list: JsSyntaxNode,
+    needs_quotes: bool,
+}
+
+impl ConsistentQuoteProperties {
+    pub(crate) fn new(list: JsSyntaxNode, needs_quotes: bool) -> Self {
+        Self { list, needs_quotes }
+    }
 }
 
 impl JsFormatContext {
@@ -62,7 +84,31 @@ impl JsFormatContext {
             cached_function_body: None,
             source_map: None,
             embedded_node_ranges: Vec::new(),
+            consistent_quote_properties: None,
         }
+    }
+
+    /// Returns whether `list` is the member list whose keys are all quoted under
+    /// `quoteProperties: consistent`.
+    pub(crate) fn member_list_needs_quotes(&self, list: &JsSyntaxNode) -> bool {
+        self.consistent_quote_properties
+            .as_ref()
+            .is_some_and(|current| current.list == *list && current.needs_quotes)
+    }
+
+    /// Returns the resolved `quoteProperties: consistent` decision, so a caller
+    /// can restore it after formatting a nested object member list.
+    pub(crate) fn consistent_quote_properties(&self) -> Option<ConsistentQuoteProperties> {
+        self.consistent_quote_properties.clone()
+    }
+
+    /// Sets the resolved `quoteProperties: consistent` decision for an object
+    /// member list.
+    pub(crate) fn set_consistent_quote_properties(
+        &mut self,
+        value: Option<ConsistentQuoteProperties>,
+    ) {
+        self.consistent_quote_properties = value;
     }
 
     /// Returns the formatted content for the passed function body if it is cached or `None` if the currently
@@ -513,6 +559,9 @@ pub enum QuoteProperties {
     AsNeeded,
     /// Preserves quotes around property names that were quoted in the input.
     Preserve,
+    /// Quotes every property name of an object when at least one of its names
+    /// cannot be written without quotes.
+    Consistent,
 }
 
 impl FromStr for QuoteProperties {
@@ -522,6 +571,7 @@ impl FromStr for QuoteProperties {
         match s {
             "as-needed" => Ok(Self::AsNeeded),
             "preserve" => Ok(Self::Preserve),
+            "consistent" => Ok(Self::Consistent),
             // TODO: replace this error with a diagnostic
             _ => Err("Value not supported for QuoteProperties"),
         }
@@ -533,6 +583,7 @@ impl fmt::Display for QuoteProperties {
         match self {
             Self::AsNeeded => write!(f, "As needed"),
             Self::Preserve => write!(f, "Preserve"),
+            Self::Consistent => write!(f, "Consistent"),
         }
     }
 }

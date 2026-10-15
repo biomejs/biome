@@ -2783,7 +2783,7 @@
 					"anyOf": [{ "$ref": "#/$defs/OperatorLinebreak" }, { "type": "null" }]
 				},
 				"quoteProperties": {
-					"description": "Controls whether quotes around object property names are preserved. `asNeeded` removes\nquotes when the property name is valid without them, while `preserve` keeps quotes around\nproperty names that were quoted in the input. Defaults to `asNeeded` in configuration\n(`as-needed` on the CLI).",
+					"description": "Controls whether quotes around object property names are preserved. `asNeeded` removes\nquotes when the property name is valid without them, `preserve` keeps quotes around\nproperty names that were quoted in the input, and `consistent` quotes every property name\nof an object when at least one of them cannot be written without quotes. Defaults to\n`asNeeded` in configuration (`as-needed` on the CLI).",
 					"anyOf": [{ "$ref": "#/$defs/QuoteProperties" }, { "type": "null" }]
 				},
 				"quoteStyle": {
@@ -8417,6 +8417,11 @@
 					"description": "Preserves quotes around property names that were quoted in the input.",
 					"type": "string",
 					"const": "preserve"
+				},
+				{
+					"description": "Quotes every property name of an object when at least one of its names\ncannot be written without quotes.",
+					"type": "string",
+					"const": "consistent"
 				}
 			]
 		},

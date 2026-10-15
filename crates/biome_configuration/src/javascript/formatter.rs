@@ -38,12 +38,13 @@ pub struct JsFormatterConfiguration {
     pub jsx_quote_style: Option<QuoteStyle>,
 
     /// Controls whether quotes around object property names are preserved. `asNeeded` removes
-    /// quotes when the property name is valid without them, while `preserve` keeps quotes around
-    /// property names that were quoted in the input. Defaults to `asNeeded` in configuration
-    /// (`as-needed` on the CLI).
+    /// quotes when the property name is valid without them, `preserve` keeps quotes around
+    /// property names that were quoted in the input, and `consistent` quotes every property name
+    /// of an object when at least one of them cannot be written without quotes. Defaults to
+    /// `asNeeded` in configuration (`as-needed` on the CLI).
     #[cfg_attr(
         feature = "cli",
-        bpaf(long("quote-properties"), argument("preserve|as-needed"))
+        bpaf(long("quote-properties"), argument("preserve|as-needed|consistent"))
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub quote_properties: Option<QuoteProperties>,

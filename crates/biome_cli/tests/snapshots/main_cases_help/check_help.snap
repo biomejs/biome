@@ -86,7 +86,7 @@ The configuration contained in `biome.json`.
         --javascript-formatter-enabled=<true|false>  Controls the formatter for JavaScript and
                               languages that extend it.
         --jsx-quote-style=<double|single>  The type of quotes used in JSX. Defaults to `double`.
-        --quote-properties=<preserve|as-needed>  Controls when object properties are quoted.
+        --quote-properties=<preserve|as-needed|consistent>  Controls when object properties are quoted.
                               Defaults to `asNeeded` in configuration (`as-needed` on the CLI).
         --trailing-commas=<all|es5|none>  Prints trailing commas wherever possible in multiline
                               comma-separated structures. Defaults to `all`.

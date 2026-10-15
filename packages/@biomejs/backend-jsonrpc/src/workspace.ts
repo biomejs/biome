@@ -1054,9 +1054,10 @@ export interface JsFormatterConfiguration {
 	operatorLinebreak?: OperatorLinebreak;
 	/**
 	 * Controls whether quotes around object property names are preserved. `asNeeded` removes
-	 * quotes when the property name is valid without them, while `preserve` keeps quotes around
-	 * property names that were quoted in the input. Defaults to `asNeeded` in configuration
-	 * (`as-needed` on the CLI).
+	 * quotes when the property name is valid without them, `preserve` keeps quotes around
+	 * property names that were quoted in the input, and `consistent` quotes every property name
+	 * of an object when at least one of them cannot be written without quotes. Defaults to
+	 * `asNeeded` in configuration (`as-needed` on the CLI).
 	 */
 	quoteProperties?: QuoteProperties;
 	/**
@@ -1588,7 +1589,7 @@ export type SelfCloseVoidElements = "never" | "always";
 export type WhitespaceSensitivity = "css" | "strict" | "ignore";
 export type ArrowParentheses = "always" | "asNeeded";
 export type OperatorLinebreak = "after" | "before";
-export type QuoteProperties = "asNeeded" | "preserve";
+export type QuoteProperties = "asNeeded" | "preserve" | "consistent";
 export type Semicolons = "always" | "asNeeded";
 /**
  * Print trailing commas wherever possible in multi-line comma-separated syntactic structures for JavaScript/TypeScript files.

@@ -52,6 +52,17 @@ impl<'token> FormatLiteralStringToken<'token> {
     }
 
     pub fn clean_text(&self, options: &JsFormatOptions) -> CleanedStringLiteralText<'_> {
+        self.clean_text_with(options, options.quote_properties())
+    }
+
+    /// Like [Self::clean_text], but uses `quote_properties` in place of the one
+    /// from `options`. Callers use it to resolve [QuoteProperties::Consistent]
+    /// for a specific object member name.
+    pub fn clean_text_with(
+        &self,
+        options: &JsFormatOptions,
+        quote_properties: QuoteProperties,
+    ) -> CleanedStringLiteralText<'_> {
         let token = self.token();
         debug_assert!(
             matches!(token.kind(), JS_STRING_LITERAL | JSX_STRING_LITERAL),
@@ -63,10 +74,9 @@ impl<'token> FormatLiteralStringToken<'token> {
             JSX_STRING_LITERAL => options.jsx_quote_style(),
             _ => options.quote_style(),
         };
-        let chosen_quote_properties = options.quote_properties();
 
         let mut string_cleaner =
-            LiteralStringNormaliser::new(self, chosen_quote_style, chosen_quote_properties);
+            LiteralStringNormaliser::new(self, chosen_quote_style, quote_properties);
 
         let content = string_cleaner.normalise_text(options.source_type().into());
         let normalized_text_width = content.width();
@@ -203,7 +213,7 @@ struct LiteralStringNormaliser<'token> {
 
 /// Convenience enum to map [biome_languages::JsFileSource] by just reading
 /// the type of file
-#[derive(Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
 pub(crate) enum SourceFileKind {
     TypeScript,
     JavaScript,
@@ -217,6 +227,44 @@ impl From<JsFileSource> for SourceFileKind {
             Self::JavaScript
         }
     }
+}
+
+/// Returns whether a member name whose content is `text_to_check` can be
+/// written as a number without quotes.
+///
+/// In TypeScript, numeric and string keys have different types, so numbers are
+/// never unquoted there.
+pub(crate) fn can_remove_number_quotes_by_file_type(
+    text_to_check: &str,
+    file_source: SourceFileKind,
+) -> bool {
+    if text_to_check
+        .bytes()
+        .next()
+        .is_some_and(|b| b.is_ascii_digit())
+    {
+        if let Ok(parsed) = text_to_check.parse::<f64>() {
+            // In TypeScript, numbers like members have different meaning from numbers.
+            // Hence, if we see a number, we bail straightaway
+            if file_source == SourceFileKind::TypeScript {
+                return false;
+            }
+
+            // Rule out inexact floats and octal literals
+            return parsed.to_string() == text_to_check;
+        }
+
+        return false;
+    }
+    false
+}
+
+/// Returns whether a member name's content can be written without quotes.
+///
+/// Under `quoteProperties: consistent`, an object whose members all satisfy
+/// this predicate behaves like `as-needed`.
+pub(crate) fn is_string_member_safe_to_unquote(content: &str, file_source: SourceFileKind) -> bool {
+    is_js_ident(content) || can_remove_number_quotes_by_file_type(content, file_source)
 }
 
 impl<'token> LiteralStringNormaliser<'token> {
@@ -286,30 +334,6 @@ impl<'token> LiteralStringNormaliser<'token> {
         self.chosen_quote_properties == QuoteProperties::Preserve
     }
 
-    fn can_remove_number_quotes_by_file_type(&self, file_source: SourceFileKind) -> bool {
-        let text_to_check = self.raw_content();
-
-        if text_to_check
-            .bytes()
-            .next()
-            .is_some_and(|b| b.is_ascii_digit())
-        {
-            if let Ok(parsed) = text_to_check.parse::<f64>() {
-                // In TypeScript, numbers like members have different meaning from numbers.
-                // Hence, if we see a number, we bail straightaway
-                if file_source == SourceFileKind::TypeScript {
-                    return false;
-                }
-
-                // Rule out inexact floats and octal literals
-                return parsed.to_string() == text_to_check;
-            }
-
-            return false;
-        }
-        false
-    }
-
     fn normalise_type_member(
         &mut self,
         string_information: StringInformation,
@@ -319,7 +343,8 @@ impl<'token> LiteralStringNormaliser<'token> {
         let is_new_keyword = quoteless == "new";
         let can_remove_quotes = !self.is_preserve_quote_properties()
             && !is_new_keyword
-            && (self.can_remove_number_quotes_by_file_type(file_source) || is_js_ident(quoteless));
+            && (can_remove_number_quotes_by_file_type(quoteless, file_source)
+                || is_js_ident(quoteless));
         if can_remove_quotes {
             Cow::Owned(quoteless.to_string())
         } else {

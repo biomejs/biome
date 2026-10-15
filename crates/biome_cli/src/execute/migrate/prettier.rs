@@ -156,6 +156,7 @@ enum QuoteProps {
     #[deserializable(rename = "as-needed")]
     AsNeeded,
     Preserve,
+    Consistent,
 }
 
 #[derive(Clone, Debug, Default, Deserializable, Eq, PartialEq)]
@@ -200,6 +201,7 @@ impl From<QuoteProps> for QuoteProperties {
         match value {
             QuoteProps::AsNeeded => Self::AsNeeded,
             QuoteProps::Preserve => Self::Preserve,
+            QuoteProps::Consistent => Self::Consistent,
         }
     }
 }
