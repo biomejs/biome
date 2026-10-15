@@ -1,0 +1,11 @@
+:nth-child(ln) {
+	color: red;
+}
+
+:nth-of-type(ln) {
+	color: blue;
+}
+
+:nth-last-child(2n) {
+	color: green;
+}

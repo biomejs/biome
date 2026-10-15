@@ -472,8 +472,10 @@ CssPseudoClassNthNumber =
 
 // :nth-child(odd) {}
 //            ^^^
+// :nth-child(ln) {}
+//            ^^
 CssPseudoClassNthIdentifier =
-	value: ('even' | 'odd')
+	value: ('even' | 'odd' | 'ident')
 
 // :nth-child(n+8) {}
 //            ^^^

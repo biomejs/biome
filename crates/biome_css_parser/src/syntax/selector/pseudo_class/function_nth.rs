@@ -102,7 +102,19 @@ pub(crate) fn is_at_pseudo_class_nth_argument(p: &mut CssParser) -> bool {
 
 #[inline]
 fn is_at_pseudo_class_nth_selector(p: &mut CssParser) -> bool {
-    is_at_scss_pseudo_class_nth(p) || p.at_ts(PSEUDO_CLASS_FUNCTION_NTH_CLASS_SET)
+    is_at_scss_pseudo_class_nth(p)
+        || p.at_ts(PSEUDO_CLASS_FUNCTION_NTH_CLASS_SET)
+        || is_at_nth_identifier(p)
+}
+
+/// Returns whether the current token is an identifier that ends in the An+B
+/// symbol `n`, such as `ln`.
+///
+/// PostCSS-based formatters keep such arguments as-is, so the argument is
+/// accepted as an nth identifier instead of being reported as bogus.
+#[inline]
+fn is_at_nth_identifier(p: &mut CssParser) -> bool {
+    p.at(T![ident]) && p.cur_text().ends_with(['n', 'N'])
 }
 
 #[inline]
@@ -138,6 +150,9 @@ fn parse_pseudo_class_nth(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     let kind = if p.eat_ts(PSEUDO_CLASS_FUNCTION_NTH_CLASS_IDENTIFIER_SET) {
+        CSS_PSEUDO_CLASS_NTH_IDENTIFIER
+    } else if is_at_nth_identifier(p) {
+        p.bump_with_context(T![ident], CssLexContext::PseudoNthSelector);
         CSS_PSEUDO_CLASS_NTH_IDENTIFIER
     } else {
         p.eat_ts_with_context(PSEUDO_CLASS_NTH_SIGN_SET, CssLexContext::PseudoNthSelector);
