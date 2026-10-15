@@ -1894,6 +1894,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("nursery", "noVueVTextVHtmlOnComponent", TypeId::of::<biome_rule_options::no_vue_v_text_v_html_on_component::NoVueVTextVHtmlOnComponentOptions>()));
     result.push((
+        "nursery",
+        "noVueWatchAfterAwait",
+        TypeId::of::<biome_rule_options::no_vue_watch_after_await::NoVueWatchAfterAwaitOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noWith",
         TypeId::of::<biome_rule_options::no_with::NoWithOptions>(),
