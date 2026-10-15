@@ -33,7 +33,7 @@ $name: base;
 ```
 invalid.scss:5:9 lint/nursery/noSelfNestedLayer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The layer base.#{$name} repeats the name of the enclosing layer base.
+  ! This layer repeats the name of an enclosing layer.
   
     4 │ @layer base {
   > 5 │ 	@layer base.#{$name} {
@@ -41,9 +41,18 @@ invalid.scss:5:9 lint/nursery/noSelfNestedLayer ━━━━━━━━━━�
     6 │ 	}
     7 │ }
   
-  i Layer names inside a layer block are relative to it, so this creates the sublayer base.base.#{$name}. A sublayer has its own place in the cascade order.
+  i The enclosing layer is declared here.
   
-  i Rename the layer so it doesn't repeat base, or remove the nested @layer if you didn't mean to create a sublayer.
+    2 │ $name: base;
+    3 │ 
+  > 4 │ @layer base {
+      │        ^^^^
+    5 │ 	@layer base.#{$name} {
+    6 │ 	}
+  
+  i Layer names inside a layer block are relative to it, so this creates a sublayer instead of adding to the enclosing layer. A sublayer has its own place in the cascade order.
+  
+  i Rename the layer, or remove the nested @layer if you didn't mean to create a sublayer.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -53,7 +62,7 @@ invalid.scss:5:9 lint/nursery/noSelfNestedLayer ━━━━━━━━━━�
 ```
 invalid.scss:10:9 lint/nursery/noSelfNestedLayer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The layer #{$name} repeats the name of the enclosing layer #{$name}.
+  ! This layer repeats the name of an enclosing layer.
   
      9 │ @layer #{$name} {
   > 10 │ 	@layer #{$name} {
@@ -61,9 +70,18 @@ invalid.scss:10:9 lint/nursery/noSelfNestedLayer ━━━━━━━━━━�
     11 │ 	}
     12 │ }
   
-  i Layer names inside a layer block are relative to it, so this creates the sublayer #{$name}.#{$name}. A sublayer has its own place in the cascade order.
+  i The enclosing layer is declared here.
   
-  i Rename the layer so it doesn't repeat #{$name}, or remove the nested @layer if you didn't mean to create a sublayer.
+     7 │ }
+     8 │ 
+   > 9 │ @layer #{$name} {
+       │        ^^^^^^^^
+    10 │ 	@layer #{$name} {
+    11 │ 	}
+  
+  i Layer names inside a layer block are relative to it, so this creates a sublayer instead of adding to the enclosing layer. A sublayer has its own place in the cascade order.
+  
+  i Rename the layer, or remove the nested @layer if you didn't mean to create a sublayer.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
@@ -73,7 +91,7 @@ invalid.scss:10:9 lint/nursery/noSelfNestedLayer ━━━━━━━━━━�
 ```
 invalid.scss:17:11 lint/nursery/noSelfNestedLayer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The layer base repeats the name of the enclosing layer base.
+  ! This layer repeats the name of an enclosing layer.
   
     15 │ 	.a {
     16 │ 		&:hover {
@@ -82,9 +100,18 @@ invalid.scss:17:11 lint/nursery/noSelfNestedLayer ━━━━━━━━━━
     18 │ 				color: red;
     19 │ 			}
   
-  i Layer names inside a layer block are relative to it, so this creates the sublayer base.base. A sublayer has its own place in the cascade order.
+  i The enclosing layer is declared here.
   
-  i Rename the layer so it doesn't repeat base, or remove the nested @layer if you didn't mean to create a sublayer.
+    12 │ }
+    13 │ 
+  > 14 │ @layer base {
+       │        ^^^^
+    15 │ 	.a {
+    16 │ 		&:hover {
+  
+  i Layer names inside a layer block are relative to it, so this creates a sublayer instead of adding to the enclosing layer. A sublayer has its own place in the cascade order.
+  
+  i Rename the layer, or remove the nested @layer if you didn't mean to create a sublayer.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   

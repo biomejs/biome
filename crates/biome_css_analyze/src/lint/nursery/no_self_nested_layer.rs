@@ -4,7 +4,7 @@ use biome_css_syntax::{
     AnyCssLayer, AnyCssLayerName, CssLayerAtRule, CssLayerNameList, decode_css_identifier,
 };
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, AstSeparatedList};
+use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 use biome_rule_options::no_self_nested_layer::NoSelfNestedLayerOptions;
 
 declare_lint_rule! {
@@ -67,14 +67,14 @@ declare_lint_rule! {
 }
 
 pub struct RuleState {
-    name: CssLayerNameList,
-    enclosing: CssLayerNameList,
+    name: TextRange,
+    enclosing: TextRange,
 }
 
 impl Rule for NoSelfNestedLayer {
     type Query = Ast<CssLayerAtRule>;
     type State = RuleState;
-    type Signals = Box<[Self::State]>;
+    type Signals = Option<Self::State>;
     type Options = NoSelfNestedLayerOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -82,40 +82,37 @@ impl Rule for NoSelfNestedLayer {
         let names = match node.layer() {
             Ok(AnyCssLayer::CssLayerDeclaration(declaration)) => declaration.references(),
             Ok(AnyCssLayer::CssLayerReference(reference)) => reference.references(),
-            _ => return Box::default(),
+            _ => return None,
         };
-        names
-            .iter()
-            .flatten()
-            .filter_map(|name| {
-                let enclosing = enclosing_layer_names(node)
-                    .find(|enclosing| starts_with_layer_name(&name, enclosing))?;
-                Some(RuleState { name, enclosing })
+        names.iter().flatten().find_map(|name| {
+            let enclosing = enclosing_layer_names(node)
+                .find(|enclosing| starts_with_layer_name(&name, enclosing))?;
+            Some(RuleState {
+                name: name.range(),
+                enclosing: enclosing.range(),
             })
-            .collect()
+        })
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let name = state.name.to_trimmed_string();
-        let enclosing = state.enclosing.to_trimmed_string();
-        let diagnostic = RuleDiagnostic::new(
-            rule_category!(),
-            state.name.range(),
-            markup! {
-                "The layer "<Emphasis>{name}</Emphasis>" repeats the name of the enclosing layer "<Emphasis>{enclosing}</Emphasis>"."
-            },
-        );
-        let diagnostic = match full_layer_name(ctx.query(), &name) {
-            Some(full_name) => diagnostic.note(markup! {
-                "Layer names inside a layer block are relative to it, so this creates the sublayer "<Emphasis>{full_name}</Emphasis>". A sublayer has its own place in the cascade order."
+    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                state.name,
+                markup! {
+                    "This layer repeats the name of an enclosing layer."
+                },
+            )
+            .detail(state.enclosing, markup! {
+                "The enclosing layer is declared here."
+            })
+            .note(markup! {
+                "Layer names inside a layer block are relative to it, so this creates a sublayer instead of adding to the enclosing layer. A sublayer has its own place in the cascade order."
+            })
+            .note(markup! {
+                "Rename the layer, or remove the nested "<Emphasis>"@layer"</Emphasis>" if you didn't mean to create a sublayer."
             }),
-            None => diagnostic.note(markup! {
-                "Layer names inside a layer block are relative to it, so this creates a new sublayer. A sublayer has its own place in the cascade order."
-            }),
-        };
-        Some(diagnostic.note(markup! {
-            "Rename the layer so it doesn't repeat "<Emphasis>{enclosing}</Emphasis>", or remove the nested "<Emphasis>"@layer"</Emphasis>" if you didn't mean to create a sublayer."
-        }))
+        )
     }
 }
 
@@ -168,22 +165,4 @@ fn starts_with_layer_name(name: &CssLayerNameList, enclosing: &CssLayerNameList)
             ) => enclosing.syntax().text_trimmed() == name.syntax().text_trimmed(),
             _ => false,
         })
-}
-
-/// Joins the names of every enclosing `@layer` block with `name`, outermost first.
-///
-/// Returns `None` when an enclosing layer is anonymous, because the resulting sublayer can't be
-/// written as a name.
-fn full_layer_name(node: &CssLayerAtRule, name: &str) -> Option<String> {
-    let mut segments = vec![name.to_string()];
-    for layer in node.syntax().ancestors().skip(1).filter_map(CssLayerAtRule::cast) {
-        let declaration = layer.layer().ok()?;
-        let references = declaration.as_css_layer_declaration()?.references();
-        if references.len() != 1 {
-            return None;
-        }
-        segments.push(references.first()?.ok()?.to_trimmed_string());
-    }
-    segments.reverse();
-    Some(segments.join("."))
 }
