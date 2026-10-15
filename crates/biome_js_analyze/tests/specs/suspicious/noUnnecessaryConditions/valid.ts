@@ -202,6 +202,26 @@ function fn(f: (() => string) | undefined) {
   return f?.();
 }
 
+// Mutable property literal initializers can change after initialization.
+const guard = { current: false };
+function runOnce() {
+  if (guard.current) {
+    return;
+  }
+  guard.current = true;
+}
+
+class Once {
+  #done = false;
+
+  run() {
+    if (this.#done) {
+      return;
+    }
+    this.#done = true;
+  }
+}
+
 // Nullable member access - must NOT be flagged
 interface MaybeConfig {
   items?: string[];
