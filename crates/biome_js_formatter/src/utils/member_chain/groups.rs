@@ -1,5 +1,8 @@
+use crate::js::expressions::call_arguments::FormatJsCallArgumentsOptions;
 use crate::prelude::*;
-use crate::utils::member_chain::chain_member::ChainMember;
+use crate::utils::member_chain::chain_member::{
+    CallExpressionPosition, ChainMember, FormatChainEndCallWithoutArguments,
+};
 use biome_formatter::write;
 use biome_js_syntax::parentheses::NeedsParentheses;
 use std::cell::RefCell;
@@ -205,6 +208,69 @@ impl MemberChainGroup {
         };
 
         Ok(result)
+    }
+
+    /// Formats this group and, if it ends the chain with a call whose last
+    /// argument is grouped and doesn't already break, also returns the group
+    /// with that argument hugged (see
+    /// [FormatJsCallArgumentsOptions::store_hugged_layout]).
+    ///
+    /// Both layouts share the formatted members, so the group isn't formatted
+    /// twice. Stores the regular layout in the cache that
+    /// [MemberChainGroup::will_break] fills, so later writes of this group
+    /// reuse it.
+    ///
+    /// Returns `None` without formatting if the group is already formatted or
+    /// doesn't end with the chain's final call. Returns `None` after caching
+    /// the regular layout if the arguments don't produce a hugged layout.
+    /// Returns an error if the final call's arguments are missing from the
+    /// syntax tree or if formatting the group fails.
+    pub(super) fn format_with_hugged_last_argument(
+        &self,
+        f: &mut JsFormatter,
+    ) -> FormatResult<Option<FormatElement>> {
+        let Some((
+            ChainMember::CallExpression {
+                expression,
+                position: CallExpressionPosition::End,
+            },
+            leading_members,
+        )) = self.members.split_last()
+        else {
+            return Ok(None);
+        };
+
+        if self.formatted.borrow().is_some() {
+            return Ok(None);
+        }
+
+        let arguments = expression.arguments()?;
+
+        let callee_and_call = f.intern(&format_with(|f| {
+            f.join().entries(leading_members.iter()).finish()?;
+            write!(f, [FormatChainEndCallWithoutArguments::new(expression)])
+        }))?;
+        let formatted_arguments = f.intern(&arguments.format().with_options(
+            FormatJsCallArgumentsOptions {
+                store_hugged_layout: true,
+            },
+        ))?;
+        let hugged_arguments = f.context_mut().take_hugged_call_arguments(&arguments);
+
+        let formatted = callee_and_call
+            .iter()
+            .cloned()
+            .chain(formatted_arguments)
+            .collect();
+        *self.formatted.borrow_mut() = f.intern_vec(formatted);
+
+        Ok(hugged_arguments.and_then(|hugged_arguments| {
+            let hugged = callee_and_call
+                .into_iter()
+                .chain([hugged_arguments])
+                .collect();
+            f.intern_vec(hugged)
+        }))
     }
 
     pub(super) fn needs_empty_line_before(&self) -> bool {

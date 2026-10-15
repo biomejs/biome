@@ -8,7 +8,7 @@ use biome_formatter::{
     FormatContext, FormatElement, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
     QuoteStyle, TrailingNewline, TransformSourceMap,
 };
-use biome_js_syntax::{AnyJsFunctionBody, JsLanguage};
+use biome_js_syntax::{AnyJsFunctionBody, JsCallArguments, JsLanguage};
 use biome_languages::JsFileSource;
 use biome_rowan::TextRange;
 use std::fmt;
@@ -46,6 +46,18 @@ pub struct JsFormatContext {
     /// This should be rare enough for us not to care about it.
     cached_function_body: Option<(AnyJsFunctionBody, FormatElement)>,
 
+    /// Stores the hugged layout of one call's arguments: the opening
+    /// parenthesis stays on the current line and the last argument is broken
+    /// across lines or, if that first line doesn't fit, every argument goes on
+    /// its own line.
+    ///
+    /// The call arguments formatter builds this layout on request from the
+    /// already formatted arguments, and the member chain formatter takes it
+    /// right after formatting the call. This lets the member chain offer a
+    /// "chain on one line, last argument broken" layout without formatting the
+    /// arguments a second time.
+    hugged_call_arguments: Option<(JsCallArguments, FormatElement)>,
+
     source_map: Option<TransformSourceMap>,
 
     /// Ranges of template chunks whose content was parsed as an embedded
@@ -60,6 +72,7 @@ impl JsFormatContext {
             options,
             comments: Rc::new(comments),
             cached_function_body: None,
+            hugged_call_arguments: None,
             source_map: None,
             embedded_node_ranges: Vec::new(),
         }
@@ -93,6 +106,32 @@ impl JsFormatContext {
         formatted: FormatElement,
     ) {
         self.cached_function_body = Some((body.clone(), formatted))
+    }
+
+    /// Stores the hugged layout of `arguments`.
+    ///
+    /// See [JsFormatContext::hugged_call_arguments] for more in depth documentation.
+    pub(crate) fn set_hugged_call_arguments(
+        &mut self,
+        arguments: &JsCallArguments,
+        formatted: FormatElement,
+    ) {
+        self.hugged_call_arguments = Some((arguments.clone(), formatted));
+    }
+
+    /// Removes the stored hugged layout and returns it if it belongs to
+    /// `arguments`. Returns `None` if nothing is stored or the stored layout
+    /// belongs to other arguments, which discards that layout.
+    ///
+    /// See [JsFormatContext::hugged_call_arguments] for more in depth documentation.
+    pub(crate) fn take_hugged_call_arguments(
+        &mut self,
+        arguments: &JsCallArguments,
+    ) -> Option<FormatElement> {
+        match self.hugged_call_arguments.take() {
+            Some((expected, formatted)) if &expected == arguments => Some(formatted),
+            _ => None,
+        }
     }
 
     pub fn with_source_map(mut self, source_map: Option<TransformSourceMap>) -> Self {
