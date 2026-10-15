@@ -174,6 +174,7 @@ declare_lint_rule! {
         recommended: false,
         sources: &[
             RuleSource::Eslint("no-implicit-coercion").same(),
+            RuleSource::EslintVueJs("no-implicit-coercion").same(),
         ],
         fix_kind: FixKind::Unsafe,
     }
