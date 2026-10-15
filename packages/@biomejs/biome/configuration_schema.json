@@ -8481,6 +8481,13 @@
 						{ "$ref": "#/$defs/UseVueMatchingComponentFileNameConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useVueTypedRef": {
+					"description": "Require a type for refs created with ref() or shallowRef() in TypeScript.\nSee https://biomejs.dev/linter/rules/use-vue-typed-ref",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueTypedRefConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -15485,6 +15492,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueTypedRefOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueTypedRefOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueVForKeyOptions": {
 			"type": "object",
 			"properties": {
@@ -20686,6 +20702,16 @@
 			]
 		},
 		"UseVueNextTickPromiseOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueTypedRefConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueTypedRefOptions" }
+			]
+		},
+		"UseVueTypedRefOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
