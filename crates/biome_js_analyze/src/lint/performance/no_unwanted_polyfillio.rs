@@ -110,7 +110,8 @@ impl Rule for NoUnwantedPolyfillio {
                 markup! { "Prevent duplicate polyfills from Polyfill.io" },
             )
             .note(markup! { {state.unwanted_features_message} " already shipped with Next.js." })
-            .note(markup! { "This unnecessarily increases page weight which can affect loading performance." }),
+            .note(markup! { "This unnecessarily increases page weight which can affect loading performance." })
+            .note(markup! { "Remove these features from the Polyfill.io URL, or remove the Polyfill.io script if no other feature is needed." }),
         )
     }
 }

@@ -28,14 +28,14 @@ expression: invalid.css
 ```
 invalid.css:1:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use unknown media feature names.
+  × Unexpected unknown media feature name.
   
   > 1 │ @media screen and (unknown) {
       │        ^^^^^^^^^^^^^^^^^^^^
     2 │ }
     3 │ 
   
-  i Unexpected unknown media feature name.
+  i Browsers treat a media query that contains an unknown feature as not matching. Another query in a comma-separated list can still match.
   
   i You should use media feature names defined in the CSS Specifications.
   
@@ -45,7 +45,7 @@ invalid.css:1:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━
 ```
 invalid.css:4:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use unknown media feature names.
+  × Unexpected unknown media feature name.
   
     2 │ }
     3 │ 
@@ -54,7 +54,7 @@ invalid.css:4:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━
     5 │ }
     6 │ 
   
-  i Unexpected unknown media feature name.
+  i Browsers treat a media query that contains an unknown feature as not matching. Another query in a comma-separated list can still match.
   
   i You should use media feature names defined in the CSS Specifications.
   
@@ -64,7 +64,7 @@ invalid.css:4:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━
 ```
 invalid.css:7:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use unknown media feature names.
+  × Unexpected unknown media feature name.
   
     5 │ }
     6 │ 
@@ -73,7 +73,7 @@ invalid.css:7:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━
     8 │ }
     9 │ 
   
-  i Unexpected unknown media feature name.
+  i Browsers treat a media query that contains an unknown feature as not matching. Another query in a comma-separated list can still match.
   
   i You should use media feature names defined in the CSS Specifications.
   
@@ -83,7 +83,7 @@ invalid.css:7:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━
 ```
 invalid.css:10:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use unknown media feature names.
+  × Unexpected unknown media feature name.
   
      8 │ }
      9 │ 
@@ -92,7 +92,7 @@ invalid.css:10:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━�
     11 │ }
     12 │ 
   
-  i Unexpected unknown media feature name.
+  i Browsers treat a media query that contains an unknown feature as not matching. Another query in a comma-separated list can still match.
   
   i You should use media feature names defined in the CSS Specifications.
   
@@ -102,7 +102,7 @@ invalid.css:10:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━�
 ```
 invalid.css:13:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use unknown media feature names.
+  × Unexpected unknown media feature name.
   
     11 │ }
     12 │ 
@@ -111,7 +111,7 @@ invalid.css:13:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━�
     14 │ }
     15 │ 
   
-  i Unexpected unknown media feature name.
+  i Browsers treat a media query that contains an unknown feature as not matching. Another query in a comma-separated list can still match.
   
   i You should use media feature names defined in the CSS Specifications.
   
@@ -121,7 +121,7 @@ invalid.css:13:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━�
 ```
 invalid.css:16:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Don't use unknown media feature names.
+  × Unexpected unknown media feature name.
   
     14 │ }
     15 │ 
@@ -130,7 +130,7 @@ invalid.css:16:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━�
     17 │ }
     18 │ 
   
-  i Unexpected unknown media feature name.
+  i Browsers treat a media query that contains an unknown feature as not matching. Another query in a comma-separated list can still match.
   
   i You should use media feature names defined in the CSS Specifications.
   

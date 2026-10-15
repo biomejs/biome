@@ -79,14 +79,27 @@ impl Rule for NoPrecisionLoss {
         let node = ctx.query();
         let value = node.as_number()?;
 
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                node.syntax().text_trimmed_range(),
-                markup! { "This number literal will lose precision at runtime." },
-            )
-            .note(markup! { "The value at runtime will be "<Emphasis>{ value.to_string() }</Emphasis> }),
+        let is_integer_literal = node
+            .syntax()
+            .text_trimmed()
+            .chars()
+            .all(|c| c.is_ascii_digit() || c == '_');
+        let diagnostic = RuleDiagnostic::new(
+            rule_category!(),
+            node.syntax().text_trimmed_range(),
+            markup! { "This number literal will lose precision at runtime." },
         )
+        .note(markup! { "The value at runtime will be "<Emphasis>{ value.to_string() }</Emphasis> });
+
+        Some(if is_integer_literal {
+            diagnostic.note(markup! {
+                "If the exact value matters, use a "<Emphasis>"BigInt"</Emphasis>" literal, such as "<Emphasis>"9007199254740993n"</Emphasis>", or use a smaller number."
+            })
+        } else {
+            diagnostic.note(markup! {
+                "Use a value that JavaScript can represent exactly, for example by using fewer digits."
+            })
+        })
     }
 }
 

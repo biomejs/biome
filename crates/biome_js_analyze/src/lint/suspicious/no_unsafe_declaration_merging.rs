@@ -100,6 +100,9 @@ impl Rule for NoUnsafeDeclarationMerging {
             })
             .note(markup! {
                 "The TypeScript compiler doesn't check whether properties defined in the interface are initialized in the class."
+            })
+            .note(markup! {
+                "Rename the "<Emphasis>"class"</Emphasis>" or the "<Emphasis>"interface"</Emphasis>" so that they do not merge, or declare the properties directly in the class and remove the interface."
             }),
         )
     }

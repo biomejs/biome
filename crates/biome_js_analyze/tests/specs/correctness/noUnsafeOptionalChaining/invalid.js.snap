@@ -108,6 +108,10 @@ invalid.js:1:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
     2 │ (obj.foo ?? bar?.baz)();
     3 │ (obj.foo || bar?.baz)();
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -129,6 +133,10 @@ invalid.js:2:16 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
       │                      ^^
     3 │ (obj.foo || bar?.baz)();
     4 │ (obj?.foo && bar)();
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -154,6 +162,10 @@ invalid.js:3:16 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
     4 │ (obj?.foo && bar)();
     5 │ (bar && obj?.foo)();
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -177,6 +189,10 @@ invalid.js:4:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
       │                  ^^
     5 │ (bar && obj?.foo)();
     6 │ (obj?.foo?.())();
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -202,6 +218,10 @@ invalid.js:5:12 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
     6 │ (obj?.foo?.())();
     7 │ (obj?.foo).bar;
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -225,6 +245,10 @@ invalid.js:6:10 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
       │               ^^
     7 │ (obj?.foo).bar;
     8 │ (obj?.foo)[1];
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -250,6 +274,10 @@ invalid.js:7:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
     8 │ (obj?.foo)[1];
     9 │ (obj?.foo)`template`
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -273,6 +301,10 @@ invalid.js:8:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
        │           ^^^
      9 │ (obj?.foo)`template`
     10 │ new (obj?.foo)();
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -298,6 +330,10 @@ invalid.js:9:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
     10 │ new (obj?.foo)();
     11 │ new (obj?.foo?.())()
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -321,6 +357,10 @@ invalid.js:10:9 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
        │ ^^^^^^^^^^^^^^^^
     11 │ new (obj?.foo?.())()
     12 │ new (obj?.foo?.() || obj?.bar)()
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -346,6 +386,10 @@ invalid.js:11:14 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     12 │ new (obj?.foo?.() || obj?.bar)()
     13 │ async function foo() { (await obj?.foo)(); }
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -369,6 +413,10 @@ invalid.js:12:25 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     13 │ async function foo() { (await obj?.foo)(); }
     14 │ async function foo() { (await obj?.foo).bar; }
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -394,6 +442,10 @@ invalid.js:13:34 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     14 │ async function foo() { (await obj?.foo).bar; }
     15 │ async function foo() { (bar?.baz ?? await obj?.foo)(); }
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -417,6 +469,10 @@ invalid.js:14:34 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
        │                                         ^^^
     15 │ async function foo() { (bar?.baz ?? await obj?.foo)(); }
     16 │ async function foo() { (bar && await obj?.foo)(); }
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -442,6 +498,10 @@ invalid.js:15:46 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     16 │ async function foo() { (bar && await obj?.foo)(); }
     17 │ async function foo() { (await (bar && obj?.foo))(); }
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -465,6 +525,10 @@ invalid.js:16:41 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
        │                                               ^^
     17 │ async function foo() { (await (bar && obj?.foo))(); }
     18 │ 
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -490,6 +554,10 @@ invalid.js:17:42 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     18 │ 
     19 │ // spread
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -511,6 +579,10 @@ invalid.js:20:8 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
        │  ^^^^^^^^^^^
     21 │ bar(...obj?.foo);
     22 │ new Bar(...obj?.foo);
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -536,6 +608,10 @@ invalid.js:21:11 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     22 │ new Bar(...obj?.foo);
     23 │ 
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -560,6 +636,10 @@ invalid.js:22:15 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     23 │ 
     24 │ // destructuring
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -581,6 +661,10 @@ invalid.js:25:18 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
        │       ^^^^^^^^^^^^^^^^
     26 │ const {foo} = obj?.bar();
     27 │ const {foo: bar} = obj?.bar();
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -606,6 +690,10 @@ invalid.js:26:18 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     27 │ const {foo: bar} = obj?.bar();
     28 │ const [foo] = obj?.bar;
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -629,6 +717,10 @@ invalid.js:27:23 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
        │       ^^^^^^^^^^^^^^^^^^^^^^^
     28 │ const [foo] = obj?.bar;
     29 │ const [foo] = obj?.bar || obj?.foo;
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -654,6 +746,10 @@ invalid.js:28:18 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     29 │ const [foo] = obj?.bar || obj?.foo;
     30 │ ([foo] = obj?.bar);
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -677,6 +773,10 @@ invalid.js:29:30 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
        │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     30 │ ([foo] = obj?.bar);
     31 │ const [foo] = obj?.bar?.();
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -702,6 +802,10 @@ invalid.js:30:13 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     31 │ const [foo] = obj?.bar?.();
     32 │ [{ foo } = obj?.bar] = [];
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -725,6 +829,10 @@ invalid.js:31:23 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
        │       ^^^^^^^^^^^^^^^^^^^^
     32 │ [{ foo } = obj?.bar] = [];
     33 │ ({bar: [ foo ] = obj?.prop} = {});
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -750,6 +858,10 @@ invalid.js:32:15 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     33 │ ({bar: [ foo ] = obj?.prop} = {});
     34 │ [[ foo ] = obj?.bar] = [];
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -773,6 +885,10 @@ invalid.js:33:21 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
        │   ^^^^^^^^^^^^^^^^^^^^^^^^
     34 │ [[ foo ] = obj?.bar] = [];
     35 │ async function foo() { const {foo} = await obj?.bar; }
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -798,6 +914,10 @@ invalid.js:34:15 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     35 │ async function foo() { const {foo} = await obj?.bar; }
     36 │ async function foo() { const {foo} = await obj?.bar(); }
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -821,6 +941,10 @@ invalid.js:35:47 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
        │                              ^^^^^^^^^^^^^^^^^^^^^^
     36 │ async function foo() { const {foo} = await obj?.bar(); }
     37 │ async function foo() { const [foo] = await obj?.bar || await obj?.foo; }
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -846,6 +970,10 @@ invalid.js:36:47 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     37 │ async function foo() { const [foo] = await obj?.bar || await obj?.foo; }
     38 │ async function foo() { ([foo] = await obj?.bar); }
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -869,6 +997,10 @@ invalid.js:37:65 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
        │                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     38 │ async function foo() { ([foo] = await obj?.bar); }
     39 │ 
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -894,6 +1026,10 @@ invalid.js:38:42 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     39 │ 
     40 │ // class declaration
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -915,6 +1051,10 @@ invalid.js:41:20 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
        │         ^^^^^^^^^^^^^^^^
     42 │ async function foo() { class A extends (await obj?.foo) {}}
     43 │ 
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -940,6 +1080,10 @@ invalid.js:42:50 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     43 │ 
     44 │ // class expression
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -961,6 +1105,10 @@ invalid.js:45:28 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
        │                 ^^^^^^^^^^^^^^^^
     46 │ async function foo() { var a = class A extends (await obj?.foo) {}}
     47 │ 
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -986,6 +1134,10 @@ invalid.js:46:58 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     47 │ 
     48 │ // relational operations
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -1007,6 +1159,10 @@ invalid.js:49:19 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^
     50 │ async function foo() { foo instanceof await obj?.prop }
     51 │ 1 in foo?.bar;
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -1032,6 +1188,10 @@ invalid.js:50:48 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     51 │ 1 in foo?.bar;
     52 │ async function foo() { 1 in await foo?.bar; }
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -1055,6 +1215,10 @@ invalid.js:51:9 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
        │ ^^^^^^^^^^^^^
     52 │ async function foo() { 1 in await foo?.bar; }
     53 │ 
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -1080,6 +1244,10 @@ invalid.js:52:38 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     53 │ 
     54 │ // for...of
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -1101,6 +1269,10 @@ invalid.js:55:16 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^
     56 │ async function foo() { for (foo of await obj?.bar);}
     57 │ 
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -1126,6 +1298,10 @@ invalid.js:56:45 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     57 │ 
     58 │ // sequence expression
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -1147,6 +1323,10 @@ invalid.js:59:10 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
        │                ^^
     60 │ (foo, obj?.foo)[1];
     61 │ async function foo() { (await (foo,  obj?.foo))(); }
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -1172,6 +1352,10 @@ invalid.js:60:10 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     61 │ async function foo() { (await (foo,  obj?.foo))(); }
     62 │ async function foo() { ((foo, await obj?.foo))(); }
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -1195,6 +1379,10 @@ invalid.js:61:41 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
        │                                                ^^
     62 │ async function foo() { ((foo, await obj?.foo))(); }
     63 │ async function foo() { (foo, await obj?.foo)[1]; }
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -1220,6 +1408,10 @@ invalid.js:62:40 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     63 │ async function foo() { (foo, await obj?.foo)[1]; }
     64 │ async function foo() { (await (foo, obj?.foo)) [1]; }
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -1243,6 +1435,10 @@ invalid.js:63:39 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
        │                                             ^^^
     64 │ async function foo() { (await (foo, obj?.foo)) [1]; }
     65 │ 
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -1268,6 +1464,10 @@ invalid.js:64:40 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     65 │ 
     66 │ // conditional expression
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -1289,6 +1489,10 @@ invalid.js:67:9 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
        │                   ^^
     68 │ (a ? b : obj?.foo)();
     69 │ (a ? obj?.foo : b)[1];
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -1314,6 +1518,10 @@ invalid.js:68:13 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     69 │ (a ? obj?.foo : b)[1];
     70 │ (a ? b : obj?.foo).bar;
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -1337,6 +1545,10 @@ invalid.js:69:9 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
        │                   ^^^
     70 │ (a ? b : obj?.foo).bar;
     71 │ async function foo() { (await (a ? obj?.foo : b))(); }
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -1362,6 +1574,10 @@ invalid.js:70:13 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     71 │ async function foo() { (await (a ? obj?.foo : b))(); }
     72 │ async function foo() { (a ? await obj?.foo : b)(); }
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -1385,6 +1601,10 @@ invalid.js:71:39 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
        │                                                  ^^
     72 │ async function foo() { (a ? await obj?.foo : b)(); }
     73 │ async function foo() { (await (a ? b : obj?.foo))(); }
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -1410,6 +1630,10 @@ invalid.js:72:38 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     73 │ async function foo() { (await (a ? b : obj?.foo))(); }
     74 │ async function foo() { (await (a ? obj?.foo : b))[1]; }
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -1433,6 +1657,10 @@ invalid.js:73:43 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
        │                                                  ^^
     74 │ async function foo() { (await (a ? obj?.foo : b))[1]; }
     75 │ async function foo() { (await (a ? b : obj?.foo)).bar; }
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -1458,6 +1686,10 @@ invalid.js:74:39 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     75 │ async function foo() { (await (a ? b : obj?.foo)).bar; }
     76 │ async function foo() { (a ? b : await obj?.foo).bar; }
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -1481,6 +1713,10 @@ invalid.js:75:43 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
        │                                                   ^^^
     76 │ async function foo() { (a ? b : await obj?.foo).bar; }
     77 │ 
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -1506,6 +1742,10 @@ invalid.js:76:42 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     77 │ 
     78 │ (obj?.foo && obj?.baz).bar
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -1529,6 +1769,10 @@ invalid.js:78:5 lint/correctness/noUnsafeOptionalChaining ━━━━━━━�
        │                        ^^^
     79 │ 
     80 │ async function foo() { with ( await obj?.foo) {}; }
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```
@@ -1554,6 +1798,10 @@ invalid.js:78:17 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
     79 │ 
     80 │ async function foo() { with ( await obj?.foo) {}; }
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -1574,6 +1822,10 @@ invalid.js:81:11 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
        │                             ^^^
     82 │ 
   
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
+  
 
 ```
 
@@ -1593,6 +1845,10 @@ invalid.js:81:22 lint/correctness/noUnsafeOptionalChaining ━━━━━━━
   > 81 │ (foo ? obj?.foo : obj?.bar).bar
        │                             ^^^
     82 │ 
+  
+  i Optional chaining produces undefined when the value before ?. is null or undefined, and this operation does not accept undefined.
+  
+  i Provide a fallback value, for example (a?.b ?? {}), or check that the value is defined before using it.
   
 
 ```

@@ -54,6 +54,8 @@ invalidClass.ts:2:27 lint/suspicious/noExplicitAny ━━━━━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -69,6 +71,8 @@ invalidClass.ts:6:11 lint/suspicious/noExplicitAny ━━━━━━━━━�
     8 │ 
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```
@@ -86,6 +90,8 @@ invalidClass.ts:10:17 lint/suspicious/noExplicitAny ━━━━━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -101,6 +107,8 @@ invalidClass.ts:14:11 lint/suspicious/noExplicitAny ━━━━━━━━━�
     16 │ 
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```
@@ -118,6 +126,8 @@ invalidClass.ts:18:23 lint/suspicious/noExplicitAny ━━━━━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -133,6 +143,8 @@ invalidClass.ts:22:17 lint/suspicious/noExplicitAny ━━━━━━━━━�
     24 │ 
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```
@@ -151,6 +163,8 @@ invalidClass.ts:25:15 lint/suspicious/noExplicitAny ━━━━━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -167,6 +181,8 @@ invalidClass.ts:25:32 lint/suspicious/noExplicitAny ━━━━━━━━━�
     27 │ abstract class Foo<t = any> extends Bar<any> {}
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```
@@ -185,6 +201,8 @@ invalidClass.ts:27:24 lint/suspicious/noExplicitAny ━━━━━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -201,6 +219,8 @@ invalidClass.ts:27:41 lint/suspicious/noExplicitAny ━━━━━━━━━�
     29 │ abstract class Foo<t = any> implements Bar<any>, Baz<any> {}
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```
@@ -219,6 +239,8 @@ invalidClass.ts:29:24 lint/suspicious/noExplicitAny ━━━━━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -235,6 +257,8 @@ invalidClass.ts:29:44 lint/suspicious/noExplicitAny ━━━━━━━━━�
     31 │ new Foo<any>()
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```
@@ -253,6 +277,8 @@ invalidClass.ts:29:54 lint/suspicious/noExplicitAny ━━━━━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -270,6 +296,8 @@ invalidClass.ts:31:9 lint/suspicious/noExplicitAny ━━━━━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -285,6 +313,8 @@ invalidClass.ts:33:5 lint/suspicious/noExplicitAny ━━━━━━━━━�
     34 │ 
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```

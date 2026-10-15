@@ -112,6 +112,8 @@ invalidTypeAndInterface.ts:2:11 lint/suspicious/noExplicitAny ━━━━━━
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -127,6 +129,8 @@ invalidTypeAndInterface.ts:6:17 lint/suspicious/noExplicitAny ━━━━━━
     8 │ 
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```
@@ -144,6 +148,8 @@ invalidTypeAndInterface.ts:10:11 lint/suspicious/noExplicitAny ━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -160,6 +166,8 @@ invalidTypeAndInterface.ts:14:23 lint/suspicious/noExplicitAny ━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -175,6 +183,8 @@ invalidTypeAndInterface.ts:18:17 lint/suspicious/noExplicitAny ━━━━━�
     20 │ 
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```
@@ -193,6 +203,8 @@ invalidTypeAndInterface.ts:21:28 lint/suspicious/noExplicitAny ━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -209,6 +221,8 @@ invalidTypeAndInterface.ts:23:35 lint/suspicious/noExplicitAny ━━━━━�
     25 │ interface Garply5 { f(...args: any): void; }
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```
@@ -227,6 +241,8 @@ invalidTypeAndInterface.ts:25:32 lint/suspicious/noExplicitAny ━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -242,6 +258,8 @@ invalidTypeAndInterface.ts:28:11 lint/suspicious/noExplicitAny ━━━━━�
     30 │ 
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```
@@ -259,6 +277,8 @@ invalidTypeAndInterface.ts:32:17 lint/suspicious/noExplicitAny ━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -274,6 +294,8 @@ invalidTypeAndInterface.ts:36:11 lint/suspicious/noExplicitAny ━━━━━�
     38 │ 
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```
@@ -291,6 +313,8 @@ invalidTypeAndInterface.ts:40:23 lint/suspicious/noExplicitAny ━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -306,6 +330,8 @@ invalidTypeAndInterface.ts:44:17 lint/suspicious/noExplicitAny ━━━━━�
     46 │ 
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```
@@ -323,6 +349,8 @@ invalidTypeAndInterface.ts:48:20 lint/suspicious/noExplicitAny ━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -338,6 +366,8 @@ invalidTypeAndInterface.ts:52:26 lint/suspicious/noExplicitAny ━━━━━�
     54 │ 
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```
@@ -355,6 +385,8 @@ invalidTypeAndInterface.ts:56:20 lint/suspicious/noExplicitAny ━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -370,6 +402,8 @@ invalidTypeAndInterface.ts:60:32 lint/suspicious/noExplicitAny ━━━━━�
     62 │ 
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```
@@ -387,6 +421,8 @@ invalidTypeAndInterface.ts:64:26 lint/suspicious/noExplicitAny ━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -402,6 +438,8 @@ invalidTypeAndInterface.ts:68:20 lint/suspicious/noExplicitAny ━━━━━�
     70 │ 
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```
@@ -419,6 +457,8 @@ invalidTypeAndInterface.ts:72:26 lint/suspicious/noExplicitAny ━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -434,6 +474,8 @@ invalidTypeAndInterface.ts:76:20 lint/suspicious/noExplicitAny ━━━━━�
     78 │ 
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```
@@ -451,6 +493,8 @@ invalidTypeAndInterface.ts:80:32 lint/suspicious/noExplicitAny ━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -466,6 +510,8 @@ invalidTypeAndInterface.ts:84:26 lint/suspicious/noExplicitAny ━━━━━�
     86 │ 
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```
@@ -484,6 +530,8 @@ invalidTypeAndInterface.ts:87:12 lint/suspicious/noExplicitAny ━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -501,6 +549,8 @@ invalidTypeAndInterface.ts:89:24 lint/suspicious/noExplicitAny ━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -516,6 +566,8 @@ invalidTypeAndInterface.ts:91:29 lint/suspicious/noExplicitAny ━━━━━�
     92 │ 
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```

@@ -36,7 +36,7 @@ function Foo() {
 ```
 invalid.jsx:3:12 lint/performance/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
+  ! JSX props should not use function expressions
   
     1 │ <>
     2 │ 	<Foo
@@ -48,9 +48,9 @@ invalid.jsx:3:12 lint/performance/noJsxPropsBind ━━━━━━━━━━�
     6 │ 	/>
     7 │ 	<Foo onClick={handleClick.bind(this)} />
   
-  i JSX props should not use function expressions
+  i This function will be recreated on every render, which can cause unnecessary rerenders.
   
-  i Consider extracting the function or wrapping it in useCallback
+  i Pass a stable function reference as the prop: extract the function, or wrap it in useCallback in a function component.
   
 
 ```
@@ -58,7 +58,7 @@ invalid.jsx:3:12 lint/performance/noJsxPropsBind ━━━━━━━━━━�
 ```
 invalid.jsx:7:16 lint/performance/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
+  ! JSX props should not use .bind()
   
     5 │ 		}}
     6 │ 	/>
@@ -67,9 +67,9 @@ invalid.jsx:7:16 lint/performance/noJsxPropsBind ━━━━━━━━━━�
     8 │ 	<Foo onClick={this._handleClick.bind(this)} />
     9 │ 	<Foo onClick={() => console.log("Hello!")} />
   
-  i JSX props should not use .bind()
+  i This function will be recreated on every render, which can cause unnecessary rerenders.
   
-  i Consider extracting the function or wrapping it in useCallback
+  i Pass a stable function reference as the prop: extract the function, or wrap it in useCallback in a function component.
   
 
 ```
@@ -77,7 +77,7 @@ invalid.jsx:7:16 lint/performance/noJsxPropsBind ━━━━━━━━━━�
 ```
 invalid.jsx:8:16 lint/performance/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
+  ! JSX props should not use .bind()
   
      6 │ 	/>
      7 │ 	<Foo onClick={handleClick.bind(this)} />
@@ -86,9 +86,9 @@ invalid.jsx:8:16 lint/performance/noJsxPropsBind ━━━━━━━━━━�
      9 │ 	<Foo onClick={() => console.log("Hello!")} />
     10 │ </>;
   
-  i JSX props should not use .bind()
+  i This function will be recreated on every render, which can cause unnecessary rerenders.
   
-  i Consider extracting the function or wrapping it in useCallback
+  i Pass a stable function reference as the prop: extract the function, or wrap it in useCallback in a function component.
   
 
 ```
@@ -96,7 +96,7 @@ invalid.jsx:8:16 lint/performance/noJsxPropsBind ━━━━━━━━━━�
 ```
 invalid.jsx:9:16 lint/performance/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
+  ! JSX props should not use arrow functions
   
      7 │ 	<Foo onClick={handleClick.bind(this)} />
      8 │ 	<Foo onClick={this._handleClick.bind(this)} />
@@ -105,9 +105,9 @@ invalid.jsx:9:16 lint/performance/noJsxPropsBind ━━━━━━━━━━�
     10 │ </>;
     11 │ 
   
-  i JSX props should not use arrow functions
+  i This function will be recreated on every render, which can cause unnecessary rerenders.
   
-  i Consider extracting the function or wrapping it in useCallback
+  i Pass a stable function reference as the prop: extract the function, or wrap it in useCallback in a function component.
   
 
 ```
@@ -115,7 +115,7 @@ invalid.jsx:9:16 lint/performance/noJsxPropsBind ━━━━━━━━━━�
 ```
 invalid.jsx:14:23 lint/performance/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
+  ! JSX props should not use function expressions
   
     12 │ function Foo() {
     13 │ 	function onClick() {}
@@ -124,9 +124,9 @@ invalid.jsx:14:23 lint/performance/noJsxPropsBind ━━━━━━━━━━
     15 │ }
     16 │ 
   
-  i JSX props should not use function expressions
+  i This function will be recreated on every render, which can cause unnecessary rerenders.
   
-  i Consider extracting the function or wrapping it in useCallback
+  i Pass a stable function reference as the prop: extract the function, or wrap it in useCallback in a function component.
   
 
 ```
@@ -134,7 +134,7 @@ invalid.jsx:14:23 lint/performance/noJsxPropsBind ━━━━━━━━━━
 ```
 invalid.jsx:19:23 lint/performance/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
+  ! JSX props should not use function expressions
   
     17 │ function Foo() {
     18 │ 	const onClick = () => {};
@@ -143,9 +143,9 @@ invalid.jsx:19:23 lint/performance/noJsxPropsBind ━━━━━━━━━━
     20 │ }
     21 │ 
   
-  i JSX props should not use function expressions
+  i This function will be recreated on every render, which can cause unnecessary rerenders.
   
-  i Consider extracting the function or wrapping it in useCallback
+  i Pass a stable function reference as the prop: extract the function, or wrap it in useCallback in a function component.
   
 
 ```
@@ -153,7 +153,7 @@ invalid.jsx:19:23 lint/performance/noJsxPropsBind ━━━━━━━━━━
 ```
 invalid.jsx:24:23 lint/performance/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
+  ! JSX props should not use function expressions
   
     22 │ function Foo() {
     23 │ 	const onClick = function () {};
@@ -162,9 +162,9 @@ invalid.jsx:24:23 lint/performance/noJsxPropsBind ━━━━━━━━━━
     25 │ }
     26 │ 
   
-  i JSX props should not use function expressions
+  i This function will be recreated on every render, which can cause unnecessary rerenders.
   
-  i Consider extracting the function or wrapping it in useCallback
+  i Pass a stable function reference as the prop: extract the function, or wrap it in useCallback in a function component.
   
 
 ```

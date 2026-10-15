@@ -83,9 +83,11 @@ impl Rule for NoGlobalEval {
             rule_category!(),
             node.range(),
             markup! {
-                <Emphasis>"eval()"</Emphasis>" exposes to security risks and performance issues."
+                "Do not use "<Emphasis>"eval()"</Emphasis>"."
             },
         ).note(markup! {
+            <Emphasis>"eval()"</Emphasis>" runs code from a string. This exposes the program to security risks, such as code injection, and can cause performance issues."
+        }).note(markup! {
             "See the "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#never_use_eval!">"MDN web docs"</Hyperlink>" for more details."
         })
         .note(
