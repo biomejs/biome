@@ -187,10 +187,10 @@ impl Rule for UseValidLang {
 
                 diagnostic.footer_list("Some of valid scripts:", scripts)
             }
-            InvalidKind::Value => diagnostic,
+            InvalidKind::Value => diagnostic.note(markup! {
+                "Use a valid language tag, for example "<Emphasis>"en"</Emphasis>" or "<Emphasis>"en-US"</Emphasis>"."
+            }),
         };
-        Some(diagnostic.note(markup! {
-            "Use a valid language tag, for example "<Emphasis>"en"</Emphasis>" or "<Emphasis>"en-US"</Emphasis>"."
-        }))
+        Some(diagnostic)
     }
 }

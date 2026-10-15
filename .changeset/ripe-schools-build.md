@@ -2,9 +2,7 @@
 "@biomejs/biome": patch
 ---
 
-Improved the diagnostics of many lint rules so that each one tells the user what was found, why it is a problem, and what to do about it. The main message now only states what was found, a separate note explains the reason, and a code action or a note describes how to fix it. Rules that mixed the reason into the main message now keep the message short and explain the reason in a note. Rules that stopped at describing the problem now also say how to resolve it.
-
-The following rules were updated:
+Improved the quality of diagnostics emitted by the following rules:
 
 - [`noAccessKey`](https://biomejs.dev/linter/rules/no-access-key/)
 - [`noArguments`](https://biomejs.dev/linter/rules/no-arguments/)

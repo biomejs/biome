@@ -34,8 +34,6 @@ invalid.vue:3:12 lint/a11y/useValidLang ━━━━━━━━━━━━━�
   
   i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
   
-  i Use a valid language tag, for example en or en-US.
-  
   i Some of valid languages:
   
   - ab
@@ -90,8 +88,6 @@ invalid.vue:5:12 lint/a11y/useValidLang ━━━━━━━━━━━━━�
   
   i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
   
-  i Use a valid language tag, for example en or en-US.
-  
   i Some of valid scripts:
   
   - Arab
@@ -127,8 +123,6 @@ invalid.vue:6:12 lint/a11y/useValidLang ━━━━━━━━━━━━━�
   
   i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
   
-  i Use a valid language tag, for example en or en-US.
-  
   i Some of valid scripts:
   
   - Arab
@@ -163,8 +157,6 @@ invalid.vue:7:12 lint/a11y/useValidLang ━━━━━━━━━━━━━�
     9 │ <!-- static Vue bindings with invalid language codes should also be flagged -->
   
   i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
-  
-  i Use a valid language tag, for example en or en-US.
   
   i Some of valid countries:
   
@@ -219,8 +211,6 @@ invalid.vue:10:13 lint/a11y/useValidLang ━━━━━━━━━━━━━
     12 │ </template>
   
   i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
-  
-  i Use a valid language tag, for example en or en-US.
   
   i Some of valid languages:
   

@@ -30,8 +30,6 @@ invalid.html:2:12 lint/a11y/useValidLang ━━━━━━━━━━━━━
   
   i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
   
-  i Use a valid language tag, for example en or en-US.
-  
   i Some of valid languages:
   
   - ab
@@ -67,8 +65,6 @@ invalid.html:3:12 lint/a11y/useValidLang ━━━━━━━━━━━━━
   
   i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
   
-  i Use a valid language tag, for example en or en-US.
-  
   i Some of valid languages:
   
   - ab
@@ -103,8 +99,6 @@ invalid.html:4:12 lint/a11y/useValidLang ━━━━━━━━━━━━━
     6 │ <html lang="en-GB-something"></html>
   
   i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
-  
-  i Use a valid language tag, for example en or en-US.
   
   i Some of valid languages:
   
@@ -160,8 +154,6 @@ invalid.html:6:12 lint/a11y/useValidLang ━━━━━━━━━━━━━
   
   i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
   
-  i Use a valid language tag, for example en or en-US.
-  
   i Some of valid scripts:
   
   - Arab
@@ -197,8 +189,6 @@ invalid.html:7:12 lint/a11y/useValidLang ━━━━━━━━━━━━━
   
   i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
   
-  i Use a valid language tag, for example en or en-US.
-  
   i Some of valid scripts:
   
   - Arab
@@ -233,8 +223,6 @@ invalid.html:8:12 lint/a11y/useValidLang ━━━━━━━━━━━━━
     10 │ 
   
   i Screen readers use the language to choose how to pronounce the text. An invalid value can make them read the content with the wrong voice.
-  
-  i Use a valid language tag, for example en or en-US.
   
   i Some of valid countries:
   
