@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validResourceEvents.tsx
+---
+# Input
+```tsx
+/* should not generate diagnostics */
+<>
+    <img src="image.png" alt="Example" onError={() => {}} />
+    <img src="image.png" alt="Example" onLoad={() => {}} />
+</>
+
+```
