@@ -37,7 +37,7 @@ pub(super) fn parse_scss_expression_operand(
     options: ScssExpressionOptions,
 ) -> ParsedSyntax {
     // A caller-owned boundary can start with an otherwise valid identifier.
-    if options.boundary.is_some_and(|boundary| boundary(p)) {
+    if options.boundary.is_some_and(|boundary| boundary(p, 0)) {
         return Absent;
     }
 

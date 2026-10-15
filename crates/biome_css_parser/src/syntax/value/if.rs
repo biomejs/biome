@@ -543,7 +543,7 @@ fn parse_if_branch(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyn
         parse_scss_optional_value_until_with_boundary(
             p,
             SCSS_IF_BRANCH_VALUE_END_SET,
-            is_at_if_branch_boundary,
+            is_nth_at_if_branch_boundary,
         )
     } else {
         Absent
@@ -561,8 +561,13 @@ fn parse_if_branch(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyn
 
 #[inline]
 fn is_at_if_branch_boundary(p: &mut CssParser) -> bool {
+    is_nth_at_if_branch_boundary(p, 0)
+}
+
+#[inline]
+fn is_nth_at_if_branch_boundary(p: &mut CssParser, n: usize) -> bool {
     // Treat `else:` as the start of the next branch when recovering.
-    p.at(T![else]) && p.nth_at(1, T![:])
+    p.nth_at(n, T![else]) && p.nth_at(n + 1, T![:])
 }
 
 struct AnyIfTestBooleanExprChainParseRecovery;
