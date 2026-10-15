@@ -1,0 +1,9 @@
+.variable-unit{width:attr(data-width $unit,10px);color:red;}
+.interpolated-unit{width:attr(data-width #{$unit},10px);color:green;}
+.prefixed-unit{width:attr(data-width r#{$suffix},1rem);color:blue;}
+.variable-name-and-unit{width:attr($name$unit,10px);color:purple;}
+.hyphen-unit{width:attr(data-width -#{$unit},10px);color:teal;}
+.literal-controls{width:attr(data-width px,10px);opacity:attr(data-progress %,0%);}
+.type-outside-attr{width:type(<length>);color:orange;}
+.after{display:block}
+.namespaced-unit{width:attr(data-width units.$unit,10px);color:black;}

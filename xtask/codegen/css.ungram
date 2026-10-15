@@ -2417,6 +2417,7 @@ AnyCssFunction =
 	| CssUrlFunction
 	| CssIfFunction
 	| CssAttrFunction
+	| CssTypeFunction
 	| ScssLegacyIfFunction
 
 // content: counter(section);
@@ -2809,6 +2810,10 @@ AnyCssAttrType =
 	| CssTypeFunction
 	| CssNumberDeclarator
 	| AnyCssAttrUnit
+	| ScssVariable
+	| ScssNamespacedVariable
+	| ScssInterpolatedIdentifier
+	| CssBogusPropertyValue
 
 // attr(data-test type(*), rem);
 //                       ^^^^^

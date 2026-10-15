@@ -12,6 +12,9 @@ $gap:2px;
 .empty{content:attr(data-label,);width:attr(data-size px,/* empty */);}
 .comments{width:attr(data-size px/* comma */,/* expression */($gap + 1px)*2/* close */);}
 
+$unit:px;$suffix:em;
+.dynamic-fallbacks{width:attr(data-size $unit,($gap + 1px)*2);height:attr(data-height #{$unit},var(--fallback,$gap*2));padding:attr(data-pad r#{$suffix},1px + $gap*2);}
+
 ```
 
 
@@ -40,6 +43,14 @@ $gap: 2px;
 		px /* comma */,
 		/* expression */ ($gap + 1px) * 2 /* close */
 	);
+}
+
+$unit: px;
+$suffix: em;
+.dynamic-fallbacks {
+	width: attr(data-size $unit, ($gap + 1px) * 2);
+	height: attr(data-height #{$unit}, var(--fallback, $gap * 2));
+	padding: attr(data-pad r#{$suffix}, 1px + $gap * 2);
 }
 
 ```

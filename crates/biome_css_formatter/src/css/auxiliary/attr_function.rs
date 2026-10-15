@@ -30,6 +30,11 @@ impl FormatNodeRule<CssAttrFunction> for FormatCssAttrFunction {
 
                             if let Some(attr_type) = &attr_type {
                                 write!(f, [soft_line_break_or_space(), attr_type.format()])?;
+                                if fallback_value.is_some()
+                                    && f.comments().has_trailing_line_comment(attr_type.syntax())
+                                {
+                                    write!(f, [hard_line_break()])?;
+                                }
                             }
 
                             write!(f, [fallback_value.format()])?;

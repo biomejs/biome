@@ -13,8 +13,11 @@ use crate::syntax::parse_error::{
 };
 use crate::syntax::property::parse_generic_component_value;
 use crate::syntax::scss::{
-    is_at_scss_interpolated_function_or_value, is_at_scss_variable,
-    parse_scss_interpolated_attribute_name, parse_scss_optional_value_until, parse_scss_variable,
+    complete_scss_interpolated_identifier, is_at_scss_interpolated_dashed_identifier,
+    is_at_scss_interpolated_function_or_value, is_at_scss_namespaced_variable, is_at_scss_variable,
+    is_nth_at_scss_hyphen_interpolated_identifier, parse_scss_interpolated_at_rule_name,
+    parse_scss_interpolated_attribute_name, parse_scss_namespaced_variable,
+    parse_scss_optional_value_until, parse_scss_variable,
 };
 use crate::syntax::value::dimension::is_nth_at_unit;
 use crate::syntax::value::r#type::is_at_type_function;
@@ -71,7 +74,7 @@ pub(crate) fn parse_attr_function(p: &mut CssParser, context: ValueParsingContex
     p.bump(T!['(']);
 
     AttrNameList { context }.parse_list(p);
-    parse_attr_type(p).ok();
+    parse_attr_type(p, context).ok();
     parse_attr_fallback_value(p, context).ok();
 
     p.expect(T![')']);
@@ -80,16 +83,57 @@ pub(crate) fn parse_attr_function(p: &mut CssParser, context: ValueParsingContex
 }
 
 #[inline]
-fn is_at_attr_type(p: &mut CssParser) -> bool {
-    p.at(T![raw_string]) || p.at(T![number]) || is_at_type_function(p) || is_at_attr_unit(p)
+fn is_at_attr_type(p: &mut CssParser, context: ValueParsingContext) -> bool {
+    (context.is_scss_exclusive_syntax_allowed() && is_at_scss_attr_type(p))
+        || p.at(T![raw_string])
+        || p.at(T![number])
+        || is_at_type_function(p)
+        || is_at_attr_unit(p)
 }
 
-/// Parses an attr type
-/// type( <syntax> ) | raw-string | number | <attr-unit>
 #[inline]
-fn parse_attr_type(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_attr_type(p) {
+fn is_at_scss_attr_type(p: &mut CssParser) -> bool {
+    is_at_scss_variable(p)
+        || is_at_scss_namespaced_variable(p)
+        || is_at_scss_interpolated_function_or_value(p)
+        || is_nth_at_scss_hyphen_interpolated_identifier(p, 0)
+        || is_at_scss_interpolated_dashed_identifier(p)
+}
+
+/// Parses a literal CSS type/unit or an SCSS variable or interpolated identifier.
+///
+/// ```scss
+/// .card { width: attr(data-width $unit, 10px); }
+/// ```
+#[inline]
+fn parse_attr_type(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyntax {
+    if !is_at_attr_type(p, context) {
         return Absent;
+    }
+
+    if context.is_scss_exclusive_syntax_allowed() && is_at_scss_attr_type(p) {
+        return CssSyntaxFeatures::Scss.parse_exclusive_syntax_with_kind(
+            p,
+            |p| {
+                if is_at_scss_variable(p) {
+                    parse_scss_variable(p)
+                } else if is_at_scss_namespaced_variable(p) {
+                    parse_scss_namespaced_variable(p)
+                } else {
+                    // Unit names allow source-tight hyphens and numeric suffixes.
+                    let Present(name) = parse_scss_interpolated_at_rule_name(p) else {
+                        return Absent;
+                    };
+                    Present(if name.kind(p) == SCSS_INTERPOLATION {
+                        complete_scss_interpolated_identifier(p, name)
+                    } else {
+                        name
+                    })
+                }
+            },
+            |p, marker| scss_only_syntax_error(p, "SCSS attr types", marker.range(p)),
+            Some(CSS_BOGUS_PROPERTY_VALUE),
+        );
     }
 
     if is_at_type_function(p) {
@@ -218,6 +262,9 @@ impl ParseRecovery for AttrNameListParseRecovery {
     }
 }
 
+/// The first component is always an attribute name; a following Sass variable
+/// starts the unit/type slot even without whitespace (`attr($name$unit)`).
+/// Source-tight interpolation stays inside the name (`attr(data-#{$name})`).
 struct AttrNameList {
     context: ValueParsingContext,
 }
@@ -232,7 +279,7 @@ impl ParseSeparatedList for AttrNameList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        is_at_attr_type(p) || p.at(T![,]) || p.at(T![')'])
+        is_at_attr_type(p, self.context) || p.at(T![,]) || p.at(T![')'])
     }
 
     fn recover(

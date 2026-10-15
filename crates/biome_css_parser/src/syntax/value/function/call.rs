@@ -8,6 +8,7 @@ use crate::syntax::scss::{
 };
 use crate::syntax::value::attr::{is_at_attr_function, parse_attr_function};
 use crate::syntax::value::r#if::{is_at_if_function, parse_if_function};
+use crate::syntax::value::r#type::{is_at_type_function, parse_type_function};
 use crate::syntax::value::url::{is_at_url_function, parse_url_function_with_context};
 use crate::syntax::{
     CssSyntaxFeatures, FunctionCallContext, ValueParsingContext, ValueParsingMode,
@@ -63,6 +64,8 @@ pub(crate) fn parse_any_function_with_context(
         }
     } else if is_at_attr_function(p) {
         parse_attr_function(p, context)
+    } else if context.is_full_scss_parsing_allowed() && is_at_scss_type_function_value(p) {
+        parse_type_function(p)
     } else if is_at_vue_v_bind_function(p) {
         CssSyntaxFeatures::CssModulesWithVue.parse_exclusive_syntax(
             p,
@@ -72,6 +75,18 @@ pub(crate) fn parse_any_function_with_context(
     } else {
         parse_function_with_context(p, context)
     }
+}
+
+/// Recognizes angle-bracket type syntax stored as a Sass value for `attr()`.
+/// Other arguments retain ordinary function-call parsing.
+///
+/// ```scss
+/// $type: type(<length>);
+/// .card { width: attr(data-width $type, 10px); }
+/// ```
+#[inline]
+fn is_at_scss_type_function_value(p: &mut CssParser) -> bool {
+    is_at_type_function(p) && is_nth_at_adjacent_l_paren(p, 1) && p.nth_at(2, T![<])
 }
 
 #[inline]

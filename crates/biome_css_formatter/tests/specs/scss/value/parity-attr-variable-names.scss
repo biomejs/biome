@@ -3,3 +3,63 @@ $name: data-title; $gap:2px; $ns:card;
 .typed{width:attr($name  px ,$gap  *2);height:attr($name type(<length>),2px);}
 .controls{width:attr( #{$name} px,2px);content:attr(#{$ns}-label);}
 .comments{content:attr(/* before */ $name /* after */);width:attr($name/* type */ px/* comma */,/* fallback */ $gap*2/* close */);}
+
+$name:data-width;$unit:px;$type:type(<length>);$part:p;$suffix:em;
+$type-union:type(<length>|<percentage>);
+$spaced-type-value:type(  <length>  );
+.type-values{content:$type-union=="type(<length>|<percentage>)";width:attr(data-width $type-union,10px);height:attr(data-height $spaced-type-value,10px);}
+$generic-type:type($unit);$numeric-type:type(1);
+$spaced-type:type (length);$comment-type:type/**/(length);
+@mixin width-from($attribute,$unit:px,$fallback:10px){width:attr($attribute $unit,$fallback);}
+.card{@include width-from(data-width);}
+.dynamic-units {
+  width:attr(data-width $unit,10px);
+  height:attr(data-height $unit);
+  min-width:attr(data-width #{$unit},10px);
+  min-height:attr(data-height #{$unit});
+  max-width:attr(data-width #{$part}x,10px);
+  max-height:attr(data-height r#{$suffix},1rem);
+  padding:attr(data-pad $type,10px);
+  margin:attr(data-margin $type-union,10px);
+  border-width:attr(data-width #{$unit}2,10px);
+  outline-width:attr(data-width number#{$suffix},10px);
+  width:attr(data-width -#{$unit},10px);
+  height:attr(data-height -#{$unit}2,10px);
+  min-width:attr(data-width #{$unit}-,10px);
+  max-width:attr(data-width --#{$unit}2,10px);
+}
+.boundaries {
+  width:attr($name $unit,10px);
+  height:attr($name$unit,10px);
+  min-width:attr(data-width$unit,10px);
+  min-height:attr(data-width#{$unit},10px);
+  max-width:attr($name,10px);
+  max-height:attr(ns|$name $unit,10px);
+}
+.literal-units{width:attr(data-width px,10px);height:attr(data-height rem,1rem);opacity:attr(data-progress %,0%);z-index:attr(data-layer number,0);content:attr(data-label raw-string,"none");padding:attr(data-pad custom-unit,0);margin:attr(data-margin type(<length>),0px);}
+.unit-comments{width:attr(/* name */data-width/* unit */$unit/* comma */,/* fallback */10px/* close */);height:attr(data-height /* prefix */r#{$suffix}/* end */,1rem);}
+.multiline{width:attr(
+  $name
+  #{$part}x,
+  10px
+);}
+.suppressed {
+  /* biome-ignore format: preserve the attr source spacing */
+  width:attr( $name$unit , 10px );
+}
+
+.comment-boundaries {
+  width:attr(data-width #{$unit}/* inline unit */,10px);
+  height:attr(data-height r#{$suffix} // trailing unit
+    ,1rem);
+  min-width:attr(data-width #{$unit}
+    /* own-line unit */
+    ,10px);
+  min-height:attr(data-height #{$unit}/* before close */);
+  max-width:attr(data-width #{$unit}
+    // own-line close
+  );
+  padding:attr(data-pad
+    /* biome-ignore format: preserve interpolated unit spacing */
+    #{ $part }x,10px);
+}

@@ -1,0 +1,49 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/value/attr-namespaced-units.scss
+---
+
+# Input
+
+```scss
+@use "sass:math";
+$name:data-width;
+.module-units {
+  width:attr(data-width math.$pi,10px);
+  height:attr($name math.$e);
+  min-width:attr(#{$name} math.$pi,0);
+  max-width:attr(data-width /* unit */math.$pi/* comma */,10px);
+  min-height:attr(data-height math.$e // unit
+    ,10px);
+  max-height:attr(data-height math.$pi
+    // close
+  );
+}
+
+```
+
+
+# Formatted
+
+```scss
+@use "sass:math";
+$name: data-width;
+.module-units {
+	width: attr(data-width math.$pi, 10px);
+	height: attr($name math.$e);
+	min-width: attr(#{$name} math.$pi, 0);
+	max-width: attr(data-width /* unit */ math.$pi /* comma */, 10px);
+	min-height: attr(
+		data-height
+		math.$e // unit
+		,
+		10px
+	);
+	max-height: attr(
+		data-height
+		math.$pi
+		// close
+	);
+}
+
+```

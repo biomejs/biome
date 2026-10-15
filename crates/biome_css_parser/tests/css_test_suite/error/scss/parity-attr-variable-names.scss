@@ -1,0 +1,21 @@
+$unit:px;
+.incomplete-variable {
+  width:attr(data-width $,10px);
+  color:red;
+}
+.after-variable{display:block}
+.empty-interpolation {
+  width:attr(data-width #{},10px);
+  color:green;
+}
+.after-empty-interpolation{display:block}
+.unclosed-interpolation {
+  width:attr(data-width #{$unit,10px);
+  color:blue;
+}
+.after-unclosed-interpolation{display:block}
+.unit-expression {
+  width:attr(data-width $unit + 1px,10px);
+  color:purple;
+}
+.after-expression{display:block}
