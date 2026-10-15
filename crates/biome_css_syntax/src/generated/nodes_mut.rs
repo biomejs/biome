@@ -276,7 +276,7 @@ impl CssColorProfileAtRuleDeclarator {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: CssCustomIdentifier) -> Self {
+    pub fn with_name(self, element: AnyCssAtRuleCustomName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -740,7 +740,7 @@ impl CssCounterStyleAtRuleDeclarator {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: CssCustomIdentifier) -> Self {
+    pub fn with_name(self, element: AnyCssAtRuleCustomName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -776,7 +776,7 @@ impl CssCustomMediaAtRuleDeclarator {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: AnyCssDashedIdentifier) -> Self {
+    pub fn with_name(self, element: AnyCssAtRuleDashedName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -1188,7 +1188,7 @@ impl CssFontPaletteValuesAtRuleDeclarator {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: CssDashedIdentifier) -> Self {
+    pub fn with_name(self, element: AnyCssAtRuleDashedName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -2124,7 +2124,7 @@ impl CssNamespaceAtRule {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_prefix(self, element: Option<CssIdentifier>) -> Self {
+    pub fn with_prefix(self, element: Option<AnyCssNamespacePrefixName>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             1usize..=1usize,
             once(element.map(|element| element.into_syntax().into())),
@@ -2236,7 +2236,7 @@ impl CssPageAtRuleBlock {
     }
 }
 impl CssPageSelector {
-    pub fn with_ty(self, element: Option<CssCustomIdentifier>) -> Self {
+    pub fn with_ty(self, element: Option<AnyCssAtRuleCustomName>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             0usize..=0usize,
             once(element.map(|element| element.into_syntax().into())),
@@ -2256,7 +2256,7 @@ impl CssPageSelectorPseudo {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_selector(self, element: CssIdentifier) -> Self {
+    pub fn with_selector(self, element: AnyCssSelectorIdentifier) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -2318,7 +2318,7 @@ impl CssPositionTryAtRuleDeclarator {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: CssDashedIdentifier) -> Self {
+    pub fn with_name(self, element: AnyCssAtRuleDashedName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -2346,7 +2346,7 @@ impl CssPropertyAtRuleDeclarator {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_name(self, element: AnyCssDashedIdentifier) -> Self {
+    pub fn with_name(self, element: AnyCssAtRuleDashedName) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),

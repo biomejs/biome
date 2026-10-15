@@ -14,6 +14,7 @@ mod import;
 pub(crate) mod keyframes;
 mod layer;
 pub(crate) mod media;
+mod name;
 mod namespace;
 mod page;
 mod parse_error;

@@ -715,7 +715,7 @@ impl CssColorProfileAtRuleDeclarator {
     pub fn color_profile_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<CssCustomIdentifier> {
+    pub fn name(&self) -> SyntaxResult<AnyCssAtRuleCustomName> {
         support::required_node(&self.syntax, 1usize)
     }
 }
@@ -730,7 +730,7 @@ impl Serialize for CssColorProfileAtRuleDeclarator {
 #[derive(Serialize)]
 pub struct CssColorProfileAtRuleDeclaratorFields {
     pub color_profile_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<CssCustomIdentifier>,
+    pub name: SyntaxResult<AnyCssAtRuleCustomName>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssCommaSeparatedValue {
@@ -1810,7 +1810,7 @@ impl CssCounterStyleAtRuleDeclarator {
     pub fn counter_style_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<CssCustomIdentifier> {
+    pub fn name(&self) -> SyntaxResult<AnyCssAtRuleCustomName> {
         support::required_node(&self.syntax, 1usize)
     }
 }
@@ -1825,7 +1825,7 @@ impl Serialize for CssCounterStyleAtRuleDeclarator {
 #[derive(Serialize)]
 pub struct CssCounterStyleAtRuleDeclaratorFields {
     pub counter_style_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<CssCustomIdentifier>,
+    pub name: SyntaxResult<AnyCssAtRuleCustomName>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssCustomIdentifier {
@@ -1926,7 +1926,7 @@ impl CssCustomMediaAtRuleDeclarator {
     pub fn custom_media_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<AnyCssDashedIdentifier> {
+    pub fn name(&self) -> SyntaxResult<AnyCssAtRuleDashedName> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn queries(&self) -> SyntaxResult<AnyCssCustomMediaQuery> {
@@ -1944,7 +1944,7 @@ impl Serialize for CssCustomMediaAtRuleDeclarator {
 #[derive(Serialize)]
 pub struct CssCustomMediaAtRuleDeclaratorFields {
     pub custom_media_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<AnyCssDashedIdentifier>,
+    pub name: SyntaxResult<AnyCssAtRuleDashedName>,
     pub queries: SyntaxResult<AnyCssCustomMediaQuery>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -3005,7 +3005,7 @@ impl CssFontPaletteValuesAtRuleDeclarator {
     pub fn font_palette_values_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<CssDashedIdentifier> {
+    pub fn name(&self) -> SyntaxResult<AnyCssAtRuleDashedName> {
         support::required_node(&self.syntax, 1usize)
     }
 }
@@ -3020,7 +3020,7 @@ impl Serialize for CssFontPaletteValuesAtRuleDeclarator {
 #[derive(Serialize)]
 pub struct CssFontPaletteValuesAtRuleDeclaratorFields {
     pub font_palette_values_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<CssDashedIdentifier>,
+    pub name: SyntaxResult<AnyCssAtRuleDashedName>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssFunction {
@@ -5315,7 +5315,7 @@ impl CssNamespaceAtRule {
     pub fn namespace_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn prefix(&self) -> Option<CssIdentifier> {
+    pub fn prefix(&self) -> Option<AnyCssNamespacePrefixName> {
         support::node(&self.syntax, 1usize)
     }
     pub fn url(&self) -> SyntaxResult<AnyCssNamespaceUrl> {
@@ -5336,7 +5336,7 @@ impl Serialize for CssNamespaceAtRule {
 #[derive(Serialize)]
 pub struct CssNamespaceAtRuleFields {
     pub namespace_token: SyntaxResult<SyntaxToken>,
-    pub prefix: Option<CssIdentifier>,
+    pub prefix: Option<AnyCssNamespacePrefixName>,
     pub url: SyntaxResult<AnyCssNamespaceUrl>,
     pub semicolon_token: SyntaxResult<SyntaxToken>,
 }
@@ -5635,7 +5635,7 @@ impl CssPageSelector {
             pseudos: self.pseudos(),
         }
     }
-    pub fn ty(&self) -> Option<CssCustomIdentifier> {
+    pub fn ty(&self) -> Option<AnyCssAtRuleCustomName> {
         support::node(&self.syntax, 0usize)
     }
     pub fn pseudos(&self) -> CssPageSelectorPseudoList {
@@ -5652,7 +5652,7 @@ impl Serialize for CssPageSelector {
 }
 #[derive(Serialize)]
 pub struct CssPageSelectorFields {
-    pub ty: Option<CssCustomIdentifier>,
+    pub ty: Option<AnyCssAtRuleCustomName>,
     pub pseudos: CssPageSelectorPseudoList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -5678,7 +5678,7 @@ impl CssPageSelectorPseudo {
     pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn selector(&self) -> SyntaxResult<CssIdentifier> {
+    pub fn selector(&self) -> SyntaxResult<AnyCssSelectorIdentifier> {
         support::required_node(&self.syntax, 1usize)
     }
 }
@@ -5693,7 +5693,7 @@ impl Serialize for CssPageSelectorPseudo {
 #[derive(Serialize)]
 pub struct CssPageSelectorPseudoFields {
     pub colon_token: SyntaxResult<SyntaxToken>,
-    pub selector: SyntaxResult<CssIdentifier>,
+    pub selector: SyntaxResult<AnyCssSelectorIdentifier>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssParenthesizedExpression {
@@ -5843,7 +5843,7 @@ impl CssPositionTryAtRuleDeclarator {
     pub fn position_try_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<CssDashedIdentifier> {
+    pub fn name(&self) -> SyntaxResult<AnyCssAtRuleDashedName> {
         support::required_node(&self.syntax, 1usize)
     }
 }
@@ -5858,7 +5858,7 @@ impl Serialize for CssPositionTryAtRuleDeclarator {
 #[derive(Serialize)]
 pub struct CssPositionTryAtRuleDeclaratorFields {
     pub position_try_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<CssDashedIdentifier>,
+    pub name: SyntaxResult<AnyCssAtRuleDashedName>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssPropertyAtRule {
@@ -5923,7 +5923,7 @@ impl CssPropertyAtRuleDeclarator {
     pub fn property_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<AnyCssDashedIdentifier> {
+    pub fn name(&self) -> SyntaxResult<AnyCssAtRuleDashedName> {
         support::required_node(&self.syntax, 1usize)
     }
 }
@@ -5938,7 +5938,7 @@ impl Serialize for CssPropertyAtRuleDeclarator {
 #[derive(Serialize)]
 pub struct CssPropertyAtRuleDeclaratorFields {
     pub property_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<AnyCssDashedIdentifier>,
+    pub name: SyntaxResult<AnyCssAtRuleDashedName>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssPseudoClassFunctionCompoundSelector {
@@ -14325,6 +14325,60 @@ impl AnyCssAtRule {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssAtRuleCustomName {
+    CssBogusCustomIdentifier(CssBogusCustomIdentifier),
+    CssCustomIdentifier(CssCustomIdentifier),
+    ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
+}
+impl AnyCssAtRuleCustomName {
+    pub fn as_css_bogus_custom_identifier(&self) -> Option<&CssBogusCustomIdentifier> {
+        match &self {
+            Self::CssBogusCustomIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_custom_identifier(&self) -> Option<&CssCustomIdentifier> {
+        match &self {
+            Self::CssCustomIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_identifier(&self) -> Option<&ScssInterpolatedIdentifier> {
+        match &self {
+            Self::ScssInterpolatedIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssAtRuleDashedName {
+    CssBogusCustomIdentifier(CssBogusCustomIdentifier),
+    CssDashedIdentifier(CssDashedIdentifier),
+    ScssInterpolatedDashedIdentifier(ScssInterpolatedDashedIdentifier),
+}
+impl AnyCssAtRuleDashedName {
+    pub fn as_css_bogus_custom_identifier(&self) -> Option<&CssBogusCustomIdentifier> {
+        match &self {
+            Self::CssBogusCustomIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_dashed_identifier(&self) -> Option<&CssDashedIdentifier> {
+        match &self {
+            Self::CssDashedIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_dashed_identifier(
+        &self,
+    ) -> Option<&ScssInterpolatedDashedIdentifier> {
+        match &self {
+            Self::ScssInterpolatedDashedIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssAtRuleDeclarator {
     CssColorProfileAtRuleDeclarator(CssColorProfileAtRuleDeclarator),
     CssContainerAtRuleDeclarator(CssContainerAtRuleDeclarator),
@@ -15586,6 +15640,7 @@ pub enum AnyCssFontFamilyName {
     CssBogusFontFamilyName(CssBogusFontFamilyName),
     CssFontFamilyName(CssFontFamilyName),
     CssString(CssString),
+    ScssInterpolatedString(ScssInterpolatedString),
 }
 impl AnyCssFontFamilyName {
     pub fn as_css_bogus_font_family_name(&self) -> Option<&CssBogusFontFamilyName> {
@@ -15603,6 +15658,12 @@ impl AnyCssFontFamilyName {
     pub fn as_css_string(&self) -> Option<&CssString> {
         match &self {
             Self::CssString(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_string(&self) -> Option<&ScssInterpolatedString> {
+        match &self {
+            Self::ScssInterpolatedString(item) => Some(item),
             _ => None,
         }
     }
@@ -16548,6 +16609,32 @@ impl AnyCssNamespacePrefix {
     pub fn as_css_universal_namespace_prefix(&self) -> Option<&CssUniversalNamespacePrefix> {
         match &self {
             Self::CssUniversalNamespacePrefix(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyCssNamespacePrefixName {
+    CssBogusCustomIdentifier(CssBogusCustomIdentifier),
+    CssIdentifier(CssIdentifier),
+    ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
+}
+impl AnyCssNamespacePrefixName {
+    pub fn as_css_bogus_custom_identifier(&self) -> Option<&CssBogusCustomIdentifier> {
+        match &self {
+            Self::CssBogusCustomIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_identifier(&self) -> Option<&CssIdentifier> {
+        match &self {
+            Self::CssIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_identifier(&self) -> Option<&ScssInterpolatedIdentifier> {
+        match &self {
+            Self::ScssInterpolatedIdentifier(item) => Some(item),
             _ => None,
         }
     }
@@ -36537,6 +36624,164 @@ impl From<AnyCssAtRule> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssBogusCustomIdentifier> for AnyCssAtRuleCustomName {
+    fn from(node: CssBogusCustomIdentifier) -> Self {
+        Self::CssBogusCustomIdentifier(node)
+    }
+}
+impl From<CssCustomIdentifier> for AnyCssAtRuleCustomName {
+    fn from(node: CssCustomIdentifier) -> Self {
+        Self::CssCustomIdentifier(node)
+    }
+}
+impl From<ScssInterpolatedIdentifier> for AnyCssAtRuleCustomName {
+    fn from(node: ScssInterpolatedIdentifier) -> Self {
+        Self::ScssInterpolatedIdentifier(node)
+    }
+}
+impl AstNode for AnyCssAtRuleCustomName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusCustomIdentifier::KIND_SET
+        .union(CssCustomIdentifier::KIND_SET)
+        .union(ScssInterpolatedIdentifier::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_BOGUS_CUSTOM_IDENTIFIER | CSS_CUSTOM_IDENTIFIER | SCSS_INTERPOLATED_IDENTIFIER
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_BOGUS_CUSTOM_IDENTIFIER => {
+                Self::CssBogusCustomIdentifier(CssBogusCustomIdentifier { syntax })
+            }
+            CSS_CUSTOM_IDENTIFIER => Self::CssCustomIdentifier(CssCustomIdentifier { syntax }),
+            SCSS_INTERPOLATED_IDENTIFIER => {
+                Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssBogusCustomIdentifier(it) => it.syntax(),
+            Self::CssCustomIdentifier(it) => it.syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssBogusCustomIdentifier(it) => it.into_syntax(),
+            Self::CssCustomIdentifier(it) => it.into_syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssAtRuleCustomName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssBogusCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssAtRuleCustomName> for SyntaxNode {
+    fn from(n: AnyCssAtRuleCustomName) -> Self {
+        match n {
+            AnyCssAtRuleCustomName::CssBogusCustomIdentifier(it) => it.into_syntax(),
+            AnyCssAtRuleCustomName::CssCustomIdentifier(it) => it.into_syntax(),
+            AnyCssAtRuleCustomName::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssAtRuleCustomName> for SyntaxElement {
+    fn from(n: AnyCssAtRuleCustomName) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssBogusCustomIdentifier> for AnyCssAtRuleDashedName {
+    fn from(node: CssBogusCustomIdentifier) -> Self {
+        Self::CssBogusCustomIdentifier(node)
+    }
+}
+impl From<CssDashedIdentifier> for AnyCssAtRuleDashedName {
+    fn from(node: CssDashedIdentifier) -> Self {
+        Self::CssDashedIdentifier(node)
+    }
+}
+impl From<ScssInterpolatedDashedIdentifier> for AnyCssAtRuleDashedName {
+    fn from(node: ScssInterpolatedDashedIdentifier) -> Self {
+        Self::ScssInterpolatedDashedIdentifier(node)
+    }
+}
+impl AstNode for AnyCssAtRuleDashedName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusCustomIdentifier::KIND_SET
+        .union(CssDashedIdentifier::KIND_SET)
+        .union(ScssInterpolatedDashedIdentifier::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_BOGUS_CUSTOM_IDENTIFIER
+                | CSS_DASHED_IDENTIFIER
+                | SCSS_INTERPOLATED_DASHED_IDENTIFIER
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_BOGUS_CUSTOM_IDENTIFIER => {
+                Self::CssBogusCustomIdentifier(CssBogusCustomIdentifier { syntax })
+            }
+            CSS_DASHED_IDENTIFIER => Self::CssDashedIdentifier(CssDashedIdentifier { syntax }),
+            SCSS_INTERPOLATED_DASHED_IDENTIFIER => {
+                Self::ScssInterpolatedDashedIdentifier(ScssInterpolatedDashedIdentifier { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssBogusCustomIdentifier(it) => it.syntax(),
+            Self::CssDashedIdentifier(it) => it.syntax(),
+            Self::ScssInterpolatedDashedIdentifier(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssBogusCustomIdentifier(it) => it.into_syntax(),
+            Self::CssDashedIdentifier(it) => it.into_syntax(),
+            Self::ScssInterpolatedDashedIdentifier(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssAtRuleDashedName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssBogusCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssDashedIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedDashedIdentifier(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssAtRuleDashedName> for SyntaxNode {
+    fn from(n: AnyCssAtRuleDashedName) -> Self {
+        match n {
+            AnyCssAtRuleDashedName::CssBogusCustomIdentifier(it) => it.into_syntax(),
+            AnyCssAtRuleDashedName::CssDashedIdentifier(it) => it.into_syntax(),
+            AnyCssAtRuleDashedName::ScssInterpolatedDashedIdentifier(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssAtRuleDashedName> for SyntaxElement {
+    fn from(n: AnyCssAtRuleDashedName) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<CssColorProfileAtRuleDeclarator> for AnyCssAtRuleDeclarator {
     fn from(node: CssColorProfileAtRuleDeclarator) -> Self {
         Self::CssColorProfileAtRuleDeclarator(node)
@@ -40022,15 +40267,24 @@ impl From<CssString> for AnyCssFontFamilyName {
         Self::CssString(node)
     }
 }
+impl From<ScssInterpolatedString> for AnyCssFontFamilyName {
+    fn from(node: ScssInterpolatedString) -> Self {
+        Self::ScssInterpolatedString(node)
+    }
+}
 impl AstNode for AnyCssFontFamilyName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusFontFamilyName::KIND_SET
         .union(CssFontFamilyName::KIND_SET)
-        .union(CssString::KIND_SET);
+        .union(CssString::KIND_SET)
+        .union(ScssInterpolatedString::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_FONT_FAMILY_NAME | CSS_FONT_FAMILY_NAME | CSS_STRING
+            CSS_BOGUS_FONT_FAMILY_NAME
+                | CSS_FONT_FAMILY_NAME
+                | CSS_STRING
+                | SCSS_INTERPOLATED_STRING
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -40040,6 +40294,9 @@ impl AstNode for AnyCssFontFamilyName {
             }
             CSS_FONT_FAMILY_NAME => Self::CssFontFamilyName(CssFontFamilyName { syntax }),
             CSS_STRING => Self::CssString(CssString { syntax }),
+            SCSS_INTERPOLATED_STRING => {
+                Self::ScssInterpolatedString(ScssInterpolatedString { syntax })
+            }
             _ => return None,
         };
         Some(res)
@@ -40049,6 +40306,7 @@ impl AstNode for AnyCssFontFamilyName {
             Self::CssBogusFontFamilyName(it) => it.syntax(),
             Self::CssFontFamilyName(it) => it.syntax(),
             Self::CssString(it) => it.syntax(),
+            Self::ScssInterpolatedString(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -40056,6 +40314,7 @@ impl AstNode for AnyCssFontFamilyName {
             Self::CssBogusFontFamilyName(it) => it.into_syntax(),
             Self::CssFontFamilyName(it) => it.into_syntax(),
             Self::CssString(it) => it.into_syntax(),
+            Self::ScssInterpolatedString(it) => it.into_syntax(),
         }
     }
 }
@@ -40065,6 +40324,7 @@ impl std::fmt::Debug for AnyCssFontFamilyName {
             Self::CssBogusFontFamilyName(it) => std::fmt::Debug::fmt(it, f),
             Self::CssFontFamilyName(it) => std::fmt::Debug::fmt(it, f),
             Self::CssString(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedString(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -40074,6 +40334,7 @@ impl From<AnyCssFontFamilyName> for SyntaxNode {
             AnyCssFontFamilyName::CssBogusFontFamilyName(it) => it.into_syntax(),
             AnyCssFontFamilyName::CssFontFamilyName(it) => it.into_syntax(),
             AnyCssFontFamilyName::CssString(it) => it.into_syntax(),
+            AnyCssFontFamilyName::ScssInterpolatedString(it) => it.into_syntax(),
         }
     }
 }
@@ -42917,6 +43178,84 @@ impl From<AnyCssNamespacePrefix> for SyntaxNode {
 }
 impl From<AnyCssNamespacePrefix> for SyntaxElement {
     fn from(n: AnyCssNamespacePrefix) -> Self {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<CssBogusCustomIdentifier> for AnyCssNamespacePrefixName {
+    fn from(node: CssBogusCustomIdentifier) -> Self {
+        Self::CssBogusCustomIdentifier(node)
+    }
+}
+impl From<CssIdentifier> for AnyCssNamespacePrefixName {
+    fn from(node: CssIdentifier) -> Self {
+        Self::CssIdentifier(node)
+    }
+}
+impl From<ScssInterpolatedIdentifier> for AnyCssNamespacePrefixName {
+    fn from(node: ScssInterpolatedIdentifier) -> Self {
+        Self::ScssInterpolatedIdentifier(node)
+    }
+}
+impl AstNode for AnyCssNamespacePrefixName {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusCustomIdentifier::KIND_SET
+        .union(CssIdentifier::KIND_SET)
+        .union(ScssInterpolatedIdentifier::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            CSS_BOGUS_CUSTOM_IDENTIFIER | CSS_IDENTIFIER | SCSS_INTERPOLATED_IDENTIFIER
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            CSS_BOGUS_CUSTOM_IDENTIFIER => {
+                Self::CssBogusCustomIdentifier(CssBogusCustomIdentifier { syntax })
+            }
+            CSS_IDENTIFIER => Self::CssIdentifier(CssIdentifier { syntax }),
+            SCSS_INTERPOLATED_IDENTIFIER => {
+                Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            Self::CssBogusCustomIdentifier(it) => it.syntax(),
+            Self::CssIdentifier(it) => it.syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.syntax(),
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            Self::CssBogusCustomIdentifier(it) => it.into_syntax(),
+            Self::CssIdentifier(it) => it.into_syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+        }
+    }
+}
+impl std::fmt::Debug for AnyCssNamespacePrefixName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CssBogusCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyCssNamespacePrefixName> for SyntaxNode {
+    fn from(n: AnyCssNamespacePrefixName) -> Self {
+        match n {
+            AnyCssNamespacePrefixName::CssBogusCustomIdentifier(it) => it.into_syntax(),
+            AnyCssNamespacePrefixName::CssIdentifier(it) => it.into_syntax(),
+            AnyCssNamespacePrefixName::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+        }
+    }
+}
+impl From<AnyCssNamespacePrefixName> for SyntaxElement {
+    fn from(n: AnyCssNamespacePrefixName) -> Self {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -49325,6 +49664,16 @@ impl std::fmt::Display for AnyCssAtRule {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyCssAtRuleCustomName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssAtRuleDashedName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyCssAtRuleDeclarator {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -49721,6 +50070,11 @@ impl std::fmt::Display for AnyCssMediaTypeQuery {
     }
 }
 impl std::fmt::Display for AnyCssNamespacePrefix {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyCssNamespacePrefixName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -54270,7 +54624,7 @@ impl Serialize for CssCustomIdentifierSpaceSeparatedList {
 }
 impl AstNodeList for CssCustomIdentifierSpaceSeparatedList {
     type Language = Language;
-    type Node = AnyCssCustomIdentifier;
+    type Node = AnyCssAtRuleCustomName;
     fn syntax_list(&self) -> &SyntaxList {
         &self.syntax_list
     }
@@ -54285,15 +54639,15 @@ impl Debug for CssCustomIdentifierSpaceSeparatedList {
     }
 }
 impl IntoIterator for &CssCustomIdentifierSpaceSeparatedList {
-    type Item = AnyCssCustomIdentifier;
-    type IntoIter = AstNodeListIterator<Language, AnyCssCustomIdentifier>;
+    type Item = AnyCssAtRuleCustomName;
+    type IntoIter = AstNodeListIterator<Language, AnyCssAtRuleCustomName>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
 }
 impl IntoIterator for CssCustomIdentifierSpaceSeparatedList {
-    type Item = AnyCssCustomIdentifier;
-    type IntoIter = AstNodeListIterator<Language, AnyCssCustomIdentifier>;
+    type Item = AnyCssAtRuleCustomName;
+    type IntoIter = AstNodeListIterator<Language, AnyCssAtRuleCustomName>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

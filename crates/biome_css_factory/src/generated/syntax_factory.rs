@@ -530,7 +530,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssCustomIdentifier::can_cast(element.kind())
+                    && AnyCssAtRuleCustomName::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -1316,7 +1316,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssCustomIdentifier::can_cast(element.kind())
+                    && AnyCssAtRuleCustomName::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -1387,7 +1387,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && AnyCssDashedIdentifier::can_cast(element.kind())
+                    && AnyCssAtRuleDashedName::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -2168,7 +2168,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssDashedIdentifier::can_cast(element.kind())
+                    && AnyCssAtRuleDashedName::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -3808,7 +3808,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssIdentifier::can_cast(element.kind())
+                    && AnyCssNamespacePrefixName::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -4016,7 +4016,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element
-                    && CssCustomIdentifier::can_cast(element.kind())
+                    && AnyCssAtRuleCustomName::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -4049,7 +4049,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssIdentifier::can_cast(element.kind())
+                    && AnyCssSelectorIdentifier::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -4160,7 +4160,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssDashedIdentifier::can_cast(element.kind())
+                    && AnyCssAtRuleDashedName::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -4212,7 +4212,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && AnyCssDashedIdentifier::can_cast(element.kind())
+                    && AnyCssAtRuleDashedName::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -9873,7 +9873,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 false,
             ),
             CSS_CUSTOM_IDENTIFIER_SPACE_SEPARATED_LIST => {
-                Self::make_node_list_syntax(kind, children, AnyCssCustomIdentifier::can_cast)
+                Self::make_node_list_syntax(kind, children, AnyCssAtRuleCustomName::can_cast)
             }
             CSS_CUSTOM_PROPERTY_COMPONENT_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCssCustomPropertyComponent::can_cast)
