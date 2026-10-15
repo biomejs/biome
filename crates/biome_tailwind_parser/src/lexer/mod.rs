@@ -1,4 +1,5 @@
 mod base_name_store;
+pub(crate) mod bulk;
 mod tests;
 
 use crate::lexer::base_name_store::is_delimiter;
@@ -45,6 +46,34 @@ impl<'src> TailwindLexer<'src> {
     pub(crate) fn with_base_names(mut self, base_names: &'src BaseNameStore) -> Self {
         self.base_names = base_names;
         self
+    }
+
+    /// Lexes the token at `position` in `context`, as if the lexer had just returned a token of
+    /// kind `previous`, with `after_newline` as its line-break state.
+    pub(crate) fn lex_at(
+        &mut self,
+        position: usize,
+        previous: TailwindSyntaxKind,
+        after_newline: bool,
+        context: TailwindLexContext,
+    ) -> TailwindSyntaxKind {
+        self.position = position;
+        self.current_kind = previous;
+        self.after_newline = after_newline;
+        self.next_token(context)
+    }
+
+    /// Whether the current token is whitespace with a line break.
+    pub(crate) fn after_newline(&self) -> bool {
+        self.after_newline
+    }
+
+    pub(crate) fn diagnostics_len(&self) -> usize {
+        self.diagnostics.len()
+    }
+
+    pub(crate) fn truncate_diagnostics(&mut self, len: usize) {
+        self.diagnostics.truncate(len);
     }
 
     fn consume_token(&mut self, current: u8) -> TailwindSyntaxKind {
@@ -431,7 +460,7 @@ impl<'src> TailwindLexer<'src> {
         }
 
         // Fallback to dashed-basename trie matching for cases with '-' inside the basename
-        let dashed_end = self.base_names.matcher(slice).base_end();
+        let dashed_end = self.base_names.matcher(slice).dashed_end(end);
         self.advance(dashed_end);
 
         if dashed_end == 4 && &slice[..dashed_end] == b"data" {
