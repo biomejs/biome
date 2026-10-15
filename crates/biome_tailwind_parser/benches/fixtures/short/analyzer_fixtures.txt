@@ -1,0 +1,367 @@
+w-[400px]
+text-[#555] bg-white
+max-h-[calc(100dvh-40px)]
+hover:w-[400px]
+sm:hover:text-[1.5rem]
+text-[#555]/[0.5]
+[color:red]
+p-[10px]
+bg-[#333]
+text-[13px]
+rounded-[10px]
+border-[3px]
+shadow-[0_1px_2px_black]
+duration-[250ms]
+p-[15px]
+px-[13px]
+-p-[13px]
+m-[2px]
+[color:blue]
+text-[#555]
+text-red-500
+hover:
+w-4 text-red-500 bg-white
+hover:px-2
+[&:nth-child(3)]:px-2
+has-[:checked]:bg-red-500
+p-4 text-lg font-bold
+text-red-500/[0.31] hover:bg-black/[0.5] text-sm/[18px]
+bg-(--brand) [&_svg]:size-4 data-[state=open]:flex
+w-[320px] m-[13px] -top-[3px]
+md:max-h-[calc(100dvh-40px)]!
+[margin:1rem] [width:100%]
+p-[13px] gap-[3px] space-x-[3px]
+[padding:13px]
+p-[13px]
+md:p-[13px] hover:md:p-[13px]
+p-[13px]! !p-[13px]
+-m-[2px] md:-m-[2px]!
+[color:red] hover:[color:red]!
+hover:px-2 sm:text-lg
+w-4
+bg-white
+bg-gradient-to-t bg-gradient-to-tr bg-gradient-to-r bg-gradient-to-br
+bg-gradient-to-b bg-gradient-to-bl bg-gradient-to-l bg-gradient-to-tl
+bg-left-top bg-right-top bg-left-bottom bg-right-bottom
+object-left-top object-right-top object-left-bottom object-right-bottom
+max-w-screen-sm md:max-w-screen-lg
+overflow-ellipsis decoration-slice decoration-clone
+flex-grow flex-grow-0 flex-shrink flex-shrink-0 flex-grow-[2]
+order-none break-words
+start-auto start-full -start-full start-px -start-px start-4 start-1/2
+end-auto end-full -end-full end-px -end-px -end-4 end-[3px]
+hover:flex-grow!
+flex-grow
+order-none
+overflow-ellipsis decoration-slice flex-grow flex-shrink-0
+bg-gradient-to-r bg-left-top break-words order-none
+flex-grow bg-left-top break-words
+start-4 bg-gradient-to-r
+bg-linear-to-r bg-top-left bg-bottom-right object-top-left object-bottom-right
+max-w-screen max-w-lg max-w-(--breakpoint-lg) text-ellipsis overflow-hidden
+box-decoration-slice box-decoration-clone decoration-wavy
+grow grow-0 shrink shrink-0 flex flex-1 basis-1/2
+order-0 order-first wrap-break-word break-all inset-s-4 -inset-e-px
+start-date end-of-list -start-auto flex-grow-wrapper max-w-screen-wrapper
+bg-gradient-to-r bg-left-top object-left-top max-w-screen-lg order-none break-words start-4 end-px
+start-4 -start-px end-full
+bg-pink-500
+hover:text-red-500/80
+text-white
+hover:border-red-500/50
+bg-primary
+bg-red-500
+hover:text-white/80 dark:border-slate-950
+ring-offset-black
+[&:nth-child(2)]:border-t-red-500/50!
+['bg-pink-500', selected && 'hover:text-red-500/80']
+{ 'border-slate-950': active }
+active ? `bg-pink-500` : 'hover:text-red-500/80'
+['bg-pink-500', [active && 'hover:text-red-500/80']]
+{ ['border-slate-950']: active }
+classes || 'bg-pink-500'
+classes ?? 'hover:text-red-500/80'
+(ignored, 'bg-pink-500')
+'bg-pink-500 ' + extra
+[...['bg-pink-500']]
+{...{'hover:text-red-500/80': active}}
+cached = 'bg-pink-500'
+cached += ' bg-pink-500'
+cached ??= 'bg-pink-500'
+, {     variants: { size: { large:
+, small: [
+], medium: {
+: active } } },     compoundVariants: [{ size:
+, class:
+}, { size:
+, className:
+, { ...{ variants: { size: { large:
+, enabled ? { variants: { size: { large:
+bg-pink-600 text-red-500
+hover:border-white/50 bg-pink-500 text-black fill-blue-500
+bg-black
+text-current
+bg-[#ff00aa]
+text-muted-foreground
+hover:border-brand-500/50
+bg-primary text-muted-foreground border-brand-500
+bg-transparent text-current border-inherit fill-none font-black
+bg-[#ff00aa] bg-(--brand) [color:red]
+w-red-500 bg-red-550 custom-pink-500
+[&.bg-red-500]:p-4
+bg-black hover:text-black dark:border-black! fill-black stroke-black
+bg-white hover:text-white dark:border-white! fill-white stroke-white
+bg-transparent hover:text-transparent dark:border-transparent! fill-transparent stroke-transparent
+bg-current hover:text-current dark:border-current! fill-current stroke-current
+bg-inherit hover:text-inherit dark:border-inherit! fill-inherit stroke-inherit
+hover:bg-black/50 text-white/80! ring-offset-black mask-linear-from-white
+, {     variants: { size: {
+:
+, small: {
+: isSmall } } },     defaultVariants: { size:
+},     compoundVariants: [{ size:
+'bg-pink-500' === state ? 'bg-primary' : 'text-white'
+'bg-pink-500' && 'bg-primary'
+{ 'bg-primary': 'bg-pink-500' }
+{ 'bg-primary': active ? 'bg-pink-500' : 'hover:text-red-500/80' }
+lookup['bg-pink-500']
+lookup('bg-pink-500')
+lookup(`bg-pink-500`)
+(() => 'bg-pink-500')()
+('bg-pink-500', 'bg-primary')
+'bg-pink-500'
+[...'bg-pink-500']
+{...['bg-pink-500']}
+clsx(...'bg-pink-500')
+({ 'bg-pink-500': active }) + ''
+{ [({ 'bg-pink-500': active })]: true }
+cached -= 'bg-pink-500'
+cached['bg-pink-500'] = 'bg-primary'
+['bg-white text-black', active && 'border-transparent fill-current stroke-inherit', 'bg-[#ff00aa]']
+{ 'bg-primary': active, 'text-white': selected }
+bg-pink-500 hover:text-white/80 dark:border-black!
+ring-pink-500/50 mask-linear-from-black bg-[#ff00aa]
+shadow-[inset_0_1px_2px_rgb(0_0_0/0.25)]
+[border:solid_1px_red]
+[border:none] [outline:dashed]
+bg-red-500 text-white border-blue-500 p-4 px-0 space-x-2
+hover:!bg-red-500/50 text-[color:var(--brand)]
+shadow-red-500 ring-blue-500 outline-red-500
+rounded-none
+text-sm font-bold
+hover:!rounded-none border-t-2
+dark:rounded-none!
+font-bold shadow
+font-bold
+[font-size:14px] hover:[border-radius:0]
+[&>span]:bg-[url('a:b')]
+café rounded-none
+mt-4
+shadow-lg
+p-4
+active ? 'rounded-none' : 'bg-red-500'
+['shadow-lg']
+rounded-none text-sm
+rounded-none shadow-lg
+text-sm
+rounded-none hover:shadow-lg
+hover:font-bold
+!shadow-lg
+stroke-2
+stroke-none
+leading-6 tracking-wide ring-offset-2 outline-offset-4 text-wrap bg-fixed
+mt-4 w-full
+rounded-none font-bold
+mt-4 w-full flex-1
+absolute inset-0 z-10 -mx-2
+sm:w-[400px] [margin-top:1rem]
+brand-button group peer
+'mt-4 w-full'
+rounded-none hover:rounded-lg font-bold
+shadow-lg hover:rounded-none
+animate-spin
+text-sm leading-6
+shadow-lg opacity-50
+hover:[border-radius:0]
+p-4 gap-2
+[padding:0]
+hover:rounded-none
+'shadow-lg'
+'hover:rounded-none'
+appearance-none border-collapse
+w-4 h-4
+px-2 py-2
+['w-4 h-4', selected && 'px-2 py-2']
+{ 'mr-3 ml-3': active }
+active ? `w-4 h-4` : 'px-2 py-2'
+['w-4 h-4', [active && 'px-2 py-2']]
+{ ['mr-3 ml-3']: active }
+classes || 'w-4 h-4'
+classes ?? 'px-2 py-2'
+(ignored, 'w-4 h-4')
+'w-4 h-4 ' + extra
+[...['w-4 h-4']]
+{...{'px-2 py-2': active}}
+cached = 'w-4 h-4'
+cached += ' w-4 h-4'
+cached ??= 'w-4 h-4'
+w-2 h-2
+bg-[
+hover:overflow-hidden hover:text-ellipsis hover:whitespace-nowrap
+scale-x-50 scale-y-50 scale-z-50
+content-center justify-center
+!border-x !border-y
+!content-center !justify-center
+clsx('w-4 h-4', active && 'px-2 py-2')
+['overflow-hidden text-ellipsis whitespace-nowrap', selected && 'hover:w-6 hover:h-6']
+bg-red-800
+bg-red-400
+size-4
+p-2
+hover:truncate
+clsx('size-4', active && 'p-2')
+['truncate', selected && 'hover:size-6']
+{ 'mx-3': active }
+'w-4 h-4' === state ? 'size-4' : 'p-2'
+'w-4 h-4' && 'size-4'
+{ 'size-4': 'w-4 h-4' }
+{ 'size-4': active ? 'w-4 h-4' : 'px-2 py-2' }
+lookup['w-4 h-4']
+lookup('w-4 h-4')
+lookup(`w-4 h-4`)
+(() => 'w-4 h-4')()
+('w-4 h-4', 'size-4')
+'w-4 h-4'
+[...'w-4 h-4']
+{...['w-4 h-4']}
+clsx(...'w-4 h-4')
+({ 'w-4 h-4': active }) + ''
+{ [({ 'w-4 h-4': active })]: true }
+cached -= 'w-4 h-4'
+cached['w-4 h-4'] = 'size-4'
+foo bar p-4 px-2
+custom-style1 foo rounded-lg bg-blue-500 p-4 text-center text-white shadow-lg
+custom-layout bar flex h-screen items-center justify-center bg-gray-200 text-lg font-bold
+custom-grid m-6 grid grid-cols-3 gap-4 rounded-md border border-gray-300 p-6 shadow-md
+custom-alert absolute top-0 right-0 m-4 rounded-full bg-red-600 p-2 text-sm text-white
+bar custom-button inline-block rounded border border-green-500 bg-green-300 p-2 text-green-800
+custom-list flex-col space-y-4 divide-y divide-gray-200 rounded-lg bg-white p-6 shadow-md
+custom-background foo relative m-2 h-64 w-full overflow-hidden bg-cover bg-no-repeat
+custom-text foo my-2 text-2xl font-semibold underline
+custom-container bar flex-wrap items-start justify-between bg-purple-200 p-5 text-purple-700
+custom-border gap-8 border-l-4 border-indigo-500 bg-indigo-100 p-3 text-indigo-900
+px-2 foo p-4 bar
+text-center custom-style1 p-4 bg-blue-500 text-white foo rounded-lg shadow-lg
+flex custom-layout items-center justify-center h-screen bg-gray-200 bar text-lg font-bold
+grid custom-grid grid-cols-3 gap-4 p-6 m-6 border border-gray-300 shadow-md rounded-md
+absolute top-0 right-0 m-4 p-2 text-sm bg-red-600 text-white rounded-full custom-alert
+inline-block bar bg-green-300 text-green-800 p-2 rounded border border-green-500 custom-button
+flex-col custom-list space-y-4 p-6 bg-white shadow-md rounded-lg divide-y divide-gray-200
+relative overflow-hidden custom-background bg-no-repeat bg-cover h-64 w-full foo m-2
+underline custom-text foo text-2xl font-semibold my-2
+flex-wrap custom-container justify-between items-start bar bg-purple-200 p-5 text-purple-700
+gap-8 bg-indigo-100 text-indigo-900 p-3 border-l-4 border-indigo-500 custom-border
+content-[''] absolute
+top-0 absolute
+m-2 flex items-center gap-2 p-4 [&_svg:not([class*='size-'])]:w-4
+flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center
+flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center
+custom-style1 foo p-4 shadow-lg checked:text-center hover:bg-blue-500 focus:text-white hover:focus:rounded-lg
+custom-layout bar flex items-center font-bold first-letter:text-lg required:justify-center valid:h-screen valid:required:bg-gray-200
+custom-grid m-6 grid grid-cols-3 gap-4 p-6 optional:rounded-md focus-within:border focus-within:border-gray-300 focus-within:hover:shadow-md
+lg:custom-alert sm:top-0 sm:rounded-full sm:bg-red-600 sm:text-white md:right-0 md:p-2 lg:absolute lg:m-4 xl:text-sm
+bar custom-button rounded border p-2 checked:sm:inline-block sm:checked:border-green-500 hover:md:bg-green-300 hover:lg:text-green-800
+container py-4 text-red-500 group-hover:flex-col focus:bg-red-100 hover:focus:bg-red-200 has-[:visited]:flex print:text-red-50 [&nth-child(2)]:text-red-300 [&nth-child(3)]:text-red-200 [&nth-child(2)]:[&nth-child(6)]:text-red-200
+py-4 text-black group-first:text-yellow-400 checked:visited:bg-yellow-300 hover:text-red-400 focus:bg-sky-100 [&nth-child(1)]:group-first:text-red-100 [&nth-child(2)]:text-black [&nth-child(2)]:focus:text-red-100 [&nth-child(2)]:hover:focus:bg-red-900
+group-target:font-bold group-aria-disabled:bg-red-50 group-[:visited]:text-red-400
+text-red-400 group-aria-[sort=ascending]:text-yellow-200 group-has-[.custom-class]:focus:underline has-[:checked]:focus:bg-yellow-300 aria-[sort=ascending]:bg-red-300
+checked:text-center custom-style1 p-4 hover:bg-blue-500 focus:text-white foo hover:focus:rounded-lg shadow-lg
+flex valid:required:bg-gray-200 custom-layout items-center required:justify-center valid:h-screen bar first-letter:text-lg font-bold
+focus-within:hover:shadow-md grid custom-grid grid-cols-3 gap-4 p-6 m-6 focus-within:border focus-within:border-gray-300 optional:rounded-md
+lg:absolute sm:top-0 md:right-0 lg:m-4 md:p-2 xl:text-sm sm:bg-red-600 sm:text-white sm:rounded-full lg:custom-alert
+checked:sm:inline-block bar hover:md:bg-green-300 hover:lg:text-green-800 p-2 rounded border sm:checked:border-green-500 custom-button
+[&nth-child(2)]:[&nth-child(6)]:text-red-200 [&nth-child(2)]:text-red-300 group-hover:flex-col focus:bg-red-100 py-4 text-red-500 hover:focus:bg-red-200 has-[:visited]:flex print:text-red-50 [&nth-child(3)]:text-red-200  container
+text-black [&nth-child(2)]:focus:text-red-100 [&nth-child(1)]:group-first:text-red-100 [&nth-child(2)]:hover:focus:bg-red-900 group-first:text-yellow-400 [&nth-child(2)]:text-black focus:bg-sky-100 py-4 checked:visited:bg-yellow-300 hover:text-red-400
+group-aria-disabled:bg-red-50 group-[:visited]:text-red-400 group-target:font-bold
+group-has-[.custom-class]:focus:underline aria-[sort=ascending]:bg-red-300 group-aria-[sort=ascending]:text-yellow-200 has-[:checked]:focus:bg-yellow-300 text-red-400
+-ml-2 p-4 -mt-1
+-mr-4 m-2 -mb-3
+text-center -mx-2 bg-blue-500 -my-4
+-top-2 absolute -left-4 right-0
+-space-x-2 flex -space-y-4 items-center
+hover:-ml-2 p-4 focus:-mt-1
+sm:-mx-4 lg:-my-2 md:p-2
+text-sm font-bold            other-class
+text-sm    font-bold
+text-sm  font-bold
+text-
+bg-
+p-4\n
+sm
+bg-red-500 text-white
+[broken
+prefix-
+px-2
+px-4
+px-6
+m-2
+w-[320px] md:m-[13px]
+p-[13px] md:p-[13px]!
+flex-grow bg-gradient-to-r
+hover:start-4 max-w-screen-md
+bg-gradient-to-r bg-left-top object-right-bottom max-w-screen-lg
+overflow-ellipsis decoration-clone flex-grow flex-shrink-0
+md:hover:flex-grow!
+['order-none', { 'start-4': active }]
+grow bg-linear-to-r hover:inset-s-4 max-w-(--breakpoint-md)
+start-date end-of-list flex-grow-wrapper max-w-screen-wrapper
+bg-linear-to-r bg-top-left object-bottom-right max-w-(--breakpoint-lg)
+text-ellipsis box-decoration-clone grow shrink-0 order-0 wrap-break-word inset-s-4
+grow inset-s-4
+['order-0', { 'start-date': active }]
+from-blue-500 via-cyan-500 to-teal-500
+fill-white stroke-red-500
+hover:!rounded-none dark:text-sm/6!
+font-bold shadow border-t-2
+shadow-(length:--x)
+bg-(image:--x)
+bg-(--x,var(--y))
+font-bold hover:shadow-lg
+shadow-(length:--x) bg-(image:--x)
+shadow-(--x) bg-(--x,var(--y))
+hover:rounded-lg
+animate-spin mt-4 w-full
+text-[
+overflow-hidden text-ellipsis whitespace-nowrap
+inline-block hover:w-5 hover:h-5 text-current
+rounded-md px-3 pt-2 pr-2 pb-2 pl-2
+border-x border-y dark:focus:w-[2rem] dark:focus:h-[2rem]
+inline-block group-hover:w-5 group-hover:h-5 text-current
+rounded px-3 pt-2 pr-2 pb-2 pl-2
+-mt-2 -mb-2 data-[state=open]:w-[10px] data-[state=open]:h-[10px]
+inline-block sm:hover:w-6 sm:hover:h-6 text-blue-500
+rounded-md px-4 pt-2 pr-2 pb-2 pl-2 disabled:opacity-50
+mr-3 ml-3 [&_svg]:w-[1.25rem] [&_svg]:h-[1.25rem]
+truncate
+inline-block hover:size-5 text-current
+rounded-md px-3 py-2
+border dark:focus:size-[2rem]
+inline-block group-hover:size-5 text-current
+rounded px-3 py-2
+-my-2 data-[state=open]:size-[10px]
+inline-block sm:hover:size-6 text-blue-500
+rounded-md px-4 py-2 disabled:opacity-50
+mx-3 [&_svg]:size-[1.25rem]
+bar foo p-4 px-2
+hover:focus:m-2 foo hover:px-2 p-4
+bg-{color}
+{size}-4
+hover:bg-{color}-500
+é-{color}
+p-4 {classes} text-white
+{classes}
+p-4 {
+{first} {second}
+[{value}
+p-4{active ? ' text-white' : ''}
+{active ? 'text-white ' : ''}p-4
