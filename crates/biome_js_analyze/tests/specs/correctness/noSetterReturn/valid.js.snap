@@ -29,4 +29,59 @@ class C {
 	}
 }
 
+let definedValue;
+Object.defineProperty({}, "x", {
+	set(value) {
+		definedValue = value;
+	},
+});
+
+Object.defineProperty({}, "early", {
+	set(value) {
+		if (!value) {
+			return;
+		}
+		definedValue = value;
+	},
+});
+
+Object.defineProperty({}, "arrowBlock", {
+	set: (value) => {
+		definedValue = value;
+	},
+});
+
+// Ordinary property named `set`, not a descriptor setter.
+const ordinary = {
+	set: (value) => value,
+};
+
+function shadowed(Object) {
+	Object.defineProperty({}, "x", {
+		set: (value) => value,
+	});
+}
+
+Object.defineProperty({}, "nested", {
+	set: (value) => {
+		const inner = () => {
+			return value;
+		};
+		inner();
+	},
+});
+
+// A function declared elsewhere and then installed as a setter is out of scope.
+const installedLater = () => definedValue;
+Object.defineProperty({}, "installed", {
+	set: installedLater,
+});
+
+Object.defineProperty({}, "getter", {
+	get: () => definedValue,
+	set(value) {
+		definedValue = value;
+	},
+});
+
 ```

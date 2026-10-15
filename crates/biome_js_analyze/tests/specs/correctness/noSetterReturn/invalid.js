@@ -182,3 +182,59 @@ class WhileSingleStatement {
 		while (true) return x;
 	}
 }
+
+let definedValue;
+Object.defineProperty({}, "x", {
+	get: () => definedValue,
+	set: (value) => (definedValue = value),
+});
+
+Object.defineProperty({}, "block", {
+	set: (value) => {
+		return value;
+	},
+});
+
+Object.defineProperty({}, "method", {
+	set(value) {
+		return value;
+	},
+});
+
+Object.defineProperty({}, "function", {
+	set: function (value) {
+		return value;
+	},
+});
+
+Object.defineProperty({}, "computed", {
+	["set"]: (value) => value,
+});
+
+Object?.defineProperty({}, "optional", {
+	set: (value) => value,
+});
+
+Object["defineProperty"]({}, "computedCall", {
+	set: (value) => value,
+});
+
+Object.defineProperties({}, {
+	x: {
+		set(value) {
+			return value;
+		},
+	},
+});
+
+Object.create(null, {
+	x: {
+		set: (value) => value,
+	},
+});
+
+Reflect.defineProperty({}, "x", {
+	set: function (value) {
+		return value;
+	},
+});

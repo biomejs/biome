@@ -189,6 +189,62 @@ class WhileSingleStatement {
 	}
 }
 
+let definedValue;
+Object.defineProperty({}, "x", {
+	get: () => definedValue,
+	set: (value) => (definedValue = value),
+});
+
+Object.defineProperty({}, "block", {
+	set: (value) => {
+		return value;
+	},
+});
+
+Object.defineProperty({}, "method", {
+	set(value) {
+		return value;
+	},
+});
+
+Object.defineProperty({}, "function", {
+	set: function (value) {
+		return value;
+	},
+});
+
+Object.defineProperty({}, "computed", {
+	["set"]: (value) => value,
+});
+
+Object?.defineProperty({}, "optional", {
+	set: (value) => value,
+});
+
+Object["defineProperty"]({}, "computedCall", {
+	set: (value) => value,
+});
+
+Object.defineProperties({}, {
+	x: {
+		set(value) {
+			return value;
+		},
+	},
+});
+
+Object.create(null, {
+	x: {
+		set: (value) => value,
+	},
+});
+
+Reflect.defineProperty({}, "x", {
+	set: function (value) {
+		return value;
+	},
+});
+
 ```
 
 # Diagnostics
@@ -865,6 +921,271 @@ invalid.js:182:16 lint/correctness/noSetterReturn ━━━━━━━━━━
         │ 	^
     184 │ }
     185 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:189:18 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    187 │ Object.defineProperty({}, "x", {
+    188 │ 	get: () => definedValue,
+  > 189 │ 	set: (value) => (definedValue = value),
+        │ 	                ^^^^^^^^^^^^^^^^^^^^^^
+    190 │ });
+    191 │ 
+  
+  i The setter is here:
+  
+    187 │ Object.defineProperty({}, "x", {
+    188 │ 	get: () => definedValue,
+  > 189 │ 	set: (value) => (definedValue = value),
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    190 │ });
+    191 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:194:3 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    192 │ Object.defineProperty({}, "block", {
+    193 │ 	set: (value) => {
+  > 194 │ 		return value;
+        │ 		^^^^^^^^^^^^^
+    195 │ 	},
+    196 │ });
+  
+  i The setter is here:
+  
+    192 │ Object.defineProperty({}, "block", {
+  > 193 │ 	set: (value) => {
+        │ 	^^^^^^^^^^^^^^^^^
+  > 194 │ 		return value;
+  > 195 │ 	},
+        │ 	^
+    196 │ });
+    197 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:200:3 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    198 │ Object.defineProperty({}, "method", {
+    199 │ 	set(value) {
+  > 200 │ 		return value;
+        │ 		^^^^^^^^^^^^^
+    201 │ 	},
+    202 │ });
+  
+  i The setter is here:
+  
+    198 │ Object.defineProperty({}, "method", {
+  > 199 │ 	set(value) {
+        │ 	^^^^^^^^^^^^
+  > 200 │ 		return value;
+  > 201 │ 	},
+        │ 	^
+    202 │ });
+    203 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:206:3 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    204 │ Object.defineProperty({}, "function", {
+    205 │ 	set: function (value) {
+  > 206 │ 		return value;
+        │ 		^^^^^^^^^^^^^
+    207 │ 	},
+    208 │ });
+  
+  i The setter is here:
+  
+    204 │ Object.defineProperty({}, "function", {
+  > 205 │ 	set: function (value) {
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^
+  > 206 │ 		return value;
+  > 207 │ 	},
+        │ 	^
+    208 │ });
+    209 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:211:22 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    210 │ Object.defineProperty({}, "computed", {
+  > 211 │ 	["set"]: (value) => value,
+        │ 	                    ^^^^^
+    212 │ });
+    213 │ 
+  
+  i The setter is here:
+  
+    210 │ Object.defineProperty({}, "computed", {
+  > 211 │ 	["set"]: (value) => value,
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    212 │ });
+    213 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:215:18 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    214 │ Object?.defineProperty({}, "optional", {
+  > 215 │ 	set: (value) => value,
+        │ 	                ^^^^^
+    216 │ });
+    217 │ 
+  
+  i The setter is here:
+  
+    214 │ Object?.defineProperty({}, "optional", {
+  > 215 │ 	set: (value) => value,
+        │ 	^^^^^^^^^^^^^^^^^^^^^
+    216 │ });
+    217 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:219:18 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    218 │ Object["defineProperty"]({}, "computedCall", {
+  > 219 │ 	set: (value) => value,
+        │ 	                ^^^^^
+    220 │ });
+    221 │ 
+  
+  i The setter is here:
+  
+    218 │ Object["defineProperty"]({}, "computedCall", {
+  > 219 │ 	set: (value) => value,
+        │ 	^^^^^^^^^^^^^^^^^^^^^
+    220 │ });
+    221 │ 
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:225:4 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    223 │ 	x: {
+    224 │ 		set(value) {
+  > 225 │ 			return value;
+        │ 			^^^^^^^^^^^^^
+    226 │ 		},
+    227 │ 	},
+  
+  i The setter is here:
+  
+    222 │ Object.defineProperties({}, {
+    223 │ 	x: {
+  > 224 │ 		set(value) {
+        │ 		^^^^^^^^^^^^
+  > 225 │ 			return value;
+  > 226 │ 		},
+        │ 		^
+    227 │ 	},
+    228 │ });
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:232:19 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    230 │ Object.create(null, {
+    231 │ 	x: {
+  > 232 │ 		set: (value) => value,
+        │ 		                ^^^^^
+    233 │ 	},
+    234 │ });
+  
+  i The setter is here:
+  
+    230 │ Object.create(null, {
+    231 │ 	x: {
+  > 232 │ 		set: (value) => value,
+        │ 		^^^^^^^^^^^^^^^^^^^^^
+    233 │ 	},
+    234 │ });
+  
+  i Returning a value from a setter is ignored.
+  
+
+```
+
+```
+invalid.js:238:3 lint/correctness/noSetterReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The setter should not return a value.
+  
+    236 │ Reflect.defineProperty({}, "x", {
+    237 │ 	set: function (value) {
+  > 238 │ 		return value;
+        │ 		^^^^^^^^^^^^^
+    239 │ 	},
+    240 │ });
+  
+  i The setter is here:
+  
+    236 │ Reflect.defineProperty({}, "x", {
+  > 237 │ 	set: function (value) {
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^
+  > 238 │ 		return value;
+  > 239 │ 	},
+        │ 	^
+    240 │ });
+    241 │ 
   
   i Returning a value from a setter is ignored.
   
