@@ -30,6 +30,8 @@ createElement.js:3:1 lint/correctness/noVoidElementsWithChildren  FIXABLE  ━�
     6 │ 
     7 │ React.createElement('img', {
   
+  i React throws an error when it renders a void element that has children or sets dangerouslySetInnerHTML.
+  
   i Unsafe fix: Remove the children.
   
     5 │ },·'child')
@@ -50,6 +52,8 @@ createElement.js:7:1 lint/correctness/noVoidElementsWithChildren  FIXABLE  ━�
    > 9 │ })
        │ ^^
     10 │ 
+  
+  i React throws an error when it renders a void element that has children or sets dangerouslySetInnerHTML.
   
   i Unsafe fix: Remove the dangerouslySetInnerHTML prop.
   

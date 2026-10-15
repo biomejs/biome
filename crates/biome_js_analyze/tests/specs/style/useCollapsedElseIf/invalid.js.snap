@@ -125,6 +125,8 @@ invalid.js:7:9 lint/style/useCollapsedElseIf  FIXABLE  ━━━━━━━━�
     11 │ }
     12 │ 
   
+  i An else block that only contains an if statement adds a level of nesting without need.
+  
   i Safe fix: Use collapsed else if instead.
   
       5   5 │   if (condition) {
@@ -159,6 +161,8 @@ invalid.js:15:9 lint/style/useCollapsedElseIf  FIXABLE  ━━━━━━━━
        │ 	^
     21 │ }
     22 │ 
+  
+  i An else block that only contains an if statement adds a level of nesting without need.
   
   i Safe fix: Use collapsed else if instead.
   
@@ -195,6 +199,8 @@ invalid.js:29:20 lint/style/useCollapsedElseIf ━━━━━━━━━━━
     33 │ }
     34 │ 
   
+  i An else block that only contains an if statement adds a level of nesting without need.
+  
 
 ```
 
@@ -215,6 +221,8 @@ invalid.js:37:9 lint/style/useCollapsedElseIf ━━━━━━━━━━━�
     42 │ }
     43 │ 
   
+  i An else block that only contains an if statement adds a level of nesting without need.
+  
 
 ```
 
@@ -234,6 +242,8 @@ invalid.js:46:9 lint/style/useCollapsedElseIf ━━━━━━━━━━━�
     50 │ }
     51 │ 
   
+  i An else block that only contains an if statement adds a level of nesting without need.
+  
 
 ```
 
@@ -252,6 +262,8 @@ invalid.js:54:9 lint/style/useCollapsedElseIf ━━━━━━━━━━━�
        │ 	^
     58 │ 	// Comment
     59 │ }
+  
+  i An else block that only contains an if statement adds a level of nesting without need.
   
 
 ```
@@ -274,6 +286,8 @@ invalid.js:63:20 lint/style/useCollapsedElseIf ━━━━━━━━━━━
     69 │ }
     70 │ 
   
+  i An else block that only contains an if statement adds a level of nesting without need.
+  
 
 ```
 
@@ -293,6 +307,8 @@ invalid.js:73:9 lint/style/useCollapsedElseIf ━━━━━━━━━━━�
        │ 	^
     80 │ }
     81 │ 
+  
+  i An else block that only contains an if statement adds a level of nesting without need.
   
 
 ```
@@ -315,6 +331,8 @@ invalid.js:84:9 lint/style/useCollapsedElseIf ━━━━━━━━━━━�
     90 │ }
     91 │ 
   
+  i An else block that only contains an if statement adds a level of nesting without need.
+  
 
 ```
 
@@ -335,6 +353,8 @@ invalid.js:94:9 lint/style/useCollapsedElseIf ━━━━━━━━━━━�
         │ 	^
     100 │ 	// Comment
     101 │ }
+  
+  i An else block that only contains an if statement adds a level of nesting without need.
   
 
 ```

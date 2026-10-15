@@ -38,6 +38,8 @@ invalid.js:1:1 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━
     2 │ 
     3 │ function test() {
   
+  i Declaring each variable in its own statement makes each declaration easier to find, and a change to one variable only touches one line.
+  
   i Unsafe fix: Break out into multiple declarations
   
      1    │ - var·x,·y
@@ -60,6 +62,8 @@ invalid.js:5:2 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━
       │ 	^^^^^^^^^^^^^
     6 │ }
     7 │ 
+  
+  i Declaring each variable in its own statement makes each declaration easier to find, and a change to one variable only touches one line.
   
   i Unsafe fix: Break out into multiple declarations
   
@@ -88,6 +92,8 @@ invalid.js:8:1 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━━
        │     ^^^^^
     11 │ 
     12 │ let
+  
+  i Declaring each variable in its own statement makes each declaration easier to find, and a change to one variable only touches one line.
   
   i Unsafe fix: Break out into multiple declarations
   
@@ -120,6 +126,8 @@ invalid.js:12:1 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━�
     15 │ 
     16 │ let // comment
   
+  i Declaring each variable in its own statement makes each declaration easier to find, and a change to one variable only touches one line.
+  
   i Unsafe fix: Break out into multiple declarations
   
     10 10 │       y = 2
@@ -149,6 +157,8 @@ invalid.js:16:1 lint/style/useSingleVarDeclarator  FIXABLE  ━━━━━━�
        │ 	^^^^^^^
     19 │ 
     20 │ while(true) var v = 0, u = 1;
+  
+  i Declaring each variable in its own statement makes each declaration easier to find, and a change to one variable only touches one line.
   
   i Unsafe fix: Break out into multiple declarations
   
@@ -180,6 +190,8 @@ invalid.js:20:13 lint/style/useSingleVarDeclarator ━━━━━━━━━�
   > 20 │ while(true) var v = 0, u = 1;
        │             ^^^^^^^^^^^^^^^^^
     21 │ 
+  
+  i Declaring each variable in its own statement makes each declaration easier to find, and a change to one variable only touches one line.
   
 
 ```

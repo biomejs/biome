@@ -36,6 +36,8 @@ invalidCustom.ts:2:19 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━�
     3 │   return arg;
     4 │ }
   
+  i This type is listed in the types option in your configuration.
+  
   i Safe fix: Use 'CustomType2' instead
   
      1  1 │   type CustomType = unknown
@@ -56,6 +58,8 @@ invalidCustom.ts:7:21 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━�
       │                     ^^^^^^^^^^
     8 │   constructor(foo: String | Object) {}
     9 │ 
+  
+  i This type is listed in the types option in your configuration.
   
   i Safe fix: Use 'CustomType2' instead
   
@@ -79,6 +83,8 @@ invalidCustom.ts:7:54 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━�
     8 │   constructor(foo: String | Object) {}
     9 │ 
   
+  i This type is listed in the types option in your configuration.
+  
   i Safe fix: Use 'CustomType2' instead
   
      5  5 │   
@@ -100,6 +106,8 @@ invalidCustom.ts:7:77 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━�
       │                                                                             ^^^^^^^^^^^^^^^^^^
     8 │   constructor(foo: String | Object) {}
     9 │ 
+  
+  i This type is listed in the types option in your configuration.
   
   i Safe fix: Use 'CustomType2' instead
   
@@ -125,6 +133,8 @@ invalidCustom.ts:10:11 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━
     11 │     const foo: String = 1 as CustomType;
     12 │   }
   
+  i This type is listed in the types option in your configuration.
+  
   i Safe fix: Use 'CustomType2' instead
   
      8  8 │     constructor(foo: String | Object) {}
@@ -148,6 +158,8 @@ invalidCustom.ts:11:30 lint/style/noRestrictedTypes  FIXABLE  ━━━━━━
     12 │   }
     13 │ }
   
+  i This type is listed in the types option in your configuration.
+  
   i Safe fix: Use 'CustomType2' instead
   
      9  9 │   
@@ -170,6 +182,8 @@ invalidCustom.ts:16:12 lint/style/noRestrictedTypes ━━━━━━━━━�
     17 │ 
     18 │ const identifier: InvalidUse = 'foo';
   
+  i This type is listed in the types option in your configuration.
+  
 
 ```
 
@@ -182,6 +196,8 @@ invalidCustom.ts:18:19 lint/style/noRestrictedTypes ━━━━━━━━━�
     17 │ 
   > 18 │ const identifier: InvalidUse = 'foo';
        │                   ^^^^^^^^^^
+  
+  i This type is listed in the types option in your configuration.
   
 
 ```

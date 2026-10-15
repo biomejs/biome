@@ -38,6 +38,8 @@ invalid.js:1:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━�
     2 │ Array()
     3 │ Date()
   
+  i Using new for builtins keeps the code consistent with other constructors.
+  
   i Unsafe fix: Add new keyword.
   
     1 │ new·Object()
@@ -55,6 +57,8 @@ invalid.js:2:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━�
       │ ^^^^^^^
     3 │ Date()
     4 │ Error()
+  
+  i Using new for builtins keeps the code consistent with other constructors.
   
   i Unsafe fix: Add new keyword.
   
@@ -75,6 +79,8 @@ invalid.js:3:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━�
     4 │ Error()
     5 │ Function()
   
+  i Using new for builtins keeps the code consistent with other constructors.
+  
   i Unsafe fix: Add new keyword.
   
     3 │ new·Date()
@@ -93,6 +99,8 @@ invalid.js:4:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━�
       │ ^^^^^^^
     5 │ Function()
     6 │ Promise()
+  
+  i Using new for builtins keeps the code consistent with other constructors.
   
   i Unsafe fix: Add new keyword.
   
@@ -113,6 +121,8 @@ invalid.js:6:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━�
     7 │ RegExp()
     8 │ window.Object({})
   
+  i Using new for builtins keeps the code consistent with other constructors.
+  
   i Unsafe fix: Add new keyword.
   
     6 │ new·Promise()
@@ -131,6 +141,8 @@ invalid.js:7:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━�
       │ ^^^^^^^^
     8 │ window.Object({})
     9 │ globalThis.Object()
+  
+  i Using new for builtins keeps the code consistent with other constructors.
   
   i Unsafe fix: Add new keyword.
   
@@ -151,6 +163,8 @@ invalid.js:8:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━�
      9 │ globalThis.Object()
     10 │ function foo() {
   
+  i Using new for builtins keeps the code consistent with other constructors.
+  
   i Unsafe fix: Add new keyword.
   
     8 │ new·window.Object({})
@@ -169,6 +183,8 @@ invalid.js:9:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━�
        │ ^^^^^^^^^^^^^^^^^^^
     10 │ function foo() {
     11 │     return /** Start */ globalThis.Object({ foo: 'bar' }) /** End */
+  
+  i Using new for builtins keeps the code consistent with other constructors.
   
   i Unsafe fix: Add new keyword.
   
@@ -189,6 +205,8 @@ invalid.js:11:25 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━�
     12 │ }
     13 │ 
   
+  i Using new for builtins keeps the code consistent with other constructors.
+  
   i Unsafe fix: Add new keyword.
   
     11 │ ····return·/**·Start·*/·new·globalThis.Object({·foo:·'bar'·})·/**·End·*/
@@ -208,6 +226,8 @@ invalid.js:14:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━
     15 │ new Number()
     16 │ new String()
   
+  i Using new with this builtin creates a wrapper object instead of a primitive value.
+  
   i Unsafe fix: Remove new keyword.
   
     14 │ new·Boolean()
@@ -225,6 +245,8 @@ invalid.js:15:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━
        │ ^^^^^^^^^^^^
     16 │ new String()
     17 │ new window.String(123)
+  
+  i Using new with this builtin creates a wrapper object instead of a primitive value.
   
   i Unsafe fix: Remove new keyword.
   
@@ -245,6 +267,8 @@ invalid.js:16:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━
     17 │ new window.String(123)
     18 │ new globalThis.String()
   
+  i Using new with this builtin creates a wrapper object instead of a primitive value.
+  
   i Unsafe fix: Remove new keyword.
   
     16 │ new·String()
@@ -263,6 +287,8 @@ invalid.js:17:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^
     18 │ new globalThis.String()
     19 │ function foo() {
+  
+  i Using new with this builtin creates a wrapper object instead of a primitive value.
   
   i Unsafe fix: Remove new keyword.
   
@@ -283,6 +309,8 @@ invalid.js:18:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━
     19 │ function foo() {
     20 │     return /** Start */ new globalThis.String("foo") /** End */
   
+  i Using new with this builtin creates a wrapper object instead of a primitive value.
+  
   i Unsafe fix: Remove new keyword.
   
     18 │ new·globalThis.String()
@@ -300,6 +328,8 @@ invalid.js:20:25 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━�
   > 20 │     return /** Start */ new globalThis.String("foo") /** End */
        │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     21 │ }
+  
+  i Using new with this builtin creates a wrapper object instead of a primitive value.
   
   i Unsafe fix: Remove new keyword.
   

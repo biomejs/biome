@@ -102,7 +102,9 @@ invalid.css:2:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     3 │ }
     4 │ .foo {
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a keyword starting with to.
   
   i See MDN web docs for more details.
   
@@ -121,7 +123,9 @@ invalid.css:5:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     6 │ }
     7 │ .foo {
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a keyword starting with to.
   
   i See MDN web docs for more details.
   
@@ -140,7 +144,9 @@ invalid.css:8:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
      9 │ }
     10 │ .foo {
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a keyword starting with to.
   
   i See MDN web docs for more details.
   
@@ -159,7 +165,9 @@ invalid.css:11:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     12 │ }
     13 │ .foo {
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a keyword starting with to.
   
   i See MDN web docs for more details.
   
@@ -178,7 +186,9 @@ invalid.css:14:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     15 │ }
     16 │ .foo {
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a keyword starting with to.
   
   i See MDN web docs for more details.
   
@@ -197,7 +207,9 @@ invalid.css:17:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     18 │ }
     19 │ .foo {
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a keyword starting with to.
   
   i See MDN web docs for more details.
   
@@ -216,7 +228,9 @@ invalid.css:20:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     21 │ }
     22 │ .foo {
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a keyword starting with to.
   
   i See MDN web docs for more details.
   
@@ -235,7 +249,9 @@ invalid.css:23:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     24 │ }
     25 │ .foo {
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a keyword starting with to.
   
   i See MDN web docs for more details.
   
@@ -254,7 +270,9 @@ invalid.css:26:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     27 │ }
     28 │ .foo {
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a keyword starting with to.
   
   i See MDN web docs for more details.
   
@@ -273,7 +291,9 @@ invalid.css:29:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     30 │ }
     31 │ .foo {
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a keyword starting with to.
   
   i See MDN web docs for more details.
   
@@ -292,7 +312,9 @@ invalid.css:32:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     33 │ }
     34 │ .foo {
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a keyword starting with to.
   
   i See MDN web docs for more details.
   
@@ -311,7 +333,9 @@ invalid.css:35:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     36 │ }
     37 │ .foo {
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a keyword starting with to.
   
   i See MDN web docs for more details.
   
@@ -330,7 +354,9 @@ invalid.css:38:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     39 │ }
     40 │ .foo {
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a keyword starting with to.
   
   i See MDN web docs for more details.
   
@@ -349,7 +375,9 @@ invalid.css:41:38 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     42 │ }
     43 │ .foo {
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a side or corner keyword like top or bottom right.
   
   i See MDN web docs for more details.
   
@@ -368,7 +396,9 @@ invalid.css:44:35 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     45 │ }
     46 │ .foo {
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a side or corner keyword like top or bottom right.
   
   i See MDN web docs for more details.
   
@@ -387,7 +417,9 @@ invalid.css:47:33 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     48 │ }
     49 │ .foo {
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a side or corner keyword like top or bottom right.
   
   i See MDN web docs for more details.
   
@@ -406,7 +438,9 @@ invalid.css:50:52 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     51 │ }
     52 │ .foo {
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a side or corner keyword like top or bottom right.
   
   i See MDN web docs for more details.
   
@@ -425,7 +459,9 @@ invalid.css:53:49 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     54 │ }
     55 │ .foo {
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a side or corner keyword like top or bottom right.
   
   i See MDN web docs for more details.
   
@@ -444,7 +480,9 @@ invalid.css:56:47 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     57 │ }
     58 │ .foo {
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a side or corner keyword like top or bottom right.
   
   i See MDN web docs for more details.
   
@@ -463,7 +501,9 @@ invalid.css:59:38 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     60 │ }
     61 │ .foo {
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a side or corner keyword like top or bottom right.
   
   i See MDN web docs for more details.
   
@@ -482,7 +522,9 @@ invalid.css:62:49 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     63 │ 		url(foo.png);
     64 │ }
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a side or corner keyword like top or bottom right.
   
   i See MDN web docs for more details.
   
@@ -501,7 +543,9 @@ invalid.css:66:33 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     67 │ }
     68 │ .foo {
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a side or corner keyword like top or bottom right.
   
   i See MDN web docs for more details.
   
@@ -520,7 +564,9 @@ invalid.css:69:52 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     70 │ 		url(bar.png);
     71 │ }
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a side or corner keyword like top or bottom right.
   
   i See MDN web docs for more details.
   
@@ -539,7 +585,9 @@ invalid.css:73:49 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     74 │ 		url(bar.png);
     75 │ }
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a side or corner keyword like top or bottom right.
   
   i See MDN web docs for more details.
   
@@ -558,7 +606,9 @@ invalid.css:77:47 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     78 │ 		url(bar.png);
     79 │ }
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a side or corner keyword like top or bottom right.
   
   i See MDN web docs for more details.
   
@@ -577,7 +627,9 @@ invalid.css:81:48 lint/correctness/noInvalidDirectionInLinearGradient ━━━�
     82 │ 		url(bar.png);
     83 │ }
   
-  i You should fix the direction value to follow the syntax.
+  i Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied.
+  
+  i Use a direction that follows the syntax, such as an angle or a side or corner keyword like top or bottom right.
   
   i See MDN web docs for more details.
   

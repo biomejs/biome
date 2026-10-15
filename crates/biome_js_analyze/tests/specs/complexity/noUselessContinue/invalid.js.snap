@@ -50,6 +50,8 @@ invalid.js:2:2 lint/complexity/noUselessContinue  FIXABLE  ━━━━━━━
     3 │ }
     4 │ 
   
+  i The loop already moves on to the next iteration at this point, so the statement has no effect.
+  
   i Safe fix: Delete the unnecessary continue statement
   
      1  1 │   loop: for (let i = 0; i < 5; i++) {
@@ -70,6 +72,8 @@ invalid.js:6:2 lint/complexity/noUselessContinue  FIXABLE  ━━━━━━━
       │ 	^^^^^^^^^
     7 │ }
     8 │ 
+  
+  i The loop already moves on to the next iteration at this point, so the statement has no effect.
   
   i Safe fix: Delete the unnecessary continue statement
   
@@ -92,6 +96,8 @@ invalid.js:10:2 lint/complexity/noUselessContinue  FIXABLE  ━━━━━━�
        │ 	^^^^^^^^^
     11 │ }
     12 │ 
+  
+  i The loop already moves on to the next iteration at this point, so the statement has no effect.
   
   i Safe fix: Delete the unnecessary continue statement
   
@@ -116,6 +122,8 @@ invalid.js:16:3 lint/complexity/noUselessContinue  FIXABLE  ━━━━━━�
     17 │ 	} else if (i >= 5 && i < 8) {
     18 │ 		console.log("test");
   
+  i The loop already moves on to the next iteration at this point, so the statement has no effect.
+  
   i Safe fix: Delete the unnecessary continue statement
   
     14 14 │     if (i > 5) {
@@ -137,6 +145,8 @@ invalid.js:25:2 lint/complexity/noUselessContinue  FIXABLE  ━━━━━━�
        │ 	^^^^^^^^^
     26 │ }
     27 │ 
+  
+  i The loop already moves on to the next iteration at this point, so the statement has no effect.
   
   i Safe fix: Delete the unnecessary continue statement
   
@@ -161,6 +171,8 @@ invalid.js:28:35 lint/complexity/noUselessContinue  FIXABLE  ━━━━━━�
     29 │ 
     30 │ test2: do {
   
+  i The loop already moves on to the next iteration at this point, so the statement has no effect.
+  
   i Safe fix: Delete the unnecessary continue statement
   
     28 │ test:·for·(let·i·=·0;·i·<·9;·i++)·continue·test;
@@ -177,6 +189,8 @@ invalid.js:31:2 lint/complexity/noUselessContinue  FIXABLE  ━━━━━━�
   > 31 │ 	continue test2;
        │ 	^^^^^^^^^^^^^^^
     32 │ } while (true);
+  
+  i The loop already moves on to the next iteration at this point, so the statement has no effect.
   
   i Safe fix: Delete the unnecessary continue statement
   

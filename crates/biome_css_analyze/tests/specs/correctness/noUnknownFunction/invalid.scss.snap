@@ -26,6 +26,8 @@ invalid.scss:3:10 lint/correctness/noUnknownFunction ━━━━━━━━━
     4 │   color: If(true, red, blue);
     5 │   color: \49 F(true, red, blue);
   
+  i Browsers ignore a declaration that contains an unknown function, so the style is not applied.
+  
   i Use a known function instead.
   
   i See MDN web docs for more details.
@@ -45,6 +47,8 @@ invalid.scss:4:10 lint/correctness/noUnknownFunction ━━━━━━━━━
     5 │   color: \49 F(true, red, blue);
     6 │ }
   
+  i Browsers ignore a declaration that contains an unknown function, so the style is not applied.
+  
   i Use a known function instead.
   
   i See MDN web docs for more details.
@@ -63,6 +67,8 @@ invalid.scss:5:10 lint/correctness/noUnknownFunction ━━━━━━━━━
       │          ^^^^^
     6 │ }
     7 │ 
+  
+  i Browsers ignore a declaration that contains an unknown function, so the style is not applied.
   
   i Use a known function instead.
   

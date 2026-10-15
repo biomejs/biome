@@ -17,7 +17,7 @@ obj.foo.apply(obj, args);
 ```
 invalid.js:3:1 lint/style/useSpreadOverApply  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i apply() is used to call a function with arguments provided as an array.
+  i Use the spread operator instead of apply().
   
     1 │ // should generate diagnostics
     2 │ 
@@ -25,6 +25,8 @@ invalid.js:3:1 lint/style/useSpreadOverApply  FIXABLE  ━━━━━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^
     4 │ foo.apply(null, [1, 2, 3]);
     5 │ foo.apply(undefined, args);
+  
+  i apply() calls a function with arguments provided as an array. The spread operator does the same and is easier to read.
   
   i Unsafe fix: Use the spread operator.
   
@@ -41,13 +43,15 @@ invalid.js:3:1 lint/style/useSpreadOverApply  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:4:1 lint/style/useSpreadOverApply  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i apply() is used to call a function with arguments provided as an array.
+  i Use the spread operator instead of apply().
   
     3 │ foo.apply(null, args);
   > 4 │ foo.apply(null, [1, 2, 3]);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │ foo.apply(undefined, args);
     6 │ obj.foo.apply(obj, args);
+  
+  i apply() calls a function with arguments provided as an array. The spread operator does the same and is easier to read.
   
   i Unsafe fix: Use the spread operator.
   
@@ -64,7 +68,7 @@ invalid.js:4:1 lint/style/useSpreadOverApply  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:5:1 lint/style/useSpreadOverApply  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i apply() is used to call a function with arguments provided as an array.
+  i Use the spread operator instead of apply().
   
     3 │ foo.apply(null, args);
     4 │ foo.apply(null, [1, 2, 3]);
@@ -72,6 +76,8 @@ invalid.js:5:1 lint/style/useSpreadOverApply  FIXABLE  ━━━━━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ obj.foo.apply(obj, args);
     7 │ 
+  
+  i apply() calls a function with arguments provided as an array. The spread operator does the same and is easier to read.
   
   i Unsafe fix: Use the spread operator.
   
@@ -88,13 +94,15 @@ invalid.js:5:1 lint/style/useSpreadOverApply  FIXABLE  ━━━━━━━━�
 ```
 invalid.js:6:1 lint/style/useSpreadOverApply  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i apply() is used to call a function with arguments provided as an array.
+  i Use the spread operator instead of apply().
   
     4 │ foo.apply(null, [1, 2, 3]);
     5 │ foo.apply(undefined, args);
   > 6 │ obj.foo.apply(obj, args);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
     7 │ 
+  
+  i apply() calls a function with arguments provided as an array. The spread operator does the same and is easier to read.
   
   i Unsafe fix: Use the spread operator.
   

@@ -118,6 +118,8 @@ invalid.css:5:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━
     5 │ .foo {}
     6 │ 
   
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
   i Remove or merge the duplicate rule to keep the stylesheet clean.
   
 
@@ -142,6 +144,8 @@ invalid.css:9:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^
      9 │ div { color: blue; }
     10 │ 
+  
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
   
   i Remove or merge the duplicate rule to keep the stylesheet clean.
   
@@ -169,6 +173,8 @@ invalid.css:14:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━�
     14 │   .bar {}
     15 │ }
   
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
   i Remove or merge the duplicate rule to keep the stylesheet clean.
   
 
@@ -193,6 +199,8 @@ invalid.css:19:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━�
        │ ^^^^^^^^^
     19 │ .b, .a {}
     20 │ 
+  
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
   
   i Remove or merge the duplicate rule to keep the stylesheet clean.
   
@@ -219,6 +227,8 @@ invalid.css:24:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━�
     23 │ a {
     24 │   & b {}
   
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
   i Remove or merge the duplicate rule to keep the stylesheet clean.
   
 
@@ -244,6 +254,8 @@ invalid.css:29:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━�
     29 │ .b.a {}
     30 │ 
   
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
   i Remove or merge the duplicate rule to keep the stylesheet clean.
   
 
@@ -267,6 +279,8 @@ invalid.css:32:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^
      9 │ div { color: blue; }
     10 │ 
+  
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
   
   i Remove or merge the duplicate rule to keep the stylesheet clean.
   
@@ -293,6 +307,8 @@ invalid.css:33:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━�
      9 │ div { color: blue; }
     10 │ 
   
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
   i Remove or merge the duplicate rule to keep the stylesheet clean.
   
 
@@ -318,6 +334,8 @@ invalid.css:38:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━�
     37 │ .nav {
     38 │   .link {}
   
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
   i Remove or merge the duplicate rule to keep the stylesheet clean.
   
 
@@ -342,6 +360,8 @@ invalid.css:45:5 lint/suspicious/noDuplicateSelectors ━━━━━━━━�
        │ ^^^^^^^^^^^
     43 │ .x {
     44 │   .y {
+  
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
   
   i Remove or merge the duplicate rule to keep the stylesheet clean.
   
@@ -369,6 +389,8 @@ invalid.css:53:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━�
     52 │ button {
     53 │   &:hover {}
   
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
   i Remove or merge the duplicate rule to keep the stylesheet clean.
   
 
@@ -395,6 +417,8 @@ invalid.css:60:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━�
     59 │ span {
     60 │   &::before {}
   
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
   i Remove or merge the duplicate rule to keep the stylesheet clean.
   
 
@@ -419,6 +443,8 @@ invalid.css:73:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━�
        │ ^^^^^^^^^
     72 │ h3 {
     73 │   & ~ p {}
+  
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
   
   i Remove or merge the duplicate rule to keep the stylesheet clean.
   
@@ -445,6 +471,8 @@ invalid.css:78:1 lint/suspicious/noDuplicateSelectors ━━━━━━━━�
     78 │ [type="text"] {}
     79 │ 
   
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
+  
   i Remove or merge the duplicate rule to keep the stylesheet clean.
   
 
@@ -469,6 +497,8 @@ invalid.css:83:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^
     82 │ #main {
     83 │   .content {}
+  
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
   
   i Remove or merge the duplicate rule to keep the stylesheet clean.
   
@@ -495,6 +525,8 @@ invalid.css:89:3 lint/suspicious/noDuplicateSelectors ━━━━━━━━�
        │   ^^^^^^^^
     89 │   .card {}
     90 │ }
+  
+  i Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain.
   
   i Remove or merge the duplicate rule to keep the stylesheet clean.
   

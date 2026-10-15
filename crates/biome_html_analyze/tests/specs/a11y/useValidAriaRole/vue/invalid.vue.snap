@@ -34,6 +34,8 @@ invalid.vue:3:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━
     4 │ <div role="datepicker"></div>
     5 │ <div role=""></div>
   
+  i Assistive technologies may ignore an invalid or abstract role, so they may not describe the element correctly to the user.
+  
   i Check WAI-ARIA for valid roles or provide options accordingly.
   
   i Unsafe fix: Remove the invalid role attribute.
@@ -55,6 +57,8 @@ invalid.vue:4:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━
       │ ^^^^^^^^^^^^^^^^^^^^^^^
     5 │ <div role=""></div>
     6 │ <div role="datepicker" />
+  
+  i Assistive technologies may ignore an invalid or abstract role, so they may not describe the element correctly to the user.
   
   i Check WAI-ARIA for valid roles or provide options accordingly.
   
@@ -78,6 +82,8 @@ invalid.vue:5:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━
     6 │ <div role="datepicker" />
     7 │ <div role="unknown-invalid-role" />
   
+  i Assistive technologies may ignore an invalid or abstract role, so they may not describe the element correctly to the user.
+  
   i Check WAI-ARIA for valid roles or provide options accordingly.
   
   i Unsafe fix: Remove the invalid role attribute.
@@ -99,6 +105,8 @@ invalid.vue:6:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
     7 │ <div role="unknown-invalid-role" />
     8 │ <div role="tabpanel row foobar"></div>
+  
+  i Assistive technologies may ignore an invalid or abstract role, so they may not describe the element correctly to the user.
   
   i Check WAI-ARIA for valid roles or provide options accordingly.
   
@@ -122,6 +130,8 @@ invalid.vue:7:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━
     8 │ <div role="tabpanel row foobar"></div>
     9 │ <div role="doc-endnotes range"></div>
   
+  i Assistive technologies may ignore an invalid or abstract role, so they may not describe the element correctly to the user.
+  
   i Check WAI-ARIA for valid roles or provide options accordingly.
   
   i Unsafe fix: Remove the invalid role attribute.
@@ -143,6 +153,8 @@ invalid.vue:8:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
      9 │ <div role="doc-endnotes range"></div>
     10 │ <!-- static Vue bindings with invalid roles should also be flagged -->
+  
+  i Assistive technologies may ignore an invalid or abstract role, so they may not describe the element correctly to the user.
   
   i Check WAI-ARIA for valid roles or provide options accordingly.
   
@@ -166,6 +178,8 @@ invalid.vue:9:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━━
     10 │ <!-- static Vue bindings with invalid roles should also be flagged -->
     11 │ <div :role="'range'" />
   
+  i Assistive technologies may ignore an invalid or abstract role, so they may not describe the element correctly to the user.
+  
   i Check WAI-ARIA for valid roles or provide options accordingly.
   
   i Unsafe fix: Remove the invalid role attribute.
@@ -187,6 +201,8 @@ invalid.vue:11:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^
     12 │ <div v-bind:role="'datepicker'" />
     13 │ <div :role="'unknown-invalid-role'" />
+  
+  i Assistive technologies may ignore an invalid or abstract role, so they may not describe the element correctly to the user.
   
   i Check WAI-ARIA for valid roles or provide options accordingly.
   
@@ -210,6 +226,8 @@ invalid.vue:12:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━�
     13 │ <div :role="'unknown-invalid-role'" />
     14 │ </template>
   
+  i Assistive technologies may ignore an invalid or abstract role, so they may not describe the element correctly to the user.
+  
   i Check WAI-ARIA for valid roles or provide options accordingly.
   
   i Unsafe fix: Remove the invalid role attribute.
@@ -231,6 +249,8 @@ invalid.vue:13:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     14 │ </template>
     15 │ 
+  
+  i Assistive technologies may ignore an invalid or abstract role, so they may not describe the element correctly to the user.
   
   i Check WAI-ARIA for valid roles or provide options accordingly.
   

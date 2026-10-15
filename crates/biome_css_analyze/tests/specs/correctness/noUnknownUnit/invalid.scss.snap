@@ -20,6 +20,8 @@ invalid.scss:1:24 lint/correctness/noUnknownUnit ━━━━━━━━━━�
   
   i See MDN web docs for more details.
   
+  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
+  
   i Use a known unit instead, such as:
   
   - px

@@ -23,6 +23,8 @@ invalid.scss:2:2 lint/suspicious/noIrregularWhitespace ━━━━━━━━�
     3 │   color: red;
     4 │ }
   
+  i Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find.
+  
   i Replace the irregular whitespace with normal whitespaces.
   
 
