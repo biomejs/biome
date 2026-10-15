@@ -18,12 +18,7 @@ impl FormatNodeRule<CssTypeFunction> for FormatCssTypeFunction {
         if !is_css_type {
             // Standalone Sass type() values are unquoted strings: whitespace
             // changes can alter equality and string operations before CSS emission.
-            return format_css_verbatim_range(
-                node.syntax(),
-                node.syntax().text_trimmed_range(),
-                |_, _, _| Ok(CssVerbatimTokenFormat::Source),
-            )
-            .fmt(f);
+            return format_css_verbatim_fields(node.syntax()).fmt(f);
         }
 
         let CssTypeFunctionFields {

@@ -34,6 +34,20 @@ pub fn format_css_verbatim_node(node: &CssSyntaxNode) -> FormatCssVerbatimNode<'
     }
 }
 
+/// Preserves opaque fields, normalizing CR and CRLF line endings.
+/// The enclosing node rule formats outer comments.
+///
+/// ```scss
+/// .icon { --image: url(icons/logo.svg); }
+/// ```
+pub(crate) fn format_css_verbatim_fields(node: &CssSyntaxNode) -> FormatCssVerbatimNode<'_> {
+    FormatCssVerbatimNode {
+        node,
+        kind: VerbatimKind::Skipped,
+        format_comments: false,
+    }
+}
+
 /// Formats a source range from a subtree as verbatim source text.
 ///
 /// Use this when a formatter must preserve source spacing but still replace
@@ -138,7 +152,7 @@ impl Format<CssFormatContext> for FormatCssVerbatimNode<'_> {
                 .map_or_else(|| range, |source_map| source_map.source_range(range))
         }
 
-        let preserve_outer_trivia = self.node.parent().is_none();
+        let preserve_outer_trivia = self.format_comments && self.node.parent().is_none();
 
         #[cfg(debug_assertions)]
         for element in self.node.descendants_with_tokens(Direction::Next) {
@@ -219,11 +233,13 @@ impl Format<CssFormatContext> for FormatCssVerbatimNode<'_> {
             },
         );
 
-        text(
-            &normalize_newlines(&original_source, LINE_TERMINATORS),
-            Some(verbatim_text_start),
-        )
-        .fmt(f)?;
+        // Unicode separators can be literal data in opaque CSS fields.
+        let normalized_source = if matches!(self.kind, VerbatimKind::Skipped) {
+            normalize_newlines(&original_source, ['\r'])
+        } else {
+            normalize_newlines(&original_source, LINE_TERMINATORS)
+        };
+        text(&normalized_source, Some(verbatim_text_start)).fmt(f)?;
 
         for comment in f.context().comments().dangling_comments(self.node) {
             comment.mark_formatted();
