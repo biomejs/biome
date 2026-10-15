@@ -568,7 +568,10 @@ impl NeedsParentheses for JsSequenceExpression {
         };
         !matches!(
             parent.kind(),
+            // The return and throw argument formatters add the parentheses themselves,
+            // wrapping the sequence in an indented block.
             JsSyntaxKind::JS_RETURN_STATEMENT |
+            JsSyntaxKind::JS_THROW_STATEMENT |
             // There's a precedence for writing `x++, y++`
             JsSyntaxKind::JS_FOR_STATEMENT |
             JsSyntaxKind::JS_EXPRESSION_STATEMENT |
