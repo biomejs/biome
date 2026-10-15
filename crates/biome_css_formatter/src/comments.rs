@@ -497,6 +497,11 @@ fn handle_scss_attr_type_comment(
         && range.start() >= unit_range.end()
         && range.end() <= next.text_trimmed_range().start()
     {
+        if is_token_boundary_suppressed(&last, &next)
+            && let Some(fallback) = function.fallback_value()
+        {
+            return CommentPlacement::leading(fallback.into_syntax(), comment);
+        }
         CommentPlacement::trailing(unit.into_syntax(), comment)
     } else {
         CommentPlacement::Default(comment)

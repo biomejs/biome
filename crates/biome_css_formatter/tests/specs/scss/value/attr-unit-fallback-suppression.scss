@@ -1,0 +1,16 @@
+@use "sass:math";
+$unit:px;$gap:2px;
+.suppressed-fallbacks {
+  width:attr(data-width $unit
+    /* biome-ignore format: preserve the fallback expression */
+    , $gap*2);
+  height:attr(data-height #{$unit}
+    /* before directive */
+    /* biome-ignore format: preserve the fallback expression */
+    // after directive
+    , $gap*2);
+  min-width:attr(data-width math.$pi
+    /* biome-ignore format: preserve the fallback expression */
+    , $gap*2);
+  max-width:attr(data-width $unit/* before *//* biome-ignore format: preserve the fallback expression *//* after */, $gap*2);
+}

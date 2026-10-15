@@ -1,0 +1,68 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/value/attr-unit-fallback-suppression.scss
+---
+
+# Input
+
+```scss
+@use "sass:math";
+$unit:px;$gap:2px;
+.suppressed-fallbacks {
+  width:attr(data-width $unit
+    /* biome-ignore format: preserve the fallback expression */
+    , $gap*2);
+  height:attr(data-height #{$unit}
+    /* before directive */
+    /* biome-ignore format: preserve the fallback expression */
+    // after directive
+    , $gap*2);
+  min-width:attr(data-width math.$pi
+    /* biome-ignore format: preserve the fallback expression */
+    , $gap*2);
+  max-width:attr(data-width $unit/* before *//* biome-ignore format: preserve the fallback expression *//* after */, $gap*2);
+}
+
+```
+
+
+# Formatted
+
+```scss
+@use "sass:math";
+$unit: px;
+$gap: 2px;
+.suppressed-fallbacks {
+	width: attr(
+		data-width
+		$unit
+		/* biome-ignore format: preserve the fallback expression */
+		, $gap*2
+	);
+	height: attr(
+		data-height
+		#{$unit}
+		/* before directive */
+		/* biome-ignore format: preserve the fallback expression */
+		// after directive
+		, $gap*2
+	);
+	min-width: attr(
+		data-width
+		math.$pi
+		/* biome-ignore format: preserve the fallback expression */
+		, $gap*2
+	);
+	max-width: attr(
+		data-width
+		$unit
+		/* before */ /* biome-ignore format: preserve the fallback expression */ /* after */ , $gap*2
+	);
+}
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   28: 		/* before */ /* biome-ignore format: preserve the fallback expression */ /* after */ , $gap*2
+```
