@@ -1,0 +1,20 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: stringMetavariables
+---
+SnapshotResult {
+    messages: [],
+    matched_ranges: [
+        "1:1-1:29",
+    ],
+    rewritten_files: [
+        OutputFile {
+            messages: [],
+            variables: [],
+            source_file: "tests/specs/ts/stringMetavariables.ts",
+            content: "Hello(Lucy);\ngreet(\"Hello, Lucy\", \"Bert\");\n",
+            byte_ranges: None,
+        },
+    ],
+    created_files: [],
+}
