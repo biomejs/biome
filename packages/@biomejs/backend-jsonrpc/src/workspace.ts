@@ -3343,6 +3343,11 @@ export interface Nursery {
 	 */
 	noVueVText?: NoVueVTextConfiguration;
 	/**
+	 * Disallow v-text and v-html on components.
+	 * See https://biomejs.dev/linter/rules/no-vue-v-text-v-html-on-component
+	 */
+	noVueVTextVHtmlOnComponent?: NoVueVTextVHtmlOnComponentConfiguration;
+	/**
 	 * Disallow the bitwise XOR operator where exponentiation was likely intended.
 	 * See https://biomejs.dev/linter/rules/no-xor-as-exponentiation
 	 */
@@ -6020,6 +6025,9 @@ export type NoVueVHtmlConfiguration =
 export type NoVueVTextConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueVTextOptions;
+export type NoVueVTextVHtmlOnComponentConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueVTextVHtmlOnComponentOptions;
 export type NoXorAsExponentiationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoXorAsExponentiationOptions;
@@ -8657,6 +8665,10 @@ export interface RuleWithNoVueVTextOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueVTextOptions;
 }
+export interface RuleWithNoVueVTextVHtmlOnComponentOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueVTextVHtmlOnComponentOptions;
+}
 export interface RuleWithNoXorAsExponentiationOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -11135,6 +11147,7 @@ export interface NoVueUndeclaredDirectivesOptions {
 export type NoVueUnusedEmitDeclarationsOptions = {};
 export type NoVueVHtmlOptions = {};
 export type NoVueVTextOptions = {};
+export type NoVueVTextVHtmlOnComponentOptions = {};
 export type NoXorAsExponentiationOptions = {};
 export type NoZeroFractionsOptions = {};
 export type NoZeroLengthUnitOptions = {};
@@ -12878,6 +12891,7 @@ export type Category =
 	| "lint/nursery/noVueVHtml"
 	| "lint/nursery/noVueVOnNumberValues"
 	| "lint/nursery/noVueVText"
+	| "lint/nursery/noVueVTextVHtmlOnComponent"
 	| "lint/nursery/noXorAsExponentiation"
 	| "lint/nursery/noZeroFractions"
 	| "lint/nursery/noZeroLengthUnit"

@@ -7636,6 +7636,16 @@
 			]
 		},
 		"NoVueVTextOptions": { "type": "object", "additionalProperties": false },
+		"NoVueVTextVHtmlOnComponentConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueVTextVHtmlOnComponentOptions" }
+			]
+		},
+		"NoVueVTextVHtmlOnComponentOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoWithConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8285,6 +8295,13 @@
 					"description": "Disallow the use of Vue's v-text directive.\nSee https://biomejs.dev/linter/rules/no-vue-v-text",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueVTextConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueVTextVHtmlOnComponent": {
+					"description": "Disallow v-text and v-html on components.\nSee https://biomejs.dev/linter/rules/no-vue-v-text-v-html-on-component",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueVTextVHtmlOnComponentConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13466,6 +13483,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueVTextOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueVTextVHtmlOnComponentOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueVTextVHtmlOnComponentOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
