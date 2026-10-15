@@ -1,4 +1,5 @@
-{ "key": value } # 1
+{ ? "key" # 1
+  : value }
 ---
 { ? ["key"] # 2
   : value }
@@ -8,11 +9,5 @@
   "key": value,
 }
 ---
-{ ? & [
-      "key",
-      # 4
-      "",
-    ]
+{ ? "key" # 1
   : value }
----
-{ "key": value } # 1
