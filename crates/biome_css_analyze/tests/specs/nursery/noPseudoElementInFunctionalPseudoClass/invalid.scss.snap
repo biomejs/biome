@@ -21,7 +21,7 @@ expression: invalid.scss
 ```
 invalid.scss:3:7 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The pseudo-element ::before can't be used inside :is().
+  × This pseudo-element can't be used inside :is().
   
     1 │ /* should generate diagnostics */
     2 │ .a {
@@ -42,7 +42,7 @@ invalid.scss:3:7 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━�
 ```
 invalid.scss:3:17 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The pseudo-element ::after can't be used inside :is().
+  × This pseudo-element can't be used inside :is().
   
     1 │ /* should generate diagnostics */
     2 │ .a {
@@ -63,7 +63,7 @@ invalid.scss:3:17 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━�
 ```
 invalid.scss:7:10 lint/nursery/noPseudoElementInFunctionalPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The pseudo-element ::marker can't be used inside :not().
+  × This pseudo-element can't be used inside :not().
   
     5 │ 	}
     6 │ 
