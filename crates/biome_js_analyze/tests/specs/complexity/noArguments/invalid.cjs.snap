@@ -32,6 +32,8 @@ invalid.cjs:2:17 lint/complexity/noArguments ━━━━━━━━━━━�
   
   i arguments does not have Array.prototype methods and can be inconvenient to use.
   
+  i Declare a rest parameter, such as ...args, in the function signature and use it instead.
+  
 
 ```
 
@@ -49,6 +51,8 @@ invalid.cjs:4:23 lint/complexity/noArguments ━━━━━━━━━━━�
   
   i arguments does not have Array.prototype methods and can be inconvenient to use.
   
+  i Declare a rest parameter, such as ...args, in the function signature and use it instead.
+  
 
 ```
 
@@ -64,6 +68,8 @@ invalid.cjs:5:21 lint/complexity/noArguments ━━━━━━━━━━━�
     7 │ }
   
   i arguments does not have Array.prototype methods and can be inconvenient to use.
+  
+  i Declare a rest parameter, such as ...args, in the function signature and use it instead.
   
 
 ```

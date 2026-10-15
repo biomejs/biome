@@ -25,7 +25,7 @@ expression: parity-keyframe-at-root.invalid.scss
 ```
 parity-keyframe-at-root.invalid.scss:12:16 lint/suspicious/noImportantInKeyframe ━━━━━━━━━━━━━━━━━━━
 
-  × Using !important within keyframes declaration is completely ignored in some browsers.
+  × Unexpected !important within a keyframes declaration.
   
     10 │   }
     11 │   to {
@@ -34,7 +34,9 @@ parity-keyframe-at-root.invalid.scss:12:16 lint/suspicious/noImportantInKeyframe
     13 │   }
     14 │ }
   
-  i Consider removing useless !important declaration.
+  i Declarations marked !important inside keyframes are completely ignored in some browsers, so they have no effect there.
+  
+  i Remove the !important annotation and keep the declaration.
   
 
 ```

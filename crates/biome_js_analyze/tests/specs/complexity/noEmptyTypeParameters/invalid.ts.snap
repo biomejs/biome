@@ -12,11 +12,13 @@ interface B<> {};
 ```
 invalid.ts:1:7 lint/complexity/noEmptyTypeParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using an empty type parameter list is confusing.
+  ! Unexpected empty type parameter list.
   
   > 1 │ type A<> = {};
       │       ^^
     2 │ interface B<> {};
+  
+  i An empty type parameter list declares nothing, so it has no effect and can hide a missing type parameter.
   
   i Remove the empty type parameter list or add a type parameter.
   
@@ -26,11 +28,13 @@ invalid.ts:1:7 lint/complexity/noEmptyTypeParameters ━━━━━━━━━
 ```
 invalid.ts:2:12 lint/complexity/noEmptyTypeParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using an empty type parameter list is confusing.
+  ! Unexpected empty type parameter list.
   
     1 │ type A<> = {};
   > 2 │ interface B<> {};
       │            ^^
+  
+  i An empty type parameter list declares nothing, so it has no effect and can hide a missing type parameter.
   
   i Remove the empty type parameter list or add a type parameter.
   

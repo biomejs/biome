@@ -81,7 +81,7 @@ biome.json:2:15 deserialize  DEPRECATED  ━━━━━━━━━━━━━
 ```block
 test1.jsx:10:29 lint/performance/noJsxPropsBind ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This function will be recreated on every render. Pass stable function references as props to avoid unnecessary rerenders.
+  ! JSX props should not use arrow functions
   
      8 │     }, []);
      9 │ 
@@ -90,9 +90,9 @@ test1.jsx:10:29 lint/performance/noJsxPropsBind ━━━━━━━━━━�
     11 │ }
     12 │ 
   
-  i JSX props should not use arrow functions
+  i This function will be recreated on every render, which can cause unnecessary rerenders.
   
-  i Consider extracting the function or wrapping it in useCallback
+  i Pass a stable function reference as the prop: extract the function, or wrap it in useCallback in a function component.
   
 
 ```

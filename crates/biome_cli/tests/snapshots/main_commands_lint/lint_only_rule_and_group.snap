@@ -30,10 +30,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 ```block
 check.js:1:11 lint/performance/noDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Avoid the delete operator which can impact performance.
+  ! Avoid the delete operator.
   
   > 1 │ debugger; delete obj.prop; a === -0;
       │           ^^^^^^^^^^^^^^^
+  
+  i Deleting a property changes the shape of the object, which can prevent JavaScript engines from optimizing code that uses it.
   
   i Unsafe fix: Use an undefined assignment instead.
   

@@ -39,6 +39,8 @@ invalid.jsx:8:23 lint/performance/noUnwantedPolyfillio ━━━━━━━━�
   
   i This unnecessarily increases page weight which can affect loading performance.
   
+  i Remove these features from the Polyfill.io URL, or remove the Polyfill.io script if no other feature is needed.
+  
 
 ```
 
@@ -57,6 +59,8 @@ invalid.jsx:9:23 lint/performance/noUnwantedPolyfillio ━━━━━━━━�
   i Array.prototype.copyWithin is already shipped with Next.js.
   
   i This unnecessarily increases page weight which can affect loading performance.
+  
+  i Remove these features from the Polyfill.io URL, or remove the Polyfill.io script if no other feature is needed.
   
 
 ```
@@ -77,6 +81,8 @@ invalid.jsx:10:23 lint/performance/noUnwantedPolyfillio ━━━━━━━━
   
   i This unnecessarily increases page weight which can affect loading performance.
   
+  i Remove these features from the Polyfill.io URL, or remove the Polyfill.io script if no other feature is needed.
+  
 
 ```
 
@@ -95,6 +101,8 @@ invalid.jsx:11:23 lint/performance/noUnwantedPolyfillio ━━━━━━━━
   i Object.fromEntries is already shipped with Next.js.
   
   i This unnecessarily increases page weight which can affect loading performance.
+  
+  i Remove these features from the Polyfill.io URL, or remove the Polyfill.io script if no other feature is needed.
   
 
 ```

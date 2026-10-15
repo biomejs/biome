@@ -17,7 +17,7 @@ expression: invalid.astro
 ```
 invalid.astro:2:22 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard commands.
+  × Avoid the accesskey attribute.
   
     1 │ <!-- should generate diagnostics -->
   > 2 │ <input type="submit" accesskey="s" value="Submit" />
@@ -25,7 +25,7 @@ invalid.astro:2:22 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━�
     3 │ <a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
     4 │ <button accesskey="n">Next</button>
   
-  i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications.
+  i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications, and the shortcuts can conflict with screen reader keyboard commands.
   
   i Unsafe fix: Remove the accesskey attribute.
   
@@ -37,7 +37,7 @@ invalid.astro:2:22 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━�
 ```
 invalid.astro:3:31 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard commands.
+  × Avoid the accesskey attribute.
   
     1 │ <!-- should generate diagnostics -->
     2 │ <input type="submit" accesskey="s" value="Submit" />
@@ -46,7 +46,7 @@ invalid.astro:3:31 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━�
     4 │ <button accesskey="n">Next</button>
     5 │ <button accesskey={accesskeyValue}>Next</button>
   
-  i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications.
+  i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications, and the shortcuts can conflict with screen reader keyboard commands.
   
   i Unsafe fix: Remove the accesskey attribute.
   
@@ -58,7 +58,7 @@ invalid.astro:3:31 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━�
 ```
 invalid.astro:4:9 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard commands.
+  × Avoid the accesskey attribute.
   
     2 │ <input type="submit" accesskey="s" value="Submit" />
     3 │ <a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
@@ -67,7 +67,7 @@ invalid.astro:4:9 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━
     5 │ <button accesskey={accesskeyValue}>Next</button>
     6 │ <button {accesskey}>Next</button>
   
-  i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications.
+  i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications, and the shortcuts can conflict with screen reader keyboard commands.
   
   i Unsafe fix: Remove the accesskey attribute.
   
@@ -79,7 +79,7 @@ invalid.astro:4:9 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━
 ```
 invalid.astro:5:9 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard commands.
+  × Avoid the accesskey attribute.
   
     3 │ <a href="https://webaim.org/" accesskey="w">WebAIM.org</a>
     4 │ <button accesskey="n">Next</button>
@@ -88,7 +88,7 @@ invalid.astro:5:9 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━
     6 │ <button {accesskey}>Next</button>
     7 │ 
   
-  i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications.
+  i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications, and the shortcuts can conflict with screen reader keyboard commands.
   
   i Unsafe fix: Remove the accesskey attribute.
   
@@ -100,7 +100,7 @@ invalid.astro:5:9 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━
 ```
 invalid.astro:6:9 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Avoid the accesskey attribute to reduce inconsistencies between keyboard shortcuts and screen reader keyboard commands.
+  × Avoid the accesskey attribute.
   
     4 │ <button accesskey="n">Next</button>
     5 │ <button accesskey={accesskeyValue}>Next</button>
@@ -108,7 +108,7 @@ invalid.astro:6:9 lint/a11y/noAccessKey  FIXABLE  ━━━━━━━━━━
       │         ^^^^^^^^^^^
     7 │ 
   
-  i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications.
+  i Assigning keyboard shortcuts using the accesskey attribute leads to inconsistent keyboard actions across applications, and the shortcuts can conflict with screen reader keyboard commands.
   
   i Unsafe fix: Remove the accesskey attribute.
   

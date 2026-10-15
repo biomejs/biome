@@ -37,6 +37,8 @@ invalidVariable.ts:1:15 lint/suspicious/noExplicitAny ━━━━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -53,6 +55,8 @@ invalidVariable.ts:3:17 lint/suspicious/noExplicitAny ━━━━━━━━�
     5 │ const anyMatrix: any[][] = []
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```
@@ -71,6 +75,8 @@ invalidVariable.ts:5:18 lint/suspicious/noExplicitAny ━━━━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -87,6 +93,8 @@ invalidVariable.ts:7:24 lint/suspicious/noExplicitAny ━━━━━━━━�
     9 │ const anyMatrix2: Array<Array<any>> = []
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```
@@ -105,6 +113,8 @@ invalidVariable.ts:9:31 lint/suspicious/noExplicitAny ━━━━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -121,6 +131,8 @@ invalidVariable.ts:11:22 lint/suspicious/noExplicitAny ━━━━━━━━�
     13 │ const bar5 = function (...args: any) {}
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```
@@ -139,6 +151,8 @@ invalidVariable.ts:11:33 lint/suspicious/noExplicitAny ━━━━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -155,6 +169,8 @@ invalidVariable.ts:13:33 lint/suspicious/noExplicitAny ━━━━━━━━�
     15 │ const baz5 = (...args: any) => {}
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```
@@ -173,6 +189,8 @@ invalidVariable.ts:15:24 lint/suspicious/noExplicitAny ━━━━━━━━�
   
   i any disables many type checking rules. Its use should be avoided.
   
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
+  
 
 ```
 
@@ -188,6 +206,8 @@ invalidVariable.ts:17:33 lint/suspicious/noExplicitAny ━━━━━━━━�
     18 │ 
   
   i any disables many type checking rules. Its use should be avoided.
+  
+  i Replace any with a specific type. If the type is not known, use unknown and narrow it before using the value.
   
 
 ```

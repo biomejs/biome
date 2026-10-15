@@ -27,5 +27,9 @@ invalidBaz.js:1:21 lint/suspicious/noImportCycles ━━━━━━━━━━
         ... which imports tests/specs/suspicious/noImportCycles/invalidBaz.js
         ... which is the file we're importing from.
   
+  i Modules in a cycle can be loaded in an unexpected order, so values they import may still be uninitialized when they are used. Cycles also make dependencies harder to follow.
+  
+  i Break the cycle, for example by moving the shared code into a separate module that the files import instead.
+  
 
 ```

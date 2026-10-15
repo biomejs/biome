@@ -30,5 +30,7 @@ c04-if-branch.scss:5:50 lint/correctness/noMissingVarFunction ━━━━━━
   
   i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
   
+  i Wrap the variable in 'var()', for example var(--inner).
+  
 
 ```

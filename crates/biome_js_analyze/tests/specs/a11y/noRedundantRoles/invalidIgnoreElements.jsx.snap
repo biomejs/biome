@@ -16,7 +16,7 @@ expression: invalidIgnoreElements.jsx
 ```
 invalidIgnoreElements.jsx:3:16 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the role attribute 'article' on the 'article' element is redundant, because it is implied by its semantic.
+  × Using the role attribute 'article' on the 'article' element is redundant.
   
     1 │ /* should generate diagnostics */
     2 │ <>
@@ -24,6 +24,8 @@ invalidIgnoreElements.jsx:3:16 lint/a11y/noRedundantRoles  FIXABLE  ━━━━
       │ 	              ^^^^^^^^^
     4 │ 	<ul role="list"></ul>
     5 │ </>;
+  
+  i The element already has this role because of its semantics, so the attribute has no effect.
   
   i Unsafe fix: Remove the role attribute.
   
@@ -35,7 +37,7 @@ invalidIgnoreElements.jsx:3:16 lint/a11y/noRedundantRoles  FIXABLE  ━━━━
 ```
 invalidIgnoreElements.jsx:4:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Using the role attribute 'list' on the 'ul' element is redundant, because it is implied by its semantic.
+  × Using the role attribute 'list' on the 'ul' element is redundant.
   
     2 │ <>
     3 │ 	<article role="article"></article>
@@ -43,6 +45,8 @@ invalidIgnoreElements.jsx:4:11 lint/a11y/noRedundantRoles  FIXABLE  ━━━━
       │ 	         ^^^^^^
     5 │ </>;
     6 │ 
+  
+  i The element already has this role because of its semantics, so the attribute has no effect.
   
   i Unsafe fix: Remove the role attribute.
   
