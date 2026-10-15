@@ -1,0 +1,98 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.control { content: "\31
+x"; }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..9 "control" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@9..11 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@11..18 "content" [] [],
+                                },
+                                colon_token: COLON@18..20 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssString {
+                                        value_token: CSS_STRING_LITERAL@20..28 "\"\\31\r\nx\"" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@28..30 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@30..31 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@31..33 "" [Newline("\r\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..33
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..31
+    0: CSS_QUALIFIED_RULE@0..31
+      0: CSS_SELECTOR_LIST@0..9
+        0: CSS_COMPOUND_SELECTOR@0..9
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..9
+            0: CSS_CLASS_SELECTOR@0..9
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..9
+                0: IDENT@1..9 "control" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@9..31
+        0: L_CURLY@9..11 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@11..30
+          0: CSS_DECLARATION_WITH_SEMICOLON@11..30
+            0: CSS_DECLARATION@11..28
+              0: CSS_GENERIC_PROPERTY@11..28
+                0: CSS_IDENTIFIER@11..18
+                  0: IDENT@11..18 "content" [] []
+                1: COLON@18..20 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@20..28
+                  0: CSS_STRING@20..28
+                    0: CSS_STRING_LITERAL@20..28 "\"\\31\r\nx\"" [] []
+              1: (empty)
+            1: SEMICOLON@28..30 ";" [] [Whitespace(" ")]
+        2: R_CURLY@30..31 "}" [] []
+  2: EOF@31..33 "" [Newline("\r\n")] []
+
+```

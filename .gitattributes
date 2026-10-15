@@ -32,6 +32,7 @@
 /crates/biome_css_formatter/src/scss/any/*.rs linguist-generated=true text=auto eol=lf
 /crates/biome_css_formatter/src/tailwind/**/mod.rs linguist-generated=true text=auto eol=lf
 /crates/biome_css_formatter/src/tailwind/any/*.rs linguist-generated=true text=auto eol=lf
+/crates/biome_css_parser/tests/css_test_suite/ok/value/hex-escape-crlf.css -text
 /crates/biome_css_syntax/src/keywords/generated.rs linguist-generated=true text=auto eol=lf
 # JSON
 /crates/biome_json_analyze/build.rs linguist-generated=true text=auto eol=lf

@@ -162,7 +162,10 @@ impl<'src> CssScanCursor<'src> {
         }
 
         if self.byte_at(offset).is_some_and(is_css_whitespace_byte) {
-            offset += 1;
+            // CSS preprocessing treats CRLF as one escape terminator.
+            let is_crlf =
+                self.byte_at(offset) == Some(b'\r') && self.byte_at(offset + 1) == Some(b'\n');
+            offset += if is_crlf { 2 } else { 1 };
         }
 
         self.advance(offset);
