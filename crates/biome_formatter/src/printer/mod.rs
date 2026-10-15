@@ -6,7 +6,7 @@ mod stack;
 
 pub use printer_options::*;
 
-use crate::format_element::{BestFittingMode, BestFittingVariants, LineMode, PrintMode, TextWidth};
+use crate::format_element::{BestFittingVariants, LineMode, PrintMode, TextWidth};
 use crate::{
     ActualStart, FormatElement, GroupId, IndentStyle, InvalidDocumentError, PrintError,
     PrintResult, Printed, SourceMarker, TextRange,
@@ -19,8 +19,8 @@ use crate::format_element::tag::Condition;
 use crate::prelude::Tag::EndFill;
 use crate::prelude::tag::{DedentMode, Tag, TagKind, VerbatimKind};
 use crate::printer::call_stack::{
-    CallStack, FitsCallStack, FitsIndentStack, IndentStack, MeasureMode, PrintCallStack,
-    PrintElementArgs, StackFrame, SuffixStack,
+    CallStack, FitsCallStack, FitsIndentStack, IndentStack, PrintCallStack, PrintElementArgs,
+    StackFrame, SuffixStack,
 };
 use crate::printer::line_suffixes::{LineSuffixEntry, LineSuffixes};
 use crate::printer::queue::{
@@ -187,8 +187,8 @@ impl<'a> Printer<'a> {
                 self.flush_line_suffixes(queue, stack, indent_stack, Some(HARD_BREAK));
             }
 
-            FormatElement::BestFitting(variants, mode) => {
-                self.print_best_fitting(variants, *mode, queue, stack, indent_stack)?;
+            FormatElement::BestFitting(variants) => {
+                self.print_best_fitting(variants, queue, stack, indent_stack)?;
             }
 
             FormatElement::Interned(content) => {
@@ -309,7 +309,7 @@ impl<'a> Printer<'a> {
                 | StartEntry
                 | StartEmbedded(_)
                 | StartBestFittingEntry
-                | StartAllowOverflow),
+                | StartSkipFitsCheck),
             ) => {
                 stack.push(tag.kind(), args);
             }
@@ -322,7 +322,7 @@ impl<'a> Printer<'a> {
                 | EndVerbatim
                 | EndFill
                 | EndEmbedded
-                | EndAllowOverflow),
+                | EndSkipFitsCheck),
             ) => {
                 stack.pop(tag.kind())?;
             }
@@ -540,7 +540,6 @@ impl<'a> Printer<'a> {
     fn print_best_fitting(
         &mut self,
         variants: &'a BestFittingVariants,
-        mode: BestFittingMode,
         queue: &mut PrintQueue<'a>,
         stack: &mut PrintCallStack,
         indent_stack: &mut PrintIndentStack,
@@ -567,10 +566,7 @@ impl<'a> Printer<'a> {
                     return invalid_start_tag(TagKind::BestFittingEntry, current.first());
                 }
 
-                let entry_args = args
-                    .clone()
-                    .with_print_mode(PrintMode::Flat)
-                    .with_measure_mode(mode.into());
+                let entry_args = args.clone().with_print_mode(PrintMode::Flat);
 
                 // Skip the first element because we want to override the args for the entry and the
                 // args must be popped from the stack as soon as it sees the matching end entry.
@@ -1162,11 +1158,6 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
 
     /// Tests if it's possible to print the content of the queue up to the first hard line break
     /// or the end of the document on a single line without exceeding the line width.
-    ///
-    /// Inside a best fitting entry measured with [BestFittingMode::AllLines], line breaks don't
-    /// end the measurement. Instead, every line of the entry must fit. Inside content marked with
-    /// [crate::builders::allow_overflow], text may exceed the print width, and line breaks don't
-    /// end the measurement unless a fill entry is being measured.
     fn fits<P>(&mut self, predicate: &mut P) -> PrintResult<bool>
     where
         P: FitsEndPredicate,
@@ -1253,7 +1244,7 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                         }
                         LineMode::Soft => {}
                         LineMode::Literal { .. } => {
-                            if args.measure_mode().measures_all_lines() && !self.must_be_flat {
+                            if self.skips_fits_check(&args) {
                                 self.start_new_line(true);
                             } else {
                                 // Literal is a forced fit boundary without parent propagation.
@@ -1302,17 +1293,14 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                             // is known to break and _not_ fit already because the check is performed
                             // on the group. But within the group itself, the content with hardlines
                             // (the `\n<Foo />\n`) _does_ fit, for the same logic in the first case.
-                            //
-                            // When measuring all lines, the line break ends the current line and the
-                            // measurement continues on the next one.
-                            if args.measure_mode().measures_all_lines() && !self.must_be_flat {
+                            if self.skips_fits_check(&args) {
                                 self.start_new_line(false);
                             } else {
                                 return Ok(Fits::Yes);
                             }
                         }
                     }
-                } else if args.measure_mode().measures_all_lines() && !self.must_be_flat {
+                } else if self.skips_fits_check(&args) {
                     self.start_new_line(line_mode.is_literal());
                 } else {
                     // Reachable if the restQueue contains an element with mode expanded because Expanded
@@ -1365,7 +1353,7 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                 // Source position tracking is not needed for fits checking
             }
 
-            FormatElement::BestFitting(best_fitting, _) => {
+            FormatElement::BestFitting(best_fitting) => {
                 let slice = match args.mode() {
                     PrintMode::Flat => best_fitting.most_flat(),
                     PrintMode::Expanded => best_fitting.most_expanded(),
@@ -1473,11 +1461,8 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
             ) => {
                 self.stack.push(tag.kind(), args);
             }
-            FormatElement::Tag(tag @ StartAllowOverflow) => {
-                self.stack.push(
-                    tag.kind(),
-                    args.with_measure_mode(MeasureMode::AllLinesAllowOverflow),
-                );
+            FormatElement::Tag(tag @ StartSkipFitsCheck) => {
+                self.stack.push(tag.kind(), args.with_skip_fits_check());
             }
             FormatElement::Tag(
                 tag @ (EndLabelled
@@ -1488,7 +1473,7 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                 | EndVerbatim
                 | EndFill
                 | EndEmbedded
-                | EndAllowOverflow),
+                | EndSkipFitsCheck),
             ) => {
                 self.stack.pop(tag.kind())?;
             }
@@ -1547,7 +1532,10 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                                 if self.must_be_flat || self.exceeds_print_width() {
                                     return Fits::No;
                                 }
-                                if self.stack.top().measure_mode().measures_all_lines() {
+                                if self.skips_fits_check(&self.stack.top()) {
+                                    // Unlike a line break element, a newline in text doesn't
+                                    // flush pending line suffixes when printed, so the line
+                                    // suffix state stays as it is.
                                     self.state.line_width = 0;
                                     continue;
                                 }
@@ -1570,15 +1558,20 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
         Fits::Maybe
     }
 
-    /// Returns `true` if the current line is wider than the print width and the
-    /// content being measured doesn't allow overflowing it.
     fn exceeds_print_width(&self) -> bool {
         self.state.line_width > self.options().print_width.into()
-            && !self.stack.top().measure_mode().allows_overflow()
+            && !self.skips_fits_check(&self.stack.top())
     }
 
-    /// Continues the measurement at the start of the next line, which is
-    /// indented unless the line break is a literal line break.
+    /// Returns `true` if the fits test skips the content that `args` belong to.
+    /// Fits tests of fill entries never skip content, because an entry must fit
+    /// on one line.
+    fn skips_fits_check(&self, args: &PrintElementArgs) -> bool {
+        args.skips_fits_check() && !self.must_be_flat
+    }
+
+    /// Continues the fits test at the start of the next line, which is indented
+    /// unless the line break is a literal line break.
     fn start_new_line(&mut self, is_literal: bool) {
         // The printer flushes pending line suffixes before printing a line break.
         self.state.has_line_suffix = false;
@@ -2504,262 +2497,237 @@ Group 1 breaks"#
         assert_eq!(result.as_code(), "textanother");
     }
 
-    fn format_best_fitting_lines(mode: BestFittingMode) -> Printed {
-        // The first line of every variant fits, but the second line of the
-        // first variant exceeds the print width.
-        let too_long =
-            format_with(|f| write!(f, [token("a"), hard_line_break(), token("bbbbbbbbbbbbbb")]));
-        let fits = format_with(|f| {
+    fn width_10() -> PrinterOptions {
+        PrinterOptions {
+            print_width: PrintWidth::new(10),
+            indent_style: IndentStyle::Space,
+            indent_width: 2.try_into().unwrap(),
+            ..PrinterOptions::default()
+        }
+    }
+
+    #[test]
+    fn skip_fits_check_prints_content_unchanged() {
+        let content = format_with(|f| {
             write!(
                 f,
-                [
-                    token("a"),
-                    hard_line_break(),
-                    token("bbbbbbb"),
-                    hard_line_break(),
-                    token("bbbbbbb")
-                ]
+                [group(&format_args![
+                    token("aaaaaa"),
+                    soft_line_break_or_space(),
+                    token("bbbbbb")
+                ])]
             )
         });
-        let fallback = token("c");
 
-        format_with_options(
-            &best_fitting![too_long, fits, fallback].with_mode(mode),
-            PrinterOptions {
-                print_width: PrintWidth::new(10),
-                ..PrinterOptions::default()
-            },
-        )
+        let skipped = format_with_options(&skip_fits_check(&content), width_10());
+        let unskipped = format_with_options(&content, width_10());
+
+        assert_eq!(skipped.as_code(), "aaaaaa\nbbbbbb");
+        assert_eq!(skipped.as_code(), unskipped.as_code());
     }
 
     #[test]
-    fn best_fitting_first_line_ignores_later_lines() {
-        let result = format_best_fitting_lines(BestFittingMode::FirstLine);
+    fn skip_fits_check_ignores_width() {
+        let variant = |skip: bool| {
+            format_with(move |f| {
+                let line =
+                    format_with(|f| write!(f, [token("aaaaaaaaaaaaaaa"), hard_line_break()]));
+                if skip {
+                    write!(f, [skip_fits_check(&line), token("b")])
+                } else {
+                    write!(f, [line, token("b")])
+                }
+            })
+        };
 
-        assert_eq!(result.as_code(), "a\nbbbbbbbbbbbbbb");
+        let skipped = format_with_options(&best_fitting![variant(true), token("c")], width_10());
+        let unskipped = format_with_options(&best_fitting![variant(false), token("c")], width_10());
+
+        assert_eq!(skipped.as_code(), "aaaaaaaaaaaaaaa\nb");
+        assert_eq!(unskipped.as_code(), "c");
     }
 
     #[test]
-    fn best_fitting_all_lines_measures_every_line() {
-        let result = format_best_fitting_lines(BestFittingMode::AllLines);
+    fn skip_fits_check_continues_past_line_breaks() {
+        let variant = |skip: bool| {
+            format_with(move |f| {
+                let line = format_with(|f| write!(f, [token("a"), hard_line_break()]));
+                if skip {
+                    write!(f, [skip_fits_check(&line), token("bbbbbbbbbbbbbbb")])
+                } else {
+                    write!(f, [line, token("bbbbbbbbbbbbbbb")])
+                }
+            })
+        };
 
-        assert_eq!(result.as_code(), "a\nbbbbbbb\nbbbbbbb");
+        let skipped = format_with_options(&best_fitting![variant(true), token("c")], width_10());
+        let unskipped = format_with_options(&best_fitting![variant(false), token("c")], width_10());
+
+        assert_eq!(skipped.as_code(), "c");
+        assert_eq!(unskipped.as_code(), "a\nbbbbbbbbbbbbbbb");
     }
 
     #[test]
-    fn best_fitting_all_lines_includes_indentation() {
-        // The second line is 9 characters wide and only exceeds the print width
-        // once it is indented.
-        let indented = format_with(|f| {
-            write!(
-                f,
-                [
-                    token("a"),
-                    indent(&format_args![hard_line_break(), token("bbbbbbbbb")])
-                ]
-            )
-        });
-        let fallback = token("c");
-
-        let result = format_with_options(
-            &best_fitting![indented, fallback].with_mode(BestFittingMode::AllLines),
-            PrinterOptions {
-                print_width: PrintWidth::new(10),
-                indent_style: IndentStyle::Space,
-                indent_width: 2.try_into().unwrap(),
-                ..PrinterOptions::default()
-            },
-        );
-
-        assert_eq!(result.as_code(), "c");
-    }
-
-    #[test]
-    fn best_fitting_all_lines_stops_after_the_variant() {
-        // Only the first line of the content after the variant counts, as with
-        // `BestFittingMode::FirstLine`.
-        let variant = format_with(|f| write!(f, [token("a"), hard_line_break(), token("b")]));
-        let fallback = token("c");
-
-        let result = format_with_options(
-            &format_args![
-                best_fitting![variant, fallback].with_mode(BestFittingMode::AllLines),
-                hard_line_break(),
-                token("dddddddddddddddd")
-            ],
-            PrinterOptions {
-                print_width: PrintWidth::new(10),
-                ..PrinterOptions::default()
-            },
-        );
-
-        assert_eq!(result.as_code(), "a\nb\ndddddddddddddddd");
-    }
-
-    #[test]
-    fn best_fitting_all_lines_flushes_line_suffixes_at_line_breaks() {
-        // The line suffix is printed before the line break, so it doesn't make
-        // the boundary on the next line fail.
+    fn skip_fits_check_continues_past_soft_line_breaks_of_expanded_groups() {
         let variant = format_with(|f| {
             write!(
                 f,
                 [
-                    token("a"),
-                    line_suffix(&token(" // c")),
-                    hard_line_break(),
-                    token("b"),
-                    line_suffix_boundary()
-                ]
-            )
-        });
-        let fallback = token("c");
-
-        let result = format(&best_fitting![variant, fallback].with_mode(BestFittingMode::AllLines));
-
-        assert_eq!(result.as_code(), "a // c\nb");
-    }
-
-    #[test]
-    fn best_fitting_all_lines_allows_overflow_in_marked_content() {
-        // Only the line after the marked content must fit.
-        let variant = format_with(|f| {
-            write!(
-                f,
-                [
-                    allow_overflow(&format_args![
-                        token("aaaaaaaaaaaaaaa"),
-                        hard_line_break(),
-                        token("aaaaaaaaaaaaaaa")
-                    ]),
-                    hard_line_break(),
-                    token("b")
-                ]
-            )
-        });
-        let too_long = format_with(|f| {
-            write!(
-                f,
-                [
-                    allow_overflow(&token("a")),
-                    hard_line_break(),
+                    skip_fits_check(
+                        &group(&format_args![token("a"), soft_line_break()]).should_expand(true)
+                    ),
                     token("bbbbbbbbbbbbbbb")
                 ]
             )
         });
-        let fallback = token("c");
 
-        let options = PrinterOptions {
-            print_width: PrintWidth::new(10),
-            ..PrinterOptions::default()
-        };
-
-        let fits = format_with_options(
-            &best_fitting![variant, fallback].with_mode(BestFittingMode::AllLines),
-            options.clone(),
-        );
-        assert_eq!(fits.as_code(), "aaaaaaaaaaaaaaa\naaaaaaaaaaaaaaa\nb");
-
-        let does_not_fit = format_with_options(
-            &best_fitting![too_long, fallback].with_mode(BestFittingMode::AllLines),
-            options,
-        );
-        assert_eq!(does_not_fit.as_code(), "c");
-    }
-
-    #[test]
-    fn best_fitting_all_lines_measures_content_after_allowed_overflow() {
-        // The content after the marked content continues its overflowing line.
-        let variant =
-            format_with(|f| write!(f, [allow_overflow(&token("aaaaaaaaaaaaaaa")), token("b")]));
-        let fallback = token("c");
-
-        let result = format_with_options(
-            &best_fitting![variant, fallback].with_mode(BestFittingMode::AllLines),
-            PrinterOptions {
-                print_width: PrintWidth::new(10),
-                ..PrinterOptions::default()
-            },
-        );
+        let result = format_with_options(&best_fitting![variant, token("c")], width_10());
 
         assert_eq!(result.as_code(), "c");
     }
 
     #[test]
-    fn best_fitting_all_lines_measures_lines_after_literal_line_breaks() {
-        // The line after the literal line break starts without indentation, so
-        // it fits, although it wouldn't fit if it were indented.
+    fn skip_fits_check_continues_on_the_last_line() {
+        let variant =
+            format_with(|f| write!(f, [skip_fits_check(&token("aaaaaaaaaaaaaaa")), token("b")]));
+
+        let result = format_with_options(&best_fitting![variant, token("c")], width_10());
+
+        assert_eq!(result.as_code(), "c");
+    }
+
+    #[test]
+    fn skip_fits_check_starts_lines_at_the_indentation() {
+        // `bbbbbbbbb` is 9 characters wide and only exceeds the print width
+        // once it is indented.
         let variant = format_with(|f| {
             write!(
                 f,
                 [
                     token("a"),
                     indent(&format_args![
-                        literal_line_break_without_parent(),
+                        skip_fits_check(&hard_line_break()),
                         token("bbbbbbbbb")
                     ])
+                ]
+            )
+        });
+
+        let result = format_with_options(&best_fitting![variant, token("c")], width_10());
+
+        assert_eq!(result.as_code(), "c");
+    }
+
+    #[test]
+    fn skip_fits_check_starts_lines_after_literal_line_breaks_at_column_zero() {
+        let variant = format_with(|f| {
+            write!(
+                f,
+                [
+                    token("a"),
+                    indent(&format_args![
+                        skip_fits_check(&literal_line_break_without_parent()),
+                        token("bbbbbbbbb")
+                    ])
+                ]
+            )
+        });
+
+        let result = format_with_options(&best_fitting![variant, token("c")], width_10());
+
+        assert_eq!(result.as_code(), "a\nbbbbbbbbb");
+    }
+
+    #[test]
+    fn skip_fits_check_starts_lines_after_newlines_in_text_at_column_zero() {
+        let fits = format_with(|f| {
+            write!(
+                f,
+                [
+                    skip_fits_check(&text("aaaaaaaaaaaaaaa\nb", None)),
+                    token("c")
                 ]
             )
         });
         let too_long = format_with(|f| {
             write!(
                 f,
+                [skip_fits_check(&text("a\nb", None)), token("cccccccccc")]
+            )
+        });
+
+        let fits = format_with_options(&best_fitting![fits, token("d")], width_10());
+        let too_long = format_with_options(&best_fitting![too_long, token("d")], width_10());
+
+        assert_eq!(fits.as_code(), "aaaaaaaaaaaaaaa\nbc");
+        assert_eq!(too_long.as_code(), "d");
+    }
+
+    #[test]
+    fn skip_fits_check_flushes_line_suffixes_at_line_breaks() {
+        // The printer prints the line suffix before the line break, so the
+        // boundary on the next line has no pending line suffix.
+        let variant = format_with(|f| {
+            write!(
+                f,
                 [
                     token("a"),
-                    literal_line_break_without_parent(),
-                    token("bbbbbbbbbbbbbb")
+                    line_suffix(&token(" // c")),
+                    skip_fits_check(&hard_line_break()),
+                    token("b"),
+                    line_suffix_boundary()
                 ]
             )
         });
-        let fallback = token("c");
 
-        let options = PrinterOptions {
-            print_width: PrintWidth::new(10),
-            indent_style: IndentStyle::Space,
-            indent_width: 2.try_into().unwrap(),
-            ..PrinterOptions::default()
-        };
+        let result = format(&best_fitting![variant, token("d")]);
 
-        let fits = format_with_options(
-            &best_fitting![variant, fallback].with_mode(BestFittingMode::AllLines),
-            options.clone(),
-        );
-        assert_eq!(fits.as_code(), "a\nbbbbbbbbb");
-
-        let does_not_fit = format_with_options(
-            &best_fitting![too_long, fallback].with_mode(BestFittingMode::AllLines),
-            options,
-        );
-        assert_eq!(does_not_fit.as_code(), "c");
+        assert_eq!(result.as_code(), "a // c\nb");
     }
 
     #[test]
-    fn best_fitting_all_lines_measures_lines_of_text() {
-        let too_long = text("a\nbbbbbbbbbbbbbb", None);
-        let fits = text("a\nbbbbbbb", None);
-        let fallback = token("c");
+    fn skip_fits_check_keeps_line_suffixes_at_newlines_in_text() {
+        // The printer keeps the line suffix pending past a newline in text, so
+        // the boundary after the text still has to break.
+        let variant = format_with(|f| {
+            write!(
+                f,
+                [
+                    token("a"),
+                    line_suffix(&token(" // c")),
+                    skip_fits_check(&text("b\nc", None)),
+                    line_suffix_boundary(),
+                    token("d")
+                ]
+            )
+        });
 
-        let options = PrinterOptions {
-            print_width: PrintWidth::new(10),
-            ..PrinterOptions::default()
-        };
+        let result = format(&best_fitting![variant, token("e")]);
 
-        let first_line = format_with_options(
-            &best_fitting![too_long, fallback].with_mode(BestFittingMode::FirstLine),
-            options.clone(),
-        );
-        assert_eq!(first_line.as_code(), "a\nbbbbbbbbbbbbbb");
-
-        let all_lines = format_with_options(
-            &best_fitting![too_long, fits, fallback].with_mode(BestFittingMode::AllLines),
-            options,
-        );
-        assert_eq!(all_lines.as_code(), "a\nbbbbbbb");
+        assert_eq!(result.as_code(), "e");
     }
 
     #[test]
-    fn group_measures_lines_of_allowed_overflow_after_it() {
-        // The group's fit test continues through the marked content and fails
-        // at `c`, which follows the overflowing last line of that content.
+    fn skip_fits_check_line_suffix_boundary_does_not_fit() {
+        let variant = format_with(|f| {
+            write!(
+                f,
+                [
+                    token("a"),
+                    line_suffix(&token(" // c")),
+                    skip_fits_check(&line_suffix_boundary()),
+                    token("b")
+                ]
+            )
+        });
+
+        let result = format(&best_fitting![variant, token("d")]);
+
+        assert_eq!(result.as_code(), "d");
+    }
+
+    #[test]
+    fn group_fits_check_continues_through_skip_fits_check_after_it() {
         let result = format_with_options(
             &format_args![
                 group(&format_args![
@@ -2767,34 +2735,24 @@ Group 1 breaks"#
                     soft_line_break_or_space(),
                     token("b")
                 ]),
-                allow_overflow(&format_args![hard_line_break(), token("xxxxxxxxxxxxxxx")]),
+                skip_fits_check(&format_args![hard_line_break(), token("xxxxxxxxxxxxxxx")]),
                 token("c")
             ],
-            PrinterOptions {
-                print_width: PrintWidth::new(10),
-                ..PrinterOptions::default()
-            },
+            width_10(),
         );
 
         assert_eq!(result.as_code(), "a\nb\nxxxxxxxxxxxxxxxc");
     }
 
     #[test]
-    fn fill_entry_line_breaks_in_allowed_overflow_end_the_test() {
-        // The fill isn't inside a group that is known to fit, so the printer
-        // tests each entry, which must fit on one line. The line break in the
-        // text ends that test as it does without the marker.
-        let options = PrinterOptions {
-            print_width: PrintWidth::new(10),
-            ..PrinterOptions::default()
-        };
-        let fill_with = |marked: bool| {
+    fn fill_entries_ignore_skip_fits_check() {
+        let fill_with = |entry: &'static str, skip: bool| {
             format_with(move |f| {
-                let entry = format_with(|f| write!(f, [text("b\ncc", None)]));
+                let entry = format_with(|f| write!(f, [text(entry, None)]));
                 let mut fill = f.fill();
                 fill.entry(&soft_line_break_or_space(), &token("aaaaaaaaaa"));
-                if marked {
-                    fill.entry(&soft_line_break_or_space(), &allow_overflow(&entry));
+                if skip {
+                    fill.entry(&soft_line_break_or_space(), &skip_fits_check(&entry));
                 } else {
                     fill.entry(&soft_line_break_or_space(), &entry);
                 }
@@ -2802,10 +2760,12 @@ Group 1 breaks"#
             })
         };
 
-        let marked = format_with_options(&fill_with(true), options.clone());
-        let unmarked = format_with_options(&fill_with(false), options);
+        for entry in ["bbbbbbbbbbbbbbb", "b\ncc"] {
+            let skipped = format_with_options(&fill_with(entry, true), width_10());
+            let unskipped = format_with_options(&fill_with(entry, false), width_10());
 
-        assert_eq!(marked.as_code(), unmarked.as_code());
+            assert_eq!(skipped.as_code(), unskipped.as_code(), "entry: {entry:?}");
+        }
     }
 
     #[test]

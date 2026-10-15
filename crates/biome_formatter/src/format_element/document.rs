@@ -74,7 +74,7 @@ impl Document {
                             interned_expands
                         }
                     },
-                    FormatElement::BestFitting(variants, _) => {
+                    FormatElement::BestFitting(variants) => {
                         enclosing.push(Enclosing::BestFitting);
 
                         propagate_expands(variants, enclosing, checked_interned);
@@ -195,7 +195,7 @@ fn replace_embedded_elements(
                     *interned = Interned::new(nested_elements);
                 }
             },
-            FormatElement::BestFitting(best_fitting, _) => {
+            FormatElement::BestFitting(best_fitting) => {
                 replace_embedded_elements(best_fitting.as_slice_mut(), format_embedded);
             }
             _ => {}
@@ -474,13 +474,8 @@ impl Format<IrFormatContext> for &[FormatElement] {
                     write!(f, [token("line_suffix_boundary")])?;
                 }
 
-                FormatElement::BestFitting(best_fitting, mode) => {
-                    match mode {
-                        BestFittingMode::FirstLine => write!(f, [token("best_fitting([")])?,
-                        BestFittingMode::AllLines => {
-                            write!(f, [token("best_fitting(mode: all_lines, [")])?
-                        }
-                    }
+                FormatElement::BestFitting(best_fitting) => {
+                    write!(f, [token("best_fitting([")])?;
                     f.write_elements([
                         FormatElement::Tag(StartIndent),
                         FormatElement::Line(LineMode::Hard),
@@ -681,8 +676,8 @@ impl Format<IrFormatContext> for &[FormatElement] {
                             write!(f, [token("embedded(")])?;
                         }
 
-                        StartAllowOverflow => {
-                            write!(f, [token("allow_overflow(")])?;
+                        StartSkipFitsCheck => {
+                            write!(f, [token("skip_fits_check(")])?;
                         }
                         StartEntry | StartBestFittingEntry => {
                             // handled after the match for all start tags
@@ -700,7 +695,7 @@ impl Format<IrFormatContext> for &[FormatElement] {
                         | EndDedent(_)
                         | EndVerbatim
                         | EndEmbedded
-                        | EndAllowOverflow => {
+                        | EndSkipFitsCheck => {
                             write!(f, [ContentArrayEnd, token(")")])?;
                         }
                     };
@@ -1019,17 +1014,14 @@ mod tests {
         //   best_fitting(...)
         // ]
         let interned = Interned::new(vec![FormatElement::ExpandParent, unsafe {
-            FormatElement::BestFitting(
-                BestFittingVariants::from_vec_unchecked(vec![
-                    FormatElement::Tag(StartBestFittingEntry),
-                    FormatElement::Token { text: "a" },
-                    FormatElement::Tag(EndBestFittingEntry),
-                    FormatElement::Tag(StartBestFittingEntry),
-                    FormatElement::Token { text: "b" },
-                    FormatElement::Tag(EndBestFittingEntry),
-                ]),
-                BestFittingMode::FirstLine,
-            )
+            FormatElement::BestFitting(BestFittingVariants::from_vec_unchecked(vec![
+                FormatElement::Tag(StartBestFittingEntry),
+                FormatElement::Token { text: "a" },
+                FormatElement::Tag(EndBestFittingEntry),
+                FormatElement::Tag(StartBestFittingEntry),
+                FormatElement::Token { text: "b" },
+                FormatElement::Tag(EndBestFittingEntry),
+            ]))
         }]);
 
         let mut document = Document::from(vec![

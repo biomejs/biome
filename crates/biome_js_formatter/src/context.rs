@@ -46,16 +46,15 @@ pub struct JsFormatContext {
     /// This should be rare enough for us not to care about it.
     cached_function_body: Option<(AnyJsFunctionBody, FormatElement)>,
 
-    /// Stores the hugged layout of one call's arguments: the opening
-    /// parenthesis stays on the current line and the last argument is broken
-    /// across lines or, if that first line doesn't fit, every argument goes on
-    /// its own line.
+    /// The hugged layout of a call's arguments: `(`, the other arguments and
+    /// the start of the last argument stay on the current line, and the last
+    /// argument breaks across lines, as in `.send({` followed by the object's
+    /// members. If that first line doesn't fit, every argument goes on its own
+    /// line instead.
     ///
-    /// The call arguments formatter builds this layout on request from the
-    /// already formatted arguments, and the member chain formatter takes it
-    /// right after formatting the call. This lets the member chain offer a
-    /// "chain on one line, last argument broken" layout without formatting the
-    /// arguments a second time.
+    /// Member chains use it to keep the chain on one line and break only the
+    /// last argument. The call arguments formatter stores it while formatting
+    /// the arguments, so the member chain doesn't format them twice.
     hugged_call_arguments: Option<(JsCallArguments, FormatElement)>,
 
     source_map: Option<TransformSourceMap>,
@@ -120,8 +119,7 @@ impl JsFormatContext {
     }
 
     /// Removes the stored hugged layout and returns it if it belongs to
-    /// `arguments`. Returns `None` if nothing is stored or the stored layout
-    /// belongs to other arguments, which discards that layout.
+    /// `arguments`. A layout stored for other arguments is discarded.
     ///
     /// See [JsFormatContext::hugged_call_arguments] for more in depth documentation.
     pub(crate) fn take_hugged_call_arguments(

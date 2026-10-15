@@ -78,13 +78,11 @@ pub enum Tag {
     StartBestFittingEntry,
     EndBestFittingEntry,
 
-    /// Content that the printer measures line by line, letting its text exceed
-    /// the print width, when a test of whether content fits reaches it from
-    /// outside.
+    /// Content that the fits test skips.
     ///
-    /// See [crate::builders::allow_overflow] for documentation.
-    StartAllowOverflow,
-    EndAllowOverflow,
+    /// See [crate::builders::skip_fits_check] for documentation.
+    StartSkipFitsCheck,
+    EndSkipFitsCheck,
 }
 
 impl Tag {
@@ -105,7 +103,7 @@ impl Tag {
                 | Self::StartLabelled(_)
                 | Self::StartEmbedded(_)
                 | Self::StartBestFittingEntry
-                | Self::StartAllowOverflow
+                | Self::StartSkipFitsCheck
         )
     }
 
@@ -131,7 +129,7 @@ impl Tag {
             StartLabelled(_) | EndLabelled => TagKind::Labelled,
             StartEmbedded(_) | EndEmbedded => TagKind::Embedded,
             StartBestFittingEntry | EndBestFittingEntry => TagKind::BestFittingEntry,
-            StartAllowOverflow | EndAllowOverflow => TagKind::AllowOverflow,
+            StartSkipFitsCheck | EndSkipFitsCheck => TagKind::SkipFitsCheck,
         }
     }
 }
@@ -155,7 +153,7 @@ pub enum TagKind {
     Labelled,
     Embedded,
     BestFittingEntry,
-    AllowOverflow,
+    SkipFitsCheck,
 }
 
 #[derive(Debug, Copy, Default, Clone, Eq, PartialEq)]

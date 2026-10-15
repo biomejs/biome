@@ -319,9 +319,6 @@ macro_rules! format {
 /// The definition of *fits* differs to groups in that the printer only tests if it is possible to print
 /// the content up to the first non-soft line break without exceeding the configured print width.
 /// This definition differs from groups as that non-soft line breaks make group expand.
-/// This definition of *fits* is [`BestFittingMode::FirstLine`], the default. Use
-/// [`BestFitting::with_mode`] with [`BestFittingMode::AllLines`] to require that every line of a
-/// variant fits.
 ///
 /// [crate::BestFitting] acts as a "break" boundary, meaning that it is considered to fit
 ///
@@ -329,9 +326,6 @@ macro_rules! format {
 /// [`Flat`]: crate::format_element::PrintMode::Flat
 /// [`Expanded`]: crate::format_element::PrintMode::Expanded
 /// [`MostExpanded`]: crate::format_element::BestFittingVariants::most_expanded
-/// [`BestFittingMode::FirstLine`]: crate::format_element::BestFittingMode::FirstLine
-/// [`BestFittingMode::AllLines`]: crate::format_element::BestFittingMode::AllLines
-/// [`BestFitting::with_mode`]: crate::BestFitting::with_mode
 #[macro_export]
 macro_rules! best_fitting {
     ($least_expanded:expr, $($tail:expr),+ $(,)?) => {

@@ -10,9 +10,7 @@ use crate::utils::function_body::FunctionBodyCacheMode;
 use crate::utils::member_chain::SimpleArgument;
 use crate::utils::{is_long_curried_call, write_arguments_multi_line};
 use biome_formatter::{
-    FormatRuleWithOptions, VecBuffer, format_args,
-    format_element::{BestFittingMode, BestFittingVariants},
-    write,
+    FormatRuleWithOptions, VecBuffer, format_args, format_element::BestFittingVariants, write,
 };
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsStatement,
@@ -30,14 +28,6 @@ pub(crate) struct FormatJsCallArguments {
 
 #[derive(Debug, Clone, Copy, Default)]
 pub(crate) struct FormatJsCallArgumentsOptions {
-    /// When `true` and the last argument is grouped, also stores a layout that
-    /// breaks the last argument across lines, as if that argument already
-    /// spanned multiple lines, and falls back to one argument per line when the
-    /// first line doesn't fit. The layout is stored with
-    /// [JsFormatContext::set_hugged_call_arguments].
-    ///
-    /// Nothing is stored when the arguments use another layout or when the
-    /// last argument already breaks.
     pub(crate) store_hugged_layout: bool,
 }
 
@@ -679,12 +669,8 @@ fn write_grouped_arguments(
             .unwrap_or_else(|| middle_variant_no_spaces.clone());
         variants.extend(most_expanded.iter().cloned());
 
-        // SAFETY: `variants` contains the middle and the most expanded entries.
         let best_fitting = unsafe {
-            FormatElement::BestFitting(
-                BestFittingVariants::from_vec_unchecked(variants),
-                BestFittingMode::FirstLine,
-            )
+            FormatElement::BestFitting(BestFittingVariants::from_vec_unchecked(variants))
         };
         if let Some(hugged) = f.intern_vec(vec![FormatElement::ExpandParent, best_fitting]) {
             f.context_mut()
@@ -740,7 +726,6 @@ fn write_grouped_arguments(
     unsafe {
         f.write_element(FormatElement::BestFitting(
             BestFittingVariants::from_vec_unchecked(variants),
-            BestFittingMode::FirstLine,
         ))
     }
 }

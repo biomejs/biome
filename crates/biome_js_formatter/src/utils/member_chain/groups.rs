@@ -210,21 +210,16 @@ impl MemberChainGroup {
         Ok(result)
     }
 
-    /// Formats this group and, if it ends the chain with a call whose last
-    /// argument is grouped and doesn't already break, also returns the group
-    /// with that argument hugged (see
-    /// [FormatJsCallArgumentsOptions::store_hugged_layout]).
+    /// Formats this group and returns a second version of it with the last
+    /// argument hugged, if the arguments have a hugged layout (see
+    /// [JsFormatContext::hugged_call_arguments]).
     ///
-    /// Both layouts share the formatted members, so the group isn't formatted
-    /// twice. Stores the regular layout in the cache that
-    /// [MemberChainGroup::will_break] fills, so later writes of this group
-    /// reuse it.
+    /// Both versions share the formatted callee, so the group is formatted only
+    /// once. The regular version goes into the same cache as
+    /// [MemberChainGroup::will_break], so later writes of the group reuse it.
     ///
-    /// Returns `None` without formatting if the group is already formatted or
-    /// doesn't end with the chain's final call. Returns `None` after caching
-    /// the regular layout if the arguments don't produce a hugged layout.
-    /// Returns an error if the final call's arguments are missing from the
-    /// syntax tree or if formatting the group fails.
+    /// Returns `None` if the group is already formatted, doesn't end with the
+    /// chain's last call, or the arguments have no hugged layout.
     pub(super) fn format_with_hugged_last_argument(
         &self,
         f: &mut JsFormatter,

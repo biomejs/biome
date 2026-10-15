@@ -310,8 +310,6 @@ impl MemberChain {
         }
     }
 
-    /// Returns `true` if any call expression except the last one has a function
-    /// or arrow function argument.
     fn has_function_like_argument_before_last_call(&self) -> bool {
         let mut calls = self
             .members()
@@ -330,56 +328,45 @@ impl MemberChain {
         false
     }
 
-    /// Returns `true` if the chain can offer the layout that keeps the chain
-    /// on one line and breaks the last argument of its last call. Without that
-    /// layout, the result depends on whether that argument spans multiple
-    /// lines in the source.
+    /// Returns `true` if the chain can use the hugged layout, which keeps the
+    /// chain on one line and breaks only the last argument of its last call:
     ///
-    /// With `Expand::Auto`, an object literal stays expanded when the source
-    /// has a line break after its opening brace. A chain whose last call breaks
-    /// such an argument is kept on one line if its first line fits. Without
-    /// that line break, the whole chain is measured on one line, doesn't fit,
-    /// and is expanded, which can break the object and add the line break for
-    /// the next formatting run.
+    /// ```js
+    /// reply.code(409).send({
+    ///     ok: false,
+    /// });
+    /// ```
     ///
-    /// The object can be the last argument itself or the expression body of an
-    /// arrow function argument, also when wrapped in parentheses or TypeScript
-    /// syntax that only affects types (`as`, `satisfies`, `!`, `<T>`).
+    /// Without this layout, formatting isn't stable. With `expand: "auto"`, an
+    /// object keeps a line break after `{` from the source. If the source has
+    /// none, the first formatting expands the whole chain and breaks the
+    /// object, which adds that line break. The second formatting then keeps the
+    /// chain on one line.
     ///
-    /// Returns `false` when `expand` isn't `Expand::Auto`, when the tail has
-    /// fewer than two groups, when an earlier call has a function or arrow
-    /// function argument, when a line of the expanded chain might not fit
-    /// although the first line of the one-line chain fits (estimated with
-    /// [Self::min_group_width]), when the last group doesn't end with a call,
-    /// has more than one call, or its call has type arguments that aren't
-    /// simple types, when comments are attached to the arguments node, or when
-    /// the last argument isn't a non-empty object that the call arguments
-    /// formatter groups.
+    /// The last argument must be a non-empty object, or an arrow function
+    /// whose body is one, possibly wrapped in parentheses or type assertions.
+    /// Neither the argument list nor the last argument may have comments
+    /// attached. The comments in the body explain the other conditions.
     fn can_hug_last_argument(&self, f: &JsFormatter) -> bool {
         if f.options().expand() != Expand::Auto {
-            // Objects only keep the line break of the source with `Expand::Auto`.
             return false;
         }
 
         if self.tail.len() < 2 || self.has_function_like_argument_before_last_call() {
-            // Chains with fewer than two tail groups use the expanded layout
-            // only when they have comments, and then `groups_should_break`
-            // always expands them. `groups_should_break` also expands the chain
-            // when the last call breaks after a call with a function argument.
+            // Chains with fewer than two tail groups never reach this layout
+            // without comments, and comments make `groups_should_break` expand
+            // them. `groups_should_break` also expands the chain when the last
+            // call breaks after a call with a function argument.
             return false;
         }
 
-        // Offer the hugged layout only if every line of the expanded chain fits
-        // whenever the first line of the one-line chain fits. If a line of the
-        // expanded chain can be too wide, that line breaks a tail group other
-        // than the last one, and that output is already stable on the next
-        // formatting run. On one line, the head and all
-        // tail groups up to the object share the first line. In the expanded
-        // chain, each tail group starts its own line one indentation level
-        // deeper than the chain. So the first line of the one-line chain is at
-        // least as wide as each line of the expanded chain if the rest of the
-        // first line without that tail group is at least one indentation level
-        // wide.
+        // `FormatExpandedLastLine` doesn't check the lines of the head and the
+        // leading groups. That's only safe if those lines fit whenever the first
+        // line of the hugged layout fits. In the expanded chain, each tail group
+        // starts its own line, one indentation level deeper. In the hugged
+        // layout, the head and all tail groups share the first line. So the
+        // hugged first line is at least as wide as any expanded line if the
+        // other groups together are at least one indentation level wide.
         let indent_width = usize::from(f.options().indent_width().value());
         let head_width = self.min_group_width(&self.head, f);
         let tail_width: usize = self
@@ -402,12 +389,11 @@ impl MemberChain {
             return false;
         };
 
-        // The layout that keeps the chain expanded prints the last group in
-        // flat mode if it fits, while `format_expanded` prints it in expanded
-        // mode. Both print the same as long as the last group contains no line
-        // break outside of a group. That isn't guaranteed for calls other than
-        // the last one in the last group (like `.c(x)` in `.c(x)[0]({})`) or
-        // for type arguments other than simple types.
+        // `FormatExpandedLastLine` prints the last group in flat mode, while
+        // `format_expanded` prints it in expanded mode. Both print the same only
+        // if the last group has no line break outside a group. Other calls in
+        // the group (like `.c(x)` in `.c(x)[0]({})`) and type arguments that
+        // aren't simple types can have one.
         let has_one_call = last_group
             .iter()
             .filter(|member| member.is_call_expression())
@@ -455,15 +441,12 @@ impl MemberChain {
     }
 
     /// Returns a lower bound of the width that `group` takes on the first
-    /// line of the one-line chain.
+    /// line of the hugged layout.
     ///
-    /// Counts identifier and `this` names, member names and their `.` or `?.`
-    /// operators, 2 for each call, which prints its opening parenthesis and
-    /// either its closing parenthesis or the start of its last argument on the
-    /// same line, 2 for the square brackets of each computed member, and 1 for
-    /// each `!`. The formatter prints all of these unchanged. Counts nothing
-    /// for other head nodes, arguments, type arguments, optional call tokens,
-    /// or computed member contents.
+    /// Only counts tokens that always print the same: names, `this`, `.` and
+    /// `?.`, 2 for each call (`(` and the character after it), 2 for the
+    /// brackets of each computed member, and 1 for each `!`. Everything else
+    /// counts as zero.
     fn min_group_width(&self, group: &MemberChainGroup, f: &JsFormatter) -> usize {
         let indent_width = f.options().indent_width();
         let width = |token: SyntaxResult<JsSyntaxToken>| {
@@ -588,14 +571,9 @@ impl Format<JsFormatContext> for MemberChain {
                         f.write_element(hugged_last_group.clone())
                     });
 
-                    // The expanded chain formats the same way on the next
-                    // formatting run only if the last argument doesn't break in
-                    // it. Otherwise, the next formatting run sees a broken last
-                    // argument and keeps the chain on one line, so that layout
-                    // is preferred right away.
-                    // `FormatExpandedLastLine` prints the head and the
-                    // leading groups as `format_expanded` does, so they don't
-                    // decide whether it fits.
+                    // Prefer the expanded chain only if its last group fits on
+                    // one line. Otherwise use the hugged layout. See
+                    // `can_hug_last_argument` for why.
                     write!(
                         f,
                         [best_fitting!(
@@ -604,7 +582,6 @@ impl Format<JsFormatContext> for MemberChain {
                                 FormatExpandedLastLine(self),
                                 best_fitting!(format_one_line_hugged, format_expanded)
                             )
-                            .with_mode(BestFittingMode::AllLines)
                         )]
                     )
                 } else {
@@ -623,21 +600,16 @@ impl Format<JsFormatContext> for MemberChain {
     }
 }
 
-/// Formats the expanded layout of a member chain so that it only fits if the
-/// line of the last tail group fits in flat mode.
+/// Formats the expanded layout of a member chain as a variant that only fits
+/// if the line of the last group fits.
 ///
-/// When it fits, it prints the same as the expanded layout that
-/// `MemberChain::fmt` writes as the last best fitting variant:
-/// * The head is in an expanded group, so it prints in expanded mode.
-/// * The leading groups (the tail groups before the last one) are in a group
-///   that expands because of their line breaks.
-/// * The last group prints in flat mode, which is the same as in expanded mode
-///   because it has no line break outside of a group. `MemberChain::fmt`
-///   uses this layout only when [MemberChain::can_hug_last_argument] returns
-///   `true`, which guarantees that.
+/// It prints the same as `format_expanded`, the fallback variant in
+/// `MemberChain::fmt` (see the conditions in
+/// [MemberChain::can_hug_last_argument]).
 ///
-/// The lines of the head and the leading groups may overflow while measuring
-/// because they print the same in both layouts.
+/// The fits test skips the head and the leading groups because they print the
+/// same as in `format_expanded`. Only the line of the last group decides
+/// whether this variant fits.
 struct FormatExpandedLastLine<'a>(&'a MemberChain);
 
 impl Format<JsFormatContext> for FormatExpandedLastLine<'_> {
@@ -655,21 +627,26 @@ impl Format<JsFormatContext> for FormatExpandedLastLine<'_> {
                 .finish()
         });
 
+        let last_group = chain.tail.last();
+        let last_group_separator = format_with(|f| match last_group {
+            Some(group) if group.needs_empty_line_before() => write!(f, [empty_line()]),
+            Some(_) => write!(f, [hard_line_break()]),
+            None => Ok(()),
+        });
+
         write!(
             f,
             [
-                allow_overflow(&group(&chain.head).should_expand(true)),
+                skip_fits_check(&group(&chain.head).should_expand(true)),
                 indent(&format_args![
-                    allow_overflow(&group(&leading_groups)),
-                    chain.tail.last().map(FormatTailGroup)
+                    skip_fits_check(&format_args![group(&leading_groups), last_group_separator]),
+                    last_group
                 ])
             ]
         )
     }
 }
 
-/// Formats a group of the tail on its own line in the expanded layout of a
-/// member chain.
 struct FormatTailGroup<'a>(&'a MemberChainGroup);
 
 impl Format<JsFormatContext> for FormatTailGroup<'_> {

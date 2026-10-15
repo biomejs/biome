@@ -82,7 +82,7 @@ pub enum FormatElement {
 
     /// A list of different variants representing the same content. The printer picks the best fitting content.
     /// Line breaks inside of a best fitting don't propagate to parent groups.
-    BestFitting(BestFittingVariants, BestFittingMode),
+    BestFitting(BestFittingVariants),
 
     /// A [Tag] that marks the start/end of some content to which some special formatting is applied.
     Tag(Tag),
@@ -119,11 +119,9 @@ impl std::fmt::Debug for FormatElement {
                 .field(source_position)
                 .finish(),
             Self::LineSuffixBoundary => write!(fmt, "LineSuffixBoundary"),
-            Self::BestFitting(best_fitting, mode) => fmt
-                .debug_tuple("BestFitting")
-                .field(&best_fitting)
-                .field(mode)
-                .finish(),
+            Self::BestFitting(best_fitting) => {
+                fmt.debug_tuple("BestFitting").field(&best_fitting).finish()
+            }
             Self::Interned(interned) => fmt.debug_list().entries(interned.deref()).finish(),
             Self::Tag(tag) => fmt.debug_tuple("Tag").field(tag).finish(),
         }
@@ -324,7 +322,7 @@ impl FormatElements for FormatElement {
             Self::Interned(interned) => interned.will_break(),
             // Traverse into the most flat version because the content is guaranteed to expand when even
             // the most flat version contains some content that forces a break.
-            Self::BestFitting(best_fitting, _) => best_fitting.most_flat().will_break(),
+            Self::BestFitting(best_fitting) => best_fitting.most_flat().will_break(),
             Self::LineSuffixBoundary
             | Self::Space
             | Self::Tag(_)
@@ -427,34 +425,6 @@ impl TextWidth {
     pub(crate) const fn is_multiline(self) -> bool {
         matches!(self, Self::Multiline)
     }
-}
-
-/// How the printer tests whether a variant of a [FormatElement::BestFitting],
-/// except the most expanded one, fits.
-///
-/// The printer measures each variant in flat mode. Groups that are known to
-/// break, and every group nested inside them, are measured in expanded mode.
-///
-/// The mode only applies when the printer picks one of the variants of its
-/// best fitting element. When the printer measures content that contains a
-/// nested best fitting element, it measures the most flat or the most expanded
-/// variant of the nested element with the mode of the enclosing measurement.
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
-pub enum BestFittingMode {
-    /// The variant fits if everything from the variant onward, up to the first
-    /// line break, fits on the current line. A line break is a hard, empty, or literal line break, a
-    /// line break in text, or any line break measured in expanded mode.
-    #[default]
-    FirstLine,
-
-    /// The variant fits if every one of its lines fits. Line breaks inside the
-    /// variant start a new line instead of ending the measurement. The content
-    /// after the variant is measured up to its first line break, as with
-    /// [BestFittingMode::FirstLine].
-    ///
-    /// Measuring every line costs more than measuring the first line. Use this
-    /// mode when a variant is only acceptable if its later lines fit as well.
-    AllLines,
 }
 
 /// Provides the printer with different representations for the same element so that the printer

@@ -712,32 +712,31 @@ impl<Context> Format<Context> for LineSuffixBoundary {
     }
 }
 
-/// Marks content whose lines may exceed the print width when the printer tests
-/// if the surrounding content fits.
+/// Excludes `content` from the fits test that decides whether something fits.
 ///
-/// When a test of whether content fits reaches `content`, the printer measures
-/// every line of `content`, even when the test otherwise ends at the first line
-/// break, and text inside `content` may exceed the print width. A test that
-/// starts inside `content`, such as the test of a group inside `content`,
-/// measures as usual. Content that follows
-/// `content` on its last line is measured from the end of `content`, so the
-/// test fails if that line is already too wide. The printer prints `content`
-/// the same as without the marker.
+/// Use it in a [`best_fitting!`](crate::best_fitting) variant for lines that
+/// print the same as in the fallback variant, so that only the other lines
+/// decide whether this variant fits. Take `a.b().c().d({ x })` printed with
+/// one call per line: the lines `a`, `.b()` and `.c()` are the same as in the
+/// fallback variant, so only the line of `.d({ x })` should decide whether this
+/// variant fits.
 ///
-/// When the printer tests if a [`fill`](Formatter::fill) entry fits, which
-/// requires the entry to fit on a single line, line breaks inside `content`
-/// end the test as they do without the marker.
+/// The printer runs the fits test by adding up the width of the current line.
+/// The test fails if the line gets wider than the print width, and succeeds at
+/// the first line break. Inside `content`, no line fails the test and line
+/// breaks don't end it. After `content`, the test continues on the line where
+/// `content` ends, including the width that `content` adds to it.
 ///
-/// Use it with [`BestFittingMode::AllLines`] to exempt the lines of `content`
-/// from the width check, while every other line of a
-/// [`best_fitting!`](crate::best_fitting) variant must still fit. Place a line
-/// break right after `content` so that later content doesn't continue its last
-/// line.
+/// Fits tests that start inside `content` are unaffected, so `content` prints
+/// the same as without `skip_fits_check`. Content before it can print
+/// differently: for example, a group before it expands if the line where
+/// `content` ends doesn't fit. Fits tests of [`fill`](Formatter::fill) entries
+/// ignore `skip_fits_check`, because an entry must fit on one line.
 ///
 /// # Examples
 ///
-/// The first variant is printed because its last line fits, although its
-/// first line exceeds the print width.
+/// The first variant is printed. Its first line exceeds the print width, but
+/// the fits test skips that line and only checks `b`.
 ///
 /// ```
 /// use biome_formatter::{format, format_args, LineWidth, SimpleFormatOptions};
@@ -752,13 +751,11 @@ impl<Context> Format<Context> for LineSuffixBoundary {
 /// let formatted = format!(context, [
 ///     best_fitting!(
 ///         format_args![
-///             allow_overflow(&token("aaaaaaaaaaaaaaa")),
-///             hard_line_break(),
+///             skip_fits_check(&format_args![token("aaaaaaaaaaaaaaa"), hard_line_break()]),
 ///             token("b")
 ///         ],
 ///         token("c")
 ///     )
-///     .with_mode(BestFittingMode::AllLines)
 /// ])?;
 ///
 /// assert_eq!("aaaaaaaaaaaaaaa\nb", formatted.print()?.as_code());
@@ -766,31 +763,31 @@ impl<Context> Format<Context> for LineSuffixBoundary {
 /// # }
 /// ```
 #[inline]
-pub fn allow_overflow<Content, Context>(content: &Content) -> AllowOverflow<'_, Context>
+pub fn skip_fits_check<Content, Context>(content: &Content) -> SkipFitsCheck<'_, Context>
 where
     Content: Format<Context>,
 {
-    AllowOverflow {
+    SkipFitsCheck {
         content: Argument::new(content),
     }
 }
 
 #[derive(Copy, Clone)]
-pub struct AllowOverflow<'a, Context> {
+pub struct SkipFitsCheck<'a, Context> {
     content: Argument<'a, Context>,
 }
 
-impl<Context> Format<Context> for AllowOverflow<'_, Context> {
+impl<Context> Format<Context> for SkipFitsCheck<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
-        f.write_element(FormatElement::Tag(StartAllowOverflow))?;
+        f.write_element(FormatElement::Tag(StartSkipFitsCheck))?;
         Arguments::from(&self.content).fmt(f)?;
-        f.write_element(FormatElement::Tag(EndAllowOverflow))
+        f.write_element(FormatElement::Tag(EndSkipFitsCheck))
     }
 }
 
-impl<Context> std::fmt::Debug for AllowOverflow<'_, Context> {
+impl<Context> std::fmt::Debug for SkipFitsCheck<'_, Context> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_tuple("AllowOverflow")
+        f.debug_tuple("SkipFitsCheck")
             .field(&"{{content}}")
             .finish()
     }
@@ -3002,7 +2999,6 @@ impl<'a, 'buf, Context> FillBuilder<'a, 'buf, Context> {
 #[derive(Copy, Clone)]
 pub struct BestFitting<'a, Context> {
     variants: Arguments<'a, Context>,
-    mode: BestFittingMode,
 }
 
 impl<'a, Context> BestFitting<'a, Context> {
@@ -3026,17 +3022,7 @@ impl<'a, Context> BestFitting<'a, Context> {
             "Requires at least the least expanded and most expanded variants"
         );
 
-        Self {
-            variants,
-            mode: BestFittingMode::default(),
-        }
-    }
-
-    /// Changes how the printer tests whether a variant fits. Defaults to
-    /// [BestFittingMode::FirstLine]. See [BestFittingMode].
-    pub fn with_mode(mut self, mode: BestFittingMode) -> Self {
-        self.mode = mode;
-        self
+        Self { variants }
     }
 }
 
@@ -3055,10 +3041,7 @@ impl<Context> Format<Context> for BestFitting<'_, Context> {
         // SAFETY: The constructor guarantees that there are always at least two variants. It's, therefore,
         // safe to call into the unsafe `from_vec_unchecked` function
         let element = unsafe {
-            FormatElement::BestFitting(
-                BestFittingVariants::from_vec_unchecked(buffer.into_vec()),
-                self.mode,
-            )
+            FormatElement::BestFitting(BestFittingVariants::from_vec_unchecked(buffer.into_vec()))
         };
 
         f.write_element(element)

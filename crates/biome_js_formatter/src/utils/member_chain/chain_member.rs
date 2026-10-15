@@ -177,11 +177,9 @@ impl Format<JsFormatContext> for ChainMember {
     }
 }
 
-/// Formats the optional chaining token (`?.`) and the type arguments of the
-/// call expression that ends a member chain.
-///
-/// The preceding chain members format the callee. The caller formats the
-/// arguments, which lets the member chain format them with options.
+/// Formats the optional chain token and type arguments of the chain's last
+/// call, without its arguments. The member chain formats the arguments
+/// separately so that it can pass options to them.
 pub(super) struct FormatChainEndCallWithoutArguments<'a> {
     expression: &'a JsCallExpression,
 }
