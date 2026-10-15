@@ -207,6 +207,9 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
                 .iter()
                 .next()
         }
+        "CssPseudoClassFunctionHeading" => {
+            lang::CssPseudoClassFunctionHeading::KIND_SET.iter().next()
+        }
         "CssPseudoClassFunctionIdentifier" => lang::CssPseudoClassFunctionIdentifier::KIND_SET
             .iter()
             .next(),
@@ -603,6 +606,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "CssPropertyAtRuleDeclarator" => &[("name", 1)],
         "CssPseudoClassFunctionCompoundSelector" => &[("name", 0), ("selector", 2)],
         "CssPseudoClassFunctionCustomIdentifier" => &[("name", 0), ("ident", 2)],
+        "CssPseudoClassFunctionHeading" => &[("name", 0), ("levels", 2)],
         "CssPseudoClassFunctionIdentifier" => &[("name", 0), ("ident", 2)],
         "CssPseudoClassFunctionNth" => &[("name", 0), ("selector", 2)],
         "CssPseudoClassFunctionSelector" => &[("name", 0), ("selector", 2)],

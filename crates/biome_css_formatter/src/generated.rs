@@ -4803,6 +4803,38 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssPseudoClassFunctionCu
         FormatOwnedWithRule :: new (self , crate :: css :: pseudo :: pseudo_class_function_custom_identifier_list :: FormatCssPseudoClassFunctionCustomIdentifierList :: default ())
     }
 }
+impl FormatRule<biome_css_syntax::CssPseudoClassFunctionHeading>
+    for crate::css::pseudo::pseudo_class_function_heading::FormatCssPseudoClassFunctionHeading
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssPseudoClassFunctionHeading,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssPseudoClassFunctionHeading>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssPseudoClassFunctionHeading {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssPseudoClassFunctionHeading,
+        crate::css::pseudo::pseudo_class_function_heading::FormatCssPseudoClassFunctionHeading,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: pseudo :: pseudo_class_function_heading :: FormatCssPseudoClassFunctionHeading :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssPseudoClassFunctionHeading {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssPseudoClassFunctionHeading,
+        crate::css::pseudo::pseudo_class_function_heading::FormatCssPseudoClassFunctionHeading,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: pseudo :: pseudo_class_function_heading :: FormatCssPseudoClassFunctionHeading :: default ())
+    }
+}
 impl FormatRule<biome_css_syntax::CssPseudoClassFunctionIdentifier>
     for crate::css::pseudo::pseudo_class_function_identifier::FormatCssPseudoClassFunctionIdentifier
 {
@@ -11406,6 +11438,31 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssGenericComponentValue
     >;
     fn into_format(self) -> Self::Format {
         FormatOwnedWithRule :: new (self , crate :: css :: lists :: generic_component_value_list :: FormatCssGenericComponentValueList :: default ())
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssHeadingLevelList {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssHeadingLevelList,
+        crate::css::lists::heading_level_list::FormatCssHeadingLevelList,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::css::lists::heading_level_list::FormatCssHeadingLevelList::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssHeadingLevelList {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssHeadingLevelList,
+        crate::css::lists::heading_level_list::FormatCssHeadingLevelList,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::lists::heading_level_list::FormatCssHeadingLevelList::default(),
+        )
     }
 }
 impl AsFormat<CssFormatContext> for biome_css_syntax::CssIfBranchList {

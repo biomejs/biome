@@ -1,6 +1,5 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 249
 info: css/atrule/supports.css
 ---
 
@@ -618,9 +617,9 @@ B
 +.b,:not(asdasldaskdhjkashdahsdkjahskdjhakj,asdasldaskdhjkashdahsdkjahskdjhakj)){
  }
  @supports not (selector(:before) or not (not (selector(:before)))) {
- }
--@supports selector(selector(:focus-visible)) {
 -}
+-@supports selector(selector(:focus-visible)) {
+ }
 -@supports selector(:::selector(:focus-visible)) {
 -}
 -@supports selector(--selector(:focus-visible)) {
@@ -669,14 +668,19 @@ B
    ) {
  }
  
-@@ -281,7 +282,5 @@
+@@ -280,8 +281,9 @@
+     background: greenyellow;
    }
  }
- @supports ({"example": 1}) {
+-@supports ({"example": 1}) {
 -  * {
 -    background: red;
 -  }
-+  * { background: red; }
++@supports ({"example": 1}
++) {
++* {
++  background: red;
++}
  }
 ```
 
@@ -966,8 +970,11 @@ B
     background: greenyellow;
   }
 }
-@supports ({"example": 1}) {
-  * { background: red; }
+@supports ({"example": 1}
+) {
+* {
+  background: red;
+}
 }
 ```
 
@@ -1432,21 +1439,63 @@ supports.css:391:24 parse ━━━━━━━━━━━━━━━━━━
   - past
   - future
   
-supports.css:394:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+supports.css:391:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `}` but instead the file ends
+  × Expected a body but instead found '}'.
   
+    389 │   }
+    390 │ }
+  > 391 │ @supports ({"example": 1}) {
+        │                         ^
     392 │   * { background: red; }
     393 │ }
-  > 394 │ 
-        │ 
   
-  i the file ends here
+  i Expected a body here.
   
+    389 │   }
+    390 │ }
+  > 391 │ @supports ({"example": 1}) {
+        │                         ^
     392 │   * { background: red; }
     393 │ }
-  > 394 │ 
-        │ 
+  
+supports.css:391:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a qualified rule, or an at rule but instead found ') {'.
+  
+    389 │   }
+    390 │ }
+  > 391 │ @supports ({"example": 1}) {
+        │                          ^^^
+    392 │   * { background: red; }
+    393 │ }
+  
+  i Expected a qualified rule, or an at rule here.
+  
+    389 │   }
+    390 │ }
+  > 391 │ @supports ({"example": 1}) {
+        │                          ^^^
+    392 │   * { background: red; }
+    393 │ }
+  
+supports.css:393:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a qualified rule, or an at rule but instead found '}'.
+  
+    391 │ @supports ({"example": 1}) {
+    392 │   * { background: red; }
+  > 393 │ }
+        │ ^
+    394 │ 
+  
+  i Expected a qualified rule, or an at rule here.
+  
+    391 │ @supports ({"example": 1}) {
+    392 │   * { background: red; }
+  > 393 │ }
+        │ ^
+    394 │ 
   
 
 ```

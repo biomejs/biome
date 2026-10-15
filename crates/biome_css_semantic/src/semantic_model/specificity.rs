@@ -52,6 +52,7 @@ fn evaluate_any_pseudo_class(class: &AnyCssPseudoClass) -> Specificity {
 
             CLASS_SPECIFICITY + list_max
         }
+        AnyCssPseudoClass::CssPseudoClassFunctionHeading(_) => CLASS_SPECIFICITY,
         AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(_) => CLASS_SPECIFICITY,
         AnyCssPseudoClass::CssPseudoClassFunctionNth(_) => CLASS_SPECIFICITY,
         AnyCssPseudoClass::CssPseudoClassFunctionRelativeSelectorList(selector_list) => {

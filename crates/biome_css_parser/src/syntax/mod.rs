@@ -12,7 +12,9 @@ mod value;
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
-use crate::syntax::block::{DeclarationOrRuleList, parse_declaration_or_rule_list_block};
+use crate::syntax::block::{
+    DeclarationOrRuleList, expected_block, parse_declaration_or_rule_list_block,
+};
 use crate::syntax::declaration::{is_at_scss_empty_declaration, parse_empty_declaration};
 use crate::syntax::parse_error::{
     expected_any_rule, expected_any_rule_list_item, expected_non_css_wide_keyword_identifier,
@@ -47,7 +49,7 @@ use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{Parser, SyntaxFeature};
+use biome_parser::{Parser, SyntaxFeature, token_set};
 use value::dimension::{is_at_any_dimension, parse_any_dimension};
 
 pub(crate) enum CssSyntaxFeatures {
@@ -265,8 +267,18 @@ pub(crate) fn parse_qualified_rule(p: &mut CssParser) -> ParsedSyntax {
     let m = p.start();
 
     SelectorList::default()
+        .with_end_kind_ts(token_set![T!['{'], T!['}']])
+        .with_recovery_ts(token_set![T!['{'], T!['}']])
         .allow_partial_combinator_nesting()
         .parse_list(p);
+
+    if p.at(CSS_SPACE_LITERAL) && p.nth_at(1, T!['}']) {
+        p.bump(CSS_SPACE_LITERAL);
+    }
+    if p.at(T!['}']) {
+        p.error(expected_block(p, p.cur_range()));
+        return Present(m.complete(p, CSS_BOGUS_RULE));
+    }
 
     parse_declaration_or_rule_list_block(p);
 
@@ -359,6 +371,14 @@ fn parse_nested_qualified_rule_with_selector_recovery(
         RelativeSelectorList::new(T!['{'])
             .allow_partial_combinator_nesting()
             .parse_list(p);
+    }
+
+    if p.at(T!['}']) || p.at(T![;]) {
+        p.error(expected_block(p, p.cur_range()));
+        // Keep a recovery semicolon in the bogus rule so formatting preserves
+        // the boundary before the next declaration. Leave the enclosing brace.
+        p.eat(T![;]);
+        return Some((Present(m.complete(p, CSS_BOGUS_RULE)), CSS_BOGUS_BLOCK));
     }
 
     let block = parse_declaration_or_rule_list_block(p);

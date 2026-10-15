@@ -1,0 +1,27 @@
+:heading() { color: red; }
+.after-empty { color: green; }
+:heading(1,) { color: red; }
+.after-trailing-comma { color: green; }
+:heading(1 2) { color: red; }
+.after-missing-comma { color: green; }
+:heading(1.0) { color: red; }
+.after-decimal { color: green; }
+:heading(1e0) { color: red; }
+.after-exponent { color: green; }
+:heading(odd) { color: red; }
+.after-odd { color: green; }
+:heading(2n+1) { color: red; }
+.after-an-plus-b { color: green; }
+:heading(calc(1)) { color: red; }
+.after-calc { color: green; }
+:heading(1px) { color: red; }
+.after-dimension { color: green; }
+:heading(2 of .section) { color: red; }
+.after-of { color: green; }
+:heading(1, 2 { color: red; }
+.after-missing-close { color: green; }
+:unknown-heading(1) { color: red; }
+.after-unknown-function { color: green; }
+.close-boundary { &:heading(1 } .after-close-boundary { color: green; }
+.semicolon-boundary { &:heading(1; --after-semicolon: green; } .after-semicolon-boundary { color: green; }
+.invalid-close-boundary { &:heading(odd } .after-invalid-close-boundary { color: green; }

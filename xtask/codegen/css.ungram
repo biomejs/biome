@@ -331,6 +331,7 @@ AnyCssPseudoClass =
 	| CssPseudoClassFunctionRelativeSelectorList
 	| CssPseudoClassFunctionValueList
 	| CssPseudoClassFunctionNth
+	| CssPseudoClassFunctionHeading
 	| CssPseudoClassFunctionCustomIdentifierList
 	| CssPseudoClassFunctionCustomIdentifier
 	| ScssInterpolatedPseudoClassFunction
@@ -430,6 +431,18 @@ AnyCssPseudoValue =
 	| ScssInterpolatedIdentifier
 	| CssString
 	| ScssInterpolatedString
+
+// :heading(1, 2) {}
+//  ^^^^^^^^^^^^^
+CssPseudoClassFunctionHeading =
+	name: CssIdentifier
+	'('
+	levels: CssHeadingLevelList
+	')'
+
+// :heading(1, 2) {}
+//          ^^^^
+CssHeadingLevelList = (CssNumber (',' CssNumber)*)
 
 // :nth-child(2n+1 of li, .test) {}
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

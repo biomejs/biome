@@ -6141,6 +6141,56 @@ pub struct CssPseudoClassFunctionCustomIdentifierListFields {
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssPseudoClassFunctionHeading {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssPseudoClassFunctionHeading {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssPseudoClassFunctionHeadingFields {
+        CssPseudoClassFunctionHeadingFields {
+            name: self.name(),
+            l_paren_token: self.l_paren_token(),
+            levels: self.levels(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn name(&self) -> SyntaxResult<CssIdentifier> {
+        support::required_node(&self.syntax, 0usize)
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn levels(&self) -> CssHeadingLevelList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 3usize)
+    }
+}
+impl Serialize for CssPseudoClassFunctionHeading {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssPseudoClassFunctionHeadingFields {
+    pub name: SyntaxResult<CssIdentifier>,
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub levels: CssHeadingLevelList,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssPseudoClassFunctionIdentifier {
     pub(crate) syntax: SyntaxNode,
 }
@@ -16821,6 +16871,7 @@ pub enum AnyCssPseudoClass {
     CssPseudoClassFunctionCompoundSelectorList(CssPseudoClassFunctionCompoundSelectorList),
     CssPseudoClassFunctionCustomIdentifier(CssPseudoClassFunctionCustomIdentifier),
     CssPseudoClassFunctionCustomIdentifierList(CssPseudoClassFunctionCustomIdentifierList),
+    CssPseudoClassFunctionHeading(CssPseudoClassFunctionHeading),
     CssPseudoClassFunctionIdentifier(CssPseudoClassFunctionIdentifier),
     CssPseudoClassFunctionNth(CssPseudoClassFunctionNth),
     CssPseudoClassFunctionRelativeSelectorList(CssPseudoClassFunctionRelativeSelectorList),
@@ -16866,6 +16917,12 @@ impl AnyCssPseudoClass {
     ) -> Option<&CssPseudoClassFunctionCustomIdentifierList> {
         match &self {
             Self::CssPseudoClassFunctionCustomIdentifierList(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_pseudo_class_function_heading(&self) -> Option<&CssPseudoClassFunctionHeading> {
+        match &self {
+            Self::CssPseudoClassFunctionHeading(item) => Some(item),
             _ => None,
         }
     }
@@ -26419,6 +26476,62 @@ impl From<CssPseudoClassFunctionCustomIdentifierList> for SyntaxNode {
 }
 impl From<CssPseudoClassFunctionCustomIdentifierList> for SyntaxElement {
     fn from(n: CssPseudoClassFunctionCustomIdentifierList) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssPseudoClassFunctionHeading {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_PSEUDO_CLASS_FUNCTION_HEADING as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_PSEUDO_CLASS_FUNCTION_HEADING
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssPseudoClassFunctionHeading {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssPseudoClassFunctionHeading")
+                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field(
+                    "l_paren_token",
+                    &support::DebugSyntaxResult(self.l_paren_token()),
+                )
+                .field("levels", &self.levels())
+                .field(
+                    "r_paren_token",
+                    &support::DebugSyntaxResult(self.r_paren_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("CssPseudoClassFunctionHeading").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssPseudoClassFunctionHeading> for SyntaxNode {
+    fn from(n: CssPseudoClassFunctionHeading) -> Self {
+        n.syntax
+    }
+}
+impl From<CssPseudoClassFunctionHeading> for SyntaxElement {
+    fn from(n: CssPseudoClassFunctionHeading) -> Self {
         n.syntax.into()
     }
 }
@@ -43795,6 +43908,11 @@ impl From<CssPseudoClassFunctionCustomIdentifierList> for AnyCssPseudoClass {
         Self::CssPseudoClassFunctionCustomIdentifierList(node)
     }
 }
+impl From<CssPseudoClassFunctionHeading> for AnyCssPseudoClass {
+    fn from(node: CssPseudoClassFunctionHeading) -> Self {
+        Self::CssPseudoClassFunctionHeading(node)
+    }
+}
 impl From<CssPseudoClassFunctionIdentifier> for AnyCssPseudoClass {
     fn from(node: CssPseudoClassFunctionIdentifier) -> Self {
         Self::CssPseudoClassFunctionIdentifier(node)
@@ -43842,6 +43960,7 @@ impl AstNode for AnyCssPseudoClass {
         .union(CssPseudoClassFunctionCompoundSelectorList::KIND_SET)
         .union(CssPseudoClassFunctionCustomIdentifier::KIND_SET)
         .union(CssPseudoClassFunctionCustomIdentifierList::KIND_SET)
+        .union(CssPseudoClassFunctionHeading::KIND_SET)
         .union(CssPseudoClassFunctionIdentifier::KIND_SET)
         .union(CssPseudoClassFunctionNth::KIND_SET)
         .union(CssPseudoClassFunctionRelativeSelectorList::KIND_SET)
@@ -43858,6 +43977,7 @@ impl AstNode for AnyCssPseudoClass {
                 | CSS_PSEUDO_CLASS_FUNCTION_COMPOUND_SELECTOR_LIST
                 | CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER
                 | CSS_PSEUDO_CLASS_FUNCTION_CUSTOM_IDENTIFIER_LIST
+                | CSS_PSEUDO_CLASS_FUNCTION_HEADING
                 | CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER
                 | CSS_PSEUDO_CLASS_FUNCTION_NTH
                 | CSS_PSEUDO_CLASS_FUNCTION_RELATIVE_SELECTOR_LIST
@@ -43890,6 +44010,9 @@ impl AstNode for AnyCssPseudoClass {
                 Self::CssPseudoClassFunctionCustomIdentifierList(
                     CssPseudoClassFunctionCustomIdentifierList { syntax },
                 )
+            }
+            CSS_PSEUDO_CLASS_FUNCTION_HEADING => {
+                Self::CssPseudoClassFunctionHeading(CssPseudoClassFunctionHeading { syntax })
             }
             CSS_PSEUDO_CLASS_FUNCTION_IDENTIFIER => {
                 Self::CssPseudoClassFunctionIdentifier(CssPseudoClassFunctionIdentifier { syntax })
@@ -43932,6 +44055,7 @@ impl AstNode for AnyCssPseudoClass {
             Self::CssPseudoClassFunctionCompoundSelectorList(it) => it.syntax(),
             Self::CssPseudoClassFunctionCustomIdentifier(it) => it.syntax(),
             Self::CssPseudoClassFunctionCustomIdentifierList(it) => it.syntax(),
+            Self::CssPseudoClassFunctionHeading(it) => it.syntax(),
             Self::CssPseudoClassFunctionIdentifier(it) => it.syntax(),
             Self::CssPseudoClassFunctionNth(it) => it.syntax(),
             Self::CssPseudoClassFunctionRelativeSelectorList(it) => it.syntax(),
@@ -43949,6 +44073,7 @@ impl AstNode for AnyCssPseudoClass {
             Self::CssPseudoClassFunctionCompoundSelectorList(it) => it.into_syntax(),
             Self::CssPseudoClassFunctionCustomIdentifier(it) => it.into_syntax(),
             Self::CssPseudoClassFunctionCustomIdentifierList(it) => it.into_syntax(),
+            Self::CssPseudoClassFunctionHeading(it) => it.into_syntax(),
             Self::CssPseudoClassFunctionIdentifier(it) => it.into_syntax(),
             Self::CssPseudoClassFunctionNth(it) => it.into_syntax(),
             Self::CssPseudoClassFunctionRelativeSelectorList(it) => it.into_syntax(),
@@ -43968,6 +44093,7 @@ impl std::fmt::Debug for AnyCssPseudoClass {
             Self::CssPseudoClassFunctionCompoundSelectorList(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassFunctionCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassFunctionCustomIdentifierList(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssPseudoClassFunctionHeading(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassFunctionIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassFunctionNth(it) => std::fmt::Debug::fmt(it, f),
             Self::CssPseudoClassFunctionRelativeSelectorList(it) => std::fmt::Debug::fmt(it, f),
@@ -43987,6 +44113,7 @@ impl From<AnyCssPseudoClass> for SyntaxNode {
             AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelectorList(it) => it.into_syntax(),
             AnyCssPseudoClass::CssPseudoClassFunctionCustomIdentifier(it) => it.into_syntax(),
             AnyCssPseudoClass::CssPseudoClassFunctionCustomIdentifierList(it) => it.into_syntax(),
+            AnyCssPseudoClass::CssPseudoClassFunctionHeading(it) => it.into_syntax(),
             AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(it) => it.into_syntax(),
             AnyCssPseudoClass::CssPseudoClassFunctionNth(it) => it.into_syntax(),
             AnyCssPseudoClass::CssPseudoClassFunctionRelativeSelectorList(it) => it.into_syntax(),
@@ -51169,6 +51296,11 @@ impl std::fmt::Display for CssPseudoClassFunctionCustomIdentifierList {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for CssPseudoClassFunctionHeading {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for CssPseudoClassFunctionIdentifier {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -55386,6 +55518,88 @@ impl IntoIterator for &CssGenericComponentValueList {
 impl IntoIterator for CssGenericComponentValueList {
     type Item = AnyCssGenericComponentValue;
     type IntoIter = AstNodeListIterator<Language, AnyCssGenericComponentValue>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct CssHeadingLevelList {
+    syntax_list: SyntaxList,
+}
+impl CssHeadingLevelList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for CssHeadingLevelList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_HEADING_LEVEL_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_HEADING_LEVEL_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for CssHeadingLevelList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstSeparatedList for CssHeadingLevelList {
+    type Language = Language;
+    type Node = CssNumber;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for CssHeadingLevelList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("CssHeadingLevelList ")?;
+        f.debug_list().entries(self.elements()).finish()
+    }
+}
+impl IntoIterator for CssHeadingLevelList {
+    type Item = SyntaxResult<CssNumber>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, CssNumber>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for &CssHeadingLevelList {
+    type Item = SyntaxResult<CssNumber>;
+    type IntoIter = AstSeparatedListNodesIterator<Language, CssNumber>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

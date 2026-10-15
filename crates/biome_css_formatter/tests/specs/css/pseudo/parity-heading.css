@@ -1,0 +1,26 @@
+.article   :heading( 1,2 ,  3 ) {text-wrap:balance}
+:heading( 0,-1,99999 , +2,-0,+0 ){}
+:heading(9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999){}
+:heading{}
+:HEADING( 1,2 ),:HeAdInG(3),:h\65 ading( 1,2 ),:\68 eading(3){}
+:heading(/* first */1/* before comma */,/* after comma */2/* last */){color:red}
+:heading(
+1,
+/* between levels */
+2,3
+) {color: blue}
+:is( :heading( 1,2 ) ,h3 ),:where( :heading(1 , 2) ){color:green}
+@supports selector(:heading( 1,2 )){
+.supported :heading(1){color:green}
+}
+:lang(en,"fr"),:nth-child(2n+1),:nth-of-type(odd),:unknown-heading{}
+heading,.heading{--heading: heading}
+
+:heading(
+/* biome-ignore format: preserve the level */
+0001, 2
+/* final level comment */
+){color:blue}
+
+/* biome-ignore format: preserve the heading selector spacing */
+.suppressed  :heading( 1,2 ,3 ) { color : red; }

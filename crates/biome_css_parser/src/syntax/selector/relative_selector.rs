@@ -128,7 +128,9 @@ impl ParseRecovery for RelativeSelectorListParseRecovery {
     ///     /*        ^^^^^^^^ invalid selector     ^ recovery point at new relative selector */
     ///     ```
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(self.end_kind) || p.at(T![,]) || is_at_relative_selector(p)
+        is_at_relative_selector_list_end(p, self.end_kind)
+            || p.at(T![,])
+            || is_at_relative_selector(p)
     }
 }
 
@@ -143,7 +145,7 @@ impl ParseSeparatedList for RelativeSelectorList {
     }
 
     fn is_at_list_end(&self, p: &mut CssParser) -> bool {
-        p.at(self.end_kind)
+        is_at_relative_selector_list_end(p, self.end_kind)
     }
 
     fn recover(&mut self, p: &mut CssParser, parsed_element: ParsedSyntax) -> RecoveryResult {
@@ -161,6 +163,10 @@ impl ParseSeparatedList for RelativeSelectorList {
     fn separating_element_kind(&mut self) -> CssSyntaxKind {
         T![,]
     }
+}
+
+fn is_at_relative_selector_list_end(p: &mut CssParser, end_kind: CssSyntaxKind) -> bool {
+    p.at(end_kind) || (end_kind == T!['{'] && (p.at(T!['}']) || p.at(T![;])))
 }
 
 /// A set of CSS syntax kinds representing combinator types for relative selectors.

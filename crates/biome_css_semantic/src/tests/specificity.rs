@@ -95,6 +95,49 @@ fn test_specificity_pseudo_class_selector() {
 }
 
 #[test]
+fn test_specificity_heading_function() {
+    let cases = [
+        (":heading", Specificity(0, 1, 0)),
+        (":heading(1)", Specificity(0, 1, 0)),
+        (":heading(1, 2, 3)", Specificity(0, 1, 0)),
+        (
+            ":heading(0, -1, +7, 0001, -0, 999999999999999999999999999999)",
+            Specificity(0, 1, 0),
+        ),
+        (":HeAdInG(1, 2)", Specificity(0, 1, 0)),
+        (r":h\65 ading(1, 2)", Specificity(0, 1, 0)),
+        (".article :heading(1, 2)", Specificity(0, 2, 0)),
+        (":where(:heading(1, 2))", Specificity(0, 0, 0)),
+        (":is(:heading(1, 2), h3)", Specificity(0, 1, 0)),
+        (":is(#id, :heading(1, 2))", Specificity(1, 0, 0)),
+        (":not(:heading(1, 2))", Specificity(0, 1, 0)),
+        (":lang(en)", Specificity(0, 1, 0)),
+        (":nth-child(2n+1)", Specificity(0, 1, 0)),
+        (":nth-of-type(odd)", Specificity(0, 1, 0)),
+    ];
+
+    for source in [CssFileSource::css(), CssFileSource::scss()] {
+        for (selector, expected) in cases {
+            let css_code = format!("{selector} {{}}");
+            let parse = parse_css(&css_code, source, CssParserOptions::default());
+            assert!(
+                parse.diagnostics().is_empty(),
+                "{selector}: {:#?}",
+                parse.diagnostics()
+            );
+
+            let root = parse.tree();
+            let model = semantic_model(&root);
+            let rules = model.rules();
+            let rule = rules.first().expect("expected the heading selector rule");
+
+            assert_eq!(rule.selectors.len(), 1, "{selector}");
+            assert_eq!(rule.selectors[0].specificity, expected, "{selector}");
+        }
+    }
+}
+
+#[test]
 fn test_specificity_pseudo_element_selector() {
     let css_code = "::before {}";
     let parse = parse_css(css_code, CssFileSource::css(), CssParserOptions::default());

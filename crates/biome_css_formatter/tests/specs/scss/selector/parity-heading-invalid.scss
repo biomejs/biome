@@ -1,0 +1,6 @@
+:heading(1 2){color:red}
+:heading(1.0){color:red}
+:heading(1e0){color:red}
+:heading(1,){color:red}
+.outer-semicolon { &:heading(1; width:7px; } .after-semicolon{color:green}
+.outer-brace { &:heading(1 } .after-brace{color:green}

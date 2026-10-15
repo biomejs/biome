@@ -2,6 +2,7 @@ mod function_compound_selector;
 mod function_compound_selector_list;
 mod function_custom_identifier;
 mod function_custom_identifier_list;
+mod function_heading;
 mod function_identifier;
 mod function_nth;
 mod function_relative_selector_list;
@@ -13,6 +14,9 @@ mod identifier;
 use self::function_compound_selector_list::{
     is_at_pseudo_class_function_compound_selector_list,
     parse_pseudo_class_function_compound_selector_list,
+};
+use self::function_heading::{
+    is_at_pseudo_class_function_heading, parse_pseudo_class_function_heading,
 };
 use self::function_identifier::{
     is_at_pseudo_class_function_identifier, parse_pseudo_class_function_identifier,
@@ -104,6 +108,8 @@ fn parse_pseudo_class(p: &mut CssParser) -> ParsedSyntax {
         parse_pseudo_class_function_value_list(p)
     } else if is_at_pseudo_class_function_nth(p) {
         parse_pseudo_class_function_nth(p)
+    } else if is_at_pseudo_class_function_heading(p) {
+        parse_pseudo_class_function_heading(p)
     } else if is_at_pseudo_class_function_custom_identifier_list(p) {
         parse_pseudo_class_function_custom_identifier_list(p)
     } else if is_at_pseudo_class_function_custom_identifier(p) {

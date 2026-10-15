@@ -13,21 +13,22 @@ use crate::utils::scss_include_comments::{
 use biome_css_syntax::{
     AnyCssAtRule, AnyCssAtRuleCustomName, AnyCssControlBlock, AnyCssDeclarationName,
     AnyCssMediaQuery, AnyCssNamespacePrefixName, AnyCssProperty, AnyCssPseudoClass,
-    AnyCssPseudoElement, AnyCssSelector, AnyCssSelectorIdentifier, AnyCssUnknownAtRuleName,
-    CssComplexSelector, CssDeclaration, CssDeclarationImportant, CssDeclarationOrRuleBlock,
-    CssFunction, CssGenericComponentValueList, CssGenericProperty, CssIdentifier, CssIfBranch,
-    CssLanguage, CssMediaQueryList, CssNamespaceAtRule, CssNestedQualifiedRule, CssPageSelector,
-    CssPseudoElementFunction, CssQualifiedRule, CssSyntaxKind, CssSyntaxNode, CssSyntaxToken,
-    ScssAtRootAtRule, ScssAtRootQueryClause, ScssAtRootSelector, ScssEachHeader, ScssEachValueList,
-    ScssExpression, ScssExpressionItemList, ScssIfAtRule, ScssInterpolatedPseudoClassFunction,
-    ScssInterpolatedPseudoElementFunction, ScssListExpression, ScssListExpressionElement,
-    ScssMapExpression, ScssMapExpressionPair, ScssVariableDeclaration, T, TextLen, TextSize,
-    is_in_scss_include_arguments,
+    AnyCssPseudoElement, AnyCssSelector, AnyCssSelectorIdentifier, AnyCssSubSelector,
+    AnyCssUnknownAtRuleName, CssComplexSelector, CssCompoundSelector, CssDeclaration,
+    CssDeclarationImportant, CssDeclarationOrRuleBlock, CssFunction, CssGenericComponentValueList,
+    CssGenericProperty, CssIdentifier, CssIfBranch, CssLanguage, CssMediaQueryList,
+    CssNamespaceAtRule, CssNestedQualifiedRule, CssPageSelector, CssPseudoClassSelector,
+    CssPseudoElementFunction, CssQualifiedRule, CssSubSelectorList, CssSyntaxKind, CssSyntaxNode,
+    CssSyntaxToken, ScssAtRootAtRule, ScssAtRootQueryClause, ScssAtRootSelector, ScssEachHeader,
+    ScssEachValueList, ScssExpression, ScssExpressionItemList, ScssIfAtRule,
+    ScssInterpolatedPseudoClassFunction, ScssInterpolatedPseudoElementFunction, ScssListExpression,
+    ScssListExpressionElement, ScssMapExpression, ScssMapExpressionPair, ScssVariableDeclaration,
+    T, TextLen, TextSize, is_in_scss_include_arguments,
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
-    CommentKind, CommentPlacement, CommentStyle, Comments, DecoratedComment, SourceComment,
-    is_doc_comment,
+    CommentKind, CommentPlacement, CommentStyle, CommentSuppressionTarget, Comments,
+    DecoratedComment, SourceComment, is_doc_comment,
 };
 use biome_formatter::formatter::Formatter;
 use biome_formatter::{FormatResult, FormatRule, write};
@@ -111,6 +112,37 @@ impl CommentStyle for CssCommentStyle {
         }
     }
 
+    fn suppression_target(
+        &self,
+        comment: &DecoratedComment<Self::Language>,
+    ) -> CommentSuppressionTarget<Self::Language> {
+        if let Some(class) =
+            heading_colon_comment_selector(comment).and_then(|selector| selector.class().ok())
+        {
+            return CommentSuppressionTarget::Node(class.into_syntax());
+        }
+
+        let (Some(_), Some(preceding), Some(following)) = (
+            heading_compound_comment_list(comment),
+            comment.preceding_node(),
+            comment.following_node(),
+        ) else {
+            return CommentSuppressionTarget::CommentPlacement;
+        };
+
+        // The list prints this boundary, but the suppression still targets its child.
+        let target = if comment.text_position().is_end_of_line()
+            || comment.text_position().is_same_line()
+                && is_trailing_comment_on_node(preceding, comment)
+        {
+            preceding
+        } else {
+            following
+        };
+
+        CommentSuppressionTarget::Node(target.clone())
+    }
+
     fn place_comment(
         &self,
         comment: DecoratedComment<Self::Language>,
@@ -128,6 +160,8 @@ impl CommentStyle for CssCommentStyle {
             .or_else(handle_empty_custom_property_container_comment)
             .or_else(handle_function_comment)
             .or_else(handle_pseudo_function_boundary_comment)
+            .or_else(handle_heading_colon_comment)
+            .or_else(handle_heading_compound_comment)
             .or_else(handle_media_separator_comment)
             // Handle SCSS variable name/colon comments before generic properties.
             .or_else(handle_scss_variable_declaration_comment)
@@ -522,6 +556,100 @@ fn handle_pseudo_function_boundary_comment(
     } else {
         CommentPlacement::leading(name.into_syntax(), comment)
     }
+}
+
+fn handle_heading_colon_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(selector) = heading_colon_comment_selector(&comment) else {
+        return CommentPlacement::Default(comment);
+    };
+
+    CommentPlacement::dangling(selector.into_syntax(), comment)
+}
+
+/// Keeps `:` adjacent to the heading name across block comments.
+///
+/// ```css
+/// :/**/heading(1) {}
+/// ```
+fn heading_colon_comment_selector(
+    comment: &DecoratedComment<CssLanguage>,
+) -> Option<CssPseudoClassSelector> {
+    if comment.kind().is_line() {
+        return None;
+    }
+
+    let selector = CssPseudoClassSelector::cast_ref(comment.enclosing_node())?;
+    let AnyCssPseudoClass::CssPseudoClassFunctionHeading(function) = selector.class().ok()? else {
+        return None;
+    };
+    let colon = selector.colon_token().ok()?;
+    let first = function.syntax().first_token()?;
+    if colon
+        .trailing_trivia()
+        .pieces()
+        .chain(first.leading_trivia().pieces())
+        .any(|piece| piece.is_whitespace() || piece.is_newline())
+    {
+        return None;
+    }
+
+    TextRange::new(
+        colon.text_trimmed_range().end(),
+        function.syntax().text_trimmed_range().start(),
+    )
+    .contains_range(comment.piece().text_range())
+    .then_some(selector)
+}
+
+fn handle_heading_compound_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(list) = heading_compound_comment_list(&comment) else {
+        return CommentPlacement::Default(comment);
+    };
+
+    CommentPlacement::dangling(list.into_syntax(), comment)
+}
+
+/// Keeps comments beside `:heading()` inside their compound selector.
+///
+/// ```css
+/// :heading(1)/**/.active {}
+/// ```
+fn heading_compound_comment_list(
+    comment: &DecoratedComment<CssLanguage>,
+) -> Option<CssSubSelectorList> {
+    if comment.kind().is_line() {
+        return None;
+    }
+
+    let compound = CssCompoundSelector::cast_ref(comment.enclosing_node())?;
+    let preceding = comment.preceding_node()?;
+    let following = comment.following_node()?;
+    let list = AnyCssSubSelector::cast_ref(following)?.parent::<CssSubSelectorList>()?;
+    if list
+        .parent::<CssCompoundSelector>()
+        .is_none_or(|owner| owner != compound)
+    {
+        return None;
+    }
+
+    let has_heading = [preceding, following]
+        .into_iter()
+        .filter_map(CssPseudoClassSelector::cast_ref)
+        .any(|selector| {
+            matches!(
+                selector.class(),
+                Ok(AnyCssPseudoClass::CssPseudoClassFunctionHeading(_))
+            )
+        });
+    let range = comment.piece().text_range();
+    (has_heading
+        && range.start() >= preceding.text_trimmed_range().end()
+        && range.end() <= following.text_trimmed_range().start())
+    .then_some(list)
 }
 
 /// Attaches media-list comma comments to the following query.

@@ -17,6 +17,7 @@ pub(crate) mod font_family_name_list;
 pub(crate) mod font_feature_values_item_list;
 pub(crate) mod function_parameter_list;
 pub(crate) mod generic_component_value_list;
+pub(crate) mod heading_level_list;
 pub(crate) mod if_branch_list;
 pub(crate) mod keyframes_item_list;
 pub(crate) mod keyframes_selector_list;

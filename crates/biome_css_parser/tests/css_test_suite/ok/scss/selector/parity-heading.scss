@@ -1,0 +1,31 @@
+$heading-offset: 5rem;
+$pseudo: heading;
+
+.article {
+  :heading(1, 2, 3) {
+    scroll-margin-block-start: $heading-offset;
+    text-wrap: balance;
+  }
+  &:heading(1) {}
+  :heading(0, -1, 99999, +2, -0, +0) {}
+  :heading(9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999) {}
+  :heading {}
+  :HEADING(1, 2) {}
+  :HeAdInG(3) {}
+  :h\65 ading(1, 2) {}
+  :\68 eading(3) {}
+  :heading(/* first */ 1 /* before comma */, /* after comma */ 2 /* last */) {}
+  :is(:heading(1, 2), h3) {}
+  :where(:heading(1, 2)) {}
+  @supports selector(:heading(1, 2)) {
+    :heading(1) { color: green; }
+  }
+  :lang(en, "fr") {}
+  :nth-child(2n+1) {}
+  :nth-of-type(odd) {}
+  :unknown-heading {}
+  :#{$pseudo}(1) {}
+  :head#{"ing"}(2) {}
+  :#{$pseudo} {}
+  heading, .heading { --heading: heading; }
+}

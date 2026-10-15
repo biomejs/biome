@@ -1,0 +1,4 @@
+@media all { :heading(1 } .after { color:green; }
+@media all { :heading(odd } .after-invalid { color:green; }
+@media all { :heading( } .after-empty { color:green; }
+@media all { :heading(1, 2 } .after-list { color:green; }

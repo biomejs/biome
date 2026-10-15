@@ -246,38 +246,39 @@ CssRoot {
                 L_CURLY@218..220 "{" [] [Whitespace(" ")],
             ],
         },
-        CssQualifiedRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selectors: CssNestedSelectorList [],
-                    simple_selector: CssTypeSelector {
-                        namespace: missing (optional),
-                        ident: CssIdentifier {
-                            value_token: IDENT@220..231 "font-family" [] [],
+        CssBogusRule {
+            items: [
+                CssSelectorList [
+                    CssCompoundSelector {
+                        nesting_selectors: CssNestedSelectorList [],
+                        simple_selector: CssTypeSelector {
+                            namespace: missing (optional),
+                            ident: CssIdentifier {
+                                value_token: IDENT@220..231 "font-family" [] [],
+                            },
                         },
+                        sub_selectors: CssSubSelectorList [
+                            CssBogusSubSelector {
+                                items: [
+                                    COLON@231..233 ":" [] [Whitespace(" ")],
+                                ],
+                            },
+                        ],
                     },
-                    sub_selectors: CssSubSelectorList [
-                        CssBogusSubSelector {
-                            items: [
-                                COLON@231..233 ":" [] [Whitespace(" ")],
-                            ],
-                        },
-                    ],
-                },
-                missing separator,
-                CssBogusSelector {
-                    items: [
-                        CSS_STRING_LITERAL@233..239 "\"Bixa\"" [] [],
-                        SEMICOLON@239..241 ";" [] [Whitespace(" ")],
-                    ],
-                },
-            ],
-            block: CssBogusBlock {
-                items: [
-                    CssDeclarationOrRuleList [],
-                    R_CURLY@241..242 "}" [] [],
+                    missing separator,
+                    CssBogusSelector {
+                        items: [
+                            CSS_STRING_LITERAL@233..239 "\"Bixa\"" [] [],
+                            SEMICOLON@239..241 ";" [] [Whitespace(" ")],
+                        ],
+                    },
                 ],
-            },
+            ],
+        },
+        CssBogusRule {
+            items: [
+                R_CURLY@241..242 "}" [] [],
+            ],
         },
         CssQualifiedRule {
             prelude: CssSelectorList [
@@ -467,7 +468,7 @@ CssRoot {
           2: R_CURLY@216..218 "}" [] [Whitespace(" ")]
     5: CSS_BOGUS_RULE@218..220
       0: L_CURLY@218..220 "{" [] [Whitespace(" ")]
-    6: CSS_QUALIFIED_RULE@220..242
+    6: CSS_BOGUS_RULE@220..241
       0: CSS_SELECTOR_LIST@220..241
         0: CSS_COMPOUND_SELECTOR@220..233
           0: CSS_NESTED_SELECTOR_LIST@220..220
@@ -482,10 +483,9 @@ CssRoot {
         2: CSS_BOGUS_SELECTOR@233..241
           0: CSS_STRING_LITERAL@233..239 "\"Bixa\"" [] []
           1: SEMICOLON@239..241 ";" [] [Whitespace(" ")]
-      1: CSS_BOGUS_BLOCK@241..242
-        0: CSS_DECLARATION_OR_RULE_LIST@241..241
-        1: R_CURLY@241..242 "}" [] []
-    7: CSS_QUALIFIED_RULE@242..282
+    7: CSS_BOGUS_RULE@241..242
+      0: R_CURLY@241..242 "}" [] []
+    8: CSS_QUALIFIED_RULE@242..282
       0: CSS_SELECTOR_LIST@242..265
         0: CSS_COMPOUND_SELECTOR@242..265
           0: CSS_NESTED_SELECTOR_LIST@242..242
@@ -674,7 +674,7 @@ interpolated-font-palette-values.scss:8:54 parse ━━━━━━━━━━�
   
 interpolated-font-palette-values.scss:8:62 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `}`
+  × Expected a body but instead found '}'.
   
      6 │ .after-unclosed { color: blue; }
      7 │ 
@@ -683,6 +683,13 @@ interpolated-font-palette-values.scss:8:62 parse ━━━━━━━━━━�
      9 │ .after-invalid-prefix { color: green; }
     10 │ 
   
-  i Remove }
+  i Expected a body here.
+  
+     6 │ .after-unclosed { color: blue; }
+     7 │ 
+   > 8 │ @font-palette-values palette-#{$name} { font-family: "Bixa"; }
+       │                                                              ^
+     9 │ .after-invalid-prefix { color: green; }
+    10 │ 
   
 ```

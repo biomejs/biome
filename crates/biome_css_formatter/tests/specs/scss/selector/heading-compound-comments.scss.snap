@@ -1,0 +1,109 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/selector/heading-compound-comments.scss
+---
+
+# Input
+
+```scss
+:heading(1)/**/.foo { color:red; }
+:heading(1)/* first *//* second */.foo { color:red; }
+:heading(1)/* line
+break */.foo { color:red; }
+.foo/**/:heading(1) { color:red; }
+:heading(1)/**/#target { color:red; }
+:heading(1)/**/[hidden] { color:red; }
+:heading(1)/**/:hover { color:red; }
+:heading(1)/**/::before { color:red; }
+:heading(1)/**/ .foo { color:red; }
+:heading(1) /**/.foo { color:red; }
+:heading(1)/**/>.foo { color:red; }
+:HEADING( 1 )/* biome-ignore format: x */:HEADING(2,3) { color:red; }
+.foo/* biome-ignore format: x */:HEADING( 1,2 ) { color:red; }
+
+/* biome-ignore format: preserve the rule */
+:heading( 1 )/**/.foo { color:red; }
+
+:/**/heading(1) { color:red; }
+:/* first *//* second */heading(1,2) { color:red; }
+:/* line
+break */heading(1) { color:red; }
+:/**/h\65 ading(1) { color:red; }
+:/**/heading(1)/**/.foo { color:red; }
+:/* biome-ignore format: keep function */HEADING( 1,2 ) { color:red; }
+:/**/ heading(1) { color:red; }
+
+```
+
+
+# Formatted
+
+```scss
+:heading(1)/**/.foo {
+	color: red;
+}
+:heading(1)/* first *//* second */.foo {
+	color: red;
+}
+:heading(1)/* line
+break */.foo {
+	color: red;
+}
+.foo/**/:heading(1) {
+	color: red;
+}
+:heading(1)/**/#target {
+	color: red;
+}
+:heading(1)/**/[hidden] {
+	color: red;
+}
+:heading(1)/**/:hover {
+	color: red;
+}
+:heading(1)/**/::before {
+	color: red;
+}
+:heading(1) /**/ .foo {
+	color: red;
+}
+:heading(1) /**/ .foo {
+	color: red;
+}
+:heading(1) /**/ > .foo {
+	color: red;
+}
+:HEADING( 1 )/* biome-ignore format: x */:heading(2, 3) {
+	color: red;
+}
+.foo/* biome-ignore format: x */:heading(1, 2) {
+	color: red;
+}
+
+/* biome-ignore format: preserve the rule */
+:heading( 1 )/**/.foo { color:red; }
+
+:/**/heading(1) {
+	color: red;
+}
+:/* first *//* second */heading(1, 2) {
+	color: red;
+}
+:/* line
+break */heading(1) {
+	color: red;
+}
+:/**/h\65 ading(1) {
+	color: red;
+}
+:/**/heading(1)/**/.foo {
+	color: red;
+}
+:/* biome-ignore format: keep function */HEADING( 1,2 ) {
+	color: red;
+}
+:/**/ heading(1) {
+	color: red;
+}
+
+```

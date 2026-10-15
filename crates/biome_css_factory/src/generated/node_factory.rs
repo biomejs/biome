@@ -2105,6 +2105,22 @@ pub fn css_pseudo_class_function_custom_identifier_list(
         ],
     ))
 }
+pub fn css_pseudo_class_function_heading(
+    name: CssIdentifier,
+    l_paren_token: SyntaxToken,
+    levels: CssHeadingLevelList,
+    r_paren_token: SyntaxToken,
+) -> CssPseudoClassFunctionHeading {
+    CssPseudoClassFunctionHeading::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_PSEUDO_CLASS_FUNCTION_HEADING,
+        [
+            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Token(l_paren_token)),
+            Some(SyntaxElement::Node(levels.into_syntax())),
+            Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
 pub fn css_pseudo_class_function_identifier(
     name: CssIdentifier,
     l_paren_token: SyntaxToken,
@@ -5349,6 +5365,27 @@ where
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn css_heading_level_list<I, S>(items: I, separators: S) -> CssHeadingLevelList
+where
+    I: IntoIterator<Item = CssNumber>,
+    I::IntoIter: ExactSizeIterator,
+    S: IntoIterator<Item = CssSyntaxToken>,
+    S::IntoIter: ExactSizeIterator,
+{
+    let mut items = items.into_iter();
+    let mut separators = separators.into_iter();
+    let length = items.len() + separators.len();
+    CssHeadingLevelList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_HEADING_LEVEL_LIST,
+        (0..length).map(|index| {
+            if index % 2 == 0 {
+                Some(items.next()?.into_syntax().into())
+            } else {
+                Some(separators.next()?.into())
+            }
+        }),
     ))
 }
 pub fn css_if_branch_list<I, S>(items: I, separators: S) -> CssIfBranchList
