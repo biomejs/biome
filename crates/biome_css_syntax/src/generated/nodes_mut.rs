@@ -4941,6 +4941,14 @@ impl ScssPartialCombinatorSelector {
         )
     }
 }
+impl ScssPercentValue {
+    pub fn with_percent_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl ScssPlaceholderSelector {
     pub fn with_percent_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(

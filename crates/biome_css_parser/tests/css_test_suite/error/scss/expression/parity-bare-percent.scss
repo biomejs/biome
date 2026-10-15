@@ -1,0 +1,17 @@
+$malformed: 10 % +;
+.after-modulo { width: 75%; }
+
+@mixin width-in($amount, $unit: %) {
+  width: #{$amount}#{$unit};
+}
+.incomplete {
+  @include width-in(75, %;
+  color: red;
+}
+.after-include { color: blue; }
+
+.missing-separator {
+  width: if(sass(true): 10 % else: 2px);
+  color: red;
+}
+.after-if { width: 75%; }

@@ -1,0 +1,179 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+$value: foo % bar;
+.control { value: $value; width: 75%; }
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        ScssVariableDeclaration {
+            name: ScssVariable {
+                dollar_token: DOLLAR@0..1 "$" [] [],
+                name: CssIdentifier {
+                    value_token: IDENT@1..6 "value" [] [],
+                },
+            },
+            colon_token: COLON@6..8 ":" [] [Whitespace(" ")],
+            value: ScssExpression {
+                items: ScssExpressionItemList [
+                    ScssBinaryExpression {
+                        left: CssIdentifier {
+                            value_token: IDENT@8..12 "foo" [] [Whitespace(" ")],
+                        },
+                        operator: PERCENT@12..14 "%" [] [Whitespace(" ")],
+                        right: CssIdentifier {
+                            value_token: IDENT@14..17 "bar" [] [],
+                        },
+                    },
+                ],
+            },
+            modifiers: ScssVariableModifierList [],
+            semicolon_token: SEMICOLON@17..18 ";" [] [],
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@18..20 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@20..28 "control" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@28..30 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@30..35 "value" [] [],
+                                },
+                                colon_token: COLON@35..37 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        ScssVariable {
+                                            dollar_token: DOLLAR@37..38 "$" [] [],
+                                            name: CssIdentifier {
+                                                value_token: IDENT@38..43 "value" [] [],
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@43..45 ";" [] [Whitespace(" ")],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@45..50 "width" [] [],
+                                },
+                                colon_token: COLON@50..52 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssPercentage {
+                                            value_token: CSS_NUMBER_LITERAL@52..54 "75" [] [],
+                                            percent_token: PERCENT@54..55 "%" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@55..57 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@57..58 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@58..59 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..59
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..58
+    0: SCSS_VARIABLE_DECLARATION@0..18
+      0: SCSS_VARIABLE@0..6
+        0: DOLLAR@0..1 "$" [] []
+        1: CSS_IDENTIFIER@1..6
+          0: IDENT@1..6 "value" [] []
+      1: COLON@6..8 ":" [] [Whitespace(" ")]
+      2: SCSS_EXPRESSION@8..17
+        0: SCSS_EXPRESSION_ITEM_LIST@8..17
+          0: SCSS_BINARY_EXPRESSION@8..17
+            0: CSS_IDENTIFIER@8..12
+              0: IDENT@8..12 "foo" [] [Whitespace(" ")]
+            1: PERCENT@12..14 "%" [] [Whitespace(" ")]
+            2: CSS_IDENTIFIER@14..17
+              0: IDENT@14..17 "bar" [] []
+      3: SCSS_VARIABLE_MODIFIER_LIST@17..17
+      4: SEMICOLON@17..18 ";" [] []
+    1: CSS_QUALIFIED_RULE@18..58
+      0: CSS_SELECTOR_LIST@18..28
+        0: CSS_COMPOUND_SELECTOR@18..28
+          0: CSS_NESTED_SELECTOR_LIST@18..18
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@18..28
+            0: CSS_CLASS_SELECTOR@18..28
+              0: DOT@18..20 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@20..28
+                0: IDENT@20..28 "control" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@28..58
+        0: L_CURLY@28..30 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@30..57
+          0: CSS_DECLARATION_WITH_SEMICOLON@30..45
+            0: CSS_DECLARATION@30..43
+              0: CSS_GENERIC_PROPERTY@30..43
+                0: CSS_IDENTIFIER@30..35
+                  0: IDENT@30..35 "value" [] []
+                1: COLON@35..37 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@37..43
+                  0: SCSS_EXPRESSION_ITEM_LIST@37..43
+                    0: SCSS_VARIABLE@37..43
+                      0: DOLLAR@37..38 "$" [] []
+                      1: CSS_IDENTIFIER@38..43
+                        0: IDENT@38..43 "value" [] []
+              1: (empty)
+            1: SEMICOLON@43..45 ";" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_WITH_SEMICOLON@45..57
+            0: CSS_DECLARATION@45..55
+              0: CSS_GENERIC_PROPERTY@45..55
+                0: CSS_IDENTIFIER@45..50
+                  0: IDENT@45..50 "width" [] []
+                1: COLON@50..52 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@52..55
+                  0: SCSS_EXPRESSION_ITEM_LIST@52..55
+                    0: CSS_PERCENTAGE@52..55
+                      0: CSS_NUMBER_LITERAL@52..54 "75" [] []
+                      1: PERCENT@54..55 "%" [] []
+              1: (empty)
+            1: SEMICOLON@55..57 ";" [] [Whitespace(" ")]
+        2: R_CURLY@57..58 "}" [] []
+  2: EOF@58..59 "" [Newline("\n")] []
+
+```

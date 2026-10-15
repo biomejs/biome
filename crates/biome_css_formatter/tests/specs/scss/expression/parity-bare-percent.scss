@@ -1,0 +1,100 @@
+@use "sass:meta";
+@use "sass:list";
+@use "sass:map";
+
+$unit : % ;
+$default-unit:% !default;
+$default-list:10 % !default;
+$global-unit:null;
+$global-unit : % !global;
+$global-list:null;
+$global-list:10 % !global;
+@mixin width-in( $amount , $unit : /* default */ % ) { width : #{$amount}#{$unit} ; }
+@function percent( $unit : % ) { @return % ; }
+.progress { @include width-in( 75 ); }
+.sidebar { @include width-in( 320 , px ); }
+.progress-explicit { @include width-in(
+50 ,
+/* explicit unit */ %
+); }
+
+$grouped:( % );
+$bracketed: [ % , px ];
+$mapping : ( unit : % );
+$leading:% foo;
+$trailing:foo %;
+$number-list:10 %;
+$comparison-list:10 % == 3;
+$modulo:10 % 3;
+$modulo-adjacent:10 %3;
+$percentage-adjacent:10%3;
+$percentage-spaced:10% 3;
+$addition:% + 1;
+$percent-list: % %;
+$comma-list: % , px;
+$grouped-list:(%,px);
+$negative-list:% -1;
+$negative-modulo:10 % -3;
+$three:3;
+$variable-modulo:10 % $three;
+$modulo-comments:10 /* left */ % /* right */ 3;
+$trailing-comments:10 /* number */ % /* unit */ ;
+$leading-comments: % /* unit */ foo;
+$number-newline:10
+% ;
+$trailing-newline:foo
+% ;
+$modulo-newlines:10
+%
+3;
+
+.identity {
+  type:meta.type-of($unit);
+  grouped:meta.inspect($grouped);
+  bracketed:meta.inspect($bracketed);
+  bracketed-flag:list.is-bracketed($bracketed);
+  map:meta.inspect($mapping);
+  map-unit:meta.inspect(map.get($mapping,unit));
+  leading:meta.inspect($leading);
+  trailing:meta.inspect($trailing);
+  number-list:meta.inspect($number-list);
+  number-list-type:meta.type-of($number-list);
+  number-list-length:list.length($number-list);
+  default-list:meta.inspect($default-list);
+  global-list:meta.inspect($global-list);
+  comparison-list:meta.inspect($comparison-list);
+  comparison-list-type:meta.type-of($comparison-list);
+  modulo:meta.inspect($modulo);
+  modulo-type:meta.type-of($modulo);
+  modulo-adjacent:meta.inspect($modulo-adjacent);
+  percentage-adjacent:meta.inspect($percentage-adjacent);
+  percentage-spaced:meta.inspect($percentage-spaced);
+  addition:meta.inspect($addition);
+  percent-list:meta.inspect($percent-list);
+  comma-list:meta.inspect($comma-list);
+  grouped-list:meta.inspect($grouped-list);
+  negative-list:meta.inspect($negative-list);
+  negative-modulo:meta.inspect($negative-modulo);
+  variable-modulo:meta.inspect($variable-modulo);
+  modulo-comments:meta.inspect($modulo-comments);
+  trailing-comments:meta.inspect($trailing-comments);
+  leading-comments:meta.inspect($leading-comments);
+  number-newline:meta.inspect($number-newline);
+  trailing-newline:meta.inspect($trailing-newline);
+  modulo-newlines:meta.inspect($modulo-newlines);
+}
+
+%placeholder { width : 75% ; }
+.controls {
+@extend %placeholder;
+width:75%;
+width:attr(data-progress %,0%);
+width:attr(data-progress %, %);
+unit: % !important;
+generic:unknown(%,10 %,% foo,foo %);
+returned:percent(%);
+interpolation:#{%};
+arithmetic:(2 + 3) * 4;
+--unit: %;
+--raw: 10 % +;
+}

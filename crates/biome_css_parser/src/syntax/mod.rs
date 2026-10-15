@@ -25,13 +25,14 @@ use crate::syntax::scss::{
     is_at_any_scss_value, is_at_scss_binary_operator, is_at_scss_function,
     is_at_scss_interpolated_dashed_identifier, is_at_scss_interpolated_function_or_value,
     is_at_scss_interpolated_string, is_at_scss_module_member_access,
-    is_at_scss_parent_selector_value, is_at_scss_suffixed_interpolated_value, is_at_scss_variable,
-    is_at_scss_variable_declaration, parse_scss_bracketed_value_expression_item,
-    parse_scss_expression_from_head, parse_scss_function, parse_scss_hash_value_or_color,
-    parse_scss_interpolated_dashed_identifier, parse_scss_interpolated_function_or_value,
-    parse_scss_interpolated_string, parse_scss_module_member_access,
-    parse_scss_parent_selector_value, parse_scss_suffixed_interpolated_value_until,
-    parse_scss_variable, parse_scss_variable_declaration,
+    is_at_scss_parent_selector_value, is_at_scss_percent_value,
+    is_at_scss_suffixed_interpolated_value, is_at_scss_variable, is_at_scss_variable_declaration,
+    parse_scss_bracketed_value_expression_item, parse_scss_expression_from_head,
+    parse_scss_function, parse_scss_hash_value_or_color, parse_scss_interpolated_dashed_identifier,
+    parse_scss_interpolated_function_or_value, parse_scss_interpolated_string,
+    parse_scss_module_member_access, parse_scss_parent_selector_value, parse_scss_percent_value,
+    parse_scss_suffixed_interpolated_value_until, parse_scss_variable,
+    parse_scss_variable_declaration,
 };
 use crate::syntax::selector::SelectorList;
 use crate::syntax::selector::is_nth_at_selector;
@@ -706,6 +707,8 @@ fn parse_any_exclusive_scss_value(p: &mut CssParser) -> ParsedSyntax {
             parse_scss_parent_selector_value,
             |p, m| scss_only_syntax_error(p, "SCSS parent selector values", m.range(p)),
         )
+    } else if is_at_scss_percent_value(p) {
+        CssSyntaxFeatures::Scss.parse_supported_syntax(p, parse_scss_percent_value)
     } else if is_at_scss_interpolated_string(p) {
         CssSyntaxFeatures::Scss.parse_exclusive_syntax(
             p,
