@@ -3297,6 +3297,11 @@ export interface Nursery {
 	 */
 	noVueVText?: NoVueVTextConfiguration;
 	/**
+	 * Disallow creating Vue watchers after an await in setup().
+	 * See https://biomejs.dev/linter/rules/no-vue-watch-after-await
+	 */
+	noVueWatchAfterAwait?: NoVueWatchAfterAwaitConfiguration;
+	/**
 	 * Disallow the bitwise XOR operator where exponentiation was likely intended.
 	 * See https://biomejs.dev/linter/rules/no-xor-as-exponentiation
 	 */
@@ -5907,6 +5912,9 @@ export type NoVueVHtmlConfiguration =
 export type NoVueVTextConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueVTextOptions;
+export type NoVueWatchAfterAwaitConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueWatchAfterAwaitOptions;
 export type NoXorAsExponentiationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoXorAsExponentiationOptions;
@@ -8480,6 +8488,10 @@ export interface RuleWithNoVueVTextOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueVTextOptions;
 }
+export interface RuleWithNoVueWatchAfterAwaitOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueWatchAfterAwaitOptions;
+}
 export interface RuleWithNoXorAsExponentiationOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -10890,6 +10902,7 @@ export interface NoVueUndeclaredDirectivesOptions {
 }
 export type NoVueVHtmlOptions = {};
 export type NoVueVTextOptions = {};
+export type NoVueWatchAfterAwaitOptions = {};
 export type NoXorAsExponentiationOptions = {};
 export type NoZeroFractionsOptions = {};
 export type UseAstroClientOnlyDirectiveValueOptions = {};
@@ -12516,13 +12529,13 @@ export type Category =
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noEmptyObjectKeys"
 	| "lint/nursery/noExcessiveNestedCallbacks"
@@ -12560,8 +12573,8 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForNavigation"
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
-	| "lint/nursery/noPromiseExecutorReturn"
 	| "lint/nursery/noProcessExit"
+	| "lint/nursery/noPromiseExecutorReturn"
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
@@ -12600,16 +12613,17 @@ export type Category =
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
-	| "lint/nursery/noVueLifecycleAfterAwait"
-	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueImportCompilerMacros"
+	| "lint/nursery/noVueLifecycleAfterAwait"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRequiredPropWithDefault"
+	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueVHtml"
 	| "lint/nursery/noVueVOnNumberValues"
 	| "lint/nursery/noVueVText"
+	| "lint/nursery/noVueWatchAfterAwait"
 	| "lint/nursery/noXorAsExponentiation"
 	| "lint/nursery/noZeroFractions"
 	| "lint/nursery/useAstroClientOnlyDirectiveValue"
@@ -12664,8 +12678,8 @@ export type Category =
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useSvelteShorthandDirective"
 	| "lint/nursery/useTailwindShorthandClasses"
-	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTailwindSortedClasses"
+	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useUnaryMinus"
 	| "lint/nursery/useUniqueArgumentNames"
