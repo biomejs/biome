@@ -562,32 +562,31 @@ fn load_jsdoc_types_from_node(model: &mut JsDocTypeModel, node: &SyntaxNode<JsLa
 
 /// Loads the types referenced by the module comment of a file.
 ///
-/// The module comment is a JSDoc comment with a `@module` tag that documents
-/// the whole file. TypeDoc requires it to be the first comment in the file, so
-/// there is at most one per file and only the first comment is inspected. A
-/// `@module` comment anywhere else is ignored, like any other JSDoc comment
-/// that isn't attached to a declaration.
+/// The module comment is the first JSDoc comment with a `@module` tag in the
+/// file header, i.e. among the comments before the first token of code. Other
+/// comments, such as a license banner, may come before it. There is at most
+/// one module comment per file, and a `@module` comment after the first token
+/// is ignored, like any other JSDoc comment that isn't attached to a
+/// declaration.
 fn load_jsdoc_types_from_module_comment(model: &mut JsDocTypeModel, root: &AnyJsRoot) {
     let Some(mut token) = root.syntax().first_token() else {
         return;
     };
-    // A shebang is not a comment, so the first comment comes after it.
+    // A shebang is not a comment, so the header comments come after it.
     if token.kind() == JsSyntaxKind::JS_SHEBANG {
         let Some(next) = token.next_token() else {
             return;
         };
         token = next;
     }
-    let Some(comment) = token
-        .leading_trivia()
-        .pieces()
-        .find(|piece| piece.is_comments())
-    else {
-        return;
-    };
-    let text = comment.text();
-    if JsdocComment::text_is_jsdoc_comment(text) && JSDOC_MODULE_TAG_REGEX.is_match(text) {
-        load_jsdoc_types_from_jsdoc_comment(model, text);
+    let module_comment = token.leading_trivia().pieces().find(|piece| {
+        piece.is_comments() && {
+            let text = piece.text();
+            JsdocComment::text_is_jsdoc_comment(text) && JSDOC_MODULE_TAG_REGEX.is_match(text)
+        }
+    });
+    if let Some(comment) = module_comment {
+        load_jsdoc_types_from_jsdoc_comment(model, comment.text());
     }
 }
 

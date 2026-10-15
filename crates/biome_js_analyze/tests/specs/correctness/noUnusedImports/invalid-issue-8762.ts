@@ -1,24 +1,18 @@
 /* should generate diagnostics */
 
-// Only the first comment of a file can be its module comment. Every `@module`
-// comment below comes after another comment, so none of them count.
+// A `@module` comment only counts in the file header, before the first line
+// of code. Both comments below come after code, so neither counts.
+
+import type { Foo } from "./foo";
+import type { Bar } from "./bar";
 
 /**
  * Documents {@link Foo}.
  * @module
  */
-
-import type { Foo } from "./foo";
-import type { Bar } from "./bar";
-import type { Baz } from "./baz";
-
-/**
- * Documents {@link Bar}.
- * @module
- */
 console.log("side effect");
 
 /**
- * Documents {@link Baz}.
+ * Documents {@link Bar}.
  * @module
  */
