@@ -89,7 +89,10 @@ impl Rule for UseTailwindSortedClasses {
             rule_category!(),
             ctx.query().node().html_string()?.range(),
             "These CSS classes should be sorted.",
-        ))
+        )
+        .note(markup! {
+            "A consistent class order makes class lists easier to read and keeps changes to them small."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<HtmlRuleAction> {

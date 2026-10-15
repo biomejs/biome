@@ -164,37 +164,47 @@ impl Rule for NoUnusedPrivateClassMembers {
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        match state {
-            UnusedMemberAction::RemoveMember(_) => Some(RuleDiagnostic::new(
+        let diagnostic = match state {
+            UnusedMemberAction::RemoveMember(_) => RuleDiagnostic::new(
                 rule_category!(),
                 state.property_range(),
                 markup! {
                     "This private class member is defined but never used."
                 },
-            )),
+            )
+            .note(markup! {
+                "A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used."
+            }),
             UnusedMemberAction::RemovePrivateModifier {
                 rename_with_underscore,
                 ..
             } => {
                 if *rename_with_underscore {
-                    Some(RuleDiagnostic::new(
+                    RuleDiagnostic::new(
                         rule_category!(),
                         state.property_range(),
                         markup! {
                             "This private class member is defined but never used."
                         },
-                    ))
+                    )
+                    .note(markup! {
+                        "A private class member that nothing uses is dead code. It adds noise and can mislead readers into thinking it is used."
+                    })
                 } else {
-                    Some(RuleDiagnostic::new(
+                    RuleDiagnostic::new(
                         rule_category!(),
                         state.property_range(),
                         markup! {
                             "This parameter is never used outside of the constructor."
                         },
-                    ))
+                    )
+                    .note(markup! {
+                        "The parameter property is never read outside of the constructor, so it does not need to be declared as a class member."
+                    })
                 }
             }
-        }
+        };
+        Some(diagnostic)
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
@@ -301,8 +311,10 @@ fn traverse_members_usage(
             }
             Err(node) => {
                 if let Some(binding) = JsObjectBindingPattern::cast(node.clone())
-                    && let Some(declarator) =
-                        binding.syntax().parent().and_then(JsVariableDeclarator::cast)
+                    && let Some(declarator) = binding
+                        .syntax()
+                        .parent()
+                        .and_then(JsVariableDeclarator::cast)
                     && let Some(initializer) = declarator.initializer()
                     && let Ok(AnyJsExpression::JsThisExpression(_)) = initializer.expression()
                 {

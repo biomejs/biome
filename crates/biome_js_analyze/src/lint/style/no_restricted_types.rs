@@ -83,7 +83,10 @@ impl Rule for NoRestrictedTypes {
             rule_category!(),
             ctx.query().range(),
             markup! { {state.message} }.to_owned(),
-        ))
+        )
+        .note(markup! {
+            "This type is listed in the "<Emphasis>"types"</Emphasis>" option in your configuration."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {

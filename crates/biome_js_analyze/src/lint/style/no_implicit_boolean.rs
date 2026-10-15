@@ -80,7 +80,10 @@ impl Rule for NoImplicitBoolean {
                 "Use explicit boolean values for boolean JSX props."
             }
             .to_owned(),
-        ))
+        )
+        .note(markup! {
+            "Writing the value explicitly makes it clear that the prop is set to "<Emphasis>"true"</Emphasis>", which is easy to miss when the prop is written without a value."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

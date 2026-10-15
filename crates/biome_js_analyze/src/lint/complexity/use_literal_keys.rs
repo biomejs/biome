@@ -128,7 +128,10 @@ impl Rule for UseLiteralKeys {
                     "The computed expression can be simplified without the use of a string literal."
                 }
             },
-        ))
+        )
+        .note(markup! {
+            "A literal key is easier to read, and tools such as type checkers and minifiers can understand the property name."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, (_, token, _): &Self::State) -> Option<JsRuleAction> {

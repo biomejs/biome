@@ -149,7 +149,11 @@ impl Rule for UseConsistentArrayType {
                     get_diagnostic_title(TsArrayKind::Shorthand)
                 };
 
-                Some(RuleDiagnostic::new(rule_category!(), query.range(), title))
+                Some(
+                    RuleDiagnostic::new(rule_category!(), query.range(), title).note(markup! {
+                        "Using one array type syntax throughout the code makes it consistent and easier to read."
+                    }),
+                )
             }
             AnyTsType::TsReferenceType(ty) => {
                 if options.syntax.unwrap_or_default() == ConsistentArrayType::Generic {
@@ -161,7 +165,10 @@ impl Rule for UseConsistentArrayType {
                         rule_category!(),
                         ty.range(),
                         get_diagnostic_title(kind),
-                    ));
+                    )
+                    .note(markup! {
+                        "Using one array type syntax throughout the code makes it consistent and easier to read."
+                    }));
                 }
 
                 None

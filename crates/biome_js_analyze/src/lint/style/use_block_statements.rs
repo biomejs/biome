@@ -170,7 +170,10 @@ impl Rule for UseBlockStatements {
             markup! {
                 "Block statements are preferred in this position."
             },
-        ))
+        )
+        .note(markup! {
+            "Without braces, it is easy to add a second statement that looks like part of the block but is not. This can cause bugs."
+        }))
     }
 
     fn action(

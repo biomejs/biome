@@ -248,6 +248,9 @@ impl Rule for NoDuplicateSelectors {
                 },
             )
             .note(markup! {
+                "Declarations in the later rule can silently override the earlier ones, and duplicated rules make the stylesheet harder to maintain."
+            })
+            .note(markup! {
                 "Remove or merge the duplicate rule to keep the stylesheet clean."
             }),
         )

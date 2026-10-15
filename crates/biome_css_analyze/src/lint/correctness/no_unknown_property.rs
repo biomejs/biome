@@ -153,10 +153,13 @@ impl Rule for NoUnknownProperty {
                 },
             )
             .note(markup! {
-                "See "<Hyperlink href="https://stylelint.io/user-guide/rules/property-no-unknown/">"CSS Specifications and browser specific properties"</Hyperlink>" for more details."
+                "Browsers ignore properties they do not know, so the declaration has no effect. An unknown property is often a typo."
             })
            .note(markup! {
-                "To resolve this issue, replace the unknown property with a valid CSS property."
+                "Use a known CSS property instead."
+            })
+            .note(markup! {
+                "See "<Hyperlink href="https://stylelint.io/user-guide/rules/property-no-unknown/">"CSS Specifications and browser specific properties"</Hyperlink>" for more details."
             })
         )
     }

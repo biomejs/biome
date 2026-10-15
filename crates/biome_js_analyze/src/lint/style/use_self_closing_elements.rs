@@ -116,9 +116,12 @@ impl Rule for UseSelfClosingElements {
             rule_category!(),
             ctx.query().range(),
             markup! {
-                "JSX elements without children should be marked as self-closing. In JSX, it is valid for any element to be self-closing."
+                "JSX elements without children should be marked as self-closing."
             },
-        ))
+        )
+        .note(markup! {
+            "In JSX, it is valid for any element to be self-closing, and the shorter form is easier to read."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

@@ -90,7 +90,10 @@ impl Rule for NoNegationElse {
             markup! {
                 "Invert blocks when performing a negation test."
             },
-        ))
+        )
+        .note(markup! {
+            "A negated condition with an "<Emphasis>"else"</Emphasis>" branch makes the reader reverse the logic twice. Swapping the blocks removes the negation."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
