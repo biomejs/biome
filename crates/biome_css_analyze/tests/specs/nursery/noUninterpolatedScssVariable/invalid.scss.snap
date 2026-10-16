@@ -25,6 +25,15 @@ $path: "a.png";
 	--url-module: url(t.$path);
 	--sass-call: darken($gap, 10%);
 	--module-call: math.max($gap, 1px);
+	--url-interpolated: url($dir/#{$name}.svg);
+	--url-upper: URL($path);
+	--if-branch: if(media(print): $gap; else: 0);
+	--if-style-query: if(style(--a: $gap): 1; else: 2);
+	--if-sass: if(sass($flag): 1; else: 2);
+	--if-supports: if(supports(display: $display): 1; else: 2);
+	--if-media: if(media(width > $breakpoint): 1; else: 2);
+	--if-module: if(sass(t.$flag): 1; else: 2);
+	--if-in-call: darken(if(media(print): $gap; else: red), 10%);
 }
 
 @supports (--raw: $gap) {
@@ -134,7 +143,7 @@ invalid.scss:11:23 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━
 ```
 
 ```
-invalid.scss:12:13 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:12:13 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The Sass variable $path isn't interpolated, so Sass outputs it unchanged.
   
@@ -149,10 +158,6 @@ invalid.scss:12:13 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Unsafe fix: Wrap the variable in interpolation.
-  
-    12 │ → --url:·url(#{$path});
-       │              ++     +  
 
 ```
 
@@ -272,7 +277,7 @@ invalid.scss:18:3 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━�
 ```
 
 ```
-invalid.scss:19:20 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:19:20 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The Sass variable t.$path isn't interpolated, so Sass outputs it unchanged.
   
@@ -287,10 +292,6 @@ invalid.scss:19:20 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
   
-  i Unsafe fix: Wrap the variable in interpolation.
-  
-    19 │ → --url-module:·url(#{t.$path});
-       │                     ++       +  
 
 ```
 
@@ -304,7 +305,7 @@ invalid.scss:20:22 lint/nursery/noUninterpolatedScssVariable ━━━━━━�
   > 20 │ 	--sass-call: darken($gap, 10%);
        │ 	                    ^^^^
     21 │ 	--module-call: math.max($gap, 1px);
-    22 │ }
+    22 │ 	--url-interpolated: url($dir/#{$name}.svg);
   
   i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
   
@@ -322,8 +323,8 @@ invalid.scss:21:26 lint/nursery/noUninterpolatedScssVariable ━━━━━━�
     20 │ 	--sass-call: darken($gap, 10%);
   > 21 │ 	--module-call: math.max($gap, 1px);
        │ 	                        ^^^^
-    22 │ }
-    23 │ 
+    22 │ 	--url-interpolated: url($dir/#{$name}.svg);
+    23 │ 	--url-upper: URL($path);
   
   i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
   
@@ -333,16 +334,54 @@ invalid.scss:21:26 lint/nursery/noUninterpolatedScssVariable ━━━━━━�
 ```
 
 ```
-invalid.scss:24:19 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:22:26 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $dir isn't interpolated, so Sass outputs it unchanged.
+  
+    20 │ 	--sass-call: darken($gap, 10%);
+    21 │ 	--module-call: math.max($gap, 1px);
+  > 22 │ 	--url-interpolated: url($dir/#{$name}.svg);
+       │ 	                        ^^^^
+    23 │ 	--url-upper: URL($path);
+    24 │ 	--if-branch: if(media(print): $gap; else: 0);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $dir instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:23:19 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $path isn't interpolated, so Sass outputs it unchanged.
+  
+    21 │ 	--module-call: math.max($gap, 1px);
+    22 │ 	--url-interpolated: url($dir/#{$name}.svg);
+  > 23 │ 	--url-upper: URL($path);
+       │ 	                 ^^^^^
+    24 │ 	--if-branch: if(media(print): $gap; else: 0);
+    25 │ 	--if-style-query: if(style(--a: $gap): 1; else: 2);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $path instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:24:32 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
   
-    22 │ }
-    23 │ 
-  > 24 │ @supports (--raw: $gap) {
-       │                   ^^^^
-    25 │ 	a {
-    26 │ 		color: red;
+    22 │ 	--url-interpolated: url($dir/#{$name}.svg);
+    23 │ 	--url-upper: URL($path);
+  > 24 │ 	--if-branch: if(media(print): $gap; else: 0);
+       │ 	                              ^^^^
+    25 │ 	--if-style-query: if(style(--a: $gap): 1; else: 2);
+    26 │ 	--if-sass: if(sass($flag): 1; else: 2);
   
   i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
   
@@ -350,22 +389,163 @@ invalid.scss:24:19 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━
   
   i Unsafe fix: Wrap the variable in interpolation.
   
-    24 │ @supports·(--raw:·#{$gap})·{
+    24 │ → --if-branch:·if(media(print):·#{$gap};·else:·0);
+       │                                 ++    +           
+
+```
+
+```
+invalid.scss:25:34 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+    23 │ 	--url-upper: URL($path);
+    24 │ 	--if-branch: if(media(print): $gap; else: 0);
+  > 25 │ 	--if-style-query: if(style(--a: $gap): 1; else: 2);
+       │ 	                                ^^^^
+    26 │ 	--if-sass: if(sass($flag): 1; else: 2);
+    27 │ 	--if-supports: if(supports(display: $display): 1; else: 2);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    25 │ → --if-style-query:·if(style(--a:·#{$gap}):·1;·else:·2);
+       │                                   ++    +               
+
+```
+
+```
+invalid.scss:26:21 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $flag isn't interpolated, so Sass outputs it unchanged.
+  
+    24 │ 	--if-branch: if(media(print): $gap; else: 0);
+    25 │ 	--if-style-query: if(style(--a: $gap): 1; else: 2);
+  > 26 │ 	--if-sass: if(sass($flag): 1; else: 2);
+       │ 	                   ^^^^^
+    27 │ 	--if-supports: if(supports(display: $display): 1; else: 2);
+    28 │ 	--if-media: if(media(width > $breakpoint): 1; else: 2);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $flag instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:27:38 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $display isn't interpolated, so Sass outputs it unchanged.
+  
+    25 │ 	--if-style-query: if(style(--a: $gap): 1; else: 2);
+    26 │ 	--if-sass: if(sass($flag): 1; else: 2);
+  > 27 │ 	--if-supports: if(supports(display: $display): 1; else: 2);
+       │ 	                                    ^^^^^^^^
+    28 │ 	--if-media: if(media(width > $breakpoint): 1; else: 2);
+    29 │ 	--if-module: if(sass(t.$flag): 1; else: 2);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $display instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:28:31 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $breakpoint isn't interpolated, so Sass outputs it unchanged.
+  
+    26 │ 	--if-sass: if(sass($flag): 1; else: 2);
+    27 │ 	--if-supports: if(supports(display: $display): 1; else: 2);
+  > 28 │ 	--if-media: if(media(width > $breakpoint): 1; else: 2);
+       │ 	                             ^^^^^^^^^^^
+    29 │ 	--if-module: if(sass(t.$flag): 1; else: 2);
+    30 │ 	--if-in-call: darken(if(media(print): $gap; else: red), 10%);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $breakpoint instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:29:23 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable t.$flag isn't interpolated, so Sass outputs it unchanged.
+  
+    27 │ 	--if-supports: if(supports(display: $display): 1; else: 2);
+    28 │ 	--if-media: if(media(width > $breakpoint): 1; else: 2);
+  > 29 │ 	--if-module: if(sass(t.$flag): 1; else: 2);
+       │ 	                     ^^^^^^^
+    30 │ 	--if-in-call: darken(if(media(print): $gap; else: red), 10%);
+    31 │ }
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text t.$flag instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:30:40 lint/nursery/noUninterpolatedScssVariable ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+    28 │ 	--if-media: if(media(width > $breakpoint): 1; else: 2);
+    29 │ 	--if-module: if(sass(t.$flag): 1; else: 2);
+  > 30 │ 	--if-in-call: darken(if(media(print): $gap; else: red), 10%);
+       │ 	                                      ^^^^
+    31 │ }
+    32 │ 
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:33:19 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
+  
+    31 │ }
+    32 │ 
+  > 33 │ @supports (--raw: $gap) {
+       │                   ^^^^
+    34 │ 	a {
+    35 │ 		color: red;
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Wrap the variable in interpolation.
+  
+    33 │ @supports·(--raw:·#{$gap})·{
        │                   ++    +   
 
 ```
 
 ```
-invalid.scss:30:23 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:39:23 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The Sass variable $gap isn't interpolated, so Sass outputs it unchanged.
   
-    28 │ }
-    29 │ 
-  > 30 │ @container style(--c: $gap) {
+    37 │ }
+    38 │ 
+  > 39 │ @container style(--c: $gap) {
        │                       ^^^^
-    31 │ 	a {
-    32 │ 		color: red;
+    40 │ 	a {
+    41 │ 		color: red;
   
   i Sass only evaluates #{...} inside custom property values, so the browser receives the text $gap instead of the variable's value.
   
@@ -373,7 +553,7 @@ invalid.scss:30:23 lint/nursery/noUninterpolatedScssVariable  FIXABLE  ━━━
   
   i Unsafe fix: Wrap the variable in interpolation.
   
-    30 │ @container·style(--c:·#{$gap})·{
+    39 │ @container·style(--c:·#{$gap})·{
        │                       ++    +   
 
 ```

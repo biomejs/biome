@@ -19,6 +19,15 @@ $path: "a.png";
 	--url-module: url(t.$path);
 	--sass-call: darken($gap, 10%);
 	--module-call: math.max($gap, 1px);
+	--url-interpolated: url($dir/#{$name}.svg);
+	--url-upper: URL($path);
+	--if-branch: if(media(print): $gap; else: 0);
+	--if-style-query: if(style(--a: $gap): 1; else: 2);
+	--if-sass: if(sass($flag): 1; else: 2);
+	--if-supports: if(supports(display: $display): 1; else: 2);
+	--if-media: if(media(width > $breakpoint): 1; else: 2);
+	--if-module: if(sass(t.$flag): 1; else: 2);
+	--if-in-call: darken(if(media(print): $gap; else: red), 10%);
 }
 
 @supports (--raw: $gap) {

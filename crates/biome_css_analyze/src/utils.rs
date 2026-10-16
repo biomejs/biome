@@ -11,6 +11,8 @@ use biome_css_syntax::keywords::{
     VENDOR_PREFIXES, VENDOR_SPECIFIC_PSEUDO_ELEMENTS,
 };
 
+use biome_css_syntax::{CssCustomPropertyValue, CssSyntaxNode};
+use biome_rowan::AstNode;
 use biome_string_case::{StrLikeExtension, StrOnlyExtension};
 
 pub fn is_css_variable(value: &str) -> bool {
@@ -20,6 +22,15 @@ pub fn is_css_variable(value: &str) -> bool {
 /// Check if the value is a double-dashed custom function.
 pub fn is_custom_function(value: &str) -> bool {
     value.starts_with("--")
+}
+
+/// Whether `value` is part of another custom property value, such as an `if()` branch in
+/// `--a: if(media(print): 1; else: 2)` or the query in `--a: if(style(--b: 1): 1)`.
+pub fn is_nested_custom_property_value(value: &CssSyntaxNode) -> bool {
+    value
+        .ancestors()
+        .skip(1)
+        .any(|node| CssCustomPropertyValue::can_cast(node.kind()))
 }
 
 // Returns the vendor prefix extracted from an input string.

@@ -1,21 +1,21 @@
 use crate::CssRuleAction;
 use crate::fonts::is_function_keyword;
-use crate::utils::is_custom_function;
+use crate::utils::{is_custom_function, is_nested_custom_property_value};
 use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_css_factory::make;
 use biome_css_syntax::{
-    AnyCssCustomPropertyComponent, AnyCssValue, AnyScssExpression, AnyScssExpressionItem,
-    AnyScssModuleMember, CssCustomIdentifier, CssCustomPropertyComponentList,
-    CssCustomPropertyDelimiter, CssCustomPropertyFunction, CssCustomPropertyValue, CssSyntaxNode,
-    CssSyntaxToken,
-    ScssInterpolatedString, ScssInterpolation, T,
+    AnyCssCustomPropertyComponent, AnyCssUrlValue, AnyCssValue, AnyScssExpression,
+    AnyScssExpressionItem, AnyScssModuleMember, CssCustomIdentifier,
+    CssCustomPropertyComponentList, CssCustomPropertyDelimiter, CssCustomPropertyFunction,
+    CssCustomPropertyValue, CssSyntaxNode, CssSyntaxToken, CssUrlFunction,
+    ScssInterpolatedString, ScssInterpolation, ScssModuleMemberAccess, ScssVariable, T,
 };
 use biome_diagnostics::Severity;
 use biome_languages::CssFileSource;
-use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TextRange, WalkEvent};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TextRange, TextSize, WalkEvent};
 use biome_rule_options::no_uninterpolated_scss_variable::NoUninterpolatedScssVariableOptions;
 
 declare_lint_rule! {
@@ -34,7 +34,8 @@ declare_lint_rule! {
     ///
     /// The fix wraps the variable in `#{}`. It isn't offered when the variable is an argument of a
     /// Sass function, such as `darken($base, 10%)`, because Sass would still output the call
-    /// unchanged. Wrap the whole call in `#{}` instead.
+    /// unchanged. Wrap the whole call in `#{}` instead. It isn't offered inside `url()` or in the
+    /// conditions of `if()` either.
     ///
     /// ## Examples
     ///
@@ -81,7 +82,15 @@ declare_lint_rule! {
     }
 }
 
-pub struct RuleState {
+pub enum RuleState {
+    Component(ComponentVariable),
+    /// A variable the fix can't wrap, at the start of a URL as in `url($path)`, or in an `if()`
+    /// condition as in `if(sass($flag): 1)`.
+    Unfixable(TextRange),
+}
+
+/// A variable written as separate components, such as `$gap` or `ns.$gap`.
+pub struct ComponentVariable {
     /// The `ns` and `.` of a module variable written as `ns.$name`.
     namespace: Option<(CssCustomIdentifier, CssCustomPropertyDelimiter)>,
     dollar: CssCustomPropertyDelimiter,
@@ -95,12 +104,14 @@ impl Rule for NoUninterpolatedScssVariable {
     type Options = NoUninterpolatedScssVariableOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        if !ctx.source_type::<CssFileSource>().is_scss() {
+        let value = ctx.query().syntax();
+        if !ctx.source_type::<CssFileSource>().is_scss() || is_nested_custom_property_value(value)
+        {
             return Box::default();
         }
 
         let mut signals = Vec::new();
-        let mut walk = ctx.query().syntax().preorder();
+        let mut walk = value.preorder();
         while let Some(event) = walk.next() {
             let WalkEvent::Enter(node) = event else {
                 continue;
@@ -109,6 +120,23 @@ impl Rule for NoUninterpolatedScssVariable {
                 || ScssInterpolatedString::can_cast(node.kind())
             {
                 walk.skip_subtree();
+                continue;
+            }
+            if let Some(url) = CssUrlFunction::cast_ref(&node) {
+                walk.skip_subtree();
+                if let Some(range) = url_variable_range(&url) {
+                    signals.push(RuleState::Unfixable(range));
+                }
+                continue;
+            }
+            // `if()` conditions are parsed as Sass expressions, which Sass doesn't evaluate in a
+            // custom property either.
+            if ScssVariable::can_cast(node.kind()) {
+                let variable = node
+                    .parent()
+                    .filter(|parent| ScssModuleMemberAccess::can_cast(parent.kind()))
+                    .unwrap_or(node);
+                signals.push(RuleState::Unfixable(variable.text_trimmed_range()));
                 continue;
             }
             let Some(dollar) = CssCustomPropertyDelimiter::cast(node) else {
@@ -125,44 +153,43 @@ impl Rule for NoUninterpolatedScssVariable {
             else {
                 continue;
             };
-            let state = RuleState {
+            signals.push(RuleState::Component(ComponentVariable {
                 namespace: module_namespace(&dollar),
                 dollar,
                 name,
-            };
-            // A `$` in the middle of a URL, as in `url(https://example.com/a$b.svg)`, is part
-            // of the address, so only a variable that starts the URL is reported.
-            if is_url_body(&state.dollar) && state.first_node().prev_sibling().is_some() {
-                continue;
-            }
-            signals.push(state);
+            }));
         }
         signals.into_boxed_slice()
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let name = state.name.value_token().ok()?;
-        let namespace = match &state.namespace {
-            Some((namespace, _)) => Some(namespace.value_token().ok()?),
-            None => None,
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let range = match state {
+            RuleState::Component(variable) => variable.range(),
+            RuleState::Unfixable(range) => *range,
         };
-        let namespace = namespace.as_ref().map_or("", |token| token.text_trimmed());
-        let dot = if namespace.is_empty() { "" } else { "." };
+        let value = ctx.query().syntax();
+        let variable = value
+            .text_trimmed()
+            .slice(range - value.text_trimmed_range().start())
+            .into_text();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                state.range(),
+                range,
                 markup! {
-                    "The Sass variable "<Emphasis>{namespace}{dot}"$"{name.text_trimmed()}</Emphasis>" isn't interpolated, so Sass outputs it unchanged."
+                    "The Sass variable "<Emphasis>{variable.text()}</Emphasis>" isn't interpolated, so Sass outputs it unchanged."
                 },
             )
             .note(markup! {
-                "Sass only evaluates "<Emphasis>"#{...}"</Emphasis>" inside custom property values, so the browser receives the text "<Emphasis>{namespace}{dot}"$"{name.text_trimmed()}</Emphasis>" instead of the variable's value."
+                "Sass only evaluates "<Emphasis>"#{...}"</Emphasis>" inside custom property values, so the browser receives the text "<Emphasis>{variable.text()}</Emphasis>" instead of the variable's value."
             }),
         )
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<CssRuleAction> {
+        let RuleState::Component(state) = state else {
+            return None;
+        };
         if is_sass_call_argument(&state.dollar) {
             return None;
         }
@@ -199,7 +226,7 @@ impl Rule for NoUninterpolatedScssVariable {
     }
 }
 
-impl RuleState {
+impl ComponentVariable {
     fn first_node(&self) -> &CssSyntaxNode {
         self.namespace
             .as_ref()
@@ -223,7 +250,7 @@ impl RuleState {
 }
 
 /// Builds `#{$name}` or `#{ns.$name}`, keeping the trivia that surrounded the variable.
-fn make_interpolation(state: &RuleState) -> Option<ScssInterpolation> {
+fn make_interpolation(state: &ComponentVariable) -> Option<ScssInterpolation> {
     let name_token = state.name.value_token().ok()?;
     let variable = make::scss_variable(
         without_trivia(&state.dollar.value().ok()?),
@@ -280,7 +307,6 @@ fn is_sass_call_argument(dollar: &CssCustomPropertyDelimiter) -> bool {
     dollar
         .syntax()
         .ancestors()
-        .take_while(|node| !CssCustomPropertyValue::can_cast(node.kind()))
         .filter_map(CssCustomPropertyFunction::cast)
         .any(|function| {
             let is_module_call = function
@@ -295,23 +321,47 @@ fn is_sass_call_argument(dollar: &CssCustomPropertyDelimiter) -> bool {
                 return false;
             };
             let name = name.text_trimmed();
-            is_module_call
-                || !(is_custom_function(name)
-                    || is_function_keyword(name)
-                    || ["if", "style", "media", "supports"]
-                        .iter()
-                        .any(|css| name.eq_ignore_ascii_case(css)))
+            is_module_call || !(is_custom_function(name) || is_function_keyword(name))
         })
 }
 
-/// Whether `dollar` is directly inside the parentheses of `url()`.
-fn is_url_body(dollar: &CssCustomPropertyDelimiter) -> bool {
-    dollar
-        .syntax()
-        .grand_parent()
-        .and_then(CssCustomPropertyFunction::cast)
-        .and_then(|function| function.name().ok()?.value_token().ok())
-        .is_some_and(|name| name.text_trimmed().eq_ignore_ascii_case("url"))
+/// Returns the range of the `$name` or `ns.$name` that starts the URL of `url`.
+///
+/// A `$` later in the URL, as in `url(https://example.com/a$b.svg)`, is part of the address.
+fn url_variable_range(url: &CssUrlFunction) -> Option<TextRange> {
+    let token = match url.value()? {
+        AnyCssUrlValue::CssUrlValueRaw(raw) => raw.value_token().ok()?,
+        AnyCssUrlValue::ScssInterpolatedUrlValue(value) => value
+            .parts()
+            .first()?
+            .as_scss_url_text()?
+            .value_token()
+            .ok()?,
+        _ => return None,
+    };
+    let text = token.text_trimmed();
+    let namespace_len = identifier_len(text);
+    let name = if namespace_len == 0 {
+        text.strip_prefix('$')?
+    } else {
+        text[namespace_len..].strip_prefix(".$")?
+    };
+    let name_len = identifier_len(name);
+    if name_len == 0 {
+        return None;
+    }
+    let len = TextSize::try_from(text.len() - name.len() + name_len).ok()?;
+    Some(TextRange::at(token.text_trimmed_range().start(), len))
+}
+
+/// Returns the byte length of the Sass identifier that starts `text`, which can't start with a
+/// digit. Non-ASCII characters are identifier characters.
+fn identifier_len(text: &str) -> usize {
+    if text.starts_with(|c: char| c.is_ascii_digit()) {
+        return 0;
+    }
+    text.find(|c: char| c.is_ascii() && !(c.is_ascii_alphanumeric() || matches!(c, '-' | '_')))
+        .unwrap_or(text.len())
 }
 
 /// Whether `right` starts where `left` ends, with no whitespace or comments in between.
