@@ -779,7 +779,9 @@ AnyCssCustomPropertyComponent =
 	| CssNumber
 	| AnyCssDimension
 	| CssString
+	| CssUrlValueRaw
 	| ScssInterpolatedString
+	| ScssInterpolatedUrlValue
 	| ScssInterpolation
 	| CssCustomPropertyFunction
 	| CssCustomPropertyParenthesizedBlock
@@ -2309,7 +2311,7 @@ CssFunctionParameter =
 //                                        ^^^^^                  ^^^^^
 CssFunctionParameterDefaultValue =
 	':'
-	value: AnyCssValue
+	components: CssCustomPropertyComponentList
 
 // returns <css-type>
 //

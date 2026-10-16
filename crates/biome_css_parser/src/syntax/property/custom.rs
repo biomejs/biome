@@ -3,18 +3,21 @@ use crate::parser::CssParser;
 use crate::syntax::parse_error::expected_component_value;
 use crate::syntax::scss::{
     is_at_scss_interpolated_string, is_at_scss_interpolation, parse_scss_interpolated_string,
-    parse_scss_interpolation_with_context,
+    parse_scss_interpolated_url_value, parse_scss_interpolation_with_context,
 };
 use crate::syntax::value::dimension::{is_at_any_dimension, parse_any_dimension};
-use crate::syntax::value::function::is_nth_at_adjacent_l_paren;
-use crate::syntax::{is_at_identifier, parse_custom_identifier_with_keywords, parse_number};
+use crate::syntax::value::function::{is_nth_at_adjacent_l_paren, is_nth_at_css_function};
+use crate::syntax::value::url::parse_url_value_raw;
+use crate::syntax::{
+    CssSyntaxFeatures, is_at_identifier, parse_custom_identifier_with_keywords, parse_number,
+};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{RecoveryError, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{CompletedMarker, Parser, TokenSet, token_set};
+use biome_parser::{CompletedMarker, Parser, SyntaxFeature, TokenSet, token_set};
 
 const CUSTOM_PROPERTY_DELIMITER_SET: TokenSet<CssSyntaxKind> = token_set![
     CSS_DELIM_LITERAL,
@@ -83,6 +86,25 @@ pub(crate) fn parse_legacy_filter_value(
     value.complete(p, CSS_LEGACY_FILTER_VALUE)
 }
 
+/// Parses raw native CSS parameter defaults such as `$gap 16px` in SCSS.
+/// Only explicit interpolation is parsed as Sass. Outer separators and invalid
+/// declaration-value boundaries remain available to the parameter parser.
+pub(crate) fn parse_function_parameter_default_components(
+    p: &mut CssParser,
+    recover_at_body: bool,
+) -> CompletedMarker {
+    CustomPropertyComponentList {
+        boundary: CustomPropertyListBoundary::ParameterDefault,
+        comment_mode: CssCustomPropertyCommentMode::ScssLineComments,
+        nested_end_set: recover_at_body.then_some(token_set![T!['{']]),
+        legacy_filter_recovery: false,
+        mode: CustomPropertyValueMode::FunctionDefault {
+            scss_interpolation: CssSyntaxFeatures::Scss.is_supported(p),
+        },
+    }
+    .parse_list(p)
+}
+
 /// Parses an SCSS custom-property value in an `@supports` declaration.
 ///
 /// Example: `$gap` in `@supports (--space: $gap) {}`.
@@ -115,11 +137,28 @@ struct CustomPropertyComponentList {
     comment_mode: CssCustomPropertyCommentMode,
     nested_end_set: Option<TokenSet<CssSyntaxKind>>,
     legacy_filter_recovery: bool,
+    mode: CustomPropertyValueMode,
+}
+
+#[derive(Clone, Copy)]
+enum CustomPropertyValueMode {
+    General,
+    FunctionDefault { scss_interpolation: bool },
+}
+
+impl CustomPropertyValueMode {
+    fn allows_scss_interpolation(self) -> bool {
+        match self {
+            Self::General => true,
+            Self::FunctionDefault { scss_interpolation } => scss_interpolation,
+        }
+    }
 }
 
 /// Controls which tokens terminate a raw custom-property component list.
 enum CustomPropertyListBoundary {
     Value(TokenSet<CssSyntaxKind>),
+    ParameterDefault,
     Block,
 }
 
@@ -130,6 +169,7 @@ impl CustomPropertyComponentList {
             comment_mode,
             nested_end_set: None,
             legacy_filter_recovery: false,
+            mode: CustomPropertyValueMode::General,
         }
     }
 
@@ -142,6 +182,7 @@ impl CustomPropertyComponentList {
             comment_mode: CssCustomPropertyCommentMode::PreserveDoubleSlash,
             nested_end_set: Some(nested_end_set),
             legacy_filter_recovery: true,
+            mode: CustomPropertyValueMode::General,
         }
     }
 
@@ -149,12 +190,14 @@ impl CustomPropertyComponentList {
         comment_mode: CssCustomPropertyCommentMode,
         nested_end_set: Option<TokenSet<CssSyntaxKind>>,
         legacy_filter_recovery: bool,
+        mode: CustomPropertyValueMode,
     ) -> Self {
         Self {
             boundary: CustomPropertyListBoundary::Block,
             comment_mode,
             nested_end_set,
             legacy_filter_recovery,
+            mode,
         }
     }
 
@@ -177,11 +220,16 @@ impl ParseNodeList for CustomPropertyComponentList {
             self.comment_mode,
             self.nested_end_set,
             self.legacy_filter_recovery,
+            self.mode,
         )
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
         match self.boundary {
+            CustomPropertyListBoundary::ParameterDefault => {
+                p.at_ts(CUSTOM_PROPERTY_BLOCK_END_SET.union(token_set![T![,], T![;], T![!]]))
+                    || self.nested_end_set.is_some_and(|end_set| p.at_ts(end_set))
+            }
             CustomPropertyListBoundary::Value(end_set) => {
                 if p.at(T![!]) {
                     p.source()
@@ -231,23 +279,36 @@ fn parse_custom_property_component(
     comment_mode: CssCustomPropertyCommentMode,
     nested_end_set: Option<TokenSet<CssSyntaxKind>>,
     legacy_filter_recovery: bool,
+    mode: CustomPropertyValueMode,
 ) -> ParsedSyntax {
     let context = CssLexContext::CustomPropertyValue(comment_mode);
 
-    if is_at_scss_interpolation(p) {
+    if mode.allows_scss_interpolation() && is_at_scss_interpolation(p) {
         parse_scss_interpolation_with_context(p, context)
     } else if is_at_scss_interpolated_string(p) {
         parse_scss_interpolated_string(p, context)
     } else if p.at(CSS_STRING_LITERAL) {
         parse_custom_property_string(p, context)
     } else if is_at_custom_property_function(p) {
-        parse_custom_property_function(p, comment_mode, nested_end_set, legacy_filter_recovery)
+        parse_custom_property_function(
+            p,
+            comment_mode,
+            nested_end_set,
+            legacy_filter_recovery,
+            mode,
+        )
     } else if is_at_any_dimension(p) {
         parse_any_dimension(p, context)
     } else if p.at(CSS_NUMBER_LITERAL) {
         parse_number(p, context)
     } else if p.at_ts(CUSTOM_PROPERTY_BLOCK_START_SET) {
-        parse_custom_property_block(p, comment_mode, nested_end_set, legacy_filter_recovery)
+        parse_custom_property_block(
+            p,
+            comment_mode,
+            nested_end_set,
+            legacy_filter_recovery,
+            mode,
+        )
     } else if is_at_identifier(p) {
         parse_custom_identifier_with_keywords(p, context, true)
     } else {
@@ -269,6 +330,7 @@ fn parse_custom_property_function(
     comment_mode: CssCustomPropertyCommentMode,
     nested_end_set: Option<TokenSet<CssSyntaxKind>>,
     legacy_filter_recovery: bool,
+    mode: CustomPropertyValueMode,
 ) -> ParsedSyntax {
     if !is_at_custom_property_function(p) {
         return Absent;
@@ -279,6 +341,31 @@ fn parse_custom_property_function(
     let context = CssLexContext::CustomPropertyValue(comment_mode);
 
     parse_custom_identifier_with_keywords(p, context, true).ok();
+
+    if is_url_function
+        && matches!(mode, CustomPropertyValueMode::FunctionDefault { .. })
+        && !is_nth_at_css_function(p, 1)
+    {
+        let url_context = p
+            .source()
+            .url_body_lex_context(mode.allows_scss_interpolation());
+        if matches!(
+            url_context,
+            CssLexContext::UrlRawValue(_) | CssLexContext::ScssUrlValue { .. }
+        ) {
+            // URL payload brackets and braces are bytes, not balanced blocks.
+            p.bump_with_context(T!['('], url_context);
+            let components = p.start();
+            if matches!(url_context, CssLexContext::ScssUrlValue { .. }) {
+                parse_scss_interpolated_url_value(p, url_context).ok();
+            } else {
+                parse_url_value_raw(p).ok();
+            }
+            components.complete(p, CSS_CUSTOM_PROPERTY_COMPONENT_LIST);
+            p.expect_with_context(T![')'], context);
+            return Present(function.complete(p, CSS_CUSTOM_PROPERTY_FUNCTION));
+        }
+    }
 
     // Raw `url(...)` contents keep `//` as URL text; fallback function bodies
     // parse it as a Sass comment.
@@ -295,8 +382,13 @@ fn parse_custom_property_function(
         T!['('],
         CssLexContext::CustomPropertyValue(body_comment_mode),
     );
-    CustomPropertyComponentList::block(body_comment_mode, nested_end_set, legacy_filter_recovery)
-        .parse_list(p);
+    CustomPropertyComponentList::block(
+        body_comment_mode,
+        nested_end_set,
+        legacy_filter_recovery,
+        mode,
+    )
+    .parse_list(p);
     p.expect_with_context(T![')'], context);
     Present(function.complete(p, CSS_CUSTOM_PROPERTY_FUNCTION))
 }
@@ -307,6 +399,7 @@ fn parse_custom_property_block(
     comment_mode: CssCustomPropertyCommentMode,
     nested_end_set: Option<TokenSet<CssSyntaxKind>>,
     legacy_filter_recovery: bool,
+    mode: CustomPropertyValueMode,
 ) -> ParsedSyntax {
     let (open, close, kind) = match p.cur() {
         T!['('] => (T!['('], T![')'], CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK),
@@ -318,7 +411,7 @@ fn parse_custom_property_block(
     let block = p.start();
     let context = CssLexContext::CustomPropertyValue(comment_mode);
     p.bump_with_context(open, context);
-    CustomPropertyComponentList::block(comment_mode, nested_end_set, legacy_filter_recovery)
+    CustomPropertyComponentList::block(comment_mode, nested_end_set, legacy_filter_recovery, mode)
         .parse_list(p);
     p.expect_with_context(close, context);
     Present(block.complete(p, kind))

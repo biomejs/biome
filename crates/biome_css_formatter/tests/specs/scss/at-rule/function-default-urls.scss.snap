@@ -1,0 +1,83 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/at-rule/function-default-urls.scss
+---
+
+# Input
+
+```scss
+$suffix:b;
+@function --relative(--image:url(a,b),--other: red){result:var(--image)}
+@function --data(--image:url(data:image/svg+xml,%3Csvg%3E%3C/svg%3E),--other: 1px){result:var(--image)}
+@function --nested(--image:var(--image,url(../images/a,b.png)),--other: 1px){result:var(--image)}
+@function --comments(--image:/* before */url(a/*payload*/,b)/* after */,--quoted:url("a,b") ){result:var(--image)}
+@function --interpolated(--image:url(a,#{ $suffix }),--other: 1px){result:var(--image)}
+@function --boundaries(--a:url(a{b),--b:url(a}b),--c:url(a[b),--d:url(a]b),--other:8px 16px){result:var(--a)}
+@function --boundary-controls(--nested:var(--image,url(a{b)),--quoted:url("a[b"),--function:url(var(--image)),--literal:url($literal,b)){result:var(--nested)}
+@function --boundary-interpolation(--a:url(a{#{ $suffix }),--b:url(a]#{ $suffix })){result:var(--a)}
+@function --leading-boundaries(--a:url([a),--b:url({a),--c:url(]a),--d:url(}a)){result:var(--a)}
+
+```
+
+
+# Formatted
+
+```scss
+$suffix: b;
+@function --relative(--image: url(a,b), --other: red) {
+	result: var(--image);
+}
+@function --data(
+	--image: url(data:image/svg+xml,%3Csvg%3E%3C/svg%3E),
+	--other: 1px
+) {
+	result: var(--image);
+}
+@function --nested(
+	--image: var(--image, url(../images/a,b.png)),
+	--other: 1px
+) {
+	result: var(--image);
+}
+@function --comments(
+	--image: /* before */ url(a/*payload*/,b) /* after */,
+	--quoted: url("a,b")
+) {
+	result: var(--image);
+}
+@function --interpolated(--image: url(a,#{ $suffix }), --other: 1px) {
+	result: var(--image);
+}
+@function --boundaries(
+	--a: url(a{b),
+	--b: url(a}b),
+	--c: url(a[b),
+	--d: url(a]b),
+	--other: 8px 16px
+) {
+	result: var(--a);
+}
+@function --boundary-controls(
+	--nested: var(--image, url(a{b)),
+	--quoted: url("a[b"),
+	--function: url(var(--image)),
+	--literal: url($literal,b)
+) {
+	result: var(--nested);
+}
+@function --boundary-interpolation(
+	--a: url(a{#{ $suffix }),
+	--b: url(a]#{ $suffix })
+) {
+	result: var(--a);
+}
+@function --leading-boundaries(
+	--a: url([a),
+	--b: url({a),
+	--c: url(]a),
+	--d: url(}a)
+) {
+	result: var(--a);
+}
+
+```

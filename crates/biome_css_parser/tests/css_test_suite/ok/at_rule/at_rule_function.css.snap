@@ -620,9 +620,11 @@ CssRoot {
                             },
                             default_value: CssFunctionParameterDefaultValue {
                                 colon_token: COLON@515..517 ":" [] [Whitespace(" ")],
-                                value: CssNumber {
-                                    value_token: CSS_NUMBER_LITERAL@517..520 "0.8" [] [],
-                                },
+                                components: CssCustomPropertyComponentList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@517..520 "0.8" [] [],
+                                    },
+                                ],
                             },
                         },
                     ],
@@ -2356,9 +2358,11 @@ CssRoot {
                             },
                             default_value: CssFunctionParameterDefaultValue {
                                 colon_token: COLON@2091..2093 ":" [] [Whitespace(" ")],
-                                value: CssIdentifier {
-                                    value_token: IDENT@2093..2097 "rem" [] [Whitespace(" ")],
-                                },
+                                components: CssCustomPropertyComponentList [
+                                    CssCustomIdentifier {
+                                        value_token: IDENT@2093..2097 "rem" [] [Whitespace(" ")],
+                                    },
+                                ],
                             },
                         },
                         COMMA@2097..2099 "," [] [Whitespace(" ")],
@@ -2722,8 +2726,9 @@ CssRoot {
                 1: (empty)
               2: CSS_FUNCTION_PARAMETER_DEFAULT_VALUE@515..520
                 0: COLON@515..517 ":" [] [Whitespace(" ")]
-                1: CSS_NUMBER@517..520
-                  0: CSS_NUMBER_LITERAL@517..520 "0.8" [] []
+                1: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@517..520
+                  0: CSS_NUMBER@517..520
+                    0: CSS_NUMBER_LITERAL@517..520 "0.8" [] []
           4: R_PAREN@520..522 ")" [] [Whitespace(" ")]
           5: CSS_RETURNS_STATEMENT@522..538
             0: RETURNS_KW@522..530 "returns" [] [Whitespace(" ")]
@@ -3853,8 +3858,9 @@ CssRoot {
                 1: (empty)
               2: CSS_FUNCTION_PARAMETER_DEFAULT_VALUE@2091..2097
                 0: COLON@2091..2093 ":" [] [Whitespace(" ")]
-                1: CSS_IDENTIFIER@2093..2097
-                  0: IDENT@2093..2097 "rem" [] [Whitespace(" ")]
+                1: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@2093..2097
+                  0: CSS_CUSTOM_IDENTIFIER@2093..2097
+                    0: IDENT@2093..2097 "rem" [] [Whitespace(" ")]
             1: COMMA@2097..2099 "," [] [Whitespace(" ")]
             2: CSS_FUNCTION_PARAMETER@2099..2107
               0: CSS_DASHED_IDENTIFIER@2099..2107

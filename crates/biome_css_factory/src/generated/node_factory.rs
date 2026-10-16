@@ -1168,13 +1168,13 @@ impl CssFunctionParameterBuilder {
 }
 pub fn css_function_parameter_default_value(
     colon_token: SyntaxToken,
-    value: AnyCssValue,
+    components: CssCustomPropertyComponentList,
 ) -> CssFunctionParameterDefaultValue {
     CssFunctionParameterDefaultValue::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_FUNCTION_PARAMETER_DEFAULT_VALUE,
         [
             Some(SyntaxElement::Token(colon_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
+            Some(SyntaxElement::Node(components.into_syntax())),
         ],
     ))
 }

@@ -1,0 +1,110 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/atrule/function-default-values.css
+---
+
+# Input
+
+```css
+@function --inset ( --padding  :  8px   16px ){result:var(--padding)}
+.card{padding:--inset()}
+.override{padding:--inset(4px 12px)}
+
+@function --typed-inset( --padding /* type */ <length>+ /* colon */ : 8px   16px )returns <length>+{result:var(--padding)}
+
+@function --shadow( --value:0  1px 2px rgb(0,  0,0),--extra: 1px){result:var(--value)}
+
+@function --fallback(
+--value:var(--size,8px  16px)   calc(100% - var(--offset,  2px)),
+--color type(<color>|<custom-ident>):red
+)returns <length>+{result:var(--value)}
+
+@function --position(--value:left  top,--single:center,--required){result:var(--value)}
+
+@function --comments(
+--value:/* first */ 8px /* between */
+16px /* last */,
+/* parameter */--other:4px  12px/* end */
+)/* returns */returns <length>+{result:var(--value)}
+
+@function --default-suppression(--value: /* biome-ignore format: preserve the value component */ 8px    16px,--other:4px 12px){result:var(--value)}
+
+/* biome-ignore format: preserve the complete function */
+@function --suppressed( --value:8px    16px , --other:4px ){result:var(--value)}
+
+.after-functions{padding:1px}
+
+@function --parameter-suppression(
+/* biome-ignore format: preserve this parameter */
+--padding:   8px    16px,
+--other: 1px  2px
+){result:var(--padding)}
+
+```
+
+
+# Formatted
+
+```css
+@function --inset(--padding: 8px 16px) {
+	result: var(--padding);
+}
+.card {
+	padding: --inset();
+}
+.override {
+	padding: --inset(4px 12px);
+}
+
+@function --typed-inset(
+	--padding /* type */ <length>+ /* colon */: 8px 16px
+) returns <length>+ {
+	result: var(--padding);
+}
+
+@function --shadow(--value: 0 1px 2px rgb(0, 0, 0), --extra: 1px) {
+	result: var(--value);
+}
+
+@function --fallback(
+	--value: var(--size, 8px 16px) calc(100% - var(--offset, 2px)),
+	--color type(<color> | <custom-ident>): red
+) returns <length>+ {
+	result: var(--value);
+}
+
+@function --position(--value: left top, --single: center, --required) {
+	result: var(--value);
+}
+
+@function --comments(
+	--value: /* first */ 8px /* between */
+	16px /* last */,
+	/* parameter */ --other: 4px 12px /* end */
+) /* returns */ returns <length>+ {
+	result: var(--value);
+}
+
+@function --default-suppression(
+	--value: /* biome-ignore format: preserve the value component */ 8px 16px,
+	--other: 4px 12px
+) {
+	result: var(--value);
+}
+
+/* biome-ignore format: preserve the complete function */
+@function --suppressed( --value:8px    16px , --other:4px ){result:var(--value)}
+
+.after-functions {
+	padding: 1px;
+}
+
+@function --parameter-suppression(
+	/* biome-ignore format: preserve this parameter */
+	--padding:   8px    16px,
+	--other: 1px 2px
+) {
+	result: var(--padding);
+}
+
+```

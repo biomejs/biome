@@ -1,0 +1,84 @@
+$gap: 8px;
+
+@function --inset(--padding: 8px 16px) {
+  result: var(--padding);
+}
+
+.card {
+  padding: --inset();
+}
+
+.override {
+  padding: --inset(4px 12px);
+}
+
+@function --typed-inset(--padding <length>+: 8px 16px) returns <length>+ {
+  result: var(--padding);
+}
+
+@function --shadow(
+  --value: 0 1px 2px rgb(0, 0, 0),
+  --extra: var(--gap, 1px 2px) calc(100% - var(--offset, 2px))
+) {
+  result: var(--value);
+}
+
+@function --literal(--value: $gap 16px, --operator: 1 + 2) {
+  result: var(--value);
+}
+
+@function --tokens(--type-tokens: 10px <length>, --colon-tokens: 1: 2) {
+  result: var(--type-tokens);
+}
+
+@function --nested-boundaries(
+  --value: unknown(a; b !important, c) 8px,
+  --brackets: [a, b] 8px,
+  --other: 2px
+) {
+  result: var(--value);
+}
+
+@function --interpolated(--value: #{$gap} 16px, --nested: var(--gap, #{$gap} 16px)) {
+  result: var(--value);
+}
+
+@function --line-comment(
+  --value: #{$gap} // keep this comment
+    16px,
+  --other: 1px
+) {
+  result: var(--value);
+}
+
+@function --background(--image: url(http://example.test/image.png) center, --other: 1px) {
+  result: var(--image);
+}
+
+@function --comments(
+  --value: /* first */ #{$gap} /* between */
+    16px /* last */,
+  /* parameter */ --other: left top /* end */
+) /* returns */ returns <length>+ {
+  result: var(--value);
+}
+
+@function --controls(--required, --single: 8px) {
+  result: var(--single);
+}
+
+@function ordinary($value: 1 + 2, $padding: 8px 16px) {
+  @return $value;
+}
+
+.after-functions {
+  padding: ordinary();
+}
+
+@function --url-boundaries(
+  --open-curly: url(a{b), --close-curly: url(a}b),
+  --open-bracket: url(a[b), --close-bracket: url(a]b),
+  --nested: var(--image, url(a{b)), --quoted: url("a[b"),
+  --function: url(var(--image)), --literal: url($literal,b),
+  --interpolated: url(a{#{$gap})
+) { result: var(--open-curly); }

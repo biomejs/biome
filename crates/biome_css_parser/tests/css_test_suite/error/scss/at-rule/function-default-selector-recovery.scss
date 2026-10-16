@@ -1,0 +1,16 @@
+@function --f(--x: red {
+  result: var(--x);
+}
+.a, .b { color: red; }
+.after { color: blue; }
+
+@function --g(--x: 8px 16px {
+  result: var(--x);
+}
+.c,
+.d, .e { color: green; }
+.end { color: black; }
+
+@function --pseudo(--x: red { result: red; }
+.a, :is(.b) { color: blue; }
+.after-pseudo { color: green; }

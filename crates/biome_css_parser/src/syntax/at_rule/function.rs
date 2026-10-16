@@ -1,8 +1,10 @@
+use crate::lexer::{CssCustomPropertyCommentMode, CssLexContext};
 use crate::syntax::at_rule::parse_error::{
     expected_any_type, expected_function_parameter, expected_parameter_default_value,
 };
 use crate::syntax::block::parse_declaration_or_at_rule_list_block;
 use crate::syntax::parse_error::expected_dashed_identifier;
+use crate::syntax::property::parse_function_parameter_default_components;
 use crate::syntax::scss::{
     is_at_scss_interpolated_dashed_identifier, parse_scss_interpolated_dashed_identifier,
 };
@@ -10,7 +12,7 @@ use crate::syntax::value::r#type::{
     is_at_syntax_single_component, is_at_syntax_type, is_at_type_function,
     parse_any_syntax_component, parse_type_function,
 };
-use crate::syntax::{is_at_identifier, parse_any_value};
+use crate::syntax::{is_at_identifier, try_parse};
 use crate::{parser::CssParser, syntax::parse_dashed_identifier};
 use biome_css_syntax::{
     CssSyntaxKind::{self, *},
@@ -72,7 +74,31 @@ pub(crate) fn parse_function_at_rule_declarator(p: &mut CssParser) -> ParsedSynt
         .ok();
 
     p.expect(T!['(']);
-    CssFunctionParameterList.parse_list(p);
+    let encountered = p.state().encountered_if_function;
+    let speculative = p.is_speculative_parsing();
+    let closed = try_parse(p, |p| {
+        let diagnostics = p.context().diagnostics().len();
+        CssFunctionParameterList {
+            recover_at_body: false,
+        }
+        .parse_list(p);
+        if p.at(T![')']) && p.context().diagnostics().len() == diagnostics {
+            Ok(())
+        } else {
+            Err(())
+        }
+    })
+    .is_ok();
+    p.state_mut().encountered_if_function =
+        encountered || (closed && speculative && p.state().encountered_if_function);
+    if !closed {
+        // A missing `)` makes the body look like a braced default. Recovery
+        // must not turn a following selector's `)` into a successful first pass.
+        CssFunctionParameterList {
+            recover_at_body: true,
+        }
+        .parse_list(p);
+    }
     p.expect(T![')']);
 
     parse_returns_statement(p).ok();
@@ -90,7 +116,7 @@ fn parse_function_name(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
-fn parse_function_parameter(p: &mut CssParser) -> ParsedSyntax {
+fn parse_function_parameter(p: &mut CssParser, recover_at_body: bool) -> ParsedSyntax {
     // expect identifier and not just dashed identifier
     // to allow better recovery on invalid parameter names
     if !is_at_identifier(p) {
@@ -108,7 +134,7 @@ fn parse_function_parameter(p: &mut CssParser) -> ParsedSyntax {
         .ok();
 
     parse_any_type(p).ok();
-    parse_function_parameter_default_value(p).ok();
+    parse_function_parameter_default_value(p, recover_at_body).ok();
 
     Present(m.complete(p, CSS_FUNCTION_PARAMETER))
 }
@@ -131,22 +157,27 @@ fn is_at_function_parameter_default_value(p: &mut CssParser) -> bool {
     p.at(T![:])
 }
 
+/// Parses a nonempty raw default, leaving outer commas and `)` to the parameter list.
+/// Nested functions retain their own commas, as in `0 1px rgb(0, 0, 0)`.
 #[inline]
-fn parse_function_parameter_default_value(p: &mut CssParser) -> ParsedSyntax {
+fn parse_function_parameter_default_value(
+    p: &mut CssParser,
+    recover_at_body: bool,
+) -> ParsedSyntax {
     if !is_at_function_parameter_default_value(p) {
         return Absent;
     }
 
     let m = p.start();
 
-    p.bump(T![:]);
-    parse_any_value(p)
-        .or_recover_with_token_set(
-            p,
-            &ParseRecoveryTokenSet::new(CSS_BOGUS, token_set![T![,], T![')']]),
-            expected_parameter_default_value,
-        )
-        .ok();
+    p.bump_with_context(
+        T![:],
+        CssLexContext::CustomPropertyValue(CssCustomPropertyCommentMode::ScssLineComments),
+    );
+    let components = parse_function_parameter_default_components(p, recover_at_body);
+    if components.range(p).is_empty() {
+        p.error(expected_parameter_default_value(p, p.cur_range()));
+    }
 
     Present(m.complete(p, CSS_FUNCTION_PARAMETER_DEFAULT_VALUE))
 }
@@ -188,7 +219,9 @@ impl ParseRecovery for CssFunctionParameterListParseRecovery {
     }
 }
 
-struct CssFunctionParameterList;
+struct CssFunctionParameterList {
+    recover_at_body: bool,
+}
 
 impl ParseSeparatedList for CssFunctionParameterList {
     type Kind = CssSyntaxKind;
@@ -196,11 +229,11 @@ impl ParseSeparatedList for CssFunctionParameterList {
     const LIST_KIND: Self::Kind = CSS_FUNCTION_PARAMETER_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_function_parameter(p)
+        parse_function_parameter(p, self.recover_at_body)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T![')'])
+        p.at_ts(token_set![T![')'], T![returns], T!['{']])
     }
 
     fn recover(

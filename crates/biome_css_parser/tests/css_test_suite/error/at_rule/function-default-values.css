@@ -1,0 +1,24 @@
+@function --semicolon(--value: 8px; 16px, --after: 4px) {
+  result: var(--after);
+}
+.after-semicolon { color: red; }
+
+@function --important(--value: 8px 16px !important, --after: 4px) {
+  result: var(--after);
+}
+.after-important { color: red; }
+
+@function --mismatched(--value: rgb(0, 0, 0], --after: 4px) {
+  result: var(--after);
+}
+.after-mismatched { color: red; }
+
+@function --unmatched(--value: [8px 16px), --after: 4px) {
+  result: var(--after);
+}
+.after-unmatched { color: red; }
+
+@function --missing-outer(--value: 8px 16px {
+  result: var(--value);
+}
+.after-missing-outer { color: red; }

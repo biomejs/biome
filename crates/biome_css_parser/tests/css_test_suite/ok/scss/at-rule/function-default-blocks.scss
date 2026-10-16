@@ -1,0 +1,11 @@
+$gap: 8px;
+
+@function --blocks(--value: {a, #{$gap}}, --other: fn({a; b !important}, [c, d]) tail) {
+  result: var(--value);
+}
+
+@function --sequence(--value: first {a: b} last, --empty: {}) {
+  result: var(--value);
+}
+
+.after { color: red; }

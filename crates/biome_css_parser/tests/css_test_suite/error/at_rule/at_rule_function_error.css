@@ -35,15 +35,9 @@
 @function --numeric-param(123) {}
 @function --at-param(@foo) {}
 
-/* Type after default value (wrong order) */
-@function --wrong-order(--param: 10px <length>) {}
-
 /* Unclosed type syntax */
 @function --unclosed-type(--param <string) {}
 @function --empty-type(--param <>) {}
-
-/* Multiple colons/defaults */
-@function --double-default(--param: 1: 2) {}
 
 /* Misspelled returns */
 @function --misspelled() return <number> {}

@@ -3234,14 +3234,14 @@ impl CssFunctionParameterDefaultValue {
     pub fn as_fields(&self) -> CssFunctionParameterDefaultValueFields {
         CssFunctionParameterDefaultValueFields {
             colon_token: self.colon_token(),
-            value: self.value(),
+            components: self.components(),
         }
     }
     pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn value(&self) -> SyntaxResult<AnyCssValue> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn components(&self) -> CssCustomPropertyComponentList {
+        support::list(&self.syntax, 1usize)
     }
 }
 impl Serialize for CssFunctionParameterDefaultValue {
@@ -3255,7 +3255,7 @@ impl Serialize for CssFunctionParameterDefaultValue {
 #[derive(Serialize)]
 pub struct CssFunctionParameterDefaultValueFields {
     pub colon_token: SyntaxResult<SyntaxToken>,
-    pub value: SyntaxResult<AnyCssValue>,
+    pub components: CssCustomPropertyComponentList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssGenericDelimiter {
@@ -15174,7 +15174,9 @@ pub enum AnyCssCustomPropertyComponent {
     CssCustomPropertyParenthesizedBlock(CssCustomPropertyParenthesizedBlock),
     CssNumber(CssNumber),
     CssString(CssString),
+    CssUrlValueRaw(CssUrlValueRaw),
     ScssInterpolatedString(ScssInterpolatedString),
+    ScssInterpolatedUrlValue(ScssInterpolatedUrlValue),
     ScssInterpolation(ScssInterpolation),
 }
 impl AnyCssCustomPropertyComponent {
@@ -15236,9 +15238,21 @@ impl AnyCssCustomPropertyComponent {
             _ => None,
         }
     }
+    pub fn as_css_url_value_raw(&self) -> Option<&CssUrlValueRaw> {
+        match &self {
+            Self::CssUrlValueRaw(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_scss_interpolated_string(&self) -> Option<&ScssInterpolatedString> {
         match &self {
             Self::ScssInterpolatedString(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_url_value(&self) -> Option<&ScssInterpolatedUrlValue> {
+        match &self {
+            Self::ScssInterpolatedUrlValue(item) => Some(item),
             _ => None,
         }
     }
@@ -22901,7 +22915,7 @@ impl std::fmt::Debug for CssFunctionParameterDefaultValue {
                     "colon_token",
                     &support::DebugSyntaxResult(self.colon_token()),
                 )
-                .field("value", &support::DebugSyntaxResult(self.value()))
+                .field("components", &self.components())
                 .finish()
         } else {
             f.debug_struct("CssFunctionParameterDefaultValue").finish()
@@ -39052,9 +39066,19 @@ impl From<CssString> for AnyCssCustomPropertyComponent {
         Self::CssString(node)
     }
 }
+impl From<CssUrlValueRaw> for AnyCssCustomPropertyComponent {
+    fn from(node: CssUrlValueRaw) -> Self {
+        Self::CssUrlValueRaw(node)
+    }
+}
 impl From<ScssInterpolatedString> for AnyCssCustomPropertyComponent {
     fn from(node: ScssInterpolatedString) -> Self {
         Self::ScssInterpolatedString(node)
+    }
+}
+impl From<ScssInterpolatedUrlValue> for AnyCssCustomPropertyComponent {
+    fn from(node: ScssInterpolatedUrlValue) -> Self {
+        Self::ScssInterpolatedUrlValue(node)
     }
 }
 impl From<ScssInterpolation> for AnyCssCustomPropertyComponent {
@@ -39073,7 +39097,9 @@ impl AstNode for AnyCssCustomPropertyComponent {
         .union(CssCustomPropertyParenthesizedBlock::KIND_SET)
         .union(CssNumber::KIND_SET)
         .union(CssString::KIND_SET)
+        .union(CssUrlValueRaw::KIND_SET)
         .union(ScssInterpolatedString::KIND_SET)
+        .union(ScssInterpolatedUrlValue::KIND_SET)
         .union(ScssInterpolation::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
@@ -39085,7 +39111,9 @@ impl AstNode for AnyCssCustomPropertyComponent {
             | CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK
             | CSS_NUMBER
             | CSS_STRING
+            | CSS_URL_VALUE_RAW
             | SCSS_INTERPOLATED_STRING
+            | SCSS_INTERPOLATED_URL_VALUE
             | SCSS_INTERPOLATION => true,
             k if AnyCssDimension::can_cast(k) => true,
             _ => false,
@@ -39113,8 +39141,12 @@ impl AstNode for AnyCssCustomPropertyComponent {
             }
             CSS_NUMBER => Self::CssNumber(CssNumber { syntax }),
             CSS_STRING => Self::CssString(CssString { syntax }),
+            CSS_URL_VALUE_RAW => Self::CssUrlValueRaw(CssUrlValueRaw { syntax }),
             SCSS_INTERPOLATED_STRING => {
                 Self::ScssInterpolatedString(ScssInterpolatedString { syntax })
+            }
+            SCSS_INTERPOLATED_URL_VALUE => {
+                Self::ScssInterpolatedUrlValue(ScssInterpolatedUrlValue { syntax })
             }
             SCSS_INTERPOLATION => Self::ScssInterpolation(ScssInterpolation { syntax }),
             _ => {
@@ -39136,7 +39168,9 @@ impl AstNode for AnyCssCustomPropertyComponent {
             Self::CssCustomPropertyParenthesizedBlock(it) => it.syntax(),
             Self::CssNumber(it) => it.syntax(),
             Self::CssString(it) => it.syntax(),
+            Self::CssUrlValueRaw(it) => it.syntax(),
             Self::ScssInterpolatedString(it) => it.syntax(),
+            Self::ScssInterpolatedUrlValue(it) => it.syntax(),
             Self::ScssInterpolation(it) => it.syntax(),
             Self::AnyCssDimension(it) => it.syntax(),
         }
@@ -39151,7 +39185,9 @@ impl AstNode for AnyCssCustomPropertyComponent {
             Self::CssCustomPropertyParenthesizedBlock(it) => it.into_syntax(),
             Self::CssNumber(it) => it.into_syntax(),
             Self::CssString(it) => it.into_syntax(),
+            Self::CssUrlValueRaw(it) => it.into_syntax(),
             Self::ScssInterpolatedString(it) => it.into_syntax(),
+            Self::ScssInterpolatedUrlValue(it) => it.into_syntax(),
             Self::ScssInterpolation(it) => it.into_syntax(),
             Self::AnyCssDimension(it) => it.into_syntax(),
         }
@@ -39169,7 +39205,9 @@ impl std::fmt::Debug for AnyCssCustomPropertyComponent {
             Self::CssCustomPropertyParenthesizedBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::CssNumber(it) => std::fmt::Debug::fmt(it, f),
             Self::CssString(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssUrlValueRaw(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolatedString(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedUrlValue(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolation(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -39188,7 +39226,9 @@ impl From<AnyCssCustomPropertyComponent> for SyntaxNode {
             }
             AnyCssCustomPropertyComponent::CssNumber(it) => it.into_syntax(),
             AnyCssCustomPropertyComponent::CssString(it) => it.into_syntax(),
+            AnyCssCustomPropertyComponent::CssUrlValueRaw(it) => it.into_syntax(),
             AnyCssCustomPropertyComponent::ScssInterpolatedString(it) => it.into_syntax(),
+            AnyCssCustomPropertyComponent::ScssInterpolatedUrlValue(it) => it.into_syntax(),
             AnyCssCustomPropertyComponent::ScssInterpolation(it) => it.into_syntax(),
         }
     }

@@ -1,0 +1,10 @@
+@function --leading(--a: url([a), --b: url({a), --c: url(]a), --d: url(}a)) {
+  result: var(--a);
+}
+.a {
+  background: url([a);
+  background: url({a);
+  background: url(]a);
+  background: url(}a);
+  color: red;
+}

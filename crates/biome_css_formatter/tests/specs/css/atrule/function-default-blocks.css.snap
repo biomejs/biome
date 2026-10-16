@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: css/atrule/function-default-blocks.css
+---
+
+# Input
+
+```css
+@function --blocks(--value: {a,   b},--other:fn({a; b !important},[c, d])   tail){result:var(--value)}
+@function --sequence(--value:first {a:  b} last,--empty:{/* empty */}){result:var(--value)}
+@function --comments(--value:/* first */ {a, /* middle */ b} /* last */,--other:[c, d]){result:var(--value)}
+.after{color:red}
+
+```
+
+
+# Formatted
+
+```css
+@function --blocks(
+	--value: {a, b},
+	--other: fn({a; b !important}, [c, d]) tail
+) {
+	result: var(--value);
+}
+@function --sequence(--value: first {a: b} last, --empty: {/* empty */}) {
+	result: var(--value);
+}
+@function --comments(
+	--value: /* first */ {a, /* middle */ b} /* last */,
+	--other: [c, d]
+) {
+	result: var(--value);
+}
+.after {
+	color: red;
+}
+
+```

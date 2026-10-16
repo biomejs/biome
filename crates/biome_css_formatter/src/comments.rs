@@ -15,14 +15,14 @@ use biome_css_syntax::{
     AnyCssMediaQuery, AnyCssNamespacePrefixName, AnyCssProperty, AnyCssPseudoClass,
     AnyCssPseudoElement, AnyCssSelector, AnyCssSelectorIdentifier, AnyCssUnknownAtRuleName,
     CssComplexSelector, CssDeclaration, CssDeclarationImportant, CssDeclarationOrRuleBlock,
-    CssFunction, CssGenericComponentValueList, CssGenericProperty, CssIdentifier, CssIfBranch,
-    CssLanguage, CssMediaQueryList, CssNamespaceAtRule, CssNestedQualifiedRule, CssPageSelector,
-    CssPseudoElementFunction, CssQualifiedRule, CssSyntaxKind, CssSyntaxNode, CssSyntaxToken,
-    ScssAtRootAtRule, ScssAtRootQueryClause, ScssAtRootSelector, ScssEachHeader, ScssEachValueList,
-    ScssExpression, ScssExpressionItemList, ScssIfAtRule, ScssInterpolatedPseudoClassFunction,
-    ScssInterpolatedPseudoElementFunction, ScssListExpression, ScssListExpressionElement,
-    ScssMapExpression, ScssMapExpressionPair, ScssVariableDeclaration, T, TextLen, TextSize,
-    is_in_scss_include_arguments,
+    CssFunction, CssFunctionParameter, CssGenericComponentValueList, CssGenericProperty,
+    CssIdentifier, CssIfBranch, CssLanguage, CssMediaQueryList, CssNamespaceAtRule,
+    CssNestedQualifiedRule, CssPageSelector, CssPseudoElementFunction, CssQualifiedRule,
+    CssSyntaxKind, CssSyntaxNode, CssSyntaxToken, ScssAtRootAtRule, ScssAtRootQueryClause,
+    ScssAtRootSelector, ScssEachHeader, ScssEachValueList, ScssExpression, ScssExpressionItemList,
+    ScssIfAtRule, ScssInterpolatedPseudoClassFunction, ScssInterpolatedPseudoElementFunction,
+    ScssListExpression, ScssListExpressionElement, ScssMapExpression, ScssMapExpressionPair,
+    ScssVariableDeclaration, T, TextLen, TextSize, is_in_scss_include_arguments,
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
@@ -127,6 +127,7 @@ impl CommentStyle for CssCommentStyle {
             .or_else(handle_scss_else_clause_comment)
             .or_else(handle_empty_custom_property_container_comment)
             .or_else(handle_function_comment)
+            .or_else(handle_function_parameter_comment)
             .or_else(handle_pseudo_function_boundary_comment)
             .or_else(handle_media_separator_comment)
             // Handle SCSS variable name/colon comments before generic properties.
@@ -449,6 +450,42 @@ fn handle_function_comment(
     let is_after_name = CssIdentifier::can_cast(preceding_node.kind());
     if is_inside_function && is_after_name {
         CommentPlacement::leading(following_node.clone(), comment)
+    } else {
+        CommentPlacement::Default(comment)
+    }
+}
+
+/// Keeps native function parameter comments inside the parameter list.
+///
+/// For example, `--padding /* type */ <length>+: 8px 16px` retains the comment
+/// before its type, and a suppression after `(` applies to the first parameter.
+fn handle_function_parameter_comment(
+    comment: DecoratedComment<CssLanguage>,
+) -> CommentPlacement<CssLanguage> {
+    let Some(parameter) = comment
+        .following_token()
+        .and_then(|token| token.ancestors().find_map(CssFunctionParameter::cast))
+    else {
+        return CommentPlacement::Default(comment);
+    };
+
+    let range = comment.piece().text_range();
+    if range.end() <= parameter.syntax().text_trimmed_range().start() {
+        return CommentPlacement::leading(parameter.into_syntax(), comment);
+    }
+
+    let Ok(name) = parameter.name() else {
+        return CommentPlacement::Default(comment);
+    };
+    let following = parameter
+        .ty()
+        .map(AstNode::into_syntax)
+        .or_else(|| parameter.default_value().map(AstNode::into_syntax));
+    if let Some(following) = following
+        && range.start() >= name.syntax().text_trimmed_range().end()
+        && range.end() <= following.text_trimmed_range().start()
+    {
+        CommentPlacement::leading(following, comment)
     } else {
         CommentPlacement::Default(comment)
     }

@@ -546,7 +546,7 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "CssFunctionAtRule" => &[("declarator", 0), ("block", 1)],
         "CssFunctionAtRuleDeclarator" => &[("name", 1), ("parameters", 3), ("returns", 5)],
         "CssFunctionParameter" => &[("name", 0), ("ty", 1), ("default_value", 2)],
-        "CssFunctionParameterDefaultValue" => &[("value", 1)],
+        "CssFunctionParameterDefaultValue" => &[("components", 1)],
         "CssGenericProperty" => &[("name", 0), ("value", 2)],
         "CssIdSelector" => &[("name", 1)],
         "CssIfBranch" => &[("condition", 0), ("value", 2)],
