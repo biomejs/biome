@@ -240,6 +240,7 @@ struct FontFeatureValuesBlock;
 
 impl ParseBlockBody for FontFeatureValuesBlock {
     const BLOCK_KIND: CssSyntaxKind = CSS_FONT_FEATURE_VALUES_BLOCK;
+    const SASS_BLOCK_KIND: CssSyntaxKind = CSS_BOGUS_BLOCK;
 
     fn is_at_element(&self, p: &mut CssParser) -> bool {
         p.at(T![@])

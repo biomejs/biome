@@ -7600,6 +7600,146 @@ pub struct CssRuleBlockFields {
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssSassIndentedDeclarationBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssSassIndentedDeclarationBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssSassIndentedDeclarationBlockFields {
+        CssSassIndentedDeclarationBlockFields {
+            declarations: self.declarations(),
+        }
+    }
+    pub fn declarations(&self) -> CssDeclarationList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+impl Serialize for CssSassIndentedDeclarationBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssSassIndentedDeclarationBlockFields {
+    pub declarations: CssDeclarationList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssSassIndentedDeclarationOrAtRuleBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssSassIndentedDeclarationOrAtRuleBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssSassIndentedDeclarationOrAtRuleBlockFields {
+        CssSassIndentedDeclarationOrAtRuleBlockFields {
+            items: self.items(),
+        }
+    }
+    pub fn items(&self) -> CssDeclarationOrAtRuleList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+impl Serialize for CssSassIndentedDeclarationOrAtRuleBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssSassIndentedDeclarationOrAtRuleBlockFields {
+    pub items: CssDeclarationOrAtRuleList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssSassIndentedDeclarationOrRuleBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssSassIndentedDeclarationOrRuleBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssSassIndentedDeclarationOrRuleBlockFields {
+        CssSassIndentedDeclarationOrRuleBlockFields {
+            items: self.items(),
+        }
+    }
+    pub fn items(&self) -> CssDeclarationOrRuleList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+impl Serialize for CssSassIndentedDeclarationOrRuleBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssSassIndentedDeclarationOrRuleBlockFields {
+    pub items: CssDeclarationOrRuleList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssSassIndentedRuleBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssSassIndentedRuleBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssSassIndentedRuleBlockFields {
+        CssSassIndentedRuleBlockFields {
+            rules: self.rules(),
+        }
+    }
+    pub fn rules(&self) -> CssRuleList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+impl Serialize for CssSassIndentedRuleBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssSassIndentedRuleBlockFields {
+    pub rules: CssRuleList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssScopeAtRule {
     pub(crate) syntax: SyntaxNode,
 }
@@ -10408,7 +10548,7 @@ impl ScssFunctionAtRule {
     pub fn parameters(&self) -> Option<ScssParameterList> {
         support::node(&self.syntax, 2usize)
     }
-    pub fn block(&self) -> SyntaxResult<CssDeclarationOrRuleBlock> {
+    pub fn block(&self) -> SyntaxResult<AnyCssDeclarationOrRuleBlock> {
         support::required_node(&self.syntax, 3usize)
     }
 }
@@ -10425,7 +10565,7 @@ pub struct ScssFunctionAtRuleFields {
     pub function_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<CssIdentifier>,
     pub parameters: Option<ScssParameterList>,
-    pub block: SyntaxResult<CssDeclarationOrRuleBlock>,
+    pub block: SyntaxResult<AnyCssDeclarationOrRuleBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssHashValue {
@@ -10683,7 +10823,7 @@ impl ScssIncludeAtRule {
     pub fn using_clause(&self) -> Option<ScssIncludeUsingClause> {
         support::node(&self.syntax, 3usize)
     }
-    pub fn block(&self) -> Option<CssDeclarationOrRuleBlock> {
+    pub fn block(&self) -> Option<AnyCssDeclarationOrRuleBlock> {
         support::node(&self.syntax, 4usize)
     }
     pub fn semicolon_token(&self) -> Option<SyntaxToken> {
@@ -10704,7 +10844,7 @@ pub struct ScssIncludeAtRuleFields {
     pub name: SyntaxResult<AnyScssIncludeTarget>,
     pub arguments: Option<ScssIncludeArgumentList>,
     pub using_clause: Option<ScssIncludeUsingClause>,
-    pub block: Option<CssDeclarationOrRuleBlock>,
+    pub block: Option<AnyCssDeclarationOrRuleBlock>,
     pub semicolon_token: Option<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -11829,7 +11969,7 @@ impl ScssMixinAtRule {
     pub fn parameters(&self) -> Option<ScssParameterList> {
         support::node(&self.syntax, 2usize)
     }
-    pub fn block(&self) -> SyntaxResult<CssDeclarationOrRuleBlock> {
+    pub fn block(&self) -> SyntaxResult<AnyCssDeclarationOrRuleBlock> {
         support::required_node(&self.syntax, 3usize)
     }
 }
@@ -11846,7 +11986,7 @@ pub struct ScssMixinAtRuleFields {
     pub mixin_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<CssIdentifier>,
     pub parameters: Option<ScssParameterList>,
-    pub block: SyntaxResult<CssDeclarationOrRuleBlock>,
+    pub block: SyntaxResult<AnyCssDeclarationOrRuleBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssModuleConfiguration {
@@ -14730,6 +14870,7 @@ pub enum AnyCssConditionalBlock {
     CssBogusBlock(CssBogusBlock),
     CssDeclarationOrRuleBlock(CssDeclarationOrRuleBlock),
     CssRuleBlock(CssRuleBlock),
+    CssSassIndentedDeclarationOrRuleBlock(CssSassIndentedDeclarationOrRuleBlock),
 }
 impl AnyCssConditionalBlock {
     pub fn as_css_bogus_block(&self) -> Option<&CssBogusBlock> {
@@ -14747,6 +14888,14 @@ impl AnyCssConditionalBlock {
     pub fn as_css_rule_block(&self) -> Option<&CssRuleBlock> {
         match &self {
             Self::CssRuleBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_sass_indented_declaration_or_rule_block(
+        &self,
+    ) -> Option<&CssSassIndentedDeclarationOrRuleBlock> {
+        match &self {
+            Self::CssSassIndentedDeclarationOrRuleBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -15110,6 +15259,7 @@ impl AnyCssContainerStyleQuery {
 pub enum AnyCssControlBlock {
     CssDeclarationOrRuleBlock(CssDeclarationOrRuleBlock),
     CssKeyframesBlock(CssKeyframesBlock),
+    CssSassIndentedDeclarationOrRuleBlock(CssSassIndentedDeclarationOrRuleBlock),
 }
 impl AnyCssControlBlock {
     pub fn as_css_declaration_or_rule_block(&self) -> Option<&CssDeclarationOrRuleBlock> {
@@ -15121,6 +15271,14 @@ impl AnyCssControlBlock {
     pub fn as_css_keyframes_block(&self) -> Option<&CssKeyframesBlock> {
         match &self {
             Self::CssKeyframesBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_sass_indented_declaration_or_rule_block(
+        &self,
+    ) -> Option<&CssSassIndentedDeclarationOrRuleBlock> {
+        match &self {
+            Self::CssSassIndentedDeclarationOrRuleBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -15314,6 +15472,7 @@ impl AnyCssDeclaration {
 pub enum AnyCssDeclarationBlock {
     CssBogusBlock(CssBogusBlock),
     CssDeclarationBlock(CssDeclarationBlock),
+    CssSassIndentedDeclarationBlock(CssSassIndentedDeclarationBlock),
 }
 impl AnyCssDeclarationBlock {
     pub fn as_css_bogus_block(&self) -> Option<&CssBogusBlock> {
@@ -15325,6 +15484,14 @@ impl AnyCssDeclarationBlock {
     pub fn as_css_declaration_block(&self) -> Option<&CssDeclarationBlock> {
         match &self {
             Self::CssDeclarationBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_sass_indented_declaration_block(
+        &self,
+    ) -> Option<&CssSassIndentedDeclarationBlock> {
+        match &self {
+            Self::CssSassIndentedDeclarationBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -15413,6 +15580,7 @@ impl AnyCssDeclarationOrAtRule {
 pub enum AnyCssDeclarationOrAtRuleBlock {
     CssBogusBlock(CssBogusBlock),
     CssDeclarationOrAtRuleBlock(CssDeclarationOrAtRuleBlock),
+    CssSassIndentedDeclarationOrAtRuleBlock(CssSassIndentedDeclarationOrAtRuleBlock),
 }
 impl AnyCssDeclarationOrAtRuleBlock {
     pub fn as_css_bogus_block(&self) -> Option<&CssBogusBlock> {
@@ -15424,6 +15592,14 @@ impl AnyCssDeclarationOrAtRuleBlock {
     pub fn as_css_declaration_or_at_rule_block(&self) -> Option<&CssDeclarationOrAtRuleBlock> {
         match &self {
             Self::CssDeclarationOrAtRuleBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_sass_indented_declaration_or_at_rule_block(
+        &self,
+    ) -> Option<&CssSassIndentedDeclarationOrAtRuleBlock> {
+        match &self {
+            Self::CssSassIndentedDeclarationOrAtRuleBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -15493,6 +15669,7 @@ impl AnyCssDeclarationOrRule {
 pub enum AnyCssDeclarationOrRuleBlock {
     CssBogusBlock(CssBogusBlock),
     CssDeclarationOrRuleBlock(CssDeclarationOrRuleBlock),
+    CssSassIndentedDeclarationOrRuleBlock(CssSassIndentedDeclarationOrRuleBlock),
 }
 impl AnyCssDeclarationOrRuleBlock {
     pub fn as_css_bogus_block(&self) -> Option<&CssBogusBlock> {
@@ -15507,12 +15684,22 @@ impl AnyCssDeclarationOrRuleBlock {
             _ => None,
         }
     }
+    pub fn as_css_sass_indented_declaration_or_rule_block(
+        &self,
+    ) -> Option<&CssSassIndentedDeclarationOrRuleBlock> {
+        match &self {
+            Self::CssSassIndentedDeclarationOrRuleBlock(item) => Some(item),
+            _ => None,
+        }
+    }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssDeclarationOrStatementBlock {
     CssBogusBlock(CssBogusBlock),
     CssDeclarationBlock(CssDeclarationBlock),
     CssDeclarationOrAtRuleBlock(CssDeclarationOrAtRuleBlock),
+    CssSassIndentedDeclarationBlock(CssSassIndentedDeclarationBlock),
+    CssSassIndentedDeclarationOrAtRuleBlock(CssSassIndentedDeclarationOrAtRuleBlock),
 }
 impl AnyCssDeclarationOrStatementBlock {
     pub fn as_css_bogus_block(&self) -> Option<&CssBogusBlock> {
@@ -15530,6 +15717,22 @@ impl AnyCssDeclarationOrStatementBlock {
     pub fn as_css_declaration_or_at_rule_block(&self) -> Option<&CssDeclarationOrAtRuleBlock> {
         match &self {
             Self::CssDeclarationOrAtRuleBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_sass_indented_declaration_block(
+        &self,
+    ) -> Option<&CssSassIndentedDeclarationBlock> {
+        match &self {
+            Self::CssSassIndentedDeclarationBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_sass_indented_declaration_or_at_rule_block(
+        &self,
+    ) -> Option<&CssSassIndentedDeclarationOrAtRuleBlock> {
+        match &self {
+            Self::CssSassIndentedDeclarationOrAtRuleBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -17376,6 +17579,7 @@ impl AnyCssRule {
 pub enum AnyCssRuleBlock {
     CssBogusBlock(CssBogusBlock),
     CssRuleBlock(CssRuleBlock),
+    CssSassIndentedRuleBlock(CssSassIndentedRuleBlock),
 }
 impl AnyCssRuleBlock {
     pub fn as_css_bogus_block(&self) -> Option<&CssBogusBlock> {
@@ -17387,6 +17591,12 @@ impl AnyCssRuleBlock {
     pub fn as_css_rule_block(&self) -> Option<&CssRuleBlock> {
         match &self {
             Self::CssRuleBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_sass_indented_rule_block(&self) -> Option<&CssSassIndentedRuleBlock> {
+        match &self {
+            Self::CssSassIndentedRuleBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -18280,6 +18490,7 @@ impl AnyScssAtRootSelectorList {
 pub enum AnyScssElseClauseBody {
     CssDeclarationOrRuleBlock(CssDeclarationOrRuleBlock),
     CssKeyframesBlock(CssKeyframesBlock),
+    CssSassIndentedDeclarationOrRuleBlock(CssSassIndentedDeclarationOrRuleBlock),
     ScssIfAtRule(ScssIfAtRule),
 }
 impl AnyScssElseClauseBody {
@@ -18292,6 +18503,14 @@ impl AnyScssElseClauseBody {
     pub fn as_css_keyframes_block(&self) -> Option<&CssKeyframesBlock> {
         match &self {
             Self::CssKeyframesBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_sass_indented_declaration_or_rule_block(
+        &self,
+    ) -> Option<&CssSassIndentedDeclarationOrRuleBlock> {
+        match &self {
+            Self::CssSassIndentedDeclarationOrRuleBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -28183,6 +28402,198 @@ impl From<CssRuleBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for CssSassIndentedDeclarationBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SASS_INDENTED_DECLARATION_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_SASS_INDENTED_DECLARATION_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssSassIndentedDeclarationBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssSassIndentedDeclarationBlock")
+                .field("declarations", &self.declarations())
+                .finish()
+        } else {
+            f.debug_struct("CssSassIndentedDeclarationBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssSassIndentedDeclarationBlock> for SyntaxNode {
+    fn from(n: CssSassIndentedDeclarationBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<CssSassIndentedDeclarationBlock> for SyntaxElement {
+    fn from(n: CssSassIndentedDeclarationBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssSassIndentedDeclarationOrAtRuleBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
+        CSS_SASS_INDENTED_DECLARATION_OR_AT_RULE_BLOCK as u16,
+    ));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_SASS_INDENTED_DECLARATION_OR_AT_RULE_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssSassIndentedDeclarationOrAtRuleBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssSassIndentedDeclarationOrAtRuleBlock")
+                .field("items", &self.items())
+                .finish()
+        } else {
+            f.debug_struct("CssSassIndentedDeclarationOrAtRuleBlock")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssSassIndentedDeclarationOrAtRuleBlock> for SyntaxNode {
+    fn from(n: CssSassIndentedDeclarationOrAtRuleBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<CssSassIndentedDeclarationOrAtRuleBlock> for SyntaxElement {
+    fn from(n: CssSassIndentedDeclarationOrAtRuleBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssSassIndentedDeclarationOrRuleBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
+        CSS_SASS_INDENTED_DECLARATION_OR_RULE_BLOCK as u16,
+    ));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_SASS_INDENTED_DECLARATION_OR_RULE_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssSassIndentedDeclarationOrRuleBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssSassIndentedDeclarationOrRuleBlock")
+                .field("items", &self.items())
+                .finish()
+        } else {
+            f.debug_struct("CssSassIndentedDeclarationOrRuleBlock")
+                .finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssSassIndentedDeclarationOrRuleBlock> for SyntaxNode {
+    fn from(n: CssSassIndentedDeclarationOrRuleBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<CssSassIndentedDeclarationOrRuleBlock> for SyntaxElement {
+    fn from(n: CssSassIndentedDeclarationOrRuleBlock) -> Self {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssSassIndentedRuleBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_SASS_INDENTED_RULE_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_SASS_INDENTED_RULE_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssSassIndentedRuleBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("CssSassIndentedRuleBlock")
+                .field("rules", &self.rules())
+                .finish()
+        } else {
+            f.debug_struct("CssSassIndentedRuleBlock").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<CssSassIndentedRuleBlock> for SyntaxNode {
+    fn from(n: CssSassIndentedRuleBlock) -> Self {
+        n.syntax
+    }
+}
+impl From<CssSassIndentedRuleBlock> for SyntaxElement {
+    fn from(n: CssSassIndentedRuleBlock) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for CssScopeAtRule {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -37726,15 +38137,24 @@ impl From<CssRuleBlock> for AnyCssConditionalBlock {
         Self::CssRuleBlock(node)
     }
 }
+impl From<CssSassIndentedDeclarationOrRuleBlock> for AnyCssConditionalBlock {
+    fn from(node: CssSassIndentedDeclarationOrRuleBlock) -> Self {
+        Self::CssSassIndentedDeclarationOrRuleBlock(node)
+    }
+}
 impl AstNode for AnyCssConditionalBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusBlock::KIND_SET
         .union(CssDeclarationOrRuleBlock::KIND_SET)
-        .union(CssRuleBlock::KIND_SET);
+        .union(CssRuleBlock::KIND_SET)
+        .union(CssSassIndentedDeclarationOrRuleBlock::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_BLOCK | CSS_DECLARATION_OR_RULE_BLOCK | CSS_RULE_BLOCK
+            CSS_BOGUS_BLOCK
+                | CSS_DECLARATION_OR_RULE_BLOCK
+                | CSS_RULE_BLOCK
+                | CSS_SASS_INDENTED_DECLARATION_OR_RULE_BLOCK
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -37744,6 +38164,11 @@ impl AstNode for AnyCssConditionalBlock {
                 Self::CssDeclarationOrRuleBlock(CssDeclarationOrRuleBlock { syntax })
             }
             CSS_RULE_BLOCK => Self::CssRuleBlock(CssRuleBlock { syntax }),
+            CSS_SASS_INDENTED_DECLARATION_OR_RULE_BLOCK => {
+                Self::CssSassIndentedDeclarationOrRuleBlock(CssSassIndentedDeclarationOrRuleBlock {
+                    syntax,
+                })
+            }
             _ => return None,
         };
         Some(res)
@@ -37753,6 +38178,7 @@ impl AstNode for AnyCssConditionalBlock {
             Self::CssBogusBlock(it) => it.syntax(),
             Self::CssDeclarationOrRuleBlock(it) => it.syntax(),
             Self::CssRuleBlock(it) => it.syntax(),
+            Self::CssSassIndentedDeclarationOrRuleBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -37760,6 +38186,7 @@ impl AstNode for AnyCssConditionalBlock {
             Self::CssBogusBlock(it) => it.into_syntax(),
             Self::CssDeclarationOrRuleBlock(it) => it.into_syntax(),
             Self::CssRuleBlock(it) => it.into_syntax(),
+            Self::CssSassIndentedDeclarationOrRuleBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -37769,6 +38196,7 @@ impl std::fmt::Debug for AnyCssConditionalBlock {
             Self::CssBogusBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDeclarationOrRuleBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::CssRuleBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssSassIndentedDeclarationOrRuleBlock(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -37778,6 +38206,7 @@ impl From<AnyCssConditionalBlock> for SyntaxNode {
             AnyCssConditionalBlock::CssBogusBlock(it) => it.into_syntax(),
             AnyCssConditionalBlock::CssDeclarationOrRuleBlock(it) => it.into_syntax(),
             AnyCssConditionalBlock::CssRuleBlock(it) => it.into_syntax(),
+            AnyCssConditionalBlock::CssSassIndentedDeclarationOrRuleBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -38838,12 +39267,23 @@ impl From<CssKeyframesBlock> for AnyCssControlBlock {
         Self::CssKeyframesBlock(node)
     }
 }
+impl From<CssSassIndentedDeclarationOrRuleBlock> for AnyCssControlBlock {
+    fn from(node: CssSassIndentedDeclarationOrRuleBlock) -> Self {
+        Self::CssSassIndentedDeclarationOrRuleBlock(node)
+    }
+}
 impl AstNode for AnyCssControlBlock {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssDeclarationOrRuleBlock::KIND_SET.union(CssKeyframesBlock::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssDeclarationOrRuleBlock::KIND_SET
+        .union(CssKeyframesBlock::KIND_SET)
+        .union(CssSassIndentedDeclarationOrRuleBlock::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_DECLARATION_OR_RULE_BLOCK | CSS_KEYFRAMES_BLOCK)
+        matches!(
+            kind,
+            CSS_DECLARATION_OR_RULE_BLOCK
+                | CSS_KEYFRAMES_BLOCK
+                | CSS_SASS_INDENTED_DECLARATION_OR_RULE_BLOCK
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
@@ -38851,6 +39291,11 @@ impl AstNode for AnyCssControlBlock {
                 Self::CssDeclarationOrRuleBlock(CssDeclarationOrRuleBlock { syntax })
             }
             CSS_KEYFRAMES_BLOCK => Self::CssKeyframesBlock(CssKeyframesBlock { syntax }),
+            CSS_SASS_INDENTED_DECLARATION_OR_RULE_BLOCK => {
+                Self::CssSassIndentedDeclarationOrRuleBlock(CssSassIndentedDeclarationOrRuleBlock {
+                    syntax,
+                })
+            }
             _ => return None,
         };
         Some(res)
@@ -38859,12 +39304,14 @@ impl AstNode for AnyCssControlBlock {
         match self {
             Self::CssDeclarationOrRuleBlock(it) => it.syntax(),
             Self::CssKeyframesBlock(it) => it.syntax(),
+            Self::CssSassIndentedDeclarationOrRuleBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssDeclarationOrRuleBlock(it) => it.into_syntax(),
             Self::CssKeyframesBlock(it) => it.into_syntax(),
+            Self::CssSassIndentedDeclarationOrRuleBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -38873,6 +39320,7 @@ impl std::fmt::Debug for AnyCssControlBlock {
         match self {
             Self::CssDeclarationOrRuleBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::CssKeyframesBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssSassIndentedDeclarationOrRuleBlock(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -38881,6 +39329,7 @@ impl From<AnyCssControlBlock> for SyntaxNode {
         match n {
             AnyCssControlBlock::CssDeclarationOrRuleBlock(it) => it.into_syntax(),
             AnyCssControlBlock::CssKeyframesBlock(it) => it.into_syntax(),
+            AnyCssControlBlock::CssSassIndentedDeclarationOrRuleBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -39380,17 +39829,29 @@ impl From<CssDeclarationBlock> for AnyCssDeclarationBlock {
         Self::CssDeclarationBlock(node)
     }
 }
+impl From<CssSassIndentedDeclarationBlock> for AnyCssDeclarationBlock {
+    fn from(node: CssSassIndentedDeclarationBlock) -> Self {
+        Self::CssSassIndentedDeclarationBlock(node)
+    }
+}
 impl AstNode for AnyCssDeclarationBlock {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusBlock::KIND_SET.union(CssDeclarationBlock::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusBlock::KIND_SET
+        .union(CssDeclarationBlock::KIND_SET)
+        .union(CssSassIndentedDeclarationBlock::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_BLOCK | CSS_DECLARATION_BLOCK)
+        matches!(
+            kind,
+            CSS_BOGUS_BLOCK | CSS_DECLARATION_BLOCK | CSS_SASS_INDENTED_DECLARATION_BLOCK
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_BOGUS_BLOCK => Self::CssBogusBlock(CssBogusBlock { syntax }),
             CSS_DECLARATION_BLOCK => Self::CssDeclarationBlock(CssDeclarationBlock { syntax }),
+            CSS_SASS_INDENTED_DECLARATION_BLOCK => {
+                Self::CssSassIndentedDeclarationBlock(CssSassIndentedDeclarationBlock { syntax })
+            }
             _ => return None,
         };
         Some(res)
@@ -39399,12 +39860,14 @@ impl AstNode for AnyCssDeclarationBlock {
         match self {
             Self::CssBogusBlock(it) => it.syntax(),
             Self::CssDeclarationBlock(it) => it.syntax(),
+            Self::CssSassIndentedDeclarationBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssBogusBlock(it) => it.into_syntax(),
             Self::CssDeclarationBlock(it) => it.into_syntax(),
+            Self::CssSassIndentedDeclarationBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -39413,6 +39876,7 @@ impl std::fmt::Debug for AnyCssDeclarationBlock {
         match self {
             Self::CssBogusBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDeclarationBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssSassIndentedDeclarationBlock(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -39421,6 +39885,7 @@ impl From<AnyCssDeclarationBlock> for SyntaxNode {
         match n {
             AnyCssDeclarationBlock::CssBogusBlock(it) => it.into_syntax(),
             AnyCssDeclarationBlock::CssDeclarationBlock(it) => it.into_syntax(),
+            AnyCssDeclarationBlock::CssSassIndentedDeclarationBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -39649,18 +40114,34 @@ impl From<CssDeclarationOrAtRuleBlock> for AnyCssDeclarationOrAtRuleBlock {
         Self::CssDeclarationOrAtRuleBlock(node)
     }
 }
+impl From<CssSassIndentedDeclarationOrAtRuleBlock> for AnyCssDeclarationOrAtRuleBlock {
+    fn from(node: CssSassIndentedDeclarationOrAtRuleBlock) -> Self {
+        Self::CssSassIndentedDeclarationOrAtRuleBlock(node)
+    }
+}
 impl AstNode for AnyCssDeclarationOrAtRuleBlock {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusBlock::KIND_SET.union(CssDeclarationOrAtRuleBlock::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusBlock::KIND_SET
+        .union(CssDeclarationOrAtRuleBlock::KIND_SET)
+        .union(CssSassIndentedDeclarationOrAtRuleBlock::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_BLOCK | CSS_DECLARATION_OR_AT_RULE_BLOCK)
+        matches!(
+            kind,
+            CSS_BOGUS_BLOCK
+                | CSS_DECLARATION_OR_AT_RULE_BLOCK
+                | CSS_SASS_INDENTED_DECLARATION_OR_AT_RULE_BLOCK
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_BOGUS_BLOCK => Self::CssBogusBlock(CssBogusBlock { syntax }),
             CSS_DECLARATION_OR_AT_RULE_BLOCK => {
                 Self::CssDeclarationOrAtRuleBlock(CssDeclarationOrAtRuleBlock { syntax })
+            }
+            CSS_SASS_INDENTED_DECLARATION_OR_AT_RULE_BLOCK => {
+                Self::CssSassIndentedDeclarationOrAtRuleBlock(
+                    CssSassIndentedDeclarationOrAtRuleBlock { syntax },
+                )
             }
             _ => return None,
         };
@@ -39670,12 +40151,14 @@ impl AstNode for AnyCssDeclarationOrAtRuleBlock {
         match self {
             Self::CssBogusBlock(it) => it.syntax(),
             Self::CssDeclarationOrAtRuleBlock(it) => it.syntax(),
+            Self::CssSassIndentedDeclarationOrAtRuleBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssBogusBlock(it) => it.into_syntax(),
             Self::CssDeclarationOrAtRuleBlock(it) => it.into_syntax(),
+            Self::CssSassIndentedDeclarationOrAtRuleBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -39684,6 +40167,7 @@ impl std::fmt::Debug for AnyCssDeclarationOrAtRuleBlock {
         match self {
             Self::CssBogusBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDeclarationOrAtRuleBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssSassIndentedDeclarationOrAtRuleBlock(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -39692,6 +40176,9 @@ impl From<AnyCssDeclarationOrAtRuleBlock> for SyntaxNode {
         match n {
             AnyCssDeclarationOrAtRuleBlock::CssBogusBlock(it) => it.into_syntax(),
             AnyCssDeclarationOrAtRuleBlock::CssDeclarationOrAtRuleBlock(it) => it.into_syntax(),
+            AnyCssDeclarationOrAtRuleBlock::CssSassIndentedDeclarationOrAtRuleBlock(it) => {
+                it.into_syntax()
+            }
         }
     }
 }
@@ -39852,18 +40339,34 @@ impl From<CssDeclarationOrRuleBlock> for AnyCssDeclarationOrRuleBlock {
         Self::CssDeclarationOrRuleBlock(node)
     }
 }
+impl From<CssSassIndentedDeclarationOrRuleBlock> for AnyCssDeclarationOrRuleBlock {
+    fn from(node: CssSassIndentedDeclarationOrRuleBlock) -> Self {
+        Self::CssSassIndentedDeclarationOrRuleBlock(node)
+    }
+}
 impl AstNode for AnyCssDeclarationOrRuleBlock {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssBogusBlock::KIND_SET.union(CssDeclarationOrRuleBlock::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusBlock::KIND_SET
+        .union(CssDeclarationOrRuleBlock::KIND_SET)
+        .union(CssSassIndentedDeclarationOrRuleBlock::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_BLOCK | CSS_DECLARATION_OR_RULE_BLOCK)
+        matches!(
+            kind,
+            CSS_BOGUS_BLOCK
+                | CSS_DECLARATION_OR_RULE_BLOCK
+                | CSS_SASS_INDENTED_DECLARATION_OR_RULE_BLOCK
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_BOGUS_BLOCK => Self::CssBogusBlock(CssBogusBlock { syntax }),
             CSS_DECLARATION_OR_RULE_BLOCK => {
                 Self::CssDeclarationOrRuleBlock(CssDeclarationOrRuleBlock { syntax })
+            }
+            CSS_SASS_INDENTED_DECLARATION_OR_RULE_BLOCK => {
+                Self::CssSassIndentedDeclarationOrRuleBlock(CssSassIndentedDeclarationOrRuleBlock {
+                    syntax,
+                })
             }
             _ => return None,
         };
@@ -39873,12 +40376,14 @@ impl AstNode for AnyCssDeclarationOrRuleBlock {
         match self {
             Self::CssBogusBlock(it) => it.syntax(),
             Self::CssDeclarationOrRuleBlock(it) => it.syntax(),
+            Self::CssSassIndentedDeclarationOrRuleBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssBogusBlock(it) => it.into_syntax(),
             Self::CssDeclarationOrRuleBlock(it) => it.into_syntax(),
+            Self::CssSassIndentedDeclarationOrRuleBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -39887,6 +40392,7 @@ impl std::fmt::Debug for AnyCssDeclarationOrRuleBlock {
         match self {
             Self::CssBogusBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDeclarationOrRuleBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssSassIndentedDeclarationOrRuleBlock(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -39895,6 +40401,9 @@ impl From<AnyCssDeclarationOrRuleBlock> for SyntaxNode {
         match n {
             AnyCssDeclarationOrRuleBlock::CssBogusBlock(it) => it.into_syntax(),
             AnyCssDeclarationOrRuleBlock::CssDeclarationOrRuleBlock(it) => it.into_syntax(),
+            AnyCssDeclarationOrRuleBlock::CssSassIndentedDeclarationOrRuleBlock(it) => {
+                it.into_syntax()
+            }
         }
     }
 }
@@ -39919,15 +40428,31 @@ impl From<CssDeclarationOrAtRuleBlock> for AnyCssDeclarationOrStatementBlock {
         Self::CssDeclarationOrAtRuleBlock(node)
     }
 }
+impl From<CssSassIndentedDeclarationBlock> for AnyCssDeclarationOrStatementBlock {
+    fn from(node: CssSassIndentedDeclarationBlock) -> Self {
+        Self::CssSassIndentedDeclarationBlock(node)
+    }
+}
+impl From<CssSassIndentedDeclarationOrAtRuleBlock> for AnyCssDeclarationOrStatementBlock {
+    fn from(node: CssSassIndentedDeclarationOrAtRuleBlock) -> Self {
+        Self::CssSassIndentedDeclarationOrAtRuleBlock(node)
+    }
+}
 impl AstNode for AnyCssDeclarationOrStatementBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusBlock::KIND_SET
         .union(CssDeclarationBlock::KIND_SET)
-        .union(CssDeclarationOrAtRuleBlock::KIND_SET);
+        .union(CssDeclarationOrAtRuleBlock::KIND_SET)
+        .union(CssSassIndentedDeclarationBlock::KIND_SET)
+        .union(CssSassIndentedDeclarationOrAtRuleBlock::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_BOGUS_BLOCK | CSS_DECLARATION_BLOCK | CSS_DECLARATION_OR_AT_RULE_BLOCK
+            CSS_BOGUS_BLOCK
+                | CSS_DECLARATION_BLOCK
+                | CSS_DECLARATION_OR_AT_RULE_BLOCK
+                | CSS_SASS_INDENTED_DECLARATION_BLOCK
+                | CSS_SASS_INDENTED_DECLARATION_OR_AT_RULE_BLOCK
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -39936,6 +40461,14 @@ impl AstNode for AnyCssDeclarationOrStatementBlock {
             CSS_DECLARATION_BLOCK => Self::CssDeclarationBlock(CssDeclarationBlock { syntax }),
             CSS_DECLARATION_OR_AT_RULE_BLOCK => {
                 Self::CssDeclarationOrAtRuleBlock(CssDeclarationOrAtRuleBlock { syntax })
+            }
+            CSS_SASS_INDENTED_DECLARATION_BLOCK => {
+                Self::CssSassIndentedDeclarationBlock(CssSassIndentedDeclarationBlock { syntax })
+            }
+            CSS_SASS_INDENTED_DECLARATION_OR_AT_RULE_BLOCK => {
+                Self::CssSassIndentedDeclarationOrAtRuleBlock(
+                    CssSassIndentedDeclarationOrAtRuleBlock { syntax },
+                )
             }
             _ => return None,
         };
@@ -39946,6 +40479,8 @@ impl AstNode for AnyCssDeclarationOrStatementBlock {
             Self::CssBogusBlock(it) => it.syntax(),
             Self::CssDeclarationBlock(it) => it.syntax(),
             Self::CssDeclarationOrAtRuleBlock(it) => it.syntax(),
+            Self::CssSassIndentedDeclarationBlock(it) => it.syntax(),
+            Self::CssSassIndentedDeclarationOrAtRuleBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -39953,6 +40488,8 @@ impl AstNode for AnyCssDeclarationOrStatementBlock {
             Self::CssBogusBlock(it) => it.into_syntax(),
             Self::CssDeclarationBlock(it) => it.into_syntax(),
             Self::CssDeclarationOrAtRuleBlock(it) => it.into_syntax(),
+            Self::CssSassIndentedDeclarationBlock(it) => it.into_syntax(),
+            Self::CssSassIndentedDeclarationOrAtRuleBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -39962,6 +40499,8 @@ impl std::fmt::Debug for AnyCssDeclarationOrStatementBlock {
             Self::CssBogusBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDeclarationBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDeclarationOrAtRuleBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssSassIndentedDeclarationBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssSassIndentedDeclarationOrAtRuleBlock(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -39971,6 +40510,12 @@ impl From<AnyCssDeclarationOrStatementBlock> for SyntaxNode {
             AnyCssDeclarationOrStatementBlock::CssBogusBlock(it) => it.into_syntax(),
             AnyCssDeclarationOrStatementBlock::CssDeclarationBlock(it) => it.into_syntax(),
             AnyCssDeclarationOrStatementBlock::CssDeclarationOrAtRuleBlock(it) => it.into_syntax(),
+            AnyCssDeclarationOrStatementBlock::CssSassIndentedDeclarationBlock(it) => {
+                it.into_syntax()
+            }
+            AnyCssDeclarationOrStatementBlock::CssSassIndentedDeclarationOrAtRuleBlock(it) => {
+                it.into_syntax()
+            }
         }
     }
 }
@@ -45168,16 +45713,29 @@ impl From<CssRuleBlock> for AnyCssRuleBlock {
         Self::CssRuleBlock(node)
     }
 }
+impl From<CssSassIndentedRuleBlock> for AnyCssRuleBlock {
+    fn from(node: CssSassIndentedRuleBlock) -> Self {
+        Self::CssSassIndentedRuleBlock(node)
+    }
+}
 impl AstNode for AnyCssRuleBlock {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = CssBogusBlock::KIND_SET.union(CssRuleBlock::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssBogusBlock::KIND_SET
+        .union(CssRuleBlock::KIND_SET)
+        .union(CssSassIndentedRuleBlock::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_BOGUS_BLOCK | CSS_RULE_BLOCK)
+        matches!(
+            kind,
+            CSS_BOGUS_BLOCK | CSS_RULE_BLOCK | CSS_SASS_INDENTED_RULE_BLOCK
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             CSS_BOGUS_BLOCK => Self::CssBogusBlock(CssBogusBlock { syntax }),
             CSS_RULE_BLOCK => Self::CssRuleBlock(CssRuleBlock { syntax }),
+            CSS_SASS_INDENTED_RULE_BLOCK => {
+                Self::CssSassIndentedRuleBlock(CssSassIndentedRuleBlock { syntax })
+            }
             _ => return None,
         };
         Some(res)
@@ -45186,12 +45744,14 @@ impl AstNode for AnyCssRuleBlock {
         match self {
             Self::CssBogusBlock(it) => it.syntax(),
             Self::CssRuleBlock(it) => it.syntax(),
+            Self::CssSassIndentedRuleBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             Self::CssBogusBlock(it) => it.into_syntax(),
             Self::CssRuleBlock(it) => it.into_syntax(),
+            Self::CssSassIndentedRuleBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -45200,6 +45760,7 @@ impl std::fmt::Debug for AnyCssRuleBlock {
         match self {
             Self::CssBogusBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::CssRuleBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssSassIndentedRuleBlock(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -45208,6 +45769,7 @@ impl From<AnyCssRuleBlock> for SyntaxNode {
         match n {
             AnyCssRuleBlock::CssBogusBlock(it) => it.into_syntax(),
             AnyCssRuleBlock::CssRuleBlock(it) => it.into_syntax(),
+            AnyCssRuleBlock::CssSassIndentedRuleBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -47634,6 +48196,11 @@ impl From<CssKeyframesBlock> for AnyScssElseClauseBody {
         Self::CssKeyframesBlock(node)
     }
 }
+impl From<CssSassIndentedDeclarationOrRuleBlock> for AnyScssElseClauseBody {
+    fn from(node: CssSassIndentedDeclarationOrRuleBlock) -> Self {
+        Self::CssSassIndentedDeclarationOrRuleBlock(node)
+    }
+}
 impl From<ScssIfAtRule> for AnyScssElseClauseBody {
     fn from(node: ScssIfAtRule) -> Self {
         Self::ScssIfAtRule(node)
@@ -47643,11 +48210,15 @@ impl AstNode for AnyScssElseClauseBody {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssDeclarationOrRuleBlock::KIND_SET
         .union(CssKeyframesBlock::KIND_SET)
+        .union(CssSassIndentedDeclarationOrRuleBlock::KIND_SET)
         .union(ScssIfAtRule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            CSS_DECLARATION_OR_RULE_BLOCK | CSS_KEYFRAMES_BLOCK | SCSS_IF_AT_RULE
+            CSS_DECLARATION_OR_RULE_BLOCK
+                | CSS_KEYFRAMES_BLOCK
+                | CSS_SASS_INDENTED_DECLARATION_OR_RULE_BLOCK
+                | SCSS_IF_AT_RULE
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -47656,6 +48227,11 @@ impl AstNode for AnyScssElseClauseBody {
                 Self::CssDeclarationOrRuleBlock(CssDeclarationOrRuleBlock { syntax })
             }
             CSS_KEYFRAMES_BLOCK => Self::CssKeyframesBlock(CssKeyframesBlock { syntax }),
+            CSS_SASS_INDENTED_DECLARATION_OR_RULE_BLOCK => {
+                Self::CssSassIndentedDeclarationOrRuleBlock(CssSassIndentedDeclarationOrRuleBlock {
+                    syntax,
+                })
+            }
             SCSS_IF_AT_RULE => Self::ScssIfAtRule(ScssIfAtRule { syntax }),
             _ => return None,
         };
@@ -47665,6 +48241,7 @@ impl AstNode for AnyScssElseClauseBody {
         match self {
             Self::CssDeclarationOrRuleBlock(it) => it.syntax(),
             Self::CssKeyframesBlock(it) => it.syntax(),
+            Self::CssSassIndentedDeclarationOrRuleBlock(it) => it.syntax(),
             Self::ScssIfAtRule(it) => it.syntax(),
         }
     }
@@ -47672,6 +48249,7 @@ impl AstNode for AnyScssElseClauseBody {
         match self {
             Self::CssDeclarationOrRuleBlock(it) => it.into_syntax(),
             Self::CssKeyframesBlock(it) => it.into_syntax(),
+            Self::CssSassIndentedDeclarationOrRuleBlock(it) => it.into_syntax(),
             Self::ScssIfAtRule(it) => it.into_syntax(),
         }
     }
@@ -47681,6 +48259,7 @@ impl std::fmt::Debug for AnyScssElseClauseBody {
         match self {
             Self::CssDeclarationOrRuleBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::CssKeyframesBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssSassIndentedDeclarationOrRuleBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssIfAtRule(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -47690,6 +48269,7 @@ impl From<AnyScssElseClauseBody> for SyntaxNode {
         match n {
             AnyScssElseClauseBody::CssDeclarationOrRuleBlock(it) => it.into_syntax(),
             AnyScssElseClauseBody::CssKeyframesBlock(it) => it.into_syntax(),
+            AnyScssElseClauseBody::CssSassIndentedDeclarationOrRuleBlock(it) => it.into_syntax(),
             AnyScssElseClauseBody::ScssIfAtRule(it) => it.into_syntax(),
         }
     }
@@ -51335,6 +51915,26 @@ impl std::fmt::Display for CssRoot {
     }
 }
 impl std::fmt::Display for CssRuleBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssSassIndentedDeclarationBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssSassIndentedDeclarationOrAtRuleBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssSassIndentedDeclarationOrRuleBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssSassIndentedRuleBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

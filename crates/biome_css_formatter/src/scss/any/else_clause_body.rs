@@ -10,6 +10,9 @@ impl FormatRule<AnyScssElseClauseBody> for FormatAnyScssElseClauseBody {
         match node {
             AnyScssElseClauseBody::CssDeclarationOrRuleBlock(node) => node.format().fmt(f),
             AnyScssElseClauseBody::CssKeyframesBlock(node) => node.format().fmt(f),
+            AnyScssElseClauseBody::CssSassIndentedDeclarationOrRuleBlock(node) => {
+                node.format().fmt(f)
+            }
             AnyScssElseClauseBody::ScssIfAtRule(node) => node.format().fmt(f),
         }
     }

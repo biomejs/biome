@@ -32,7 +32,13 @@ pub(crate) fn is_at_scss_module_member_access(p: &mut CssParser) -> bool {
 /// Docs: https://sass-lang.com/documentation/modules
 #[inline]
 pub(crate) fn is_nth_at_scss_module_member_access(p: &mut CssParser, n: usize) -> bool {
+    // A line break ends the statement in the indented syntax, so `value` on one
+    // line and `.member` on the next are separate statements, not a module
+    // member access.
+    let breaks_line = p.source_type.is_indented_syntax() && p.has_nth_preceding_line_break(n + 1);
+
     is_nth_at_identifier(p, n)
+        && !breaks_line
         && p.nth_at(n + 1, T![.])
         && ((p.nth_at(n + 2, T![$]) && is_nth_at_identifier(p, n + 3))
             || is_nth_at_identifier(p, n + 2))

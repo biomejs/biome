@@ -2606,6 +2606,36 @@ pub fn css_rule_block(
         ],
     ))
 }
+pub fn css_sass_indented_declaration_block(
+    declarations: CssDeclarationList,
+) -> CssSassIndentedDeclarationBlock {
+    CssSassIndentedDeclarationBlock::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SASS_INDENTED_DECLARATION_BLOCK,
+        [Some(SyntaxElement::Node(declarations.into_syntax()))],
+    ))
+}
+pub fn css_sass_indented_declaration_or_at_rule_block(
+    items: CssDeclarationOrAtRuleList,
+) -> CssSassIndentedDeclarationOrAtRuleBlock {
+    CssSassIndentedDeclarationOrAtRuleBlock::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SASS_INDENTED_DECLARATION_OR_AT_RULE_BLOCK,
+        [Some(SyntaxElement::Node(items.into_syntax()))],
+    ))
+}
+pub fn css_sass_indented_declaration_or_rule_block(
+    items: CssDeclarationOrRuleList,
+) -> CssSassIndentedDeclarationOrRuleBlock {
+    CssSassIndentedDeclarationOrRuleBlock::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SASS_INDENTED_DECLARATION_OR_RULE_BLOCK,
+        [Some(SyntaxElement::Node(items.into_syntax()))],
+    ))
+}
+pub fn css_sass_indented_rule_block(rules: CssRuleList) -> CssSassIndentedRuleBlock {
+    CssSassIndentedRuleBlock::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_SASS_INDENTED_RULE_BLOCK,
+        [Some(SyntaxElement::Node(rules.into_syntax()))],
+    ))
+}
 pub fn css_scope_at_rule(
     declarator: CssScopeAtRuleDeclarator,
     block: AnyCssConditionalBlock,
@@ -3627,7 +3657,7 @@ impl ScssForwardAtRuleBuilder {
 pub fn scss_function_at_rule(
     function_token: SyntaxToken,
     name: CssIdentifier,
-    block: CssDeclarationOrRuleBlock,
+    block: AnyCssDeclarationOrRuleBlock,
 ) -> ScssFunctionAtRuleBuilder {
     ScssFunctionAtRuleBuilder {
         function_token,
@@ -3639,7 +3669,7 @@ pub fn scss_function_at_rule(
 pub struct ScssFunctionAtRuleBuilder {
     function_token: SyntaxToken,
     name: CssIdentifier,
-    block: CssDeclarationOrRuleBlock,
+    block: AnyCssDeclarationOrRuleBlock,
     parameters: Option<ScssParameterList>,
 }
 impl ScssFunctionAtRuleBuilder {
@@ -3778,7 +3808,7 @@ pub struct ScssIncludeAtRuleBuilder {
     name: AnyScssIncludeTarget,
     arguments: Option<ScssIncludeArgumentList>,
     using_clause: Option<ScssIncludeUsingClause>,
-    block: Option<CssDeclarationOrRuleBlock>,
+    block: Option<AnyCssDeclarationOrRuleBlock>,
     semicolon_token: Option<SyntaxToken>,
 }
 impl ScssIncludeAtRuleBuilder {
@@ -3790,7 +3820,7 @@ impl ScssIncludeAtRuleBuilder {
         self.using_clause = Some(using_clause);
         self
     }
-    pub fn with_block(mut self, block: CssDeclarationOrRuleBlock) -> Self {
+    pub fn with_block(mut self, block: AnyCssDeclarationOrRuleBlock) -> Self {
         self.block = Some(block);
         self
     }
@@ -4173,7 +4203,7 @@ impl ScssMediaQueryBuilder {
 pub fn scss_mixin_at_rule(
     mixin_token: SyntaxToken,
     name: CssIdentifier,
-    block: CssDeclarationOrRuleBlock,
+    block: AnyCssDeclarationOrRuleBlock,
 ) -> ScssMixinAtRuleBuilder {
     ScssMixinAtRuleBuilder {
         mixin_token,
@@ -4185,7 +4215,7 @@ pub fn scss_mixin_at_rule(
 pub struct ScssMixinAtRuleBuilder {
     mixin_token: SyntaxToken,
     name: CssIdentifier,
-    block: CssDeclarationOrRuleBlock,
+    block: AnyCssDeclarationOrRuleBlock,
     parameters: Option<ScssParameterList>,
 }
 impl ScssMixinAtRuleBuilder {

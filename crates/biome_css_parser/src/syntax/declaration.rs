@@ -1,5 +1,6 @@
 use crate::parser::CssParser;
 use crate::syntax::CssSyntaxFeatures;
+use crate::syntax::indented::is_at_list_end_for;
 use crate::syntax::parse_error::{expected_declaration_item, scss_only_syntax_error};
 use crate::syntax::property::{
     is_at_any_property, parse_any_property, parse_any_property_with_value_end_set,
@@ -37,7 +38,7 @@ impl ParseRecovery for DeclarationListParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS_DECLARATION;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(self.end_kind) || p.at(T![;])
+        is_at_list_end_for(p, self.end_kind) || p.at(T![;])
     }
 }
 
@@ -71,7 +72,7 @@ impl ParseNodeList for DeclarationList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(self.end_kind)
+        is_at_list_end_for(p, self.end_kind)
     }
 
     fn recover(
@@ -183,6 +184,13 @@ pub(crate) fn complete_declaration_with_semicolon(
 
 #[inline]
 pub(crate) fn parse_optional_declaration_semicolon(p: &mut CssParser) {
+    // In the indented syntax a line break terminates the declaration and the
+    // semicolon is optional, so it is consumed only when present.
+    if p.source_type.is_indented_syntax() {
+        p.eat(T![;]);
+        return;
+    }
+
     // If the next token is a closing brace ('}'), the semicolon is optional.
     // Otherwise, a semicolon is expected and the parser will enforce its presence.
     // div { color: red; }

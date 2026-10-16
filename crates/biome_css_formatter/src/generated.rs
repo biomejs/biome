@@ -5891,6 +5891,77 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssRuleBlock {
         )
     }
 }
+impl FormatRule < biome_css_syntax :: CssSassIndentedDeclarationBlock > for crate :: css :: auxiliary :: sass_indented_declaration_block :: FormatCssSassIndentedDeclarationBlock { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: CssSassIndentedDeclarationBlock , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: CssSassIndentedDeclarationBlock > :: fmt (self , node , f) } }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssSassIndentedDeclarationBlock {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssSassIndentedDeclarationBlock , crate :: css :: auxiliary :: sass_indented_declaration_block :: FormatCssSassIndentedDeclarationBlock > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: sass_indented_declaration_block :: FormatCssSassIndentedDeclarationBlock :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssSassIndentedDeclarationBlock {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: CssSassIndentedDeclarationBlock , crate :: css :: auxiliary :: sass_indented_declaration_block :: FormatCssSassIndentedDeclarationBlock > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: sass_indented_declaration_block :: FormatCssSassIndentedDeclarationBlock :: default ())
+    }
+}
+impl FormatRule < biome_css_syntax :: CssSassIndentedDeclarationOrAtRuleBlock > for crate :: css :: auxiliary :: sass_indented_declaration_or_at_rule_block :: FormatCssSassIndentedDeclarationOrAtRuleBlock { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: CssSassIndentedDeclarationOrAtRuleBlock , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: CssSassIndentedDeclarationOrAtRuleBlock > :: fmt (self , node , f) } }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssSassIndentedDeclarationOrAtRuleBlock {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssSassIndentedDeclarationOrAtRuleBlock , crate :: css :: auxiliary :: sass_indented_declaration_or_at_rule_block :: FormatCssSassIndentedDeclarationOrAtRuleBlock > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: sass_indented_declaration_or_at_rule_block :: FormatCssSassIndentedDeclarationOrAtRuleBlock :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssSassIndentedDeclarationOrAtRuleBlock {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: CssSassIndentedDeclarationOrAtRuleBlock , crate :: css :: auxiliary :: sass_indented_declaration_or_at_rule_block :: FormatCssSassIndentedDeclarationOrAtRuleBlock > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: sass_indented_declaration_or_at_rule_block :: FormatCssSassIndentedDeclarationOrAtRuleBlock :: default ())
+    }
+}
+impl FormatRule < biome_css_syntax :: CssSassIndentedDeclarationOrRuleBlock > for crate :: css :: auxiliary :: sass_indented_declaration_or_rule_block :: FormatCssSassIndentedDeclarationOrRuleBlock { type Context = CssFormatContext ; # [inline (always)] fn fmt (& self , node : & biome_css_syntax :: CssSassIndentedDeclarationOrRuleBlock , f : & mut CssFormatter) -> FormatResult < () > { FormatNodeRule :: < biome_css_syntax :: CssSassIndentedDeclarationOrRuleBlock > :: fmt (self , node , f) } }
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssSassIndentedDeclarationOrRuleBlock {
+    type Format < 'a > = FormatRefWithRule < 'a , biome_css_syntax :: CssSassIndentedDeclarationOrRuleBlock , crate :: css :: auxiliary :: sass_indented_declaration_or_rule_block :: FormatCssSassIndentedDeclarationOrRuleBlock > ;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: sass_indented_declaration_or_rule_block :: FormatCssSassIndentedDeclarationOrRuleBlock :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssSassIndentedDeclarationOrRuleBlock {
+    type Format = FormatOwnedWithRule < biome_css_syntax :: CssSassIndentedDeclarationOrRuleBlock , crate :: css :: auxiliary :: sass_indented_declaration_or_rule_block :: FormatCssSassIndentedDeclarationOrRuleBlock > ;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: sass_indented_declaration_or_rule_block :: FormatCssSassIndentedDeclarationOrRuleBlock :: default ())
+    }
+}
+impl FormatRule<biome_css_syntax::CssSassIndentedRuleBlock>
+    for crate::css::auxiliary::sass_indented_rule_block::FormatCssSassIndentedRuleBlock
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssSassIndentedRuleBlock,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssSassIndentedRuleBlock>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssSassIndentedRuleBlock {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssSassIndentedRuleBlock,
+        crate::css::auxiliary::sass_indented_rule_block::FormatCssSassIndentedRuleBlock,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule :: new (self , crate :: css :: auxiliary :: sass_indented_rule_block :: FormatCssSassIndentedRuleBlock :: default ())
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssSassIndentedRuleBlock {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssSassIndentedRuleBlock,
+        crate::css::auxiliary::sass_indented_rule_block::FormatCssSassIndentedRuleBlock,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule :: new (self , crate :: css :: auxiliary :: sass_indented_rule_block :: FormatCssSassIndentedRuleBlock :: default ())
+    }
+}
 impl FormatRule<biome_css_syntax::CssScopeAtRule>
     for crate::css::statements::scope_at_rule::FormatCssScopeAtRule
 {

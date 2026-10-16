@@ -1,5 +1,6 @@
 use crate::CssCommentStyle;
 use crate::utils::case::CssCase;
+use biome_formatter::printer::PrintWidth;
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, LineEnding, LineWidth,
     TrailingNewline, TransformSourceMap,
@@ -77,13 +78,13 @@ pub struct CssFormatOptions {
     delimiter_spacing: DelimiterSpacing,
     /// Whether to add a trailing newline at the end of the file. Defaults to true.
     trailing_newline: TrailingNewline,
-    _file_source: CssFileSource,
+    file_source: CssFileSource,
 }
 
 impl CssFormatOptions {
     pub fn new(file_source: CssFileSource) -> Self {
         Self {
-            _file_source: file_source,
+            file_source,
             indent_style: IndentStyle::default(),
             indent_width: IndentWidth::default(),
             line_ending: LineEnding::default(),
@@ -168,6 +169,17 @@ impl CssFormatOptions {
     pub fn trailing_newline(&self) -> TrailingNewline {
         self.trailing_newline
     }
+
+    /// Returns the file source this formatter run targets.
+    pub fn file_source(&self) -> &CssFileSource {
+        &self.file_source
+    }
+
+    /// Whether the formatter is formatting the indented Sass syntax, which uses
+    /// indentation and line breaks instead of braces and semicolons.
+    pub fn is_indented_syntax(&self) -> bool {
+        self.file_source.is_indented_syntax()
+    }
 }
 
 impl FormatOptions for CssFormatOptions {
@@ -192,6 +204,12 @@ impl FormatOptions for CssFormatOptions {
     }
 
     fn as_print_options(&self) -> PrinterOptions {
+        if self.is_indented_syntax() {
+            // A line break ends a statement in the indented syntax, so the
+            // formatter must not wrap statements to fit the line width.
+            return PrinterOptions::from(self).with_print_width(PrintWidth::new(u32::MAX));
+        }
+
         PrinterOptions::from(self)
     }
 }

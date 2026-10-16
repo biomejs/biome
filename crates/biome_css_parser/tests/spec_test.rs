@@ -95,10 +95,10 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
         }
     }
 
-    let mut source_type = if extension == "scss" {
-        CssFileSource::scss()
-    } else {
-        CssFileSource::css()
+    let mut source_type = match extension {
+        "scss" => CssFileSource::scss(),
+        "sass" => CssFileSource::sass(),
+        _ => CssFileSource::css(),
     };
 
     if file_name.ends_with(".styled.css") {

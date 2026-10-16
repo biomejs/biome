@@ -6,6 +6,18 @@ pub(crate) struct FormatCssRelativeSelectorList;
 impl FormatRule<CssRelativeSelectorList> for FormatCssRelativeSelectorList {
     type Context = CssFormatContext;
     fn fmt(&self, node: &CssRelativeSelectorList, f: &mut CssFormatter) -> FormatResult<()> {
+        if f.options().is_indented_syntax() {
+            // A line break ends a selector in the indented syntax, so the list
+            // stays on one line.
+            let mut joiner = f.join_with(space());
+
+            for formatted in node.format_separated(",") {
+                joiner.entry(&group(&formatted));
+            }
+
+            return joiner.finish();
+        }
+
         // Using `join_with` instead of `join_nodes_with_soft_line` to avoid
         // preserving empty lines from the input source. See the comment in
         // [FormatCssSelectorList] for more information.

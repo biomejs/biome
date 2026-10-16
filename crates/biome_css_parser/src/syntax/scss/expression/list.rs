@@ -1,4 +1,5 @@
 use crate::parser::CssParser;
+use crate::syntax::indented::is_at_indented_statement_end;
 use crate::syntax::parse_error::expected_component_value;
 use crate::syntax::property::{is_at_generic_delimiter, parse_generic_component_value};
 use crate::syntax::scss::expression::precedence::{
@@ -85,7 +86,15 @@ pub(crate) fn parse_required_scss_value_until(
     p: &mut CssParser,
     end_ts: TokenSet<CssSyntaxKind>,
 ) -> CompletedMarker {
-    match parse_scss_optional_value_until(p, end_ts) {
+    // In the indented syntax a line break ends the statement, so the value
+    // stops at the end of its line. Nested parenthesized values clear the
+    // boundary and keep parsing across line breaks.
+    let options = if p.source_type.is_indented_syntax() {
+        ScssExpressionOptions::value(end_ts).with_boundary(is_at_indented_statement_end)
+    } else {
+        ScssExpressionOptions::value(end_ts)
+    };
+    match parse_scss_optional_value_with_options(p, options) {
         Present(value) => value,
         Absent => {
             let empty_expression = complete_empty_scss_expression(p);
@@ -109,7 +118,15 @@ pub(crate) fn parse_scss_expression_until(
     p: &mut CssParser,
     end_ts: TokenSet<CssSyntaxKind>,
 ) -> ParsedSyntax {
-    parse_scss_expression_with_options(p, ScssExpressionOptions::value(end_ts))
+    // In the indented syntax a line break ends the statement, so an at-rule
+    // header such as `@if $condition` stops at the end of its line.
+    let options = if p.source_type.is_indented_syntax() {
+        ScssExpressionOptions::value(end_ts).with_boundary(is_at_indented_statement_end)
+    } else {
+        ScssExpressionOptions::value(end_ts)
+    };
+
+    parse_scss_expression_with_options(p, options)
 }
 
 /// Parses a SCSS expression tail after the caller has already parsed the first
@@ -158,7 +175,13 @@ pub(crate) fn parse_scss_expression_in_variable_value_until(
     p: &mut CssParser,
     end_ts: TokenSet<CssSyntaxKind>,
 ) -> ParsedSyntax {
-    parse_scss_expression_with_options(p, ScssExpressionOptions::variable_value(end_ts))
+    let options = if p.source_type.is_indented_syntax() {
+        ScssExpressionOptions::variable_value(end_ts).with_boundary(is_at_indented_statement_end)
+    } else {
+        ScssExpressionOptions::variable_value(end_ts)
+    };
+
+    parse_scss_expression_with_options(p, options)
 }
 
 #[inline]

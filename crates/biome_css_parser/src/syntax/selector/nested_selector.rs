@@ -1,5 +1,6 @@
 use crate::parser::CssParser;
 use crate::syntax::CssSyntaxFeatures;
+use crate::syntax::indented::is_at_indented_selector_end;
 use crate::syntax::scss::{is_at_scss_parent_selector, parse_scss_parent_selector};
 use crate::syntax::selector::selector_lex_context;
 use biome_css_syntax::CssSyntaxKind::{CSS_NESTED_SELECTOR, CSS_NESTED_SELECTOR_LIST};
@@ -10,7 +11,13 @@ use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{Parser, SyntaxFeature};
 
-pub(crate) struct NestedSelectorList;
+#[derive(Default)]
+pub(crate) struct NestedSelectorList {
+    /// Whether at least one nested selector has been parsed, so a later line
+    /// break can end the list in the indented syntax.
+    has_parsed_element: bool,
+}
+
 impl ParseNodeList for NestedSelectorList {
     type Kind = CssSyntaxKind;
     type Parser<'source> = CssParser<'source>;
@@ -18,11 +25,12 @@ impl ParseNodeList for NestedSelectorList {
     const LIST_KIND: CssSyntaxKind = CSS_NESTED_SELECTOR_LIST;
 
     fn parse_element(&mut self, p: &mut CssParser) -> ParsedSyntax {
+        self.has_parsed_element = true;
         parse_nested_selector(p)
     }
 
     fn is_at_list_end(&self, p: &mut CssParser) -> bool {
-        !p.at(T![&])
+        !p.at(T![&]) || (self.has_parsed_element && is_at_indented_selector_end(p))
     }
 
     fn recover(&mut self, _p: &mut CssParser, parsed_element: ParsedSyntax) -> RecoveryResult {

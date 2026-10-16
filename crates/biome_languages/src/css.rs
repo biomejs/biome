@@ -105,6 +105,9 @@ pub enum CssFileLanguage {
     #[default]
     Css,
     Scss,
+    /// The indented Sass syntax, which uses indentation instead of braces and
+    /// line breaks instead of semicolons.
+    Sass,
 }
 
 impl CssFileLanguage {
@@ -114,6 +117,16 @@ impl CssFileLanguage {
 
     pub const fn is_scss(&self) -> bool {
         matches!(self, Self::Scss)
+    }
+
+    pub const fn is_sass(&self) -> bool {
+        matches!(self, Self::Sass)
+    }
+
+    /// Whether the file uses the Sass language, either the SCSS syntax or the
+    /// indented syntax.
+    pub const fn is_sass_language(&self) -> bool {
+        matches!(self, Self::Scss | Self::Sass)
     }
 }
 
@@ -149,6 +162,14 @@ impl CssFileSource {
     pub fn scss() -> Self {
         Self {
             language: CssFileLanguage::Scss,
+            variant: CssVariant::Standard,
+            embedding_kind: CssEmbeddingKind::None,
+        }
+    }
+
+    pub fn sass() -> Self {
+        Self {
+            language: CssFileLanguage::Sass,
             variant: CssVariant::Standard,
             embedding_kind: CssEmbeddingKind::None,
         }
@@ -197,6 +218,21 @@ impl CssFileSource {
         self.language.is_scss()
     }
 
+    pub fn is_sass(&self) -> bool {
+        self.language.is_sass()
+    }
+
+    /// Whether this file uses Sass syntax, either SCSS or the indented syntax.
+    pub fn is_sass_language(&self) -> bool {
+        self.language.is_sass_language()
+    }
+
+    /// Whether this file uses the indented syntax, where blocks are delimited
+    /// by indentation and statements end at line breaks.
+    pub fn is_indented_syntax(&self) -> bool {
+        self.language.is_sass()
+    }
+
     pub fn is_css_modules(&self) -> bool {
         self.variant == CssVariant::CssModules
     }
@@ -231,10 +267,10 @@ impl CssFileSource {
     ///
     /// Don't use this function to write files on disk, as it might support "multiple extensions for the same file"
     pub const fn file_extension(&self) -> &'static str {
-        if self.language.is_scss() {
-            "scss"
-        } else {
-            "css"
+        match self.language {
+            CssFileLanguage::Css => "css",
+            CssFileLanguage::Scss => "scss",
+            CssFileLanguage::Sass => "sass",
         }
     }
 
@@ -281,6 +317,9 @@ impl CssFileSource {
         if file_name.ends_with(".module.scss") {
             return Self::try_from_extension("module.scss");
         }
+        if file_name.ends_with(".module.sass") {
+            return Self::try_from_extension("module.sass");
+        }
 
         match path.extension() {
             Some(extension) => Self::try_from_extension(extension),
@@ -294,8 +333,10 @@ impl CssFileSource {
         match extension {
             "css" => Ok(Self::css()),
             "scss" => Ok(Self::scss()),
+            "sass" => Ok(Self::sass()),
             "module.css" => Ok(Self::new_css_modules()),
             "module.scss" => Ok(Self::scss().with_css_modules()),
+            "module.sass" => Ok(Self::sass().with_css_modules()),
             _ => Err(FileSourceError::UnknownExtension),
         }
     }
@@ -310,6 +351,7 @@ impl CssFileSource {
         match language_id {
             "css" => Ok(Self::css()),
             "scss" => Ok(Self::scss()),
+            "sass" => Ok(Self::sass()),
             "tailwindcss" => Ok(Self::tailwind_css()),
             _ => Err(FileSourceError::UnknownLanguageId),
         }
@@ -359,5 +401,29 @@ mod tests {
             assert!(deserialized.is_scss());
             assert!(deserialized.is_css_modules());
         }
+    }
+
+    #[test]
+    fn sass_files_are_detected_from_extension_and_language_id() {
+        for path in ["style.sass", "STYLE.SASS"] {
+            let source = DocumentFileSource::from_path(Utf8Path::new(path), false)
+                .to_css_file_source()
+                .unwrap();
+
+            assert!(source.is_sass());
+            assert!(!source.is_scss());
+            assert!(source.is_sass_language());
+            assert!(source.is_indented_syntax());
+            assert_eq!(source.file_extension(), "sass");
+        }
+
+        let from_id = CssFileSource::try_from_language_id("sass").unwrap();
+        assert!(from_id.is_sass());
+
+        let serialized = serde_json::to_string(&from_id).unwrap();
+        assert_eq!(
+            serialized,
+            r#"{"language":"sass","variant":"standard","embeddingKind":"None"}"#
+        );
     }
 }

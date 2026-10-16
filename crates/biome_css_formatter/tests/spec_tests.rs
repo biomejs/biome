@@ -9,4 +9,8 @@ mod formatter {
     mod scss_module {
         tests_macros::gen_tests! {"tests/specs/scss/**/*.scss", crate::spec_test::run, ""}
     }
+
+    mod sass_module {
+        tests_macros::gen_tests! {"tests/specs/sass/**/*.sass", crate::spec_test::run, ""}
+    }
 }

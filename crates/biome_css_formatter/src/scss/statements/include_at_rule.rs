@@ -36,14 +36,14 @@ impl FormatNodeRule<ScssIncludeAtRule> for FormatScssIncludeAtRule {
             if let Some(semicolon_token) = semicolon_token {
                 write!(f, [format_removed(&semicolon_token)])?;
             }
-        } else {
-            if let Some(semicolon_token) = semicolon_token {
-                write!(f, [semicolon_token.format()])?;
-            } else {
-                write!(f, [token(";")])?;
-            }
-        }
 
-        Ok(())
+            Ok(())
+        } else if f.options().is_indented_syntax() {
+            Ok(())
+        } else if let Some(semicolon_token) = semicolon_token {
+            write!(f, [semicolon_token.format()])
+        } else {
+            write!(f, [token(";")])
+        }
     }
 }

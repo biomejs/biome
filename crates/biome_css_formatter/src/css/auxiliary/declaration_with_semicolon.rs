@@ -15,6 +15,11 @@ impl FormatNodeRule<CssDeclarationWithSemicolon> for FormatCssDeclarationWithSem
             declaration,
             semicolon_token,
         } = node.as_fields();
+
+        if f.options().is_indented_syntax() {
+            return write!(f, [declaration.format()]);
+        }
+
         // Keep the pre-`;` gap only for `!important` block comments:
         // `a { color: red !important /* c */ ; }`.
         // Plain declarations normalize: `a { --token: /* c */ ; }` -> `a { --token: /* c */; }`.

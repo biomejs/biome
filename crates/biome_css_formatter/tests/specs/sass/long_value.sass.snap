@@ -1,0 +1,26 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: sass/long_value.sass
+---
+
+# Input
+
+```sass
+.grid
+  grid-template-areas: "header header header header header" "main main main main sidebar" "footer footer footer footer footer"
+
+```
+
+
+# Formatted
+
+```sass
+.grid
+	grid-template-areas: "header header header header header" "main main main main sidebar" "footer footer footer footer footer"
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2: 	grid-template-areas: "header header header header header" "main main main main sidebar" "footer footer footer footer footer"
+```

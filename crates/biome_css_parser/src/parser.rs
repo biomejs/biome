@@ -174,20 +174,26 @@ impl<'source> CssParser<'source> {
         CssParserCheckpoint {
             context: self.context.checkpoint(),
             source: self.source.checkpoint(),
-            // `state` is not checkpointed because it (currently) only contains
-            // scoped properties that aren't only dependent on checkpoints and
-            // should be reset manually when the scope of their use is exited.
+            // The rest of `state` is not checkpointed because it (currently)
+            // only contains scoped properties that aren't only dependent on
+            // checkpoints and should be reset manually when the scope of their
+            // use is exited. The indentation stack is checkpointed because
+            // speculative parses push and pop entries and a rewind must restore
+            // the indentation of the enclosing blocks.
+            sass_indentation: self.state.sass_indentation.clone(),
         }
     }
 
     pub fn rewind(&mut self, checkpoint: CssParserCheckpoint) {
-        let CssParserCheckpoint { context, source } = checkpoint;
+        let CssParserCheckpoint {
+            context,
+            source,
+            sass_indentation,
+        } = checkpoint;
 
         self.context.rewind(context);
         self.source.rewind(source);
-        // `state` is not checkpointed because it (currently) only contains
-        // scoped properties that aren't only dependent on checkpoints and
-        // should be reset manually when the scope of their use is exited.
+        self.state.sass_indentation = sass_indentation;
     }
 
     pub fn finish(self) -> (Vec<Event<CssSyntaxKind>>, Vec<ParseDiagnostic>, Vec<Trivia>) {
@@ -228,9 +234,9 @@ impl<'source> Parser for CssParser<'source> {
 pub struct CssParserCheckpoint {
     pub(super) context: ParserContextCheckpoint,
     pub(super) source: CssTokenSourceCheckpoint,
-    // `state` is not checkpointed because it (currently) only contains
-    // scoped properties that aren't only dependent on checkpoints and
-    // should be reset manually when the scope of their use is exited.
+    /// Checkpointed copy of [`CssParserState::sass_indentation`] so a rewind
+    /// restores the indentation of the enclosing indented Sass blocks.
+    pub(super) sass_indentation: Vec<u32>,
 }
 
 impl From<&CssFileSource> for CssParserOptions {
