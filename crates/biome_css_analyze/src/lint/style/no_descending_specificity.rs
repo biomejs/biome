@@ -2,18 +2,19 @@ use rustc_hash::{FxHashMap, FxHashSet};
 
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_css_semantic::model::{Rule as CssSemanticRule, RuleId, Specificity};
+use biome_css_semantic::model::{ResolvedSelector, Rule as CssSemanticRule, RuleId, Specificity};
 use biome_css_syntax::{
-    AnyCssRoot, AnyCssSelector, CssContainerAtRule, CssLanguage, CssLayerAtRule, CssMediaAtRule,
-    CssScopeAtRule, CssStartingStyleAtRule, CssSupportsAtRule, ScssAtRootAtRule, ScssEachAtRule,
-    ScssElseClause, ScssForAtRule, ScssFunctionAtRule, ScssIfAtRule, ScssIncludeAtRule,
-    ScssMixinAtRule, ScssWhileAtRule,
+    AnyCssRoot, CssContainerAtRule, CssLanguage, CssLayerAtRule, CssMediaAtRule, CssScopeAtRule,
+    CssStartingStyleAtRule, CssSupportsAtRule, ScssAtRootAtRule, ScssEachAtRule, ScssElseClause,
+    ScssForAtRule, ScssFunctionAtRule, ScssIfAtRule, ScssIncludeAtRule, ScssMixinAtRule,
+    ScssWhileAtRule, T,
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, SyntaxKindSet, TextRange};
 use biome_rule_options::no_descending_specificity::NoDescendingSpecificityOptions;
 
 use crate::services::semantic::Semantic;
+use crate::utils::is_pseudo_elements;
 
 const INDEPENDENT_AT_RULE_KINDS: SyntaxKindSet<CssLanguage> = CssContainerAtRule::KIND_SET
     .union(CssMediaAtRule::KIND_SET)
@@ -108,8 +109,8 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```css
-    /// a:hover { color: red; }
     /// a { color: red; }
+    /// a:hover { color: red; }
     /// ```
     ///
     /// ```css
@@ -198,13 +199,12 @@ impl Rule for NoDescendingSpecificity {
                 &mut descending_selectors,
             );
 
-            let child_at_rule_context = if INDEPENDENT_AT_RULE_KINDS
-                .matches(rule_node.syntax().kind())
-            {
-                Some(rule.id())
-            } else {
-                at_rule_context
-            };
+            let child_at_rule_context =
+                if INDEPENDENT_AT_RULE_KINDS.matches(rule_node.syntax().kind()) {
+                    Some(rule.id())
+                } else {
+                    at_rule_context
+                };
             for child_id in rule.child_ids().iter().rev() {
                 if let Some(child_rule) = model.get_rule_by_id(child_id) {
                     rules.push((child_rule, child_at_rule_context));
@@ -250,35 +250,53 @@ struct SelectorContext {
 }
 
 type SelectorContexts = FxHashMap<SelectorContext, FxHashMap<String, (TextRange, Specificity)>>;
-/// find tail selector
+/// Returns the element a selector styles: the last compound of the resolved selector, without
+/// pseudo-classes. Pseudo-elements stay, including legacy single-colon ones such as `:before`,
+/// because they style a different element. Returns `None` when nothing is left, as for `:hover`.
+///
 /// ```css
-/// a b:hover {
-///   ^^^^^^^
+/// .a ul li:hover {
+///       ^^
 /// }
 /// ```
-fn find_tail_selector_str(selector: &AnyCssSelector) -> Option<String> {
-    match selector {
-        AnyCssSelector::CssCompoundSelector(s) => {
-            let mut result = String::new();
-            if let Some(simple) = s.simple_selector() {
-                simple.syntax().text_trimmed().for_each_chunk(|chunk| {
-                    result.push_str(chunk);
-                });
+fn subject_key(selector: &ResolvedSelector) -> Option<String> {
+    let mut key = String::new();
+    let mut depth = 0u32;
+    let mut tokens = selector.tokens().peekable();
+    while let Some((kind, text)) = tokens.next() {
+        match *kind {
+            T!['('] => depth += 1,
+            T![')'] => depth = depth.saturating_sub(1),
+            kind if depth == 0 && ResolvedSelector::is_combinator(kind) => {
+                key.clear();
+                continue;
             }
-
-            s.sub_selectors()
-                .syntax()
-                .text_trimmed()
-                .for_each_chunk(|chunk| result.push_str(chunk));
-
-            Some(result)
+            T![:]
+                if tokens
+                    .peek()
+                    .is_some_and(|(_, name)| !is_pseudo_elements(name)) =>
+            {
+                tokens.next();
+                if tokens.next_if(|(kind, _)| *kind == T!['(']).is_some() {
+                    let mut depth = 1u32;
+                    for (kind, _) in tokens.by_ref() {
+                        match *kind {
+                            T!['('] => depth += 1,
+                            T![')'] => depth -= 1,
+                            _ => {}
+                        }
+                        if depth == 0 {
+                            break;
+                        }
+                    }
+                }
+                continue;
+            }
+            _ => {}
         }
-        AnyCssSelector::CssComplexSelector(s) => {
-            // negligible recursion
-            s.right().as_ref().ok().and_then(find_tail_selector_str)
-        }
-        _ => None,
+        key.push_str(text);
     }
+    (!key.is_empty()).then_some(key)
 }
 
 /// Checks selectors against the highest preceding specificity with the same tail selector in the same at-rule context.
@@ -297,10 +315,7 @@ fn find_descending_selector(
         if resolved_selector.contains('%') || resolved_selector.contains("#{") {
             continue;
         }
-        let Some(casted_selector) = AnyCssSelector::cast(selector.node().syntax().clone()) else {
-            continue;
-        };
-        let Some(tail_selector_str) = find_tail_selector_str(&casted_selector) else {
+        let Some(tail_selector_str) = subject_key(selector.resolved()) else {
             continue;
         };
 
