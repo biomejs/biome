@@ -12,7 +12,7 @@ use crate::syntax::value::r#type::{
     is_at_syntax_single_component, is_at_syntax_type, is_at_type_function,
     parse_any_syntax_component, parse_type_function,
 };
-use crate::syntax::{is_at_identifier, try_parse};
+use crate::syntax::{is_at_dashed_identifier, is_at_identifier, try_parse};
 use crate::{parser::CssParser, syntax::parse_dashed_identifier};
 use biome_css_syntax::{
     CssSyntaxKind::{self, *},
@@ -73,22 +73,27 @@ pub(crate) fn parse_function_at_rule_declarator(p: &mut CssParser) -> ParsedSynt
         )
         .ok();
 
+    let opening = p.cur_range().start();
     p.expect(T!['(']);
     let encountered = p.state().encountered_if_function;
     let speculative = p.is_speculative_parsing();
-    let closed = try_parse(p, |p| {
-        let diagnostics = p.context().diagnostics().len();
-        CssFunctionParameterList {
-            recover_at_body: false,
-        }
-        .parse_list(p);
-        if p.at(T![')']) && p.context().diagnostics().len() == diagnostics {
-            Ok(())
-        } else {
-            Err(())
-        }
-    })
-    .is_ok();
+    let closed = !p
+        .state()
+        .unclosed_function_default_parens
+        .contains(&opening)
+        && try_parse(p, |p| {
+            let mut parameters = CssFunctionParameterList {
+                recover_at_body: false,
+                has_structural_error: false,
+            };
+            parameters.parse_list(p);
+            if p.at(T![')']) && !parameters.has_structural_error {
+                Ok(())
+            } else {
+                Err(())
+            }
+        })
+        .is_ok();
     p.state_mut().encountered_if_function =
         encountered || (closed && speculative && p.state().encountered_if_function);
     if !closed {
@@ -96,6 +101,7 @@ pub(crate) fn parse_function_at_rule_declarator(p: &mut CssParser) -> ParsedSynt
         // must not turn a following selector's `)` into a successful first pass.
         CssFunctionParameterList {
             recover_at_body: true,
+            has_structural_error: false,
         }
         .parse_list(p);
     }
@@ -221,6 +227,7 @@ impl ParseRecovery for CssFunctionParameterListParseRecovery {
 
 struct CssFunctionParameterList {
     recover_at_body: bool,
+    has_structural_error: bool,
 }
 
 impl ParseSeparatedList for CssFunctionParameterList {
@@ -229,7 +236,14 @@ impl ParseSeparatedList for CssFunctionParameterList {
     const LIST_KIND: Self::Kind = CSS_FUNCTION_PARAMETER_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        self.has_structural_error |= !is_at_dashed_identifier(p);
         parse_function_parameter(p, self.recover_at_body)
+    }
+
+    fn expect_separator(&mut self, p: &mut Self::Parser<'_>) -> bool {
+        let present = p.expect(T![,]);
+        self.has_structural_error |= !present;
+        present
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
@@ -266,5 +280,70 @@ impl ParseRecovery for CssFunctionParameterNameParseRecovery {
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
         p.at_ts(token_set![T![,], T![')'], T![:]]) || is_at_type_function(p) || is_at_syntax_type(p)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_function_at_rule_declarator;
+    use crate::{CssParserOptions, parser::CssParser, syntax::parse_root};
+    use biome_languages::CssFileSource;
+    use biome_parser::Parser;
+
+    #[test]
+    fn valid_function_defaults_do_not_rewind() {
+        for source_type in [CssFileSource::css(), CssFileSource::scss()] {
+            for name in ["--f", "--f ", "--#{$name}", "--#{$name} "] {
+                if source_type == CssFileSource::css() && name.contains('#') {
+                    continue;
+                }
+                let source =
+                    format!("function {name}(--x: {{a; b !important}} @raw(value), --y: [c, d])\n")
+                        .repeat(32);
+                let mut parser = CssParser::new(&source, source_type, CssParserOptions::default());
+                for _ in 0..32 {
+                    assert!(parse_function_at_rule_declarator(&mut parser).is_present());
+                }
+                assert!(
+                    parser.context().diagnostics().is_empty(),
+                    "{source_type:?}: {name}"
+                );
+                assert_eq!(parser.source().rewinds, 0, "{source_type:?}: {name}");
+            }
+        }
+    }
+
+    #[test]
+    fn malformed_function_defaults_have_linear_token_work() {
+        let mut failures = Vec::new();
+        for source_type in [CssFileSource::css(), CssFileSource::scss()] {
+            for name in ["--f", "--f ", "--#{$name}", "--#{$name} "] {
+                if source_type == CssFileSource::css() && name.contains('#') {
+                    continue;
+                }
+                for suffix in [
+                    "",
+                    "] @function --good(--x:red) {result:red;}",
+                    "} @function --good(--x:red) {result:red;}",
+                ] {
+                    for count in [32, 64, 128] {
+                        let mut source =
+                            format!("@function {name}(--x:red {{result:red;}}\n").repeat(count);
+                        source.push_str(suffix);
+                        let mut parser =
+                            CssParser::new(&source, source_type, CssParserOptions::default());
+                        parse_root(&mut parser);
+                        let steps = parser.source().token_steps;
+                        println!(
+                            "{source_type:?}: {name:?}: {suffix:?}: {count} headers, {steps} token steps"
+                        );
+                        if steps > count * 100 {
+                            failures.push((source_type, name, suffix, count, steps));
+                        }
+                    }
+                }
+            }
+        }
+        assert!(failures.is_empty(), "repeated suffix scans: {failures:#?}");
     }
 }

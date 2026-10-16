@@ -378,6 +378,7 @@ fn parse_custom_property_function(
         comment_mode
     };
 
+    let opening = p.cur_range().start();
     p.bump_with_context(
         T!['('],
         CssLexContext::CustomPropertyValue(body_comment_mode),
@@ -389,6 +390,14 @@ fn parse_custom_property_function(
         mode,
     )
     .parse_list(p);
+    if p.at_ts(token_set![T![']'], T!['}'], EOF])
+        && p.is_speculative_parsing()
+        && matches!(mode, CustomPropertyValueMode::FunctionDefault { .. })
+    {
+        p.state_mut()
+            .unclosed_function_default_parens
+            .insert(opening);
+    }
     p.expect_with_context(T![')'], context);
     Present(function.complete(p, CSS_CUSTOM_PROPERTY_FUNCTION))
 }
@@ -410,9 +419,19 @@ fn parse_custom_property_block(
 
     let block = p.start();
     let context = CssLexContext::CustomPropertyValue(comment_mode);
+    let opening = p.cur_range().start();
     p.bump_with_context(open, context);
     CustomPropertyComponentList::block(comment_mode, nested_end_set, legacy_filter_recovery, mode)
         .parse_list(p);
+    if open == T!['(']
+        && p.at_ts(token_set![T![']'], T!['}'], EOF])
+        && p.is_speculative_parsing()
+        && matches!(mode, CustomPropertyValueMode::FunctionDefault { .. })
+    {
+        p.state_mut()
+            .unclosed_function_default_parens
+            .insert(opening);
+    }
     p.expect_with_context(close, context);
     Present(block.complete(p, kind))
 }

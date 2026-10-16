@@ -16,6 +16,12 @@ use smallvec::SmallVec;
 pub(crate) struct CssTokenSource<'src> {
     lexer: BufferedLexer<CssSyntaxKind, CssLexer<'src>>,
 
+    // Counts lexer advancement across rewinds for parser work regressions.
+    #[cfg(test)]
+    pub(crate) token_steps: usize,
+    #[cfg(test)]
+    pub(crate) rewinds: usize,
+
     /// List of the skipped trivia. Needed to construct the CST and compute the non-trivia token offsets.
     pub(super) trivia_list: Vec<Trivia>,
     /// Stack of outer SCSS string quotes whose `#{...}` bodies are currently
@@ -44,6 +50,10 @@ impl<'src> CssTokenSource<'src> {
     pub(crate) fn new(lexer: BufferedLexer<CssSyntaxKind, CssLexer<'src>>) -> Self {
         CssTokenSource {
             lexer,
+            #[cfg(test)]
+            token_steps: 0,
+            #[cfg(test)]
+            rewinds: 0,
             trivia_list: vec![],
             scss_string_interpolation_quotes: SmallVec::new(),
         }
@@ -73,6 +83,10 @@ impl<'src> CssTokenSource<'src> {
         let context = self.effective_context(context);
 
         loop {
+            #[cfg(test)]
+            {
+                self.token_steps += 1;
+            }
             let kind = self.lexer.next_token(context);
 
             let trivia_kind = TriviaPieceKind::try_from(kind);
@@ -239,6 +253,10 @@ impl<'src> CssTokenSource<'src> {
 
     /// Restores the token source to a previous state
     pub fn rewind(&mut self, checkpoint: CssTokenSourceCheckpoint) {
+        #[cfg(test)]
+        {
+            self.rewinds += 1;
+        }
         let CssTokenSourceCheckpoint {
             lexer_checkpoint,
             trivia_len,

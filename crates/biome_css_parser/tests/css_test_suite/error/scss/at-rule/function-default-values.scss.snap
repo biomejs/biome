@@ -33,6 +33,9 @@ $gap: 8px;
 }
 .after-missing-outer { color: red; }
 
+@function --f(--x: , --y: {a:b}) {result:red;}
+.after-empty-default { color: blue; }
+
 ```
 
 
@@ -812,17 +815,136 @@ CssRoot {
                 r_curly_token: R_CURLY@627..628 "}" [] [],
             },
         },
+        CssAtRule {
+            at_token: AT@628..631 "@" [Newline("\n"), Newline("\n")] [],
+            rule: CssFunctionAtRule {
+                declarator: CssFunctionAtRuleDeclarator {
+                    function_token: FUNCTION_KW@631..640 "function" [] [Whitespace(" ")],
+                    name: CssDashedIdentifier {
+                        value_token: IDENT@640..643 "--f" [] [],
+                    },
+                    l_paren_token: L_PAREN@643..644 "(" [] [],
+                    parameters: CssFunctionParameterList [
+                        CssFunctionParameter {
+                            name: CssDashedIdentifier {
+                                value_token: IDENT@644..647 "--x" [] [],
+                            },
+                            ty: missing (optional),
+                            default_value: CssFunctionParameterDefaultValue {
+                                colon_token: COLON@647..649 ":" [] [Whitespace(" ")],
+                                components: CssCustomPropertyComponentList [],
+                            },
+                        },
+                        COMMA@649..651 "," [] [Whitespace(" ")],
+                        CssFunctionParameter {
+                            name: CssDashedIdentifier {
+                                value_token: IDENT@651..654 "--y" [] [],
+                            },
+                            ty: missing (optional),
+                            default_value: CssFunctionParameterDefaultValue {
+                                colon_token: COLON@654..656 ":" [] [Whitespace(" ")],
+                                components: CssCustomPropertyComponentList [
+                                    CssCustomPropertyBracedBlock {
+                                        l_curly_token: L_CURLY@656..657 "{" [] [],
+                                        components: CssCustomPropertyComponentList [
+                                            CssCustomIdentifier {
+                                                value_token: IDENT@657..658 "a" [] [],
+                                            },
+                                            CssCustomPropertyDelimiter {
+                                                value: COLON@658..659 ":" [] [],
+                                            },
+                                            CssCustomIdentifier {
+                                                value_token: IDENT@659..660 "b" [] [],
+                                            },
+                                        ],
+                                        r_curly_token: R_CURLY@660..661 "}" [] [],
+                                    },
+                                ],
+                            },
+                        },
+                    ],
+                    r_paren_token: R_PAREN@661..663 ")" [] [Whitespace(" ")],
+                    returns: missing (optional),
+                },
+                block: CssDeclarationOrAtRuleBlock {
+                    l_curly_token: L_CURLY@663..664 "{" [] [],
+                    items: CssDeclarationOrAtRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@664..670 "result" [] [],
+                                    },
+                                    colon_token: COLON@670..671 ":" [] [],
+                                    value: ScssExpression {
+                                        items: ScssExpressionItemList [
+                                            CssIdentifier {
+                                                value_token: IDENT@671..674 "red" [] [],
+                                            },
+                                        ],
+                                    },
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@674..675 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@675..676 "}" [] [],
+                },
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@676..678 "." [Newline("\n")] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@678..698 "after-empty-default" [] [Whitespace(" ")],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@698..700 "{" [] [Whitespace(" ")],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@700..705 "color" [] [],
+                                },
+                                colon_token: COLON@705..707 ":" [] [Whitespace(" ")],
+                                value: ScssExpression {
+                                    items: ScssExpressionItemList [
+                                        CssIdentifier {
+                                            value_token: IDENT@707..711 "blue" [] [],
+                                        },
+                                    ],
+                                },
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@711..713 ";" [] [Whitespace(" ")],
+                    },
+                ],
+                r_curly_token: R_CURLY@713..714 "}" [] [],
+            },
+        },
     ],
-    eof_token: EOF@628..629 "" [Newline("\n")] [],
+    eof_token: EOF@714..715 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..629
+0: CSS_ROOT@0..715
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..628
+  1: CSS_ROOT_ITEM_LIST@0..714
     0: SCSS_VARIABLE_DECLARATION@0..10
       0: SCSS_VARIABLE@0..4
         0: DOLLAR@0..1 "$" [] []
@@ -1316,7 +1438,85 @@ CssRoot {
               1: (empty)
             1: SEMICOLON@625..627 ";" [] [Whitespace(" ")]
         2: R_CURLY@627..628 "}" [] []
-  2: EOF@628..629 "" [Newline("\n")] []
+    13: CSS_AT_RULE@628..676
+      0: AT@628..631 "@" [Newline("\n"), Newline("\n")] []
+      1: CSS_FUNCTION_AT_RULE@631..676
+        0: CSS_FUNCTION_AT_RULE_DECLARATOR@631..663
+          0: FUNCTION_KW@631..640 "function" [] [Whitespace(" ")]
+          1: CSS_DASHED_IDENTIFIER@640..643
+            0: IDENT@640..643 "--f" [] []
+          2: L_PAREN@643..644 "(" [] []
+          3: CSS_FUNCTION_PARAMETER_LIST@644..661
+            0: CSS_FUNCTION_PARAMETER@644..649
+              0: CSS_DASHED_IDENTIFIER@644..647
+                0: IDENT@644..647 "--x" [] []
+              1: (empty)
+              2: CSS_FUNCTION_PARAMETER_DEFAULT_VALUE@647..649
+                0: COLON@647..649 ":" [] [Whitespace(" ")]
+                1: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@649..649
+            1: COMMA@649..651 "," [] [Whitespace(" ")]
+            2: CSS_FUNCTION_PARAMETER@651..661
+              0: CSS_DASHED_IDENTIFIER@651..654
+                0: IDENT@651..654 "--y" [] []
+              1: (empty)
+              2: CSS_FUNCTION_PARAMETER_DEFAULT_VALUE@654..661
+                0: COLON@654..656 ":" [] [Whitespace(" ")]
+                1: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@656..661
+                  0: CSS_CUSTOM_PROPERTY_BRACED_BLOCK@656..661
+                    0: L_CURLY@656..657 "{" [] []
+                    1: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@657..660
+                      0: CSS_CUSTOM_IDENTIFIER@657..658
+                        0: IDENT@657..658 "a" [] []
+                      1: CSS_CUSTOM_PROPERTY_DELIMITER@658..659
+                        0: COLON@658..659 ":" [] []
+                      2: CSS_CUSTOM_IDENTIFIER@659..660
+                        0: IDENT@659..660 "b" [] []
+                    2: R_CURLY@660..661 "}" [] []
+          4: R_PAREN@661..663 ")" [] [Whitespace(" ")]
+          5: (empty)
+        1: CSS_DECLARATION_OR_AT_RULE_BLOCK@663..676
+          0: L_CURLY@663..664 "{" [] []
+          1: CSS_DECLARATION_OR_AT_RULE_LIST@664..675
+            0: CSS_DECLARATION_WITH_SEMICOLON@664..675
+              0: CSS_DECLARATION@664..674
+                0: CSS_GENERIC_PROPERTY@664..674
+                  0: CSS_IDENTIFIER@664..670
+                    0: IDENT@664..670 "result" [] []
+                  1: COLON@670..671 ":" [] []
+                  2: SCSS_EXPRESSION@671..674
+                    0: SCSS_EXPRESSION_ITEM_LIST@671..674
+                      0: CSS_IDENTIFIER@671..674
+                        0: IDENT@671..674 "red" [] []
+                1: (empty)
+              1: SEMICOLON@674..675 ";" [] []
+          2: R_CURLY@675..676 "}" [] []
+    14: CSS_QUALIFIED_RULE@676..714
+      0: CSS_SELECTOR_LIST@676..698
+        0: CSS_COMPOUND_SELECTOR@676..698
+          0: CSS_NESTED_SELECTOR_LIST@676..676
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@676..698
+            0: CSS_CLASS_SELECTOR@676..698
+              0: DOT@676..678 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@678..698
+                0: IDENT@678..698 "after-empty-default" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@698..714
+        0: L_CURLY@698..700 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@700..713
+          0: CSS_DECLARATION_WITH_SEMICOLON@700..713
+            0: CSS_DECLARATION@700..711
+              0: CSS_GENERIC_PROPERTY@700..711
+                0: CSS_IDENTIFIER@700..705
+                  0: IDENT@700..705 "color" [] []
+                1: COLON@705..707 ":" [] [Whitespace(" ")]
+                2: SCSS_EXPRESSION@707..711
+                  0: SCSS_EXPRESSION_ITEM_LIST@707..711
+                    0: CSS_IDENTIFIER@707..711
+                      0: IDENT@707..711 "blue" [] []
+              1: (empty)
+            1: SEMICOLON@711..713 ";" [] [Whitespace(" ")]
+        2: R_CURLY@713..714 "}" [] []
+  2: EOF@714..715 "" [Newline("\n")] []
 
 ```
 
@@ -1486,5 +1686,25 @@ function-default-values.scss:23:49 parse ━━━━━━━━━━━━━
     25 │ }
   
   i Remove {
+  
+function-default-values.scss:28:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a function parameter default value but instead found ','.
+  
+    26 │ .after-missing-outer { color: red; }
+    27 │ 
+  > 28 │ @function --f(--x: , --y: {a:b}) {result:red;}
+       │                    ^
+    29 │ .after-empty-default { color: blue; }
+    30 │ 
+  
+  i Expected a function parameter default value here.
+  
+    26 │ .after-missing-outer { color: red; }
+    27 │ 
+  > 28 │ @function --f(--x: , --y: {a:b}) {result:red;}
+       │                    ^
+    29 │ .after-empty-default { color: blue; }
+    30 │ 
   
 ```

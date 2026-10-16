@@ -1,5 +1,5 @@
 use biome_css_syntax::TextSize;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 #[derive(Clone, Copy)]
 pub(crate) enum IfFunctionKind {
@@ -53,6 +53,12 @@ pub(crate) struct CssParserState {
     /// Recovery choices are retained too, preventing these repeated attempts
     /// on malformed input.
     pub(crate) if_function_kinds: Option<HashMap<TextSize, IfFunctionKind>>,
+
+    /// Raw function or block parentheses stopped by EOF or a mismatched closer
+    /// during speculative native-default parsing.
+    /// These offsets survive rewinds: later malformed headers at the same `(`
+    /// cannot close without recovery and must not rescan the remaining suffix.
+    pub(crate) unclosed_function_default_parens: HashSet<TextSize>,
 }
 
 impl CssParserState {
@@ -63,6 +69,7 @@ impl CssParserState {
             is_in_if_media_test: false,
             encountered_if_function: false,
             if_function_kinds: None,
+            unclosed_function_default_parens: HashSet::new(),
         }
     }
 }

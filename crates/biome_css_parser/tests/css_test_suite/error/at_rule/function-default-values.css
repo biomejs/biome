@@ -22,3 +22,6 @@
   result: var(--value);
 }
 .after-missing-outer { color: red; }
+
+@function --f(--x: , --y: {a:b}) {result:red;}
+.after-empty-default { color: blue; }

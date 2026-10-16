@@ -278,3 +278,78 @@ fn ordinary_urls_with_leading_delimiters_round_trip() {
         }
     }
 }
+
+#[test]
+fn native_default_validation_preserves_header_ownership() {
+    let mut failures = Vec::new();
+    for source_type in [CssFileSource::css(), CssFileSource::scss()] {
+        let source = "@function --f(--x: , --y: {a:b}) {result:red;}\n.after {color:blue;}";
+        let parsed = parse_css(source, source_type, CssParserOptions::default());
+        assert!(parsed.has_errors());
+        assert_eq!(parsed.syntax().to_string(), source);
+        let function = parsed
+            .syntax()
+            .descendants()
+            .find_map(CssFunctionAtRule::cast)
+            .unwrap();
+        let body = function.block().unwrap();
+        if body.syntax().text_trimmed() != "{result:red;}" {
+            failures.push(format!("{source_type:?}: {}", body.syntax().text_trimmed()));
+            continue;
+        }
+        assert_eq!(parsed.diagnostics().len(), 1);
+        let parameters: Vec<_> = function
+            .syntax()
+            .descendants()
+            .filter_map(CssFunctionParameter::cast)
+            .collect();
+        assert_eq!(parameters.len(), 2);
+        assert_eq!(parameters[1].syntax().text_trimmed(), "--y: {a:b}");
+        assert!(!has_bogus_nodes_or_empty_slots(parameters[1].syntax()));
+        let after = parsed
+            .syntax()
+            .descendants()
+            .find_map(CssQualifiedRule::cast)
+            .unwrap();
+        assert_eq!(after.syntax().text_trimmed(), ".after {color:blue;}");
+        assert!(!has_bogus_nodes_or_empty_slots(after.syntax()));
+    }
+    assert!(
+        failures.is_empty(),
+        "braced defaults became bodies: {failures:#?}"
+    );
+}
+
+#[test]
+fn malformed_native_defaults_preserve_later_braced_defaults() {
+    for source_type in [CssFileSource::css(), CssFileSource::scss()] {
+        for name in ["--f", "--f ", "--#{$name}", "--#{$name} "] {
+            if source_type == CssFileSource::css() && name.contains('#') {
+                continue;
+            }
+            for boundary in ["", "] ", "} "] {
+                let malformed = format!("@function {name}(--x:red {{result:red;}}\n");
+                let valid = "@function --good(--x: {a; b !important} @raw(value), --y: [c, d]) {result:var(--x);}";
+                let source = format!("{}{boundary}{valid}", malformed.repeat(16));
+                let parsed = parse_css(&source, source_type, CssParserOptions::default());
+                assert!(parsed.has_errors());
+                assert_eq!(parsed.syntax().to_string(), source);
+                let functions: Vec<_> = parsed
+                    .syntax()
+                    .descendants()
+                    .filter_map(CssFunctionAtRule::cast)
+                    .collect();
+                assert_eq!(functions.len(), 17);
+                for function in &functions[..16] {
+                    assert_eq!(
+                        function.block().unwrap().syntax().text_trimmed(),
+                        "{result:red;}"
+                    );
+                }
+                let good = functions.last().unwrap();
+                assert_eq!(good.syntax().text_trimmed(), &valid[1..]);
+                assert!(!has_bogus_nodes_or_empty_slots(good.syntax()));
+            }
+        }
+    }
+}
