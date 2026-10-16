@@ -1,0 +1,105 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid_issue_9768.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+// Different parents resolve to different subjects: `li` and `a`.
+.c1a {
+  ul li {
+    &:hover { color: red; }
+  }
+}
+
+.c1b {
+  a {
+    &:hover { color: blue; }
+  }
+}
+
+// BEM suffixes resolve to different classes.
+.c2 {
+  &--x + &--y { color: red; }
+
+  &--z { color: blue; }
+}
+
+// Pseudo-elements under different parents.
+.c3a .x {
+  &::after { color: red; }
+}
+
+.c3b {
+  &::after { color: blue; }
+}
+
+// Pseudo-classes don't change the subject, so `.c5` is reported.
+.c5a .c5:hover { color: red; }
+
+.c5 { color: blue; }
+
+// A legacy single-colon pseudo-element is a different subject.
+.c7a .c7:before { color: red; }
+
+.c7 { color: blue; }
+
+// A descending pair through BEM nesting, so `.c8i` is reported.
+.c8 {
+  &--x .c8i { color: red; }
+}
+
+.c8i { color: blue; }
+
+```
+
+# Diagnostics
+```
+invalid_issue_9768.scss:34:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    32 │ .c5a .c5:hover { color: red; }
+    33 │ 
+  > 34 │ .c5 { color: blue; }
+       │ ^^^
+    35 │ 
+    36 │ // A legacy single-colon pseudo-element is a different subject.
+  
+  i This selector specificity is (0, 3, 0)
+  
+    31 │ // Pseudo-classes don't change the subject, so `.c5` is reported.
+  > 32 │ .c5a .c5:hover { color: red; }
+       │ ^^^^^^^^^^^^^^
+    33 │ 
+    34 │ .c5 { color: blue; }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+invalid_issue_9768.scss:46:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    44 │ }
+    45 │ 
+  > 46 │ .c8i { color: blue; }
+       │ ^^^^
+    47 │ 
+  
+  i This selector specificity is (0, 2, 0)
+  
+    41 │ // A descending pair through BEM nesting, so `.c8i` is reported.
+    42 │ .c8 {
+  > 43 │   &--x .c8i { color: red; }
+       │   ^^^^^^^^^
+    44 │ }
+    45 │ 
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```

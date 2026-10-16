@@ -7,15 +7,16 @@ use biome_console::markup;
 use biome_css_semantic::model::{ResolvedSelector, Rule as CssSemanticRule, RuleId, Specificity};
 use biome_css_syntax::{
     AnyCssRoot, CssContainerAtRule, CssLanguage, CssLayerAtRule, CssMediaAtRule, CssScopeAtRule,
-    CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxKind, ScssAtRootAtRule, ScssEachAtRule,
-    ScssElseClause, ScssForAtRule, ScssFunctionAtRule, ScssIfAtRule, ScssIncludeAtRule,
-    ScssMixinAtRule, ScssWhileAtRule,
+    CssStartingStyleAtRule, CssSupportsAtRule, ScssAtRootAtRule, ScssEachAtRule, ScssElseClause,
+    ScssForAtRule, ScssFunctionAtRule, ScssIfAtRule, ScssIncludeAtRule, ScssMixinAtRule,
+    ScssWhileAtRule, T,
 };
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, SyntaxKindSet, TextRange, TokenText};
+use biome_rowan::{AstNode, SyntaxKindSet, TextRange};
 use biome_rule_options::no_descending_specificity::NoDescendingSpecificityOptions;
 
 use crate::services::semantic::Semantic;
+use crate::utils::is_pseudo_elements;
 
 const INDEPENDENT_AT_RULE_KINDS: SyntaxKindSet<CssLanguage> = CssContainerAtRule::KIND_SET
     .union(CssMediaAtRule::KIND_SET)
@@ -110,8 +111,8 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```css
-    /// a:hover { color: red; }
     /// a { color: red; }
+    /// a:hover { color: red; }
     /// ```
     ///
     /// ```css
@@ -200,13 +201,12 @@ impl Rule for NoDescendingSpecificity {
                 &mut descending_selectors,
             );
 
-            let child_at_rule_context = if INDEPENDENT_AT_RULE_KINDS
-                .matches(rule_node.syntax().kind())
-            {
-                Some(rule.id())
-            } else {
-                at_rule_context
-            };
+            let child_at_rule_context =
+                if INDEPENDENT_AT_RULE_KINDS.matches(rule_node.syntax().kind()) {
+                    Some(rule.id())
+                } else {
+                    at_rule_context
+                };
             for child_id in rule.child_ids().iter().rev() {
                 if let Some(child_rule) = model.get_rule_by_id(child_id) {
                     rules.push((child_rule, child_at_rule_context));
@@ -254,37 +254,54 @@ struct SelectorContext {
     scss: Option<TextRange>,
 }
 
-type TailSelector = Vec<(CssSyntaxKind, TokenText)>;
-type SelectorContexts =
-    FxHashMap<SelectorContext, FxHashMap<TailSelector, (TextRange, Specificity)>>;
-
-/// Returns the last top-level compound selector from a resolved selector.
+type SelectorContexts = FxHashMap<SelectorContext, FxHashMap<String, (TextRange, Specificity)>>;
+/// Returns the element a selector styles: the last compound of the resolved selector, without
+/// pseudo-classes. Pseudo-elements stay, including legacy single-colon ones such as `:before`,
+/// because they style a different element. Returns `None` when nothing is left, as for `:hover`.
 ///
-/// Combinators inside functional pseudo-classes, such as `>` in `:has(.a > .b)`, remain part of
-/// the compound selector.
-fn tail_selector(selector: &ResolvedSelector) -> Option<TailSelector> {
-    let mut delimiter_depth = 0usize;
-    let mut tail_start = 0;
-
-    for (index, (kind, _)) in selector.tokens().enumerate() {
-        match kind {
-            CssSyntaxKind::L_PAREN | CssSyntaxKind::L_BRACK => delimiter_depth += 1,
-            CssSyntaxKind::R_PAREN | CssSyntaxKind::R_BRACK => {
-                delimiter_depth = delimiter_depth.saturating_sub(1);
+/// ```css
+/// .a ul li:hover {
+///       ^^
+/// }
+/// ```
+fn subject_key(selector: &ResolvedSelector) -> Option<String> {
+    let mut key = String::new();
+    let mut depth = 0u32;
+    let mut tokens = selector.tokens().peekable();
+    while let Some((kind, text)) = tokens.next() {
+        match *kind {
+            T!['('] => depth += 1,
+            T![')'] => depth = depth.saturating_sub(1),
+            kind if depth == 0 && ResolvedSelector::is_combinator(kind) => {
+                key.clear();
+                continue;
             }
-            _ if delimiter_depth == 0 && ResolvedSelector::is_combinator(*kind) => {
-                tail_start = index + 1;
+            T![:]
+                if tokens
+                    .peek()
+                    .is_some_and(|(_, name)| !is_pseudo_elements(name)) =>
+            {
+                tokens.next();
+                if tokens.next_if(|(kind, _)| *kind == T!['(']).is_some() {
+                    let mut depth = 1u32;
+                    for (kind, _) in tokens.by_ref() {
+                        match *kind {
+                            T!['('] => depth += 1,
+                            T![')'] => depth -= 1,
+                            _ => {}
+                        }
+                        if depth == 0 {
+                            break;
+                        }
+                    }
+                }
+                continue;
             }
             _ => {}
         }
+        key.push_str(text);
     }
-
-    let tail = selector
-        .tokens()
-        .skip(tail_start)
-        .cloned()
-        .collect::<Vec<_>>();
-    (!tail.is_empty()).then_some(tail)
+    (!key.is_empty()).then_some(key)
 }
 
 /// Checks selectors against the highest preceding specificity with the same tail selector in the same at-rule context.
@@ -304,7 +321,7 @@ fn find_descending_selector(
         if resolved_selector_text.contains('%') || resolved_selector_text.contains("#{") {
             continue;
         }
-        let Some(tail_selector) = tail_selector(resolved_selector) else {
+        let Some(tail_selector) = subject_key(resolved_selector) else {
             continue;
         };
 
@@ -330,10 +347,7 @@ fn find_descending_selector(
                 *seen = (selector.range(), specificity);
             }
         } else {
-            visited_selectors.insert(
-                tail_selector,
-                (selector.range(), selector.specificity()),
-            );
+            visited_selectors.insert(tail_selector, (selector.range(), selector.specificity()));
         }
     }
 }

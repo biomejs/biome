@@ -17,11 +17,11 @@ c {
     }
 }
 
-e:hover {
+e {
     color: red;
 }
 
-e {
+e:hover {
     color: red;
 }
 
