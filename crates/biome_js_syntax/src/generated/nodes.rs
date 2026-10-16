@@ -8100,14 +8100,14 @@ impl JsxShorthandAttribute {
     pub fn as_fields(&self) -> JsxShorthandAttributeFields {
         JsxShorthandAttributeFields {
             l_curly_token: self.l_curly_token(),
-            name: self.name(),
+            expression: self.expression(),
             r_curly_token: self.r_curly_token(),
         }
     }
     pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn name(&self) -> SyntaxResult<JsReferenceIdentifier> {
+    pub fn expression(&self) -> SyntaxResult<AnyJsExpression> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -8125,7 +8125,7 @@ impl Serialize for JsxShorthandAttribute {
 #[derive(Serialize)]
 pub struct JsxShorthandAttributeFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
-    pub name: SyntaxResult<JsReferenceIdentifier>,
+    pub expression: SyntaxResult<AnyJsExpression>,
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -26293,7 +26293,7 @@ impl std::fmt::Debug for JsxShorthandAttribute {
                     "l_curly_token",
                     &support::DebugSyntaxResult(self.l_curly_token()),
                 )
-                .field("name", &support::DebugSyntaxResult(self.name()))
+                .field("expression", &support::DebugSyntaxResult(self.expression()))
                 .field(
                     "r_curly_token",
                     &support::DebugSyntaxResult(self.r_curly_token()),

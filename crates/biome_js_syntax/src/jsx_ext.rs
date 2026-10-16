@@ -332,9 +332,14 @@ impl JsxAttributeList {
                 return false;
             };
             attribute
-                .name()
+                .expression()
                 .ok()
-                .and_then(|name| name.value_token().ok())
+                .and_then(|expression| match expression {
+                    AnyJsExpression::JsIdentifierExpression(expression) => {
+                        expression.name().ok()?.value_token().ok()
+                    }
+                    _ => None,
+                })
                 .is_some_and(|token| token.text_trimmed() == name_to_lookup)
         })
     }

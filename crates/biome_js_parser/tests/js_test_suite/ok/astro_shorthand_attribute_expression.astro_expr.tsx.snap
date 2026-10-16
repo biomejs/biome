@@ -1,0 +1,174 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```tsx
+<div {object?.something}></div>
+<Component {props.foo} {call()} />
+
+```
+
+
+## AST
+
+```
+JsExpressionTemplateRoot {
+    expression: JsxTagExpression {
+        tag: AstroImplicitFragment {
+            elements: JsxChildList [
+                JsxElement {
+                    opening_element: JsxOpeningElement {
+                        l_angle_token: L_ANGLE@0..1 "<" [] [],
+                        name: JsxName {
+                            value_token: JSX_IDENT@1..5 "div" [] [Whitespace(" ")],
+                        },
+                        type_arguments: missing (optional),
+                        attributes: JsxAttributeList [
+                            JsxShorthandAttribute {
+                                l_curly_token: L_CURLY@5..6 "{" [] [],
+                                expression: JsStaticMemberExpression {
+                                    object: JsIdentifierExpression {
+                                        name: JsReferenceIdentifier {
+                                            value_token: IDENT@6..12 "object" [] [],
+                                        },
+                                    },
+                                    operator_token: QUESTIONDOT@12..14 "?." [] [],
+                                    member: JsName {
+                                        value_token: IDENT@14..23 "something" [] [],
+                                    },
+                                },
+                                r_curly_token: R_CURLY@23..24 "}" [] [],
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@24..25 ">" [] [],
+                    },
+                    elements: JsxChildList [],
+                    closing_element: JsxClosingElement {
+                        l_angle_token: L_ANGLE@25..26 "<" [] [],
+                        slash_token: SLASH@26..27 "/" [] [],
+                        name: JsxName {
+                            value_token: JSX_IDENT@27..30 "div" [] [],
+                        },
+                        r_angle_token: R_ANGLE@30..31 ">" [] [],
+                    },
+                },
+                JsxSelfClosingElement {
+                    l_angle_token: L_ANGLE@31..33 "<" [Newline("\n")] [],
+                    name: JsxReferenceIdentifier {
+                        value_token: JSX_IDENT@33..43 "Component" [] [Whitespace(" ")],
+                    },
+                    type_arguments: missing (optional),
+                    attributes: JsxAttributeList [
+                        JsxShorthandAttribute {
+                            l_curly_token: L_CURLY@43..44 "{" [] [],
+                            expression: JsStaticMemberExpression {
+                                object: JsIdentifierExpression {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@44..49 "props" [] [],
+                                    },
+                                },
+                                operator_token: DOT@49..50 "." [] [],
+                                member: JsName {
+                                    value_token: IDENT@50..53 "foo" [] [],
+                                },
+                            },
+                            r_curly_token: R_CURLY@53..55 "}" [] [Whitespace(" ")],
+                        },
+                        JsxShorthandAttribute {
+                            l_curly_token: L_CURLY@55..56 "{" [] [],
+                            expression: JsCallExpression {
+                                callee: JsIdentifierExpression {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@56..60 "call" [] [],
+                                    },
+                                },
+                                optional_chain_token: missing (optional),
+                                type_arguments: missing (optional),
+                                arguments: JsCallArguments {
+                                    l_paren_token: L_PAREN@60..61 "(" [] [],
+                                    args: JsCallArgumentList [],
+                                    r_paren_token: R_PAREN@61..62 ")" [] [],
+                                },
+                            },
+                            r_curly_token: R_CURLY@62..64 "}" [] [Whitespace(" ")],
+                        },
+                    ],
+                    slash_token: SLASH@64..65 "/" [] [],
+                    r_angle_token: R_ANGLE@65..66 ">" [] [],
+                },
+            ],
+        },
+    },
+    eof_token: EOF@66..67 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_EXPRESSION_TEMPLATE_ROOT@0..67
+  0: JSX_TAG_EXPRESSION@0..66
+    0: ASTRO_IMPLICIT_FRAGMENT@0..66
+      0: JSX_CHILD_LIST@0..66
+        0: JSX_ELEMENT@0..31
+          0: JSX_OPENING_ELEMENT@0..25
+            0: L_ANGLE@0..1 "<" [] []
+            1: JSX_NAME@1..5
+              0: JSX_IDENT@1..5 "div" [] [Whitespace(" ")]
+            2: (empty)
+            3: JSX_ATTRIBUTE_LIST@5..24
+              0: JSX_SHORTHAND_ATTRIBUTE@5..24
+                0: L_CURLY@5..6 "{" [] []
+                1: JS_STATIC_MEMBER_EXPRESSION@6..23
+                  0: JS_IDENTIFIER_EXPRESSION@6..12
+                    0: JS_REFERENCE_IDENTIFIER@6..12
+                      0: IDENT@6..12 "object" [] []
+                  1: QUESTIONDOT@12..14 "?." [] []
+                  2: JS_NAME@14..23
+                    0: IDENT@14..23 "something" [] []
+                2: R_CURLY@23..24 "}" [] []
+            4: R_ANGLE@24..25 ">" [] []
+          1: JSX_CHILD_LIST@25..25
+          2: JSX_CLOSING_ELEMENT@25..31
+            0: L_ANGLE@25..26 "<" [] []
+            1: SLASH@26..27 "/" [] []
+            2: JSX_NAME@27..30
+              0: JSX_IDENT@27..30 "div" [] []
+            3: R_ANGLE@30..31 ">" [] []
+        1: JSX_SELF_CLOSING_ELEMENT@31..66
+          0: L_ANGLE@31..33 "<" [Newline("\n")] []
+          1: JSX_REFERENCE_IDENTIFIER@33..43
+            0: JSX_IDENT@33..43 "Component" [] [Whitespace(" ")]
+          2: (empty)
+          3: JSX_ATTRIBUTE_LIST@43..64
+            0: JSX_SHORTHAND_ATTRIBUTE@43..55
+              0: L_CURLY@43..44 "{" [] []
+              1: JS_STATIC_MEMBER_EXPRESSION@44..53
+                0: JS_IDENTIFIER_EXPRESSION@44..49
+                  0: JS_REFERENCE_IDENTIFIER@44..49
+                    0: IDENT@44..49 "props" [] []
+                1: DOT@49..50 "." [] []
+                2: JS_NAME@50..53
+                  0: IDENT@50..53 "foo" [] []
+              2: R_CURLY@53..55 "}" [] [Whitespace(" ")]
+            1: JSX_SHORTHAND_ATTRIBUTE@55..64
+              0: L_CURLY@55..56 "{" [] []
+              1: JS_CALL_EXPRESSION@56..62
+                0: JS_IDENTIFIER_EXPRESSION@56..60
+                  0: JS_REFERENCE_IDENTIFIER@56..60
+                    0: IDENT@56..60 "call" [] []
+                1: (empty)
+                2: (empty)
+                3: JS_CALL_ARGUMENTS@60..62
+                  0: L_PAREN@60..61 "(" [] []
+                  1: JS_CALL_ARGUMENT_LIST@61..61
+                  2: R_PAREN@61..62 ")" [] []
+              2: R_CURLY@62..64 "}" [] [Whitespace(" ")]
+          4: SLASH@64..65 "/" [] []
+          5: R_ANGLE@65..66 ">" [] []
+  1: EOF@66..67 "" [Newline("\n")] []
+
+```
