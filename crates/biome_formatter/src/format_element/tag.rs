@@ -200,6 +200,17 @@ impl Group {
         }
     }
 
+    /// Clears a previous [`Self::propagate_expand`], leaving an explicit
+    /// [`GroupMode::Expand`] untouched.
+    ///
+    /// A second propagation run, after embedded content replaced the host
+    /// placeholder, must not keep the expansion the placeholder caused.
+    pub fn reset_expand(&self) {
+        if self.mode.get() == GroupMode::Propagated {
+            self.mode.set(GroupMode::Flat)
+        }
+    }
+
     pub fn id(&self) -> Option<GroupId> {
         self.id
     }

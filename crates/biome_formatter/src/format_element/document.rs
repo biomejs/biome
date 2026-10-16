@@ -58,6 +58,9 @@ impl Document {
             for element in elements {
                 let element_expands = match element {
                     FormatElement::Tag(Tag::StartGroup(group)) => {
+                        // A repeated propagation run must not keep the expansion the previous
+                        // run set, which may have come from a placeholder the host replaced.
+                        group.reset_expand();
                         enclosing.push(Enclosing::Group(group));
                         false
                     }
@@ -907,6 +910,33 @@ mod tests {
 
         document.propagate_expand();
 
+        assert_eq!(group.mode(), GroupMode::Flat);
+    }
+
+    #[test]
+    fn reset_expand_clears_stale_propagation() {
+        use Tag::*;
+
+        // Simulates the first propagation run, where the host placeholder set
+        // the group's mode to propagated.
+        let group = tag::Group::new();
+        group.propagate_expand();
+        assert_eq!(group.mode(), GroupMode::Propagated);
+
+        let mut document = Document::from(vec![
+            FormatElement::Tag(StartGroup(group)),
+            FormatElement::Token { text: "a" },
+            FormatElement::Tag(EndGroup),
+        ]);
+
+        // The second run must not carry over the stale propagation: nothing
+        // inside the group expands.
+        document.propagate_expand();
+
+        let group = match &document.as_elements()[0] {
+            FormatElement::Tag(StartGroup(group)) => group,
+            element => panic!("expected a start group, got {element:?}"),
+        };
         assert_eq!(group.mode(), GroupMode::Flat);
     }
 
