@@ -7178,12 +7178,12 @@ static JSX_SHORTHAND_ATTRIBUTE_FIELDS: JsAstNodeFields = JsAstNodeFields {
             },
         },
         JsAstField {
-            property: "name",
-            updater: "withName",
+            property: "expression",
+            updater: "withExpression",
             optional: false,
             value: JsAstFieldValue::Node {
-                ty: "JsReferenceIdentifier",
-                can_cast: JsReferenceIdentifier::can_cast,
+                ty: "AnyJsExpression",
+                can_cast: AnyJsExpression::can_cast,
             },
         },
         JsAstField {

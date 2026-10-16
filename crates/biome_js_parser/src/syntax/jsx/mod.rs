@@ -11,7 +11,7 @@ use crate::JsSyntaxFeature::{Astro, TypeScript};
 use crate::lexer::{JsLexContext, JsReLexContext, JsSyntaxKind, JsxRawTextElement, T};
 use crate::syntax::expr::{
     ExpressionContext, is_nth_at_identifier_or_keyword, parse_expression, parse_name,
-    parse_reference_identifier, parse_template_literal,
+    parse_template_literal,
 };
 use crate::syntax::js_parse_error::{expected_expression, expected_identifier};
 use crate::syntax::jsx::jsx_parse_errors::{
@@ -781,16 +781,16 @@ fn parse_jsx_spread_attribute(p: &mut JsParser) -> ParsedSyntax {
 }
 
 /// Returns `true` when the parser is positioned at a JSX shorthand attribute
-/// of the form `{ ident }`. Shorthand attributes only exist inside Astro
+/// of the form `{ expr }`. Shorthand attributes only exist inside Astro
 /// templates (the JSX-like body of an `.astro` file), so the check is gated
 /// on the JS source's embedding kind.
 fn is_at_jsx_shorthand_attribute(p: &mut JsParser) -> bool {
     if !p.source_type.as_embedding_kind().is_astro_template() {
         return false;
     }
-    // `{` followed by an identifier and a closing `}` — anything else
-    // (spread, expression, etc.) is handled by other branches or recovered.
-    p.at(T!['{']) && is_nth_at_identifier_or_keyword(p, 1) && p.nth_at(2, T!['}'])
+    // `{` that does not open a spread attribute. The value is an arbitrary
+    // expression, so the plugin accepts `{object?.something}` as well as `{name}`.
+    p.at(T!['{']) && !p.nth_at(1, T![...])
 }
 
 fn parse_jsx_shorthand_attribute(p: &mut JsParser) -> ParsedSyntax {
@@ -800,7 +800,7 @@ fn parse_jsx_shorthand_attribute(p: &mut JsParser) -> ParsedSyntax {
 
     let m = p.start();
     p.expect(T!['{']);
-    parse_reference_identifier(p).or_add_diagnostic(p, expected_identifier);
+    parse_expression(p, ExpressionContext::default()).or_add_diagnostic(p, expected_expression);
     p.expect(T!['}']);
 
     Present(m.complete(p, JSX_SHORTHAND_ATTRIBUTE))

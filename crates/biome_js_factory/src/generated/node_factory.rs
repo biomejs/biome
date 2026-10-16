@@ -4148,14 +4148,14 @@ impl JsxSelfClosingElementBuilder {
 }
 pub fn jsx_shorthand_attribute(
     l_curly_token: SyntaxToken,
-    name: JsReferenceIdentifier,
+    expression: AnyJsExpression,
     r_curly_token: SyntaxToken,
 ) -> JsxShorthandAttribute {
     JsxShorthandAttribute::unwrap_cast(SyntaxNode::new_detached(
         JsSyntaxKind::JSX_SHORTHAND_ATTRIBUTE,
         [
             Some(SyntaxElement::Token(l_curly_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
+            Some(SyntaxElement::Node(expression.into_syntax())),
             Some(SyntaxElement::Token(r_curly_token)),
         ],
     ))

@@ -2378,8 +2378,8 @@ export interface JsxShorthandAttribute extends JsAstNode {
 	readonly kind: "JSX_SHORTHAND_ATTRIBUTE";
 	readonly lCurlyToken: string | undefined;
 	withLCurlyToken(value: JsAstToken): JsxShorthandAttribute;
-	readonly name: JsReferenceIdentifier | undefined;
-	withName(value: JsReferenceIdentifier): JsxShorthandAttribute;
+	readonly expression: AnyJsExpression | undefined;
+	withExpression(value: AnyJsExpression): JsxShorthandAttribute;
 	readonly rCurlyToken: string | undefined;
 	withRCurlyToken(value: JsAstToken): JsxShorthandAttribute;
 	token(field: "lCurlyToken" | "rCurlyToken"): JsAstToken | undefined;
