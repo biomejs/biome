@@ -1,10 +1,12 @@
 use super::TailwindTokenSource;
+use super::legacy::LegacyTokenSource;
+use super::simd::SimdTokenSource;
 use crate::lexer::{BASENAME_STORE, BaseNameStore, TailwindLexContext};
 use crate::parse_with_parser;
 use crate::parser::TailwindParser;
 use crate::test_support::{fixtures, mutate, random_fragments, xorshift};
 use biome_parser::prelude::BumpWithContext;
-use biome_parser::token_source::{NthToken, TokenSource};
+use biome_parser::token_source::TokenSource;
 use biome_rowan::NodeCache;
 use biome_tailwind_syntax::TailwindSyntaxKind::EOF;
 
@@ -14,8 +16,8 @@ fn token_sources<'source>(
     base_names: &'source BaseNameStore,
 ) -> [TailwindTokenSource<'source>; 2] {
     [
-        TailwindTokenSource::legacy(source, base_names),
-        TailwindTokenSource::simd(source, base_names),
+        TailwindTokenSource::Legacy(LegacyTokenSource::from_str(source, base_names)),
+        TailwindTokenSource::Simd(SimdTokenSource::from_str(source, base_names)),
     ]
 }
 
@@ -67,10 +69,9 @@ fn walk(mut tokens: TailwindTokenSource, seed: u64) -> Vec<String> {
             0 => {
                 for n in 1..4 {
                     log.push(format!(
-                        "nth {n}: {:?} {:?} {}",
+                        "nth {n}: {:?} {:?}",
                         tokens.nth(n),
-                        tokens.nth_range(n),
-                        tokens.has_nth_preceding_line_break(n)
+                        tokens.nth_token(n)
                     ));
                 }
             }

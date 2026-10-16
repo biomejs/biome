@@ -1,12 +1,14 @@
 //! The lexers of Tailwind class strings.
 //!
-//! [legacy::TailwindLexer] lexes one token at a time, in the context the parser asks for. It is
-//! the reference implementation. [simd::SimdLexer] classifies the whole class string with SIMD
-//! up front, lexes the regular-context tokens into flat arrays, and lexes any other token from
-//! the same bitmaps. Both produce the same tokens and diagnostics for every context, offset and
-//! preceding token, which the tests check against each other.
+//! [simd::SimdLexer] classifies the whole class string with SIMD up front, lexes the
+//! regular-context tokens into flat arrays, and lexes any other token from the same bitmaps.
+//!
+//! `legacy::TailwindLexer`, which only tests compile, lexes one token at a time in the context
+//! the parser asks for. It is the reference implementation: the tests check that both produce
+//! the same tokens and diagnostics for every context, offset and preceding token.
 
 mod base_name_store;
+#[cfg(test)]
 pub(crate) mod legacy;
 pub(crate) mod simd;
 
