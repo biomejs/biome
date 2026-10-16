@@ -68,9 +68,6 @@ struct LookaheadCursor {
 pub(crate) struct LookaheadToken {
     pub(crate) kind: TailwindSyntaxKind,
     pub(crate) range: TextRange,
-    pub(crate) has_preceding_line_break: bool,
-    /// Whether the token is whitespace with a line break.
-    line_break: bool,
 }
 
 /// A position of [SimdTokenSource] to which it can return.
@@ -107,8 +104,6 @@ impl<'source> SimdTokenSource<'source> {
                 token: LookaheadToken {
                     kind: EOF,
                     range: TextRange::default(),
-                    has_preceding_line_break: false,
-                    line_break: false,
                 },
             },
             trivia_list: vec![],
@@ -232,8 +227,6 @@ impl<'source> SimdTokenSource<'source> {
                 LookaheadToken {
                     kind: self.current,
                     range: self.current_range(),
-                    has_preceding_line_break: self.current_has_line_break,
-                    line_break: self.after_newline,
                 },
             )
         };
@@ -285,8 +278,6 @@ impl<'source> SimdTokenSource<'source> {
         LookaheadToken {
             kind,
             range: TextRange::new(start, end),
-            has_preceding_line_break: previous.line_break,
-            line_break: kind == WHITESPACE && self.lexer.has_line_break(start.into(), end.into()),
         }
     }
 
