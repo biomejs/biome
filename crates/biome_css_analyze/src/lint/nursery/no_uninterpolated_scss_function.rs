@@ -1,11 +1,11 @@
 use crate::fonts::is_function_keyword;
-use crate::utils::is_custom_function;
+use crate::utils::{is_custom_function, is_nested_custom_property_value};
 use biome_analyze::{Ast, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_syntax::{
-    CssCustomIdentifier, CssCustomPropertyComponentList, CssCustomPropertyDelimiter,
-    CssCustomPropertyFunction, CssCustomPropertyParenthesizedBlock, CssCustomPropertyValue,
-    CssSyntaxNode, ScssInterpolatedString, ScssInterpolation, T,
+    CssCustomIdentifier, CssCustomPropertyDelimiter, CssCustomPropertyFunction,
+    CssCustomPropertyValue, CssIfSassTest, CssSyntaxNode, ScssInterpolatedString,
+    ScssInterpolation, T,
 };
 use biome_diagnostics::Severity;
 use biome_languages::CssFileSource;
@@ -77,25 +77,21 @@ declare_lint_rule! {
     }
 }
 
-pub struct RuleState {
-    namespace: Option<CssCustomIdentifier>,
-    name: CssCustomIdentifier,
-    range: TextRange,
-}
-
 impl Rule for NoUninterpolatedScssFunction {
     type Query = Ast<CssCustomPropertyValue>;
-    type State = RuleState;
+    /// The call's name, including the `ns.` of a module function.
+    type State = TextRange;
     type Signals = Box<[Self::State]>;
     type Options = NoUninterpolatedScssFunctionOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        if !ctx.source_type::<CssFileSource>().is_scss() {
+        let value = ctx.query().syntax();
+        if !ctx.source_type::<CssFileSource>().is_scss() || is_nested_custom_property_value(value) {
             return Box::default();
         }
 
         let mut signals = Vec::new();
-        let mut walk = ctx.query().syntax().preorder();
+        let mut walk = value.preorder();
         while let Some(event) = walk.next() {
             let WalkEvent::Enter(node) = event else {
                 continue;
@@ -104,6 +100,13 @@ impl Rule for NoUninterpolatedScssFunction {
                 || ScssInterpolatedString::can_cast(node.kind())
             {
                 walk.skip_subtree();
+                continue;
+            }
+            if let Some(test) = CssIfSassTest::cast_ref(&node) {
+                walk.skip_subtree();
+                if let Ok(token) = test.sass_token() {
+                    signals.push(token.text_trimmed_range());
+                }
                 continue;
             }
             let Some(function) = CssCustomPropertyFunction::cast(node) else {
@@ -118,23 +121,13 @@ impl Rule for NoUninterpolatedScssFunction {
                     continue;
                 };
                 let text = token.text_trimmed();
-                // The body of `url()` is a URL, not a list of function calls.
+                // The body of a `url()` that isn't parsed as a URL node, such as
+                // `url(foo(bar).svg)`, is still a URL, not a list of function calls.
                 if text.eq_ignore_ascii_case("url") {
                     walk.skip_subtree();
                     continue;
                 }
-                // The arguments of an `if()` condition are condition syntax, such as
-                // `selector(:has(a))` or `font-tech(color-COLRv1)`, not values.
-                if is_if_condition(&function, text) {
-                    walk.skip_subtree();
-                    continue;
-                }
-                // CSS `if()` is parsed as its own node in regular values, so it isn't in the
-                // list of known functions.
-                if is_custom_function(text)
-                    || is_function_keyword(text)
-                    || text.eq_ignore_ascii_case("if")
-                {
+                if is_custom_function(text) || is_function_keyword(text) {
                     continue;
                 }
             }
@@ -145,29 +138,23 @@ impl Rule for NoUninterpolatedScssFunction {
                 .map_or(name.syntax(), |namespace| namespace.syntax())
                 .text_trimmed_range()
                 .start();
-            signals.push(RuleState {
-                range: TextRange::new(start, name.syntax().text_trimmed_range().end()),
-                namespace,
-                name,
-            });
+            signals.push(TextRange::new(start, name.syntax().text_trimmed_range().end()));
         }
         signals.into_boxed_slice()
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let name = state.name.value_token().ok()?;
-        let namespace = match &state.namespace {
-            Some(namespace) => Some(namespace.value_token().ok()?),
-            None => None,
-        };
-        let namespace = namespace.as_ref().map_or("", |token| token.text_trimmed());
-        let dot = if namespace.is_empty() { "" } else { "." };
+    fn diagnostic(ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
+        let value = ctx.query().syntax();
+        let name = value
+            .text_trimmed()
+            .slice(*range - value.text_trimmed_range().start())
+            .into_text();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                state.range,
+                *range,
                 markup! {
-                    "The function "<Emphasis>{namespace}{dot}{name.text_trimmed()}"()"</Emphasis>" isn't interpolated, so Sass outputs it unchanged."
+                    "The function "<Emphasis>{name.text()}"()"</Emphasis>" isn't interpolated, so Sass outputs it unchanged."
                 },
             )
             .note(markup! {
@@ -178,27 +165,6 @@ impl Rule for NoUninterpolatedScssFunction {
             }),
         )
     }
-}
-
-/// Whether `function` is a `style()`, `media()` or `supports()` condition of CSS `if()`.
-///
-/// Conditions can be grouped in parentheses, as in `if(not (style(--a: 1)): x; else: y)`, so
-/// parenthesized blocks between the condition and `if()` are skipped.
-fn is_if_condition(function: &CssCustomPropertyFunction, name: &str) -> bool {
-    ["style", "media", "supports"]
-        .iter()
-        .any(|condition| name.eq_ignore_ascii_case(condition))
-        && function
-            .syntax()
-            .ancestors()
-            .skip(1)
-            .find(|node| {
-                !CssCustomPropertyComponentList::can_cast(node.kind())
-                    && !CssCustomPropertyParenthesizedBlock::can_cast(node.kind())
-            })
-            .and_then(CssCustomPropertyFunction::cast)
-            .and_then(|parent| parent.name().ok()?.value_token().ok())
-            .is_some_and(|parent| parent.text_trimmed().eq_ignore_ascii_case("if"))
 }
 
 /// Returns `ns` when `function` is a module function written as `ns.name()`.

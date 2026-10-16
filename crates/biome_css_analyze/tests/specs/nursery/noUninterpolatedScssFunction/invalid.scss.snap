@@ -20,6 +20,10 @@ expression: invalid.scss
 	--imported: bpx(3);
 	--if-branch: if(style(--a: 1): darken(#fff, 10%); else: 3);
 	--bare-condition: style(--a: 1);
+	--legacy-if: if($condition, 1px, 2px);
+	--if-style-query: if(style(--a: double(1px)): 1; else: 2);
+	--if-sass-test: if(sass(true): 1; else: 2);
+	--if-in-call: darken(if(media(print): lighten(#000, 1%); else: red), 10%);
 }
 
 @container style(--c: double(1px)) {
@@ -172,7 +176,7 @@ invalid.scss:15:33 lint/nursery/noUninterpolatedScssFunction ━━━━━━�
   > 15 │ 	--if-branch: if(style(--a: 1): darken(#fff, 10%); else: 3);
        │ 	                               ^^^^^^
     16 │ 	--bare-condition: style(--a: 1);
-    17 │ }
+    17 │ 	--legacy-if: if($condition, 1px, 2px);
   
   i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
   
@@ -192,8 +196,8 @@ invalid.scss:16:20 lint/nursery/noUninterpolatedScssFunction ━━━━━━�
     15 │ 	--if-branch: if(style(--a: 1): darken(#fff, 10%); else: 3);
   > 16 │ 	--bare-condition: style(--a: 1);
        │ 	                  ^^^^^
-    17 │ }
-    18 │ 
+    17 │ 	--legacy-if: if($condition, 1px, 2px);
+    18 │ 	--if-style-query: if(style(--a: double(1px)): 1; else: 2);
   
   i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
   
@@ -205,16 +209,100 @@ invalid.scss:16:20 lint/nursery/noUninterpolatedScssFunction ━━━━━━�
 ```
 
 ```
-invalid.scss:19:23 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:17:15 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function if() isn't interpolated, so Sass outputs it unchanged.
+  
+    15 │ 	--if-branch: if(style(--a: 1): darken(#fff, 10%); else: 3);
+    16 │ 	--bare-condition: style(--a: 1);
+  > 17 │ 	--legacy-if: if($condition, 1px, 2px);
+       │ 	             ^^
+    18 │ 	--if-style-query: if(style(--a: double(1px)): 1; else: 2);
+    19 │ 	--if-sass-test: if(sass(true): 1; else: 2);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:18:34 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The function double() isn't interpolated, so Sass outputs it unchanged.
   
-    17 │ }
-    18 │ 
-  > 19 │ @container style(--c: double(1px)) {
+    16 │ 	--bare-condition: style(--a: 1);
+    17 │ 	--legacy-if: if($condition, 1px, 2px);
+  > 18 │ 	--if-style-query: if(style(--a: double(1px)): 1; else: 2);
+       │ 	                                ^^^^^^
+    19 │ 	--if-sass-test: if(sass(true): 1; else: 2);
+    20 │ 	--if-in-call: darken(if(media(print): lighten(#000, 1%); else: red), 10%);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:19:21 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function sass() isn't interpolated, so Sass outputs it unchanged.
+  
+    17 │ 	--legacy-if: if($condition, 1px, 2px);
+    18 │ 	--if-style-query: if(style(--a: double(1px)): 1; else: 2);
+  > 19 │ 	--if-sass-test: if(sass(true): 1; else: 2);
+       │ 	                   ^^^^
+    20 │ 	--if-in-call: darken(if(media(print): lighten(#000, 1%); else: red), 10%);
+    21 │ }
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:20:16 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function darken() isn't interpolated, so Sass outputs it unchanged.
+  
+    18 │ 	--if-style-query: if(style(--a: double(1px)): 1; else: 2);
+    19 │ 	--if-sass-test: if(sass(true): 1; else: 2);
+  > 20 │ 	--if-in-call: darken(if(media(print): lighten(#000, 1%); else: red), 10%);
+       │ 	              ^^^^^^
+    21 │ }
+    22 │ 
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:23:23 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function double() isn't interpolated, so Sass outputs it unchanged.
+  
+    21 │ }
+    22 │ 
+  > 23 │ @container style(--c: double(1px)) {
        │                       ^^^^^^
-    20 │ 	a {
-    21 │ 		color: red;
+    24 │ 	a {
+    25 │ 		color: red;
   
   i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
   
@@ -226,16 +314,16 @@ invalid.scss:19:23 lint/nursery/noUninterpolatedScssFunction ━━━━━━�
 ```
 
 ```
-invalid.scss:25:19 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.scss:29:19 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The function double() isn't interpolated, so Sass outputs it unchanged.
   
-    23 │ }
-    24 │ 
-  > 25 │ @supports (--raw: double(1px)) {
+    27 │ }
+    28 │ 
+  > 29 │ @supports (--raw: double(1px)) {
        │                   ^^^^^^
-    26 │ 	a {
-    27 │ 		color: red;
+    30 │ 	a {
+    31 │ 		color: red;
   
   i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
   

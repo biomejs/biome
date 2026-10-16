@@ -10,6 +10,7 @@ $gap: 8px;
 	--price: 5$;
 	--name-#{$gap}: 1px;
 	--url-text: url(https://cdn.example/a$b.svg);
+	--url-digit: url($1x.png);
 }
 
 a {
