@@ -1,4 +1,4 @@
-use super::flow_map_implicit_entry::FormatImplicitEntryBody;
+use super::flow_map_implicit_entry::{FormatBreakableKeyEntry, FormatImplicitEntryBody};
 use crate::prelude::*;
 use crate::utils::{FormatMultilineKeyEntry, multiline_plain_key};
 use biome_formatter::trivia::format_dangling_comments;
@@ -25,6 +25,28 @@ impl FormatNodeRule<YamlFlowMapExplicitEntry> for FormatYamlFlowMapExplicitEntry
 
         let question_mark_token = question_mark_token?;
         let has_dangling_comments = f.comments().has_dangling_comments(node.syntax());
+
+        // An entry whose key may break is formatted like an implicit one,
+        // with a `?` that `FormatBreakableKeyEntry` synthesizes when the key
+        // breaks
+        if !has_dangling_comments
+            && let (Some(entry_key), Some(colon_token), Some(entry_value)) =
+                (&key, &colon_token, &value)
+            && (entry_key.is_flow_collection()
+                || f.comments().has_trailing_comments(entry_key.syntax()))
+        {
+            return write!(
+                f,
+                [
+                    format_removed(&question_mark_token),
+                    FormatBreakableKeyEntry {
+                        key: entry_key,
+                        colon_token,
+                        value: entry_value.clone().into(),
+                    }
+                ]
+            );
+        }
 
         // A key spanning multiple lines can only be held by the explicit
         // form, which is kept

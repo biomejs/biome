@@ -34,6 +34,8 @@ impl Document {
     ///
     /// [`BestFitting`] elements act as expand boundaries, meaning that the fact that a
     /// [`BestFitting`]'s content expands is not propagated past the [`BestFitting`] element.
+    /// Boundary groups, see [crate::builders::boundary_group], stop the expansion the same way:
+    /// their content never expands them or the groups around them.
     ///
     /// [`BestFitting`]: FormatElement::BestFitting
     pub(crate) fn propagate_expand(&mut self) {
@@ -41,6 +43,7 @@ impl Document {
         enum Enclosing<'a> {
             Group(&'a tag::Group),
             BestFitting,
+            BoundaryGroup,
         }
 
         fn expand_parent(enclosing: &[Enclosing]) {
@@ -55,8 +58,15 @@ impl Document {
             checked_interned: &mut FxHashMap<&'a Interned, bool>,
         ) -> bool {
             let mut expands = false;
+            // The enclosing elements opened by `elements` itself, rather than
+            // by the content around it
+            let outer_len = enclosing.len();
             for element in elements {
                 let element_expands = match element {
+                    FormatElement::Tag(Tag::StartGroup(group)) if group.is_boundary() => {
+                        enclosing.push(Enclosing::BoundaryGroup);
+                        false
+                    }
                     FormatElement::Tag(Tag::StartGroup(group)) => {
                         enclosing.push(Enclosing::Group(group));
                         false
@@ -129,7 +139,14 @@ impl Document {
                 };
 
                 if element_expands {
-                    expands = true;
+                    // An expansion inside a boundary group doesn't reach
+                    // the content around `elements`
+                    let in_boundary_group = enclosing[outer_len..]
+                        .iter()
+                        .any(|enclosing| matches!(enclosing, Enclosing::BoundaryGroup));
+                    if !in_boundary_group {
+                        expands = true;
+                    }
                     expand_parent(enclosing)
                 }
             }
@@ -598,7 +615,11 @@ impl Format<IrFormatContext> for &[FormatElement] {
                         }
 
                         StartGroup(group) => {
-                            write!(f, [token("group(")])?;
+                            if group.is_boundary() {
+                                write!(f, [token("boundary_group(")])?;
+                            } else {
+                                write!(f, [token("group(")])?;
+                            }
 
                             if let Some(group_id) = group.id() {
                                 write!(
@@ -908,6 +929,52 @@ mod tests {
         document.propagate_expand();
 
         assert_eq!(group.mode(), GroupMode::Flat);
+    }
+
+    #[test]
+    fn boundary_group_stops_expand_propagation() {
+        use Tag::*;
+
+        let mut document = Document::from(vec![
+            FormatElement::Tag(StartGroup(tag::Group::new())),
+            FormatElement::Tag(StartGroup(tag::Group::new().with_boundary(true))),
+            FormatElement::Tag(StartGroup(tag::Group::new())),
+            FormatElement::Line(LineMode::Hard),
+            FormatElement::Tag(EndGroup),
+            FormatElement::Tag(EndGroup),
+            FormatElement::Tag(EndGroup),
+        ]);
+
+        document.propagate_expand();
+
+        assert_eq!(
+            &std::format!("{document}"),
+            "[group([boundary_group([group(expand: propagated, [hard_line_break])])])]"
+        );
+    }
+
+    #[test]
+    fn interned_boundary_group_does_not_expand_reference() {
+        use Tag::*;
+
+        let interned = Interned::new(vec![
+            FormatElement::Tag(StartGroup(tag::Group::new().with_boundary(true))),
+            FormatElement::Line(LineMode::Hard),
+            FormatElement::Tag(EndGroup),
+        ]);
+        let mut document = Document::from(vec![
+            FormatElement::Interned(interned.clone()),
+            FormatElement::Tag(StartGroup(tag::Group::new())),
+            FormatElement::Interned(interned),
+            FormatElement::Tag(EndGroup),
+        ]);
+
+        document.propagate_expand();
+
+        assert_eq!(
+            &std::format!("{document}"),
+            "[<interned 0> [boundary_group([hard_line_break])], group([<ref interned *0>])]"
+        );
     }
 
     #[test]

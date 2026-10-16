@@ -2040,6 +2040,75 @@ pub fn group<Context>(content: &impl Format<Context>) -> Group<'_, Context> {
         content: Argument::new(content),
         group_id: None,
         should_expand: false,
+        boundary: false,
+    }
+}
+
+/// Creates a boundary group, Biome's equivalent of Prettier's
+/// `conditionalGroup` called with a single state: `conditionalGroup([content])`.
+/// Wherever a Prettier printer calls `conditionalGroup` with one state, port
+/// it to `boundary_group`.
+///
+/// A boundary group is a group that the expansion of its content doesn't
+/// pass through. Before printing, a group that holds a hard line break, an
+/// [`expand_parent`], or an expanded group is marked as expanded. That group
+/// then expands its parent, and so on up to the root, so a single line break
+/// can expand every group around it. The expansion stops at a boundary group:
+/// neither the boundary group nor the groups around it are marked. The groups
+/// inside it are marked as usual.
+///
+/// When printing, a boundary group is like any other group. The printer
+/// prints it on one line if its content fits, and breaks it otherwise.
+///
+/// This is exactly what Prettier's `conditionalGroup` does with one state.
+/// Prettier doesn't propagate a break into a group with `expandedStates`, and
+/// prints a single-state `conditionalGroup` flat if it fits and broken
+/// otherwise. The "conditional" in Prettier's name refers to picking the
+/// first of several states that fits, which a single state never does. For
+/// several states, the closest Biome element is [`best_fitting!`].
+///
+/// ```
+/// use biome_formatter::{format, format_args, write};
+/// use biome_formatter::prelude::*;
+///
+/// # fn main() -> FormatResult<()> {
+/// let content = format_with(|f| {
+///     write!(f, [token("a"), hard_line_break(), token("b")])
+/// });
+///
+/// // The hard line break expands the enclosing group
+/// let elements = format!(SimpleFormatContext::default(), [
+///     group(&format_args![
+///         token("["),
+///         soft_line_break(),
+///         group(&content),
+///         soft_line_break(),
+///         token("]"),
+///     ])
+/// ])?;
+/// assert_eq!("[\na\nb\n]", elements.print()?.as_code());
+///
+/// // The boundary group stops the expansion
+/// let elements = format!(SimpleFormatContext::default(), [
+///     group(&format_args![
+///         token("["),
+///         soft_line_break(),
+///         boundary_group(&content),
+///         soft_line_break(),
+///         token("]"),
+///     ])
+/// ])?;
+/// assert_eq!("[a\nb]", elements.print()?.as_code());
+/// # Ok(())
+/// # }
+/// ```
+#[inline]
+pub fn boundary_group<Context>(content: &impl Format<Context>) -> Group<'_, Context> {
+    Group {
+        content: Argument::new(content),
+        group_id: None,
+        should_expand: false,
+        boundary: true,
     }
 }
 
@@ -2048,6 +2117,7 @@ pub struct Group<'a, Context> {
     content: Argument<'a, Context>,
     group_id: Option<GroupId>,
     should_expand: bool,
+    boundary: bool,
 }
 
 impl<Context> Group<'_, Context> {
@@ -2076,7 +2146,10 @@ impl<Context> Format<Context> for Group<'_, Context> {
         };
 
         f.write_element(FormatElement::Tag(StartGroup(
-            tag::Group::new().with_id(self.group_id).with_mode(mode),
+            tag::Group::new()
+                .with_id(self.group_id)
+                .with_mode(mode)
+                .with_boundary(self.boundary),
         )))?;
 
         Arguments::from(&self.content).fmt(f)?;
@@ -2090,6 +2163,7 @@ impl<Context> std::fmt::Debug for Group<'_, Context> {
         f.debug_struct("GroupElements")
             .field("group_id", &self.group_id)
             .field("should_expand", &self.should_expand)
+            .field("boundary", &self.boundary)
             .field("content", &"{{content}}")
             .finish()
     }
