@@ -51,6 +51,29 @@ expression: invalid_issue_9768.scss
 
 .c8i { color: blue; }
 
+// A rule without declarations can't lose the cascade.
+.c4a .c4 { color: red; }
+
+.c4 {
+  /* note */
+}
+
+// Declarations inside a nested `@media` still count, so `.c6` is reported.
+.c6a .c6 { color: red; }
+
+.c6 {
+  @media (min-width: 1px) {
+    color: blue;
+  }
+}
+
+// An `@include` can emit declarations, so `.c9` is reported.
+.c9a .c9 { color: red; }
+
+.c9 {
+  @include theme;
+}
+
 ```
 
 # Diagnostics
@@ -89,6 +112,7 @@ invalid_issue_9768.scss:46:1 lint/style/noDescendingSpecificity ━━━━━�
   > 46 │ .c8i { color: blue; }
        │ ^^^^
     47 │ 
+    48 │ // A rule without declarations can't lose the cascade.
   
   i This selector specificity is (0, 2, 0)
   
@@ -98,6 +122,56 @@ invalid_issue_9768.scss:46:1 lint/style/noDescendingSpecificity ━━━━━�
        │   ^^^^^^^^^
     44 │ }
     45 │ 
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+invalid_issue_9768.scss:58:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    56 │ .c6a .c6 { color: red; }
+    57 │ 
+  > 58 │ .c6 {
+       │ ^^^
+    59 │   @media (min-width: 1px) {
+    60 │     color: blue;
+  
+  i This selector specificity is (0, 2, 0)
+  
+    55 │ // Declarations inside a nested `@media` still count, so `.c6` is reported.
+  > 56 │ .c6a .c6 { color: red; }
+       │ ^^^^^^^^
+    57 │ 
+    58 │ .c6 {
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+invalid_issue_9768.scss:67:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    65 │ .c9a .c9 { color: red; }
+    66 │ 
+  > 67 │ .c9 {
+       │ ^^^
+    68 │   @include theme;
+    69 │ }
+  
+  i This selector specificity is (0, 2, 0)
+  
+    64 │ // An `@include` can emit declarations, so `.c9` is reported.
+  > 65 │ .c9a .c9 { color: red; }
+       │ ^^^^^^^^
+    66 │ 
+    67 │ .c9 {
   
   i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
   

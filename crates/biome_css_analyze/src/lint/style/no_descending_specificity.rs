@@ -4,12 +4,14 @@ use rustc_hash::{FxHashMap, FxHashSet};
 
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_css_semantic::model::{ResolvedSelector, Rule as CssSemanticRule, RuleId, Specificity};
+use biome_css_semantic::model::{
+    ResolvedSelector, Rule as CssSemanticRule, RuleId, SemanticModel, Specificity,
+};
 use biome_css_syntax::{
-    AnyCssRoot, CssContainerAtRule, CssLanguage, CssLayerAtRule, CssMediaAtRule, CssScopeAtRule,
-    CssStartingStyleAtRule, CssSupportsAtRule, ScssAtRootAtRule, ScssEachAtRule, ScssElseClause,
-    ScssForAtRule, ScssFunctionAtRule, ScssIfAtRule, ScssIncludeAtRule, ScssMixinAtRule,
-    ScssWhileAtRule, T,
+    AnyCssAtRule, AnyCssRoot, CssAtRule, CssContainerAtRule, CssDeclarationOrRuleBlock,
+    CssLanguage, CssLayerAtRule, CssMediaAtRule, CssScopeAtRule, CssStartingStyleAtRule,
+    CssSupportsAtRule, ScssAtRootAtRule, ScssEachAtRule, ScssElseClause, ScssForAtRule,
+    ScssFunctionAtRule, ScssIfAtRule, ScssIncludeAtRule, ScssMixinAtRule, ScssWhileAtRule, T,
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, SyntaxKindSet, TextRange};
@@ -48,6 +50,10 @@ declare_lint_rule! {
     /// The rule reports likely conflicts between selectors that end with the same target under the
     /// same surrounding rules, such as `@media` or `@layer`. It cannot determine every case where
     /// two selectors match the same element.
+    ///
+    /// Rules without declarations, such as a rule that only contains a comment or nested rules,
+    /// are ignored because they can't lose to another selector. In SCSS, an `@include` counts as
+    /// a declaration.
     ///
     /// ## SCSS limitations
     ///
@@ -182,6 +188,21 @@ impl Rule for NoDescendingSpecificity {
             }
 
             let rule_node = rule.node(&root);
+            let child_at_rule_context =
+                if INDEPENDENT_AT_RULE_KINDS.matches(rule_node.syntax().kind()) {
+                    Some(rule.id())
+                } else {
+                    at_rule_context
+                };
+            for child_id in rule.child_ids().iter().rev() {
+                if let Some(child_rule) = model.get_rule_by_id(child_id) {
+                    rules.push((child_rule, child_at_rule_context));
+                }
+            }
+
+            if !has_declarations(model, &root, &rule) {
+                continue;
+            }
             find_descending_selector(
                 &rule,
                 SelectorContext {
@@ -200,18 +221,6 @@ impl Rule for NoDescendingSpecificity {
                 &mut visited_selectors,
                 &mut descending_selectors,
             );
-
-            let child_at_rule_context =
-                if INDEPENDENT_AT_RULE_KINDS.matches(rule_node.syntax().kind()) {
-                    Some(rule.id())
-                } else {
-                    at_rule_context
-                };
-            for child_id in rule.child_ids().iter().rev() {
-                if let Some(child_rule) = model.get_rule_by_id(child_id) {
-                    rules.push((child_rule, child_at_rule_context));
-                }
-            }
         }
         descending_selectors
             .into_values()
@@ -302,6 +311,32 @@ fn subject_key(selector: &ResolvedSelector) -> Option<String> {
         key.push_str(text);
     }
     (!key.is_empty()).then_some(key)
+}
+
+/// Returns whether the rule has declarations, directly or inside a nested at-rule such as
+/// `@media`. A rule without declarations can't lose to a higher specificity selector. An SCSS
+/// `@include` counts as a declaration, because the mixin usually emits some.
+fn has_declarations(model: &SemanticModel, root: &AnyCssRoot, rule: &CssSemanticRule) -> bool {
+    !rule.declarations().is_empty()
+        || rule
+            .node(root)
+            .syntax()
+            .children()
+            .filter_map(CssDeclarationOrRuleBlock::cast)
+            .flat_map(|block| block.items())
+            .any(|item| {
+                CssAtRule::cast(item.into_syntax())
+                    .and_then(|at_rule| at_rule.rule().ok())
+                    .is_some_and(|rule| matches!(rule, AnyCssAtRule::ScssIncludeAtRule(_)))
+            })
+        || rule
+            .child_ids()
+            .iter()
+            .filter_map(|id| model.get_rule_by_id(id))
+            .any(|child| {
+                INDEPENDENT_AT_RULE_KINDS.matches(child.node(root).syntax().kind())
+                    && has_declarations(model, root, &child)
+            })
 }
 
 /// Checks selectors against the highest preceding specificity with the same tail selector in the same at-rule context.
