@@ -19,6 +19,11 @@ impl ParseSeparatedList for VariantList {
     const LIST_KIND: Self::Kind = TW_VARIANT_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        // A variant ends in a `:` and never spans whitespace, so without a `:` before the next
+        // whitespace, `parse_variant` would parse the rest of the class only to rewind.
+        if !p.source().has_colon_before_whitespace() {
+            return Absent;
+        }
         parse_variant(p)
     }
 

@@ -10,7 +10,6 @@ use biome_parser::prelude::*;
 use biome_parser::{Parser, parse_recovery::ParseRecoveryTokenSet, token_set};
 use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::{self, *};
-use biome_unicode_table::{Dispatch::WHS, lookup_byte};
 
 mod css_value;
 mod parse_error;
@@ -240,16 +239,9 @@ fn parse_arbitrary_candidate(p: &mut TailwindParser) -> ParsedSyntax {
 ///
 /// Both variant forms end in a `:` (`parse_variant_expression` and
 /// `parse_arbitrary_variant` rewind without one), so a chunk without a
-/// colon can never begin with variants. The scan stops on the same bytes
-/// the lexer classifies as whitespace, keeping the chunk boundary in sync
-/// with tokenization.
+/// colon can never begin with variants.
 fn class_chunk_has_colon(p: &TailwindParser) -> bool {
-    let text = p.source().text().as_bytes();
-    let start = usize::from(p.source().position());
-    text[start..]
-        .iter()
-        .take_while(|&&byte| !matches!(lookup_byte(byte), WHS))
-        .any(|&byte| byte == b':')
+    p.source().has_colon_before_whitespace()
 }
 
 pub(crate) fn parse_modifier(p: &mut TailwindParser) -> ParsedSyntax {
