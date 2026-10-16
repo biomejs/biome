@@ -270,6 +270,15 @@ pub(crate) const fn is_delimiter(b: Dispatch) -> bool {
     matches!(b, WHS | EXL | COL | SLH)
 }
 
+/// Returns the position of the first `-[` or `-(` before a delimiter, which ends
+/// the basename of a candidate with an arbitrary value or a CSS variable.
+pub(crate) fn arbitrary_value_base_end(slice: &[u8]) -> Option<usize> {
+    slice
+        .windows(2)
+        .take_while(|pair| !is_delimiter(lookup_byte(pair[0])))
+        .position(|pair| pair[0] == b'-' && matches!(pair[1], b'[' | b'('))
+}
+
 #[inline]
 const fn is_boundary_byte(b: Dispatch) -> bool {
     // Valid boundary after a dashed basename:

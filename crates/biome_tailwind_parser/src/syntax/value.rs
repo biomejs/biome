@@ -1,10 +1,10 @@
+use crate::lexer::TailwindLexContext;
 use crate::parser::TailwindParser;
 use crate::syntax::css_value::{
     is_at_dashed_identifier, is_at_identifier, parse_css_generic_component_value_list,
     parse_css_parameter_list,
 };
 use crate::syntax::parse_error::expected_value;
-use crate::token_source::TailwindLexContext;
 use biome_parser::Parser;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;

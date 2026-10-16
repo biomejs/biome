@@ -3,6 +3,8 @@
 mod lexer;
 mod parser;
 mod syntax;
+#[cfg(test)]
+mod test_support;
 mod token_source;
 
 use crate::lexer::BASENAME_STORE;
@@ -47,8 +49,15 @@ pub fn parse_tailwind_with_options(
     cache: &mut NodeCache,
     options: TailwindParserOptions,
 ) -> TailwindParse {
-    let mut parser = TailwindParser::new(source, options);
+    parse_with_parser(source, cache, TailwindParser::new(source, options))
+}
 
+/// Parses `source` with `parser`, which reads tokens from `source`.
+fn parse_with_parser(
+    source: &str,
+    cache: &mut NodeCache,
+    mut parser: TailwindParser,
+) -> TailwindParse {
     parse_root(&mut parser);
 
     let (events, diagnostics, trivia) = parser.finish();

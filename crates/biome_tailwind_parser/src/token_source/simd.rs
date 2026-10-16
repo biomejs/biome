@@ -1,0 +1,396 @@
+//! The token source over [SimdLexer], which lexes the whole class string before parsing.
+
+use crate::lexer::simd::{self, SimdLexer, previous_class};
+use crate::lexer::{BaseNameStore, TailwindLexContext};
+use biome_parser::diagnostic::ParseDiagnostic;
+use biome_parser::prelude::BumpWithContext;
+use biome_parser::token_source::{TokenSource, Trivia};
+use biome_rowan::TriviaPieceKind;
+use biome_tailwind_syntax::TailwindSyntaxKind::{EOF, WHITESPACE};
+use biome_tailwind_syntax::{TailwindSyntaxKind, TextRange, TextSize};
+
+/// Token source for the parser.
+///
+/// While the parser asks for the regular tokens in order, they come from the arrays of
+/// [SimdLexer]. Any other token, in another context or after another token, comes from
+/// [SimdLexer::lex].
+pub(crate) struct SimdTokenSource<'source> {
+    lexer: SimdLexer<'source>,
+    diagnostics: Vec<ParseDiagnostic>,
+
+    /// The kind of the current token as lexed, which the parser may remap.
+    current: TailwindSyntaxKind,
+    current_start: TextSize,
+    current_end: TextSize,
+    current_has_line_break: bool,
+
+    /// Index of the regular token that starts at `current_end`, while the current token is the
+    /// regular token before it, so that it was lexed after the current token. Otherwise
+    /// [UNKNOWN], or [NO_TOKEN] if no regular token starts at `current_end`.
+    next: u32,
+
+    /// Whether the current token is whitespace with a line break.
+    after_newline: bool,
+
+    /// The index of a regular token at or before `current_end`, where
+    /// [SimdLexer::find_from] starts searching.
+    resync_hint: u32,
+
+    /// The last token that [Self::lookahead] returned.
+    lookahead: LookaheadCursor,
+
+    /// Trivia emitted by the lexer and tokens skipped during parser recovery.
+    trivia_list: Vec<Trivia>,
+}
+
+/// The value of [SimdTokenSource::next] when no regular token starts at the current token's end.
+const NO_TOKEN: u32 = u32::MAX;
+/// The value of [SimdTokenSource::next] when the regular token at the current token's end hasn't
+/// been looked up.
+const UNKNOWN: u32 = u32::MAX - 1;
+
+/// Where [SimdTokenSource::lookahead] stopped. Lookahead lexes in [TailwindLexContext::Regular]
+/// after the current token, so it depends only on where the current token ends and on its kind.
+#[derive(Clone, Copy)]
+struct LookaheadCursor {
+    /// The end of the current token when the lookahead ran.
+    from: TextSize,
+    /// The kind of the current token when the lookahead ran.
+    after: TailwindSyntaxKind,
+    /// How many non-trivia tokens after the current one the lookahead lexed, or zero if none.
+    count: usize,
+    /// The last of those tokens.
+    token: LookaheadToken,
+}
+
+/// A token returned by lookahead.
+#[derive(Clone, Copy)]
+pub(crate) struct LookaheadToken {
+    pub(crate) kind: TailwindSyntaxKind,
+    pub(crate) range: TextRange,
+    pub(crate) has_preceding_line_break: bool,
+    /// Whether the token is whitespace with a line break.
+    line_break: bool,
+}
+
+/// A position of [SimdTokenSource] to which it can return.
+#[derive(Debug)]
+pub(crate) struct SimdTokenSourceCheckpoint {
+    current: TailwindSyntaxKind,
+    current_start: TextSize,
+    current_end: TextSize,
+    current_has_line_break: bool,
+    next: u32,
+    after_newline: bool,
+    trivia_len: u32,
+    diagnostics_len: u32,
+}
+
+impl<'source> SimdTokenSource<'source> {
+    /// Creates a new token source for the given string.
+    pub(crate) fn from_str(source: &'source str, base_names: &'source BaseNameStore) -> Self {
+        let mut source = Self {
+            lexer: SimdLexer::new(source, base_names),
+            diagnostics: Vec::new(),
+            // The lexer starts with `EOF` as its current kind.
+            current: EOF,
+            current_start: TextSize::from(0),
+            current_end: TextSize::from(0),
+            current_has_line_break: false,
+            next: 0,
+            after_newline: false,
+            resync_hint: 0,
+            lookahead: LookaheadCursor {
+                from: TextSize::from(0),
+                after: EOF,
+                count: 0,
+                token: LookaheadToken {
+                    kind: EOF,
+                    range: TextRange::default(),
+                    has_preceding_line_break: false,
+                    line_break: false,
+                },
+            },
+            trivia_list: vec![],
+        };
+        source.next_non_trivia_token(TailwindLexContext::Regular, true);
+        source
+    }
+
+    #[inline]
+    fn next_non_trivia_token(&mut self, context: TailwindLexContext, first_token: bool) {
+        let trailing = !first_token;
+        loop {
+            let kind = self.next_token(context);
+            let Ok(trivia_kind) = TriviaPieceKind::try_from(kind) else {
+                break;
+            };
+            self.trivia_list
+                .push(Trivia::new(trivia_kind, self.current_range(), trailing));
+        }
+    }
+
+    /// Moves to the token at `current_end`, lexed in `context`.
+    #[inline(always)]
+    fn next_token(&mut self, context: TailwindLexContext) -> TailwindSyntaxKind {
+        if context == TailwindLexContext::Regular
+            && let Some(raw) = self.lexer.get(self.next)
+            && raw & simd::SLOW == 0
+        {
+            self.take_regular_token(raw);
+            return self.current;
+        }
+        self.next_token_slow(context)
+    }
+
+    /// Moves to the token at `current_end`, lexed in `context`, when it isn't the next regular
+    /// token after the current one.
+    #[inline(never)]
+    fn next_token_slow(&mut self, context: TailwindLexContext) -> TailwindSyntaxKind {
+        if context == TailwindLexContext::Regular {
+            if self.next == UNKNOWN {
+                self.next = self.find(u32::from(self.current_end));
+            }
+            if let Some(raw) = self.lexer.get(self.next)
+                && simd::fits_after(raw, previous_class(self.current))
+            {
+                self.take_regular_token(raw);
+                return self.current;
+            }
+        }
+        self.lex(context)
+    }
+
+    /// Makes the regular token `next`, of kind and flags `raw`, the current token.
+    #[inline(always)]
+    fn take_regular_token(&mut self, raw: u16) {
+        let end = TextSize::from(self.lexer.start(self.next + 1));
+        self.set_current(simd::kind(raw), end, raw & simd::LINE_BREAK != 0);
+        self.next += 1;
+        self.resync_hint = self.next;
+    }
+
+    /// Lexes the token at `current_end` in `context` with [SimdLexer].
+    fn lex(&mut self, context: TailwindLexContext) -> TailwindSyntaxKind {
+        let start = usize::from(self.current_end);
+        let (kind, end) = match context {
+            TailwindLexContext::VariantSegment => self.lexer.segment_token(start),
+            _ => None,
+        }
+        .unwrap_or_else(|| {
+            self.lexer
+                .lex(start, context, self.current, &mut self.diagnostics)
+        });
+        let line_break = kind == WHITESPACE && self.lexer.has_line_break(start, end);
+        self.set_current(kind, TextSize::from(end as u32), line_break);
+        self.next = UNKNOWN;
+        kind
+    }
+
+    /// Makes the token of `kind` that ends at `end` the token after the current one.
+    #[inline(always)]
+    fn set_current(&mut self, kind: TailwindSyntaxKind, end: TextSize, line_break: bool) {
+        self.current = kind;
+        self.current_start = self.current_end;
+        self.current_end = end;
+        self.current_has_line_break = self.after_newline;
+        self.after_newline = line_break;
+    }
+
+    /// Returns the index of the regular token at `position`, or [NO_TOKEN].
+    #[inline(never)]
+    fn find(&mut self, position: u32) -> u32 {
+        match self.lexer.find_from(position, self.resync_hint) {
+            Some(index) => {
+                self.resync_hint = index;
+                index
+            }
+            None => NO_TOKEN,
+        }
+    }
+
+    /// Returns the `n`th non-trivia token after the current one, lexed in
+    /// [TailwindLexContext::Regular].
+    pub(crate) fn lookahead(&mut self, n: usize) -> Option<LookaheadToken> {
+        debug_assert_ne!(n, 0);
+        if self.current == EOF {
+            return None;
+        }
+        let cursor = self.lookahead;
+        let (mut count, mut previous) = if cursor.from == self.current_end
+            && cursor.after == self.current
+            && cursor.count != 0
+            && cursor.count <= n
+        {
+            if cursor.count == n {
+                return Some(cursor.token);
+            }
+            (cursor.count, cursor.token)
+        } else {
+            (
+                0,
+                LookaheadToken {
+                    kind: self.current,
+                    range: self.current_range(),
+                    has_preceding_line_break: self.current_has_line_break,
+                    line_break: self.after_newline,
+                },
+            )
+        };
+
+        loop {
+            if previous.kind == EOF {
+                return None;
+            }
+            let token = self.lookahead_token(previous);
+            previous = token;
+            if TriviaPieceKind::try_from(token.kind).is_ok() {
+                continue;
+            }
+            count += 1;
+            if count == n {
+                self.lookahead = LookaheadCursor {
+                    from: self.current_end,
+                    after: self.current,
+                    count,
+                    token,
+                };
+                return Some(token);
+            }
+        }
+    }
+
+    /// Returns the token after `previous`, lexed in [TailwindLexContext::Regular], without its
+    /// diagnostics.
+    fn lookahead_token(&mut self, previous: LookaheadToken) -> LookaheadToken {
+        let start = previous.range.end();
+        let (kind, end) = match self
+            .lexer
+            .find_from(u32::from(start), self.resync_hint)
+            .and_then(|index| Some((index, self.lexer.get(index)?)))
+        {
+            Some((index, raw)) if simd::fits_after(raw, previous_class(previous.kind)) => {
+                (simd::kind(raw), TextSize::from(self.lexer.start(index + 1)))
+            }
+            _ => {
+                let (kind, end) = self.lexer.lex(
+                    usize::from(start),
+                    TailwindLexContext::Regular,
+                    previous.kind,
+                    &mut Vec::new(),
+                );
+                (kind, TextSize::from(end as u32))
+            }
+        };
+        LookaheadToken {
+            kind,
+            range: TextRange::new(start, end),
+            has_preceding_line_break: previous.line_break,
+            line_break: kind == WHITESPACE && self.lexer.has_line_break(start.into(), end.into()),
+        }
+    }
+
+    /// Creates a checkpoint to which it can later return using [Self::rewind].
+    pub(crate) fn checkpoint(&self) -> SimdTokenSourceCheckpoint {
+        SimdTokenSourceCheckpoint {
+            current: self.current,
+            current_start: self.current_start,
+            current_end: self.current_end,
+            current_has_line_break: self.current_has_line_break,
+            next: self.next,
+            after_newline: self.after_newline,
+            trivia_len: self.trivia_list.len() as u32,
+            diagnostics_len: self.diagnostics.len() as u32,
+        }
+    }
+
+    /// Restores the token source to a previous state.
+    pub(crate) fn rewind(&mut self, checkpoint: SimdTokenSourceCheckpoint) {
+        assert!(self.trivia_list.len() >= checkpoint.trivia_len as usize);
+        self.trivia_list.truncate(checkpoint.trivia_len as usize);
+        self.diagnostics
+            .truncate(checkpoint.diagnostics_len as usize);
+        self.current = checkpoint.current;
+        self.current_start = checkpoint.current_start;
+        self.current_end = checkpoint.current_end;
+        self.current_has_line_break = checkpoint.current_has_line_break;
+        self.next = checkpoint.next;
+        self.after_newline = checkpoint.after_newline;
+    }
+
+    /// Lexes the current token again in `context`, as if no token came before it.
+    ///
+    /// Like the legacy token source, this keeps the diagnostics of the current token, and takes
+    /// the current token's line break state as the one before it.
+    pub(crate) fn re_lex_current_in_context(
+        &mut self,
+        context: TailwindLexContext,
+    ) -> TailwindSyntaxKind {
+        self.current_end = self.current_start;
+        self.current = EOF;
+        self.lex(context)
+    }
+
+    /// Returns whether a `:` follows the start of the current token before the next whitespace.
+    pub(crate) fn has_colon_before_whitespace(&self) -> bool {
+        self.lexer
+            .has_colon_before_whitespace(usize::from(self.current_start))
+    }
+}
+
+impl TokenSource for SimdTokenSource<'_> {
+    type Kind = TailwindSyntaxKind;
+
+    #[inline(always)]
+    fn current(&self) -> Self::Kind {
+        self.current
+    }
+
+    #[inline(always)]
+    fn current_range(&self) -> TextRange {
+        TextRange::new(self.current_start, self.current_end)
+    }
+
+    fn text(&self) -> &str {
+        self.lexer.source()
+    }
+
+    #[inline(always)]
+    fn has_preceding_line_break(&self) -> bool {
+        self.current_has_line_break
+    }
+
+    fn bump(&mut self) {
+        self.bump_with_context(TailwindLexContext::Regular)
+    }
+
+    fn skip_as_trivia(&mut self) {
+        self.skip_as_trivia_with_context(TailwindLexContext::Regular)
+    }
+
+    fn finish(self) -> (Vec<Trivia>, Vec<ParseDiagnostic>) {
+        (self.trivia_list, self.diagnostics)
+    }
+}
+
+impl BumpWithContext for SimdTokenSource<'_> {
+    type Context = TailwindLexContext;
+
+    #[inline(always)]
+    fn bump_with_context(&mut self, context: Self::Context) {
+        if self.current() != EOF {
+            self.next_non_trivia_token(context, false);
+        }
+    }
+
+    fn skip_as_trivia_with_context(&mut self, context: Self::Context) {
+        if self.current() != EOF {
+            self.trivia_list.push(Trivia::new(
+                TriviaPieceKind::Skipped,
+                self.current_range(),
+                false,
+            ));
+            self.next_non_trivia_token(context, true)
+        }
+    }
+}
