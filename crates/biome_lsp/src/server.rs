@@ -512,6 +512,8 @@ impl LanguageServer for LSPServer {
                 if let Err(err) = result {
                     error!("Failed to remove project from the workspace: {}", err);
                     self.notify_error(err).await;
+                } else {
+                    self.session.unregister_project(project_key);
                 }
             }
         }

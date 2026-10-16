@@ -100,10 +100,8 @@ async fn ensure_project_for_opened_document(
             // Use the per-file resolved configurationPath so each workspace folder
             // uses its own config, even when a project is already open.
             if let Some(resolved_path) = config_path.as_ref() {
-                let status = session
-                    .load_biome_configuration_file(resolved_path.clone(), false)
-                    .await;
-                session.set_configuration_status(project_key, status);
+                let status =
+                    load_from_workspace_root_for_path(session, path, Some(resolved_path)).await;
                 load_status = Some(status);
             }
         }
@@ -116,11 +114,6 @@ async fn ensure_project_for_opened_document(
 
     if load_status.is_none() {
         let status = load_from_workspace_root_for_path(session, path, config_path.as_ref()).await;
-        // On success the project was created during loading, so it can now be
-        // resolved from the path and the status recorded against it.
-        if let Some(project_key) = session.project_for_path(path) {
-            session.set_configuration_status(project_key, status);
-        }
         load_status = Some(status);
     }
     let status = load_status.expect("load_status should be set");
@@ -142,22 +135,21 @@ async fn load_from_workspace_root_for_path(
     path: &Utf8Path,
     config_path: Option<&ConfigurationPathHint>,
 ) -> ConfigurationStatus {
-    if let Some(path) = config_path {
-        info!("Loading user configuration from text_document {:?}", &path);
-        return session
-            .load_biome_configuration_file(path.clone(), false)
-            .await;
-    }
-
     let project_path = path
         .parent()
         .map(|parent| parent.to_path_buf())
         .unwrap_or_default();
-    info!("Loading configuration from text_document {}", &project_path);
     let project_path = resolve_workspace_base_path(session, &project_path);
+    let config_path = if let Some(path) = config_path {
+        info!("Loading user configuration from text_document {:?}", &path);
+        path.clone()
+    } else {
+        info!("Loading configuration from text_document {}", &project_path);
+        ConfigurationPathHint::FromLsp(project_path.clone())
+    };
 
     session
-        .load_biome_configuration_file(ConfigurationPathHint::FromLsp(project_path), false)
+        .load_biome_configuration_file(config_path, Some(project_path), false, false)
         .await
 }
 

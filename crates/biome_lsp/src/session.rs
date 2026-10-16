@@ -34,7 +34,7 @@ use futures::StreamExt;
 use futures::stream::futures_unordered::FuturesUnordered;
 use papaya::{HashMap, HashSet};
 use parking_lot::RwLock;
-use rustc_hash::{FxBuildHasher, FxHashMap};
+use rustc_hash::{FxBuildHasher, FxHashMap, FxHashSet};
 use serde_json::Value;
 use std::sync::Arc;
 use std::sync::atomic::Ordering;
@@ -72,6 +72,7 @@ pub(crate) struct SessionKey(pub u64);
 struct ConfigurationCacheKey {
     base_path: Utf8PathBuf,
     settings_path: Option<Utf8PathBuf>,
+    project_path: Utf8PathBuf,
 }
 
 const DIAGNOSTICS_DEBOUNCE: Duration = Duration::from_millis(250);
@@ -154,9 +155,9 @@ pub(crate) struct Session {
 
     /// Lock used to synchronize multiple atomic operations to load the configuration file
     loading_operations:
-        TokioRwLock<FxHashMap<Utf8PathBuf, tokio::sync::broadcast::Sender<ConfigurationStatus>>>,
+        TokioRwLock<FxHashMap<ConfigurationCacheKey, watch::Receiver<Option<ConfigurationStatus>>>>,
 
-    /// Cached configuration status per base path to avoid reloading on every request.
+    /// Cached configuration status per base path and project to avoid reloading on every request.
     configuration_status_by_path:
         TokioRwLock<FxHashMap<ConfigurationCacheKey, ConfigurationStatus>>,
 }
@@ -424,22 +425,13 @@ impl Session {
             .map(|(_project_path, project_key)| *project_key)
     }
 
-    /// Registers an open project with its root path and scans the folder.
-    #[tracing::instrument(level = "debug", skip(self))]
-    pub(crate) async fn insert_and_scan_project(
-        self: &Arc<Self>,
-        project_key: ProjectKey,
-        path: BiomePath,
-        scan_kind: ScanKind,
-        force: bool,
-    ) {
-        self.projects.pin().insert(path.clone(), project_key);
-
-        // Spawn the scan in the background, to avoid timing out the LSP request.
-        let session = self.clone();
-        spawn(async move { session.scan_project(project_key, scan_kind, force).await })
-            .await
-            .expect("Scanning task to complete successfully");
+    /// Removes all session registrations for a successfully closed project.
+    pub(crate) fn unregister_project(&self, project_key: ProjectKey) {
+        self.projects.pin().retain(|_, key| *key != project_key);
+        self.configuration_status.pin().remove(&project_key);
+        self.notified_broken_configuration
+            .pin()
+            .remove(&project_key);
     }
 
     /// Get a [`Document`] matching the provided [`Uri`]
@@ -1034,14 +1026,53 @@ impl Session {
     /// the root URI and update the workspace settings accordingly
     #[tracing::instrument(level = "debug", skip(self))]
     pub(crate) async fn load_workspace_settings(self: &Arc<Self>, reload: bool) {
+        let mut reloaded_projects = FxHashSet::default();
+        if reload {
+            let mut project_paths: Vec<_> = self
+                .get_workspace_folders()
+                .unwrap_or_default()
+                .into_iter()
+                .filter_map(|folder| {
+                    folder
+                        .uri
+                        .to_file_path()
+                        .and_then(|path| Utf8PathBuf::from_path_buf(path.to_path_buf()).ok())
+                })
+                .collect();
+            project_paths.extend(
+                self.projects
+                    .pin()
+                    .keys()
+                    .map(|path| path.as_path().to_path_buf()),
+            );
+            // Prefer advertised workspace roots when several roots share a project.
+            for project_path in project_paths {
+                let Some(project_key) = self.project_for_path(&project_path) else {
+                    continue;
+                };
+                if !reloaded_projects.insert(project_key) {
+                    continue;
+                }
+                let config_path = self
+                    .resolve_configuration_path(Some(&project_path))
+                    .unwrap_or_else(|| ConfigurationPathHint::FromWorkspace(project_path.clone()));
+                self.load_biome_configuration_file(config_path, Some(project_path), reload, true)
+                    .await;
+            }
+        }
         if let Some(config_path) = self.resolve_configuration_path(None) {
             info!("Detected configuration path in the workspace settings.");
-            let config_file_path = config_path.to_path_buf();
+            let project_path = self.configuration_project_path(&config_path);
+            if self
+                .project_for_path(&project_path)
+                .is_some_and(|project_key| reloaded_projects.contains(&project_key))
+            {
+                return;
+            }
             let status = self
-                .load_biome_configuration_file(config_path, reload)
+                .load_biome_configuration_file(config_path, None, reload, true)
                 .await;
             debug!("Configuration status: {:?}", status);
-            self.record_configuration_status(config_file_path.as_deref(), status);
         } else if let Some(folders) = self.get_workspace_folders() {
             info!("Detected workspace folder.");
             for folder in folders {
@@ -1051,14 +1082,21 @@ impl Session {
                 });
                 match base_path {
                     Some(base_path) => {
+                        if self
+                            .project_for_path(&base_path)
+                            .is_some_and(|project_key| reloaded_projects.contains(&project_key))
+                        {
+                            continue;
+                        }
                         let status = self
                             .load_biome_configuration_file(
                                 ConfigurationPathHint::FromWorkspace(base_path.clone()),
+                                None,
                                 reload,
+                                true,
                             )
                             .await;
                         debug!("Configuration status: {:?}", status);
-                        self.record_configuration_status(Some(&base_path), status);
                     }
                     None => {
                         error!(
@@ -1073,9 +1111,14 @@ impl Session {
                 None => ConfigurationPathHint::default(),
                 Some(path) => ConfigurationPathHint::FromLsp(path),
             };
-            let config_file_path = base_path.to_path_buf();
-            let status = self.load_biome_configuration_file(base_path, reload).await;
-            self.record_configuration_status(config_file_path.as_deref(), status);
+            if self
+                .project_for_path(&self.configuration_project_path(&base_path))
+                .is_some_and(|project_key| reloaded_projects.contains(&project_key))
+            {
+                return;
+            }
+            self.load_biome_configuration_file(base_path, None, reload, true)
+                .await;
         }
     }
 
@@ -1156,186 +1199,10 @@ impl Session {
         }
     }
 
-    #[tracing::instrument(level = "debug", skip(self))]
-    pub(super) async fn load_biome_configuration_file(
-        self: &Arc<Self>,
-        base_path: ConfigurationPathHint,
-        reload: bool,
-    ) -> ConfigurationStatus {
-        // Check if there's already an ongoing operation for this path
-        let path_to_index = base_path.to_path_buf().unwrap_or_default();
-        let cache_key = ConfigurationCacheKey {
-            base_path: path_to_index.clone(),
-            settings_path: self.get_settings_configuration_path(),
-        };
-        if !reload {
-            let cached = self.configuration_status_by_path.read().await;
-            if let Some(status) = cached.get(&cache_key) {
-                return *status;
-            }
-        }
-        {
-            let operations = self.loading_operations.read().await;
-
-            if let Some(sender) = operations.get(&path_to_index).cloned() {
-                drop(operations); // Release read lock
-
-                // Wait for the ongoing operation to complete
-                let mut receiver = sender.subscribe();
-                match receiver.recv().await {
-                    Ok(status) => {
-                        debug!(
-                            "Reused configuration loading result for path: {:?}",
-                            base_path
-                        );
-                        return status;
-                    }
-                    Err(_) => {
-                        // The sender was dropped or no more messages, continue to load
-                        debug!(
-                            "Configuration loading broadcast ended for path: {:?}",
-                            base_path
-                        );
-                    }
-                }
-            }
-        }
-
-        // Create a broadcast channel for this operation
-        let (tx, _rx) = tokio::sync::broadcast::channel(1);
-
-        // Store the receiver for other tasks to subscribe to
-        {
-            let mut operations = self.loading_operations.write().await;
-            operations.insert(path_to_index.clone(), tx.clone());
-        }
-
-        // Perform the actual loading
-        let status = self
-            .load_biome_configuration_file_internal(base_path.clone(), reload)
-            .await;
-
-        {
-            let mut cached = self.configuration_status_by_path.write().await;
-            cached.insert(cache_key, status);
-        }
-
-        // Broadcast the result to any waiting tasks
-        let _ = tx.send(status);
-
-        // Clean up the operation
-        {
-            let mut operations = self.loading_operations.write().await;
-            operations.remove(&path_to_index);
-        }
-
-        status
-    }
-
-    #[tracing::instrument(level = "debug", skip(self))]
-    pub(super) async fn load_biome_configuration_file_internal(
-        self: &Arc<Self>,
-        base_path: ConfigurationPathHint,
-        force: bool,
-    ) -> ConfigurationStatus {
-        let loaded_configuration =
-            match load_configuration(self.workspace().fs(), base_path.clone()) {
-                Ok(loaded_configuration) => loaded_configuration,
-                Err(err) => {
-                    error!("Couldn't load the configuration file, reason:\n {err}");
-                    self.client.log_message(MessageType::ERROR, &err).await;
-                    return ConfigurationStatus::Error;
-                }
-            };
-        if !loaded_configuration.loaded_location.is_in_project() {
-            let config_path = loaded_configuration
-                .file_path()
-                .map_or_else(|| "<unknown>".to_string(), |p| p.to_string());
-            let working_directory = match &base_path {
-                ConfigurationPathHint::FromLsp(path)
-                | ConfigurationPathHint::FromWorkspace(path) => path.to_string(),
-                ConfigurationPathHint::FromUser(path) => {
-                    let workspace = self.workspace();
-                    let fs = workspace.fs();
-                    if fs.path_is_file(path) {
-                        path.parent()
-                            .map_or("<unknown>".to_string(), |p| p.to_string())
-                    } else {
-                        path.to_string()
-                    }
-                }
-                ConfigurationPathHint::FromUserExternal(_) => self
-                    .base_path()
-                    .map_or("<unknown>".to_string(), |p| p.to_string()),
-                ConfigurationPathHint::None => "<unknown>".to_string(),
-            };
-            let message = PrintDescription(&ConfigurationOutsideProject {
-                config_path,
-                working_directory,
-            })
-            .to_string();
-            self.client.log_message(MessageType::INFO, message).await;
-        }
-
-        if loaded_configuration.has_errors() {
-            error!("Couldn't load the configuration file, reasons:");
-            for diagnostic in loaded_configuration.as_diagnostics_iter() {
-                let message = PrintDescription(diagnostic).to_string();
-                self.client.log_message(MessageType::ERROR, message).await;
-            }
-            return ConfigurationStatus::Error;
-        }
-
-        info!("Configuration loaded successfully from disk.");
-        info!("Update workspace settings.");
-
-        let fs_configuration = loaded_configuration.resolved_configuration();
-        let configuration_path = loaded_configuration
-            .directory_path()
-            .map(Utf8Path::to_path_buf);
-
-        if configuration_path.is_none() && self.requires_configuration() {
-            return ConfigurationStatus::Missing;
-        }
-
+    fn configuration_project_path(&self, base_path: &ConfigurationPathHint) -> Utf8PathBuf {
         let workspace = self.workspace();
         let fs = workspace.fs();
-        let should_use_editorconfig = fs_configuration.use_editorconfig();
-        let mut configuration = if should_use_editorconfig {
-            let (editorconfig, editorconfig_diagnostics) = {
-                let search_path = configuration_path
-                    .clone()
-                    .unwrap_or_else(|| fs.working_directory().unwrap_or_default());
-                match load_editorconfig(fs, search_path, None) {
-                    Ok(result) => result,
-                    Err(error) => {
-                        error!("Failed load the `.editorconfig` file. Reason: {error}");
-                        self.client.log_message(MessageType::ERROR, &error).await;
-                        return ConfigurationStatus::EditorConfigError;
-                    }
-                }
-            };
-            for diagnostic in editorconfig_diagnostics {
-                let message = PrintDescription(&diagnostic).to_string();
-                self.client.log_message(MessageType::ERROR, message).await;
-            }
-            editorconfig.unwrap_or_default()
-        } else {
-            Default::default()
-        };
-
-        configuration.merge_with(fs_configuration);
-
-        let inline_configuration = self.inline_config();
-        if let Some(inline_configuration) = inline_configuration {
-            configuration.merge_with(inline_configuration);
-        }
-
-        // If the configuration from the LSP or the workspace, the directory path is used as
-        // the working directory. Otherwise, the base path of the session is used, then the current
-        // working directory is used as the last resort.
-        debug!("Configuration path provided {:?}", &base_path);
-        let project_path = match &base_path {
+        match base_path {
             ConfigurationPathHint::FromLsp(path) | ConfigurationPathHint::FromWorkspace(path) => {
                 path.to_path_buf()
             }
@@ -1368,7 +1235,195 @@ impl Session {
                 .base_path()
                 .or_else(|| fs.working_directory())
                 .unwrap_or_default(),
+        }
+    }
+
+    #[tracing::instrument(level = "debug", skip(self))]
+    pub(super) async fn load_biome_configuration_file(
+        self: &Arc<Self>,
+        base_path: ConfigurationPathHint,
+        project_path: Option<Utf8PathBuf>,
+        reload: bool,
+        wait_for_scan: bool,
+    ) -> ConfigurationStatus {
+        let inferred_project_path = self.configuration_project_path(&base_path);
+        let project_path = match project_path {
+            Some(project_path) => {
+                let project_key = self.project_for_path(&project_path);
+                // Reuse completed loads when both roots already identify the same project.
+                if project_key.is_some()
+                    && project_key == self.project_for_path(&inferred_project_path)
+                {
+                    inferred_project_path
+                } else {
+                    project_path
+                }
+            }
+            None => inferred_project_path,
         };
+        let cache_key = ConfigurationCacheKey {
+            base_path: base_path.to_path_buf().unwrap_or_default(),
+            settings_path: self.get_settings_configuration_path(),
+            project_path: project_path.clone(),
+        };
+        if !reload {
+            let cached = self.configuration_status_by_path.read().await;
+            if let Some(status) = cached.get(&cache_key) {
+                return *status;
+            }
+        }
+        let completion = loop {
+            let mut operations = self.loading_operations.write().await;
+            // A load can finish after the first cache lookup but before this lock.
+            if !reload
+                && let Some(status) = self
+                    .configuration_status_by_path
+                    .read()
+                    .await
+                    .get(&cache_key)
+            {
+                return *status;
+            }
+            if let Some(mut receiver) = operations
+                .get(&cache_key)
+                .filter(|receiver| receiver.has_changed().is_ok())
+                .cloned()
+            {
+                drop(operations);
+                if let Ok(status) = receiver.wait_for(Option::is_some).await {
+                    return status.expect("completed configuration has a status");
+                }
+            } else {
+                let (sender, receiver) = watch::channel(None);
+                operations.insert(cache_key.clone(), receiver);
+                break sender;
+            }
+        };
+
+        let (status, scan) = self
+            .load_biome_configuration_file_internal(base_path, project_path.clone())
+            .await;
+
+        // Documents need the registered project and applied settings, not the completed scan.
+        {
+            let mut operations = self.loading_operations.write().await;
+            self.record_configuration_status(Some(&project_path), status);
+            let mut cached = self.configuration_status_by_path.write().await;
+            cached.insert(cache_key.clone(), status);
+            completion.send_replace(Some(status));
+            operations.remove(&cache_key);
+        }
+
+        if let Some((project_key, scan_kind)) = scan {
+            let session = self.clone();
+            let scan =
+                spawn(async move { session.scan_project(project_key, scan_kind, reload).await });
+            if wait_for_scan {
+                scan.await.expect("Scanning task to complete successfully");
+            }
+        }
+
+        status
+    }
+
+    #[tracing::instrument(level = "debug", skip(self))]
+    async fn load_biome_configuration_file_internal(
+        self: &Arc<Self>,
+        base_path: ConfigurationPathHint,
+        project_path: Utf8PathBuf,
+    ) -> (ConfigurationStatus, Option<(ProjectKey, ScanKind)>) {
+        let loaded_configuration =
+            match load_configuration(self.workspace().fs(), base_path.clone()) {
+                Ok(loaded_configuration) => loaded_configuration,
+                Err(err) => {
+                    error!("Couldn't load the configuration file, reason:\n {err}");
+                    self.client.log_message(MessageType::ERROR, &err).await;
+                    return (ConfigurationStatus::Error, None);
+                }
+            };
+        if !loaded_configuration.loaded_location.is_in_project() {
+            let config_path = loaded_configuration
+                .file_path()
+                .map_or_else(|| "<unknown>".to_string(), |p| p.to_string());
+            let working_directory = match &base_path {
+                ConfigurationPathHint::FromLsp(path)
+                | ConfigurationPathHint::FromWorkspace(path) => path.to_string(),
+                ConfigurationPathHint::FromUser(path) => {
+                    let workspace = self.workspace();
+                    let fs = workspace.fs();
+                    if fs.path_is_file(path) {
+                        path.parent()
+                            .map_or("<unknown>".to_string(), |p| p.to_string())
+                    } else {
+                        path.to_string()
+                    }
+                }
+                ConfigurationPathHint::FromUserExternal(_) => project_path.to_string(),
+                ConfigurationPathHint::None => "<unknown>".to_string(),
+            };
+            let message = PrintDescription(&ConfigurationOutsideProject {
+                config_path,
+                working_directory,
+            })
+            .to_string();
+            self.client.log_message(MessageType::INFO, message).await;
+        }
+
+        if loaded_configuration.has_errors() {
+            error!("Couldn't load the configuration file, reasons:");
+            for diagnostic in loaded_configuration.as_diagnostics_iter() {
+                let message = PrintDescription(diagnostic).to_string();
+                self.client.log_message(MessageType::ERROR, message).await;
+            }
+            return (ConfigurationStatus::Error, None);
+        }
+
+        info!("Configuration loaded successfully from disk.");
+        info!("Update workspace settings.");
+
+        let fs_configuration = loaded_configuration.resolved_configuration();
+        let configuration_path = loaded_configuration
+            .directory_path()
+            .map(Utf8Path::to_path_buf);
+
+        if configuration_path.is_none() && self.requires_configuration() {
+            return (ConfigurationStatus::Missing, None);
+        }
+
+        let workspace = self.workspace();
+        let fs = workspace.fs();
+        let should_use_editorconfig = fs_configuration.use_editorconfig();
+        let mut configuration = if should_use_editorconfig {
+            let (editorconfig, editorconfig_diagnostics) = {
+                let search_path = configuration_path
+                    .clone()
+                    .unwrap_or_else(|| fs.working_directory().unwrap_or_default());
+                match load_editorconfig(fs, search_path, None) {
+                    Ok(result) => result,
+                    Err(error) => {
+                        error!("Failed load the `.editorconfig` file. Reason: {error}");
+                        self.client.log_message(MessageType::ERROR, &error).await;
+                        return (ConfigurationStatus::EditorConfigError, None);
+                    }
+                }
+            };
+            for diagnostic in editorconfig_diagnostics {
+                let message = PrintDescription(&diagnostic).to_string();
+                self.client.log_message(MessageType::ERROR, message).await;
+            }
+            editorconfig.unwrap_or_default()
+        } else {
+            Default::default()
+        };
+
+        configuration.merge_with(fs_configuration);
+
+        let inline_configuration = self.inline_config();
+        if let Some(inline_configuration) = inline_configuration {
+            configuration.merge_with(inline_configuration);
+        }
+
+        debug!("Configuration path provided {:?}", &base_path);
 
         let project_key = match self.project_for_path(&project_path) {
             Some(project_key) => project_key,
@@ -1382,7 +1437,7 @@ impl Session {
                     Err(error) => {
                         error!("Failed to register the project folder: {error}");
                         self.client.log_message(MessageType::ERROR, &error).await;
-                        return ConfigurationStatus::Error;
+                        return (ConfigurationStatus::Error, None);
                     }
                 };
                 project_key
@@ -1412,10 +1467,9 @@ impl Session {
             module_graph_resolution_kind: ModuleGraphResolutionKind::from(&scan_kind),
         });
 
-        self.insert_and_scan_project(project_key, project_path.into(), scan_kind, force)
-            .await;
+        self.projects.pin().insert(project_path.into(), project_key);
 
-        if let Err(WorkspaceError::PluginErrors(error)) = result {
+        let status = if let Err(WorkspaceError::PluginErrors(error)) = result {
             error!("Failed to load plugins: {error:?}");
             self.client
                 .log_message(MessageType::ERROR, format!("{error:?}"))
@@ -1427,7 +1481,8 @@ impl Session {
             ConfigurationStatus::Error
         } else {
             ConfigurationStatus::Loaded
-        }
+        };
+        (status, Some((project_key, scan_kind)))
     }
 
     /// Requests "workspace/configuration" from client and updates Session config.
@@ -1657,6 +1712,56 @@ mod tests {
             .unwrap()
             .take()
             .expect("session should be initialized")
+    }
+
+    #[tokio::test]
+    async fn configuration_completion_between_cache_miss_and_subscription_is_observed() {
+        assert_late_configuration_completion(false).await;
+    }
+
+    #[tokio::test]
+    async fn configuration_completion_is_replayed_to_late_reload_waiters() {
+        assert_late_configuration_completion(true).await;
+    }
+
+    async fn assert_late_configuration_completion(reload: bool) {
+        let session = create_test_session();
+        let project_path = Utf8PathBuf::from("/project");
+        let project_key = ProjectKey::new();
+        session
+            .projects
+            .pin()
+            .insert(project_path.clone().into(), project_key);
+        let cache_key = ConfigurationCacheKey {
+            base_path: project_path.clone(),
+            settings_path: None,
+            project_path: project_path.clone(),
+        };
+        let mut operations = session.loading_operations.write().await;
+        let (sender, receiver) = watch::channel(None);
+        operations.insert(cache_key.clone(), receiver);
+        let load = session.load_biome_configuration_file(
+            ConfigurationPathHint::FromWorkspace(project_path.clone()),
+            Some(project_path.clone()),
+            reload,
+            true,
+        );
+        tokio::pin!(load);
+        assert!(futures::poll!(&mut load).is_pending());
+
+        session
+            .configuration_status_by_path
+            .write()
+            .await
+            .insert(cache_key, ConfigurationStatus::Loaded);
+        sender.send_replace(Some(ConfigurationStatus::Loaded));
+        drop(operations);
+
+        let status = tokio::time::timeout(Duration::from_secs(1), load)
+            .await
+            .expect("a completed configuration must not wait for another notification");
+        assert!(status.is_loaded());
+        assert_eq!(session.project_for_path(&project_path), Some(project_key));
     }
 
     #[tokio::test]
