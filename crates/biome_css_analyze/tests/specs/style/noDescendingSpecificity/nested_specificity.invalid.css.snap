@@ -9,24 +9,24 @@ expression: nested_specificity.invalid.css
 /* The `&` resolves to `.x .y`, so `html body & .d` is (0,3,2), more specific than `.x .y .d` */
 .x {
   .y {
-    html body & .d {}
+    html body & .d { color: red; }
   }
 }
-.x .y .d {}
+.x .y .d { color: red; }
 
 /* Selectors nested inside `@container` are compared with each other */
 .a {
   @container (min-width: 1px) {
-    & .b .c {}
-    & .c {}
+    & .b .c { color: red; }
+    & .c { color: red; }
   }
 }
 
 /* Selectors nested inside `@starting-style` are compared with each other */
 .e {
   @starting-style {
-    & .f .g {}
-    & .g {}
+    & .f .g { color: red; }
+    & .g { color: red; }
   }
 }
 
@@ -40,7 +40,7 @@ nested_specificity.invalid.css:9:1 lint/style/noDescendingSpecificity ━━━�
   
      7 │   }
      8 │ }
-   > 9 │ .x .y .d {}
+   > 9 │ .x .y .d { color: red; }
        │ ^^^^^^^^
     10 │ 
     11 │ /* Selectors nested inside `@container` are compared with each other */
@@ -49,7 +49,7 @@ nested_specificity.invalid.css:9:1 lint/style/noDescendingSpecificity ━━━�
   
     4 │ .x {
     5 │   .y {
-  > 6 │     html body & .d {}
+  > 6 │     html body & .d { color: red; }
       │     ^^^^^^^^^^^^^^
     7 │   }
     8 │ }
@@ -65,8 +65,8 @@ nested_specificity.invalid.css:15:5 lint/style/noDescendingSpecificity ━━━
   ! Descending specificity selector found. This selector specificity is (0, 2, 0)
   
     13 │   @container (min-width: 1px) {
-    14 │     & .b .c {}
-  > 15 │     & .c {}
+    14 │     & .b .c { color: red; }
+  > 15 │     & .c { color: red; }
        │     ^^^^
     16 │   }
     17 │ }
@@ -75,9 +75,9 @@ nested_specificity.invalid.css:15:5 lint/style/noDescendingSpecificity ━━━
   
     12 │ .a {
     13 │   @container (min-width: 1px) {
-  > 14 │     & .b .c {}
+  > 14 │     & .b .c { color: red; }
        │     ^^^^^^^
-    15 │     & .c {}
+    15 │     & .c { color: red; }
     16 │   }
   
   i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
@@ -91,8 +91,8 @@ nested_specificity.invalid.css:23:5 lint/style/noDescendingSpecificity ━━━
   ! Descending specificity selector found. This selector specificity is (0, 2, 0)
   
     21 │   @starting-style {
-    22 │     & .f .g {}
-  > 23 │     & .g {}
+    22 │     & .f .g { color: red; }
+  > 23 │     & .g { color: red; }
        │     ^^^^
     24 │   }
     25 │ }
@@ -101,9 +101,9 @@ nested_specificity.invalid.css:23:5 lint/style/noDescendingSpecificity ━━━
   
     20 │ .e {
     21 │   @starting-style {
-  > 22 │     & .f .g {}
+  > 22 │     & .f .g { color: red; }
        │     ^^^^^^^
-    23 │     & .g {}
+    23 │     & .g { color: red; }
     24 │   }
   
   i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
