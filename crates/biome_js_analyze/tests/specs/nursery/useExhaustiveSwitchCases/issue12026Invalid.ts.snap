@@ -1,0 +1,157 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue12026Invalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+import type { Letters } from "./issue12026Letters.ts";
+import { Letters as letters } from "./issue12026Letters.ts";
+import * as letterModule from "./issue12026Letters.ts";
+
+function fromType(letter: Letters): number {
+	switch (letter) {
+		case "a":
+			return 1;
+		case "b":
+			return 2;
+	}
+	return 0;
+}
+
+function fromValue(letter: (typeof letters)[number]): number {
+	switch (letter) {
+		case "a":
+			return 1;
+		case "b":
+			return 2;
+	}
+	return 0;
+}
+
+function fromNamespace(letter: letterModule.Letters): number {
+	switch (letter) {
+		case "a":
+			return 1;
+		case "b":
+			return 2;
+	}
+	return 0;
+}
+
+```
+
+# Diagnostics
+```
+issue12026Invalid.ts:7:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+     6 │ function fromType(letter: Letters): number {
+   > 7 │ 	switch (letter) {
+       │ 	^^^^^^^^^^^^^^^^^
+   > 8 │ 		case "a":
+   > 9 │ 			return 1;
+  > 10 │ 		case "b":
+  > 11 │ 			return 2;
+  > 12 │ 	}
+       │ 	^
+    13 │ 	return 0;
+    14 │ }
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - "c"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+     9  9 │         return 1;
+    10 10 │       case "b":
+    11    │ - → → → return·2;
+       11 │ + → → → return·2;
+       12 │ + → → case·"c":·throw·new·Error("TODO:·Not·implemented·yet");
+    12 13 │     }
+    13 14 │     return 0;
+  
+
+```
+
+```
+issue12026Invalid.ts:17:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    16 │ function fromValue(letter: (typeof letters)[number]): number {
+  > 17 │ 	switch (letter) {
+       │ 	^^^^^^^^^^^^^^^^^
+  > 18 │ 		case "a":
+  > 19 │ 			return 1;
+  > 20 │ 		case "b":
+  > 21 │ 			return 2;
+  > 22 │ 	}
+       │ 	^
+    23 │ 	return 0;
+    24 │ }
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - "c"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    19 19 │         return 1;
+    20 20 │       case "b":
+    21    │ - → → → return·2;
+       21 │ + → → → return·2;
+       22 │ + → → case·"c":·throw·new·Error("TODO:·Not·implemented·yet");
+    22 23 │     }
+    23 24 │     return 0;
+  
+
+```
+
+```
+issue12026Invalid.ts:27:2 lint/nursery/useExhaustiveSwitchCases  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The switch statement is not exhaustive.
+  
+    26 │ function fromNamespace(letter: letterModule.Letters): number {
+  > 27 │ 	switch (letter) {
+       │ 	^^^^^^^^^^^^^^^^^
+  > 28 │ 		case "a":
+  > 29 │ 			return 1;
+  > 30 │ 		case "b":
+  > 31 │ 			return 2;
+  > 32 │ 	}
+       │ 	^
+    33 │ 	return 0;
+    34 │ }
+  
+  i Some variants of the union type are not handled here.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i These cases are missing:
+  
+  - "c"
+  
+  i Unsafe fix: Add the missing cases to the switch statement.
+  
+    29 29 │         return 1;
+    30 30 │       case "b":
+    31    │ - → → → return·2;
+       31 │ + → → → return·2;
+       32 │ + → → case·"c":·throw·new·Error("TODO:·Not·implemented·yet");
+    32 33 │     }
+    33 34 │     return 0;
+  
+
+```
