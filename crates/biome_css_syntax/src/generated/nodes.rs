@@ -15172,6 +15172,7 @@ pub enum AnyCssCustomPropertyComponent {
     CssCustomPropertyDelimiter(CssCustomPropertyDelimiter),
     CssCustomPropertyFunction(CssCustomPropertyFunction),
     CssCustomPropertyParenthesizedBlock(CssCustomPropertyParenthesizedBlock),
+    CssIfFunction(CssIfFunction),
     CssNumber(CssNumber),
     CssString(CssString),
     CssUrlFunction(CssUrlFunction),
@@ -15222,6 +15223,12 @@ impl AnyCssCustomPropertyComponent {
     ) -> Option<&CssCustomPropertyParenthesizedBlock> {
         match &self {
             Self::CssCustomPropertyParenthesizedBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_if_function(&self) -> Option<&CssIfFunction> {
+        match &self {
+            Self::CssIfFunction(item) => Some(item),
             _ => None,
         }
     }
@@ -15878,10 +15885,17 @@ impl AnyCssIfBranch {
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssIfBranchValue {
+    CssCustomPropertyValue(CssCustomPropertyValue),
     CssGenericComponentValueList(CssGenericComponentValueList),
     ScssExpression(ScssExpression),
 }
 impl AnyCssIfBranchValue {
+    pub fn as_css_custom_property_value(&self) -> Option<&CssCustomPropertyValue> {
+        match &self {
+            Self::CssCustomPropertyValue(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_css_generic_component_value_list(&self) -> Option<&CssGenericComponentValueList> {
         match &self {
             Self::CssGenericComponentValueList(item) => Some(item),
@@ -39049,6 +39063,11 @@ impl From<CssCustomPropertyParenthesizedBlock> for AnyCssCustomPropertyComponent
         Self::CssCustomPropertyParenthesizedBlock(node)
     }
 }
+impl From<CssIfFunction> for AnyCssCustomPropertyComponent {
+    fn from(node: CssIfFunction) -> Self {
+        Self::CssIfFunction(node)
+    }
+}
 impl From<CssNumber> for AnyCssCustomPropertyComponent {
     fn from(node: CssNumber) -> Self {
         Self::CssNumber(node)
@@ -39083,6 +39102,7 @@ impl AstNode for AnyCssCustomPropertyComponent {
         .union(CssCustomPropertyDelimiter::KIND_SET)
         .union(CssCustomPropertyFunction::KIND_SET)
         .union(CssCustomPropertyParenthesizedBlock::KIND_SET)
+        .union(CssIfFunction::KIND_SET)
         .union(CssNumber::KIND_SET)
         .union(CssString::KIND_SET)
         .union(CssUrlFunction::KIND_SET)
@@ -39096,6 +39116,7 @@ impl AstNode for AnyCssCustomPropertyComponent {
             | CSS_CUSTOM_PROPERTY_DELIMITER
             | CSS_CUSTOM_PROPERTY_FUNCTION
             | CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK
+            | CSS_IF_FUNCTION
             | CSS_NUMBER
             | CSS_STRING
             | CSS_URL_FUNCTION
@@ -39125,6 +39146,7 @@ impl AstNode for AnyCssCustomPropertyComponent {
                     syntax,
                 })
             }
+            CSS_IF_FUNCTION => Self::CssIfFunction(CssIfFunction { syntax }),
             CSS_NUMBER => Self::CssNumber(CssNumber { syntax }),
             CSS_STRING => Self::CssString(CssString { syntax }),
             CSS_URL_FUNCTION => Self::CssUrlFunction(CssUrlFunction { syntax }),
@@ -39149,6 +39171,7 @@ impl AstNode for AnyCssCustomPropertyComponent {
             Self::CssCustomPropertyDelimiter(it) => it.syntax(),
             Self::CssCustomPropertyFunction(it) => it.syntax(),
             Self::CssCustomPropertyParenthesizedBlock(it) => it.syntax(),
+            Self::CssIfFunction(it) => it.syntax(),
             Self::CssNumber(it) => it.syntax(),
             Self::CssString(it) => it.syntax(),
             Self::CssUrlFunction(it) => it.syntax(),
@@ -39165,6 +39188,7 @@ impl AstNode for AnyCssCustomPropertyComponent {
             Self::CssCustomPropertyDelimiter(it) => it.into_syntax(),
             Self::CssCustomPropertyFunction(it) => it.into_syntax(),
             Self::CssCustomPropertyParenthesizedBlock(it) => it.into_syntax(),
+            Self::CssIfFunction(it) => it.into_syntax(),
             Self::CssNumber(it) => it.into_syntax(),
             Self::CssString(it) => it.into_syntax(),
             Self::CssUrlFunction(it) => it.into_syntax(),
@@ -39184,6 +39208,7 @@ impl std::fmt::Debug for AnyCssCustomPropertyComponent {
             Self::CssCustomPropertyDelimiter(it) => std::fmt::Debug::fmt(it, f),
             Self::CssCustomPropertyFunction(it) => std::fmt::Debug::fmt(it, f),
             Self::CssCustomPropertyParenthesizedBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssIfFunction(it) => std::fmt::Debug::fmt(it, f),
             Self::CssNumber(it) => std::fmt::Debug::fmt(it, f),
             Self::CssString(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUrlFunction(it) => std::fmt::Debug::fmt(it, f),
@@ -39204,6 +39229,7 @@ impl From<AnyCssCustomPropertyComponent> for SyntaxNode {
             AnyCssCustomPropertyComponent::CssCustomPropertyParenthesizedBlock(it) => {
                 it.into_syntax()
             }
+            AnyCssCustomPropertyComponent::CssIfFunction(it) => it.into_syntax(),
             AnyCssCustomPropertyComponent::CssNumber(it) => it.into_syntax(),
             AnyCssCustomPropertyComponent::CssString(it) => it.into_syntax(),
             AnyCssCustomPropertyComponent::CssUrlFunction(it) => it.into_syntax(),
@@ -40962,6 +40988,11 @@ impl From<AnyCssIfBranch> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssCustomPropertyValue> for AnyCssIfBranchValue {
+    fn from(node: CssCustomPropertyValue) -> Self {
+        Self::CssCustomPropertyValue(node)
+    }
+}
 impl From<CssGenericComponentValueList> for AnyCssIfBranchValue {
     fn from(node: CssGenericComponentValueList) -> Self {
         Self::CssGenericComponentValueList(node)
@@ -40974,13 +41005,20 @@ impl From<ScssExpression> for AnyCssIfBranchValue {
 }
 impl AstNode for AnyCssIfBranchValue {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        CssGenericComponentValueList::KIND_SET.union(ScssExpression::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = CssCustomPropertyValue::KIND_SET
+        .union(CssGenericComponentValueList::KIND_SET)
+        .union(ScssExpression::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, CSS_GENERIC_COMPONENT_VALUE_LIST | SCSS_EXPRESSION)
+        matches!(
+            kind,
+            CSS_CUSTOM_PROPERTY_VALUE | CSS_GENERIC_COMPONENT_VALUE_LIST | SCSS_EXPRESSION
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            CSS_CUSTOM_PROPERTY_VALUE => {
+                Self::CssCustomPropertyValue(CssCustomPropertyValue { syntax })
+            }
             CSS_GENERIC_COMPONENT_VALUE_LIST => {
                 Self::CssGenericComponentValueList(CssGenericComponentValueList::cast(syntax)?)
             }
@@ -40991,12 +41029,14 @@ impl AstNode for AnyCssIfBranchValue {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::CssCustomPropertyValue(it) => it.syntax(),
             Self::CssGenericComponentValueList(it) => it.syntax(),
             Self::ScssExpression(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::CssCustomPropertyValue(it) => it.into_syntax(),
             Self::CssGenericComponentValueList(it) => it.into_syntax(),
             Self::ScssExpression(it) => it.into_syntax(),
         }
@@ -41005,6 +41045,7 @@ impl AstNode for AnyCssIfBranchValue {
 impl std::fmt::Debug for AnyCssIfBranchValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::CssCustomPropertyValue(it) => std::fmt::Debug::fmt(it, f),
             Self::CssGenericComponentValueList(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssExpression(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -41013,6 +41054,7 @@ impl std::fmt::Debug for AnyCssIfBranchValue {
 impl From<AnyCssIfBranchValue> for SyntaxNode {
     fn from(n: AnyCssIfBranchValue) -> Self {
         match n {
+            AnyCssIfBranchValue::CssCustomPropertyValue(it) => it.into_syntax(),
             AnyCssIfBranchValue::CssGenericComponentValueList(it) => it.into_syntax(),
             AnyCssIfBranchValue::ScssExpression(it) => it.into_syntax(),
         }

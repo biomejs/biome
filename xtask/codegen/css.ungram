@@ -783,6 +783,7 @@ AnyCssCustomPropertyComponent =
 	| ScssInterpolation
 	| CssCustomPropertyFunction
 	| CssUrlFunction
+	| CssIfFunction
 	| CssCustomPropertyParenthesizedBlock
 	| CssCustomPropertyBracketedBlock
 	| CssCustomPropertyBracedBlock
@@ -2588,9 +2589,13 @@ CssIfBranch =
 
 // if(sass(true): 1px + 2px; else: 0)
 //                ^^^^^^^^^
+// Inside an SCSS custom property, Sass doesn't evaluate branch values:
+// --gap: if(media(print): $gap; else: 0)
+//                         ^^^^
 AnyCssIfBranchValue =
 	CssGenericComponentValueList
 	| ScssExpression
+	| CssCustomPropertyValue
 
 AnyCssIfBranch =
 	CssIfBranch

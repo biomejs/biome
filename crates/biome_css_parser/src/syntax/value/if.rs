@@ -11,6 +11,7 @@ use biome_parser::prelude::{CompletedMarker, ParsedSyntax};
 use biome_parser::token_set;
 use biome_parser::{Parser, SyntaxFeature};
 
+use crate::lexer::{CssCustomPropertyCommentMode, CssLexContext};
 use crate::parser::CssParser;
 use crate::syntax::at_rule::container::error::expected_any_container_style_query;
 use crate::syntax::at_rule::container::parse_any_container_style_query;
@@ -28,7 +29,7 @@ use crate::syntax::is_at_declaration;
 use crate::syntax::parse_error::scss_only_syntax_error;
 use crate::syntax::property::{
     END_OF_PROPERTY_VALUE_COMPONENT_LIST_TOKEN_SET, END_OF_PROPERTY_VALUE_TOKEN_SET,
-    GenericComponentValueList,
+    GenericComponentValueList, parse_custom_property_value_with_mode,
 };
 use crate::syntax::scss::{
     expected_scss_expression, is_at_scss_interpolation, parse_scss_expression_until,
@@ -37,7 +38,7 @@ use crate::syntax::scss::{
 use crate::syntax::value::parse_error::expected_if_branch;
 use crate::syntax::value::parse_error::expected_if_test_boolean_expr_group;
 use crate::syntax::value::parse_error::expected_if_test_boolean_not_expr;
-use crate::syntax::{CssSyntaxFeatures, ValueParsingContext};
+use crate::syntax::{CssSyntaxFeatures, ValueParsingContext, ValueParsingMode};
 
 const IF_BRANCH_RECOVERY_TOKEN_SET: TokenSet<CssSyntaxKind> =
     token_set![T![;], T![')'], T!['}'], EOF];
@@ -47,6 +48,7 @@ const IF_BRANCH_VALUE_END_SET: TokenSet<CssSyntaxKind> =
 const IF_BRANCH_VALUE_RECOVERY_SET: TokenSet<CssSyntaxKind> =
     END_OF_PROPERTY_VALUE_TOKEN_SET.union(token_set!(T![')'], T![else]));
 const SCSS_IF_BRANCH_VALUE_END_SET: TokenSet<CssSyntaxKind> = token_set![T![;], T![')'], T!['}']];
+const IF_RAW_BRANCH_VALUE_END_SET: TokenSet<CssSyntaxKind> = token_set![T![;], T![')']];
 
 pub(crate) fn is_at_if_function(p: &mut CssParser) -> bool {
     p.at(T![if]) && p.nth_at(1, T!['('])
@@ -114,6 +116,30 @@ pub(crate) fn is_at_if_function(p: &mut CssParser) -> bool {
 ///   style( <style-query> )
 /// ```
 pub(crate) fn parse_if_function(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyntax {
+    parse_if_function_with_branch_values(p, context, None)
+}
+
+/// Parses a modern `if()` in an SCSS custom property. Sass doesn't evaluate custom property
+/// values, so each branch value stays raw, as in the rest of the property.
+///
+/// ```scss
+/// .a { --gap: if(media(print): $gap; else: 0); }
+/// ```
+pub(crate) fn parse_custom_property_if_function(
+    p: &mut CssParser,
+    comment_mode: CssCustomPropertyCommentMode,
+) -> ParsedSyntax {
+    let context = ValueParsingContext::new(p, ValueParsingMode::ScssAware);
+    parse_if_function_with_branch_values(p, context, Some(comment_mode))
+}
+
+/// Parses `if()`, with raw branch values when `raw_values` holds the comment mode of the
+/// enclosing custom property.
+fn parse_if_function_with_branch_values(
+    p: &mut CssParser,
+    context: ValueParsingContext,
+    raw_values: Option<CssCustomPropertyCommentMode>,
+) -> ParsedSyntax {
     if !is_at_if_function(p) {
         return Absent;
     }
@@ -129,9 +155,18 @@ pub(crate) fn parse_if_function(p: &mut CssParser, context: ValueParsingContext)
     p.bump(T![if]);
     p.expect(T!['(']);
 
-    CssIfBranchList { context }.parse_list(p);
+    CssIfBranchList {
+        context,
+        raw_values,
+    }
+    .parse_list(p);
 
-    p.expect(T![')']);
+    match raw_values {
+        Some(comment_mode) => {
+            p.expect_with_context(T![')'], CssLexContext::CustomPropertyValue(comment_mode))
+        }
+        None => p.expect(T![')']),
+    };
 
     Present(m.complete(p, CSS_IF_FUNCTION))
 }
@@ -519,7 +554,11 @@ fn parse_any_if_condition(p: &mut CssParser, context: ValueParsingContext) -> Pa
 }
 
 #[inline]
-fn parse_if_branch(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyntax {
+fn parse_if_branch(
+    p: &mut CssParser,
+    context: ValueParsingContext,
+    raw_values: Option<CssCustomPropertyCommentMode>,
+) -> ParsedSyntax {
     if !is_at_any_if_condition(p) {
         return Absent;
     }
@@ -536,6 +575,12 @@ fn parse_if_branch(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyn
             expected_if_branch,
         )
         .ok();
+
+    if let Some(comment_mode) = raw_values {
+        p.expect_with_context(T![:], CssLexContext::CustomPropertyValue(comment_mode));
+        parse_custom_property_value_with_mode(p, IF_RAW_BRANCH_VALUE_END_SET, comment_mode);
+        return Present(m.complete(p, CSS_IF_BRANCH));
+    }
 
     p.expect(T![:]);
 
@@ -596,6 +641,7 @@ impl ParseRecovery for IfBranchListParseRecovery {
 
 struct CssIfBranchList {
     context: ValueParsingContext,
+    raw_values: Option<CssCustomPropertyCommentMode>,
 }
 
 impl ParseSeparatedList for CssIfBranchList {
@@ -604,7 +650,7 @@ impl ParseSeparatedList for CssIfBranchList {
     const LIST_KIND: Self::Kind = CSS_IF_BRANCH_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_if_branch(p, self.context)
+        parse_if_branch(p, self.context, self.raw_values)
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
