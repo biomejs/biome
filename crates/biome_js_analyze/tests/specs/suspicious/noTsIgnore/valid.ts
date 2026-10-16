@@ -1,0 +1,14 @@
+/* should not generate diagnostics */
+// @ts-expect-error
+let foo;
+
+let trailing; // @ts-ignore
+
+function inTrailingTrivia() {
+	return /* @ts-ignore */ value;
+}
+
+const inString = "@ts-ignore";
+const inTemplate = `// @ts-ignore`;
+// @ts-ignor
+let almost;
