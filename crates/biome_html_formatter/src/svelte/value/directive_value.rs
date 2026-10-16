@@ -63,16 +63,15 @@ impl FormatSvelteDirectiveValue {
             else {
                 return Ok(false);
             };
-            let Some(initializer_value) = initializer.value().ok().and_then(|v| {
-                Some(
-                    v.as_html_attribute_single_text_expression()?
-                        .expression()
-                        .ok()?
-                        .to_trimmed_text(),
-                )
+            let Some(expression) = initializer.value().ok().and_then(|value| {
+                value
+                    .as_html_attribute_single_text_expression()?
+                    .expression()
+                    .ok()
             }) else {
                 return Ok(false);
             };
+            let initializer_value = expression.to_trimmed_text();
 
             if initializer_value.text() != binding_value.text_trimmed() {
                 return Ok(false);
@@ -82,11 +81,19 @@ impl FormatSvelteDirectiveValue {
                 node: property,
                 compact: true,
             };
+            write!(f, [colon_token.format()])?;
+            if !f.context().is_embedded_node_range(expression.range()) {
+                write!(
+                    f,
+                    [text(
+                        initializer_value.text(),
+                        Some(initializer.range().start())
+                    )]
+                )?;
+            }
             write!(
                 f,
                 [
-                    colon_token.format(),
-                    text(initializer_value.text(), Some(initializer.range().start())),
                     initializer.format().with_options(
                         FormatHtmlAttributeInitializerClauseOptions {
                             compact: CompactKind::Remove,
