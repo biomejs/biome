@@ -34,6 +34,8 @@ pub(super) struct Block {
     pub(super) segment_stop: u64,
     /// ASCII digits and `.`.
     pub(super) numeric: u64,
+    /// `:` and whitespace, which bound the variants of a class.
+    pub(super) colon_stop: u64,
     /// The starts of the tokens in [TailwindLexContext::VariantSegment], which depend on the
     /// offset alone, plus every position past the end of the source.
     ///
@@ -53,6 +55,7 @@ const SEGMENT_STOP: u16 = 1 << 8;
 const NUMERIC: u16 = 1 << 9;
 /// The bytes that start a variant segment name: ASCII letters and digits, `_`, `@` and `*`.
 const NAME_START: u16 = 1 << 10;
+const COLON_STOP: u16 = 1 << 11;
 
 /// The classes of an ASCII byte.
 const fn ascii_classes(byte: u8) -> u16 {
@@ -91,6 +94,9 @@ const fn ascii_classes(byte: u8) -> u16 {
     if byte.is_ascii_alphanumeric() || matches!(byte, b'_' | b'@' | b'*') {
         classes |= NAME_START;
     }
+    if whitespace || byte == b':' {
+        classes |= COLON_STOP;
+    }
     classes
 }
 
@@ -118,6 +124,7 @@ struct Classes {
     segment_stop: u64,
     numeric: u64,
     name_start: u64,
+    colon_stop: u64,
     non_ascii: u64,
     /// UTF-8 continuation bytes, `0x80` to `0xBF`.
     continuation: u64,
@@ -148,6 +155,7 @@ fn classify_scalar(bytes: &[u8; 64], len: usize) -> Classes {
         classes.segment_stop |= set(SEGMENT_STOP);
         classes.numeric |= set(NUMERIC);
         classes.name_start |= set(NAME_START);
+        classes.colon_stop |= set(COLON_STOP);
     }
     classes
 }
@@ -215,6 +223,7 @@ impl SegmentTracker {
             paren_stop: classes.paren_stop | invalid,
             segment_stop: classes.segment_stop | invalid,
             numeric: classes.numeric & valid,
+            colon_stop: classes.colon_stop | invalid,
             segment_starts,
         }
     }
@@ -275,15 +284,16 @@ const SENTINEL: Block = Block {
     paren_stop: u64::MAX,
     segment_stop: u64::MAX,
     numeric: 0,
+    colon_stop: u64::MAX,
     segment_starts: u64::MAX,
 };
 
 #[cfg(target_arch = "x86_64")]
 mod x86 {
     use super::{
-        ASCII_CLASSES, BAD_WHITESPACE, BASE_STOP, Block, Classes, LINE_BREAK, MODIFIER_STOP,
-        NAME_START, NUMERIC, PAREN_STOP, SEGMENT_STOP, SELECTOR_STOP, VALUE_STOP, WHITESPACE,
-        classify_with,
+        ASCII_CLASSES, BAD_WHITESPACE, BASE_STOP, Block, COLON_STOP, Classes, LINE_BREAK,
+        MODIFIER_STOP, NAME_START, NUMERIC, PAREN_STOP, SEGMENT_STOP, SELECTOR_STOP, VALUE_STOP,
+        WHITESPACE, classify_with,
     };
     use std::arch::x86_64::*;
 
@@ -300,7 +310,7 @@ mod x86 {
         table
     }
 
-    static BITSETS: [[u8; 16]; 11] = [
+    static BITSETS: [[u8; 16]; 12] = [
         bitset(WHITESPACE),
         bitset(BAD_WHITESPACE),
         bitset(LINE_BREAK),
@@ -312,6 +322,7 @@ mod x86 {
         bitset(SEGMENT_STOP),
         bitset(NUMERIC),
         bitset(NAME_START),
+        bitset(COLON_STOP),
     ];
 
     static BITS: [u8; 16] = [1, 2, 4, 8, 16, 32, 64, 128, 1, 2, 4, 8, 16, 32, 64, 128];
@@ -336,6 +347,7 @@ mod x86 {
             load(&BITSETS[8]),
             load(&BITSETS[9]),
             load(&BITSETS[10]),
+            load(&BITSETS[11]),
         ];
         let bits = load(&BITS);
         let low_nibble = _mm256_set1_epi8(0x0F);
@@ -370,6 +382,7 @@ mod x86 {
                 class(bitsets[8]),
                 class(bitsets[9]),
                 class(bitsets[10]),
+                class(bitsets[11]),
                 non_ascii,
                 continuation,
             ]
@@ -380,7 +393,7 @@ mod x86 {
             let high = if len > 32 {
                 half(&bytes[32..])
             } else {
-                [0; 13]
+                [0; 14]
             };
             let join = |index: usize| low[index] | (high[index] << 32);
             Classes {
@@ -395,8 +408,9 @@ mod x86 {
                 segment_stop: join(8),
                 numeric: join(9),
                 name_start: join(10),
-                non_ascii: join(11),
-                continuation: join(12),
+                colon_stop: join(11),
+                non_ascii: join(12),
+                continuation: join(13),
             }
         })
     }
@@ -440,6 +454,7 @@ mod x86 {
                 segment_stop: mask(or(whitespace, any(b":-/![])"))),
                 numeric: mask(or(digit, eq(b'.'))),
                 name_start: mask(or(alphanumeric, any(b"_@*"))),
+                colon_stop: mask(or(whitespace, eq(b':'))),
                 non_ascii,
                 continuation: mask(_mm_cmplt_epi8(v, _mm_set1_epi8(0xC0u8 as i8))) & non_ascii,
             }
@@ -472,6 +487,7 @@ mod x86 {
                 segment_stop: join(|c| c.segment_stop),
                 numeric: join(|c| c.numeric),
                 name_start: join(|c| c.name_start),
+                colon_stop: join(|c| c.colon_stop),
                 non_ascii: join(|c| c.non_ascii),
                 continuation: join(|c| c.continuation),
             }

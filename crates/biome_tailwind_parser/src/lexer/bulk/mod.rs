@@ -237,6 +237,17 @@ impl BulkTokens {
         Some((kind, end))
     }
 
+    /// Returns whether a `:` follows `offset` before the next whitespace, or `None` for
+    /// [Self::new_empty].
+    #[inline(always)]
+    pub(crate) fn has_colon_before_whitespace(&self, source: &[u8], offset: usize) -> Option<bool> {
+        if self.is_empty() {
+            return None;
+        }
+        let end = next_bit(&self.blocks, offset, |block| block.colon_stop);
+        Some(source.get(end) == Some(&b':'))
+    }
+
     /// Returns the flags of the whitespace token `start..end`, or `None` if the lexer reports a
     /// diagnostic for it.
     #[inline(always)]

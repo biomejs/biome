@@ -8,6 +8,7 @@ use biome_parser::token_source::{NthToken, TokenSource, Trivia};
 use biome_rowan::TriviaPieceKind;
 use biome_tailwind_syntax::TailwindSyntaxKind::EOF;
 use biome_tailwind_syntax::{TailwindSyntaxKind, TextRange, TextSize};
+use biome_unicode_table::{Dispatch::WHS, lookup_byte};
 
 /// Token source for the parser.
 ///
@@ -438,6 +439,20 @@ impl<'source> TailwindTokenSource<'source> {
         self.current_has_line_break = checkpoint.current_has_line_break;
         self.next = checkpoint.next;
         self.after_newline = checkpoint.after_newline;
+    }
+
+    /// Returns whether a `:` follows the start of the current token before the next whitespace.
+    pub fn has_colon_before_whitespace(&self) -> bool {
+        let source = self.lexer.source().as_bytes();
+        let start = usize::from(self.current_start);
+        self.tokens
+            .has_colon_before_whitespace(source, start)
+            .unwrap_or_else(|| {
+                source[start..]
+                    .iter()
+                    .take_while(|&&byte| !matches!(lookup_byte(byte), WHS))
+                    .any(|&byte| byte == b':')
+            })
     }
 
     /// Lexes the current token again in `context`, as if no token came before it.

@@ -36,6 +36,7 @@ fn check_tokens(source: &str, base_names: &BaseNameStore) {
         after_newline = lexer.after_newline();
     }
 
+    let bytes = source.as_bytes();
     for offset in tokens.segment_starts(source.len()) {
         assert!(
             source.is_char_boundary(offset),
@@ -43,8 +44,19 @@ fn check_tokens(source: &str, base_names: &BaseNameStore) {
         );
     }
 
+    for offset in (0..=bytes.len()).filter(|&offset| source.is_char_boundary(offset)) {
+        let expected = bytes[offset..]
+            .iter()
+            .take_while(|byte| !matches!(byte, b'\t' | b'\n' | 0x0B | 0x0C | b'\r' | b' '))
+            .any(|&byte| byte == b':');
+        assert_eq!(
+            tokens.has_colon_before_whitespace(bytes, offset),
+            Some(expected),
+            "colon after {offset} of {source:?}"
+        );
+    }
+
     // The variant segment tokens along the lexer's tokens from the start.
-    let bytes = source.as_bytes();
     let mut position = 0;
     while position < bytes.len() {
         let diagnostics = lexer.diagnostics_len();
