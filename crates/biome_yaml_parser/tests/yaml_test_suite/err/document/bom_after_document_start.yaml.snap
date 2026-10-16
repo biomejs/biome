@@ -25,12 +25,12 @@ YamlRoot {
             items: [
                 ERROR_TOKEN@3..7 "\u{feff}" [Newline("\n")] [],
                 FLOW_START@7..7 "" [] [],
-                PLAIN_LITERAL@7..13 "value\n" [] [],
-                FLOW_END@13..13 "" [] [],
+                PLAIN_LITERAL@7..12 "value" [] [],
+                FLOW_END@12..12 "" [] [],
             ],
         },
     ],
-    eof_token: EOF@13..13 "" [] [],
+    eof_token: EOF@12..13 "" [Newline("\n")] [],
 }
 ```
 
@@ -38,19 +38,19 @@ YamlRoot {
 
 ```
 0: YAML_ROOT@0..13
-  0: YAML_DOCUMENT_LIST@0..13
+  0: YAML_DOCUMENT_LIST@0..12
     0: YAML_DOCUMENT@0..3
       0: (empty)
       1: YAML_DIRECTIVE_LIST@0..0
       2: DIRECTIVE_END@0..3 "---" [] []
       3: (empty)
       4: (empty)
-    1: YAML_BOGUS@3..13
+    1: YAML_BOGUS@3..12
       0: ERROR_TOKEN@3..7 "\u{feff}" [Newline("\n")] []
       1: FLOW_START@7..7 "" [] []
-      2: PLAIN_LITERAL@7..13 "value\n" [] []
-      3: FLOW_END@13..13 "" [] []
-  1: EOF@13..13 "" [] []
+      2: PLAIN_LITERAL@7..12 "value" [] []
+      3: FLOW_END@12..12 "" [] []
+  1: EOF@12..13 "" [Newline("\n")] []
 
 ```
 
