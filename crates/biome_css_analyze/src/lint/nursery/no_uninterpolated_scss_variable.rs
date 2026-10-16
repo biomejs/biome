@@ -88,29 +88,6 @@ pub struct RuleState {
     name: CssCustomIdentifier,
 }
 
-impl RuleState {
-    fn first_node(&self) -> &CssSyntaxNode {
-        self.namespace
-            .as_ref()
-            .map_or(self.dollar.syntax(), |(namespace, _)| namespace.syntax())
-    }
-
-    fn range(&self) -> TextRange {
-        TextRange::new(
-            self.first_node().text_trimmed_range().start(),
-            self.name.syntax().text_trimmed_range().end(),
-        )
-    }
-
-    fn is_part(&self, node: &CssSyntaxNode) -> bool {
-        node == self.dollar.syntax()
-            || node == self.name.syntax()
-            || self.namespace.as_ref().is_some_and(|(namespace, dot)| {
-                node == namespace.syntax() || node == dot.syntax()
-            })
-    }
-}
-
 impl Rule for NoUninterpolatedScssVariable {
     type Query = Ast<CssCustomPropertyValue>;
     type State = RuleState;
@@ -219,6 +196,29 @@ impl Rule for NoUninterpolatedScssVariable {
             markup! { "Wrap the variable in interpolation." }.to_owned(),
             mutation,
         ))
+    }
+}
+
+impl RuleState {
+    fn first_node(&self) -> &CssSyntaxNode {
+        self.namespace
+            .as_ref()
+            .map_or(self.dollar.syntax(), |(namespace, _)| namespace.syntax())
+    }
+
+    fn range(&self) -> TextRange {
+        TextRange::new(
+            self.first_node().text_trimmed_range().start(),
+            self.name.syntax().text_trimmed_range().end(),
+        )
+    }
+
+    fn is_part(&self, node: &CssSyntaxNode) -> bool {
+        node == self.dollar.syntax()
+            || node == self.name.syntax()
+            || self.namespace.as_ref().is_some_and(|(namespace, dot)| {
+                node == namespace.syntax() || node == dot.syntax()
+            })
     }
 }
 
