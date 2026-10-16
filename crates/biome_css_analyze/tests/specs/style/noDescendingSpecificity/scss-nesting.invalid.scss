@@ -1,35 +1,35 @@
 /* should generate diagnostics */
 .parent {
   .middle {
-    .nested-parent .nested-target {}
+    .nested-parent .nested-target { color: red; }
   }
 }
-.nested-target {}
+.nested-target { color: red; }
 
 .block {
-  &--active .suffix-target {}
+  &--active .suffix-target { color: red; }
 }
-.suffix-target {}
+.suffix-target { color: red; }
 
 .multi-parent {
-  & & .multi-target {}
-  & .multi-target {}
+  & & .multi-target { color: red; }
+  & .multi-target { color: red; }
 }
 
 .sidebar > {
-  .partial-target {}
+  .partial-target { color: red; }
 }
-.partial-target {}
+.partial-target { color: red; }
 
 .card {
   + {
-    .adjacent-target {}
+    .adjacent-target { color: red; }
   }
 }
-.adjacent-target {}
+.adjacent-target { color: red; }
 
 .low,
 #high {
-  .list-target {}
+  .list-target { color: red; }
 }
-.list-target {}
+.list-target { color: red; }
