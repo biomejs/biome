@@ -278,19 +278,25 @@ declare_lint_rule! {
     ///   }
     ///   ```
     ///
-    /// - Declarations inside an external TypeScript module
+    /// - Declarations inside an external TypeScript module, including inside its nested namespaces
     ///
     ///   ```ts
     ///   declare module "myExternalModule" {
     ///     export interface my_INTERFACE {}
+    ///     namespace Inner {
+    ///       interface my_OTHER_INTERFACE {}
+    ///     }
     ///   }
     ///   ```
     ///
-    /// - Declarations inside a global declaration
+    /// - Declarations inside a global declaration, including inside its nested namespaces
     ///
     ///   ```ts
     ///   declare global {
     ///     interface HTMLElement {}
+    ///     namespace NodeJS {
+    ///       interface process_ENV {}
+    ///     }
     ///   }
     ///   ```
     ///
