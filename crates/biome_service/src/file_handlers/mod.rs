@@ -1709,6 +1709,7 @@ struct LintVisitor<'a, 'b> {
     pub(crate) rules_with_fix: FxHashSet<RuleFilter<'a>>,
     rules: Option<&'b Rules>,
     domains: Option<&'b RuleDomains>,
+    explicitly_enabled_rules: &'b FxHashSet<RuleFilter<'static>>,
     globals: &'b mut Vec<Box<str>>,
 }
 
@@ -1716,6 +1717,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
     pub(crate) fn new(
         rules: Option<&'b Rules>,
         domains: Option<&'b RuleDomains>,
+        explicitly_enabled_rules: &'b FxHashSet<RuleFilter<'static>>,
         globals: &'b mut Vec<Box<str>>,
     ) -> Self {
         Self {
@@ -1724,6 +1726,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
             rules_with_fix: Default::default(),
             rules,
             domains,
+            explicitly_enabled_rules,
             globals,
         }
     }
@@ -1796,8 +1799,8 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         let rules = self.rules.cloned().unwrap_or_default();
         // A rule enabled explicitly in the configuration stays enabled even if
         // one of its domains is disabled.
-        for rule_filter in rules.as_explicitly_enabled_rules() {
-            self.disabled_rules.remove(&rule_filter);
+        for rule_filter in self.explicitly_enabled_rules {
+            self.disabled_rules.remove(rule_filter);
         }
         self.enabled_rules.extend(rules.as_enabled_rules());
         self.disabled_rules.extend(rules.as_disabled_rules());
@@ -2435,12 +2438,15 @@ fn compute_analyzer_visitor(
 
     let linter_rules = settings.as_linter_rules_by_indices(override_indices);
     let linter_domains = settings.as_linter_domains_by_indices(override_indices);
+    let explicitly_enabled_rules =
+        settings.as_linter_explicitly_enabled_rules_by_indices(override_indices);
     let assist_actions = settings.as_assist_actions_by_indices(override_indices);
 
     let mut globals = Vec::new();
     let mut lint = LintVisitor::new(
         linter_rules.as_deref(),
         linter_domains.as_deref(),
+        &explicitly_enabled_rules,
         &mut globals,
     );
 
