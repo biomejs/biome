@@ -116,6 +116,10 @@ pub(crate) struct Session {
     /// The settings of the Biome extension (under the `biome` namespace)
     pub(crate) extension_settings: RwLock<ExtensionSettings>,
 
+    /// The initial settings attempt can finish while the project scan is still
+    /// running. Failed requests leave the current settings in use.
+    extension_settings_initialized: AtomicBool,
+
     pub(crate) workspace: Arc<WorkspaceServer>,
     db_state: Arc<DbState>,
 
@@ -265,6 +269,7 @@ impl Session {
             documents: Default::default(),
             diagnostics: Default::default(),
             extension_settings: config,
+            extension_settings_initialized: AtomicBool::new(false),
             cancellation,
             notified_broken_configuration: Default::default(),
             initialized: AtomicBool::new(false),
@@ -934,6 +939,10 @@ impl Session {
         self.initialized.load(Ordering::Relaxed)
     }
 
+    pub(crate) fn has_initialized_extension_settings(&self) -> bool {
+        self.extension_settings_initialized.load(Ordering::Acquire)
+    }
+
     /// Returns the configuration path set by the user in the extension settings
     pub(crate) fn get_settings_configuration_path(&self) -> Option<Utf8PathBuf> {
         self.extension_settings.read().configuration_path()
@@ -1435,15 +1444,13 @@ impl Session {
                     section: Some(String::from(CONFIGURATION_SECTION)),
                 };
 
-                let client_configurations = match self.client.configuration(vec![item]).await {
-                    Ok(client_configurations) => client_configurations,
+                let client_configuration = match self.client.configuration(vec![item]).await {
+                    Ok(client_configurations) => client_configurations.into_iter().next(),
                     Err(err) => {
                         error!("Couldn't read configuration from the client: {err}");
-                        return;
+                        None
                     }
                 };
-
-                let client_configuration = client_configurations.into_iter().next();
 
                 if let Some(client_configuration) = client_configuration {
                     info!("Loaded client configuration: {client_configuration:#?}");
@@ -1468,6 +1475,8 @@ impl Session {
             }
         }
         self.clear_configuration_cache().await;
+        self.extension_settings_initialized
+            .store(true, Ordering::Release);
     }
 
     pub(crate) async fn clear_configuration_cache(&self) {

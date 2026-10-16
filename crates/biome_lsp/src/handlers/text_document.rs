@@ -14,6 +14,10 @@ use std::sync::Arc;
 use tower_lsp_server::ls_types as lsp;
 use tracing::{debug, error, field, info, trace};
 
+#[cfg(test)]
+#[path = "text_document.tests.rs"]
+mod tests;
+
 /// Handler for `textDocument/didOpen` LSP notification
 #[tracing::instrument(
     level = "debug",
@@ -34,12 +38,7 @@ pub(crate) async fn did_open(
     let language_hint =
         DocumentFileSource::from_language_id(&params.text_document.language_id, path.extension());
 
-    let file_path = path.to_path_buf();
-    let config_path = session.resolve_configuration_path(Some(&file_path));
-
-    let Some(project_key) =
-        ensure_project_for_opened_document(session, &path, config_path.as_ref()).await
-    else {
+    let Some(project_key) = ensure_project_for_opened_document(session, &path).await else {
         return Ok(());
     };
 
@@ -82,8 +81,13 @@ pub(crate) async fn did_open(
 async fn ensure_project_for_opened_document(
     session: &Arc<Session>,
     path: &Utf8Path,
-    config_path: Option<&ConfigurationPathHint>,
 ) -> Option<ProjectKey> {
+    if !session.has_initialized() && !session.has_initialized_extension_settings() {
+        session.load_extension_settings(None).await;
+    }
+
+    let file_path = path.to_path_buf();
+    let config_path = session.resolve_configuration_path(Some(&file_path));
     let is_relative_config_path = session
         .get_settings_configuration_path()
         .is_some_and(|config_path| !config_path.is_absolute());
@@ -95,7 +99,7 @@ async fn ensure_project_for_opened_document(
             // Absolute configurationPath is global; only relative needs per-file resolution.
             // Use the per-file resolved configurationPath so each workspace folder
             // uses its own config, even when a project is already open.
-            if let Some(resolved_path) = config_path {
+            if let Some(resolved_path) = config_path.as_ref() {
                 let status = session
                     .load_biome_configuration_file(resolved_path.clone(), false)
                     .await;
@@ -111,10 +115,7 @@ async fn ensure_project_for_opened_document(
     }
 
     if load_status.is_none() {
-        if !session.has_initialized() {
-            session.load_extension_settings(None).await;
-        }
-        let status = load_from_workspace_root_for_path(session, path, config_path).await;
+        let status = load_from_workspace_root_for_path(session, path, config_path.as_ref()).await;
         // On success the project was created during loading, so it can now be
         // resolved from the path and the status recorded against it.
         if let Some(project_key) = session.project_for_path(path) {
