@@ -23,6 +23,7 @@ impl FormatRule<AnyCssCustomPropertyComponent> for FormatAnyCssCustomPropertyCom
             }
             AnyCssCustomPropertyComponent::CssNumber(node) => node.format().fmt(f),
             AnyCssCustomPropertyComponent::CssString(node) => node.format().fmt(f),
+            AnyCssCustomPropertyComponent::CssUrlFunction(node) => node.format().fmt(f),
             AnyCssCustomPropertyComponent::ScssInterpolatedString(node) => node.format().fmt(f),
             AnyCssCustomPropertyComponent::ScssInterpolation(node) => node.format().fmt(f),
         }

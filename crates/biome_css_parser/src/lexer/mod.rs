@@ -1827,11 +1827,6 @@ impl<'src> CssLexer<'src> {
         self.scan_cursor_at(start).is_at_scss_concatenation_plus()
     }
 
-    /// Returns whether a complete `url(...)` body at `start` uses Sass raw-URL syntax.
-    pub(crate) fn is_scss_raw_url_body(&self, start: usize) -> bool {
-        self.scan_cursor_at(start).is_scss_raw_url_body()
-    }
-
     /// Returns whether `start` begins a final custom-property `!important`.
     ///
     /// This uses the source scanner because buffered token lookahead always
@@ -1863,6 +1858,10 @@ impl<'src> CssLexer<'src> {
     ) -> CssLexContext {
         self.scan_cursor_at(start)
             .url_body_lex_context(scss_exclusive_syntax_allowed)
+    }
+
+    pub(crate) fn custom_property_url_lex_context(&self, start: usize) -> Option<CssLexContext> {
+        self.scan_cursor_at(start).custom_property_url_lex_context()
     }
 }
 
