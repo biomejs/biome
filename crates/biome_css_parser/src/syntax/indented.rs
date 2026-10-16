@@ -47,6 +47,10 @@ pub(crate) fn is_at_indented_list_end(p: &mut CssParser) -> bool {
 /// braced terminator.
 ///
 /// Files without the indented syntax keep using the braced terminator.
+///
+/// Always inlined so the hot list terminators keep the plain `p.at(end_kind)`
+/// check for non-indented files without a call boundary.
+#[inline(always)]
 pub(crate) fn is_at_list_end_for(p: &mut CssParser, end_kind: CssSyntaxKind) -> bool {
     if p.source_type.is_indented_syntax() {
         is_at_indented_list_end(p)
