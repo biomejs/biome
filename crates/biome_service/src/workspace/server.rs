@@ -840,6 +840,29 @@ impl WorkspaceServerWithDb<'_> {
         let settings =
             self.settings_handle_with_query(&settings, editor_features.unwrap_or_default(), query);
 
+        if reason.is_index()
+            && matches!(content, FileContent::FromServer)
+            && self
+                .documents
+                .pin()
+                .get(path.as_path())
+                .is_some_and(|document| document.version.is_some())
+        {
+            // Index client-owned syntax without replacing it with the on-disk file.
+            let Ok(parsed) = self.get_parse(&path) else {
+                return Ok(InternalOpenFileResult::default());
+            };
+            let (dependencies, diagnostics) = self.update_service_data(
+                &path,
+                UpdateKind::AddedOrChanged(reason, parsed.into()),
+                project_key,
+            )?;
+            return Ok(InternalOpenFileResult {
+                dependencies,
+                diagnostics,
+            });
+        }
+
         let mut source = if let Some(document_file_source) = document_file_source {
             let path_source = DocumentFileSource::from_path(
                 &path,
@@ -3356,7 +3379,6 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             editor_features,
         }: ChangeFileParams,
     ) -> Result<ChangeFileResult, WorkspaceError> {
-        let is_indexed = self.should_update_service_data(&path);
         let documents = self.documents.pin();
         let (index, existing_version, same_content) = documents
             .get(path.as_path())
@@ -3475,7 +3497,8 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             std::panic::resume_unwind(Box::new(salsa::Cancelled::PendingWrite));
         }
 
-        if is_indexed {
+        // A scan can index the file while this edit waits for the database setter gate.
+        if self.should_update_service_data(&path) {
             self.finish_change_file(project_key, &path, parsed)
         } else {
             Ok(ChangeFileResult {
@@ -4918,6 +4941,10 @@ fn init_thread_pool(_threads: Option<usize>) {}
 #[cfg(test)]
 #[path = "server.tests.rs"]
 mod tests;
+
+#[cfg(all(test, feature = "module_graph", feature = "lang_js"))]
+#[path = "server.scanner_ownership.tests.rs"]
+mod scanner_ownership_tests;
 
 #[cfg(all(test, feature = "md_embeds"))]
 #[path = "md_embeds.tests.rs"]
