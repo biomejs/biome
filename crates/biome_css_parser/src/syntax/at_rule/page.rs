@@ -193,6 +193,7 @@ struct PageBlock;
 
 impl ParseBlockBody for PageBlock {
     const BLOCK_KIND: CssSyntaxKind = CSS_PAGE_AT_RULE_BLOCK;
+    const SASS_BLOCK_KIND: CssSyntaxKind = CSS_BOGUS_BLOCK;
 
     fn is_at_element(&self, p: &mut CssParser) -> bool {
         at_margin_rule(p)

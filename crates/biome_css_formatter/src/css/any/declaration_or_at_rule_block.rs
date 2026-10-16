@@ -12,6 +12,9 @@ impl FormatRule<AnyCssDeclarationOrAtRuleBlock> for FormatAnyCssDeclarationOrAtR
             AnyCssDeclarationOrAtRuleBlock::CssDeclarationOrAtRuleBlock(node) => {
                 node.format().fmt(f)
             }
+            AnyCssDeclarationOrAtRuleBlock::CssSassIndentedDeclarationOrAtRuleBlock(node) => {
+                node.format().fmt(f)
+            }
         }
     }
 }

@@ -1,0 +1,19 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: sass/variable_list.sass
+---
+
+# Input
+
+```sass
+$cfg: "save" 50px, "cancel" 50px
+
+```
+
+
+# Formatted
+
+```sass
+$cfg: "save" 50px, "cancel" 50px
+
+```

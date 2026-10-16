@@ -53,6 +53,13 @@ pub(crate) struct CssParserState {
     /// Recovery choices are retained too, preventing these repeated attempts
     /// on malformed input.
     pub(crate) if_function_kinds: Option<HashMap<TextSize, IfFunctionKind>>,
+
+    /// Stack of indentation widths for the enclosing indented Sass blocks.
+    ///
+    /// The root level is represented by an empty stack. Each entry is the
+    /// indentation of the first item in that block. An indented list ends when
+    /// a token starts a line that is less indented than the innermost entry.
+    pub(crate) sass_indentation: Vec<u32>,
 }
 
 impl CssParserState {
@@ -63,6 +70,7 @@ impl CssParserState {
             is_in_if_media_test: false,
             encountered_if_function: false,
             if_function_kinds: None,
+            sass_indentation: Vec::new(),
         }
     }
 }

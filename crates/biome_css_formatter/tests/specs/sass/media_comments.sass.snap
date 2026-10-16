@@ -1,0 +1,37 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: sass/media_comments.sass
+---
+
+# Input
+
+```sass
+.alpha, .beta
+  color: red
+  /* block comment */
+  // line comment
+  &:hover
+    color: blue
+
+@media (min-width: 100px)
+  .gamma
+    color: green
+
+```
+
+
+# Formatted
+
+```sass
+.alpha, .beta
+	color: red
+	/* block comment */
+	// line comment
+	&:hover
+		color: blue
+
+@media (min-width: 100px)
+	.gamma
+		color: green
+
+```

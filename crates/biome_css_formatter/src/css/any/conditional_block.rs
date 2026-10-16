@@ -11,6 +11,9 @@ impl FormatRule<AnyCssConditionalBlock> for FormatAnyCssConditionalBlock {
             AnyCssConditionalBlock::CssBogusBlock(node) => node.format().fmt(f),
             AnyCssConditionalBlock::CssDeclarationOrRuleBlock(node) => node.format().fmt(f),
             AnyCssConditionalBlock::CssRuleBlock(node) => node.format().fmt(f),
+            AnyCssConditionalBlock::CssSassIndentedDeclarationOrRuleBlock(node) => {
+                node.format().fmt(f)
+            }
         }
     }
 }

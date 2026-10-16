@@ -342,7 +342,9 @@ fn resolve_style_language(
     candidate: &EmbedCandidate,
     _file_source: &DocumentFileSource,
 ) -> Option<GuestLanguage> {
-    if candidate.has_attribute_value("lang", "scss") {
+    if candidate.has_attribute_value("lang", "scss")
+        || candidate.has_attribute_value("lang", "sass")
+    {
         None
     } else {
         Some(GuestLanguage::Css)

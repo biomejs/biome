@@ -3,6 +3,7 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::error::{AnyInParensChainParseRecovery, AnyInParensParseRecovery};
 use crate::syntax::at_rule::feature::{expected_any_query_feature, parse_media_query_feature};
 use crate::syntax::block::parse_conditional_block;
+use crate::syntax::indented::is_at_indented_selector_end;
 use crate::syntax::parse_error::scss_only_syntax_error;
 use crate::syntax::scss::{
     is_at_scss_interpolated_media_in_parens, is_at_scss_media_condition, is_at_scss_media_query,
@@ -83,7 +84,7 @@ impl ParseSeparatedList for MediaQueryList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(self.end_kind)
+        p.at(self.end_kind) || is_at_indented_selector_end(p)
     }
 
     fn recover(

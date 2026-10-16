@@ -135,6 +135,13 @@ pub(super) fn parse_scss_expression_at_rule(
 /// ```
 #[inline]
 pub(crate) fn expect_scss_semicolon_at_rule(p: &mut CssParser) {
+    // In the indented syntax a line break ends the statement, so the semicolon
+    // is optional and only consumed when present.
+    if p.source_type.is_indented_syntax() {
+        p.eat(T![;]);
+        return;
+    }
+
     // Dart Sass allows omitting the final semicolon only at the end of the
     // current block or file, not before the next statement.
     if p.eat(T![;]) || p.at(T!['}']) || p.at(EOF) {

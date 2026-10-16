@@ -1,6 +1,7 @@
 use super::ScssBlockParser;
 use crate::parser::CssParser;
 use crate::syntax::block::parse_declaration_or_rule_list_block;
+use crate::syntax::indented::is_at_indented_block_body;
 use crate::syntax::scss::at_rule::if_at_rule::{
     is_at_scss_if_at_rule, parse_scss_if_at_rule_with_block,
 };
@@ -87,7 +88,7 @@ fn is_at_scss_else_at_rule(p: &mut CssParser) -> bool {
 fn parse_scss_else_body(p: &mut CssParser, parse_block: ScssBlockParser) -> ParsedSyntax {
     if is_at_scss_if_at_rule(p) {
         parse_scss_if_at_rule_with_block(p, parse_block)
-    } else if p.at(T!['{']) {
+    } else if p.at(T!['{']) || is_at_indented_block_body(p) {
         Present(parse_block.parse(p))
     } else {
         Absent

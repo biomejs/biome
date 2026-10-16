@@ -4,6 +4,7 @@ use crate::syntax::block::parse_declaration_or_rule_list_block;
 use crate::syntax::declaration::{
     complete_declaration_with_semicolon, parse_declaration_important,
 };
+use crate::syntax::indented::is_at_indented_statement_end;
 use crate::syntax::parse_error::{expected_component_value, scss_only_syntax_error};
 use crate::syntax::property::{
     END_OF_PROPERTY_VALUE_COMPONENT_LIST_TOKEN_SET, parse_custom_property_value,
@@ -13,6 +14,7 @@ use crate::syntax::scss::{
     is_at_scss_interpolated_dashed_identifier, is_at_scss_interpolated_identifier,
     is_at_scss_interpolated_property_name, parse_scss_interpolated_identifier,
     parse_scss_interpolated_property_name, parse_scss_optional_value_until,
+    parse_scss_optional_value_until_with_boundary,
 };
 use crate::syntax::{CssSyntaxFeatures, is_at_dashed_identifier, is_at_identifier, try_parse};
 use biome_css_syntax::CssSyntaxKind::{
@@ -130,11 +132,21 @@ fn parse_scss_nesting_declaration_after_prefix(
         return Some(complete_scss_nesting_regular_declaration(p, markers, false));
     }
 
-    let missing_value =
+    let value = if p.source_type.is_indented_syntax() {
+        // In the indented syntax a line break ends the declaration, so a value
+        // stops at the end of its line instead of consuming the next statement.
+        parse_scss_optional_value_until_with_boundary(
+            p,
+            SCSS_NESTING_VALUE_END_SET,
+            is_at_indented_statement_end,
+        )
+    } else {
         // Allow an empty value here because nested-property syntax may continue
         // directly into `{ ... }`, and the explicit missing-value diagnostic is
         // handled by the caller via `missing_value`.
-        parse_scss_optional_value_until(p, SCSS_NESTING_VALUE_END_SET).is_absent();
+        parse_scss_optional_value_until(p, SCSS_NESTING_VALUE_END_SET)
+    };
+    let missing_value = value.is_absent();
 
     if could_be_selector
         && p.at(T!['{'])

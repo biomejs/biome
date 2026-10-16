@@ -6,6 +6,7 @@ mod rule_block;
 
 use crate::parser::CssParser;
 use crate::syntax::CssSyntaxFeatures;
+use crate::syntax::indented::current_line_indentation;
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::diagnostic::{ParseDiagnostic, expected_node};
@@ -41,6 +42,12 @@ pub(crate) fn parse_declaration_or_statement_block(p: &mut CssParser) -> Complet
 pub(crate) trait ParseBlockBody {
     const BLOCK_KIND: CssSyntaxKind;
 
+    /// The block kind produced by the indented Sass syntax.
+    ///
+    /// Indented blocks carry the same item list as their braced counterpart
+    /// but have no brace tokens.
+    const SASS_BLOCK_KIND: CssSyntaxKind;
+
     /// If the '{' is missing try we need to recover:
     ///  - Try to check if the next item is an item of a list. If it is, we can parse the list.
     ///  - If the next item is not a list item, we return bogus block and skip the list parsing.
@@ -54,6 +61,10 @@ pub(crate) trait ParseBlockBody {
     /// It temporarily sets the parser's state to indicate it is within a nesting block and then
     /// processes the content of the block using the provided callback function.
     fn parse_block_body(&mut self, p: &mut CssParser) -> CompletedMarker {
+        if p.source_type.is_indented_syntax() {
+            return self.parse_indented_block_body(p);
+        }
+
         let m = p.start();
 
         let is_open_brace_missing = !p.expect(T!['{']);
@@ -81,6 +92,41 @@ pub(crate) trait ParseBlockBody {
         };
 
         m.complete(p, kind)
+    }
+
+    /// Parses the body of an indented Sass block.
+    ///
+    /// The body is the indented region that starts on the line after the
+    /// prelude. The indentation of the first item defines the block
+    /// indentation. The body ends when a line is less indented than that
+    /// indentation.
+    ///
+    /// ```sass
+    /// .foo
+    ///   color: red
+    /// ```
+    fn parse_indented_block_body(&mut self, p: &mut CssParser) -> CompletedMarker {
+        let m = p.start();
+
+        if !self.is_at_element(p) {
+            p.error(expected_block(p, p.cur_range()));
+            return m.complete(p, CSS_BOGUS_BLOCK);
+        }
+
+        let block_indentation = current_line_indentation(p);
+        let parent_indentation = p.state().sass_indentation.last().copied().unwrap_or(0);
+        if block_indentation <= parent_indentation {
+            p.error(expected_block(p, p.cur_range()));
+            return m.complete(p, CSS_BOGUS_BLOCK);
+        }
+
+        p.state_mut().sass_indentation.push(block_indentation);
+        let old_nesting_block = std::mem::replace(&mut p.state_mut().is_nesting_block, true);
+        self.parse_list(p);
+        p.state_mut().is_nesting_block = old_nesting_block;
+        p.state_mut().sass_indentation.pop();
+
+        m.complete(p, Self::SASS_BLOCK_KIND)
     }
 }
 

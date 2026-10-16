@@ -16,6 +16,7 @@ struct RuleBlock;
 
 impl ParseBlockBody for RuleBlock {
     const BLOCK_KIND: CssSyntaxKind = CSS_RULE_BLOCK;
+    const SASS_BLOCK_KIND: CssSyntaxKind = CSS_SASS_INDENTED_RULE_BLOCK;
 
     fn is_at_element(&self, p: &mut CssParser) -> bool {
         // A semicolon cannot supply the body when the opening brace is missing.

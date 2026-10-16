@@ -3059,6 +3059,38 @@ impl CssRuleBlock {
         )
     }
 }
+impl CssSassIndentedDeclarationBlock {
+    pub fn with_declarations(self, element: CssDeclarationList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl CssSassIndentedDeclarationOrAtRuleBlock {
+    pub fn with_items(self, element: CssDeclarationOrAtRuleList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl CssSassIndentedDeclarationOrRuleBlock {
+    pub fn with_items(self, element: CssDeclarationOrRuleList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl CssSassIndentedRuleBlock {
+    pub fn with_rules(self, element: CssRuleList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl CssScopeAtRule {
     pub fn with_declarator(self, element: CssScopeAtRuleDeclarator) -> Self {
         Self::unwrap_cast(
@@ -4170,7 +4202,7 @@ impl ScssFunctionAtRule {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_block(self, element: CssDeclarationOrRuleBlock) -> Self {
+    pub fn with_block(self, element: AnyCssDeclarationOrRuleBlock) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
@@ -4296,7 +4328,7 @@ impl ScssIncludeAtRule {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_block(self, element: Option<CssDeclarationOrRuleBlock>) -> Self {
+    pub fn with_block(self, element: Option<AnyCssDeclarationOrRuleBlock>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             4usize..=4usize,
             once(element.map(|element| element.into_syntax().into())),
@@ -4696,7 +4728,7 @@ impl ScssMixinAtRule {
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_block(self, element: CssDeclarationOrRuleBlock) -> Self {
+    pub fn with_block(self, element: AnyCssDeclarationOrRuleBlock) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),

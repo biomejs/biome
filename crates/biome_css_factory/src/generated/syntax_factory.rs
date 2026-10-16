@@ -5417,6 +5417,82 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.into_node(CSS_RULE_BLOCK, children)
             }
+            CSS_SASS_INDENTED_DECLARATION_BLOCK => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && CssDeclarationList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_SASS_INDENTED_DECLARATION_BLOCK.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_SASS_INDENTED_DECLARATION_BLOCK, children)
+            }
+            CSS_SASS_INDENTED_DECLARATION_OR_AT_RULE_BLOCK => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && CssDeclarationOrAtRuleList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_SASS_INDENTED_DECLARATION_OR_AT_RULE_BLOCK.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_SASS_INDENTED_DECLARATION_OR_AT_RULE_BLOCK, children)
+            }
+            CSS_SASS_INDENTED_DECLARATION_OR_RULE_BLOCK => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && CssDeclarationOrRuleList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_SASS_INDENTED_DECLARATION_OR_RULE_BLOCK.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_SASS_INDENTED_DECLARATION_OR_RULE_BLOCK, children)
+            }
+            CSS_SASS_INDENTED_RULE_BLOCK => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && CssRuleList::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        CSS_SASS_INDENTED_RULE_BLOCK.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(CSS_SASS_INDENTED_RULE_BLOCK, children)
+            }
             CSS_SCOPE_AT_RULE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
@@ -7370,7 +7446,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssDeclarationOrRuleBlock::can_cast(element.kind())
+                    && AnyCssDeclarationOrRuleBlock::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -7575,7 +7651,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssDeclarationOrRuleBlock::can_cast(element.kind())
+                    && AnyCssDeclarationOrRuleBlock::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();
@@ -8321,7 +8397,7 @@ impl SyntaxFactory for CssSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element
-                    && CssDeclarationOrRuleBlock::can_cast(element.kind())
+                    && AnyCssDeclarationOrRuleBlock::can_cast(element.kind())
                 {
                     slots.mark_present();
                     current_element = elements.next();

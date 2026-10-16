@@ -10,6 +10,7 @@ impl FormatRule<AnyCssControlBlock> for FormatAnyCssControlBlock {
         match node {
             AnyCssControlBlock::CssDeclarationOrRuleBlock(node) => node.format().fmt(f),
             AnyCssControlBlock::CssKeyframesBlock(node) => node.format().fmt(f),
+            AnyCssControlBlock::CssSassIndentedDeclarationOrRuleBlock(node) => node.format().fmt(f),
         }
     }
 }

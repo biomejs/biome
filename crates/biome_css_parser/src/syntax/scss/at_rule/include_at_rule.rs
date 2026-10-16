@@ -4,6 +4,7 @@ use crate::parser::CssParser;
 use crate::syntax::ValueParsingContext;
 use crate::syntax::ValueParsingMode;
 use crate::syntax::block::parse_declaration_or_rule_list_block;
+use crate::syntax::indented::is_at_indented_block_body;
 use crate::syntax::parse_error::expected_identifier;
 use crate::syntax::scss::parse_scss_function_name;
 use crate::syntax::value::function::ParameterList;
@@ -41,7 +42,7 @@ pub(crate) fn parse_scss_include_at_rule(p: &mut CssParser) -> ParsedSyntax {
     // The content-parameter clause is optional, but `using (...)` requires a block.
     let using_clause = parse_scss_include_using_clause(p);
 
-    if using_clause.is_present() || p.at(T!['{']) {
+    if using_clause.is_present() || p.at(T!['{']) || is_at_indented_block_body(p) {
         parse_declaration_or_rule_list_block(p);
     } else {
         expect_scss_semicolon_at_rule(p);

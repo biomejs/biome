@@ -17,6 +17,12 @@ pub(crate) struct FormatScssStatementAtRuleSemicolon {
 
 impl Format<CssFormatContext> for FormatScssStatementAtRuleSemicolon {
     fn fmt(&self, f: &mut CssFormatter) -> FormatResult<()> {
+        // The indented syntax terminates statements with line breaks, so it
+        // never prints a semicolon.
+        if f.options().is_indented_syntax() {
+            return Ok(());
+        }
+
         if let Some(semicolon) = &self.semicolon {
             write!(f, [semicolon.format()])
         } else {

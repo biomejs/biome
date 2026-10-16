@@ -1,5 +1,6 @@
 use crate::parser::CssParser;
 use crate::syntax::CssSyntaxFeatures;
+use crate::syntax::indented::is_at_indented_selector_end;
 use crate::syntax::parse_error::{expected_relative_selector, scss_only_syntax_error};
 use crate::syntax::selector::{
     is_at_scss_partial_combinator_selector, is_nth_at_compound_selector, parse_selector,
@@ -31,6 +32,9 @@ pub(crate) struct RelativeSelectorList {
     /// Flag indicating whether error recovery is disabled.
     is_recovery_disabled: bool,
     is_partial_combinator_nesting_allowed: bool,
+    /// Whether at least one relative selector has been parsed, so a later line
+    /// break can end the list in the indented syntax.
+    has_parsed_selector: bool,
 }
 
 impl RelativeSelectorList {
@@ -46,6 +50,7 @@ impl RelativeSelectorList {
             end_kind,
             is_recovery_disabled: false,
             is_partial_combinator_nesting_allowed: false,
+            has_parsed_selector: false,
         }
     }
 
@@ -128,7 +133,10 @@ impl ParseRecovery for RelativeSelectorListParseRecovery {
     ///     /*        ^^^^^^^^ invalid selector     ^ recovery point at new relative selector */
     ///     ```
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(self.end_kind) || p.at(T![,]) || is_at_relative_selector(p)
+        p.at(self.end_kind)
+            || p.at(T![,])
+            || is_at_indented_selector_end(p)
+            || is_at_relative_selector(p)
     }
 }
 
@@ -139,11 +147,12 @@ impl ParseSeparatedList for RelativeSelectorList {
     const LIST_KIND: CssSyntaxKind = CSS_RELATIVE_SELECTOR_LIST;
 
     fn parse_element(&mut self, p: &mut CssParser) -> ParsedSyntax {
+        self.has_parsed_selector = true;
         parse_relative_selector(p, self.is_partial_combinator_nesting_allowed)
     }
 
     fn is_at_list_end(&self, p: &mut CssParser) -> bool {
-        p.at(self.end_kind)
+        p.at(self.end_kind) || (self.has_parsed_selector && is_at_indented_selector_end(p))
     }
 
     fn recover(&mut self, p: &mut CssParser, parsed_element: ParsedSyntax) -> RecoveryResult {

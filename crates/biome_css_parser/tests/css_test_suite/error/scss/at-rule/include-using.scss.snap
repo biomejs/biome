@@ -123,41 +123,41 @@ CssRoot {
         },
         CssAtRule {
             at_token: AT@94..97 "@" [Newline("\n"), Newline("\n")] [],
-            rule: CssBogusAtRule {
-                items: [
-                    INCLUDE_KW@97..105 "include" [] [Whitespace(" ")],
-                    CssIdentifier {
-                        value_token: IDENT@105..112 "button" [] [Whitespace(" ")],
-                    },
-                    ScssIncludeUsingClause {
-                        using_token: USING_KW@112..118 "using" [] [Whitespace(" ")],
-                        parameters: ScssParameterList {
-                            l_paren_token: L_PAREN@118..119 "(" [] [],
-                            items: ScssParameterItemList [
-                                ScssParameter {
-                                    name: ScssVariable {
-                                        dollar_token: DOLLAR@119..120 "$" [] [],
-                                        name: CssIdentifier {
-                                            value_token: IDENT@120..125 "value" [] [],
-                                        },
+            rule: ScssIncludeAtRule {
+                include_token: INCLUDE_KW@97..105 "include" [] [Whitespace(" ")],
+                name: CssIdentifier {
+                    value_token: IDENT@105..112 "button" [] [Whitespace(" ")],
+                },
+                arguments: missing (optional),
+                using_clause: ScssIncludeUsingClause {
+                    using_token: USING_KW@112..118 "using" [] [Whitespace(" ")],
+                    parameters: ScssParameterList {
+                        l_paren_token: L_PAREN@118..119 "(" [] [],
+                        items: ScssParameterItemList [
+                            ScssParameter {
+                                name: ScssVariable {
+                                    dollar_token: DOLLAR@119..120 "$" [] [],
+                                    name: CssIdentifier {
+                                        value_token: IDENT@120..125 "value" [] [],
                                     },
-                                    default_value: missing (optional),
-                                    ellipsis_token: missing (optional),
                                 },
-                            ],
-                            r_paren_token: R_PAREN@125..126 ")" [] [],
-                        },
-                    },
-                    CssBogusBlock {
-                        items: [
-                            CssDeclarationOrRuleList [
-                                CssEmptyDeclaration {
-                                    semicolon_token: SEMICOLON@126..127 ";" [] [],
-                                },
-                            ],
+                                default_value: missing (optional),
+                                ellipsis_token: missing (optional),
+                            },
                         ],
+                        r_paren_token: R_PAREN@125..126 ")" [] [],
                     },
-                ],
+                },
+                block: CssBogusBlock {
+                    items: [
+                        CssDeclarationOrRuleList [
+                            CssEmptyDeclaration {
+                                semicolon_token: SEMICOLON@126..127 ";" [] [],
+                            },
+                        ],
+                    ],
+                },
+                semicolon_token: missing (optional),
             },
         },
     ],
@@ -236,11 +236,12 @@ CssRoot {
         5: (empty)
     2: CSS_AT_RULE@94..127
       0: AT@94..97 "@" [Newline("\n"), Newline("\n")] []
-      1: CSS_BOGUS_AT_RULE@97..127
+      1: SCSS_INCLUDE_AT_RULE@97..127
         0: INCLUDE_KW@97..105 "include" [] [Whitespace(" ")]
         1: CSS_IDENTIFIER@105..112
           0: IDENT@105..112 "button" [] [Whitespace(" ")]
-        2: SCSS_INCLUDE_USING_CLAUSE@112..126
+        2: (empty)
+        3: SCSS_INCLUDE_USING_CLAUSE@112..126
           0: USING_KW@112..118 "using" [] [Whitespace(" ")]
           1: SCSS_PARAMETER_LIST@118..126
             0: L_PAREN@118..119 "(" [] []
@@ -253,10 +254,11 @@ CssRoot {
                 1: (empty)
                 2: (empty)
             2: R_PAREN@125..126 ")" [] []
-        3: CSS_BOGUS_BLOCK@126..127
+        4: CSS_BOGUS_BLOCK@126..127
           0: CSS_DECLARATION_OR_RULE_LIST@126..127
             0: CSS_EMPTY_DECLARATION@126..127
               0: SEMICOLON@126..127 ";" [] []
+        5: (empty)
   2: EOF@127..128 "" [Newline("\n")] []
 
 ```

@@ -23,11 +23,15 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
     };
 
     let is_scss = test_file.file_name().ends_with(".scss");
+    let is_sass = test_file.file_name().ends_with(".sass");
     let mut snapshot = SpecSnapshot::new(test_file, test_directory, config);
 
     if is_scss {
         snapshot =
             snapshot.with_document_file_source(DocumentFileSource::Css(CssFileSource::scss()));
+    } else if is_sass {
+        snapshot =
+            snapshot.with_document_file_source(DocumentFileSource::Css(CssFileSource::sass()));
     }
 
     snapshot.test()
