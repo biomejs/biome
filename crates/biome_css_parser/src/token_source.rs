@@ -121,6 +121,12 @@ impl<'src> CssTokenSource<'src> {
             .url_body_lex_context(start, scss_exclusive_syntax_allowed)
     }
 
+    /// Classifies the body after the next `(` in `--image: url($name.svg)`.
+    pub(crate) fn custom_property_url_lex_context(&mut self) -> Option<CssLexContext> {
+        let start = usize::from(<Self as NthToken<CssLexer<'src>>>::nth_range(self, 1)?.end());
+        self.lexer.lexer().custom_property_url_lex_context(start)
+    }
+
     /// Delegates to the lexer-owned `CssScanCursor` helper without exposing
     /// cursor construction or current-token offset plumbing at the
     /// token-source layer.
@@ -147,13 +153,6 @@ impl<'src> CssTokenSource<'src> {
     pub(crate) fn is_current_token_followed_by_scss_concatenation_plus(&self) -> bool {
         let start = usize::from(self.current_range().end());
         self.lexer.lexer().is_at_scss_concatenation_plus(start)
-    }
-
-    /// Returns whether the body after the current `(` uses Sass raw-URL syntax,
-    /// as in `url(//cdn.example/app.css)`.
-    pub(crate) fn is_scss_raw_url_body(&self) -> bool {
-        let start = usize::from(self.current_range().end());
-        self.lexer.lexer().is_scss_raw_url_body(start)
     }
 
     /// Returns whether the current token starts a final custom-property

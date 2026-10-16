@@ -30,12 +30,13 @@ impl<'src> CssScanCursor<'src> {
         UrlBodyScanner::new(self).lex_context(scss_exclusive_syntax_allowed)
     }
 
-    /// Returns whether a complete `url(...)` body uses Sass raw-URL syntax.
+    /// Classifies raw custom-property URLs, keeping `$name` literal.
     ///
-    /// `url(//cdn.example/app.css)` is raw, while
-    /// `url(// comment\napp.css)` falls back to function parsing.
-    pub(crate) fn is_scss_raw_url_body(self) -> bool {
-        UrlBodyScanner::new(self).is_scss_raw_url_body()
+    /// ```scss
+    /// .icon { --image: url($directory/#{$name}.svg); }
+    /// ```
+    pub(crate) fn custom_property_url_lex_context(self) -> Option<CssLexContext> {
+        UrlBodyScanner::new(self).custom_property_lex_context()
     }
 
     /// Returns the position before the next SCSS URL-value boundary.
@@ -87,20 +88,38 @@ impl<'src> UrlBodyScanner<'src> {
         }
     }
 
-    /// Returns whether the body can be consumed as Sass raw URL contents.
+    /// Leaves incomplete bodies and expressions on the generic raw-component path.
     ///
-    /// Internal whitespace is only valid immediately before `)`; otherwise
-    /// Sass parses the body as an ordinary function expression.
-    fn is_scss_raw_url_body(&mut self) -> bool {
+    /// ```scss
+    /// .icon { --image: url($directory + "/icon.svg"); }
+    /// ```
+    fn custom_property_lex_context(&mut self) -> Option<CssLexContext> {
         self.cursor.skip_whitespace();
+        let start = self.cursor.position();
 
-        matches!(
-            self.scan_scss_raw_url_body(false),
-            ScssRawUrlBodyScan::Complete { .. }
-        )
+        match self.scan_scss_raw_url_body(false, true) {
+            ScssRawUrlBodyScan::Complete { has_interpolation }
+                if self.cursor.position() > start =>
+            {
+                Some(if has_interpolation {
+                    CssLexContext::ScssUrlValue { start }
+                } else {
+                    CssLexContext::UrlRawValue(UrlRawValueScan {
+                        start,
+                        end: self.cursor.position(),
+                        terminated: true,
+                    })
+                })
+            }
+            _ => None,
+        }
     }
 
-    fn scan_scss_raw_url_body(&mut self, mut has_interpolation: bool) -> ScssRawUrlBodyScan {
+    fn scan_scss_raw_url_body(
+        &mut self,
+        mut has_interpolation: bool,
+        is_literal_dollar_allowed: bool,
+    ) -> ScssRawUrlBodyScan {
         while let Some(current) = self.cursor.current_byte() {
             match current {
                 b')' => {
@@ -126,7 +145,9 @@ impl<'src> UrlBodyScanner<'src> {
                     }
                     break;
                 }
-                _ if Self::is_scss_raw_url_byte(current) => {
+                _ if Self::is_scss_raw_url_byte(current)
+                    || (is_literal_dollar_allowed && current == b'$') =>
+                {
                     self.cursor.advance_byte_or_char(current);
                 }
                 _ => break,
@@ -190,7 +211,7 @@ impl<'src> UrlBodyScanner<'src> {
                 }
             };
 
-            match self.scan_scss_raw_url_body(has_interpolation) {
+            match self.scan_scss_raw_url_body(has_interpolation, false) {
                 ScssRawUrlBodyScan::Complete {
                     has_interpolation: true,
                 } => {

@@ -782,6 +782,7 @@ AnyCssCustomPropertyComponent =
 	| ScssInterpolatedString
 	| ScssInterpolation
 	| CssCustomPropertyFunction
+	| CssUrlFunction
 	| CssCustomPropertyParenthesizedBlock
 	| CssCustomPropertyBracketedBlock
 	| CssCustomPropertyBracedBlock
