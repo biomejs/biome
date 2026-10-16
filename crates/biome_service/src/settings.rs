@@ -87,6 +87,7 @@ use biome_yaml_syntax::YamlLanguage;
 use camino::{Utf8Path, Utf8PathBuf};
 use enumflags2::BitFlags;
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
+use rustc_hash::FxHashSet;
 use std::borrow::Cow;
 use std::ops::Deref;
 use std::sync::{Arc, RwLock};
@@ -454,6 +455,34 @@ impl Settings {
                     Some(Cow::Borrowed(pattern_rules))
                 };
             }
+        }
+        result
+    }
+
+    /// Returns the rules explicitly enabled by the base configuration and selected overrides.
+    ///
+    /// Each configuration layer is inspected separately because merging a group-wide severity with
+    /// per-rule overrides expands the severity into individual rule settings.
+    pub(crate) fn as_linter_explicitly_enabled_rules_by_indices(
+        &self,
+        indices: &[usize],
+    ) -> FxHashSet<biome_analyze::RuleFilter<'static>> {
+        let mut result = self
+            .linter
+            .rules
+            .as_ref()
+            .map(Rules::as_explicitly_enabled_rules)
+            .unwrap_or_default();
+        for &index in indices {
+            let Some(pattern_rules) = self
+                .override_settings
+                .patterns
+                .get(index)
+                .and_then(|pattern| pattern.linter.rules.as_ref())
+            else {
+                continue;
+            };
+            result.extend(pattern_rules.as_explicitly_enabled_rules());
         }
         result
     }
