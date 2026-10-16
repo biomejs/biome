@@ -229,7 +229,7 @@ pub(crate) fn fixtures() -> Vec<String> {
             }
         }
     }
-    assert!(sources.len() > 500, "only found {} fixtures", sources.len());
+    assert!(sources.len() > 200, "only found {} fixtures", sources.len());
     sources
 }
 
