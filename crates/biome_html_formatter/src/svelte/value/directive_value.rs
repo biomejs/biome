@@ -81,22 +81,13 @@ impl FormatSvelteDirectiveValue {
                 node: property,
                 compact: true,
             };
-            write!(f, [colon_token.format()])?;
-            if !f.context().is_embedded_node_range(expression.range()) {
-                write!(
-                    f,
-                    [text(
-                        initializer_value.text(),
-                        Some(initializer.range().start())
-                    )]
-                )?;
-            }
             write!(
                 f,
                 [
+                    colon_token.format(),
                     initializer.format().with_options(
                         FormatHtmlAttributeInitializerClauseOptions {
-                            compact: CompactKind::Remove,
+                            compact: CompactKind::Unwrap,
                             attribute_name: None,
                             tag_name: None
                         }
