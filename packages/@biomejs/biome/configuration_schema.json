@@ -8821,6 +8821,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueComponentIs": {
+					"description": "Require \\<component> elements to bind the is attribute.\nSee https://biomejs.dev/linter/rules/use-vue-component-is",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueComponentIsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueConsistentEventHyphenation": {
 					"description": "Enforce a consistent hyphenation style for event names in v-on directives on custom components.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-event-hyphenation",
 					"anyOf": [
@@ -16012,6 +16019,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueComponentIsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueComponentIsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueConsistentDefinePropsDeclarationOptions": {
 			"type": "object",
 			"properties": {
@@ -21299,6 +21315,16 @@
 			]
 		},
 		"UseVueBaseImportOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueComponentIsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueComponentIsOptions" }
+			]
+		},
+		"UseVueComponentIsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
