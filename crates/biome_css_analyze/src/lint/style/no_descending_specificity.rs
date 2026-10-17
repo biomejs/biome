@@ -3,13 +3,14 @@ use rustc_hash::{FxHashMap, FxHashSet};
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_semantic::model::{
-    AnyRuleStart, ResolvedSelector, Rule as CssSemanticRule, RuleId, SemanticModel, Specificity,
+    AnyRuleStart, ResolvedSelector, Rule as CssSemanticRule, RuleId, Specificity,
 };
 use biome_css_syntax::{
-    AnyCssRoot, CssContainerAtRule, CssLanguage, CssLayerAtRule, CssMediaAtRule, CssScopeAtRule,
-    CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxNode, ScssAtRootAtRule, ScssEachAtRule,
-    ScssElseClause, ScssForAtRule, ScssFunctionAtRule, ScssIfAtRule, ScssIncludeAtRule,
-    ScssMixinAtRule, ScssWhileAtRule, T,
+    AnyCssRoot, CssContainerAtRule, CssDeclaration, CssLanguage, CssLayerAtRule, CssMediaAtRule,
+    CssRelativeSelectorList, CssScopeAtRule, CssSelectorList, CssStartingStyleAtRule,
+    CssSupportsAtRule, CssSupportsFeatureDeclaration, CssSyntaxNode, ScssAtRootAtRule,
+    ScssEachAtRule, ScssElseClause, ScssForAtRule, ScssFunctionAtRule, ScssIfAtRule,
+    ScssIncludeAtRule, ScssMixinAtRule, ScssWhileAtRule, T,
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, SyntaxKindSet, TextRange, WalkEvent};
@@ -174,6 +175,7 @@ impl Rule for NoDescendingSpecificity {
         let mut visited_rules = FxHashSet::default();
         let mut visited_selectors = SelectorContexts::default();
         let mut descending_selectors = Vec::new();
+        let mut key = String::new();
 
         let mut rules = model
             .rules()
@@ -199,7 +201,7 @@ impl Rule for NoDescendingSpecificity {
                 }
             }
 
-            if !has_declarations(model, &root, &rule) {
+            if rule.selectors().is_empty() || !has_declarations(&rule, rule_node.syntax()) {
                 continue;
             }
             find_descending_selector(
@@ -219,6 +221,7 @@ impl Rule for NoDescendingSpecificity {
                 },
                 &mut visited_selectors,
                 &mut descending_selectors,
+                &mut key,
             );
         }
         descending_selectors.into_boxed_slice()
@@ -260,18 +263,18 @@ struct SelectorContext {
 }
 
 type SelectorContexts = FxHashMap<SelectorContext, FxHashMap<String, (TextRange, Specificity)>>;
-/// Returns the element a selector styles: the last compound of the resolved selector, without
-/// pseudo-classes. Pseudo-elements stay, including legacy single-colon ones such as `:before`,
-/// because they style a different element. Simple selectors are sorted, so `.a.b` and `.b.a` share
-/// a key. Returns `None` when nothing is left, as for `:hover`.
+/// Writes the element a selector styles into `key`: the last compound of the resolved selector,
+/// without pseudo-classes. Pseudo-elements stay, including legacy single-colon ones such as
+/// `:before`, because they style a different element. Simple selectors are sorted, so `.a.b` and
+/// `.b.a` share a key. Returns `false` when nothing is left, as for `:hover`.
 ///
 /// ```css
 /// .a ul li:hover {
 ///       ^^
 /// }
 /// ```
-fn subject_key(selector: &ResolvedSelector) -> Option<String> {
-    let mut key = String::new();
+fn subject_key(selector: &ResolvedSelector, key: &mut String) -> bool {
+    key.clear();
     // Where each simple selector after the type selector starts in `key`.
     let mut first = None;
     let mut rest = Vec::new();
@@ -331,40 +334,40 @@ fn subject_key(selector: &ResolvedSelector) -> Option<String> {
             .collect();
         if !parts.is_sorted() {
             parts.sort_unstable();
-            key = [&key[..first]].into_iter().chain(parts).collect();
+            let sorted: String = [&key[..first]].into_iter().chain(parts).collect();
+            *key = sorted;
         }
     }
-    (!key.is_empty()).then_some(key)
+    !key.is_empty()
 }
 
-/// Returns whether the rule has declarations, directly or inside a nested at-rule such as
-/// `@media`. A rule without declarations can't lose to a higher specificity selector. An SCSS
-/// `@include` counts as a declaration, because the mixin usually emits some.
-fn has_declarations(model: &SemanticModel, root: &AnyCssRoot, rule: &CssSemanticRule) -> bool {
-    !rule.declarations().is_empty()
-        || has_include(rule.node(root).syntax())
-        || rule
-            .child_ids()
-            .iter()
-            .filter_map(|id| model.get_rule_by_id(id))
-            .any(|child| {
-                INDEPENDENT_AT_RULE_KINDS.matches(child.node(root).syntax().kind())
-                    && has_declarations(model, root, &child)
-            })
-}
-
-/// Returns whether the rule contains an `@include`, including one inside SCSS control flow such
-/// as `@if`, but not one inside a nested rule.
-fn has_include(rule: &CssSyntaxNode) -> bool {
-    let mut events = rule.preorder();
+/// Returns whether the rule has declarations, directly, inside SCSS control flow, or inside a
+/// nested at-rule such as `@media`, but not inside a nested rule. An SCSS `@include` counts as a
+/// declaration, because the mixin usually emits some. A rule without declarations can't lose to a
+/// higher specificity selector.
+fn has_declarations(rule: &CssSemanticRule, node: &CssSyntaxNode) -> bool {
+    if !rule.declarations().is_empty() {
+        return true;
+    }
+    let mut events = node.preorder();
     while let Some(event) = events.next() {
-        if let WalkEvent::Enter(node) = event {
-            if ScssIncludeAtRule::can_cast(node.kind()) {
-                return true;
-            }
-            if node != *rule && AnyRuleStart::can_cast(node.kind()) {
-                events.skip_subtree();
-            }
+        let WalkEvent::Enter(child) = event else {
+            continue;
+        };
+        let kind = child.kind();
+        if CssDeclaration::can_cast(kind) || ScssIncludeAtRule::can_cast(kind) {
+            return true;
+        }
+        // Selectors can't contain declarations, `@supports` conditions only test them, and nested
+        // rules declare for themselves.
+        if CssSupportsFeatureDeclaration::can_cast(kind)
+            || CssSelectorList::can_cast(kind)
+            || CssRelativeSelectorList::can_cast(kind)
+            || (child != *node
+                && AnyRuleStart::can_cast(kind)
+                && !INDEPENDENT_AT_RULE_KINDS.matches(kind))
+        {
+            events.skip_subtree();
         }
     }
     false
@@ -377,6 +380,7 @@ fn find_descending_selector(
     context: SelectorContext,
     visited_selectors: &mut SelectorContexts,
     descending_selectors: &mut Vec<DescendingSelector>,
+    key: &mut String,
 ) {
     let visited_selectors = visited_selectors.entry(context).or_default();
 
@@ -386,11 +390,11 @@ fn find_descending_selector(
         if resolved_selector.contains('%') || resolved_selector.contains("#{") {
             continue;
         }
-        let Some(tail_selector_str) = subject_key(selector.resolved()) else {
+        if !subject_key(selector.resolved(), key) {
             continue;
-        };
+        }
 
-        if let Some(seen) = visited_selectors.get_mut(&tail_selector_str) {
+        if let Some(seen) = visited_selectors.get_mut(key.as_str()) {
             let (last_text_range, last_specificity) = *seen;
             let specificity = selector.specificity();
             if last_specificity > specificity {
@@ -402,10 +406,7 @@ fn find_descending_selector(
                 *seen = (selector.range(), specificity);
             }
         } else {
-            visited_selectors.insert(
-                tail_selector_str,
-                (selector.range(), selector.specificity()),
-            );
+            visited_selectors.insert(key.clone(), (selector.range(), selector.specificity()));
         }
     }
 }
