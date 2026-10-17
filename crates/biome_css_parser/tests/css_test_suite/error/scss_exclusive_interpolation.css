@@ -1,0 +1,10 @@
+/* should generate diagnostics */
+.a {
+  value: prefix-#{name}-suffix;
+  background: url("a.png" #{format}(woff2));
+}
+@supports #{condition} {}
+@media (min-#{feature}: 1px) {}
+@container (#{feature}: 1px) {}
+:lang(en-#{locale}) {}
+.after { color: red; }
