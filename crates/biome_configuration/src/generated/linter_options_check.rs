@@ -2303,6 +2303,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::use_iterable_callback_return::UseIterableCallbackReturnOptions,
         >(),
     ));
+    result.push((
+        "nursery",
+        "useIteratorZip",
+        TypeId::of::<biome_rule_options::use_iterator_zip::UseIteratorZipOptions>(),
+    ));
     result.push(("correctness", "useJsonImportAttributes", TypeId::of::<biome_rule_options::use_json_import_attributes::UseJsonImportAttributesOptions>()));
     result.push((
         "correctness",

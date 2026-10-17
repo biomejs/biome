@@ -3397,6 +3397,11 @@ export interface Nursery {
 	 */
 	useIncludes?: UseIncludesConfiguration;
 	/**
+	 * Prefer Iterator.zip() over reading several arrays with the same index.
+	 * See https://biomejs.dev/linter/rules/use-iterator-zip
+	 */
+	useIteratorZip?: UseIteratorZipConfiguration;
+	/**
 	 * Enforce style rules to be defined within a cascade layer.
 	 * See https://biomejs.dev/linter/rules/use-layered-styles
 	 */
@@ -5967,6 +5972,9 @@ export type UseFlatMathMinMaxConfiguration =
 export type UseIncludesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseIncludesOptions;
+export type UseIteratorZipConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseIteratorZipOptions;
 export type UseLayeredStylesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseLayeredStylesOptions;
@@ -8604,6 +8612,10 @@ export interface RuleWithUseIncludesOptions {
 	level: RulePlainConfiguration;
 	options?: UseIncludesOptions;
 }
+export interface RuleWithUseIteratorZipOptions {
+	level: RulePlainConfiguration;
+	options?: UseIteratorZipOptions;
+}
 export interface RuleWithUseLayeredStylesOptions {
 	level: RulePlainConfiguration;
 	options?: UseLayeredStylesOptions;
@@ -10987,6 +10999,7 @@ export type UseFlatMathMinMaxOptions = {};
  * Options for the `useIncludes` rule.
  */
 export type UseIncludesOptions = {};
+export type UseIteratorZipOptions = {};
 export interface UseLayeredStylesOptions {
 	/**
 	 * Require `@import` rules to have a cascade layer. Defaults to `true`.
@@ -12635,6 +12648,7 @@ export type Category =
 	| "lint/nursery/useFlatMathMinMax"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useIncludes"
+	| "lint/nursery/useIteratorZip"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useLayeredStyles"
 	| "lint/nursery/useLogicalProperties"
