@@ -1,7 +1,5 @@
 #![deny(clippy::use_self)]
 
-#[cfg(test)]
-mod legacy;
 mod lexer;
 mod parser;
 mod syntax;

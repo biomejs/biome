@@ -119,7 +119,7 @@ fn parse_arbitrary_variant(p: &mut TailwindParser) -> ParsedSyntax {
 
 /// Groups the token after the `[` of an arbitrary variant or variant segment: the selector, which
 /// runs to the next whitespace or the `]` that closes the brackets it opens, or one byte.
-pub(crate) fn group_selector(source: &mut TailwindTokenSource) {
+fn group_selector(source: &mut TailwindTokenSource) {
     match source.next_byte() {
         None => source.take(EOF, 0),
         Some(byte) if is_whitespace(byte) => source.take_whitespace(),

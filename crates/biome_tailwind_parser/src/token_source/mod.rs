@@ -395,8 +395,8 @@ impl<'source> TailwindTokenSource<'source> {
     /// Groups the atoms of the current token and the ones after it again with `group`, as if no
     /// token came before them.
     ///
-    /// Like the legacy token source, this keeps the diagnostics of the current token, and takes
-    /// the current token's line break state as the one before it.
+    /// This keeps the diagnostics of the current token, and takes the current token's line break
+    /// state as the one before it.
     pub(crate) fn regroup_current(&mut self, group: Grouping) {
         self.current_end = self.current_start;
         self.current = EOF;
