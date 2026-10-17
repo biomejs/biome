@@ -9,10 +9,7 @@ mod classify;
 #[cfg(test)]
 mod tests;
 
-use super::{
-    BaseNameStore, TailwindLexContext, css_identifier_kind, invalid_whitespace,
-    unexpected_character,
-};
+use super::{BaseNameStore, css_identifier_kind, invalid_whitespace, unexpected_character};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::{self, *};
@@ -103,92 +100,41 @@ impl<'src> SimdLexer<'src> {
         start < end && any_in(&self.blocks, start, end, |block| block.line_break)
     }
 
-    /// Lexes the token at `position` in `context`, after a token of kind `previous`, and pushes
-    /// its diagnostics to `diagnostics`. Returns the token's kind and end.
-    pub(crate) fn lex(
-        &self,
-        position: usize,
-        context: TailwindLexContext,
-        previous: TailwindSyntaxKind,
-        diagnostics: &mut Vec<ParseDiagnostic>,
-    ) -> (TailwindSyntaxKind, usize) {
+    /// Returns the end of the unit at `position`, which runs to the next byte that isn't an ASCII
+    /// letter.
+    ///
+    /// This deviates from the CSS Syntax spec and `biome_css_parser`, where the unit is a full
+    /// identifier and includes `-` (`svh-var` in `100svh-var(--x)`). It follows Tailwind, which
+    /// inserts whitespace around the `-` instead.
+    pub(crate) fn css_unit_end(&self, position: usize) -> usize {
         let bytes = self.source.as_bytes();
-        let Some(&byte) = bytes.get(position) else {
-            return (EOF, position);
-        };
-        let (kind, end) = if is_whitespace(byte) {
-            (WHITESPACE, self.whitespace_end(position))
-        } else {
-            match context {
-                TailwindLexContext::CssValue => {
-                    return self.css_value(position, previous, diagnostics);
-                }
-            }
-        };
-        if kind == WHITESPACE {
-            self.push_whitespace_diagnostics(position, end, diagnostics);
-        }
-        (kind, end)
+        bytes[position..]
+            .iter()
+            .position(|byte| !byte.is_ascii_alphabetic())
+            .map_or(bytes.len(), |len| position + len)
     }
 
-    /// Lexes the token at `position` in [TailwindLexContext::CssValue], after a token of kind
-    /// `previous`.
-    fn css_value(
-        &self,
-        position: usize,
-        previous: TailwindSyntaxKind,
-        diagnostics: &mut Vec<ParseDiagnostic>,
-    ) -> (TailwindSyntaxKind, usize) {
+    /// Returns the end of the `_`s at `position`, which Tailwind decodes to whitespace.
+    pub(crate) fn underscores_end(&self, position: usize) -> usize {
         let bytes = self.source.as_bytes();
-        let byte = bytes[position];
-        let next = bytes.get(position + 1).copied();
-        match byte {
-            b'(' | b')' | b'[' | b']' | b':' => single(byte, position),
-            // In math functions, Tailwind adds whitespace around a `-` that directly follows a
-            // value, so it is a binary operator rather than the start of a negative number.
-            b'-' if position > 0
-                && (bytes[position - 1].is_ascii_alphanumeric()
-                    || matches!(bytes[position - 1], b'%' | b')')) =>
-            {
-                single(byte, position)
-            }
-            b'-' if next.is_some_and(is_css_identifier_start) => self.css_identifier(position),
-            b'-' if next.is_some_and(|next| next.is_ascii_digit() || next == b'.') => {
-                css_number(bytes, position)
-            }
-            b'0'..=b'9' => css_number(bytes, position),
-            b'.' if next.is_some_and(|next| next.is_ascii_digit()) => css_number(bytes, position),
-            b'_' => {
-                let end = bytes[position..]
-                    .iter()
-                    .position(|&byte| byte != b'_')
-                    .map_or(bytes.len(), |len| position + len);
-                (CSS_WHITESPACE, end)
-            }
-            b'a'..=b'z' | b'A'..=b'Z' if previous == CSS_DIMENSION_VALUE => {
-                let end = bytes[position..]
-                    .iter()
-                    .position(|&byte| !byte.is_ascii_alphabetic())
-                    .map_or(bytes.len(), |len| position + len);
-                (css_identifier_kind(&bytes[position..end]), end)
-            }
-            b'a'..=b'z' | b'A'..=b'Z' => self.css_identifier(position),
-            b'"' | b'\'' => (CSS_STRING_LITERAL, css_string_end(bytes, position)),
-            b'#' => {
-                let end = bytes[position + 1..]
-                    .iter()
-                    .position(|byte| !byte.is_ascii_hexdigit())
-                    .map_or(bytes.len(), |len| position + 1 + len);
-                (CSS_COLOR_LITERAL, end)
-            }
-            b'-' | b'%' | b'+' | b'*' | b',' | b'.' | b'=' | b'/' => single(byte, position),
-            _ => self.unexpected(position, diagnostics),
-        }
+        bytes[position..]
+            .iter()
+            .position(|&byte| byte != b'_')
+            .map_or(bytes.len(), |len| position + len)
+    }
+
+    /// Returns the end of the hex color at `position`: a `#` and the hex digits after it.
+    pub(crate) fn color_end(&self, position: usize) -> usize {
+        let bytes = self.source.as_bytes();
+        bytes[position + 1..]
+            .iter()
+            .position(|byte| !byte.is_ascii_hexdigit())
+            .map_or(bytes.len(), |len| position + 1 + len)
     }
 
     /// Lexes the CSS identifier at `position`. A custom property, which starts with `--`, also
     /// takes `_` and non-ASCII chars, which Tailwind keeps in its name.
-    fn css_identifier(&self, position: usize) -> (TailwindSyntaxKind, usize) {
+    pub(crate) fn css_identifier(&self, position: usize) -> (TailwindSyntaxKind, usize) {
         let bytes = self.source.as_bytes();
         let is_custom_property = bytes[position..].starts_with(b"--");
         let mut end = position;
@@ -301,12 +247,6 @@ pub(crate) enum Stop {
     Modifier,
 }
 
-/// Returns the kind and end of the one-byte token `byte` at `position`.
-#[inline(always)]
-fn single(byte: u8, position: usize) -> (TailwindSyntaxKind, usize) {
-    (punctuation(byte), position + 1)
-}
-
 /// Returns the kind of the one-byte token `byte`, which must be one of `()[]:-!/%+*,.=`.
 #[inline(always)]
 pub(crate) fn punctuation(byte: u8) -> TailwindSyntaxKind {
@@ -335,15 +275,9 @@ pub(crate) fn is_whitespace(byte: u8) -> bool {
     matches!(byte, b'\t' | b'\n' | 0x0B | 0x0C | b'\r' | b' ')
 }
 
-/// Whether `byte` can start a CSS identifier after `-`: an ASCII letter or `-`.
-#[inline(always)]
-fn is_css_identifier_start(byte: u8) -> bool {
-    byte.is_ascii_alphabetic() || byte == b'-'
-}
-
 /// Returns the end of the CSS number at `start`, and its kind: a percentage if `%` follows, a
 /// dimension if a unit follows, and a number otherwise.
-fn css_number(bytes: &[u8], start: usize) -> (TailwindSyntaxKind, usize) {
+pub(crate) fn css_number(bytes: &[u8], start: usize) -> (TailwindSyntaxKind, usize) {
     let digits = |from: usize| {
         bytes[from..]
             .iter()

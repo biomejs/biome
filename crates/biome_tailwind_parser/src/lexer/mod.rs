@@ -1,9 +1,10 @@
 //! The lexers of Tailwind class strings.
 //!
-//! [simd::SimdLexer] classifies the whole class string with SIMD up front, lexes the
-//! regular-context tokens into flat arrays, and lexes any other token from the same bitmaps.
+//! [simd::SimdLexer] classifies the whole class string with SIMD up front. The token source's
+//! groupings build every token from its bitmaps.
 //!
-//! The tests check it against the lexer of the reference implementation in `crate::legacy`.
+//! The tests check the groupings against the lexer of the reference implementation in
+//! `crate::legacy`.
 
 mod base_name_store;
 pub(crate) mod simd;
@@ -15,14 +16,6 @@ use biome_parser::diagnostic::ParseDiagnostic;
 use biome_rowan::TextLen;
 use biome_tailwind_syntax::TailwindSyntaxKind::{self, *};
 use biome_tailwind_syntax::TextSize;
-
-/// The contexts in which [simd::SimdLexer::lex] lexes a token, which the token source's groupings
-/// haven't replaced yet.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
-pub(crate) enum TailwindLexContext {
-    /// CSS value lexing inside arbitrary values and arbitrary candidate values.
-    CssValue,
-}
 
 /// The diagnostic for `char` at `start`, which no token can start with.
 pub(crate) fn unexpected_character(char: char, start: TextSize) -> ParseDiagnostic {

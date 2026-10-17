@@ -1,9 +1,10 @@
 use crate::lexer::simd::{Stop, is_whitespace};
 use crate::parser::TailwindParser;
+use crate::syntax::css_value::group_css_value;
 use crate::syntax::css_value::parse_css_parameter_list;
 use crate::syntax::parse_error::*;
 use crate::syntax::parse_modifier;
-use crate::token_source::{TailwindTokenSource, lex_css_value};
+use crate::token_source::TailwindTokenSource;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{Parser, parse_recovery::ParseRecoveryTokenSet, token_set};
@@ -225,7 +226,7 @@ fn parse_arbitrary_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
 
 fn parse_css_variable_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
     let m = p.start();
-    p.expect_with_context(T!['('], lex_css_value);
+    p.expect_with_context(T!['('], group_css_value);
     let parameters = parse_css_parameter_list(p);
     if parameters.range(p).is_empty() {
         p.error(expected_value(p, p.cur_range()));

@@ -4,7 +4,7 @@ use crate::syntax::css_value::parse_css_generic_component_value_list;
 use crate::syntax::parse_error::*;
 use crate::syntax::value::parse_value;
 use crate::syntax::variant::VariantList;
-use crate::token_source::{TailwindTokenSource, lex_css_value};
+use crate::token_source::TailwindTokenSource;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
@@ -17,8 +17,9 @@ mod parse_error;
 mod value;
 mod variant;
 
+pub(crate) use css_value::group_css_value;
 #[cfg(test)]
-pub(crate) use css_value::group_url_value;
+pub(crate) use css_value::{group_css_unit, group_url_value};
 #[cfg(test)]
 pub(crate) use variant::{group_selector, group_variant_segment};
 
@@ -126,6 +127,7 @@ fn parse_full_candidate(p: &mut TailwindParser) -> ParsedSyntax {
 /// Groups the token after the current one where the grammar doesn't pick a grouping, as after the
 /// tokens that error recovery skips. It depends on the current token: a `[` starts a selector, a
 /// `(` a value up to the next `)`, a `-` a value and a `/` a modifier.
+#[inline(always)]
 pub(crate) fn group_regular(source: &mut TailwindTokenSource) {
     match source.current() {
         T!['['] => group_bracketed(source),
@@ -300,7 +302,7 @@ fn parse_arbitrary_candidate(p: &mut TailwindParser) -> ParsedSyntax {
         p.rewind(checkpoint);
         return Absent;
     }
-    if !p.expect_with_context(T![:], lex_css_value) {
+    if !p.expect_with_context(T![:], group_css_value) {
         m.abandon(p);
         p.rewind(checkpoint);
         return Absent;
