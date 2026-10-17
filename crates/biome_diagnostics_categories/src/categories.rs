@@ -266,6 +266,7 @@ define_categories! {
     "lint/nursery/noPlaywrightForceOption": "https://biomejs.dev/linter/rules/no-playwright-force-option",
     "lint/nursery/noPlaywrightMissingAwait": "https://biomejs.dev/linter/rules/no-playwright-missing-await",
     "lint/nursery/noPlaywrightNetworkidle": "https://biomejs.dev/linter/rules/no-playwright-networkidle",
+    "lint/nursery/noPlaywrightNthMethods": "https://biomejs.dev/linter/rules/no-playwright-nth-methods",
     "lint/nursery/noPlaywrightPagePause": "https://biomejs.dev/linter/rules/no-playwright-page-pause",
     "lint/nursery/noPlaywrightUselessAwait": "https://biomejs.dev/linter/rules/no-playwright-useless-await",
     "lint/nursery/noPlaywrightWaitForNavigation": "https://biomejs.dev/linter/rules/no-playwright-wait-for-navigation",

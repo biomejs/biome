@@ -983,6 +983,12 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         ),
     ));
     result.push((
+        "nursery",
+        "noPlaywrightNthMethods",
+        TypeId::of::<biome_rule_options::no_playwright_nth_methods::NoPlaywrightNthMethodsOptions>(
+        ),
+    ));
+    result.push((
         "suspicious",
         "noPlaywrightPagePause",
         TypeId::of::<biome_rule_options::no_playwright_page_pause::NoPlaywrightPagePauseOptions>(),
