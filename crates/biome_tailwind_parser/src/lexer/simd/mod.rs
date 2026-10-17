@@ -24,6 +24,8 @@ const MAX_KEPT_BLOCKS: usize = 1 << 10;
 thread_local! {
     /// The bitmap buffer of the last [SimdLexer] dropped on this thread, so that classifying a
     /// class string doesn't allocate it.
+    ///
+    /// This exists purely to reduce pressure on the memory allocator.
     static BUFFERS: Cell<Option<Vec<Block>>> = const { Cell::new(None) };
 }
 
