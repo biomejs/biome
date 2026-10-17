@@ -11,15 +11,16 @@ use crate::utils::scss_include_comments::{
     place_separated_list_comment,
 };
 use biome_css_syntax::{
-    AnyCssAtRule, AnyCssAtRuleCustomName, AnyCssControlBlock, AnyCssDeclarationName,
-    AnyCssMediaQuery, AnyCssNamespacePrefixName, AnyCssProperty, AnyCssPseudoClass,
-    AnyCssPseudoElement, AnyCssSelector, AnyCssSelectorIdentifier, AnyCssUnknownAtRuleName,
-    CssComplexSelector, CssDeclaration, CssDeclarationImportant, CssDeclarationOrRuleBlock,
-    CssFunction, CssGenericComponentValueList, CssGenericProperty, CssIdentifier, CssIfBranch,
-    CssLanguage, CssMediaQueryList, CssNamespaceAtRule, CssNestedQualifiedRule, CssPageSelector,
-    CssPseudoElementFunction, CssQualifiedRule, CssSyntaxKind, CssSyntaxNode, CssSyntaxToken,
-    ScssAtRootAtRule, ScssAtRootQueryClause, ScssAtRootSelector, ScssEachHeader, ScssEachValueList,
-    ScssExpression, ScssExpressionItemList, ScssIfAtRule, ScssInterpolatedPseudoClassFunction,
+    AnyCssAtRule, AnyCssAtRuleCustomName, AnyCssAtRuleDeclarator, AnyCssControlBlock,
+    AnyCssDeclarationName, AnyCssMediaQuery, AnyCssNamespacePrefixName, AnyCssProperty,
+    AnyCssPseudoClass, AnyCssPseudoElement, AnyCssSelector, AnyCssSelectorIdentifier,
+    AnyCssUnknownAtRuleName, CssComplexSelector, CssDeclaration, CssDeclarationBlock,
+    CssDeclarationImportant, CssDeclarationOrRuleBlock, CssFunction, CssGenericComponentValueList,
+    CssGenericProperty, CssIdentifier, CssIfBranch, CssLanguage, CssMediaQueryList,
+    CssNamespaceAtRule, CssNestedQualifiedRule, CssPageSelector, CssPseudoElementFunction,
+    CssQualifiedRule, CssSyntaxKind, CssSyntaxNode, CssSyntaxToken, ScssAtRootAtRule,
+    ScssAtRootQueryClause, ScssAtRootSelector, ScssEachHeader, ScssEachValueList, ScssExpression,
+    ScssExpressionItemList, ScssIfAtRule, ScssInterpolatedPseudoClassFunction,
     ScssInterpolatedPseudoElementFunction, ScssListExpression, ScssListExpressionElement,
     ScssMapExpression, ScssMapExpressionPair, ScssVariableDeclaration, T, TextLen, TextSize,
     is_in_scss_include_arguments,
@@ -859,11 +860,13 @@ fn handle_scss_at_rule_name_comment(
     }
 }
 
-/// Keeps comments after page names and namespace prefixes.
+/// Keeps comments after at-rule names with the following prelude or block.
 ///
 /// ```scss
 /// @page report /* note */ :first {}
 /// @namespace ns-#{$name} /* note */ url("http://example.com");
+/// @property #{$name} // note
+/// { syntax: "*"; inherits: false; }
 /// ```
 fn handle_at_rule_prelude_name_comment(
     comment: DecoratedComment<CssLanguage>,
@@ -875,7 +878,16 @@ fn handle_at_rule_prelude_name_comment(
     let is_prelude_name = AnyCssAtRuleCustomName::cast_ref(name)
         .is_some_and(|name| name.parent::<CssPageSelector>().is_some())
         || AnyCssNamespacePrefixName::cast_ref(name)
-            .is_some_and(|name| name.parent::<CssNamespaceAtRule>().is_some());
+            .is_some_and(|name| name.parent::<CssNamespaceAtRule>().is_some())
+        || (CssDeclarationBlock::can_cast(following.kind())
+            && matches!(
+                AnyCssAtRuleDeclarator::cast_ref(name),
+                Some(
+                    AnyCssAtRuleDeclarator::CssPropertyAtRuleDeclarator(_)
+                        | AnyCssAtRuleDeclarator::CssFontPaletteValuesAtRuleDeclarator(_)
+                        | AnyCssAtRuleDeclarator::CssPositionTryAtRuleDeclarator(_)
+                )
+            ));
     if !is_prelude_name {
         return CommentPlacement::Default(comment);
     }

@@ -1,0 +1,17 @@
+$name: "--brand";
+$prefix: "--";
+
+@property #{$name} { syntax: "<color>"; inherits: true; initial-value: red; }
+@font-palette-values #{$name} { font-family: "Bixa"; }
+@position-try #{$name} { top: 0; }
+
+@property #{$name}-accent { syntax: "*"; inherits: false; }
+@font-palette-values #{$prefix}theme { font-family: "Bixa"; }
+@position-try #{$name}2 { left: 0; }
+
+@each $property, $color in ("--brand": red, "--accent": blue) {
+  @property #{$property} { syntax: "<color>"; inherits: true; initial-value: $color; }
+}
+
+@custom-media #{$name} (width > 1px);
+.following { color: green; }

@@ -77,15 +77,18 @@ pub(super) fn parse_custom_at_rule_name(p: &mut CssParser) -> ParsedSyntax {
     }
 }
 
-/// Requires a literal `--` prefix, allowing interpolation in SCSS names.
+/// Requires `--` in literal names; SCSS interpolation can supply the whole name.
 ///
 /// ```scss
 /// @font-palette-values --palette-#{$name} { font-family: "Bixa"; }
 /// @property --#{$name} { syntax: "*"; inherits: false; }
+/// @property #{$name} { syntax: "*"; inherits: false; }
 /// ```
 #[inline]
 pub(super) fn parse_dashed_at_rule_name(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_scss_interpolated_dashed_identifier(p) {
+    if is_at_scss_interpolation(p) {
+        parse_scss_at_rule_prelude_name(p)
+    } else if is_at_scss_interpolated_dashed_identifier(p) {
         CssSyntaxFeatures::Scss.parse_exclusive_syntax_with_kind(
             p,
             |p| {

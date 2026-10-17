@@ -14355,6 +14355,7 @@ pub enum AnyCssAtRuleDashedName {
     CssBogusCustomIdentifier(CssBogusCustomIdentifier),
     CssDashedIdentifier(CssDashedIdentifier),
     ScssInterpolatedDashedIdentifier(ScssInterpolatedDashedIdentifier),
+    ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
 }
 impl AnyCssAtRuleDashedName {
     pub fn as_css_bogus_custom_identifier(&self) -> Option<&CssBogusCustomIdentifier> {
@@ -14374,6 +14375,12 @@ impl AnyCssAtRuleDashedName {
     ) -> Option<&ScssInterpolatedDashedIdentifier> {
         match &self {
             Self::ScssInterpolatedDashedIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_identifier(&self) -> Option<&ScssInterpolatedIdentifier> {
+        match &self {
+            Self::ScssInterpolatedIdentifier(item) => Some(item),
             _ => None,
         }
     }
@@ -36724,17 +36731,24 @@ impl From<ScssInterpolatedDashedIdentifier> for AnyCssAtRuleDashedName {
         Self::ScssInterpolatedDashedIdentifier(node)
     }
 }
+impl From<ScssInterpolatedIdentifier> for AnyCssAtRuleDashedName {
+    fn from(node: ScssInterpolatedIdentifier) -> Self {
+        Self::ScssInterpolatedIdentifier(node)
+    }
+}
 impl AstNode for AnyCssAtRuleDashedName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = CssBogusCustomIdentifier::KIND_SET
         .union(CssDashedIdentifier::KIND_SET)
-        .union(ScssInterpolatedDashedIdentifier::KIND_SET);
+        .union(ScssInterpolatedDashedIdentifier::KIND_SET)
+        .union(ScssInterpolatedIdentifier::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
             CSS_BOGUS_CUSTOM_IDENTIFIER
                 | CSS_DASHED_IDENTIFIER
                 | SCSS_INTERPOLATED_DASHED_IDENTIFIER
+                | SCSS_INTERPOLATED_IDENTIFIER
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -36746,6 +36760,9 @@ impl AstNode for AnyCssAtRuleDashedName {
             SCSS_INTERPOLATED_DASHED_IDENTIFIER => {
                 Self::ScssInterpolatedDashedIdentifier(ScssInterpolatedDashedIdentifier { syntax })
             }
+            SCSS_INTERPOLATED_IDENTIFIER => {
+                Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
+            }
             _ => return None,
         };
         Some(res)
@@ -36755,6 +36772,7 @@ impl AstNode for AnyCssAtRuleDashedName {
             Self::CssBogusCustomIdentifier(it) => it.syntax(),
             Self::CssDashedIdentifier(it) => it.syntax(),
             Self::ScssInterpolatedDashedIdentifier(it) => it.syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -36762,6 +36780,7 @@ impl AstNode for AnyCssAtRuleDashedName {
             Self::CssBogusCustomIdentifier(it) => it.into_syntax(),
             Self::CssDashedIdentifier(it) => it.into_syntax(),
             Self::ScssInterpolatedDashedIdentifier(it) => it.into_syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
         }
     }
 }
@@ -36771,6 +36790,7 @@ impl std::fmt::Debug for AnyCssAtRuleDashedName {
             Self::CssBogusCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssDashedIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolatedDashedIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -36780,6 +36800,7 @@ impl From<AnyCssAtRuleDashedName> for SyntaxNode {
             AnyCssAtRuleDashedName::CssBogusCustomIdentifier(it) => it.into_syntax(),
             AnyCssAtRuleDashedName::CssDashedIdentifier(it) => it.into_syntax(),
             AnyCssAtRuleDashedName::ScssInterpolatedDashedIdentifier(it) => it.into_syntax(),
+            AnyCssAtRuleDashedName::ScssInterpolatedIdentifier(it) => it.into_syntax(),
         }
     }
 }
