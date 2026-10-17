@@ -51,15 +51,14 @@ impl<'source> TailwindParser<'source> {
         self.source.rewind(checkpoint.token_source);
     }
 
-    /// Whether the `n`th non-trivia token after the current one, lexed in
-    /// [TailwindLexContext::Regular](crate::lexer::TailwindLexContext::Regular), is of `kind`.
+    /// Whether the `n`th non-trivia token after the current one, grouped with
+    /// [group_regular](crate::syntax::group_regular), is of `kind`.
     pub fn nth_at(&mut self, n: usize, kind: TailwindSyntaxKind) -> bool {
         self.source.nth(n) == kind
     }
 
-    /// Whether the `n`th non-trivia token after the current one, lexed in
-    /// [TailwindLexContext::Regular](crate::lexer::TailwindLexContext::Regular), is of one of
-    /// `kinds`.
+    /// Whether the `n`th non-trivia token after the current one, grouped with
+    /// [group_regular](crate::syntax::group_regular), is of one of `kinds`.
     pub fn nth_at_ts(&mut self, n: usize, kinds: TokenSet<TailwindSyntaxKind>) -> bool {
         kinds.contains(self.source.nth(n))
     }

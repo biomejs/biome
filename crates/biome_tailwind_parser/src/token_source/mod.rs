@@ -4,14 +4,16 @@
 #[cfg(test)]
 pub(crate) mod tests;
 
-use crate::lexer::simd::{self, SimdLexer, Stop, css_string_end};
-use crate::lexer::{BaseNameStore, TailwindLexContext};
+use crate::lexer::simd::{self, SimdLexer, Stop, css_number, css_string_end};
+use crate::lexer::{BaseNameStore, css_identifier_kind};
 use crate::syntax::group_regular;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::prelude::BumpWithContext;
 use biome_parser::token_source::{TokenSource, Trivia};
 use biome_rowan::TriviaPieceKind;
-use biome_tailwind_syntax::TailwindSyntaxKind::{CSS_STRING_LITERAL, EOF, TW_SELECTOR, WHITESPACE};
+use biome_tailwind_syntax::TailwindSyntaxKind::{
+    CSS_COLOR_LITERAL, CSS_STRING_LITERAL, CSS_WHITESPACE, EOF, TW_SELECTOR, WHITESPACE,
+};
 use biome_tailwind_syntax::{TailwindSyntaxKind, TextRange, TextSize};
 
 /// Groups the atoms after the current token into the token after it: sets its kind and end with
@@ -29,7 +31,7 @@ pub(crate) struct TailwindTokenSource<'source> {
     lexer: SimdLexer<'source>,
     diagnostics: Vec<ParseDiagnostic>,
 
-    /// The kind of the current token as lexed, which the parser may remap.
+    /// The kind of the current token as grouped, which the parser may remap.
     current: TailwindSyntaxKind,
     current_start: TextSize,
     current_end: TextSize,
@@ -41,7 +43,7 @@ pub(crate) struct TailwindTokenSource<'source> {
     /// The last token that [Self::lookahead] returned.
     lookahead: LookaheadCursor,
 
-    /// Trivia emitted by the lexer and tokens skipped during parser recovery.
+    /// Trivia that the groupings emit and tokens skipped during parser recovery.
     trivia_list: Vec<Trivia>,
 }
 
@@ -53,7 +55,7 @@ struct LookaheadCursor {
     from: TextSize,
     /// The kind of the current token when the lookahead ran.
     after: TailwindSyntaxKind,
-    /// How many non-trivia tokens after the current one the lookahead lexed, or zero if none.
+    /// How many non-trivia tokens after the current one the lookahead grouped, or zero if none.
     count: usize,
     /// The last of those tokens.
     token: LookaheadToken,
@@ -84,7 +86,7 @@ impl<'source> TailwindTokenSource<'source> {
         let mut source = Self {
             lexer: SimdLexer::new(source, base_names),
             diagnostics: Vec::new(),
-            // The lexer starts with `EOF` as its current kind.
+            // The token before the first one is an `EOF`.
             current: EOF,
             current_start: TextSize::from(0),
             current_end: TextSize::from(0),
@@ -117,7 +119,7 @@ impl<'source> TailwindTokenSource<'source> {
         self.trivia_list.clear();
     }
 
-    #[inline]
+    #[inline(always)]
     fn next_non_trivia_token(&mut self, group: Grouping, first_token: bool) {
         let trailing = !first_token;
         loop {
@@ -130,20 +132,26 @@ impl<'source> TailwindTokenSource<'source> {
         }
     }
 
-    /// Lexes the token at `current_end` in `context` with [SimdLexer].
-    fn lex(&mut self, context: TailwindLexContext) {
-        let start = usize::from(self.current_end);
-        let (kind, end) = self
-            .lexer
-            .lex(start, context, self.current, &mut self.diagnostics);
-        let line_break = kind == WHITESPACE && self.lexer.has_line_break(start, end);
-        self.set_token(kind, end, line_break);
-    }
-
     /// Makes the token of `kind` that ends at `end` the token after the current one.
     #[inline(always)]
     fn set_token(&mut self, kind: TailwindSyntaxKind, end: usize, line_break: bool) {
         self.set_current(kind, TextSize::from(end as u32), line_break);
+    }
+
+    /// Returns the last byte of the current token, or `None` at the start of the source.
+    #[inline(always)]
+    pub(crate) fn last_byte(&self) -> Option<u8> {
+        let end = usize::from(self.current_end);
+        end.checked_sub(1).map(|last| self.text().as_bytes()[last])
+    }
+
+    /// Returns the second byte after the current token, or `None` past the end of the source.
+    #[inline(always)]
+    pub(crate) fn second_next_byte(&self) -> Option<u8> {
+        self.text()
+            .as_bytes()
+            .get(usize::from(self.current_end) + 1)
+            .copied()
     }
 
     /// Returns the first byte after the current token, or `None` at the end of the source.
@@ -209,6 +217,45 @@ impl<'source> TailwindTokenSource<'source> {
     pub(crate) fn merge_selector(&mut self) {
         let end = self.lexer.selector_end(usize::from(self.current_end));
         self.set_token(TW_SELECTOR, end, false);
+    }
+
+    /// Makes the CSS identifier after the current token the next token: the atoms of ASCII
+    /// letters, digits and `-`, and also of `_` and non-ASCII chars in a custom property, which
+    /// starts with `--`. Its kind is the keyword it spells, such as a unit, or `IDENT`.
+    pub(crate) fn merge_css_identifier(&mut self) {
+        let (kind, end) = self.lexer.css_identifier(usize::from(self.current_end));
+        self.set_token(kind, end, false);
+    }
+
+    /// Makes the CSS number after the current token the next token: an optional sign, digits,
+    /// a fraction and an exponent. Its kind is a percentage if `%` follows, a dimension if a
+    /// letter follows, and a number otherwise.
+    pub(crate) fn merge_css_number(&mut self) {
+        let (kind, end) = css_number(self.text().as_bytes(), usize::from(self.current_end));
+        self.set_token(kind, end, false);
+    }
+
+    /// Makes the unit after the current token, the ASCII letters after a dimension, the next
+    /// token. Its kind is the unit's keyword, or `IDENT` for an unknown unit.
+    pub(crate) fn merge_css_unit(&mut self) {
+        let start = usize::from(self.current_end);
+        let end = self.lexer.css_unit_end(start);
+        let kind = css_identifier_kind(&self.text().as_bytes()[start..end]);
+        self.set_token(kind, end, false);
+    }
+
+    /// Makes the `_`s after the current token, which Tailwind decodes to whitespace, the next
+    /// token, a `CSS_WHITESPACE` trivia.
+    pub(crate) fn merge_underscores(&mut self) {
+        let end = self.lexer.underscores_end(usize::from(self.current_end));
+        self.set_token(CSS_WHITESPACE, end, false);
+    }
+
+    /// Makes the hex color after the current token, a `#` and the hex digits after it, the next
+    /// token. It can end inside an atom of letters (`#abcxyz`).
+    pub(crate) fn merge_color(&mut self) {
+        let end = self.lexer.color_end(usize::from(self.current_end));
+        self.set_token(CSS_COLOR_LITERAL, end, false);
     }
 
     /// Makes the whitespace after the current token the next token, and reports the bytes in it
@@ -427,9 +474,4 @@ impl BumpWithContext for TailwindTokenSource<'_> {
             self.next_non_trivia_token(group, true)
         }
     }
-}
-
-/// The [Grouping] of the tokens that [SimdLexer] lexes in [TailwindLexContext::CssValue].
-pub(crate) fn lex_css_value(source: &mut TailwindTokenSource) {
-    source.lex(TailwindLexContext::CssValue);
 }

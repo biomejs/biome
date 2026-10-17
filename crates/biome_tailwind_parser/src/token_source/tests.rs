@@ -1,10 +1,10 @@
-use super::{Grouping, TailwindTokenSource, lex_css_value};
+use super::{Grouping, TailwindTokenSource};
 use crate::legacy::lexer::{TailwindLexContext, TailwindLexer};
 use crate::legacy::token_source::LegacyTokenSource;
 use crate::lexer::{BASENAME_STORE, BaseNameStore};
 use crate::syntax::{
-    group_modifier, group_negative_base, group_property, group_regular, group_selector,
-    group_url_value, group_value, group_variant_segment,
+    group_css_unit, group_css_value, group_modifier, group_negative_base, group_property,
+    group_regular, group_selector, group_url_value, group_value, group_variant_segment,
 };
 use crate::test_support::{fixtures, mutate, random_fragments, xorshift};
 use crate::{TailwindParserOptions, legacy, parse_tailwind_with_options};
@@ -32,9 +32,24 @@ const PREVIOUS: &[TailwindSyntaxKind] = &[
     IDENT,
 ];
 
+/// [PREVIOUS] without `CSS_DIMENSION_VALUE`, after which a CSS value starts with its unit.
+const CSS_PREVIOUS: &[TailwindSyntaxKind] = &[
+    EOF,
+    T!['['],
+    T!['('],
+    T![-],
+    T![/],
+    T![:],
+    T![']'],
+    T![')'],
+    WHITESPACE,
+    TW_BASE,
+    IDENT,
+];
+
 /// Each context of the reference lexer, the [Grouping] that groups the tokens it lexes, and the
 /// kinds of the token before after which the parser uses it.
-const GROUPINGS: [(TailwindLexContext, Grouping, &[TailwindSyntaxKind]); 9] = [
+const GROUPINGS: [(TailwindLexContext, Grouping, &[TailwindSyntaxKind]); 10] = [
     (TailwindLexContext::Regular, group_regular, PREVIOUS),
     (TailwindLexContext::Regular, group_value, &[T![-]]),
     (TailwindLexContext::Regular, group_modifier, &[T![/]]),
@@ -58,7 +73,12 @@ const GROUPINGS: [(TailwindLexContext, Grouping, &[TailwindSyntaxKind]); 9] = [
         group_variant_segment,
         &[EOF, T![-]],
     ),
-    (TailwindLexContext::CssValue, lex_css_value, PREVIOUS),
+    (TailwindLexContext::CssValue, group_css_value, CSS_PREVIOUS),
+    (
+        TailwindLexContext::CssValue,
+        group_css_unit,
+        &[CSS_DIMENSION_VALUE],
+    ),
     (
         TailwindLexContext::CssUrlRawValue,
         group_url_value,
@@ -205,7 +225,7 @@ impl Walk for LegacyTokenSource<'_> {
 fn walk(mut tokens: impl Walk, seed: u64) -> Vec<String> {
     // Indices into `GROUPINGS`, with the regular tokens and variant segments more often. A
     // grouping that the parser doesn't use after the current token falls back to the regular one.
-    let groupings = [0, 0, 0, 6, 6, 1, 2, 3, 4, 5, 7, 8];
+    let groupings = [0, 0, 0, 6, 6, 1, 2, 3, 4, 5, 7, 8, 9];
     let mut next = xorshift(seed);
     let mut checkpoints = Vec::new();
     let mut log = Vec::new();
