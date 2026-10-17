@@ -5,8 +5,11 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{JsLanguage, JsSyntaxKind, JsxAttribute, jsx_ext::AnyJsxElement};
-use biome_rowan::{AstNode, BatchMutationExt, WalkEvent};
+use biome_js_syntax::{
+    JsLanguage, JsSyntaxKind, JsxAttribute, JsxClosingElement, JsxOpeningElement,
+    JsxSelfClosingElement, jsx_ext::AnyJsxElement,
+};
+use biome_rowan::{AstNode, BatchMutationExt, SyntaxKindSet, WalkEvent};
 use biome_rule_options::no_autofocus::NoAutofocusOptions;
 use biome_string_case::StrOnlyExtension;
 
@@ -158,6 +161,17 @@ struct ValidAutofocusVisitor {
 
 impl Visitor for ValidAutofocusVisitor {
     type Language = JsLanguage;
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(
+            JsxOpeningElement::KIND_SET
+                .union(JsxSelfClosingElement::KIND_SET)
+                .union(JsxClosingElement::KIND_SET),
+        )
+    }
 
     fn visit(
         &mut self,

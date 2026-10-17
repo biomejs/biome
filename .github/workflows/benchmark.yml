@@ -173,6 +173,8 @@ jobs:
               - 'Cargo.lock'
               - 'crates/biome_analyze/**/*.rs'
               - 'crates/biome_configuration/**/*.rs'
+              - 'crates/biome_css_*/**/*.rs'
+              - 'crates/biome_formatter/**/*.rs'
               - 'crates/biome_fs/**/*.rs'
               - 'crates/biome_js_*/**/*.rs'
               - 'crates/biome_module_graph/**/*.rs'
@@ -181,6 +183,7 @@ jobs:
               - 'crates/biome_resolver/**/*.rs'
               - 'crates/biome_rowan/**/*.rs'
               - 'crates/biome_service/**/*.rs'
+              - 'crates/biome_service/benches/fixtures/**'
               - 'crates/biome_workspace_db/**/*.rs'
             console:
               - '.github/workflows/benchmark.yml'
@@ -323,7 +326,7 @@ jobs:
 
       - name: Compile
         timeout-minutes: 20
-        run: cargo codspeed build -p biome_service --bench pull_diagnostics --features type_inference
+        run: cargo codspeed build -p biome_service --bench pull_diagnostics --bench format_embedded --features type_inference,js_embeds
         env:
           CARGO_BUILD_JOBS: 3
 
@@ -332,7 +335,7 @@ jobs:
         timeout-minutes: 50
         with:
           mode: simulation
-          run: cargo codspeed run -p biome_service --bench pull_diagnostics
+          run: cargo codspeed run -p biome_service --bench pull_diagnostics --bench format_embedded
           token: ${{ secrets.CODSPEED_TOKEN }}
 
   plugins:

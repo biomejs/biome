@@ -7,7 +7,7 @@ use biome_db::AnyParsedSource;
 use biome_js_semantic::{SemanticModel, SemanticModelOptions, js_semantic_model, semantic_model};
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange, WalkEvent};
 use biome_languages::{JsFileSource, LanguageDb};
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, SyntaxKindSet};
 use std::rc::Rc;
 
 /// ## Warning
@@ -132,6 +132,13 @@ impl Visitor for SemanticModelBuilderVisitor {
     }
 
     fn visit(&mut self, _: &WalkEvent<JsSyntaxNode>, _: VisitorContext<JsLanguage>) {}
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(SyntaxKindSet::EMPTY)
+    }
 }
 
 pub struct SemanticModelVisitor;
@@ -161,5 +168,12 @@ impl Visitor for SemanticModelVisitor {
 
         let text_range = root.text_range_with_trivia();
         ctx.match_query(SemanticModelEvent(text_range));
+    }
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(AnyJsRoot::KIND_SET)
     }
 }

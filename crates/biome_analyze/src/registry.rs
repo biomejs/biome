@@ -7,7 +7,7 @@ use crate::{
     signals::RuleSignal,
 };
 use biome_diagnostics::Error;
-use biome_rowan::{AstNode, Language, RawSyntaxKind, SyntaxKind, SyntaxNode};
+use biome_rowan::{AstNode, Language, RawSyntaxKind, SyntaxKind, SyntaxKindSet, SyntaxNode};
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::{
     any::TypeId,
@@ -129,6 +129,8 @@ impl<L: Language + Default> RuleRegistry<L> {
 struct PhaseRules<L: Language> {
     /// Maps the [TypeId] of known query matches types to the corresponding list of rules
     type_rules: FxHashMap<TypeId, TypeRules<L>>,
+    /// Union of the kinds of all the [QueryKey::Syntax] rules in this phase
+    syntax_kinds: SyntaxKindSet<L>,
     /// Holds a list of states for all the rules in this phase
     rule_states: Vec<RuleState<L>>,
 }
@@ -197,6 +199,7 @@ impl<L: Language + Default + 'static> PhaseRules<L> {
                         "the SyntaxNode type has already been registered as a TypeRules instead of a SyntaxRules, this is generally caused by an implementation of `Queryable::key` returning a `QueryKey::TypeId` with the type ID of `SyntaxNode`"
                     )
                 };
+                self.syntax_kinds = self.syntax_kinds.union(key);
 
                 // Iterate on all the SyntaxKind variants this node can match
                 for kind in key.iter() {
@@ -298,6 +301,10 @@ impl<L: Language + 'static> QueryMatcher<L> for RuleRegistry<L> {
             // TODO: #3394 track error in the signal queue
             let _ = (rule.run)(&mut params, state);
         }
+    }
+
+    fn syntax_query_kinds(&self, phase: Phases) -> Option<SyntaxKindSet<L>> {
+        Some(self.phase_rules[phase as usize].syntax_kinds)
     }
 }
 

@@ -164,9 +164,22 @@ pub struct AnalyzerOptions {
 
     /// The working directory for the caller.
     pub working_directory: Arc<Option<Utf8PathBuf>>,
+
+    /// Walks every node in every phase, even when the visitors of a phase only
+    /// read some kinds. See [crate::Visitor::visited_kinds].
+    pub(crate) walk_every_node: bool,
 }
 
 impl AnalyzerOptions {
+    /// Makes every phase walk every node of the tree, as it would if a visitor
+    /// of the phase read every event. The diagnostics and actions must not
+    /// change; tests use this to check that skipping nodes is exact.
+    #[doc(hidden)]
+    pub fn with_walk_every_node(mut self) -> Self {
+        self.walk_every_node = true;
+        self
+    }
+
     pub fn with_file_path(mut self, file_path: impl Into<Utf8PathBuf>) -> Self {
         self.file_path = file_path.into();
         self

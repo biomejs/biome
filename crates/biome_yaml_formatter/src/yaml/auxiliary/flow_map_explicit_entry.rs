@@ -1,8 +1,8 @@
 use super::flow_map_implicit_entry::{FormatBreakableKeyEntry, FormatImplicitEntryBody};
+use crate::comments::FormatCommentsSlice;
 use crate::prelude::*;
 use crate::utils::{FormatMultilineKeyEntry, multiline_plain_key};
-use biome_formatter::trivia::format_dangling_comments;
-use biome_formatter::{format_args, write};
+use biome_formatter::write;
 use biome_rowan::AstNode;
 use biome_yaml_syntax::{
     AnyYamlFlowNode, AnyYamlMappingImplicitKey, YamlFlowMapExplicitEntry,
@@ -102,22 +102,23 @@ impl FormatNodeRule<YamlFlowMapExplicitEntry> for FormatYamlFlowMapExplicitEntry
             write!(
                 f,
                 [FormatExplicitPair {
-                    question_mark_token: &question_mark_token,
+                    question_mark_token: Some(&question_mark_token),
                     key: &key,
                     colon_token,
                     value: &value,
                     dangling_comments_of: has_dangling_comments.then(|| node.syntax()),
                 }]
             )
-        } else if !in_flow_mapping {
+        } else if !in_flow_mapping && value.is_none() {
             // Inside a flow sequence, `? key` is a compact single-pair
             // mapping while a bare `key` is a plain entry, so the `?` is
-            // semantically significant and must be kept
+            // semantically significant and must be kept. With a value, the
+            // pair is `key: value` either way
             write!(
                 f,
                 [group(&format_with(|f| {
                     write!(f, [question_mark_token.format()])?;
-                    if key.is_some() || colon_token.is_some() || value.is_some() {
+                    if key.is_some() || colon_token.is_some() {
                         write!(f, [space()])?;
                     }
                     write!(
@@ -139,18 +140,14 @@ impl FormatNodeRule<YamlFlowMapExplicitEntry> for FormatYamlFlowMapExplicitEntry
             // value, which we normalize to `:`.
             write!(f, [format_replaced(&question_mark_token, &text(":", None))])
         } else {
-            write!(
-                f,
-                [group(&format_args![
-                    format_removed(&question_mark_token),
-                    FormatImplicitEntryBody {
-                        key: &key,
-                        colon_token: &colon_token,
-                        value: &value,
-                        in_flow_mapping: true
-                    }
-                ])]
-            )
+            let body = FormatImplicitEntryBody {
+                key: &key,
+                colon_token: &colon_token,
+                value: &value,
+                in_flow_mapping,
+            };
+            let entry = format_with(|f| write!(f, [format_removed(&question_mark_token), body]));
+            write!(f, [body.group(&entry, f)])
         }
     }
 
@@ -179,25 +176,38 @@ impl FormatNodeRule<YamlFlowMapExplicitEntry> for FormatYamlFlowMapExplicitEntry
 /// : value
 /// ```
 ///
-struct FormatExplicitPair<'a> {
-    question_mark_token: &'a YamlSyntaxToken,
-    key: &'a Option<AnyYamlMappingImplicitKey>,
-    colon_token: &'a YamlSyntaxToken,
-    value: &'a Option<AnyYamlFlowNode>,
-    dangling_comments_of: Option<&'a YamlSyntaxNode>,
+pub(crate) struct FormatExplicitPair<'a> {
+    /// The `?` of an entry already in the explicit form; a synthesized `?`
+    /// is printed without one
+    pub(crate) question_mark_token: Option<&'a YamlSyntaxToken>,
+    pub(crate) key: &'a Option<AnyYamlMappingImplicitKey>,
+    pub(crate) colon_token: &'a YamlSyntaxToken,
+    pub(crate) value: &'a Option<AnyYamlFlowNode>,
+    pub(crate) dangling_comments_of: Option<&'a YamlSyntaxNode>,
 }
 
 impl Format<YamlFormatContext> for FormatExplicitPair<'_> {
     fn fmt(&self, f: &mut YamlFormatter) -> FormatResult<()> {
-        write!(f, [self.question_mark_token.format()])?;
+        match self.question_mark_token {
+            Some(token) => write!(f, [token.format()])?,
+            None => write!(f, [text("?", None)])?,
+        }
         if let Some(key) = self.key {
             write!(f, [space(), align("  ", &key.format())])?;
         }
-        write!(f, [hard_line_break()])?;
         if let Some(node) = self.dangling_comments_of {
-            write!(f, [format_dangling_comments(node), hard_line_break()])?;
+            // Every comment is printed on a line of its own, keeping the
+            // blank lines between them
+            let comments = f.comments().clone();
+            write!(
+                f,
+                [FormatCommentsSlice {
+                    comments: comments.dangling_comments(node),
+                    inline_first: false
+                }]
+            )?;
         }
-        write!(f, [self.colon_token.format()])?;
+        write!(f, [hard_line_break(), self.colon_token.format()])?;
         if let Some(value) = self.value {
             write!(f, [space(), align("  ", &value.format())])?;
         }

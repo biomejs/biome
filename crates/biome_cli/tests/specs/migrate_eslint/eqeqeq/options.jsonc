@@ -1,0 +1,29 @@
+{
+  "biome": {
+    "linter": {
+      "rules": {
+        "suspicious": {
+          "noDoubleEquals": {
+            "level": "warn",
+            "options": { "ignoreNull": true }
+          }
+        }
+      }
+    }
+  },
+  "eslint": {
+    "overrides": [
+      { "files": ["severity.js"], "rules": { "eqeqeq": ["warn"] } },
+      { "files": ["always.js"], "rules": { "eqeqeq": ["error", "always"] } },
+      { "files": ["empty.js"], "rules": { "eqeqeq": [2, "always", {}] } },
+      { "files": ["null-always.js"], "rules": { "eqeqeq": ["error", "always", { "null": "always" }] } },
+      { "files": ["null-ignore.js"], "rules": { "eqeqeq": ["error", "always", { "null": "ignore" }] } },
+      { "files": ["null-never.js"], "rules": { "eqeqeq": ["error", "always", { "null": "never" }] } },
+      { "files": ["smart.js"], "rules": { "eqeqeq": ["warn", "smart"] } },
+      { "files": ["allow-null.js"], "rules": { "eqeqeq": [1, "allow-null"] } },
+      { "files": ["off.js"], "rules": { "eqeqeq": ["off", "always"] } },
+      { "files": ["shared-warn.js"], "rules": { "eqeqeq": ["warn", "always"], "vue/eqeqeq": "error" } },
+      { "files": ["shared-off.js"], "rules": { "eqeqeq": ["off", "always"], "vue/eqeqeq": "error" } }
+    ]
+  }
+}
