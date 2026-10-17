@@ -313,6 +313,7 @@ pub enum RuleName {
     NoPromiseExecutorReturn,
     NoProto,
     NoPrototypeBuiltins,
+    NoPseudoElementInFunctionalPseudoClass,
     NoQuickfixBiome,
     NoQwikUseVisibleTask,
     NoReExportAll,
@@ -930,6 +931,9 @@ impl RuleName {
             Self::NoPromiseExecutorReturn => "noPromiseExecutorReturn",
             Self::NoProto => "noProto",
             Self::NoPrototypeBuiltins => "noPrototypeBuiltins",
+            Self::NoPseudoElementInFunctionalPseudoClass => {
+                "noPseudoElementInFunctionalPseudoClass"
+            }
             Self::NoQuickfixBiome => "noQuickfixBiome",
             Self::NoQwikUseVisibleTask => "noQwikUseVisibleTask",
             Self::NoReExportAll => "noReExportAll",
@@ -1543,6 +1547,7 @@ impl RuleName {
             Self::NoPromiseExecutorReturn => RuleGroup::Nursery,
             Self::NoProto => RuleGroup::Suspicious,
             Self::NoPrototypeBuiltins => RuleGroup::Suspicious,
+            Self::NoPseudoElementInFunctionalPseudoClass => RuleGroup::Nursery,
             Self::NoQuickfixBiome => RuleGroup::Suspicious,
             Self::NoQwikUseVisibleTask => RuleGroup::Correctness,
             Self::NoReExportAll => RuleGroup::Performance,
@@ -2165,6 +2170,9 @@ impl std::str::FromStr for RuleName {
             "noPromiseExecutorReturn" => Ok(Self::NoPromiseExecutorReturn),
             "noProto" => Ok(Self::NoProto),
             "noPrototypeBuiltins" => Ok(Self::NoPrototypeBuiltins),
+            "noPseudoElementInFunctionalPseudoClass" => {
+                Ok(Self::NoPseudoElementInFunctionalPseudoClass)
+            }
             "noQuickfixBiome" => Ok(Self::NoQuickfixBiome),
             "noQwikUseVisibleTask" => Ok(Self::NoQwikUseVisibleTask),
             "noReExportAll" => Ok(Self::NoReExportAll),

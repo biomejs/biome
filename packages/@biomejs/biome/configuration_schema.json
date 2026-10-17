@@ -5719,6 +5719,18 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoPseudoElementInFunctionalPseudoClassConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{
+					"$ref": "#/$defs/RuleWithNoPseudoElementInFunctionalPseudoClassOptions"
+				}
+			]
+		},
+		"NoPseudoElementInFunctionalPseudoClassOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoQuickfixBiomeConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7840,6 +7852,15 @@
 					"description": "Disallow returning values from the function passed to new Promise().\nSee https://biomejs.dev/linter/rules/no-promise-executor-return",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoPromiseExecutorReturnConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noPseudoElementInFunctionalPseudoClass": {
+					"description": "Disallow pseudo-elements inside :is(), :where(), :not() and :has().\nSee https://biomejs.dev/linter/rules/no-pseudo-element-in-functional-pseudo-class",
+					"anyOf": [
+						{
+							"$ref": "#/$defs/NoPseudoElementInFunctionalPseudoClassConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -11510,6 +11531,17 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoPrototypeBuiltinsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoPseudoElementInFunctionalPseudoClassOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": {
+					"$ref": "#/$defs/NoPseudoElementInFunctionalPseudoClassOptions"
+				}
 			},
 			"additionalProperties": false,
 			"required": ["level"]
