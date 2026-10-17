@@ -549,7 +549,14 @@ impl eslint_eslint::FlatConfigData {
                 .as_ref()
                 .map(eslint_eslint::Rules::base_no_unused_vars_rules)
                 .unwrap_or_default();
-            for flat_config_object in override_config_objects {
+            let base_eqeqeq = global_config_object
+                .rules
+                .as_ref()
+                .and_then(eslint_eslint::Rules::eqeqeq_options);
+            for mut flat_config_object in override_config_objects {
+                if let Some(rules) = &mut flat_config_object.rules {
+                    rules.inherit_eqeqeq_options(base_eqeqeq);
+                }
                 let mut override_pat = biome_config::OverridePattern::default();
                 if let Some(language_options) = flat_config_object.language_options {
                     let globals = language_options.globals.enabled().collect();
@@ -625,6 +632,7 @@ impl eslint_eslint::LegacyConfigData {
         }
         let mut linter = biome_config::LinterConfiguration::default();
         let base_no_unused_vars = self.rules.base_no_unused_vars_rules();
+        let base_eqeqeq = self.rules.eqeqeq_options();
         let mut rules = self
             .rules
             .into_biome_rules(&Default::default(), options, &mut results);
@@ -634,7 +642,8 @@ impl eslint_eslint::LegacyConfigData {
         linter.includes = (!includes.is_empty()).then_some(includes);
         if !self.overrides.is_empty() {
             let mut overrides = biome_config::Overrides::default();
-            for override_elt in self.overrides {
+            for mut override_elt in self.overrides {
+                override_elt.rules.inherit_eqeqeq_options(base_eqeqeq);
                 let mut override_pattern = biome_config::OverridePattern::default();
                 if !override_elt.globals.is_empty() {
                     let globals = override_elt
@@ -799,6 +808,22 @@ fn migrate_eslint_rule(
                                 },
                             ));
                     }
+                }
+            }
+        }
+        eslint_eslint::Rule::Eqeqeq(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let group = rules.suspicious.get_or_insert_with(Default::default);
+                if let SeverityOrGroup::Group(group) = group
+                    && let Some(rule) = group.no_double_equals.as_mut()
+                {
+                    *rule = biome_config::RuleFixConfiguration::WithOptions(
+                        biome_config::RuleWithFixOptions {
+                            level: rule.level(),
+                            fix: None,
+                            options: conf.into(),
+                        },
+                    );
                 }
             }
         }
