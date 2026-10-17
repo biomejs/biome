@@ -1819,9 +1819,20 @@ fn infer_generic_return_type<'db>(
             continue;
         };
         if parameter_ty.is_generic_reference(db) {
+            // A nullish argument only adds nullability to the generic. When a
+            // non-nullish argument for another parameter also mentions the
+            // generic, its candidate isn't inferred here, so the generic can't
+            // be resolved to `undefined`.
+            let replacement = if is_nullish(arg)
+                && has_non_nullish_candidate_elsewhere(db, function, args, index, parameter_ty)
+            {
+                InferredTypeData::Unknown
+            } else {
+                arg
+            };
             let substitution = InferredTypeSubstitution {
                 generic: parameter_ty,
-                replacement: arg,
+                replacement,
             };
             let TypeTransformResult::Transformed(substituted) =
                 return_ty.substitute_type(db, substitution)
@@ -1926,6 +1937,59 @@ fn infer_generic_return_type<'db>(
     }
 
     return_ty
+}
+
+fn is_nullish(ty: InferredTypeData) -> bool {
+    matches!(
+        ty,
+        InferredTypeData::Undefined | InferredTypeData::Null | InferredTypeData::VoidKeyword
+    )
+}
+
+/// Returns whether a parameter other than the one at `index` mentions
+/// `generic`, either as the generic itself or as an instance of it, and
+/// received at least one non-nullish argument.
+fn has_non_nullish_candidate_elsewhere<'db>(
+    db: &'db dyn ModuleDb,
+    function: InferredFunction<'db>,
+    args: &[ResolvedCallArgument<'db>],
+    index: usize,
+    generic: InferredTypeData<'db>,
+) -> bool {
+    let alternate = match generic {
+        InferredTypeData::Generic(_) => InferredTypeData::instance_of(db, generic, Box::default()),
+        InferredTypeData::InstanceOf(instance) => instance.ty(db),
+        _ => generic,
+    };
+    function
+        .parameters(db)
+        .iter()
+        .enumerate()
+        .filter(|(other_index, _)| *other_index != index)
+        .filter(|(other_index, other)| {
+            let other_args = if other.is_rest() {
+                args.get(*other_index..).unwrap_or_default()
+            } else {
+                args.get(*other_index..=*other_index).unwrap_or_default()
+            };
+            other_args.iter().any(|arg| !is_nullish(arg.ty()))
+        })
+        .any(|(_, other)| {
+            let other_ty = other.ty();
+            [generic, alternate].into_iter().any(|generic| {
+                let substitution = InferredTypeSubstitution {
+                    generic,
+                    replacement: InferredTypeData::Unknown,
+                };
+                match other_ty.substitute_type(db, substitution) {
+                    TypeTransformResult::Transformed(substituted) => substituted != other_ty,
+                    // An incomplete walk can't rule out a mention.
+                    TypeTransformResult::LimitExceeded | TypeTransformResult::InvalidRebuild => {
+                        true
+                    }
+                }
+            })
+        })
 }
 
 /// Determines the value produced by a callback with a generic return type.
