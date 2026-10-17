@@ -1,0 +1,6 @@
+{
+	"name": "my-package",
+	"config": {
+		"cpu": ["x64", "arm64"]
+	}
+}
