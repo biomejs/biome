@@ -388,6 +388,7 @@ pub mod no_with;
 pub mod no_xor_as_exponentiation;
 pub mod no_yoda_expression;
 pub mod no_zero_fractions;
+pub mod no_zero_length_unit;
 pub mod organize_imports;
 pub mod use_adjacent_overload_signatures;
 pub mod use_alt_text;
