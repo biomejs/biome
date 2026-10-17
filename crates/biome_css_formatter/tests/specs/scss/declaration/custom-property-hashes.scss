@@ -1,0 +1,15 @@
+$suffix:   abc;
+.theme{--hashes:  #000000B2   #12PX #12e3!important;
+--escaped: #\31 2unknown #a\;b;
+--interpolation: #12#{$suffix};
+--punctuation: #1e+2 #12% #12.5 #--> #;
+--comments: /* before */#4566a8/* after */ #/**/12px;
+--quoted: #12PX"quoted" #12PX'#{$suffix}';
+--literal: #$suffix #url(image.svg);
+--slashes: #12PX//raw;}
+
+@supports (--accent:#4566A8 // comment
+){.after-supports{--raw: #12unknown;}}
+
+/* biome-ignore format: Preserve authored raw hashes. */
+.keep{--value: #4566A8   #12PX;}

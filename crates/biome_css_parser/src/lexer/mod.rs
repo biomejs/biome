@@ -48,7 +48,7 @@ pub(crate) struct UrlRawValueScan {
     pub(crate) terminated: bool,
 }
 
-/// Source range of the identifier body in an SCSS hash string.
+/// Source range of a hash body, including raw numeric forms such as `#12px`.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub(crate) struct ScssHashValueScan {
     /// Absolute byte position immediately after the leading `#`.
@@ -1754,6 +1754,21 @@ impl<'src> ReLexer<'src> for CssLexer<'src> {
 }
 
 impl<'src> CssLexer<'src> {
+    /// Scans raw hash text without interpreting it as a color or dimension.
+    ///
+    /// ```scss
+    /// .theme { --color: #4566a8; --raw: #12unknown; }
+    /// ```
+    pub(crate) fn custom_property_hash_value_scan(
+        &self,
+        start: usize,
+    ) -> Option<ScssHashValueScan> {
+        let mut cursor = self.scan_cursor_at(start);
+        cursor.advance_ident_sequence();
+        let end = cursor.position();
+        (end > start).then_some(ScssHashValueScan { start, end })
+    }
+
     /// Classifies the complete identifier after `#` before color lexing begins.
     ///
     /// Returns its source range when the body is a Sass string, including a

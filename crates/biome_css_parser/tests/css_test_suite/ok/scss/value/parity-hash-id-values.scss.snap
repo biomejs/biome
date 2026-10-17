@@ -2363,24 +2363,17 @@ CssRoot {
                                 colon_token: COLON@1879..1881 ":" [] [Whitespace(" ")],
                                 value: CssCustomPropertyValue {
                                     components: CssCustomPropertyComponentList [
-                                        CssCustomPropertyDelimiter {
-                                            value: HASH@1881..1882 "#" [] [],
-                                        },
-                                        CssCustomIdentifier {
+                                        ScssHashValue {
+                                            hash_token: HASH@1881..1882 "#" [] [],
                                             value_token: IDENT@1882..1886 "app" [] [Whitespace(" ")],
                                         },
-                                        CssCustomPropertyDelimiter {
-                                            value: HASH@1886..1887 "#" [] [],
-                                        },
-                                        CssCustomIdentifier {
+                                        ScssHashValue {
+                                            hash_token: HASH@1886..1887 "#" [] [],
                                             value_token: IDENT@1887..1892 "ABCG" [] [Whitespace(" ")],
                                         },
-                                        CssCustomPropertyDelimiter {
-                                            value: HASH@1892..1893 "#" [] [],
-                                        },
-                                        CssRegularDimension {
-                                            value_token: CSS_NUMBER_LITERAL@1893..1895 "12" [] [],
-                                            unit_token: IDENT@1895..1897 "px" [] [],
+                                        ScssHashValue {
+                                            hash_token: HASH@1892..1893 "#" [] [],
+                                            value_token: IDENT@1893..1897 "12px" [] [],
                                         },
                                     ],
                                 },
@@ -4163,19 +4156,15 @@ CssRoot {
                 1: COLON@1879..1881 ":" [] [Whitespace(" ")]
                 2: CSS_CUSTOM_PROPERTY_VALUE@1881..1897
                   0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@1881..1897
-                    0: CSS_CUSTOM_PROPERTY_DELIMITER@1881..1882
+                    0: SCSS_HASH_VALUE@1881..1886
                       0: HASH@1881..1882 "#" [] []
-                    1: CSS_CUSTOM_IDENTIFIER@1882..1886
-                      0: IDENT@1882..1886 "app" [] [Whitespace(" ")]
-                    2: CSS_CUSTOM_PROPERTY_DELIMITER@1886..1887
+                      1: IDENT@1882..1886 "app" [] [Whitespace(" ")]
+                    1: SCSS_HASH_VALUE@1886..1892
                       0: HASH@1886..1887 "#" [] []
-                    3: CSS_CUSTOM_IDENTIFIER@1887..1892
-                      0: IDENT@1887..1892 "ABCG" [] [Whitespace(" ")]
-                    4: CSS_CUSTOM_PROPERTY_DELIMITER@1892..1893
+                      1: IDENT@1887..1892 "ABCG" [] [Whitespace(" ")]
+                    2: SCSS_HASH_VALUE@1892..1897
                       0: HASH@1892..1893 "#" [] []
-                    5: CSS_REGULAR_DIMENSION@1893..1897
-                      0: CSS_NUMBER_LITERAL@1893..1895 "12" [] []
-                      1: IDENT@1895..1897 "px" [] []
+                      1: IDENT@1893..1897 "12px" [] []
               1: (empty)
             1: SEMICOLON@1897..1898 ";" [] []
           39: CSS_DECLARATION_WITH_SEMICOLON@1898..1921

@@ -1,0 +1,12 @@
+/* should not generate diagnostics */
+.theme {
+  --colors: #4566a8 #000000B2;
+  --raw: #12unknown #12345;
+  --nested: token(#12unknown);
+  --interpolated: #12#{suffix};
+  color: #4566a8;
+}
+
+@supports (--accent: #4566a8) {
+  .supported { --raw: #12unknown; }
+}

@@ -15175,6 +15175,7 @@ pub enum AnyCssCustomPropertyComponent {
     CssNumber(CssNumber),
     CssString(CssString),
     CssUrlFunction(CssUrlFunction),
+    ScssHashValue(ScssHashValue),
     ScssInterpolatedString(ScssInterpolatedString),
     ScssInterpolation(ScssInterpolation),
 }
@@ -15240,6 +15241,12 @@ impl AnyCssCustomPropertyComponent {
     pub fn as_css_url_function(&self) -> Option<&CssUrlFunction> {
         match &self {
             Self::CssUrlFunction(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_hash_value(&self) -> Option<&ScssHashValue> {
+        match &self {
+            Self::ScssHashValue(item) => Some(item),
             _ => None,
         }
     }
@@ -39064,6 +39071,11 @@ impl From<CssUrlFunction> for AnyCssCustomPropertyComponent {
         Self::CssUrlFunction(node)
     }
 }
+impl From<ScssHashValue> for AnyCssCustomPropertyComponent {
+    fn from(node: ScssHashValue) -> Self {
+        Self::ScssHashValue(node)
+    }
+}
 impl From<ScssInterpolatedString> for AnyCssCustomPropertyComponent {
     fn from(node: ScssInterpolatedString) -> Self {
         Self::ScssInterpolatedString(node)
@@ -39086,6 +39098,7 @@ impl AstNode for AnyCssCustomPropertyComponent {
         .union(CssNumber::KIND_SET)
         .union(CssString::KIND_SET)
         .union(CssUrlFunction::KIND_SET)
+        .union(ScssHashValue::KIND_SET)
         .union(ScssInterpolatedString::KIND_SET)
         .union(ScssInterpolation::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
@@ -39099,6 +39112,7 @@ impl AstNode for AnyCssCustomPropertyComponent {
             | CSS_NUMBER
             | CSS_STRING
             | CSS_URL_FUNCTION
+            | SCSS_HASH_VALUE
             | SCSS_INTERPOLATED_STRING
             | SCSS_INTERPOLATION => true,
             k if AnyCssDimension::can_cast(k) => true,
@@ -39128,6 +39142,7 @@ impl AstNode for AnyCssCustomPropertyComponent {
             CSS_NUMBER => Self::CssNumber(CssNumber { syntax }),
             CSS_STRING => Self::CssString(CssString { syntax }),
             CSS_URL_FUNCTION => Self::CssUrlFunction(CssUrlFunction { syntax }),
+            SCSS_HASH_VALUE => Self::ScssHashValue(ScssHashValue { syntax }),
             SCSS_INTERPOLATED_STRING => {
                 Self::ScssInterpolatedString(ScssInterpolatedString { syntax })
             }
@@ -39152,6 +39167,7 @@ impl AstNode for AnyCssCustomPropertyComponent {
             Self::CssNumber(it) => it.syntax(),
             Self::CssString(it) => it.syntax(),
             Self::CssUrlFunction(it) => it.syntax(),
+            Self::ScssHashValue(it) => it.syntax(),
             Self::ScssInterpolatedString(it) => it.syntax(),
             Self::ScssInterpolation(it) => it.syntax(),
             Self::AnyCssDimension(it) => it.syntax(),
@@ -39168,6 +39184,7 @@ impl AstNode for AnyCssCustomPropertyComponent {
             Self::CssNumber(it) => it.into_syntax(),
             Self::CssString(it) => it.into_syntax(),
             Self::CssUrlFunction(it) => it.into_syntax(),
+            Self::ScssHashValue(it) => it.into_syntax(),
             Self::ScssInterpolatedString(it) => it.into_syntax(),
             Self::ScssInterpolation(it) => it.into_syntax(),
             Self::AnyCssDimension(it) => it.into_syntax(),
@@ -39187,6 +39204,7 @@ impl std::fmt::Debug for AnyCssCustomPropertyComponent {
             Self::CssNumber(it) => std::fmt::Debug::fmt(it, f),
             Self::CssString(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUrlFunction(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssHashValue(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolatedString(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssInterpolation(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -39207,6 +39225,7 @@ impl From<AnyCssCustomPropertyComponent> for SyntaxNode {
             AnyCssCustomPropertyComponent::CssNumber(it) => it.into_syntax(),
             AnyCssCustomPropertyComponent::CssString(it) => it.into_syntax(),
             AnyCssCustomPropertyComponent::CssUrlFunction(it) => it.into_syntax(),
+            AnyCssCustomPropertyComponent::ScssHashValue(it) => it.into_syntax(),
             AnyCssCustomPropertyComponent::ScssInterpolatedString(it) => it.into_syntax(),
             AnyCssCustomPropertyComponent::ScssInterpolation(it) => it.into_syntax(),
         }
