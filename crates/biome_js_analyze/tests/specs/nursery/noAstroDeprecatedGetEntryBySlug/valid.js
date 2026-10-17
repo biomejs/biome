@@ -1,0 +1,11 @@
+/* should not generate diagnostics */
+import { getEntry } from "astro:content";
+import { getCollection, getEntry as getPost } from "astro:content";
+import * as content from "astro:content";
+import "astro:content";
+import { getEntryBySlug } from "./content";
+import { getEntryBySlug as getPage } from "astro";
+export { getEntry as getEntryBySlug } from "astro:content";
+export { getEntryBySlug as getBySlug } from "./content";
+
+function getEntryBySlug2() {}
