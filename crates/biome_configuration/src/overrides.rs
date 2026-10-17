@@ -758,13 +758,16 @@ pub struct OverrideFormatterConfiguration {
     ///
     /// `never` formats arrays and objects on one line if they fit.
     ///
+    /// `whenMultiple` expands arrays and objects with more than one member, and keeps single-member
+    /// collections on one line if they fit. Use `when-multiple` on the CLI.
+    ///
     /// If unset, uses the configured formatter setting.
     ///
     /// When formatting `package.json`, Biome uses `always` unless configured otherwise.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(
         feature = "cli",
-        bpaf(long("object-wrap"), argument("auto|always|never"))
+        bpaf(long("object-wrap"), argument("auto|always|never|when-multiple"))
     )]
     pub expand: Option<Expand>,
 

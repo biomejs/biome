@@ -1,0 +1,70 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome format --write selected.js selected.json other.js
+```
+
+## `biome.json`
+
+```json
+{
+  "formatter": { "expand": "never" },
+  "overrides": [
+    {
+      "includes": ["selected.js", "selected.json"],
+      "formatter": { "expand": "whenMultiple" }
+    }
+  ]
+}
+```
+
+## `other.js`
+
+```js
+const single = { a: 1 };
+const multiple = { a: 1, b: 2 };
+const array = [1, 2];
+
+```
+
+## `selected.js`
+
+```js
+const single = { a: 1 };
+const multiple = {
+	a: 1,
+	b: 2,
+};
+const array = [
+	1,
+	2,
+];
+
+```
+
+## `selected.json`
+
+```json
+{
+	"single": { "a": 1 },
+	"multiple": {
+		"a": 1,
+		"b": 2
+	},
+	"array": [
+		1,
+		2
+	]
+}
+
+```
+
+# Emitted Messages
+
+```block
+Formatted 3 files in <TIME>. Fixed 3 files.
+```

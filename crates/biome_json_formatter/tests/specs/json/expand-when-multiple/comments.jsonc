@@ -1,0 +1,14 @@
+{
+  "multiple": { /* first */ "a": 1, /* between */ "b": 2 /* last */ },
+  "single": { "a": 1 /* last */ },
+  "lineComment": { "a": 1 // last
+  },
+  "emptyComment": { /* empty */ },
+  "multipleArray": [/* first */ 1, /* between */ 2 /* last */],
+  "singleArray": [1 /* last */],
+  "arrayLineComment": [1 // last
+  ],
+  "emptyArrayComment": [/* empty */],
+  // biome-ignore format: Preserve the explicit layout
+  "suppressed": { "a": 1, "b": 2 }
+}

@@ -1,7 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::{
-    CstFormatContext, Expand, FormatContext, FormatRuleWithOptions, GroupId, write,
-};
+use biome_formatter::{CstFormatContext, FormatRuleWithOptions, GroupId, write};
 
 use crate::utils::array::write_array_node;
 
@@ -27,7 +25,7 @@ impl FormatRule<JsArrayElementList> for FormatJsArrayElementList {
     type Context = JsFormatContext;
 
     fn fmt(&self, node: &JsArrayElementList, f: &mut JsFormatter) -> FormatResult<()> {
-        let expand_lists = f.context().options().expand() == Expand::Always;
+        let expand_lists = f.options().expand().should_expand_for_length(node.len());
         let layout = if expand_lists {
             ArrayLayout::OnePerLine
         } else if can_concisely_print_array_list(node, f.context().comments()) {

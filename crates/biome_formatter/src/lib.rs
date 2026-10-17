@@ -958,6 +958,21 @@ pub enum Expand {
     Always,
     /// Objects and arrays remain on one line if they fit.
     Never,
+    /// Objects and arrays with multiple members are expanded. Single-member collections remain on
+    /// one line if they fit.
+    WhenMultiple,
+}
+
+impl Expand {
+    /// Returns whether the number of members forces a collection onto multiple lines.
+    /// Source newlines, comments, and line width are handled separately by the language formatter.
+    pub const fn should_expand_for_length(self, length: usize) -> bool {
+        match self {
+            Self::Always => true,
+            Self::WhenMultiple => length > 1,
+            Self::Auto | Self::Never => false,
+        }
+    }
 }
 
 impl FromStr for Expand {
@@ -967,6 +982,7 @@ impl FromStr for Expand {
             "auto" => Ok(Self::Auto),
             "always" => Ok(Self::Always),
             "never" => Ok(Self::Never),
+            "when-multiple" => Ok(Self::WhenMultiple),
             _ => Err(std::format!("unknown expand literal: {s}")),
         }
     }
@@ -978,6 +994,7 @@ impl fmt::Display for Expand {
             Self::Auto => std::write!(f, "Auto"),
             Self::Always => std::write!(f, "Always"),
             Self::Never => std::write!(f, "Never"),
+            Self::WhenMultiple => std::write!(f, "When Multiple"),
         }
     }
 }
