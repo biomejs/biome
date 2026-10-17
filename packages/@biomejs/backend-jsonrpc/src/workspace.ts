@@ -2977,6 +2977,11 @@ export interface Nursery {
 	 */
 	noBunModules?: NoBunModulesConfiguration;
 	/**
+	 * Disallow names that start or end with an underscore.
+	 * See https://biomejs.dev/linter/rules/no-dangling-underscore
+	 */
+	noDanglingUnderscore?: NoDanglingUnderscoreConfiguration;
+	/**
 	 * Disallow two comparisons of the same values that can be combined into one.
 	 * See https://biomejs.dev/linter/rules/no-double-comparison
 	 */
@@ -5715,6 +5720,9 @@ export type NoBaseToStringConfiguration =
 export type NoBunModulesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBunModulesOptions;
+export type NoDanglingUnderscoreConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDanglingUnderscoreOptions;
 export type NoDoubleComparisonConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDoubleComparisonOptions;
@@ -8159,6 +8167,10 @@ export interface RuleWithNoBaseToStringOptions {
 export interface RuleWithNoBunModulesOptions {
 	level: RulePlainConfiguration;
 	options?: NoBunModulesOptions;
+}
+export interface RuleWithNoDanglingUnderscoreOptions {
+	level: RulePlainConfiguration;
+	options?: NoDanglingUnderscoreOptions;
 }
 export interface RuleWithNoDoubleComparisonOptions {
 	/**
@@ -10755,6 +10767,7 @@ export interface NoBaseToStringOptions {
 	ignoredTypeNames?: string[];
 }
 export type NoBunModulesOptions = {};
+export type NoDanglingUnderscoreOptions = {};
 export type NoDoubleComparisonOptions = {};
 export type NoDuplicateMapKeysOptions = {};
 export interface NoExcessiveStatementsPerFunctionOptions {
@@ -12516,6 +12529,7 @@ export type Category =
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
+	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
