@@ -4,7 +4,6 @@ use biome_diagnostics::{Error, StdError};
 use biome_fs::normalize_path;
 use biome_package::node_semver::Version;
 use camino::{Utf8Path, Utf8PathBuf};
-use reqwest::blocking::Client;
 use self_update::backends::github::Update;
 use std::env;
 use std::fmt;
@@ -12,8 +11,10 @@ use std::process::{Command, Stdio};
 use std::time::Duration;
 
 const BREW_BINARY_NAME: &str = "biome";
+const GITHUB_API_BASE_URL: &str = "https://api.github.com";
 const GITHUB_REPO_OWNER: &str = "biomejs";
 const GITHUB_REPO_NAME: &str = "biome";
+const GITHUB_RELEASE_TAG_PREFIX: &str = "@biomejs/biome@";
 const LATEST_VERSION_URL: &str = "https://biomejs.dev/api/versions/latest.txt";
 
 /// Upgrade Biome to the latest version.
@@ -38,7 +39,7 @@ pub(crate) fn upgrade(session: CliSession) -> Result<(), CliDiagnostic> {
             None,
         )),
         InstallSource::Homebrew => upgrade_with_homebrew(session),
-        InstallSource::Standalone => upgrade_standalone(session),
+        InstallSource::Standalone => upgrade_standalone(session, &current_exe),
         InstallSource::Unknown => Err(unknown_install_source_upgrade_error()),
     }
 }
@@ -101,11 +102,10 @@ fn upgrade_with_homebrew(session: CliSession) -> Result<(), CliDiagnostic> {
 
 /// Upgrade the standalone Biome binary by downloading the latest release from GitHub and replacing
 /// the current executable.
-fn upgrade_standalone(session: CliSession) -> Result<(), CliDiagnostic> {
+fn upgrade_standalone(session: CliSession, current_exe: &Utf8Path) -> Result<(), CliDiagnostic> {
     let target =
         release_target().map_err(|err| CliDiagnostic::upgrade_error(err.to_string(), None))?;
-    let identifier = release_asset_identifier(&target);
-    let latest_version = latest_available_version()?;
+    let latest_version = latest_available_version(LATEST_VERSION_URL)?;
 
     if !is_version_newer(VERSION, &latest_version)? {
         session.app.console.log(markup! {
@@ -118,17 +118,59 @@ fn upgrade_standalone(session: CliSession) -> Result<(), CliDiagnostic> {
         "Downloading the latest standalone Biome release..."
     });
 
-    let status = Update::configure()
+    let status = install_release(
+        GITHUB_API_BASE_URL,
+        &target,
+        VERSION,
+        &latest_version,
+        current_exe,
+    )?;
+
+    match status {
+        self_update::VersionStatus::UpToDate(version) => {
+            session.app.console.log(markup! {
+                "Biome is already up to date at version "<Emphasis>{version}</Emphasis>"."
+            });
+        }
+        self_update::VersionStatus::Updated(version) => {
+            session.app.console.log(markup! {
+                "Biome upgraded successfully to version "<Emphasis>{version}</Emphasis>"."
+            });
+            session.app.console.log(markup! {
+                <Info>
+                    "Your editor may still be using the previous Biome version. Reload it to pick up the updated binary."
+                </Info>
+            });
+        }
+        _ => {}
+    }
+
+    Ok(())
+}
+
+/// Download the release tagged with `latest_version` through the GitHub API at `api_base_url` and
+/// install its binary for `target` at `install_path`.
+fn install_release(
+    api_base_url: &str,
+    target: &str,
+    current_version: &str,
+    latest_version: &str,
+    install_path: &Utf8Path,
+) -> Result<self_update::VersionStatus, CliDiagnostic> {
+    Update::configure()
+        .api_base_url(api_base_url)
         .repo_owner(GITHUB_REPO_OWNER)
         .repo_name(GITHUB_REPO_NAME)
+        .tag_prefix(GITHUB_RELEASE_TAG_PREFIX)
         .bin_name(binary_name_for_self_update())
-        .target(&target)
-        .identifier(&identifier)
-        .current_version(VERSION)
-        .target_version_tag(&release_tag_for_version(&latest_version))
+        .target(target)
+        .asset_identifier(release_asset_identifier(target))
+        .current_version(current_version)
+        .release_tag(release_tag_for_version(latest_version))
         .show_output(false)
         .show_download_progress(true)
         .no_confirm(true)
+        .bin_install_path(install_path)
         .build()
         .map_err(|err| {
             CliDiagnostic::upgrade_error(
@@ -142,57 +184,23 @@ fn upgrade_standalone(session: CliSession) -> Result<(), CliDiagnostic> {
                 "Failed to apply the standalone upgrade.",
                 Some(Error::from(StdError::from(err))),
             )
-        })?;
-
-    match status {
-        self_update::Status::UpToDate(version) => {
-            session.app.console.log(markup! {
-                "Biome is already up to date at version "<Emphasis>{version}</Emphasis>"."
-            });
-        }
-        self_update::Status::Updated(version) => {
-            session.app.console.log(markup! {
-                "Biome upgraded successfully to version "<Emphasis>{version}</Emphasis>"."
-            });
-            session.app.console.log(markup! {
-                <Info>
-                    "Your editor may still be using the previous Biome version. Reload it to pick up the updated binary."
-                </Info>
-            });
-        }
-    }
-
-    Ok(())
+        })
 }
 
-fn latest_available_version() -> Result<String, CliDiagnostic> {
-    let version = Client::builder()
-        .connect_timeout(Duration::from_secs(10))
-        .timeout(Duration::from_secs(30))
-        .build()
-        .map_err(|err| {
-            CliDiagnostic::upgrade_error(
-                "Failed to create the HTTP client used to check the latest Biome version.",
-                Some(Error::from(StdError::from(err))),
-            )
-        })?
-        .get(LATEST_VERSION_URL)
-        .send()
-        .map_err(|err| {
-            CliDiagnostic::upgrade_error(
-                "Failed to request the latest Biome version.",
-                Some(Error::from(StdError::from(err))),
-            )
-        })?
-        .error_for_status()
-        .map_err(|err| {
-            CliDiagnostic::upgrade_error(
-                "Failed to fetch the latest Biome version.",
-                Some(Error::from(StdError::from(err))),
-            )
-        })?;
+fn latest_available_version(url: &str) -> Result<String, CliDiagnostic> {
+    let config = ureq::Agent::config_builder()
+        .timeout_global(Some(Duration::from_secs(30)))
+        .timeout_connect(Some(Duration::from_secs(10)))
+        .build();
 
-    let version = version.text().map_err(|err| {
+    let mut response = ureq::Agent::from(config).get(url).call().map_err(|err| {
+        CliDiagnostic::upgrade_error(
+            "Failed to fetch the latest Biome version.",
+            Some(Error::from(StdError::from(err))),
+        )
+    })?;
+
+    let version = response.body_mut().read_to_string().map_err(|err| {
         CliDiagnostic::upgrade_error(
             "Failed to read the latest Biome version response.",
             Some(Error::from(StdError::from(err))),
@@ -205,7 +213,7 @@ fn latest_available_version() -> Result<String, CliDiagnostic> {
 }
 
 fn release_tag_for_version(version: &str) -> String {
-    format!("@biomejs/biome@{version}")
+    format!("{GITHUB_RELEASE_TAG_PREFIX}{version}")
 }
 
 fn is_version_newer(current: &str, latest: &str) -> Result<bool, CliDiagnostic> {
@@ -381,6 +389,8 @@ impl fmt::Display for ExitStatusDisplay {
 mod tests {
     use super::*;
     use biome_diagnostics::PrintDescription;
+    use std::io::{BufRead, BufReader, Write};
+    use std::net::TcpListener;
 
     #[test]
     fn detects_npm_install_from_path() {
@@ -471,5 +481,89 @@ mod tests {
     #[test]
     fn rejects_invalid_versions() {
         assert!(parse_version("not-a-version").is_err());
+    }
+
+    /// Serve `respond(path, base_url)` over HTTP on a random local port and return the base URL.
+    /// Paths without a response get a `404`.
+    fn start_http_server(respond: fn(&str, &str) -> Option<Vec<u8>>) -> String {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let base_url = format!("http://{}", listener.local_addr().unwrap());
+
+        let server_base_url = base_url.clone();
+        std::thread::spawn(move || {
+            for stream in listener.incoming() {
+                let mut stream = stream.unwrap();
+                let mut request_line = String::new();
+                let mut reader = BufReader::new(&stream);
+                reader.read_line(&mut request_line).unwrap();
+                // Drain the headers; every request in these tests is a bodiless GET.
+                let mut header = String::new();
+                while reader.read_line(&mut header).unwrap() > 2 {
+                    header.clear();
+                }
+
+                let path = request_line.split(' ').nth(1).unwrap_or_default();
+                let (status, body) = match respond(path, &server_base_url) {
+                    Some(body) => ("200 OK", body),
+                    None => ("404 Not Found", Vec::new()),
+                };
+                write!(
+                    stream,
+                    "HTTP/1.1 {status}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+                    body.len()
+                )
+                .unwrap();
+                stream.write_all(&body).unwrap();
+            }
+        });
+
+        base_url
+    }
+
+    #[test]
+    fn installs_latest_release_from_github() {
+        let base_url = start_http_server(|path, base_url| match path {
+            "/latest.txt" => Some(b"2.5.15\n".to_vec()),
+            "/repos/biomejs/biome/releases/tags/%40biomejs%2Fbiome%402.5.15" => {
+                let target = release_target().unwrap();
+                let asset = release_asset_identifier(&target);
+                Some(
+                    format!(
+                        r#"{{
+                            "tag_name": "@biomejs/biome@2.5.15",
+                            "created_at": "2026-10-01T00:00:00Z",
+                            "assets": [{{ "name": "{asset}", "url": "{base_url}/assets/{asset}" }}]
+                        }}"#
+                    )
+                    .into_bytes(),
+                )
+            }
+            path if path.starts_with("/assets/") => Some(b"new biome".to_vec()),
+            _ => None,
+        });
+
+        let dir = std::env::temp_dir().join(format!("biome-upgrade-test-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let install_path = Utf8PathBuf::from_path_buf(dir.join("biome")).unwrap();
+        std::fs::write(&install_path, "old biome").unwrap();
+
+        let latest_version = latest_available_version(&format!("{base_url}/latest.txt")).unwrap();
+        assert_eq!(latest_version, "2.5.15");
+
+        let status = install_release(
+            &base_url,
+            &release_target().unwrap(),
+            "2.5.0",
+            &latest_version,
+            &install_path,
+        )
+        .unwrap();
+
+        let installed = std::fs::read_to_string(&install_path).unwrap();
+        std::fs::remove_dir_all(&dir).unwrap();
+        assert!(
+            matches!(status, self_update::VersionStatus::Updated(version) if version == "2.5.15")
+        );
+        assert_eq!(installed, "new biome");
     }
 }
