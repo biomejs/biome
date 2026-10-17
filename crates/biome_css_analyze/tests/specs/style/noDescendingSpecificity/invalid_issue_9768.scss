@@ -67,3 +67,31 @@
 .c9 {
   @include theme;
 }
+
+// An `@include` inside control flow still counts, so `.c10` is reported.
+.c10a .c10 { color: red; }
+
+.c10 {
+  @if $condition {
+    @include theme;
+  }
+}
+
+// Nested selectors are compared as written out in full, like `nav label:hover {}`, so
+// `aside label` is reported.
+nav {
+  label {
+    color: green;
+
+    &:hover { background: #ccc; }
+  }
+}
+
+aside {
+  label { color: blue; }
+}
+
+// The order of simple selectors doesn't change the subject, so `.baz.bar` is reported.
+#foo .bar.baz { color: red; }
+
+.baz.bar { color: blue; }

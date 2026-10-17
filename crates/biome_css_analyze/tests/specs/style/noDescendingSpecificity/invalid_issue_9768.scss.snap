@@ -74,6 +74,34 @@ expression: invalid_issue_9768.scss
   @include theme;
 }
 
+// An `@include` inside control flow still counts, so `.c10` is reported.
+.c10a .c10 { color: red; }
+
+.c10 {
+  @if $condition {
+    @include theme;
+  }
+}
+
+// Nested selectors are compared as written out in full, like `nav label:hover {}`, so
+// `aside label` is reported.
+nav {
+  label {
+    color: green;
+
+    &:hover { background: #ccc; }
+  }
+}
+
+aside {
+  label { color: blue; }
+}
+
+// The order of simple selectors doesn't change the subject, so `.baz.bar` is reported.
+#foo .bar.baz { color: red; }
+
+.baz.bar { color: blue; }
+
 ```
 
 # Diagnostics
@@ -172,6 +200,80 @@ invalid_issue_9768.scss:67:1 lint/style/noDescendingSpecificity ━━━━━�
        │ ^^^^^^^^
     66 │ 
     67 │ .c9 {
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+invalid_issue_9768.scss:74:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 1, 0)
+  
+    72 │ .c10a .c10 { color: red; }
+    73 │ 
+  > 74 │ .c10 {
+       │ ^^^^
+    75 │   @if $condition {
+    76 │     @include theme;
+  
+  i This selector specificity is (0, 2, 0)
+  
+    71 │ // An `@include` inside control flow still counts, so `.c10` is reported.
+  > 72 │ .c10a .c10 { color: red; }
+       │ ^^^^^^^^^^
+    73 │ 
+    74 │ .c10 {
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+invalid_issue_9768.scss:91:3 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 0, 2)
+  
+    90 │ aside {
+  > 91 │   label { color: blue; }
+       │   ^^^^^
+    92 │ }
+    93 │ 
+  
+  i This selector specificity is (0, 1, 2)
+  
+    84 │     color: green;
+    85 │ 
+  > 86 │     &:hover { background: #ccc; }
+       │     ^^^^^^^
+    87 │   }
+    88 │ }
+  
+  i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
+  
+
+```
+
+```
+invalid_issue_9768.scss:97:1 lint/style/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Descending specificity selector found. This selector specificity is (0, 2, 0)
+  
+    95 │ #foo .bar.baz { color: red; }
+    96 │ 
+  > 97 │ .baz.bar { color: blue; }
+       │ ^^^^^^^^
+    98 │ 
+  
+  i This selector specificity is (1, 2, 0)
+  
+    94 │ // The order of simple selectors doesn't change the subject, so `.baz.bar` is reported.
+  > 95 │ #foo .bar.baz { color: red; }
+       │ ^^^^^^^^^^^^^
+    96 │ 
+    97 │ .baz.bar { color: blue; }
   
   i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
   
