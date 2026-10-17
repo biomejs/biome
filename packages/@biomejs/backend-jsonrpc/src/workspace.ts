@@ -3437,6 +3437,11 @@ export interface Nursery {
 	 */
 	useNullishCoalescing?: UseNullishCoalescingConfiguration;
 	/**
+	 * Enforce that the engines field in package.json is valid.
+	 * See https://biomejs.dev/linter/rules/use-package-json-valid-engines
+	 */
+	usePackageJsonValidEngines?: UsePackageJsonValidEnginesConfiguration;
+	/**
 	 * Require Error objects as Promise rejection reasons.
 	 * See https://biomejs.dev/linter/rules/use-promise-reject-errors
 	 */
@@ -5991,6 +5996,9 @@ export type UseNamedLayerConfiguration =
 export type UseNullishCoalescingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseNullishCoalescingOptions;
+export type UsePackageJsonValidEnginesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUsePackageJsonValidEnginesOptions;
 export type UsePromiseRejectErrorsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUsePromiseRejectErrorsOptions;
@@ -8652,6 +8660,10 @@ export interface RuleWithUseNullishCoalescingOptions {
 	level: RulePlainConfiguration;
 	options?: UseNullishCoalescingOptions;
 }
+export interface RuleWithUsePackageJsonValidEnginesOptions {
+	level: RulePlainConfiguration;
+	options?: UsePackageJsonValidEnginesOptions;
+}
 export interface RuleWithUsePromiseRejectErrorsOptions {
 	level: RulePlainConfiguration;
 	options?: UsePromiseRejectErrorsOptions;
@@ -11038,6 +11050,7 @@ export interface UseNullishCoalescingOptions {
 	 */
 	ignoreTernaryTests?: boolean;
 }
+export type UsePackageJsonValidEnginesOptions = {};
 export type UsePromiseRejectErrorsOptions = {};
 export interface UseReactCompilerOptions {
 	/**
@@ -12647,6 +12660,7 @@ export type Category =
 	| "lint/nursery/useNamedFunction"
 	| "lint/nursery/useNamedLayer"
 	| "lint/nursery/useNullishCoalescing"
+	| "lint/nursery/usePackageJsonValidEngines"
 	| "lint/nursery/usePromiseRejectErrors"
 	| "lint/nursery/useReactCompiler"
 	| "lint/nursery/useReactFunctionComponentDefinition"

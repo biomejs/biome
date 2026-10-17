@@ -358,6 +358,7 @@ define_categories! {
     "lint/nursery/useNamedFunction": "https://biomejs.dev/linter/rules/use-named-function",
     "lint/nursery/useNamedLayer": "https://biomejs.dev/linter/rules/use-named-layer",
     "lint/nursery/useNullishCoalescing": "https://biomejs.dev/linter/rules/use-nullish-coalescing",
+    "lint/nursery/usePackageJsonValidEngines": "https://biomejs.dev/linter/rules/use-package-json-valid-engines",
     "lint/nursery/usePromiseRejectErrors": "https://biomejs.dev/linter/rules/use-promise-reject-errors",
     "lint/nursery/useReactCompiler": "https://biomejs.dev/linter/rules/use-react-compiler",
     "lint/nursery/useReactFunctionComponentDefinition": "https://biomejs.dev/linter/rules/use-react-function-component-definition",

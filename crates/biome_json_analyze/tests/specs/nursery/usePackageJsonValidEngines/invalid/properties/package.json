@@ -1,0 +1,14 @@
+{
+	"name": "example",
+	"engines": {
+		"node": 24,
+		"npm": "",
+		"pnpm": "   ",
+		"yarn": "\t\n",
+		"bun": null,
+		"deno": true,
+		"vscode": ["^1.90.0"],
+		"electron": { "min": "30.0.0" },
+		"": 24
+	}
+}
