@@ -241,6 +241,9 @@ export interface FormatterConfiguration {
 	 *
 	 * `never` formats arrays and objects on one line if they fit.
 	 *
+	 * `whenMultiple` expands arrays and objects with more than one member, and keeps single-member
+	 * collections on one line if they fit. Use `when-multiple` on the CLI.
+	 *
 	 * Defaults to `auto`.
 	 *
 	 * When formatting `package.json`, Biome uses `always` unless configured otherwise.
@@ -733,7 +736,7 @@ export type BracketSpacing = boolean;
  * no extra spaces are added. The specific delimiters affected depend on the language.
  */
 export type DelimiterSpacing = boolean;
-export type Expand = "auto" | "always" | "never";
+export type Expand = "auto" | "always" | "never" | "whenMultiple";
 export type IndentStyle = "tab" | "space";
 /**
  * Sets the indentation width. With space indentation, this is the number of spaces emitted per
@@ -1018,7 +1021,8 @@ export interface JsFormatterConfiguration {
 	 */
 	enabled?: Bool;
 	/**
-	 * Uses the same `auto`, `always`, and `never` behavior as the global expansion setting.
+	 * Uses the same `auto`, `always`, `never`, and `whenMultiple` behavior as the global expansion
+	 * setting. Use `when-multiple` on the CLI.
 	 *
 	 * If unset, inherits the global expansion setting.
 	 */
@@ -1173,7 +1177,8 @@ export interface JsonFormatterConfiguration {
 	 */
 	enabled?: Bool;
 	/**
-	 * Uses the same `auto`, `always`, and `never` behavior as the global expansion setting.
+	 * Uses the same `auto`, `always`, `never`, and `whenMultiple` behavior as the global expansion
+	 * setting. Use `when-multiple` on the CLI.
 	 *
 	 * If unset, inherits the global expansion setting.
 	 *
@@ -1667,6 +1672,9 @@ export interface OverrideFormatterConfiguration {
 	 * `always` formats arrays and objects on multiple lines.
 	 *
 	 * `never` formats arrays and objects on one line if they fit.
+	 *
+	 * `whenMultiple` expands arrays and objects with more than one member, and keeps single-member
+	 * collections on one line if they fit. Use `when-multiple` on the CLI.
 	 *
 	 * If unset, uses the configured formatter setting.
 	 *

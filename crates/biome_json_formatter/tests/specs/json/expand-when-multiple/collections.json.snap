@@ -1,0 +1,90 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: json/expand-when-multiple/collections.json
+---
+
+# Input
+
+```json
+{
+  "single": { "a": 1 },
+  "multiple": { "a": 1, "b": 2 },
+  "empty": {},
+  "expandedSingle": {
+    "a": 1
+  },
+  "nested": { "a": { "b": 1, "c": 2 } },
+  "singleArray": [1],
+  "multipleArray": [1, 2, 3],
+  "emptyArray": [],
+  "expandedSingleArray": [
+    1
+  ],
+  "nestedArray": [[1, 2], { "a": 1, "b": 2 }],
+  "singleNestedArray": [{ "a": 1 }],
+  "longSingle": { "value": "a value that is long enough to make this single-property object exceed the configured line width" }
+}
+
+```
+
+
+# Options
+
+```json
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "json": {
+    "formatter": {
+      "expand": "whenMultiple"
+    }
+  }
+}
+```
+
+# Formatted
+
+```json
+{
+	"single": { "a": 1 },
+	"multiple": {
+		"a": 1,
+		"b": 2
+	},
+	"empty": {},
+	"expandedSingle": { "a": 1 },
+	"nested": {
+		"a": {
+			"b": 1,
+			"c": 2
+		}
+	},
+	"singleArray": [1],
+	"multipleArray": [
+		1,
+		2,
+		3
+	],
+	"emptyArray": [],
+	"expandedSingleArray": [1],
+	"nestedArray": [
+		[
+			1,
+			2
+		],
+		{
+			"a": 1,
+			"b": 2
+		}
+	],
+	"singleNestedArray": [{ "a": 1 }],
+	"longSingle": {
+		"value": "a value that is long enough to make this single-property object exceed the configured line width"
+	}
+}
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   35: 		"value": "a value that is long enough to make this single-property object exceed the configured line width"
+```

@@ -2008,6 +2008,11 @@
 					"description": "Objects and arrays remain on one line if they fit.",
 					"type": "string",
 					"const": "never"
+				},
+				{
+					"description": "Objects and arrays with multiple members are expanded. Single-member collections remain on\none line if they fit.",
+					"type": "string",
+					"const": "whenMultiple"
 				}
 			]
 		},
@@ -2125,7 +2130,7 @@
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"expand": {
-					"description": "Controls whether arrays and objects are formatted on one line or multiple lines.\n\n`auto` formats objects on multiple lines if the first property has a newline, and arrays on\none line if they fit.\n\n`always` formats arrays and objects on multiple lines.\n\n`never` formats arrays and objects on one line if they fit.\n\nDefaults to `auto`.\n\nWhen formatting `package.json`, Biome uses `always` unless configured otherwise.",
+					"description": "Controls whether arrays and objects are formatted on one line or multiple lines.\n\n`auto` formats objects on multiple lines if the first property has a newline, and arrays on\none line if they fit.\n\n`always` formats arrays and objects on multiple lines.\n\n`never` formats arrays and objects on one line if they fit.\n\n`whenMultiple` expands arrays and objects with more than one member, and keeps single-member\ncollections on one line if they fit. Use `when-multiple` on the CLI.\n\nDefaults to `auto`.\n\nWhen formatting `package.json`, Biome uses `always` unless configured otherwise.",
 					"anyOf": [{ "$ref": "#/$defs/Expand" }, { "type": "null" }]
 				},
 				"formatWithErrors": {
@@ -2755,7 +2760,7 @@
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"expand": {
-					"description": "Uses the same `auto`, `always`, and `never` behavior as the global expansion setting.\n\nIf unset, inherits the global expansion setting.",
+					"description": "Uses the same `auto`, `always`, `never`, and `whenMultiple` behavior as the global expansion\nsetting. Use `when-multiple` on the CLI.\n\nIf unset, inherits the global expansion setting.",
 					"anyOf": [{ "$ref": "#/$defs/Expand" }, { "type": "null" }]
 				},
 				"indentStyle": {
@@ -2913,7 +2918,7 @@
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"expand": {
-					"description": "Uses the same `auto`, `always`, and `never` behavior as the global expansion setting.\n\nIf unset, inherits the global expansion setting.\n\nWhen formatting `package.json`, Biome uses `always` unless configured otherwise.",
+					"description": "Uses the same `auto`, `always`, `never`, and `whenMultiple` behavior as the global expansion\nsetting. Use `when-multiple` on the CLI.\n\nIf unset, inherits the global expansion setting.\n\nWhen formatting `package.json`, Biome uses `always` unless configured otherwise.",
 					"anyOf": [{ "$ref": "#/$defs/Expand" }, { "type": "null" }]
 				},
 				"indentStyle": {
@@ -7989,7 +7994,7 @@
 					"anyOf": [{ "$ref": "#/$defs/Bool" }, { "type": "null" }]
 				},
 				"expand": {
-					"description": "Controls whether arrays and objects are formatted on one line or multiple lines.\n\n`auto` formats objects on multiple lines if the first property has a newline, and arrays on\none line if they fit.\n\n`always` formats arrays and objects on multiple lines.\n\n`never` formats arrays and objects on one line if they fit.\n\nIf unset, uses the configured formatter setting.\n\nWhen formatting `package.json`, Biome uses `always` unless configured otherwise.",
+					"description": "Controls whether arrays and objects are formatted on one line or multiple lines.\n\n`auto` formats objects on multiple lines if the first property has a newline, and arrays on\none line if they fit.\n\n`always` formats arrays and objects on multiple lines.\n\n`never` formats arrays and objects on one line if they fit.\n\n`whenMultiple` expands arrays and objects with more than one member, and keeps single-member\ncollections on one line if they fit. Use `when-multiple` on the CLI.\n\nIf unset, uses the configured formatter setting.\n\nWhen formatting `package.json`, Biome uses `always` unless configured otherwise.",
 					"anyOf": [{ "$ref": "#/$defs/Expand" }, { "type": "null" }]
 				},
 				"formatWithErrors": {

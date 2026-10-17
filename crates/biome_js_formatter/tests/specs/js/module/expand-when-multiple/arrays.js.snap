@@ -1,0 +1,110 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/expand-when-multiple/arrays.js
+---
+
+# Input
+
+```js
+const single = [1];
+const multiple = [1, 2, 3];
+const empty = [];
+const expandedSingle = [
+  1,
+];
+const expandedMultiple = [
+  1, 2,
+];
+const nested = [[1, 2], { a: 1, b: 2 }];
+const singleNested = [{ a: 1 }];
+const holes = [, ,];
+const spread = [...other, 1];
+const comments = [/* first */ 1, /* between */ 2 /* last */];
+const lineComment = [1 // last
+];
+const emptyComment = [/* empty */];
+const longSingle = [firstArgument + secondArgument + thirdArgument + fourthArgument + fifthArgument];
+consume([1, 2]);
+const template = `${[1, 2]}`;
+// biome-ignore format: Preserve the explicit layout
+const suppressed = [1, 2];
+
+```
+
+
+# Options
+
+```json
+{
+  "$schema": "../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "expand": "whenMultiple"
+    }
+  }
+}
+```
+
+# Formatted
+
+```js
+const single = [1];
+const multiple = [
+	1,
+	2,
+	3,
+];
+const empty = [];
+const expandedSingle = [1];
+const expandedMultiple = [
+	1,
+	2,
+];
+const nested = [
+	[
+		1,
+		2,
+	],
+	{
+		a: 1,
+		b: 2,
+	},
+];
+const singleNested = [{ a: 1 }];
+const holes = [
+	,
+	,
+];
+const spread = [
+	...other,
+	1,
+];
+const comments = [
+	/* first */ 1,
+	/* between */ 2 /* last */,
+];
+const lineComment = [
+	1, // last
+];
+const emptyComment = [
+	/* empty */
+];
+const longSingle = [
+	firstArgument +
+		secondArgument +
+		thirdArgument +
+		fourthArgument +
+		fifthArgument,
+];
+consume([
+	1,
+	2,
+]);
+const template = `${[
+	1,
+	2,
+]}`;
+// biome-ignore format: Preserve the explicit layout
+const suppressed = [1, 2];
+
+```

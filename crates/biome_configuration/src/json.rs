@@ -134,14 +134,19 @@ pub struct JsonFormatterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub trailing_commas: Option<TrailingCommas>,
 
-    /// Uses the same `auto`, `always`, and `never` behavior as the global expansion setting.
+    /// Uses the same `auto`, `always`, `never`, and `whenMultiple` behavior as the global expansion
+    /// setting. Use `when-multiple` on the CLI.
     ///
     /// If unset, inherits the global expansion setting.
     ///
     /// When formatting `package.json`, Biome uses `always` unless configured otherwise.
     #[cfg_attr(
         feature = "cli",
-        bpaf(long("json-formatter-expand"), argument("auto|always|never"), optional)
+        bpaf(
+            long("json-formatter-expand"),
+            argument("auto|always|never|when-multiple"),
+            optional
+        )
     )]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub expand: Option<Expand>,
