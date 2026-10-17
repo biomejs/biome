@@ -2231,23 +2231,32 @@ impl TypeMember {
                 })
             }
             AnyJsClassMember::JsMethodClassMember(member) => member.name().ok().and_then(|name| {
+                let type_parameters = member.type_parameters();
+                // Reusing the enclosing scope lets nongeneric methods share raw types.
+                let method_scope_id = if type_parameters.is_some() {
+                    collector
+                        .scope_for_node(member.syntax())
+                        .unwrap_or(scope_id)
+                } else {
+                    scope_id
+                };
                 let is_async = member.async_token().is_some();
                 let function = Function {
                     is_async,
                     type_parameters: generic_params_from_ts_type_params(
                         collector,
-                        scope_id,
-                        member.type_parameters(),
+                        method_scope_id,
+                        type_parameters,
                     ),
                     name: name.name().map(text_from_class_member_name),
                     parameters: function_params_from_js_params(
                         collector,
-                        scope_id,
+                        method_scope_id,
                         member.parameters(),
                     ),
                     return_type: function_return_type(
                         collector,
-                        scope_id,
+                        method_scope_id,
                         is_async,
                         member.return_type_annotation(),
                         member.body().ok().map(AnyJsFunctionBody::JsFunctionBody),
@@ -2261,24 +2270,33 @@ impl TypeMember {
                 Self::from_class_member_info(collector, scope_id, name, ty.into(), is_static, false)
             }),
             AnyJsClassMember::TsMethodSignatureClassMember(member) => {
+                let type_parameters = member.type_parameters();
+                // Reusing the enclosing scope lets nongeneric signatures share raw types.
+                let method_scope_id = if type_parameters.is_some() {
+                    collector
+                        .scope_for_node(member.syntax())
+                        .unwrap_or(scope_id)
+                } else {
+                    scope_id
+                };
                 member.name().ok().and_then(|name| {
                     let is_async = member.async_token().is_some();
                     let function = Function {
                         is_async,
                         type_parameters: generic_params_from_ts_type_params(
                             collector,
-                            scope_id,
-                            member.type_parameters(),
+                            method_scope_id,
+                            type_parameters,
                         ),
                         name: name.name().map(text_from_class_member_name),
                         parameters: function_params_from_js_params(
                             collector,
-                            scope_id,
+                            method_scope_id,
                             member.parameters(),
                         ),
                         return_type: function_return_type(
                             collector,
-                            scope_id,
+                            method_scope_id,
                             is_async,
                             member.return_type_annotation(),
                             None,
