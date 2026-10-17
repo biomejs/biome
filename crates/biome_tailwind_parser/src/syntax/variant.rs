@@ -1,9 +1,9 @@
-use crate::lexer::simd::is_whitespace;
+use crate::lexer::simd::{Stop, is_whitespace};
 use crate::parser::TailwindParser;
 use crate::syntax::css_value::parse_css_parameter_list;
 use crate::syntax::parse_error::*;
 use crate::syntax::parse_modifier;
-use crate::token_source::{TailwindTokenSource, lex_css_value, lex_variant_segment};
+use crate::token_source::{TailwindTokenSource, lex_css_value};
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{Parser, parse_recovery::ParseRecoveryTokenSet, token_set};
@@ -131,13 +131,13 @@ fn parse_variant_expression(p: &mut TailwindParser) -> ParsedSyntax {
     let checkpoint = p.checkpoint();
     let m = p.start();
 
-    p.source_mut().regroup_current(lex_variant_segment);
+    p.source_mut().regroup_current(group_variant_segment);
 
     let segments = p.start();
     parse_any_variant_segment(p).or_add_diagnostic(p, expected_value);
 
     while p.at(T![-]) {
-        p.bump_with_context(T![-], lex_variant_segment);
+        p.bump_with_context(T![-], group_variant_segment);
         parse_any_variant_segment(p).or_add_diagnostic(p, expected_value);
     }
 
@@ -168,6 +168,22 @@ fn parse_variant_expression(p: &mut TailwindParser) -> ParsedSyntax {
     Present(m.complete(p, TW_VARIANT_EXPRESSION))
 }
 
+/// Groups the first token of a variant segment: a name, which runs to the next whitespace, `:`,
+/// `-`, `/`, `!`, `[`, `]` or `)`, or one byte.
+pub(crate) fn group_variant_segment(source: &mut TailwindTokenSource) {
+    match source.next_byte() {
+        None => source.take(EOF, 0),
+        Some(byte) if is_whitespace(byte) => source.take_whitespace(),
+        Some(byte @ (b'(' | b')' | b'[' | b']' | b':' | b'-' | b'!' | b'/')) => {
+            source.take_punctuation(byte);
+        }
+        Some(b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' | b'@' | b'*') => {
+            source.merge_until(Stop::Segment, TW_VARIANT_SEGMENT);
+        }
+        Some(_) => source.take_unexpected(),
+    }
+}
+
 fn parse_any_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
     if p.at(T!['[']) {
         return parse_arbitrary_variant_segment(p);
@@ -186,7 +202,9 @@ fn parse_named_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.bump_with_context(TW_VARIANT_SEGMENT, lex_variant_segment);
+    // A segment name ends at a byte that the regular tokens also take on its own, whitespace or
+    // the end of the source.
+    p.bump(TW_VARIANT_SEGMENT);
 
     Present(m.complete(p, TW_NAMED_VARIANT_SEGMENT))
 }

@@ -20,7 +20,7 @@ mod variant;
 #[cfg(test)]
 pub(crate) use css_value::group_url_value;
 #[cfg(test)]
-pub(crate) use variant::group_selector;
+pub(crate) use variant::{group_selector, group_variant_segment};
 
 pub fn parse_root(p: &mut TailwindParser) {
     let m = p.start();
