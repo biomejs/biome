@@ -16,10 +16,9 @@ impl JsxString {
     ///
     /// ```
     /// use biome_js_factory::make;
-    /// use biome_rowan::TriviaPieceKind;
     ///
     ///let string = make::jsx_string(make::jsx_string_literal("button")
-    ///     .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]));
+    ///     .with_leading_space());
     /// assert_eq!(string.inner_string_text().unwrap().text(), "button");
     /// ```
     pub fn inner_string_text(&self) -> SyntaxResult<TokenText> {

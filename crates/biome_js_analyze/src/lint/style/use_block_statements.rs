@@ -97,7 +97,7 @@ macro_rules! use_block_statements_replace_body {
             $node.clone(),
             AnyJsBlockStatement::$stmt_type($stmt.clone().$builder_method(
                 AnyJsStatement::JsBlockStatement(make::js_block_statement(
-                    make::token(T!['{']).with_leading_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                    make::token(T!['{']).with_leading_space(),
                     make::js_statement_list([]),
                     make::token(T!['}']),
                 )),
@@ -203,8 +203,7 @@ impl Rule for UseBlockStatements {
                     });
 
                 if !has_previous_space {
-                    l_curly_token =
-                        l_curly_token.with_leading_trivia([(TriviaPieceKind::Whitespace, " ")]);
+                    l_curly_token = l_curly_token.with_leading_space();
                 }
 
                 // Clone the leading trivia of the single statement as the
@@ -219,8 +218,7 @@ impl Rule for UseBlockStatements {
                 // If the statement has no leading trivia, add a space after
                 // the opening curly token
                 if leading_trivia.is_empty() {
-                    l_curly_token =
-                        l_curly_token.with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+                    l_curly_token = l_curly_token.with_trailing_space();
                 }
 
                 // If the leading trivia for the statement contains any newline,
@@ -267,9 +265,9 @@ impl Rule for UseBlockStatements {
                     // if the node we have to enclose has some trailing comments, then we add a new line
                     // to the leading trivia of the right curly brace
                     if !has_trailing_single_line_comments {
-                        r_curly_token.with_leading_trivia([(TriviaPieceKind::Whitespace, " ")])
+                        r_curly_token.with_leading_space()
                     } else {
-                        r_curly_token.with_leading_trivia([(TriviaPieceKind::Newline, "\n")])
+                        r_curly_token.with_leading_newline()
                     }
                 };
 

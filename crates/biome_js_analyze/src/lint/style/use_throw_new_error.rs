@@ -7,7 +7,7 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsExpression, JsCallExpression, JsNewExpression, JsParenthesizedExpression, JsSyntaxKind, T,
 };
-use biome_rowan::{AstNode, BatchMutationExt, TokenText, TriviaPieceKind};
+use biome_rowan::{AstNode, BatchMutationExt, TokenText};
 use biome_rule_options::use_throw_new_error::UseThrowNewErrorOptions;
 
 use crate::JsRuleAction;
@@ -165,7 +165,7 @@ pub(crate) fn convert_call_expression_to_new_expression(
 
     let new_token = make::token(T![new])
         .with_leading_trivia_pieces(leading_trivia_pieces)
-        .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+        .with_trailing_space();
 
     callee = callee.with_leading_trivia_pieces([])?;
 
