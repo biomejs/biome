@@ -1,0 +1,12 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: validMultipleContents.css
+---
+# Input
+```css
+/* Copyright 2026 Acme Inc. */
+.a { color: red; }
+/* should not generate diagnostics */
+.b { color: blue; }
+
+```
