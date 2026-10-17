@@ -86,11 +86,7 @@ pub(crate) fn parse_attr_function(p: &mut CssParser, context: ValueParsingContex
 /// Recognizes a type after the attribute name in `attr(data-width $unit, 10px)`.
 #[inline]
 fn is_at_attr_type(p: &mut CssParser, context: ValueParsingContext) -> bool {
-    (context.is_scss_exclusive_syntax_allowed() && is_at_scss_attr_type(p))
-        || p.at(T![raw_string])
-        || p.at(T![number])
-        || is_at_type_function(p)
-        || is_at_attr_unit(p)
+    (context.is_scss_exclusive_syntax_allowed() && is_at_scss_attr_type(p)) || is_at_attr_unit(p)
 }
 
 /// Parses a CSS type/unit or its Sass variable or interpolated spelling.
@@ -186,7 +182,7 @@ fn parse_scss_attr_interpolated_name(p: &mut CssParser) -> ParsedSyntax {
 
 #[inline]
 fn is_at_attr_unit(p: &mut CssParser) -> bool {
-    p.at(T![%]) || is_nth_at_unit(p, 0) || is_at_identifier(p)
+    p.at(T![%]) || is_at_identifier(p)
 }
 
 #[inline]
@@ -346,22 +342,12 @@ fn parse_attr_name(p: &mut CssParser, context: ValueParsingContext) -> ParsedSyn
         );
     }
 
-    let name = if is_at_scss_interpolated_name_with_suffixes(p) {
-        parse_scss_attr_interpolated_name(p)
+    if is_at_scss_interpolated_name_with_suffixes(p) {
+        let name = parse_scss_attr_interpolated_name(p);
+        CssSyntaxFeatures::Scss.exclusive_syntax(p, name, |p, marker| {
+            scss_only_syntax_error(p, "SCSS interpolated attribute names", marker.range(p))
+        })
     } else {
         parse_regular_identifier(p)
-    };
-    let Present(name) = name else {
-        return Absent;
-    };
-
-    if name.kind(p) != SCSS_INTERPOLATED_IDENTIFIER {
-        return Present(name);
     }
-
-    CssSyntaxFeatures::Scss.parse_exclusive_syntax(
-        p,
-        |_| Present(name),
-        |p, marker| scss_only_syntax_error(p, "SCSS interpolated attribute names", marker.range(p)),
-    )
 }
