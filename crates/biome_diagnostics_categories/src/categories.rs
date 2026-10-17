@@ -235,6 +235,7 @@ define_categories! {
     "lint/nursery/noDrizzleUpdateWithoutWhere": "https://biomejs.dev/linter/rules/no-drizzle-update-without-where",
     "lint/nursery/noDuplicateFieldDefinitionNames": "https://biomejs.dev/linter/rules/no-duplicate-field-definition-names",
     "lint/nursery/noDuplicateSelectors": "https://biomejs.dev/linter/rules/no-duplicate-selectors",
+    "lint/nursery/noEagerArrayMethodsInLoops": "https://biomejs.dev/linter/rules/no-eager-array-methods-in-loops",
     "lint/nursery/noEmptyObjectKeys": "https://biomejs.dev/linter/rules/no-empty-object-keys",
     "lint/nursery/noExcessiveNestedCallbacks": "https://biomejs.dev/linter/rules/no-excessive-nested-callbacks",
     "lint/nursery/noExcessiveSelectorClasses": "https://biomejs.dev/linter/rules/no-excessive-selector-classes",
