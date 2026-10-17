@@ -1,0 +1,72 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: scss/value/dynamic-attr-units.scss
+---
+
+# Input
+
+```scss
+$name: data-width; $unit:px;
+.card{width:attr( data-width $unit ,10px );height:attr($name$unit,1px);content:attr($name);}
+.interpolated{width:attr(#{$name} #{$unit},10px);height:attr(data-height r#{em},1rem);unknown:attr(data-x #{$unit}01,0);}
+.namespaced{width:attr(data-width units.$unit,10px);}
+.comments{width:attr(#{$name}/**/#{$unit},10px);height:attr(data-height/* unit */$unit/* fallback */,10px);padding:attr(data-gap #{$unit}/* end */);}
+.line-comment{width:attr(data-width $unit // unit
+,10px);}
+.suppressed{width:attr(data-width $unit
+// biome-ignore format: Keep the fallback layout.
+, 10px   +   2px);}
+.keep{width:/* biome-ignore format: Keep the function layout. */ attr( data-width $unit,10px );}
+
+```
+
+
+# Formatted
+
+```scss
+$name: data-width;
+$unit: px;
+.card {
+	width: attr(data-width $unit, 10px);
+	height: attr($name $unit, 1px);
+	content: attr($name);
+}
+.interpolated {
+	width: attr(#{$name} #{$unit}, 10px);
+	height: attr(data-height r#{em}, 1rem);
+	unknown: attr(data-x #{$unit}01, 0);
+}
+.namespaced {
+	width: attr(data-width units.$unit, 10px);
+}
+.comments {
+	width: attr(#{$name} /**/ #{$unit}, 10px);
+	height: attr(data-height /* unit */ $unit /* fallback */, 10px);
+	padding: attr(data-gap #{$unit} /* end */);
+}
+.line-comment {
+	width: attr(
+		data-width
+		$unit // unit
+		,
+		10px
+	);
+}
+.suppressed {
+	width: attr(
+		data-width
+		$unit
+		// biome-ignore format: Keep the fallback layout.
+		, 10px   +   2px
+	);
+}
+.keep {
+	width:/* biome-ignore format: Keep the function layout. */ attr( data-width $unit,10px );
+}
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   38: 	width:/* biome-ignore format: Keep the function layout. */ attr( data-width $unit,10px );
+```
