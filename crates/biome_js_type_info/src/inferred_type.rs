@@ -1,4 +1,6 @@
+mod any_type_kind;
 mod boolean_coercion;
+pub use any_type_kind::AnyTypeKind;
 pub use boolean_coercion::BooleanCoercion;
 
 use crate::TypeDb;
