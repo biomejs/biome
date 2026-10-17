@@ -601,16 +601,35 @@ fn handle_document_comment(
 
     if let Some(dashdashdash) = document.dashdashdash_token() {
         if comment_start < dashdashdash.text_trimmed_range().start() {
-            // Comments between the last directive and the `---` marker stay
-            // with the directive so they aren't moved after the marker.
-            if let Some(directive) = document.directives().iter().last()
-                && directive.range().end() <= comment_start
-            {
-                return CommentPlacement::trailing(directive.syntax().clone(), comment);
+            // Comments after a directive belong to the document head, as in
+            // Prettier: one on the line of a directive trails it, one on a
+            // line of its own leads the next directive, and those after the
+            // last directive are dangling comments of the document, printed
+            // between the directives and the `---` marker
+            let mut preceding = None;
+            for directive in document.directives() {
+                if comment_start < directive.range().start() {
+                    if comment.text_position() == CommentTextPosition::EndOfLine
+                        && let Some(preceding) = preceding
+                    {
+                        return CommentPlacement::trailing(preceding, comment);
+                    }
+                    if preceding.is_some() {
+                        return CommentPlacement::leading(directive.syntax().clone(), comment);
+                    }
+                    break;
+                }
+                preceding = Some(directive.syntax().clone());
+            }
+            if let Some(last) = preceding {
+                if comment.text_position() == CommentTextPosition::EndOfLine {
+                    return CommentPlacement::trailing(last, comment);
+                }
+                return CommentPlacement::dangling(document.syntax().clone(), comment);
             }
 
-            // Comments preceding the `---` marker of a document without
-            // directives lead the whole document.
+            // Comments preceding the directives, or the `---` marker of a
+            // document without directives, lead the whole document.
             return CommentPlacement::leading(document.syntax().clone(), comment);
         }
 
