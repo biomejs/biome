@@ -144,7 +144,7 @@ use crate::runner::execution::{Execution, Stdin};
 use crate::runner::finalizer::{FinalizePayload, Finalizer};
 use crate::runner::handler::Handler;
 use crate::runner::impls::watchers::default::DefaultWatcher;
-use crate::runner::process_file::{ProcessFile, ProcessStdinFilePayload};
+use crate::runner::process_file::{ProcessFile, ProcessStdinFilePayload, stdin_display_path};
 use crate::runner::scan_kind::derive_best_scan_kind;
 use crate::runner::watcher::{Watcher, WatcherEvent};
 use crate::{CliDiagnostic, CliSession, setup_cli_subscriber};
@@ -296,8 +296,9 @@ pub(crate) trait CommandRunner {
             let (stdin_path, content) = stdin.into_parts();
             // Biome path must starts_with(the project directory), which will have been
             // joined to workdir. Otherwise we won't find nested settings.
-            let working_dir = fs.working_directory().unwrap_or_default();
-            let biome_path = BiomePath::new(working_dir.join(stdin_path));
+            let working_dir = fs.working_directory();
+            let biome_path =
+                BiomePath::new(working_dir.clone().unwrap_or_default().join(stdin_path));
             if biome_path.extension().is_none() {
                 console.error(markup! {
                     {PrintDiagnostic::simple(&CliDiagnostic::from(StdinDiagnostic::new_no_extension()))}
@@ -307,6 +308,7 @@ pub(crate) trait CommandRunner {
             }
 
             return Self::ProcessFile::process_std_in(ProcessStdinFilePayload {
+                display_path: stdin_display_path(&biome_path, working_dir.as_deref()),
                 biome_path: &biome_path,
                 project_key,
                 workspace,

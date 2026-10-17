@@ -129,6 +129,7 @@ impl ProcessFile for LintAssistProcessFile {
             content,
             project_key,
             biome_path,
+            display_path,
             console,
             cli_options,
             execution,
@@ -150,13 +151,13 @@ impl ProcessFile for LintAssistProcessFile {
             console.append_raw(content);
             // Write error last because files may generally be long
             console.error(markup! {
-                <Warn>"The content was not fixed because the path `"{biome_path.as_str()}"` is ignored."</Warn>
+                <Warn>"The content was not fixed because the path `"{display_path.as_str()}"` is ignored."</Warn>
             });
             return Ok(());
         }
 
         if file_features.is_protected() {
-            let protected_diagnostic = WorkspaceError::protected_file(biome_path.to_string());
+            let protected_diagnostic = WorkspaceError::protected_file(display_path.clone());
             if protected_diagnostic.tags().is_verbose() {
                 if cli_options.verbose {
                     console.error(markup! {{PrintDiagnostic::verbose(&protected_diagnostic)}})

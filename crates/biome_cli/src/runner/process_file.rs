@@ -17,6 +17,7 @@ use biome_service::workspace::{
     SupportKind, SupportsFeatureParams,
 };
 use biome_service::{Workspace, WorkspaceError};
+use camino::Utf8Path;
 
 #[derive(Debug)]
 pub(crate) struct ChangedFile {
@@ -108,6 +109,8 @@ pub(crate) type FileResult = Result<FileStatus, Message>;
 
 pub(crate) struct ProcessStdinFilePayload<'a> {
     pub(crate) biome_path: &'a BiomePath,
+    /// path we show in diagnostics, see [stdin_display_path]
+    pub(crate) display_path: String,
     pub(crate) content: &'a str,
     pub(crate) project_key: ProjectKey,
     pub(crate) workspace: &'a dyn Workspace,
@@ -117,16 +120,26 @@ pub(crate) struct ProcessStdinFilePayload<'a> {
     pub(crate) skip_ignore_check: bool,
 }
 
+/// stdin path relative to the cwd for diagnostics, the workspace still gets the absolute one so nested configs resolve fine
+pub(crate) fn stdin_display_path(
+    biome_path: &BiomePath,
+    working_directory: Option<&Utf8Path>,
+) -> String {
+    working_directory
+        .and_then(|working_directory| biome_path.strip_prefix(working_directory).ok())
+        .map_or_else(|| biome_path.to_string(), |path| path.to_string())
+}
+
 pub(crate) fn print_stdin_diagnostics(
     console: &mut dyn Console,
     cli_options: &CliOptions,
-    biome_path: &BiomePath,
+    display_path: &str,
     source: &str,
     diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
 ) {
     for diagnostic in diagnostics {
         let diagnostic = Error::from(diagnostic)
-            .with_file_path(biome_path.to_string())
+            .with_file_path(display_path)
             .with_file_source_code(source);
         if diagnostic.tags().is_verbose() {
             if cli_options.verbose {
