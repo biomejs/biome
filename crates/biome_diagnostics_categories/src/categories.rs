@@ -300,6 +300,7 @@ define_categories! {
     "lint/nursery/noUnmodifiedLoopCondition": "https://biomejs.dev/linter/rules/no-unmodified-loop-condition",
     "lint/nursery/noUnsafeIframeSandbox": "https://biomejs.dev/linter/rules/no-unsafe-iframe-sandbox",
     "lint/nursery/noUnsafePlusOperands": "https://biomejs.dev/linter/rules/no-unsafe-plus-operands",
+    "lint/nursery/noUnsafeReturn": "https://biomejs.dev/linter/rules/no-unsafe-return",
     "lint/nursery/noUnsafeTypeAssertion": "https://biomejs.dev/linter/rules/no-unsafe-type-assertion",
     "lint/nursery/noUnsafeUnaryMinus": "https://biomejs.dev/linter/rules/no-unsafe-unary-minus",
     "lint/nursery/noUnusedClasses": "https://biomejs.dev/linter/rules/no-unused-classes",

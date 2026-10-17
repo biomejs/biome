@@ -1,0 +1,187 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+/* should not generate diagnostics */
+declare const value: any;
+declare const promisedValue: Promise<any>;
+
+function returnsNothing() {
+	return;
+}
+
+function returnsNumber() {
+	return 1;
+}
+
+function returnsString() {
+	return "";
+}
+
+function returnsEmptyArray() {
+	return [];
+}
+
+function declaredAny(): any {
+	return {} as any;
+}
+
+declare function takesCallback(arg: () => any): void;
+takesCallback((): any => "foo" as any);
+
+declare function takesNullableCallback(arg: null | (() => any)): void;
+takesNullableCallback((): any => "foo" as any);
+
+function declaredAnyArray(): any[] {
+	return [] as any[];
+}
+
+function declaredSetOfAny(): Set<any> {
+	return new Set<any>();
+}
+
+async function declaredPromiseAnyResolve(): Promise<any> {
+	return Promise.resolve({} as any);
+}
+
+async function declaredPromiseAny(): Promise<any> {
+	return {} as any;
+}
+
+function syncReturnsPromiseAny(): object {
+	return Promise.resolve({} as any);
+}
+
+function differentGenericType(): ReadonlySet<number> {
+	return new Set<any>();
+}
+
+function sameTypeArguments(): Set<number> {
+	return new Set([1]);
+}
+
+function unknownFromAny<T>(x: T): unknown {
+	return x as any;
+}
+
+function unknownArrayFromAnyArray<T>(x: T): unknown[] {
+	return x as any[];
+}
+
+function setOfUnknownFromSetOfAny<T>(x: T): Set<unknown> {
+	return x as Set<any>;
+}
+
+async function promiseUnknownFromAny<T>(x: T): Promise<unknown> {
+	return x as any;
+}
+
+function promiseUnknownFromPromiseAny<T>(x: T): Promise<unknown> {
+	return Promise.resolve(x as any);
+}
+
+function emptyMap(): Map<string, string> {
+	return new Map();
+}
+
+function declaredAnyReturnsAnyArray(): any {
+	return [] as any[];
+}
+
+function declaredUnknownReturnsAnyArray(): unknown {
+	return [] as any[];
+}
+
+function syncReturnsDeclaredPromiseAny() {
+	return promisedValue;
+}
+
+const optionalCallback: (() => void) | undefined = () => 1;
+
+const unknownCallback: (() => unknown) | undefined = () => value;
+
+class Fluent {
+	public foo(): this {
+		return this;
+	}
+}
+
+class Annotated {
+	method(): unknown {
+		return value;
+	}
+
+	get getter(): any {
+		return value;
+	}
+}
+
+function* generator() {
+	yield 1;
+}
+
+function unresolved(): Set<string> {
+	return new Set<NotKnown>();
+}
+
+class Box<T> {
+	constructor(public value: T) {}
+}
+class OtherBox<T> {
+	constructor(public value: T) {}
+}
+function returnsOtherBox(): Box<string> {
+	return new OtherBox<any>(1);
+}
+
+function emptySet(): Set<string> {
+	return new Set();
+}
+
+function emptyWeakMap(): WeakMap<object, string> {
+	return new WeakMap();
+}
+
+function returnsUnknownCallback(): () => unknown {
+	return () => value;
+}
+
+async function returnsUnknownCallbackAsync(): Promise<() => unknown> {
+	return () => value;
+}
+
+const typedObject: { fn: () => unknown } = { fn: () => value };
+
+class PropertyCallback {
+	callback: () => unknown = () => value;
+}
+
+let assignedCallback: () => unknown;
+assignedCallback = () => value;
+
+class ComputedMember {
+	[Symbol.iterator](): unknown {
+		return value;
+	}
+}
+
+const satisfiesCallback = (() => value) satisfies () => unknown;
+
+const assertedCallback = (() => value) as () => unknown;
+
+declare const condition: boolean;
+const conditionalCallback: () => unknown = condition ? () => value : () => 0;
+
+declare const maybeCallback: (() => unknown) | undefined;
+const logicalCallback: () => unknown = maybeCallback ?? (() => value);
+
+declare function takesUnknownCallback(callback: () => unknown): void;
+takesUnknownCallback(() => value);
+
+function readonlyUnknownArray(): ReadonlyArray<unknown> {
+	return [] as any[];
+}
+
+```
