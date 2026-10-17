@@ -118,6 +118,12 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noBooleanSortComparator",
+        TypeId::of::<biome_rule_options::no_boolean_sort_comparator::NoBooleanSortComparatorOptions>(
+        ),
+    ));
+    result.push((
+        "nursery",
         "noBunModules",
         TypeId::of::<biome_rule_options::no_bun_modules::NoBunModulesOptions>(),
     ));

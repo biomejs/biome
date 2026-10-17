@@ -225,6 +225,7 @@ define_categories! {
     "lint/nursery/noAstroConflictingSetDirectives": "https://biomejs.dev/linter/rules/no-astro-conflicting-set-directives",
     "lint/nursery/noAstroSetHtmlDirective": "https://biomejs.dev/linter/rules/no-astro-set-html-directive",
     "lint/nursery/noBaseToString": "https://biomejs.dev/linter/rules/no-base-to-string",
+    "lint/nursery/noBooleanSortComparator": "https://biomejs.dev/linter/rules/no-boolean-sort-comparator",
     "lint/nursery/noBunModules": "https://biomejs.dev/linter/rules/no-bun-modules",
     "lint/nursery/noColorInvalidHex": "https://biomejs.dev/linter/rules/no-color-invalid-hex",
     "lint/nursery/noDuplicateMapKeys": "https://biomejs.dev/linter/rules/no-duplicate-map-keys",

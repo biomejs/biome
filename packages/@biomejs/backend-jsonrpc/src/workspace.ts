@@ -2972,6 +2972,11 @@ export interface Nursery {
 	 */
 	noBaseToString?: NoBaseToStringConfiguration;
 	/**
+	 * Disallow sort comparators that return a boolean.
+	 * See https://biomejs.dev/linter/rules/no-boolean-sort-comparator
+	 */
+	noBooleanSortComparator?: NoBooleanSortComparatorConfiguration;
+	/**
 	 * Forbid the use of Bun builtin modules.
 	 * See https://biomejs.dev/linter/rules/no-bun-modules
 	 */
@@ -5712,6 +5717,9 @@ export type NoAstroSetHtmlDirectiveConfiguration =
 export type NoBaseToStringConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBaseToStringOptions;
+export type NoBooleanSortComparatorConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoBooleanSortComparatorOptions;
 export type NoBunModulesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoBunModulesOptions;
@@ -8155,6 +8163,14 @@ export interface RuleWithNoAstroSetHtmlDirectiveOptions {
 export interface RuleWithNoBaseToStringOptions {
 	level: RulePlainConfiguration;
 	options?: NoBaseToStringOptions;
+}
+export interface RuleWithNoBooleanSortComparatorOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoBooleanSortComparatorOptions;
 }
 export interface RuleWithNoBunModulesOptions {
 	level: RulePlainConfiguration;
@@ -10754,6 +10770,7 @@ export type NoAstroSetHtmlDirectiveOptions = {};
 export interface NoBaseToStringOptions {
 	ignoredTypeNames?: string[];
 }
+export type NoBooleanSortComparatorOptions = {};
 export type NoBunModulesOptions = {};
 export type NoDoubleComparisonOptions = {};
 export type NoDuplicateMapKeysOptions = {};
@@ -12514,6 +12531,7 @@ export type Category =
 	| "lint/nursery/noAstroConflictingSetDirectives"
 	| "lint/nursery/noAstroSetHtmlDirective"
 	| "lint/nursery/noBaseToString"
+	| "lint/nursery/noBooleanSortComparator"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noDuplicateMapKeys"
