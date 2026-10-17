@@ -1,0 +1,79 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidCommonJsHooks.cjs
+---
+# Input
+```cjs
+// should generate diagnostics
+const { describe, beforeEach } = require("node:test");
+
+describe("duplicate CommonJS hook", () => {
+    beforeEach(() => {});
+    beforeEach(() => {});
+});
+
+describe("duplicate member import", () => {
+    const afterEach = require("node:test").afterEach;
+    afterEach(() => {});
+    afterEach(() => {});
+});
+
+describe("duplicate computed import", () => {
+    const afterAll = require("vitest")["afterAll"];
+    afterAll(() => {});
+    afterAll(() => {});
+});
+
+```
+
+# Diagnostics
+```
+invalidCommonJsHooks.cjs:6:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate beforeEach hook found.
+  
+    4 │ describe("duplicate CommonJS hook", () => {
+    5 │     beforeEach(() => {});
+  > 6 │     beforeEach(() => {});
+      │     ^^^^^^^^^^^^^^^^^^^^
+    7 │ });
+    8 │ 
+  
+  i Remove this duplicate hook or consolidate the logic into a single hook.
+  
+
+```
+
+```
+invalidCommonJsHooks.cjs:12:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate afterEach hook found.
+  
+    10 │     const afterEach = require("node:test").afterEach;
+    11 │     afterEach(() => {});
+  > 12 │     afterEach(() => {});
+       │     ^^^^^^^^^^^^^^^^^^^
+    13 │ });
+    14 │ 
+  
+  i Remove this duplicate hook or consolidate the logic into a single hook.
+  
+
+```
+
+```
+invalidCommonJsHooks.cjs:18:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate afterAll hook found.
+  
+    16 │     const afterAll = require("vitest")["afterAll"];
+    17 │     afterAll(() => {});
+  > 18 │     afterAll(() => {});
+       │     ^^^^^^^^^^^^^^^^^^
+    19 │ });
+    20 │ 
+  
+  i Remove this duplicate hook or consolidate the logic into a single hook.
+  
+
+```

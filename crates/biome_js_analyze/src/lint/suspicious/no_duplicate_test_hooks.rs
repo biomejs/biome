@@ -1,11 +1,15 @@
+use crate::services::semantic::Semantic;
 use biome_analyze::{
-    AddVisitor, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic, RuleDomain, RuleSource,
-    ServiceBag, Visitor, VisitorContext, context::RuleContext, declare_lint_rule,
+    Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::{AnyJsExpression, JsCallExpression, JsLanguage, TextRange};
-use biome_rowan::{AstNode, Language, SyntaxNode, WalkEvent};
+use biome_js_semantic::{Binding, SemanticModel};
+use biome_js_syntax::{
+    AnyJsExpression, JsCallExpression, JsSyntaxKind, binding_ext::AnyJsBindingDeclaration,
+    unescape_js_identifier,
+};
+use biome_rowan::{AstNode, WalkEvent};
 use biome_rule_options::no_duplicate_test_hooks::NoDuplicateTestHooksOptions;
 
 declare_lint_rule! {
@@ -72,28 +76,71 @@ declare_lint_rule! {
     }
 }
 
-// Declare a query match struct type containing a JavaScript function node
-pub struct DuplicateHooks(JsCallExpression);
-
 impl Rule for NoDuplicateTestHooks {
-    type Query = DuplicateHooks;
-    type State = ();
-    type Signals = Option<Self::State>;
+    type Query = Semantic<JsCallExpression>;
+    type State = JsCallExpression;
+    type Signals = Box<[Self::State]>;
     type Options = NoDuplicateTestHooksOptions;
 
-    fn run(_: &RuleContext<Self>) -> Self::Signals {
-        Some(())
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let scope = ctx.query();
+        if !Self::is_test_describe_call(scope) {
+            return Box::default();
+        }
+        let model = ctx.model();
+        let mut hooks = HooksContext::default();
+        let mut duplicates = Vec::new();
+        let mut preorder = scope.syntax().preorder();
+        while let Some(event) = preorder.next() {
+            let WalkEvent::Enter(node) = event else {
+                continue;
+            };
+            let Some(call) = JsCallExpression::cast(node) else {
+                continue;
+            };
+            if call == *scope {
+                continue;
+            }
+            if Self::is_test_describe_call(&call) {
+                preorder.skip_subtree();
+                continue;
+            }
+            let Ok(AnyJsExpression::JsIdentifierExpression(identifier)) = call.callee() else {
+                continue;
+            };
+            let Ok(reference) = identifier.name() else {
+                continue;
+            };
+            let Ok(name) = reference.value_token() else {
+                continue;
+            };
+            if !matches!(
+                name.text_trimmed(),
+                "beforeEach" | "beforeAll" | "afterEach" | "afterAll" | "after" | "before"
+            ) {
+                continue;
+            }
+            if model
+                .binding(&reference)
+                .is_some_and(|binding| Self::is_local_function(&binding, model))
+            {
+                continue;
+            }
+            if hooks.add(name.text_trimmed()) > 1 {
+                duplicates.push(call);
+            }
+        }
+        duplicates.into_boxed_slice()
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
+    fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
         let callee = node.callee().ok()?;
         let node_name = callee.get_callee_object_name()?;
 
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                ctx.query().range(),
+                node.range(),
                 markup! {
                     "Duplicate "<Emphasis>{node_name.text_trimmed()}</Emphasis>" hook found."
                 },
@@ -134,65 +181,63 @@ impl HooksContext {
     }
 }
 
-#[derive(Default)]
-struct DuplicateHooksVisitor {
-    stack: Vec<HooksContext>,
-}
-
-impl Visitor for DuplicateHooksVisitor {
-    type Language = JsLanguage;
-
-    fn visit(
-        &mut self,
-        event: &WalkEvent<SyntaxNode<Self::Language>>,
-        mut ctx: VisitorContext<Self::Language>,
-    ) {
-        match event {
-            WalkEvent::Enter(node) => {
-                let Some(node) = JsCallExpression::cast_ref(node) else {
-                    return;
-                };
-
-                // When the visitor enters a function node, push a new entry on the stack
-                if Self::is_test_describe_call(&node) {
-                    self.stack.push(HooksContext::default());
-                }
-
-                if let Ok(AnyJsExpression::JsIdentifierExpression(identifier)) = node.callee() {
-                    identifier
-                        .name()
-                        .and_then(|name| name.value_token())
-                        .map_or((), |name| {
-                            if let Some(hooks_context) = self.stack.last_mut() {
-                                match name.text_trimmed() {
-                                    "beforeEach" | "beforeAll" | "afterEach" | "afterAll"
-                                    | "after" | "before" => {
-                                        let counter =
-                                            HooksContext::add(hooks_context, name.text_trimmed());
-                                        if counter > 1 {
-                                            ctx.match_query(DuplicateHooks(node.clone()));
-                                        }
-                                    }
-                                    _ => {}
-                                };
-                            };
-                        })
-                }
-            }
-            WalkEvent::Leave(node) => {
-                // When the visitor exits a function, if it matches the node of the top-most
-                // entry of the stack and the `has_yield` flag is `false`, emit a query match
-                if let Some(node) = JsCallExpression::cast_ref(node)
-                    && Self::is_test_describe_call(&node)
-                {
-                    self.stack.pop();
-                }
-            }
+impl NoDuplicateTestHooks {
+    fn is_local_function(binding: &Binding, model: &SemanticModel) -> bool {
+        if binding.all_writes().next().is_some() {
+            return false;
+        }
+        let Ok(name) = binding.tree().name_token() else {
+            return false;
+        };
+        let name = unescape_js_identifier(name.text_trimmed());
+        let scope = model
+            .scope_hoisted_to(&binding.syntax())
+            .unwrap_or_else(|| binding.scope());
+        if scope.syntax().kind() == JsSyntaxKind::JS_FUNCTION_BODY
+            && scope
+                .parent()
+                .and_then(|parent| parent.get_binding(name.as_ref()))
+                .is_some_and(|other| {
+                    other.declaration_kind().declares_value()
+                        && !matches!(
+                            other.tree().declaration(),
+                            Some(AnyJsBindingDeclaration::JsFunctionExpression(_))
+                        )
+                })
+        {
+            return false;
+        }
+        if scope.bindings().any(|other| {
+            other.range() != binding.range()
+                && other.declaration_kind().declares_value()
+                && other
+                    .tree()
+                    .name_token()
+                    .is_ok_and(|token| unescape_js_identifier(token.text_trimmed()) == name)
+        }) {
+            return false;
+        }
+        match binding.tree().declaration() {
+            Some(
+                AnyJsBindingDeclaration::JsFunctionDeclaration(_)
+                | AnyJsBindingDeclaration::JsFunctionExpression(_)
+                | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_),
+            ) => true,
+            Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator)) => declarator
+                .initializer()
+                .and_then(|initializer| initializer.expression().ok())
+                .and_then(|expression| expression.inner_expression())
+                .is_some_and(|expression| {
+                    matches!(
+                        expression,
+                        AnyJsExpression::JsArrowFunctionExpression(_)
+                            | AnyJsExpression::JsFunctionExpression(_)
+                    )
+                }),
+            _ => false,
         }
     }
-}
 
-impl DuplicateHooksVisitor {
     /// Determines if a [call expression] is a `describe.` call by checking:
     /// 1. The node must be a test call expression
     ///    e.g. `it.only`, `describe.skip`, `test`
@@ -219,33 +264,5 @@ impl DuplicateHooksVisitor {
         }
 
         false
-    }
-}
-
-impl QueryMatch for DuplicateHooks {
-    fn text_range(&self) -> TextRange {
-        self.0.range()
-    }
-}
-
-impl Queryable for DuplicateHooks {
-    // `Input` is the type that `ctx.match_query()` is called with in the visitor
-    type Input = Self;
-    type Language = JsLanguage;
-    // `Output` if the type that `ctx.query()` will return in the rule
-    type Output = JsCallExpression;
-    type Services = ();
-
-    fn build_visitor(
-        analyzer: &mut impl AddVisitor<Self::Language>,
-        _: &<Self::Language as Language>::Root,
-    ) {
-        // Register our custom visitor to run in the `Syntax` phase
-        analyzer.add_visitor(Phases::Syntax, DuplicateHooksVisitor::default);
-    }
-
-    // Extract the output object from the input type
-    fn unwrap_match(_: &ServiceBag, query: &Self::Input) -> Self::Output {
-        query.0.clone()
     }
 }

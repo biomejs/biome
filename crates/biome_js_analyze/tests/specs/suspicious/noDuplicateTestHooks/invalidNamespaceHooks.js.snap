@@ -1,0 +1,82 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidNamespaceHooks.js
+---
+# Input
+```js
+// should generate diagnostics
+import { describe } from "vitest";
+import * as hooks from "vitest";
+
+describe("namespace import", () => {
+    const { afterEach } = hooks;
+    afterEach(() => {});
+    afterEach(() => {});
+});
+
+describe("global namespace", () => {
+    const after = globalThis.after;
+    after(() => {});
+    after(() => {});
+});
+
+describe("aliased namespace import", () => {
+    const alias = hooks;
+    const beforeAll = alias.beforeAll;
+    beforeAll(() => {});
+    beforeAll(() => {});
+});
+
+```
+
+# Diagnostics
+```
+invalidNamespaceHooks.js:8:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate afterEach hook found.
+  
+     6 │     const { afterEach } = hooks;
+     7 │     afterEach(() => {});
+   > 8 │     afterEach(() => {});
+       │     ^^^^^^^^^^^^^^^^^^^
+     9 │ });
+    10 │ 
+  
+  i Remove this duplicate hook or consolidate the logic into a single hook.
+  
+
+```
+
+```
+invalidNamespaceHooks.js:14:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate after hook found.
+  
+    12 │     const after = globalThis.after;
+    13 │     after(() => {});
+  > 14 │     after(() => {});
+       │     ^^^^^^^^^^^^^^^
+    15 │ });
+    16 │ 
+  
+  i Remove this duplicate hook or consolidate the logic into a single hook.
+  
+
+```
+
+```
+invalidNamespaceHooks.js:21:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate beforeAll hook found.
+  
+    19 │     const beforeAll = alias.beforeAll;
+    20 │     beforeAll(() => {});
+  > 21 │     beforeAll(() => {});
+       │     ^^^^^^^^^^^^^^^^^^^
+    22 │ });
+    23 │ 
+  
+  i Remove this duplicate hook or consolidate the logic into a single hook.
+  
+
+```

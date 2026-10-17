@@ -1,0 +1,87 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidImportedHooks.js
+---
+# Input
+```js
+// should generate diagnostics
+import { describe, beforeEach } from "vitest";
+import { beforeEach as hooksBeforeEach } from "vitest";
+
+describe("duplicate imported hook", () => {
+    beforeEach(() => {});
+    {
+        const beforeEach = () => {};
+        beforeEach();
+        beforeEach();
+    }
+    beforeEach(() => {});
+});
+
+describe("assigned hook", () => {
+    let beforeEach;
+    beforeEach = hooksBeforeEach;
+    beforeEach(() => {});
+    beforeEach(() => {});
+});
+
+describe("reassigned function", () => {
+    let beforeEach = () => {};
+    beforeEach = hooksBeforeEach;
+    beforeEach(() => {});
+    beforeEach(() => {});
+});
+
+```
+
+# Diagnostics
+```
+invalidImportedHooks.js:12:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate beforeEach hook found.
+  
+    10 │         beforeEach();
+    11 │     }
+  > 12 │     beforeEach(() => {});
+       │     ^^^^^^^^^^^^^^^^^^^^
+    13 │ });
+    14 │ 
+  
+  i Remove this duplicate hook or consolidate the logic into a single hook.
+  
+
+```
+
+```
+invalidImportedHooks.js:19:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate beforeEach hook found.
+  
+    17 │     beforeEach = hooksBeforeEach;
+    18 │     beforeEach(() => {});
+  > 19 │     beforeEach(() => {});
+       │     ^^^^^^^^^^^^^^^^^^^^
+    20 │ });
+    21 │ 
+  
+  i Remove this duplicate hook or consolidate the logic into a single hook.
+  
+
+```
+
+```
+invalidImportedHooks.js:26:5 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Duplicate beforeEach hook found.
+  
+    24 │     beforeEach = hooksBeforeEach;
+    25 │     beforeEach(() => {});
+  > 26 │     beforeEach(() => {});
+       │     ^^^^^^^^^^^^^^^^^^^^
+    27 │ });
+    28 │ 
+  
+  i Remove this duplicate hook or consolidate the logic into a single hook.
+  
+
+```
