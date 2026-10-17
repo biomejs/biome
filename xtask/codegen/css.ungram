@@ -2814,11 +2814,19 @@ CssRegularAttrUnit =
 CssUnknownAttrUnit =
 	unit: 'ident'
 
+// .card { width: attr(data-width $unit, 10px); }
+//                                ^^^^^
+// .card { width: attr(data-width #{$unit}, 10px); }
+//                                ^^^^^^^^
 AnyCssAttrType =
 	CssRawStringDeclarator
 	| CssTypeFunction
 	| CssNumberDeclarator
 	| AnyCssAttrUnit
+	| ScssVariable
+	| ScssNamespacedVariable
+	| ScssInterpolatedIdentifier
+	| CssBogusPropertyValue
 
 // attr(data-test type(*), rem);
 //                       ^^^^^

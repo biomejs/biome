@@ -14548,14 +14548,24 @@ impl AnyCssAttrName {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssAttrType {
     AnyCssAttrUnit(AnyCssAttrUnit),
+    CssBogusPropertyValue(CssBogusPropertyValue),
     CssNumberDeclarator(CssNumberDeclarator),
     CssRawStringDeclarator(CssRawStringDeclarator),
     CssTypeFunction(CssTypeFunction),
+    ScssInterpolatedIdentifier(ScssInterpolatedIdentifier),
+    ScssNamespacedVariable(ScssNamespacedVariable),
+    ScssVariable(ScssVariable),
 }
 impl AnyCssAttrType {
     pub fn as_any_css_attr_unit(&self) -> Option<&AnyCssAttrUnit> {
         match &self {
             Self::AnyCssAttrUnit(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_bogus_property_value(&self) -> Option<&CssBogusPropertyValue> {
+        match &self {
+            Self::CssBogusPropertyValue(item) => Some(item),
             _ => None,
         }
     }
@@ -14574,6 +14584,24 @@ impl AnyCssAttrType {
     pub fn as_css_type_function(&self) -> Option<&CssTypeFunction> {
         match &self {
             Self::CssTypeFunction(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_interpolated_identifier(&self) -> Option<&ScssInterpolatedIdentifier> {
+        match &self {
+            Self::ScssInterpolatedIdentifier(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_namespaced_variable(&self) -> Option<&ScssNamespacedVariable> {
+        match &self {
+            Self::ScssNamespacedVariable(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_variable(&self) -> Option<&ScssVariable> {
+        match &self {
+            Self::ScssVariable(item) => Some(item),
             _ => None,
         }
     }
@@ -37185,6 +37213,11 @@ impl From<AnyCssAttrName> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssBogusPropertyValue> for AnyCssAttrType {
+    fn from(node: CssBogusPropertyValue) -> Self {
+        Self::CssBogusPropertyValue(node)
+    }
+}
 impl From<CssNumberDeclarator> for AnyCssAttrType {
     fn from(node: CssNumberDeclarator) -> Self {
         Self::CssNumberDeclarator(node)
@@ -37200,26 +37233,61 @@ impl From<CssTypeFunction> for AnyCssAttrType {
         Self::CssTypeFunction(node)
     }
 }
+impl From<ScssInterpolatedIdentifier> for AnyCssAttrType {
+    fn from(node: ScssInterpolatedIdentifier) -> Self {
+        Self::ScssInterpolatedIdentifier(node)
+    }
+}
+impl From<ScssNamespacedVariable> for AnyCssAttrType {
+    fn from(node: ScssNamespacedVariable) -> Self {
+        Self::ScssNamespacedVariable(node)
+    }
+}
+impl From<ScssVariable> for AnyCssAttrType {
+    fn from(node: ScssVariable) -> Self {
+        Self::ScssVariable(node)
+    }
+}
 impl AstNode for AnyCssAttrType {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssAttrUnit::KIND_SET
+        .union(CssBogusPropertyValue::KIND_SET)
         .union(CssNumberDeclarator::KIND_SET)
         .union(CssRawStringDeclarator::KIND_SET)
-        .union(CssTypeFunction::KIND_SET);
+        .union(CssTypeFunction::KIND_SET)
+        .union(ScssInterpolatedIdentifier::KIND_SET)
+        .union(ScssNamespacedVariable::KIND_SET)
+        .union(ScssVariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_NUMBER_DECLARATOR | CSS_RAW_STRING_DECLARATOR | CSS_TYPE_FUNCTION => true,
+            CSS_BOGUS_PROPERTY_VALUE
+            | CSS_NUMBER_DECLARATOR
+            | CSS_RAW_STRING_DECLARATOR
+            | CSS_TYPE_FUNCTION
+            | SCSS_INTERPOLATED_IDENTIFIER
+            | SCSS_NAMESPACED_VARIABLE
+            | SCSS_VARIABLE => true,
             k if AnyCssAttrUnit::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            CSS_BOGUS_PROPERTY_VALUE => {
+                Self::CssBogusPropertyValue(CssBogusPropertyValue { syntax })
+            }
             CSS_NUMBER_DECLARATOR => Self::CssNumberDeclarator(CssNumberDeclarator { syntax }),
             CSS_RAW_STRING_DECLARATOR => {
                 Self::CssRawStringDeclarator(CssRawStringDeclarator { syntax })
             }
             CSS_TYPE_FUNCTION => Self::CssTypeFunction(CssTypeFunction { syntax }),
+            SCSS_INTERPOLATED_IDENTIFIER => {
+                Self::ScssInterpolatedIdentifier(ScssInterpolatedIdentifier { syntax })
+            }
+            SCSS_NAMESPACED_VARIABLE => {
+                Self::ScssNamespacedVariable(ScssNamespacedVariable { syntax })
+            }
+            SCSS_VARIABLE => Self::ScssVariable(ScssVariable { syntax }),
             _ => {
                 if let Some(any_css_attr_unit) = AnyCssAttrUnit::cast(syntax) {
                     return Some(Self::AnyCssAttrUnit(any_css_attr_unit));
@@ -37231,17 +37299,25 @@ impl AstNode for AnyCssAttrType {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::CssBogusPropertyValue(it) => it.syntax(),
             Self::CssNumberDeclarator(it) => it.syntax(),
             Self::CssRawStringDeclarator(it) => it.syntax(),
             Self::CssTypeFunction(it) => it.syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.syntax(),
+            Self::ScssNamespacedVariable(it) => it.syntax(),
+            Self::ScssVariable(it) => it.syntax(),
             Self::AnyCssAttrUnit(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::CssBogusPropertyValue(it) => it.into_syntax(),
             Self::CssNumberDeclarator(it) => it.into_syntax(),
             Self::CssRawStringDeclarator(it) => it.into_syntax(),
             Self::CssTypeFunction(it) => it.into_syntax(),
+            Self::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+            Self::ScssNamespacedVariable(it) => it.into_syntax(),
+            Self::ScssVariable(it) => it.into_syntax(),
             Self::AnyCssAttrUnit(it) => it.into_syntax(),
         }
     }
@@ -37250,9 +37326,13 @@ impl std::fmt::Debug for AnyCssAttrType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AnyCssAttrUnit(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogusPropertyValue(it) => std::fmt::Debug::fmt(it, f),
             Self::CssNumberDeclarator(it) => std::fmt::Debug::fmt(it, f),
             Self::CssRawStringDeclarator(it) => std::fmt::Debug::fmt(it, f),
             Self::CssTypeFunction(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssInterpolatedIdentifier(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssNamespacedVariable(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssVariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -37260,9 +37340,13 @@ impl From<AnyCssAttrType> for SyntaxNode {
     fn from(n: AnyCssAttrType) -> Self {
         match n {
             AnyCssAttrType::AnyCssAttrUnit(it) => it.into_syntax(),
+            AnyCssAttrType::CssBogusPropertyValue(it) => it.into_syntax(),
             AnyCssAttrType::CssNumberDeclarator(it) => it.into_syntax(),
             AnyCssAttrType::CssRawStringDeclarator(it) => it.into_syntax(),
             AnyCssAttrType::CssTypeFunction(it) => it.into_syntax(),
+            AnyCssAttrType::ScssInterpolatedIdentifier(it) => it.into_syntax(),
+            AnyCssAttrType::ScssNamespacedVariable(it) => it.into_syntax(),
+            AnyCssAttrType::ScssVariable(it) => it.into_syntax(),
         }
     }
 }
