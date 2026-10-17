@@ -278,6 +278,7 @@ mod tests {
                         event_handler: false,
                         allow_statements: false,
                         slot_props: false,
+                        generics_list: false,
                     },
                 )),
             })
@@ -301,6 +302,7 @@ mod tests {
                 event_handler: false,
                 allow_statements: false,
                 slot_props: false,
+                generics_list: false,
             }),
             JsParserOptions::default(),
         )
@@ -334,6 +336,7 @@ mod tests {
                 event_handler: false,
                 allow_statements: false,
                 slot_props: false,
+                generics_list: false,
             }),
             JsParserOptions::default(),
         )
