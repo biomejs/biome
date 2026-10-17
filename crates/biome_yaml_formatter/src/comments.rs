@@ -12,8 +12,8 @@ use biome_suppression::SuppressionKind;
 use biome_yaml_syntax::{
     AnyYamlMappingImplicitKey, YamlBlockInBlockNode, YamlBlockMapExplicitEntry,
     YamlBlockMapImplicitEntry, YamlDocument, YamlFlowJsonNode, YamlFlowMapExplicitEntry,
-    YamlFlowYamlNode, YamlFoldedScalar, YamlLanguage, YamlLiteralScalar, YamlSyntaxKind,
-    YamlSyntaxNode, YamlSyntaxToken,
+    YamlFlowMapImplicitEntry, YamlFlowYamlNode, YamlFoldedScalar, YamlLanguage, YamlLiteralScalar,
+    YamlSyntaxKind, YamlSyntaxNode, YamlSyntaxToken,
 };
 
 use crate::prelude::*;
@@ -60,7 +60,7 @@ impl CommentStyle for YamlCommentStyle {
     ) -> CommentPlacement<Self::Language> {
         handle_suppression_comment(comment)
             .or_else(handle_document_comment)
-            .or_else(handle_flow_map_explicit_entry_comment)
+            .or_else(handle_flow_map_entry_comment)
             .or_else(handle_block_map_explicit_entry_comment)
             .or_else(handle_middle_comment)
             .or_else(handle_flow_collection_open_comment)
@@ -627,19 +627,36 @@ fn handle_document_comment(
     CommentPlacement::Default(comment)
 }
 
-/// Handles comments between the key and the value of an explicit flow
-/// mapping entry (`? key : value`). A comment on the line of the key trails
-/// the key, as it does in an implicit entry, and one on the line of the `:`
-/// leads the value. The other comments before the `:` are made dangling
-/// comments of the entry so its format rule can print them on their own
-/// lines before the `:`, where they attach the same way when reparsed.
-fn handle_flow_map_explicit_entry_comment(
+/// Handles comments between the key and the value of a flow mapping entry,
+/// attaching them as Prettier does:
+///
+/// ```yaml
+/// { ? key # trails the key
+///   # dangling comment of the entry
+///   : # leads the value
+///   value }
+/// ```
+///
+/// A comment on the line of the key trails the key, and so does one after a
+/// `:` on the line of the key (`key: # comment`). The other comments before
+/// the `:` are made dangling comments of the entry so its format rule can
+/// print them on their own lines before the `:`, where they attach the same
+/// way when reparsed; an implicit entry without a value leaves them to the
+/// default placement, since its `:` is dropped. The other comments after the
+/// `:` lead the value.
+fn handle_flow_map_entry_comment(
     comment: DecoratedComment<YamlLanguage>,
 ) -> CommentPlacement<YamlLanguage> {
-    let Some(entry) = YamlFlowMapExplicitEntry::cast_ref(comment.enclosing_node()) else {
-        return CommentPlacement::Default(comment);
-    };
-    let Some(colon) = entry.colon_token() else {
+    let enclosing = comment.enclosing_node();
+    let (is_explicit, colon, value) =
+        if let Some(entry) = YamlFlowMapExplicitEntry::cast_ref(enclosing) {
+            (true, entry.colon_token(), entry.value())
+        } else if let Some(entry) = YamlFlowMapImplicitEntry::cast_ref(enclosing) {
+            (false, entry.colon_token(), entry.value())
+        } else {
+            return CommentPlacement::Default(comment);
+        };
+    let Some(colon) = colon else {
         return CommentPlacement::Default(comment);
     };
     let comment_start = comment.piece().text_range().start();
@@ -649,17 +666,22 @@ fn handle_flow_map_explicit_entry_comment(
         if is_end_of_line && let Some(key) = comment.preceding_node() {
             return CommentPlacement::trailing(key.clone(), comment);
         }
-        return CommentPlacement::dangling(entry.syntax().clone(), comment);
+        if is_explicit || value.is_some() {
+            return CommentPlacement::dangling(enclosing.clone(), comment);
+        }
+        return CommentPlacement::Default(comment);
     }
 
+    let Some(value) = value.filter(|value| comment_start < value.range().start()) else {
+        return CommentPlacement::Default(comment);
+    };
     if is_end_of_line
-        && let Some(value) = entry.value()
-        && comment_start < value.range().start()
+        && !colon.has_leading_newline()
+        && let Some(key) = comment.preceding_node()
     {
-        return CommentPlacement::leading(value.syntax().clone(), comment);
+        return CommentPlacement::trailing(key.clone(), comment);
     }
-
-    CommentPlacement::Default(comment)
+    CommentPlacement::leading(value.syntax().clone(), comment)
 }
 
 /// Handles the comment on the header line of a block scalar (`a: | # c`).

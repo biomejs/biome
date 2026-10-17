@@ -1,11 +1,12 @@
-use crate::comments::subtree_has_comments;
+use super::flow_map_explicit_entry::FormatExplicitPair;
+use crate::comments::{YamlComments, subtree_has_comments};
 use crate::prelude::*;
 use crate::utils::{FormatMultilineKeyEntry, multiline_plain_key, needs_space_before_colon};
 use biome_formatter::{format_args, write};
 use biome_rowan::AstNode;
 use biome_yaml_syntax::{
     AnyYamlEntryValue, AnyYamlFlowNode, AnyYamlMappingImplicitKey, YamlFlowMapImplicitEntry,
-    YamlFlowMapImplicitEntryFields, YamlSyntaxKind, YamlSyntaxToken,
+    YamlFlowMapImplicitEntryFields, YamlSyntaxKind, YamlSyntaxNode, YamlSyntaxToken,
 };
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatYamlFlowMapImplicitEntry;
@@ -25,6 +26,31 @@ impl FormatNodeRule<YamlFlowMapImplicitEntry> for FormatYamlFlowMapImplicitEntry
             .syntax()
             .parent()
             .is_some_and(|parent| parent.kind() == YamlSyntaxKind::YAML_FLOW_MAP_ENTRY_LIST);
+
+        // The comments on lines of their own between the key and the `:` are
+        // only kept there in the explicit form:
+        //
+        // ```yaml
+        // {
+        //   ? key
+        //   # comment
+        //   : value,
+        // }
+        // ```
+        if let (Some(colon_token), Some(_)) = (&colon_token, &value)
+            && f.comments().has_dangling_comments(node.syntax())
+        {
+            return write!(
+                f,
+                [FormatExplicitPair {
+                    question_mark_token: None,
+                    key: &key,
+                    colon_token,
+                    value: &value,
+                    dangling_comments_of: Some(node.syntax()),
+                }]
+            );
+        }
 
         // A key spanning multiple lines can only be held by the explicit
         // `? key : value` form, so the entry converts to it
@@ -57,15 +83,24 @@ impl FormatNodeRule<YamlFlowMapImplicitEntry> for FormatYamlFlowMapImplicitEntry
             );
         }
 
-        write!(
-            f,
-            [group(&FormatImplicitEntryBody {
-                key: &key,
-                colon_token: &colon_token,
-                value: &value,
-                in_flow_mapping
-            })]
-        )
+        let body = FormatImplicitEntryBody {
+            key: &key,
+            colon_token: &colon_token,
+            value: &value,
+            in_flow_mapping,
+        };
+        write!(f, [body.group(&body, f)])
+    }
+
+    fn fmt_dangling_comments(
+        &self,
+        _: &YamlFlowMapImplicitEntry,
+        _: &mut YamlFormatter,
+    ) -> FormatResult<()> {
+        // The dangling comments sit between the key and the `:`. They are
+        // printed inside `FormatExplicitPair` on their own lines before the
+        // `:`; the default implementation would print them after the value
+        Ok(())
     }
 }
 
@@ -113,6 +148,8 @@ impl Format<YamlFormatContext> for FormatBreakableKeyEntry<'_> {
         .memoized();
         // A comment inside the value forces it to break
         let value_has_comments = subtree_has_comments(f.comments(), self.value.syntax());
+        let value_on_own_line =
+            value_starts_on_own_line(f.comments(), self.colon_token, self.value.syntax());
 
         write!(
             f,
@@ -129,6 +166,15 @@ impl Format<YamlFormatContext> for FormatBreakableKeyEntry<'_> {
                 ])
                 .with_group_id(Some(group_id)),
                 if_group_fits_on_line(&format_with(|f| {
+                    if value_on_own_line {
+                        return write!(
+                            f,
+                            [align(
+                                "  ",
+                                &format_args![colon_format, hard_line_break(), value_format]
+                            )]
+                        );
+                    }
                     write!(f, [colon_format])?;
                     if value_has_comments {
                         // A value that a comment forces to break stays on the
@@ -181,6 +227,58 @@ pub(crate) struct FormatImplicitEntryBody<'a> {
     pub(crate) in_flow_mapping: bool,
 }
 
+/// Whether comments sit on lines between the `:` and the value, which then
+/// starts on a line of its own, as in Prettier:
+///
+/// ```yaml
+/// { key:
+///     # comment
+///     value }
+/// ```
+///
+/// A comment leading the value on the line of the key, a suppression
+/// comment, stays on that line.
+fn value_starts_on_own_line(
+    comments: &YamlComments,
+    colon_token: &YamlSyntaxToken,
+    value: &YamlSyntaxNode,
+) -> bool {
+    comments
+        .leading_comments(value)
+        .first()
+        .is_some_and(|comment| comment.lines_before() > 0 || colon_token.has_leading_newline())
+}
+
+impl FormatImplicitEntryBody<'_> {
+    /// Whether the value starts on a line of its own, see
+    /// [value_starts_on_own_line]. Without a key, the `:` starts the entry
+    /// and the value stays on its line, after any comment
+    pub(crate) fn value_on_own_line(&self, f: &YamlFormatter) -> bool {
+        match (self.key, self.colon_token, self.value) {
+            (Some(_), Some(colon_token), Some(value)) => {
+                value_starts_on_own_line(f.comments(), colon_token, value.syntax())
+            }
+            _ => false,
+        }
+    }
+
+    /// Groups `content`, the entry holding this body. The group is a
+    /// boundary group, where Prettier uses a single-state `conditionalGroup`,
+    /// when the value starts on a line of its own, so that the line break
+    /// doesn't expand the enclosing collection
+    pub(crate) fn group<'b>(
+        &self,
+        content: &'b impl Format<YamlFormatContext>,
+        f: &YamlFormatter,
+    ) -> Group<'b, YamlFormatContext> {
+        if self.value_on_own_line(f) {
+            boundary_group(content)
+        } else {
+            group(content)
+        }
+    }
+}
+
 impl Format<YamlFormatContext> for FormatImplicitEntryBody<'_> {
     fn fmt(&self, f: &mut YamlFormatter) -> FormatResult<()> {
         if let Some(key) = self.key {
@@ -210,11 +308,26 @@ impl Format<YamlFormatContext> for FormatImplicitEntryBody<'_> {
 
         // A `:` directly following an alias, anchor, or tag would be lexed as
         // part of that token, so the separating space is required
-        if self.key.as_ref().is_some_and(needs_space_before_colon) {
-            write!(f, [space()])?;
+        let colon = format_with(|f| {
+            if self.key.as_ref().is_some_and(needs_space_before_colon) {
+                write!(f, [space()])?;
+            }
+            write!(f, [colon_token.format()])
+        });
+
+        if let Some(value) = self.value
+            && self.value_on_own_line(f)
+        {
+            return write!(
+                f,
+                [align(
+                    "  ",
+                    &format_args![colon, hard_line_break(), value.format()]
+                )]
+            );
         }
 
-        write!(f, [colon_token.format()])?;
+        write!(f, [colon])?;
 
         // In the single-pair form inside a flow sequence, the space that
         // would separate the value is printed even when there is none:
@@ -225,7 +338,7 @@ impl Format<YamlFormatContext> for FormatImplicitEntryBody<'_> {
 
         if let Some(value) = self.value {
             if !value.is_flow_collection() {
-                write!(f, [space(), value.format()])?;
+                write!(f, [space(), align("  ", &value.format())])?;
             } else if self.key.is_none() || subtree_has_comments(f.comments(), value.syntax()) {
                 // With no key before it, the collection stays on the `:` line
                 // even when it breaks. The same goes for a collection that a
