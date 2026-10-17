@@ -50,3 +50,21 @@ e:hover {
 :where(#h) :is(h) {
     color: red;
 }
+.s ::slotted(.k:hover) {
+    color: red;
+}
+
+::slotted(.k) {
+    color: red;
+}
+
+/* `ul li.active` and `.active` have different subjects, as in the flat form. */
+ul li {
+    &.active {
+        color: red;
+    }
+}
+
+.active {
+    color: red;
+}
