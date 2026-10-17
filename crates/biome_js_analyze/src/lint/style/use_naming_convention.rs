@@ -13,8 +13,9 @@ use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_semantic::{CanBeImportedExported, SemanticModel};
 use biome_js_syntax::{
-    AnyJsClassMember, AnyJsObjectMember, AnyJsVariableDeclaration, AnyTsTypeMember,
-    JsIdentifierBinding, JsLiteralExportName, JsLiteralMemberName, JsModuleItemList,
+    AnyJsClassMember, AnyJsModuleItem, AnyJsObjectMember, AnyJsRoot, AnyJsStatement,
+    AnyJsVariableDeclaration, AnyTsTypeMember, JsIdentifierBinding, JsLiteralExportName,
+    JsLiteralMemberName, JsModuleItemList,
     JsPrivateClassMemberName, JsShorthandPropertyObjectMember, JsSyntaxKind, JsSyntaxToken,
     JsVariableDeclarator, JsVariableKind, Modifier, TsDeclarationModule, TsIdentifierBinding,
     TsLiteralEnumMemberName, TsTypeParameterName,
@@ -957,6 +958,28 @@ impl Rule for UseNamingConvention {
             }
         }
         let model = ctx.model();
+        let source_type = ctx.source_type::<JsFileSource>();
+        if source_type.language().is_typescript()
+            && !source_type.is_embedded()
+            && !source_type.variant().is_standard_restricted()
+            && model
+                .scope_hoisted_to(node.syntax())
+                .unwrap_or_else(|| model.scope(node.syntax()))
+                .is_global_scope()
+            && let AnyJsRoot::JsModule(module) = ctx.root()
+            && module.items().into_iter().all(|item| match item {
+                AnyJsModuleItem::AnyJsStatement(AnyJsStatement::TsImportEqualsDeclaration(import)) => {
+                    import.module_reference().is_ok_and(|reference| {
+                        reference.as_ts_external_module_reference().is_none()
+                    })
+                }
+                AnyJsModuleItem::AnyJsStatement(_) => true,
+                _ => false,
+            })
+        {
+            // Script globals may be referenced in other files, which a local rename cannot update.
+            return None;
+        }
         if let Some(renamable) = renamable(node, model) {
             let node = ctx.query();
             let name_token = &node.name_token().ok()?;
