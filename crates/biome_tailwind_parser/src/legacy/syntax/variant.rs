@@ -1,8 +1,8 @@
+use crate::legacy::lexer::TailwindLexContext;
 use crate::legacy::parser::LegacyParser;
 use crate::legacy::syntax::css_value::parse_css_parameter_list;
 use crate::legacy::syntax::parse_error::*;
 use crate::legacy::syntax::parse_modifier;
-use crate::lexer::TailwindLexContext;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{Parser, parse_recovery::ParseRecoveryTokenSet, token_set};

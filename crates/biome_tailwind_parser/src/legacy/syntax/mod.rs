@@ -1,9 +1,9 @@
+use crate::legacy::lexer::TailwindLexContext;
 use crate::legacy::parser::LegacyParser;
 use crate::legacy::syntax::css_value::parse_css_generic_component_value_list;
 use crate::legacy::syntax::parse_error::*;
 use crate::legacy::syntax::value::parse_value;
 use crate::legacy::syntax::variant::VariantList;
-use crate::lexer::TailwindLexContext;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;

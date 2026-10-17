@@ -1,9 +1,9 @@
-use crate::lexer::TailwindLexContext;
 use crate::parser::TailwindParser;
 use crate::syntax::css_value::parse_css_generic_component_value_list;
 use crate::syntax::parse_error::*;
 use crate::syntax::value::parse_value;
 use crate::syntax::variant::VariantList;
+use crate::token_source::{lex_arbitrary_candidate, lex_css_value, lex_saw_negative};
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
@@ -15,6 +15,9 @@ mod css_value;
 mod parse_error;
 mod value;
 mod variant;
+
+#[cfg(test)]
+pub(crate) use css_value::group_url_value;
 
 pub fn parse_root(p: &mut TailwindParser) {
     let m = p.start();
@@ -85,7 +88,7 @@ fn parse_full_candidate(p: &mut TailwindParser) -> ParsedSyntax {
     let legacy_important = p.eat(T![!]);
 
     if p.at(T![-]) {
-        p.bump_with_context(T![-], TailwindLexContext::SawNegative);
+        p.bump_with_context(T![-], lex_saw_negative);
     }
 
     let candidate = parse_arbitrary_candidate(p)
@@ -193,17 +196,17 @@ fn parse_arbitrary_candidate(p: &mut TailwindParser) -> ParsedSyntax {
 
     let checkpoint = p.checkpoint();
     let m = p.start();
-    if !p.expect_with_context(T!['['], TailwindLexContext::ArbitraryCandidate) {
+    if !p.expect_with_context(T!['['], lex_arbitrary_candidate) {
         m.abandon(p);
         p.rewind(checkpoint);
         return Absent;
     }
-    if !p.expect_with_context(TW_PROPERTY, TailwindLexContext::ArbitraryCandidate) {
+    if !p.expect_with_context(TW_PROPERTY, lex_arbitrary_candidate) {
         m.abandon(p);
         p.rewind(checkpoint);
         return Absent;
     }
-    if !p.expect_with_context(T![:], TailwindLexContext::CssValue) {
+    if !p.expect_with_context(T![:], lex_css_value) {
         m.abandon(p);
         p.rewind(checkpoint);
         return Absent;

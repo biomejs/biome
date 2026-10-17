@@ -47,13 +47,13 @@ impl<'source> LegacyParser<'source> {
     }
 
     /// Whether the `n`th non-trivia token after the current one, lexed in
-    /// [TailwindLexContext::Regular](crate::lexer::TailwindLexContext::Regular), is of `kind`.
+    /// [TailwindLexContext::Regular](crate::legacy::lexer::TailwindLexContext::Regular), is of `kind`.
     pub(crate) fn nth_at(&mut self, n: usize, kind: TailwindSyntaxKind) -> bool {
         self.source.nth(n) == kind
     }
 
     /// Whether the `n`th non-trivia token after the current one, lexed in
-    /// [TailwindLexContext::Regular](crate::lexer::TailwindLexContext::Regular), is of one of
+    /// [TailwindLexContext::Regular](crate::legacy::lexer::TailwindLexContext::Regular), is of one of
     /// `kinds`.
     pub(crate) fn nth_at_ts(&mut self, n: usize, kinds: TokenSet<TailwindSyntaxKind>) -> bool {
         kinds.contains(self.source.nth(n))

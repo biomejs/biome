@@ -1,7 +1,7 @@
 //! The token source over [TailwindLexer], which lexes each token when the parser asks for it.
 
-use super::lexer::TailwindLexer;
-use crate::lexer::{BaseNameStore, TailwindLexContext};
+use super::lexer::{TailwindLexContext, TailwindLexer};
+use crate::lexer::BaseNameStore;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::BufferedLexer;
 use biome_parser::prelude::BumpWithContext;

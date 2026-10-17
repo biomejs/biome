@@ -1,5 +1,5 @@
+use crate::legacy::lexer::TailwindLexContext;
 use crate::legacy::parser::LegacyParser;
-use crate::lexer::TailwindLexContext;
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};

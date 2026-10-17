@@ -1,8 +1,8 @@
-use crate::lexer::TailwindLexContext;
 use crate::parser::TailwindParser;
 use crate::syntax::css_value::parse_css_parameter_list;
 use crate::syntax::parse_error::*;
 use crate::syntax::parse_modifier;
+use crate::token_source::{lex_arbitrary_variant, lex_css_value, lex_variant_segment};
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{Parser, parse_recovery::ParseRecoveryTokenSet, token_set};
@@ -99,8 +99,8 @@ pub(crate) fn parse_variant(p: &mut TailwindParser) -> ParsedSyntax {
 fn parse_arbitrary_variant(p: &mut TailwindParser) -> ParsedSyntax {
     let checkpoint = p.checkpoint();
     let m = p.start();
-    p.expect_with_context(T!['['], TailwindLexContext::ArbitraryVariant);
-    p.expect_with_context(TW_SELECTOR, TailwindLexContext::ArbitraryVariant);
+    p.expect_with_context(T!['['], lex_arbitrary_variant);
+    p.expect_with_context(TW_SELECTOR, lex_arbitrary_variant);
     p.expect(T![']']);
 
     if !p.at(COLON) {
@@ -117,14 +117,13 @@ fn parse_variant_expression(p: &mut TailwindParser) -> ParsedSyntax {
     let checkpoint = p.checkpoint();
     let m = p.start();
 
-    p.source_mut()
-        .re_lex_current_in_context(TailwindLexContext::VariantSegment);
+    p.source_mut().regroup_current(lex_variant_segment);
 
     let segments = p.start();
     parse_any_variant_segment(p).or_add_diagnostic(p, expected_value);
 
     while p.at(T![-]) {
-        p.bump_with_context(T![-], TailwindLexContext::VariantSegment);
+        p.bump_with_context(T![-], lex_variant_segment);
         parse_any_variant_segment(p).or_add_diagnostic(p, expected_value);
     }
 
@@ -173,7 +172,7 @@ fn parse_named_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.bump_with_context(TW_VARIANT_SEGMENT, TailwindLexContext::VariantSegment);
+    p.bump_with_context(TW_VARIANT_SEGMENT, lex_variant_segment);
 
     Present(m.complete(p, TW_NAMED_VARIANT_SEGMENT))
 }
@@ -184,15 +183,15 @@ fn parse_arbitrary_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
     // — this keeps combinators (`has-[>svg]`, `[+p]`, `[~span]`) inside the
     // selector instead of erroring on them in the CSS-value grammar.
     let m = p.start();
-    p.expect_with_context(T!['['], TailwindLexContext::ArbitraryVariant);
-    p.expect_with_context(TW_SELECTOR, TailwindLexContext::ArbitraryVariant);
+    p.expect_with_context(T!['['], lex_arbitrary_variant);
+    p.expect_with_context(TW_SELECTOR, lex_arbitrary_variant);
     p.expect(T![']']);
     Present(m.complete(p, TW_ARBITRARY_VARIANT_SEGMENT))
 }
 
 fn parse_css_variable_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
     let m = p.start();
-    p.expect_with_context(T!['('], TailwindLexContext::CssValue);
+    p.expect_with_context(T!['('], lex_css_value);
     let parameters = parse_css_parameter_list(p);
     if parameters.range(p).is_empty() {
         p.error(expected_value(p, p.cur_range()));

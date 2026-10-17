@@ -1,7 +1,6 @@
 #![cfg(test)]
 
-use super::{TailwindLexer, TextSize};
-use crate::lexer::TailwindLexContext;
+use super::{TailwindLexContext, TailwindLexer, TextSize};
 use biome_parser::lexer::Lexer;
 use biome_tailwind_syntax::TailwindSyntaxKind::{self, *};
 use quickcheck_macros::quickcheck;
