@@ -118,8 +118,10 @@ fn parse_exclusive_scss_interpolated_block_item(
 /// }
 /// ```
 #[inline]
-fn parse_metavariable_block_item(p: &mut CssParser, end_kind: CssSyntaxKind) -> ParsedSyntax {
-    if let Ok(rule) = try_parse_nested_qualified_rule_without_selector_recovery(p, end_kind) {
+fn parse_metavariable_block_item(p: &mut CssParser) -> ParsedSyntax {
+    // The rule must reach its own closing brace, also at the root of a styled
+    // snippet, whose list ends at the end of the file.
+    if let Ok(rule) = try_parse_nested_qualified_rule_without_selector_recovery(p, T!['}']) {
         return rule;
     }
 
@@ -316,7 +318,7 @@ impl ParseNodeList for DeclarationOrRuleList {
             // because declaration error is more relevant.
             parse_any_declaration_with_semicolon(p)
         } else if is_at_metavariable(p) {
-            parse_metavariable_block_item(p, self.end_kind)
+            parse_metavariable_block_item(p)
         } else if is_at_nested_qualified_rule(p) {
             parse_nested_qualified_rule(p)
         } else {
