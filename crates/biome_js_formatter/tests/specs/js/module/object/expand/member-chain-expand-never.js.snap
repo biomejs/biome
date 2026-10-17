@@ -1,0 +1,58 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/module/object/expand/member-chain-expand-never.js
+---
+
+# Input
+
+```js
+// With `expand: "never"`, objects don't keep the line break of the source, so
+// the chain expands and the object breaks whether or not the source object
+// spans multiple lines.
+reply.code(409).send({ ok: false, error: "User with this email already exists here", code: "DUPLICATE_EMAIL" });
+
+reply.code(409).send({
+	ok: false,
+	error: "User with this email already exists here",
+	code: "DUPLICATE_EMAIL",
+});
+
+```
+
+
+# Options
+
+```json
+{
+  "$schema": "../../../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "javascript": {
+    "formatter": {
+      "expand": "never"
+    }
+  }
+}
+```
+
+# Formatted
+
+```js
+// With `expand: "never"`, objects don't keep the line break of the source, so
+// the chain expands and the object breaks whether or not the source object
+// spans multiple lines.
+reply
+	.code(409)
+	.send({
+		ok: false,
+		error: "User with this email already exists here",
+		code: "DUPLICATE_EMAIL",
+	});
+
+reply
+	.code(409)
+	.send({
+		ok: false,
+		error: "User with this email already exists here",
+		code: "DUPLICATE_EMAIL",
+	});
+
+```

@@ -1,0 +1,62 @@
+// The object would also break in the expanded chain, so the chain stays on one
+// line and only the object breaks.
+const example = pgTable("example", {
+	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "example_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
+});
+
+function handler(reply) {
+	return reply.code(409).send({ ok: false, error: "User with this email already exists here", code: "DUPLICATE_EMAIL" });
+}
+
+z.string().min(2).max(200).regex(/[a-z]/gm, { message: "Only English alphabet symbols and hyphen allowed" });
+
+model = types.model({ something: mxSomething }).volatile((self) => ({ loading: false, savingStatus: "idle", undoDisabled: false }));
+
+function f0() {
+	function f1() {
+		function f2() {
+			function f3() {
+				function f4() {
+					return reply.code(409).send({ ok: false, error: "User exists here and there!", code: "DU" });
+				}
+			}
+		}
+	}
+}
+
+// The first line doesn't fit when the chain stays on one line, so the chain
+// is expanded and the object breaks.
+someVeryLongObjectNameThatIsLonger.someVeryLongMethodName().anotherVeryLongMethodNameHere({ alpha: "aaaaaaaa", beta: "bbbbbbbbbb", gamma: "cccccccc" });
+
+// Comments inside the object and after the chain stay in place.
+reply.code(409).send({ ok: false, /* inside */ error: "User with this email already exists here", code: "DUPLICATE_EMAIL" });
+
+reply.code(409).send({ ok: false, error: "User with this email already exists here", code: "DUPLICATE_EMAIL" }); // trailing
+
+// Already formatted: stays as is.
+reply.code(409).send({
+	ok: false,
+	error: "User with this email already exists here",
+	code: "DUPLICATE_EMAIL",
+});
+
+// Every line of the expanded chain fits, so the chain is expanded.
+const value = something.someMethodCall().anotherMethodCall().finalCall({ a: 1, b: 2 });
+
+// The last group fits on its own line, so the chain is expanded although
+// the line of another group doesn't fit.
+something.foo(1)("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy").finalCall({ a: 1, b: 2 });
+
+// The last group fits on its own line, so the chain is expanded, and the
+// expanded layout breaks the arguments of the head call.
+const curried = foo(aaaa, bbbb)(c).yyyyyyyyyyyyyyyyyyyy().zzzzzzzzzzzzzzzzzzzz({ k: 1, j: 2 });
+
+// The object would also break in the expanded chain, so the chain stays on one
+// line.
+const curriedObject = foo(aaaa, bbbb)(c).yyyyyyyyyyyy().zzzzzzzzzzzzz({ kkkkkkkk: 1, jjjjjjjjjjjjjj: 2, llllllllllll: 3, mmmmmmm: 4 });
+
+// The chain fits on one line.
+const query = db.select().from(users).where({ id: 1 });
+
+// A function argument before the last call expands the chain.
+promise.then((value) => value * 2).finally({ ok: false, error: "User with this email already exists", code: "DUPLICATE" });

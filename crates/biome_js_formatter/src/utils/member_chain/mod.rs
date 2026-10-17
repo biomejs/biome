@@ -105,6 +105,7 @@ mod simple_argument;
 
 use crate::JsLabels;
 use crate::context::TabWidth;
+use crate::js::expressions::call_arguments::should_group_last_argument;
 use crate::prelude::*;
 use crate::utils::is_long_curried_call;
 use crate::utils::member_chain::chain_member::{CallExpressionPosition, ChainMember};
@@ -112,10 +113,12 @@ use crate::utils::member_chain::groups::{
     MemberChainGroup, MemberChainGroupsBuilder, TailChainGroups,
 };
 pub use crate::utils::member_chain::simple_argument::SimpleArgument;
-use biome_formatter::{Buffer, write};
+use crate::utils::typescript::is_simple_type;
+use biome_formatter::{Buffer, Expand, FormatOptions, format_args, write};
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, JsCallExpression,
-    JsIdentifierExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken, JsThisExpression,
+    AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression,
+    JsCallExpression, JsIdentifierExpression, JsSyntaxKind, JsSyntaxNode, JsSyntaxToken,
+    JsThisExpression,
 };
 use biome_rowan::{AstNode, SyntaxResult};
 use std::iter::FusedIterator;
@@ -253,26 +256,16 @@ impl MemberChain {
             return Ok(true);
         }
 
-        let mut call_expressions = self
-            .members()
-            .filter_map(|member| match member {
-                ChainMember::CallExpression { expression, .. } => Some(expression),
-                _ => None,
-            })
-            .peekable();
+        let call_expressions = self.members().filter_map(|member| match member {
+            ChainMember::CallExpression { expression, .. } => Some(expression),
+            _ => None,
+        });
 
         let mut calls_count = 0u32;
-        let mut any_has_function_like_argument = false;
         let mut any_complex_args = false;
 
-        while let Some(call) = call_expressions.next() {
+        for call in call_expressions {
             calls_count += 1;
-
-            if call_expressions.peek().is_some() {
-                any_has_function_like_argument =
-                    any_has_function_like_argument || has_arrow_or_function_expression_arg(call)
-            }
-
             any_complex_args = any_complex_args || !has_simple_arguments(call);
         }
 
@@ -280,7 +273,7 @@ impl MemberChain {
             return Ok(true);
         }
 
-        if self.last_call_breaks(f)? && any_has_function_like_argument {
+        if self.last_call_breaks(f)? && self.has_function_like_argument_before_last_call() {
             return Ok(true);
         }
 
@@ -315,6 +308,176 @@ impl MemberChain {
         } else {
             Ok(false)
         }
+    }
+
+    fn has_function_like_argument_before_last_call(&self) -> bool {
+        let mut calls = self
+            .members()
+            .filter_map(|member| match member {
+                ChainMember::CallExpression { expression, .. } => Some(expression),
+                _ => None,
+            })
+            .peekable();
+
+        while let Some(call) = calls.next() {
+            if calls.peek().is_some() && has_arrow_or_function_expression_arg(call) {
+                return true;
+            }
+        }
+
+        false
+    }
+
+    /// Returns `true` if the chain can use the hugged layout, which keeps the
+    /// chain on one line and breaks only the last argument of its last call:
+    ///
+    /// ```js
+    /// reply.code(409).send({
+    ///     ok: false,
+    /// });
+    /// ```
+    ///
+    /// Without this layout, formatting isn't stable. With `expand: "auto"`, an
+    /// object keeps a line break after `{` from the source. If the source has
+    /// none, the first formatting expands the whole chain and breaks the
+    /// object, which adds that line break. The second formatting then keeps the
+    /// chain on one line.
+    ///
+    /// The last argument must be a non-empty object, or an arrow function
+    /// whose body is one, possibly wrapped in parentheses or type assertions.
+    /// Neither the argument list nor the last argument may have comments
+    /// attached. The comments in the body explain the other conditions.
+    fn can_hug_last_argument(&self, f: &JsFormatter) -> bool {
+        if f.options().expand() != Expand::Auto {
+            return false;
+        }
+
+        if self.tail.len() < 2 || self.has_function_like_argument_before_last_call() {
+            // Chains with fewer than two tail groups never reach this layout
+            // without comments, and comments make `groups_should_break` expand
+            // them. `groups_should_break` also expands the chain when the last
+            // call breaks after a call with a function argument.
+            return false;
+        }
+
+        // `FormatExpandedLastLine` doesn't check the lines of the head and the
+        // leading groups. That's only safe if those lines fit whenever the first
+        // line of the hugged layout fits. In the expanded chain, each tail group
+        // starts its own line, one indentation level deeper. In the hugged
+        // layout, the head and all tail groups share the first line. So the
+        // hugged first line is at least as wide as any expanded line if the
+        // other groups together are at least one indentation level wide.
+        let indent_width = usize::from(f.options().indent_width().value());
+        let head_width = self.min_group_width(&self.head, f);
+        let tail_width: usize = self
+            .tail
+            .iter()
+            .map(|group| self.min_group_width(group, f))
+            .sum();
+        let one_line_is_widest = self
+            .tail
+            .iter()
+            .all(|group| head_width + tail_width - self.min_group_width(group, f) >= indent_width);
+        if !one_line_is_widest {
+            return false;
+        }
+
+        let comments = f.comments();
+
+        let last_group = self.last_group().members();
+        let Some(ChainMember::CallExpression { expression, .. }) = last_group.last() else {
+            return false;
+        };
+
+        // `FormatExpandedLastLine` prints the last group in flat mode, while
+        // `format_expanded` prints it in expanded mode. Both print the same only
+        // if the last group has no line break outside a group. Other calls in
+        // the group (like `.c(x)` in `.c(x)[0]({})`) and type arguments that
+        // aren't simple types can have one.
+        let has_one_call = last_group
+            .iter()
+            .filter(|member| member.is_call_expression())
+            .count()
+            == 1;
+        let has_simple_type_arguments = expression.type_arguments().is_none_or(|arguments| {
+            arguments
+                .ts_type_argument_list()
+                .iter()
+                .all(|argument| argument.is_ok_and(|argument| is_simple_type(&argument)))
+        });
+        if !has_one_call || !has_simple_type_arguments {
+            return false;
+        }
+
+        let Ok(arguments) = expression.arguments() else {
+            return false;
+        };
+
+        if comments.has_comments(arguments.syntax()) {
+            return false;
+        }
+
+        let args = arguments.args();
+
+        let is_object = |expression: AnyJsExpression| {
+            matches!(
+                expression.omit_type_wrappers(),
+                Some(AnyJsExpression::JsObjectExpression(object)) if !object.members().is_empty()
+            )
+        };
+
+        let last_argument_is_object = match args.last() {
+            Some(Ok(AnyJsCallArgument::AnyJsExpression(argument))) => match argument {
+                AnyJsExpression::JsArrowFunctionExpression(arrow) => match arrow.body() {
+                    Ok(AnyJsFunctionBody::AnyJsExpression(body)) => is_object(body),
+                    _ => false,
+                },
+                argument => is_object(argument),
+            },
+            _ => false,
+        };
+
+        last_argument_is_object && should_group_last_argument(&args, comments).unwrap_or(false)
+    }
+
+    /// Returns a lower bound of the width that `group` takes on the first
+    /// line of the hugged layout.
+    ///
+    /// Only counts tokens that always print the same: names, `this`, `.` and
+    /// `?.`, 2 for each call (`(` and the character after it), 2 for the
+    /// brackets of each computed member, and 1 for each `!`. Everything else
+    /// counts as zero.
+    fn min_group_width(&self, group: &MemberChainGroup, f: &JsFormatter) -> usize {
+        let indent_width = f.options().indent_width();
+        let width = |token: SyntaxResult<JsSyntaxToken>| {
+            token.map_or(0, |token| {
+                TextWidth::from_text(token.text_trimmed(), indent_width)
+                    .width()
+                    .map_or(0, |width| width.value() as usize)
+            })
+        };
+
+        group
+            .members()
+            .iter()
+            .map(|member| match member {
+                ChainMember::StaticMember { expression } => {
+                    width(expression.operator_token())
+                        + width(expression.member().and_then(|member| member.value_token()))
+                }
+                ChainMember::CallExpression { .. } | ChainMember::ComputedMember { .. } => 2,
+                ChainMember::TsNonNullAssertionExpression { .. } => 1,
+                ChainMember::Node(node) => {
+                    if let Some(identifier) = JsIdentifierExpression::cast_ref(node) {
+                        width(identifier.name().and_then(|name| name.value_token()))
+                    } else if JsThisExpression::can_cast(node.kind()) {
+                        4
+                    } else {
+                        0
+                    }
+                }
+            })
+            .sum()
     }
 
     fn last_group(&self) -> &MemberChainGroup {
@@ -374,18 +537,18 @@ impl Format<JsFormatContext> for MemberChain {
         }
 
         let format_tail = format_with(|f| {
-            for group in self.tail.iter() {
-                if group.needs_empty_line_before() {
-                    write!(f, [empty_line()])?;
-                } else {
-                    write!(f, [hard_line_break()])?;
-                }
-                write!(f, [group])?;
-            }
-            Ok(())
+            f.join()
+                .entries(self.tail.iter().map(FormatTailGroup))
+                .finish()
         });
 
         let format_expanded = format_with(|f| write!(f, [self.head, indent(&group(&format_tail))]));
+
+        let hugged_last_group = if self.can_hug_last_argument(f) {
+            self.last_group().format_with_hugged_last_argument(f)?
+        } else {
+            None
+        };
 
         let format_content = format_with(|f| {
             if self.groups_should_break(f)? {
@@ -398,9 +561,32 @@ impl Format<JsFormatContext> for MemberChain {
 
                 if has_empty_line_before_tail || self.last_group().will_break(f)? {
                     write!(f, [expand_parent()])?;
-                }
+                    write!(f, [best_fitting!(format_one_line, format_expanded)])
+                } else if let Some(hugged_last_group) = &hugged_last_group {
+                    let format_one_line_hugged = format_with(|f| {
+                        let mut joiner = f.join();
+                        joiner.entry(&self.head);
+                        joiner.entries(self.tail.iter().take(self.tail.len() - 1));
+                        joiner.finish()?;
+                        f.write_element(hugged_last_group.clone())
+                    });
 
-                write!(f, [best_fitting!(format_one_line, format_expanded)])
+                    // Prefer the expanded chain only if its last group fits on
+                    // one line. Otherwise use the hugged layout. See
+                    // `can_hug_last_argument` for why.
+                    write!(
+                        f,
+                        [best_fitting!(
+                            format_one_line,
+                            best_fitting!(
+                                FormatExpandedLastLine(self),
+                                best_fitting!(format_one_line_hugged, format_expanded)
+                            )
+                        )]
+                    )
+                } else {
+                    write!(f, [best_fitting!(format_one_line, format_expanded)])
+                }
             }
         });
 
@@ -411,6 +597,66 @@ impl Format<JsFormatContext> for MemberChain {
                 &format_content
             )]
         )
+    }
+}
+
+/// Formats the expanded layout of a member chain as a variant that only fits
+/// if the line of the last group fits.
+///
+/// It prints the same as `format_expanded`, the fallback variant in
+/// `MemberChain::fmt` (see the conditions in
+/// [MemberChain::can_hug_last_argument]).
+///
+/// The fits test skips the head and the leading groups because they print the
+/// same as in `format_expanded`. Only the line of the last group decides
+/// whether this variant fits.
+struct FormatExpandedLastLine<'a>(&'a MemberChain);
+
+impl Format<JsFormatContext> for FormatExpandedLastLine<'_> {
+    fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
+        let chain = self.0;
+        let leading_groups = format_with(|f| {
+            f.join()
+                .entries(
+                    chain
+                        .tail
+                        .iter()
+                        .take(chain.tail.len().saturating_sub(1))
+                        .map(FormatTailGroup),
+                )
+                .finish()
+        });
+
+        let last_group = chain.tail.last();
+        let last_group_separator = format_with(|f| match last_group {
+            Some(group) if group.needs_empty_line_before() => write!(f, [empty_line()]),
+            Some(_) => write!(f, [hard_line_break()]),
+            None => Ok(()),
+        });
+
+        write!(
+            f,
+            [
+                skip_fits_check(&group(&chain.head).should_expand(true)),
+                indent(&format_args![
+                    skip_fits_check(&format_args![group(&leading_groups), last_group_separator]),
+                    last_group
+                ])
+            ]
+        )
+    }
+}
+
+struct FormatTailGroup<'a>(&'a MemberChainGroup);
+
+impl Format<JsFormatContext> for FormatTailGroup<'_> {
+    fn fmt(&self, f: &mut Formatter<JsFormatContext>) -> FormatResult<()> {
+        if self.0.needs_empty_line_before() {
+            write!(f, [empty_line()])?;
+        } else {
+            write!(f, [hard_line_break()])?;
+        }
+        write!(f, [self.0])
     }
 }
 

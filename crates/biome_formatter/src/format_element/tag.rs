@@ -77,6 +77,12 @@ pub enum Tag {
     /// Entry inside of a [crate::FormatElement::BestFitting]
     StartBestFittingEntry,
     EndBestFittingEntry,
+
+    /// Content that the fits test skips.
+    ///
+    /// See [crate::builders::skip_fits_check] for documentation.
+    StartSkipFitsCheck,
+    EndSkipFitsCheck,
 }
 
 impl Tag {
@@ -97,6 +103,7 @@ impl Tag {
                 | Self::StartLabelled(_)
                 | Self::StartEmbedded(_)
                 | Self::StartBestFittingEntry
+                | Self::StartSkipFitsCheck
         )
     }
 
@@ -122,6 +129,7 @@ impl Tag {
             StartLabelled(_) | EndLabelled => TagKind::Labelled,
             StartEmbedded(_) | EndEmbedded => TagKind::Embedded,
             StartBestFittingEntry | EndBestFittingEntry => TagKind::BestFittingEntry,
+            StartSkipFitsCheck | EndSkipFitsCheck => TagKind::SkipFitsCheck,
         }
     }
 }
@@ -145,6 +153,7 @@ pub enum TagKind {
     Labelled,
     Embedded,
     BestFittingEntry,
+    SkipFitsCheck,
 }
 
 #[derive(Debug, Copy, Default, Clone, Eq, PartialEq)]
