@@ -1,9 +1,9 @@
 use crate::parser::TailwindParser;
-use crate::syntax::css_value::group_css_value;
 use crate::syntax::css_value::{
-    is_at_dashed_identifier, is_at_identifier, parse_css_generic_component_value_list,
+    is_at_dashed_identifier, is_identifier, parse_css_generic_component_value_list,
     parse_css_parameter_list,
 };
+use crate::syntax::letters::{ValueEnd, css_token, value};
 use crate::syntax::parse_error::expected_value;
 use biome_parser::Parser;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
@@ -11,52 +11,39 @@ use biome_parser::prelude::*;
 use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::*;
 
-/// Parses a candidate or modifier value. Tailwind accepts a type hint
-/// (`bg-(color:--a)`) only in a candidate's CSS variable, so modifiers pass
-/// `allow_type_hint: false`.
-pub(crate) fn parse_value(p: &mut TailwindParser, allow_type_hint: bool) -> ParsedSyntax {
+/// Parses a candidate value, after its `-`, or a modifier value, after its `/`. Tailwind accepts a
+/// type hint (`bg-(color:--a)`) only in a candidate's CSS variable.
+pub(crate) fn parse_value(p: &mut TailwindParser, end: ValueEnd) -> ParsedSyntax {
     if p.at(T!['[']) {
         return parse_arbitrary_value(p);
     }
     if p.at(T!['(']) {
-        return parse_css_variable_value(p, allow_type_hint);
+        return parse_css_variable_value(p, end == ValueEnd::Candidate);
     }
-    if p.at(TW_NUMBER) {
-        return parse_numeric_value(p);
-    }
-    parse_named_value(p)
-}
-
-fn parse_named_value(p: &mut TailwindParser) -> ParsedSyntax {
-    let checkpoint = p.checkpoint();
-    let m = p.start();
-    if !p.expect(TW_VALUE) {
-        m.abandon(p);
-        p.rewind(checkpoint);
+    if matches!(p.cur(), WHITESPACE | T![')'] | T![']'] | EOF) {
         return Absent;
     }
-
-    Present(m.complete(p, TW_NAMED_VALUE))
-}
-
-/// Parses a numeric value which can be either a number or a percentage (a number followed by a % sign).
-fn parse_numeric_value(p: &mut TailwindParser) -> ParsedSyntax {
-    if !p.at(TW_NUMBER) {
+    let (kind, letters) = value(p.source(), end);
+    // A candidate's value can be empty (`bg-%` is the percentage of an empty number), but a
+    // modifier can't.
+    if letters == 0 && end == ValueEnd::Modifier {
         return Absent;
     }
     let m = p.start();
-    p.bump(TW_NUMBER);
+    p.bump_letters(kind, letters);
+    if kind == TW_VALUE {
+        return Present(m.complete(p, TW_NAMED_VALUE));
+    }
     if p.eat(T![%]) {
         return Present(m.complete(p, TW_PERCENTAGE_VALUE));
     }
-
     Present(m.complete(p, TW_NUMBER_VALUE))
 }
 
 fn parse_arbitrary_value(p: &mut TailwindParser) -> ParsedSyntax {
     let checkpoint = p.checkpoint();
     let m = p.start();
-    if !p.expect_with_context(T!['['], group_css_value) {
+    if !p.expect_css(T!['[']) {
         m.abandon(p);
         p.rewind(checkpoint);
         return Absent;
@@ -76,7 +63,7 @@ fn parse_arbitrary_value(p: &mut TailwindParser) -> ParsedSyntax {
 fn parse_css_variable_value(p: &mut TailwindParser, allow_type_hint: bool) -> ParsedSyntax {
     let checkpoint = p.checkpoint();
     let m = p.start();
-    if !p.expect_with_context(T!['('], group_css_value) {
+    if !p.expect_css(T!['(']) {
         m.abandon(p);
         p.rewind(checkpoint);
         return Absent;
@@ -100,14 +87,15 @@ fn parse_css_variable_value(p: &mut TailwindParser, allow_type_hint: bool) -> Pa
 /// Parses the `color:` in `bg-(color:--brand)`.
 fn parse_type_hint(p: &mut TailwindParser) -> ParsedSyntax {
     // A dashed identifier before a `:` is the variable itself (`bg-(--a:b)`),
-    // which Tailwind rejects; leaving it to the parameter list reports the
-    // whole value as invalid.
-    if !is_at_identifier(p) || is_at_dashed_identifier(p) || !p.nth_at(1, T![:]) {
+    // which Tailwind rejects; leaving it to the parameter list reports what
+    // follows the variable as invalid.
+    let (kind, letters) = css_token(p.source(), 0);
+    if !is_identifier(kind) || is_at_dashed_identifier(p) || p.source().nth_kind(letters) != T![:] {
         return Absent;
     }
 
     let m = p.start();
-    p.bump_remap_with_context(TW_VALUE, group_css_value);
-    p.bump_with_context(T![:], group_css_value);
+    p.bump_css_letters(TW_VALUE, letters);
+    p.bump_css(T![:]);
     Present(m.complete(p, TW_TYPE_HINT))
 }

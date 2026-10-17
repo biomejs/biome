@@ -1,24 +1,12 @@
-//! The lexers of Tailwind class strings.
-//!
-//! [simd::SimdLexer] classifies the whole class string with SIMD up front. The token source's
-//! groupings build every token from its bitmaps.
+//! The lexer of Tailwind class strings, and the dashed basenames that the parser matches.
 
 mod base_name_store;
 pub(crate) mod simd;
 
 pub use base_name_store::{BASENAME_STORE, BaseNameStore};
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_rowan::TextLen;
 use biome_tailwind_syntax::TailwindSyntaxKind::{self, *};
 use biome_tailwind_syntax::TextSize;
-
-/// The diagnostic for `char` at `start`, which no token can start with.
-pub(crate) fn unexpected_character(char: char, start: TextSize) -> ParseDiagnostic {
-    ParseDiagnostic::new(
-        format!("Unexpected character `{char}`"),
-        start..start + char.text_len(),
-    )
-}
 
 /// The diagnostic for the whitespace byte at `start` that CSS doesn't allow: `\x0B` or `\x0C`.
 pub(crate) fn invalid_whitespace(start: TextSize) -> ParseDiagnostic {
