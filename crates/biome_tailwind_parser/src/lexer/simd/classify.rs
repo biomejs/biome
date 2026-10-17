@@ -102,6 +102,7 @@ const fn ascii_classes(byte: u8) -> u16 {
     classes
 }
 
+/// A lookup table for ascii bytes to classes, computed at compile time.
 static ASCII_CLASSES: [u16; 128] = {
     let mut table = [0; 128];
     let mut byte = 0;
