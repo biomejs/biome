@@ -935,6 +935,7 @@ dependencies = [
  "biome_unicode_table",
  "camino",
  "codspeed-criterion-compat",
+ "enumflags2",
  "filetime",
  "insta",
  "mimalloc",
