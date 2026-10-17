@@ -3417,6 +3417,11 @@ export interface Nursery {
 	 */
 	useMatchingFunctionName?: UseMatchingFunctionNameConfiguration;
 	/**
+	 * Prefer Math.abs() over manual absolute value calculations and range checks.
+	 * See https://biomejs.dev/linter/rules/use-math-abs
+	 */
+	useMathAbs?: UseMathAbsConfiguration;
+	/**
 	 * Use modern Math APIs for common mathematical operations.
 	 * See https://biomejs.dev/linter/rules/use-modern-math-apis
 	 */
@@ -5979,6 +5984,9 @@ export type UseLowercaseTestTitleConfiguration =
 export type UseMatchingFunctionNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseMatchingFunctionNameOptions;
+export type UseMathAbsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseMathAbsOptions;
 export type UseModernMathApisConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseModernMathApisOptions;
@@ -8628,6 +8636,14 @@ export interface RuleWithUseMatchingFunctionNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseMatchingFunctionNameOptions;
 }
+export interface RuleWithUseMathAbsOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseMathAbsOptions;
+}
 export interface RuleWithUseModernMathApisOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -11006,6 +11022,7 @@ export interface UseLowercaseTestTitleOptions {
 	allowedPrefixes?: string[];
 }
 export type UseMatchingFunctionNameOptions = {};
+export type UseMathAbsOptions = {};
 export type UseModernMathApisOptions = {};
 export type UseNamedFunctionOptions = {};
 export type UseNamedLayerOptions = {};
@@ -12640,6 +12657,7 @@ export type Category =
 	| "lint/nursery/useLogicalProperties"
 	| "lint/nursery/useLowercaseTestTitle"
 	| "lint/nursery/useMatchingFunctionName"
+	| "lint/nursery/useMathAbs"
 	| "lint/nursery/useMathMinMax"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useModernMathApis"
