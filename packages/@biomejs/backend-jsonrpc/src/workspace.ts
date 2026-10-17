@@ -3408,6 +3408,11 @@ export interface Nursery {
 	 */
 	useConsistentJsonFileRead?: UseConsistentJsonFileReadConfiguration;
 	/**
+	 * Enforce a consistent notation for the lightness of colors.
+	 * See https://biomejs.dev/linter/rules/use-consistent-lightness-notation
+	 */
+	useConsistentLightnessNotation?: UseConsistentLightnessNotationConfiguration;
+	/**
 	 * Enforce JSON keys with consistent Unicode representation.
 	 * See https://biomejs.dev/linter/rules/use-consistent-object-keys
 	 */
@@ -6069,6 +6074,9 @@ export type UseConsistentHeadingLevelConfiguration =
 export type UseConsistentJsonFileReadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentJsonFileReadOptions;
+export type UseConsistentLightnessNotationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseConsistentLightnessNotationOptions;
 export type UseConsistentObjectKeysConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseConsistentObjectKeysOptions;
@@ -8757,6 +8765,14 @@ export interface RuleWithUseConsistentJsonFileReadOptions {
 	level: RulePlainConfiguration;
 	options?: UseConsistentJsonFileReadOptions;
 }
+export interface RuleWithUseConsistentLightnessNotationOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseConsistentLightnessNotationOptions;
+}
 export interface RuleWithUseConsistentObjectKeysOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -11205,6 +11221,14 @@ export interface UseConsistentJsonFileReadOptions {
 	 */
 	readAs?: JsonFileReadAs;
 }
+export interface UseConsistentLightnessNotationOptions {
+	/**
+	 * Whether the lightness of `lab()`, `lch()`, `oklab()`, and `oklch()` colors should be written as a percentage or as a number.
+	 *
+	 * Default: `"percentage"`
+	 */
+	notation?: LightnessNotation;
+}
 export interface UseConsistentObjectKeysOptions {
 	/**
 	 * The Unicode normalization form that every object key must use so equivalent characters share one encoding. Defaults to `NFC`.
@@ -12306,6 +12330,7 @@ export interface BlockLangOptions {
  */
 export type FunctionStyle = "expression" | "declaration";
 export type JsonFileReadAs = "string" | "buffer";
+export type LightnessNotation = "percentage" | "number";
 export type NormalizationForm = "NFC" | "NFD" | "NFKC" | "NFKD";
 export type UnicodeBom = "always" | "never";
 export type UseLogicalPropertiesDirection = "ltr" | "rtl";
@@ -12922,6 +12947,7 @@ export type Category =
 	| "lint/nursery/useConsistentFunctionStyle"
 	| "lint/nursery/useConsistentHeadingLevel"
 	| "lint/nursery/useConsistentJsonFileRead"
+	| "lint/nursery/useConsistentLightnessNotation"
 	| "lint/nursery/useConsistentObjectDefinition"
 	| "lint/nursery/useConsistentObjectKeys"
 	| "lint/nursery/useConsistentUnicodeBom"
