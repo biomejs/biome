@@ -7,12 +7,16 @@ use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_source_rule,
 };
 use biome_console::markup;
+use biome_css_factory::make::{
+    css_declaration_list, css_declaration_or_at_rule_list, css_declaration_or_rule_list,
+};
 use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssDeclarationOrRule, AnyCssProperty, AnyCssRule,
-    CssDeclarationOrRuleBlock, CssDeclarationOrRuleList, CssDeclarationWithSemicolon,
-    CssSyntaxKind, TextRange, keywords::VENDOR_PREFIXES,
+    CssDeclarationBlock, CssDeclarationOrAtRuleBlock, CssDeclarationOrRuleBlock,
+    CssDeclarationWithSemicolon, CssKeyframesItem, CssLanguage, CssSyntaxKind, CssSyntaxToken,
+    TextRange, keywords::VENDOR_PREFIXES,
 };
-use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken, SyntaxNode, TokenText};
+use biome_rowan::{AstNode, BatchMutationExt, TokenText, declare_node_union};
 use biome_rule_options::use_sorted_properties::UseSortedPropertiesOptions;
 use biome_string_case::StrOnlyExtension;
 use std::{
@@ -27,6 +31,8 @@ declare_source_rule! {
     /// The action uses a predefined order that groups related properties by purpose.
     /// Custom properties come first, and nested rules or at-rules such as `@media` come after
     /// declarations.
+    ///
+    /// Properties inside CSS and SCSS keyframe steps use the same order.
     ///
     /// The main groups are:
     ///
@@ -66,6 +72,15 @@ declare_source_rule! {
     /// }
     /// ```
     ///
+    /// ```css,expect_diff
+    /// @keyframes fade {
+    ///   from {
+    ///     opacity: 0;
+    ///     display: block;
+    ///   }
+    /// }
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```css
@@ -96,9 +111,13 @@ declare_source_rule! {
     }
 }
 
+declare_node_union! {
+    pub AnySortableBlockLike = CssDeclarationOrRuleBlock | CssDeclarationBlock | CssDeclarationOrAtRuleBlock
+}
+
 pub struct UseSortedPropertiesState {
     /// The containing node
-    block: CssDeclarationOrRuleBlock,
+    block: AnySortableBlockLike,
     /// The items to be sorted in their original order
     original_properties: Vec<AnyCssDeclarationOrRule>,
     /// The items in their sorted order, or [None] if sorting would be unsafe or if the rule contains unknown items.
@@ -106,7 +125,7 @@ pub struct UseSortedPropertiesState {
 }
 
 impl Rule for UseSortedProperties {
-    type Query = Ast<CssDeclarationOrRuleBlock>;
+    type Query = Ast<AnySortableBlockLike>;
     type State = UseSortedPropertiesState;
     type Signals = Option<Self::State>;
     type Options = UseSortedPropertiesOptions;
@@ -114,10 +133,27 @@ impl Rule for UseSortedProperties {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
 
-        let original_properties = node
-            .items()
-            .into_iter()
-            .collect::<Vec<AnyCssDeclarationOrRule>>();
+        // Declaration and declaration-or-at-rule blocks also occur in descriptor at-rules
+        // such as @font-face; only sort them when they belong to a keyframe step.
+        if !matches!(node, AnySortableBlockLike::CssDeclarationOrRuleBlock(_)) {
+            CssKeyframesItem::cast(node.syntax().parent()?)?;
+        }
+
+        let original_properties = match node {
+            AnySortableBlockLike::CssDeclarationOrRuleBlock(block) => {
+                block.items().into_iter().collect::<Vec<_>>()
+            }
+            AnySortableBlockLike::CssDeclarationBlock(block) => block
+                .declarations()
+                .into_iter()
+                .map(|declaration| AnyCssDeclarationOrRule::cast(declaration.into_syntax()))
+                .collect::<Option<Vec<_>>>()?,
+            AnySortableBlockLike::CssDeclarationOrAtRuleBlock(block) => block
+                .items()
+                .into_iter()
+                .map(|declaration| AnyCssDeclarationOrRule::cast(declaration.into_syntax()))
+                .collect::<Option<Vec<_>>>()?,
+        };
 
         // Template steps can depend on declarations before enclosing controls or content blocks.
         // Native keyframe lists do not use the declaration-or-rule list alternative.
@@ -183,7 +219,26 @@ impl Rule for UseSortedProperties {
         }
 
         let mut mutation = ctx.root().begin();
-        mutation.replace_node(state.block.items(), sorted_properties.as_sorted()?);
+        match &state.block {
+            AnySortableBlockLike::CssDeclarationOrRuleBlock(block) => {
+                mutation.replace_node_discard_trivia(
+                    block.items(),
+                    css_declaration_or_rule_list(sorted_properties.sorted_items()?),
+                );
+            }
+            AnySortableBlockLike::CssDeclarationBlock(block) => {
+                mutation.replace_node_discard_trivia(
+                    block.declarations(),
+                    css_declaration_list(sorted_properties.sorted_items()?),
+                );
+            }
+            AnySortableBlockLike::CssDeclarationOrAtRuleBlock(block) => {
+                mutation.replace_node_discard_trivia(
+                    block.items(),
+                    css_declaration_or_at_rule_list(sorted_properties.sorted_items()?),
+                );
+            }
+        }
 
         Some(CssRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
@@ -191,6 +246,61 @@ impl Rule for UseSortedProperties {
             markup! { "Sort these properties" }.to_owned(),
             mutation,
         ))
+    }
+}
+
+fn with_terminated_line_comment(
+    item: AnyCssDeclarationOrRule,
+    next_item: Option<&AnyCssDeclarationOrRule>,
+) -> Option<AnyCssDeclarationOrRule> {
+    let last_token = item.syntax().last_token()?;
+    if !last_token
+        .trailing_trivia()
+        .pieces()
+        .any(|piece| piece.text().starts_with("//"))
+    {
+        return Some(item);
+    }
+
+    let next_token = match next_item {
+        Some(next) => next.syntax().first_token()?,
+        None => item.syntax().parent()?.last_token()?.next_token()?,
+    };
+    if next_token
+        .leading_trivia()
+        .pieces()
+        .find(|piece| !piece.kind().is_whitespace())
+        .is_some_and(|piece| piece.kind().is_newline())
+    {
+        return Some(item);
+    }
+
+    // The parser attaches the terminating newline to the following token.
+    // Preserve it when sorting would otherwise extend the comment over code.
+    let newline = last_token
+        .next_token()?
+        .leading_trivia()
+        .pieces()
+        .find(|piece| piece.kind().is_newline())?;
+    item.append_trivia_pieces([newline])
+}
+
+fn with_semicolon(item: AnyCssDeclarationOrRule) -> Option<AnyCssDeclarationOrRule> {
+    match item {
+        AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(declaration)
+            if declaration.semicolon_token().is_none() =>
+        {
+            let trailing_trivia = declaration.syntax().last_token()?.trailing_trivia();
+            let semicolon = CssSyntaxToken::new_detached(CssSyntaxKind::SEMICOLON, ";", [], [])
+                .with_trailing_trivia_pieces(trailing_trivia.pieces());
+            Some(
+                declaration
+                    .with_trailing_trivia_pieces([])?
+                    .with_semicolon_token(Some(semicolon))
+                    .into(),
+            )
+        }
+        item => Some(item),
     }
 }
 
@@ -217,16 +327,18 @@ impl RecessOrderProperties {
             .all(|(a, b)| a.0 == *b)
     }
 
-    /// Wrap the sorted list in a CssDeclarationOrRuleList.
-    pub fn as_sorted(&self) -> Option<CssDeclarationOrRuleList> {
-        let slots = self
-            .0
-            .iter()
-            .map(|item| Some(NodeOrToken::Node(item.0.clone().into_syntax())));
-        CssDeclarationOrRuleList::cast(SyntaxNode::new_detached(
-            CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST,
-            slots,
-        ))
+    fn sorted_items<N>(&self) -> Option<Vec<N>>
+    where
+        N: AstNode<Language = CssLanguage>,
+    {
+        let mut members = self.0.iter().peekable();
+        let mut items = Vec::with_capacity(self.0.len());
+        while let Some(member) = members.next() {
+            let item =
+                with_terminated_line_comment(member.0.clone(), members.peek().map(|next| &next.0))?;
+            items.push(N::cast(with_semicolon(item)?.into_syntax())?);
+        }
+        Some(items)
     }
 }
 
@@ -292,9 +404,7 @@ impl RecessOrderMember {
                                     NodeKindOrder::Declaration
                                 }
                             }
-                            AnyCssDeclarationName::CssMetavariable(_) => {
-                                NodeKindOrder::UnknownKind
-                            }
+                            AnyCssDeclarationName::CssMetavariable(_) => NodeKindOrder::UnknownKind,
                         }
                     }
                 }
