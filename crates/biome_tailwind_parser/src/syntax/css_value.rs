@@ -1,5 +1,6 @@
-use crate::lexer::TailwindLexContext;
+use crate::lexer::simd::{Stop, is_whitespace};
 use crate::parser::TailwindParser;
+use crate::token_source::{TailwindTokenSource, lex_css_value};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
@@ -55,7 +56,7 @@ impl ParseNodeList for CssGenericComponentValueList {
 fn parse_css_generic_component_value(p: &mut TailwindParser) -> ParsedSyntax {
     if p.at_ts(token_set![T![,], T![/], T![:], T![=], T![.]]) {
         let m = p.start();
-        p.bump_with_context(p.cur(), TailwindLexContext::CssValue);
+        p.bump_with_context(p.cur(), lex_css_value);
         Present(m.complete(p, CSS_GENERIC_DELIMITER))
     } else {
         parse_css_value(p)
@@ -104,7 +105,7 @@ fn parse_css_identifier(p: &mut TailwindParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.bump_remap_with_context(T![ident], TailwindLexContext::CssValue);
+    p.bump_remap_with_context(T![ident], lex_css_value);
     Present(m.complete(p, CSS_IDENTIFIER))
 }
 
@@ -114,19 +115,19 @@ fn parse_css_dashed_identifier(p: &mut TailwindParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.bump_remap_with_context(T![ident], TailwindLexContext::CssValue);
+    p.bump_remap_with_context(T![ident], lex_css_value);
     Present(m.complete(p, CSS_DASHED_IDENTIFIER))
 }
 
 fn parse_css_string(p: &mut TailwindParser) -> ParsedSyntax {
     let m = p.start();
-    p.bump_with_context(CSS_STRING_LITERAL, TailwindLexContext::CssValue);
+    p.bump_with_context(CSS_STRING_LITERAL, lex_css_value);
     Present(m.complete(p, CSS_STRING))
 }
 
 fn parse_css_number(p: &mut TailwindParser) -> ParsedSyntax {
     let m = p.start();
-    p.bump_with_context(CSS_NUMBER_LITERAL, TailwindLexContext::CssValue);
+    p.bump_with_context(CSS_NUMBER_LITERAL, lex_css_value);
     Present(m.complete(p, CSS_NUMBER))
 }
 
@@ -141,7 +142,7 @@ fn parse_css_number_or_ratio(p: &mut TailwindParser) -> ParsedSyntax {
         return number;
     }
 
-    p.bump_with_context(T![/], TailwindLexContext::CssValue);
+    p.bump_with_context(T![/], lex_css_value);
     let ratio = number.precede(p);
     parse_css_number(p).ok();
 
@@ -155,7 +156,7 @@ fn current_slash_is_followed_by_css_number(p: &mut TailwindParser) -> bool {
 
     // because p.nth_at() does not preserve the current lex context
     let checkpoint = p.checkpoint();
-    p.bump_with_context(T![/], TailwindLexContext::CssValue);
+    p.bump_with_context(T![/], lex_css_value);
     let is_followed_by_number = p.at(CSS_NUMBER_LITERAL);
     p.rewind(checkpoint);
 
@@ -164,26 +165,26 @@ fn current_slash_is_followed_by_css_number(p: &mut TailwindParser) -> bool {
 
 fn parse_css_dimension(p: &mut TailwindParser) -> ParsedSyntax {
     let m = p.start();
-    p.bump_remap_with_context(CSS_NUMBER_LITERAL, TailwindLexContext::CssValue);
+    p.bump_remap_with_context(CSS_NUMBER_LITERAL, lex_css_value);
     let kind = if is_nth_at_unit(p, 0) {
         CSS_REGULAR_DIMENSION
     } else {
         CSS_UNKNOWN_DIMENSION
     };
-    p.bump_remap_with_context(T![ident], TailwindLexContext::CssValue);
+    p.bump_remap_with_context(T![ident], lex_css_value);
     Present(m.complete(p, kind))
 }
 
 fn parse_css_percentage(p: &mut TailwindParser) -> ParsedSyntax {
     let m = p.start();
-    p.bump_remap_with_context(CSS_NUMBER_LITERAL, TailwindLexContext::CssValue);
-    p.expect_with_context(T![%], TailwindLexContext::CssValue);
+    p.bump_remap_with_context(CSS_NUMBER_LITERAL, lex_css_value);
+    p.expect_with_context(T![%], lex_css_value);
     Present(m.complete(p, CSS_PERCENTAGE))
 }
 
 fn parse_css_color(p: &mut TailwindParser) -> ParsedSyntax {
     let m = p.start();
-    p.bump_with_context(CSS_COLOR_LITERAL, TailwindLexContext::CssValue);
+    p.bump_with_context(CSS_COLOR_LITERAL, lex_css_value);
     Present(m.complete(p, CSS_COLOR))
 }
 
@@ -216,16 +217,15 @@ fn parse_url_function(p: &mut TailwindParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.bump_with_context(T![url], TailwindLexContext::CssValue);
-    p.expect_with_context(T!['('], TailwindLexContext::CssValue);
+    p.bump_with_context(T![url], lex_css_value);
+    p.expect_with_context(T!['('], lex_css_value);
     if is_at_any_function(p) {
         ParameterList.parse_list(p);
     } else {
-        p.source_mut()
-            .re_lex_current_in_context(TailwindLexContext::CssUrlRawValue);
+        p.source_mut().regroup_current(group_url_value);
         parse_url_value(p).ok();
     }
-    p.expect_with_context(T![')'], TailwindLexContext::CssValue);
+    p.expect_with_context(T![')'], lex_css_value);
     Present(m.complete(p, CSS_URL_FUNCTION))
 }
 
@@ -236,11 +236,22 @@ fn parse_url_value_raw(p: &mut TailwindParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.bump_with_context(
-        CSS_URL_VALUE_RAW_LITERAL,
-        TailwindLexContext::CssUrlRawValue,
-    );
+    // A raw URL ends at a `)`, whitespace or the end of the source, which the regular tokens
+    // group like the URL does.
+    p.bump(CSS_URL_VALUE_RAW_LITERAL);
     Present(m.complete(p, CSS_URL_VALUE_RAW))
+}
+
+/// Groups the token after `url(` when it isn't a function: a string, or a raw URL, which runs to
+/// the next `)` or whitespace.
+pub(crate) fn group_url_value(source: &mut TailwindTokenSource) {
+    match source.next_byte() {
+        None => source.take(EOF, 0),
+        Some(b')') => source.take(T![')'], 1),
+        Some(byte) if is_whitespace(byte) => source.take_whitespace(),
+        Some(b'"' | b'\'') => source.take_string(),
+        Some(_) => source.merge_until(Stop::ParenOrWhitespace, CSS_URL_VALUE_RAW_LITERAL),
+    }
 }
 
 #[inline]
@@ -269,9 +280,9 @@ fn parse_function(p: &mut TailwindParser) -> ParsedSyntax {
 
     let m = p.start();
     parse_css_identifier(p).ok();
-    p.expect_with_context(T!['('], TailwindLexContext::CssValue);
+    p.expect_with_context(T!['('], lex_css_value);
     ParameterList.parse_list(p);
-    p.expect_with_context(T![')'], TailwindLexContext::CssValue);
+    p.expect_with_context(T![')'], lex_css_value);
     Present(m.complete(p, CSS_FUNCTION))
 }
 
@@ -310,7 +321,7 @@ impl ParseSeparatedList for ParameterList {
     }
 
     fn expect_separator(&mut self, p: &mut Self::Parser<'_>) -> bool {
-        p.expect_with_context(T![,], TailwindLexContext::CssValue)
+        p.expect_with_context(T![,], lex_css_value)
     }
 
     fn allow_trailing_separating_element(&self) -> bool {
@@ -337,7 +348,7 @@ fn parse_any_expression(p: &mut TailwindParser) -> ParsedSyntax {
 
     if is_at_binary_operator(p) {
         let binary_expression = param.precede(p);
-        p.eat_ts_with_context(BINARY_OPERATION_TOKEN, TailwindLexContext::CssValue);
+        p.eat_ts_with_context(BINARY_OPERATION_TOKEN, lex_css_value);
         parse_any_expression(p).or_add_diagnostic(p, crate::syntax::parse_error::expected_value);
         Present(binary_expression.complete(p, CSS_BINARY_EXPRESSION))
     } else {
@@ -367,7 +378,7 @@ fn parse_unary_expression(p: &mut TailwindParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.eat_ts_with_context(UNARY_OPERATION_TOKEN, TailwindLexContext::CssValue);
+    p.eat_ts_with_context(UNARY_OPERATION_TOKEN, lex_css_value);
     parse_unary_expression_operand(p)
         .or_add_diagnostic(p, crate::syntax::parse_error::expected_value);
     Present(m.complete(p, CSS_UNARY_EXPRESSION))
@@ -390,9 +401,9 @@ fn parse_parenthesized_expression(p: &mut TailwindParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.expect_with_context(T!['('], TailwindLexContext::CssValue);
+    p.expect_with_context(T!['('], lex_css_value);
     parse_any_expression(p).ok();
-    p.expect_with_context(T![')'], TailwindLexContext::CssValue);
+    p.expect_with_context(T![')'], lex_css_value);
     Present(m.complete(p, CSS_PARENTHESIZED_EXPRESSION))
 }
 

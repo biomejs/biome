@@ -2,22 +2,28 @@
 //! parsing.
 
 #[cfg(test)]
-mod tests;
+pub(crate) mod tests;
 
-use crate::lexer::simd::{self, SimdLexer, previous_class};
+use crate::lexer::simd::{self, SimdLexer, Stop, css_string_end, previous_class};
 use crate::lexer::{BaseNameStore, TailwindLexContext};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::prelude::BumpWithContext;
 use biome_parser::token_source::{TokenSource, Trivia};
 use biome_rowan::TriviaPieceKind;
-use biome_tailwind_syntax::TailwindSyntaxKind::{EOF, WHITESPACE};
+use biome_tailwind_syntax::TailwindSyntaxKind::{CSS_STRING_LITERAL, EOF, WHITESPACE};
 use biome_tailwind_syntax::{TailwindSyntaxKind, TextRange, TextSize};
+
+/// Groups the atoms after the current token into the token after it: sets its kind and end with
+/// the primitives of [TailwindTokenSource], and pushes its diagnostics.
+///
+/// The same bytes form different tokens depending on what the parser expects, so the parser
+/// passes a grouping to each bump.
+pub(crate) type Grouping = fn(&mut TailwindTokenSource);
 
 /// Token source for the parser.
 ///
 /// While the parser asks for the regular tokens in order, they come from the arrays of
-/// [SimdLexer]. Any other token, in another context or after another token, comes from
-/// [SimdLexer::lex].
+/// [SimdLexer]. Any other token comes from a [Grouping].
 pub(crate) struct TailwindTokenSource<'source> {
     lexer: SimdLexer<'source>,
     diagnostics: Vec<ParseDiagnostic>,
@@ -112,16 +118,29 @@ impl<'source> TailwindTokenSource<'source> {
             },
             trivia_list: vec![],
         };
-        source.next_non_trivia_token(TailwindLexContext::Regular, true);
+        source.next_non_trivia_token(lex_regular, true);
         source
     }
 
+    /// Moves to an empty token of kind `previous` at `offset`, for testing a [Grouping] after
+    /// it, and drops the diagnostics and trivia so far.
+    #[cfg(test)]
+    pub(crate) fn place_after(&mut self, offset: usize, previous: TailwindSyntaxKind) {
+        self.current = previous;
+        self.current_start = TextSize::from(offset as u32);
+        self.current_end = TextSize::from(offset as u32);
+        self.next = UNKNOWN;
+        self.after_newline = false;
+        self.diagnostics.clear();
+        self.trivia_list.clear();
+    }
+
     #[inline]
-    fn next_non_trivia_token(&mut self, context: TailwindLexContext, first_token: bool) {
+    fn next_non_trivia_token(&mut self, group: Grouping, first_token: bool) {
         let trailing = !first_token;
         loop {
-            let kind = self.next_token(context);
-            let Ok(trivia_kind) = TriviaPieceKind::try_from(kind) else {
+            group(self);
+            let Ok(trivia_kind) = TriviaPieceKind::try_from(self.current) else {
                 break;
             };
             self.trivia_list
@@ -129,35 +148,32 @@ impl<'source> TailwindTokenSource<'source> {
         }
     }
 
-    /// Moves to the token at `current_end`, lexed in `context`.
+    /// Moves to the token at `current_end`, lexed in [TailwindLexContext::Regular].
     #[inline(always)]
-    fn next_token(&mut self, context: TailwindLexContext) -> TailwindSyntaxKind {
-        if context == TailwindLexContext::Regular
-            && let Some(raw) = self.lexer.get(self.next)
+    fn next_regular_token(&mut self) {
+        if let Some(raw) = self.lexer.get(self.next)
             && raw & simd::SLOW == 0
         {
             self.take_regular_token(raw);
-            return self.current;
+            return;
         }
-        self.next_token_slow(context)
+        self.next_regular_token_slow();
     }
 
-    /// Moves to the token at `current_end`, lexed in `context`, when it isn't the next regular
-    /// token after the current one.
+    /// Moves to the token at `current_end`, lexed in [TailwindLexContext::Regular], when it
+    /// isn't the next regular token after the current one.
     #[inline(never)]
-    fn next_token_slow(&mut self, context: TailwindLexContext) -> TailwindSyntaxKind {
-        if context == TailwindLexContext::Regular {
-            if self.next == UNKNOWN {
-                self.next = self.find(u32::from(self.current_end));
-            }
-            if let Some(raw) = self.lexer.get(self.next)
-                && simd::fits_after(raw, previous_class(self.current))
-            {
-                self.take_regular_token(raw);
-                return self.current;
-            }
+    fn next_regular_token_slow(&mut self) {
+        if self.next == UNKNOWN {
+            self.next = self.find(u32::from(self.current_end));
         }
-        self.lex(context)
+        if let Some(raw) = self.lexer.get(self.next)
+            && simd::fits_after(raw, previous_class(self.current))
+        {
+            self.take_regular_token(raw);
+            return;
+        }
+        self.lex(TailwindLexContext::Regular);
     }
 
     /// Makes the regular token `next`, of kind and flags `raw`, the current token.
@@ -170,7 +186,7 @@ impl<'source> TailwindTokenSource<'source> {
     }
 
     /// Lexes the token at `current_end` in `context` with [SimdLexer].
-    fn lex(&mut self, context: TailwindLexContext) -> TailwindSyntaxKind {
+    fn lex(&mut self, context: TailwindLexContext) {
         let start = usize::from(self.current_end);
         let (kind, end) = match context {
             TailwindLexContext::VariantSegment => self.lexer.segment_token(start),
@@ -181,9 +197,56 @@ impl<'source> TailwindTokenSource<'source> {
                 .lex(start, context, self.current, &mut self.diagnostics)
         });
         let line_break = kind == WHITESPACE && self.lexer.has_line_break(start, end);
+        self.set_token(kind, end, line_break);
+    }
+
+    /// Makes the token of `kind` that ends at `end` the token after the current one, outside of
+    /// the regular tokens.
+    #[inline(always)]
+    fn set_token(&mut self, kind: TailwindSyntaxKind, end: usize, line_break: bool) {
         self.set_current(kind, TextSize::from(end as u32), line_break);
         self.next = UNKNOWN;
-        kind
+    }
+
+    /// Returns the first byte after the current token, or `None` at the end of the source.
+    #[inline(always)]
+    pub(crate) fn next_byte(&self) -> Option<u8> {
+        self.text()
+            .as_bytes()
+            .get(usize::from(self.current_end))
+            .copied()
+    }
+
+    /// Makes the `len` bytes after the current token a token of `kind`.
+    #[inline(always)]
+    pub(crate) fn take(&mut self, kind: TailwindSyntaxKind, len: usize) {
+        self.set_token(kind, usize::from(self.current_end) + len, false);
+    }
+
+    /// Makes the whitespace after the current token the next token, and reports the bytes in it
+    /// that CSS doesn't allow.
+    pub(crate) fn take_whitespace(&mut self) {
+        let start = usize::from(self.current_end);
+        let end = self.lexer.whitespace_end(start);
+        self.lexer
+            .push_whitespace_diagnostics(start, end, &mut self.diagnostics);
+        let line_break = self.lexer.has_line_break(start, end);
+        self.set_token(WHITESPACE, end, line_break);
+    }
+
+    /// Makes the CSS string after the current token the next token. It runs to its closing quote
+    /// or to the next whitespace.
+    pub(crate) fn take_string(&mut self) {
+        let end = css_string_end(self.text().as_bytes(), usize::from(self.current_end));
+        self.set_token(CSS_STRING_LITERAL, end, false);
+    }
+
+    /// Makes the atoms after the current token, up to the first one that `stop` matches, a token
+    /// of kind `kind`.
+    #[inline(always)]
+    pub(crate) fn merge_until(&mut self, stop: Stop, kind: TailwindSyntaxKind) {
+        let end = self.lexer.find_stop(usize::from(self.current_end), stop);
+        self.set_token(kind, end, false);
     }
 
     /// Makes the token of `kind` that ends at `end` the token after the current one.
@@ -313,17 +376,16 @@ impl<'source> TailwindTokenSource<'source> {
         self.after_newline = checkpoint.after_newline;
     }
 
-    /// Lexes the current token again in `context`, as if no token came before it.
+    /// Groups the atoms of the current token and the ones after it again with `group`, as if no
+    /// token came before them.
     ///
     /// Like the legacy token source, this keeps the diagnostics of the current token, and takes
     /// the current token's line break state as the one before it.
-    pub(crate) fn re_lex_current_in_context(
-        &mut self,
-        context: TailwindLexContext,
-    ) -> TailwindSyntaxKind {
+    pub(crate) fn regroup_current(&mut self, group: Grouping) {
         self.current_end = self.current_start;
         self.current = EOF;
-        self.lex(context)
+        self.next = UNKNOWN;
+        group(self);
     }
 
     /// Returns the kind of the `n`th non-trivia token after the current one, lexed in
@@ -365,11 +427,11 @@ impl TokenSource for TailwindTokenSource<'_> {
     }
 
     fn bump(&mut self) {
-        self.bump_with_context(TailwindLexContext::Regular)
+        self.bump_with_context(lex_regular)
     }
 
     fn skip_as_trivia(&mut self) {
-        self.skip_as_trivia_with_context(TailwindLexContext::Regular)
+        self.skip_as_trivia_with_context(lex_regular)
     }
 
     fn finish(self) -> (Vec<Trivia>, Vec<ParseDiagnostic>) {
@@ -378,23 +440,57 @@ impl TokenSource for TailwindTokenSource<'_> {
 }
 
 impl BumpWithContext for TailwindTokenSource<'_> {
-    type Context = TailwindLexContext;
+    type Context = Grouping;
 
     #[inline(always)]
-    fn bump_with_context(&mut self, context: Self::Context) {
+    fn bump_with_context(&mut self, group: Self::Context) {
         if self.current() != EOF {
-            self.next_non_trivia_token(context, false);
+            self.next_non_trivia_token(group, false);
         }
     }
 
-    fn skip_as_trivia_with_context(&mut self, context: Self::Context) {
+    fn skip_as_trivia_with_context(&mut self, group: Self::Context) {
         if self.current() != EOF {
             self.trivia_list.push(Trivia::new(
                 TriviaPieceKind::Skipped,
                 self.current_range(),
                 false,
             ));
-            self.next_non_trivia_token(context, true)
+            self.next_non_trivia_token(group, true)
         }
     }
+}
+
+/// The [Grouping] of the tokens that [SimdLexer] lexes in [TailwindLexContext::Regular]: the
+/// token after a `[` is a selector, after a `(` a value up to the `)`, after a `-` a value, after
+/// a `/` a modifier, and otherwise a basename or one byte.
+pub(crate) fn lex_regular(source: &mut TailwindTokenSource) {
+    source.next_regular_token();
+}
+
+/// The [Grouping] of the tokens that [SimdLexer] lexes in [TailwindLexContext::SawNegative].
+pub(crate) fn lex_saw_negative(source: &mut TailwindTokenSource) {
+    source.lex(TailwindLexContext::SawNegative);
+}
+
+/// The [Grouping] of the tokens that [SimdLexer] lexes in
+/// [TailwindLexContext::ArbitraryVariant].
+pub(crate) fn lex_arbitrary_variant(source: &mut TailwindTokenSource) {
+    source.lex(TailwindLexContext::ArbitraryVariant);
+}
+
+/// The [Grouping] of the tokens that [SimdLexer] lexes in
+/// [TailwindLexContext::ArbitraryCandidate].
+pub(crate) fn lex_arbitrary_candidate(source: &mut TailwindTokenSource) {
+    source.lex(TailwindLexContext::ArbitraryCandidate);
+}
+
+/// The [Grouping] of the tokens that [SimdLexer] lexes in [TailwindLexContext::VariantSegment].
+pub(crate) fn lex_variant_segment(source: &mut TailwindTokenSource) {
+    source.lex(TailwindLexContext::VariantSegment);
+}
+
+/// The [Grouping] of the tokens that [SimdLexer] lexes in [TailwindLexContext::CssValue].
+pub(crate) fn lex_css_value(source: &mut TailwindTokenSource) {
+    source.lex(TailwindLexContext::CssValue);
 }

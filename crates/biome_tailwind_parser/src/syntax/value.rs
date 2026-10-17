@@ -1,10 +1,10 @@
-use crate::lexer::TailwindLexContext;
 use crate::parser::TailwindParser;
 use crate::syntax::css_value::{
     is_at_dashed_identifier, is_at_identifier, parse_css_generic_component_value_list,
     parse_css_parameter_list,
 };
 use crate::syntax::parse_error::expected_value;
+use crate::token_source::lex_css_value;
 use biome_parser::Parser;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
@@ -56,7 +56,7 @@ fn parse_numeric_value(p: &mut TailwindParser) -> ParsedSyntax {
 fn parse_arbitrary_value(p: &mut TailwindParser) -> ParsedSyntax {
     let checkpoint = p.checkpoint();
     let m = p.start();
-    if !p.expect_with_context(T!['['], TailwindLexContext::CssValue) {
+    if !p.expect_with_context(T!['['], lex_css_value) {
         m.abandon(p);
         p.rewind(checkpoint);
         return Absent;
@@ -76,7 +76,7 @@ fn parse_arbitrary_value(p: &mut TailwindParser) -> ParsedSyntax {
 fn parse_css_variable_value(p: &mut TailwindParser, allow_type_hint: bool) -> ParsedSyntax {
     let checkpoint = p.checkpoint();
     let m = p.start();
-    if !p.expect_with_context(T!['('], TailwindLexContext::CssValue) {
+    if !p.expect_with_context(T!['('], lex_css_value) {
         m.abandon(p);
         p.rewind(checkpoint);
         return Absent;
@@ -107,7 +107,7 @@ fn parse_type_hint(p: &mut TailwindParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.bump_remap_with_context(TW_VALUE, TailwindLexContext::CssValue);
-    p.bump_with_context(T![:], TailwindLexContext::CssValue);
+    p.bump_remap_with_context(TW_VALUE, lex_css_value);
+    p.bump_with_context(T![:], lex_css_value);
     Present(m.complete(p, TW_TYPE_HINT))
 }

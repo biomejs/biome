@@ -215,6 +215,15 @@ impl<'src> SimdLexer<'src> {
         self.source.as_bytes().get(end) == Some(&b':')
     }
 
+    /// Returns the offset of the first atom at or after `position` that `stop` matches, or the
+    /// source length if there is none.
+    #[inline(always)]
+    pub(crate) fn find_stop(&self, position: usize, stop: Stop) -> usize {
+        match stop {
+            Stop::ParenOrWhitespace => next_bit(&self.blocks, position, |block| block.paren_stop),
+        }
+    }
+
     /// Returns whether `start..end` holds a line break.
     #[inline(always)]
     pub(crate) fn has_line_break(&self, start: usize, end: usize) -> bool {
@@ -287,14 +296,6 @@ impl<'src> SimdLexer<'src> {
                 TailwindLexContext::CssValue => {
                     return self.css_value(position, previous, diagnostics);
                 }
-                TailwindLexContext::CssUrlRawValue => match byte {
-                    b')' => single(byte, position),
-                    b'"' | b'\'' => (CSS_STRING_LITERAL, css_string_end(bytes, position)),
-                    _ => (
-                        CSS_URL_VALUE_RAW_LITERAL,
-                        next_bit(&self.blocks, position + 1, |block| block.paren_stop),
-                    ),
-                },
             }
         };
         if kind == WHITESPACE {
@@ -409,7 +410,7 @@ impl<'src> SimdLexer<'src> {
     }
 
     /// Pushes a diagnostic for each whitespace byte in `start..end` that CSS doesn't allow.
-    fn push_whitespace_diagnostics(
+    pub(crate) fn push_whitespace_diagnostics(
         &self,
         start: usize,
         end: usize,
@@ -427,7 +428,7 @@ impl<'src> SimdLexer<'src> {
 
     /// Returns the end of the whitespace at `position`.
     #[inline(always)]
-    fn whitespace_end(&self, position: usize) -> usize {
+    pub(crate) fn whitespace_end(&self, position: usize) -> usize {
         next_bit(&self.blocks, position + 1, |block| !block.whitespace)
     }
 
@@ -591,6 +592,17 @@ impl<'src> SimdLexer<'src> {
     }
 }
 
+/// The atoms that end a token that [SimdLexer::find_stop] looks for.
+///
+/// The lexer splits the source into atoms: sequences of whitespace, ASCII letters, ASCII digits
+/// or `_`, and single bytes or chars of any other kind. Each stop is a set of punctuation bytes and
+/// whitespace, so the first atom that it matches starts at the first byte in its bitmap.
+#[derive(Clone, Copy, Debug)]
+pub(crate) enum Stop {
+    /// `)` and whitespace.
+    ParenOrWhitespace,
+}
+
 /// Returns the kind and end of the one-byte token `byte` at `position`.
 #[inline(always)]
 fn single(byte: u8, position: usize) -> (TailwindSyntaxKind, usize) {
@@ -616,7 +628,7 @@ fn single(byte: u8, position: usize) -> (TailwindSyntaxKind, usize) {
 
 /// Whether the lexer reads `byte` as whitespace.
 #[inline(always)]
-fn is_whitespace(byte: u8) -> bool {
+pub(crate) fn is_whitespace(byte: u8) -> bool {
     matches!(byte, b'\t' | b'\n' | 0x0B | 0x0C | b'\r' | b' ')
 }
 
@@ -662,7 +674,7 @@ fn css_number(bytes: &[u8], start: usize) -> (TailwindSyntaxKind, usize) {
 
 /// Returns the end of the CSS string at `start`, which runs to its closing quote or to the next
 /// whitespace.
-fn css_string_end(bytes: &[u8], start: usize) -> usize {
+pub(crate) fn css_string_end(bytes: &[u8], start: usize) -> usize {
     let quote = bytes[start];
     let mut end = start + 1;
     while let Some(&byte) = bytes.get(end) {

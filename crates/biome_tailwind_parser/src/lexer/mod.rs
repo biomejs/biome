@@ -12,11 +12,12 @@ pub(crate) mod simd;
 pub(crate) use base_name_store::is_delimiter;
 pub use base_name_store::{BASENAME_STORE, BaseNameStore};
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_parser::lexer::LexContext;
 use biome_rowan::TextLen;
 use biome_tailwind_syntax::TailwindSyntaxKind::{self, *};
 use biome_tailwind_syntax::TextSize;
 
+/// The contexts in which [simd::SimdLexer::lex] lexes a token, which the token source's groupings
+/// haven't replaced yet.
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord)]
 pub(crate) enum TailwindLexContext {
     /// The default state.
@@ -35,14 +36,6 @@ pub(crate) enum TailwindLexContext {
     VariantSegment,
     /// CSS value lexing inside arbitrary values and arbitrary candidate values.
     CssValue,
-    /// Raw URL body lexing inside `url(...)`.
-    CssUrlRawValue,
-}
-
-impl LexContext for TailwindLexContext {
-    fn is_regular(&self) -> bool {
-        matches!(self, Self::Regular)
-    }
 }
 
 /// The diagnostic for `char` at `start`, which no token can start with.

@@ -1,44 +1,17 @@
 use super::{LINE_BREAK, SLOW, SimdLexer, kind};
-use crate::legacy::lexer::TailwindLexer;
-use crate::lexer::{BASENAME_STORE, BaseNameStore, TailwindLexContext};
+use crate::legacy::lexer::{TailwindLexContext, TailwindLexer};
+use crate::lexer::{BASENAME_STORE, BaseNameStore};
 use crate::test_support::{fixtures, mutate, random_fragments, xorshift};
+use crate::token_source::tests::check_groupings;
 use biome_parser::lexer::Lexer;
-use biome_tailwind_syntax::T;
-use biome_tailwind_syntax::TailwindSyntaxKind::{self, *};
+use biome_tailwind_syntax::TailwindSyntaxKind::*;
 
-const CONTEXTS: [TailwindLexContext; 7] = [
-    TailwindLexContext::Regular,
-    TailwindLexContext::SawNegative,
-    TailwindLexContext::ArbitraryVariant,
-    TailwindLexContext::ArbitraryCandidate,
-    TailwindLexContext::VariantSegment,
-    TailwindLexContext::CssValue,
-    TailwindLexContext::CssUrlRawValue,
-];
-
-/// Kinds of the token before, covering every kind a lexer context checks for.
-const PREVIOUS: [TailwindSyntaxKind; 12] = [
-    EOF,
-    T!['['],
-    T!['('],
-    T![-],
-    T![/],
-    T![:],
-    T![']'],
-    T![')'],
-    CSS_DIMENSION_VALUE,
-    WHITESPACE,
-    TW_BASE,
-    IDENT,
-];
-
-/// The longest source whose every offset [check] lexes in every context.
-const MAX_EXHAUSTIVE_LEN: usize = 600;
-
-/// Asserts that [SimdLexer] lexes `source` like [TailwindLexer]: its regular tokens, its colon
-/// query, and, for sources up to [MAX_EXHAUSTIVE_LEN] bytes, the token at every offset in every
-/// context after every kind of token.
+/// Asserts that [SimdLexer] lexes the regular tokens of `source` like [TailwindLexer], that it
+/// answers its colon query at every offset, and that the groupings of the token source group its
+/// tokens like [TailwindLexer] lexes them in each context.
 fn check(source: &str, base_names: &BaseNameStore) {
+    check_groupings(source, base_names);
+
     let simd = SimdLexer::new(source, base_names);
     let bytes = source.as_bytes();
 
@@ -70,8 +43,7 @@ fn check(source: &str, base_names: &BaseNameStore) {
         after_newline = legacy.after_newline();
     }
 
-    let offsets = (0..=bytes.len()).filter(|&offset| source.is_char_boundary(offset));
-    for offset in offsets.clone() {
+    for offset in (0..=bytes.len()).filter(|&offset| source.is_char_boundary(offset)) {
         let expected = bytes[offset..]
             .iter()
             .take_while(|byte| !matches!(byte, b'\t' | b'\n' | 0x0B | 0x0C | b'\r' | b' '))
@@ -81,41 +53,6 @@ fn check(source: &str, base_names: &BaseNameStore) {
             expected,
             "colon after {offset} of {source:?}"
         );
-    }
-
-    if bytes.len() > MAX_EXHAUSTIVE_LEN {
-        return;
-    }
-    for offset in offsets {
-        for context in CONTEXTS {
-            for previous in PREVIOUS {
-                let mut legacy = TailwindLexer::from_str(source).with_base_names(base_names);
-                let expected_kind = legacy.lex_at(offset, previous, false, context);
-                let expected_end = usize::from(legacy.current_range().end());
-                let mut diagnostics = Vec::new();
-                let (actual_kind, actual_end) =
-                    simd.lex(offset, context, previous, &mut diagnostics);
-                let at = || format!("{context:?} after {previous:?} at {offset} of {source:?}");
-                assert_eq!(
-                    (actual_kind, actual_end),
-                    (expected_kind, expected_end),
-                    "{}",
-                    at()
-                );
-                assert_eq!(
-                    format!("{diagnostics:?}"),
-                    format!("{:?}", legacy.diagnostics()),
-                    "{}",
-                    at()
-                );
-                assert_eq!(
-                    actual_kind == WHITESPACE && simd.has_line_break(offset, actual_end),
-                    legacy.after_newline(),
-                    "{}",
-                    at()
-                );
-            }
-        }
     }
 }
 

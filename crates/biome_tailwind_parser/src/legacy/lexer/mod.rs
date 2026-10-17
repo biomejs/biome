@@ -4,15 +4,44 @@ mod tests;
 
 use crate::lexer::is_delimiter;
 use crate::lexer::{
-    BASENAME_STORE, BaseNameStore, TailwindLexContext, css_identifier_kind, invalid_whitespace,
-    unexpected_character,
+    BASENAME_STORE, BaseNameStore, css_identifier_kind, invalid_whitespace, unexpected_character,
 };
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags};
+use biome_parser::lexer::{
+    LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
+};
 use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::*;
 use biome_tailwind_syntax::{TailwindSyntaxKind, TextSize};
 use biome_unicode_table::{Dispatch::*, lookup_byte};
+
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord)]
+pub(crate) enum TailwindLexContext {
+    /// The default state.
+    #[default]
+    Regular,
+    /// The parser just encountered a `-` before a basename, e.g. in `-mt-4`. That meant that the next token should be a basename.
+    SawNegative,
+    /// Like Arbitrary, but specifically for arbitrary variants.
+    ArbitraryVariant,
+    /// Like Arbitrary, but specifically for arbitrary candidates.
+    ArbitraryCandidate,
+    /// Lexing one segment inside a Tailwind variant expression.
+    ///
+    /// Named segments stop at `-` and `:` so `group-peer-hover`
+    /// becomes `group` / `peer` / `hover`.
+    VariantSegment,
+    /// CSS value lexing inside arbitrary values and arbitrary candidate values.
+    CssValue,
+    /// Raw URL body lexing inside `url(...)`.
+    CssUrlRawValue,
+}
+
+impl LexContext for TailwindLexContext {
+    fn is_regular(&self) -> bool {
+        matches!(self, Self::Regular)
+    }
+}
 
 pub(crate) struct TailwindLexer<'src> {
     /// Source text
