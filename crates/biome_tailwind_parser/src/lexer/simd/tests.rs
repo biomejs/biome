@@ -1,5 +1,5 @@
 use super::{LINE_BREAK, SLOW, SimdLexer, kind};
-use crate::lexer::legacy::TailwindLexer;
+use crate::legacy::lexer::TailwindLexer;
 use crate::lexer::{BASENAME_STORE, BaseNameStore, TailwindLexContext};
 use crate::test_support::{fixtures, mutate, random_fragments, xorshift};
 use biome_parser::lexer::Lexer;

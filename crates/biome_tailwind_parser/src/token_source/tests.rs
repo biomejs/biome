@@ -1,46 +1,96 @@
 use super::TailwindTokenSource;
-use super::legacy::LegacyTokenSource;
-use super::simd::SimdTokenSource;
+use crate::legacy::token_source::LegacyTokenSource;
 use crate::lexer::{BASENAME_STORE, BaseNameStore, TailwindLexContext};
-use crate::parse_with_parser;
-use crate::parser::TailwindParser;
 use crate::test_support::{fixtures, mutate, random_fragments, xorshift};
+use crate::{TailwindParserOptions, legacy, parse_tailwind_with_options};
 use biome_parser::prelude::BumpWithContext;
-use biome_parser::token_source::TokenSource;
+use biome_parser::token_source::{NthToken, TokenSource};
 use biome_rowan::NodeCache;
-use biome_tailwind_syntax::TailwindSyntaxKind::EOF;
+use biome_tailwind_syntax::TailwindSyntaxKind::{self, EOF};
+use biome_tailwind_syntax::TextRange;
 
-/// Creates a token source over `source` with each lexer.
-fn token_sources<'source>(
-    source: &'source str,
-    base_names: &'source BaseNameStore,
-) -> [TailwindTokenSource<'source>; 2] {
-    [
-        TailwindTokenSource::Legacy(LegacyTokenSource::from_str(source, base_names)),
-        TailwindTokenSource::Simd(SimdTokenSource::from_str(source, base_names)),
-    ]
+/// Asserts that the parser gives the same tree and diagnostics for `source` as the reference
+/// implementation.
+fn check_parse(source: &str, base_names: &BaseNameStore) {
+    let parse = parse_tailwind_with_options(
+        source,
+        &mut NodeCache::default(),
+        TailwindParserOptions::with_base_names(base_names),
+    );
+    let expected = legacy::parse(source, base_names);
+    assert!(
+        format!("{:#?}", parse.syntax()) == format!("{:#?}", expected.syntax()),
+        "the trees differ for {source:?}"
+    );
+    assert!(
+        format!("{:?}", parse.diagnostics()) == format!("{:?}", expected.diagnostics()),
+        "the diagnostics differ for {source:?}"
+    );
 }
 
-/// Asserts that parsing `source` gives the same tree and diagnostics with both token sources.
-fn check_parse(source: &str, base_names: &BaseNameStore) {
-    let [legacy, simd] = token_sources(source, base_names).map(|token_source| {
-        let parse = parse_with_parser(
-            source,
-            &mut NodeCache::default(),
-            TailwindParser::with_token_source(token_source),
-        );
-        (
-            format!("{:#?}", parse.syntax()),
-            format!("{:?}", parse.diagnostics()),
-        )
-    });
-    assert!(legacy.0 == simd.0, "the trees differ for {source:?}");
-    assert!(legacy.1 == simd.1, "the diagnostics differ for {source:?}");
+/// The operations of a token source that [walk] takes.
+trait Walk:
+    TokenSource<Kind = TailwindSyntaxKind> + BumpWithContext<Context = TailwindLexContext>
+{
+    type Checkpoint;
+    fn checkpoint(&self) -> Self::Checkpoint;
+    fn rewind(&mut self, checkpoint: Self::Checkpoint);
+    fn re_lex_current_in_context(&mut self, context: TailwindLexContext);
+    fn has_colon_before_whitespace(&self) -> bool;
+    fn nth_token(&mut self, n: usize) -> Option<(TailwindSyntaxKind, TextRange)>;
+}
+
+impl Walk for TailwindTokenSource<'_> {
+    type Checkpoint = super::TailwindTokenSourceCheckpoint;
+
+    fn checkpoint(&self) -> Self::Checkpoint {
+        self.checkpoint()
+    }
+
+    fn rewind(&mut self, checkpoint: Self::Checkpoint) {
+        self.rewind(checkpoint);
+    }
+
+    fn re_lex_current_in_context(&mut self, context: TailwindLexContext) {
+        self.re_lex_current_in_context(context);
+    }
+
+    fn has_colon_before_whitespace(&self) -> bool {
+        self.has_colon_before_whitespace()
+    }
+
+    fn nth_token(&mut self, n: usize) -> Option<(TailwindSyntaxKind, TextRange)> {
+        self.lookahead(n).map(|token| (token.kind, token.range))
+    }
+}
+
+impl Walk for LegacyTokenSource<'_> {
+    type Checkpoint = crate::legacy::token_source::LegacyTokenSourceCheckpoint;
+
+    fn checkpoint(&self) -> Self::Checkpoint {
+        self.checkpoint()
+    }
+
+    fn rewind(&mut self, checkpoint: Self::Checkpoint) {
+        self.rewind(checkpoint);
+    }
+
+    fn re_lex_current_in_context(&mut self, context: TailwindLexContext) {
+        self.re_lex_current_in_context(context);
+    }
+
+    fn has_colon_before_whitespace(&self) -> bool {
+        self.has_colon_before_whitespace()
+    }
+
+    fn nth_token(&mut self, n: usize) -> Option<(TailwindSyntaxKind, TextRange)> {
+        self.nth_range(n).map(|range| (self.nth(n), range))
+    }
 }
 
 /// The token source's state after each step of a pseudo-random walk over its source, which ends
 /// by bumping to the end of the source.
-fn walk(mut tokens: TailwindTokenSource, seed: u64) -> Vec<String> {
+fn walk(mut tokens: impl Walk, seed: u64) -> Vec<String> {
     let contexts = [
         TailwindLexContext::Regular,
         TailwindLexContext::Regular,
@@ -68,11 +118,7 @@ fn walk(mut tokens: TailwindTokenSource, seed: u64) -> Vec<String> {
         match next() % 12 {
             0 => {
                 for n in 1..4 {
-                    log.push(format!(
-                        "nth {n}: {:?} {:?}",
-                        tokens.nth(n),
-                        tokens.nth_token(n)
-                    ));
+                    log.push(format!("nth {n}: {:?}", tokens.nth_token(n)));
                 }
             }
             1 => checkpoints.push(tokens.checkpoint()),
@@ -104,10 +150,9 @@ fn walk(mut tokens: TailwindTokenSource, seed: u64) -> Vec<String> {
     log
 }
 
-/// Parses every fixture, and a copy of each with a few edits that break it, with both token
-/// sources.
+/// Parses every fixture, and a copy of each with a few edits that break it.
 #[test]
-fn fixtures_parse_the_same_with_both_token_sources() {
+fn fixtures_parse_like_the_reference() {
     let mut next = xorshift(0x2545_F491_4F6C_DD1D);
     for source in fixtures() {
         check_parse(&source, &BASENAME_STORE);
@@ -119,7 +164,7 @@ fn fixtures_parse_the_same_with_both_token_sources() {
 
 /// Parses sequences of fragments that the lexers and the parser treat differently.
 #[test]
-fn random_fragments_parse_the_same_with_both_token_sources() {
+fn random_fragments_parse_like_the_reference() {
     let mut next = xorshift(0x9E37_79B9_7F4A_7C15);
     for _ in 0..3000 {
         check_parse(&random_fragments(&mut next), &BASENAME_STORE);
@@ -127,7 +172,7 @@ fn random_fragments_parse_the_same_with_both_token_sources() {
 }
 
 #[test]
-fn contexts_parse_the_same_with_both_token_sources() {
+fn contexts_parse_like_the_reference() {
     for source in [
         "[[data-state=open]_&]:flex [&>div]:p-4 has-[>svg]:p-0 [(x)]:a [[a]b]:c",
         "[color:red] [mask:circle_at_center] [--x:calc(1px+2%)] [a:url(x)] [:x]",
@@ -145,7 +190,7 @@ fn contexts_parse_the_same_with_both_token_sources() {
 }
 
 #[test]
-fn custom_base_names_parse_the_same_with_both_token_sources() {
+fn custom_base_names_parse_like_the_reference() {
     let base_names = BaseNameStore::new(&["slide-in-from-top", "bg-red", "data-x"]);
     check_parse(
         "slide-in-from-top-4 bg-red-500 data-x-1 hover:slide-in-from-top-2 data-[a]:flex",
@@ -163,9 +208,12 @@ fn random_walks_match() {
     for source in sources {
         for _ in 0..3 {
             let seed = next() | 1;
-            let [legacy, simd] =
-                token_sources(&source, &BASENAME_STORE).map(|tokens| walk(tokens, seed));
-            assert_eq!(legacy, simd, "{source:?} with seed {seed:#x}");
+            let expected = walk(LegacyTokenSource::from_str(&source, &BASENAME_STORE), seed);
+            let actual = walk(
+                TailwindTokenSource::from_str(&source, &BASENAME_STORE),
+                seed,
+            );
+            assert_eq!(actual, expected, "{source:?} with seed {seed:#x}");
         }
     }
 }

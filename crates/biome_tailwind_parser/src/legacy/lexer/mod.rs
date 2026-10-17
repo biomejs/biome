@@ -2,8 +2,8 @@
 
 mod tests;
 
-use super::base_name_store::is_delimiter;
-use super::{
+use crate::lexer::is_delimiter;
+use crate::lexer::{
     BASENAME_STORE, BaseNameStore, TailwindLexContext, css_identifier_kind, invalid_whitespace,
     unexpected_character,
 };
