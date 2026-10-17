@@ -15,13 +15,6 @@ expression: invalid.js
 /😀/;
 /café/i;
 
-// RegExp constructor without flags
-RegExp("foo");
-new RegExp("foo");
-
-// RegExp constructor with trailing comma (no flags)
-new RegExp("foo",);
-
 // RegExp constructor with non-unicode flags
 RegExp("foo", "");
 RegExp("foo", "g");
@@ -38,27 +31,40 @@ new RegExp("foo", 'gi');
 RegExp("foo", 'gim');
 
 // Unicode in RegExp constructor WITHOUT u/v flag
-new RegExp("😀");
 new RegExp("😀", "g");
 
 // Parenthesized pattern
-new RegExp(("foo"));
 new RegExp(("foo"), "gi");
 
 // globalThis.RegExp
-globalThis.RegExp("foo");
 globalThis.RegExp("foo", "gi");
-new globalThis.RegExp("foo");
 new globalThis.RegExp("foo", "gi");
 
 // window.RegExp (browser)
-window.RegExp("foo");
 window.RegExp("foo", "gi");
-new window.RegExp("foo");
 new window.RegExp("foo", "gi");
 
 // Trivia preservation in constructor flags
 new RegExp("foo", /* leading */ "gi" /* trailing */);
+
+// Patterns that stay valid with the u flag - should be fixed
+/a{2}/;
+/a{1,}b{1,3}?/g;
+/[\d-]/;
+/[-\w]/;
+/[a-z\-]/;
+/(a)\1/;
+/(?<n>a)\k<n>/;
+/\k<n>(?<n>a)/;
+/\cA\x41\u0041\0/;
+/[\w\s\b]/;
+/(?=a)b/;
+/(?<!a)b/;
+/\/\.\*/;
+/[^\]]/;
+new RegExp("\\d+", "g");
+// An escaped backslash followed by a digit is not a legacy octal escape
+new RegExp("\\1(a)", "g");
 
 ```
 
@@ -229,7 +235,7 @@ invalid.js:10:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━
   > 10 │ /café/i;
        │ ^^^^^^^
     11 │ 
-    12 │ // RegExp constructor without flags
+    12 │ // RegExp constructor with non-unicode flags
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -242,62 +248,192 @@ invalid.js:10:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━
     10    │ - /café/i;
        10 │ + /café/iu;
     11 11 │   
-    12 12 │   // RegExp constructor without flags
+    12 12 │   // RegExp constructor with non-unicode flags
   
 
 ```
 
 ```
-invalid.js:13:1 lint/style/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    12 │ // RegExp constructor without flags
-  > 13 │ RegExp("foo");
-       │ ^^^^^^^^^^^^^
-    14 │ new RegExp("foo");
-    15 │ 
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-
-```
-
-```
-invalid.js:14:1 lint/style/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    12 │ // RegExp constructor without flags
-    13 │ RegExp("foo");
-  > 14 │ new RegExp("foo");
+    12 │ // RegExp constructor with non-unicode flags
+  > 13 │ RegExp("foo", "");
        │ ^^^^^^^^^^^^^^^^^
-    15 │ 
-    16 │ // RegExp constructor with trailing comma (no flags)
+    14 │ RegExp("foo", "g");
+    15 │ RegExp("foo", "gi");
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
   i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
   
+  i Safe fix: Add the u flag.
+  
+    13 │ RegExp("foo",·"u");
+       │                +   
 
 ```
 
 ```
-invalid.js:17:1 lint/style/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:14:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    16 │ // RegExp constructor with trailing comma (no flags)
-  > 17 │ new RegExp("foo",);
+    12 │ // RegExp constructor with non-unicode flags
+    13 │ RegExp("foo", "");
+  > 14 │ RegExp("foo", "g");
        │ ^^^^^^^^^^^^^^^^^^
-    18 │ 
-    19 │ // RegExp constructor with non-unicode flags
+    15 │ RegExp("foo", "gi");
+    16 │ RegExp("foo", "gim");
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
   i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i Safe fix: Add the u flag.
+  
+    12 12 │   // RegExp constructor with non-unicode flags
+    13 13 │   RegExp("foo", "");
+    14    │ - RegExp("foo",·"g");
+       14 │ + RegExp("foo",·"gu");
+    15 15 │   RegExp("foo", "gi");
+    16 16 │   RegExp("foo", "gim");
+  
+
+```
+
+```
+invalid.js:15:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    13 │ RegExp("foo", "");
+    14 │ RegExp("foo", "g");
+  > 15 │ RegExp("foo", "gi");
+       │ ^^^^^^^^^^^^^^^^^^^
+    16 │ RegExp("foo", "gim");
+    17 │ RegExp("foo", "gimy");
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i Safe fix: Add the u flag.
+  
+    13 13 │   RegExp("foo", "");
+    14 14 │   RegExp("foo", "g");
+    15    │ - RegExp("foo",·"gi");
+       15 │ + RegExp("foo",·"giu");
+    16 16 │   RegExp("foo", "gim");
+    17 17 │   RegExp("foo", "gimy");
+  
+
+```
+
+```
+invalid.js:16:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    14 │ RegExp("foo", "g");
+    15 │ RegExp("foo", "gi");
+  > 16 │ RegExp("foo", "gim");
+       │ ^^^^^^^^^^^^^^^^^^^^
+    17 │ RegExp("foo", "gimy");
+    18 │ new RegExp("foo", "");
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i Safe fix: Add the u flag.
+  
+    14 14 │   RegExp("foo", "g");
+    15 15 │   RegExp("foo", "gi");
+    16    │ - RegExp("foo",·"gim");
+       16 │ + RegExp("foo",·"gimu");
+    17 17 │   RegExp("foo", "gimy");
+    18 18 │   new RegExp("foo", "");
+  
+
+```
+
+```
+invalid.js:17:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    15 │ RegExp("foo", "gi");
+    16 │ RegExp("foo", "gim");
+  > 17 │ RegExp("foo", "gimy");
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    18 │ new RegExp("foo", "");
+    19 │ new RegExp("foo", "i");
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i Safe fix: Add the u flag.
+  
+    15 15 │   RegExp("foo", "gi");
+    16 16 │   RegExp("foo", "gim");
+    17    │ - RegExp("foo",·"gimy");
+       17 │ + RegExp("foo",·"gimyu");
+    18 18 │   new RegExp("foo", "");
+    19 19 │   new RegExp("foo", "i");
+  
+
+```
+
+```
+invalid.js:18:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    16 │ RegExp("foo", "gim");
+    17 │ RegExp("foo", "gimy");
+  > 18 │ new RegExp("foo", "");
+       │ ^^^^^^^^^^^^^^^^^^^^^
+    19 │ new RegExp("foo", "i");
+    20 │ new RegExp("foo", "gi");
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i Safe fix: Add the u flag.
+  
+    18 │ new·RegExp("foo",·"u");
+       │                    +   
+
+```
+
+```
+invalid.js:19:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    17 │ RegExp("foo", "gimy");
+    18 │ new RegExp("foo", "");
+  > 19 │ new RegExp("foo", "i");
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    20 │ new RegExp("foo", "gi");
+    21 │ new RegExp("foo", "gimy");
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i Safe fix: Add the u flag.
+  
+    17 17 │   RegExp("foo", "gimy");
+    18 18 │   new RegExp("foo", "");
+    19    │ - new·RegExp("foo",·"i");
+       19 │ + new·RegExp("foo",·"iu");
+    20 20 │   new RegExp("foo", "gi");
+    21 21 │   new RegExp("foo", "gimy");
   
 
 ```
@@ -307,11 +443,12 @@ invalid.js:20:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    19 │ // RegExp constructor with non-unicode flags
-  > 20 │ RegExp("foo", "");
-       │ ^^^^^^^^^^^^^^^^^
-    21 │ RegExp("foo", "g");
-    22 │ RegExp("foo", "gi");
+    18 │ new RegExp("foo", "");
+    19 │ new RegExp("foo", "i");
+  > 20 │ new RegExp("foo", "gi");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ new RegExp("foo", "gimy");
+    22 │ 
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -319,8 +456,13 @@ invalid.js:20:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━
   
   i Safe fix: Add the u flag.
   
-    20 │ RegExp("foo",·"u");
-       │                +   
+    18 18 │   new RegExp("foo", "");
+    19 19 │   new RegExp("foo", "i");
+    20    │ - new·RegExp("foo",·"gi");
+       20 │ + new·RegExp("foo",·"giu");
+    21 21 │   new RegExp("foo", "gimy");
+    22 22 │   
+  
 
 ```
 
@@ -329,12 +471,12 @@ invalid.js:21:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    19 │ // RegExp constructor with non-unicode flags
-    20 │ RegExp("foo", "");
-  > 21 │ RegExp("foo", "g");
-       │ ^^^^^^^^^^^^^^^^^^
-    22 │ RegExp("foo", "gi");
-    23 │ RegExp("foo", "gim");
+    19 │ new RegExp("foo", "i");
+    20 │ new RegExp("foo", "gi");
+  > 21 │ new RegExp("foo", "gimy");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ 
+    23 │ // Single quotes - should preserve quote style in fix
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -342,68 +484,12 @@ invalid.js:21:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━
   
   i Safe fix: Add the u flag.
   
-    19 19 │   // RegExp constructor with non-unicode flags
-    20 20 │   RegExp("foo", "");
-    21    │ - RegExp("foo",·"g");
-       21 │ + RegExp("foo",·"gu");
-    22 22 │   RegExp("foo", "gi");
-    23 23 │   RegExp("foo", "gim");
-  
-
-```
-
-```
-invalid.js:22:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    20 │ RegExp("foo", "");
-    21 │ RegExp("foo", "g");
-  > 22 │ RegExp("foo", "gi");
-       │ ^^^^^^^^^^^^^^^^^^^
-    23 │ RegExp("foo", "gim");
-    24 │ RegExp("foo", "gimy");
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i Safe fix: Add the u flag.
-  
-    20 20 │   RegExp("foo", "");
-    21 21 │   RegExp("foo", "g");
-    22    │ - RegExp("foo",·"gi");
-       22 │ + RegExp("foo",·"giu");
-    23 23 │   RegExp("foo", "gim");
-    24 24 │   RegExp("foo", "gimy");
-  
-
-```
-
-```
-invalid.js:23:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    21 │ RegExp("foo", "g");
-    22 │ RegExp("foo", "gi");
-  > 23 │ RegExp("foo", "gim");
-       │ ^^^^^^^^^^^^^^^^^^^^
-    24 │ RegExp("foo", "gimy");
-    25 │ new RegExp("foo", "");
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i Safe fix: Add the u flag.
-  
-    21 21 │   RegExp("foo", "g");
-    22 22 │   RegExp("foo", "gi");
-    23    │ - RegExp("foo",·"gim");
-       23 │ + RegExp("foo",·"gimu");
-    24 24 │   RegExp("foo", "gimy");
-    25 25 │   new RegExp("foo", "");
+    19 19 │   new RegExp("foo", "i");
+    20 20 │   new RegExp("foo", "gi");
+    21    │ - new·RegExp("foo",·"gimy");
+       21 │ + new·RegExp("foo",·"gimyu");
+    22 22 │   
+    23 23 │   // Single quotes - should preserve quote style in fix
   
 
 ```
@@ -413,12 +499,11 @@ invalid.js:24:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    22 │ RegExp("foo", "gi");
-    23 │ RegExp("foo", "gim");
-  > 24 │ RegExp("foo", "gimy");
-       │ ^^^^^^^^^^^^^^^^^^^^^
-    25 │ new RegExp("foo", "");
-    26 │ new RegExp("foo", "i");
+    23 │ // Single quotes - should preserve quote style in fix
+  > 24 │ new RegExp("foo", 'gi');
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ RegExp("foo", 'gim');
+    26 │ 
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -426,12 +511,12 @@ invalid.js:24:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━
   
   i Safe fix: Add the u flag.
   
-    22 22 │   RegExp("foo", "gi");
-    23 23 │   RegExp("foo", "gim");
-    24    │ - RegExp("foo",·"gimy");
-       24 │ + RegExp("foo",·"gimyu");
-    25 25 │   new RegExp("foo", "");
-    26 26 │   new RegExp("foo", "i");
+    22 22 │   
+    23 23 │   // Single quotes - should preserve quote style in fix
+    24    │ - new·RegExp("foo",·'gi');
+       24 │ + new·RegExp("foo",·'giu');
+    25 25 │   RegExp("foo", 'gim');
+    26 26 │   
   
 
 ```
@@ -441,12 +526,12 @@ invalid.js:25:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    23 │ RegExp("foo", "gim");
-    24 │ RegExp("foo", "gimy");
-  > 25 │ new RegExp("foo", "");
-       │ ^^^^^^^^^^^^^^^^^^^^^
-    26 │ new RegExp("foo", "i");
-    27 │ new RegExp("foo", "gi");
+    23 │ // Single quotes - should preserve quote style in fix
+    24 │ new RegExp("foo", 'gi');
+  > 25 │ RegExp("foo", 'gim');
+       │ ^^^^^^^^^^^^^^^^^^^^
+    26 │ 
+    27 │ // Unicode in RegExp constructor WITHOUT u/v flag
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -454,63 +539,12 @@ invalid.js:25:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━
   
   i Safe fix: Add the u flag.
   
-    25 │ new·RegExp("foo",·"u");
-       │                    +   
-
-```
-
-```
-invalid.js:26:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    24 │ RegExp("foo", "gimy");
-    25 │ new RegExp("foo", "");
-  > 26 │ new RegExp("foo", "i");
-       │ ^^^^^^^^^^^^^^^^^^^^^^
-    27 │ new RegExp("foo", "gi");
-    28 │ new RegExp("foo", "gimy");
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i Safe fix: Add the u flag.
-  
-    24 24 │   RegExp("foo", "gimy");
-    25 25 │   new RegExp("foo", "");
-    26    │ - new·RegExp("foo",·"i");
-       26 │ + new·RegExp("foo",·"iu");
-    27 27 │   new RegExp("foo", "gi");
-    28 28 │   new RegExp("foo", "gimy");
-  
-
-```
-
-```
-invalid.js:27:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    25 │ new RegExp("foo", "");
-    26 │ new RegExp("foo", "i");
-  > 27 │ new RegExp("foo", "gi");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    28 │ new RegExp("foo", "gimy");
-    29 │ 
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i Safe fix: Add the u flag.
-  
-    25 25 │   new RegExp("foo", "");
-    26 26 │   new RegExp("foo", "i");
-    27    │ - new·RegExp("foo",·"gi");
-       27 │ + new·RegExp("foo",·"giu");
-    28 28 │   new RegExp("foo", "gimy");
-    29 29 │   
+    23 23 │   // Single quotes - should preserve quote style in fix
+    24 24 │   new RegExp("foo", 'gi');
+    25    │ - RegExp("foo",·'gim');
+       25 │ + RegExp("foo",·'gimu');
+    26 26 │   
+    27 27 │   // Unicode in RegExp constructor WITHOUT u/v flag
   
 
 ```
@@ -520,12 +554,11 @@ invalid.js:28:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    26 │ new RegExp("foo", "i");
-    27 │ new RegExp("foo", "gi");
-  > 28 │ new RegExp("foo", "gimy");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ // Unicode in RegExp constructor WITHOUT u/v flag
+  > 28 │ new RegExp("😀", "g");
+       │ ^^^^^^^^^^^^^^^^^^^^^
     29 │ 
-    30 │ // Single quotes - should preserve quote style in fix
+    30 │ // Parenthesized pattern
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -533,12 +566,12 @@ invalid.js:28:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━
   
   i Safe fix: Add the u flag.
   
-    26 26 │   new RegExp("foo", "i");
-    27 27 │   new RegExp("foo", "gi");
-    28    │ - new·RegExp("foo",·"gimy");
-       28 │ + new·RegExp("foo",·"gimyu");
+    26 26 │   
+    27 27 │   // Unicode in RegExp constructor WITHOUT u/v flag
+    28    │ - new·RegExp("😀",·"g");
+       28 │ + new·RegExp("😀",·"gu");
     29 29 │   
-    30 30 │   // Single quotes - should preserve quote style in fix
+    30 30 │   // Parenthesized pattern
   
 
 ```
@@ -548,11 +581,11 @@ invalid.js:31:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    30 │ // Single quotes - should preserve quote style in fix
-  > 31 │ new RegExp("foo", 'gi');
-       │ ^^^^^^^^^^^^^^^^^^^^^^^
-    32 │ RegExp("foo", 'gim');
-    33 │ 
+    30 │ // Parenthesized pattern
+  > 31 │ new RegExp(("foo"), "gi");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ 
+    33 │ // globalThis.RegExp
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -561,164 +594,25 @@ invalid.js:31:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━
   i Safe fix: Add the u flag.
   
     29 29 │   
-    30 30 │   // Single quotes - should preserve quote style in fix
-    31    │ - new·RegExp("foo",·'gi');
-       31 │ + new·RegExp("foo",·'giu');
-    32 32 │   RegExp("foo", 'gim');
-    33 33 │   
+    30 30 │   // Parenthesized pattern
+    31    │ - new·RegExp(("foo"),·"gi");
+       31 │ + new·RegExp(("foo"),·"giu");
+    32 32 │   
+    33 33 │   // globalThis.RegExp
   
 
 ```
 
 ```
-invalid.js:32:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:34:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    30 │ // Single quotes - should preserve quote style in fix
-    31 │ new RegExp("foo", 'gi');
-  > 32 │ RegExp("foo", 'gim');
-       │ ^^^^^^^^^^^^^^^^^^^^
-    33 │ 
-    34 │ // Unicode in RegExp constructor WITHOUT u/v flag
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i Safe fix: Add the u flag.
-  
-    30 30 │   // Single quotes - should preserve quote style in fix
-    31 31 │   new RegExp("foo", 'gi');
-    32    │ - RegExp("foo",·'gim');
-       32 │ + RegExp("foo",·'gimu');
-    33 33 │   
-    34 34 │   // Unicode in RegExp constructor WITHOUT u/v flag
-  
-
-```
-
-```
-invalid.js:35:1 lint/style/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    34 │ // Unicode in RegExp constructor WITHOUT u/v flag
-  > 35 │ new RegExp("😀");
-       │ ^^^^^^^^^^^^^^^^
-    36 │ new RegExp("😀", "g");
-    37 │ 
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-
-```
-
-```
-invalid.js:36:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    34 │ // Unicode in RegExp constructor WITHOUT u/v flag
-    35 │ new RegExp("😀");
-  > 36 │ new RegExp("😀", "g");
-       │ ^^^^^^^^^^^^^^^^^^^^^
-    37 │ 
-    38 │ // Parenthesized pattern
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i Safe fix: Add the u flag.
-  
-    34 34 │   // Unicode in RegExp constructor WITHOUT u/v flag
-    35 35 │   new RegExp("😀");
-    36    │ - new·RegExp("😀",·"g");
-       36 │ + new·RegExp("😀",·"gu");
-    37 37 │   
-    38 38 │   // Parenthesized pattern
-  
-
-```
-
-```
-invalid.js:39:1 lint/style/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    38 │ // Parenthesized pattern
-  > 39 │ new RegExp(("foo"));
-       │ ^^^^^^^^^^^^^^^^^^^
-    40 │ new RegExp(("foo"), "gi");
-    41 │ 
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-
-```
-
-```
-invalid.js:40:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    38 │ // Parenthesized pattern
-    39 │ new RegExp(("foo"));
-  > 40 │ new RegExp(("foo"), "gi");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
-    41 │ 
-    42 │ // globalThis.RegExp
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-  i Safe fix: Add the u flag.
-  
-    38 38 │   // Parenthesized pattern
-    39 39 │   new RegExp(("foo"));
-    40    │ - new·RegExp(("foo"),·"gi");
-       40 │ + new·RegExp(("foo"),·"giu");
-    41 41 │   
-    42 42 │   // globalThis.RegExp
-  
-
-```
-
-```
-invalid.js:43:1 lint/style/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    42 │ // globalThis.RegExp
-  > 43 │ globalThis.RegExp("foo");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^
-    44 │ globalThis.RegExp("foo", "gi");
-    45 │ new globalThis.RegExp("foo");
-  
-  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
-  
-  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
-  
-
-```
-
-```
-invalid.js:44:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i This regular expression is missing the u or v flag.
-  
-    42 │ // globalThis.RegExp
-    43 │ globalThis.RegExp("foo");
-  > 44 │ globalThis.RegExp("foo", "gi");
+    33 │ // globalThis.RegExp
+  > 34 │ globalThis.RegExp("foo", "gi");
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    45 │ new globalThis.RegExp("foo");
-    46 │ new globalThis.RegExp("foo", "gi");
+    35 │ new globalThis.RegExp("foo", "gi");
+    36 │ 
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -726,32 +620,145 @@ invalid.js:44:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━
   
   i Safe fix: Add the u flag.
   
-    42 42 │   // globalThis.RegExp
-    43 43 │   globalThis.RegExp("foo");
-    44    │ - globalThis.RegExp("foo",·"gi");
-       44 │ + globalThis.RegExp("foo",·"giu");
-    45 45 │   new globalThis.RegExp("foo");
-    46 46 │   new globalThis.RegExp("foo", "gi");
+    32 32 │   
+    33 33 │   // globalThis.RegExp
+    34    │ - globalThis.RegExp("foo",·"gi");
+       34 │ + globalThis.RegExp("foo",·"giu");
+    35 35 │   new globalThis.RegExp("foo", "gi");
+    36 36 │   
   
 
 ```
 
 ```
-invalid.js:45:1 lint/style/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:35:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    43 │ globalThis.RegExp("foo");
-    44 │ globalThis.RegExp("foo", "gi");
-  > 45 │ new globalThis.RegExp("foo");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    46 │ new globalThis.RegExp("foo", "gi");
-    47 │ 
+    33 │ // globalThis.RegExp
+    34 │ globalThis.RegExp("foo", "gi");
+  > 35 │ new globalThis.RegExp("foo", "gi");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ 
+    37 │ // window.RegExp (browser)
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
   i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
   
+  i Safe fix: Add the u flag.
+  
+    33 33 │   // globalThis.RegExp
+    34 34 │   globalThis.RegExp("foo", "gi");
+    35    │ - new·globalThis.RegExp("foo",·"gi");
+       35 │ + new·globalThis.RegExp("foo",·"giu");
+    36 36 │   
+    37 37 │   // window.RegExp (browser)
+  
+
+```
+
+```
+invalid.js:38:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    37 │ // window.RegExp (browser)
+  > 38 │ window.RegExp("foo", "gi");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ new window.RegExp("foo", "gi");
+    40 │ 
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i Safe fix: Add the u flag.
+  
+    36 36 │   
+    37 37 │   // window.RegExp (browser)
+    38    │ - window.RegExp("foo",·"gi");
+       38 │ + window.RegExp("foo",·"giu");
+    39 39 │   new window.RegExp("foo", "gi");
+    40 40 │   
+  
+
+```
+
+```
+invalid.js:39:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    37 │ // window.RegExp (browser)
+    38 │ window.RegExp("foo", "gi");
+  > 39 │ new window.RegExp("foo", "gi");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    40 │ 
+    41 │ // Trivia preservation in constructor flags
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i Safe fix: Add the u flag.
+  
+    37 37 │   // window.RegExp (browser)
+    38 38 │   window.RegExp("foo", "gi");
+    39    │ - new·window.RegExp("foo",·"gi");
+       39 │ + new·window.RegExp("foo",·"giu");
+    40 40 │   
+    41 41 │   // Trivia preservation in constructor flags
+  
+
+```
+
+```
+invalid.js:42:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    41 │ // Trivia preservation in constructor flags
+  > 42 │ new RegExp("foo", /* leading */ "gi" /* trailing */);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ 
+    44 │ // Patterns that stay valid with the u flag - should be fixed
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i Safe fix: Add the u flag.
+  
+    40 40 │   
+    41 41 │   // Trivia preservation in constructor flags
+    42    │ - new·RegExp("foo",·/*·leading·*/·"gi"·/*·trailing·*/);
+       42 │ + new·RegExp("foo",·/*·leading·*/·"giu"·/*·trailing·*/);
+    43 43 │   
+    44 44 │   // Patterns that stay valid with the u flag - should be fixed
+  
+
+```
+
+```
+invalid.js:45:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    44 │ // Patterns that stay valid with the u flag - should be fixed
+  > 45 │ /a{2}/;
+       │ ^^^^^^
+    46 │ /a{1,}b{1,3}?/g;
+    47 │ /[\d-]/;
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i Safe fix: Add the u flag.
+  
+    45 │ /a{2}/u;
+       │       + 
 
 ```
 
@@ -760,12 +767,12 @@ invalid.js:46:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    44 │ globalThis.RegExp("foo", "gi");
-    45 │ new globalThis.RegExp("foo");
-  > 46 │ new globalThis.RegExp("foo", "gi");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    47 │ 
-    48 │ // window.RegExp (browser)
+    44 │ // Patterns that stay valid with the u flag - should be fixed
+    45 │ /a{2}/;
+  > 46 │ /a{1,}b{1,3}?/g;
+       │ ^^^^^^^^^^^^^^^
+    47 │ /[\d-]/;
+    48 │ /[-\w]/;
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -773,31 +780,82 @@ invalid.js:46:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━
   
   i Safe fix: Add the u flag.
   
-    44 44 │   globalThis.RegExp("foo", "gi");
-    45 45 │   new globalThis.RegExp("foo");
-    46    │ - new·globalThis.RegExp("foo",·"gi");
-       46 │ + new·globalThis.RegExp("foo",·"giu");
-    47 47 │   
-    48 48 │   // window.RegExp (browser)
+    44 44 │   // Patterns that stay valid with the u flag - should be fixed
+    45 45 │   /a{2}/;
+    46    │ - /a{1,}b{1,3}?/g;
+       46 │ + /a{1,}b{1,3}?/gu;
+    47 47 │   /[\d-]/;
+    48 48 │   /[-\w]/;
   
 
 ```
 
 ```
-invalid.js:49:1 lint/style/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:47:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    48 │ // window.RegExp (browser)
-  > 49 │ window.RegExp("foo");
-       │ ^^^^^^^^^^^^^^^^^^^^
-    50 │ window.RegExp("foo", "gi");
-    51 │ new window.RegExp("foo");
+    45 │ /a{2}/;
+    46 │ /a{1,}b{1,3}?/g;
+  > 47 │ /[\d-]/;
+       │ ^^^^^^^
+    48 │ /[-\w]/;
+    49 │ /[a-z\-]/;
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
   i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
   
+  i Safe fix: Add the u flag.
+  
+    47 │ /[\d-]/u;
+       │        + 
+
+```
+
+```
+invalid.js:48:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    46 │ /a{1,}b{1,3}?/g;
+    47 │ /[\d-]/;
+  > 48 │ /[-\w]/;
+       │ ^^^^^^^
+    49 │ /[a-z\-]/;
+    50 │ /(a)\1/;
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i Safe fix: Add the u flag.
+  
+    48 │ /[-\w]/u;
+       │        + 
+
+```
+
+```
+invalid.js:49:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    47 │ /[\d-]/;
+    48 │ /[-\w]/;
+  > 49 │ /[a-z\-]/;
+       │ ^^^^^^^^^
+    50 │ /(a)\1/;
+    51 │ /(?<n>a)\k<n>/;
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i Safe fix: Add the u flag.
+  
+    49 │ /[a-z\-]/u;
+       │          + 
 
 ```
 
@@ -806,12 +864,12 @@ invalid.js:50:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    48 │ // window.RegExp (browser)
-    49 │ window.RegExp("foo");
-  > 50 │ window.RegExp("foo", "gi");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    51 │ new window.RegExp("foo");
-    52 │ new window.RegExp("foo", "gi");
+    48 │ /[-\w]/;
+    49 │ /[a-z\-]/;
+  > 50 │ /(a)\1/;
+       │ ^^^^^^^
+    51 │ /(?<n>a)\k<n>/;
+    52 │ /\k<n>(?<n>a)/;
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -819,32 +877,31 @@ invalid.js:50:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━
   
   i Safe fix: Add the u flag.
   
-    48 48 │   // window.RegExp (browser)
-    49 49 │   window.RegExp("foo");
-    50    │ - window.RegExp("foo",·"gi");
-       50 │ + window.RegExp("foo",·"giu");
-    51 51 │   new window.RegExp("foo");
-    52 52 │   new window.RegExp("foo", "gi");
-  
+    50 │ /(a)\1/u;
+       │        + 
 
 ```
 
 ```
-invalid.js:51:1 lint/style/useUnicodeRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:51:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    49 │ window.RegExp("foo");
-    50 │ window.RegExp("foo", "gi");
-  > 51 │ new window.RegExp("foo");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^
-    52 │ new window.RegExp("foo", "gi");
-    53 │ 
+    49 │ /[a-z\-]/;
+    50 │ /(a)\1/;
+  > 51 │ /(?<n>a)\k<n>/;
+       │ ^^^^^^^^^^^^^^
+    52 │ /\k<n>(?<n>a)/;
+    53 │ /\cA\x41\u0041\0/;
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
   i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
   
+  i Safe fix: Add the u flag.
+  
+    51 │ /(?<n>a)\k<n>/u;
+       │               + 
 
 ```
 
@@ -853,12 +910,12 @@ invalid.js:52:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    50 │ window.RegExp("foo", "gi");
-    51 │ new window.RegExp("foo");
-  > 52 │ new window.RegExp("foo", "gi");
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    53 │ 
-    54 │ // Trivia preservation in constructor flags
+    50 │ /(a)\1/;
+    51 │ /(?<n>a)\k<n>/;
+  > 52 │ /\k<n>(?<n>a)/;
+       │ ^^^^^^^^^^^^^^
+    53 │ /\cA\x41\u0041\0/;
+    54 │ /[\w\s\b]/;
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -866,13 +923,54 @@ invalid.js:52:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━
   
   i Safe fix: Add the u flag.
   
-    50 50 │   window.RegExp("foo", "gi");
-    51 51 │   new window.RegExp("foo");
-    52    │ - new·window.RegExp("foo",·"gi");
-       52 │ + new·window.RegExp("foo",·"giu");
-    53 53 │   
-    54 54 │   // Trivia preservation in constructor flags
+    52 │ /\k<n>(?<n>a)/u;
+       │               + 
+
+```
+
+```
+invalid.js:53:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
   
+    51 │ /(?<n>a)\k<n>/;
+    52 │ /\k<n>(?<n>a)/;
+  > 53 │ /\cA\x41\u0041\0/;
+       │ ^^^^^^^^^^^^^^^^^
+    54 │ /[\w\s\b]/;
+    55 │ /(?=a)b/;
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i Safe fix: Add the u flag.
+  
+    53 │ /\cA\x41\u0041\0/u;
+       │                  + 
+
+```
+
+```
+invalid.js:54:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    52 │ /\k<n>(?<n>a)/;
+    53 │ /\cA\x41\u0041\0/;
+  > 54 │ /[\w\s\b]/;
+       │ ^^^^^^^^^^
+    55 │ /(?=a)b/;
+    56 │ /(?<!a)b/;
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i Safe fix: Add the u flag.
+  
+    54 │ /[\w\s\b]/u;
+       │           + 
 
 ```
 
@@ -881,10 +979,12 @@ invalid.js:55:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━
 
   i This regular expression is missing the u or v flag.
   
-    54 │ // Trivia preservation in constructor flags
-  > 55 │ new RegExp("foo", /* leading */ "gi" /* trailing */);
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    56 │ 
+    53 │ /\cA\x41\u0041\0/;
+    54 │ /[\w\s\b]/;
+  > 55 │ /(?=a)b/;
+       │ ^^^^^^^^
+    56 │ /(?<!a)b/;
+    57 │ /\/\.\*/;
   
   i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
   
@@ -892,11 +992,130 @@ invalid.js:55:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━
   
   i Safe fix: Add the u flag.
   
-    53 53 │   
-    54 54 │   // Trivia preservation in constructor flags
-    55    │ - new·RegExp("foo",·/*·leading·*/·"gi"·/*·trailing·*/);
-       55 │ + new·RegExp("foo",·/*·leading·*/·"giu"·/*·trailing·*/);
-    56 56 │   
+    55 │ /(?=a)b/u;
+       │         + 
+
+```
+
+```
+invalid.js:56:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    54 │ /[\w\s\b]/;
+    55 │ /(?=a)b/;
+  > 56 │ /(?<!a)b/;
+       │ ^^^^^^^^^
+    57 │ /\/\.\*/;
+    58 │ /[^\]]/;
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i Safe fix: Add the u flag.
+  
+    56 │ /(?<!a)b/u;
+       │          + 
+
+```
+
+```
+invalid.js:57:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    55 │ /(?=a)b/;
+    56 │ /(?<!a)b/;
+  > 57 │ /\/\.\*/;
+       │ ^^^^^^^^
+    58 │ /[^\]]/;
+    59 │ new RegExp("\\d+", "g");
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i Safe fix: Add the u flag.
+  
+    57 │ /\/\.\*/u;
+       │         + 
+
+```
+
+```
+invalid.js:58:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    56 │ /(?<!a)b/;
+    57 │ /\/\.\*/;
+  > 58 │ /[^\]]/;
+       │ ^^^^^^^
+    59 │ new RegExp("\\d+", "g");
+    60 │ // An escaped backslash followed by a digit is not a legacy octal escape
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i Safe fix: Add the u flag.
+  
+    58 │ /[^\]]/u;
+       │        + 
+
+```
+
+```
+invalid.js:59:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    57 │ /\/\.\*/;
+    58 │ /[^\]]/;
+  > 59 │ new RegExp("\\d+", "g");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    60 │ // An escaped backslash followed by a digit is not a legacy octal escape
+    61 │ new RegExp("\\1(a)", "g");
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i Safe fix: Add the u flag.
+  
+    57 57 │   /\/\.\*/;
+    58 58 │   /[^\]]/;
+    59    │ - new·RegExp("\\d+",·"g");
+       59 │ + new·RegExp("\\d+",·"gu");
+    60 60 │   // An escaped backslash followed by a digit is not a legacy octal escape
+    61 61 │   new RegExp("\\1(a)", "g");
+  
+
+```
+
+```
+invalid.js:61:1 lint/style/useUnicodeRegex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This regular expression is missing the u or v flag.
+  
+    59 │ new RegExp("\\d+", "g");
+    60 │ // An escaped backslash followed by a digit is not a legacy octal escape
+  > 61 │ new RegExp("\\1(a)", "g");
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    62 │ 
+  
+  i Without the u or v flag, this regular expression may not correctly handle Unicode characters, such as emoji or characters outside the Basic Multilingual Plane.
+  
+  i The u flag enables Unicode mode which correctly handles surrogate pairs and Unicode escapes. The v flag (ES2024) enables Unicode Sets mode with additional features like set notation in character classes.
+  
+  i Safe fix: Add the u flag.
+  
+    59 59 │   new RegExp("\\d+", "g");
+    60 60 │   // An escaped backslash followed by a digit is not a legacy octal escape
+    61    │ - new·RegExp("\\1(a)",·"g");
+       61 │ + new·RegExp("\\1(a)",·"gu");
+    62 62 │   
   
 
 ```
