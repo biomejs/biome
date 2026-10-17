@@ -16,7 +16,9 @@ use biome_js_syntax::{
     JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSetterClassMember,
     JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode, JsTryFinallyStatement, TextRange,
 };
-use biome_rowan::{AstNode, Language, SyntaxNode, Text, WalkEvent, declare_node_union};
+use biome_rowan::{
+    AstNode, Language, SyntaxKindSet, SyntaxNode, Text, WalkEvent, declare_node_union,
+};
 use rustc_hash::FxHashMap;
 use std::ops::{Deref, DerefMut};
 
@@ -533,6 +535,18 @@ struct EarlyReturnDetectionVisitorStackEntry {
 impl Visitor for EarlyReturnDetectionVisitor {
     type Language = JsLanguage;
 
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(
+            AnyFunctionLike::KIND_SET
+                .union(AnyPropertyAccessor::KIND_SET)
+                .union(JsReturnStatement::KIND_SET)
+                .union(JsCallExpression::KIND_SET),
+        )
+    }
+
     fn visit(
         &mut self,
         event: &WalkEvent<SyntaxNode<Self::Language>>,
@@ -586,6 +600,13 @@ struct FunctionCallVisitor;
 
 impl Visitor for FunctionCallVisitor {
     type Language = JsLanguage;
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(JsCallExpression::KIND_SET)
+    }
 
     fn visit(
         &mut self,

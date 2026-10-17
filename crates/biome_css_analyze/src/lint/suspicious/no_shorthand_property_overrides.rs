@@ -172,6 +172,13 @@ struct NoDeclarationBlockShorthandPropertyOverridesVisitor {
 impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
     type Language = CssLanguage;
 
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<CssLanguage>>,
+    ) -> Option<SyntaxKindSet<CssLanguage>> {
+        Some(CssGenericProperty::KIND_SET.union(DECLARATION_LIST_KINDS))
+    }
+
     fn visit(
         &mut self,
         event: &WalkEvent<SyntaxNode<Self::Language>>,

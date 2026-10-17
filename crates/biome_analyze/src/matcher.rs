@@ -2,7 +2,7 @@ use crate::{
     AnalyzerOptions, AnalyzerSignal, Phases, QueryMatch, Rule, RuleCategory, RuleFilter, RuleGroup,
     ServiceBag, SuppressionAction,
 };
-use biome_rowan::{Language, TextRange};
+use biome_rowan::{Language, SyntaxKindSet, TextRange};
 use std::fmt::Display;
 use std::{
     any::{Any, TypeId},
@@ -17,6 +17,14 @@ use std::{
 pub trait QueryMatcher<L: Language> {
     /// Execute a single query match
     fn match_query(&mut self, params: MatchQueryParams<L>);
+
+    /// Returns the kinds of [SyntaxNode](biome_rowan::SyntaxNode) queries that
+    /// can run a rule in `phase`, or `None` if the matcher can't tell. Queries
+    /// for nodes of other kinds must have no effect.
+    fn syntax_query_kinds(&self, phase: Phases) -> Option<SyntaxKindSet<L>> {
+        let _ = phase;
+        None
+    }
 }
 
 /// Parameters provided to [QueryMatcher::match_query] and require to run lint rules
@@ -187,6 +195,10 @@ impl<L: Language> PartialEq for SignalEntry<'_, L> {
 
 /// Adapter type wrapping a [QueryMatcher] type with a function that can be
 /// used to inspect the query matches emitted by the analyzer
+///
+/// It reports [QueryMatcher::syntax_query_kinds] of the wrapped matcher, so
+/// the function doesn't see syntax node queries the wrapped matcher would
+/// ignore when the analyzer skips those nodes.
 pub struct InspectMatcher<F, I> {
     func: F,
     inner: I,
@@ -214,6 +226,10 @@ where
     fn match_query(&mut self, params: MatchQueryParams<L>) {
         (self.func)(&params);
         self.inner.match_query(params);
+    }
+
+    fn syntax_query_kinds(&self, phase: Phases) -> Option<SyntaxKindSet<L>> {
+        self.inner.syntax_query_kinds(phase)
     }
 }
 

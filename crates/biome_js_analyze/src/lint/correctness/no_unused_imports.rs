@@ -28,7 +28,8 @@ use biome_languages::JsFileSource;
 use biome_languages::javascript::JsEmbeddingKind;
 use biome_rowan::{
     AstNode, AstNodeList, AstSeparatedElement, AstSeparatedList, BatchMutationExt, Language,
-    NodeOrToken, SyntaxNode, TextRange, TriviaPieceKind, WalkEvent, declare_node_union,
+    NodeOrToken, SyntaxKindSet, SyntaxNode, TextRange, TriviaPieceKind, WalkEvent,
+    declare_node_union,
 };
 use regex::Regex;
 use rustc_hash::FxHashSet;
@@ -532,6 +533,13 @@ declare_node_union! {
 
 impl Visitor for JsDocTypeCollectorVisitor {
     type Language = JsLanguage;
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(AnyJsWithTypeReferencingJsDoc::KIND_SET)
+    }
     fn visit(
         &mut self,
         event: &WalkEvent<SyntaxNode<Self::Language>>,

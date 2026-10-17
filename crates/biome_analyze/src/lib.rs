@@ -71,8 +71,8 @@ pub use crate::visitor::{
 };
 use biome_diagnostics::{Diagnostic, DiagnosticExt, category};
 use biome_rowan::{
-    AstNode, BatchMutation, BorrowedToken, Language, SyntaxKind as _, SyntaxToken, TextRange,
-    TextSize, TokenAtOffset, TriviaPieceKind,
+    AstNode, BatchMutation, BorrowedToken, Language, SyntaxKind as _, SyntaxKindSet, SyntaxNode,
+    SyntaxToken, TextRange, TextSize, TokenAtOffset, TriviaPieceKind, WalkEvent,
 };
 use biome_suppression::{Suppression as ParsedSuppression, SuppressionKind};
 use rustc_hash::FxHashSet;
@@ -383,24 +383,7 @@ where
             }
         }
         // Iterate for syntax rules after we've established suppressions
-        let iter = self.root.syntax().preorder();
-        for event in iter {
-            // If this is a node event pass it to the visitors for this phase
-            for visitor in self.visitors.iter_mut() {
-                let ctx = VisitorContext {
-                    phase: self.phase,
-                    root: self.root,
-                    services: self.services,
-                    range: self.range,
-                    query_matcher: self.query_matcher,
-                    signal_queue: &mut self.signal_queue,
-                    suppression_action: self.suppression_action,
-                    options: self.options,
-                };
-
-                visitor.visit(&event, ctx);
-            }
-        }
+        self.walk_nodes(|_| ControlFlow::Continue(()))?;
 
         // Flush all remaining pending events
         self.flush_matches(None)
@@ -409,8 +392,48 @@ where
     /// Runs phases 1..N over nodes, since suppression comments were already
     /// processed and cached in `run_initial_phase`
     fn run_remaining_phases(mut self) -> ControlFlow<Break> {
-        for event in self.root.syntax().preorder() {
-            // Run all the active visitors for the phase on the event
+        // Flush all pending query signals after each event
+        self.walk_nodes(|runner| runner.flush_matches(None))
+    }
+
+    /// Passes the walk events of the phase to its visitors, calling
+    /// `after_event` after each event.
+    ///
+    /// The walk skips the nodes that no visitor of the phase reads, as
+    /// reported by [Visitor::visited_kinds]. Skipped nodes have no effect on
+    /// the visitors, so the queries and signals are those of a full walk.
+    fn walk_nodes(
+        &mut self,
+        after_event: impl FnMut(&mut Self) -> ControlFlow<Break>,
+    ) -> ControlFlow<Break> {
+        let root = self.root.syntax();
+        match self.visited_kinds() {
+            None => self.visit_events(root.preorder(), after_event),
+            Some(kinds) if kinds == SyntaxKindSet::EMPTY => ControlFlow::Continue(()),
+            Some(kinds) => self.visit_events(root.preorder_of_kinds(kinds), after_event),
+        }
+    }
+
+    /// Returns the union of the kinds the visitors of this phase read, or
+    /// `None` if one of them reads every node.
+    fn visited_kinds(&self) -> Option<SyntaxKindSet<L>> {
+        if self.options.walk_every_node {
+            return None;
+        }
+        let query_kinds = self.query_matcher.syntax_query_kinds(self.phase);
+        self.visitors
+            .iter()
+            .try_fold(SyntaxKindSet::EMPTY, |kinds, visitor| {
+                Some(kinds.union(visitor.visited_kinds(query_kinds)?))
+            })
+    }
+
+    fn visit_events(
+        &mut self,
+        events: impl Iterator<Item = WalkEvent<SyntaxNode<L>>>,
+        mut after_event: impl FnMut(&mut Self) -> ControlFlow<Break>,
+    ) -> ControlFlow<Break> {
+        for event in events {
             for visitor in self.visitors.iter_mut() {
                 let ctx = VisitorContext {
                     phase: self.phase,
@@ -426,8 +449,7 @@ where
                 visitor.visit(&event, ctx);
             }
 
-            // Flush all pending query signals
-            self.flush_matches(None)?;
+            after_event(self)?;
         }
 
         ControlFlow::Continue(())
