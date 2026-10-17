@@ -223,6 +223,7 @@ define_categories! {
     "lint/nursery/noAccidentalBitwiseOperators": "https://biomejs.dev/linter/rules/no-accidental-bitwise-operators",
     "lint/nursery/noArgumentsCallerOrCallee": "https://biomejs.dev/linter/rules/no-arguments-caller-or-callee",
     "lint/nursery/noAstroConflictingSetDirectives": "https://biomejs.dev/linter/rules/no-astro-conflicting-set-directives",
+    "lint/nursery/noAstroDeprecatedResolve": "https://biomejs.dev/linter/rules/no-astro-deprecated-resolve",
     "lint/nursery/noAstroSetHtmlDirective": "https://biomejs.dev/linter/rules/no-astro-set-html-directive",
     "lint/nursery/noBaseToString": "https://biomejs.dev/linter/rules/no-base-to-string",
     "lint/nursery/noBunModules": "https://biomejs.dev/linter/rules/no-bun-modules",
