@@ -223,6 +223,31 @@ impl<'source> TailwindTokenSource<'source> {
         self.set_token(kind, usize::from(self.current_end) + len, false);
     }
 
+    /// Makes the punctuation byte after the current token, one of `()[]:-!/%+*,.=`, the next
+    /// token.
+    #[inline(always)]
+    pub(crate) fn take_punctuation(&mut self, byte: u8) {
+        self.take(simd::punctuation(byte), 1);
+    }
+
+    /// Makes the char after the current token an error token, and reports it as unexpected.
+    #[cold]
+    pub(crate) fn take_unexpected(&mut self) {
+        let (kind, end) = self
+            .lexer
+            .unexpected(usize::from(self.current_end), &mut self.diagnostics);
+        self.set_token(kind, end, false);
+    }
+
+    /// Makes the basename after the current token the next token: the atoms up to the next `-`,
+    /// whitespace, `!`, `:` or `/`, continued over each `-` that the dashed basenames continue
+    /// over. A basename that is exactly `data` is `DATA_KW`.
+    #[inline(always)]
+    pub(crate) fn merge_base(&mut self) {
+        let (raw, end) = self.lexer.base(usize::from(self.current_end));
+        self.set_token(simd::kind(raw), end, false);
+    }
+
     /// Makes the whitespace after the current token the next token, and reports the bytes in it
     /// that CSS doesn't allow.
     pub(crate) fn take_whitespace(&mut self) {
@@ -466,11 +491,6 @@ impl BumpWithContext for TailwindTokenSource<'_> {
 /// a `/` a modifier, and otherwise a basename or one byte.
 pub(crate) fn lex_regular(source: &mut TailwindTokenSource) {
     source.next_regular_token();
-}
-
-/// The [Grouping] of the tokens that [SimdLexer] lexes in [TailwindLexContext::SawNegative].
-pub(crate) fn lex_saw_negative(source: &mut TailwindTokenSource) {
-    source.lex(TailwindLexContext::SawNegative);
 }
 
 /// The [Grouping] of the tokens that [SimdLexer] lexes in

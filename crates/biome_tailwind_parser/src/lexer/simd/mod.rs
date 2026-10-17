@@ -254,19 +254,6 @@ impl<'src> SimdLexer<'src> {
                     }
                     (kind(raw), end)
                 }
-                TailwindLexContext::SawNegative => match byte {
-                    b'(' | b')' | b'[' | b']' => single(byte, position),
-                    _ if matches!(previous, T!['['] | T!['(']) => {
-                        let (raw, end) = self.regular_token(position, previous_class(previous));
-                        (kind(raw), end)
-                    }
-                    b':' | b'-' | b'%' | b'!' | b'/' => single(byte, position),
-                    b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' => {
-                        let (raw, end) = self.base(position);
-                        (kind(raw), end)
-                    }
-                    _ => return self.unexpected(position, diagnostics),
-                },
                 TailwindLexContext::ArbitraryVariant => match byte {
                     b'(' | b')' | b']' => single(byte, position),
                     // A selector can itself start with `[`.
@@ -399,7 +386,7 @@ impl<'src> SimdLexer<'src> {
 
     /// Returns an error token for the char at `position`, and pushes its diagnostic.
     #[cold]
-    fn unexpected(
+    pub(crate) fn unexpected(
         &self,
         position: usize,
         diagnostics: &mut Vec<ParseDiagnostic>,
@@ -464,7 +451,7 @@ impl<'src> SimdLexer<'src> {
 
     /// Lexes the basename at `start`, matching dashed basenames.
     #[inline(always)]
-    fn base(&self, start: usize) -> (u16, usize) {
+    pub(crate) fn base(&self, start: usize) -> (u16, usize) {
         let source = self.source.as_bytes();
         let end = next_bit(&self.blocks, start + 1, |block| block.base_stop);
         if &source[start..end] == b"data" {
@@ -606,7 +593,13 @@ pub(crate) enum Stop {
 /// Returns the kind and end of the one-byte token `byte` at `position`.
 #[inline(always)]
 fn single(byte: u8, position: usize) -> (TailwindSyntaxKind, usize) {
-    let kind = match byte {
+    (punctuation(byte), position + 1)
+}
+
+/// Returns the kind of the one-byte token `byte`, which must be one of `()[]:-!/%+*,.=`.
+#[inline(always)]
+pub(crate) fn punctuation(byte: u8) -> TailwindSyntaxKind {
+    match byte {
         b'(' => T!['('],
         b')' => T![')'],
         b'[' => T!['['],
@@ -622,8 +615,7 @@ fn single(byte: u8, position: usize) -> (TailwindSyntaxKind, usize) {
         b'.' => T![.],
         b'=' => T![=],
         _ => unreachable!("not a one-byte token: {byte:?}"),
-    };
-    (kind, position + 1)
+    }
 }
 
 /// Whether the lexer reads `byte` as whitespace.

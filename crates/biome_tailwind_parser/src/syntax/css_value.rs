@@ -247,7 +247,7 @@ fn parse_url_value_raw(p: &mut TailwindParser) -> ParsedSyntax {
 pub(crate) fn group_url_value(source: &mut TailwindTokenSource) {
     match source.next_byte() {
         None => source.take(EOF, 0),
-        Some(b')') => source.take(T![')'], 1),
+        Some(b')') => source.take_punctuation(b')'),
         Some(byte) if is_whitespace(byte) => source.take_whitespace(),
         Some(b'"' | b'\'') => source.take_string(),
         Some(_) => source.merge_until(Stop::ParenOrWhitespace, CSS_URL_VALUE_RAW_LITERAL),

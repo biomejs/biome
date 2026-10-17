@@ -1,11 +1,11 @@
 use super::{
     Grouping, TailwindTokenSource, lex_arbitrary_candidate, lex_arbitrary_variant, lex_css_value,
-    lex_regular, lex_saw_negative, lex_variant_segment,
+    lex_regular, lex_variant_segment,
 };
 use crate::legacy::lexer::{TailwindLexContext, TailwindLexer};
 use crate::legacy::token_source::LegacyTokenSource;
 use crate::lexer::{BASENAME_STORE, BaseNameStore};
-use crate::syntax::group_url_value;
+use crate::syntax::{group_negative_base, group_url_value};
 use crate::test_support::{fixtures, mutate, random_fragments, xorshift};
 use crate::{TailwindParserOptions, legacy, parse_tailwind_with_options};
 use biome_parser::lexer::Lexer;
@@ -16,22 +16,8 @@ use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::{self, *};
 use biome_tailwind_syntax::TextRange;
 
-/// Each context of the reference lexer, and the [Grouping] that groups the tokens it lexes.
-const GROUPINGS: [(TailwindLexContext, Grouping); 7] = [
-    (TailwindLexContext::Regular, lex_regular),
-    (TailwindLexContext::SawNegative, lex_saw_negative),
-    (TailwindLexContext::ArbitraryVariant, lex_arbitrary_variant),
-    (
-        TailwindLexContext::ArbitraryCandidate,
-        lex_arbitrary_candidate,
-    ),
-    (TailwindLexContext::VariantSegment, lex_variant_segment),
-    (TailwindLexContext::CssValue, lex_css_value),
-    (TailwindLexContext::CssUrlRawValue, group_url_value),
-];
-
 /// Kinds of the token before, covering every kind a lexer context checks for.
-const PREVIOUS: [TailwindSyntaxKind; 12] = [
+const PREVIOUS: &[TailwindSyntaxKind] = &[
     EOF,
     T!['['],
     T!['('],
@@ -46,12 +32,44 @@ const PREVIOUS: [TailwindSyntaxKind; 12] = [
     IDENT,
 ];
 
+/// Each context of the reference lexer, the [Grouping] that groups the tokens it lexes, and the
+/// kinds of the token before after which the parser uses it.
+const GROUPINGS: [(TailwindLexContext, Grouping, &[TailwindSyntaxKind]); 7] = [
+    (TailwindLexContext::Regular, lex_regular, PREVIOUS),
+    (
+        TailwindLexContext::SawNegative,
+        group_negative_base,
+        &[T![-]],
+    ),
+    (
+        TailwindLexContext::ArbitraryVariant,
+        lex_arbitrary_variant,
+        PREVIOUS,
+    ),
+    (
+        TailwindLexContext::ArbitraryCandidate,
+        lex_arbitrary_candidate,
+        PREVIOUS,
+    ),
+    (
+        TailwindLexContext::VariantSegment,
+        lex_variant_segment,
+        PREVIOUS,
+    ),
+    (TailwindLexContext::CssValue, lex_css_value, PREVIOUS),
+    (
+        TailwindLexContext::CssUrlRawValue,
+        group_url_value,
+        PREVIOUS,
+    ),
+];
+
 /// The longest source whose every offset [check_groupings] groups.
 const MAX_EXHAUSTIVE_LEN: usize = 600;
 
 /// Asserts that, for sources up to [MAX_EXHAUSTIVE_LEN] bytes, each grouping in [GROUPINGS]
-/// groups the token at every offset after every kind of token in [PREVIOUS] like the reference
-/// lexer lexes it in the grouping's context.
+/// groups the token at every offset after each kind of token that the parser uses it after like
+/// the reference lexer lexes it in the grouping's context.
 pub(crate) fn check_groupings(source: &str, base_names: &BaseNameStore) {
     if source.len() > MAX_EXHAUSTIVE_LEN {
         return;
@@ -59,8 +77,8 @@ pub(crate) fn check_groupings(source: &str, base_names: &BaseNameStore) {
     let mut tokens = TailwindTokenSource::from_str(source, base_names);
     let offsets = (0..=source.len()).filter(|&offset| source.is_char_boundary(offset));
     for offset in offsets {
-        for (context, group) in GROUPINGS {
-            for previous in PREVIOUS {
+        for (context, group, previous_kinds) in GROUPINGS {
+            for &previous in previous_kinds {
                 let mut legacy = TailwindLexer::from_str(source).with_base_names(base_names);
                 let expected_kind = legacy.lex_at(offset, previous, false, context);
                 tokens.place_after(offset, previous);
@@ -183,7 +201,8 @@ impl Walk for LegacyTokenSource<'_> {
 /// The token source's state after each step of a pseudo-random walk over its source, which ends
 /// by bumping to the end of the source.
 fn walk(mut tokens: impl Walk, seed: u64) -> Vec<String> {
-    // Indices into `GROUPINGS`, with the regular tokens and variant segments more often.
+    // Indices into `GROUPINGS`, with the regular tokens and variant segments more often. A
+    // grouping that the parser doesn't use after the current token falls back to the regular one.
     let groupings = [0, 0, 0, 4, 4, 1, 2, 3, 5, 6];
     let mut next = xorshift(seed);
     let mut checkpoints = Vec::new();
@@ -196,7 +215,7 @@ fn walk(mut tokens: impl Walk, seed: u64) -> Vec<String> {
             tokens.has_preceding_line_break(),
             tokens.has_colon_before_whitespace(),
         ));
-        let grouping = groupings[(next() % groupings.len() as u64) as usize];
+        let mut grouping = groupings[(next() % groupings.len() as u64) as usize];
         match next() % 12 {
             0 => {
                 for n in 1..4 {
@@ -211,13 +230,24 @@ fn walk(mut tokens: impl Walk, seed: u64) -> Vec<String> {
             }
             3 => {
                 if tokens.current() != EOF {
+                    if !GROUPINGS[grouping].2.contains(&EOF) {
+                        grouping = 0;
+                    }
                     tokens.regroup_current(grouping);
                 }
             }
-            4 => tokens.skip_as_trivia_with(grouping),
+            4 => {
+                if !GROUPINGS[grouping].2.contains(&tokens.current()) {
+                    grouping = 0;
+                }
+                tokens.skip_as_trivia_with(grouping);
+            }
             _ => {
                 if tokens.current() == EOF && checkpoints.is_empty() {
                     break;
+                }
+                if !GROUPINGS[grouping].2.contains(&tokens.current()) {
+                    grouping = 0;
                 }
                 tokens.bump_with(grouping);
             }

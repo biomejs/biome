@@ -1,9 +1,10 @@
+use crate::lexer::simd::is_whitespace;
 use crate::parser::TailwindParser;
 use crate::syntax::css_value::parse_css_generic_component_value_list;
 use crate::syntax::parse_error::*;
 use crate::syntax::value::parse_value;
 use crate::syntax::variant::VariantList;
-use crate::token_source::{lex_arbitrary_candidate, lex_css_value, lex_saw_negative};
+use crate::token_source::{TailwindTokenSource, lex_arbitrary_candidate, lex_css_value};
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
@@ -88,7 +89,7 @@ fn parse_full_candidate(p: &mut TailwindParser) -> ParsedSyntax {
     let legacy_important = p.eat(T![!]);
 
     if p.at(T![-]) {
-        p.bump_with_context(T![-], lex_saw_negative);
+        p.bump_with_context(T![-], group_negative_base);
     }
 
     let candidate = parse_arbitrary_candidate(p)
@@ -118,6 +119,20 @@ fn parse_full_candidate(p: &mut TailwindParser) -> ParsedSyntax {
     }
 
     Present(m.complete(p, TW_FULL_CANDIDATE))
+}
+
+/// Groups the token after the `-` of a negative candidate: a basename, which here can't start
+/// with `@` or `*`, or one byte.
+pub(crate) fn group_negative_base(source: &mut TailwindTokenSource) {
+    match source.next_byte() {
+        None => source.take(EOF, 0),
+        Some(byte) if is_whitespace(byte) => source.take_whitespace(),
+        Some(byte @ (b'(' | b')' | b'[' | b']' | b':' | b'-' | b'%' | b'!' | b'/')) => {
+            source.take_punctuation(byte);
+        }
+        Some(b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_') => source.merge_base(),
+        Some(_) => source.take_unexpected(),
+    }
 }
 
 fn parse_functional_or_static_candidate(p: &mut TailwindParser) -> ParsedSyntax {
