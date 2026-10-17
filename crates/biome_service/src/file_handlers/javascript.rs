@@ -1813,11 +1813,16 @@ fn format_embedded(
             .collect();
         let mut formatted = format_node(options, &tree, snippets.keys().copied().collect())?;
 
+        let host_contents = formatted.document().embedded_contents();
+        let mut host_ranges: Box<[TextRange]> = host_contents.keys().copied().collect();
+        host_ranges.sort_unstable_by_key(|range| (range.start(), std::cmp::Reverse(range.end())));
+
         let embedded_formatter = EmbeddedSnippetFormatter {
             biome_path,
             settings,
             workspace_db: &workspace_db,
-            host_contents: formatted.document().embedded_contents(),
+            host_contents,
+            host_ranges,
             snippets,
         };
         formatted.format_embedded(|range| embedded_formatter.format(range));
@@ -1856,6 +1861,9 @@ struct EmbeddedSnippetFormatter<'a, 'settings> {
     /// The content the JavaScript formatter wrote for each embedded element,
     /// including the interpolations of the embedded templates.
     host_contents: FxHashMap<TextRange, Interned>,
+    /// The keys of `host_contents`, sorted by start, with an enclosing range
+    /// before the ranges it encloses.
+    host_ranges: Box<[TextRange]>,
 }
 
 #[cfg(feature = "js_embeds")]
@@ -1923,14 +1931,24 @@ impl EmbeddedSnippetFormatter<'_, '_> {
     /// These are the outermost embedded elements inside the template, while the
     /// others are inside the interpolations.
     fn interpolations_in(&self, range: TextRange) -> Box<[TextRange]> {
-        let is_inside = |inner: &TextRange| *inner != range && range.contains_range(*inner);
-        self.host_contents
-            .keys()
-            .filter(|inner| is_inside(inner))
+        let first = self
+            .host_ranges
+            .partition_point(|inner| inner.start() < range.start());
+
+        let mut outer_end = range.start();
+
+        self.host_ranges[first..]
+            .iter()
+            .take_while(|inner| inner.start() < range.end())
+            .filter(|inner| **inner != range && range.contains_range(**inner))
             .filter(|inner| {
-                !self.host_contents.keys().any(|outer| {
-                    outer != *inner && is_inside(outer) && outer.contains_range(**inner)
-                })
+                // An enclosing range comes first, so a range that ends at or
+                // before the end of the last kept one is inside it.
+                let is_outermost = inner.end() > outer_end;
+                if is_outermost {
+                    outer_end = inner.end();
+                }
+                is_outermost
             })
             .map(|inner| *inner - range.start())
             .collect()
