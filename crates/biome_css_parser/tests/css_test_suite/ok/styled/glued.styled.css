@@ -23,3 +23,7 @@ margin: -.5${unit};
 ${Item}.active {
 	color: red;
 }
+width: 1.${fraction};
+h1.${cls} {
+	color: red;
+}

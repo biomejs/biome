@@ -31,6 +31,10 @@ margin: -.5${unit};
 ${Item}.active {
 	color: red;
 }
+width: 1.${fraction};
+h1.${cls} {
+	color: red;
+}
 
 ```
 
@@ -462,16 +466,80 @@ CssSnippetRoot {
                 r_curly_token: R_CURLY@446..448 "}" [Newline("\n")] [],
             },
         },
+        CssDeclarationWithSemicolon {
+            declaration: CssDeclaration {
+                property: CssGenericProperty {
+                    name: CssIdentifier {
+                        value_token: IDENT@448..454 "width" [Newline("\n")] [],
+                    },
+                    colon_token: COLON@454..456 ":" [] [Whitespace(" ")],
+                    value: CssGenericComponentValueList [
+                        CssMetavariable {
+                            value_token: GRIT_METAVARIABLE@456..469 "1.${fraction}" [] [],
+                        },
+                    ],
+                },
+                important: missing (optional),
+            },
+            semicolon_token: SEMICOLON@469..470 ";" [] [],
+        },
+        CssNestedQualifiedRule {
+            prelude: CssRelativeSelectorList [
+                CssRelativeSelector {
+                    combinator: missing (optional),
+                    selector: CssCompoundSelector {
+                        nesting_selectors: CssNestedSelectorList [],
+                        simple_selector: CssTypeSelector {
+                            namespace: missing (optional),
+                            ident: CssIdentifier {
+                                value_token: IDENT@470..473 "h1" [Newline("\n")] [],
+                            },
+                        },
+                        sub_selectors: CssSubSelectorList [
+                            CssClassSelector {
+                                dot_token: DOT@473..474 "." [] [],
+                                name: CssMetavariable {
+                                    value_token: GRIT_METAVARIABLE@474..481 "${cls}" [] [Whitespace(" ")],
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@481..482 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@482..489 "color" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@489..491 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@491..494 "red" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@494..495 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@495..497 "}" [Newline("\n")] [],
+            },
+        },
     ],
-    eof_token: EOF@448..449 "" [Newline("\n")] [],
+    eof_token: EOF@497..498 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_SNIPPET_ROOT@0..449
-  0: CSS_DECLARATION_OR_RULE_LIST@0..448
+0: CSS_SNIPPET_ROOT@0..498
+  0: CSS_DECLARATION_OR_RULE_LIST@0..497
     0: CSS_DECLARATION_WITH_SEMICOLON@0..18
       0: CSS_DECLARATION@0..17
         0: CSS_GENERIC_PROPERTY@0..17
@@ -744,6 +812,47 @@ CssSnippetRoot {
               1: (empty)
             1: SEMICOLON@445..446 ";" [] []
         2: R_CURLY@446..448 "}" [Newline("\n")] []
-  1: EOF@448..449 "" [Newline("\n")] []
+    17: CSS_DECLARATION_WITH_SEMICOLON@448..470
+      0: CSS_DECLARATION@448..469
+        0: CSS_GENERIC_PROPERTY@448..469
+          0: CSS_IDENTIFIER@448..454
+            0: IDENT@448..454 "width" [Newline("\n")] []
+          1: COLON@454..456 ":" [] [Whitespace(" ")]
+          2: CSS_GENERIC_COMPONENT_VALUE_LIST@456..469
+            0: CSS_METAVARIABLE@456..469
+              0: GRIT_METAVARIABLE@456..469 "1.${fraction}" [] []
+        1: (empty)
+      1: SEMICOLON@469..470 ";" [] []
+    18: CSS_NESTED_QUALIFIED_RULE@470..497
+      0: CSS_RELATIVE_SELECTOR_LIST@470..481
+        0: CSS_RELATIVE_SELECTOR@470..481
+          0: (empty)
+          1: CSS_COMPOUND_SELECTOR@470..481
+            0: CSS_NESTED_SELECTOR_LIST@470..470
+            1: CSS_TYPE_SELECTOR@470..473
+              0: (empty)
+              1: CSS_IDENTIFIER@470..473
+                0: IDENT@470..473 "h1" [Newline("\n")] []
+            2: CSS_SUB_SELECTOR_LIST@473..481
+              0: CSS_CLASS_SELECTOR@473..481
+                0: DOT@473..474 "." [] []
+                1: CSS_METAVARIABLE@474..481
+                  0: GRIT_METAVARIABLE@474..481 "${cls}" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@481..497
+        0: L_CURLY@481..482 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@482..495
+          0: CSS_DECLARATION_WITH_SEMICOLON@482..495
+            0: CSS_DECLARATION@482..494
+              0: CSS_GENERIC_PROPERTY@482..494
+                0: CSS_IDENTIFIER@482..489
+                  0: IDENT@482..489 "color" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@489..491 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@491..494
+                  0: CSS_IDENTIFIER@491..494
+                    0: IDENT@491..494 "red" [] []
+              1: (empty)
+            1: SEMICOLON@494..495 ";" [] []
+        2: R_CURLY@495..497 "}" [Newline("\n")] []
+  1: EOF@497..498 "" [Newline("\n")] []
 
 ```

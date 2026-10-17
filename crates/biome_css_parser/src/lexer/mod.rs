@@ -461,12 +461,14 @@ impl<'src> CssLexer<'src> {
             match lookup_byte(byte) {
                 IDT | DIG | ZER | MIN | PRC | HAS => position += 1,
                 // A decimal point belongs to the number, such as in
-                // `1.5${unit}`, while a selector dot like in `${Item}.active`
-                // is a boundary.
+                // `1.5${unit}` or `1.${fraction}`, while a selector dot like in
+                // `${Item}.active` is a boundary.
                 PRD if source
                     .as_bytes()
                     .get(position + 1)
-                    .is_some_and(|&next| matches!(lookup_byte(next), DIG | ZER)) =>
+                    .is_some_and(|&next| matches!(lookup_byte(next), DIG | ZER))
+                    || (is_number_prefix(&source[self.position()..position])
+                        && self.metavariable_end_at(position + 1).is_some()) =>
                 {
                     position += 1;
                 }
@@ -2029,4 +2031,11 @@ enum SameQuoteInInterpolation {
     NestedString(StringBodyScan),
     /// The quote should be treated as the outer string closing early.
     OuterQuote,
+}
+
+/// Returns `true` if `text` is an optionally signed run of digits, such as the
+/// `-1` before the decimal point in `-1.${fraction}`.
+fn is_number_prefix(text: &str) -> bool {
+    let digits = text.strip_prefix(['-', '+']).unwrap_or(text);
+    !digits.is_empty() && digits.bytes().all(|byte| byte.is_ascii_digit())
 }
