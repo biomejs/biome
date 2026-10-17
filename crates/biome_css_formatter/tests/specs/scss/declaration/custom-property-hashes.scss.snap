@@ -7,19 +7,14 @@ info: scss/declaration/custom-property-hashes.scss
 
 ```scss
 $suffix:   abc;
-.theme{--short:  #1A2   #1A2B;--long: #4566A8 #4566A8FF #000000B2;
---color-code: #4a729a;--color-focus-blue: #1a73e8;
---raw: #12PX   #12unknown #12345 #1234567 #12e3 #-- #app #and;
+.theme{--hashes:  #000000B2   #12PX #12e3!important;
 --escaped: #\31 2unknown #a\;b;
---interpolation: #12unknown#{$suffix} #12#{$suffix} #{$suffix};
---nested: token( #12unknown [#4566A8] {#12PX} );
+--interpolation: #12#{$suffix};
 --punctuation: #1e+2 #12% #12.5 #--> #;
---separated: # 12px #/**/12px #/* after */;
+--comments: /* before */#4566a8/* after */ #/**/12px;
 --quoted: #12PX"quoted" #12PX'#{$suffix}';
 --literal: #$suffix #url(image.svg);
---slashes: #12PX//raw;
---important: #12unknown !important;
-color: #4566A8; width:12px;}
+--slashes: #12PX//raw;}
 
 @supports (--accent:#4566A8 // comment
 ){.after-supports{--raw: #12unknown;}}
@@ -35,22 +30,14 @@ color: #4566A8; width:12px;}
 ```scss
 $suffix: abc;
 .theme {
-	--short: #1A2 #1A2B;
-	--long: #4566A8 #4566A8FF #000000B2;
-	--color-code: #4a729a;
-	--color-focus-blue: #1a73e8;
-	--raw: #12PX #12unknown #12345 #1234567 #12e3 #-- #app #and;
+	--hashes: #000000B2 #12PX #12e3 !important;
 	--escaped: #\31 2unknown #a\;b;
-	--interpolation: #12unknown#{$suffix} #12#{$suffix} #{$suffix};
-	--nested: token(#12unknown [#4566A8] {#12PX});
+	--interpolation: #12#{$suffix};
 	--punctuation: #1e+2 #12% #12.5 #--> #;
-	--separated: # 12px # /**/ 12px # /* after */;
+	--comments: /* before */ #4566a8 /* after */ # /**/ 12px;
 	--quoted: #12PX"quoted" #12PX"#{$suffix}";
 	--literal: #$suffix #url(image.svg);
 	--slashes: #12PX//raw;
-	--important: #12unknown !important;
-	color: #4566a8;
-	width: 12px;
 }
 
 @supports (

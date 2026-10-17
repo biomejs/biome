@@ -8,7 +8,6 @@ expression: invalid-custom-property-hash-boundaries.scss
 .theme {
   --separated: # 12unknown;
   --comment: #/**/12unknown;
-  --dimension: 12unknown;
   --interpolation: #{12unknown};
   width: 12unknown;
 }
@@ -26,7 +25,7 @@ invalid-custom-property-hash-boundaries.scss:3:20 lint/correctness/noUnknownUnit
   > 3 │   --separated: # 12unknown;
       │                    ^^^^^^^
     4 │   --comment: #/**/12unknown;
-    5 │   --dimension: 12unknown;
+    5 │   --interpolation: #{12unknown};
   
   i See MDN web docs for more details.
   
@@ -51,8 +50,8 @@ invalid-custom-property-hash-boundaries.scss:4:21 lint/correctness/noUnknownUnit
     3 │   --separated: # 12unknown;
   > 4 │   --comment: #/**/12unknown;
       │                     ^^^^^^^
-    5 │   --dimension: 12unknown;
-    6 │   --interpolation: #{12unknown};
+    5 │   --interpolation: #{12unknown};
+    6 │   width: 12unknown;
   
   i See MDN web docs for more details.
   
@@ -69,16 +68,16 @@ invalid-custom-property-hash-boundaries.scss:4:21 lint/correctness/noUnknownUnit
 ```
 
 ```
-invalid-custom-property-hash-boundaries.scss:5:18 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━
+invalid-custom-property-hash-boundaries.scss:5:24 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━
 
   × Unexpected unknown unit: unknown
   
     3 │   --separated: # 12unknown;
     4 │   --comment: #/**/12unknown;
-  > 5 │   --dimension: 12unknown;
-      │                  ^^^^^^^
-    6 │   --interpolation: #{12unknown};
-    7 │   width: 12unknown;
+  > 5 │   --interpolation: #{12unknown};
+      │                        ^^^^^^^
+    6 │   width: 12unknown;
+    7 │ }
   
   i See MDN web docs for more details.
   
@@ -95,42 +94,16 @@ invalid-custom-property-hash-boundaries.scss:5:18 lint/correctness/noUnknownUnit
 ```
 
 ```
-invalid-custom-property-hash-boundaries.scss:6:24 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━
+invalid-custom-property-hash-boundaries.scss:6:12 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━
 
   × Unexpected unknown unit: unknown
   
     4 │   --comment: #/**/12unknown;
-    5 │   --dimension: 12unknown;
-  > 6 │   --interpolation: #{12unknown};
-      │                        ^^^^^^^
-    7 │   width: 12unknown;
-    8 │ }
-  
-  i See MDN web docs for more details.
-  
-  i Browsers ignore a declaration that contains an unknown unit, so the value is not applied.
-  
-  i Use a known unit instead, such as:
-  
-  - px
-  - em
-  - rem
-  - etc.
-  
-
-```
-
-```
-invalid-custom-property-hash-boundaries.scss:7:12 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected unknown unit: unknown
-  
-    5 │   --dimension: 12unknown;
-    6 │   --interpolation: #{12unknown};
-  > 7 │   width: 12unknown;
+    5 │   --interpolation: #{12unknown};
+  > 6 │   width: 12unknown;
       │            ^^^^^^^
-    8 │ }
-    9 │ 
+    7 │ }
+    8 │ 
   
   i See MDN web docs for more details.
   

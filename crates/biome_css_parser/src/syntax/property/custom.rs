@@ -237,10 +237,9 @@ fn parse_custom_property_component(
 
     if is_at_scss_interpolation(p) {
         parse_scss_interpolation_with_context(p, context)
-    } else if !legacy_filter_recovery
-        && let Present(hash) = parse_custom_property_hash_value(p, context)
-    {
-        Present(hash)
+    } else if p.at(T![#]) && !legacy_filter_recovery {
+        parse_custom_property_hash_value(p, context)
+            .or_else(|| parse_custom_property_delimiter(p, context))
     } else if is_at_scss_interpolated_string(p) {
         parse_scss_interpolated_string(p, context)
     } else if p.at(CSS_STRING_LITERAL) {
