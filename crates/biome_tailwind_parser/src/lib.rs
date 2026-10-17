@@ -1,5 +1,7 @@
 #![deny(clippy::use_self)]
 
+#[cfg(test)]
+mod legacy;
 mod lexer;
 mod parser;
 mod syntax;
@@ -49,15 +51,8 @@ pub fn parse_tailwind_with_options(
     cache: &mut NodeCache,
     options: TailwindParserOptions,
 ) -> TailwindParse {
-    parse_with_parser(source, cache, TailwindParser::new(source, options))
-}
+    let mut parser = TailwindParser::new(source, options);
 
-/// Parses `source` with `parser`, which reads tokens from `source`.
-fn parse_with_parser(
-    source: &str,
-    cache: &mut NodeCache,
-    mut parser: TailwindParser,
-) -> TailwindParse {
     parse_root(&mut parser);
 
     let (events, diagnostics, trivia) = parser.finish();

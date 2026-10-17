@@ -18,13 +18,9 @@ pub(crate) struct TailwindParser<'source> {
 
 impl<'source> TailwindParser<'source> {
     pub fn new(source: &'source str, options: TailwindParserOptions<'source>) -> Self {
-        Self::with_token_source(TailwindTokenSource::from_str(source, options))
-    }
-
-    pub(crate) fn with_token_source(source: TailwindTokenSource<'source>) -> Self {
         Self {
             context: ParserContext::default(),
-            source,
+            source: TailwindTokenSource::from_str(source, options.base_names),
         }
     }
 
