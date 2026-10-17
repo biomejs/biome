@@ -326,7 +326,7 @@ jobs:
 
       - name: Compile
         timeout-minutes: 20
-        run: cargo codspeed build -p biome_service --bench pull_diagnostics --bench format_embedded --features type_inference,js_embeds
+        run: cargo codspeed build -p biome_service --features type_inference,js_embeds
         env:
           CARGO_BUILD_JOBS: 3
 
@@ -335,7 +335,7 @@ jobs:
         timeout-minutes: 50
         with:
           mode: simulation
-          run: cargo codspeed run -p biome_service --bench pull_diagnostics --bench format_embedded
+          run: cargo codspeed run -p biome_service
           token: ${{ secrets.CODSPEED_TOKEN }}
 
   plugins:
