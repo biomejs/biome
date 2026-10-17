@@ -1,6 +1,5 @@
-use crate::lexer::simd::{Stop, is_whitespace};
 use crate::parser::TailwindParser;
-use crate::token_source::TailwindTokenSource;
+use crate::syntax::letters::{css_token, url_raw_value};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
@@ -8,6 +7,18 @@ use biome_parser::prelude::*;
 use biome_parser::{Parser, TokenSet, token_set};
 use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::{self, *};
+
+/// Returns the kind and length in letters of the CSS token at the current letter.
+#[inline]
+fn css(p: &TailwindParser) -> (TailwindSyntaxKind, usize) {
+    p.css_token()
+}
+
+/// Whether the CSS token at the current letter is of one of `kinds`.
+#[inline]
+fn css_at_ts(p: &TailwindParser, kinds: TokenSet<TailwindSyntaxKind>) -> bool {
+    kinds.contains(css(p).0)
+}
 
 pub(crate) fn parse_css_generic_component_value_list(p: &mut TailwindParser) -> bool {
     let start = p.source().position();
@@ -54,9 +65,10 @@ impl ParseNodeList for CssGenericComponentValueList {
 }
 
 fn parse_css_generic_component_value(p: &mut TailwindParser) -> ParsedSyntax {
-    if p.at_ts(token_set![T![,], T![/], T![:], T![=], T![.]]) {
+    let (kind, _) = css(p);
+    if token_set![T![,], T![/], T![:], T![=], T![.]].contains(kind) {
         let m = p.start();
-        p.bump_with_context(p.cur(), group_css_value);
+        p.bump_css(kind);
         Present(m.complete(p, CSS_GENERIC_DELIMITER))
     } else {
         parse_css_value(p)
@@ -64,10 +76,10 @@ fn parse_css_generic_component_value(p: &mut TailwindParser) -> ParsedSyntax {
 }
 
 fn parse_css_value(p: &mut TailwindParser) -> ParsedSyntax {
-    if p.at_ts(token_set![T![+], T![-]]) {
-        parse_css_unary_expression(p)
+    if css_at_ts(p, token_set![T![+], T![-]]) {
+        parse_unary_expression(p)
     } else if p.at(T!['(']) {
-        parse_css_parenthesized_expression(p)
+        parse_parenthesized_expression(p)
     } else {
         parse_any_value(p)
     }
@@ -77,262 +89,169 @@ fn parse_css_value(p: &mut TailwindParser) -> ParsedSyntax {
 /// parentheses are left to the caller.
 fn parse_any_value(p: &mut TailwindParser) -> ParsedSyntax {
     if is_at_any_function(p) {
-        parse_any_function(p)
-    } else if is_at_identifier(p) {
-        if is_at_dashed_identifier(p) {
-            parse_css_dashed_identifier(p)
-        } else {
-            parse_css_identifier(p)
+        return parse_any_function(p);
+    }
+    let (kind, letters) = css(p);
+    if is_identifier(kind) {
+        return parse_css_identifier(p);
+    }
+    match kind {
+        CSS_STRING_LITERAL => parse_css_string(p),
+        CSS_DIMENSION_VALUE => {
+            let m = p.start();
+            p.bump_css_letters(CSS_NUMBER_LITERAL, letters);
+            // The lexer splits a number from its unit, the ASCII letters after it, and gives the
+            // unit the kind of its keyword.
+            let node = if is_unit(p.cur()) {
+                CSS_REGULAR_DIMENSION
+            } else {
+                CSS_UNKNOWN_DIMENSION
+            };
+            p.bump_css_letters(T![ident], 1);
+            Present(m.complete(p, node))
         }
-    } else if p.at(CSS_STRING_LITERAL) {
-        parse_css_string(p)
-    } else if p.at(CSS_DIMENSION_VALUE) {
-        parse_css_dimension(p)
-    } else if p.at(CSS_PERCENTAGE_VALUE) {
-        parse_css_percentage(p)
-    } else if p.at(CSS_NUMBER_LITERAL) {
-        parse_css_number_or_ratio(p)
-    } else if p.at(CSS_COLOR_LITERAL) {
-        parse_css_color(p)
-    } else {
-        Absent
+        CSS_PERCENTAGE_VALUE => {
+            let m = p.start();
+            p.bump_css_letters(CSS_NUMBER_LITERAL, letters);
+            p.expect_css(T![%]);
+            Present(m.complete(p, CSS_PERCENTAGE))
+        }
+        CSS_NUMBER_LITERAL => parse_css_number_or_ratio(p),
+        CSS_COLOR_LITERAL => {
+            let m = p.start();
+            p.bump_css_letters(CSS_COLOR_LITERAL, letters);
+            Present(m.complete(p, CSS_COLOR))
+        }
+        _ => Absent,
     }
 }
 
+/// Parses an identifier, which is dashed if it starts with `--`.
 fn parse_css_identifier(p: &mut TailwindParser) -> ParsedSyntax {
-    if !is_at_identifier(p) {
+    let (kind, letters) = css(p);
+    if !is_identifier(kind) {
         return Absent;
     }
-
+    let node = if is_at_dashed_identifier(p) {
+        CSS_DASHED_IDENTIFIER
+    } else {
+        CSS_IDENTIFIER
+    };
     let m = p.start();
-    p.bump_remap_with_context(T![ident], group_css_value);
-    Present(m.complete(p, CSS_IDENTIFIER))
-}
-
-fn parse_css_dashed_identifier(p: &mut TailwindParser) -> ParsedSyntax {
-    if !is_at_dashed_identifier(p) {
-        return Absent;
-    }
-
-    let m = p.start();
-    p.bump_remap_with_context(T![ident], group_css_value);
-    Present(m.complete(p, CSS_DASHED_IDENTIFIER))
+    p.bump_css_letters(T![ident], letters);
+    Present(m.complete(p, node))
 }
 
 fn parse_css_string(p: &mut TailwindParser) -> ParsedSyntax {
+    let (_, letters) = css(p);
     let m = p.start();
-    p.bump_with_context(CSS_STRING_LITERAL, group_css_value);
+    p.bump_css_letters(CSS_STRING_LITERAL, letters);
     Present(m.complete(p, CSS_STRING))
 }
 
 fn parse_css_number(p: &mut TailwindParser) -> ParsedSyntax {
+    let (kind, letters) = css(p);
+    if kind != CSS_NUMBER_LITERAL {
+        return Absent;
+    }
     let m = p.start();
-    p.bump_with_context(CSS_NUMBER_LITERAL, group_css_value);
+    p.bump_css_letters(CSS_NUMBER_LITERAL, letters);
     Present(m.complete(p, CSS_NUMBER))
 }
 
 fn parse_css_number_or_ratio(p: &mut TailwindParser) -> ParsedSyntax {
-    if !p.at(CSS_NUMBER_LITERAL) {
-        return Absent;
-    }
-
     let number = parse_css_number(p);
-
-    if !current_slash_is_followed_by_css_number(p) {
+    if number.is_absent() || !current_slash_is_followed_by_css_number(p) {
         return number;
     }
 
-    p.bump_with_context(T![/], group_css_value);
+    p.bump_css(T![/]);
     let ratio = number.precede(p);
     parse_css_number(p).ok();
 
     Present(ratio.complete(p, CSS_RATIO))
 }
 
-fn current_slash_is_followed_by_css_number(p: &mut TailwindParser) -> bool {
+/// Whether the current letter is a `/` and the CSS token after it, past any `_`s, is a number.
+fn current_slash_is_followed_by_css_number(p: &TailwindParser) -> bool {
     if !p.at(T![/]) {
         return false;
     }
-
-    // `p.nth_at()` groups the token after the `/` as a regular token, not as a CSS value.
-    let checkpoint = p.checkpoint();
-    p.bump_with_context(T![/], group_css_value);
-    let is_followed_by_number = p.at(CSS_NUMBER_LITERAL);
-    p.rewind(checkpoint);
-
-    is_followed_by_number
-}
-
-fn parse_css_dimension(p: &mut TailwindParser) -> ParsedSyntax {
-    let m = p.start();
-    p.bump_remap_with_context(CSS_NUMBER_LITERAL, group_css_unit);
-    let kind = if is_nth_at_unit(p, 0) {
-        CSS_REGULAR_DIMENSION
-    } else {
-        CSS_UNKNOWN_DIMENSION
-    };
-    p.bump_remap_with_context(T![ident], group_css_value);
-    Present(m.complete(p, kind))
-}
-
-fn parse_css_percentage(p: &mut TailwindParser) -> ParsedSyntax {
-    let m = p.start();
-    p.bump_remap_with_context(CSS_NUMBER_LITERAL, group_css_value);
-    p.expect_with_context(T![%], group_css_value);
-    Present(m.complete(p, CSS_PERCENTAGE))
-}
-
-fn parse_css_color(p: &mut TailwindParser) -> ParsedSyntax {
-    let m = p.start();
-    p.bump_with_context(CSS_COLOR_LITERAL, group_css_value);
-    Present(m.complete(p, CSS_COLOR))
+    let mut n = 1;
+    while p.source().nth_kind(n) == CSS_WHITESPACE {
+        n += 1;
+    }
+    css_token(p.source(), n).0 == CSS_NUMBER_LITERAL
 }
 
 #[inline]
-fn is_at_any_function(p: &mut TailwindParser) -> bool {
+fn is_at_any_function(p: &TailwindParser) -> bool {
     is_at_url_function(p) || is_at_function(p)
 }
 
 #[inline]
 fn parse_any_function(p: &mut TailwindParser) -> ParsedSyntax {
-    if !is_at_any_function(p) {
-        return Absent;
-    }
-
     if is_at_url_function(p) {
         parse_url_function(p)
-    } else {
+    } else if is_at_function(p) {
         parse_function(p)
+    } else {
+        Absent
     }
 }
 
+/// Whether the current letter starts an identifier with a `(` right after it.
 #[inline]
-fn is_at_url_function(p: &mut TailwindParser) -> bool {
-    p.at(T![url]) && p.nth_at(1, T!['('])
+fn is_at_identifier_and_paren(p: &TailwindParser) -> bool {
+    let (kind, letters) = css(p);
+    is_identifier(kind) && p.source().nth_kind(letters) == T!['(']
+}
+
+#[inline]
+fn is_at_url_function(p: &TailwindParser) -> bool {
+    css(p).0 == T![url] && is_at_identifier_and_paren(p)
+}
+
+#[inline]
+fn is_at_function(p: &TailwindParser) -> bool {
+    is_at_identifier_and_paren(p) && css(p).0 != T![url]
 }
 
 fn parse_url_function(p: &mut TailwindParser) -> ParsedSyntax {
-    if !is_at_url_function(p) {
-        return Absent;
-    }
-
     let m = p.start();
-    p.bump_with_context(T![url], group_css_value);
-    p.expect_with_context(T!['('], group_css_value);
+    let (_, letters) = css(p);
+    p.bump_css_letters(T![url], letters);
+    p.expect_css(T!['(']);
     if is_at_any_function(p) {
         ParameterList.parse_list(p);
     } else {
-        p.source_mut().regroup_current(group_url_value);
         parse_url_value(p).ok();
     }
-    p.expect_with_context(T![')'], group_css_value);
+    p.expect_css(T![')']);
     Present(m.complete(p, CSS_URL_FUNCTION))
 }
 
-#[inline]
-fn parse_url_value_raw(p: &mut TailwindParser) -> ParsedSyntax {
-    if !p.at(CSS_URL_VALUE_RAW_LITERAL) {
-        return Absent;
-    }
-
-    let m = p.start();
-    // A raw URL ends at a `)`, whitespace or the end of the source, which the regular tokens
-    // group like the URL does.
-    p.bump(CSS_URL_VALUE_RAW_LITERAL);
-    Present(m.complete(p, CSS_URL_VALUE_RAW))
-}
-
-/// Groups a token of a CSS value: an identifier, number, string, hex color, `_`s that Tailwind
-/// decodes to whitespace, or one byte.
-pub(crate) fn group_css_value(source: &mut TailwindTokenSource) {
-    let Some(byte) = source.next_byte() else {
-        return source.take(EOF, 0);
-    };
-    let second = source.second_next_byte();
-    match byte {
-        _ if is_whitespace(byte) => source.take_whitespace(),
-        b'(' | b')' | b'[' | b']' | b':' => source.take_punctuation(byte),
-        // In math functions, Tailwind adds whitespace around a `-` that directly follows a value
-        // (`calc(100svh-var(--header))` becomes `calc(100svh - var(--header))`), so it is a
-        // binary operator rather than the start of a negative number or an identifier. This
-        // doesn't track the enclosing function, so it also applies outside math functions.
-        //
-        // This deviates from the CSS Syntax spec and `biome_css_parser`, which require
-        // whitespace around `-` in math functions and lex `100svh-var` as one dimension with the
-        // unit `svh-var`.
-        b'-' if source
-            .last_byte()
-            .is_some_and(|last| last.is_ascii_alphanumeric() || matches!(last, b'%' | b')')) =>
-        {
-            source.take_punctuation(byte);
-        }
-        b'-' if second.is_some_and(|second| second.is_ascii_alphabetic() || second == b'-') => {
-            source.merge_css_identifier();
-        }
-        b'-' if second.is_some_and(|second| second.is_ascii_digit() || second == b'.') => {
-            source.merge_css_number();
-        }
-        b'0'..=b'9' => source.merge_css_number(),
-        b'.' if second.is_some_and(|second| second.is_ascii_digit()) => source.merge_css_number(),
-        b'_' => source.merge_underscores(),
-        b'a'..=b'z' | b'A'..=b'Z' => source.merge_css_identifier(),
-        b'"' | b'\'' => source.take_string(),
-        b'#' => source.merge_color(),
-        b'-' | b'%' | b'+' | b'*' | b',' | b'.' | b'=' | b'/' => source.take_punctuation(byte),
-        _ => source.take_unexpected(),
-    }
-}
-
-/// Groups the token after a dimension's number: its unit, which runs to the next byte that isn't
-/// an ASCII letter, or any other token of a CSS value.
-pub(crate) fn group_css_unit(source: &mut TailwindTokenSource) {
-    match source.next_byte() {
-        Some(b'a'..=b'z' | b'A'..=b'Z') => source.merge_css_unit(),
-        _ => group_css_value(source),
-    }
-}
-
-/// Groups the token after `url(` when it isn't a function: a string, or a raw URL, which runs to
-/// the next `)` or whitespace.
-pub(crate) fn group_url_value(source: &mut TailwindTokenSource) {
-    match source.next_byte() {
-        None => source.take(EOF, 0),
-        Some(b')') => source.take_punctuation(b')'),
-        Some(byte) if is_whitespace(byte) => source.take_whitespace(),
-        Some(b'"' | b'\'') => source.take_string(),
-        Some(_) => source.merge_until(Stop::ParenOrWhitespace, CSS_URL_VALUE_RAW_LITERAL),
-    }
-}
-
-#[inline]
+/// Parses the argument of `url(...)` when it isn't a function: a string, or a raw URL, which
+/// runs to the next `)` or whitespace.
 fn parse_url_value(p: &mut TailwindParser) -> ParsedSyntax {
-    if p.at(CSS_STRING_LITERAL) {
-        parse_css_string(p)
-    } else {
-        parse_url_value_raw(p)
+    match p.source().nth_byte(0) {
+        Some(b'"' | b'\'') => parse_css_string(p),
+        None | Some(b')' | b'\t' | b'\n' | 0x0B | 0x0C | b'\r' | b' ') => Absent,
+        Some(_) => {
+            let m = p.start();
+            let letters = url_raw_value(p.source());
+            p.bump_letters(CSS_URL_VALUE_RAW_LITERAL, letters);
+            Present(m.complete(p, CSS_URL_VALUE_RAW))
+        }
     }
-}
-
-#[inline]
-fn is_at_function(p: &mut TailwindParser) -> bool {
-    is_nth_at_function(p, 0) && !is_at_url_function(p)
-}
-
-#[inline]
-fn is_nth_at_function(p: &mut TailwindParser, n: usize) -> bool {
-    is_nth_at_identifier(p, n) && p.nth_at(n + 1, T!['('])
 }
 
 fn parse_function(p: &mut TailwindParser) -> ParsedSyntax {
-    if !is_at_function(p) {
-        return Absent;
-    }
-
     let m = p.start();
     parse_css_identifier(p).ok();
-    p.expect_with_context(T!['('], group_css_value);
+    p.expect_css(T!['(']);
     ParameterList.parse_list(p);
-    p.expect_with_context(T![')'], group_css_value);
+    p.expect_css(T![')']);
     Present(m.complete(p, CSS_FUNCTION))
 }
 
@@ -371,7 +290,7 @@ impl ParseSeparatedList for ParameterList {
     }
 
     fn expect_separator(&mut self, p: &mut Self::Parser<'_>) -> bool {
-        p.expect_with_context(T![,], group_css_value)
+        p.expect_css(T![,])
     }
 
     fn allow_trailing_separating_element(&self) -> bool {
@@ -379,12 +298,8 @@ impl ParseSeparatedList for ParameterList {
     }
 }
 
-fn parse_css_parenthesized_expression(p: &mut TailwindParser) -> ParsedSyntax {
-    parse_parenthesized_expression(p)
-}
-
 #[inline]
-fn is_at_any_expression(p: &mut TailwindParser) -> bool {
+fn is_at_any_expression(p: &TailwindParser) -> bool {
     is_at_unary_operator(p) || p.at(T!['(']) || is_at_any_value(p)
 }
 
@@ -396,9 +311,10 @@ fn parse_any_expression(p: &mut TailwindParser) -> ParsedSyntax {
 
     let param = parse_unary_expression_operand(p);
 
-    if is_at_binary_operator(p) {
+    let (kind, _) = css(p);
+    if BINARY_OPERATION_TOKEN.contains(kind) {
         let binary_expression = param.precede(p);
-        p.eat_ts_with_context(BINARY_OPERATION_TOKEN, group_css_value);
+        p.bump_css(kind);
         parse_any_expression(p).or_add_diagnostic(p, crate::syntax::parse_error::expected_value);
         Present(binary_expression.complete(p, CSS_BINARY_EXPRESSION))
     } else {
@@ -412,23 +328,19 @@ const COMPONENT_VALUE_EXPRESSION_RECOVERY_SET: TokenSet<TailwindSyntaxKind> =
     token_set![T![')'], T![,], T![']'], WHITESPACE].union(BINARY_OPERATION_TOKEN);
 
 #[inline]
-fn is_at_binary_operator(p: &mut TailwindParser) -> bool {
-    p.at_ts(BINARY_OPERATION_TOKEN)
-}
-
-#[inline]
-fn is_at_unary_operator(p: &mut TailwindParser) -> bool {
-    p.at_ts(UNARY_OPERATION_TOKEN)
+fn is_at_unary_operator(p: &TailwindParser) -> bool {
+    css_at_ts(p, UNARY_OPERATION_TOKEN)
 }
 
 #[inline]
 fn parse_unary_expression(p: &mut TailwindParser) -> ParsedSyntax {
-    if !is_at_unary_operator(p) {
+    let (kind, _) = css(p);
+    if !UNARY_OPERATION_TOKEN.contains(kind) {
         return Absent;
     }
 
     let m = p.start();
-    p.eat_ts_with_context(UNARY_OPERATION_TOKEN, group_css_value);
+    p.bump_css(kind);
     parse_unary_expression_operand(p)
         .or_add_diagnostic(p, crate::syntax::parse_error::expected_value);
     Present(m.complete(p, CSS_UNARY_EXPRESSION))
@@ -451,9 +363,9 @@ fn parse_parenthesized_expression(p: &mut TailwindParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    p.expect_with_context(T!['('], group_css_value);
+    p.expect_css(T!['(']);
     parse_any_expression(p).ok();
-    p.expect_with_context(T![')'], group_css_value);
+    p.expect_css(T![')']);
     Present(m.complete(p, CSS_PARENTHESIZED_EXPRESSION))
 }
 
@@ -480,8 +392,10 @@ impl ParseNodeList for ComponentValueExpressionList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at_ts(BINARY_OPERATION_TOKEN.union(token_set![T![,], T![')'], T![']']]))
-            || is_at_class_separator(p)
+        css_at_ts(
+            p,
+            BINARY_OPERATION_TOKEN.union(token_set![T![,], T![')'], T![']']]),
+        ) || is_at_class_separator(p)
     }
 
     fn recover(
@@ -501,45 +415,41 @@ impl ParseNodeList for ComponentValueExpressionList {
 }
 
 #[inline]
-fn parse_css_unary_expression(p: &mut TailwindParser) -> ParsedSyntax {
-    parse_unary_expression(p)
-}
-
-#[inline]
-fn is_at_any_value(p: &mut TailwindParser) -> bool {
+fn is_at_any_value(p: &TailwindParser) -> bool {
+    let (kind, _) = css(p);
     is_at_any_function(p)
-        || is_at_identifier(p)
-        || p.at_ts(token_set![
+        || is_identifier(kind)
+        || token_set![
             CSS_STRING_LITERAL,
             CSS_DIMENSION_VALUE,
             CSS_PERCENTAGE_VALUE,
             CSS_NUMBER_LITERAL,
             CSS_COLOR_LITERAL
-        ])
+        ]
+        .contains(kind)
 }
 
-fn is_at_class_separator(p: &mut TailwindParser) -> bool {
+fn is_at_class_separator(p: &TailwindParser) -> bool {
     p.at(WHITESPACE)
 }
 
+/// Whether a CSS token of `kind` is an identifier: `IDENT`, or a keyword such as `var` or a
+/// unit.
 #[inline]
-pub(crate) fn is_at_identifier(p: &mut TailwindParser) -> bool {
-    is_nth_at_identifier(p, 0)
+pub(crate) fn is_identifier(kind: TailwindSyntaxKind) -> bool {
+    kind == IDENT || CSS_VALUE_KEYWORD_SET.contains(kind)
 }
 
+/// Whether the CSS token at the current letter is a dashed identifier: one that starts with `--`.
 #[inline]
-fn is_nth_at_identifier(p: &mut TailwindParser, n: usize) -> bool {
-    p.nth_at(n, IDENT) || p.nth_at_ts(n, CSS_VALUE_KEYWORD_SET)
+pub(crate) fn is_at_dashed_identifier(p: &TailwindParser) -> bool {
+    css(p).0 == IDENT && p.source().text()[p.cur_range().start().into()..].starts_with("--")
 }
 
+/// Whether a token of `kind` is a unit keyword.
 #[inline]
-pub(crate) fn is_at_dashed_identifier(p: &mut TailwindParser) -> bool {
-    p.at(IDENT) && p.cur_text().starts_with("--")
-}
-
-#[inline]
-fn is_nth_at_unit(p: &mut TailwindParser, n: usize) -> bool {
-    p.nth_at_ts(n, ALL_UNIT_SET)
+fn is_unit(kind: TailwindSyntaxKind) -> bool {
+    ALL_UNIT_SET.contains(kind)
 }
 
 const CSS_VALUE_KEYWORD_SET: TokenSet<TailwindSyntaxKind> =

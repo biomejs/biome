@@ -1,71 +1,49 @@
-use super::{Grouping, TailwindTokenSource};
+use super::TailwindTokenSource;
 use crate::lexer::{BASENAME_STORE, BaseNameStore};
-use crate::syntax::{
-    group_css_unit, group_css_value, group_negative_base, group_regular, group_url_value,
-    group_variant_segment,
-};
 use crate::test_support::{fixtures, mutate, random_fragments, xorshift};
-use crate::{TailwindParserOptions, parse_tailwind_with_options};
+use crate::{TailwindParserOptions, parse_tailwind, parse_tailwind_with_options};
 use biome_parser::token_source::TokenSource;
 use biome_rowan::NodeCache;
 use biome_tailwind_syntax::TailwindSyntaxKind::{self, *};
-use biome_tailwind_syntax::{T, TextSize};
 use quickcheck_macros::quickcheck;
 use std::sync::mpsc::channel;
 use std::thread;
 use std::time::Duration;
 
-/// Returns the kind and length of each token of `source`, grouping each with `group`, including
-/// trivia.
-fn tokens(source: &str, group: Grouping) -> Vec<(TailwindSyntaxKind, TextSize)> {
+/// Returns the kind and text of each letter that the lexer writes for `source`.
+fn letters(source: &str) -> Vec<(TailwindSyntaxKind, &str)> {
     let mut tokens = TailwindTokenSource::from_str(source, &BASENAME_STORE);
-    tokens.place_after(0, EOF);
     let mut result = Vec::new();
-    loop {
-        group(&mut tokens);
-        if tokens.current() == EOF {
-            return result;
-        }
-        result.push((tokens.current(), tokens.current_range().len()));
+    while tokens.current() != EOF {
+        result.push((tokens.current(), &source[tokens.current_range()]));
+        tokens.bump();
     }
+    result
 }
 
-/// Groups CSS values, with the unit after a dimension.
-fn css(source: &mut TailwindTokenSource) {
-    if source.current() == CSS_DIMENSION_VALUE {
-        group_css_unit(source);
-    } else {
-        group_css_value(source);
-    }
+/// Returns the kind and text of each token in the tree of `source`, without trivia.
+fn tree_tokens(source: &str) -> Vec<(TailwindSyntaxKind, String)> {
+    parse_tailwind(source)
+        .syntax()
+        .descendants_tokens(biome_rowan::Direction::Next)
+        .filter(|token| token.kind() != EOF)
+        .map(|token| (token.kind(), token.text_trimmed().to_string()))
+        .collect()
 }
 
-/// Groups regular tokens, with a negative candidate's basename after a `-`.
-fn negative(source: &mut TailwindTokenSource) {
-    if source.current() == T![-] {
-        group_negative_base(source);
-    } else {
-        group_regular(source);
-    }
-}
-
-/// Asserts that grouping a source gives tokens of the given kinds and lengths, which make up the
-/// whole source.
-macro_rules! assert_tokens {
-    ($group:expr, $src:expr, $($kind:ident:$len:expr),* $(,)?) => {{
-        let expected: Vec<(TailwindSyntaxKind, TextSize)> =
-            vec![$(($kind, TextSize::from($len))),*];
-        assert_eq!(tokens($src, $group), expected);
-        assert_eq!(
-            expected.iter().map(|(_, len)| *len).sum::<TextSize>(),
-            TextSize::of($src),
-        );
-    }};
-    ($src:expr, $($kind:ident:$len:expr),* $(,)?) => {
-        assert_tokens!(group_regular, $src, $($kind:$len),*)
+macro_rules! assert_letters {
+    ($src:expr, $($kind:ident $text:literal),* $(,)?) => {
+        assert_eq!(letters($src), vec![$(($kind, $text)),*]);
     };
 }
 
-// The tokens of a random string cover it, and grouping them terminates.
+macro_rules! assert_tree_tokens {
+    ($src:expr, $($kind:ident $text:literal),* $(,)?) => {
+        assert_eq!(tree_tokens($src), vec![$(($kind, $text.to_string())),*]);
+    };
+}
+
+// The letters of a random string cover it, and lexing it terminates.
 #[quickcheck]
 fn losslessness(string: String) -> bool {
     let cloned = string.clone();
@@ -83,264 +61,297 @@ fn losslessness(string: String) -> bool {
     });
     let ranges = receiver
         .recv_timeout(Duration::from_secs(2))
-        .unwrap_or_else(|_| panic!("Grouping doesn't terminate on ->{string}<-"));
+        .unwrap_or_else(|_| panic!("Lexing doesn't terminate on ->{string}<-"));
 
     let rebuilt: String = ranges.into_iter().map(|range| &string[range]).collect();
     string == rebuilt
 }
 
 #[test]
-fn basic() {
-    assert_tokens!("block", TW_BASE:5);
-}
-
-#[test]
-fn basic_value() {
-    assert_tokens!("text-sm", TW_BASE:4, DASH:1, TW_VALUE:2);
-}
-
-#[test]
-fn basic_multiple() {
-    assert_tokens!(
-        "text-sm font-bold",
-        TW_BASE:4,
-        DASH:1,
-        TW_VALUE:2,
-        WHITESPACE:1,
-        TW_BASE:4,
-        DASH:1,
-        TW_VALUE:4,
+fn letters_are_sequences_of_one_class_or_single_chars() {
+    assert_letters!(
+        "bg-red-500/50 \t\n%\u{e9}\u{e9}__x",
+        TW_BASE "bg",
+        DASH "-",
+        TW_BASE "red",
+        DASH "-",
+        TW_NUMBER "500",
+        SLASH "/",
+        TW_NUMBER "50",
+        WHITESPACE " \t\n",
+        PERCENT "%",
+        ERROR_TOKEN "\u{e9}",
+        ERROR_TOKEN "\u{e9}",
+        CSS_WHITESPACE "__",
+        TW_BASE "x",
     );
 }
 
 #[test]
-fn whitespace_includes_newlines() {
-    assert_tokens!(" \t\r\n\n ", WHITESPACE:6);
-}
-
-#[test]
-fn css_underscore_whitespace_has_its_own_kind() {
-    assert_tokens!(css, "foo__bar", IDENT:3, CSS_WHITESPACE:2, IDENT:3);
-}
-
-#[test]
-fn css_strings_stop_at_whitespace() {
-    assert_tokens!(
-        css,
-        "\"foo bar\"",
-        CSS_STRING_LITERAL:4,
-        WHITESPACE:1,
-        IDENT:3,
-        CSS_STRING_LITERAL:1,
+fn words_before_a_colon_are_variant_segments() {
+    assert_letters!(
+        "group-hover/menu:flex data-[a]:x data",
+        TW_VARIANT_SEGMENT "group",
+        DASH "-",
+        TW_VARIANT_SEGMENT "hover",
+        SLASH "/",
+        TW_VARIANT_SEGMENT "menu",
+        COLON ":",
+        TW_BASE "flex",
+        WHITESPACE " ",
+        TW_VARIANT_SEGMENT "data",
+        DASH "-",
+        L_BRACKET "[",
+        IDENT "a",
+        R_BRACKET "]",
+        COLON ":",
+        TW_BASE "x",
+        WHITESPACE " ",
+        DATA_KW "data",
     );
 }
 
 #[test]
-fn nested_brackets_stop_at_whitespace() {
-    assert_tokens!(
-        "[foo[bar baz]]",
-        L_BRACKET:1,
-        TW_SELECTOR:7,
-        WHITESPACE:1,
-        TW_BASE:5,
+fn words_inside_brackets_are_css_identifiers() {
+    assert_letters!(
+        "bg-[color:red] w-[10px]",
+        TW_BASE "bg",
+        DASH "-",
+        L_BRACKET "[",
+        IDENT "color",
+        COLON ":",
+        IDENT "red",
+        R_BRACKET "]",
+        WHITESPACE " ",
+        TW_BASE "w",
+        DASH "-",
+        L_BRACKET "[",
+        CSS_NUMBER_LITERAL "10",
+        PX_KW "px",
+        R_BRACKET "]",
     );
 }
 
 #[test]
-fn basic_modifier() {
-    assert_tokens!(
-        "bg-primary/10",
-        TW_BASE:2,
-        DASH:1,
-        TW_VALUE:7,
-        SLASH:1,
-        TW_NUMBER:2,
+fn whitespace_closes_brackets() {
+    assert_letters!(
+        "w-[1 hover:x",
+        TW_BASE "w",
+        DASH "-",
+        L_BRACKET "[",
+        CSS_NUMBER_LITERAL "1",
+        WHITESPACE " ",
+        TW_VARIANT_SEGMENT "hover",
+        COLON ":",
+        TW_BASE "x",
     );
 }
 
 #[test]
-fn basic_modifier_important() {
-    assert_tokens!(
-        "bg-primary/10!",
-        TW_BASE:2,
-        DASH:1,
-        TW_VALUE:7,
-        SLASH:1,
-        TW_NUMBER:2,
-        BANG:1,
+fn hex_colors_end_inside_a_word() {
+    assert_letters!(
+        "[#abcxyz]",
+        L_BRACKET "[",
+        HASH "#",
+        IDENT "abc",
+        IDENT "xyz",
+        R_BRACKET "]",
     );
-}
-
-#[test]
-fn variant() {
-    assert_tokens!("hover:", TW_BASE:5, COLON:1);
-}
-
-#[test]
-fn variant_multiple() {
-    assert_tokens!("hover:focus:", TW_BASE:5, COLON:1, TW_BASE:5, COLON:1);
-}
-
-#[test]
-fn variant_multiple_full() {
-    assert_tokens!(
-        "hover:focus:bg-red-500",
-        TW_BASE:5,
-        COLON:1,
-        TW_BASE:5,
-        COLON:1,
-        TW_BASE:2,
-        DASH:1,
-        TW_VALUE:7,
-    );
-}
-
-#[test]
-fn negative_basename() {
-    assert_tokens!(negative, "-mt", DASH:1, TW_BASE:2);
-}
-
-#[test]
-fn negative_basename_cant_start_with_at() {
-    assert_tokens!(negative, "-@x", DASH:1, ERROR_TOKEN:1, TW_BASE:1);
 }
 
 #[test]
 fn byte_order_mark() {
-    assert_tokens!("\u{FEFF}flex", UNICODE_BOM:3, TW_BASE:4);
+    assert_letters!("\u{FEFF}flex", UNICODE_BOM "\u{FEFF}", TW_BASE "flex");
 }
 
 #[test]
-fn bracket_after_bracket() {
-    assert_tokens!("[[a]", L_BRACKET:1, L_BRACKET:1, TW_SELECTOR:1, R_BRACKET:1);
+fn bad_whitespace_is_reported_once() {
+    let parse = parse_tailwind("a\x0Bb");
+    assert_eq!(parse.diagnostics().len(), 1);
 }
 
 #[test]
-fn variant_segment_names() {
-    assert_tokens!(
-        group_variant_segment,
-        "@sm-*%",
-        TW_VARIANT_SEGMENT:3,
-        DASH:1,
-        TW_VARIANT_SEGMENT:2,
-    );
-    assert_tokens!(group_variant_segment, "%", ERROR_TOKEN:1);
-}
-
-#[test]
-fn raw_urls_and_url_strings() {
-    assert_tokens!(group_url_value, "a.png", CSS_URL_VALUE_RAW_LITERAL:5);
-    assert_tokens!(group_url_value, "'a b'", CSS_STRING_LITERAL:2, WHITESPACE:1, CSS_URL_VALUE_RAW_LITERAL:2);
-}
-
-#[test]
-fn css_punctuation() {
-    assert_tokens!(css, "a=b,c", IDENT:1, EQ:1, IDENT:1, COMMA:1, IDENT:1);
-}
-
-#[test]
-fn css_hex_colors_end_at_the_first_other_letter() {
-    assert_tokens!(css, "#abcxyz", CSS_COLOR_LITERAL:4, IDENT:3);
-}
-
-#[test]
-fn arbitrary_css_dimensions_and_percentages() {
-    assert_tokens!(
-        css,
-        "12px 100% .5rem -1rem",
-        CSS_DIMENSION_VALUE:2,
-        PX_KW:2,
-        WHITESPACE:1,
-        CSS_PERCENTAGE_VALUE:3,
-        PERCENT:1,
-        WHITESPACE:1,
-        CSS_DIMENSION_VALUE:2,
-        REM_KW:3,
-        WHITESPACE:1,
-        CSS_DIMENSION_VALUE:2,
-        REM_KW:3,
+fn values_and_modifiers_merge_letters() {
+    assert_tree_tokens!(
+        "text-sm bg-primary/10! bg-red-500/[.5]",
+        TW_BASE "text",
+        DASH "-",
+        TW_VALUE "sm",
+        WHITESPACE " ",
+        TW_BASE "bg",
+        DASH "-",
+        TW_VALUE "primary",
+        SLASH "/",
+        TW_NUMBER "10",
+        BANG "!",
+        WHITESPACE " ",
+        TW_BASE "bg",
+        DASH "-",
+        TW_VALUE "red-500",
+        SLASH "/",
+        L_BRACKET "[",
+        CSS_NUMBER_LITERAL ".5",
+        R_BRACKET "]",
     );
 }
 
 #[test]
-fn arbitrary_css_numbers_with_exponents() {
-    assert_tokens!(
-        css,
-        "1e2px 1E+2% 1e-2 1e 1e+",
-        CSS_DIMENSION_VALUE:3,
-        PX_KW:2,
-        WHITESPACE:1,
-        CSS_PERCENTAGE_VALUE:4,
-        PERCENT:1,
-        WHITESPACE:1,
-        CSS_NUMBER_LITERAL:4,
-        WHITESPACE:1,
-        CSS_DIMENSION_VALUE:1,
-        IDENT:1,
-        WHITESPACE:1,
-        CSS_DIMENSION_VALUE:1,
-        IDENT:1,
-        PLUS:1,
+fn variants_keep_their_segments() {
+    assert_tree_tokens!(
+        "hover:focus:bg-red-500 -mt-4",
+        TW_VARIANT_SEGMENT "hover",
+        COLON ":",
+        TW_VARIANT_SEGMENT "focus",
+        COLON ":",
+        TW_BASE "bg",
+        DASH "-",
+        TW_VALUE "red-500",
+        WHITESPACE " ",
+        DASH "-",
+        TW_BASE "mt",
+        DASH "-",
+        TW_NUMBER "4",
     );
 }
 
 #[test]
-fn arbitrary_css_underscores_are_whitespace() {
-    assert_tokens!(
-        css,
-        "0px_2px_4px",
-        CSS_DIMENSION_VALUE:1,
-        PX_KW:2,
-        CSS_WHITESPACE:1,
-        CSS_DIMENSION_VALUE:1,
-        PX_KW:2,
-        CSS_WHITESPACE:1,
-        CSS_DIMENSION_VALUE:1,
-        PX_KW:2,
+fn selectors_merge_letters() {
+    assert_tree_tokens!(
+        "[[data-state=open]_&]:flex has-[>svg]:p-0",
+        L_BRACKET "[",
+        TW_SELECTOR "[data-state=open]_&",
+        R_BRACKET "]",
+        COLON ":",
+        TW_BASE "flex",
+        WHITESPACE " ",
+        TW_VARIANT_SEGMENT "has",
+        DASH "-",
+        L_BRACKET "[",
+        TW_SELECTOR ">svg",
+        R_BRACKET "]",
+        COLON ":",
+        TW_BASE "p",
+        DASH "-",
+        TW_NUMBER "0",
     );
 }
 
 #[test]
-fn arbitrary_css_minus_after_value_is_an_operator() {
-    assert_tokens!(
-        css,
-        "100svh-var 1px-2px 100-1 50%-1 (1)-1",
-        CSS_DIMENSION_VALUE:3,
-        SVH_KW:3,
-        DASH:1,
-        VAR_KW:3,
-        WHITESPACE:1,
-        CSS_DIMENSION_VALUE:1,
-        PX_KW:2,
-        DASH:1,
-        CSS_DIMENSION_VALUE:1,
-        PX_KW:2,
-        WHITESPACE:1,
-        CSS_NUMBER_LITERAL:3,
-        DASH:1,
-        CSS_NUMBER_LITERAL:1,
-        WHITESPACE:1,
-        CSS_PERCENTAGE_VALUE:2,
-        PERCENT:1,
-        DASH:1,
-        CSS_NUMBER_LITERAL:1,
-        WHITESPACE:1,
-        L_PAREN:1,
-        CSS_NUMBER_LITERAL:1,
-        R_PAREN:1,
-        DASH:1,
-        CSS_NUMBER_LITERAL:1,
+fn css_dimensions_percentages_and_exponents() {
+    assert_tree_tokens!(
+        "w-[12px_100%_.5rem_-1rem_1e2px_1E+2%_1e-2]",
+        TW_BASE "w",
+        DASH "-",
+        L_BRACKET "[",
+        CSS_NUMBER_LITERAL "12",
+        IDENT "px",
+        CSS_NUMBER_LITERAL "100",
+        PERCENT "%",
+        CSS_NUMBER_LITERAL ".5",
+        IDENT "rem",
+        CSS_NUMBER_LITERAL "-1",
+        IDENT "rem",
+        CSS_NUMBER_LITERAL "1e2",
+        IDENT "px",
+        CSS_NUMBER_LITERAL "1E+2",
+        PERCENT "%",
+        CSS_NUMBER_LITERAL "1e-2",
+        R_BRACKET "]",
     );
+}
+
+#[test]
+fn css_minus_after_a_value_is_an_operator() {
+    assert_tree_tokens!(
+        "w-[calc(100svh-var(--x))]",
+        TW_BASE "w",
+        DASH "-",
+        L_BRACKET "[",
+        IDENT "calc",
+        L_PAREN "(",
+        CSS_NUMBER_LITERAL "100",
+        IDENT "svh",
+        DASH "-",
+        IDENT "var",
+        L_PAREN "(",
+        IDENT "--x",
+        R_PAREN ")",
+        R_PAREN ")",
+        R_BRACKET "]",
+    );
+}
+
+#[test]
+fn css_strings_colors_and_urls() {
+    assert_tree_tokens!(
+        "content-['a_b'] bg-[#abc] bg-[url(a.png)]",
+        TW_BASE "content",
+        DASH "-",
+        L_BRACKET "[",
+        CSS_STRING_LITERAL "'a_b'",
+        R_BRACKET "]",
+        WHITESPACE " ",
+        TW_BASE "bg",
+        DASH "-",
+        L_BRACKET "[",
+        CSS_COLOR_LITERAL "#abc",
+        R_BRACKET "]",
+        WHITESPACE " ",
+        TW_BASE "bg",
+        DASH "-",
+        L_BRACKET "[",
+        URL_KW "url",
+        L_PAREN "(",
+        CSS_URL_VALUE_RAW_LITERAL "a.png",
+        R_PAREN ")",
+        R_BRACKET "]",
+    );
+}
+
+#[test]
+fn css_strings_escape_quotes_and_colors_end_before_other_letters() {
+    assert_tree_tokens!(
+        "content-['a\\'b'] bg-[#abcxyz]",
+        TW_BASE "content",
+        DASH "-",
+        L_BRACKET "[",
+        CSS_STRING_LITERAL "'a\\'b'",
+        R_BRACKET "]",
+        WHITESPACE " ",
+        TW_BASE "bg",
+        DASH "-",
+        L_BRACKET "[",
+        CSS_COLOR_LITERAL "#abc",
+        IDENT "xyz",
+        R_BRACKET "]",
+    );
+}
+
+#[test]
+fn properties_run_to_the_colon() {
+    let tokens = tree_tokens("[--a[--b)c:var(--d)]");
+    assert_eq!(tokens[1], (TW_PROPERTY, "--a[--b)c".to_string()));
+}
+
+#[test]
+fn custom_base_names() {
+    let base_names = BaseNameStore::new(&["slide-in-from-top"]);
+    let parse = parse_tailwind_with_options(
+        "slide-in-from-top-4",
+        &mut NodeCache::default(),
+        TailwindParserOptions::with_base_names(&base_names),
+    );
+    let base = parse
+        .syntax()
+        .descendants_tokens(biome_rowan::Direction::Next)
+        .next()
+        .unwrap();
+    assert_eq!((base.kind(), base.text()), (TW_BASE, "slide-in-from-top"));
 }
 
 /// Asserts that parsing `source` gives a tree whose text is `source`.
-fn check_parse(source: &str, base_names: &BaseNameStore) {
-    let parse = parse_tailwind_with_options(
-        source,
-        &mut NodeCache::default(),
-        TailwindParserOptions::with_base_names(base_names),
-    );
-    assert_eq!(parse.syntax().to_string(), source);
+fn check_parse(source: &str) {
+    assert_eq!(parse_tailwind(source).syntax().to_string(), source);
 }
 
 /// Parses every fixture, and copies of each with a few edits that break it.
@@ -348,28 +359,18 @@ fn check_parse(source: &str, base_names: &BaseNameStore) {
 fn fixtures_parse_losslessly() {
     let mut next = xorshift(0x2545_F491_4F6C_DD1D);
     for source in fixtures() {
-        check_parse(&source, &BASENAME_STORE);
+        check_parse(&source);
         for _ in 0..3 {
-            check_parse(&mutate(&source, &mut next), &BASENAME_STORE);
+            check_parse(&mutate(&source, &mut next));
         }
     }
 }
 
-/// Parses sequences of fragments that the groupings and the parser treat differently.
+/// Parses sequences of fragments that the lexer and the parser treat differently.
 #[test]
 fn random_fragments_parse_losslessly() {
     let mut next = xorshift(0x9E37_79B9_7F4A_7C15);
     for _ in 0..3000 {
-        check_parse(&random_fragments(&mut next), &BASENAME_STORE);
+        check_parse(&random_fragments(&mut next));
     }
-}
-
-#[test]
-fn custom_base_names() {
-    let base_names = BaseNameStore::new(&["slide-in-from-top"]);
-    let source = TailwindTokenSource::from_str("slide-in-from-top-4", &base_names);
-    assert_eq!(
-        (source.current(), source.current_range().len()),
-        (TW_BASE, TextSize::from(17))
-    );
 }

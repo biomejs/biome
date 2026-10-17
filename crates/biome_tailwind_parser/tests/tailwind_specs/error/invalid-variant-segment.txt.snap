@@ -24,9 +24,8 @@ TwRoot {
             negative_token: missing (optional),
             candidate: TwBogusCandidate {
                 items: [
-                    TW_BASE@0..5 "group" [] [],
+                    TW_VARIANT_SEGMENT@0..5 "group" [] [],
                     DASH@5..6 "-" [] [],
-                    TW_NUMBER@6..6 "" [] [],
                     PERCENT@6..7 "%" [] [],
                     COLON@7..8 ":" [] [],
                     TW_BASE@8..12 "flex" [] [],
@@ -52,12 +51,11 @@ TwRoot {
       1: (empty)
       2: (empty)
       3: TW_BOGUS_CANDIDATE@0..12
-        0: TW_BASE@0..5 "group" [] []
+        0: TW_VARIANT_SEGMENT@0..5 "group" [] []
         1: DASH@5..6 "-" [] []
-        2: TW_NUMBER@6..6 "" [] []
-        3: PERCENT@6..7 "%" [] []
-        4: COLON@7..8 ":" [] []
-        5: TW_BASE@8..12 "flex" [] []
+        2: PERCENT@6..7 "%" [] []
+        3: COLON@7..8 ":" [] []
+        4: TW_BASE@8..12 "flex" [] []
       4: (empty)
     1: WHITESPACE@12..13 "\n" [] []
   3: EOF@13..13 "" [] []

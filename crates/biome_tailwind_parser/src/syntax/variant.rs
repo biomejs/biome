@@ -1,10 +1,9 @@
-use crate::lexer::simd::{Stop, is_whitespace};
 use crate::parser::TailwindParser;
-use crate::syntax::css_value::group_css_value;
 use crate::syntax::css_value::parse_css_parameter_list;
+use crate::syntax::letters::{is_at_segment, is_at_selector, segment, selector};
 use crate::syntax::parse_error::*;
 use crate::syntax::parse_modifier;
-use crate::token_source::TailwindTokenSource;
+use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{Parser, parse_recovery::ParseRecoveryTokenSet, token_set};
@@ -101,10 +100,8 @@ pub(crate) fn parse_variant(p: &mut TailwindParser) -> ParsedSyntax {
 fn parse_arbitrary_variant(p: &mut TailwindParser) -> ParsedSyntax {
     let checkpoint = p.checkpoint();
     let m = p.start();
-    p.expect_with_context(T!['['], group_selector);
-    // A selector ends at a `]`, whitespace or the end of the source, which the regular tokens
-    // group like the variant does.
-    p.expect(TW_SELECTOR);
+    p.bump(T!['[']);
+    parse_selector(p);
     p.expect(T![']']);
 
     if !p.at(COLON) {
@@ -117,28 +114,15 @@ fn parse_arbitrary_variant(p: &mut TailwindParser) -> ParsedSyntax {
     Present(m.complete(p, TW_ARBITRARY_VARIANT))
 }
 
-/// Groups the token after the `[` of an arbitrary variant or variant segment: the selector, which
-/// runs to the next whitespace or the `]` that closes the brackets it opens, or one byte.
-fn group_selector(source: &mut TailwindTokenSource) {
-    match source.next_byte() {
-        None => source.take(EOF, 0),
-        Some(byte) if is_whitespace(byte) => source.take_whitespace(),
-        Some(byte @ (b'(' | b')' | b']')) => source.take_punctuation(byte),
-        Some(_) => source.merge_selector(),
-    }
-}
-
 fn parse_variant_expression(p: &mut TailwindParser) -> ParsedSyntax {
     let checkpoint = p.checkpoint();
     let m = p.start();
-
-    p.source_mut().regroup_current(group_variant_segment);
 
     let segments = p.start();
     parse_any_variant_segment(p).or_add_diagnostic(p, expected_value);
 
     while p.at(T![-]) {
-        p.bump_with_context(T![-], group_variant_segment);
+        p.bump(T![-]);
         parse_any_variant_segment(p).or_add_diagnostic(p, expected_value);
     }
 
@@ -169,22 +153,6 @@ fn parse_variant_expression(p: &mut TailwindParser) -> ParsedSyntax {
     Present(m.complete(p, TW_VARIANT_EXPRESSION))
 }
 
-/// Groups the first token of a variant segment: a name, which runs to the next whitespace, `:`,
-/// `-`, `/`, `!`, `[`, `]` or `)`, or one byte.
-pub(crate) fn group_variant_segment(source: &mut TailwindTokenSource) {
-    match source.next_byte() {
-        None => source.take(EOF, 0),
-        Some(byte) if is_whitespace(byte) => source.take_whitespace(),
-        Some(byte @ (b'(' | b')' | b'[' | b']' | b':' | b'-' | b'!' | b'/')) => {
-            source.take_punctuation(byte);
-        }
-        Some(b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' | b'@' | b'*') => {
-            source.merge_until(Stop::Segment, TW_VARIANT_SEGMENT);
-        }
-        Some(_) => source.take_unexpected(),
-    }
-}
-
 fn parse_any_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
     if p.at(T!['[']) {
         return parse_arbitrary_variant_segment(p);
@@ -198,14 +166,13 @@ fn parse_any_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
 }
 
 fn parse_named_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
-    if !p.at(TW_VARIANT_SEGMENT) {
+    if !is_at_segment(p.source()) {
         return Absent;
     }
 
     let m = p.start();
-    // A segment name ends at a byte that the regular tokens also take on its own, whitespace or
-    // the end of the source.
-    p.bump(TW_VARIANT_SEGMENT);
+    let letters = segment(p.source());
+    p.bump_letters(TW_VARIANT_SEGMENT, letters);
 
     Present(m.complete(p, TW_NAMED_VARIANT_SEGMENT))
 }
@@ -216,17 +183,26 @@ fn parse_arbitrary_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
     // — this keeps combinators (`has-[>svg]`, `[+p]`, `[~span]`) inside the
     // selector instead of erroring on them in the CSS-value grammar.
     let m = p.start();
-    p.expect_with_context(T!['['], group_selector);
-    // A selector ends at a `]`, whitespace or the end of the source, which the regular tokens
-    // group like the variant does.
-    p.expect(TW_SELECTOR);
+    p.bump(T!['[']);
+    parse_selector(p);
     p.expect(T![']']);
     Present(m.complete(p, TW_ARBITRARY_VARIANT_SEGMENT))
 }
 
+/// Bumps the selector after the `[` of an arbitrary variant or variant segment, which runs to the
+/// next whitespace or the `]` that closes the brackets it opens, or reports that it's missing.
+fn parse_selector(p: &mut TailwindParser) {
+    if is_at_selector(p.source()) {
+        let letters = selector(p.source());
+        p.bump_letters(TW_SELECTOR, letters);
+    } else {
+        p.error(expected_token(TW_SELECTOR));
+    }
+}
+
 fn parse_css_variable_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
     let m = p.start();
-    p.expect_with_context(T!['('], group_css_value);
+    p.expect_css(T!['(']);
     let parameters = parse_css_parameter_list(p);
     if parameters.range(p).is_empty() {
         p.error(expected_value(p, p.cur_range()));

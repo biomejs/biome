@@ -1,15 +1,22 @@
-//! A lexer that classifies the whole class string with SIMD before parsing starts.
+//! The lexer of Tailwind class strings, which runs once before parsing.
 //!
-//! [classify] computes bitmaps of character classes 64 bytes at a time, without context. They
-//! split the source into atoms, and for each kind of token they mark the atoms that end it. With
-//! them, the token source's groupings find the end of most tokens with a search for the next set
-//! bit of one bitmap, plus short scalar loops for CSS values, strings and nested brackets.
+//! [classify] computes bitmaps of character classes 64 bytes at a time with SIMD. The lexer then
+//! writes the whole token stream to flat arrays: the start and the kind of each token. The tokens
+//! are the letters of the class string's alphabet: a sequence of whitespace, ASCII letters, ASCII
+//! digits or `_`, or any other char on its own. Their boundaries come straight from the
+//! `letter_start` bitmap.
+//!
+//! Each letter's kind comes from local rules over the bytes, with no grammar state: a word with a
+//! `:` after it outside brackets, before the next whitespace, is a `TW_VARIANT_SEGMENT`; another
+//! word outside brackets is a `TW_BASE`; a word inside brackets is a CSS identifier or keyword.
+//! The parser never asks for a token to be lexed again. When a token of the tree spans several
+//! letters, such as the value `red-500`, the parser merges them.
 
 mod classify;
 #[cfg(test)]
 mod tests;
 
-use super::{BaseNameStore, css_identifier_kind, invalid_whitespace, unexpected_character};
+use super::{BaseNameStore, css_identifier_kind, invalid_whitespace};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::{self, *};
@@ -17,53 +24,254 @@ use biome_tailwind_syntax::TextSize;
 use classify::{Block, classify};
 use std::cell::Cell;
 
-/// The largest number of blocks whose buffer [SimdLexer] keeps for the next class string, so
+/// The buffers of a [SimdLexer]: its blocks, starts and kinds.
+type Buffers = (Vec<Block>, Vec<u32>, Vec<TailwindSyntaxKind>);
+
+/// The largest number of letters whose buffers [SimdLexer] keeps for the next class string, so
 /// that parsing one long class string doesn't keep its memory.
-const MAX_KEPT_BLOCKS: usize = 1 << 10;
+const MAX_KEPT_LETTERS: usize = 1 << 14;
 
 thread_local! {
-    /// The bitmap buffer of the last [SimdLexer] dropped on this thread, so that classifying a
-    /// class string doesn't allocate it.
+    /// The buffers of the last [SimdLexer] dropped on this thread, so that lexing a class string
+    /// doesn't allocate them.
     ///
     /// This exists purely to reduce pressure on the memory allocator.
-    static BUFFERS: Cell<Option<Vec<Block>>> = const { Cell::new(None) };
+    static BUFFERS: Cell<Option<Buffers>> = const { Cell::new(None) };
 }
 
-/// The bitmaps of a class string.
+/// The letters of a class string.
 pub(crate) struct SimdLexer<'src> {
     source: &'src str,
     base_names: &'src BaseNameStore,
     blocks: Vec<Block>,
+    /// The start of each letter, followed by the source length.
+    starts: Vec<u32>,
+    /// The kind of each letter, followed by `EOF`.
+    kinds: Vec<TailwindSyntaxKind>,
+    /// The diagnostics of the whitespace that CSS doesn't allow.
+    diagnostics: Vec<ParseDiagnostic>,
 }
 
 impl Drop for SimdLexer<'_> {
     fn drop(&mut self) {
-        if self.blocks.capacity() <= MAX_KEPT_BLOCKS {
-            let blocks = std::mem::take(&mut self.blocks);
-            // The thread may be ending, in which case the buffer is dropped.
-            let _ = BUFFERS.try_with(|cell| cell.set(Some(blocks)));
+        if self.starts.capacity() <= MAX_KEPT_LETTERS {
+            let buffers = (
+                std::mem::take(&mut self.blocks),
+                std::mem::take(&mut self.starts),
+                std::mem::take(&mut self.kinds),
+            );
+            // The thread may be ending, in which case the buffers are dropped.
+            let _ = BUFFERS.try_with(|cell| cell.set(Some(buffers)));
         }
     }
 }
 
 impl<'src> SimdLexer<'src> {
-    /// Classifies `source`, matching dashed basenames against `base_names`.
+    /// Lexes `source` into letters. The parser matches dashed basenames against `base_names`.
     pub(crate) fn new(source: &'src str, base_names: &'src BaseNameStore) -> Self {
-        let mut blocks = BUFFERS
+        let (blocks, starts, kinds) = BUFFERS
             .try_with(|cell| cell.take())
             .ok()
             .flatten()
             .unwrap_or_default();
-        classify(source.as_bytes(), &mut blocks);
-        Self {
+        let mut lexer = Self {
             source,
             base_names,
             blocks,
+            starts,
+            kinds,
+            diagnostics: Vec::new(),
+        };
+        #[cfg(target_arch = "x86_64")]
+        if std::arch::is_x86_feature_detected!("avx2")
+            && std::arch::is_x86_feature_detected!("bmi1")
+            && std::arch::is_x86_feature_detected!("bmi2")
+            && std::arch::is_x86_feature_detected!("lzcnt")
+            && std::arch::is_x86_feature_detected!("popcnt")
+        {
+            // SAFETY: the CPU supports the features.
+            unsafe { lexer.lex_with_bit_instructions() };
+            return lexer;
         }
+        lexer.lex();
+        lexer
+    }
+
+    /// [Self::lex], compiled with the bit manipulation instructions of x86_64 CPUs since 2013,
+    /// which the extraction of letter starts uses for every letter.
+    ///
+    /// # Safety
+    /// The CPU must support AVX2, BMI1, BMI2, LZCNT and POPCNT.
+    #[cfg(target_arch = "x86_64")]
+    #[target_feature(enable = "avx2,bmi1,bmi2,lzcnt,popcnt")]
+    unsafe fn lex_with_bit_instructions(&mut self) {
+        self.lex();
+    }
+
+    #[inline(always)]
+    fn lex(&mut self) {
+        classify(self.source.as_bytes(), &mut self.blocks);
+        self.split_hex_colors();
+        self.write_starts();
+        self.write_kinds();
+    }
+
+    /// Splits a hex color from the letters after it in the same word, as in `#abcxyz`, so that
+    /// the color ends on a letter boundary.
+    fn split_hex_colors(&mut self) {
+        let bytes = self.source.as_bytes();
+        for block_index in 0..self.blocks.len() {
+            let mut hashes = self.blocks[block_index].hash;
+            while hashes != 0 {
+                let hash = block_index * 64 + hashes.trailing_zeros() as usize;
+                hashes &= hashes - 1;
+                let mut end = hash + 1;
+                while bytes.get(end).is_some_and(u8::is_ascii_hexdigit) {
+                    end += 1;
+                }
+                if bytes.get(end).is_some_and(u8::is_ascii_alphanumeric)
+                    && bytes[end - 1].is_ascii_alphabetic()
+                {
+                    self.blocks[end / 64].letter_start |= 1 << (end % 64);
+                }
+            }
+        }
+    }
+
+    /// Writes the start of each letter, and the source length after them.
+    #[inline(always)]
+    fn write_starts(&mut self) {
+        let len = self.source.len();
+        let starts = &mut self.starts;
+        starts.clear();
+        // Each letter takes at least one byte.
+        starts.reserve(len + 1);
+        let out = &mut starts.spare_capacity_mut()[..len + 1];
+        let mut count = 0;
+        for (block_index, block) in self.blocks.iter().enumerate() {
+            let mut bits = block.letter_start;
+            while bits != 0 {
+                out[count].write((block_index * 64) as u32 + bits.trailing_zeros());
+                count += 1;
+                bits &= bits - 1;
+            }
+        }
+        out[count].write(len as u32);
+        // SAFETY: the loop and the write after it initialized the first `count + 1` starts.
+        unsafe { starts.set_len(count + 1) };
+    }
+
+    /// Writes the kind of each letter, and `EOF` after them.
+    fn write_kinds(&mut self) {
+        let bytes = self.source.as_bytes();
+        let count = self.starts.len() - 1;
+        let kinds = &mut self.kinds;
+        kinds.clear();
+        kinds.reserve(count + 1);
+        // How many brackets and parentheses are open in the current class.
+        let mut depth = 0u32;
+        // The first letter of the current class that a `:` may still make a variant segment.
+        let mut unresolved = 0;
+        for index in 0..count {
+            let start = self.starts[index] as usize;
+            let end = self.starts[index + 1] as usize;
+            let byte = bytes[start];
+            let kind = match LETTER_KINDS[byte as usize] {
+                WHITESPACE => {
+                    depth = 0;
+                    unresolved = index + 1;
+                    if any_in(&self.blocks, start, end, |block| block.bad_whitespace) {
+                        push_whitespace_diagnostics(bytes, start, end, &mut self.diagnostics);
+                    }
+                    WHITESPACE
+                }
+                TW_BASE if depth == 0 => {
+                    if &bytes[start..end] == b"data" {
+                        DATA_KW
+                    } else {
+                        TW_BASE
+                    }
+                }
+                TW_BASE => css_identifier_kind(&bytes[start..end]),
+                TW_NUMBER if depth > 0 => CSS_NUMBER_LITERAL,
+                kind @ (T!['['] | T!['(']) => {
+                    depth += 1;
+                    kind
+                }
+                kind @ (T![']'] | T![')']) => {
+                    depth = depth.saturating_sub(1);
+                    kind
+                }
+                T![:] => {
+                    if depth == 0 {
+                        for kind in &mut kinds[unresolved..index] {
+                            if matches!(kind, TW_BASE | DATA_KW) {
+                                *kind = TW_VARIANT_SEGMENT;
+                            }
+                        }
+                        unresolved = index + 1;
+                    }
+                    T![:]
+                }
+                ERROR_TOKEN if start == 0 && bytes.starts_with(&[0xEF, 0xBB, 0xBF]) => UNICODE_BOM,
+                kind => kind,
+            };
+            kinds.push(kind);
+        }
+        kinds.push(EOF);
     }
 
     pub(crate) fn source(&self) -> &'src str {
         self.source
+    }
+
+    /// Returns the kind of letter `index`, or `EOF` past the last letter.
+    #[inline(always)]
+    pub(crate) fn kind(&self, index: usize) -> TailwindSyntaxKind {
+        self.kinds.get(index).copied().unwrap_or(EOF)
+    }
+
+    /// Returns the start of letter `index`, or the source length past the last letter.
+    #[inline(always)]
+    pub(crate) fn start(&self, index: usize) -> usize {
+        self.starts
+            .get(index)
+            .map_or(self.source.len(), |&start| start as usize)
+    }
+
+    /// Returns the first byte of letter `index`, or `None` past the last letter.
+    #[inline(always)]
+    pub(crate) fn byte(&self, index: usize) -> Option<u8> {
+        self.source.as_bytes().get(self.start(index)).copied()
+    }
+
+    /// Returns the text of letter `index`, which is empty past the last letter.
+    #[inline(always)]
+    pub(crate) fn text(&self, index: usize) -> &'src str {
+        &self.source[self.start(index)..self.start(index + 1)]
+    }
+
+    /// Returns the index of the letter that starts at `offset`, searching forward from letter
+    /// `from`. The offset must be a letter boundary.
+    #[inline(always)]
+    pub(crate) fn index_at(&self, offset: usize, from: usize) -> usize {
+        let mut index = from;
+        while self.start(index) < offset {
+            index += 1;
+        }
+        debug_assert_eq!(self.start(index), offset);
+        index
+    }
+
+    /// Returns the end of the basename that starts at `start` and runs to `end`, before a `-`,
+    /// continued over each `-` that a dashed basename continues over.
+    #[inline(always)]
+    pub(crate) fn dashed_base_end(&self, start: usize, end: usize) -> usize {
+        start
+            + self
+                .base_names
+                .matcher(&self.source.as_bytes()[start..])
+                .dashed_end(end - start)
     }
 
     /// Returns whether a `:` follows `offset` before the next whitespace.
@@ -73,284 +281,64 @@ impl<'src> SimdLexer<'src> {
         self.source.as_bytes().get(end) == Some(&b':')
     }
 
-    /// Returns the offset of the first atom at or after `position` that `stop` matches, or the
-    /// source length if there is none.
-    #[inline(always)]
-    pub(crate) fn find_stop(&self, position: usize, stop: Stop) -> usize {
-        match stop {
-            Stop::ParenOrWhitespace => next_bit(&self.blocks, position, |block| block.paren_stop),
-            Stop::ColonOrWhitespace => next_bit(&self.blocks, position, |block| block.colon_stop),
-            Stop::Segment => next_bit(&self.blocks, position, |block| block.segment_stop),
-            Stop::Value => next_bit(&self.blocks, position, |block| block.value_stop),
-            Stop::Modifier => next_bit(&self.blocks, position, |block| block.modifier_stop),
-        }
-    }
-
-    /// Returns whether `start..end` holds a line break or a whitespace byte that CSS doesn't
-    /// allow.
-    #[inline(always)]
-    pub(crate) fn has_line_break_or_bad_whitespace(&self, start: usize, end: usize) -> bool {
-        start < end
-            && any_in(&self.blocks, start, end, |block| {
-                block.line_break | block.bad_whitespace
-            })
-    }
-
     /// Returns whether `start..end` holds a line break.
     #[inline(always)]
     pub(crate) fn has_line_break(&self, start: usize, end: usize) -> bool {
         start < end && any_in(&self.blocks, start, end, |block| block.line_break)
     }
 
-    /// Returns the end of the unit at `position`, which runs to the next byte that isn't an ASCII
-    /// letter.
-    ///
-    /// This deviates from the CSS Syntax spec and `biome_css_parser`, where the unit is a full
-    /// identifier and includes `-` (`svh-var` in `100svh-var(--x)`). It follows Tailwind, which
-    /// inserts whitespace around the `-` instead.
-    pub(crate) fn css_unit_end(&self, position: usize) -> usize {
-        let bytes = self.source.as_bytes();
-        bytes[position..]
-            .iter()
-            .position(|byte| !byte.is_ascii_alphabetic())
-            .map_or(bytes.len(), |len| position + len)
-    }
-
-    /// Returns the end of the `_`s at `position`, which Tailwind decodes to whitespace.
-    pub(crate) fn underscores_end(&self, position: usize) -> usize {
-        let bytes = self.source.as_bytes();
-        bytes[position..]
-            .iter()
-            .position(|&byte| byte != b'_')
-            .map_or(bytes.len(), |len| position + len)
-    }
-
-    /// Returns the end of the hex color at `position`: a `#` and the hex digits after it.
-    pub(crate) fn color_end(&self, position: usize) -> usize {
-        let bytes = self.source.as_bytes();
-        bytes[position + 1..]
-            .iter()
-            .position(|byte| !byte.is_ascii_hexdigit())
-            .map_or(bytes.len(), |len| position + 1 + len)
-    }
-
-    /// Lexes the CSS identifier at `position`. A custom property, which starts with `--`, also
-    /// takes `_` and non-ASCII chars, which Tailwind keeps in its name.
-    pub(crate) fn css_identifier(&self, position: usize) -> (TailwindSyntaxKind, usize) {
-        let bytes = self.source.as_bytes();
-        let is_custom_property = bytes[position..].starts_with(b"--");
-        let mut end = position;
-        while let Some(&byte) = bytes.get(end) {
-            if byte.is_ascii_alphanumeric() || byte == b'-' {
-                end += 1;
-            } else if is_custom_property && (byte == b'_' || !byte.is_ascii()) {
-                end += utf8_len(byte);
-            } else {
-                break;
-            }
-        }
-        (css_identifier_kind(&bytes[position..end]), end)
-    }
-
-    /// Returns an error token for the char at `position`, and pushes its diagnostic.
-    #[cold]
-    pub(crate) fn unexpected(
-        &self,
-        position: usize,
-        diagnostics: &mut Vec<ParseDiagnostic>,
-    ) -> (TailwindSyntaxKind, usize) {
-        let char = self.source[position..].chars().next().unwrap_or_default();
-        diagnostics.push(unexpected_character(char, TextSize::from(position as u32)));
-        (ERROR_TOKEN, position + char.len_utf8())
-    }
-
-    /// Pushes a diagnostic for each whitespace byte in `start..end` that CSS doesn't allow.
-    pub(crate) fn push_whitespace_diagnostics(
-        &self,
-        start: usize,
-        end: usize,
-        diagnostics: &mut Vec<ParseDiagnostic>,
-    ) {
-        if !any_in(&self.blocks, start, end, |block| block.bad_whitespace) {
-            return;
-        }
-        for (offset, &byte) in self.source.as_bytes()[start..end].iter().enumerate() {
-            if matches!(byte, 0x0B | 0x0C) {
-                diagnostics.push(invalid_whitespace(TextSize::from((start + offset) as u32)));
-            }
-        }
-    }
-
-    /// Returns the end of the whitespace at `position`.
-    #[inline(always)]
-    pub(crate) fn whitespace_end(&self, position: usize) -> usize {
-        next_bit(&self.blocks, position + 1, |block| !block.whitespace)
-    }
-
-    /// Returns the end of the selector at `position`, counting nested brackets.
-    #[inline(always)]
-    pub(crate) fn selector_end(&self, position: usize) -> usize {
-        let end = next_bit(&self.blocks, position, |block| block.selector_stop);
-        let bytes = self.source.as_bytes();
-        if end < bytes.len() && bytes[end] == b'[' {
-            nested_selector_end(bytes, end)
-        } else {
-            end
-        }
-    }
-
-    /// Returns `TW_NUMBER` if `start..end` holds only digits and `.`, and `TW_VALUE` otherwise.
-    #[inline(always)]
-    pub(crate) fn number_or_value(&self, start: usize, end: usize) -> TailwindSyntaxKind {
-        if next_bit(&self.blocks, start, |block| !block.numeric) >= end {
-            TW_NUMBER
-        } else {
-            TW_VALUE
-        }
-    }
-
-    /// Lexes the basename at `start`, matching dashed basenames.
-    #[inline(always)]
-    pub(crate) fn base(&self, start: usize) -> (TailwindSyntaxKind, usize) {
-        let source = self.source.as_bytes();
-        let end = next_bit(&self.blocks, start + 1, |block| block.base_stop);
-        if &source[start..end] == b"data" {
-            return (DATA_KW, end);
-        }
-        if source.get(end) != Some(&b'-') {
-            return (TW_BASE, end);
-        }
-        // A dashed basename continues past a '-', so it isn't `data`.
-        let end = start
-            + self
-                .base_names
-                .matcher(&source[start..])
-                .dashed_end(end - start);
-        (TW_BASE, end)
+    /// Takes the diagnostics of the whitespace that CSS doesn't allow.
+    pub(crate) fn take_diagnostics(&mut self) -> Vec<ParseDiagnostic> {
+        std::mem::take(&mut self.diagnostics)
     }
 }
 
-/// The atoms that end a token that [SimdLexer::find_stop] looks for.
-///
-/// The lexer splits the source into atoms: sequences of whitespace, ASCII letters, ASCII digits
-/// or `_`, and single bytes or chars of any other kind. Each stop is a set of punctuation bytes and
-/// whitespace, so the first atom that it matches starts at the first byte in its bitmap.
-#[derive(Clone, Copy, Debug)]
-pub(crate) enum Stop {
-    /// `)` and whitespace.
-    ParenOrWhitespace,
-    /// `:` and whitespace.
-    ColonOrWhitespace,
-    /// The end of a variant segment name: whitespace, `:`, `-`, `/`, `!`, `[`, `]` and `)`.
-    Segment,
-    /// The end of a value after `-`: whitespace, `:`, `/`, `!`, `]`, `)` and `%`.
-    Value,
-    /// The end of a modifier after `/`: whitespace, `!`, `%` and `:`.
-    Modifier,
-}
-
-/// Returns the kind of the one-byte token `byte`, which must be one of `()[]:-!/%+*,.=`.
-#[inline(always)]
-pub(crate) fn punctuation(byte: u8) -> TailwindSyntaxKind {
-    match byte {
-        b'(' => T!['('],
-        b')' => T![')'],
-        b'[' => T!['['],
-        b']' => T![']'],
-        b':' => T![:],
-        b'-' => T![-],
-        b'!' => T![!],
-        b'/' => T![/],
-        b'%' => T![%],
-        b'+' => T![+],
-        b'*' => T![*],
-        b',' => T![,],
-        b'.' => T![.],
-        b'=' => T![=],
-        _ => unreachable!("not a one-byte token: {byte:?}"),
+/// The kind of a letter by its first byte, before the rules that look around it: `TW_BASE` for a
+/// word, `TW_NUMBER` for digits, and `ERROR_TOKEN` for a char without a kind of its own.
+static LETTER_KINDS: [TailwindSyntaxKind; 256] = {
+    let mut table = [ERROR_TOKEN; 256];
+    let mut byte = 0;
+    while byte < 256 {
+        table[byte] = match byte as u8 {
+            b'\t' | b'\n' | 0x0B | 0x0C | b'\r' | b' ' => WHITESPACE,
+            b'a'..=b'z' | b'A'..=b'Z' => TW_BASE,
+            b'0'..=b'9' => TW_NUMBER,
+            b'_' => CSS_WHITESPACE,
+            b'(' => T!['('],
+            b')' => T![')'],
+            b'[' => T!['['],
+            b']' => T![']'],
+            b':' => T![:],
+            b'-' => T![-],
+            b'!' => T![!],
+            b'/' => T![/],
+            b'%' => T![%],
+            b'+' => T![+],
+            b'*' => T![*],
+            b',' => T![,],
+            b'.' => T![.],
+            b'=' => T![=],
+            b'#' => T![#],
+            _ => ERROR_TOKEN,
+        };
+        byte += 1;
     }
-}
+    table
+};
 
-/// Whether the lexer reads `byte` as whitespace.
-#[inline(always)]
-pub(crate) fn is_whitespace(byte: u8) -> bool {
-    matches!(byte, b'\t' | b'\n' | 0x0B | 0x0C | b'\r' | b' ')
-}
-
-/// Returns the end of the CSS number at `start`, and its kind: a percentage if `%` follows, a
-/// dimension if a unit follows, and a number otherwise.
-pub(crate) fn css_number(bytes: &[u8], start: usize) -> (TailwindSyntaxKind, usize) {
-    let digits = |from: usize| {
-        bytes[from..]
-            .iter()
-            .position(|byte| !byte.is_ascii_digit())
-            .map_or(bytes.len(), |len| from + len)
-    };
-    let mut end = start;
-    if matches!(bytes.get(end), Some(b'+' | b'-')) {
-        end += 1;
-    }
-    end = digits(end);
-    if bytes.get(end) == Some(&b'.') && bytes.get(end + 1).is_some_and(u8::is_ascii_digit) {
-        end = digits(end + 1);
-    }
-    if matches!(bytes.get(end), Some(b'e' | b'E')) {
-        let mut exponent = end + 1;
-        if matches!(bytes.get(exponent), Some(b'+' | b'-')) {
-            exponent += 1;
-        }
-        if bytes.get(exponent).is_some_and(u8::is_ascii_digit) {
-            end = digits(exponent);
-        }
-    }
-    let kind = match bytes.get(end) {
-        Some(b'%') => CSS_PERCENTAGE_VALUE,
-        Some(byte) if byte.is_ascii_alphabetic() => CSS_DIMENSION_VALUE,
-        _ => CSS_NUMBER_LITERAL,
-    };
-    (kind, end)
-}
-
-/// Returns the end of the CSS string at `start`, which runs to its closing quote or to the next
-/// whitespace.
-pub(crate) fn css_string_end(bytes: &[u8], start: usize) -> usize {
-    let quote = bytes[start];
-    let mut end = start + 1;
-    while let Some(&byte) = bytes.get(end) {
-        if is_whitespace(byte) {
-            break;
-        }
-        end += 1;
-        if byte == quote {
-            break;
-        }
-        if byte == b'\\'
-            && bytes
-                .get(end)
-                .is_some_and(|&escaped| !is_whitespace(escaped))
-        {
-            end += 1;
-        }
-    }
-    end
-}
-
-/// Returns the end of a selector from the `[` at `bracket`, counting nested brackets.
+/// Pushes a diagnostic for each whitespace byte in `start..end` that CSS doesn't allow.
 #[cold]
-fn nested_selector_end(source: &[u8], bracket: usize) -> usize {
-    let mut depth = 0u32;
-    let mut position = bracket;
-    while let Some(&byte) = source.get(position) {
-        match byte {
-            b'[' => depth += 1,
-            b']' if depth > 0 => depth -= 1,
-            b']' => break,
-            _ if is_whitespace(byte) => break,
-            _ => {}
+fn push_whitespace_diagnostics(
+    bytes: &[u8],
+    start: usize,
+    end: usize,
+    diagnostics: &mut Vec<ParseDiagnostic>,
+) {
+    for (offset, &byte) in bytes[start..end].iter().enumerate() {
+        if matches!(byte, 0x0B | 0x0C) {
+            diagnostics.push(invalid_whitespace(TextSize::from((start + offset) as u32)));
         }
-        position += 1;
     }
-    position
 }
 
 /// Returns the offset of the first bit of `field` at or after `from`. The fields this is called
@@ -380,15 +368,4 @@ fn any_in(blocks: &[Block], from: usize, to: usize, field: impl Fn(&Block) -> u6
             .iter()
             .any(|block| field(block) != 0)
         || field(&blocks[last]) & high != 0
-}
-
-/// Returns the length of the UTF-8 char starting with `byte`.
-#[inline(always)]
-fn utf8_len(byte: u8) -> usize {
-    match byte {
-        0xF0.. => 4,
-        0xE0.. => 3,
-        0xC0.. => 2,
-        _ => 1,
-    }
 }
