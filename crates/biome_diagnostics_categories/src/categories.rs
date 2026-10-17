@@ -369,6 +369,7 @@ define_categories! {
     "lint/nursery/useSingleTopLevelHeading": "https://biomejs.dev/linter/rules/use-single-top-level-heading",
     "lint/nursery/useStrictBooleanExpressions": "https://biomejs.dev/linter/rules/use-strict-boolean-expressions",
     "lint/nursery/useStringStartsEndsWith": "https://biomejs.dev/linter/rules/use-string-starts-ends-with",
+    "lint/nursery/useSvelteEventDispatcherTypes": "https://biomejs.dev/linter/rules/use-svelte-event-dispatcher-types",
     "lint/nursery/useSvelteKitResolve": "https://biomejs.dev/linter/rules/use-svelte-kit-resolve",
     "lint/nursery/useSvelteKitRuneImports": "https://biomejs.dev/linter/rules/use-svelte-kit-rune-imports",
     "lint/nursery/useSvelteReactiveClasses": "https://biomejs.dev/linter/rules/use-svelte-reactive-classes",
