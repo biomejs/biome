@@ -1,0 +1,8 @@
+.broken {
+  --empty-interpolation: #12px#{};
+  --after: #4566a8;
+  color: red;
+}
+.after { --raw: #12unknown; }
+
+.unclosed { --value: (#12px

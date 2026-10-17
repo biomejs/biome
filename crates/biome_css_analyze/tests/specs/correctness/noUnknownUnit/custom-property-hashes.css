@@ -1,0 +1,6 @@
+/* should not generate diagnostics */
+.theme {
+  --colors: #1a2 #1a2b #4566a8 #4566a8ff #000000B2;
+  color: #4566a8;
+  width: 12px;
+}

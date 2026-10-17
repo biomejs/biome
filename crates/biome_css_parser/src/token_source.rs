@@ -105,6 +105,12 @@ impl<'src> CssTokenSource<'src> {
         self.lexer.lexer().scss_hash_value_scan(start)
     }
 
+    /// Scans the adjacent body after `#` in `--raw: #12unknown;`.
+    pub(crate) fn custom_property_hash_value_scan(&self) -> Option<ScssHashValueScan> {
+        let start = usize::from(self.current_range().end());
+        self.lexer.lexer().custom_property_hash_value_scan(start)
+    }
+
     pub(crate) fn current_has_pending_scss_string_start(&self) -> bool {
         self.lexer.lexer().has_pending_scss_string_start()
     }

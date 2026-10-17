@@ -1,0 +1,27 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: custom-property-hashes.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+.theme {
+  --short: #1a2 #1a2b;
+  --long: #4566a8 #4566a8ff;
+  --color-code: #4a729a;
+  --color-focus-blue: #1a73e8;
+  --alpha: #000000B2;
+  --controls: #ff0000 #000000;
+  --raw: #12px #12unknown #12345 #1234567 #12e3 #-- #app;
+  --nested: token(#12unknown [#4566a8]);
+  --escaped: #\31 2unknown;
+  --interpolated: #12unknown#{suffix} #12#{suffix};
+  color: #4566a8;
+  width: 12px;
+}
+
+@supports (--accent: #4566a8) {
+  .supported { --raw: #12unknown; }
+}
+
+```

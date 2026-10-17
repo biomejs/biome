@@ -1,0 +1,8 @@
+/* should generate diagnostics */
+.theme {
+  --separated: # 12unknown;
+  --comment: #/**/12unknown;
+  --dimension: 12unknown;
+  --interpolation: #{12unknown};
+  width: 12unknown;
+}
