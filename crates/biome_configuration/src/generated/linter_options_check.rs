@@ -1660,6 +1660,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_useless_return::NoUselessReturnOptions>(),
     ));
     result.push((
+        "nursery",
+        "noUselessSplice",
+        TypeId::of::<biome_rule_options::no_useless_splice::NoUselessSpliceOptions>(),
+    ));
+    result.push((
         "complexity",
         "noUselessStringConcat",
         TypeId::of::<biome_rule_options::no_useless_string_concat::NoUselessStringConcatOptions>(),

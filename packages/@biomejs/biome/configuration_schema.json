@@ -7215,6 +7215,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUselessSpliceConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUselessSpliceOptions" }
+			]
+		},
+		"NoUselessSpliceOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUselessStringConcatConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8050,6 +8060,13 @@
 					"description": "Disallow calling .getTime() on a date before passing it to the Date constructor.\nSee https://biomejs.dev/linter/rules/no-useless-date-get-time",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUselessDateGetTimeConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessSplice": {
+					"description": "Disallow splice() calls that have a simpler alternative.\nSee https://biomejs.dev/linter/rules/no-useless-splice",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUselessSpliceConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12799,6 +12816,19 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUselessReturnOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUselessSpliceOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUselessSpliceOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
