@@ -1,0 +1,39 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-issue-8762-not-jsdoc.ts
+---
+# Input
+```ts
+/* {@link Foo} @module */
+
+/* should generate diagnostics */
+
+// The first comment has a `@module` tag, but it is a block comment, not JSDoc.
+
+import type { Foo } from "./foo";
+
+```
+
+# Diagnostics
+```
+invalid-issue-8762-not-jsdoc.ts:7:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    5 │ // The first comment has a `@module` tag, but it is a block comment, not JSDoc.
+    6 │ 
+  > 7 │ import type { Foo } from "./foo";
+      │             ^^^^^^^
+    8 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    5 5 │   // The first comment has a `@module` tag, but it is a block comment, not JSDoc.
+    6 6 │   
+    7   │ - import·type·{·Foo·}·from·"./foo";
+    8 7 │   
+  
+
+```
