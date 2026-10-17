@@ -10,7 +10,7 @@ use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::prelude::BumpWithContext;
 use biome_parser::token_source::{TokenSource, Trivia};
 use biome_rowan::TriviaPieceKind;
-use biome_tailwind_syntax::TailwindSyntaxKind::{CSS_STRING_LITERAL, EOF, WHITESPACE};
+use biome_tailwind_syntax::TailwindSyntaxKind::{CSS_STRING_LITERAL, EOF, TW_SELECTOR, WHITESPACE};
 use biome_tailwind_syntax::{TailwindSyntaxKind, TextRange, TextSize};
 
 /// Groups the atoms after the current token into the token after it: sets its kind and end with
@@ -246,6 +246,14 @@ impl<'source> TailwindTokenSource<'source> {
     pub(crate) fn merge_base(&mut self) {
         let (raw, end) = self.lexer.base(usize::from(self.current_end));
         self.set_token(simd::kind(raw), end, false);
+    }
+
+    /// Makes the selector after the current token the next token: the atoms up to the next
+    /// whitespace or the `]` that closes the brackets the selector opens.
+    #[inline(always)]
+    pub(crate) fn merge_selector(&mut self) {
+        let end = self.lexer.selector_end(usize::from(self.current_end));
+        self.set_token(TW_SELECTOR, end, false);
     }
 
     /// Makes the whitespace after the current token the next token, and reports the bytes in it
@@ -491,12 +499,6 @@ impl BumpWithContext for TailwindTokenSource<'_> {
 /// a `/` a modifier, and otherwise a basename or one byte.
 pub(crate) fn lex_regular(source: &mut TailwindTokenSource) {
     source.next_regular_token();
-}
-
-/// The [Grouping] of the tokens that [SimdLexer] lexes in
-/// [TailwindLexContext::ArbitraryVariant].
-pub(crate) fn lex_arbitrary_variant(source: &mut TailwindTokenSource) {
-    source.lex(TailwindLexContext::ArbitraryVariant);
 }
 
 /// The [Grouping] of the tokens that [SimdLexer] lexes in [TailwindLexContext::VariantSegment].
