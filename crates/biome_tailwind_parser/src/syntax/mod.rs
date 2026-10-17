@@ -123,6 +123,81 @@ fn parse_full_candidate(p: &mut TailwindParser) -> ParsedSyntax {
     Present(m.complete(p, TW_FULL_CANDIDATE))
 }
 
+/// Groups the token after the current one where the grammar doesn't pick a grouping, as after the
+/// tokens that error recovery skips. It depends on the current token: a `[` starts a selector, a
+/// `(` a value up to the next `)`, a `-` a value and a `/` a modifier.
+pub(crate) fn group_regular(source: &mut TailwindTokenSource) {
+    match source.current() {
+        T!['['] => group_bracketed(source),
+        T!['('] => group_parenthesized(source),
+        T![-] => group_value(source),
+        T![/] => group_modifier(source),
+        _ => group_class_token(source),
+    }
+}
+
+/// Groups a token of a class outside of brackets and values: a basename, a variant segment name
+/// that starts with `*`, or one byte.
+fn group_class_token(source: &mut TailwindTokenSource) {
+    match source.next_byte() {
+        None => source.take(EOF, 0),
+        Some(byte) if is_whitespace(byte) => source.take_whitespace(),
+        Some(byte @ (b'(' | b')' | b'[' | b']' | b':' | b'-' | b'%' | b'!' | b'/')) => {
+            source.take_punctuation(byte);
+        }
+        Some(b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' | b'@') => source.merge_base(),
+        // `*` only begins a variant (`*:flex`). It's a segment name rather than an error token,
+        // whose diagnostic would outlive the variant's regrouping.
+        Some(b'*') => source.merge_until(Stop::Segment, TW_VARIANT_SEGMENT),
+        Some(_) if source.at_byte_order_mark() => source.take(UNICODE_BOM, 3),
+        Some(_) => source.take_unexpected(),
+    }
+}
+
+/// Groups the token after a `[` that error recovery skips: a selector or one bracket.
+fn group_bracketed(source: &mut TailwindTokenSource) {
+    match source.next_byte() {
+        None => source.take(EOF, 0),
+        Some(byte) if is_whitespace(byte) => source.take_whitespace(),
+        Some(byte @ (b'(' | b')' | b'[' | b']')) => source.take_punctuation(byte),
+        Some(_) => source.merge_selector(),
+    }
+}
+
+/// Groups the token after a `(` that error recovery skips: a value up to the next `)` or one
+/// bracket.
+fn group_parenthesized(source: &mut TailwindTokenSource) {
+    match source.next_byte() {
+        None => source.take(EOF, 0),
+        Some(byte) if is_whitespace(byte) => source.take_whitespace(),
+        Some(byte @ (b'(' | b')' | b'[' | b']')) => source.take_punctuation(byte),
+        Some(_) => source.merge_until(Stop::ParenOrWhitespace, TW_VALUE),
+    }
+}
+
+/// Groups the value after the `-` of a candidate: the atoms up to the next whitespace, `:`, `/`,
+/// `!`, `]`, `)` or `%`, which may be none, or one bracket.
+pub(crate) fn group_value(source: &mut TailwindTokenSource) {
+    match source.next_byte() {
+        None => source.take(EOF, 0),
+        Some(byte) if is_whitespace(byte) => source.take_whitespace(),
+        Some(byte @ (b'(' | b')' | b'[' | b']')) => source.take_punctuation(byte),
+        Some(_) => source.merge_value(Stop::Value),
+    }
+}
+
+/// Groups the modifier after a `/`: the atoms up to the next whitespace, `!`, `%` or `:`, or one
+/// bracket. An empty modifier is an error token.
+pub(crate) fn group_modifier(source: &mut TailwindTokenSource) {
+    match source.next_byte() {
+        None => source.take(EOF, 0),
+        Some(byte) if is_whitespace(byte) => source.take_whitespace(),
+        Some(byte @ (b'(' | b')' | b'[' | b']')) => source.take_punctuation(byte),
+        Some(b'!' | b'%' | b':') => source.take(ERROR_TOKEN, 0),
+        Some(_) => source.merge_value(Stop::Modifier),
+    }
+}
+
 /// Groups the token after the `-` of a negative candidate: a basename, which here can't start
 /// with `@` or `*`, or one byte.
 pub(crate) fn group_negative_base(source: &mut TailwindTokenSource) {
@@ -170,7 +245,7 @@ fn parse_functional_or_static_candidate(p: &mut TailwindParser) -> ParsedSyntax 
         }
         return Present(m.complete(p, TW_STATIC_CANDIDATE));
     }
-    p.expect(T![-]);
+    p.expect_with_context(T![-], group_value);
     match parse_value(p, true).or_recover_with_token_set(
         p,
         &ParseRecoveryTokenSet::new(TW_BOGUS_VALUE, token_set![WHITESPACE, T![!]]),
@@ -279,7 +354,7 @@ fn class_chunk_has_colon(p: &TailwindParser) -> bool {
 
 pub(crate) fn parse_modifier(p: &mut TailwindParser) -> ParsedSyntax {
     let m = p.start();
-    if !p.expect(T![/]) {
+    if !p.expect_with_context(T![/], group_modifier) {
         m.abandon(p);
         return Absent;
     }

@@ -1,11 +1,12 @@
-//! The token source of the parser, over [SimdLexer], which lexes the whole class string before
-//! parsing.
+//! The token source of the parser, over [SimdLexer], which classifies the whole class string
+//! before parsing.
 
 #[cfg(test)]
 pub(crate) mod tests;
 
-use crate::lexer::simd::{self, SimdLexer, Stop, css_string_end, previous_class};
+use crate::lexer::simd::{self, SimdLexer, Stop, css_string_end};
 use crate::lexer::{BaseNameStore, TailwindLexContext};
+use crate::syntax::group_regular;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::prelude::BumpWithContext;
 use biome_parser::token_source::{TokenSource, Trivia};
@@ -22,8 +23,8 @@ pub(crate) type Grouping = fn(&mut TailwindTokenSource);
 
 /// Token source for the parser.
 ///
-/// While the parser asks for the regular tokens in order, they come from the arrays of
-/// [SimdLexer]. Any other token comes from a [Grouping].
+/// Each token comes from a [Grouping], which merges the atoms after the token before it. A bump
+/// without one groups the next token with [group_regular].
 pub(crate) struct TailwindTokenSource<'source> {
     lexer: SimdLexer<'source>,
     diagnostics: Vec<ParseDiagnostic>,
@@ -34,17 +35,8 @@ pub(crate) struct TailwindTokenSource<'source> {
     current_end: TextSize,
     current_has_line_break: bool,
 
-    /// Index of the regular token that starts at `current_end`, while the current token is the
-    /// regular token before it, so that it was lexed after the current token. Otherwise
-    /// [UNKNOWN], or [NO_TOKEN] if no regular token starts at `current_end`.
-    next: u32,
-
     /// Whether the current token is whitespace with a line break.
     after_newline: bool,
-
-    /// The index of a regular token at or before `current_end`, where
-    /// [SimdLexer::find_from] starts searching.
-    resync_hint: u32,
 
     /// The last token that [Self::lookahead] returned.
     lookahead: LookaheadCursor,
@@ -53,14 +45,8 @@ pub(crate) struct TailwindTokenSource<'source> {
     trivia_list: Vec<Trivia>,
 }
 
-/// The value of [TailwindTokenSource::next] when no regular token starts at the current token's end.
-const NO_TOKEN: u32 = u32::MAX;
-/// The value of [TailwindTokenSource::next] when the regular token at the current token's end hasn't
-/// been looked up.
-const UNKNOWN: u32 = u32::MAX - 1;
-
-/// Where [TailwindTokenSource::lookahead] stopped. Lookahead lexes in [TailwindLexContext::Regular]
-/// after the current token, so it depends only on where the current token ends and on its kind.
+/// Where [TailwindTokenSource::lookahead] stopped. Lookahead groups with [group_regular] after the
+/// current token, so it depends only on where the current token ends and on its kind.
 #[derive(Clone, Copy)]
 struct LookaheadCursor {
     /// The end of the current token when the lookahead ran.
@@ -87,7 +73,6 @@ pub(crate) struct TailwindTokenSourceCheckpoint {
     current_start: TextSize,
     current_end: TextSize,
     current_has_line_break: bool,
-    next: u32,
     after_newline: bool,
     trivia_len: u32,
     diagnostics_len: u32,
@@ -104,9 +89,7 @@ impl<'source> TailwindTokenSource<'source> {
             current_start: TextSize::from(0),
             current_end: TextSize::from(0),
             current_has_line_break: false,
-            next: 0,
             after_newline: false,
-            resync_hint: 0,
             lookahead: LookaheadCursor {
                 from: TextSize::from(0),
                 after: EOF,
@@ -118,7 +101,7 @@ impl<'source> TailwindTokenSource<'source> {
             },
             trivia_list: vec![],
         };
-        source.next_non_trivia_token(lex_regular, true);
+        source.next_non_trivia_token(group_regular, true);
         source
     }
 
@@ -129,7 +112,6 @@ impl<'source> TailwindTokenSource<'source> {
         self.current = previous;
         self.current_start = TextSize::from(offset as u32);
         self.current_end = TextSize::from(offset as u32);
-        self.next = UNKNOWN;
         self.after_newline = false;
         self.diagnostics.clear();
         self.trivia_list.clear();
@@ -148,43 +130,6 @@ impl<'source> TailwindTokenSource<'source> {
         }
     }
 
-    /// Moves to the token at `current_end`, lexed in [TailwindLexContext::Regular].
-    #[inline(always)]
-    fn next_regular_token(&mut self) {
-        if let Some(raw) = self.lexer.get(self.next)
-            && raw & simd::SLOW == 0
-        {
-            self.take_regular_token(raw);
-            return;
-        }
-        self.next_regular_token_slow();
-    }
-
-    /// Moves to the token at `current_end`, lexed in [TailwindLexContext::Regular], when it
-    /// isn't the next regular token after the current one.
-    #[inline(never)]
-    fn next_regular_token_slow(&mut self) {
-        if self.next == UNKNOWN {
-            self.next = self.find(u32::from(self.current_end));
-        }
-        if let Some(raw) = self.lexer.get(self.next)
-            && simd::fits_after(raw, previous_class(self.current))
-        {
-            self.take_regular_token(raw);
-            return;
-        }
-        self.lex(TailwindLexContext::Regular);
-    }
-
-    /// Makes the regular token `next`, of kind and flags `raw`, the current token.
-    #[inline(always)]
-    fn take_regular_token(&mut self, raw: u16) {
-        let end = TextSize::from(self.lexer.start(self.next + 1));
-        self.set_current(simd::kind(raw), end, raw & simd::LINE_BREAK != 0);
-        self.next += 1;
-        self.resync_hint = self.next;
-    }
-
     /// Lexes the token at `current_end` in `context` with [SimdLexer].
     fn lex(&mut self, context: TailwindLexContext) {
         let start = usize::from(self.current_end);
@@ -195,12 +140,10 @@ impl<'source> TailwindTokenSource<'source> {
         self.set_token(kind, end, line_break);
     }
 
-    /// Makes the token of `kind` that ends at `end` the token after the current one, outside of
-    /// the regular tokens.
+    /// Makes the token of `kind` that ends at `end` the token after the current one.
     #[inline(always)]
     fn set_token(&mut self, kind: TailwindSyntaxKind, end: usize, line_break: bool) {
         self.set_current(kind, TextSize::from(end as u32), line_break);
-        self.next = UNKNOWN;
     }
 
     /// Returns the first byte after the current token, or `None` at the end of the source.
@@ -225,6 +168,12 @@ impl<'source> TailwindTokenSource<'source> {
         self.take(simd::punctuation(byte), 1);
     }
 
+    /// Returns whether the current token ends at the start of the source, which starts with a
+    /// byte order mark.
+    pub(crate) fn at_byte_order_mark(&self) -> bool {
+        self.current_end == TextSize::from(0) && self.text().starts_with('\u{FEFF}')
+    }
+
     /// Makes the char after the current token an error token, and reports it as unexpected.
     #[cold]
     pub(crate) fn take_unexpected(&mut self) {
@@ -239,8 +188,19 @@ impl<'source> TailwindTokenSource<'source> {
     /// over. A basename that is exactly `data` is `DATA_KW`.
     #[inline(always)]
     pub(crate) fn merge_base(&mut self) {
-        let (raw, end) = self.lexer.base(usize::from(self.current_end));
-        self.set_token(simd::kind(raw), end, false);
+        let (kind, end) = self.lexer.base(usize::from(self.current_end));
+        self.set_token(kind, end, false);
+    }
+
+    /// Makes the atoms after the current token, up to the first one that `stop` matches, a
+    /// `TW_NUMBER` if they hold only digits and `.`, and a `TW_VALUE` otherwise. The value is an
+    /// empty `TW_NUMBER` if `stop` matches the first atom.
+    #[inline(always)]
+    pub(crate) fn merge_value(&mut self, stop: Stop) {
+        let start = usize::from(self.current_end);
+        let end = self.lexer.find_stop(start, stop);
+        let kind = self.lexer.number_or_value(start, end);
+        self.set_token(kind, end, false);
     }
 
     /// Makes the selector after the current token the next token: the atoms up to the next
@@ -253,13 +213,22 @@ impl<'source> TailwindTokenSource<'source> {
 
     /// Makes the whitespace after the current token the next token, and reports the bytes in it
     /// that CSS doesn't allow.
+    #[inline(always)]
     pub(crate) fn take_whitespace(&mut self) {
         let start = usize::from(self.current_end);
         let end = self.lexer.whitespace_end(start);
+        let line_break = self.lexer.has_line_break_or_bad_whitespace(start, end)
+            && self.whitespace_slow(start, end);
+        self.set_token(WHITESPACE, end, line_break);
+    }
+
+    /// Reports the bytes in the whitespace `start..end` that CSS doesn't allow, and returns
+    /// whether it holds a line break.
+    #[cold]
+    fn whitespace_slow(&mut self, start: usize, end: usize) -> bool {
         self.lexer
             .push_whitespace_diagnostics(start, end, &mut self.diagnostics);
-        let line_break = self.lexer.has_line_break(start, end);
-        self.set_token(WHITESPACE, end, line_break);
+        self.lexer.has_line_break(start, end)
     }
 
     /// Makes the CSS string after the current token the next token. It runs to its closing quote
@@ -287,20 +256,7 @@ impl<'source> TailwindTokenSource<'source> {
         self.after_newline = line_break;
     }
 
-    /// Returns the index of the regular token at `position`, or [NO_TOKEN].
-    #[inline(never)]
-    fn find(&mut self, position: u32) -> u32 {
-        match self.lexer.find_from(position, self.resync_hint) {
-            Some(index) => {
-                self.resync_hint = index;
-                index
-            }
-            None => NO_TOKEN,
-        }
-    }
-
-    /// Returns the `n`th non-trivia token after the current one, lexed in
-    /// [TailwindLexContext::Regular].
+    /// Returns the `n`th non-trivia token after the current one, grouped with [group_regular].
     pub(crate) fn lookahead(&mut self, n: usize) -> Option<LookaheadToken> {
         debug_assert_ne!(n, 0);
         if self.current == EOF {
@@ -348,32 +304,19 @@ impl<'source> TailwindTokenSource<'source> {
         }
     }
 
-    /// Returns the token after `previous`, lexed in [TailwindLexContext::Regular], without its
-    /// diagnostics.
+    /// Returns the token after `previous`, grouped with [group_regular], without its diagnostics.
     fn lookahead_token(&mut self, previous: LookaheadToken) -> LookaheadToken {
-        let start = previous.range.end();
-        let (kind, end) = match self
-            .lexer
-            .find_from(u32::from(start), self.resync_hint)
-            .and_then(|index| Some((index, self.lexer.get(index)?)))
-        {
-            Some((index, raw)) if simd::fits_after(raw, previous_class(previous.kind)) => {
-                (simd::kind(raw), TextSize::from(self.lexer.start(index + 1)))
-            }
-            _ => {
-                let (kind, end) = self.lexer.lex(
-                    usize::from(start),
-                    TailwindLexContext::Regular,
-                    previous.kind,
-                    &mut Vec::new(),
-                );
-                (kind, TextSize::from(end as u32))
-            }
+        let checkpoint = self.checkpoint();
+        self.current = previous.kind;
+        self.current_start = previous.range.start();
+        self.current_end = previous.range.end();
+        group_regular(self);
+        let token = LookaheadToken {
+            kind: self.current,
+            range: self.current_range(),
         };
-        LookaheadToken {
-            kind,
-            range: TextRange::new(start, end),
-        }
+        self.rewind(checkpoint);
+        token
     }
 
     /// Creates a checkpoint to which it can later return using [Self::rewind].
@@ -383,7 +326,6 @@ impl<'source> TailwindTokenSource<'source> {
             current_start: self.current_start,
             current_end: self.current_end,
             current_has_line_break: self.current_has_line_break,
-            next: self.next,
             after_newline: self.after_newline,
             trivia_len: self.trivia_list.len() as u32,
             diagnostics_len: self.diagnostics.len() as u32,
@@ -400,7 +342,6 @@ impl<'source> TailwindTokenSource<'source> {
         self.current_start = checkpoint.current_start;
         self.current_end = checkpoint.current_end;
         self.current_has_line_break = checkpoint.current_has_line_break;
-        self.next = checkpoint.next;
         self.after_newline = checkpoint.after_newline;
     }
 
@@ -412,12 +353,11 @@ impl<'source> TailwindTokenSource<'source> {
     pub(crate) fn regroup_current(&mut self, group: Grouping) {
         self.current_end = self.current_start;
         self.current = EOF;
-        self.next = UNKNOWN;
         group(self);
     }
 
-    /// Returns the kind of the `n`th non-trivia token after the current one, lexed in
-    /// [TailwindLexContext::Regular], or `EOF` past the end.
+    /// Returns the kind of the `n`th non-trivia token after the current one, grouped with
+    /// [group_regular], or `EOF` past the end.
     pub(crate) fn nth(&mut self, n: usize) -> TailwindSyntaxKind {
         if n == 0 {
             return self.current;
@@ -455,11 +395,11 @@ impl TokenSource for TailwindTokenSource<'_> {
     }
 
     fn bump(&mut self) {
-        self.bump_with_context(lex_regular)
+        self.bump_with_context(group_regular)
     }
 
     fn skip_as_trivia(&mut self) {
-        self.skip_as_trivia_with_context(lex_regular)
+        self.skip_as_trivia_with_context(group_regular)
     }
 
     fn finish(self) -> (Vec<Trivia>, Vec<ParseDiagnostic>) {
@@ -487,13 +427,6 @@ impl BumpWithContext for TailwindTokenSource<'_> {
             self.next_non_trivia_token(group, true)
         }
     }
-}
-
-/// The [Grouping] of the tokens that [SimdLexer] lexes in [TailwindLexContext::Regular]: the
-/// token after a `[` is a selector, after a `(` a value up to the `)`, after a `-` a value, after
-/// a `/` a modifier, and otherwise a basename or one byte.
-pub(crate) fn lex_regular(source: &mut TailwindTokenSource) {
-    source.next_regular_token();
 }
 
 /// The [Grouping] of the tokens that [SimdLexer] lexes in [TailwindLexContext::CssValue].

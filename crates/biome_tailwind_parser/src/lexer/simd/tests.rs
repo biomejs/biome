@@ -1,48 +1,20 @@
-use super::{LINE_BREAK, SLOW, SimdLexer, kind};
+use super::SimdLexer;
 use crate::legacy::lexer::{TailwindLexContext, TailwindLexer};
 use crate::lexer::{BASENAME_STORE, BaseNameStore};
 use crate::test_support::{fixtures, mutate, random_fragments, xorshift};
+use crate::token_source::TailwindTokenSource;
 use crate::token_source::tests::check_groupings;
 use biome_parser::lexer::Lexer;
+use biome_parser::token_source::TokenSource;
 use biome_tailwind_syntax::TailwindSyntaxKind::*;
 
-/// Asserts that [SimdLexer] lexes the regular tokens of `source` like [TailwindLexer], that it
-/// answers its colon query at every offset, and that the groupings of the token source group its
-/// tokens like [TailwindLexer] lexes them in each context.
+/// Asserts that [SimdLexer] answers the colon query of `source` at every offset, and that the
+/// groupings of the token source group its tokens like [TailwindLexer] lexes them in each
+/// context.
 fn check(source: &str, base_names: &BaseNameStore) {
     check_groupings(source, base_names);
-
     let simd = SimdLexer::new(source, base_names);
     let bytes = source.as_bytes();
-
-    // The regular tokens, each after the one before it.
-    let mut legacy = TailwindLexer::from_str(source).with_base_names(base_names);
-    let mut previous = EOF;
-    let mut after_newline = false;
-    for (start, end, raw) in simd.regular_tokens() {
-        let diagnostics = legacy.diagnostics().len();
-        let lexed = legacy.lex_at(
-            start as usize,
-            previous,
-            after_newline,
-            TailwindLexContext::Regular,
-        );
-        let at = || format!("regular token at {start} of {source:?}");
-        assert_eq!(u32::from(legacy.current_range().end()), end, "{}", at());
-        assert_eq!(
-            raw & SLOW != 0,
-            legacy.diagnostics().len() > diagnostics,
-            "{}",
-            at()
-        );
-        if raw & SLOW == 0 {
-            assert_eq!(kind(raw), lexed, "{}", at());
-            assert_eq!(raw & LINE_BREAK != 0, legacy.after_newline(), "{}", at());
-        }
-        previous = lexed;
-        after_newline = legacy.after_newline();
-    }
-
     for offset in (0..=bytes.len()).filter(|&offset| source.is_char_boundary(offset)) {
         let expected = bytes[offset..]
             .iter()
@@ -135,8 +107,8 @@ fn simd_lexer_uses_the_given_base_names() {
 
 /// Runs one lexing pass over each input many times, for `perf stat` to measure. Reads the
 /// inputs from `TW_LEX_FILE`, one per line if `TW_LEX_LINES` is set, and lexes them
-/// `TW_LEX_ITERATIONS` times with [SimdLexer], or with [TailwindLexer] in
-/// [TailwindLexContext::Regular] if `TW_LEX_MODE` is `legacy`.
+/// `TW_LEX_ITERATIONS` times by bumping through the regular tokens of [TailwindTokenSource], or
+/// with [TailwindLexer] in [TailwindLexContext::Regular] if `TW_LEX_MODE` is `legacy`.
 #[test]
 #[ignore]
 fn lexing_pass() {
@@ -159,9 +131,11 @@ fn lexing_pass() {
                 }
                 tokens += lexer.finish().len();
             } else {
-                tokens += SimdLexer::new(input, &BASENAME_STORE)
-                    .regular_tokens()
-                    .count();
+                let mut source = TailwindTokenSource::from_str(input, &BASENAME_STORE);
+                while source.current() != EOF {
+                    source.bump();
+                    tokens += 1;
+                }
             }
         }
     }
