@@ -280,7 +280,8 @@ impl RecessOrderMember {
                             return NodeKindOrder::UnknownKind;
                         };
                         match prop {
-                            AnyCssDeclarationName::AnyCssDashedIdentifier(_) => {
+                            AnyCssDeclarationName::AnyCssDashedIdentifier(_)
+                            | AnyCssDeclarationName::TwValueThemeReference(_) => {
                                 NodeKindOrder::CustomProperty
                             }
                             AnyCssDeclarationName::CssIdentifier(_) => NodeKindOrder::Declaration,
@@ -290,9 +291,6 @@ impl RecessOrderMember {
                                 } else {
                                     NodeKindOrder::Declaration
                                 }
-                            }
-                            AnyCssDeclarationName::TwValueThemeReference(_) => {
-                                NodeKindOrder::Declaration
                             }
                             AnyCssDeclarationName::CssMetavariable(_) => {
                                 NodeKindOrder::UnknownKind
