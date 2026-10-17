@@ -3,16 +3,16 @@ use rustc_hash::{FxHashMap, FxHashSet};
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_css_semantic::model::{
-    ResolvedSelector, Rule as CssSemanticRule, RuleId, SemanticModel, Specificity,
+    AnyRuleStart, ResolvedSelector, Rule as CssSemanticRule, RuleId, SemanticModel, Specificity,
 };
 use biome_css_syntax::{
-    AnyCssAtRule, AnyCssRoot, CssAtRule, CssContainerAtRule, CssDeclarationOrRuleBlock,
-    CssLanguage, CssLayerAtRule, CssMediaAtRule, CssScopeAtRule, CssStartingStyleAtRule,
-    CssSupportsAtRule, ScssAtRootAtRule, ScssEachAtRule, ScssElseClause, ScssForAtRule,
-    ScssFunctionAtRule, ScssIfAtRule, ScssIncludeAtRule, ScssMixinAtRule, ScssWhileAtRule, T,
+    AnyCssRoot, CssContainerAtRule, CssLanguage, CssLayerAtRule, CssMediaAtRule, CssScopeAtRule,
+    CssStartingStyleAtRule, CssSupportsAtRule, CssSyntaxNode, ScssAtRootAtRule, ScssEachAtRule,
+    ScssElseClause, ScssForAtRule, ScssFunctionAtRule, ScssIfAtRule, ScssIncludeAtRule,
+    ScssMixinAtRule, ScssWhileAtRule, T,
 };
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, SyntaxKindSet, TextRange};
+use biome_rowan::{AstNode, SyntaxKindSet, TextRange, WalkEvent};
 use biome_rule_options::no_descending_specificity::NoDescendingSpecificityOptions;
 
 use crate::services::semantic::Semantic;
@@ -47,7 +47,8 @@ declare_lint_rule! {
     ///
     /// The rule reports likely conflicts between selectors that end with the same target under the
     /// same surrounding rules, such as `@media` or `@layer`. It cannot determine every case where
-    /// two selectors match the same element.
+    /// two selectors match the same element. Nested selectors are compared as written out in full,
+    /// so `nav { a { &:hover {} } }` behaves like `nav a:hover {}`.
     ///
     /// Rules without declarations, such as a rule that only contains a comment or nested rules,
     /// are ignored because they can't lose to another selector. In SCSS, an `@include` counts as
@@ -261,7 +262,8 @@ struct SelectorContext {
 type SelectorContexts = FxHashMap<SelectorContext, FxHashMap<String, (TextRange, Specificity)>>;
 /// Returns the element a selector styles: the last compound of the resolved selector, without
 /// pseudo-classes. Pseudo-elements stay, including legacy single-colon ones such as `:before`,
-/// because they style a different element. Returns `None` when nothing is left, as for `:hover`.
+/// because they style a different element. Simple selectors are sorted, so `.a.b` and `.b.a` share
+/// a key. Returns `None` when nothing is left, as for `:hover`.
 ///
 /// ```css
 /// .a ul li:hover {
@@ -270,6 +272,9 @@ type SelectorContexts = FxHashMap<SelectorContext, FxHashMap<String, (TextRange,
 /// ```
 fn subject_key(selector: &ResolvedSelector) -> Option<String> {
     let mut key = String::new();
+    // Where each simple selector after the type selector starts in `key`.
+    let mut first = None;
+    let mut rest = Vec::new();
     let mut depth = 0u32;
     let mut tokens = selector.tokens().peekable();
     while let Some((kind, text)) = tokens.next() {
@@ -278,12 +283,15 @@ fn subject_key(selector: &ResolvedSelector) -> Option<String> {
             T![')'] => depth = depth.saturating_sub(1),
             kind if depth == 0 && ResolvedSelector::is_combinator(kind) => {
                 key.clear();
+                first = None;
+                rest.clear();
                 continue;
             }
             T![:]
-                if tokens
-                    .peek()
-                    .is_some_and(|(_, name)| !is_pseudo_elements(name)) =>
+                if depth == 0
+                    && tokens
+                        .peek()
+                        .is_some_and(|(_, name)| !is_pseudo_elements(name)) =>
             {
                 tokens.next();
                 if tokens.next_if(|(kind, _)| *kind == T!['(']).is_some() {
@@ -301,9 +309,30 @@ fn subject_key(selector: &ResolvedSelector) -> Option<String> {
                 }
                 continue;
             }
+            T![.] | T![#] | T!['['] | T![:] | T![::] if depth == 0 => {
+                if first.is_none() {
+                    first = Some(key.len());
+                } else {
+                    rest.push(key.len());
+                }
+            }
             _ => {}
         }
         key.push_str(text);
+    }
+    if let Some(first) = first
+        && !rest.is_empty()
+    {
+        let ends = rest.iter().copied().chain([key.len()]);
+        let mut parts: Vec<_> = std::iter::once(first)
+            .chain(rest.iter().copied())
+            .zip(ends)
+            .map(|(start, end)| &key[start..end])
+            .collect();
+        if !parts.is_sorted() {
+            parts.sort_unstable();
+            key = [&key[..first]].into_iter().chain(parts).collect();
+        }
     }
     (!key.is_empty()).then_some(key)
 }
@@ -313,17 +342,7 @@ fn subject_key(selector: &ResolvedSelector) -> Option<String> {
 /// `@include` counts as a declaration, because the mixin usually emits some.
 fn has_declarations(model: &SemanticModel, root: &AnyCssRoot, rule: &CssSemanticRule) -> bool {
     !rule.declarations().is_empty()
-        || rule
-            .node(root)
-            .syntax()
-            .children()
-            .filter_map(CssDeclarationOrRuleBlock::cast)
-            .flat_map(|block| block.items())
-            .any(|item| {
-                CssAtRule::cast(item.into_syntax())
-                    .and_then(|at_rule| at_rule.rule().ok())
-                    .is_some_and(|rule| matches!(rule, AnyCssAtRule::ScssIncludeAtRule(_)))
-            })
+        || has_include(rule.node(root).syntax())
         || rule
             .child_ids()
             .iter()
@@ -332,6 +351,23 @@ fn has_declarations(model: &SemanticModel, root: &AnyCssRoot, rule: &CssSemantic
                 INDEPENDENT_AT_RULE_KINDS.matches(child.node(root).syntax().kind())
                     && has_declarations(model, root, &child)
             })
+}
+
+/// Returns whether the rule contains an `@include`, including one inside SCSS control flow such
+/// as `@if`, but not one inside a nested rule.
+fn has_include(rule: &CssSyntaxNode) -> bool {
+    let mut events = rule.preorder();
+    while let Some(event) = events.next() {
+        if let WalkEvent::Enter(node) = event {
+            if ScssIncludeAtRule::can_cast(node.kind()) {
+                return true;
+            }
+            if node != *rule && AnyRuleStart::can_cast(node.kind()) {
+                events.skip_subtree();
+            }
+        }
+    }
+    false
 }
 
 /// Checks selectors against the highest preceding specificity with the same tail selector in the same at-rule context.
