@@ -5,19 +5,19 @@ expression: parity-compound-placeholders.scss
 # Input
 ```css
 /* should generate diagnostics */
-%a%b .placeholder-target {}
-.placeholder-target {}
+%a%b .placeholder-target { color: red; }
+.placeholder-target { color: red; }
 
-.card%a%b .mixed-target {}
-.mixed-target {}
+.card%a%b .mixed-target { color: red; }
+.mixed-target { color: red; }
 
 %a%b {
-  .nested-target {}
+  .nested-target { color: red; }
 }
-.nested-target {}
+.nested-target { color: red; }
 
-.parent .normal-target {}
-.normal-target {}
+.parent .normal-target { color: red; }
+.normal-target { color: red; }
 
 ```
 
@@ -27,18 +27,18 @@ parity-compound-placeholders.scss:14:1 lint/style/noDescendingSpecificity ━━
 
   ! Descending specificity selector found. This selector specificity is (0, 1, 0)
   
-    13 │ .parent .normal-target {}
-  > 14 │ .normal-target {}
+    13 │ .parent .normal-target { color: red; }
+  > 14 │ .normal-target { color: red; }
        │ ^^^^^^^^^^^^^^
     15 │ 
   
   i This selector specificity is (0, 2, 0)
   
-    11 │ .nested-target {}
+    11 │ .nested-target { color: red; }
     12 │ 
-  > 13 │ .parent .normal-target {}
+  > 13 │ .parent .normal-target { color: red; }
        │ ^^^^^^^^^^^^^^^^^^^^^^
-    14 │ .normal-target {}
+    14 │ .normal-target { color: red; }
     15 │ 
   
   i Descending specificity selector may not be applied. Consider rearranging the order of the selectors. See MDN web docs for more details.
