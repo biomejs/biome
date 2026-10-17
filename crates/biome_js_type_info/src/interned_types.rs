@@ -147,6 +147,7 @@ pub enum TypeData<'db> {
     TypeOperator(InternedTypeOperatorType<'db>),
     IndexedAccess(InternedIndexedAccessType<'db>),
     MappedType(InternedMappedType<'db>),
+    Extends(InternedExtendsType<'db>),
     Literal(InternedLiteral<'db>),
     InstanceOf(InternedTypeInstance<'db>),
     MergedReference(InternedMergedReference<'db>),
@@ -277,6 +278,7 @@ impl<'db> TypeData<'db> {
                 | Self::TypeofExpression(_)
                 | Self::IndexedAccess(_)
                 | Self::MappedType(_)
+                | Self::Extends(_)
                 | Self::AnyKeyword
                 | Self::UnknownKeyword
         )
@@ -360,6 +362,7 @@ impl<'db> TypeData<'db> {
                 Self::TypeOperator(_) => "type operator",
                 Self::IndexedAccess(_) => "indexed access",
                 Self::MappedType(_) => "mapped type",
+                Self::Extends(_) => "conditional type",
                 Self::TypeofExpression(_) | Self::TypeofType(_) | Self::TypeofValue(_) => "typeof",
                 Self::Conditional => "conditional",
                 Self::Global | Self::GlobalType(_) => "global",
@@ -621,6 +624,7 @@ impl<'db> TypeData<'db> {
             | Self::TypeOperator(_)
             | Self::IndexedAccess(_)
             | Self::MappedType(_)
+            | Self::Extends(_)
             | Self::TypeofType(_)
             | Self::TypeofValue(_)
             | Self::InstanceOf(_)
@@ -660,7 +664,8 @@ impl<'db> TypeData<'db> {
             | Self::MappedType(_)
             | Self::Object(_)
             | Self::Tuple(_)
-            | Self::Union(_) => type_parameters.is_empty(),
+            | Self::Union(_)
+            | Self::Extends(_) => type_parameters.is_empty(),
             Self::Class(_)
             | Self::Generic(_)
             | Self::GlobalType(_)
@@ -949,6 +954,7 @@ impl<'db> TypeData<'db> {
             | Self::TypeOperator(_)
             | Self::IndexedAccess(_)
             | Self::MappedType(_)
+            | Self::Extends(_)
             | Self::Literal(_)
             | Self::InstanceOf(_)
             | Self::MergedReference(_)
@@ -1179,6 +1185,15 @@ impl<'db> TypeData<'db> {
                 mapped.readonly_modifier,
                 mapped.optional_modifier,
             )),
+            raw::TypeData::Extends(extends) => Self::Extends(InternedExtendsType::new(
+                db,
+                resolve_reference(&extends.check_type),
+                resolve_reference(&extends.extends_type),
+                resolve_reference(&extends.true_type),
+                resolve_reference(&extends.false_type),
+                convert_references(db, &extends.infer_types, resolve_reference),
+                extends.distributive,
+            )),
             raw::TypeData::Literal(literal) => Self::Literal(InternedLiteral::new(
                 db,
                 convert_literal(db, literal.as_ref(), resolve_reference),
@@ -1317,6 +1332,15 @@ impl<'db> TypeDataSlots<'db> {
                 mapped.keys(db).operand(),
                 mapped.ty(db),
             ]),
+            TypeData::Extends(extends) => {
+                result.slots.extend([
+                    extends.check_type(db),
+                    extends.extends_type(db),
+                    extends.true_type(db),
+                    extends.false_type(db),
+                ]);
+                result.slots.extend_from_slice(extends.infer_types(db));
+            }
             TypeData::Literal(literal) => {
                 if let Literal::Object(members) = literal.literal(db) {
                     result.push_type_members_slots(members);
@@ -1685,6 +1709,15 @@ impl<'db> TypeDataSlotReplacements<'db> {
                 self.take_type()?,
                 mapped.readonly_modifier(db),
                 mapped.optional_modifier(db),
+            )),
+            TypeData::Extends(extends) => TypeData::Extends(InternedExtendsType::new(
+                db,
+                self.take_type()?,
+                self.take_type()?,
+                self.take_type()?,
+                self.take_type()?,
+                self.take_types(extends.infer_types(db).len())?,
+                extends.distributive(db),
             )),
             TypeData::Literal(literal) => TypeData::Literal(InternedLiteral::new(
                 db,
@@ -2720,6 +2753,27 @@ pub struct InternedIndexedAccessType<'db> {
     pub object: TypeData<'db>,
     #[returns(copy)]
     pub index: TypeData<'db>,
+}
+
+/// The operands of a TypeScript conditional type, stored in the database. See
+/// [`raw::ExtendsType`] for an example.
+#[salsa::interned]
+#[derive(Debug)]
+pub struct InternedExtendsType<'db> {
+    #[returns(copy)]
+    pub check_type: TypeData<'db>,
+    #[returns(copy)]
+    pub extends_type: TypeData<'db>,
+    #[returns(copy)]
+    pub true_type: TypeData<'db>,
+    #[returns(copy)]
+    pub false_type: TypeData<'db>,
+    /// Generics declared by `infer` inside `extends_type`.
+    #[returns(ref)]
+    pub infer_types: Box<[TypeData<'db>]>,
+    /// Whether the check type was a bare type parameter when declared.
+    #[returns(copy)]
+    pub distributive: bool,
 }
 
 impl<'db> InternedIndexedAccessType<'db> {
@@ -3766,6 +3820,17 @@ mod tests {
         });
         assert_identity(&db, |s| {
             TypeData::IndexedAccess(InternedIndexedAccessType::new(&db, s.next(), s.next()))
+        });
+        assert_identity(&db, |s| {
+            TypeData::Extends(InternedExtendsType::new(
+                &db,
+                s.next(),
+                s.next(),
+                s.next(),
+                s.next(),
+                Box::<[_]>::from([s.next(), s.next()]),
+                true,
+            ))
         });
         assert_identity(&db, |s| {
             TypeData::Literal(InternedLiteral::new(
