@@ -1922,7 +1922,7 @@ impl EmbeddedSnippetFormatter<'_, '_> {
     ///
     /// These are the outermost embedded elements inside the template, while the
     /// others are inside the interpolations.
-    fn interpolations_in(&self, range: TextRange) -> Vec<TextRange> {
+    fn interpolations_in(&self, range: TextRange) -> Box<[TextRange]> {
         let is_inside = |inner: &TextRange| *inner != range && range.contains_range(*inner);
         self.host_contents
             .keys()

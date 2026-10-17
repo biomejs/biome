@@ -270,19 +270,19 @@ where
 #[derive(Debug, Default, Clone)]
 pub struct CssFormatLanguage {
     options: CssFormatOptions,
-    metavariable_ranges: Vec<TextRange>,
+    metavariable_ranges: Box<[TextRange]>,
 }
 
 impl CssFormatLanguage {
     pub fn new(options: CssFormatOptions) -> Self {
         Self {
             options,
-            metavariable_ranges: Vec::new(),
+            metavariable_ranges: Box::default(),
         }
     }
 
     /// Writes the given ranges of metavariables as embedded elements.
-    pub fn with_metavariable_ranges(mut self, metavariable_ranges: Vec<TextRange>) -> Self {
+    pub fn with_metavariable_ranges(mut self, metavariable_ranges: Box<[TextRange]>) -> Self {
         self.metavariable_ranges = metavariable_ranges;
         self
     }
@@ -447,7 +447,7 @@ pub fn format_node_with_offset(
 pub fn format_node_with_offset_and_metavariables(
     options: CssFormatOptions,
     root: &CssSyntaxNodeWithOffset,
-    metavariable_ranges: Vec<TextRange>,
+    metavariable_ranges: Box<[TextRange]>,
 ) -> FormatResult<Formatted<CssFormatContext>> {
     biome_formatter::format_node_with_offset(
         root,

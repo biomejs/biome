@@ -20,7 +20,7 @@ pub struct CssFormatContext {
     source_map: Option<TransformSourceMap>,
     identifier_case: CssCase,
     /// Ranges of the metavariables that are written as embedded elements.
-    metavariable_ranges: Vec<TextRange>,
+    metavariable_ranges: Box<[TextRange]>,
 }
 
 impl CssFormatContext {
@@ -30,7 +30,7 @@ impl CssFormatContext {
             comments: Rc::new(comments),
             source_map: None,
             identifier_case: CssCase::Auto,
-            metavariable_ranges: Vec::new(),
+            metavariable_ranges: Box::default(),
         }
     }
 
@@ -39,7 +39,7 @@ impl CssFormatContext {
         self
     }
 
-    pub fn with_metavariable_ranges(mut self, metavariable_ranges: Vec<TextRange>) -> Self {
+    pub fn with_metavariable_ranges(mut self, metavariable_ranges: Box<[TextRange]>) -> Self {
         self.metavariable_ranges = metavariable_ranges;
         self
     }
