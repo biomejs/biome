@@ -3662,6 +3662,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/use-vue-typed-ref
 	 */
 	useVueTypedRef?: UseVueTypedRefConfiguration;
+	/**
+	 * Enforce the .exact modifier on v-on directives when another listener for the same event needs more modifier keys.
+	 * See https://biomejs.dev/linter/rules/use-vue-v-on-exact
+	 */
+	useVueVOnExact?: UseVueVOnExactConfiguration;
 }
 /**
  * Configures all rules in one lint group.
@@ -6237,6 +6242,9 @@ export type UseVueMatchingComponentFileNameConfiguration =
 export type UseVueTypedRefConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueTypedRefOptions;
+export type UseVueVOnExactConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueVOnExactOptions;
 export type NoAccumulatingSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAccumulatingSpreadOptions;
@@ -9081,6 +9089,10 @@ export interface RuleWithUseVueTypedRefOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueTypedRefOptions;
 }
+export interface RuleWithUseVueVOnExactOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueVOnExactOptions;
+}
 export interface RuleWithNoAccumulatingSpreadOptions {
 	level: RulePlainConfiguration;
 	options?: NoAccumulatingSpreadOptions;
@@ -11439,6 +11451,7 @@ export interface UseVueConsistentEventHyphenationOptions {
 }
 export type UseVueMatchingComponentFileNameOptions = {};
 export type UseVueTypedRefOptions = {};
+export type UseVueVOnExactOptions = {};
 export type NoAccumulatingSpreadOptions = {};
 export type NoAwaitInLoopsOptions = {};
 export type NoBarrelFileOptions = {};
@@ -13031,6 +13044,7 @@ export type Category =
 	| "lint/nursery/useVueTypedRef"
 	| "lint/nursery/useVueValidVFor"
 	| "lint/nursery/useVueValidVModel"
+	| "lint/nursery/useVueVOnExact"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
 	| "lint/performance/noBarrelFile"

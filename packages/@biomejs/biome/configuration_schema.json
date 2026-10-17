@@ -8769,6 +8769,13 @@
 						{ "$ref": "#/$defs/UseVueTypedRefConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useVueVOnExact": {
+					"description": "Enforce the .exact modifier on v-on directives when another listener for the same event needs more modifier keys.\nSee https://biomejs.dev/linter/rules/use-vue-v-on-exact",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueVOnExactConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -16011,6 +16018,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueVOnExactOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueVOnExactOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueValidTemplateRootOptions": {
 			"type": "object",
 			"properties": {
@@ -21317,6 +21333,16 @@
 			]
 		},
 		"UseVueVForKeyOptions": { "type": "object", "additionalProperties": false },
+		"UseVueVOnExactConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueVOnExactOptions" }
+			]
+		},
+		"UseVueVOnExactOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseVueValidTemplateRootConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },

@@ -960,6 +960,7 @@ dependencies = [
  "biome_vue_semantic",
  "camino",
  "codspeed-criterion-compat",
+ "enumflags2",
  "filetime",
  "insta",
  "mimalloc",
