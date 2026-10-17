@@ -1,0 +1,335 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+@use "sass:math";
+
+@function double($x) {
+	@return $x * 2;
+}
+
+:root {
+	--module: math.div(8px, 2);
+	--own: double(3px);
+	--built-in: darken(#fff, 10%);
+	--inside-calc: calc(double(3px) + 1px);
+	--outer-only: darken(lighten(#000, 10%), 5%);
+	--imported: bpx(3);
+	--if-branch: if(style(--a: 1): darken(#fff, 10%); else: 3);
+	--bare-condition: style(--a: 1);
+	--legacy-if: if($condition, 1px, 2px);
+	--if-style-query: if(style(--a: double(1px)): 1; else: 2);
+	--if-sass-test: if(sass(true): 1; else: 2);
+	--if-in-call: darken(if(media(print): lighten(#000, 1%); else: red), 10%);
+}
+
+@container style(--c: double(1px)) {
+	a {
+		color: red;
+	}
+}
+
+@supports (--raw: double(1px)) {
+	a {
+		color: red;
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalid.scss:9:12 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function math.div() isn't interpolated, so Sass outputs it unchanged.
+  
+     8 │ :root {
+   > 9 │ 	--module: math.div(8px, 2);
+       │ 	          ^^^^^^^^
+    10 │ 	--own: double(3px);
+    11 │ 	--built-in: darken(#fff, 10%);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:10:9 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function double() isn't interpolated, so Sass outputs it unchanged.
+  
+     8 │ :root {
+     9 │ 	--module: math.div(8px, 2);
+  > 10 │ 	--own: double(3px);
+       │ 	       ^^^^^^
+    11 │ 	--built-in: darken(#fff, 10%);
+    12 │ 	--inside-calc: calc(double(3px) + 1px);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:11:14 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function darken() isn't interpolated, so Sass outputs it unchanged.
+  
+     9 │ 	--module: math.div(8px, 2);
+    10 │ 	--own: double(3px);
+  > 11 │ 	--built-in: darken(#fff, 10%);
+       │ 	            ^^^^^^
+    12 │ 	--inside-calc: calc(double(3px) + 1px);
+    13 │ 	--outer-only: darken(lighten(#000, 10%), 5%);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:12:22 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function double() isn't interpolated, so Sass outputs it unchanged.
+  
+    10 │ 	--own: double(3px);
+    11 │ 	--built-in: darken(#fff, 10%);
+  > 12 │ 	--inside-calc: calc(double(3px) + 1px);
+       │ 	                    ^^^^^^
+    13 │ 	--outer-only: darken(lighten(#000, 10%), 5%);
+    14 │ 	--imported: bpx(3);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:13:16 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function darken() isn't interpolated, so Sass outputs it unchanged.
+  
+    11 │ 	--built-in: darken(#fff, 10%);
+    12 │ 	--inside-calc: calc(double(3px) + 1px);
+  > 13 │ 	--outer-only: darken(lighten(#000, 10%), 5%);
+       │ 	              ^^^^^^
+    14 │ 	--imported: bpx(3);
+    15 │ 	--if-branch: if(style(--a: 1): darken(#fff, 10%); else: 3);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:14:14 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function bpx() isn't interpolated, so Sass outputs it unchanged.
+  
+    12 │ 	--inside-calc: calc(double(3px) + 1px);
+    13 │ 	--outer-only: darken(lighten(#000, 10%), 5%);
+  > 14 │ 	--imported: bpx(3);
+       │ 	            ^^^
+    15 │ 	--if-branch: if(style(--a: 1): darken(#fff, 10%); else: 3);
+    16 │ 	--bare-condition: style(--a: 1);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:15:33 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function darken() isn't interpolated, so Sass outputs it unchanged.
+  
+    13 │ 	--outer-only: darken(lighten(#000, 10%), 5%);
+    14 │ 	--imported: bpx(3);
+  > 15 │ 	--if-branch: if(style(--a: 1): darken(#fff, 10%); else: 3);
+       │ 	                               ^^^^^^
+    16 │ 	--bare-condition: style(--a: 1);
+    17 │ 	--legacy-if: if($condition, 1px, 2px);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:16:20 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function style() isn't interpolated, so Sass outputs it unchanged.
+  
+    14 │ 	--imported: bpx(3);
+    15 │ 	--if-branch: if(style(--a: 1): darken(#fff, 10%); else: 3);
+  > 16 │ 	--bare-condition: style(--a: 1);
+       │ 	                  ^^^^^
+    17 │ 	--legacy-if: if($condition, 1px, 2px);
+    18 │ 	--if-style-query: if(style(--a: double(1px)): 1; else: 2);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:17:15 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function if() isn't interpolated, so Sass outputs it unchanged.
+  
+    15 │ 	--if-branch: if(style(--a: 1): darken(#fff, 10%); else: 3);
+    16 │ 	--bare-condition: style(--a: 1);
+  > 17 │ 	--legacy-if: if($condition, 1px, 2px);
+       │ 	             ^^
+    18 │ 	--if-style-query: if(style(--a: double(1px)): 1; else: 2);
+    19 │ 	--if-sass-test: if(sass(true): 1; else: 2);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:18:34 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function double() isn't interpolated, so Sass outputs it unchanged.
+  
+    16 │ 	--bare-condition: style(--a: 1);
+    17 │ 	--legacy-if: if($condition, 1px, 2px);
+  > 18 │ 	--if-style-query: if(style(--a: double(1px)): 1; else: 2);
+       │ 	                                ^^^^^^
+    19 │ 	--if-sass-test: if(sass(true): 1; else: 2);
+    20 │ 	--if-in-call: darken(if(media(print): lighten(#000, 1%); else: red), 10%);
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:19:21 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function sass() isn't interpolated, so Sass outputs it unchanged.
+  
+    17 │ 	--legacy-if: if($condition, 1px, 2px);
+    18 │ 	--if-style-query: if(style(--a: double(1px)): 1; else: 2);
+  > 19 │ 	--if-sass-test: if(sass(true): 1; else: 2);
+       │ 	                   ^^^^
+    20 │ 	--if-in-call: darken(if(media(print): lighten(#000, 1%); else: red), 10%);
+    21 │ }
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:20:16 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function darken() isn't interpolated, so Sass outputs it unchanged.
+  
+    18 │ 	--if-style-query: if(style(--a: double(1px)): 1; else: 2);
+    19 │ 	--if-sass-test: if(sass(true): 1; else: 2);
+  > 20 │ 	--if-in-call: darken(if(media(print): lighten(#000, 1%); else: red), 10%);
+       │ 	              ^^^^^^
+    21 │ }
+    22 │ 
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:23:23 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function double() isn't interpolated, so Sass outputs it unchanged.
+  
+    21 │ }
+    22 │ 
+  > 23 │ @container style(--c: double(1px)) {
+       │                       ^^^^^^
+    24 │ 	a {
+    25 │ 		color: red;
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.scss:29:19 lint/nursery/noUninterpolatedScssFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The function double() isn't interpolated, so Sass outputs it unchanged.
+  
+    27 │ }
+    28 │ 
+  > 29 │ @supports (--raw: double(1px)) {
+       │                   ^^^^^^
+    30 │ 	a {
+    31 │ 		color: red;
+  
+  i Sass only evaluates #{...} inside custom property values, so the browser receives this call as plain text instead of its result.
+  
+  i Wrap the call in #{...} so Sass evaluates it.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

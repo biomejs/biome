@@ -1,0 +1,33 @@
+/* should generate diagnostics */
+@use "sass:math";
+
+@function double($x) {
+	@return $x * 2;
+}
+
+:root {
+	--module: math.div(8px, 2);
+	--own: double(3px);
+	--built-in: darken(#fff, 10%);
+	--inside-calc: calc(double(3px) + 1px);
+	--outer-only: darken(lighten(#000, 10%), 5%);
+	--imported: bpx(3);
+	--if-branch: if(style(--a: 1): darken(#fff, 10%); else: 3);
+	--bare-condition: style(--a: 1);
+	--legacy-if: if($condition, 1px, 2px);
+	--if-style-query: if(style(--a: double(1px)): 1; else: 2);
+	--if-sass-test: if(sass(true): 1; else: 2);
+	--if-in-call: darken(if(media(print): lighten(#000, 1%); else: red), 10%);
+}
+
+@container style(--c: double(1px)) {
+	a {
+		color: red;
+	}
+}
+
+@supports (--raw: double(1px)) {
+	a {
+		color: red;
+	}
+}

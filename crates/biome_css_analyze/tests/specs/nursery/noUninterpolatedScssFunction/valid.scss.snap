@@ -1,0 +1,36 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.scss
+---
+# Input
+```css
+/* should not generate diagnostics */
+@use "sass:math";
+
+:root {
+	--interpolated: #{math.div(8px, 2)};
+	--calc: calc(100% - var(--gutter));
+	--color: rgb(0 0 0 / 50%);
+	--mix: color-mix(in srgb, red, blue);
+	--custom: --my-function(1);
+	--if: if(style(--a: 1): 2; else: 3);
+	--if-media-supports: if(media(print): 1; supports(display: grid): 2; else: 3);
+	--if-grouped: if((style(--a: 1) or style(--b: 2)) and media(print): 1; else: 2);
+	--if-not: if(not (supports(display: grid)): a; else: b);
+	--if-selector: if(supports(selector(:has(a))): 1; else: 2);
+	--if-font-tech: if(supports(font-tech(color-COLRv1)): 1; else: 2);
+	--css-named-sass: saturate(#f00, 20%);
+	--url: url(foo(bar).svg);
+	--prefixed: -webkit-gradient(linear, left top, left bottom);
+	--string: "darken(#fff, 10%)";
+	--interpolated-string: "#{math.div(8px, 2)}";
+	--upper: CALC(1px + 2px);
+	--if-upper: IF(STYLE(--a: 1): 2; else: 3);
+	--url-upper: URL(foo(bar).svg);
+}
+
+a {
+	width: math.div(8px, 2);
+}
+
+```

@@ -1,0 +1,18 @@
+/* should not generate diagnostics */
+$gap: 8px;
+
+:root {
+	--gap: #{$gap};
+	--calc: calc(#{$gap} * 2);
+	--label: "$gap";
+	--interpolated-string: "gap-#{$gap}";
+	--dollar-space: $ gap;
+	--price: 5$;
+	--name-#{$gap}: 1px;
+	--url-text: url(https://cdn.example/a$b.svg);
+	--url-digit: url($1x.png);
+}
+
+a {
+	margin: $gap;
+}
