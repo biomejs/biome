@@ -85,7 +85,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseCapitalizedConstructors {
-        version: "next",
+        version: "2.6.0",
         name: "useCapitalizedConstructors",
         language: "js",
         recommended: true,

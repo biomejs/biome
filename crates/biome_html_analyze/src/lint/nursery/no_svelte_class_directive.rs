@@ -45,7 +45,7 @@ declare_lint_rule! {
     /// - [Svelte `class` documentation](https://svelte.dev/docs/svelte/class)
     ///
     pub NoSvelteClassDirective {
-        version: "next",
+        version: "2.6.0",
         name: "noSvelteClassDirective",
         language: "html",
         domains: &[RuleDomain::Svelte],

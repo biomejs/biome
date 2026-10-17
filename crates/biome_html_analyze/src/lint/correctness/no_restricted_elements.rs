@@ -62,7 +62,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoRestrictedElements {
-        version: "next",
+        version: "2.6.0",
         name: "noRestrictedElements",
         language: "html",
         recommended: false,

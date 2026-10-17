@@ -112,7 +112,7 @@ declare_lint_rule! {
     ///
     /// - [`svelte/reactivity`](https://svelte.dev/docs/svelte/svelte-reactivity)
     pub UseSvelteReactiveClasses {
-        version: "next",
+        version: "2.6.0",
         name: "useSvelteReactiveClasses",
         language: "js",
         domains: &[RuleDomain::Svelte],

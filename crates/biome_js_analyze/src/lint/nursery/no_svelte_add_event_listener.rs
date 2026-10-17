@@ -57,7 +57,7 @@ declare_lint_rule! {
     /// - [Svelte event delegation](https://svelte.dev/docs/svelte/basic-markup#Events-Event-delegation)
     /// - [`on` from `svelte/events`](https://svelte.dev/docs/svelte/svelte-events#on)
     pub NoSvelteAddEventListener {
-        version: "next",
+        version: "2.6.0",
         name: "noSvelteAddEventListener",
         language: "js",
         domains: &[RuleDomain::Svelte],
