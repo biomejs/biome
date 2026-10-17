@@ -2,9 +2,9 @@ use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::block::parse_declaration_or_rule_list_block;
 use crate::syntax::scss::{
-    expect_scss_semicolon_at_rule, is_at_scss_interpolated_string, is_at_scss_interpolation,
-    is_nth_at_scss_interpolated_dashed_identifier, is_nth_at_scss_interpolation,
-    parse_scss_interpolated_at_rule_name, parse_scss_interpolated_string,
+    expect_scss_semicolon_at_rule, is_at_scss_interpolated_name_with_suffixes,
+    is_at_scss_interpolated_string, is_at_scss_interpolation,
+    parse_scss_interpolated_name_with_suffixes, parse_scss_interpolated_string,
     parse_scss_interpolated_url_value, parse_scss_regular_interpolation,
 };
 use crate::syntax::value::function::is_nth_at_adjacent_l_paren;
@@ -54,13 +54,7 @@ pub(crate) fn parse_unknown_at_rule(p: &mut CssParser) -> ParsedSyntax {
 /// ```
 #[inline]
 pub(crate) fn is_at_scss_interpolated_unknown_at_rule(p: &mut CssParser) -> bool {
-    is_at_scss_interpolation(p)
-        || ((is_at_identifier(p) || p.at(T![-]))
-            && is_nth_at_scss_interpolation(p, 1)
-            && p.source_mut().is_nth_source_tight(1))
-        || (is_nth_at_scss_interpolated_dashed_identifier(p, 0)
-            && p.source_mut().is_nth_source_tight(1)
-            && p.source_mut().is_nth_source_tight(2))
+    is_at_scss_interpolated_name_with_suffixes(p)
 }
 
 /// Keeps adjacent name fragments separate from an unknown SCSS at-rule's prelude.
@@ -81,7 +75,7 @@ pub(crate) fn parse_scss_interpolated_unknown_at_rule(p: &mut CssParser) -> Pars
     let m = p.start();
 
     // Guarded by `is_at_scss_interpolated_unknown_at_rule`.
-    parse_scss_interpolated_at_rule_name(p).ok();
+    parse_scss_interpolated_name_with_suffixes(p).ok();
     parse_scss_unknown_at_rule_components(p);
 
     complete_unknown_at_rule(p, m)
