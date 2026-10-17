@@ -1,0 +1,22 @@
+/* should generate diagnostics */
+$name: base;
+
+@layer base {
+	@layer base.#{$name} {
+	}
+}
+
+@layer #{$name} {
+	@layer #{$name} {
+	}
+}
+
+@layer base {
+	.a {
+		&:hover {
+			@layer base {
+				color: red;
+			}
+		}
+	}
+}

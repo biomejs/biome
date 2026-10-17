@@ -3117,6 +3117,11 @@ export interface Nursery {
 	 */
 	noSelfImport?: NoSelfImportConfiguration;
 	/**
+	 * Disallow nesting a cascade layer inside a layer with the same name.
+	 * See https://biomejs.dev/linter/rules/no-self-nested-layer
+	 */
+	noSelfNestedLayer?: NoSelfNestedLayerConfiguration;
+	/**
 	 * Disallow addEventListener in Svelte files.
 	 * See https://biomejs.dev/linter/rules/no-svelte-add-event-listener
 	 */
@@ -5799,6 +5804,9 @@ export type NoReturnInFinallyConfiguration =
 export type NoSelfImportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSelfImportOptions;
+export type NoSelfNestedLayerConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSelfNestedLayerOptions;
 export type NoSvelteAddEventListenerConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSvelteAddEventListenerOptions;
@@ -8303,6 +8311,10 @@ export interface RuleWithNoReturnInFinallyOptions {
 export interface RuleWithNoSelfImportOptions {
 	level: RulePlainConfiguration;
 	options?: NoSelfImportOptions;
+}
+export interface RuleWithNoSelfNestedLayerOptions {
+	level: RulePlainConfiguration;
+	options?: NoSelfNestedLayerOptions;
 }
 export interface RuleWithNoSvelteAddEventListenerOptions {
 	/**
@@ -10816,6 +10828,7 @@ export type NoReactObjectTypeAsDefaultPropOptions = {};
 export type NoRestrictedDependenciesOptions = {};
 export type NoReturnInFinallyOptions = {};
 export type NoSelfImportOptions = {};
+export type NoSelfNestedLayerOptions = {};
 export type NoSvelteAddEventListenerOptions = {};
 export type NoSvelteAtDebugTagsOptions = {};
 export type NoSvelteAtHtmlTagsOptions = {};
@@ -12569,6 +12582,7 @@ export type Category =
 	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noReturnInFinally"
 	| "lint/nursery/noSelfImport"
+	| "lint/nursery/noSelfNestedLayer"
 	| "lint/nursery/noSvelteAddEventListener"
 	| "lint/nursery/noSvelteAtDebugTags"
 	| "lint/nursery/noSvelteAtHtmlTags"
