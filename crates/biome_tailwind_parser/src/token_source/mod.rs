@@ -188,14 +188,9 @@ impl<'source> TailwindTokenSource<'source> {
     /// Lexes the token at `current_end` in `context` with [SimdLexer].
     fn lex(&mut self, context: TailwindLexContext) {
         let start = usize::from(self.current_end);
-        let (kind, end) = match context {
-            TailwindLexContext::VariantSegment => self.lexer.segment_token(start),
-            _ => None,
-        }
-        .unwrap_or_else(|| {
-            self.lexer
-                .lex(start, context, self.current, &mut self.diagnostics)
-        });
+        let (kind, end) = self
+            .lexer
+            .lex(start, context, self.current, &mut self.diagnostics);
         let line_break = kind == WHITESPACE && self.lexer.has_line_break(start, end);
         self.set_token(kind, end, line_break);
     }
@@ -499,11 +494,6 @@ impl BumpWithContext for TailwindTokenSource<'_> {
 /// a `/` a modifier, and otherwise a basename or one byte.
 pub(crate) fn lex_regular(source: &mut TailwindTokenSource) {
     source.next_regular_token();
-}
-
-/// The [Grouping] of the tokens that [SimdLexer] lexes in [TailwindLexContext::VariantSegment].
-pub(crate) fn lex_variant_segment(source: &mut TailwindTokenSource) {
-    source.lex(TailwindLexContext::VariantSegment);
 }
 
 /// The [Grouping] of the tokens that [SimdLexer] lexes in [TailwindLexContext::CssValue].

@@ -1,8 +1,10 @@
-use super::{Grouping, TailwindTokenSource, lex_css_value, lex_regular, lex_variant_segment};
+use super::{Grouping, TailwindTokenSource, lex_css_value, lex_regular};
 use crate::legacy::lexer::{TailwindLexContext, TailwindLexer};
 use crate::legacy::token_source::LegacyTokenSource;
 use crate::lexer::{BASENAME_STORE, BaseNameStore};
-use crate::syntax::{group_negative_base, group_property, group_selector, group_url_value};
+use crate::syntax::{
+    group_negative_base, group_property, group_selector, group_url_value, group_variant_segment,
+};
 use crate::test_support::{fixtures, mutate, random_fragments, xorshift};
 use crate::{TailwindParserOptions, legacy, parse_tailwind_with_options};
 use biome_parser::lexer::Lexer;
@@ -50,8 +52,8 @@ const GROUPINGS: [(TailwindLexContext, Grouping, &[TailwindSyntaxKind]); 7] = [
     ),
     (
         TailwindLexContext::VariantSegment,
-        lex_variant_segment,
-        PREVIOUS,
+        group_variant_segment,
+        &[EOF, T![-]],
     ),
     (TailwindLexContext::CssValue, lex_css_value, PREVIOUS),
     (

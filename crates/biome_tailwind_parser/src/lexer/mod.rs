@@ -23,11 +23,6 @@ pub(crate) enum TailwindLexContext {
     /// The default state.
     #[default]
     Regular,
-    /// Lexing one segment inside a Tailwind variant expression.
-    ///
-    /// Named segments stop at `-` and `:` so `group-peer-hover`
-    /// becomes `group` / `peer` / `hover`.
-    VariantSegment,
     /// CSS value lexing inside arbitrary values and arbitrary candidate values.
     CssValue,
 }

@@ -222,6 +222,7 @@ impl<'src> SimdLexer<'src> {
         match stop {
             Stop::ParenOrWhitespace => next_bit(&self.blocks, position, |block| block.paren_stop),
             Stop::ColonOrWhitespace => next_bit(&self.blocks, position, |block| block.colon_stop),
+            Stop::Segment => next_bit(&self.blocks, position, |block| block.segment_stop),
         }
     }
 
@@ -255,14 +256,6 @@ impl<'src> SimdLexer<'src> {
                     }
                     (kind(raw), end)
                 }
-                TailwindLexContext::VariantSegment => match byte {
-                    b'(' | b')' | b'[' | b']' | b':' | b'-' | b'!' | b'/' => single(byte, position),
-                    b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' | b'@' | b'*' => (
-                        TW_VARIANT_SEGMENT,
-                        next_bit(&self.blocks, position + 1, |block| block.segment_stop),
-                    ),
-                    _ => return self.unexpected(position, diagnostics),
-                },
                 TailwindLexContext::CssValue => {
                     return self.css_value(position, previous, diagnostics);
                 }
@@ -272,26 +265,6 @@ impl<'src> SimdLexer<'src> {
             self.push_whitespace_diagnostics(position, end, diagnostics);
         }
         (kind, end)
-    }
-
-    /// Lexes the token at `position` in [TailwindLexContext::VariantSegment], like [Self::lex],
-    /// unless the lexer reports a diagnostic for it, in which case it returns `None`.
-    #[inline(always)]
-    pub(crate) fn segment_token(&self, position: usize) -> Option<(TailwindSyntaxKind, usize)> {
-        let kind = SEGMENT_KINDS[*self.source.as_bytes().get(position)? as usize];
-        let end = match kind {
-            WHITESPACE => {
-                let end = self.whitespace_end(position);
-                if any_in(&self.blocks, position, end, |block| block.bad_whitespace) {
-                    return None;
-                }
-                end
-            }
-            TW_VARIANT_SEGMENT => next_bit(&self.blocks, position + 1, |block| block.segment_stop),
-            ERROR_TOKEN => return None,
-            _ => position + 1,
-        };
-        Some((kind, end))
     }
 
     /// Lexes the token at `position` in [TailwindLexContext::CssValue], after a token of kind
@@ -565,6 +538,8 @@ pub(crate) enum Stop {
     ParenOrWhitespace,
     /// `:` and whitespace.
     ColonOrWhitespace,
+    /// The end of a variant segment name: whitespace, `:`, `-`, `/`, `!`, `[`, `]` and `)`.
+    Segment,
 }
 
 /// Returns the kind and end of the one-byte token `byte` at `position`.
@@ -758,30 +733,6 @@ static REGULAR_FIRST: [u16; 256] = {
             b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' | b'@' => BASE_FIRST,
             b'*' => SEGMENT_FIRST,
             _ => ERROR_FIRST,
-        };
-        byte += 1;
-    }
-    table
-};
-
-/// The kind of a token in [TailwindLexContext::VariantSegment] by its first byte, where
-/// `ERROR_TOKEN` stands for the tokens the lexer reports.
-static SEGMENT_KINDS: [TailwindSyntaxKind; 256] = {
-    let mut table = [ERROR_TOKEN; 256];
-    let mut byte = 0;
-    while byte < 256 {
-        table[byte] = match byte as u8 {
-            b'\t' | b'\n' | 0x0B | 0x0C | b'\r' | b' ' => WHITESPACE,
-            b'(' => T!['('],
-            b')' => T![')'],
-            b'[' => T!['['],
-            b']' => T![']'],
-            b':' => T![:],
-            b'-' => T![-],
-            b'!' => T![!],
-            b'/' => T![/],
-            b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' | b'@' | b'*' => TW_VARIANT_SEGMENT,
-            _ => ERROR_TOKEN,
         };
         byte += 1;
     }
