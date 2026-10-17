@@ -255,13 +255,6 @@ impl<'src> SimdLexer<'src> {
                     }
                     (kind(raw), end)
                 }
-                TailwindLexContext::ArbitraryVariant => match byte {
-                    b'(' | b')' | b']' => single(byte, position),
-                    // A selector can itself start with `[`.
-                    _ if previous == T!['['] => (TW_SELECTOR, self.selector_end(position)),
-                    b'[' => single(byte, position),
-                    _ => self.named_value(position),
-                },
                 TailwindLexContext::VariantSegment => match byte {
                     b'(' | b')' | b'[' | b']' | b':' | b'-' | b'!' | b'/' => single(byte, position),
                     b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' | b'@' | b'*' => (
@@ -411,7 +404,7 @@ impl<'src> SimdLexer<'src> {
 
     /// Returns the end of the selector at `position`, counting nested brackets.
     #[inline(always)]
-    fn selector_end(&self, position: usize) -> usize {
+    pub(crate) fn selector_end(&self, position: usize) -> usize {
         let end = next_bit(&self.blocks, position, |block| block.selector_stop);
         let bytes = self.source.as_bytes();
         if end < bytes.len() && bytes[end] == b'[' {
@@ -419,14 +412,6 @@ impl<'src> SimdLexer<'src> {
         } else {
             end
         }
-    }
-
-    /// Lexes the value at `position` that runs to the next whitespace, `:`, `/`, `!`, `]`, `)`
-    /// or `%`, which is a number if it holds only digits and `.`.
-    #[inline(always)]
-    fn named_value(&self, position: usize) -> (TailwindSyntaxKind, usize) {
-        let end = next_bit(&self.blocks, position, |block| block.value_stop);
-        (kind(self.number_or_value(position, end)), end)
     }
 
     /// Returns `TW_NUMBER` if `start..end` holds only digits and `.`, and `TW_VALUE` otherwise.

@@ -1,8 +1,9 @@
+use crate::lexer::simd::is_whitespace;
 use crate::parser::TailwindParser;
 use crate::syntax::css_value::parse_css_parameter_list;
 use crate::syntax::parse_error::*;
 use crate::syntax::parse_modifier;
-use crate::token_source::{lex_arbitrary_variant, lex_css_value, lex_variant_segment};
+use crate::token_source::{TailwindTokenSource, lex_css_value, lex_variant_segment};
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{Parser, parse_recovery::ParseRecoveryTokenSet, token_set};
@@ -99,8 +100,10 @@ pub(crate) fn parse_variant(p: &mut TailwindParser) -> ParsedSyntax {
 fn parse_arbitrary_variant(p: &mut TailwindParser) -> ParsedSyntax {
     let checkpoint = p.checkpoint();
     let m = p.start();
-    p.expect_with_context(T!['['], lex_arbitrary_variant);
-    p.expect_with_context(TW_SELECTOR, lex_arbitrary_variant);
+    p.expect_with_context(T!['['], group_selector);
+    // A selector ends at a `]`, whitespace or the end of the source, which the regular tokens
+    // group like the variant does.
+    p.expect(TW_SELECTOR);
     p.expect(T![']']);
 
     if !p.at(COLON) {
@@ -111,6 +114,17 @@ fn parse_arbitrary_variant(p: &mut TailwindParser) -> ParsedSyntax {
     }
 
     Present(m.complete(p, TW_ARBITRARY_VARIANT))
+}
+
+/// Groups the token after the `[` of an arbitrary variant or variant segment: the selector, which
+/// runs to the next whitespace or the `]` that closes the brackets it opens, or one byte.
+pub(crate) fn group_selector(source: &mut TailwindTokenSource) {
+    match source.next_byte() {
+        None => source.take(EOF, 0),
+        Some(byte) if is_whitespace(byte) => source.take_whitespace(),
+        Some(byte @ (b'(' | b')' | b']')) => source.take_punctuation(byte),
+        Some(_) => source.merge_selector(),
+    }
 }
 
 fn parse_variant_expression(p: &mut TailwindParser) -> ParsedSyntax {
@@ -183,8 +197,10 @@ fn parse_arbitrary_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
     // — this keeps combinators (`has-[>svg]`, `[+p]`, `[~span]`) inside the
     // selector instead of erroring on them in the CSS-value grammar.
     let m = p.start();
-    p.expect_with_context(T!['['], lex_arbitrary_variant);
-    p.expect_with_context(TW_SELECTOR, lex_arbitrary_variant);
+    p.expect_with_context(T!['['], group_selector);
+    // A selector ends at a `]`, whitespace or the end of the source, which the regular tokens
+    // group like the variant does.
+    p.expect(TW_SELECTOR);
     p.expect(T![']']);
     Present(m.complete(p, TW_ARBITRARY_VARIANT_SEGMENT))
 }
