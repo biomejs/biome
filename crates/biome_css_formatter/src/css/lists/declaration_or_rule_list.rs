@@ -12,27 +12,40 @@ impl FormatRule<CssDeclarationOrRuleList> for FormatCssDeclarationOrRuleList {
 
         let mut items = node.iter().peekable();
         while let Some(declaration_or_rule) = items.next() {
-            // The semicolon after a metavariable stays on the same line:
+            // The semicolon after a metavariable, and the metavariables after
+            // it on the same line, stay on the same line:
             //
             // ```css
             // ${truncate};
+            // ${base} ${hover}
             // ```
-            let semicolon = if matches!(
-                declaration_or_rule,
-                AnyCssDeclarationOrRule::CssMetavariable(_)
-            ) {
-                items
-                    .next_if(|next| matches!(next, AnyCssDeclarationOrRule::CssEmptyDeclaration(_)))
-            } else {
-                None
-            };
+            let mut same_line = Vec::new();
+            if is_metavariable(&declaration_or_rule) {
+                loop {
+                    if let Some(semicolon) = items.next_if(|next| {
+                        matches!(next, AnyCssDeclarationOrRule::CssEmptyDeclaration(_))
+                    }) {
+                        same_line.push(semicolon);
+                    }
+
+                    match items.next_if(|next| {
+                        is_metavariable(next) && !next.syntax().has_leading_newline()
+                    }) {
+                        Some(metavariable) => same_line.push(metavariable),
+                        None => break,
+                    }
+                }
+            }
 
             join.entry(
                 declaration_or_rule.syntax(),
                 &format_with(|f| {
                     write!(f, [format_or_verbatim(declaration_or_rule.format())])?;
-                    if let Some(semicolon) = &semicolon {
-                        write!(f, [format_or_verbatim(semicolon.format())])?;
+                    for item in &same_line {
+                        if is_metavariable(item) {
+                            write!(f, [space()])?;
+                        }
+                        write!(f, [format_or_verbatim(item.format())])?;
                     }
                     Ok(())
                 }),
@@ -41,4 +54,11 @@ impl FormatRule<CssDeclarationOrRuleList> for FormatCssDeclarationOrRuleList {
 
         join.finish()
     }
+}
+
+fn is_metavariable(declaration_or_rule: &AnyCssDeclarationOrRule) -> bool {
+    matches!(
+        declaration_or_rule,
+        AnyCssDeclarationOrRule::CssMetavariable(_)
+    )
 }
