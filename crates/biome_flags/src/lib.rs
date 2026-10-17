@@ -2,6 +2,12 @@
 
 #![deny(clippy::use_self)]
 
+mod ci;
+mod environment;
+
+pub use ci::CiProvider;
+pub use environment::{Environment, MemoryEnvironment, OsEnvironment};
+
 use biome_console::fmt::{Display, Formatter};
 use biome_console::{DebugDisplay, KeyValuePair, markup};
 use std::env;

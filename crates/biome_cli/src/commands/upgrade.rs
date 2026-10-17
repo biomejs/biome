@@ -1,9 +1,9 @@
+use crate::install_source::InstallSource;
 use crate::{CliDiagnostic, CliSession, VERSION};
 use biome_console::{ConsoleExt, markup};
 use biome_diagnostics::{Error, StdError};
-use biome_fs::normalize_path;
 use biome_package::node_semver::Version;
-use camino::{Utf8Path, Utf8PathBuf};
+use camino::Utf8PathBuf;
 use reqwest::blocking::Client;
 use self_update::backends::github::Update;
 use std::env;
@@ -30,7 +30,7 @@ pub(crate) fn upgrade(session: CliSession) -> Result<(), CliDiagnostic> {
                 None,
             )
         })?;
-    let install_source = detect_install_source(&current_exe);
+    let install_source = InstallSource::from_executable(session.environment.as_ref(), &current_exe);
 
     match install_source {
         InstallSource::Npm => Err(CliDiagnostic::upgrade_error(
@@ -223,82 +223,6 @@ fn parse_version(version: &str) -> Result<Version, CliDiagnostic> {
     })
 }
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
-enum InstallSource {
-    Homebrew,
-    Npm,
-    Standalone,
-    Unknown,
-}
-
-impl From<&str> for InstallSource {
-    fn from(source: &str) -> Self {
-        match source {
-            "homebrew" => Self::Homebrew,
-            "npm" => Self::Npm,
-            "standalone" => Self::Standalone,
-            _ => Self::Unknown,
-        }
-    }
-}
-
-/// Detect the installation source
-///
-/// This method detects the installation source based on the path to the binary.
-///
-/// If the `BIOME_DISTRIBUTION` environment variable is set, it will be used to determine the
-/// installation source instead of path-based detection. This allows users to override the
-/// detected installation source if necessary. Any unrecognized installation source is treated as
-/// unknown so `biome upgrade` does not attempt a cross-channel self-update.
-fn detect_install_source(current_exe: &Utf8Path) -> InstallSource {
-    if let Some(install_source) = install_source_from_env() {
-        return install_source;
-    }
-
-    let canonical = current_exe
-        .canonicalize_utf8()
-        .unwrap_or_else(|_| current_exe.to_path_buf());
-
-    if is_npm_install(&canonical) {
-        InstallSource::Npm
-    } else if is_homebrew_install(&canonical) {
-        InstallSource::Homebrew
-    } else {
-        InstallSource::Standalone
-    }
-}
-
-/// Detect the installation source from the environment
-fn install_source_from_env() -> Option<InstallSource> {
-    let install_source = env::var_os("BIOME_DISTRIBUTION")?;
-    let install_source = InstallSource::from(install_source.to_str()?);
-
-    Some(install_source)
-}
-
-/// Determines whether Biome was installed using a npm-compatible package manager
-fn is_npm_install(executable: &Utf8Path) -> bool {
-    executable
-        .components()
-        .any(|component| component.as_str() == "node_modules")
-}
-
-/// Determines if Biome was installed with Homebrew
-///
-/// See https://docs.brew.sh/Installation for common Homebrew installation paths
-///
-/// - /opt/homebrew covers macOS on Apple Silicon
-/// - /usr/local/Cellar covers macOS on Intel
-/// - /home/linuxbrew/.linuxbrew/ covers Linux installations
-/// - /Cellar/biome/ covers custom prefixes if users have set one
-fn is_homebrew_install(executable: &Utf8Path) -> bool {
-    let executable = normalize_path(executable);
-    executable.starts_with("/opt/homebrew/")
-        || executable.starts_with("/usr/local/Cellar/")
-        || executable.starts_with("/home/linuxbrew/.linuxbrew/")
-        || executable.as_str().contains("/Cellar/biome/")
-}
-
 fn binary_name_for_self_update() -> &'static str {
     if cfg!(windows) { "biome.exe" } else { "biome" }
 }
@@ -381,32 +305,6 @@ impl fmt::Display for ExitStatusDisplay {
 mod tests {
     use super::*;
     use biome_diagnostics::PrintDescription;
-
-    #[test]
-    fn detects_npm_install_from_path() {
-        assert_eq!(
-            detect_install_source(Utf8Path::new(
-                "/tmp/project/node_modules/@biomejs/cli-darwin-arm64/biome"
-            )),
-            InstallSource::Npm
-        );
-    }
-
-    #[test]
-    fn detects_homebrew_install_from_path() {
-        assert_eq!(
-            detect_install_source(Utf8Path::new("/opt/homebrew/Cellar/biome/2.4.8/bin/biome")),
-            InstallSource::Homebrew
-        );
-    }
-
-    #[test]
-    fn defaults_to_standalone_install_source() {
-        assert_eq!(
-            detect_install_source(Utf8Path::new("/usr/local/bin/biome")),
-            InstallSource::Standalone
-        );
-    }
 
     #[test]
     fn reports_unknown_install_source_upgrade_error() {
