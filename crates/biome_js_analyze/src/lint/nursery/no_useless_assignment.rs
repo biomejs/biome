@@ -114,7 +114,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUselessAssignment {
-        version: "next",
+        version: "2.6.0",
         name: "noUselessAssignment",
         language: "js",
         sources: &[RuleSource::Eslint("no-useless-assignment").same()],

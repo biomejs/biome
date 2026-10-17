@@ -104,7 +104,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseConsistentJsonFileRead {
-        version: "next",
+        version: "2.6.0",
         name: "useConsistentJsonFileRead",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("consistent-json-file-read").same()],

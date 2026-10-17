@@ -122,7 +122,7 @@ declare_lint_rule! {
     /// - [`noThisOutsideOfClass`](https://biomejs.dev/linter/rules/no-this-outside-of-class/)
     ///
     pub NoInvalidThis {
-        version: "next",
+        version: "2.6.0",
         name: "noInvalidThis",
         language: "js",
         sources: &[RuleSource::Eslint("no-invalid-this").same()],
