@@ -3140,6 +3140,20 @@
 				}
 			]
 		},
+		"LightnessNotation": {
+			"oneOf": [
+				{
+					"description": "Write lightness as a percentage, such as `oklch(85% 0.17 88)`.",
+					"type": "string",
+					"const": "percentage"
+				},
+				{
+					"description": "Write lightness as a number, such as `oklch(0.85 0.17 88)`.",
+					"type": "string",
+					"const": "number"
+				}
+			]
+		},
 		"LineEnding": {
 			"oneOf": [
 				{
@@ -8197,6 +8211,13 @@
 					"description": "Enforce a consistent way of reading JSON files before passing them to JSON.parse().\nSee https://biomejs.dev/linter/rules/use-consistent-json-file-read",
 					"anyOf": [
 						{ "$ref": "#/$defs/UseConsistentJsonFileReadConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentLightnessNotation": {
+					"description": "Enforce a consistent notation for the lightness of colors.\nSee https://biomejs.dev/linter/rules/use-consistent-lightness-notation",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseConsistentLightnessNotationConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13609,6 +13630,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseConsistentLightnessNotationOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseConsistentLightnessNotationOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseConsistentMemberAccessibilityOptions": {
 			"type": "object",
 			"properties": {
@@ -18388,6 +18422,22 @@
 				"readAs": {
 					"description": "Whether JSON files should be read as strings or as `Buffer`s before they are passed to `JSON.parse()`.\n\nDefault: `\"string\"`",
 					"anyOf": [{ "$ref": "#/$defs/JsonFileReadAs" }, { "type": "null" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseConsistentLightnessNotationConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseConsistentLightnessNotationOptions" }
+			]
+		},
+		"UseConsistentLightnessNotationOptions": {
+			"type": "object",
+			"properties": {
+				"notation": {
+					"description": "Whether the lightness of `lab()`, `lch()`, `oklab()`, and `oklch()` colors should be written as a percentage or as a number.\n\nDefault: `\"percentage\"`",
+					"anyOf": [{ "$ref": "#/$defs/LightnessNotation" }, { "type": "null" }]
 				}
 			},
 			"additionalProperties": false
