@@ -2,15 +2,10 @@
 //!
 //! [simd::SimdLexer] classifies the whole class string with SIMD up front. The token source's
 //! groupings build every token from its bitmaps.
-//!
-//! The tests check the groupings against the lexer of the reference implementation in
-//! `crate::legacy`.
 
 mod base_name_store;
 pub(crate) mod simd;
 
-#[cfg(test)]
-pub(crate) use base_name_store::is_delimiter;
 pub use base_name_store::{BASENAME_STORE, BaseNameStore};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_rowan::TextLen;

@@ -21,7 +21,7 @@ pub(crate) use css_value::group_css_value;
 #[cfg(test)]
 pub(crate) use css_value::{group_css_unit, group_url_value};
 #[cfg(test)]
-pub(crate) use variant::{group_selector, group_variant_segment};
+pub(crate) use variant::group_variant_segment;
 
 pub fn parse_root(p: &mut TailwindParser) {
     let m = p.start();
@@ -179,7 +179,7 @@ fn group_parenthesized(source: &mut TailwindTokenSource) {
 
 /// Groups the value after the `-` of a candidate: the atoms up to the next whitespace, `:`, `/`,
 /// `!`, `]`, `)` or `%`, which may be none, or one bracket.
-pub(crate) fn group_value(source: &mut TailwindTokenSource) {
+fn group_value(source: &mut TailwindTokenSource) {
     match source.next_byte() {
         None => source.take(EOF, 0),
         Some(byte) if is_whitespace(byte) => source.take_whitespace(),
@@ -190,7 +190,7 @@ pub(crate) fn group_value(source: &mut TailwindTokenSource) {
 
 /// Groups the modifier after a `/`: the atoms up to the next whitespace, `!`, `%` or `:`, or one
 /// bracket. An empty modifier is an error token.
-pub(crate) fn group_modifier(source: &mut TailwindTokenSource) {
+fn group_modifier(source: &mut TailwindTokenSource) {
     match source.next_byte() {
         None => source.take(EOF, 0),
         Some(byte) if is_whitespace(byte) => source.take_whitespace(),
@@ -335,7 +335,7 @@ fn parse_arbitrary_candidate(p: &mut TailwindParser) -> ParsedSyntax {
 
 /// Groups the token after the `[` of an arbitrary candidate: the property, which runs to the next
 /// `:` or whitespace, or one byte.
-pub(crate) fn group_property(source: &mut TailwindTokenSource) {
+fn group_property(source: &mut TailwindTokenSource) {
     match source.next_byte() {
         None => source.take(EOF, 0),
         Some(byte) if is_whitespace(byte) => source.take_whitespace(),
