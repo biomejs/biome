@@ -1,0 +1,20 @@
+$suffix:   abc;
+.theme{--short:  #1A2   #1A2B;--long: #4566A8 #4566A8FF #000000B2;
+--color-code: #4a729a;--color-focus-blue: #1a73e8;
+--raw: #12PX   #12unknown #12345 #1234567 #12e3 #-- #app #and;
+--escaped: #\31 2unknown #a\;b;
+--interpolation: #12unknown#{$suffix} #12#{$suffix} #{$suffix};
+--nested: token( #12unknown [#4566A8] {#12PX} );
+--punctuation: #1e+2 #12% #12.5 #--> #;
+--separated: # 12px #/**/12px #/* after */;
+--quoted: #12PX"quoted" #12PX'#{$suffix}';
+--literal: #$suffix #url(image.svg);
+--slashes: #12PX//raw;
+--important: #12unknown !important;
+color: #4566A8; width:12px;}
+
+@supports (--accent:#4566A8 // comment
+){.after-supports{--raw: #12unknown;}}
+
+/* biome-ignore format: Preserve authored raw hashes. */
+.keep{--value: #4566A8   #12PX;}
