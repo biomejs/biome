@@ -25,8 +25,6 @@ pub(crate) enum TailwindLexContext {
     Regular,
     /// Like Arbitrary, but specifically for arbitrary variants.
     ArbitraryVariant,
-    /// Like Arbitrary, but specifically for arbitrary candidates.
-    ArbitraryCandidate,
     /// Lexing one segment inside a Tailwind variant expression.
     ///
     /// Named segments stop at `-` and `:` so `group-peer-hover`

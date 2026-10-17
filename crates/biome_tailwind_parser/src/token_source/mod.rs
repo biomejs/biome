@@ -499,12 +499,6 @@ pub(crate) fn lex_arbitrary_variant(source: &mut TailwindTokenSource) {
     source.lex(TailwindLexContext::ArbitraryVariant);
 }
 
-/// The [Grouping] of the tokens that [SimdLexer] lexes in
-/// [TailwindLexContext::ArbitraryCandidate].
-pub(crate) fn lex_arbitrary_candidate(source: &mut TailwindTokenSource) {
-    source.lex(TailwindLexContext::ArbitraryCandidate);
-}
-
 /// The [Grouping] of the tokens that [SimdLexer] lexes in [TailwindLexContext::VariantSegment].
 pub(crate) fn lex_variant_segment(source: &mut TailwindTokenSource) {
     source.lex(TailwindLexContext::VariantSegment);
