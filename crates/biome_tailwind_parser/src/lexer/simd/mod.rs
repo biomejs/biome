@@ -221,6 +221,7 @@ impl<'src> SimdLexer<'src> {
     pub(crate) fn find_stop(&self, position: usize, stop: Stop) -> usize {
         match stop {
             Stop::ParenOrWhitespace => next_bit(&self.blocks, position, |block| block.paren_stop),
+            Stop::ColonOrWhitespace => next_bit(&self.blocks, position, |block| block.colon_stop),
         }
     }
 
@@ -259,17 +260,6 @@ impl<'src> SimdLexer<'src> {
                     // A selector can itself start with `[`.
                     _ if previous == T!['['] => (TW_SELECTOR, self.selector_end(position)),
                     b'[' => single(byte, position),
-                    _ => self.named_value(position),
-                },
-                TailwindLexContext::ArbitraryCandidate => match byte {
-                    b'(' | b')' | b'[' | b']' | b':' => single(byte, position),
-                    _ if previous == T!['['] => {
-                        let end = next_bit(&self.blocks, position, |block| block.colon_stop);
-                        (TW_PROPERTY, end)
-                    }
-                    _ if previous == T![:] => {
-                        return self.css_value(position, previous, diagnostics);
-                    }
                     _ => self.named_value(position),
                 },
                 TailwindLexContext::VariantSegment => match byte {
@@ -588,6 +578,8 @@ impl<'src> SimdLexer<'src> {
 pub(crate) enum Stop {
     /// `)` and whitespace.
     ParenOrWhitespace,
+    /// `:` and whitespace.
+    ColonOrWhitespace,
 }
 
 /// Returns the kind and end of the one-byte token `byte` at `position`.

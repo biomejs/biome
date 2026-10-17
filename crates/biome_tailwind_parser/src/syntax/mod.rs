@@ -1,10 +1,10 @@
-use crate::lexer::simd::is_whitespace;
+use crate::lexer::simd::{Stop, is_whitespace};
 use crate::parser::TailwindParser;
 use crate::syntax::css_value::parse_css_generic_component_value_list;
 use crate::syntax::parse_error::*;
 use crate::syntax::value::parse_value;
 use crate::syntax::variant::VariantList;
-use crate::token_source::{TailwindTokenSource, lex_arbitrary_candidate, lex_css_value};
+use crate::token_source::{TailwindTokenSource, lex_css_value};
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::prelude::*;
@@ -211,12 +211,14 @@ fn parse_arbitrary_candidate(p: &mut TailwindParser) -> ParsedSyntax {
 
     let checkpoint = p.checkpoint();
     let m = p.start();
-    if !p.expect_with_context(T!['['], lex_arbitrary_candidate) {
+    if !p.expect_with_context(T!['['], group_property) {
         m.abandon(p);
         p.rewind(checkpoint);
         return Absent;
     }
-    if !p.expect_with_context(TW_PROPERTY, lex_arbitrary_candidate) {
+    // A property ends at a `:`, whitespace or the end of the source, which the regular tokens
+    // group like the candidate does.
+    if !p.expect(TW_PROPERTY) {
         m.abandon(p);
         p.rewind(checkpoint);
         return Absent;
@@ -250,6 +252,17 @@ fn parse_arbitrary_candidate(p: &mut TailwindParser) -> ParsedSyntax {
     }
 
     Present(m.complete(p, TW_ARBITRARY_CANDIDATE))
+}
+
+/// Groups the token after the `[` of an arbitrary candidate: the property, which runs to the next
+/// `:` or whitespace, or one byte.
+pub(crate) fn group_property(source: &mut TailwindTokenSource) {
+    match source.next_byte() {
+        None => source.take(EOF, 0),
+        Some(byte) if is_whitespace(byte) => source.take_whitespace(),
+        Some(byte @ (b'(' | b')' | b'[' | b']' | b':')) => source.take_punctuation(byte),
+        Some(_) => source.merge_until(Stop::ColonOrWhitespace, TW_PROPERTY),
+    }
 }
 
 /// Whether the class chunk at the current position contains a `:` before
