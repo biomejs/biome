@@ -1,7 +1,9 @@
-use crate::TailwindParserOptions;
-use crate::lexer::TailwindLexer;
+//! The token source over [TailwindLexer], which lexes each token when the parser asks for it.
+
+use crate::lexer::legacy::TailwindLexer;
+use crate::lexer::{BaseNameStore, TailwindLexContext};
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_parser::lexer::{BufferedLexer, LexContext};
+use biome_parser::lexer::BufferedLexer;
 use biome_parser::prelude::BumpWithContext;
 use biome_parser::token_source::{
     TokenSource, TokenSourceCheckpoint, TokenSourceWithBufferedLexer, Trivia,
@@ -9,47 +11,20 @@ use biome_parser::token_source::{
 use biome_rowan::TriviaPieceKind;
 use biome_tailwind_syntax::TailwindSyntaxKind::EOF;
 use biome_tailwind_syntax::{TailwindSyntaxKind, TextRange};
+use biome_unicode_table::{Dispatch::WHS, lookup_byte};
 
-pub(crate) struct TailwindTokenSource<'source> {
+pub(crate) struct LegacyTokenSource<'source> {
     lexer: BufferedLexer<TailwindSyntaxKind, TailwindLexer<'source>>,
 
     /// Trivia emitted by the lexer and tokens skipped during parser recovery.
     pub(super) trivia_list: Vec<Trivia>,
 }
-pub(crate) type TailwindTokenSourceCheckpoint = TokenSourceCheckpoint<TailwindSyntaxKind>;
+pub(crate) type LegacyTokenSourceCheckpoint = TokenSourceCheckpoint<TailwindSyntaxKind>;
 
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord)]
-pub(crate) enum TailwindLexContext {
-    /// The default state.
-    #[default]
-    Regular,
-    /// The parser just encountered a `-` before a basename, e.g. in `-mt-4`. That meant that the next token should be a basename.
-    SawNegative,
-    /// Like Arbitrary, but specifically for arbitrary variants.
-    ArbitraryVariant,
-    /// Like Arbitrary, but specifically for arbitrary candidates.
-    ArbitraryCandidate,
-    /// Lexing one segment inside a Tailwind variant expression.
-    ///
-    /// Named segments stop at `-` and `:` so `group-peer-hover`
-    /// becomes `group` / `peer` / `hover`.
-    VariantSegment,
-    /// CSS value lexing inside arbitrary values and arbitrary candidate values.
-    CssValue,
-    /// Raw URL body lexing inside `url(...)`.
-    CssUrlRawValue,
-}
-
-impl LexContext for TailwindLexContext {
-    fn is_regular(&self) -> bool {
-        matches!(self, Self::Regular)
-    }
-}
-
-impl<'source> TailwindTokenSource<'source> {
+impl<'source> LegacyTokenSource<'source> {
     /// Creates a new token source for the given string
-    pub fn from_str(source: &'source str, options: TailwindParserOptions<'source>) -> Self {
-        let lexer = TailwindLexer::from_str(source).with_base_names(options.base_names);
+    pub fn from_str(source: &'source str, base_names: &'source BaseNameStore) -> Self {
+        let lexer = TailwindLexer::from_str(source).with_base_names(base_names);
 
         let buffered = BufferedLexer::new(lexer);
         let mut source = Self::new(buffered);
@@ -81,15 +56,15 @@ impl<'source> TailwindTokenSource<'source> {
     }
 
     /// Creates a checkpoint to which it can later return using [Self::rewind].
-    pub fn checkpoint(&self) -> TailwindTokenSourceCheckpoint {
-        TailwindTokenSourceCheckpoint {
+    pub fn checkpoint(&self) -> LegacyTokenSourceCheckpoint {
+        LegacyTokenSourceCheckpoint {
             trivia_len: self.trivia_list.len() as u32,
             lexer_checkpoint: self.lexer.checkpoint(),
         }
     }
 
     /// Restores the token source to a previous state
-    pub fn rewind(&mut self, checkpoint: TailwindTokenSourceCheckpoint) {
+    pub fn rewind(&mut self, checkpoint: LegacyTokenSourceCheckpoint) {
         assert!(self.trivia_list.len() >= checkpoint.trivia_len as usize);
         self.trivia_list.truncate(checkpoint.trivia_len as usize);
         self.lexer.rewind(checkpoint.lexer_checkpoint);
@@ -98,9 +73,18 @@ impl<'source> TailwindTokenSource<'source> {
     pub fn re_lex_current_in_context(&mut self, context: TailwindLexContext) -> TailwindSyntaxKind {
         self.lexer.force_relex_in_context(context)
     }
+
+    /// Returns whether a `:` follows the start of the current token before the next whitespace.
+    pub fn has_colon_before_whitespace(&self) -> bool {
+        let start = usize::from(self.current_range().start());
+        self.text().as_bytes()[start..]
+            .iter()
+            .take_while(|&&byte| !matches!(lookup_byte(byte), WHS))
+            .any(|&byte| byte == b':')
+    }
 }
 
-impl TokenSource for TailwindTokenSource<'_> {
+impl TokenSource for LegacyTokenSource<'_> {
     type Kind = TailwindSyntaxKind;
 
     fn current(&self) -> Self::Kind {
@@ -132,7 +116,7 @@ impl TokenSource for TailwindTokenSource<'_> {
     }
 }
 
-impl BumpWithContext for TailwindTokenSource<'_> {
+impl BumpWithContext for LegacyTokenSource<'_> {
     type Context = TailwindLexContext;
     fn bump_with_context(&mut self, context: Self::Context) {
         if self.current() != EOF {
@@ -153,9 +137,7 @@ impl BumpWithContext for TailwindTokenSource<'_> {
     }
 }
 
-impl<'source> TokenSourceWithBufferedLexer<TailwindLexer<'source>>
-    for TailwindTokenSource<'source>
-{
+impl<'source> TokenSourceWithBufferedLexer<TailwindLexer<'source>> for LegacyTokenSource<'source> {
     fn lexer(&mut self) -> &mut BufferedLexer<TailwindSyntaxKind, TailwindLexer<'source>> {
         &mut self.lexer
     }

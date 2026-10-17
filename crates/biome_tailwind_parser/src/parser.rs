@@ -3,7 +3,7 @@ use crate::token_source::{TailwindTokenSource, TailwindTokenSourceCheckpoint};
 use biome_parser::diagnostic::{ParseDiagnostic, merge_diagnostics};
 use biome_parser::event::Event;
 use biome_parser::tree_sink::LosslessTreeSink;
-use biome_parser::{Parser, ParserContext};
+use biome_parser::{Parser, ParserContext, TokenSet};
 use biome_parser::{ParserContextCheckpoint, prelude::*};
 use biome_tailwind_factory::TailwindSyntaxFactory;
 use biome_tailwind_syntax::{TailwindLanguage, TailwindSyntaxKind};
@@ -18,9 +18,13 @@ pub(crate) struct TailwindParser<'source> {
 
 impl<'source> TailwindParser<'source> {
     pub fn new(source: &'source str, options: TailwindParserOptions<'source>) -> Self {
+        Self::with_token_source(TailwindTokenSource::from_str(source, options))
+    }
+
+    pub(crate) fn with_token_source(source: TailwindTokenSource<'source>) -> Self {
         Self {
             context: ParserContext::default(),
-            source: TailwindTokenSource::from_str(source, options),
+            source,
         }
     }
 
@@ -49,6 +53,19 @@ impl<'source> TailwindParser<'source> {
     pub fn rewind(&mut self, checkpoint: TailwindParserCheckpoint) {
         self.context.rewind(checkpoint.parser);
         self.source.rewind(checkpoint.token_source);
+    }
+
+    /// Whether the `n`th non-trivia token after the current one, lexed in
+    /// [TailwindLexContext::Regular](crate::lexer::TailwindLexContext::Regular), is of `kind`.
+    pub fn nth_at(&mut self, n: usize, kind: TailwindSyntaxKind) -> bool {
+        self.source.nth(n) == kind
+    }
+
+    /// Whether the `n`th non-trivia token after the current one, lexed in
+    /// [TailwindLexContext::Regular](crate::lexer::TailwindLexContext::Regular), is of one of
+    /// `kinds`.
+    pub fn nth_at_ts(&mut self, n: usize, kinds: TokenSet<TailwindSyntaxKind>) -> bool {
+        kinds.contains(self.source.nth(n))
     }
 }
 

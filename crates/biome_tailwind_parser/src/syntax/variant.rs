@@ -1,8 +1,8 @@
+use crate::lexer::TailwindLexContext;
 use crate::parser::TailwindParser;
 use crate::syntax::css_value::parse_css_parameter_list;
 use crate::syntax::parse_error::*;
 use crate::syntax::parse_modifier;
-use crate::token_source::TailwindLexContext;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
 use biome_parser::{Parser, parse_recovery::ParseRecoveryTokenSet, token_set};
@@ -19,6 +19,11 @@ impl ParseSeparatedList for VariantList {
     const LIST_KIND: Self::Kind = TW_VARIANT_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        // A variant ends in a `:` and never spans whitespace, so without a `:` before the next
+        // whitespace, `parse_variant` would parse the rest of the class only to rewind.
+        if !p.source().has_colon_before_whitespace() {
+            return Absent;
+        }
         parse_variant(p)
     }
 
