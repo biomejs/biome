@@ -18,11 +18,8 @@ use biome_tailwind_syntax::TextSize;
 
 /// The contexts in which [simd::SimdLexer::lex] lexes a token, which the token source's groupings
 /// haven't replaced yet.
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, PartialOrd, Ord)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
 pub(crate) enum TailwindLexContext {
-    /// The default state.
-    #[default]
-    Regular,
     /// CSS value lexing inside arbitrary values and arbitrary candidate values.
     CssValue,
 }
