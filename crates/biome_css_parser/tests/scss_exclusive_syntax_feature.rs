@@ -110,6 +110,9 @@ fn scss_only_entries_recover_with_one_diagnostic() {
         "a { value: [$value]; color: red; }",
         "@media (width: 10px + 1px) { .inside {} }",
         "@media (width: $value + 1px) { .inside {} }",
+        "@property #{$name} { syntax: \"*\"; inherits: false; }",
+        "@font-palette-values #{$name} { font-family: \"Bixa\"; }",
+        "@position-try #{$name} { top: 0; }",
     ] {
         let source = format!("{source} .after {{ color: blue; }}");
         let parsed = parse_css(

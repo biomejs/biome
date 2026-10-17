@@ -11,6 +11,7 @@ impl FormatRule<AnyCssAtRuleDashedName> for FormatAnyCssAtRuleDashedName {
             AnyCssAtRuleDashedName::CssBogusCustomIdentifier(node) => node.format().fmt(f),
             AnyCssAtRuleDashedName::CssDashedIdentifier(node) => node.format().fmt(f),
             AnyCssAtRuleDashedName::ScssInterpolatedDashedIdentifier(node) => node.format().fmt(f),
+            AnyCssAtRuleDashedName::ScssInterpolatedIdentifier(node) => node.format().fmt(f),
         }
     }
 }
