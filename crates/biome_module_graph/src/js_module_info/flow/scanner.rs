@@ -2,10 +2,10 @@ use super::builder::MAX_DEPTH;
 use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::{JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
-    AnyJsStatement, AnyTsReturnType, JsAssignmentExpression, JsAssignmentOperator,
+    AnyJsBinding, AnyJsStatement, AnyTsReturnType, JsAssignmentExpression, JsAssignmentOperator,
     JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIdentifierBinding,
     JsIfStatement, JsLogicalExpression, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode,
-    JsWhileStatement, unescape_js_identifier,
+    JsWhileStatement, TsDeclareFunctionDeclaration, unescape_js_identifier,
 };
 use biome_rowan::{AstNode, SyntaxKind, TextRange, declare_node_union};
 
@@ -40,9 +40,9 @@ declare_node_union! {
 /// logical assignments, bogus syntax, or nesting deeper than [`MAX_DEPTH`].
 ///
 /// Types never run, so the scanner ignores conditions and references inside
-/// them and skips type aliases, interfaces, and function overload declarations
-/// entirely. Roots nested in types, such as a function in a computed property
-/// key, are therefore never selected.
+/// them, skips type aliases and interfaces entirely, and skips everything but
+/// the name of a function overload declaration. Roots nested in types, such as
+/// a function in a computed property key, are therefore never selected.
 #[derive(Default)]
 pub(crate) struct FlowRootScanner {
     open: Vec<OpenRoot>,
@@ -109,6 +109,12 @@ impl FlowRootScanner {
                 | JsSyntaxKind::TS_INTERFACE_DECLARATION
                 | JsSyntaxKind::TS_DECLARE_FUNCTION_DECLARATION
         ) {
+            // The signature never runs, but its name is a value of this root.
+            if let Some(declaration) = TsDeclareFunctionDeclaration::cast_ref(node)
+                && let Ok(AnyJsBinding::JsIdentifierBinding(binding)) = declaration.id()
+            {
+                self.bindings.push(binding);
+            }
             self.declaration = Some(self.depth);
             return;
         }

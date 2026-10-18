@@ -109,8 +109,8 @@ parameter, `let`, or `const` declared inside the function that owns the
 the top level of a script. Variables typed
 `any`, or whose type includes an undetermined part, never narrow because no
 supported test can change them. Collection already drops reads of untyped and
-`any`-annotated variables, and builds no graph for a root that declares no
-other variable; other variable types are resolved only when a
+`any`-annotated variables, and builds no graph for a root that declares none
+of the variables that can narrow; other variable types are resolved only when a
 candidate read is queried, because resolving them can be costly. If flow
 solving exhausts its work limit or a query cycle occurs, the result is unknown.
 Callers must respect that result rather than replace it with a more confident
