@@ -9,6 +9,7 @@ use biome_js_syntax::{
     TsExportAssignmentClause, unescape_js_string,
 };
 use biome_js_type_info::{ImportSymbol, RawTypeCollector, TypeData, TypeReference};
+use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, TokenText, WalkEvent};
 use camino::Utf8PathBuf;
 
@@ -45,7 +46,10 @@ impl JsModuleVisitor {
     pub fn collect_info(mut self) -> JsModuleInfo {
         let mut collector = JsModuleInfoCollector::new(self.semantic_model.clone());
         let mut flow_roots = FlowRootScanner::default();
-        let scan_flow_roots = self.inference_mode != TypeInferenceMode::Disabled;
+        // Declaration files contain no code that runs, so no root can need flow.
+        let scan_flow_roots = self.inference_mode != TypeInferenceMode::Disabled
+            && !JsFileSource::try_from(self.file_path.as_path())
+                .is_ok_and(|source| source.language().is_definition_file());
 
         let iter = self.root.syntax().preorder();
         for event in iter {
