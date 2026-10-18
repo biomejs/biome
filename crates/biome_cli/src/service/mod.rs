@@ -283,6 +283,9 @@ where
         if let Some(channel) = channel {
             let response = match (response.result, response.error) {
                 (Some(result), None) => Ok(result),
+                (None, Some(err)) if err.code == CONTENT_MODIFIED => {
+                    Err(TransportError::ContentModified)
+                }
                 (None, Some(err)) => match err.data.and_then(|data| from_str(data.get()).ok()) {
                     Some(diagnostic) => Err(TransportError::RemoteDiagnostic(Box::new(diagnostic))),
                     None => Err(TransportError::RPCError(err.message)),
@@ -440,9 +443,13 @@ struct JsonRpcResponse {
     error: Option<JsonRpcError>,
 }
 
+/// The `ContentModified` error code of the Language Server Protocol. The
+/// server answers with it when a concurrent change to the workspace cancelled
+/// the request.
+const CONTENT_MODIFIED: i64 = -32801;
+
 #[derive(Debug, Deserialize)]
 struct JsonRpcError {
-    #[expect(dead_code)]
     code: i64,
     message: String,
     data: Option<Box<RawValue>>,
@@ -483,5 +490,116 @@ impl FromStr for TransportHeader {
             }
             _ => Ok(Self::Unknown(name.into())),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use biome_fs::{BiomePath, MemoryFileSystem};
+    use biome_service::projects::ProjectKey;
+    use biome_service::workspace::{
+        FileExistsParams, ScanKind, ScanProjectParams, WorkspaceClient,
+    };
+    use biome_service::{Workspace, WorkspaceError};
+    use serde_json::json;
+    use tokio::io::{duplex, split};
+
+    /// Answers the requests read from `stream` with `responses`, in order, and
+    /// returns the methods of the requests.
+    async fn scripted_server<S>(stream: S, responses: Vec<Value>) -> Vec<String>
+    where
+        S: AsyncRead + AsyncWrite,
+    {
+        let (read, mut write) = split(stream);
+        let mut read = BufReader::new(read);
+        let mut methods = Vec::new();
+
+        for mut response in responses {
+            let request: Value = from_slice(&read_message(&mut read).await.unwrap()).unwrap();
+            methods.push(request["method"].as_str().unwrap().to_string());
+
+            response["jsonrpc"] = json!("2.0");
+            response["id"] = request["id"].clone();
+            write_message(&mut write, to_vec(&response).unwrap())
+                .await
+                .unwrap();
+        }
+
+        methods
+    }
+
+    /// Returns a client connected to a [scripted_server] that answers
+    /// `initialize` and then the requests of the test with `responses`, and a
+    /// function that waits for the server and returns the methods it received.
+    fn scripted_client(
+        responses: Vec<Value>,
+    ) -> (
+        WorkspaceClient<SocketTransport>,
+        impl FnOnce() -> Vec<String>,
+    ) {
+        let runtime = Runtime::new().unwrap();
+        let (client, server) = duplex(4096);
+        let mut all_responses = vec![json!({ "result": {} })];
+        all_responses.extend(responses);
+        let server = runtime.spawn(scripted_server(server, all_responses));
+        let handle = runtime.handle().clone();
+
+        let (client_read, client_write) = split(client);
+        let transport = SocketTransport::open(runtime, client_read, client_write);
+        let workspace =
+            WorkspaceClient::new(transport, Box::new(MemoryFileSystem::default())).unwrap();
+
+        (workspace, move || handle.block_on(server).unwrap())
+    }
+
+    fn content_modified() -> Value {
+        json!({
+            "error": {
+                "code": CONTENT_MODIFIED,
+                "message": "cancelled because of pending write",
+                "data": "PendingWrite",
+            }
+        })
+    }
+
+    #[test]
+    fn resends_request_cancelled_by_content_change() {
+        let (workspace, received_methods) =
+            scripted_client(vec![content_modified(), json!({ "result": true })]);
+
+        let exists = workspace.file_exists(FileExistsParams {
+            file_path: BiomePath::new("file.js"),
+        });
+
+        assert!(matches!(exists, Ok(true)), "unexpected result {exists:?}");
+        assert_eq!(
+            received_methods(),
+            ["initialize", "biome/file_exists", "biome/file_exists"]
+        );
+    }
+
+    #[test]
+    fn does_not_resend_project_scan_cancelled_by_content_change() {
+        let (workspace, received_methods) = scripted_client(vec![content_modified()]);
+
+        let result = workspace.scan_project(ScanProjectParams {
+            project_key: ProjectKey::new(),
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::KnownFiles,
+            verbose: false,
+        });
+
+        assert!(
+            matches!(
+                result,
+                Err(WorkspaceError::TransportError(
+                    TransportError::ContentModified
+                ))
+            ),
+            "unexpected result {result:?}"
+        );
+        assert_eq!(received_methods(), ["initialize", "biome/scan_project"]);
     }
 }

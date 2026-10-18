@@ -605,6 +605,9 @@ pub enum TransportError {
     Timeout,
     /// Error caused by a serialization or deserialization issue
     SerdeError(String),
+    /// Error emitted when the remote workspace cancelled a request because
+    /// its content changed while the request was running.
+    ContentModified,
     /// Generic error type for RPC errors that can't be deserialized into RomeError
     RPCError(String),
     /// A diagnostic returned by a remote workspace.
@@ -639,6 +642,9 @@ impl Diagnostic for TransportError {
                 "a request to the remote workspace failed because the connection was interrupted",
             ),
             Self::Timeout => fmt.write_str("the request to the remote workspace timed out"),
+            Self::ContentModified => fmt.write_str(
+                "the remote workspace cancelled the request because its content changed",
+            ),
             Self::RPCError(err) => fmt.write_str(err),
             Self::RemoteDiagnostic(diagnostic) => diagnostic.description(fmt),
         }
@@ -651,6 +657,9 @@ impl Diagnostic for TransportError {
                 "a request to the remote workspace failed because the connection was interrupted",
             ),
             Self::Timeout => fmt.write_str("the request to the remote workspace timed out"),
+            Self::ContentModified => fmt.write_str(
+                "the remote workspace cancelled the request because its content changed",
+            ),
             Self::RPCError(err) => fmt.write_str(err),
             Self::RemoteDiagnostic(diagnostic) => diagnostic.message(fmt),
         }
