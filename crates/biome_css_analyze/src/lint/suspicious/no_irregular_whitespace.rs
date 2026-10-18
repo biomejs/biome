@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_css_syntax::{AnyCssRoot, CssSyntaxKind, CssSyntaxNode};
 use biome_diagnostics::Severity;
-use biome_rowan::{AstNode, Direction, TextRange};
+use biome_rowan::{AstNode, TextRange};
 use biome_rule_options::no_irregular_whitespace::NoIrregularWhitespaceOptions;
 
 declare_lint_rule! {
@@ -89,7 +89,7 @@ fn is_irregular_whitespace(c: char) -> bool {
 
 fn get_irregular_whitespace(syntax: &CssSyntaxNode) -> Vec<TextRange> {
     let mut results = vec![];
-    for token in syntax.descendants_tokens(Direction::Next) {
+    for token in syntax.borrowed_tokens() {
         let is_bom = token.kind() == CssSyntaxKind::UNICODE_BOM;
 
         let is_string = matches!(
@@ -98,17 +98,26 @@ fn get_irregular_whitespace(syntax: &CssSyntaxNode) -> Vec<TextRange> {
         );
 
         for piece in token
-            .leading_trivia()
-            .pieces()
-            .chain(token.trailing_trivia().pieces())
+            .leading_trivia_pieces()
+            .chain(token.trailing_trivia_pieces())
         {
             if !piece.kind().is_comment() && piece.text().chars().any(is_irregular_whitespace) {
                 results.push(piece.text_range());
             }
         }
 
-        if !is_bom && !is_string && token.text_trimmed().chars().any(is_irregular_whitespace) {
-            results.push(token.text_trimmed_range());
+        if !is_bom && !is_string {
+            let text_range = token.text_range();
+            let text_trimmed_range = token.text_trimmed_range();
+            let start = usize::from(text_trimmed_range.start() - text_range.start());
+            let end = usize::from(text_trimmed_range.end() - text_range.start());
+
+            if token.text()[start..end]
+                .chars()
+                .any(is_irregular_whitespace)
+            {
+                results.push(text_trimmed_range);
+            }
         }
     }
     results
