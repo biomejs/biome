@@ -213,12 +213,12 @@ impl Rule for NoMisusedPromises {
         }
 
         let mut mutation = ctx.root().begin();
-        let await_expression = AnyJsExpression::JsAwaitExpression(make::js_await_expression(
-            make::token(JsSyntaxKind::AWAIT_KW).with_trailing_space(),
-            expression.clone().trim_leading_trivia()?,
-        ));
-
-        mutation.replace_node(expression.clone(), await_expression);
+        mutation.wrap_node(expression.clone(), |expression| {
+            AnyJsExpression::JsAwaitExpression(make::js_await_expression(
+                make::token(JsSyntaxKind::AWAIT_KW).with_trailing_space(),
+                expression,
+            ))
+        })?;
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),

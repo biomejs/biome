@@ -369,6 +369,30 @@ where
         self.replace_token_discard_trivia(prev_token, new_token)
     }
 
+    /// Push a change to replace `node` with the node that `wrap` builds around it, such as
+    /// `await node` or `(node)`.
+    ///
+    /// `wrap` receives `node` without its outer leading and trailing trivia. That trivia is put
+    /// around the result instead, so comments in front of `node` end up in front of the wrapper
+    /// and appear once.
+    ///
+    /// Returns `None` if `node` has no tokens.
+    pub fn wrap_node<T, U>(&mut self, node: T, wrap: impl FnOnce(T) -> U) -> Option<()>
+    where
+        T: AstNode<Language = L>,
+        U: AstNode<Language = L>,
+    {
+        let prev_node = node.syntax().clone();
+        let leading = prev_node.first_leading_trivia()?;
+        let trailing = prev_node.last_trailing_trivia()?;
+        let wrapped = wrap(node.trim_comments_and_trivia()?)
+            .into_syntax()
+            .prepend_trivia_pieces(leading.pieces())?
+            .append_trivia_pieces(trailing.pieces())?;
+        self.replace_element_discard_trivia(prev_node.into(), wrapped.into());
+        Some(())
+    }
+
     /// Push a change to replace the "prev_element" with "next_element".
     ///
     /// Changes to take effect must be committed.
@@ -735,8 +759,10 @@ where
 #[cfg(test)]
 pub mod test {
     use crate::{
-        AstNode, BatchMutationExt, SyntaxNodeCast, TriviaPiece,
-        raw_language::{LiteralExpression, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder},
+        AstNode, BatchMutationExt, RawSyntaxKind, SyntaxKindSet, SyntaxNodeCast, TriviaPiece,
+        raw_language::{
+            LiteralExpression, RawLanguage, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder,
+        },
     };
 
     /// ```
@@ -960,5 +986,76 @@ pub mod test {
             .descendants_tokens(crate::Direction::Next)
             .any(|t: crate::SyntaxToken<_>| t.text_trimmed() == "a");
         assert!(!has_a, "node 'a' should have been removed");
+    }
+
+    /// A `( LITERAL_EXPRESSION )` node, used as the wrapper in the `wrap_node` test.
+    #[derive(Clone)]
+    struct Condition {
+        node: crate::SyntaxNode<RawLanguage>,
+    }
+
+    impl AstNode for Condition {
+        type Language = RawLanguage;
+
+        const KIND_SET: SyntaxKindSet<RawLanguage> =
+            SyntaxKindSet::from_raw(RawSyntaxKind(RawLanguageKind::CONDITION as u16));
+
+        fn can_cast(kind: RawLanguageKind) -> bool {
+            kind == RawLanguageKind::CONDITION
+        }
+
+        fn cast(syntax: crate::SyntaxNode<RawLanguage>) -> Option<Self> {
+            Self::can_cast(syntax.kind()).then_some(Self { node: syntax })
+        }
+
+        fn syntax(&self) -> &crate::SyntaxNode<RawLanguage> {
+            &self.node
+        }
+
+        fn into_syntax(self) -> crate::SyntaxNode<RawLanguage> {
+            self.node
+        }
+    }
+
+    #[test]
+    pub fn ok_wrap_node_moves_trivia_outside_wrapper() {
+        let mut builder = RawSyntaxTreeBuilder::new();
+        builder.start_node(RawLanguageKind::ROOT);
+        builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+        builder.token_with_trivia(
+            RawLanguageKind::STRING_TOKEN,
+            "// a\na /* b */",
+            &[TriviaPiece::single_line_comment(4), TriviaPiece::newline(1)],
+            &[
+                TriviaPiece::whitespace(1),
+                TriviaPiece::multi_line_comment(7),
+            ],
+        );
+        builder.finish_node();
+        builder.finish_node();
+        let root = builder.finish().cast::<RawLanguageRoot>().unwrap();
+
+        let node_a = find(&root, "a");
+        let mut batch = root.begin();
+        batch
+            .wrap_node(node_a, |node_a| {
+                assert_eq!(node_a.syntax().to_string(), "a");
+                let token =
+                    |kind, text| Some(crate::SyntaxToken::new_detached(kind, text, [], []).into());
+                Condition {
+                    node: crate::SyntaxNode::new_detached(
+                        RawLanguageKind::CONDITION,
+                        [
+                            token(RawLanguageKind::L_PAREN_TOKEN, "("),
+                            Some(node_a.into_syntax().into()),
+                            token(RawLanguageKind::R_PAREN_TOKEN, ")"),
+                        ],
+                    ),
+                }
+            })
+            .unwrap();
+        let after = batch.commit();
+
+        assert_eq!(after.to_string(), "// a\n(a) /* b */");
     }
 }

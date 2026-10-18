@@ -168,31 +168,33 @@ impl Rule for NoVueDataObjectDeclaration {
             .clone()
             .cast::<AnyJsExpression>()?;
 
-        let data_function = make::js_function_expression(
-            make::token(T![function]),
-            make::js_parameters(
-                make::token(T!['(']),
-                make::js_parameter_list(None, None),
-                make::token(T![')']).with_trailing_space(),
-            ),
-            make::js_function_body(
-                make::token(T!['{']).with_trailing_trivia([(TriviaPieceKind::Newline, "\n")]),
-                make::js_directive_list(None),
-                make::js_statement_list([AnyJsStatement::JsReturnStatement(
-                    make::js_return_statement(make::token(T![return]).with_trailing_space())
-                        .with_argument(data_expr.clone())
-                        .build(),
-                )]),
-                make::token(T!['}']).with_leading_newline(),
-            ),
-        )
-        .build();
-
         let mut mutation = ctx.root().begin();
-        mutation.replace_node(
-            data_expr,
-            AnyJsExpression::JsFunctionExpression(data_function),
-        );
+        mutation.wrap_node(data_expr, |data_expr| {
+            AnyJsExpression::JsFunctionExpression(
+                make::js_function_expression(
+                    make::token(T![function]),
+                    make::js_parameters(
+                        make::token(T!['(']),
+                        make::js_parameter_list(None, None),
+                        make::token(T![')']).with_trailing_space(),
+                    ),
+                    make::js_function_body(
+                        make::token(T!['{'])
+                            .with_trailing_trivia([(TriviaPieceKind::Newline, "\n")]),
+                        make::js_directive_list(None),
+                        make::js_statement_list([AnyJsStatement::JsReturnStatement(
+                            make::js_return_statement(
+                                make::token(T![return]).with_trailing_space(),
+                            )
+                            .with_argument(data_expr)
+                            .build(),
+                        )]),
+                        make::token(T!['}']).with_leading_newline(),
+                    ),
+                )
+                .build(),
+            )
+        })?;
 
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
