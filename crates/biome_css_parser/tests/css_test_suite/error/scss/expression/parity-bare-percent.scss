@@ -1,9 +1,6 @@
 $malformed: 10 % +;
 .after-modulo { width: 75%; }
 
-@mixin width-in($amount, $unit: %) {
-  width: #{$amount}#{$unit};
-}
 .incomplete {
   @include width-in(75, %;
   color: red;

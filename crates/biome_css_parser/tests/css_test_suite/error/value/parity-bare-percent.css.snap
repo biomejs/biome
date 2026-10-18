@@ -8,20 +8,11 @@ expression: snapshot
 ```css
 .bare {
   width: %;
-  color: red;
-}
-.generic {
-  width: unknown(%);
-  color: blue;
-}
-.fallback {
-  width: attr(data-progress %, %);
-  width: 75%;
-}
-.custom-properties {
+  generic: unknown(%);
+  fallback: attr(data-progress %, %);
   --unit: %;
   --raw: 10 % +;
-  color: green;
+  color: red;
 }
 .after { width: attr(data-progress %, 0%); }
 
@@ -77,69 +68,30 @@ CssRoot {
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssGenericProperty {
-                                name: CssIdentifier {
-                                    value_token: IDENT@19..27 "color" [Newline("\n"), Whitespace("  ")] [],
-                                },
-                                colon_token: COLON@27..29 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    CssIdentifier {
-                                        value_token: IDENT@29..32 "red" [] [],
-                                    },
-                                ],
-                            },
-                            important: missing (optional),
-                        },
-                        semicolon_token: SEMICOLON@32..33 ";" [] [],
-                    },
-                ],
-                r_curly_token: R_CURLY@33..35 "}" [Newline("\n")] [],
-            },
-        },
-        CssQualifiedRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selectors: CssNestedSelectorList [],
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssClassSelector {
-                            dot_token: DOT@35..37 "." [Newline("\n")] [],
-                            name: CssCustomIdentifier {
-                                value_token: IDENT@37..45 "generic" [] [Whitespace(" ")],
-                            },
-                        },
-                    ],
-                },
-            ],
-            block: CssDeclarationOrRuleBlock {
-                l_curly_token: L_CURLY@45..46 "{" [] [],
-                items: CssDeclarationOrRuleList [
-                    CssDeclarationWithSemicolon {
-                        declaration: CssDeclaration {
                             property: CssBogusProperty {
                                 items: [
                                     CssIdentifier {
-                                        value_token: IDENT@46..54 "width" [Newline("\n"), Whitespace("  ")] [],
+                                        value_token: IDENT@19..29 "generic" [Newline("\n"), Whitespace("  ")] [],
                                     },
-                                    COLON@54..56 ":" [] [Whitespace(" ")],
+                                    COLON@29..31 ":" [] [Whitespace(" ")],
                                     CssBogus {
                                         items: [
                                             CssBogusSupportsCondition {
                                                 items: [
                                                     CssIdentifier {
-                                                        value_token: IDENT@56..63 "unknown" [] [],
+                                                        value_token: IDENT@31..38 "unknown" [] [],
                                                     },
-                                                    L_PAREN@63..64 "(" [] [],
+                                                    L_PAREN@38..39 "(" [] [],
                                                     CssBogus {
                                                         items: [
                                                             CssBogusParameter {
                                                                 items: [
-                                                                    PERCENT@64..65 "%" [] [],
+                                                                    PERCENT@39..40 "%" [] [],
                                                                 ],
                                                             },
                                                         ],
                                                     },
-                                                    R_PAREN@65..66 ")" [] [],
+                                                    R_PAREN@40..41 ")" [] [],
                                                 ],
                                             },
                                         ],
@@ -148,84 +100,45 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@66..67 ";" [] [],
+                        semicolon_token: SEMICOLON@41..42 ";" [] [],
                     },
-                    CssDeclarationWithSemicolon {
-                        declaration: CssDeclaration {
-                            property: CssGenericProperty {
-                                name: CssIdentifier {
-                                    value_token: IDENT@67..75 "color" [Newline("\n"), Whitespace("  ")] [],
-                                },
-                                colon_token: COLON@75..77 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    CssIdentifier {
-                                        value_token: IDENT@77..81 "blue" [] [],
-                                    },
-                                ],
-                            },
-                            important: missing (optional),
-                        },
-                        semicolon_token: SEMICOLON@81..82 ";" [] [],
-                    },
-                ],
-                r_curly_token: R_CURLY@82..84 "}" [Newline("\n")] [],
-            },
-        },
-        CssQualifiedRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selectors: CssNestedSelectorList [],
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssClassSelector {
-                            dot_token: DOT@84..86 "." [Newline("\n")] [],
-                            name: CssCustomIdentifier {
-                                value_token: IDENT@86..95 "fallback" [] [Whitespace(" ")],
-                            },
-                        },
-                    ],
-                },
-            ],
-            block: CssDeclarationOrRuleBlock {
-                l_curly_token: L_CURLY@95..96 "{" [] [],
-                items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssBogusProperty {
                                 items: [
                                     CssIdentifier {
-                                        value_token: IDENT@96..104 "width" [Newline("\n"), Whitespace("  ")] [],
+                                        value_token: IDENT@42..53 "fallback" [Newline("\n"), Whitespace("  ")] [],
                                     },
-                                    COLON@104..106 ":" [] [Whitespace(" ")],
+                                    COLON@53..55 ":" [] [Whitespace(" ")],
                                     CssBogus {
                                         items: [
                                             CssBogusSupportsCondition {
                                                 items: [
-                                                    ATTR_KW@106..110 "attr" [] [],
-                                                    L_PAREN@110..111 "(" [] [],
+                                                    ATTR_KW@55..59 "attr" [] [],
+                                                    L_PAREN@59..60 "(" [] [],
                                                     CssAttrNameList [
                                                         CssIdentifier {
-                                                            value_token: IDENT@111..125 "data-progress" [] [Whitespace(" ")],
+                                                            value_token: IDENT@60..74 "data-progress" [] [Whitespace(" ")],
                                                         },
                                                     ],
                                                     CssRegularAttrUnit {
-                                                        unit_token: IDENT@125..126 "%" [] [],
+                                                        unit_token: IDENT@74..75 "%" [] [],
                                                     },
                                                     CssBogus {
                                                         items: [
-                                                            COMMA@126..128 "," [] [Whitespace(" ")],
+                                                            COMMA@75..77 "," [] [Whitespace(" ")],
                                                             CssBogus {
                                                                 items: [
                                                                     CssBogusPropertyValue {
                                                                         items: [
-                                                                            PERCENT@128..129 "%" [] [],
+                                                                            PERCENT@77..78 "%" [] [],
                                                                         ],
                                                                     },
                                                                 ],
                                                             },
                                                         ],
                                                     },
-                                                    R_PAREN@129..130 ")" [] [],
+                                                    R_PAREN@78..79 ")" [] [],
                                                 ],
                                             },
                                         ],
@@ -234,61 +147,21 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@130..131 ";" [] [],
+                        semicolon_token: SEMICOLON@79..80 ";" [] [],
                     },
-                    CssDeclarationWithSemicolon {
-                        declaration: CssDeclaration {
-                            property: CssGenericProperty {
-                                name: CssIdentifier {
-                                    value_token: IDENT@131..139 "width" [Newline("\n"), Whitespace("  ")] [],
-                                },
-                                colon_token: COLON@139..141 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    CssPercentage {
-                                        value_token: CSS_NUMBER_LITERAL@141..143 "75" [] [],
-                                        percent_token: PERCENT@143..144 "%" [] [],
-                                    },
-                                ],
-                            },
-                            important: missing (optional),
-                        },
-                        semicolon_token: SEMICOLON@144..145 ";" [] [],
-                    },
-                ],
-                r_curly_token: R_CURLY@145..147 "}" [Newline("\n")] [],
-            },
-        },
-        CssQualifiedRule {
-            prelude: CssSelectorList [
-                CssCompoundSelector {
-                    nesting_selectors: CssNestedSelectorList [],
-                    simple_selector: missing (optional),
-                    sub_selectors: CssSubSelectorList [
-                        CssClassSelector {
-                            dot_token: DOT@147..149 "." [Newline("\n")] [],
-                            name: CssCustomIdentifier {
-                                value_token: IDENT@149..167 "custom-properties" [] [Whitespace(" ")],
-                            },
-                        },
-                    ],
-                },
-            ],
-            block: CssDeclarationOrRuleBlock {
-                l_curly_token: L_CURLY@167..168 "{" [] [],
-                items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssBogusProperty {
                                 items: [
                                     CssDashedIdentifier {
-                                        value_token: IDENT@168..177 "--unit" [Newline("\n"), Whitespace("  ")] [],
+                                        value_token: IDENT@80..89 "--unit" [Newline("\n"), Whitespace("  ")] [],
                                     },
-                                    COLON@177..179 ":" [] [Whitespace(" ")],
+                                    COLON@89..91 ":" [] [Whitespace(" ")],
                                     CssBogus {
                                         items: [
                                             CssBogusPropertyValue {
                                                 items: [
-                                                    PERCENT@179..180 "%" [] [],
+                                                    PERCENT@91..92 "%" [] [],
                                                 ],
                                             },
                                         ],
@@ -297,25 +170,25 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@180..181 ";" [] [],
+                        semicolon_token: SEMICOLON@92..93 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssBogusProperty {
                                 items: [
                                     CssDashedIdentifier {
-                                        value_token: IDENT@181..189 "--raw" [Newline("\n"), Whitespace("  ")] [],
+                                        value_token: IDENT@93..101 "--raw" [Newline("\n"), Whitespace("  ")] [],
                                     },
-                                    COLON@189..191 ":" [] [Whitespace(" ")],
+                                    COLON@101..103 ":" [] [Whitespace(" ")],
                                     CssBogus {
                                         items: [
                                             CssNumber {
-                                                value_token: CSS_NUMBER_LITERAL@191..194 "10" [] [Whitespace(" ")],
+                                                value_token: CSS_NUMBER_LITERAL@103..106 "10" [] [Whitespace(" ")],
                                             },
                                             CssBogusPropertyValue {
                                                 items: [
-                                                    PERCENT@194..196 "%" [] [Whitespace(" ")],
-                                                    PLUS@196..197 "+" [] [],
+                                                    PERCENT@106..108 "%" [] [Whitespace(" ")],
+                                                    PLUS@108..109 "+" [] [],
                                                 ],
                                             },
                                         ],
@@ -324,27 +197,27 @@ CssRoot {
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@197..198 ";" [] [],
+                        semicolon_token: SEMICOLON@109..110 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@198..206 "color" [Newline("\n"), Whitespace("  ")] [],
+                                    value_token: IDENT@110..118 "color" [Newline("\n"), Whitespace("  ")] [],
                                 },
-                                colon_token: COLON@206..208 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@118..120 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssIdentifier {
-                                        value_token: IDENT@208..213 "green" [] [],
+                                        value_token: IDENT@120..123 "red" [] [],
                                     },
                                 ],
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@213..214 ";" [] [],
+                        semicolon_token: SEMICOLON@123..124 ";" [] [],
                     },
                 ],
-                r_curly_token: R_CURLY@214..216 "}" [Newline("\n")] [],
+                r_curly_token: R_CURLY@124..126 "}" [Newline("\n")] [],
             },
         },
         CssQualifiedRule {
@@ -354,69 +227,69 @@ CssRoot {
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
-                            dot_token: DOT@216..218 "." [Newline("\n")] [],
+                            dot_token: DOT@126..128 "." [Newline("\n")] [],
                             name: CssCustomIdentifier {
-                                value_token: IDENT@218..224 "after" [] [Whitespace(" ")],
+                                value_token: IDENT@128..134 "after" [] [Whitespace(" ")],
                             },
                         },
                     ],
                 },
             ],
             block: CssDeclarationOrRuleBlock {
-                l_curly_token: L_CURLY@224..226 "{" [] [Whitespace(" ")],
+                l_curly_token: L_CURLY@134..136 "{" [] [Whitespace(" ")],
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@226..231 "width" [] [],
+                                    value_token: IDENT@136..141 "width" [] [],
                                 },
-                                colon_token: COLON@231..233 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@141..143 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssAttrFunction {
-                                        name_token: ATTR_KW@233..237 "attr" [] [],
-                                        l_paren_token: L_PAREN@237..238 "(" [] [],
+                                        name_token: ATTR_KW@143..147 "attr" [] [],
+                                        l_paren_token: L_PAREN@147..148 "(" [] [],
                                         attr_name: CssAttrNameList [
                                             CssIdentifier {
-                                                value_token: IDENT@238..252 "data-progress" [] [Whitespace(" ")],
+                                                value_token: IDENT@148..162 "data-progress" [] [Whitespace(" ")],
                                             },
                                         ],
                                         attr_type: CssRegularAttrUnit {
-                                            unit_token: IDENT@252..253 "%" [] [],
+                                            unit_token: IDENT@162..163 "%" [] [],
                                         },
                                         fallback_value: CssAttrFallbackValue {
-                                            comma_token: COMMA@253..255 "," [] [Whitespace(" ")],
+                                            comma_token: COMMA@163..165 "," [] [Whitespace(" ")],
                                             value: CssGenericComponentValueList [
                                                 CssPercentage {
-                                                    value_token: CSS_NUMBER_LITERAL@255..256 "0" [] [],
-                                                    percent_token: PERCENT@256..257 "%" [] [],
+                                                    value_token: CSS_NUMBER_LITERAL@165..166 "0" [] [],
+                                                    percent_token: PERCENT@166..167 "%" [] [],
                                                 },
                                             ],
                                         },
-                                        r_paren_token: R_PAREN@257..258 ")" [] [],
+                                        r_paren_token: R_PAREN@167..168 ")" [] [],
                                     },
                                 ],
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@258..260 ";" [] [Whitespace(" ")],
+                        semicolon_token: SEMICOLON@168..170 ";" [] [Whitespace(" ")],
                     },
                 ],
-                r_curly_token: R_CURLY@260..261 "}" [] [],
+                r_curly_token: R_CURLY@170..171 "}" [] [],
             },
         },
     ],
-    eof_token: EOF@261..262 "" [Newline("\n")] [],
+    eof_token: EOF@171..172 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..262
+0: CSS_ROOT@0..172
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..261
-    0: CSS_QUALIFIED_RULE@0..35
+  1: CSS_ROOT_ITEM_LIST@0..171
+    0: CSS_QUALIFIED_RULE@0..126
       0: CSS_SELECTOR_LIST@0..6
         0: CSS_COMPOUND_SELECTOR@0..6
           0: CSS_NESTED_SELECTOR_LIST@0..0
@@ -426,9 +299,9 @@ CssRoot {
               0: DOT@0..1 "." [] []
               1: CSS_CUSTOM_IDENTIFIER@1..6
                 0: IDENT@1..6 "bare" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_OR_RULE_BLOCK@6..35
+      1: CSS_DECLARATION_OR_RULE_BLOCK@6..126
         0: L_CURLY@6..7 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@7..33
+        1: CSS_DECLARATION_OR_RULE_LIST@7..124
           0: CSS_DECLARATION_WITH_SEMICOLON@7..19
             0: CSS_DECLARATION@7..18
               0: CSS_BOGUS_PROPERTY@7..18
@@ -440,198 +313,122 @@ CssRoot {
                     0: PERCENT@17..18 "%" [] []
               1: (empty)
             1: SEMICOLON@18..19 ";" [] []
-          1: CSS_DECLARATION_WITH_SEMICOLON@19..33
-            0: CSS_DECLARATION@19..32
-              0: CSS_GENERIC_PROPERTY@19..32
-                0: CSS_IDENTIFIER@19..27
-                  0: IDENT@19..27 "color" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@27..29 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@29..32
-                  0: CSS_IDENTIFIER@29..32
-                    0: IDENT@29..32 "red" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@19..42
+            0: CSS_DECLARATION@19..41
+              0: CSS_BOGUS_PROPERTY@19..41
+                0: CSS_IDENTIFIER@19..29
+                  0: IDENT@19..29 "generic" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@29..31 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@31..41
+                  0: CSS_BOGUS_SUPPORTS_CONDITION@31..41
+                    0: CSS_IDENTIFIER@31..38
+                      0: IDENT@31..38 "unknown" [] []
+                    1: L_PAREN@38..39 "(" [] []
+                    2: CSS_BOGUS@39..40
+                      0: CSS_BOGUS_PARAMETER@39..40
+                        0: PERCENT@39..40 "%" [] []
+                    3: R_PAREN@40..41 ")" [] []
               1: (empty)
-            1: SEMICOLON@32..33 ";" [] []
-        2: R_CURLY@33..35 "}" [Newline("\n")] []
-    1: CSS_QUALIFIED_RULE@35..84
-      0: CSS_SELECTOR_LIST@35..45
-        0: CSS_COMPOUND_SELECTOR@35..45
-          0: CSS_NESTED_SELECTOR_LIST@35..35
+            1: SEMICOLON@41..42 ";" [] []
+          2: CSS_DECLARATION_WITH_SEMICOLON@42..80
+            0: CSS_DECLARATION@42..79
+              0: CSS_BOGUS_PROPERTY@42..79
+                0: CSS_IDENTIFIER@42..53
+                  0: IDENT@42..53 "fallback" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@53..55 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@55..79
+                  0: CSS_BOGUS_SUPPORTS_CONDITION@55..79
+                    0: ATTR_KW@55..59 "attr" [] []
+                    1: L_PAREN@59..60 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@60..74
+                      0: CSS_IDENTIFIER@60..74
+                        0: IDENT@60..74 "data-progress" [] [Whitespace(" ")]
+                    3: CSS_REGULAR_ATTR_UNIT@74..75
+                      0: IDENT@74..75 "%" [] []
+                    4: CSS_BOGUS@75..78
+                      0: COMMA@75..77 "," [] [Whitespace(" ")]
+                      1: CSS_BOGUS@77..78
+                        0: CSS_BOGUS_PROPERTY_VALUE@77..78
+                          0: PERCENT@77..78 "%" [] []
+                    5: R_PAREN@78..79 ")" [] []
+              1: (empty)
+            1: SEMICOLON@79..80 ";" [] []
+          3: CSS_DECLARATION_WITH_SEMICOLON@80..93
+            0: CSS_DECLARATION@80..92
+              0: CSS_BOGUS_PROPERTY@80..92
+                0: CSS_DASHED_IDENTIFIER@80..89
+                  0: IDENT@80..89 "--unit" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@89..91 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@91..92
+                  0: CSS_BOGUS_PROPERTY_VALUE@91..92
+                    0: PERCENT@91..92 "%" [] []
+              1: (empty)
+            1: SEMICOLON@92..93 ";" [] []
+          4: CSS_DECLARATION_WITH_SEMICOLON@93..110
+            0: CSS_DECLARATION@93..109
+              0: CSS_BOGUS_PROPERTY@93..109
+                0: CSS_DASHED_IDENTIFIER@93..101
+                  0: IDENT@93..101 "--raw" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@101..103 ":" [] [Whitespace(" ")]
+                2: CSS_BOGUS@103..109
+                  0: CSS_NUMBER@103..106
+                    0: CSS_NUMBER_LITERAL@103..106 "10" [] [Whitespace(" ")]
+                  1: CSS_BOGUS_PROPERTY_VALUE@106..109
+                    0: PERCENT@106..108 "%" [] [Whitespace(" ")]
+                    1: PLUS@108..109 "+" [] []
+              1: (empty)
+            1: SEMICOLON@109..110 ";" [] []
+          5: CSS_DECLARATION_WITH_SEMICOLON@110..124
+            0: CSS_DECLARATION@110..123
+              0: CSS_GENERIC_PROPERTY@110..123
+                0: CSS_IDENTIFIER@110..118
+                  0: IDENT@110..118 "color" [Newline("\n"), Whitespace("  ")] []
+                1: COLON@118..120 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@120..123
+                  0: CSS_IDENTIFIER@120..123
+                    0: IDENT@120..123 "red" [] []
+              1: (empty)
+            1: SEMICOLON@123..124 ";" [] []
+        2: R_CURLY@124..126 "}" [Newline("\n")] []
+    1: CSS_QUALIFIED_RULE@126..171
+      0: CSS_SELECTOR_LIST@126..134
+        0: CSS_COMPOUND_SELECTOR@126..134
+          0: CSS_NESTED_SELECTOR_LIST@126..126
           1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@35..45
-            0: CSS_CLASS_SELECTOR@35..45
-              0: DOT@35..37 "." [Newline("\n")] []
-              1: CSS_CUSTOM_IDENTIFIER@37..45
-                0: IDENT@37..45 "generic" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_OR_RULE_BLOCK@45..84
-        0: L_CURLY@45..46 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@46..82
-          0: CSS_DECLARATION_WITH_SEMICOLON@46..67
-            0: CSS_DECLARATION@46..66
-              0: CSS_BOGUS_PROPERTY@46..66
-                0: CSS_IDENTIFIER@46..54
-                  0: IDENT@46..54 "width" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@54..56 ":" [] [Whitespace(" ")]
-                2: CSS_BOGUS@56..66
-                  0: CSS_BOGUS_SUPPORTS_CONDITION@56..66
-                    0: CSS_IDENTIFIER@56..63
-                      0: IDENT@56..63 "unknown" [] []
-                    1: L_PAREN@63..64 "(" [] []
-                    2: CSS_BOGUS@64..65
-                      0: CSS_BOGUS_PARAMETER@64..65
-                        0: PERCENT@64..65 "%" [] []
-                    3: R_PAREN@65..66 ")" [] []
+          2: CSS_SUB_SELECTOR_LIST@126..134
+            0: CSS_CLASS_SELECTOR@126..134
+              0: DOT@126..128 "." [Newline("\n")] []
+              1: CSS_CUSTOM_IDENTIFIER@128..134
+                0: IDENT@128..134 "after" [] [Whitespace(" ")]
+      1: CSS_DECLARATION_OR_RULE_BLOCK@134..171
+        0: L_CURLY@134..136 "{" [] [Whitespace(" ")]
+        1: CSS_DECLARATION_OR_RULE_LIST@136..170
+          0: CSS_DECLARATION_WITH_SEMICOLON@136..170
+            0: CSS_DECLARATION@136..168
+              0: CSS_GENERIC_PROPERTY@136..168
+                0: CSS_IDENTIFIER@136..141
+                  0: IDENT@136..141 "width" [] []
+                1: COLON@141..143 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@143..168
+                  0: CSS_ATTR_FUNCTION@143..168
+                    0: ATTR_KW@143..147 "attr" [] []
+                    1: L_PAREN@147..148 "(" [] []
+                    2: CSS_ATTR_NAME_LIST@148..162
+                      0: CSS_IDENTIFIER@148..162
+                        0: IDENT@148..162 "data-progress" [] [Whitespace(" ")]
+                    3: CSS_REGULAR_ATTR_UNIT@162..163
+                      0: IDENT@162..163 "%" [] []
+                    4: CSS_ATTR_FALLBACK_VALUE@163..167
+                      0: COMMA@163..165 "," [] [Whitespace(" ")]
+                      1: CSS_GENERIC_COMPONENT_VALUE_LIST@165..167
+                        0: CSS_PERCENTAGE@165..167
+                          0: CSS_NUMBER_LITERAL@165..166 "0" [] []
+                          1: PERCENT@166..167 "%" [] []
+                    5: R_PAREN@167..168 ")" [] []
               1: (empty)
-            1: SEMICOLON@66..67 ";" [] []
-          1: CSS_DECLARATION_WITH_SEMICOLON@67..82
-            0: CSS_DECLARATION@67..81
-              0: CSS_GENERIC_PROPERTY@67..81
-                0: CSS_IDENTIFIER@67..75
-                  0: IDENT@67..75 "color" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@75..77 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@77..81
-                  0: CSS_IDENTIFIER@77..81
-                    0: IDENT@77..81 "blue" [] []
-              1: (empty)
-            1: SEMICOLON@81..82 ";" [] []
-        2: R_CURLY@82..84 "}" [Newline("\n")] []
-    2: CSS_QUALIFIED_RULE@84..147
-      0: CSS_SELECTOR_LIST@84..95
-        0: CSS_COMPOUND_SELECTOR@84..95
-          0: CSS_NESTED_SELECTOR_LIST@84..84
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@84..95
-            0: CSS_CLASS_SELECTOR@84..95
-              0: DOT@84..86 "." [Newline("\n")] []
-              1: CSS_CUSTOM_IDENTIFIER@86..95
-                0: IDENT@86..95 "fallback" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_OR_RULE_BLOCK@95..147
-        0: L_CURLY@95..96 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@96..145
-          0: CSS_DECLARATION_WITH_SEMICOLON@96..131
-            0: CSS_DECLARATION@96..130
-              0: CSS_BOGUS_PROPERTY@96..130
-                0: CSS_IDENTIFIER@96..104
-                  0: IDENT@96..104 "width" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@104..106 ":" [] [Whitespace(" ")]
-                2: CSS_BOGUS@106..130
-                  0: CSS_BOGUS_SUPPORTS_CONDITION@106..130
-                    0: ATTR_KW@106..110 "attr" [] []
-                    1: L_PAREN@110..111 "(" [] []
-                    2: CSS_ATTR_NAME_LIST@111..125
-                      0: CSS_IDENTIFIER@111..125
-                        0: IDENT@111..125 "data-progress" [] [Whitespace(" ")]
-                    3: CSS_REGULAR_ATTR_UNIT@125..126
-                      0: IDENT@125..126 "%" [] []
-                    4: CSS_BOGUS@126..129
-                      0: COMMA@126..128 "," [] [Whitespace(" ")]
-                      1: CSS_BOGUS@128..129
-                        0: CSS_BOGUS_PROPERTY_VALUE@128..129
-                          0: PERCENT@128..129 "%" [] []
-                    5: R_PAREN@129..130 ")" [] []
-              1: (empty)
-            1: SEMICOLON@130..131 ";" [] []
-          1: CSS_DECLARATION_WITH_SEMICOLON@131..145
-            0: CSS_DECLARATION@131..144
-              0: CSS_GENERIC_PROPERTY@131..144
-                0: CSS_IDENTIFIER@131..139
-                  0: IDENT@131..139 "width" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@139..141 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@141..144
-                  0: CSS_PERCENTAGE@141..144
-                    0: CSS_NUMBER_LITERAL@141..143 "75" [] []
-                    1: PERCENT@143..144 "%" [] []
-              1: (empty)
-            1: SEMICOLON@144..145 ";" [] []
-        2: R_CURLY@145..147 "}" [Newline("\n")] []
-    3: CSS_QUALIFIED_RULE@147..216
-      0: CSS_SELECTOR_LIST@147..167
-        0: CSS_COMPOUND_SELECTOR@147..167
-          0: CSS_NESTED_SELECTOR_LIST@147..147
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@147..167
-            0: CSS_CLASS_SELECTOR@147..167
-              0: DOT@147..149 "." [Newline("\n")] []
-              1: CSS_CUSTOM_IDENTIFIER@149..167
-                0: IDENT@149..167 "custom-properties" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_OR_RULE_BLOCK@167..216
-        0: L_CURLY@167..168 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@168..214
-          0: CSS_DECLARATION_WITH_SEMICOLON@168..181
-            0: CSS_DECLARATION@168..180
-              0: CSS_BOGUS_PROPERTY@168..180
-                0: CSS_DASHED_IDENTIFIER@168..177
-                  0: IDENT@168..177 "--unit" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@177..179 ":" [] [Whitespace(" ")]
-                2: CSS_BOGUS@179..180
-                  0: CSS_BOGUS_PROPERTY_VALUE@179..180
-                    0: PERCENT@179..180 "%" [] []
-              1: (empty)
-            1: SEMICOLON@180..181 ";" [] []
-          1: CSS_DECLARATION_WITH_SEMICOLON@181..198
-            0: CSS_DECLARATION@181..197
-              0: CSS_BOGUS_PROPERTY@181..197
-                0: CSS_DASHED_IDENTIFIER@181..189
-                  0: IDENT@181..189 "--raw" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@189..191 ":" [] [Whitespace(" ")]
-                2: CSS_BOGUS@191..197
-                  0: CSS_NUMBER@191..194
-                    0: CSS_NUMBER_LITERAL@191..194 "10" [] [Whitespace(" ")]
-                  1: CSS_BOGUS_PROPERTY_VALUE@194..197
-                    0: PERCENT@194..196 "%" [] [Whitespace(" ")]
-                    1: PLUS@196..197 "+" [] []
-              1: (empty)
-            1: SEMICOLON@197..198 ";" [] []
-          2: CSS_DECLARATION_WITH_SEMICOLON@198..214
-            0: CSS_DECLARATION@198..213
-              0: CSS_GENERIC_PROPERTY@198..213
-                0: CSS_IDENTIFIER@198..206
-                  0: IDENT@198..206 "color" [Newline("\n"), Whitespace("  ")] []
-                1: COLON@206..208 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@208..213
-                  0: CSS_IDENTIFIER@208..213
-                    0: IDENT@208..213 "green" [] []
-              1: (empty)
-            1: SEMICOLON@213..214 ";" [] []
-        2: R_CURLY@214..216 "}" [Newline("\n")] []
-    4: CSS_QUALIFIED_RULE@216..261
-      0: CSS_SELECTOR_LIST@216..224
-        0: CSS_COMPOUND_SELECTOR@216..224
-          0: CSS_NESTED_SELECTOR_LIST@216..216
-          1: (empty)
-          2: CSS_SUB_SELECTOR_LIST@216..224
-            0: CSS_CLASS_SELECTOR@216..224
-              0: DOT@216..218 "." [Newline("\n")] []
-              1: CSS_CUSTOM_IDENTIFIER@218..224
-                0: IDENT@218..224 "after" [] [Whitespace(" ")]
-      1: CSS_DECLARATION_OR_RULE_BLOCK@224..261
-        0: L_CURLY@224..226 "{" [] [Whitespace(" ")]
-        1: CSS_DECLARATION_OR_RULE_LIST@226..260
-          0: CSS_DECLARATION_WITH_SEMICOLON@226..260
-            0: CSS_DECLARATION@226..258
-              0: CSS_GENERIC_PROPERTY@226..258
-                0: CSS_IDENTIFIER@226..231
-                  0: IDENT@226..231 "width" [] []
-                1: COLON@231..233 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@233..258
-                  0: CSS_ATTR_FUNCTION@233..258
-                    0: ATTR_KW@233..237 "attr" [] []
-                    1: L_PAREN@237..238 "(" [] []
-                    2: CSS_ATTR_NAME_LIST@238..252
-                      0: CSS_IDENTIFIER@238..252
-                        0: IDENT@238..252 "data-progress" [] [Whitespace(" ")]
-                    3: CSS_REGULAR_ATTR_UNIT@252..253
-                      0: IDENT@252..253 "%" [] []
-                    4: CSS_ATTR_FALLBACK_VALUE@253..257
-                      0: COMMA@253..255 "," [] [Whitespace(" ")]
-                      1: CSS_GENERIC_COMPONENT_VALUE_LIST@255..257
-                        0: CSS_PERCENTAGE@255..257
-                          0: CSS_NUMBER_LITERAL@255..256 "0" [] []
-                          1: PERCENT@256..257 "%" [] []
-                    5: R_PAREN@257..258 ")" [] []
-              1: (empty)
-            1: SEMICOLON@258..260 ";" [] [Whitespace(" ")]
-        2: R_CURLY@260..261 "}" [] []
-  2: EOF@261..262 "" [Newline("\n")] []
+            1: SEMICOLON@168..170 ";" [] [Whitespace(" ")]
+        2: R_CURLY@170..171 "}" [] []
+  2: EOF@171..172 "" [Newline("\n")] []
 
 ```
 
@@ -645,8 +442,8 @@ parity-bare-percent.css:2:10 parse ━━━━━━━━━━━━━━━
     1 │ .bare {
   > 2 │   width: %;
       │          ^
-    3 │   color: red;
-    4 │ }
+    3 │   generic: unknown(%);
+    4 │   fallback: attr(data-progress %, %);
   
   i Expected one of:
   
@@ -658,78 +455,78 @@ parity-bare-percent.css:2:10 parse ━━━━━━━━━━━━━━━
   - custom property
   - function
   
-parity-bare-percent.css:6:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+parity-bare-percent.css:3:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a declaration item but instead found '%'.
   
-    4 │ }
-    5 │ .generic {
-  > 6 │   width: unknown(%);
-      │                  ^
-    7 │   color: blue;
-    8 │ }
+    1 │ .bare {
+    2 │   width: %;
+  > 3 │   generic: unknown(%);
+      │                    ^
+    4 │   fallback: attr(data-progress %, %);
+    5 │   --unit: %;
   
   i Expected a declaration item here.
   
-    4 │ }
-    5 │ .generic {
-  > 6 │   width: unknown(%);
-      │                  ^
-    7 │   color: blue;
+    1 │ .bare {
+    2 │   width: %;
+  > 3 │   generic: unknown(%);
+      │                    ^
+    4 │   fallback: attr(data-progress %, %);
+    5 │   --unit: %;
+  
+parity-bare-percent.css:4:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    2 │   width: %;
+    3 │   generic: unknown(%);
+  > 4 │   fallback: attr(data-progress %, %);
+      │                                   ^
+    5 │   --unit: %;
+    6 │   --raw: 10 % +;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parity-bare-percent.css:5:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    3 │   generic: unknown(%);
+    4 │   fallback: attr(data-progress %, %);
+  > 5 │   --unit: %;
+      │           ^
+    6 │   --raw: 10 % +;
+    7 │   color: red;
+  
+  i Expected one of:
+  
+  - identifier
+  - string
+  - number
+  - dimension
+  - ratio
+  - custom property
+  - function
+  
+parity-bare-percent.css:6:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected value or character.
+  
+    4 │   fallback: attr(data-progress %, %);
+    5 │   --unit: %;
+  > 6 │   --raw: 10 % +;
+      │             ^^^
+    7 │   color: red;
     8 │ }
-  
-parity-bare-percent.css:10:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-     8 │ }
-     9 │ .fallback {
-  > 10 │   width: attr(data-progress %, %);
-       │                                ^
-    11 │   width: 75%;
-    12 │ }
-  
-  i Expected one of:
-  
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
-  
-parity-bare-percent.css:14:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    12 │ }
-    13 │ .custom-properties {
-  > 14 │   --unit: %;
-       │           ^
-    15 │   --raw: 10 % +;
-    16 │   color: green;
-  
-  i Expected one of:
-  
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
-  
-parity-bare-percent.css:15:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    13 │ .custom-properties {
-    14 │   --unit: %;
-  > 15 │   --raw: 10 % +;
-       │             ^^^
-    16 │   color: green;
-    17 │ }
   
   i Expected one of:
   

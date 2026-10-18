@@ -1,18 +1,9 @@
 .bare {
   width: %;
-  color: red;
-}
-.generic {
-  width: unknown(%);
-  color: blue;
-}
-.fallback {
-  width: attr(data-progress %, %);
-  width: 75%;
-}
-.custom-properties {
+  generic: unknown(%);
+  fallback: attr(data-progress %, %);
   --unit: %;
   --raw: 10 % +;
-  color: green;
+  color: red;
 }
 .after { width: attr(data-progress %, 0%); }
