@@ -385,6 +385,7 @@ impl LanguageServer for LSPServer {
                 name: String::from(env!("CARGO_PKG_NAME")),
                 version: Some(biome_configuration::VERSION.to_string()),
             }),
+            offset_encoding: None,
         };
 
         Ok(init)
