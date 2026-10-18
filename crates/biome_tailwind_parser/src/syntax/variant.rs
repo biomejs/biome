@@ -1,6 +1,6 @@
 use crate::parser::TailwindParser;
+use crate::syntax::atoms::{is_at_segment, is_at_selector, segment, selector};
 use crate::syntax::css_value::parse_css_parameter_list;
-use crate::syntax::letters::{is_at_segment, is_at_selector, segment, selector};
 use crate::syntax::parse_error::*;
 use crate::syntax::parse_modifier;
 use biome_parser::diagnostic::expected_token;
@@ -171,8 +171,8 @@ fn parse_named_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
     }
 
     let m = p.start();
-    let letters = segment(p.source());
-    p.bump_letters(TW_VARIANT_SEGMENT, letters);
+    let atoms = segment(p.source());
+    p.bump_atoms(TW_VARIANT_SEGMENT, atoms);
 
     Present(m.complete(p, TW_NAMED_VARIANT_SEGMENT))
 }
@@ -193,8 +193,8 @@ fn parse_arbitrary_variant_segment(p: &mut TailwindParser) -> ParsedSyntax {
 /// next whitespace or the `]` that closes the brackets it opens, or reports that it's missing.
 fn parse_selector(p: &mut TailwindParser) {
     if is_at_selector(p.source()) {
-        let letters = selector(p.source());
-        p.bump_letters(TW_SELECTOR, letters);
+        let atoms = selector(p.source());
+        p.bump_atoms(TW_SELECTOR, atoms);
     } else {
         p.error(expected_token(TW_SELECTOR));
     }

@@ -1,5 +1,5 @@
 use crate::parser::TailwindParser;
-use crate::syntax::letters::{css_token, url_raw_value};
+use crate::syntax::atoms::{css_token, url_raw_value};
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::parsed_syntax::ParsedSyntax::{Absent, Present};
@@ -9,13 +9,13 @@ use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::{self, *};
 use biome_unicode_table::Dispatch::{PNC, QOT, WHS};
 
-/// Returns the kind and length in letters of the CSS token at the current letter.
+/// Returns the kind and length in atoms of the CSS token at the current atom.
 #[inline]
 fn css(p: &TailwindParser) -> (TailwindSyntaxKind, usize) {
     p.css_token()
 }
 
-/// Whether the CSS token at the current letter is of one of `kinds`.
+/// Whether the CSS token at the current atom is of one of `kinds`.
 #[inline]
 fn css_at_ts(p: &TailwindParser, kinds: TokenSet<TailwindSyntaxKind>) -> bool {
     kinds.contains(css(p).0)
@@ -92,7 +92,7 @@ fn parse_any_value(p: &mut TailwindParser) -> ParsedSyntax {
     if is_at_any_function(p) {
         return parse_any_function(p);
     }
-    let (kind, letters) = css(p);
+    let (kind, atoms) = css(p);
     if is_identifier(kind) {
         return parse_css_identifier(p);
     }
@@ -100,7 +100,7 @@ fn parse_any_value(p: &mut TailwindParser) -> ParsedSyntax {
         CSS_STRING_LITERAL => parse_css_string(p),
         CSS_DIMENSION_VALUE => {
             let m = p.start();
-            p.bump_css_letters(CSS_NUMBER_LITERAL, letters);
+            p.bump_css_atoms(CSS_NUMBER_LITERAL, atoms);
             // The lexer splits a number from its unit, the ASCII letters after it, and gives the
             // unit the kind of its keyword.
             let node = if is_unit(p.cur()) {
@@ -108,19 +108,19 @@ fn parse_any_value(p: &mut TailwindParser) -> ParsedSyntax {
             } else {
                 CSS_UNKNOWN_DIMENSION
             };
-            p.bump_css_letters(T![ident], 1);
+            p.bump_css_atoms(T![ident], 1);
             Present(m.complete(p, node))
         }
         CSS_PERCENTAGE_VALUE => {
             let m = p.start();
-            p.bump_css_letters(CSS_NUMBER_LITERAL, letters);
+            p.bump_css_atoms(CSS_NUMBER_LITERAL, atoms);
             p.expect_css(T![%]);
             Present(m.complete(p, CSS_PERCENTAGE))
         }
         CSS_NUMBER_LITERAL => parse_css_number_or_ratio(p),
         CSS_COLOR_LITERAL => {
             let m = p.start();
-            p.bump_css_letters(CSS_COLOR_LITERAL, letters);
+            p.bump_css_atoms(CSS_COLOR_LITERAL, atoms);
             Present(m.complete(p, CSS_COLOR))
         }
         _ => Absent,
@@ -129,7 +129,7 @@ fn parse_any_value(p: &mut TailwindParser) -> ParsedSyntax {
 
 /// Parses an identifier, which is dashed if it starts with `--`.
 fn parse_css_identifier(p: &mut TailwindParser) -> ParsedSyntax {
-    let (kind, letters) = css(p);
+    let (kind, atoms) = css(p);
     if !is_identifier(kind) {
         return Absent;
     }
@@ -139,24 +139,24 @@ fn parse_css_identifier(p: &mut TailwindParser) -> ParsedSyntax {
         CSS_IDENTIFIER
     };
     let m = p.start();
-    p.bump_css_letters(T![ident], letters);
+    p.bump_css_atoms(T![ident], atoms);
     Present(m.complete(p, node))
 }
 
 fn parse_css_string(p: &mut TailwindParser) -> ParsedSyntax {
-    let (_, letters) = css(p);
+    let (_, atoms) = css(p);
     let m = p.start();
-    p.bump_css_letters(CSS_STRING_LITERAL, letters);
+    p.bump_css_atoms(CSS_STRING_LITERAL, atoms);
     Present(m.complete(p, CSS_STRING))
 }
 
 fn parse_css_number(p: &mut TailwindParser) -> ParsedSyntax {
-    let (kind, letters) = css(p);
+    let (kind, atoms) = css(p);
     if kind != CSS_NUMBER_LITERAL {
         return Absent;
     }
     let m = p.start();
-    p.bump_css_letters(CSS_NUMBER_LITERAL, letters);
+    p.bump_css_atoms(CSS_NUMBER_LITERAL, atoms);
     Present(m.complete(p, CSS_NUMBER))
 }
 
@@ -173,7 +173,7 @@ fn parse_css_number_or_ratio(p: &mut TailwindParser) -> ParsedSyntax {
     Present(ratio.complete(p, CSS_RATIO))
 }
 
-/// Whether the current letter is a `/` and the CSS token after it, past any `_`s, is a number.
+/// Whether the current atom is a `/` and the CSS token after it, past any `_`s, is a number.
 fn current_slash_is_followed_by_css_number(p: &TailwindParser) -> bool {
     if !p.at(T![/]) {
         return false;
@@ -201,11 +201,11 @@ fn parse_any_function(p: &mut TailwindParser) -> ParsedSyntax {
     }
 }
 
-/// Whether the current letter starts an identifier with a `(` right after it.
+/// Whether the current atom starts an identifier with a `(` right after it.
 #[inline]
 fn is_at_identifier_and_paren(p: &TailwindParser) -> bool {
-    let (kind, letters) = css(p);
-    is_identifier(kind) && p.source().nth_kind(letters) == T!['(']
+    let (kind, atoms) = css(p);
+    is_identifier(kind) && p.source().nth_kind(atoms) == T!['(']
 }
 
 #[inline]
@@ -220,8 +220,8 @@ fn is_at_function(p: &TailwindParser) -> bool {
 
 fn parse_url_function(p: &mut TailwindParser) -> ParsedSyntax {
     let m = p.start();
-    let (_, letters) = css(p);
-    p.bump_css_letters(T![url], letters);
+    let (_, atoms) = css(p);
+    p.bump_css_atoms(T![url], atoms);
     p.expect_css(T!['(']);
     if is_at_any_function(p) {
         ParameterList.parse_list(p);
@@ -240,8 +240,8 @@ fn parse_url_value(p: &mut TailwindParser) -> ParsedSyntax {
         None | Some(PNC | WHS) => Absent,
         Some(_) => {
             let m = p.start();
-            let letters = url_raw_value(p.source());
-            p.bump_letters(CSS_URL_VALUE_RAW_LITERAL, letters);
+            let atoms = url_raw_value(p.source());
+            p.bump_atoms(CSS_URL_VALUE_RAW_LITERAL, atoms);
             Present(m.complete(p, CSS_URL_VALUE_RAW))
         }
     }
@@ -441,7 +441,7 @@ pub(crate) fn is_identifier(kind: TailwindSyntaxKind) -> bool {
     kind == IDENT || CSS_VALUE_KEYWORD_SET.contains(kind)
 }
 
-/// Whether the CSS token at the current letter is a dashed identifier: one that starts with `--`.
+/// Whether the CSS token at the current atom is a dashed identifier: one that starts with `--`.
 #[inline]
 pub(crate) fn is_at_dashed_identifier(p: &TailwindParser) -> bool {
     css(p).0 == IDENT && p.source().text()[p.cur_range().start().into()..].starts_with("--")

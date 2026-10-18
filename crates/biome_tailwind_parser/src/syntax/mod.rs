@@ -1,6 +1,6 @@
 use crate::parser::TailwindParser;
+use crate::syntax::atoms::{ValueEnd, base, is_at_base, is_at_property, property};
 use crate::syntax::css_value::parse_css_generic_component_value_list;
-use crate::syntax::letters::{ValueEnd, base, is_at_base, is_at_property, property};
 use crate::syntax::parse_error::*;
 use crate::syntax::value::parse_value;
 use crate::syntax::variant::VariantList;
@@ -11,13 +11,13 @@ use biome_parser::{Parser, parse_recovery::ParseRecoveryTokenSet, token_set};
 use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::{self, *};
 
+mod atoms;
 mod css_value;
-mod letters;
 pub(crate) mod parse_error;
 mod value;
 mod variant;
 
-pub(crate) use letters::css_token;
+pub(crate) use atoms::css_token;
 
 pub fn parse_root(p: &mut TailwindParser) {
     let m = p.start();
@@ -124,12 +124,12 @@ fn parse_functional_or_static_candidate(p: &mut TailwindParser, negative: bool) 
     if !is_at_base(p.source(), negative) {
         return Absent;
     }
-    let letters = base(p.source());
+    let atoms = base(p.source());
 
     let checkpoint = p.checkpoint();
     let m = p.start();
 
-    p.bump_letters(TW_BASE, letters);
+    p.bump_atoms(TW_BASE, atoms);
     if p.at(T![:]) {
         // Oops, this is a Variant!
         m.abandon(p);
@@ -203,8 +203,8 @@ fn parse_arbitrary_candidate(p: &mut TailwindParser) -> ParsedSyntax {
         p.rewind(checkpoint);
         return Absent;
     }
-    let letters = property(p.source());
-    p.bump_letters(TW_PROPERTY, letters);
+    let atoms = property(p.source());
+    p.bump_atoms(TW_PROPERTY, atoms);
     if !p.at(T![:]) {
         m.abandon(p);
         p.rewind(checkpoint);

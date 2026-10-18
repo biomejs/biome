@@ -1,9 +1,9 @@
-//! How many letters each token of the tree spans.
+//! How many atoms each token of the tree spans.
 //!
-//! The lexer fixes the letters and their kinds before parsing. Where a token of the tree spans
-//! several letters, such as the value `red-500` or the selector `&>div`, the grammar asks one of
-//! these functions how many letters to merge, starting `n` letters after the current one, and
-//! bumps them as one token. They only read the letters.
+//! The lexer fixes the atoms and their kinds before parsing. Where a token of the tree spans
+//! several atoms, such as the value `red-500` or the selector `&>div`, the grammar asks one of
+//! these functions how many atoms to merge, starting `n` atoms after the current one, and
+//! bumps them as one token. They only read the atoms.
 
 use crate::lexer::css_identifier_kind;
 use crate::token_source::TailwindTokenSource;
@@ -13,9 +13,9 @@ use biome_tailwind_syntax::TailwindSyntaxKind::{self, *};
 use biome_unicode_table::Dispatch::{self, *};
 use biome_unicode_table::lookup_byte;
 
-/// Returns how many letters from the current one come before the first one whose first byte
+/// Returns how many atoms from the current one come before the first one whose first byte
 /// `stop` matches, or the end.
-fn letters_until(source: &TailwindTokenSource, n: usize, stop: impl Fn(Dispatch) -> bool) -> usize {
+fn atoms_until(source: &TailwindTokenSource, n: usize, stop: impl Fn(Dispatch) -> bool) -> usize {
     let mut count = 0;
     while let Some(dispatch) = source.nth_dispatch(n + count) {
         if stop(dispatch) {
@@ -26,7 +26,7 @@ fn letters_until(source: &TailwindTokenSource, n: usize, stop: impl Fn(Dispatch)
     count
 }
 
-/// Whether the current letter starts a basename: an ASCII letter, digit or `_`, or an `@`
+/// Whether the current atom starts a basename: an ASCII letter, digit or `_`, or an `@`
 /// unless the basename follows the `-` of a negative candidate.
 pub(crate) fn is_at_base(source: &TailwindTokenSource, negative: bool) -> bool {
     match source.nth_dispatch(0) {
@@ -36,17 +36,17 @@ pub(crate) fn is_at_base(source: &TailwindTokenSource, negative: bool) -> bool {
     }
 }
 
-/// Returns the length in letters of the basename at the current letter: up to the next `-`,
+/// Returns the length in atoms of the basename at the current atom: up to the next `-`,
 /// whitespace, `!`, `:` or `/`, continued over each `-` that a dashed basename continues over.
 pub(crate) fn base(source: &TailwindTokenSource) -> usize {
-    let count = letters_until(source, 1, |dispatch| {
+    let count = atoms_until(source, 1, |dispatch| {
         matches!(dispatch, WHS | MIN | EXL | COL | SLH)
     }) + 1;
     if source.nth_dispatch(count) != Some(MIN) {
         return count;
     }
     let end = source.dashed_base_end(source.nth_start(0), source.nth_start(count));
-    source.letters_before(end)
+    source.atoms_before(end)
 }
 
 /// Where a value ends: after the `-` of a candidate, or after the `/` of a modifier.
@@ -58,10 +58,10 @@ pub(crate) enum ValueEnd {
     Modifier,
 }
 
-/// Returns the kind and length in letters of the value at the current letter, which may be
+/// Returns the kind and length in atoms of the value at the current atom, which may be
 /// none: a `TW_NUMBER` if it holds only digits and `.`, and a `TW_VALUE` otherwise.
 pub(crate) fn value(source: &TailwindTokenSource, end: ValueEnd) -> (TailwindSyntaxKind, usize) {
-    let count = letters_until(source, 0, |dispatch| match end {
+    let count = atoms_until(source, 0, |dispatch| match end {
         ValueEnd::Candidate => matches!(dispatch, WHS | COL | SLH | EXL | BTC | PNC | PRC),
         ValueEnd::Modifier => matches!(dispatch, WHS | EXL | PRC | COL),
     });
@@ -69,7 +69,7 @@ pub(crate) fn value(source: &TailwindTokenSource, end: ValueEnd) -> (TailwindSyn
     (if numeric { TW_NUMBER } else { TW_VALUE }, count)
 }
 
-/// Whether the current letter starts a selector, rather than being whitespace or a bracket of
+/// Whether the current atom starts a selector, rather than being whitespace or a bracket of
 /// its own.
 pub(crate) fn is_at_selector(source: &TailwindTokenSource) -> bool {
     source
@@ -77,7 +77,7 @@ pub(crate) fn is_at_selector(source: &TailwindTokenSource) -> bool {
         .is_some_and(|dispatch| !matches!(dispatch, WHS | PNO | PNC | BTC))
 }
 
-/// Returns the length in letters of the selector at the current letter: up to the next
+/// Returns the length in atoms of the selector at the current atom: up to the next
 /// whitespace or the `]` that closes the brackets it opens.
 pub(crate) fn selector(source: &TailwindTokenSource) -> usize {
     let mut depth = 0u32;
@@ -94,39 +94,39 @@ pub(crate) fn selector(source: &TailwindTokenSource) -> usize {
     count
 }
 
-/// Whether the current letter starts the property of an arbitrary candidate.
+/// Whether the current atom starts the property of an arbitrary candidate.
 pub(crate) fn is_at_property(source: &TailwindTokenSource) -> bool {
     source
         .nth_dispatch(0)
         .is_some_and(|dispatch| !matches!(dispatch, WHS | PNO | PNC | BTO | BTC | COL))
 }
 
-/// Returns the length in letters of the property at the current letter: up to the next `:` or
+/// Returns the length in atoms of the property at the current atom: up to the next `:` or
 /// whitespace.
 pub(crate) fn property(source: &TailwindTokenSource) -> usize {
-    letters_until(source, 0, |dispatch| matches!(dispatch, WHS | COL))
+    atoms_until(source, 0, |dispatch| matches!(dispatch, WHS | COL))
 }
 
-/// Whether the current letter starts a variant segment name.
+/// Whether the current atom starts a variant segment name.
 pub(crate) fn is_at_segment(source: &TailwindTokenSource) -> bool {
     matches!(source.nth_dispatch(0), Some(IDT | ZER | DIG | AT_ | MUL))
 }
 
-/// Returns the length in letters of the variant segment name at the current letter: up to the
+/// Returns the length in atoms of the variant segment name at the current atom: up to the
 /// next whitespace, `:`, `-`, `/`, `!`, `[`, `]` or `)`.
 pub(crate) fn segment(source: &TailwindTokenSource) -> usize {
-    letters_until(source, 1, |dispatch| {
+    atoms_until(source, 1, |dispatch| {
         matches!(dispatch, WHS | COL | MIN | SLH | EXL | BTO | BTC | PNC)
     }) + 1
 }
 
-/// Returns the length in letters of the raw URL at the current letter: up to the next `)` or
+/// Returns the length in atoms of the raw URL at the current atom: up to the next `)` or
 /// whitespace.
 pub(crate) fn url_raw_value(source: &TailwindTokenSource) -> usize {
-    letters_until(source, 0, |dispatch| matches!(dispatch, WHS | PNC))
+    atoms_until(source, 0, |dispatch| matches!(dispatch, WHS | PNC))
 }
 
-/// Returns the kind and length in letters of the token of a CSS value that starts `n` letters
+/// Returns the kind and length in atoms of the token of a CSS value that starts `n` atoms
 /// after the current one.
 pub(crate) fn css_token(source: &TailwindTokenSource, n: usize) -> (TailwindSyntaxKind, usize) {
     let Some(byte) = source.nth_byte(n) else {
@@ -186,7 +186,7 @@ pub(crate) fn css_token(source: &TailwindTokenSource, n: usize) -> (TailwindSynt
     }
 }
 
-/// Returns the kind and length in letters of the CSS identifier that starts `n` letters after
+/// Returns the kind and length in atoms of the CSS identifier that starts `n` atoms after
 /// the current one: ASCII letters, digits and `-`, and also `_` and non-ASCII chars in a custom
 /// property, which starts with `--`. Its kind is the keyword it spells, such as a unit, or
 /// `IDENT`.
@@ -211,9 +211,9 @@ fn css_identifier(source: &TailwindTokenSource, n: usize) -> (TailwindSyntaxKind
     (css_identifier_kind(&bytes[start..end]), count)
 }
 
-/// Returns the kind and length in letters of the CSS number that starts `n` letters after the
+/// Returns the kind and length in atoms of the CSS number that starts `n` atoms after the
 /// current one: an optional sign, digits, a fraction and an exponent. Its kind is a percentage if
-/// `%` follows, a dimension if a letter follows, and a number otherwise.
+/// `%` follows, a dimension if an ASCII letter follows, and a number otherwise.
 fn css_number(source: &TailwindTokenSource, n: usize) -> (TailwindSyntaxKind, usize) {
     let is_digits = |at: usize| matches!(source.nth_dispatch(at), Some(ZER | DIG));
     let mut at = n;
@@ -243,7 +243,7 @@ fn css_number(source: &TailwindTokenSource, n: usize) -> (TailwindSyntaxKind, us
     (kind, at - n)
 }
 
-/// Returns the length in letters of the CSS string that starts `n` letters after the current
+/// Returns the length in atoms of the CSS string that starts `n` atoms after the current
 /// one, which runs to its closing quote or to the next whitespace.
 fn css_string(source: &TailwindTokenSource, n: usize) -> usize {
     let quote = source.nth_byte(n);
@@ -268,8 +268,8 @@ fn css_string(source: &TailwindTokenSource, n: usize) -> usize {
     at - n
 }
 
-/// Returns the length in letters of the hex color that starts `n` letters after the current
-/// one: a `#` and the hex digits after it. The lexer splits the color from the letters after it.
+/// Returns the length in atoms of the hex color that starts `n` atoms after the current one: a
+/// `#` and the hex digits after it. The lexer splits the color from the ASCII letters after it.
 fn css_color(source: &TailwindTokenSource, n: usize) -> usize {
     let mut at = n + 1;
     while source

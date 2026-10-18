@@ -19,8 +19,8 @@ pub(crate) type TailwindLosslessTreeSink<'source> =
 pub(crate) struct TailwindParser<'source> {
     context: ParserContext<TailwindSyntaxKind>,
     source: TailwindTokenSource<'source>,
-    /// The last result of [Self::css_token]: the letter index it was asked for, and the kind
-    /// and length in letters of the CSS token there. The letters never change, so it stays
+    /// The last result of [Self::css_token]: the atom index it was asked for, and the kind
+    /// and length in atoms of the CSS token there. The atoms never change, so it stays
     /// valid across rewinds.
     css_token: Cell<(usize, TailwindSyntaxKind, usize)>,
 }
@@ -61,40 +61,40 @@ impl<'source> TailwindParser<'source> {
         self.source.rewind(checkpoint.token_source);
     }
 
-    /// Returns the kind and length in letters of the CSS token at the current letter.
+    /// Returns the kind and length in atoms of the CSS token at the current atom.
     pub fn css_token(&self) -> (TailwindSyntaxKind, usize) {
         let position = self.source.position_index();
-        let (cached, kind, letters) = self.css_token.get();
+        let (cached, kind, atoms) = self.css_token.get();
         if cached == position {
-            return (kind, letters);
+            return (kind, atoms);
         }
-        let (kind, letters) = css_token(&self.source, 0);
-        self.css_token.set((position, kind, letters));
-        (kind, letters)
+        let (kind, atoms) = css_token(&self.source, 0);
+        self.css_token.set((position, kind, atoms));
+        (kind, atoms)
     }
 
-    /// Bumps the current letter and the `count - 1` letters after it as one token of `kind`, or
+    /// Bumps the current atom and the `count - 1` atoms after it as one token of `kind`, or
     /// adds an empty token of `kind` if `count` is zero.
-    pub fn bump_letters(&mut self, kind: TailwindSyntaxKind, count: usize) {
+    pub fn bump_atoms(&mut self, kind: TailwindSyntaxKind, count: usize) {
         let end = TextSize::from(self.source.nth_start(count) as u32);
         self.context.push_token(kind, end);
         self.source.advance(count);
     }
 
-    /// Bumps the current letter as one token of `kind`, then skips the `_`s after it, which
+    /// Bumps the current atom as one token of `kind`, then skips the `_`s after it, which
     /// Tailwind decodes to whitespace inside a CSS value, as trivia.
     pub fn bump_css(&mut self, kind: TailwindSyntaxKind) {
-        self.bump_css_letters(kind, 1);
+        self.bump_css_atoms(kind, 1);
     }
 
-    /// Like [Self::bump_letters], then skips the `_`s after the token, which Tailwind decodes to
+    /// Like [Self::bump_atoms], then skips the `_`s after the token, which Tailwind decodes to
     /// whitespace inside a CSS value, as trivia.
-    pub fn bump_css_letters(&mut self, kind: TailwindSyntaxKind, count: usize) {
-        self.bump_letters(kind, count);
+    pub fn bump_css_atoms(&mut self, kind: TailwindSyntaxKind, count: usize) {
+        self.bump_atoms(kind, count);
         self.skip_css_whitespace();
     }
 
-    /// Skips the `_`s at the current letter, which Tailwind decodes to whitespace inside a CSS
+    /// Skips the `_`s at the current atom, which Tailwind decodes to whitespace inside a CSS
     /// value, as trivia of the token before them.
     pub fn skip_css_whitespace(&mut self) {
         while self.source.nth_kind(0) == CSS_WHITESPACE {
@@ -103,7 +103,7 @@ impl<'source> TailwindParser<'source> {
         }
     }
 
-    /// Bumps the current letter if it is of `kind`, then skips the `_`s after it as in
+    /// Bumps the current atom if it is of `kind`, then skips the `_`s after it as in
     /// [Self::bump_css]. Adds a diagnostic if it isn't.
     pub fn expect_css(&mut self, kind: TailwindSyntaxKind) -> bool {
         if self.at(kind) {

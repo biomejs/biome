@@ -1,4 +1,4 @@
-//! The token source of the parser: an index into the letters that [SimdLexer] wrote before
+//! The token source of the parser: an index into the atoms that [SimdLexer] wrote before
 //! parsing.
 
 #[cfg(test)]
@@ -15,12 +15,12 @@ use biome_unicode_table::{Dispatch, lookup_byte};
 
 /// Token source for the parser.
 ///
-/// The current token is one letter of the lexer's stream. Bumping it moves to the next letter;
-/// the parser merges several letters into one token of the tree by bumping them together with
+/// The current token is one atom of the lexer's stream. Bumping it moves to the next atom;
+/// the parser merges several atoms into one token of the tree by bumping them together with
 /// [Self::advance]. A checkpoint is an index, so a rewind never lexes anything again.
 pub(crate) struct TailwindTokenSource<'source> {
     lexer: SimdLexer<'source>,
-    /// The index of the current letter.
+    /// The index of the current atom.
     position: usize,
     /// Trivia that the parser skipped.
     trivia_list: Vec<Trivia>,
@@ -34,7 +34,7 @@ pub(crate) struct TailwindTokenSourceCheckpoint {
 }
 
 impl<'source> TailwindTokenSource<'source> {
-    /// Lexes `source` and creates a token source at its first letter.
+    /// Lexes `source` and creates a token source at its first atom.
     pub(crate) fn from_str(source: &'source str, base_names: &'source BaseNameStore) -> Self {
         Self {
             lexer: SimdLexer::new(source, base_names),
@@ -43,49 +43,49 @@ impl<'source> TailwindTokenSource<'source> {
         }
     }
 
-    /// Returns the index of the current letter.
+    /// Returns the index of the current atom.
     #[inline(always)]
     pub(crate) fn position_index(&self) -> usize {
         self.position
     }
 
-    /// Returns the kind of the letter `n` letters after the current one, or `EOF` past the end.
+    /// Returns the kind of the atom `n` atoms after the current one, or `EOF` past the end.
     #[inline(always)]
     pub(crate) fn nth_kind(&self, n: usize) -> TailwindSyntaxKind {
         self.lexer.kind(self.position + n)
     }
 
-    /// Returns the first byte of the letter `n` letters after the current one, or `None` past
+    /// Returns the first byte of the atom `n` atoms after the current one, or `None` past
     /// the end.
     #[inline(always)]
     pub(crate) fn nth_byte(&self, n: usize) -> Option<u8> {
         self.lexer.byte(self.position + n)
     }
 
-    /// Returns the [Dispatch] of the first byte of the letter `n` letters after the current one,
+    /// Returns the [Dispatch] of the first byte of the atom `n` atoms after the current one,
     /// or `None` past the end.
     #[inline(always)]
     pub(crate) fn nth_dispatch(&self, n: usize) -> Option<Dispatch> {
         self.nth_byte(n).map(lookup_byte)
     }
 
-    /// Returns the text of the letter `n` letters after the current one.
+    /// Returns the text of the atom `n` atoms after the current one.
     #[inline(always)]
     pub(crate) fn nth_text(&self, n: usize) -> &'source str {
         self.lexer.text(self.position + n)
     }
 
-    /// Returns the start of the letter `n` letters after the current one, or the source length
+    /// Returns the start of the atom `n` atoms after the current one, or the source length
     /// past the end.
     #[inline(always)]
     pub(crate) fn nth_start(&self, n: usize) -> usize {
         self.lexer.start(self.position + n)
     }
 
-    /// Returns how many letters after the current one start before `offset`, which must be a
-    /// letter boundary at or after the current letter.
+    /// Returns how many atoms after the current one start before `offset`, which must be a
+    /// atom boundary at or after the current atom.
     #[inline(always)]
-    pub(crate) fn letters_before(&self, offset: usize) -> usize {
+    pub(crate) fn atoms_before(&self, offset: usize) -> usize {
         self.lexer.index_at(offset, self.position) - self.position
     }
 
@@ -96,13 +96,13 @@ impl<'source> TailwindTokenSource<'source> {
         self.lexer.dashed_base_end(start, end)
     }
 
-    /// Moves `count` letters forward.
+    /// Moves `count` atoms forward.
     #[inline(always)]
     pub(crate) fn advance(&mut self, count: usize) {
         self.position += count;
     }
 
-    /// Skips the current letter as trivia of the token before it.
+    /// Skips the current atom as trivia of the token before it.
     pub(crate) fn skip_as_trailing_trivia(&mut self, kind: TriviaPieceKind) {
         self.trivia_list
             .push(Trivia::new(kind, self.current_range(), true));
@@ -124,7 +124,7 @@ impl<'source> TailwindTokenSource<'source> {
         self.position = checkpoint.position;
     }
 
-    /// Returns whether a `:` follows the start of the current letter before the next whitespace.
+    /// Returns whether a `:` follows the start of the current atom before the next whitespace.
     pub(crate) fn has_colon_before_whitespace(&self) -> bool {
         self.lexer
             .has_colon_before_whitespace(self.lexer.start(self.position))
