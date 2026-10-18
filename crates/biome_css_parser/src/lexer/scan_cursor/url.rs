@@ -97,7 +97,7 @@ impl<'src> UrlBodyScanner<'src> {
         self.cursor.skip_whitespace();
         let start = self.cursor.position();
 
-        match self.scan_scss_raw_url_body(false, true) {
+        match self.scan_scss_raw_url_body(false, true, self.cursor.is_scss) {
             ScssRawUrlBodyScan::Complete { has_interpolation }
                 if self.cursor.position() > start =>
             {
@@ -119,6 +119,7 @@ impl<'src> UrlBodyScanner<'src> {
         &mut self,
         mut has_interpolation: bool,
         is_literal_dollar_allowed: bool,
+        is_interpolation_allowed: bool,
     ) -> ScssRawUrlBodyScan {
         while let Some(current) = self.cursor.current_byte() {
             match current {
@@ -131,7 +132,7 @@ impl<'src> UrlBodyScanner<'src> {
                     }
                     self.consume_url_escape();
                 }
-                b'#' if self.cursor.peek_byte() == Some(b'{') => {
+                b'#' if is_interpolation_allowed && self.cursor.peek_byte() == Some(b'{') => {
                     if !self.consume_complete_scss_url_interpolation() {
                         return ScssRawUrlBodyScan::MalformedInterpolation;
                     }
@@ -211,7 +212,7 @@ impl<'src> UrlBodyScanner<'src> {
                 }
             };
 
-            match self.scan_scss_raw_url_body(has_interpolation, false) {
+            match self.scan_scss_raw_url_body(has_interpolation, false, true) {
                 ScssRawUrlBodyScan::Complete {
                     has_interpolation: true,
                 } => {
@@ -379,10 +380,11 @@ impl<'src> UrlBodyScanner<'src> {
     ///
     /// Example: `url(foo.css)`.
     fn is_url_raw_value_start(byte: u8) -> bool {
-        matches!(
-            lookup_byte(byte),
-            IDT | DOL | UNI | PRD | SLH | ZER | DIG | TLD | HAS | AT_ | EXL
-        )
+        matches!(byte, b'[' | b']' | b'{' | b'}')
+            || matches!(
+                lookup_byte(byte),
+                IDT | DOL | UNI | PRD | SLH | ZER | DIG | TLD | HAS | AT_ | EXL
+            )
     }
 
     /// Returns whether `byte` may appear unescaped in Sass raw URL contents.

@@ -909,6 +909,33 @@ fn css_scan_cursor_classifies_custom_property_url_bodies() {
     assert!(protocol_relative.custom_property_url_lex_context().is_some());
     assert!(escaped_whitespace.custom_property_url_lex_context().is_some());
     assert!(line_comment.custom_property_url_lex_context().is_none());
+
+    let source = "#{$name})";
+    let css = CssScanCursor::new(SourceCursor::new(source, 0), false, false);
+    let scss = CssScanCursor::new(SourceCursor::new(source, 0), true, true);
+    assert!(matches!(
+        css.custom_property_url_lex_context(),
+        Some(CssLexContext::UrlRawValue(scan))
+            if scan.start == 0 && scan.end == source.len() - 1 && scan.terminated
+    ));
+    assert!(matches!(
+        scss.custom_property_url_lex_context(),
+        Some(CssLexContext::ScssUrlValue { start: 0 })
+    ));
+}
+
+#[test]
+fn url_body_classification_accepts_leading_delimiters() {
+    for is_scss in [false, true] {
+        for source in ["[a)", "{a)", "]a)", "}a)"] {
+            let cursor = CssScanCursor::new(SourceCursor::new(source, 0), is_scss, is_scss);
+            assert!(matches!(
+                cursor.url_body_lex_context(is_scss),
+                CssLexContext::UrlRawValue(scan)
+                    if scan.start == 0 && scan.end == 2 && scan.terminated
+            ));
+        }
+    }
 }
 
 #[test]
