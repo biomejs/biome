@@ -20,30 +20,6 @@
 
 .oneline { color: red; display: block; }
 
-.nested-rules {
-  display: block;
-  .nested {}
-  color: red;
-  .nested {}
-  margin: 1px;
-}
-
-.at-rules {
-  display: block;
-  @media (min-width: 100px) {}
-  color: red;
-  @media (min-width: 100px) {}
-  margin: 1px;
-}
-
-.mixed-rules {
-  display: block;
-  @media (min-width: 100px) {}
-  color: red;
-  .nested {}
-  margin: 1px;
-}
-
 .vendor-prefixes {
   margin: 1px;
   -moz-margin: 1px;

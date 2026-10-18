@@ -55,17 +55,25 @@ expression: valid.css
 .nested-rules {
   display: block;
   .nested {}
+  color: red;
+  .nested {}
+  margin: 1px;
 }
 
 .at-rules {
   display: block;
   @media (min-width: 100px) {}
+  color: red;
+  @media (min-width: 100px) {}
+  margin: 1px;
 }
 
 .mixed-rules {
   display: block;
-  .nested {}
   @media (min-width: 100px) {}
+  color: red;
+  .nested {}
+  margin: 1px;
 }
 
 .nested-with-content {
@@ -240,6 +248,14 @@ expression: valid.css
   position: relative;
   box-sizing: border-box;
   position-anchor: --position-anchor;
+}
+
+/**
+ * https://github.com/biomejs/biome/issues/12413
+ */
+div {
+  & { color: blue; }
+  color: red;
 }
 
 ```

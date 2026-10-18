@@ -1,0 +1,90 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: sassVariables.scss
+---
+# Input
+```css
+/* should generate diagnostics */
+.example {
+  $size: 10px;
+  width: $size;
+  display: block;
+}
+
+.declarations-around-variable {
+  color: red;
+  display: block;
+  $theme: blue;
+  transition: opacity 1s ease;
+  margin: 1px;
+}
+
+```
+
+# Diagnostics
+```
+sassVariables.scss:2:10 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ .example {
+      │          ^
+  > 3 │   $size: 10px;
+  > 4 │   width: $size;
+  > 5 │   display: block;
+  > 6 │ }
+      │ ^
+    7 │ 
+    8 │ .declarations-around-variable {
+  
+  i Safe fix: Sort these properties
+  
+     2  2 │   .example {
+     3  3 │     $size: 10px;
+     4    │ - ··width:·$size;
+     5    │ - ··display:·block;
+        4 │ + ··display:·block;
+        5 │ + ··width:·$size;
+     6  6 │   }
+     7  7 │   
+  
+
+```
+
+```
+sassVariables.scss:8:31 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+     6 │ }
+     7 │ 
+   > 8 │ .declarations-around-variable {
+       │                               ^
+   > 9 │   color: red;
+  > 10 │   display: block;
+  > 11 │   $theme: blue;
+  > 12 │   transition: opacity 1s ease;
+  > 13 │   margin: 1px;
+  > 14 │ }
+       │ ^
+    15 │ 
+  
+  i Safe fix: Sort these properties
+  
+     7  7 │   
+     8  8 │   .declarations-around-variable {
+     9    │ - ··color:·red;
+    10    │ - ··display:·block;
+        9 │ + ··display:·block;
+       10 │ + ··color:·red;
+    11 11 │     $theme: blue;
+    12    │ - ··transition:·opacity·1s·ease;
+    13    │ - ··margin:·1px;
+       12 │ + ··margin:·1px;
+       13 │ + ··transition:·opacity·1s·ease;
+    14 14 │   }
+    15 15 │   
+  
+
+```

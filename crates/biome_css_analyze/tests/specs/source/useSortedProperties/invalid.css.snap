@@ -26,30 +26,6 @@ expression: invalid.css
 
 .oneline { color: red; display: block; }
 
-.nested-rules {
-  display: block;
-  .nested {}
-  color: red;
-  .nested {}
-  margin: 1px;
-}
-
-.at-rules {
-  display: block;
-  @media (min-width: 100px) {}
-  color: red;
-  @media (min-width: 100px) {}
-  margin: 1px;
-}
-
-.mixed-rules {
-  display: block;
-  @media (min-width: 100px) {}
-  color: red;
-  .nested {}
-  margin: 1px;
-}
-
 .vendor-prefixes {
   margin: 1px;
   -moz-margin: 1px;
@@ -292,7 +268,7 @@ invalid.css:21:10 assist/source/useSortedProperties  FIXABLE  ━━━━━━
   > 21 │ .oneline { color: red; display: block; }
        │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     22 │ 
-    23 │ .nested-rules {
+    23 │ .vendor-prefixes {
   
   i Safe fix: Sort these properties
   
@@ -301,108 +277,130 @@ invalid.css:21:10 assist/source/useSortedProperties  FIXABLE  ━━━━━━
      21     │ - .oneline·{·color:·red;·display:·block;·}
          21 │ + .oneline·{·display:·block;·color:·red;·}
      22  22 │   
-     23  23 │   .nested-rules {
+     23  23 │   .vendor-prefixes {
   
 
 ```
 
 ```
-invalid.css:23:15 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:23:18 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The properties are not sorted.
   
     21 │ .oneline { color: red; display: block; }
     22 │ 
-  > 23 │ .nested-rules {
-       │               ^
-  > 24 │   display: block;
-        ...
-  > 28 │   margin: 1px;
-  > 29 │ }
+  > 23 │ .vendor-prefixes {
+       │                  ^
+  > 24 │   margin: 1px;
+  > 25 │   -moz-margin: 1px;
+  > 26 │   -webkit-margin: 1px;
+  > 27 │ }
        │ ^
-    30 │ 
-    31 │ .at-rules {
+    28 │ 
+    29 │ .case-insensitive {
   
   i Safe fix: Sort these properties
   
-     23  23 │   .nested-rules {
-     24  24 │     display: block;
-     25     │ - ··.nested·{}
-         25 │ + ··margin:·1px;
-     26  26 │     color: red;
-     27  27 │     .nested {}
-     28     │ - ··margin:·1px;
-         28 │ + ··.nested·{}
-     29  29 │   }
-     30  30 │   
+     22  22 │   
+     23  23 │   .vendor-prefixes {
+     24     │ - ··margin:·1px;
+     25     │ - ··-moz-margin:·1px;
+     26     │ - ··-webkit-margin:·1px;
+         24 │ + ··-moz-margin:·1px;
+         25 │ + ··-webkit-margin:·1px;
+         26 │ + ··margin:·1px;
+     27  27 │   }
+     28  28 │   
   
 
 ```
 
 ```
-invalid.css:31:11 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:29:19 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The properties are not sorted.
   
-    29 │ }
-    30 │ 
-  > 31 │ .at-rules {
+    27 │ }
+    28 │ 
+  > 29 │ .case-insensitive {
+       │                   ^
+  > 30 │   color: red;
+  > 31 │   DISPLAY: block;
+  > 32 │ }
+       │ ^
+    33 │ 
+    34 │ .nested-with-content {
+  
+  i Safe fix: Sort these properties
+  
+     28  28 │   
+     29  29 │   .case-insensitive {
+     30     │ - ··color:·red;
+     31     │ - ··DISPLAY:·block;
+         30 │ + ··DISPLAY:·block;
+         31 │ + ··color:·red;
+     32  32 │   }
+     33  33 │   
+  
+
+```
+
+```
+invalid.css:35:11 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    34 │ .nested-with-content {
+  > 35 │   .nested {
        │           ^
-  > 32 │   display: block;
-        ...
-  > 36 │   margin: 1px;
-  > 37 │ }
-       │ ^
-    38 │ 
-    39 │ .mixed-rules {
+  > 36 │     color: red;
+  > 37 │     display: block;
+  > 38 │   }
+       │   ^
+    39 │ }
+    40 │ 
   
   i Safe fix: Sort these properties
   
-     31  31 │   .at-rules {
-     32  32 │     display: block;
-     33     │ - ··@media·(min-width:·100px)·{}
-     34     │ - ··color:·red;
-     35     │ - ··@media·(min-width:·100px)·{}
-     36     │ - ··margin:·1px;
-         33 │ + ··margin:·1px;
-         34 │ + ··color:·red;
-         35 │ + ··@media·(min-width:·100px)·{}
-         36 │ + ··@media·(min-width:·100px)·{}
-     37  37 │   }
-     38  38 │   
+     34  34 │   .nested-with-content {
+     35  35 │     .nested {
+     36     │ - ····color:·red;
+     37     │ - ····display:·block;
+         36 │ + ····display:·block;
+         37 │ + ····color:·red;
+     38  38 │     }
+     39  39 │   }
   
 
 ```
 
 ```
-invalid.css:39:14 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:41:66 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The properties are not sorted.
   
-    37 │ }
-    38 │ 
-  > 39 │ .mixed-rules {
-       │              ^
-  > 40 │   display: block;
-        ...
-  > 44 │   margin: 1px;
+    39 │ }
+    40 │ 
+  > 41 │ .shorthand-after-longhand-not-ignored-if-different-vendor-prefix {
+       │                                                                  ^
+  > 42 │   padding: 5px;
+  > 43 │   -webkit-padding-right: 10px;
+  > 44 │   -moz-padding: 20px;
   > 45 │ }
        │ ^
     46 │ 
-    47 │ .vendor-prefixes {
+    47 │ .example-from-doc-comment {
   
   i Safe fix: Sort these properties
   
-     39  39 │   .mixed-rules {
-     40  40 │     display: block;
-     41     │ - ··@media·(min-width:·100px)·{}
-     42     │ - ··color:·red;
-     43     │ - ··.nested·{}
-     44     │ - ··margin:·1px;
-         41 │ + ··margin:·1px;
-         42 │ + ··color:·red;
-         43 │ + ··@media·(min-width:·100px)·{}
-         44 │ + ··.nested·{}
+     40  40 │   
+     41  41 │   .shorthand-after-longhand-not-ignored-if-different-vendor-prefix {
+     42     │ - ··padding:·5px;
+     43     │ - ··-webkit-padding-right:·10px;
+     44     │ - ··-moz-padding:·20px;
+         42 │ + ··-moz-padding:·20px;
+         43 │ + ··padding:·5px;
+         44 │ + ··-webkit-padding-right:·10px;
      45  45 │   }
      46  46 │   
   
@@ -410,281 +408,207 @@ invalid.css:39:14 assist/source/useSortedProperties  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.css:47:18 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:47:27 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The properties are not sorted.
   
     45 │ }
     46 │ 
-  > 47 │ .vendor-prefixes {
-       │                  ^
-  > 48 │   margin: 1px;
-  > 49 │   -moz-margin: 1px;
-  > 50 │   -webkit-margin: 1px;
-  > 51 │ }
+  > 47 │ .example-from-doc-comment {
+       │                           ^
+  > 48 │   transition: opacity 1s ease;
+        ...
+  > 54 │   --custom: 100;
+  > 55 │ }
        │ ^
-    52 │ 
-    53 │ .case-insensitive {
+    56 │ 
+    57 │ .contain-intrinsic {
   
   i Safe fix: Sort these properties
   
      46  46 │   
-     47  47 │   .vendor-prefixes {
-     48     │ - ··margin:·1px;
-     49     │ - ··-moz-margin:·1px;
-     50     │ - ··-webkit-margin:·1px;
-         48 │ + ··-moz-margin:·1px;
-         49 │ + ··-webkit-margin:·1px;
-         50 │ + ··margin:·1px;
-     51  51 │   }
-     52  52 │   
+     47  47 │   .example-from-doc-comment {
+     48     │ - ··transition:·opacity·1s·ease;
+     49     │ - ··border:·1px·solid·black;
+     50     │ - ··pointer-events:·none;
+         48 │ + ··--custom:·100;
+         49 │ + ··display:·block;
+         50 │ + ··margin:·8px;
+     51  51 │     color: black;
+     52     │ - ··margin:·8px;
+     53     │ - ··display:·block;
+     54     │ - ··--custom:·100;
+         52 │ + ··pointer-events:·none;
+         53 │ + ··border:·1px·solid·black;
+         54 │ + ··transition:·opacity·1s·ease;
+     55  55 │   }
+     56  56 │   
   
 
 ```
 
 ```
-invalid.css:53:19 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:57:20 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The properties are not sorted.
   
-    51 │ }
-    52 │ 
-  > 53 │ .case-insensitive {
-       │                   ^
-  > 54 │   color: red;
-  > 55 │   DISPLAY: block;
-  > 56 │ }
+    55 │ }
+    56 │ 
+  > 57 │ .contain-intrinsic {
+       │                    ^
+  > 58 │   contain-intrinsic-block-size: auto;
+        ...
+  > 62 │   contain-intrinsic-height: 50px;
+  > 63 │ }
        │ ^
-    57 │ 
-    58 │ .nested-with-content {
-  
-  i Safe fix: Sort these properties
-  
-     52  52 │   
-     53  53 │   .case-insensitive {
-     54     │ - ··color:·red;
-     55     │ - ··DISPLAY:·block;
-         54 │ + ··DISPLAY:·block;
-         55 │ + ··color:·red;
-     56  56 │   }
-     57  57 │   
-  
-
-```
-
-```
-invalid.css:59:11 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The properties are not sorted.
-  
-    58 │ .nested-with-content {
-  > 59 │   .nested {
-       │           ^
-  > 60 │     color: red;
-  > 61 │     display: block;
-  > 62 │   }
-       │   ^
-    63 │ }
     64 │ 
+    65 │ .containment {
   
   i Safe fix: Sort these properties
   
-     58  58 │   .nested-with-content {
-     59  59 │     .nested {
-     60     │ - ····color:·red;
-     61     │ - ····display:·block;
-         60 │ + ····display:·block;
-         61 │ + ····color:·red;
-     62  62 │     }
-     63  63 │   }
+     56  56 │   
+     57  57 │   .contain-intrinsic {
+     58     │ - ··contain-intrinsic-block-size:·auto;
+     59     │ - ··contain-intrinsic-inline-size:·auto;
+         58 │ + ··contain-intrinsic-inline-size:·auto;
+         59 │ + ··contain-intrinsic-block-size:·auto;
+     60  60 │     contain-intrinsic-size: auto;
+     61  61 │     contain-intrinsic-width: 100px;
   
 
 ```
 
 ```
-invalid.css:65:66 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:65:14 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The properties are not sorted.
   
     63 │ }
     64 │ 
-  > 65 │ .shorthand-after-longhand-not-ignored-if-different-vendor-prefix {
-       │                                                                  ^
-  > 66 │   padding: 5px;
-  > 67 │   -webkit-padding-right: 10px;
-  > 68 │   -moz-padding: 20px;
-  > 69 │ }
+  > 65 │ .containment {
+       │              ^
+  > 66 │   container: gallery / inline-size;
+        ...
+  > 70 │   content-visibility: auto;
+  > 71 │ }
        │ ^
-    70 │ 
-    71 │ .example-from-doc-comment {
+    72 │ 
+    73 │ .font-synthesis {
   
   i Safe fix: Sort these properties
   
      64  64 │   
-     65  65 │   .shorthand-after-longhand-not-ignored-if-different-vendor-prefix {
-     66     │ - ··padding:·5px;
-     67     │ - ··-webkit-padding-right:·10px;
-     68     │ - ··-moz-padding:·20px;
-         66 │ + ··-moz-padding:·20px;
-         67 │ + ··padding:·5px;
-         68 │ + ··-webkit-padding-right:·10px;
-     69  69 │   }
-     70  70 │   
+     65  65 │   .containment {
+     66     │ - ··container:·gallery·/·inline-size;
+     67     │ - ··contain:·layout;
+         66 │ + ··contain:·layout;
+         67 │ + ··container:·gallery·/·inline-size;
+     68  68 │     container-name: gallery;
+     69  69 │     container-type: inline-size;
   
 
 ```
 
 ```
-invalid.css:71:27 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:73:17 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The properties are not sorted.
   
-    69 │ }
-    70 │ 
-  > 71 │ .example-from-doc-comment {
-       │                           ^
-  > 72 │   transition: opacity 1s ease;
-        ...
-  > 78 │   --custom: 100;
-  > 79 │ }
+    71 │ }
+    72 │ 
+  > 73 │ .font-synthesis {
+       │                 ^
+  > 74 │   font-synthesis-weight: none;
+  > 75 │   font-synthesis: weight style;
+  > 76 │   font-synthesis-style: normal;
+  > 77 │   font-synthesis-small-caps: none;
+  > 78 │ }
        │ ^
-    80 │ 
-    81 │ .contain-intrinsic {
+    79 │ 
+    80 │ .colors {
+  
+
+```
+
+```
+invalid.css:80:9 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    78 │ }
+    79 │ 
+  > 80 │ .colors {
+       │         ^
+  > 81 │   override-colors: none;
+  > 82 │   base-palette: #ffffff;
+  > 83 │   font-palette: #555555;
+  > 84 │   color: #000000;
+  > 85 │ }
+       │ ^
+    86 │ 
+    87 │ .text {
   
   i Safe fix: Sort these properties
   
-     70  70 │   
-     71  71 │   .example-from-doc-comment {
-     72     │ - ··transition:·opacity·1s·ease;
-     73     │ - ··border:·1px·solid·black;
-     74     │ - ··pointer-events:·none;
-         72 │ + ··--custom:·100;
-         73 │ + ··display:·block;
-         74 │ + ··margin:·8px;
-     75  75 │     color: black;
-     76     │ - ··margin:·8px;
-     77     │ - ··display:·block;
-     78     │ - ··--custom:·100;
-         76 │ + ··pointer-events:·none;
-         77 │ + ··border:·1px·solid·black;
-         78 │ + ··transition:·opacity·1s·ease;
-     79  79 │   }
-     80  80 │   
+     79  79 │   
+     80  80 │   .colors {
+     81     │ - ··override-colors:·none;
+     82     │ - ··base-palette:·#ffffff;
+         81 │ + ··base-palette:·#ffffff;
+         82 │ + ··override-colors:·none;
+     83  83 │     font-palette: #555555;
+     84  84 │     color: #000000;
   
 
 ```
 
 ```
-invalid.css:81:20 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:87:7 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The properties are not sorted.
   
-    79 │ }
-    80 │ 
-  > 81 │ .contain-intrinsic {
-       │                    ^
-  > 82 │   contain-intrinsic-block-size: auto;
-        ...
-  > 86 │   contain-intrinsic-height: 50px;
-  > 87 │ }
-       │ ^
-    88 │ 
-    89 │ .containment {
-  
-  i Safe fix: Sort these properties
-  
-     80  80 │   
-     81  81 │   .contain-intrinsic {
-     82     │ - ··contain-intrinsic-block-size:·auto;
-     83     │ - ··contain-intrinsic-inline-size:·auto;
-         82 │ + ··contain-intrinsic-inline-size:·auto;
-         83 │ + ··contain-intrinsic-block-size:·auto;
-     84  84 │     contain-intrinsic-size: auto;
-     85  85 │     contain-intrinsic-width: 100px;
-  
-
-```
-
-```
-invalid.css:89:14 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The properties are not sorted.
-  
-    87 │ }
-    88 │ 
-  > 89 │ .containment {
-       │              ^
-  > 90 │   container: gallery / inline-size;
-        ...
-  > 94 │   content-visibility: auto;
-  > 95 │ }
-       │ ^
-    96 │ 
-    97 │ .font-synthesis {
-  
-  i Safe fix: Sort these properties
-  
-     88  88 │   
-     89  89 │   .containment {
-     90     │ - ··container:·gallery·/·inline-size;
-     91     │ - ··contain:·layout;
-         90 │ + ··contain:·layout;
-         91 │ + ··container:·gallery·/·inline-size;
-     92  92 │     container-name: gallery;
-     93  93 │     container-type: inline-size;
-  
-
-```
-
-```
-invalid.css:97:17 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The properties are not sorted.
-  
-     95 │ }
-     96 │ 
-   > 97 │ .font-synthesis {
-        │                 ^
-   > 98 │   font-synthesis-weight: none;
-   > 99 │   font-synthesis: weight style;
-  > 100 │   font-synthesis-style: normal;
-  > 101 │   font-synthesis-small-caps: none;
-  > 102 │ }
+     85 │ }
+     86 │ 
+   > 87 │ .text {
+        │       ^
+   > 88 │   hyphenate-character: "\00AD";
+         ...
+   > 99 │   white-space-collapse: preserve;
+  > 100 │ }
         │ ^
-    103 │ 
-    104 │ .colors {
+    101 │ 
+    102 │ .text-decoration {
+  
+  i Safe fix: Sort these properties
+  
+     86  86 │   
+     87  87 │   .text {
+     88     │ - ··hyphenate-character:·"\00AD";
+     89     │ - ··hyphens:·auto;
+         88 │ + ··hyphens:·auto;
+         89 │ + ··hyphenate-character:·"\00AD";
+     90  90 │     line-break: auto;
+     91  91 │     word-break: break-word;
   
 
 ```
 
 ```
-invalid.css:104:9 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:102:18 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The properties are not sorted.
   
-    102 │ }
-    103 │ 
-  > 104 │ .colors {
-        │         ^
-  > 105 │   override-colors: none;
-  > 106 │   base-palette: #ffffff;
-  > 107 │   font-palette: #555555;
-  > 108 │   color: #000000;
+    100 │ }
+    101 │ 
+  > 102 │ .text-decoration {
+        │                  ^
+  > 103 │   text-decoration-line: underline;
+         ...
+  > 108 │   text-decoration-skip-ink: auto;
   > 109 │ }
         │ ^
     110 │ 
-    111 │ .text {
-  
-  i Safe fix: Sort these properties
-  
-    103 103 │   
-    104 104 │   .colors {
-    105     │ - ··override-colors:·none;
-    106     │ - ··base-palette:·#ffffff;
-        105 │ + ··base-palette:·#ffffff;
-        106 │ + ··override-colors:·none;
-    107 107 │     font-palette: #555555;
-    108 108 │     color: #000000;
+    111 │ .ruby {
   
 
 ```
@@ -696,356 +620,305 @@ invalid.css:111:7 assist/source/useSortedProperties  FIXABLE  ━━━━━━
   
     109 │ }
     110 │ 
-  > 111 │ .text {
+  > 111 │ .ruby {
         │       ^
-  > 112 │   hyphenate-character: "\00AD";
-         ...
-  > 123 │   white-space-collapse: preserve;
-  > 124 │ }
+  > 112 │   ruby-align: center;
+  > 113 │   ruby-position: over;
+  > 114 │ }
         │ ^
-    125 │ 
-    126 │ .text-decoration {
+    115 │ 
+    116 │ .color-adjustment {
   
   i Safe fix: Sort these properties
   
     110 110 │   
-    111 111 │   .text {
-    112     │ - ··hyphenate-character:·"\00AD";
-    113     │ - ··hyphens:·auto;
-        112 │ + ··hyphens:·auto;
-        113 │ + ··hyphenate-character:·"\00AD";
-    114 114 │     line-break: auto;
-    115 115 │     word-break: break-word;
+    111 111 │   .ruby {
+    112     │ - ··ruby-align:·center;
+    113     │ - ··ruby-position:·over;
+        112 │ + ··ruby-position:·over;
+        113 │ + ··ruby-align:·center;
+    114 114 │   }
+    115 115 │   
   
 
 ```
 
 ```
-invalid.css:126:18 assist/source/useSortedProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:116:19 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The properties are not sorted.
   
-    124 │ }
-    125 │ 
-  > 126 │ .text-decoration {
-        │                  ^
-  > 127 │   text-decoration-line: underline;
-         ...
-  > 132 │   text-decoration-skip-ink: auto;
-  > 133 │ }
-        │ ^
-    134 │ 
-    135 │ .ruby {
-  
-
-```
-
-```
-invalid.css:135:7 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The properties are not sorted.
-  
-    133 │ }
-    134 │ 
-  > 135 │ .ruby {
-        │       ^
-  > 136 │   ruby-align: center;
-  > 137 │   ruby-position: over;
-  > 138 │ }
-        │ ^
-    139 │ 
-    140 │ .color-adjustment {
-  
-  i Safe fix: Sort these properties
-  
-    134 134 │   
-    135 135 │   .ruby {
-    136     │ - ··ruby-align:·center;
-    137     │ - ··ruby-position:·over;
-        136 │ + ··ruby-position:·over;
-        137 │ + ··ruby-align:·center;
-    138 138 │   }
-    139 139 │   
-  
-
-```
-
-```
-invalid.css:140:19 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The properties are not sorted.
-  
-    138 │ }
-    139 │ 
-  > 140 │ .color-adjustment {
+    114 │ }
+    115 │ 
+  > 116 │ .color-adjustment {
         │                   ^
-  > 141 │   forced-color-adjust: none;
-  > 142 │   color-scheme: light dark;
-  > 143 │   print-color-adjust: exact;
-  > 144 │ }
+  > 117 │   forced-color-adjust: none;
+  > 118 │   color-scheme: light dark;
+  > 119 │   print-color-adjust: exact;
+  > 120 │ }
         │ ^
-    145 │ 
-    146 │ .masking {
+    121 │ 
+    122 │ .masking {
   
   i Safe fix: Sort these properties
   
-    139 139 │   
-    140 140 │   .color-adjustment {
-    141     │ - ··forced-color-adjust:·none;
-    142     │ - ··color-scheme:·light·dark;
-        141 │ + ··color-scheme:·light·dark;
-        142 │ + ··forced-color-adjust:·none;
-    143 143 │     print-color-adjust: exact;
-    144 144 │   }
+    115 115 │   
+    116 116 │   .color-adjustment {
+    117     │ - ··forced-color-adjust:·none;
+    118     │ - ··color-scheme:·light·dark;
+        117 │ + ··color-scheme:·light·dark;
+        118 │ + ··forced-color-adjust:·none;
+    119 119 │     print-color-adjust: exact;
+    120 120 │   }
   
 
 ```
 
 ```
-invalid.css:146:10 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:122:10 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The properties are not sorted.
   
-    144 │ }
-    145 │ 
-  > 146 │ .masking {
+    120 │ }
+    121 │ 
+  > 122 │ .masking {
         │          ^
-  > 147 │   clip-path: inset(0);
+  > 123 │   clip-path: inset(0);
          ...
-  > 151 │   mask-type: luminance;
-  > 152 │ }
+  > 127 │   mask-type: luminance;
+  > 128 │ }
         │ ^
-    153 │ 
-    154 │ .shapes {
+    129 │ 
+    130 │ .shapes {
   
   i Safe fix: Sort these properties
   
-    145 145 │   
-    146 146 │   .masking {
-    147     │ - ··clip-path:·inset(0);
-    148     │ - ··clip:·rect(0·0·0·0);
-        147 │ + ··clip:·rect(0·0·0·0);
-        148 │ + ··clip-path:·inset(0);
-    149 149 │     clip-rule: nonzero;
-    150 150 │     mask: none;
+    121 121 │   
+    122 122 │   .masking {
+    123     │ - ··clip-path:·inset(0);
+    124     │ - ··clip:·rect(0·0·0·0);
+        123 │ + ··clip:·rect(0·0·0·0);
+        124 │ + ··clip-path:·inset(0);
+    125 125 │     clip-rule: nonzero;
+    126 126 │     mask: none;
   
 
 ```
 
 ```
-invalid.css:154:9 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:130:9 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The properties are not sorted.
   
-    152 │ }
-    153 │ 
-  > 154 │ .shapes {
+    128 │ }
+    129 │ 
+  > 130 │ .shapes {
         │         ^
-  > 155 │   shape-image-threshold: 0.5;
-  > 156 │   shape-outside: circle(50% at 50% 50%);
-  > 157 │   shape-margin: 10px;
-  > 158 │ }
+  > 131 │   shape-image-threshold: 0.5;
+  > 132 │   shape-outside: circle(50% at 50% 50%);
+  > 133 │   shape-margin: 10px;
+  > 134 │ }
         │ ^
-    159 │ 
-    160 │ .writing-modes {
+    135 │ 
+    136 │ .writing-modes {
   
   i Safe fix: Sort these properties
   
-    153 153 │   
-    154 154 │   .shapes {
-    155     │ - ··shape-image-threshold:·0.5;
-    156     │ - ··shape-outside:·circle(50%·at·50%·50%);
-    157     │ - ··shape-margin:·10px;
-        155 │ + ··shape-outside:·circle(50%·at·50%·50%);
-        156 │ + ··shape-image-threshold:·0.5;
-        157 │ + ··shape-margin:·10px;
-    158 158 │   }
-    159 159 │   
+    129 129 │   
+    130 130 │   .shapes {
+    131     │ - ··shape-image-threshold:·0.5;
+    132     │ - ··shape-outside:·circle(50%·at·50%·50%);
+    133     │ - ··shape-margin:·10px;
+        131 │ + ··shape-outside:·circle(50%·at·50%·50%);
+        132 │ + ··shape-image-threshold:·0.5;
+        133 │ + ··shape-margin:·10px;
+    134 134 │   }
+    135 135 │   
   
 
 ```
 
 ```
-invalid.css:160:16 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:136:16 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The properties are not sorted.
   
-    158 │ }
-    159 │ 
-  > 160 │ .writing-modes {
+    134 │ }
+    135 │ 
+  > 136 │ .writing-modes {
         │                ^
-  > 161 │   unicode-bidi: embed;
+  > 137 │   unicode-bidi: embed;
          ...
-  > 165 │   text-combine-upright: none;
-  > 166 │ }
+  > 141 │   text-combine-upright: none;
+  > 142 │ }
         │ ^
-    167 │ 
-    168 │ .svg {
+    143 │ 
+    144 │ .svg {
   
   i Safe fix: Sort these properties
   
-    159 159 │   
-    160 160 │   .writing-modes {
-    161     │ - ··unicode-bidi:·embed;
-    162     │ - ··direction:·ltr;
-        161 │ + ··direction:·ltr;
-        162 │ + ··unicode-bidi:·embed;
-    163 163 │     writing-mode: horizontal-tb;
-    164 164 │     text-orientation: mixed;
+    135 135 │   
+    136 136 │   .writing-modes {
+    137     │ - ··unicode-bidi:·embed;
+    138     │ - ··direction:·ltr;
+        137 │ + ··direction:·ltr;
+        138 │ + ··unicode-bidi:·embed;
+    139 139 │     writing-mode: horizontal-tb;
+    140 140 │     text-orientation: mixed;
   
 
 ```
 
 ```
-invalid.css:168:6 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:144:6 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The properties are not sorted.
   
-    166 │ }
-    167 │ 
-  > 168 │ .svg {
+    142 │ }
+    143 │ 
+  > 144 │ .svg {
         │      ^
-  > 169 │   marker-start: none;
+  > 145 │   marker-start: none;
          ...
-  > 177 │   text-rendering: auto;
+  > 153 │   text-rendering: auto;
+  > 154 │ }
+        │ ^
+    155 │ 
+    156 │ .transforms {
+  
+  i Safe fix: Sort these properties
+  
+    143 143 │   
+    144 144 │   .svg {
+    145     │ - ··marker-start:·none;
+    146     │ - ··marker:·none;
+        145 │ + ··marker:·none;
+        146 │ + ··marker-start:·none;
+    147 147 │     marker-mid: none;
+    148 148 │     marker-end: none;
+  
+
+```
+
+```
+invalid.css:156:13 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    154 │ }
+    155 │ 
+  > 156 │ .transforms {
+        │             ^
+  > 157 │   transform-origin: center center;
+         ...
+  > 166 │   backface-visibility: visible;
+  > 167 │ }
+        │ ^
+    168 │ 
+    169 │ .view-transitions {
+  
+  i Safe fix: Sort these properties
+  
+    155 155 │   
+    156 156 │   .transforms {
+    157     │ - ··transform-origin:·center·center;
+    158     │ - ··transform:·none;
+        157 │ + ··transform:·none;
+        158 │ + ··transform-origin:·center·center;
+    159 159 │     transform-box: border-box;
+    160 160 │     transform-style: flat;
+  
+
+```
+
+```
+invalid.css:169:19 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    167 │ }
+    168 │ 
+  > 169 │ .view-transitions {
+        │                   ^
+  > 170 │   view-transition-class: none;
+  > 171 │   view-transition-name: none;
+  > 172 │ }
+        │ ^
+    173 │ 
+    174 │ .animations {
+  
+  i Safe fix: Sort these properties
+  
+    168 168 │   
+    169 169 │   .view-transitions {
+    170     │ - ··view-transition-class:·none;
+    171     │ - ··view-transition-name:·none;
+        170 │ + ··view-transition-name:·none;
+        171 │ + ··view-transition-class:·none;
+    172 172 │   }
+    173 173 │   
+  
+
+```
+
+```
+invalid.css:174:13 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    172 │ }
+    173 │ 
+  > 174 │ .animations {
+        │             ^
+  > 175 │   animation-play-state: running;
+  > 176 │   animation-fill-mode: both;
+  > 177 │   animation-composition: replace;
   > 178 │ }
         │ ^
     179 │ 
-    180 │ .transforms {
+    180 │ .motion-path {
   
   i Safe fix: Sort these properties
   
-    167 167 │   
-    168 168 │   .svg {
-    169     │ - ··marker-start:·none;
-    170     │ - ··marker:·none;
-        169 │ + ··marker:·none;
-        170 │ + ··marker-start:·none;
-    171 171 │     marker-mid: none;
-    172 172 │     marker-end: none;
+    173 173 │   
+    174 174 │   .animations {
+    175     │ - ··animation-play-state:·running;
+    176     │ - ··animation-fill-mode:·both;
+        175 │ + ··animation-fill-mode:·both;
+        176 │ + ··animation-play-state:·running;
+    177 177 │     animation-composition: replace;
+    178 178 │   }
   
 
 ```
 
 ```
-invalid.css:180:13 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:180:14 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The properties are not sorted.
   
     178 │ }
     179 │ 
-  > 180 │ .transforms {
-        │             ^
-  > 181 │   transform-origin: center center;
+  > 180 │ .motion-path {
+        │              ^
+  > 181 │   offset-position: 0px 0px;
          ...
-  > 190 │   backface-visibility: visible;
-  > 191 │ }
+  > 185 │   offset-rotate: 0deg;
+  > 186 │   offset-anchor: 50% 50%;
+  > 187 │ }
         │ ^
-    192 │ 
-    193 │ .view-transitions {
+    188 │ 
   
   i Safe fix: Sort these properties
   
     179 179 │   
-    180 180 │   .transforms {
-    181     │ - ··transform-origin:·center·center;
-    182     │ - ··transform:·none;
-        181 │ + ··transform:·none;
-        182 │ + ··transform-origin:·center·center;
-    183 183 │     transform-box: border-box;
-    184 184 │     transform-style: flat;
-  
-
-```
-
-```
-invalid.css:193:19 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The properties are not sorted.
-  
-    191 │ }
-    192 │ 
-  > 193 │ .view-transitions {
-        │                   ^
-  > 194 │   view-transition-class: none;
-  > 195 │   view-transition-name: none;
-  > 196 │ }
-        │ ^
-    197 │ 
-    198 │ .animations {
-  
-  i Safe fix: Sort these properties
-  
-    192 192 │   
-    193 193 │   .view-transitions {
-    194     │ - ··view-transition-class:·none;
-    195     │ - ··view-transition-name:·none;
-        194 │ + ··view-transition-name:·none;
-        195 │ + ··view-transition-class:·none;
-    196 196 │   }
-    197 197 │   
-  
-
-```
-
-```
-invalid.css:198:13 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The properties are not sorted.
-  
-    196 │ }
-    197 │ 
-  > 198 │ .animations {
-        │             ^
-  > 199 │   animation-play-state: running;
-  > 200 │   animation-fill-mode: both;
-  > 201 │   animation-composition: replace;
-  > 202 │ }
-        │ ^
-    203 │ 
-    204 │ .motion-path {
-  
-  i Safe fix: Sort these properties
-  
-    197 197 │   
-    198 198 │   .animations {
-    199     │ - ··animation-play-state:·running;
-    200     │ - ··animation-fill-mode:·both;
-        199 │ + ··animation-fill-mode:·both;
-        200 │ + ··animation-play-state:·running;
-    201 201 │     animation-composition: replace;
-    202 202 │   }
-  
-
-```
-
-```
-invalid.css:204:14 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The properties are not sorted.
-  
-    202 │ }
-    203 │ 
-  > 204 │ .motion-path {
-        │              ^
-  > 205 │   offset-position: 0px 0px;
-         ...
-  > 209 │   offset-rotate: 0deg;
-  > 210 │   offset-anchor: 50% 50%;
-  > 211 │ }
-        │ ^
-    212 │ 
-  
-  i Safe fix: Sort these properties
-  
-    203 203 │   
-    204 204 │   .motion-path {
-    205     │ - ··offset-position:·0px·0px;
-    206     │ - ··offset:·0px;
-        205 │ + ··offset:·0px;
-        206 │ + ··offset-position:·0px·0px;
-    207 207 │     offset-path: none;
-    208 208 │     offset-distance: 0%;
+    180 180 │   .motion-path {
+    181     │ - ··offset-position:·0px·0px;
+    182     │ - ··offset:·0px;
+        181 │ + ··offset:·0px;
+        182 │ + ··offset-position:·0px·0px;
+    183 183 │     offset-path: none;
+    184 184 │     offset-distance: 0%;
   
 
 ```

@@ -1,0 +1,16 @@
+/* should generate diagnostics */
+.declarations-around-nested-rule {
+  color: red;
+  display: block;
+  & { color: blue; }
+  margin: 1px;
+}
+
+.declarations-around-conditional-at-rule {
+  transition: opacity 1s ease;
+  color: red;
+  @media (min-width: 100px) {
+    color: blue;
+  }
+  margin: 1px;
+}

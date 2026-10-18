@@ -1,0 +1,14 @@
+/* should generate diagnostics */
+.example {
+  $size: 10px;
+  width: $size;
+  display: block;
+}
+
+.declarations-around-variable {
+  color: red;
+  display: block;
+  $theme: blue;
+  transition: opacity 1s ease;
+  margin: 1px;
+}

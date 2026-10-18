@@ -19,18 +19,16 @@ use biome_css_syntax::{
 use biome_rowan::{AstNode, BatchMutationExt, TokenText, declare_node_union};
 use biome_rule_options::use_sorted_properties::UseSortedPropertiesOptions;
 use biome_string_case::StrOnlyExtension;
-use std::{
-    borrow::Cow,
-    cmp::Ordering,
-    collections::{BTreeSet, HashSet},
-};
+use std::{borrow::Cow, cmp::Ordering, collections::HashSet};
 
 declare_source_rule! {
-    /// Sort CSS properties and nested rules into a consistent order.
+    /// Sort CSS properties into a consistent order.
     ///
     /// The action uses a predefined order that groups related properties by purpose.
-    /// Custom properties come first, and nested rules or at-rules such as `@media` come after
-    /// declarations.
+    ///
+    /// Properties are sorted only within a run of consecutive declarations. Nested rules,
+    /// at-rules such as `@media`, Sass variables, and other statements keep their position,
+    /// because moving declarations around them can change the cascade.
     ///
     /// Properties inside CSS and SCSS keyframe steps use the same order.
     ///
@@ -43,7 +41,6 @@ declare_source_rule! {
     /// 5. Interaction properties, including `pointer-events`.
     /// 6. Background and border properties.
     /// 7. Transition and animation properties.
-    /// 8. Nested rules, media queries, and other at-rules.
     ///
     /// Biome skips blocks containing unknown properties because their correct position is not
     /// known. If sorting could change the result of a shorthand and longhand combination, Biome
@@ -62,13 +59,6 @@ declare_source_rule! {
     ///   margin: 8px;
     ///   display: block;
     ///   --custom: 100;
-    /// }
-    /// ```
-    ///
-    /// ```css,expect_diff
-    /// p {
-    ///   span { color: blue; }
-    ///   color: red;
     /// }
     /// ```
     ///
@@ -99,6 +89,13 @@ declare_source_rule! {
     /// p {
     ///   color: red;
     ///   span { color: blue; }
+    /// }
+    /// ```
+    ///
+    /// ```css
+    /// p {
+    ///   span { color: blue; }
+    ///   color: red;
     /// }
     /// ```
     ///
@@ -307,16 +304,27 @@ fn with_semicolon(item: AnyCssDeclarationOrRule) -> Option<AnyCssDeclarationOrRu
 /// "Recess order" is a semantic ordering that mimics the behavior of [stylelint-config-recess-order](https://github.com/stormwarning/stylelint-config-recess-order).
 ///
 /// Which in turn mimics the behavior of twitter's [RECESS](https://github.com/twitter-archive/recess/blob/29bccc870b7b4ccaa0a138e504caf608a6606b59/lib/lint/strict-property-order.js).
-pub struct RecessOrderProperties(pub BTreeSet<RecessOrderMember>);
+pub struct RecessOrderProperties(pub Vec<RecessOrderMember>);
 
 impl RecessOrderProperties {
     pub fn new(items: &[AnyCssDeclarationOrRule]) -> Self {
-        Self(
-            items
-                .iter()
-                .map(|item| RecessOrderMember(item.clone()))
-                .collect::<BTreeSet<RecessOrderMember>>(),
-        )
+        let mut sorted = Vec::with_capacity(items.len());
+        let mut group = Vec::new();
+        for item in items {
+            let member = RecessOrderMember(item.clone());
+            if member.is_sortable() {
+                group.push(member);
+                continue;
+            }
+            // Rules, at-rules and statements are only boundaries between the runs of
+            // declarations that surround them, so a run is sorted on its own.
+            group.sort();
+            sorted.append(&mut group);
+            sorted.push(member);
+        }
+        group.sort();
+        sorted.append(&mut group);
+        Self(sorted)
     }
 
     /// Checks if self's order matches the provided list's order.
@@ -342,7 +350,7 @@ impl RecessOrderProperties {
     }
 }
 
-/// Defines the ordering of different kinds of css nodes, e.g. declaration nodes should be before at-rules.
+/// Defines the ordering of different kinds of css nodes, e.g. custom properties should be before declarations.
 // The order of these enum members controls the sort order of the css nodes.
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub enum NodeKindOrder {
@@ -362,6 +370,18 @@ pub enum NodeKindOrder {
 pub struct RecessOrderMember(AnyCssDeclarationOrRule);
 
 impl RecessOrderMember {
+    /// Returns whether the item may be moved by the action. Everything else keeps its position,
+    /// because declarations depend on the cascade and on the surrounding statements.
+    ///
+    /// An empty declaration carries no property and does not change the cascade, so it moves with
+    /// the run of declarations around it instead of splitting that run in two.
+    fn is_sortable(&self) -> bool {
+        matches!(
+            self.kind(),
+            NodeKindOrder::CustomProperty | NodeKindOrder::ComposesProperty | NodeKindOrder::Declaration
+        ) || matches!(self.0, AnyCssDeclarationOrRule::CssEmptyDeclaration(_))
+    }
+
     /// Returns the kind of node for ordering purposes. The nodes are sorted in the order they're declared in [NodeKindOrder].
     pub fn kind(&self) -> NodeKindOrder {
         match &self.0 {

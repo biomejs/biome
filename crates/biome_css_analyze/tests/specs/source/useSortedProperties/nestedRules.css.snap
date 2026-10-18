@@ -1,0 +1,87 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: nestedRules.css
+---
+# Input
+```css
+/* should generate diagnostics */
+.declarations-around-nested-rule {
+  color: red;
+  display: block;
+  & { color: blue; }
+  margin: 1px;
+}
+
+.declarations-around-conditional-at-rule {
+  transition: opacity 1s ease;
+  color: red;
+  @media (min-width: 100px) {
+    color: blue;
+  }
+  margin: 1px;
+}
+
+```
+
+# Diagnostics
+```
+nestedRules.css:2:34 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ .declarations-around-nested-rule {
+      │                                  ^
+  > 3 │   color: red;
+  > 4 │   display: block;
+  > 5 │   & { color: blue; }
+  > 6 │   margin: 1px;
+  > 7 │ }
+      │ ^
+    8 │ 
+    9 │ .declarations-around-conditional-at-rule {
+  
+  i Safe fix: Sort these properties
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   .declarations-around-nested-rule {
+     3    │ - ··color:·red;
+     4    │ - ··display:·block;
+        3 │ + ··display:·block;
+        4 │ + ··color:·red;
+     5  5 │     & { color: blue; }
+     6  6 │     margin: 1px;
+  
+
+```
+
+```
+nestedRules.css:9:42 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+     7 │ }
+     8 │ 
+   > 9 │ .declarations-around-conditional-at-rule {
+       │                                          ^
+  > 10 │   transition: opacity 1s ease;
+        ...
+  > 14 │   }
+  > 15 │   margin: 1px;
+  > 16 │ }
+       │ ^
+    17 │ 
+  
+  i Safe fix: Sort these properties
+  
+     8  8 │   
+     9  9 │   .declarations-around-conditional-at-rule {
+    10    │ - ··transition:·opacity·1s·ease;
+    11    │ - ··color:·red;
+       10 │ + ··color:·red;
+       11 │ + ··transition:·opacity·1s·ease;
+    12 12 │     @media (min-width: 100px) {
+    13 13 │       color: blue;
+  
+
+```
