@@ -9,15 +9,22 @@ use biome_js_semantic::{Binding, Reference, SemanticModel};
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
-    AnyJsExpression, JsArrowFunctionExpression, JsCallExpression, JsClassExpression,
-    JsForStatement, JsFunctionExpression, JsIdentifierExpression, JsModuleItemList,
-    JsSequenceExpression, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator, TsConditionalType,
-    TsDeclarationModule, TsDeclareFunctionDeclaration, TsInferType, TsInterfaceDeclaration,
-    TsTypeAliasDeclaration, TsTypeParameterList, TsTypeParameters,
+    AnyJsExpression, JsArrayBindingPattern, JsArrayBindingPatternElement,
+    JsArrayBindingPatternElementList, JsArrayBindingPatternRestElement, JsArrowFunctionExpression,
+    JsBogusNamedImportSpecifier, JsCallExpression, JsClassExpression, JsDefaultImportSpecifier,
+    JsForStatement, JsFormalParameter, JsFunctionExpression, JsIdentifierExpression, JsLanguage,
+    JsModuleItemList, JsNamedImportSpecifier, JsNamespaceImportSpecifier, JsObjectBindingPattern,
+    JsObjectBindingPatternProperty, JsObjectBindingPatternPropertyList, JsObjectBindingPatternRest,
+    JsObjectBindingPatternShorthandProperty, JsRestParameter, JsSequenceExpression,
+    JsShorthandNamedImportSpecifier, JsSyntaxKind, JsSyntaxNode, JsVariableDeclarator,
+    TsConditionalType, TsDeclarationModule, TsDeclareFunctionDeclaration, TsEnumMember,
+    TsImportEqualsDeclaration, TsIndexSignatureParameter, TsInferType, TsInterfaceDeclaration,
+    TsMappedType, TsPropertyParameter, TsTypeAliasDeclaration, TsTypeParameterList,
+    TsTypeParameters,
 };
 use biome_languages::JsFileSource;
 use biome_languages::javascript::JsEmbeddingKind;
-use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
+use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxKindSet, SyntaxResult};
 use biome_rule_options::no_unused_variables::{
     NoUnusedVariablesOptions, NoUnusedVariablesOptionsIgnore,
 };
@@ -267,7 +274,11 @@ impl Rule for NoUnusedVariables {
 
         // Every check below can only turn a report into no report, so the
         // cheapest ones run first.
-        if is_never_reported(&binding.declaration()?) {
+        let declaration = binding.syntax().parent()?;
+        if !AnyJsBindingDeclaration::can_cast(declaration.kind()) {
+            return None;
+        }
+        if is_never_reported(&declaration) {
             debug_assert!(suggested_fix_if_unused(model, binding, ctx.options()).is_none());
             return None;
         }
@@ -645,34 +656,64 @@ fn suggested_fix_if_unused(
     }
 }
 
+/// Declaration kinds for which [suggested_fix_if_unused] returns `None`, so a
+/// binding they declare is never reported, used or not.
+const NEVER_REPORTED_DECLARATION_KINDS: SyntaxKindSet<JsLanguage> =
+    TsDeclareFunctionDeclaration::KIND_SET
+        .union(JsClassExpression::KIND_SET)
+        .union(JsFunctionExpression::KIND_SET)
+        .union(TsIndexSignatureParameter::KIND_SET)
+        .union(TsMappedType::KIND_SET)
+        .union(TsEnumMember::KIND_SET)
+        .union(TsPropertyParameter::KIND_SET)
+        .union(BINDING_PATTERN_DECLARATION_KINDS)
+        .union(JsShorthandNamedImportSpecifier::KIND_SET)
+        .union(JsNamedImportSpecifier::KIND_SET)
+        .union(JsBogusNamedImportSpecifier::KIND_SET)
+        .union(JsDefaultImportSpecifier::KIND_SET)
+        .union(JsNamespaceImportSpecifier::KIND_SET)
+        .union(JsFormalParameter::KIND_SET)
+        .union(JsRestParameter::KIND_SET)
+        .union(TsImportEqualsDeclaration::KIND_SET);
+
+/// Binding pattern declarations, which
+/// [AnyJsBindingDeclaration::parent_binding_pattern_declaration] resolves to
+/// the declaration that contains the pattern.
+const BINDING_PATTERN_DECLARATION_KINDS: SyntaxKindSet<JsLanguage> =
+    JsArrayBindingPatternElement::KIND_SET
+        .union(JsArrayBindingPatternRestElement::KIND_SET)
+        .union(JsObjectBindingPatternProperty::KIND_SET)
+        .union(JsObjectBindingPatternRest::KIND_SET)
+        .union(JsObjectBindingPatternShorthandProperty::KIND_SET);
+
+/// Pattern nodes that [AnyJsBindingDeclaration::parent_binding_pattern_declaration]
+/// skips on its way up to the declaration that contains a pattern.
+const BINDING_PATTERN_KINDS: SyntaxKindSet<JsLanguage> = JsArrayBindingPatternElement::KIND_SET
+    .union(JsArrayBindingPatternElementList::KIND_SET)
+    .union(JsArrayBindingPattern::KIND_SET)
+    .union(JsObjectBindingPattern::KIND_SET)
+    .union(JsObjectBindingPatternProperty::KIND_SET)
+    .union(JsObjectBindingPatternPropertyList::KIND_SET);
+
 /// Returns `true` if [suggested_fix_if_unused] returns `None` for every
-/// binding with this declaration, so such a binding is never reported, used or
-/// not.
-fn is_never_reported(declaration: &AnyJsBindingDeclaration) -> bool {
-    let pattern_declaration = declaration.parent_binding_pattern_declaration();
-    matches!(
-        pattern_declaration.as_ref().unwrap_or(declaration),
-        AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
-            | AnyJsBindingDeclaration::JsClassExpression(_)
-            | AnyJsBindingDeclaration::JsFunctionExpression(_)
-            | AnyJsBindingDeclaration::TsIndexSignatureParameter(_)
-            | AnyJsBindingDeclaration::TsMappedType(_)
-            | AnyJsBindingDeclaration::TsEnumMember(_)
-            | AnyJsBindingDeclaration::TsPropertyParameter(_)
-            | AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
-            | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
-            | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
-            | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
-            | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
-            | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
-            | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
-            | AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
-            | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
-            | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_)
-            | AnyJsBindingDeclaration::JsFormalParameter(_)
-            | AnyJsBindingDeclaration::JsRestParameter(_)
-            | AnyJsBindingDeclaration::TsImportEqualsDeclaration(_)
-    )
+/// binding declared by `declaration`, a node that casts to
+/// [AnyJsBindingDeclaration], so such a binding is never reported, used or not.
+///
+/// Reads only syntax kinds, mirroring the declaration that
+/// [suggested_fix_if_unused] matches on.
+fn is_never_reported(declaration: &JsSyntaxNode) -> bool {
+    let mut kind = declaration.kind();
+    if BINDING_PATTERN_DECLARATION_KINDS.matches(kind)
+        && let Some(parent_kind) = declaration
+            .ancestors()
+            .skip(1)
+            .map(|ancestor| ancestor.kind())
+            .find(|kind| !BINDING_PATTERN_KINDS.matches(*kind))
+        && AnyJsBindingDeclaration::can_cast(parent_kind)
+    {
+        kind = parent_kind;
+    }
+    NEVER_REPORTED_DECLARATION_KINDS.matches(kind)
 }
 
 /// Returns `true` if `binding` is considered as ignored by the user.
