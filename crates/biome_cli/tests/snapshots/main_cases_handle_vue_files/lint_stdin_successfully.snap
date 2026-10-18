@@ -23,9 +23,9 @@ var foo: string = "";
 # Termination Message
 
 ```block
-stdin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The contents aren't fixed. Use the `--write` flag to fix them.
+  × Some errors were emitted while running checks.
   
 
 
@@ -41,4 +41,49 @@ delete a.c;
 var foo: string = "";
 </script>
 <template></template>
+```
+
+```block
+file.svelte:2:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Using == may be unsafe if you are relying on type coercion.
+  
+    1 │ <script setup lang="ts">
+  > 2 │ a == b;
+      │   ^^
+    3 │ delete a.c;
+    4 │ 
+  
+  i == is only allowed when comparing against null.
+  
+  i Unsafe fix: Use === instead.
+  
+    1 │ a·===·b;
+      │     +   
+
+```
+
+```block
+file.svelte:5:5 lint/correctness/noUnusedVariables  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This variable foo is unused.
+  
+    3 │ delete a.c;
+    4 │ 
+  > 5 │ var foo: string = "";
+      │     ^^^
+    6 │ </script>
+    7 │ <template></template>
+  
+  i Unused variables are often the result of typos, incomplete refactors, or other sources of bugs.
+  
+  i Unsafe fix: If this is intentional, prepend foo with an underscore.
+  
+    2 2 │   delete a.c;
+    3 3 │   
+    4   │ - var·foo:·string·=·"";
+      4 │ + var·_foo:·string·=·"";
+    5 5 │   
+  
+
 ```
