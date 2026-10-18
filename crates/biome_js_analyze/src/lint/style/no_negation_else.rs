@@ -54,6 +54,8 @@ declare_lint_rule! {
         language: "js",
         sources: &[
             RuleSource::Eslint("no-negated-condition").same(),
+            RuleSource::EslintUnicorn("no-negated-condition").same(),
+            RuleSource::EslintVueJs("no-negated-condition").same(),
             RuleSource::Clippy("if_not_else").same(),
         ],
         recommended: false,

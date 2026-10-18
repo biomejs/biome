@@ -83,7 +83,10 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "noUselessStringConcat",
         language: "js",
-        sources: &[RuleSource::Eslint("no-useless-concat").same()],
+        sources: &[
+            RuleSource::Eslint("no-useless-concat").same(),
+            RuleSource::EslintVueJs("no-useless-concat").same(),
+        ],
         recommended: false,
         severity: Severity::Information,
         fix_kind: FixKind::Safe,
