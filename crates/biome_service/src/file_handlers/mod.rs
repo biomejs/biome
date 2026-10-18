@@ -1260,6 +1260,7 @@ type Search = fn(
     &dyn SearchQuery,
     &SettingsWithEditor,
     PatternId,
+    bool,
     WorkspaceDb,
 ) -> Result<Vec<SearchMatch>, WorkspaceError>;
 

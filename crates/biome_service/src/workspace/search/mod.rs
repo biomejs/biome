@@ -55,6 +55,7 @@ pub trait SearchQuery: Send + Sync {
         _parse: AnyParse,
         _settings: &SettingsWithEditor,
         _: PatternId,
+        _include_captures: bool,
     ) -> Result<Vec<SearchMatch>, WorkspaceError>;
 
     fn generate_pattern_id(&self) -> PatternId {
@@ -80,6 +81,7 @@ impl SearchQuery for NoopQueryProvider {
         _: AnyParse,
         _: &SettingsWithEditor,
         _: PatternId,
+        _: bool,
     ) -> Result<Vec<SearchMatch>, WorkspaceError> {
         Err(WorkspaceError::feature_not_enabled())
     }

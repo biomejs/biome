@@ -20,6 +20,7 @@ use biome_analyze::RuleDiagnostic;
 use biome_diagnostics::Applicability;
 use biome_grit_syntax::{GritRoot, GritRootExt};
 use camino::Utf8Path;
+use grit_pattern_matcher::binding::Binding;
 use grit_pattern_matcher::constants::{
     ABSOLUTE_PATH_INDEX, FILENAME_INDEX, GLOBAL_VARS_SCOPE_INDEX, MATCH_VAR, NEW_FILES_INDEX,
     PROGRAM_INDEX,
@@ -32,7 +33,6 @@ use grit_pattern_matcher::pattern::{
 };
 use grit_util::error::{GritPatternError, GritResult};
 use grit_util::{AnalysisLogs, Ast, ByteRange, InputRanges, Range, VariableMatch};
-use std::cmp::Reverse;
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
@@ -146,15 +146,58 @@ impl GritQuery {
     ///
     /// Falls back to `execute()` if anchor extraction fails.
     pub fn execute_optimized(&self, file: GritTargetFile) -> GritResult<GritQueryResult> {
-        let anchor_kinds = self.anchor_kinds();
-        let inner = extract_contains_inner(&self.pattern);
+        self.run_optimized(file, None)
+    }
 
-        let Some(inner) = inner else {
+    /// Returns the variables that each match of the query bound in `file`,
+    /// keyed by the range of the match, in the order the pattern declares them.
+    ///
+    /// The captures are recorded while the query's pattern runs on each
+    /// candidate node, as in [Self::execute_optimized], so a capture always
+    /// comes from running the pattern on the node of its match. Captures
+    /// include variables that a `where` clause binds outside the matched code,
+    /// for example with `within`. Variables of named patterns, variables bound
+    /// to code that is absent from the file, and anonymous variables (`$_`)
+    /// are omitted, and a variable bound several times, as in `` `$x + $x` ``,
+    /// is reported at its first value.
+    ///
+    /// The map is empty for patterns that can't run node by node, such as a
+    /// pattern that is only a variable like `$x`, or a pattern that uses
+    /// `limit`. It can also miss matches that [Self::execute] reports, when a
+    /// `where` clause selects them through `contains` rather than by their own
+    /// syntax.
+    pub fn captures_by_match(
+        &self,
+        file: GritTargetFile,
+    ) -> GritResult<BTreeMap<Range, Vec<MatchCapture>>> {
+        let mut captures = BTreeMap::new();
+        if self.node_pattern().is_some() {
+            self.run_optimized(file, Some(&mut captures))?;
+        }
+        Ok(captures)
+    }
+
+    /// Returns the pattern that [Self::execute_optimized] runs on each node of
+    /// the anchor kinds, or `None` when the query can't run node by node and
+    /// [Self::execute_optimized] falls back to [Self::execute].
+    fn node_pattern(&self) -> Option<&Pattern<GritQueryContext>> {
+        if self.anchor_kinds.is_empty() {
+            return None;
+        }
+        extract_contains_inner(&self.pattern)
+    }
+
+    /// Runs [Self::execute_optimized], and records the variables bound by each
+    /// match in `captures` when it is provided.
+    fn run_optimized(
+        &self,
+        file: GritTargetFile,
+        mut captures: Option<&mut BTreeMap<Range, Vec<MatchCapture>>>,
+    ) -> GritResult<GritQueryResult> {
+        let Some(inner) = self.node_pattern() else {
             return self.execute(file);
         };
-        if anchor_kinds.is_empty() {
-            return self.execute(file);
-        }
+        let anchor_kinds = self.anchor_kinds();
 
         let mut logs: AnalysisLogs = Vec::new().into();
 
@@ -211,6 +254,12 @@ impl GritQuery {
             let saved = state.clone();
             if inner.execute(&binding, &mut state, &context, &mut logs)? {
                 matched = true;
+                if let Some(captures) = captures.as_deref_mut()
+                    && let Some((range, bound)) =
+                        bound_in_match(&saved, &state, &context.lang, context.name)
+                {
+                    captures.entry(range).or_insert(bound);
+                }
             } else {
                 state = saved;
             }
@@ -463,86 +512,81 @@ impl Match {
             messages: vec![],
         }
     }
-
-    /// Returns the variables bound by each match: entry `i` holds the
-    /// captures found inside `self.ranges[i]`, in the order the pattern
-    /// declares the variables.
-    ///
-    /// The query reports every value a variable took in the file without
-    /// recording which match produced it. Each value is therefore assigned to
-    /// the innermost match whose range strictly contains it, or else to a match
-    /// with the same range. For `` `f($x)` `` on `f(f(1))`, the outer match
-    /// captures `f(1)` and the inner match captures `1`.
-    ///
-    /// A variable that occurs several times in one match, as in
-    /// `` `$x + $x` ``, is reported once, at its first occurrence. `$match` and
-    /// variables without a source range, such as `$filename`, are omitted.
-    pub fn captures(&self) -> Vec<Vec<MatchCapture<'_>>> {
-        let mut captures: Vec<Vec<MatchCapture>> = vec![Vec::new(); self.ranges.len()];
-
-        // Scanning this order backwards from a capture's start visits nested
-        // matches before the matches that enclose them.
-        let mut order: Vec<_> = (0..self.ranges.len()).collect();
-        order.sort_by_key(|&index| {
-            let range = &self.ranges[index];
-            (range.start_byte, Reverse(range.end_byte))
-        });
-
-        for variable in &self.variables {
-            if variable.name == MATCH_VAR {
-                continue;
-            }
-            for range in &variable.ranges {
-                let Some(index) = enclosing_match(&self.ranges, &order, range) else {
-                    continue;
-                };
-                let match_captures = &mut captures[index];
-                if match_captures
-                    .iter()
-                    .all(|capture| capture.name != variable.name)
-                {
-                    match_captures.push(MatchCapture {
-                        name: &variable.name,
-                        range: *range,
-                    });
-                }
-            }
-        }
-
-        captures
-    }
 }
 
-/// A variable bound inside one match, such as `$name` in
+/// A variable that a match captured, such as `$name` in
 /// `` `console.log($name)` ``.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct MatchCapture<'a> {
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
+pub struct MatchCapture {
     /// The variable name, including the leading `$`.
-    pub name: &'a str,
+    pub name: String,
     /// The source code bound to the variable.
     pub range: Range,
 }
 
-/// Returns the index of the innermost range in `ranges` that strictly contains
-/// `range`, or of a range equal to `range` when none does.
+/// Returns the range of the match that one successful execution of the
+/// query's pattern produced, and the variables that the execution bound, by
+/// comparing the variable values of `after` with those of `before`.
 ///
-/// `order` lists the indices of `ranges` sorted by ascending start and
-/// descending end.
-fn enclosing_match(ranges: &[Range], order: &[usize], range: &Range) -> Option<usize> {
-    let candidates = order.partition_point(|&index| ranges[index].start_byte <= range.start_byte);
-    let mut equal = None;
-    for &index in order[..candidates].iter().rev() {
-        let candidate = &ranges[index];
-        if candidate.end_byte < range.end_byte {
+/// Only the scope that bound `$match` is considered, so the parameters of named
+/// patterns and global variables such as `$filename` are not reported. A
+/// variable bound several times, as in `` `$x + $x` ``, is reported at its
+/// first value. Returns `None` when the execution bound no `$match`, for
+/// example because the match is suppressed.
+fn bound_in_match<'a>(
+    before: &State<'a, GritQueryContext>,
+    after: &State<'a, GritQueryContext>,
+    language: &GritTargetLanguage,
+    name: Option<&str>,
+) -> Option<(Range, Vec<MatchCapture>)> {
+    for (before_scope, after_scope) in before.bindings.iter().zip(&after.bindings) {
+        let (Some(before_variables), Some(after_variables)) =
+            (before_scope.last(), after_scope.last())
+        else {
             continue;
+        };
+
+        let mut match_range = None;
+        let mut captures = Vec::new();
+        for (before_variable, after_variable) in before_variables.iter().zip(after_variables) {
+            let new_values = after_variable
+                .value_history
+                .get(before_variable.value_history.len()..)
+                .unwrap_or_default();
+            let Some(range) = first_position(new_values, language, name) else {
+                continue;
+            };
+            if after_variable.name == MATCH_VAR {
+                match_range = Some(range);
+            } else {
+                captures.push(MatchCapture {
+                    name: after_variable.name.clone(),
+                    range,
+                });
+            }
         }
-        if candidate.start_byte == range.start_byte && candidate.end_byte == range.end_byte {
-            equal = equal.or(Some(index));
-        } else {
-            return Some(index);
+
+        if let Some(range) = match_range {
+            return Some((range, captures));
         }
     }
-    equal
+
+    None
+}
+
+/// Returns the source range of the first value in `values` that isn't
+/// suppressed.
+fn first_position(
+    values: &[GritResolvedPattern],
+    language: &GritTargetLanguage,
+    name: Option<&str>,
+) -> Option<Range> {
+    values
+        .iter()
+        .filter_map(|value| value.get_bindings())
+        .flatten()
+        .filter(|binding| !binding.is_suppressed(language, name))
+        .find_map(|binding| binding.position(language))
 }
 
 #[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
@@ -976,27 +1020,22 @@ mod tests {
         );
     }
 
-    // -- Match::captures tests --
+    // -- GritQuery::captures_by_match tests --
 
-    /// Returns `(name, captured code)` pairs for each match of `pattern` in `code`.
+    /// Returns `(name, captured code)` pairs for each match of `pattern` in
+    /// `code`, in source order.
     fn captured_code(pattern: &str, code: &str) -> Vec<Vec<(String, String)>> {
-        let result = compile_js_query(pattern)
-            .execute(make_js_file(code))
-            .expect("execute failed");
-        let [GritQueryEffect::Match(found)] = result.effects.as_slice() else {
-            panic!("expected one match effect, got {:?}", result.effects);
-        };
-
-        found
-            .captures()
-            .into_iter()
+        compile_js_query(pattern)
+            .captures_by_match(make_js_file(code))
+            .expect("captures_by_match failed")
+            .values()
             .map(|captures| {
                 captures
-                    .into_iter()
+                    .iter()
                     .map(|capture| {
                         let range =
                             capture.range.start_byte as usize..capture.range.end_byte as usize;
-                        (capture.name.to_string(), code[range].to_string())
+                        (capture.name.clone(), code[range].to_string())
                     })
                     .collect()
             })
@@ -1048,6 +1087,66 @@ mod tests {
             captured_code("`f($_, $second)`", "f(a, b);\n"),
             pairs(&[&[("$second", "b")]])
         );
+    }
+
+    #[test]
+    fn captures_of_nested_matches_include_variables_bound_to_the_whole_match() {
+        assert_eq!(
+            captured_code("`f($x)` as $call", "f(f(1));\n"),
+            pairs(&[
+                &[("$x", "f(1)"), ("$call", "f(f(1))")],
+                &[("$x", "1"), ("$call", "f(1)")],
+            ])
+        );
+    }
+
+    #[test]
+    fn captures_include_variables_bound_outside_the_match() {
+        assert_eq!(
+            captured_code(
+                "`console.log($msg)` where { $msg <: within `function $name() { $body }` }",
+                "function a() { console.log(1); }\n"
+            ),
+            pairs(&[&[("$msg", "1"), ("$name", "a"), ("$body", "console.log(1);")]])
+        );
+    }
+
+    #[test]
+    fn captures_omit_the_variables_of_named_patterns() {
+        assert_eq!(
+            captured_code(
+                "pattern one() { $local where { $local <: `1` } }\n`console.log($msg)` where { $msg <: one() }",
+                "console.log(1);\n"
+            ),
+            pairs(&[&[("$msg", "1")]])
+        );
+    }
+
+    #[test]
+    fn captures_of_syntax_node_patterns() {
+        assert_eq!(
+            captured_code(
+                "JsConditionalExpression(consequent = $consequent, alternate = $alternate)",
+                "a ? b : c;\n"
+            ),
+            pairs(&[&[("$consequent", "b"), ("$alternate", "c")]])
+        );
+    }
+
+    #[test]
+    fn captures_are_empty_when_the_pattern_cannot_run_node_by_node() {
+        for pattern in ["$x", "`f($x)` limit 10"] {
+            let query = compile_js_query(pattern);
+            let result = query
+                .execute(make_js_file("f(1);"))
+                .expect("execute failed");
+            assert!(!result.effects.is_empty(), "`{pattern}` should match");
+
+            let captures = query
+                .captures_by_match(make_js_file("f(1);"))
+                .expect("captures_by_match failed");
+            assert!(captures.is_empty(), "`{pattern}` recorded {captures:?}");
+        }
     }
 
     #[test]

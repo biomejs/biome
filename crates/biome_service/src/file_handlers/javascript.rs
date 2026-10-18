@@ -2119,6 +2119,7 @@ fn update_snippets(
     Ok(root.as_send().unwrap())
 }
 
+#[expect(clippy::too_many_arguments)]
 fn search(
     path: &BiomePath,
     document: &DocumentFileSource,
@@ -2126,8 +2127,16 @@ fn search(
     provider: &dyn SearchQuery,
     settings: &SettingsWithEditor,
     pattern_id: PatternId,
+    include_captures: bool,
     workspace_db: WorkspaceDb,
 ) -> Result<Vec<SearchMatch>, WorkspaceError> {
     let any_parse = parsed.any_parse(&workspace_db);
-    provider.search(path, document, any_parse.clone(), settings, pattern_id)
+    provider.search(
+        path,
+        document,
+        any_parse.clone(),
+        settings,
+        pattern_id,
+        include_captures,
+    )
 }

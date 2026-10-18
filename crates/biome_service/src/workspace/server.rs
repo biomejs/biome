@@ -4417,6 +4417,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             project_key,
             path,
             pattern,
+            include_captures,
         }: SearchPatternParams,
     ) -> Result<SearchResults, WorkspaceError> {
         let workspace_db = self.get_db();
@@ -4442,6 +4443,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             provider.as_ref(),
             &settings,
             pattern,
+            include_captures,
             workspace_db.into_untracked_db(),
         )?
         .into_iter()

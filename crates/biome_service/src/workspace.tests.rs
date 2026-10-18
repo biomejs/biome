@@ -1545,7 +1545,7 @@ export const squash = function squash() {};
 }
 
 #[test]
-fn search_pattern_reports_captures_of_each_match() {
+fn search_pattern_reports_captures_of_each_match_on_request() {
     const SOURCE: &str = "f(1, 2);\nconst a = f(3, b.c);\n";
 
     let (workspace, project_key) = create_server();
@@ -1569,13 +1569,25 @@ fn search_pattern_reports_captures_of_each_match() {
         })
         .unwrap()
         .pattern_id;
+    let without_captures = workspace
+        .search_pattern(SearchPatternParams {
+            project_key,
+            path: path.clone(),
+            pattern: pattern.clone(),
+            include_captures: false,
+        })
+        .unwrap();
     let results = workspace
         .search_pattern(SearchPatternParams {
             project_key,
             path,
             pattern,
+            include_captures: true,
         })
         .unwrap();
+
+    assert_eq!(without_captures.matches, results.matches);
+    assert!(without_captures.captures.iter().all(Vec::is_empty));
 
     let matched: Vec<_> = results
         .matches
