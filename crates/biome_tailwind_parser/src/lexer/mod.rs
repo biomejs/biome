@@ -4,18 +4,7 @@ mod base_name_store;
 pub(crate) mod simd;
 
 pub use base_name_store::{BASENAME_STORE, BaseNameStore};
-use biome_parser::diagnostic::ParseDiagnostic;
 use biome_tailwind_syntax::TailwindSyntaxKind::{self, *};
-use biome_tailwind_syntax::TextSize;
-
-/// The diagnostic for the whitespace byte at `start` that CSS doesn't allow: `\x0B` or `\x0C`.
-pub(crate) fn invalid_whitespace(start: TextSize) -> ParseDiagnostic {
-    ParseDiagnostic::new(
-        "The CSS standard only allows tabs, whitespace, carriage return and line feed whitespace.",
-        start..start + TextSize::from(1),
-    )
-    .with_hint("Use a regular whitespace character instead.")
-}
 
 /// Returns the kind of the CSS identifier `text`: a keyword such as a unit, or `IDENT`.
 pub(crate) fn css_identifier_kind(text: &[u8]) -> TailwindSyntaxKind {

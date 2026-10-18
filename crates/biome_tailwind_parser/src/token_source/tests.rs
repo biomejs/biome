@@ -107,7 +107,7 @@ fn words_before_a_colon_are_variant_segments() {
         COLON ":",
         TW_BASE "x",
         WHITESPACE " ",
-        DATA_KW "data",
+        TW_BASE "data",
     );
 }
 
@@ -331,6 +331,19 @@ fn css_strings_escape_quotes_and_colors_end_before_other_letters() {
 fn properties_run_to_the_colon() {
     let tokens = tree_tokens("[--a[--b)c:var(--d)]");
     assert_eq!(tokens[1], (TW_PROPERTY, "--a[--b)c".to_string()));
+}
+
+#[test]
+fn data_is_a_basename() {
+    assert!(parse_tailwind("data data-mt-4").diagnostics().is_empty());
+    assert_tree_tokens!(
+        "data data-mt-4",
+        TW_BASE "data",
+        WHITESPACE " ",
+        TW_BASE "data",
+        DASH "-",
+        TW_VALUE "mt-4",
+    );
 }
 
 #[test]

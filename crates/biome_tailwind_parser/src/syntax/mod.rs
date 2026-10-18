@@ -13,7 +13,7 @@ use biome_tailwind_syntax::TailwindSyntaxKind::{self, *};
 
 mod css_value;
 mod letters;
-mod parse_error;
+pub(crate) mod parse_error;
 mod value;
 mod variant;
 
@@ -124,10 +124,7 @@ fn parse_functional_or_static_candidate(p: &mut TailwindParser, negative: bool) 
     if !is_at_base(p.source(), negative) {
         return Absent;
     }
-    let (kind, letters) = base(p.source());
-    if kind != TW_BASE {
-        return Absent;
-    }
+    let letters = base(p.source());
 
     let checkpoint = p.checkpoint();
     let m = p.start();

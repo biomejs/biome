@@ -39,23 +39,17 @@ pub(crate) fn is_at_base(source: &TailwindTokenSource, negative: bool) -> bool {
     }
 }
 
-/// Returns the kind and length in letters of the basename at the current letter: up to the next
-/// `-`, whitespace, `!`, `:` or `/`, continued over each `-` that a dashed basename continues
-/// over. A basename that is exactly `data` is a `DATA_KW`.
-pub(crate) fn base(source: &TailwindTokenSource) -> (TailwindSyntaxKind, usize) {
+/// Returns the length in letters of the basename at the current letter: up to the next `-`,
+/// whitespace, `!`, `:` or `/`, continued over each `-` that a dashed basename continues over.
+pub(crate) fn base(source: &TailwindTokenSource) -> usize {
     let count = letters_until(source, 1, |byte| {
         is_whitespace(byte) || matches!(byte, b'-' | b'!' | b':' | b'/')
     }) + 1;
-    let start = source.nth_start(0);
-    let end = source.nth_start(count);
-    if &source.text().as_bytes()[start..end] == b"data" {
-        return (DATA_KW, count);
-    }
     if source.nth_byte(count) != Some(b'-') {
-        return (TW_BASE, count);
+        return count;
     }
-    let end = source.dashed_base_end(start, end);
-    (TW_BASE, source.letters_before(end))
+    let end = source.dashed_base_end(source.nth_start(0), source.nth_start(count));
+    source.letters_before(end)
 }
 
 /// Where a value ends: after the `-` of a candidate, or after the `/` of a modifier.
