@@ -5,7 +5,7 @@ use biome_analyze::RuleSource;
 use biome_analyze::{FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_semantic::{ReferencesExtensions, SemanticModel};
+use biome_js_semantic::{Binding, Reference, SemanticModel};
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::declaration_ext::is_in_ambient_context;
 use biome_js_syntax::{
@@ -264,6 +264,14 @@ impl Rule for NoUnusedVariables {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let binding = ctx.query();
         let model = ctx.model();
+
+        // Every check below can only turn a report into no report, so the
+        // cheapest ones run first.
+        if is_never_reported(&binding.declaration()?) {
+            debug_assert!(suggested_fix_if_unused(model, binding, ctx.options()).is_none());
+            return None;
+        }
+
         let embedded = ctx
             .get_service::<EmbeddedService>()
             .expect("embedded service");
@@ -637,6 +645,36 @@ fn suggested_fix_if_unused(
     }
 }
 
+/// Returns `true` if [suggested_fix_if_unused] returns `None` for every
+/// binding with this declaration, so such a binding is never reported, used or
+/// not.
+fn is_never_reported(declaration: &AnyJsBindingDeclaration) -> bool {
+    let pattern_declaration = declaration.parent_binding_pattern_declaration();
+    matches!(
+        pattern_declaration.as_ref().unwrap_or(declaration),
+        AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
+            | AnyJsBindingDeclaration::JsClassExpression(_)
+            | AnyJsBindingDeclaration::JsFunctionExpression(_)
+            | AnyJsBindingDeclaration::TsIndexSignatureParameter(_)
+            | AnyJsBindingDeclaration::TsMappedType(_)
+            | AnyJsBindingDeclaration::TsEnumMember(_)
+            | AnyJsBindingDeclaration::TsPropertyParameter(_)
+            | AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
+            | AnyJsBindingDeclaration::JsArrayBindingPatternRestElement(_)
+            | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_)
+            | AnyJsBindingDeclaration::JsObjectBindingPatternRest(_)
+            | AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
+            | AnyJsBindingDeclaration::JsShorthandNamedImportSpecifier(_)
+            | AnyJsBindingDeclaration::JsNamedImportSpecifier(_)
+            | AnyJsBindingDeclaration::JsBogusNamedImportSpecifier(_)
+            | AnyJsBindingDeclaration::JsDefaultImportSpecifier(_)
+            | AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_)
+            | AnyJsBindingDeclaration::JsFormalParameter(_)
+            | AnyJsBindingDeclaration::JsRestParameter(_)
+            | AnyJsBindingDeclaration::TsImportEqualsDeclaration(_)
+    )
+}
+
 /// Returns `true` if `binding` is considered as ignored by the user.
 pub fn is_ignored(
     binding: &AnyJsIdentifierBinding,
@@ -743,7 +781,8 @@ fn is_value_merged_with_used_namespace(
 
     // Namespace declarations must follow the value they merge with, so the
     // scope name lookup points directly at the merged namespace when it exists.
-    let namespace = scope.get_binding(name)?.tree();
+    let namespace_binding = scope.get_binding(name)?;
+    let namespace = namespace_binding.tree();
     if namespace.syntax().text_trimmed_range() == binding.syntax().text_trimmed_range() {
         return Some(false);
     }
@@ -758,7 +797,7 @@ fn is_value_merged_with_used_namespace(
 
     Some(
         model.is_exported(&namespace)
-            || !is_unused_by_references(model, &namespace, namespace_decl.syntax()),
+            || !is_unused_by_references(&namespace_binding, namespace_decl.syntax()),
     )
 }
 
@@ -801,7 +840,7 @@ fn is_interface_merged_with_used(
             .name_token()
             .is_ok_and(|other_name| other_name.text_trimmed() == name)
             && (model.is_exported(&other)
-                || !is_unused_by_references(model, &other, other_declaration.syntax()))
+                || !is_unused_by_references(&scope_binding, other_declaration.syntax()))
     }))
 }
 
@@ -856,54 +895,38 @@ fn is_svelte_bindable_prop(binding: &AnyJsIdentifierBinding) -> bool {
     is_call_to(&props_call, "$props")
 }
 
-fn is_unused_by_references(
-    model: &SemanticModel,
-    binding: &AnyJsIdentifierBinding,
-    declaration: &JsSyntaxNode,
-) -> bool {
-    binding
-        .all_references(model)
-        .filter_map(|reference| {
-            let ref_parent = reference.syntax().parent()?;
-            if reference.is_write() {
-                // Skip self assignment such as `a += 1` and `a++`.
-                // Ensure that the assignment is not used in an used expression.
-                let is_statement_like = ref_parent
-                    .ancestors()
-                    .find(|x| {
-                        matches!(
-                            x.kind(),
-                            JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION
-                                | JsSyntaxKind::JS_POST_UPDATE_EXPRESSION
-                                | JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION
-                        )
-                    })
-                    .and_then(|x| is_unused_expression(&x).ok())
-                    .unwrap_or(false);
-                if is_statement_like {
-                    return None;
-                }
-            } else if JsIdentifierExpression::can_cast(ref_parent.kind())
-                && is_unused_expression(&ref_parent).ok()?
-            {
-                // The reference is in an unused expression
-                return None;
-            }
-            Some(ref_parent)
+fn is_unused_by_references(binding: &Binding, declaration: &JsSyntaxNode) -> bool {
+    // Expressions in a return position inside an arrow function expression are used.
+    // Type parameters declared in mapped types are only used in the mapped type.
+    let any_use_counts = matches!(
+        declaration.kind(),
+        JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION | JsSyntaxKind::TS_MAPPED_TYPE
+    );
+    // A reference starts inside this range exactly when it lies inside the
+    // declaration, so the stored start tells where it is without building its node.
+    let declaration_range = declaration.text_range_with_trivia();
+
+    // Any use outside the declaration means the binding is used.
+    if binding
+        .all_references()
+        .filter(|reference| {
+            any_use_counts || !declaration_range.contains(reference.range_start())
         })
+        .any(|reference| use_parent(&reference, declaration).is_some())
+    {
+        return false;
+    }
+    if any_use_counts {
+        return true;
+    }
+    binding
+        .all_references()
+        .filter(|reference| declaration_range.contains(reference.range_start()))
+        .filter_map(|reference| use_parent(&reference, declaration))
         .all(|ref_parent| {
-            if matches!(
-                declaration.kind(),
-                JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION | JsSyntaxKind::TS_MAPPED_TYPE
-            ) {
-                // Expression in an return position inside an arrow function expression are used.
-                // Type parameters declared in mapped types are only used in the mapped type.
-                return false;
-            }
             let mut is_unused = true;
             for ancestor in ref_parent.ancestors() {
                 if &ancestor == declaration {
-                    // inside the declaration
                     return is_unused;
                 }
                 match ancestor.kind() {
@@ -934,9 +957,42 @@ fn is_unused_by_references(
                     _ => {}
                 }
             }
-            // Always false when the ref is outside the declaration
+            // Only reached if the declaration is not an ancestor of the reference.
             false
         })
+}
+
+/// Returns the parent of the reference's node, or `None` if the reference does
+/// not use the binding: a write that only updates it in statement position, such
+/// as `a += 1` or `a++`, or a read whose value is discarded, such as `a;`.
+///
+/// The reference's node is built from the closest ancestor of `declaration`
+/// that contains it.
+fn use_parent(reference: &Reference, declaration: &JsSyntaxNode) -> Option<JsSyntaxNode> {
+    let ref_parent = reference.syntax_near(declaration).parent()?;
+    if reference.is_write() {
+        // Ensure that the assignment is not used in an used expression.
+        let is_statement_like = ref_parent
+            .ancestors()
+            .find(|x| {
+                matches!(
+                    x.kind(),
+                    JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION
+                        | JsSyntaxKind::JS_POST_UPDATE_EXPRESSION
+                        | JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION
+                )
+            })
+            .and_then(|x| is_unused_expression(&x).ok())
+            .unwrap_or(false);
+        if is_statement_like {
+            return None;
+        }
+    } else if JsIdentifierExpression::can_cast(ref_parent.kind())
+        && is_unused_expression(&ref_parent).ok()?
+    {
+        return None;
+    }
+    Some(ref_parent)
 }
 
 /// Returns `true` if `binding` is considered as unused.
@@ -953,14 +1009,14 @@ pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> boo
         return false;
     }
 
-    if model.is_exported(binding) {
-        return false;
-    }
-
     let Some(declaration) = binding.declaration() else {
         return false;
     };
-    if !is_unused_by_references(model, binding, declaration.syntax()) {
+    let model_binding = model.as_binding(binding);
+    if model_binding.is_exported() {
+        return false;
+    }
+    if !is_unused_by_references(&model_binding, declaration.syntax()) {
         return false;
     }
     !is_declaration_merged_with_used(model, binding).unwrap_or(false)
@@ -969,26 +1025,27 @@ pub fn is_unused(model: &SemanticModel, binding: &AnyJsIdentifierBinding) -> boo
 /// Returns `true` if `expr` is unused.
 fn is_unused_expression(expr: &JsSyntaxNode) -> SyntaxResult<bool> {
     debug_assert!(AnyJsExpression::can_cast(expr.kind()));
-    // We use range as a way to identify nodes without owning them.
-    let mut previous = expr.text_trimmed_range();
+    // The child of `parent` that contains `expr`. Its range identifies it
+    // among the children of `parent`, and is only computed when needed.
+    let mut previous = expr.clone();
     for parent in expr.ancestors().skip(1) {
         match parent.kind() {
             JsSyntaxKind::JS_EXPRESSION_STATEMENT => return Ok(true),
             JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION => {
-                previous = parent.text_trimmed_range();
+                previous = parent;
             }
             JsSyntaxKind::JS_SEQUENCE_EXPRESSION => {
                 let seq_expr = JsSequenceExpression::unwrap_cast(parent);
                 // If the expression is not the rightmost node in a comma sequence
-                if seq_expr.left()?.range() == previous {
+                if seq_expr.left()?.range() == previous.text_trimmed_range() {
                     return Ok(true);
                 }
-                previous = seq_expr.range();
+                previous = seq_expr.into_syntax();
             }
             JsSyntaxKind::JS_FOR_STATEMENT => {
                 let for_stmt = JsForStatement::unwrap_cast(parent);
                 if let Some(for_test) = for_stmt.test() {
-                    return Ok(for_test.range() != previous);
+                    return Ok(for_test.range() != previous.text_trimmed_range());
                 }
                 return Ok(true);
             }
