@@ -108,8 +108,10 @@ impl Scope {
     }
 
     /// Returns the distinct names bound in this scope, with unicode escapes
-    /// decoded, in no particular order. A binding whose name cannot be read,
-    /// such as one with a bogus name, contributes no name.
+    /// decoded, in no particular order.
+    ///
+    /// Only identifier bindings and type parameter names contribute a name.
+    /// Enum members and bindings with a bogus name contribute none.
     ///
     /// It **does not** return names of parent scopes.
     pub fn binding_names(&self) -> impl ExactSizeIterator<Item = &str> {

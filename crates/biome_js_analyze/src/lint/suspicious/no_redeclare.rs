@@ -218,9 +218,10 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
 /// `scope` or `function_scope`, judged from the names the semantic model stores.
 ///
 /// Two bindings can only conflict if they have the same name. A scope has as
-/// many distinct names as bindings only if every binding has a readable name
-/// and no two of them share it, after unicode escapes are decoded and therefore
-/// also before.
+/// many distinct names as bindings only if every binding contributes a name to
+/// [Scope::binding_names] and no two of them share it, after unicode escapes
+/// are decoded and therefore also before. Scopes with enum members never pass
+/// this check and always take the full check.
 fn may_have_redeclarations(scope: &Scope, function_scope: Option<&Scope>) -> bool {
     let has_unique_names = |scope: &Scope| scope.binding_names().len() == scope.bindings().len();
     if !has_unique_names(scope) {

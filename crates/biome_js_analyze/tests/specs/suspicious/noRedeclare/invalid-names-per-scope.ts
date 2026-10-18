@@ -11,16 +11,6 @@ const h = (y) => {
 	var y;
 };
 
-// Names that differ only in unicode escapes.
-var ab;
-var ab;
-function m(n) {
-	let n;
-}
-function o(n) {
-	let n;
-}
-
 // Enum members.
 enum E {
 	A,

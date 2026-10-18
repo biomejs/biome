@@ -12,7 +12,15 @@ function k(p) {
 // A nested scope can shadow its parent.
 let cd = 1;
 {
-	let cd = 2;
+	let c\u0064 = 2;
+}
+
+// Names that are spelled differently are not redeclarations, even when they
+// are equal once unicode escapes are decoded.
+var \u0061b;
+var ab;
+function m(\u006e) {
+	let n;
 }
 
 // Mergeable declarations.
