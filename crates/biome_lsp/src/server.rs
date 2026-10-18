@@ -978,7 +978,14 @@ impl ServerConnection {
     {
         let stdin = DisconnectOnEof::new(stdin, self.lifecycle.clone());
         let service = DisconnectOnExit::new(self.service, self.lifecycle);
-        Server::new(stdin, stdout, self.socket).serve(service).await;
+        // Workspace methods run on the blocking thread pool, so this limit
+        // decides how many cores a single client can keep busy. The default of
+        // 4 starves `--use-server` runs, which send one request per file.
+        let concurrency = std::thread::available_parallelism().map_or(4, |n| n.get().max(4));
+        Server::new(stdin, stdout, self.socket)
+            .concurrency_level(concurrency)
+            .serve(service)
+            .await;
     }
 }
 
