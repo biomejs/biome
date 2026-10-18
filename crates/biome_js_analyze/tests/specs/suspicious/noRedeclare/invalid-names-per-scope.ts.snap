@@ -1,0 +1,260 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-names-per-scope.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+// A body redeclares a parameter or type parameter of its function.
+function f<T>(a, b) {
+	type T = number;
+	const a = 0;
+}
+const g = function g(x) {
+	let x;
+};
+const h = (y) => {
+	var y;
+};
+
+// Names that differ only in unicode escapes.
+var ab;
+var ab;
+function m(n) {
+	let n;
+}
+function o(n) {
+	let n;
+}
+
+// Enum members.
+enum E {
+	A,
+	A,
+}
+
+```
+
+# Diagnostics
+```
+invalid-names-per-scope.ts:16:5 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'ab' is redeclared in the same scope.
+  
+    14 │ // Names that differ only in unicode escapes.
+    15 │ var ab;
+  > 16 │ var ab;
+       │     ^^
+    17 │ function m(n) {
+    18 │ 	let n;
+  
+  i 'ab' is defined here:
+  
+    14 │ // Names that differ only in unicode escapes.
+  > 15 │ var ab;
+       │     ^^
+    16 │ var ab;
+    17 │ function m(n) {
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
+  
+
+```
+
+```
+invalid-names-per-scope.ts:4:7 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'T' is redeclared in the same scope.
+  
+    2 │ // A body redeclares a parameter or type parameter of its function.
+    3 │ function f<T>(a, b) {
+  > 4 │ 	type T = number;
+      │ 	     ^
+    5 │ 	const a = 0;
+    6 │ }
+  
+  i 'T' is defined here:
+  
+    1 │ /* should generate diagnostics */
+    2 │ // A body redeclares a parameter or type parameter of its function.
+  > 3 │ function f<T>(a, b) {
+      │            ^
+    4 │ 	type T = number;
+    5 │ 	const a = 0;
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
+  
+
+```
+
+```
+invalid-names-per-scope.ts:5:8 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'a' is redeclared in the same scope.
+  
+    3 │ function f<T>(a, b) {
+    4 │ 	type T = number;
+  > 5 │ 	const a = 0;
+      │ 	      ^
+    6 │ }
+    7 │ const g = function g(x) {
+  
+  i 'a' is defined here:
+  
+    1 │ /* should generate diagnostics */
+    2 │ // A body redeclares a parameter or type parameter of its function.
+  > 3 │ function f<T>(a, b) {
+      │               ^
+    4 │ 	type T = number;
+    5 │ 	const a = 0;
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
+  
+
+```
+
+```
+invalid-names-per-scope.ts:8:6 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'x' is redeclared in the same scope.
+  
+     6 │ }
+     7 │ const g = function g(x) {
+   > 8 │ 	let x;
+       │ 	    ^
+     9 │ };
+    10 │ const h = (y) => {
+  
+  i 'x' is defined here:
+  
+    5 │ 	const a = 0;
+    6 │ }
+  > 7 │ const g = function g(x) {
+      │                      ^
+    8 │ 	let x;
+    9 │ };
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
+  
+
+```
+
+```
+invalid-names-per-scope.ts:11:6 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'y' is redeclared in the same scope.
+  
+     9 │ };
+    10 │ const h = (y) => {
+  > 11 │ 	var y;
+       │ 	    ^
+    12 │ };
+    13 │ 
+  
+  i 'y' is defined here:
+  
+     8 │ 	let x;
+     9 │ };
+  > 10 │ const h = (y) => {
+       │            ^
+    11 │ 	var y;
+    12 │ };
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
+  
+
+```
+
+```
+invalid-names-per-scope.ts:18:6 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'n' is redeclared in the same scope.
+  
+    16 │ var ab;
+    17 │ function m(n) {
+  > 18 │ 	let n;
+       │ 	    ^
+    19 │ }
+    20 │ function o(n) {
+  
+  i 'n' is defined here:
+  
+    15 │ var ab;
+    16 │ var ab;
+  > 17 │ function m(n) {
+       │            ^
+    18 │ 	let n;
+    19 │ }
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
+  
+
+```
+
+```
+invalid-names-per-scope.ts:21:6 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'n' is redeclared in the same scope.
+  
+    19 │ }
+    20 │ function o(n) {
+  > 21 │ 	let n;
+       │ 	    ^
+    22 │ }
+    23 │ 
+  
+  i 'n' is defined here:
+  
+    18 │ 	let n;
+    19 │ }
+  > 20 │ function o(n) {
+       │            ^
+    21 │ 	let n;
+    22 │ }
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
+  
+
+```
+
+```
+invalid-names-per-scope.ts:27:2 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'A' is redeclared in the same scope.
+  
+    25 │ enum E {
+    26 │ 	A,
+  > 27 │ 	A,
+       │ 	^
+    28 │ }
+    29 │ 
+  
+  i 'A' is defined here:
+  
+    24 │ // Enum members.
+    25 │ enum E {
+  > 26 │ 	A,
+       │ 	^
+    27 │ 	A,
+    28 │ }
+  
+  i Redeclarations make it unclear which variable a reference points to and can hide earlier declarations.
+  
+  i Remove the duplicate declaration or rename one of the variables.
+  
+
+```

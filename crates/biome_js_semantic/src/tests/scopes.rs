@@ -1,4 +1,7 @@
-use crate::assert_semantics;
+use crate::{SemanticModel, assert_semantics, semantic_model};
+use biome_js_parser::parse;
+use biome_js_syntax::AnyJsRoot;
+use biome_languages::JsFileSource;
 
 // Statements
 assert_semantics! {
@@ -71,4 +74,58 @@ assert_semantics! {
 // Others
 assert_semantics! {
     ok_scope_global, "/*START GLOBAL*//*END GLOBAL*/",
+}
+
+fn build_ts_model(source: &str) -> SemanticModel {
+    let parsed = parse(source, JsFileSource::ts(), Default::default());
+    let parsed: AnyJsRoot = parsed.tree();
+    semantic_model(&parsed, Default::default())
+}
+
+const STORED_DATA_SOURCE: &str = "
+    let a;
+    var \\u0062;
+    function f<T>(c) {
+        if (c) { var d; function g() {} }
+        const h = () => { let i; };
+    }
+    class C { static { var j; } method(k) {} }
+    namespace N { export const l = 1; }
+    type U<V> = V extends (infer W)[] ? W : never;
+    enum E { M }
+";
+
+#[test]
+fn binding_scope_hoisted_to_matches_syntax_lookup() {
+    let model = build_ts_model(STORED_DATA_SOURCE);
+    let mut hoisted = 0;
+    for binding in model.all_bindings() {
+        let expected = model.scope_hoisted_to(&binding.syntax());
+        hoisted += usize::from(expected.is_some());
+        assert_eq!(
+            binding.scope_hoisted_to(),
+            expected,
+            "{:?}",
+            binding.syntax()
+        );
+    }
+    assert!(hoisted > 0);
+}
+
+#[test]
+fn scope_syntax_kind_matches_syntax() {
+    let model = build_ts_model(STORED_DATA_SOURCE);
+    for scope in model.global_scope().descendents() {
+        assert_eq!(scope.syntax_kind(), scope.syntax().kind());
+    }
+}
+
+#[test]
+fn scope_binding_names_are_distinct_and_decoded() {
+    let model = build_ts_model("let a; let \\u0061; var b; function c(d) {}");
+    let global_scope = model.global_scope();
+    let mut names: Vec<_> = global_scope.binding_names().collect();
+    names.sort_unstable();
+    assert_eq!(names, ["a", "b", "c"]);
+    assert_eq!(global_scope.bindings().len(), 4);
 }

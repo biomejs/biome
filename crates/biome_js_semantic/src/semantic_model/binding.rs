@@ -540,6 +540,19 @@ impl Binding {
         }
     }
 
+    /// Returns the scope this binding was hoisted to, if any.
+    ///
+    /// This equals `model.scope_hoisted_to(&self.syntax())`, but reads the
+    /// stored scope instead of locating the syntax node in the tree.
+    pub fn scope_hoisted_to(&self) -> Option<Scope> {
+        let binding = self.data.binding(self.id);
+        let id = self.data.scope_hoisted_to(binding.range)?;
+        Some(Scope {
+            data: self.data.clone(),
+            id,
+        })
+    }
+
     /// Returns the kind of declaration that introduced this binding.
     pub fn declaration_kind(&self) -> JsDeclarationKind {
         self.data.binding(self.id).declaration_kind

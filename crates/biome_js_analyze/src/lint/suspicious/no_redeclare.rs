@@ -89,14 +89,11 @@ impl Rule for NoRedeclare {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let model = ctx.model();
         let binding = model.as_binding(ctx.query());
-        let scope = model
-            .scope_hoisted_to(&binding.syntax())
+        let scope = binding
+            .scope_hoisted_to()
             .unwrap_or_else(|| binding.scope());
-        if scope
-            .bindings()
-            .next()
-            .is_none_or(|first| first.syntax() != binding.syntax())
-        {
+        // Each scope is checked once, by its first binding.
+        if scope.bindings().next().is_none_or(|first| first != binding) {
             return Box::default();
         }
         let mut redeclarations = Vec::default();
@@ -134,8 +131,16 @@ impl Rule for NoRedeclare {
 }
 
 fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<Redeclaration>) {
+    let function_scope = if scope.syntax_kind() == JsSyntaxKind::JS_FUNCTION_BODY {
+        scope.parent()
+    } else {
+        None
+    };
+    if !may_have_redeclarations(scope, function_scope.as_ref()) {
+        return;
+    }
     let mut declarations = FxHashMap::<TokenText, (TextRange, AnyJsBindingDeclaration)>::default();
-    if scope.syntax().kind() == JsSyntaxKind::JS_FUNCTION_BODY {
+    if let Some(function_scope) = function_scope {
         // Handle cases where a variable/type redeclares a parameter or type parameter.
         // For example:
         //
@@ -156,20 +161,15 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
         // function g() {}
         // function f<T = U>(h = g) { type U = number; function g() {}; }
         // ```
-        if let Some(function_scope) = scope.parent() {
-            for binding in function_scope.bindings() {
-                let id_binding = binding.tree();
-                if let Some(decl) = id_binding.declaration() {
-                    // Ignore the function itself.
-                    if !matches!(decl, AnyJsBindingDeclaration::JsFunctionExpression(_)) {
-                        let Ok(name) = id_binding.name_token() else {
-                            continue;
-                        };
-                        declarations.insert(
-                            name.token_text_trimmed(),
-                            (binding.range(), decl),
-                        );
-                    }
+        for binding in function_scope.bindings() {
+            let id_binding = binding.tree();
+            if let Some(decl) = id_binding.declaration() {
+                // Ignore the function itself.
+                if !matches!(decl, AnyJsBindingDeclaration::JsFunctionExpression(_)) {
+                    let Ok(name) = id_binding.name_token() else {
+                        continue;
+                    };
+                    declarations.insert(name.token_text_trimmed(), (binding.range(), decl));
                 }
             }
         }
@@ -212,4 +212,24 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
             }
         }
     }
+}
+
+/// Returns `false` when no binding of `scope` can redeclare a binding of
+/// `scope` or `function_scope`, judged from the names the semantic model stores.
+///
+/// Two bindings can only conflict if they have the same name. A scope has as
+/// many distinct names as bindings only if every binding has a readable name
+/// and no two of them share it, after unicode escapes are decoded and therefore
+/// also before.
+fn may_have_redeclarations(scope: &Scope, function_scope: Option<&Scope>) -> bool {
+    let has_unique_names = |scope: &Scope| scope.binding_names().len() == scope.bindings().len();
+    if !has_unique_names(scope) {
+        return true;
+    }
+    function_scope.is_some_and(|function_scope| {
+        !has_unique_names(function_scope)
+            || scope
+                .binding_names()
+                .any(|name| function_scope.get_binding_reference(name).is_some())
+    })
 }

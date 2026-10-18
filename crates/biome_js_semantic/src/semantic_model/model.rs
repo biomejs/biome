@@ -241,7 +241,7 @@ impl SemanticModelData {
     }
 
     /// Returns the [ScopeId] which the specified syntax node was hoisted to, if any.
-    fn scope_hoisted_to(&self, range: TextRange) -> Option<ScopeId> {
+    pub(crate) fn scope_hoisted_to(&self, range: TextRange) -> Option<ScopeId> {
         self.scope_hoisted_to_by_range.get(&range.start()).copied()
     }
 

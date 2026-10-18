@@ -107,6 +107,18 @@ impl Scope {
         }
     }
 
+    /// Returns the distinct names bound in this scope, with unicode escapes
+    /// decoded, in no particular order. A binding whose name cannot be read,
+    /// such as one with a bogus name, contributes no name.
+    ///
+    /// It **does not** return names of parent scopes.
+    pub fn binding_names(&self) -> impl ExactSizeIterator<Item = &str> {
+        self.data.scopes[self.id.index()]
+            .bindings_by_name
+            .keys()
+            .map(|name| name.text())
+    }
+
     /// Returns a [Binding] by its identifier name. Unicode escapes in `name`
     /// are decoded before lookup. It **does not** return bindings of parent scopes.
     ///
@@ -164,6 +176,14 @@ impl Scope {
 
     pub fn range(&self) -> TextRange {
         self.data.scopes[self.id.index()].range
+    }
+
+    /// Returns the kind of the syntax node that created this scope.
+    ///
+    /// This equals `self.syntax().kind()`, but reads the stored kind instead of
+    /// locating the syntax node in the tree.
+    pub fn syntax_kind(&self) -> JsSyntaxKind {
+        self.data.scope_node_by_range[&self.range()].kind()
     }
 
     pub fn syntax(&self) -> JsSyntaxNode {
