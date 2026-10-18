@@ -70,7 +70,9 @@ enabled, collection (`src/js_module_info/flow.rs`) builds a graph of the
 possible paths through each execution root that tests one of its own
 variables. The module visitor selects the roots that contain a condition and
 only supported syntax during its own syntax walk, so collection never walks the
-whole module again and a module without conditions builds no graph. Collection
+whole module again and a module without conditions builds no graph.
+Declaration files (`.d.ts`, `.d.mts`, `.d.cts`, in any letter case) contain no
+code that runs, so the visitor does not look for flow roots in them. Collection
 decomposes every condition into guards on semantic bindings. For
 example, `typeof value === "string"` can narrow `value`; `check(value)` and
 `value.length` cannot. Collection then records which reads a test of their
@@ -107,7 +109,8 @@ parameter, `let`, or `const` declared inside the function that owns the
 the top level of a script. Variables typed
 `any`, or whose type includes an undetermined part, never narrow because no
 supported test can change them. Collection already drops reads of untyped and
-`any`-annotated variables; other variable types are resolved only when a
+`any`-annotated variables, and builds no graph for a root that declares no
+other variable; other variable types are resolved only when a
 candidate read is queried, because resolving them can be costly. If flow
 solving exhausts its work limit or a query cycle occurs, the result is unknown.
 Callers must respect that result rather than replace it with a more confident
