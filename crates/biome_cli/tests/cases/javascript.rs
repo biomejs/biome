@@ -147,6 +147,48 @@ const reported = styled.div`colr: red;`;"#
 }
 
 #[test]
+fn reports_irregular_whitespace_in_embedded_css() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let file = Utf8Path::new("file.js");
+    fs.insert(
+        file.into(),
+        "const Button = styled.button`\n  &:hover {\n    padding:\u{3000}10px;\n  }\n  &::before {\n    content: \"\u{3000}\";\n  }\n`;\n"
+            .as_bytes(),
+    );
+    fs.insert(
+        "biome.json".into(),
+        r#"{
+  "javascript": { "experimentalEmbeddedSnippetsEnabled": true },
+  "linter": {
+    "rules": {
+      "recommended": false,
+      "suspicious": {
+        "noIrregularWhitespace": "error"
+      }
+    }
+  }
+}"#
+        .as_bytes(),
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file.as_str()].as_slice()),
+    );
+    assert!(result.is_err(), "{result:?}\n{console:#?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "reports_irregular_whitespace_in_embedded_css",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn host_and_css_suppressions_are_both_used() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
