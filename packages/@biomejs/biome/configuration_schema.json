@@ -7185,6 +7185,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUselessRecursionConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUselessRecursionOptions" }
+			]
+		},
+		"NoUselessRecursionOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUselessRegexBackrefsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8050,6 +8060,13 @@
 					"description": "Disallow calling .getTime() on a date before passing it to the Date constructor.\nSee https://biomejs.dev/linter/rules/no-useless-date-get-time",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUselessDateGetTimeConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessRecursion": {
+					"description": "Disallow functions that return a call to themselves when a loop can do the same work.\nSee https://biomejs.dev/linter/rules/no-useless-recursion",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUselessRecursionConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12764,6 +12781,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUselessLoneBlockStatementsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUselessRecursionOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUselessRecursionOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
