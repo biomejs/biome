@@ -12444,6 +12444,41 @@ pub struct ScssPartialCombinatorSelectorFields {
     pub combinator: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct ScssPercentValue {
+    pub(crate) syntax: SyntaxNode,
+}
+impl ScssPercentValue {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> ScssPercentValueFields {
+        ScssPercentValueFields {
+            percent_token: self.percent_token(),
+        }
+    }
+    pub fn percent_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for ScssPercentValue {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct ScssPercentValueFields {
+    pub percent_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct ScssPlaceholderSelector {
     pub(crate) syntax: SyntaxNode,
 }
@@ -18089,6 +18124,7 @@ pub enum AnyCssValue {
     ScssInterpolatedValue(ScssInterpolatedValue),
     ScssModuleMemberAccess(ScssModuleMemberAccess),
     ScssParentSelectorValue(ScssParentSelectorValue),
+    ScssPercentValue(ScssPercentValue),
     ScssVariable(ScssVariable),
     TwValueThemeReference(TwValueThemeReference),
 }
@@ -18198,6 +18234,12 @@ impl AnyCssValue {
     pub fn as_scss_parent_selector_value(&self) -> Option<&ScssParentSelectorValue> {
         match &self {
             Self::ScssParentSelectorValue(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_scss_percent_value(&self) -> Option<&ScssPercentValue> {
+        match &self {
+            Self::ScssPercentValue(item) => Some(item),
             _ => None,
         }
     }
@@ -34187,6 +34229,56 @@ impl From<ScssPartialCombinatorSelector> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for ScssPercentValue {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(SCSS_PERCENT_VALUE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == SCSS_PERCENT_VALUE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for ScssPercentValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        thread_local! { static DEPTH : std :: cell :: Cell < u8 > = const { std :: cell :: Cell :: new (0) } };
+        let current_depth = DEPTH.get();
+        let result = if current_depth < 16 {
+            DEPTH.set(current_depth + 1);
+            f.debug_struct("ScssPercentValue")
+                .field(
+                    "percent_token",
+                    &support::DebugSyntaxResult(self.percent_token()),
+                )
+                .finish()
+        } else {
+            f.debug_struct("ScssPercentValue").finish()
+        };
+        DEPTH.set(current_depth);
+        result
+    }
+}
+impl From<ScssPercentValue> for SyntaxNode {
+    fn from(n: ScssPercentValue) -> Self {
+        n.syntax
+    }
+}
+impl From<ScssPercentValue> for SyntaxElement {
+    fn from(n: ScssPercentValue) -> Self {
+        n.syntax.into()
+    }
+}
 impl AstNode for ScssPlaceholderSelector {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -47186,6 +47278,11 @@ impl From<ScssParentSelectorValue> for AnyCssValue {
         Self::ScssParentSelectorValue(node)
     }
 }
+impl From<ScssPercentValue> for AnyCssValue {
+    fn from(node: ScssPercentValue) -> Self {
+        Self::ScssPercentValue(node)
+    }
+}
 impl From<ScssVariable> for AnyCssValue {
     fn from(node: ScssVariable) -> Self {
         Self::ScssVariable(node)
@@ -47216,6 +47313,7 @@ impl AstNode for AnyCssValue {
         .union(ScssInterpolatedValue::KIND_SET)
         .union(ScssModuleMemberAccess::KIND_SET)
         .union(ScssParentSelectorValue::KIND_SET)
+        .union(ScssPercentValue::KIND_SET)
         .union(ScssVariable::KIND_SET)
         .union(TwValueThemeReference::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
@@ -47235,6 +47333,7 @@ impl AstNode for AnyCssValue {
             | SCSS_INTERPOLATED_VALUE
             | SCSS_MODULE_MEMBER_ACCESS
             | SCSS_PARENT_SELECTOR_VALUE
+            | SCSS_PERCENT_VALUE
             | SCSS_VARIABLE
             | TW_VALUE_THEME_REFERENCE => true,
             k if AnyCssDashedIdentifier::can_cast(k) => true,
@@ -47270,6 +47369,7 @@ impl AstNode for AnyCssValue {
             SCSS_PARENT_SELECTOR_VALUE => {
                 Self::ScssParentSelectorValue(ScssParentSelectorValue { syntax })
             }
+            SCSS_PERCENT_VALUE => Self::ScssPercentValue(ScssPercentValue { syntax }),
             SCSS_VARIABLE => Self::ScssVariable(ScssVariable { syntax }),
             TW_VALUE_THEME_REFERENCE => {
                 Self::TwValueThemeReference(TwValueThemeReference { syntax })
@@ -47312,6 +47412,7 @@ impl AstNode for AnyCssValue {
             Self::ScssInterpolatedValue(it) => it.syntax(),
             Self::ScssModuleMemberAccess(it) => it.syntax(),
             Self::ScssParentSelectorValue(it) => it.syntax(),
+            Self::ScssPercentValue(it) => it.syntax(),
             Self::ScssVariable(it) => it.syntax(),
             Self::TwValueThemeReference(it) => it.syntax(),
             Self::AnyCssDashedIdentifier(it) => it.syntax(),
@@ -47336,6 +47437,7 @@ impl AstNode for AnyCssValue {
             Self::ScssInterpolatedValue(it) => it.into_syntax(),
             Self::ScssModuleMemberAccess(it) => it.into_syntax(),
             Self::ScssParentSelectorValue(it) => it.into_syntax(),
+            Self::ScssPercentValue(it) => it.into_syntax(),
             Self::ScssVariable(it) => it.into_syntax(),
             Self::TwValueThemeReference(it) => it.into_syntax(),
             Self::AnyCssDashedIdentifier(it) => it.into_syntax(),
@@ -47365,6 +47467,7 @@ impl std::fmt::Debug for AnyCssValue {
             Self::ScssInterpolatedValue(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssModuleMemberAccess(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssParentSelectorValue(it) => std::fmt::Debug::fmt(it, f),
+            Self::ScssPercentValue(it) => std::fmt::Debug::fmt(it, f),
             Self::ScssVariable(it) => std::fmt::Debug::fmt(it, f),
             Self::TwValueThemeReference(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -47391,6 +47494,7 @@ impl From<AnyCssValue> for SyntaxNode {
             AnyCssValue::ScssInterpolatedValue(it) => it.into_syntax(),
             AnyCssValue::ScssModuleMemberAccess(it) => it.into_syntax(),
             AnyCssValue::ScssParentSelectorValue(it) => it.into_syntax(),
+            AnyCssValue::ScssPercentValue(it) => it.into_syntax(),
             AnyCssValue::ScssVariable(it) => it.into_syntax(),
             AnyCssValue::TwValueThemeReference(it) => it.into_syntax(),
         }
@@ -52079,6 +52183,11 @@ impl std::fmt::Display for ScssParenthesizedExpression {
     }
 }
 impl std::fmt::Display for ScssPartialCombinatorSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for ScssPercentValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

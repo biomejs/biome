@@ -9806,6 +9806,44 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssPartialCombinatorSel
         FormatOwnedWithRule :: new (self , crate :: scss :: selectors :: partial_combinator_selector :: FormatScssPartialCombinatorSelector :: default ())
     }
 }
+impl FormatRule<biome_css_syntax::ScssPercentValue>
+    for crate::scss::value::percent_value::FormatScssPercentValue
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::ScssPercentValue,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::ScssPercentValue>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::ScssPercentValue {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::ScssPercentValue,
+        crate::scss::value::percent_value::FormatScssPercentValue,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        FormatRefWithRule::new(
+            self,
+            crate::scss::value::percent_value::FormatScssPercentValue::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::ScssPercentValue {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::ScssPercentValue,
+        crate::scss::value::percent_value::FormatScssPercentValue,
+    >;
+    fn into_format(self) -> Self::Format {
+        FormatOwnedWithRule::new(
+            self,
+            crate::scss::value::percent_value::FormatScssPercentValue::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::ScssPlaceholderSelector>
     for crate::scss::selectors::placeholder_selector::FormatScssPlaceholderSelector
 {

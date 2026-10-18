@@ -1,0 +1,45 @@
+@use "sass:meta";
+
+$unit : % ;
+$default-list:10 % !default;
+$global-list:null;
+$global-list:10 % !global;
+$three:3;
+@mixin width-in( $amount , $unit : /* default */ % ) { width : #{$amount}#{$unit} ; }
+@function percent( ) { @return % ; }
+.progress { @include width-in( 75 ); }
+.sidebar { @include width-in( 320 , px ); }
+.progress-explicit { @include width-in(
+50 ,
+/* explicit unit */ %
+); }
+
+.identity {
+  type:meta.type-of($unit);
+  modifiers:meta.inspect(($default-list,$global-list));
+  containers:meta.inspect((unit: %,choices:[%,px],grouped:(10 %)));
+  leading:meta.inspect(% /* unit */ foo);
+  comparison:meta.inspect(10 % == 3);
+  modulo:10 /* left */
+% /* right */
+3;
+  modulo-adjacent:10 %3;
+  percentage-adjacent:meta.inspect(10%3);
+  percent-list:meta.inspect(% %);
+  negative-modulo:10 % -3;
+  variable-modulo:10 % $three;
+  trailing:meta.inspect(10 /* number */
+% /* unit */);
+}
+
+%placeholder { width : 75% ; }
+.controls {
+@extend %placeholder;
+width:attr(data-progress %, %);
+unit: % !important;
+generic:unknown(%,10 %);
+returned:percent();
+interpolation:#{%};
+--unit: %;
+--raw: 10 % +;
+}
