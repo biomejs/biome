@@ -3,7 +3,7 @@ pub(crate) mod grit;
 
 use crate::WorkspaceError;
 use crate::settings::SettingsWithEditor;
-use crate::workspace::PatternId;
+use crate::workspace::{PatternId, SearchCapture};
 use biome_fs::BiomePath;
 use biome_languages::DocumentFileSource;
 use biome_parser::AnyParse;
@@ -34,6 +34,13 @@ impl FromStr for SearchLanguage {
     }
 }
 
+/// A match of a search pattern and the variables it captured.
+#[derive(Debug)]
+pub struct SearchMatch {
+    pub range: TextRange,
+    pub captures: Vec<SearchCapture>,
+}
+
 pub trait SearchQuery: Send + Sync {
     fn parse_pattern(
         &self,
@@ -48,7 +55,7 @@ pub trait SearchQuery: Send + Sync {
         _parse: AnyParse,
         _settings: &SettingsWithEditor,
         _: PatternId,
-    ) -> Result<Vec<TextRange>, WorkspaceError>;
+    ) -> Result<Vec<SearchMatch>, WorkspaceError>;
 
     fn generate_pattern_id(&self) -> PatternId {
         static COUNTER: AtomicUsize = AtomicUsize::new(1);
@@ -73,7 +80,7 @@ impl SearchQuery for NoopQueryProvider {
         _: AnyParse,
         _: &SettingsWithEditor,
         _: PatternId,
-    ) -> Result<Vec<TextRange>, WorkspaceError> {
+    ) -> Result<Vec<SearchMatch>, WorkspaceError> {
         Err(WorkspaceError::feature_not_enabled())
     }
 }

@@ -1,7 +1,7 @@
 use crate::WorkspaceError;
 use crate::diagnostics::{QueryDiagnostic, SearchError};
 use crate::settings::SettingsWithEditor;
-use crate::workspace::{PatternId, SearchLanguage, SearchQuery};
+use crate::workspace::{PatternId, SearchCapture, SearchLanguage, SearchMatch, SearchQuery};
 use biome_fs::BiomePath;
 use biome_grit_patterns::{
     CompilePatternOptions, CssTargetLanguage, GritQuery, GritQueryEffect, GritTargetFile,
@@ -48,7 +48,7 @@ impl SearchQuery for GritSearchQuery {
         parse: AnyParse,
         _settings: &SettingsWithEditor,
         pattern_id: PatternId,
-    ) -> Result<Vec<TextRange>, WorkspaceError> {
+    ) -> Result<Vec<SearchMatch>, WorkspaceError> {
         let patterns = self.patterns.pin();
         let query = patterns
             .get(&pattern_id)
@@ -61,16 +61,29 @@ impl SearchQuery for GritSearchQuery {
                 )))
             })?;
 
-        let matches = result
-            .effects
-            .into_iter()
-            .flat_map(|result| match result {
-                GritQueryEffect::Match(m) => m.ranges,
-                _ => Vec::new(),
-            })
-            .map(|range| TextRange::new(range.start_byte.into(), range.end_byte.into()))
-            .collect();
+        let mut matches = Vec::new();
+        for effect in &result.effects {
+            let GritQueryEffect::Match(found) = effect else {
+                continue;
+            };
+            for (range, captures) in found.ranges.iter().zip(found.captures()) {
+                matches.push(SearchMatch {
+                    range: to_text_range(range.start_byte, range.end_byte),
+                    captures: captures
+                        .into_iter()
+                        .map(|capture| SearchCapture {
+                            name: capture.name.to_string(),
+                            range: to_text_range(capture.range.start_byte, capture.range.end_byte),
+                        })
+                        .collect(),
+                });
+            }
+        }
 
         Ok(matches)
     }
+}
+
+fn to_text_range(start_byte: u32, end_byte: u32) -> TextRange {
+    TextRange::new(start_byte.into(), end_byte.into())
 }

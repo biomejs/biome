@@ -1,8 +1,9 @@
 use super::{
     ChangeFileParams, CloseFileParams, CloseProjectParams, FileContent, FileFeaturesResult,
     FileGuard, GetFileContentParams, GetModuleGraphParams, GetSyntaxTreeParams, OpenFileParams,
-    OpenProjectParams, OpenProjectResult, PullDiagnosticsParams, ScanKind, ScanProjectParams,
-    UpdateKind, UpdateModuleGraphParams, UpdateSettingsParams, server,
+    OpenProjectParams, OpenProjectResult, ParsePatternParams, PullDiagnosticsParams, ScanKind,
+    ScanProjectParams, SearchLanguage, SearchPatternParams, UpdateKind, UpdateModuleGraphParams,
+    UpdateSettingsParams, server,
 };
 use crate::projects::ProjectKey;
 use crate::settings::ModuleGraphResolutionKind;
@@ -1541,4 +1542,63 @@ export const squash = function squash() {};
     let result = workspace.get_module_graph(GetModuleGraphParams {}).unwrap();
 
     assert_debug_snapshot!(result)
+}
+
+#[test]
+fn search_pattern_reports_captures_of_each_match() {
+    const SOURCE: &str = "f(1, 2);\nconst a = f(3, b.c);\n";
+
+    let (workspace, project_key) = create_server();
+    let path = BiomePath::new("file.js");
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: path.clone(),
+            content: FileContent::from_client(SOURCE),
+            document_file_source: Some(DocumentFileSource::from(JsFileSource::default())),
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let pattern = workspace
+        .parse_pattern(ParsePatternParams {
+            pattern: "`f($first, $second)`".to_string(),
+            default_language: SearchLanguage::Js,
+        })
+        .unwrap()
+        .pattern_id;
+    let results = workspace
+        .search_pattern(SearchPatternParams {
+            project_key,
+            path,
+            pattern,
+        })
+        .unwrap();
+
+    let matched: Vec<_> = results
+        .matches
+        .iter()
+        .map(|range| &SOURCE[*range])
+        .collect();
+    let captured: Vec<Vec<_>> = results
+        .captures
+        .iter()
+        .map(|captures| {
+            captures
+                .iter()
+                .map(|capture| (capture.name.as_str(), &SOURCE[capture.range]))
+                .collect()
+        })
+        .collect();
+
+    assert_eq!(matched, ["f(1, 2)", "f(3, b.c)"]);
+    assert_eq!(
+        captured,
+        [
+            [("$first", "1"), ("$second", "2")],
+            [("$first", "3"), ("$second", "b.c")],
+        ]
+    );
 }

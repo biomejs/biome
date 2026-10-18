@@ -96,7 +96,7 @@ use crate::settings::{EditorFeatures, ModuleGraphResolutionKind, SettingsWithEdi
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 #[cfg(feature = "lang_grit")]
 pub use search::grit::GritSearchQuery;
-pub use search::{NoopQueryProvider, SearchLanguage, SearchQuery};
+pub use search::{NoopQueryProvider, SearchLanguage, SearchMatch, SearchQuery};
 pub use server::OpenFileReason;
 
 /// Notification regarding a workspace's service data.
@@ -1468,7 +1468,24 @@ pub struct SearchPatternParams {
 #[serde(rename_all = "camelCase")]
 pub struct SearchResults {
     pub path: BiomePath,
+    /// The code matched by the pattern, as ranges of UTF-8 byte offsets.
     pub matches: Vec<TextRange>,
+    /// The variables that each match captured: `captures[i]` belongs to
+    /// `matches[i]`. A match without variables, or whose variables are all
+    /// anonymous (`$_`), has an empty list.
+    pub captures: Vec<Vec<SearchCapture>>,
+}
+
+/// A variable of the pattern, such as `$name` in `` `console.log($name)` ``,
+/// and the code it captured in one match.
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct SearchCapture {
+    /// The variable name, including the leading `$`.
+    pub name: String,
+    /// The captured code, as a range of UTF-8 byte offsets.
+    pub range: TextRange,
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]

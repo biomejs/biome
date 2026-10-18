@@ -21,7 +21,8 @@ use biome_diagnostics::Applicability;
 use biome_grit_syntax::{GritRoot, GritRootExt};
 use camino::Utf8Path;
 use grit_pattern_matcher::constants::{
-    ABSOLUTE_PATH_INDEX, FILENAME_INDEX, GLOBAL_VARS_SCOPE_INDEX, NEW_FILES_INDEX, PROGRAM_INDEX,
+    ABSOLUTE_PATH_INDEX, FILENAME_INDEX, GLOBAL_VARS_SCOPE_INDEX, MATCH_VAR, NEW_FILES_INDEX,
+    PROGRAM_INDEX,
 };
 use grit_pattern_matcher::context::ExecContext;
 use grit_pattern_matcher::file_owners::{FileOwner, FileOwners};
@@ -31,6 +32,7 @@ use grit_pattern_matcher::pattern::{
 };
 use grit_util::error::{GritPatternError, GritResult};
 use grit_util::{AnalysisLogs, Ast, ByteRange, InputRanges, Range, VariableMatch};
+use std::cmp::Reverse;
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
@@ -461,6 +463,86 @@ impl Match {
             messages: vec![],
         }
     }
+
+    /// Returns the variables bound by each match: entry `i` holds the
+    /// captures found inside `self.ranges[i]`, in the order the pattern
+    /// declares the variables.
+    ///
+    /// The query reports every value a variable took in the file without
+    /// recording which match produced it. Each value is therefore assigned to
+    /// the innermost match whose range strictly contains it, or else to a match
+    /// with the same range. For `` `f($x)` `` on `f(f(1))`, the outer match
+    /// captures `f(1)` and the inner match captures `1`.
+    ///
+    /// A variable that occurs several times in one match, as in
+    /// `` `$x + $x` ``, is reported once, at its first occurrence. `$match` and
+    /// variables without a source range, such as `$filename`, are omitted.
+    pub fn captures(&self) -> Vec<Vec<MatchCapture<'_>>> {
+        let mut captures: Vec<Vec<MatchCapture>> = vec![Vec::new(); self.ranges.len()];
+
+        // Scanning this order backwards from a capture's start visits nested
+        // matches before the matches that enclose them.
+        let mut order: Vec<_> = (0..self.ranges.len()).collect();
+        order.sort_by_key(|&index| {
+            let range = &self.ranges[index];
+            (range.start_byte, Reverse(range.end_byte))
+        });
+
+        for variable in &self.variables {
+            if variable.name == MATCH_VAR {
+                continue;
+            }
+            for range in &variable.ranges {
+                let Some(index) = enclosing_match(&self.ranges, &order, range) else {
+                    continue;
+                };
+                let match_captures = &mut captures[index];
+                if match_captures
+                    .iter()
+                    .all(|capture| capture.name != variable.name)
+                {
+                    match_captures.push(MatchCapture {
+                        name: &variable.name,
+                        range: *range,
+                    });
+                }
+            }
+        }
+
+        captures
+    }
+}
+
+/// A variable bound inside one match, such as `$name` in
+/// `` `console.log($name)` ``.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct MatchCapture<'a> {
+    /// The variable name, including the leading `$`.
+    pub name: &'a str,
+    /// The source code bound to the variable.
+    pub range: Range,
+}
+
+/// Returns the index of the innermost range in `ranges` that strictly contains
+/// `range`, or of a range equal to `range` when none does.
+///
+/// `order` lists the indices of `ranges` sorted by ascending start and
+/// descending end.
+fn enclosing_match(ranges: &[Range], order: &[usize], range: &Range) -> Option<usize> {
+    let candidates = order.partition_point(|&index| ranges[index].start_byte <= range.start_byte);
+    let mut equal = None;
+    for &index in order[..candidates].iter().rev() {
+        let candidate = &ranges[index];
+        if candidate.end_byte < range.end_byte {
+            continue;
+        }
+        if candidate.start_byte == range.start_byte && candidate.end_byte == range.end_byte {
+            equal = equal.or(Some(index));
+        } else {
+            return Some(index);
+        }
+    }
+    equal
 }
 
 #[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
@@ -891,6 +973,88 @@ mod tests {
         assert_eq!(
             opt_result.effects, full_result.effects,
             "no-match: optimized and full should produce identical effects"
+        );
+    }
+
+    // -- Match::captures tests --
+
+    /// Returns `(name, captured code)` pairs for each match of `pattern` in `code`.
+    fn captured_code(pattern: &str, code: &str) -> Vec<Vec<(String, String)>> {
+        let result = compile_js_query(pattern)
+            .execute(make_js_file(code))
+            .expect("execute failed");
+        let [GritQueryEffect::Match(found)] = result.effects.as_slice() else {
+            panic!("expected one match effect, got {:?}", result.effects);
+        };
+
+        found
+            .captures()
+            .into_iter()
+            .map(|captures| {
+                captures
+                    .into_iter()
+                    .map(|capture| {
+                        let range =
+                            capture.range.start_byte as usize..capture.range.end_byte as usize;
+                        (capture.name.to_string(), code[range].to_string())
+                    })
+                    .collect()
+            })
+            .collect()
+    }
+
+    fn pairs(captures: &[&[(&str, &str)]]) -> Vec<Vec<(String, String)>> {
+        captures
+            .iter()
+            .map(|captures| {
+                captures
+                    .iter()
+                    .map(|(name, code)| (name.to_string(), code.to_string()))
+                    .collect()
+            })
+            .collect()
+    }
+
+    #[test]
+    fn captures_are_grouped_by_match_in_declaration_order() {
+        assert_eq!(
+            captured_code("`f($first, $second)`", "f(1, 2);\nf(3, 4);\n"),
+            pairs(&[
+                &[("$first", "1"), ("$second", "2")],
+                &[("$first", "3"), ("$second", "4")],
+            ])
+        );
+    }
+
+    #[test]
+    fn captures_of_nested_matches_belong_to_the_innermost_match() {
+        assert_eq!(
+            captured_code("`f($x)`", "f(f(1));\n"),
+            pairs(&[&[("$x", "f(1)")], &[("$x", "1")]])
+        );
+    }
+
+    #[test]
+    fn captures_report_a_repeated_variable_once() {
+        assert_eq!(
+            captured_code("`$x + $x`", "a + a;\n"),
+            pairs(&[&[("$x", "a")]])
+        );
+    }
+
+    #[test]
+    fn captures_omit_anonymous_and_built_in_variables() {
+        assert_eq!(
+            captured_code("`f($_, $second)`", "f(a, b);\n"),
+            pairs(&[&[("$second", "b")]])
+        );
+    }
+
+    #[test]
+    fn captures_of_a_list_span_all_its_elements() {
+        assert_eq!(
+            captured_code("`f($arguments)`", "f(a, b);\n"),
+            pairs(&[&[("$arguments", "a, b")]])
         );
     }
 }

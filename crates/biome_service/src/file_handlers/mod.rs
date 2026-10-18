@@ -48,7 +48,7 @@ use crate::utils::growth_guard::GrowthGuard;
 use crate::workspace::{
     CodeAction, DefinitionReference, FixAction, FixFileMode, GetSyntaxTreeResult,
     GoToDefinitionResult, PatternId, PullActionsResult, PullDiagnosticsAndActionsResult,
-    RenameResult, SearchQuery,
+    RenameResult, SearchMatch, SearchQuery,
 };
 use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
@@ -1261,7 +1261,7 @@ type Search = fn(
     &SettingsWithEditor,
     PatternId,
     WorkspaceDb,
-) -> Result<Vec<TextRange>, WorkspaceError>;
+) -> Result<Vec<SearchMatch>, WorkspaceError>;
 
 #[derive(Default)]
 pub(crate) struct SearchCapabilities {

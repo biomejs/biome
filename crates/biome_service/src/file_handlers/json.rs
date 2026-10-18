@@ -16,7 +16,7 @@ use crate::settings::{
     check_override_feature_activity, finalize_analyzer_options,
 };
 use crate::workspace::{CodeAction, GetSyntaxTreeResult, PatternId, PullActionsResult};
-use crate::workspace::{FixFileMode, SearchQuery};
+use crate::workspace::{FixFileMode, SearchMatch, SearchQuery};
 use crate::{WorkspaceError, extension_error};
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
@@ -1004,7 +1004,7 @@ fn search(
     settings: &SettingsWithEditor,
     pattern_id: PatternId,
     workspace_db: WorkspaceDb,
-) -> Result<Vec<TextRange>, WorkspaceError> {
+) -> Result<Vec<SearchMatch>, WorkspaceError> {
     let any_parse = parsed.any_parse(&workspace_db);
     provider.search(path, document, any_parse.clone(), settings, pattern_id)
 }
