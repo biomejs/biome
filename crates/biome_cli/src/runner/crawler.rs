@@ -207,7 +207,7 @@ where
     }
 
     fn increment_matches(&self, num_matches: usize) {
-        self.push_message(Message::Stats(MessageStat::Matches));
+        self.push_message(Message::Stats(MessageStat::Matches(num_matches)));
         self.matches.fetch_add(num_matches, Ordering::Relaxed);
     }
 
