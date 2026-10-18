@@ -351,6 +351,19 @@ mod tests {
     }
 
     #[test]
+    fn declared_function_names_belong_to_the_enclosing_root() {
+        // A `declare` statement makes its root unsupported, unlike an exported
+        // declaration or a bodiless signature.
+        for source in [
+            "export declare function g(): void; if (!g) { /*read*/g; }",
+            "function g(): void; if (!g) { /*read*/g; }",
+        ] {
+            let read = marked(source, "read", "g");
+            assert!(module(source).flow.is_candidate(read), "{source}");
+        }
+    }
+
+    #[test]
     fn declaration_files_get_no_flow() {
         const SOURCE: &str =
             "function f(value: string | null) { if (value !== null) { /*read*/value; } }";
