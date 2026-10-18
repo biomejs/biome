@@ -386,11 +386,17 @@ async fn write_task<W>(
     W: AsyncWrite + Unpin,
 {
     while let Some((message, is_shutdown)) = write_recv.recv().await {
+        let result = write_message(&mut socket_write, message).await;
+
+        // The shutdown request returns once the read task stops, after which
+        // the client may drop the runtime and cancel this task. Stopping the
+        // read task only after the write ensures the server receives the
+        // request.
         if is_shutdown {
             broadcast_shutdown.notify_waiters();
         }
 
-        if let Err(err) = write_message(&mut socket_write, message).await {
+        if let Err(err) = result {
             eprintln!(
                 "{:?}",
                 err.context("remote connection write task exited with an error")
@@ -627,6 +633,48 @@ mod tests {
             "unexpected result {result:?}"
         );
         assert_eq!(received_methods(), ["initialize", "biome/shutdown"]);
+    }
+
+    #[test]
+    fn shutdown_returns_after_sending_its_request() {
+        let server_runtime = Runtime::new().unwrap();
+        // The buffer is smaller than the shutdown request, so writing it
+        // waits until the server reads it.
+        let (client, server) = duplex(64);
+        let server = server_runtime.spawn(async move {
+            let (read, mut write) = split(server);
+            let mut read = BufReader::new(read);
+            let initialize: Value = from_slice(&read_message(&mut read).await.unwrap()).unwrap();
+            let response = json!({ "jsonrpc": "2.0", "id": initialize["id"], "result": {} });
+            write_message(&mut write, to_vec(&response).unwrap())
+                .await
+                .unwrap();
+
+            sleep(Duration::from_millis(100)).await;
+            let request: Value = from_slice(&read_message(&mut read).await.ok()?).unwrap();
+            request["method"].as_str().map(str::to_string)
+        });
+
+        let (client_read, client_write) = split(client);
+        let transport = SocketTransport::open(Runtime::new().unwrap(), client_read, client_write);
+        let workspace =
+            WorkspaceClient::new(transport, Box::new(MemoryFileSystem::default())).unwrap();
+
+        let result = workspace.shutdown();
+
+        assert!(
+            matches!(
+                result,
+                Err(WorkspaceError::TransportError(
+                    TransportError::ChannelClosed
+                ))
+            ),
+            "unexpected result {result:?}"
+        );
+        assert_eq!(
+            server_runtime.block_on(server).unwrap().as_deref(),
+            Some("biome/shutdown")
+        );
     }
 
     #[test]
