@@ -163,7 +163,7 @@ impl Rule for UseSortedProperties {
             return None;
         }
 
-        if contains_shorthand_after_longhand(&original_properties) {
+        if runs(&original_properties).any(contains_shorthand_after_longhand) {
             // This would be unsafe to sort
             return Some(UseSortedPropertiesState {
                 block: node.clone(),
@@ -548,6 +548,17 @@ fn prop_text_to_unprefixed(tok_text: &TokenText) -> Cow<'_, str> {
             .map(|stripped| Cow::Owned(stripped.to_owned())),
     };
     unprefixed.unwrap_or(prop_lowercase)
+}
+
+/// The runs of consecutive declarations that sorting moves.
+///
+/// A nested rule, an at-rule or a statement keeps its position, so it also ends the run of
+/// declarations: the declarations above and below it are sorted separately, and a shorthand below
+/// the boundary cannot be overridden by a longhand above it.
+fn runs(items: &[AnyCssDeclarationOrRule]) -> impl Iterator<Item = &[AnyCssDeclarationOrRule]> {
+    items
+        .split(|item| !RecessOrderMember(item.clone()).is_sortable())
+        .filter(|run| !run.is_empty())
 }
 
 /// Check if any shortand property (e.g. margin) appears after any of its longhand sub properties (e.g. margin-top).

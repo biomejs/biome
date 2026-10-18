@@ -258,4 +258,14 @@ div {
   color: red;
 }
 
+/**
+ * A longhand in one run and its shorthand in another: the boundary between them is what keeps the
+ * cascade, so this is not the unsafe shorthand-after-longhand case.
+ */
+div {
+  margin-top: 1px;
+  & {}
+  margin: 2px;
+}
+
 ```
