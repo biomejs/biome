@@ -10,18 +10,15 @@ use crate::token_source::TailwindTokenSource;
 use biome_parser::token_source::TokenSource;
 use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::{self, *};
-
-/// Whether `byte` is whitespace.
-fn is_whitespace(byte: u8) -> bool {
-    matches!(byte, b'\t' | b'\n' | 0x0B | 0x0C | b'\r' | b' ')
-}
+use biome_unicode_table::Dispatch::{self, *};
+use biome_unicode_table::lookup_byte;
 
 /// Returns how many letters from the current one come before the first one whose first byte
 /// `stop` matches, or the end.
-fn letters_until(source: &TailwindTokenSource, n: usize, stop: impl Fn(u8) -> bool) -> usize {
+fn letters_until(source: &TailwindTokenSource, n: usize, stop: impl Fn(Dispatch) -> bool) -> usize {
     let mut count = 0;
-    while let Some(byte) = source.nth_byte(n + count) {
-        if stop(byte) {
+    while let Some(dispatch) = source.nth_dispatch(n + count) {
+        if stop(dispatch) {
             break;
         }
         count += 1;
@@ -32,9 +29,9 @@ fn letters_until(source: &TailwindTokenSource, n: usize, stop: impl Fn(u8) -> bo
 /// Whether the current letter starts a basename: an ASCII letter, digit or `_`, or an `@`
 /// unless the basename follows the `-` of a negative candidate.
 pub(crate) fn is_at_base(source: &TailwindTokenSource, negative: bool) -> bool {
-    match source.nth_byte(0) {
-        Some(b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_') => true,
-        Some(b'@') => !negative,
+    match source.nth_dispatch(0) {
+        Some(IDT | ZER | DIG) => true,
+        Some(AT_) => !negative,
         _ => false,
     }
 }
@@ -42,10 +39,10 @@ pub(crate) fn is_at_base(source: &TailwindTokenSource, negative: bool) -> bool {
 /// Returns the length in letters of the basename at the current letter: up to the next `-`,
 /// whitespace, `!`, `:` or `/`, continued over each `-` that a dashed basename continues over.
 pub(crate) fn base(source: &TailwindTokenSource) -> usize {
-    let count = letters_until(source, 1, |byte| {
-        is_whitespace(byte) || matches!(byte, b'-' | b'!' | b':' | b'/')
+    let count = letters_until(source, 1, |dispatch| {
+        matches!(dispatch, WHS | MIN | EXL | COL | SLH)
     }) + 1;
-    if source.nth_byte(count) != Some(b'-') {
+    if source.nth_dispatch(count) != Some(MIN) {
         return count;
     }
     let end = source.dashed_base_end(source.nth_start(0), source.nth_start(count));
@@ -64,18 +61,11 @@ pub(crate) enum ValueEnd {
 /// Returns the kind and length in letters of the value at the current letter, which may be
 /// none: a `TW_NUMBER` if it holds only digits and `.`, and a `TW_VALUE` otherwise.
 pub(crate) fn value(source: &TailwindTokenSource, end: ValueEnd) -> (TailwindSyntaxKind, usize) {
-    let count = letters_until(source, 0, |byte| {
-        is_whitespace(byte)
-            || match end {
-                ValueEnd::Candidate => matches!(byte, b':' | b'/' | b'!' | b']' | b')' | b'%'),
-                ValueEnd::Modifier => matches!(byte, b'!' | b'%' | b':'),
-            }
+    let count = letters_until(source, 0, |dispatch| match end {
+        ValueEnd::Candidate => matches!(dispatch, WHS | COL | SLH | EXL | BTC | PNC | PRC),
+        ValueEnd::Modifier => matches!(dispatch, WHS | EXL | PRC | COL),
     });
-    let numeric = (0..count).all(|n| {
-        source
-            .nth_byte(n)
-            .is_some_and(|byte| byte.is_ascii_digit() || byte == b'.')
-    });
+    let numeric = (0..count).all(|n| matches!(source.nth_dispatch(n), Some(ZER | DIG | PRD)));
     (if numeric { TW_NUMBER } else { TW_VALUE }, count)
 }
 
@@ -83,8 +73,8 @@ pub(crate) fn value(source: &TailwindTokenSource, end: ValueEnd) -> (TailwindSyn
 /// its own.
 pub(crate) fn is_at_selector(source: &TailwindTokenSource) -> bool {
     source
-        .nth_byte(0)
-        .is_some_and(|byte| !is_whitespace(byte) && !matches!(byte, b'(' | b')' | b']'))
+        .nth_dispatch(0)
+        .is_some_and(|dispatch| !matches!(dispatch, WHS | PNO | PNC | BTC))
 }
 
 /// Returns the length in letters of the selector at the current letter: up to the next
@@ -92,12 +82,11 @@ pub(crate) fn is_at_selector(source: &TailwindTokenSource) -> bool {
 pub(crate) fn selector(source: &TailwindTokenSource) -> usize {
     let mut depth = 0u32;
     let mut count = 0;
-    while let Some(byte) = source.nth_byte(count) {
-        match byte {
-            b'[' => depth += 1,
-            b']' if depth > 0 => depth -= 1,
-            b']' => break,
-            _ if is_whitespace(byte) => break,
+    while let Some(dispatch) = source.nth_dispatch(count) {
+        match dispatch {
+            BTO => depth += 1,
+            BTC if depth > 0 => depth -= 1,
+            BTC | WHS => break,
             _ => {}
         }
         count += 1;
@@ -107,37 +96,34 @@ pub(crate) fn selector(source: &TailwindTokenSource) -> usize {
 
 /// Whether the current letter starts the property of an arbitrary candidate.
 pub(crate) fn is_at_property(source: &TailwindTokenSource) -> bool {
-    source.nth_byte(0).is_some_and(|byte| {
-        !is_whitespace(byte) && !matches!(byte, b'(' | b')' | b'[' | b']' | b':')
-    })
+    source
+        .nth_dispatch(0)
+        .is_some_and(|dispatch| !matches!(dispatch, WHS | PNO | PNC | BTO | BTC | COL))
 }
 
 /// Returns the length in letters of the property at the current letter: up to the next `:` or
 /// whitespace.
 pub(crate) fn property(source: &TailwindTokenSource) -> usize {
-    letters_until(source, 0, |byte| is_whitespace(byte) || byte == b':')
+    letters_until(source, 0, |dispatch| matches!(dispatch, WHS | COL))
 }
 
 /// Whether the current letter starts a variant segment name.
 pub(crate) fn is_at_segment(source: &TailwindTokenSource) -> bool {
-    matches!(
-        source.nth_byte(0),
-        Some(b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' | b'@' | b'*')
-    )
+    matches!(source.nth_dispatch(0), Some(IDT | ZER | DIG | AT_ | MUL))
 }
 
 /// Returns the length in letters of the variant segment name at the current letter: up to the
 /// next whitespace, `:`, `-`, `/`, `!`, `[`, `]` or `)`.
 pub(crate) fn segment(source: &TailwindTokenSource) -> usize {
-    letters_until(source, 1, |byte| {
-        is_whitespace(byte) || matches!(byte, b':' | b'-' | b'/' | b'!' | b'[' | b']' | b')')
+    letters_until(source, 1, |dispatch| {
+        matches!(dispatch, WHS | COL | MIN | SLH | EXL | BTO | BTC | PNC)
     }) + 1
 }
 
 /// Returns the length in letters of the raw URL at the current letter: up to the next `)` or
 /// whitespace.
 pub(crate) fn url_raw_value(source: &TailwindTokenSource) -> usize {
-    letters_until(source, 0, |byte| is_whitespace(byte) || byte == b')')
+    letters_until(source, 0, |dispatch| matches!(dispatch, WHS | PNC))
 }
 
 /// Returns the kind and length in letters of the token of a CSS value that starts `n` letters
@@ -147,8 +133,8 @@ pub(crate) fn css_token(source: &TailwindTokenSource, n: usize) -> (TailwindSynt
         return (EOF, 0);
     };
     let second = source.nth_byte(n + 1);
-    match byte {
-        _ if is_whitespace(byte) => (WHITESPACE, 1),
+    match lookup_byte(byte) {
+        WHS => (WHITESPACE, 1),
         // In math functions, Tailwind adds whitespace around a `-` that directly follows a value
         // (`calc(100svh-var(--header))` becomes `calc(100svh - var(--header))`), so it is a
         // binary operator rather than the start of a negative number or an identifier. This
@@ -157,25 +143,29 @@ pub(crate) fn css_token(source: &TailwindTokenSource, n: usize) -> (TailwindSynt
         // This deviates from the CSS Syntax spec and `biome_css_parser`, which require
         // whitespace around `-` in math functions and lex `100svh-var` as one dimension with the
         // unit `svh-var`.
-        b'-' if source
+        MIN if source
             .nth_start(n)
             .checked_sub(1)
             .map(|last| source.text().as_bytes()[last])
-            .is_some_and(|last| last.is_ascii_alphanumeric() || matches!(last, b'%' | b')')) =>
+            .is_some_and(|last| {
+                last.is_ascii_alphanumeric() || matches!(lookup_byte(last), PRC | PNC)
+            }) =>
         {
             (T![-], 1)
         }
-        b'-' if second.is_some_and(|second| second.is_ascii_alphabetic() || second == b'-') => {
+        MIN if second.is_some_and(|second| second.is_ascii_alphabetic() || second == b'-') => {
             css_identifier(source, n)
         }
-        b'-' if second.is_some_and(|second| second.is_ascii_digit() || second == b'.') => {
+        MIN if second.is_some_and(|second| matches!(lookup_byte(second), ZER | DIG | PRD)) => {
             css_number(source, n)
         }
-        b'0'..=b'9' => css_number(source, n),
-        b'.' if second.is_some_and(|second| second.is_ascii_digit()) => css_number(source, n),
-        b'a'..=b'z' | b'A'..=b'Z' => css_identifier(source, n),
-        b'"' | b'\'' => (CSS_STRING_LITERAL, css_string(source, n)),
-        b'#' => (CSS_COLOR_LITERAL, css_color(source, n)),
+        ZER | DIG => css_number(source, n),
+        PRD if second.is_some_and(|second| matches!(lookup_byte(second), ZER | DIG)) => {
+            css_number(source, n)
+        }
+        IDT if byte != b'_' => css_identifier(source, n),
+        QOT => (CSS_STRING_LITERAL, css_string(source, n)),
+        HAS => (CSS_COLOR_LITERAL, css_color(source, n)),
         _ => match source.nth_kind(n) {
             kind @ (T!['(']
             | T![')']
@@ -206,9 +196,12 @@ fn css_identifier(source: &TailwindTokenSource, n: usize) -> (TailwindSyntaxKind
     let is_custom_property = bytes[start..].starts_with(b"--");
     let mut count = 0;
     while let Some(byte) = source.nth_byte(n + count) {
-        let continues = byte.is_ascii_alphanumeric()
-            || byte == b'-'
-            || (is_custom_property && (byte == b'_' || !byte.is_ascii()));
+        let continues = match lookup_byte(byte) {
+            ZER | DIG | MIN => true,
+            IDT => byte != b'_' || is_custom_property,
+            UNI => is_custom_property,
+            _ => false,
+        };
         if !continues {
             break;
         }
@@ -222,24 +215,20 @@ fn css_identifier(source: &TailwindTokenSource, n: usize) -> (TailwindSyntaxKind
 /// current one: an optional sign, digits, a fraction and an exponent. Its kind is a percentage if
 /// `%` follows, a dimension if a letter follows, and a number otherwise.
 fn css_number(source: &TailwindTokenSource, n: usize) -> (TailwindSyntaxKind, usize) {
-    let is_digits = |at: usize| {
-        source
-            .nth_byte(at)
-            .is_some_and(|byte| byte.is_ascii_digit())
-    };
+    let is_digits = |at: usize| matches!(source.nth_dispatch(at), Some(ZER | DIG));
     let mut at = n;
-    if matches!(source.nth_byte(at), Some(b'+' | b'-')) {
+    if matches!(source.nth_dispatch(at), Some(PLS | MIN)) {
         at += 1;
     }
     if is_digits(at) {
         at += 1;
     }
-    if source.nth_byte(at) == Some(b'.') && is_digits(at + 1) {
+    if source.nth_dispatch(at) == Some(PRD) && is_digits(at + 1) {
         at += 2;
     }
     if matches!(source.nth_text(at), "e" | "E") {
         let mut exponent = at + 1;
-        if matches!(source.nth_byte(exponent), Some(b'+' | b'-')) {
+        if matches!(source.nth_dispatch(exponent), Some(PLS | MIN)) {
             exponent += 1;
         }
         if is_digits(exponent) {
@@ -260,17 +249,18 @@ fn css_string(source: &TailwindTokenSource, n: usize) -> usize {
     let quote = source.nth_byte(n);
     let mut at = n + 1;
     while let Some(byte) = source.nth_byte(at) {
-        if is_whitespace(byte) {
+        let dispatch = lookup_byte(byte);
+        if dispatch == WHS {
             break;
         }
         at += 1;
         if Some(byte) == quote {
             break;
         }
-        if byte == b'\\'
+        if dispatch == BSL
             && source
-                .nth_byte(at)
-                .is_some_and(|escaped| !is_whitespace(escaped))
+                .nth_dispatch(at)
+                .is_some_and(|escaped| escaped != WHS)
         {
             at += 1;
         }
