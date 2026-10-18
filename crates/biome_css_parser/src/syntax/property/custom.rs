@@ -8,14 +8,17 @@ use crate::syntax::scss::{
 use crate::syntax::value::dimension::{is_at_any_dimension, parse_any_dimension};
 use crate::syntax::value::function::is_nth_at_adjacent_l_paren;
 use crate::syntax::value::url::parse_custom_property_url_function;
-use crate::syntax::{is_at_identifier, parse_custom_identifier_with_keywords, parse_number};
+use crate::syntax::{
+    CssSyntaxFeatures, is_at_identifier, is_at_metavariable, parse_custom_identifier_with_keywords,
+    parse_metavariable_with_context, parse_number,
+};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{RecoveryError, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{CompletedMarker, Parser, TokenSet, token_set};
+use biome_parser::{CompletedMarker, Parser, SyntaxFeature, TokenSet, token_set};
 
 const CUSTOM_PROPERTY_DELIMITER_SET: TokenSet<CssSyntaxKind> = token_set![
     CSS_DELIM_LITERAL,
@@ -84,6 +87,28 @@ pub(crate) fn parse_legacy_filter_value(
     value.complete(p, CSS_LEGACY_FILTER_VALUE)
 }
 
+/// Parses a native default, evaluating only explicit Sass interpolation.
+/// Leaves parameter separators outside the default.
+///
+/// ```scss
+/// @function --inset(--padding: $gap 16px, --other: #{$gap}) {}
+/// ```
+pub(crate) fn parse_function_parameter_default_components(
+    p: &mut CssParser,
+    is_recovering_at_body: bool,
+) -> CompletedMarker {
+    CustomPropertyComponentList {
+        boundary: CustomPropertyListBoundary::ParameterDefault,
+        comment_mode: CssCustomPropertyCommentMode::ScssLineComments,
+        nested_end_set: is_recovering_at_body.then_some(token_set![T!['{']]),
+        legacy_filter_recovery: false,
+        mode: CustomPropertyValueMode::FunctionDefault {
+            is_scss_interpolation_allowed: CssSyntaxFeatures::Scss.is_supported(p),
+        },
+    }
+    .parse_list(p)
+}
+
 /// Parses an SCSS custom-property value in an `@supports` declaration.
 ///
 /// Example: `$gap` in `@supports (--space: $gap) {}`.
@@ -116,11 +141,30 @@ struct CustomPropertyComponentList {
     comment_mode: CssCustomPropertyCommentMode,
     nested_end_set: Option<TokenSet<CssSyntaxKind>>,
     legacy_filter_recovery: bool,
+    mode: CustomPropertyValueMode,
+}
+
+#[derive(Clone, Copy)]
+enum CustomPropertyValueMode {
+    General,
+    FunctionDefault { is_scss_interpolation_allowed: bool },
+}
+
+impl CustomPropertyValueMode {
+    fn allows_scss_interpolation(self) -> bool {
+        match self {
+            Self::General => true,
+            Self::FunctionDefault {
+                is_scss_interpolation_allowed,
+            } => is_scss_interpolation_allowed,
+        }
+    }
 }
 
 /// Controls which tokens terminate a raw custom-property component list.
 enum CustomPropertyListBoundary {
     Value(TokenSet<CssSyntaxKind>),
+    ParameterDefault,
     Block,
 }
 
@@ -131,6 +175,7 @@ impl CustomPropertyComponentList {
             comment_mode,
             nested_end_set: None,
             legacy_filter_recovery: false,
+            mode: CustomPropertyValueMode::General,
         }
     }
 
@@ -143,6 +188,7 @@ impl CustomPropertyComponentList {
             comment_mode: CssCustomPropertyCommentMode::PreserveDoubleSlash,
             nested_end_set: Some(nested_end_set),
             legacy_filter_recovery: true,
+            mode: CustomPropertyValueMode::General,
         }
     }
 
@@ -150,12 +196,14 @@ impl CustomPropertyComponentList {
         comment_mode: CssCustomPropertyCommentMode,
         nested_end_set: Option<TokenSet<CssSyntaxKind>>,
         legacy_filter_recovery: bool,
+        mode: CustomPropertyValueMode,
     ) -> Self {
         Self {
             boundary: CustomPropertyListBoundary::Block,
             comment_mode,
             nested_end_set,
             legacy_filter_recovery,
+            mode,
         }
     }
 
@@ -173,16 +221,47 @@ impl ParseNodeList for CustomPropertyComponentList {
     const LIST_KIND: Self::Kind = CSS_CUSTOM_PROPERTY_COMPONENT_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        parse_custom_property_component(
+        let is_parameter_default =
+            matches!(self.boundary, CustomPropertyListBoundary::ParameterDefault);
+        let context = CssLexContext::CustomPropertyValue(self.comment_mode);
+        if is_parameter_default && p.at_ts(token_set![T![;], T![!]]) {
+            let invalid = p.start();
+            p.error(expected_component_value(p, p.cur_range()));
+            p.bump_any_with_context(context);
+            return Present(invalid.complete(p, CSS_BOGUS_PROPERTY_VALUE));
+        }
+
+        let component = parse_custom_property_component(
             p,
             self.comment_mode,
             self.nested_end_set,
             self.legacy_filter_recovery,
-        )
+            self.mode,
+        );
+        component.map(|component| {
+            if is_parameter_default
+                && component.kind(p) == CSS_BOGUS_PROPERTY_VALUE
+                && p.at(T![')'])
+                && p.nth_at(1, T![,])
+            {
+                // In `--x: [a), --y: b`, leave the comma for the parameter list.
+                let invalid = component.precede(p);
+                p.bump_with_context(T![')'], context);
+                invalid.complete(p, CSS_BOGUS_PROPERTY_VALUE)
+            } else {
+                component
+            }
+        })
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
         match self.boundary {
+            CustomPropertyListBoundary::ParameterDefault => {
+                p.at_ts(token_set![T![,], T![')'], EOF])
+                    || self.nested_end_set.is_some_and(|end_set| {
+                        p.at_ts(end_set.union(CUSTOM_PROPERTY_BLOCK_END_SET))
+                    })
+            }
             CustomPropertyListBoundary::Value(end_set) => {
                 if p.at(T![!]) {
                     p.source()
@@ -208,7 +287,10 @@ impl ParseNodeList for CustomPropertyComponentList {
             return Ok(parsed);
         }
 
-        if p.is_speculative_parsing() {
+        // A bad default must not force later braced defaults into body recovery.
+        if p.is_speculative_parsing()
+            && !matches!(self.mode, CustomPropertyValueMode::FunctionDefault { .. })
+        {
             p.error(expected_component_value(p, p.cur_range()));
             return Err(RecoveryError::RecoveryDisabled);
         }
@@ -232,23 +314,38 @@ fn parse_custom_property_component(
     comment_mode: CssCustomPropertyCommentMode,
     nested_end_set: Option<TokenSet<CssSyntaxKind>>,
     legacy_filter_recovery: bool,
+    mode: CustomPropertyValueMode,
 ) -> ParsedSyntax {
     let context = CssLexContext::CustomPropertyValue(comment_mode);
 
-    if is_at_scss_interpolation(p) {
+    if is_at_metavariable(p) {
+        parse_metavariable_with_context(p, context)
+    } else if mode.allows_scss_interpolation() && is_at_scss_interpolation(p) {
         parse_scss_interpolation_with_context(p, context)
     } else if is_at_scss_interpolated_string(p) {
         parse_scss_interpolated_string(p, context)
     } else if p.at(CSS_STRING_LITERAL) {
         parse_custom_property_string(p, context)
     } else if is_at_custom_property_function(p) {
-        parse_custom_property_function(p, comment_mode, nested_end_set, legacy_filter_recovery)
+        parse_custom_property_function(
+            p,
+            comment_mode,
+            nested_end_set,
+            legacy_filter_recovery,
+            mode,
+        )
     } else if is_at_any_dimension(p) {
         parse_any_dimension(p, context)
     } else if p.at(CSS_NUMBER_LITERAL) {
         parse_number(p, context)
     } else if p.at_ts(CUSTOM_PROPERTY_BLOCK_START_SET) {
-        parse_custom_property_block(p, comment_mode, nested_end_set, legacy_filter_recovery)
+        parse_custom_property_block(
+            p,
+            comment_mode,
+            nested_end_set,
+            legacy_filter_recovery,
+            mode,
+        )
     } else if is_at_identifier(p) {
         parse_custom_identifier_with_keywords(p, context, true)
     } else {
@@ -270,6 +367,7 @@ fn parse_custom_property_function(
     comment_mode: CssCustomPropertyCommentMode,
     nested_end_set: Option<TokenSet<CssSyntaxKind>>,
     legacy_filter_recovery: bool,
+    mode: CustomPropertyValueMode,
 ) -> ParsedSyntax {
     if !is_at_custom_property_function(p) {
         return Absent;
@@ -283,11 +381,25 @@ fn parse_custom_property_function(
 
     let function = p.start();
     parse_custom_identifier_with_keywords(p, context, true).ok();
+    let opening = p.cur_range().start();
     p.bump_with_context(T!['('], context);
-    CustomPropertyComponentList::block(comment_mode, nested_end_set, legacy_filter_recovery)
+    CustomPropertyComponentList::block(comment_mode, nested_end_set, legacy_filter_recovery, mode)
         .parse_list(p);
-    p.expect_with_context(T![')'], context);
-    Present(function.complete(p, CSS_CUSTOM_PROPERTY_FUNCTION))
+    if p.at_ts(token_set![T![']'], T!['}'], EOF])
+        && p.is_speculative_parsing()
+        && matches!(mode, CustomPropertyValueMode::FunctionDefault { .. })
+    {
+        p.state_mut()
+            .unclosed_function_default_parens
+            .insert(opening);
+    }
+    let has_close = p.expect_with_context(T![')'], context);
+    let kind = if !has_close && matches!(mode, CustomPropertyValueMode::FunctionDefault { .. }) {
+        CSS_BOGUS_PROPERTY_VALUE
+    } else {
+        CSS_CUSTOM_PROPERTY_FUNCTION
+    };
+    Present(function.complete(p, kind))
 }
 
 /// Parses a balanced raw block such as `(a)`, `[a]`, or `{a}`.
@@ -296,6 +408,7 @@ fn parse_custom_property_block(
     comment_mode: CssCustomPropertyCommentMode,
     nested_end_set: Option<TokenSet<CssSyntaxKind>>,
     legacy_filter_recovery: bool,
+    mode: CustomPropertyValueMode,
 ) -> ParsedSyntax {
     let (open, close, kind) = match p.cur() {
         T!['('] => (T!['('], T![')'], CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK),
@@ -306,10 +419,25 @@ fn parse_custom_property_block(
 
     let block = p.start();
     let context = CssLexContext::CustomPropertyValue(comment_mode);
+    let opening = p.cur_range().start();
     p.bump_with_context(open, context);
-    CustomPropertyComponentList::block(comment_mode, nested_end_set, legacy_filter_recovery)
+    CustomPropertyComponentList::block(comment_mode, nested_end_set, legacy_filter_recovery, mode)
         .parse_list(p);
-    p.expect_with_context(close, context);
+    if open == T!['(']
+        && p.at_ts(token_set![T![']'], T!['}'], EOF])
+        && p.is_speculative_parsing()
+        && matches!(mode, CustomPropertyValueMode::FunctionDefault { .. })
+    {
+        p.state_mut()
+            .unclosed_function_default_parens
+            .insert(opening);
+    }
+    let has_close = p.expect_with_context(close, context);
+    let kind = if !has_close && matches!(mode, CustomPropertyValueMode::FunctionDefault { .. }) {
+        CSS_BOGUS_PROPERTY_VALUE
+    } else {
+        kind
+    };
     Present(block.complete(p, kind))
 }
 

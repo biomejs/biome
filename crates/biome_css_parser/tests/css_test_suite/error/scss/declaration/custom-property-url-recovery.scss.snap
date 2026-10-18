@@ -292,47 +292,41 @@ CssRoot {
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBogusProperty {
-                                items: [
-                                    CssDashedIdentifier {
-                                        value_token: IDENT@219..229 "--image" [Newline("\n"), Whitespace("  ")] [],
-                                    },
-                                    COLON@229..231 ":" [] [Whitespace(" ")],
-                                    CssBogus {
-                                        items: [
-                                            CssBogus {
-                                                items: [
-                                                    CssCustomPropertyFunction {
-                                                        name: CssCustomIdentifier {
-                                                            value_token: IDENT@231..234 "url" [] [],
-                                                        },
-                                                        l_paren_token: L_PAREN@234..235 "(" [] [],
-                                                        components: CssCustomPropertyComponentList [
-                                                            CssCustomPropertyFunction {
-                                                                name: CssCustomIdentifier {
-                                                                    value_token: IDENT@235..238 "var" [] [],
-                                                                },
-                                                                l_paren_token: L_PAREN@238..239 "(" [] [],
-                                                                components: CssCustomPropertyComponentList [
-                                                                    CssCustomIdentifier {
-                                                                        value_token: IDENT@239..246 "--image" [] [],
-                                                                    },
-                                                                ],
-                                                                r_paren_token: missing (required),
-                                                            },
-                                                        ],
-                                                        r_paren_token: missing (required),
-                                                    },
-                                                    CssBogusPropertyValue {
-                                                        items: [
-                                                            R_BRACK@246..247 "]" [] [],
-                                                        ],
-                                                    },
-                                                ],
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@219..229 "--image" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@229..231 ":" [] [Whitespace(" ")],
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
+                                        CssCustomPropertyFunction {
+                                            name: CssCustomIdentifier {
+                                                value_token: IDENT@231..234 "url" [] [],
                                             },
-                                        ],
-                                    },
-                                ],
+                                            l_paren_token: L_PAREN@234..235 "(" [] [],
+                                            components: CssCustomPropertyComponentList [
+                                                CssCustomPropertyFunction {
+                                                    name: CssCustomIdentifier {
+                                                        value_token: IDENT@235..238 "var" [] [],
+                                                    },
+                                                    l_paren_token: L_PAREN@238..239 "(" [] [],
+                                                    components: CssCustomPropertyComponentList [
+                                                        CssCustomIdentifier {
+                                                            value_token: IDENT@239..246 "--image" [] [],
+                                                        },
+                                                    ],
+                                                    r_paren_token: missing (required),
+                                                },
+                                            ],
+                                            r_paren_token: missing (required),
+                                        },
+                                        CssBogusPropertyValue {
+                                            items: [
+                                                R_BRACK@246..247 "]" [] [],
+                                            ],
+                                        },
+                                    ],
+                                },
                             },
                             important: missing (optional),
                         },
@@ -590,12 +584,12 @@ CssRoot {
         1: CSS_DECLARATION_OR_RULE_LIST@219..263
           0: CSS_DECLARATION_WITH_SEMICOLON@219..247
             0: CSS_DECLARATION@219..247
-              0: CSS_BOGUS_PROPERTY@219..247
+              0: CSS_GENERIC_PROPERTY@219..247
                 0: CSS_DASHED_IDENTIFIER@219..229
                   0: IDENT@219..229 "--image" [Newline("\n"), Whitespace("  ")] []
                 1: COLON@229..231 ":" [] [Whitespace(" ")]
-                2: CSS_BOGUS@231..247
-                  0: CSS_BOGUS@231..247
+                2: CSS_CUSTOM_PROPERTY_VALUE@231..247
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@231..247
                     0: CSS_CUSTOM_PROPERTY_FUNCTION@231..246
                       0: CSS_CUSTOM_IDENTIFIER@231..234
                         0: IDENT@231..234 "url" [] []

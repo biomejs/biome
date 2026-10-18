@@ -1,0 +1,22 @@
+@function --empty(--value: , --after: {a:b}) { result: var(--after); }
+@function --delimiters(--value: 8px; 16px !important, --after: {a:b}) { result: var(--after); }
+@function --bracket(--value: fn(8px] tail, --after: {a:b}) { result: var(--after); }
+@function --brace(--value: fn(8px} tail, --after: {a:b}) { result: var(--after); }
+@function --stray(--value: ] tail, --after: {a:b}) { result: var(--after); }
+@function --nested-bracket(--value: [[8px]), --after: 4px) { result: var(--after); }
+@function --nested-brace(--value: {{a:b}), --after: 4px) { result: var(--after); }
+@function --last(--value: [8px) { result: var(--value); }
+@function --string(--value: "unterminated
+, --after: {a:b}) { result: var(--after); }
+.after-string { color: red; }
+
+@function --missing-outer(--value: 8px 16px { result: var(--value); }
+.a,
+button, :not(:is(.b, .c)) { color: blue; }
+
+@function --first(--value: red { result: red; }
+@function --second (--value: red { result: red; }
+]
+@function --good(--value: {a; b !important} @raw(value), --after: [c, d]) { result: var(--value); }
+@function --missing-opening --value: red { result: red; }
+.after { color: green; }

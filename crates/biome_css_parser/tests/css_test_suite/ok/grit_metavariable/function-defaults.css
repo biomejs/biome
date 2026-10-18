@@ -1,0 +1,3 @@
+@function --inset(--padding: $default, --other: var(--gap, $fallback)) {
+  result: var(--padding);
+}

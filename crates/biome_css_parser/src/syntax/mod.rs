@@ -383,11 +383,21 @@ fn is_nth_at_metavariable(p: &mut CssParser, n: usize) -> bool {
 
 #[inline]
 fn parse_metavariable(p: &mut CssParser) -> ParsedSyntax {
+    parse_metavariable_with_context(p, CssLexContext::Regular)
+}
+
+/// Consumes a placeholder, keeping the caller's lexing mode for the next token.
+///
+/// ```css
+/// @function --inset(--padding: ${padding}px 16px) {}
+/// ```
+#[inline]
+fn parse_metavariable_with_context(p: &mut CssParser, context: CssLexContext) -> ParsedSyntax {
     if !is_at_metavariable(p) {
         return Absent;
     }
     let m = p.start();
-    p.bump(GRIT_METAVARIABLE);
+    p.bump_with_context(GRIT_METAVARIABLE, context);
     Present(m.complete(p, CSS_METAVARIABLE))
 }
 

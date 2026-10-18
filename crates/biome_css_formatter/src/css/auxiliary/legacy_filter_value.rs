@@ -54,6 +54,8 @@ impl Format<CssFormatContext> for FormatLegacyFilterComponent<'_> {
         }
 
         match self.0 {
+            AnyCssCustomPropertyComponent::CssBogusPropertyValue(node) => node.format().fmt(f),
+            AnyCssCustomPropertyComponent::CssMetavariable(node) => node.format().fmt(f),
             AnyCssCustomPropertyComponent::AnyCssDimension(node) => node.format().fmt(f),
             AnyCssCustomPropertyComponent::CssCustomIdentifier(node) => node.format().fmt(f),
             AnyCssCustomPropertyComponent::CssCustomPropertyBracedBlock(node) => {

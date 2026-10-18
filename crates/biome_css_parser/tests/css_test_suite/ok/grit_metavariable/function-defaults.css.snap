@@ -1,0 +1,194 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+@function --inset(--padding: $default, --other: var(--gap, $fallback)) {
+  result: var(--padding);
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssAtRule {
+            at_token: AT@0..1 "@" [] [],
+            rule: CssFunctionAtRule {
+                declarator: CssFunctionAtRuleDeclarator {
+                    function_token: FUNCTION_KW@1..10 "function" [] [Whitespace(" ")],
+                    name: CssDashedIdentifier {
+                        value_token: IDENT@10..17 "--inset" [] [],
+                    },
+                    l_paren_token: L_PAREN@17..18 "(" [] [],
+                    parameters: CssFunctionParameterList [
+                        CssFunctionParameter {
+                            name: CssDashedIdentifier {
+                                value_token: IDENT@18..27 "--padding" [] [],
+                            },
+                            ty: missing (optional),
+                            default_value: CssFunctionParameterDefaultValue {
+                                colon_token: COLON@27..29 ":" [] [Whitespace(" ")],
+                                components: CssCustomPropertyComponentList [
+                                    CssMetavariable {
+                                        value_token: GRIT_METAVARIABLE@29..37 "$default" [] [],
+                                    },
+                                ],
+                            },
+                        },
+                        COMMA@37..39 "," [] [Whitespace(" ")],
+                        CssFunctionParameter {
+                            name: CssDashedIdentifier {
+                                value_token: IDENT@39..46 "--other" [] [],
+                            },
+                            ty: missing (optional),
+                            default_value: CssFunctionParameterDefaultValue {
+                                colon_token: COLON@46..48 ":" [] [Whitespace(" ")],
+                                components: CssCustomPropertyComponentList [
+                                    CssCustomPropertyFunction {
+                                        name: CssCustomIdentifier {
+                                            value_token: IDENT@48..51 "var" [] [],
+                                        },
+                                        l_paren_token: L_PAREN@51..52 "(" [] [],
+                                        components: CssCustomPropertyComponentList [
+                                            CssCustomIdentifier {
+                                                value_token: IDENT@52..57 "--gap" [] [],
+                                            },
+                                            CssCustomPropertyDelimiter {
+                                                value: COMMA@57..59 "," [] [Whitespace(" ")],
+                                            },
+                                            CssMetavariable {
+                                                value_token: GRIT_METAVARIABLE@59..68 "$fallback" [] [],
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@68..69 ")" [] [],
+                                    },
+                                ],
+                            },
+                        },
+                    ],
+                    r_paren_token: R_PAREN@69..71 ")" [] [Whitespace(" ")],
+                    returns: missing (optional),
+                },
+                block: CssDeclarationOrAtRuleBlock {
+                    l_curly_token: L_CURLY@71..72 "{" [] [],
+                    items: CssDeclarationOrAtRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@72..81 "result" [Newline("\n"), Whitespace("  ")] [],
+                                    },
+                                    colon_token: COLON@81..83 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssFunction {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@83..86 "var" [] [],
+                                            },
+                                            l_paren_token: L_PAREN@86..87 "(" [] [],
+                                            items: CssParameterList [
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssDashedIdentifier {
+                                                            value_token: IDENT@87..96 "--padding" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@96..97 ")" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@97..98 ";" [] [],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@98..100 "}" [Newline("\n")] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@100..101 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..101
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..100
+    0: CSS_AT_RULE@0..100
+      0: AT@0..1 "@" [] []
+      1: CSS_FUNCTION_AT_RULE@1..100
+        0: CSS_FUNCTION_AT_RULE_DECLARATOR@1..71
+          0: FUNCTION_KW@1..10 "function" [] [Whitespace(" ")]
+          1: CSS_DASHED_IDENTIFIER@10..17
+            0: IDENT@10..17 "--inset" [] []
+          2: L_PAREN@17..18 "(" [] []
+          3: CSS_FUNCTION_PARAMETER_LIST@18..69
+            0: CSS_FUNCTION_PARAMETER@18..37
+              0: CSS_DASHED_IDENTIFIER@18..27
+                0: IDENT@18..27 "--padding" [] []
+              1: (empty)
+              2: CSS_FUNCTION_PARAMETER_DEFAULT_VALUE@27..37
+                0: COLON@27..29 ":" [] [Whitespace(" ")]
+                1: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@29..37
+                  0: CSS_METAVARIABLE@29..37
+                    0: GRIT_METAVARIABLE@29..37 "$default" [] []
+            1: COMMA@37..39 "," [] [Whitespace(" ")]
+            2: CSS_FUNCTION_PARAMETER@39..69
+              0: CSS_DASHED_IDENTIFIER@39..46
+                0: IDENT@39..46 "--other" [] []
+              1: (empty)
+              2: CSS_FUNCTION_PARAMETER_DEFAULT_VALUE@46..69
+                0: COLON@46..48 ":" [] [Whitespace(" ")]
+                1: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@48..69
+                  0: CSS_CUSTOM_PROPERTY_FUNCTION@48..69
+                    0: CSS_CUSTOM_IDENTIFIER@48..51
+                      0: IDENT@48..51 "var" [] []
+                    1: L_PAREN@51..52 "(" [] []
+                    2: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@52..68
+                      0: CSS_CUSTOM_IDENTIFIER@52..57
+                        0: IDENT@52..57 "--gap" [] []
+                      1: CSS_CUSTOM_PROPERTY_DELIMITER@57..59
+                        0: COMMA@57..59 "," [] [Whitespace(" ")]
+                      2: CSS_METAVARIABLE@59..68
+                        0: GRIT_METAVARIABLE@59..68 "$fallback" [] []
+                    3: R_PAREN@68..69 ")" [] []
+          4: R_PAREN@69..71 ")" [] [Whitespace(" ")]
+          5: (empty)
+        1: CSS_DECLARATION_OR_AT_RULE_BLOCK@71..100
+          0: L_CURLY@71..72 "{" [] []
+          1: CSS_DECLARATION_OR_AT_RULE_LIST@72..98
+            0: CSS_DECLARATION_WITH_SEMICOLON@72..98
+              0: CSS_DECLARATION@72..97
+                0: CSS_GENERIC_PROPERTY@72..97
+                  0: CSS_IDENTIFIER@72..81
+                    0: IDENT@72..81 "result" [Newline("\n"), Whitespace("  ")] []
+                  1: COLON@81..83 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@83..97
+                    0: CSS_FUNCTION@83..97
+                      0: CSS_IDENTIFIER@83..86
+                        0: IDENT@83..86 "var" [] []
+                      1: L_PAREN@86..87 "(" [] []
+                      2: CSS_PARAMETER_LIST@87..96
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@87..96
+                          0: CSS_COMPONENT_VALUE_LIST@87..96
+                            0: CSS_DASHED_IDENTIFIER@87..96
+                              0: IDENT@87..96 "--padding" [] []
+                      3: R_PAREN@96..97 ")" [] []
+                1: (empty)
+              1: SEMICOLON@97..98 ";" [] []
+          2: R_CURLY@98..100 "}" [Newline("\n")] []
+  2: EOF@100..101 "" [Newline("\n")] []
+
+```

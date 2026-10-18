@@ -9,6 +9,7 @@ impl FormatRule<AnyCssCustomPropertyComponent> for FormatAnyCssCustomPropertyCom
     fn fmt(&self, node: &AnyCssCustomPropertyComponent, f: &mut CssFormatter) -> FormatResult<()> {
         match node {
             AnyCssCustomPropertyComponent::AnyCssDimension(node) => node.format().fmt(f),
+            AnyCssCustomPropertyComponent::CssBogusPropertyValue(node) => node.format().fmt(f),
             AnyCssCustomPropertyComponent::CssCustomIdentifier(node) => node.format().fmt(f),
             AnyCssCustomPropertyComponent::CssCustomPropertyBracedBlock(node) => {
                 node.format().fmt(f)
@@ -21,6 +22,7 @@ impl FormatRule<AnyCssCustomPropertyComponent> for FormatAnyCssCustomPropertyCom
             AnyCssCustomPropertyComponent::CssCustomPropertyParenthesizedBlock(node) => {
                 node.format().fmt(f)
             }
+            AnyCssCustomPropertyComponent::CssMetavariable(node) => node.format().fmt(f),
             AnyCssCustomPropertyComponent::CssNumber(node) => node.format().fmt(f),
             AnyCssCustomPropertyComponent::CssString(node) => node.format().fmt(f),
             AnyCssCustomPropertyComponent::CssUrlFunction(node) => node.format().fmt(f),

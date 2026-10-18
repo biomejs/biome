@@ -777,6 +777,8 @@ CssCustomPropertyComponentList = AnyCssCustomPropertyComponent*
 
 AnyCssCustomPropertyComponent =
 	CssCustomIdentifier
+	| CssMetavariable
+	| CssBogusPropertyValue
 	| CssNumber
 	| AnyCssDimension
 	| CssString
@@ -2317,11 +2319,11 @@ CssFunctionParameter =
 	type:  AnyCssType?
 	default_value: CssFunctionParameterDefaultValue?
 
-// @function --transparent(--color <color>: red, --alpha <number>: 0.5) { }
-//                                        ^^^^^                  ^^^^^
+// @function --inset(--padding: 8px 16px, --color: rgb(0, 0, 0)) {}
+//                            ^^^^^^^^^^         ^^^^^^^^^^^^^^
 CssFunctionParameterDefaultValue =
 	':'
-	value: AnyCssValue
+	components: CssCustomPropertyComponentList
 
 // returns <css-type>
 //

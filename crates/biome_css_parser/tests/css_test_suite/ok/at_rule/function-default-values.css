@@ -1,0 +1,28 @@
+@function --inset(--padding: 8px 16px, --single: center, --required) {
+  result: var(--padding);
+}
+@function --typed(--padding <length>+: 8px 16px, --color type(<color> | <custom-ident>): red) returns <length>+ {
+  result: var(--padding);
+}
+@function --nested(--shadow: 0 1px rgb(0, 0, 0), --fallback: var(--size, 8px 16px) calc(100% - var(--offset, 2px))) {
+  result: var(--shadow);
+}
+@function --tokens(--type: 10px <length>, --colon: 1: 2, --literal: #{$literal}) {
+  result: var(--colon);
+}
+@function --blocks(--value: first {a, b} last, --nested: fn({a; b !important}, [c, d]) tail, --empty: {}) {
+  result: var(--value);
+}
+@function --urls(
+  --a: url(a{b), --b: url(a}b), --c: url(a[b), --d: url(a]b),
+  --e: url([a), --f: url({a), --g: url(]a), --h: url(}a),
+  --nested: var(--image, url(a,b)), --quoted: url("a[b"),
+  --function: url(var(--image)), --dollar: url($literal,b), --hash: url(#{$literal}),
+  --after: 8px 16px
+) { result: var(--nested); }
+.after {
+  background: url([a);
+  background: url({a);
+  background: url(]a);
+  background: url(}a);
+}

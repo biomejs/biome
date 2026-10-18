@@ -68,35 +68,29 @@ CssRoot {
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBogusProperty {
-                                items: [
-                                    CssDashedIdentifier {
-                                        value_token: IDENT@19..29 "--value" [Newline("\n"), Whitespace("  ")] [],
-                                    },
-                                    COLON@29..31 ":" [] [Whitespace(" ")],
-                                    CssBogus {
-                                        items: [
-                                            CssBogus {
-                                                items: [
-                                                    CssCustomPropertyParenthesizedBlock {
-                                                        l_paren_token: L_PAREN@31..32 "(" [] [],
-                                                        components: CssCustomPropertyComponentList [
-                                                            CssCustomIdentifier {
-                                                                value_token: IDENT@32..35 "foo" [] [],
-                                                            },
-                                                        ],
-                                                        r_paren_token: missing (required),
-                                                    },
-                                                    CssBogusPropertyValue {
-                                                        items: [
-                                                            R_BRACK@35..36 "]" [] [],
-                                                        ],
-                                                    },
-                                                ],
-                                            },
-                                        ],
-                                    },
-                                ],
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@19..29 "--value" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@29..31 ":" [] [Whitespace(" ")],
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
+                                        CssCustomPropertyParenthesizedBlock {
+                                            l_paren_token: L_PAREN@31..32 "(" [] [],
+                                            components: CssCustomPropertyComponentList [
+                                                CssCustomIdentifier {
+                                                    value_token: IDENT@32..35 "foo" [] [],
+                                                },
+                                            ],
+                                            r_paren_token: missing (required),
+                                        },
+                                        CssBogusPropertyValue {
+                                            items: [
+                                                R_BRACK@35..36 "]" [] [],
+                                            ],
+                                        },
+                                    ],
+                                },
                             },
                             important: missing (optional),
                         },
@@ -219,35 +213,29 @@ CssRoot {
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBogusProperty {
-                                items: [
-                                    CssDashedIdentifier {
-                                        value_token: IDENT@131..141 "--value" [Newline("\n"), Whitespace("  ")] [],
-                                    },
-                                    COLON@141..143 ":" [] [Whitespace(" ")],
-                                    CssBogus {
-                                        items: [
-                                            CssBogus {
-                                                items: [
-                                                    CssCustomPropertyBracedBlock {
-                                                        l_curly_token: L_CURLY@143..144 "{" [] [],
-                                                        components: CssCustomPropertyComponentList [
-                                                            CssCustomIdentifier {
-                                                                value_token: IDENT@144..147 "foo" [] [],
-                                                            },
-                                                        ],
-                                                        r_curly_token: missing (required),
-                                                    },
-                                                    CssBogusPropertyValue {
-                                                        items: [
-                                                            R_BRACK@147..148 "]" [] [],
-                                                        ],
-                                                    },
-                                                ],
-                                            },
-                                        ],
-                                    },
-                                ],
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@131..141 "--value" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@141..143 ":" [] [Whitespace(" ")],
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
+                                        CssCustomPropertyBracedBlock {
+                                            l_curly_token: L_CURLY@143..144 "{" [] [],
+                                            components: CssCustomPropertyComponentList [
+                                                CssCustomIdentifier {
+                                                    value_token: IDENT@144..147 "foo" [] [],
+                                                },
+                                            ],
+                                            r_curly_token: missing (required),
+                                        },
+                                        CssBogusPropertyValue {
+                                            items: [
+                                                R_BRACK@147..148 "]" [] [],
+                                            ],
+                                        },
+                                    ],
+                                },
                             },
                             important: missing (optional),
                         },
@@ -296,44 +284,38 @@ CssRoot {
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
-                            property: CssBogusProperty {
-                                items: [
-                                    CssDashedIdentifier {
-                                        value_token: IDENT@201..211 "--value" [Newline("\n"), Whitespace("  ")] [],
-                                    },
-                                    COLON@211..213 ":" [] [Whitespace(" ")],
-                                    CssBogus {
-                                        items: [
-                                            CssBogus {
-                                                items: [
-                                                    CssCustomPropertyParenthesizedBlock {
-                                                        l_paren_token: L_PAREN@213..214 "(" [] [],
-                                                        components: CssCustomPropertyComponentList [
-                                                            CssCustomIdentifier {
-                                                                value_token: IDENT@214..217 "foo" [] [],
-                                                            },
-                                                        ],
-                                                        r_paren_token: missing (required),
-                                                    },
-                                                    CssBogusPropertyValue {
-                                                        items: [
-                                                            R_BRACK@217..219 "]" [] [Whitespace(" ")],
-                                                        ],
-                                                    },
-                                                    CssCustomPropertyDelimiter {
-                                                        value: CSS_DELIM_LITERAL@219..220 "`" [] [],
-                                                    },
-                                                    CssCustomIdentifier {
-                                                        value_token: IDENT@220..223 "bar" [] [],
-                                                    },
-                                                    CssCustomPropertyDelimiter {
-                                                        value: CSS_DELIM_LITERAL@223..224 "`" [] [],
-                                                    },
-                                                ],
-                                            },
-                                        ],
-                                    },
-                                ],
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@201..211 "--value" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                                colon_token: COLON@211..213 ":" [] [Whitespace(" ")],
+                                value: CssCustomPropertyValue {
+                                    components: CssCustomPropertyComponentList [
+                                        CssCustomPropertyParenthesizedBlock {
+                                            l_paren_token: L_PAREN@213..214 "(" [] [],
+                                            components: CssCustomPropertyComponentList [
+                                                CssCustomIdentifier {
+                                                    value_token: IDENT@214..217 "foo" [] [],
+                                                },
+                                            ],
+                                            r_paren_token: missing (required),
+                                        },
+                                        CssBogusPropertyValue {
+                                            items: [
+                                                R_BRACK@217..219 "]" [] [Whitespace(" ")],
+                                            ],
+                                        },
+                                        CssCustomPropertyDelimiter {
+                                            value: CSS_DELIM_LITERAL@219..220 "`" [] [],
+                                        },
+                                        CssCustomIdentifier {
+                                            value_token: IDENT@220..223 "bar" [] [],
+                                        },
+                                        CssCustomPropertyDelimiter {
+                                            value: CSS_DELIM_LITERAL@223..224 "`" [] [],
+                                        },
+                                    ],
+                                },
                             },
                             important: missing (optional),
                         },
@@ -548,12 +530,12 @@ CssRoot {
         1: CSS_DECLARATION_OR_RULE_LIST@19..51
           0: CSS_DECLARATION_WITH_SEMICOLON@19..37
             0: CSS_DECLARATION@19..36
-              0: CSS_BOGUS_PROPERTY@19..36
+              0: CSS_GENERIC_PROPERTY@19..36
                 0: CSS_DASHED_IDENTIFIER@19..29
                   0: IDENT@19..29 "--value" [Newline("\n"), Whitespace("  ")] []
                 1: COLON@29..31 ":" [] [Whitespace(" ")]
-                2: CSS_BOGUS@31..36
-                  0: CSS_BOGUS@31..36
+                2: CSS_CUSTOM_PROPERTY_VALUE@31..36
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@31..36
                     0: CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK@31..35
                       0: L_PAREN@31..32 "(" [] []
                       1: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@32..35
@@ -638,12 +620,12 @@ CssRoot {
         1: CSS_DECLARATION_OR_RULE_LIST@131..163
           0: CSS_DECLARATION_WITH_SEMICOLON@131..149
             0: CSS_DECLARATION@131..148
-              0: CSS_BOGUS_PROPERTY@131..148
+              0: CSS_GENERIC_PROPERTY@131..148
                 0: CSS_DASHED_IDENTIFIER@131..141
                   0: IDENT@131..141 "--value" [Newline("\n"), Whitespace("  ")] []
                 1: COLON@141..143 ":" [] [Whitespace(" ")]
-                2: CSS_BOGUS@143..148
-                  0: CSS_BOGUS@143..148
+                2: CSS_CUSTOM_PROPERTY_VALUE@143..148
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@143..148
                     0: CSS_CUSTOM_PROPERTY_BRACED_BLOCK@143..147
                       0: L_CURLY@143..144 "{" [] []
                       1: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@144..147
@@ -682,12 +664,12 @@ CssRoot {
         1: CSS_DECLARATION_OR_RULE_LIST@201..239
           0: CSS_DECLARATION_WITH_SEMICOLON@201..225
             0: CSS_DECLARATION@201..224
-              0: CSS_BOGUS_PROPERTY@201..224
+              0: CSS_GENERIC_PROPERTY@201..224
                 0: CSS_DASHED_IDENTIFIER@201..211
                   0: IDENT@201..211 "--value" [Newline("\n"), Whitespace("  ")] []
                 1: COLON@211..213 ":" [] [Whitespace(" ")]
-                2: CSS_BOGUS@213..224
-                  0: CSS_BOGUS@213..224
+                2: CSS_CUSTOM_PROPERTY_VALUE@213..224
+                  0: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@213..224
                     0: CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK@213..217
                       0: L_PAREN@213..214 "(" [] []
                       1: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@214..217

@@ -31,7 +31,8 @@ use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{CompletedMarker, Parser, SyntaxFeature, TokenSet, token_set};
 pub(crate) use custom::{
-    parse_custom_property_value, parse_legacy_filter_value, parse_supports_custom_property_value,
+    parse_custom_property_value, parse_function_parameter_default_components,
+    parse_legacy_filter_value, parse_supports_custom_property_value,
 };
 
 #[inline]

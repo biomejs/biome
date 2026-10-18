@@ -3234,14 +3234,14 @@ impl CssFunctionParameterDefaultValue {
     pub fn as_fields(&self) -> CssFunctionParameterDefaultValueFields {
         CssFunctionParameterDefaultValueFields {
             colon_token: self.colon_token(),
-            value: self.value(),
+            components: self.components(),
         }
     }
     pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn value(&self) -> SyntaxResult<AnyCssValue> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn components(&self) -> CssCustomPropertyComponentList {
+        support::list(&self.syntax, 1usize)
     }
 }
 impl Serialize for CssFunctionParameterDefaultValue {
@@ -3255,7 +3255,7 @@ impl Serialize for CssFunctionParameterDefaultValue {
 #[derive(Serialize)]
 pub struct CssFunctionParameterDefaultValueFields {
     pub colon_token: SyntaxResult<SyntaxToken>,
-    pub value: SyntaxResult<AnyCssValue>,
+    pub components: CssCustomPropertyComponentList,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssGenericDelimiter {
@@ -15236,12 +15236,14 @@ impl AnyCssCustomMediaQuery {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCssCustomPropertyComponent {
     AnyCssDimension(AnyCssDimension),
+    CssBogusPropertyValue(CssBogusPropertyValue),
     CssCustomIdentifier(CssCustomIdentifier),
     CssCustomPropertyBracedBlock(CssCustomPropertyBracedBlock),
     CssCustomPropertyBracketedBlock(CssCustomPropertyBracketedBlock),
     CssCustomPropertyDelimiter(CssCustomPropertyDelimiter),
     CssCustomPropertyFunction(CssCustomPropertyFunction),
     CssCustomPropertyParenthesizedBlock(CssCustomPropertyParenthesizedBlock),
+    CssMetavariable(CssMetavariable),
     CssNumber(CssNumber),
     CssString(CssString),
     CssUrlFunction(CssUrlFunction),
@@ -15252,6 +15254,12 @@ impl AnyCssCustomPropertyComponent {
     pub fn as_any_css_dimension(&self) -> Option<&AnyCssDimension> {
         match &self {
             Self::AnyCssDimension(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_bogus_property_value(&self) -> Option<&CssBogusPropertyValue> {
+        match &self {
+            Self::CssBogusPropertyValue(item) => Some(item),
             _ => None,
         }
     }
@@ -15292,6 +15300,12 @@ impl AnyCssCustomPropertyComponent {
     ) -> Option<&CssCustomPropertyParenthesizedBlock> {
         match &self {
             Self::CssCustomPropertyParenthesizedBlock(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_css_metavariable(&self) -> Option<&CssMetavariable> {
+        match &self {
+            Self::CssMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -22999,7 +23013,7 @@ impl std::fmt::Debug for CssFunctionParameterDefaultValue {
                     "colon_token",
                     &support::DebugSyntaxResult(self.colon_token()),
                 )
-                .field("value", &support::DebugSyntaxResult(self.value()))
+                .field("components", &self.components())
                 .finish()
         } else {
             f.debug_struct("CssFunctionParameterDefaultValue").finish()
@@ -39230,6 +39244,11 @@ impl From<AnyCssCustomMediaQuery> for SyntaxElement {
         node.into()
     }
 }
+impl From<CssBogusPropertyValue> for AnyCssCustomPropertyComponent {
+    fn from(node: CssBogusPropertyValue) -> Self {
+        Self::CssBogusPropertyValue(node)
+    }
+}
 impl From<CssCustomIdentifier> for AnyCssCustomPropertyComponent {
     fn from(node: CssCustomIdentifier) -> Self {
         Self::CssCustomIdentifier(node)
@@ -39260,6 +39279,11 @@ impl From<CssCustomPropertyParenthesizedBlock> for AnyCssCustomPropertyComponent
         Self::CssCustomPropertyParenthesizedBlock(node)
     }
 }
+impl From<CssMetavariable> for AnyCssCustomPropertyComponent {
+    fn from(node: CssMetavariable) -> Self {
+        Self::CssMetavariable(node)
+    }
+}
 impl From<CssNumber> for AnyCssCustomPropertyComponent {
     fn from(node: CssNumber) -> Self {
         Self::CssNumber(node)
@@ -39288,12 +39312,14 @@ impl From<ScssInterpolation> for AnyCssCustomPropertyComponent {
 impl AstNode for AnyCssCustomPropertyComponent {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCssDimension::KIND_SET
+        .union(CssBogusPropertyValue::KIND_SET)
         .union(CssCustomIdentifier::KIND_SET)
         .union(CssCustomPropertyBracedBlock::KIND_SET)
         .union(CssCustomPropertyBracketedBlock::KIND_SET)
         .union(CssCustomPropertyDelimiter::KIND_SET)
         .union(CssCustomPropertyFunction::KIND_SET)
         .union(CssCustomPropertyParenthesizedBlock::KIND_SET)
+        .union(CssMetavariable::KIND_SET)
         .union(CssNumber::KIND_SET)
         .union(CssString::KIND_SET)
         .union(CssUrlFunction::KIND_SET)
@@ -39301,12 +39327,14 @@ impl AstNode for AnyCssCustomPropertyComponent {
         .union(ScssInterpolation::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            CSS_CUSTOM_IDENTIFIER
+            CSS_BOGUS_PROPERTY_VALUE
+            | CSS_CUSTOM_IDENTIFIER
             | CSS_CUSTOM_PROPERTY_BRACED_BLOCK
             | CSS_CUSTOM_PROPERTY_BRACKETED_BLOCK
             | CSS_CUSTOM_PROPERTY_DELIMITER
             | CSS_CUSTOM_PROPERTY_FUNCTION
             | CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK
+            | CSS_METAVARIABLE
             | CSS_NUMBER
             | CSS_STRING
             | CSS_URL_FUNCTION
@@ -39318,6 +39346,9 @@ impl AstNode for AnyCssCustomPropertyComponent {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            CSS_BOGUS_PROPERTY_VALUE => {
+                Self::CssBogusPropertyValue(CssBogusPropertyValue { syntax })
+            }
             CSS_CUSTOM_IDENTIFIER => Self::CssCustomIdentifier(CssCustomIdentifier { syntax }),
             CSS_CUSTOM_PROPERTY_BRACED_BLOCK => {
                 Self::CssCustomPropertyBracedBlock(CssCustomPropertyBracedBlock { syntax })
@@ -39336,6 +39367,7 @@ impl AstNode for AnyCssCustomPropertyComponent {
                     syntax,
                 })
             }
+            CSS_METAVARIABLE => Self::CssMetavariable(CssMetavariable { syntax }),
             CSS_NUMBER => Self::CssNumber(CssNumber { syntax }),
             CSS_STRING => Self::CssString(CssString { syntax }),
             CSS_URL_FUNCTION => Self::CssUrlFunction(CssUrlFunction { syntax }),
@@ -39354,12 +39386,14 @@ impl AstNode for AnyCssCustomPropertyComponent {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            Self::CssBogusPropertyValue(it) => it.syntax(),
             Self::CssCustomIdentifier(it) => it.syntax(),
             Self::CssCustomPropertyBracedBlock(it) => it.syntax(),
             Self::CssCustomPropertyBracketedBlock(it) => it.syntax(),
             Self::CssCustomPropertyDelimiter(it) => it.syntax(),
             Self::CssCustomPropertyFunction(it) => it.syntax(),
             Self::CssCustomPropertyParenthesizedBlock(it) => it.syntax(),
+            Self::CssMetavariable(it) => it.syntax(),
             Self::CssNumber(it) => it.syntax(),
             Self::CssString(it) => it.syntax(),
             Self::CssUrlFunction(it) => it.syntax(),
@@ -39370,12 +39404,14 @@ impl AstNode for AnyCssCustomPropertyComponent {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            Self::CssBogusPropertyValue(it) => it.into_syntax(),
             Self::CssCustomIdentifier(it) => it.into_syntax(),
             Self::CssCustomPropertyBracedBlock(it) => it.into_syntax(),
             Self::CssCustomPropertyBracketedBlock(it) => it.into_syntax(),
             Self::CssCustomPropertyDelimiter(it) => it.into_syntax(),
             Self::CssCustomPropertyFunction(it) => it.into_syntax(),
             Self::CssCustomPropertyParenthesizedBlock(it) => it.into_syntax(),
+            Self::CssMetavariable(it) => it.into_syntax(),
             Self::CssNumber(it) => it.into_syntax(),
             Self::CssString(it) => it.into_syntax(),
             Self::CssUrlFunction(it) => it.into_syntax(),
@@ -39389,12 +39425,14 @@ impl std::fmt::Debug for AnyCssCustomPropertyComponent {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::AnyCssDimension(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssBogusPropertyValue(it) => std::fmt::Debug::fmt(it, f),
             Self::CssCustomIdentifier(it) => std::fmt::Debug::fmt(it, f),
             Self::CssCustomPropertyBracedBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::CssCustomPropertyBracketedBlock(it) => std::fmt::Debug::fmt(it, f),
             Self::CssCustomPropertyDelimiter(it) => std::fmt::Debug::fmt(it, f),
             Self::CssCustomPropertyFunction(it) => std::fmt::Debug::fmt(it, f),
             Self::CssCustomPropertyParenthesizedBlock(it) => std::fmt::Debug::fmt(it, f),
+            Self::CssMetavariable(it) => std::fmt::Debug::fmt(it, f),
             Self::CssNumber(it) => std::fmt::Debug::fmt(it, f),
             Self::CssString(it) => std::fmt::Debug::fmt(it, f),
             Self::CssUrlFunction(it) => std::fmt::Debug::fmt(it, f),
@@ -39407,6 +39445,7 @@ impl From<AnyCssCustomPropertyComponent> for SyntaxNode {
     fn from(n: AnyCssCustomPropertyComponent) -> Self {
         match n {
             AnyCssCustomPropertyComponent::AnyCssDimension(it) => it.into_syntax(),
+            AnyCssCustomPropertyComponent::CssBogusPropertyValue(it) => it.into_syntax(),
             AnyCssCustomPropertyComponent::CssCustomIdentifier(it) => it.into_syntax(),
             AnyCssCustomPropertyComponent::CssCustomPropertyBracedBlock(it) => it.into_syntax(),
             AnyCssCustomPropertyComponent::CssCustomPropertyBracketedBlock(it) => it.into_syntax(),
@@ -39415,6 +39454,7 @@ impl From<AnyCssCustomPropertyComponent> for SyntaxNode {
             AnyCssCustomPropertyComponent::CssCustomPropertyParenthesizedBlock(it) => {
                 it.into_syntax()
             }
+            AnyCssCustomPropertyComponent::CssMetavariable(it) => it.into_syntax(),
             AnyCssCustomPropertyComponent::CssNumber(it) => it.into_syntax(),
             AnyCssCustomPropertyComponent::CssString(it) => it.into_syntax(),
             AnyCssCustomPropertyComponent::CssUrlFunction(it) => it.into_syntax(),
