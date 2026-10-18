@@ -5513,6 +5513,32 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.into_node(JS_VARIABLE_STATEMENT, children)
             }
+            JS_VUE_GENERIC_ROOT => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element
+                    && AnyJsVueGenericTypeParameters::can_cast(element.kind())
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element
+                    && element.kind() == T![EOF]
+                {
+                    slots.mark_present();
+                    current_element = elements.next();
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        JS_VUE_GENERIC_ROOT.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(JS_VUE_GENERIC_ROOT, children)
+            }
             JS_VUE_SLOT_PROPS_ROOT => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<2usize> = RawNodeSlots::default();

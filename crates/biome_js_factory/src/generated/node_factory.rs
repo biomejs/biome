@@ -3766,6 +3766,18 @@ impl JsVariableStatementBuilder {
         ))
     }
 }
+pub fn js_vue_generic_root(
+    items: AnyJsVueGenericTypeParameters,
+    eof_token: SyntaxToken,
+) -> JsVueGenericRoot {
+    JsVueGenericRoot::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_VUE_GENERIC_ROOT,
+        [
+            Some(SyntaxElement::Node(items.into_syntax())),
+            Some(SyntaxElement::Token(eof_token)),
+        ],
+    ))
+}
 pub fn js_vue_slot_props_root(
     parameters: JsParameterList,
     eof_token: SyntaxToken,
