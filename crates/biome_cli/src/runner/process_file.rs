@@ -45,7 +45,7 @@ pub(crate) enum FileStatus {
 pub(crate) enum MessageStat {
     Changed,
     Unchanged,
-    Matches,
+    Matches(usize),
     Skipped,
 }
 
