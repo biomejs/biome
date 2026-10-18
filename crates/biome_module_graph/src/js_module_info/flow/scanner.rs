@@ -3,9 +3,9 @@ use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::{JsDeclarationKind, SemanticModel};
 use biome_js_syntax::{
     AnyJsStatement, AnyTsReturnType, JsAssignmentExpression, JsAssignmentOperator,
-    JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIfStatement,
-    JsLogicalExpression, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, JsWhileStatement,
-    unescape_js_identifier,
+    JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIdentifierBinding,
+    JsIfStatement, JsLogicalExpression, JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode,
+    JsWhileStatement, unescape_js_identifier,
 };
 use biome_rowan::{AstNode, SyntaxKind, TextRange, declare_node_union};
 
@@ -46,6 +46,9 @@ declare_node_union! {
 #[derive(Default)]
 pub(crate) struct FlowRootScanner {
     open: Vec<OpenRoot>,
+    /// Bindings declared by the open roots, each root's after those of the
+    /// roots that enclose it.
+    bindings: Vec<JsIdentifierBinding>,
     visited: usize,
     /// Depth of the node most recently entered and not yet left.
     depth: usize,
@@ -55,7 +58,15 @@ pub(crate) struct FlowRootScanner {
     /// Depth of the outermost type, including type predicates, that encloses
     /// the current node.
     type_region: Option<usize>,
-    selected: Vec<AnyJsControlFlowRoot>,
+    selected: Vec<SelectedRoot>,
+}
+
+/// An execution root that may need flow.
+pub(super) struct SelectedRoot {
+    pub(super) root: AnyJsControlFlowRoot,
+    /// The bindings that the root's own code declares, outside nested roots
+    /// and types, in source order.
+    pub(super) bindings: Vec<JsIdentifierBinding>,
 }
 
 impl FlowRootScanner {
@@ -72,6 +83,7 @@ impl FlowRootScanner {
             }
             self.open.push(OpenRoot {
                 first_node: self.visited - 1,
+                first_binding: self.bindings.len(),
                 depth: self.depth,
                 range: node.text_range_with_trivia(),
                 // Arrow functions read the `arguments` object of the function
@@ -108,6 +120,8 @@ impl FlowRootScanner {
             self.type_region = Some(self.depth);
         } else if AnyFlowConditionSource::can_cast(kind) {
             root.has_condition = true;
+        } else if let Some(binding) = JsIdentifierBinding::cast_ref(node) {
+            self.bindings.push(binding);
         } else if !root.has_dynamic_scope
             && let Some(reference) = JsReferenceIdentifier::cast_ref(node)
             && self.is_dynamic_scope_reference(&reference, model)
@@ -142,14 +156,18 @@ impl FlowRootScanner {
         } else if root.has_condition
             && !root.is_unsupported
             && self.visited - root.first_node < MAX_ROOT_NODES
-            && let Some(root) = AnyJsControlFlowRoot::cast_ref(node)
+            && let Some(node) = AnyJsControlFlowRoot::cast_ref(node)
         {
-            self.selected.push(root);
+            self.selected.push(SelectedRoot {
+                root: node,
+                bindings: self.bindings.drain(root.first_binding..).collect(),
+            });
         }
+        self.bindings.truncate(root.first_binding);
     }
 
     /// Returns the selected roots, each after its nested roots.
-    pub(super) fn selected(&self) -> &[AnyJsControlFlowRoot] {
+    pub(super) fn selected(&self) -> &[SelectedRoot] {
         &self.selected
     }
 
@@ -190,6 +208,9 @@ impl FlowRootScanner {
 
 struct OpenRoot {
     first_node: usize,
+    /// Index in [`FlowRootScanner::bindings`] of the first binding the root
+    /// declares.
+    first_binding: usize,
     depth: usize,
     range: TextRange,
     /// Whether the root has its own `arguments` object when it runs.
@@ -277,6 +298,14 @@ mod tests {
 
     /// Returns the texts of the roots selected in `root`, in selection order.
     fn selected_in(root: &AnyJsRoot) -> Vec<String> {
+        scan(root)
+            .selected()
+            .iter()
+            .map(|selected| selected.root.syntax().text_trimmed().to_string())
+            .collect()
+    }
+
+    fn scan(root: &AnyJsRoot) -> FlowRootScanner {
         let model = semantic_model(root, SemanticModelOptions::default());
         let mut scanner = FlowRootScanner::default();
         for event in root.syntax().preorder() {
@@ -286,10 +315,6 @@ mod tests {
             }
         }
         scanner
-            .selected()
-            .iter()
-            .map(|root| root.syntax().text_trimmed().to_string())
-            .collect()
     }
 
     #[test]
@@ -299,6 +324,28 @@ mod tests {
         assert_eq!(
             selected("function f(x) { if (x) read(x); }"),
             ["function f(x) { if (x) read(x); }"]
+        );
+    }
+
+    #[test]
+    fn selected_roots_keep_the_bindings_of_their_own_code() {
+        const SOURCE: &str = "function f(a, b: (x: string) => void) { const c = a; const g = (d) => d && c; const h = (z) => z; if (a) { let e = c; } }";
+        let parsed = parse(SOURCE, JsFileSource::ts(), JsParserOptions::default());
+        assert!(!parsed.has_errors());
+        let bindings: Vec<Vec<String>> = scan(&parsed.tree())
+            .selected()
+            .iter()
+            .map(|selected| {
+                selected
+                    .bindings
+                    .iter()
+                    .map(|binding| binding.syntax().text_trimmed().to_string())
+                    .collect()
+            })
+            .collect();
+        assert_eq!(
+            bindings,
+            [vec!["d"], vec!["f", "a", "b", "c", "g", "h", "e"]]
         );
     }
 
