@@ -1,0 +1,13 @@
+$color: red
+
+@mixin theme($c)
+  color: $c
+
+.foo
+  @include theme($color)
+  @if $color
+    color: blue
+  @else
+    color: green
+  &:hover
+    color: red

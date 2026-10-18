@@ -7,6 +7,18 @@ pub(crate) struct FormatCssSelectorList;
 impl FormatRule<CssSelectorList> for FormatCssSelectorList {
     type Context = CssFormatContext;
     fn fmt(&self, node: &CssSelectorList, f: &mut CssFormatter) -> FormatResult<()> {
+        if f.options().is_indented_syntax() {
+            // A line break ends a selector in the indented syntax, so the list
+            // stays on one line.
+            let mut joiner = f.join_with(space());
+
+            for formatted in node.format_separated(",") {
+                joiner.entry(&group(&formatted));
+            }
+
+            return joiner.finish();
+        }
+
         let separator = soft_line_break_or_space();
         // Using `join_with` and a manual separator instead of `join_nodes_with_soft_line`
         // here allows ensures that the list won't try to read the input source to

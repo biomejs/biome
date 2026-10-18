@@ -514,7 +514,7 @@ impl<'src> CssLexer<'src> {
     /// Docs: https://sass-lang.com/documentation/operators
     #[inline]
     fn is_scss(&self) -> bool {
-        self.source_type.is_scss()
+        self.source_type.is_sass_language()
     }
 
     /// Enables `//` line-comment lexing only for SCSS (or permissive mode), since
@@ -803,9 +803,50 @@ impl<'src> CssLexer<'src> {
         let dispatched = lookup_byte(current);
 
         match dispatched {
-            WHS => self.consume_byte(CSS_SPACE_LITERAL),
+            WHS => {
+                // In the indented syntax a line break ends the selector, so
+                // whitespace that spans a line break is trivia rather than a
+                // descendant combinator.
+                if self.source_type.is_indented_syntax() && self.consume_indented_selector_newline()
+                {
+                    Self::NEWLINE
+                } else {
+                    self.consume_byte(CSS_SPACE_LITERAL)
+                }
+            }
             _ => self.consume_token(current),
         }
+    }
+
+    /// Consumes a selector whitespace run that contains a line break.
+    ///
+    /// Returns `true` and consumes the whole run, including trailing horizontal
+    /// whitespace, when a line break is present. Returns `false` and consumes
+    /// nothing otherwise.
+    fn consume_indented_selector_newline(&mut self) -> bool {
+        let start = self.position();
+        let bytes = self.source().as_bytes();
+        let mut end = start;
+        let mut has_newline = false;
+
+        while let Some(&byte) = bytes.get(end) {
+            match byte {
+                b'\t' | b' ' => end += 1,
+                b'\n' | b'\r' => {
+                    has_newline = true;
+                    end += 1;
+                }
+                _ => break,
+            }
+        }
+
+        if !has_newline {
+            return false;
+        }
+
+        self.advance(end - start);
+        self.after_newline = true;
+        true
     }
 
     fn consume_url_raw_value_token(&mut self, current: u8, scan: UrlRawValueScan) -> CssSyntaxKind {

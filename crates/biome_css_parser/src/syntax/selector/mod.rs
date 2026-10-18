@@ -7,6 +7,7 @@ pub(crate) mod relative_selector;
 use super::is_nth_at_metavariable;
 use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
+use crate::syntax::indented::is_at_indented_selector_end;
 use crate::syntax::parse_error::{
     expected_any_sub_selector, expected_compound_selector, expected_identifier, expected_selector,
     scss_only_syntax_error,
@@ -68,6 +69,9 @@ pub(crate) struct SelectorList {
     recovery_ts: TokenSet<CssSyntaxKind>,
     is_recovery_disabled: bool,
     is_partial_combinator_nesting_allowed: bool,
+    /// Whether at least one selector has been parsed, so a later line break can
+    /// end the list in the indented syntax.
+    has_parsed_selector: bool,
 }
 
 impl Default for SelectorList {
@@ -77,6 +81,7 @@ impl Default for SelectorList {
             recovery_ts: token_set![T!['{']],
             is_recovery_disabled: false,
             is_partial_combinator_nesting_allowed: false,
+            has_parsed_selector: false,
         }
     }
 }
@@ -132,6 +137,8 @@ impl ParseSeparatedList for SelectorList {
     const LIST_KIND: Self::Kind = CSS_SELECTOR_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
+        self.has_parsed_selector = true;
+
         if self.is_partial_combinator_nesting_allowed {
             parse_style_rule_selector(p)
         } else {
@@ -140,7 +147,9 @@ impl ParseSeparatedList for SelectorList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at_ts(self.end_kind_ts) || p.at(CSS_SPACE_LITERAL) && p.nth_at_ts(1, self.end_kind_ts)
+        p.at_ts(self.end_kind_ts)
+            || p.at(CSS_SPACE_LITERAL) && p.nth_at_ts(1, self.end_kind_ts)
+            || (self.has_parsed_selector && is_at_indented_selector_end(p))
     }
 
     fn recover(
@@ -443,9 +452,9 @@ fn parse_compound_selector(p: &mut CssParser) -> ParsedSyntax {
 
     let m = p.start();
 
-    NestedSelectorList.parse_list(p);
+    NestedSelectorList::default().parse_list(p);
     parse_simple_selector(p).ok(); // We don't need to handle error here because a simple selector is optional
-    SubSelectorList.parse_list(p);
+    SubSelectorList::default().parse_list(p);
 
     Present(m.complete(p, CSS_COMPOUND_SELECTOR))
 }
@@ -562,7 +571,13 @@ fn parse_namespace_prefix(p: &mut CssParser) -> ParsedSyntax {
     Present(m.complete(p, kind))
 }
 
-pub(crate) struct SubSelectorList;
+#[derive(Default)]
+pub(crate) struct SubSelectorList {
+    /// Whether at least one sub-selector has been parsed, so a later line break
+    /// can end the list in the indented syntax.
+    has_parsed_element: bool,
+}
+
 impl SubSelectorList {
     pub(crate) const START_SET: TokenSet<CssSyntaxKind> =
         token_set![T![#], T![.], T![:], T![::], T!['['], T![&], T![%]];
@@ -574,11 +589,12 @@ impl ParseNodeList for SubSelectorList {
     const LIST_KIND: CssSyntaxKind = CSS_SUB_SELECTOR_LIST;
 
     fn parse_element(&mut self, p: &mut CssParser) -> ParsedSyntax {
+        self.has_parsed_element = true;
         parse_sub_selector(p)
     }
 
     fn is_at_list_end(&self, p: &mut CssParser) -> bool {
-        !p.at_ts(Self::START_SET)
+        !p.at_ts(Self::START_SET) || (self.has_parsed_element && is_at_indented_selector_end(p))
     }
 
     fn recover(&mut self, p: &mut CssParser, parsed_element: ParsedSyntax) -> RecoveryResult {

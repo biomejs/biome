@@ -82,6 +82,19 @@ impl<'a> ScssListLayout<'a> {
             // Print `$buttonConfig:
             //   "save" 50px,
             //   "cancel" 50px;`.
+            // A line break ends a statement in the indented syntax, so the
+            // value stays on one line and only breaks when it exceeds the line
+            // width.
+            if f.options().is_indented_syntax() {
+                return write!(
+                    f,
+                    [group(&indent(&format_args![
+                        soft_line_break(),
+                        elements.format()
+                    ]))]
+                );
+            }
+
             return write!(
                 f,
                 [
@@ -91,7 +104,7 @@ impl<'a> ScssListLayout<'a> {
             );
         }
 
-        if should_preserve_source_group_breaks(self.node, f) {
+        if !f.options().is_indented_syntax() && should_preserve_source_group_breaks(self.node, f) {
             let elements = format_elements_with_source_breaks(&elements);
             return write!(f, [group(&format_args![soft_line_break(), elements])]);
         }

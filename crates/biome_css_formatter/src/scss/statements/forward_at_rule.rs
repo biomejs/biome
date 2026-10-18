@@ -37,7 +37,9 @@ impl FormatNodeRule<ScssForwardAtRule> for FormatScssForwardAtRule {
             write!(f, [space(), with_clause.format()])?;
         }
 
-        if let Some(semicolon_token) = semicolon_token {
+        if f.options().is_indented_syntax() {
+            Ok(())
+        } else if let Some(semicolon_token) = semicolon_token {
             write!(f, [semicolon_token.format()])
         } else {
             write!(f, [token(";")])

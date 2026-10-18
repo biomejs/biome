@@ -13379,7 +13379,7 @@ export type CssEmbeddingKind =
 /**
  * The language of the stylesheet.
  */
-export type CssFileLanguage = "css" | "scss";
+export type CssFileLanguage = "css" | "scss" | "sass";
 /**
  * Extra CSS features enabled for the file.
  *

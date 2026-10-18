@@ -3,6 +3,7 @@ use crate::syntax::at_rule::keyframes::parse_scss_template_keyframes_item;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::ParseBlockBody;
 use crate::syntax::declaration::parse_declaration_with_semicolon;
+use crate::syntax::indented::{is_at_indented_list_end, is_at_list_end_for};
 use crate::syntax::parse_error::{expected_any_declaration_or_at_rule, scss_only_syntax_error};
 use crate::syntax::scss::{
     is_at_scss_interpolated_property_name, is_at_scss_nesting_declaration,
@@ -34,6 +35,7 @@ struct DeclarationOrRuleListBlock;
 
 impl ParseBlockBody for DeclarationOrRuleListBlock {
     const BLOCK_KIND: CssSyntaxKind = CSS_DECLARATION_OR_RULE_BLOCK;
+    const SASS_BLOCK_KIND: CssSyntaxKind = CSS_SASS_INDENTED_DECLARATION_OR_RULE_BLOCK;
 
     fn is_at_element(&self, p: &mut CssParser) -> bool {
         is_at_declaration_or_rule_item(p)
@@ -171,7 +173,7 @@ impl ParseRecovery for DeclarationOrRuleListParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(self.end_kind) || is_at_declaration_or_rule_item(p)
+        is_at_list_end_for(p, self.end_kind) || is_at_declaration_or_rule_item(p)
     }
 }
 
@@ -276,8 +278,10 @@ impl ParseNodeList for DeclarationOrRuleList {
                 // Reject speculative declaration parses that stop at the end of an inner block
                 // rather than the current declaration-or-rule list.
                 // This avoids misclassifying selectors as declarations in embedded snippets.
-                let valid =
-                    (matches!(p.last(), Some(T![;])) && !p.at(T!['}'])) || p.at(self.end_kind);
+                let valid = (matches!(p.last(), Some(T![;])) && !p.at(T!['}']))
+                    || p.at(self.end_kind)
+                    || (p.source_type.is_indented_syntax()
+                        && (p.has_preceding_line_break() || is_at_indented_list_end(p)));
                 if valid { Ok(declaration) } else { Err(()) }
             });
 
@@ -354,7 +358,7 @@ impl ParseNodeList for DeclarationOrRuleList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(self.end_kind)
+        is_at_list_end_for(p, self.end_kind)
     }
 
     fn recover(

@@ -80,6 +80,16 @@ impl Rule for NoImportantInKeyframe {
                     .items()
                     .into_iter()
                     .find_map(|item| find_important(item.as_css_declaration_with_semicolon())),
+                AnyCssDeclarationOrStatementBlock::CssSassIndentedDeclarationBlock(block) => block
+                    .declarations()
+                    .into_iter()
+                    .find_map(|item| find_important(item.as_css_declaration_with_semicolon())),
+                AnyCssDeclarationOrStatementBlock::CssSassIndentedDeclarationOrAtRuleBlock(block) => {
+                    block
+                        .items()
+                        .into_iter()
+                        .find_map(|item| find_important(item.as_css_declaration_with_semicolon()))
+                }
                 AnyCssDeclarationOrStatementBlock::CssBogusBlock(_) => return None,
             };
 

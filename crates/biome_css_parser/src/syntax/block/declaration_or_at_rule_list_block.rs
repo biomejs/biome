@@ -1,6 +1,7 @@
 use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::ParseBlockBody;
+use crate::syntax::indented::is_at_list_end_for;
 use crate::syntax::parse_error::{expected_any_declaration_or_at_rule, scss_only_syntax_error};
 use crate::syntax::scss::{
     is_at_scss_interpolated_property_name, is_at_scss_nesting_declaration,
@@ -16,7 +17,7 @@ use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
 use biome_parser::parsed_syntax::ParsedSyntax;
 use biome_parser::parsed_syntax::ParsedSyntax::Absent;
-use biome_parser::{CompletedMarker, Parser, SyntaxFeature};
+use biome_parser::{CompletedMarker, SyntaxFeature};
 
 #[inline]
 pub(crate) fn parse_declaration_or_at_rule_list_block(p: &mut CssParser) -> CompletedMarker {
@@ -27,6 +28,7 @@ struct DeclarationOrAtRuleListBlock;
 
 impl ParseBlockBody for DeclarationOrAtRuleListBlock {
     const BLOCK_KIND: CssSyntaxKind = CSS_DECLARATION_OR_AT_RULE_BLOCK;
+    const SASS_BLOCK_KIND: CssSyntaxKind = CSS_SASS_INDENTED_DECLARATION_OR_AT_RULE_BLOCK;
 
     fn is_at_element(&self, p: &mut CssParser) -> bool {
         is_at_declaration_or_at_rule_item(p)
@@ -53,7 +55,7 @@ impl ParseRecovery for DeclarationOrAtRuleListParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T!['}']) || is_at_declaration_or_at_rule_item(p)
+        is_at_list_end_for(p, T!['}']) || is_at_declaration_or_at_rule_item(p)
     }
 }
 
@@ -116,7 +118,7 @@ impl ParseNodeList for DeclarationOrAtRuleList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(T!['}'])
+        is_at_list_end_for(p, T!['}'])
     }
 
     fn recover(

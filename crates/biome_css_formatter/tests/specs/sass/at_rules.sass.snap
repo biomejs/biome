@@ -1,0 +1,43 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: sass/at_rules.sass
+---
+
+# Input
+
+```sass
+$color: red
+
+@mixin theme($c)
+  color: $c
+
+.foo
+  @include theme($color)
+  @if $color
+    color: blue
+  @else
+    color: green
+  &:hover
+    color: red
+
+```
+
+
+# Formatted
+
+```sass
+$color: red
+
+@mixin theme($c)
+	color: $c
+
+.foo
+	@include theme($color)
+	@if $color
+		color: blue
+	@else
+		color: green
+	&:hover
+		color: red
+
+```

@@ -10,6 +10,7 @@ impl FormatRule<AnyCssDeclarationBlock> for FormatAnyCssDeclarationBlock {
         match node {
             AnyCssDeclarationBlock::CssBogusBlock(node) => node.format().fmt(f),
             AnyCssDeclarationBlock::CssDeclarationBlock(node) => node.format().fmt(f),
+            AnyCssDeclarationBlock::CssSassIndentedDeclarationBlock(node) => node.format().fmt(f),
         }
     }
 }

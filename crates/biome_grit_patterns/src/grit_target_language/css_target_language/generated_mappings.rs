@@ -252,6 +252,20 @@ pub fn native_kind_by_name(node_name: &str) -> Option<CssSyntaxKind> {
         "CssReturnsStatement" => lang::CssReturnsStatement::KIND_SET.iter().next(),
         "CssRoot" => lang::CssRoot::KIND_SET.iter().next(),
         "CssRuleBlock" => lang::CssRuleBlock::KIND_SET.iter().next(),
+        "CssSassIndentedDeclarationBlock" => lang::CssSassIndentedDeclarationBlock::KIND_SET
+            .iter()
+            .next(),
+        "CssSassIndentedDeclarationOrAtRuleBlock" => {
+            lang::CssSassIndentedDeclarationOrAtRuleBlock::KIND_SET
+                .iter()
+                .next()
+        }
+        "CssSassIndentedDeclarationOrRuleBlock" => {
+            lang::CssSassIndentedDeclarationOrRuleBlock::KIND_SET
+                .iter()
+                .next()
+        }
+        "CssSassIndentedRuleBlock" => lang::CssSassIndentedRuleBlock::KIND_SET.iter().next(),
         "CssScopeAtRule" => lang::CssScopeAtRule::KIND_SET.iter().next(),
         "CssScopeAtRuleDeclarator" => lang::CssScopeAtRuleDeclarator::KIND_SET.iter().next(),
         "CssScopeEdge" => lang::CssScopeEdge::KIND_SET.iter().next(),
@@ -634,6 +648,10 @@ pub fn native_slots_for_name(node_name: &str) -> &'static [(&'static str, u32)] 
         "CssReturnsStatement" => &[("ty", 1)],
         "CssRoot" => &[("items", 1)],
         "CssRuleBlock" => &[("rules", 1)],
+        "CssSassIndentedDeclarationBlock" => &[("declarations", 0)],
+        "CssSassIndentedDeclarationOrAtRuleBlock" => &[("items", 0)],
+        "CssSassIndentedDeclarationOrRuleBlock" => &[("items", 0)],
+        "CssSassIndentedRuleBlock" => &[("rules", 0)],
         "CssScopeAtRule" => &[("declarator", 0), ("block", 1)],
         "CssScopeAtRuleDeclarator" => &[("range", 1)],
         "CssScopeEdge" => &[("selectors", 1)],

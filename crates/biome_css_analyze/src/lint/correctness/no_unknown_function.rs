@@ -196,7 +196,7 @@ impl Rule for NoUnknownFunction {
             return None;
         }
 
-        if ctx.source_type::<CssFileSource>().is_scss()
+        if ctx.source_type::<CssFileSource>().is_sass_language()
             && (is_scss_built_in_function(function_name)
                 || ctx
                     .root()

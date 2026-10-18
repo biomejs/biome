@@ -2,6 +2,7 @@ mod at_rule;
 mod block;
 mod css_modules;
 mod declaration;
+mod indented;
 mod parse_error;
 mod property;
 mod scss;
@@ -14,6 +15,7 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::{DeclarationOrRuleList, parse_declaration_or_rule_list_block};
 use crate::syntax::declaration::{is_at_scss_empty_declaration, parse_empty_declaration};
+use crate::syntax::indented::is_at_list_end_for;
 use crate::syntax::parse_error::{
     expected_any_rule, expected_any_rule_list_item, expected_non_css_wide_keyword_identifier,
     inconsistent_scss_bracketed_list_separators, scss_only_syntax_error, tailwind_disabled,
@@ -73,7 +75,7 @@ impl SyntaxFeature for CssSyntaxFeatures {
 
     fn is_supported(&self, p: &Self::Parser<'_>) -> bool {
         match self {
-            Self::Scss => p.source_type.is_scss(),
+            Self::Scss => p.source_type.is_sass_language(),
             Self::Tailwind => p.options().is_tailwind_directives_enabled(),
             Self::CssModules => p.options().is_css_modules_enabled(),
             Self::CssModulesWithVue => p.options().is_css_modules_vue_enabled(),
@@ -196,7 +198,7 @@ impl ParseRecovery for RuleListParseRecovery {
     const RECOVERED_KIND: Self::Kind = CSS_BOGUS_RULE;
 
     fn is_at_recovered(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(self.end_kind) || is_at_rule_list_element(p)
+        is_at_list_end_for(p, self.end_kind) || is_at_rule_list_element(p)
     }
 }
 
@@ -224,7 +226,7 @@ impl ParseNodeList for RuleList {
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
-        p.at(self.end_kind)
+        is_at_list_end_for(p, self.end_kind)
     }
 
     fn recover(
@@ -307,9 +309,14 @@ pub(crate) fn try_parse_nested_qualified_rule_without_selector_recovery(
             return Err(());
         };
 
-        if block_kind != CSS_DECLARATION_OR_RULE_BLOCK
-            || p.last().is_none_or(|kind| kind != end_kind)
-        {
+        let is_indented = p.source_type.is_indented_syntax();
+        let block_matches = block_kind == CSS_DECLARATION_OR_RULE_BLOCK
+            || (is_indented && block_kind == CSS_SASS_INDENTED_DECLARATION_OR_RULE_BLOCK);
+        // The indented syntax has no closing brace, so the block parser already
+        // proves the rule is complete when it produced an indented block.
+        let reached_end = is_indented || p.last().is_some_and(|kind| kind == end_kind);
+
+        if !block_matches || !reached_end {
             return Err(());
         }
 
@@ -350,8 +357,14 @@ fn parse_nested_qualified_rule_with_selector_recovery(
             .disable_recovery()
             .parse_list(p);
 
-        // In strict mode, reject selectors that don't reach the opening brace.
-        if !p.at(T!['{']) {
+        // In strict mode, reject selectors that don't reach the opening brace or,
+        // in the indented syntax, an indented block.
+        let reached_block = if p.source_type.is_indented_syntax() {
+            crate::syntax::indented::is_at_indented_block_body(p)
+        } else {
+            p.at(T!['{'])
+        };
+        if !reached_block {
             m.abandon(p);
             return None;
         }

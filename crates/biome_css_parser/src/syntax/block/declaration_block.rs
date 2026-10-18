@@ -14,6 +14,7 @@ struct DeclarationBlock;
 
 impl ParseBlockBody for DeclarationBlock {
     const BLOCK_KIND: CssSyntaxKind = CSS_DECLARATION_BLOCK;
+    const SASS_BLOCK_KIND: CssSyntaxKind = CSS_SASS_INDENTED_DECLARATION_BLOCK;
 
     fn is_at_element(&self, p: &mut CssParser) -> bool {
         is_at_any_declaration(p)

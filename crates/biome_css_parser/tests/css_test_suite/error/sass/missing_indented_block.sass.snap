@@ -1,0 +1,142 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+
+## Input
+
+```css
+.foo
+color: red
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    items: CssRootItemList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: missing (optional),
+                    sub_selectors: CssSubSelectorList [
+                        CssClassSelector {
+                            dot_token: DOT@0..1 "." [] [],
+                            name: CssCustomIdentifier {
+                                value_token: IDENT@1..4 "foo" [] [],
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssBogusBlock {
+                items: [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@4..10 "color" [Newline("\n")] [],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [
+                        CssPseudoClassSelector {
+                            colon_token: COLON@10..12 ":" [] [Whitespace(" ")],
+                            class: CssPseudoClassIdentifier {
+                                name: CssIdentifier {
+                                    value_token: IDENT@12..15 "red" [] [],
+                                },
+                            },
+                        },
+                    ],
+                },
+            ],
+            block: CssBogusBlock {
+                items: [],
+            },
+        },
+    ],
+    eof_token: EOF@15..16 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..16
+  0: (empty)
+  1: CSS_ROOT_ITEM_LIST@0..15
+    0: CSS_QUALIFIED_RULE@0..4
+      0: CSS_SELECTOR_LIST@0..4
+        0: CSS_COMPOUND_SELECTOR@0..4
+          0: CSS_NESTED_SELECTOR_LIST@0..0
+          1: (empty)
+          2: CSS_SUB_SELECTOR_LIST@0..4
+            0: CSS_CLASS_SELECTOR@0..4
+              0: DOT@0..1 "." [] []
+              1: CSS_CUSTOM_IDENTIFIER@1..4
+                0: IDENT@1..4 "foo" [] []
+      1: CSS_BOGUS_BLOCK@4..4
+    1: CSS_QUALIFIED_RULE@4..15
+      0: CSS_SELECTOR_LIST@4..15
+        0: CSS_COMPOUND_SELECTOR@4..15
+          0: CSS_NESTED_SELECTOR_LIST@4..4
+          1: CSS_TYPE_SELECTOR@4..10
+            0: (empty)
+            1: CSS_IDENTIFIER@4..10
+              0: IDENT@4..10 "color" [Newline("\n")] []
+          2: CSS_SUB_SELECTOR_LIST@10..15
+            0: CSS_PSEUDO_CLASS_SELECTOR@10..15
+              0: COLON@10..12 ":" [] [Whitespace(" ")]
+              1: CSS_PSEUDO_CLASS_IDENTIFIER@12..15
+                0: CSS_IDENTIFIER@12..15
+                  0: IDENT@12..15 "red" [] []
+      1: CSS_BOGUS_BLOCK@15..15
+  2: EOF@15..16 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+missing_indented_block.sass:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a body but instead found 'color'.
+  
+    1 │ .foo
+  > 2 │ color: red
+      │ ^^^^^
+    3 │ 
+  
+  i Expected a body here.
+  
+    1 │ .foo
+  > 2 │ color: red
+      │ ^^^^^
+    3 │ 
+  
+missing_indented_block.sass:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a body but instead found the end of the file.
+  
+    1 │ .foo
+    2 │ color: red
+  > 3 │ 
+      │ 
+  
+  i Expected a body here.
+  
+    1 │ .foo
+    2 │ color: red
+  > 3 │ 
+      │ 
+  
+```

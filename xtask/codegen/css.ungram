@@ -650,12 +650,18 @@ CssPseudoElementFunctionParameterList = CssIdentifier*
 
 AnyCssDeclarationOrRuleBlock =
 	CssDeclarationOrRuleBlock
+	| CssSassIndentedDeclarationOrRuleBlock
 	| CssBogusBlock
 
 CssDeclarationOrRuleBlock =
 	'{'
 	items: CssDeclarationOrRuleList
 	'}'
+
+// .foo
+//   color: red
+CssSassIndentedDeclarationOrRuleBlock =
+	items: CssDeclarationOrRuleList
 
 CssDeclarationOrRuleList = AnyCssDeclarationOrRule*
 
@@ -673,12 +679,16 @@ AnyCssDeclarationOrRule =
 // 						 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AnyCssDeclarationOrAtRuleBlock =
 	CssDeclarationOrAtRuleBlock
+	| CssSassIndentedDeclarationOrAtRuleBlock
 	| CssBogusBlock
 
 CssDeclarationOrAtRuleBlock =
 	'{'
 	items: CssDeclarationOrAtRuleList
  	'}'
+
+CssSassIndentedDeclarationOrAtRuleBlock =
+	items: CssDeclarationOrAtRuleList
 
 CssDeclarationOrAtRuleList = AnyCssDeclarationOrAtRule*
 
@@ -694,6 +704,7 @@ AnyCssDeclarationOrAtRule =
 AnyCssConditionalBlock =
 	CssDeclarationOrRuleBlock
 	| CssRuleBlock
+	| CssSassIndentedDeclarationOrRuleBlock
 	| CssBogusBlock
 
 // @page :left { background: red; @media (500px <= width <= 500px) {  } }
@@ -708,6 +719,7 @@ CssEmptyDeclaration =
 
 AnyCssDeclarationBlock =
 	CssDeclarationBlock
+	| CssSassIndentedDeclarationBlock
 	| CssBogusBlock
 
 // Declaration-only CSS bodies that SCSS extends with statements.
@@ -717,12 +729,17 @@ AnyCssDeclarationBlock =
 AnyCssDeclarationOrStatementBlock =
 	CssDeclarationBlock
 	| CssDeclarationOrAtRuleBlock
+	| CssSassIndentedDeclarationBlock
+	| CssSassIndentedDeclarationOrAtRuleBlock
 	| CssBogusBlock
 
 CssDeclarationBlock =
 	'{'
 	declarations: CssDeclarationList
  	'}'
+
+CssSassIndentedDeclarationBlock =
+	declarations: CssDeclarationList
 
 CssDeclarationList = AnyCssDeclaration*
 
@@ -735,12 +752,16 @@ AnyCssDeclaration =
 
 AnyCssRuleBlock =
 	CssRuleBlock
+	| CssSassIndentedRuleBlock
 	| CssBogusBlock
 
 CssRuleBlock =
 	'{'
 	rules: CssRuleList
  	'}'
+
+CssSassIndentedRuleBlock =
+	rules: CssRuleList
 
 CssDeclaration =
 	property: AnyCssProperty
@@ -3110,6 +3131,7 @@ ScssEachAtRule =
 //                                ^^^^^^^^^^^^^^^^^^^^^^^^
 AnyCssControlBlock =
 	CssDeclarationOrRuleBlock
+	| CssSassIndentedDeclarationOrRuleBlock
 	| CssKeyframesBlock
 
 // @each $item in $list { color: $item; }
@@ -3144,7 +3166,7 @@ ScssMixinAtRule =
 	'mixin'
 	name: CssIdentifier
 	parameters: ScssParameterList?
-	block: CssDeclarationOrRuleBlock
+	block: AnyCssDeclarationOrRuleBlock
 
 // @function double($value: 2) { @return $value * 2; }
 // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -3152,7 +3174,7 @@ ScssFunctionAtRule =
 	'function'
 	name: CssIdentifier
 	parameters: ScssParameterList?
-	block: CssDeclarationOrRuleBlock
+	block: AnyCssDeclarationOrRuleBlock
 
 // @use "sass:math";
 // ^^^^^^^^^^^^^^^^^
@@ -3347,7 +3369,7 @@ ScssIncludeAtRule =
 	name: AnyScssIncludeTarget
 	arguments: ScssIncludeArgumentList?
 	using_clause: ScssIncludeUsingClause?
-	block: CssDeclarationOrRuleBlock?
+	block: AnyCssDeclarationOrRuleBlock?
 	';'?
 
 AnyScssIncludeTarget =
@@ -3462,6 +3484,7 @@ ScssElseClause =
 AnyScssElseClauseBody =
 	ScssIfAtRule
 	| CssDeclarationOrRuleBlock
+	| CssSassIndentedDeclarationOrRuleBlock
 	| CssKeyframesBlock
 
 // @while $i > 0 { $i: $i - 1; }

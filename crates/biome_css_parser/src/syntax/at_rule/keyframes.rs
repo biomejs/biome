@@ -219,6 +219,7 @@ fn parse_keyframes_block(p: &mut CssParser) -> CompletedMarker {
 
 impl ParseBlockBody for KeyframesBlock {
     const BLOCK_KIND: CssSyntaxKind = CSS_KEYFRAMES_BLOCK;
+    const SASS_BLOCK_KIND: CssSyntaxKind = CSS_BOGUS_BLOCK;
 
     fn is_at_element(&self, p: &mut CssParser) -> bool {
         // A semicolon cannot supply the body when the opening brace is missing.

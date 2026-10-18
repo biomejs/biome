@@ -245,6 +245,12 @@ impl<'a> ScssVariableDeclarationComments<'a> {
         preserve_source_gap_before_semicolon: bool,
         f: &mut CssFormatter,
     ) -> FormatResult<()> {
+        // The indented syntax terminates statements with line breaks, so it
+        // never prints a semicolon.
+        if f.options().is_indented_syntax() {
+            return Ok(());
+        }
+
         if let Some(semicolon) = semicolon_token.as_ref() {
             if preserve_source_gap_before_semicolon && has_block_comment_gap_before_token(semicolon)
             {
