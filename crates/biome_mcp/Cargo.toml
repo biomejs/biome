@@ -1,0 +1,23 @@
+[package]
+name                 = "biome_mcp"
+version              = "0.0.0"
+authors.workspace    = true
+edition.workspace    = true
+description          = "Biome's Model Context Protocol server"
+homepage.workspace   = true
+repository.workspace = true
+license.workspace    = true
+keywords.workspace   = true
+categories.workspace = true
+publish              = false
+
+[dependencies]
+biome_configuration = { workspace = true }
+rmcp                = { workspace = true, features = ["macros", "schemars", "server", "transport-io"] }
+
+[dev-dependencies]
+rmcp  = { workspace = true, features = ["client"] }
+tokio = { workspace = true, features = ["io-util", "macros", "rt", "rt-multi-thread"] }
+
+[lints]
+workspace = true

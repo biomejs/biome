@@ -59,6 +59,8 @@ pub(crate) mod format;
 pub(crate) mod init;
 pub(crate) mod inspect;
 pub(crate) mod lint;
+#[cfg(feature = "mcp")]
+pub(crate) mod mcp;
 pub(crate) mod migrate;
 pub(crate) mod rage;
 pub(crate) mod search;
@@ -695,6 +697,11 @@ pub enum BiomeCommand {
 
     #[bpaf(command("__where_am_i"), hide)]
     WhereAmI,
+
+    /// Runs a Model Context Protocol server over standard input and output, so coding agents can use Biome.
+    #[cfg(feature = "mcp")]
+    #[bpaf(command("mcp"), hide)]
+    Mcp,
 }
 
 #[derive(Debug, Bpaf, Clone)]
@@ -801,6 +808,8 @@ impl BiomeCommand {
             | Self::Clean { .. }
             | Self::PrintSocket => None,
             Self::WhereAmI => None,
+            #[cfg(feature = "mcp")]
+            Self::Mcp => None,
         }
     }
 
@@ -825,6 +834,8 @@ impl BiomeCommand {
             | Self::Clean { .. }
             | Self::PrintSocket => None,
             Self::WhereAmI => None,
+            #[cfg(feature = "mcp")]
+            Self::Mcp => None,
         }
     }
 
@@ -1186,5 +1197,20 @@ mod tests {
     #[test]
     fn check_options() {
         biome_command().check_invariants(false);
+    }
+
+    #[cfg(feature = "mcp")]
+    #[test]
+    fn mcp_command_parses_and_is_hidden_from_help() {
+        let command = biome_command()
+            .run_inner(&["mcp"])
+            .expect("`mcp` should parse");
+        assert!(matches!(command, BiomeCommand::Mcp));
+
+        let help = biome_command()
+            .run_inner(&["--help"])
+            .expect_err("`--help` should print the help")
+            .unwrap_stdout();
+        assert!(!help.contains("mcp"), "the help lists `mcp`:\n{help}");
     }
 }

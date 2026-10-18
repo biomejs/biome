@@ -348,6 +348,8 @@ impl<'app> CliSession<'app> {
                 }
                 Ok(())
             }
+            #[cfg(feature = "mcp")]
+            BiomeCommand::Mcp => commands::mcp::mcp(),
         }
     }
 }
