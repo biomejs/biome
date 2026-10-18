@@ -20,3 +20,4 @@ button, :not(:is(.b, .c)) { color: blue; }
 @function --good(--value: {a; b !important} @raw(value), --after: [c, d]) { result: var(--value); }
 @function --missing-opening --value: red { result: red; }
 .after { color: green; }
+@function --comma(--a: red,, --b: {x:y}) { result: var(--b); }

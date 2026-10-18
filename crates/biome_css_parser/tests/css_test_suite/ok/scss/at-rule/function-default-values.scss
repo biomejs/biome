@@ -22,3 +22,5 @@ $gap: 8px;
   @return $value;
 }
 .after { padding: ordinary(); background: url([a); }
+@function --adjacency(--image: (url (foo) url/**/(bar) url(baz))) { result: var(--image); }
+.raw { --image: (url (foo) url/**/(bar) url(baz)); }

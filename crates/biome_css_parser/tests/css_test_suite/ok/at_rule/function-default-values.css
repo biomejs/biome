@@ -26,3 +26,4 @@
   background: url(]a);
   background: url(}a);
 }
+@function --adjacency(--image: (url (foo) url/**/(bar) url(baz))) { result: var(--image); }

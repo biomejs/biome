@@ -252,8 +252,12 @@ impl ParseSeparatedList for CssFunctionParameterList {
     const LIST_KIND: Self::Kind = CSS_FUNCTION_PARAMETER_LIST;
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
-        self.has_structural_error |= !is_at_dashed_identifier(p);
+        self.has_structural_error |= !p.at(T![,]) && !is_at_dashed_identifier(p);
         parse_function_parameter(p, self.is_recovering_at_body)
+    }
+
+    fn diagnose_missing_element(&mut self, p: &mut Self::Parser<'_>) {
+        p.error(expected_function_parameter(p, p.cur_range()));
     }
 
     fn expect_separator(&mut self, p: &mut Self::Parser<'_>) -> bool {
@@ -348,7 +352,7 @@ mod tests {
                     "] @function --good(--x:red) {result:red;}",
                     "} @function --good(--x:red) {result:red;}",
                 ] {
-                    for count in [32, 64, 128] {
+                    for count in [32, 64, 128, 1024] {
                         let mut source =
                             format!("@function {name}(--x:red {{result:red;}}\n").repeat(count);
                         source.push_str(suffix);

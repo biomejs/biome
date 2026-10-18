@@ -34,6 +34,7 @@ expression: snapshot
   background: url(]a);
   background: url(}a);
 }
+@function --adjacency(--image: (url (foo) url/**/(bar) url(baz))) { result: var(--image); }
 
 ```
 
@@ -1216,17 +1217,119 @@ CssRoot {
                 r_curly_token: R_CURLY@1060..1062 "}" [Newline("\n")] [],
             },
         },
+        CssAtRule {
+            at_token: AT@1062..1064 "@" [Newline("\n")] [],
+            rule: CssFunctionAtRule {
+                declarator: CssFunctionAtRuleDeclarator {
+                    function_token: FUNCTION_KW@1064..1073 "function" [] [Whitespace(" ")],
+                    name: CssDashedIdentifier {
+                        value_token: IDENT@1073..1084 "--adjacency" [] [],
+                    },
+                    l_paren_token: L_PAREN@1084..1085 "(" [] [],
+                    parameters: CssFunctionParameterList [
+                        CssFunctionParameter {
+                            name: CssDashedIdentifier {
+                                value_token: IDENT@1085..1092 "--image" [] [],
+                            },
+                            ty: missing (optional),
+                            default_value: CssFunctionParameterDefaultValue {
+                                colon_token: COLON@1092..1094 ":" [] [Whitespace(" ")],
+                                components: CssCustomPropertyComponentList [
+                                    CssCustomPropertyParenthesizedBlock {
+                                        l_paren_token: L_PAREN@1094..1095 "(" [] [],
+                                        components: CssCustomPropertyComponentList [
+                                            CssCustomIdentifier {
+                                                value_token: IDENT@1095..1099 "url" [] [Whitespace(" ")],
+                                            },
+                                            CssCustomPropertyParenthesizedBlock {
+                                                l_paren_token: L_PAREN@1099..1100 "(" [] [],
+                                                components: CssCustomPropertyComponentList [
+                                                    CssCustomIdentifier {
+                                                        value_token: IDENT@1100..1103 "foo" [] [],
+                                                    },
+                                                ],
+                                                r_paren_token: R_PAREN@1103..1105 ")" [] [Whitespace(" ")],
+                                            },
+                                            CssCustomIdentifier {
+                                                value_token: IDENT@1105..1112 "url" [] [Comments("/**/")],
+                                            },
+                                            CssCustomPropertyParenthesizedBlock {
+                                                l_paren_token: L_PAREN@1112..1113 "(" [] [],
+                                                components: CssCustomPropertyComponentList [
+                                                    CssCustomIdentifier {
+                                                        value_token: IDENT@1113..1116 "bar" [] [],
+                                                    },
+                                                ],
+                                                r_paren_token: R_PAREN@1116..1118 ")" [] [Whitespace(" ")],
+                                            },
+                                            CssUrlFunction {
+                                                name: URL_KW@1118..1121 "url" [] [],
+                                                l_paren_token: L_PAREN@1121..1122 "(" [] [],
+                                                value: CssUrlValueRaw {
+                                                    value_token: CSS_URL_VALUE_RAW_LITERAL@1122..1125 "baz" [] [],
+                                                },
+                                                modifiers: CssUrlModifierList [],
+                                                r_paren_token: R_PAREN@1125..1126 ")" [] [],
+                                            },
+                                        ],
+                                        r_paren_token: R_PAREN@1126..1127 ")" [] [],
+                                    },
+                                ],
+                            },
+                        },
+                    ],
+                    r_paren_token: R_PAREN@1127..1129 ")" [] [Whitespace(" ")],
+                    returns: missing (optional),
+                },
+                block: CssDeclarationOrAtRuleBlock {
+                    l_curly_token: L_CURLY@1129..1131 "{" [] [Whitespace(" ")],
+                    items: CssDeclarationOrAtRuleList [
+                        CssDeclarationWithSemicolon {
+                            declaration: CssDeclaration {
+                                property: CssGenericProperty {
+                                    name: CssIdentifier {
+                                        value_token: IDENT@1131..1137 "result" [] [],
+                                    },
+                                    colon_token: COLON@1137..1139 ":" [] [Whitespace(" ")],
+                                    value: CssGenericComponentValueList [
+                                        CssFunction {
+                                            name: CssIdentifier {
+                                                value_token: IDENT@1139..1142 "var" [] [],
+                                            },
+                                            l_paren_token: L_PAREN@1142..1143 "(" [] [],
+                                            items: CssParameterList [
+                                                CssListOfComponentValuesExpression {
+                                                    css_component_value_list: CssComponentValueList [
+                                                        CssDashedIdentifier {
+                                                            value_token: IDENT@1143..1150 "--image" [] [],
+                                                        },
+                                                    ],
+                                                },
+                                            ],
+                                            r_paren_token: R_PAREN@1150..1151 ")" [] [],
+                                        },
+                                    ],
+                                },
+                                important: missing (optional),
+                            },
+                            semicolon_token: SEMICOLON@1151..1153 ";" [] [Whitespace(" ")],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@1153..1154 "}" [] [],
+                },
+            },
+        },
     ],
-    eof_token: EOF@1062..1063 "" [Newline("\n")] [],
+    eof_token: EOF@1154..1155 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..1063
+0: CSS_ROOT@0..1155
   0: (empty)
-  1: CSS_ROOT_ITEM_LIST@0..1062
+  1: CSS_ROOT_ITEM_LIST@0..1154
     0: CSS_AT_RULE@0..98
       0: AT@0..1 "@" [] []
       1: CSS_FUNCTION_AT_RULE@1..98
@@ -2021,6 +2124,74 @@ CssRoot {
               1: (empty)
             1: SEMICOLON@1059..1060 ";" [] []
         2: R_CURLY@1060..1062 "}" [Newline("\n")] []
-  2: EOF@1062..1063 "" [Newline("\n")] []
+    7: CSS_AT_RULE@1062..1154
+      0: AT@1062..1064 "@" [Newline("\n")] []
+      1: CSS_FUNCTION_AT_RULE@1064..1154
+        0: CSS_FUNCTION_AT_RULE_DECLARATOR@1064..1129
+          0: FUNCTION_KW@1064..1073 "function" [] [Whitespace(" ")]
+          1: CSS_DASHED_IDENTIFIER@1073..1084
+            0: IDENT@1073..1084 "--adjacency" [] []
+          2: L_PAREN@1084..1085 "(" [] []
+          3: CSS_FUNCTION_PARAMETER_LIST@1085..1127
+            0: CSS_FUNCTION_PARAMETER@1085..1127
+              0: CSS_DASHED_IDENTIFIER@1085..1092
+                0: IDENT@1085..1092 "--image" [] []
+              1: (empty)
+              2: CSS_FUNCTION_PARAMETER_DEFAULT_VALUE@1092..1127
+                0: COLON@1092..1094 ":" [] [Whitespace(" ")]
+                1: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@1094..1127
+                  0: CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK@1094..1127
+                    0: L_PAREN@1094..1095 "(" [] []
+                    1: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@1095..1126
+                      0: CSS_CUSTOM_IDENTIFIER@1095..1099
+                        0: IDENT@1095..1099 "url" [] [Whitespace(" ")]
+                      1: CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK@1099..1105
+                        0: L_PAREN@1099..1100 "(" [] []
+                        1: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@1100..1103
+                          0: CSS_CUSTOM_IDENTIFIER@1100..1103
+                            0: IDENT@1100..1103 "foo" [] []
+                        2: R_PAREN@1103..1105 ")" [] [Whitespace(" ")]
+                      2: CSS_CUSTOM_IDENTIFIER@1105..1112
+                        0: IDENT@1105..1112 "url" [] [Comments("/**/")]
+                      3: CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK@1112..1118
+                        0: L_PAREN@1112..1113 "(" [] []
+                        1: CSS_CUSTOM_PROPERTY_COMPONENT_LIST@1113..1116
+                          0: CSS_CUSTOM_IDENTIFIER@1113..1116
+                            0: IDENT@1113..1116 "bar" [] []
+                        2: R_PAREN@1116..1118 ")" [] [Whitespace(" ")]
+                      4: CSS_URL_FUNCTION@1118..1126
+                        0: URL_KW@1118..1121 "url" [] []
+                        1: L_PAREN@1121..1122 "(" [] []
+                        2: CSS_URL_VALUE_RAW@1122..1125
+                          0: CSS_URL_VALUE_RAW_LITERAL@1122..1125 "baz" [] []
+                        3: CSS_URL_MODIFIER_LIST@1125..1125
+                        4: R_PAREN@1125..1126 ")" [] []
+                    2: R_PAREN@1126..1127 ")" [] []
+          4: R_PAREN@1127..1129 ")" [] [Whitespace(" ")]
+          5: (empty)
+        1: CSS_DECLARATION_OR_AT_RULE_BLOCK@1129..1154
+          0: L_CURLY@1129..1131 "{" [] [Whitespace(" ")]
+          1: CSS_DECLARATION_OR_AT_RULE_LIST@1131..1153
+            0: CSS_DECLARATION_WITH_SEMICOLON@1131..1153
+              0: CSS_DECLARATION@1131..1151
+                0: CSS_GENERIC_PROPERTY@1131..1151
+                  0: CSS_IDENTIFIER@1131..1137
+                    0: IDENT@1131..1137 "result" [] []
+                  1: COLON@1137..1139 ":" [] [Whitespace(" ")]
+                  2: CSS_GENERIC_COMPONENT_VALUE_LIST@1139..1151
+                    0: CSS_FUNCTION@1139..1151
+                      0: CSS_IDENTIFIER@1139..1142
+                        0: IDENT@1139..1142 "var" [] []
+                      1: L_PAREN@1142..1143 "(" [] []
+                      2: CSS_PARAMETER_LIST@1143..1150
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@1143..1150
+                          0: CSS_COMPONENT_VALUE_LIST@1143..1150
+                            0: CSS_DASHED_IDENTIFIER@1143..1150
+                              0: IDENT@1143..1150 "--image" [] []
+                      3: R_PAREN@1150..1151 ")" [] []
+                1: (empty)
+              1: SEMICOLON@1151..1153 ";" [] [Whitespace(" ")]
+          2: R_CURLY@1153..1154 "}" [] []
+  2: EOF@1154..1155 "" [Newline("\n")] []
 
 ```

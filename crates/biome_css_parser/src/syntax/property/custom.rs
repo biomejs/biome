@@ -13,12 +13,12 @@ use crate::syntax::{
     parse_metavariable_with_context, parse_number,
 };
 use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::{CssSyntaxKind, T};
+use biome_css_syntax::{CssSyntaxKind, T, TextSize};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{RecoveryError, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
-use biome_parser::{CompletedMarker, Parser, SyntaxFeature, TokenSet, token_set};
+use biome_parser::{CompletedMarker, Marker, Parser, SyntaxFeature, TokenSet, token_set};
 
 const CUSTOM_PROPERTY_DELIMITER_SET: TokenSet<CssSyntaxKind> = token_set![
     CSS_DELIM_LITERAL,
@@ -326,8 +326,8 @@ fn parse_custom_property_component(
         parse_scss_interpolated_string(p, context)
     } else if p.at(CSS_STRING_LITERAL) {
         parse_custom_property_string(p, context)
-    } else if is_at_custom_property_function(p) {
-        parse_custom_property_function(
+    } else if is_at_custom_property_nested_component(p) {
+        parse_custom_property_nested_component(
             p,
             comment_mode,
             nested_end_set,
@@ -338,14 +338,6 @@ fn parse_custom_property_component(
         parse_any_dimension(p, context)
     } else if p.at(CSS_NUMBER_LITERAL) {
         parse_number(p, context)
-    } else if p.at_ts(CUSTOM_PROPERTY_BLOCK_START_SET) {
-        parse_custom_property_block(
-            p,
-            comment_mode,
-            nested_end_set,
-            legacy_filter_recovery,
-            mode,
-        )
     } else if is_at_identifier(p) {
         parse_custom_identifier_with_keywords(p, context, true)
     } else {
@@ -359,17 +351,24 @@ fn is_at_custom_property_function(p: &mut CssParser) -> bool {
     is_at_identifier(p) && is_nth_at_adjacent_l_paren(p, 1)
 }
 
-/// Parses a source-tight function with a preserved raw body.
+/// Returns whether a raw function or balanced block starts here.
 ///
-/// Example: `function(rule){...}` in `--script: function(rule){...};`.
-fn parse_custom_property_function(
+/// Example: `fn([a], {b:c})` in `--value: fn([a], {b:c});`.
+fn is_at_custom_property_nested_component(p: &mut CssParser) -> bool {
+    is_at_custom_property_function(p) || p.at_ts(CUSTOM_PROPERTY_BLOCK_START_SET)
+}
+
+/// Parses raw nested values without using the call stack for each block.
+///
+/// Example: `fn([a], {b:c})` in `--value: fn([a], {b:c});`.
+fn parse_custom_property_nested_component(
     p: &mut CssParser,
     comment_mode: CssCustomPropertyCommentMode,
     nested_end_set: Option<TokenSet<CssSyntaxKind>>,
     legacy_filter_recovery: bool,
     mode: CustomPropertyValueMode,
 ) -> ParsedSyntax {
-    if !is_at_custom_property_function(p) {
+    if !is_at_custom_property_nested_component(p) {
         return Absent;
     }
 
@@ -379,66 +378,108 @@ fn parse_custom_property_function(
         return Present(url);
     }
 
-    let function = p.start();
-    parse_custom_identifier_with_keywords(p, context, true).ok();
-    let opening = p.cur_range().start();
-    p.bump_with_context(T!['('], context);
-    CustomPropertyComponentList::block(comment_mode, nested_end_set, legacy_filter_recovery, mode)
-        .parse_list(p);
-    if p.at_ts(token_set![T![']'], T!['}'], EOF])
-        && p.is_speculative_parsing()
-        && matches!(mode, CustomPropertyValueMode::FunctionDefault { .. })
-    {
-        p.state_mut()
-            .unclosed_function_default_parens
-            .insert(opening);
-    }
-    let has_close = p.expect_with_context(T![')'], context);
-    let kind = if !has_close && matches!(mode, CustomPropertyValueMode::FunctionDefault { .. }) {
-        CSS_BOGUS_PROPERTY_VALUE
-    } else {
-        CSS_CUSTOM_PROPERTY_FUNCTION
+    let Some(mut current) = CustomPropertyContainer::new(p, context) else {
+        return Absent;
     };
-    Present(function.complete(p, kind))
+    let mut parents = Vec::new();
+    let mut components = CustomPropertyComponentList::block(
+        comment_mode,
+        nested_end_set,
+        legacy_filter_recovery,
+        mode,
+    );
+
+    loop {
+        if !components.is_at_list_end(p) {
+            if !legacy_filter_recovery
+                && let Present(_) = parse_custom_property_url_function(p, context)
+            {
+                continue;
+            }
+            if let Some(child) = CustomPropertyContainer::new(p, context) {
+                parents.push(current);
+                current = child;
+                continue;
+            }
+            let element = components.parse_element(p);
+            if components.recover(p, element).is_ok() {
+                continue;
+            }
+        }
+
+        let completed = current.complete(p, context, mode);
+        match parents.pop() {
+            Some(parent) => current = parent,
+            None => return Present(completed),
+        }
+    }
 }
 
-/// Parses a balanced raw block such as `(a)`, `[a]`, or `{a}`.
-fn parse_custom_property_block(
-    p: &mut CssParser,
-    comment_mode: CssCustomPropertyCommentMode,
-    nested_end_set: Option<TokenSet<CssSyntaxKind>>,
-    legacy_filter_recovery: bool,
-    mode: CustomPropertyValueMode,
-) -> ParsedSyntax {
-    let (open, close, kind) = match p.cur() {
-        T!['('] => (T!['('], T![')'], CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK),
-        T!['['] => (T!['['], T![']'], CSS_CUSTOM_PROPERTY_BRACKETED_BLOCK),
-        T!['{'] => (T!['{'], T!['}'], CSS_CUSTOM_PROPERTY_BRACED_BLOCK),
-        _ => return Absent,
-    };
+struct CustomPropertyContainer {
+    marker: Marker,
+    components: Marker,
+    opening_paren: Option<TextSize>,
+    close: CssSyntaxKind,
+    kind: CssSyntaxKind,
+}
 
-    let block = p.start();
-    let context = CssLexContext::CustomPropertyValue(comment_mode);
-    let opening = p.cur_range().start();
-    p.bump_with_context(open, context);
-    CustomPropertyComponentList::block(comment_mode, nested_end_set, legacy_filter_recovery, mode)
-        .parse_list(p);
-    if open == T!['(']
-        && p.at_ts(token_set![T![']'], T!['}'], EOF])
-        && p.is_speculative_parsing()
-        && matches!(mode, CustomPropertyValueMode::FunctionDefault { .. })
-    {
-        p.state_mut()
-            .unclosed_function_default_parens
-            .insert(opening);
+impl CustomPropertyContainer {
+    /// Opens the function or block and its component list in `fn([a], {b:c})`.
+    fn new(p: &mut CssParser, context: CssLexContext) -> Option<Self> {
+        let (marker, close, kind) = if is_at_custom_property_function(p) {
+            let marker = p.start();
+            parse_custom_identifier_with_keywords(p, context, true).ok();
+            (marker, T![')'], CSS_CUSTOM_PROPERTY_FUNCTION)
+        } else {
+            let (close, kind) = match p.cur() {
+                T!['('] => (T![')'], CSS_CUSTOM_PROPERTY_PARENTHESIZED_BLOCK),
+                T!['['] => (T![']'], CSS_CUSTOM_PROPERTY_BRACKETED_BLOCK),
+                T!['{'] => (T!['}'], CSS_CUSTOM_PROPERTY_BRACED_BLOCK),
+                _ => return None,
+            };
+            (p.start(), close, kind)
+        };
+        let opening_paren = p.at(T!['(']).then_some(p.cur_range().start());
+        p.bump_any_with_context(context);
+        Some(Self {
+            marker,
+            components: p.start(),
+            opening_paren,
+            close,
+            kind,
+        })
     }
-    let has_close = p.expect_with_context(close, context);
-    let kind = if !has_close && matches!(mode, CustomPropertyValueMode::FunctionDefault { .. }) {
-        CSS_BOGUS_PROPERTY_VALUE
-    } else {
-        kind
-    };
-    Present(block.complete(p, kind))
+
+    /// Closes a raw container, retaining failed `(` offsets for header recovery.
+    ///
+    /// Example: `fn(a]` leaves `]` for its parent and marks the function bogus
+    /// when it occurs in a native default.
+    fn complete(
+        self,
+        p: &mut CssParser,
+        context: CssLexContext,
+        mode: CustomPropertyValueMode,
+    ) -> CompletedMarker {
+        self.components
+            .complete(p, CSS_CUSTOM_PROPERTY_COMPONENT_LIST);
+        if let Some(opening) = self.opening_paren
+            && p.at_ts(token_set![T![']'], T!['}'], EOF])
+            && p.is_speculative_parsing()
+            && matches!(mode, CustomPropertyValueMode::FunctionDefault { .. })
+        {
+            p.state_mut()
+                .unclosed_function_default_parens
+                .insert(opening);
+        }
+        let has_close = p.expect_with_context(self.close, context);
+        let kind = if !has_close && matches!(mode, CustomPropertyValueMode::FunctionDefault { .. })
+        {
+            CSS_BOGUS_PROPERTY_VALUE
+        } else {
+            self.kind
+        };
+        self.marker.complete(p, kind)
+    }
 }
 
 /// Parses a plain string such as `"$gap"` as raw value content.

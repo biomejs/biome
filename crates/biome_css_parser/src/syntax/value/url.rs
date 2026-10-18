@@ -9,8 +9,8 @@ use crate::syntax::scss::{
     parse_scss_interpolated_url_value,
 };
 use crate::syntax::value::function::{
-    is_at_css_if_function_in_context, is_nth_at_css_function, is_nth_at_function,
-    parse_css_function, parse_function,
+    is_at_css_if_function_in_context, is_nth_at_adjacent_l_paren, is_nth_at_css_function,
+    is_nth_at_function, parse_css_function, parse_function,
 };
 use crate::syntax::value::parse_error::expected_url_modifier;
 use crate::syntax::{
@@ -104,7 +104,7 @@ pub(crate) fn parse_url_function_with_context(
     Present(m.complete(p, CSS_URL_FUNCTION))
 }
 
-/// Parses a raw URL without promoting `$name` to a Sass expression.
+/// Parses a source-tight raw URL without promoting `$name` to a Sass expression.
 /// Returns `Absent` for bodies that need generic custom-property parsing.
 ///
 /// ```scss
@@ -114,7 +114,7 @@ pub(crate) fn parse_custom_property_url_function(
     p: &mut CssParser,
     following_context: CssLexContext,
 ) -> ParsedSyntax {
-    if !is_at_url_function(p) || !p.at(T![url]) {
+    if !p.at(T![url]) || !is_nth_at_adjacent_l_paren(p, 1) {
         return Absent;
     }
     let Some(lex_context) = p.source_mut().custom_property_url_lex_context() else {

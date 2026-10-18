@@ -2059,6 +2059,64 @@ at_rule_function_error.css:26:37 parse ━━━━━━━━━━━━━�
     27 │ 
     28 │ /* Parameter list issues */
   
+at_rule_function_error.css:29:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a function parameter but instead found ','.
+  
+    28 │ /* Parameter list issues */
+  > 29 │ @function --double-comma(--a,, --b) {}
+       │                              ^
+    30 │ @function --leading-comma(, --param) {}
+    31 │ @function --just-comma(,) {}
+  
+  i Expected a function parameter here.
+  
+    28 │ /* Parameter list issues */
+  > 29 │ @function --double-comma(--a,, --b) {}
+       │                              ^
+    30 │ @function --leading-comma(, --param) {}
+    31 │ @function --just-comma(,) {}
+  
+at_rule_function_error.css:30:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a function parameter but instead found ','.
+  
+    28 │ /* Parameter list issues */
+    29 │ @function --double-comma(--a,, --b) {}
+  > 30 │ @function --leading-comma(, --param) {}
+       │                           ^
+    31 │ @function --just-comma(,) {}
+    32 │ @function --just-colon(:) {}
+  
+  i Expected a function parameter here.
+  
+    28 │ /* Parameter list issues */
+    29 │ @function --double-comma(--a,, --b) {}
+  > 30 │ @function --leading-comma(, --param) {}
+       │                           ^
+    31 │ @function --just-comma(,) {}
+    32 │ @function --just-colon(:) {}
+  
+at_rule_function_error.css:31:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a function parameter but instead found ','.
+  
+    29 │ @function --double-comma(--a,, --b) {}
+    30 │ @function --leading-comma(, --param) {}
+  > 31 │ @function --just-comma(,) {}
+       │                        ^
+    32 │ @function --just-colon(:) {}
+    33 │ 
+  
+  i Expected a function parameter here.
+  
+    29 │ @function --double-comma(--a,, --b) {}
+    30 │ @function --leading-comma(, --param) {}
+  > 31 │ @function --just-comma(,) {}
+       │                        ^
+    32 │ @function --just-colon(:) {}
+    33 │ 
+  
 at_rule_function_error.css:32:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a function parameter but instead found ':'.
