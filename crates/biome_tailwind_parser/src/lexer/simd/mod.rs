@@ -16,7 +16,8 @@ mod classify;
 #[cfg(test)]
 mod tests;
 
-use super::{BaseNameStore, css_identifier_kind, invalid_whitespace};
+use super::{BaseNameStore, css_identifier_kind};
+use crate::syntax::parse_error::invalid_whitespace;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::{self, *};
@@ -185,14 +186,7 @@ impl<'src> SimdLexer<'src> {
                     }
                     WHITESPACE
                 }
-                TW_BASE if depth == 0 => {
-                    if &bytes[start..end] == b"data" {
-                        DATA_KW
-                    } else {
-                        TW_BASE
-                    }
-                }
-                TW_BASE => css_identifier_kind(&bytes[start..end]),
+                TW_BASE if depth > 0 => css_identifier_kind(&bytes[start..end]),
                 TW_NUMBER if depth > 0 => CSS_NUMBER_LITERAL,
                 kind @ (T!['['] | T!['(']) => {
                     depth += 1;
@@ -205,7 +199,7 @@ impl<'src> SimdLexer<'src> {
                 T![:] => {
                     if depth == 0 {
                         for kind in &mut kinds[unresolved..index] {
-                            if matches!(kind, TW_BASE | DATA_KW) {
+                            if *kind == TW_BASE {
                                 *kind = TW_VARIANT_SEGMENT;
                             }
                         }
