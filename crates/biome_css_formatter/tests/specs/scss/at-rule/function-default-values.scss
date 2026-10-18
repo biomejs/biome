@@ -1,0 +1,12 @@
+$gap:8px;
+@function --inset(--padding:8px   16px){result:var(--padding)}
+@function --interpolated(--literal:$gap   16px,--operator:1 + 2,--value:#{ $gap } 16px,--nested:var(--gap,#{ $gap } 16px)){result:var(--value)}
+@function --blocks(--value:{a, /* middle */ #{ $gap }},--nested:fn({a; b !important},[c, d]) tail,--empty:{/* empty */}){result:var(--value)}
+@function --comments(--value:/* first */ #{ $gap } // keep this comment
+16px /* last */,
+/* parameter */--other:left  top/* end */)returns <length>+{result:var(--value)}
+@function --parameter-suppression(
+/* biome-ignore format: preserve this parameter */
+--padding:   #{ $gap }    16px,--other:1px  2px){result:var(--padding)}
+@function ordinary($value:1 + 2,$padding:8px 16px){@return $value;}
+.after{padding:ordinary()}

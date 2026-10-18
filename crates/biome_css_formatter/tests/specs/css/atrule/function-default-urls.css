@@ -1,0 +1,8 @@
+@function --urls(--data:url(data:image/svg+xml,%3Csvg%3E%3C/svg%3E),--nested:var(--image,url(../images/a,b.png)),--upper:URL(a,b),--escaped:u\72l(a,b),--after:8px 16px){result:var(--nested)}
+@function --comments(--image:/* before */url(a/*payload*/,b)/* after */,--quoted:url("a,b")){result:var(--image)}
+@function --boundaries(--a:url(a{b),--b:url(a}b),--c:url(a[b),--d:url(a]b),--e:url([a),--f:url({a),--g:url(]a),--h:url(}a),--after:8px 16px){result:var(--a)}
+@function --controls(--nested:var(--image,url(a{b)),--quoted:url("a[b"),--function:url(var(--image)),--dollar:url($literal,b),--hash:url(#{$literal})){result:var(--nested)}
+@function --separators(--unicode:url(a b,a b),--crlf:url(
+a,b
+),--cr:url(a,b),--after:1px){result:var(--unicode)}
+.after{background:url([a);background:url({a);background:url(]a);background:url(}a)}
