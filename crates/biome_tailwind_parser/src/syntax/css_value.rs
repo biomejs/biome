@@ -7,6 +7,7 @@ use biome_parser::prelude::*;
 use biome_parser::{Parser, TokenSet, token_set};
 use biome_tailwind_syntax::T;
 use biome_tailwind_syntax::TailwindSyntaxKind::{self, *};
+use biome_unicode_table::Dispatch::{PNC, QOT, WHS};
 
 /// Returns the kind and length in letters of the CSS token at the current letter.
 #[inline]
@@ -234,9 +235,9 @@ fn parse_url_function(p: &mut TailwindParser) -> ParsedSyntax {
 /// Parses the argument of `url(...)` when it isn't a function: a string, or a raw URL, which
 /// runs to the next `)` or whitespace.
 fn parse_url_value(p: &mut TailwindParser) -> ParsedSyntax {
-    match p.source().nth_byte(0) {
-        Some(b'"' | b'\'') => parse_css_string(p),
-        None | Some(b')' | b'\t' | b'\n' | 0x0B | 0x0C | b'\r' | b' ') => Absent,
+    match p.source().nth_dispatch(0) {
+        Some(QOT) => parse_css_string(p),
+        None | Some(PNC | WHS) => Absent,
         Some(_) => {
             let m = p.start();
             let letters = url_raw_value(p.source());

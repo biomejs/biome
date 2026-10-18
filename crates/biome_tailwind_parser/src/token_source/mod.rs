@@ -11,6 +11,7 @@ use biome_parser::token_source::{TokenSource, Trivia};
 use biome_rowan::TriviaPieceKind;
 use biome_tailwind_syntax::TailwindSyntaxKind::{self, EOF, WHITESPACE};
 use biome_tailwind_syntax::{TextRange, TextSize};
+use biome_unicode_table::{Dispatch, lookup_byte};
 
 /// Token source for the parser.
 ///
@@ -59,6 +60,13 @@ impl<'source> TailwindTokenSource<'source> {
     #[inline(always)]
     pub(crate) fn nth_byte(&self, n: usize) -> Option<u8> {
         self.lexer.byte(self.position + n)
+    }
+
+    /// Returns the [Dispatch] of the first byte of the letter `n` letters after the current one,
+    /// or `None` past the end.
+    #[inline(always)]
+    pub(crate) fn nth_dispatch(&self, n: usize) -> Option<Dispatch> {
+        self.nth_byte(n).map(lookup_byte)
     }
 
     /// Returns the text of the letter `n` letters after the current one.
