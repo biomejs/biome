@@ -10,7 +10,7 @@ use biome_js_syntax::{
     AnyJsObjectMember, JsCallExpression, JsReferenceIdentifier, JsSyntaxToken, T,
     binding_ext::AnyJsBindingDeclaration, global_identifier,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, Direction, TriviaPieceKind};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, Direction};
 use biome_rule_options::use_consistent_json_file_read::{
     JsonFileReadAs, UseConsistentJsonFileReadOptions,
 };
@@ -194,9 +194,7 @@ impl Rule for UseConsistentJsonFileRead {
             InconsistentRead::MissingEncoding(read_call) => {
                 let arguments = read_call.arguments().ok()?.args();
                 let path = arguments.first()?.ok()?;
-                let mut separators = vec![
-                    make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                ];
+                let mut separators = vec![make::token(T![,]).with_trailing_space()];
                 separators.extend(arguments.trailing_separator());
                 mutation.replace_node(
                     arguments,

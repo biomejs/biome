@@ -8,7 +8,7 @@ use biome_json_factory::make::{
     json_string_literal, json_string_value, token,
 };
 use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonMember, T};
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 use std::collections::VecDeque;
 
 declare_migration! {
@@ -97,10 +97,7 @@ impl Rule for IgnoreScanner {
 
                     if new_list.len() > 1 {
                         for _ in 0..new_list.len() - 1 {
-                            separators.push(
-                                token(T![,])
-                                    .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                            );
+                            separators.push(token(T![,]).with_trailing_space());
                         }
                     }
                     let new_member = json_member(
@@ -129,9 +126,7 @@ impl Rule for IgnoreScanner {
             )));
             if experimental_ignore_list.len() > 1 {
                 for _ in 0..experimental_ignore_list.len() - 1 {
-                    separators.push(
-                        token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                    );
+                    separators.push(token(T![,]).with_trailing_space());
                 }
             }
             let value = json_array_value(
@@ -149,8 +144,7 @@ impl Rule for IgnoreScanner {
         let mut separators = vec![];
         if files_list.len() > 1 {
             for _ in 0..files_list.len() - 1 {
-                separators
-                    .push(token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]));
+                separators.push(token(T![,]).with_trailing_space());
             }
         }
 

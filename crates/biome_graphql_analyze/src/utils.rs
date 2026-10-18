@@ -1,7 +1,6 @@
 use biome_graphql_syntax::{GraphqlLanguage, GraphqlSyntaxToken};
 use biome_rowan::{
-    AstNode, AstNodeList, SyntaxTriviaPiece, TextRange, TokenText, TriviaPieceKind,
-    chain_trivia_pieces,
+    AstNode, AstNodeList, SyntaxTriviaPiece, TextRange, TokenText, chain_trivia_pieces,
 };
 use biome_string_case::comparable_token::ComparableToken;
 use rustc_hash::FxHashMap;
@@ -225,7 +224,7 @@ where
             .is_none_or(|next| next.position_leading_len > 0);
         let last_token = node.syntax().last_token()?;
         let node = if !next_is_separated && last_token.trailing_trivia().pieces().len() == 0 {
-            let spaced = last_token.with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+            let spaced = last_token.with_trailing_space();
             N::cast(
                 node.into_syntax()
                     .replace_child(last_token.into(), spaced.into())?,
