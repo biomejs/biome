@@ -22,12 +22,13 @@ pub(crate) use expressions::AnyFlowExpression;
 pub(crate) use guards::{FlowGuard, FlowTest};
 pub(crate) use scanner::FlowRootScanner;
 
-use biome_js_control_flow::AnyJsControlFlowRoot;
 use biome_js_semantic::{JsDeclarationKind, SemanticModel};
+use biome_js_syntax::JsIdentifierBinding;
 use biome_js_type_info::{RawTypeData, TypeReference, is_raw_narrowing_invariant};
 use biome_rowan::{AstNode, TextRange};
 use builder::{BuiltRoot, build_root};
 use rustc_hash::{FxHashMap, FxHashSet};
+use scanner::SelectedRoot;
 
 /// Index of a node in [`RootFlow::nodes`].
 pub(crate) type FlowNodeId = usize;
@@ -144,26 +145,30 @@ struct RootCollector<'a> {
 }
 
 impl RootCollector<'_> {
-    fn add_root(&self, flow: &mut ModuleFlow, root: &AnyJsControlFlowRoot) {
+    fn add_root(&self, flow: &mut ModuleFlow, selected: &SelectedRoot) {
+        let eligible: FxHashSet<TextRange> = selected
+            .bindings
+            .iter()
+            .filter_map(|binding| self.eligible_range(binding))
+            .collect();
+        // Only bindings declared by the root itself can narrow in it, so
+        // without one the graph would keep no reads.
+        if eligible.is_empty() {
+            return;
+        }
         let Some(BuiltRoot {
             nodes,
             guards,
             mentions,
             reads,
-        }) = build_root(root, self.model)
+        }) = build_root(&selected.root, self.model)
         else {
             return;
         };
         let tested: FxHashSet<TextRange> = mentions.iter().map(|(_, binding)| *binding).collect();
-        let mut eligible = FxHashMap::<TextRange, bool>::default();
         let reads: Vec<_> = reads
             .into_iter()
-            .filter(|read| {
-                tested.contains(&read.binding)
-                    && *eligible
-                        .entry(read.binding)
-                        .or_insert_with(|| self.is_eligible(read.binding, root))
-            })
+            .filter(|read| tested.contains(&read.binding) && eligible.contains(&read.binding))
             .collect();
         if reads.is_empty() {
             return;
@@ -203,11 +208,11 @@ impl RootCollector<'_> {
         }
     }
 
-    /// Returns whether reads of the binding at `range` can be narrowed in `root`.
-    fn is_eligible(&self, range: TextRange, root: &AnyJsControlFlowRoot) -> bool {
-        let Some(binding) = self.model.as_binding_by_range(range) else {
-            return false;
-        };
+    /// Returns the range of `binding` when the root that declares it can
+    /// narrow its reads.
+    fn eligible_range(&self, binding: &JsIdentifierBinding) -> Option<TextRange> {
+        let range = binding.range();
+        let binding = self.model.as_binding_by_range(range)?;
         // The semantic index matches the start offset, not the entire range.
         // A `var` initializer is not a semantic write and may follow an
         // earlier guard.
@@ -216,7 +221,7 @@ impl RootCollector<'_> {
             || binding.declaration_kind() == JsDeclarationKind::HoistedValue
             || binding.all_writes().next().is_some()
         {
-            return false;
+            return None;
         }
         // Untyped and `any` bindings never narrow, so their reads need no flow.
         if self
@@ -224,14 +229,9 @@ impl RootCollector<'_> {
             .get(&range)
             .is_none_or(|reference| is_raw_narrowing_invariant(reference, self.raw_types))
         {
-            return false;
+            return None;
         }
-        binding
-            .syntax()
-            .ancestors()
-            .skip(1)
-            .find_map(AnyJsControlFlowRoot::cast)
-            .is_some_and(|declaration_root| declaration_root == *root)
+        Some(range)
     }
 
     /// Returns the `(binding, point)` pairs that a test of the binding can
@@ -290,13 +290,18 @@ mod tests {
     use std::sync::Arc;
 
     fn module(source: &str) -> JsModuleInfo {
+        module_at(source, "/index.ts")
+    }
+
+    /// Collects the TypeScript `source` as if it were the module at `path`.
+    fn module_at(source: &str, path: &str) -> JsModuleInfo {
         let parsed = parse(source, JsFileSource::ts(), JsParserOptions::default());
         assert!(!parsed.has_errors(), "{source}");
         let root = parsed.tree();
         let model = Arc::new(semantic_model(&root, SemanticModelOptions::default()));
         JsModuleVisitor::new(
             root,
-            Utf8PathBuf::from("/index.ts"),
+            Utf8PathBuf::from(path),
             model,
             TypeInferenceMode::RawTypesOnly,
         )
@@ -324,6 +329,38 @@ mod tests {
                 expected,
                 "{closure}"
             );
+        }
+    }
+
+    #[test]
+    fn only_the_root_that_declares_a_variable_narrows_its_reads() {
+        const SOURCE: &str = r#"
+            function f(outer: string | null) {
+                const g = (own: string | null) =>
+                    own !== null && outer !== null && /*own*/own && /*outer*/outer;
+            }
+        "#;
+        let info = module(SOURCE);
+        for (marker, expression, expected) in [("own", "own", true), ("outer", "outer", false)] {
+            assert_eq!(
+                info.flow.is_candidate(marked(SOURCE, marker, expression)),
+                expected,
+                "{marker}"
+            );
+        }
+    }
+
+    #[test]
+    fn declaration_files_get_no_flow() {
+        const SOURCE: &str =
+            "function f(value: string | null) { if (value !== null) { /*read*/value; } }";
+        let read = marked(SOURCE, "read", "value");
+        // A path without a known file source still gets flow.
+        for path in ["/index.ts", "/index"] {
+            assert!(module_at(SOURCE, path).flow.is_candidate(read), "{path}");
+        }
+        for path in ["/index.d.ts", "/index.d.mts", "/index.d.cts", "/INDEX.D.TS"] {
+            assert!(!module_at(SOURCE, path).flow.is_candidate(read), "{path}");
         }
     }
 
