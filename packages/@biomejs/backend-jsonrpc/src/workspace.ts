@@ -3123,6 +3123,11 @@ export interface Nursery {
 	 */
 	noPlaywrightNthMethods?: NoPlaywrightNthMethodsConfiguration;
 	/**
+	 * Disallow using variables from outside the function passed to page.evaluate() and page.addInitScript().
+	 * See https://biomejs.dev/linter/rules/no-playwright-unsafe-references
+	 */
+	noPlaywrightUnsafeReferences?: NoPlaywrightUnsafeReferencesConfiguration;
+	/**
 	 * Disallow the use of process.exit().
 	 * See https://biomejs.dev/linter/rules/no-process-exit
 	 */
@@ -5918,6 +5923,9 @@ export type NoPathConcatConfiguration =
 export type NoPlaywrightNthMethodsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPlaywrightNthMethodsOptions;
+export type NoPlaywrightUnsafeReferencesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPlaywrightUnsafeReferencesOptions;
 export type NoProcessExitConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoProcessExitOptions;
@@ -8492,6 +8500,14 @@ export interface RuleWithNoPathConcatOptions {
 export interface RuleWithNoPlaywrightNthMethodsOptions {
 	level: RulePlainConfiguration;
 	options?: NoPlaywrightNthMethodsOptions;
+}
+export interface RuleWithNoPlaywrightUnsafeReferencesOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoPlaywrightUnsafeReferencesOptions;
 }
 export interface RuleWithNoProcessExitOptions {
 	level: RulePlainConfiguration;
@@ -11126,6 +11142,7 @@ export type NoObsoleteTagsOptions = {};
 export type NoOctalOptions = {};
 export type NoPathConcatOptions = {};
 export type NoPlaywrightNthMethodsOptions = {};
+export type NoPlaywrightUnsafeReferencesOptions = {};
 export type NoProcessExitOptions = {};
 export type NoPromiseExecutorReturnOptions = {};
 export type NoReactObjectTypeAsDefaultPropOptions = {};
@@ -12916,6 +12933,7 @@ export type Category =
 	| "lint/nursery/noPlaywrightNetworkidle"
 	| "lint/nursery/noPlaywrightNthMethods"
 	| "lint/nursery/noPlaywrightPagePause"
+	| "lint/nursery/noPlaywrightUnsafeReferences"
 	| "lint/nursery/noPlaywrightUselessAwait"
 	| "lint/nursery/noPlaywrightWaitForNavigation"
 	| "lint/nursery/noPlaywrightWaitForSelector"
