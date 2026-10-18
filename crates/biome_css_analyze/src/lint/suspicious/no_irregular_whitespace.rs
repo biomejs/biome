@@ -34,12 +34,6 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```css
-    /// .firstClass::before {
-    ///   content: "　";
-    /// }
-    /// ```
-    ///
     pub NoIrregularWhitespace {
         version: "1.9.0",
         name: "noIrregularWhitespace",
