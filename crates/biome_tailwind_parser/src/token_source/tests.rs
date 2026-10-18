@@ -10,8 +10,8 @@ use std::sync::mpsc::channel;
 use std::thread;
 use std::time::Duration;
 
-/// Returns the kind and text of each letter that the lexer writes for `source`.
-fn letters(source: &str) -> Vec<(TailwindSyntaxKind, &str)> {
+/// Returns the kind and text of each atom that the lexer writes for `source`.
+fn atoms(source: &str) -> Vec<(TailwindSyntaxKind, &str)> {
     let mut tokens = TailwindTokenSource::from_str(source, &BASENAME_STORE);
     let mut result = Vec::new();
     while tokens.current() != EOF {
@@ -31,9 +31,9 @@ fn tree_tokens(source: &str) -> Vec<(TailwindSyntaxKind, String)> {
         .collect()
 }
 
-macro_rules! assert_letters {
+macro_rules! assert_atoms {
     ($src:expr, $($kind:ident $text:literal),* $(,)?) => {
-        assert_eq!(letters($src), vec![$(($kind, $text)),*]);
+        assert_eq!(atoms($src), vec![$(($kind, $text)),*]);
     };
 }
 
@@ -43,7 +43,7 @@ macro_rules! assert_tree_tokens {
     };
 }
 
-// The letters of a random string cover it, and lexing it terminates.
+// The atoms of a random string cover it, and lexing it terminates.
 #[quickcheck]
 fn losslessness(string: String) -> bool {
     let cloned = string.clone();
@@ -68,8 +68,8 @@ fn losslessness(string: String) -> bool {
 }
 
 #[test]
-fn letters_are_sequences_of_one_class_or_single_chars() {
-    assert_letters!(
+fn atoms_are_sequences_of_one_class_or_single_chars() {
+    assert_atoms!(
         "bg-red-500/50 \t\n%\u{e9}\u{e9}__x",
         TW_BASE "bg",
         DASH "-",
@@ -89,7 +89,7 @@ fn letters_are_sequences_of_one_class_or_single_chars() {
 
 #[test]
 fn words_before_a_colon_are_variant_segments() {
-    assert_letters!(
+    assert_atoms!(
         "group-hover/menu:flex data-[a]:x data",
         TW_VARIANT_SEGMENT "group",
         DASH "-",
@@ -113,7 +113,7 @@ fn words_before_a_colon_are_variant_segments() {
 
 #[test]
 fn words_inside_brackets_are_css_identifiers() {
-    assert_letters!(
+    assert_atoms!(
         "bg-[color:red] w-[10px]",
         TW_BASE "bg",
         DASH "-",
@@ -134,7 +134,7 @@ fn words_inside_brackets_are_css_identifiers() {
 
 #[test]
 fn whitespace_closes_brackets() {
-    assert_letters!(
+    assert_atoms!(
         "w-[1 hover:x",
         TW_BASE "w",
         DASH "-",
@@ -149,7 +149,7 @@ fn whitespace_closes_brackets() {
 
 #[test]
 fn hex_colors_end_inside_a_word() {
-    assert_letters!(
+    assert_atoms!(
         "[#abcxyz]",
         L_BRACKET "[",
         HASH "#",
@@ -161,7 +161,7 @@ fn hex_colors_end_inside_a_word() {
 
 #[test]
 fn byte_order_mark() {
-    assert_letters!("\u{FEFF}flex", UNICODE_BOM "\u{FEFF}", TW_BASE "flex");
+    assert_atoms!("\u{FEFF}flex", UNICODE_BOM "\u{FEFF}", TW_BASE "flex");
 }
 
 #[test]
@@ -171,7 +171,7 @@ fn bad_whitespace_is_reported_once() {
 }
 
 #[test]
-fn values_and_modifiers_merge_letters() {
+fn values_and_modifiers_merge_atoms() {
     assert_tree_tokens!(
         "text-sm bg-primary/10! bg-red-500/[.5]",
         TW_BASE "text",
@@ -215,7 +215,7 @@ fn variants_keep_their_segments() {
 }
 
 #[test]
-fn selectors_merge_letters() {
+fn selectors_merge_atoms() {
     assert_tree_tokens!(
         "[[data-state=open]_&]:flex has-[>svg]:p-0",
         L_BRACKET "[",
@@ -309,7 +309,7 @@ fn css_strings_colors_and_urls() {
 }
 
 #[test]
-fn css_strings_escape_quotes_and_colors_end_before_other_letters() {
+fn css_strings_escape_quotes_and_colors_end_before_other_atoms() {
     assert_tree_tokens!(
         "content-['a\\'b'] bg-[#abcxyz]",
         TW_BASE "content",

@@ -2,8 +2,8 @@ use super::SimdLexer;
 use crate::lexer::{BASENAME_STORE, BaseNameStore};
 use crate::test_support::{fixtures, mutate, random_fragments, xorshift};
 
-/// The class of a byte whose consecutive bytes form one letter, or `None` if each char is a
-/// letter of its own.
+/// The class of a byte whose consecutive bytes form one atom, or `None` if each char is an
+/// atom of its own.
 fn sequence_class(byte: u8) -> Option<u8> {
     match byte {
         b'\t' | b'\n' | 0x0B | 0x0C | b'\r' | b' ' => Some(0),
@@ -14,7 +14,7 @@ fn sequence_class(byte: u8) -> Option<u8> {
     }
 }
 
-/// The letter starts of `source`, found one byte at a time.
+/// The atom starts of `source`, found one byte at a time.
 fn scalar_starts(source: &str) -> Vec<usize> {
     let bytes = source.as_bytes();
     let mut starts: Vec<usize> = (0..bytes.len())
@@ -24,7 +24,7 @@ fn scalar_starts(source: &str) -> Vec<usize> {
                 && (index == 0 || class.is_none() || class != sequence_class(bytes[index - 1]))
         })
         .collect();
-    // A hex color ends before the first letter of a word that isn't a hex digit.
+    // A hex color ends before the first char of a word that isn't a hex digit.
     for hash in (0..bytes.len()).filter(|&index| bytes[index] == b'#') {
         let mut end = hash + 1;
         while bytes.get(end).is_some_and(u8::is_ascii_hexdigit) {
@@ -41,7 +41,7 @@ fn scalar_starts(source: &str) -> Vec<usize> {
     starts
 }
 
-/// Asserts that [SimdLexer] splits `source` into the letters that a byte-at-a-time scan finds,
+/// Asserts that [SimdLexer] splits `source` into the atoms that a byte-at-a-time scan finds,
 /// and answers the colon query at every offset like a scan of the bytes.
 fn check(source: &str, base_names: &BaseNameStore) {
     let simd = SimdLexer::new(source, base_names);
@@ -49,7 +49,7 @@ fn check(source: &str, base_names: &BaseNameStore) {
     let starts: Vec<usize> = (0..simd.starts.len() - 1)
         .map(|index| simd.start(index))
         .collect();
-    assert_eq!(starts, scalar_starts(source), "letters of {source:?}");
+    assert_eq!(starts, scalar_starts(source), "atoms of {source:?}");
     for offset in (0..=bytes.len()).filter(|&offset| source.is_char_boundary(offset)) {
         let expected = bytes[offset..]
             .iter()

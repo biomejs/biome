@@ -2,15 +2,15 @@
 //!
 //! [classify] computes bitmaps of character classes 64 bytes at a time with SIMD. The lexer then
 //! writes the whole token stream to flat arrays: the start and the kind of each token. The tokens
-//! are the letters of the class string's alphabet: a sequence of whitespace, ASCII letters, ASCII
-//! digits or `_`, or any other char on its own. Their boundaries come straight from the
-//! `letter_start` bitmap.
+//! are the atoms of the class string, the pieces that the parser never splits: a sequence of
+//! whitespace, ASCII letters, ASCII digits or `_`, or any other char on its own. Their boundaries
+//! come straight from the `atom_start` bitmap.
 //!
-//! Each letter's kind comes from local rules over the bytes, with no grammar state: a word with a
+//! Each atom's kind comes from local rules over the bytes, with no grammar state: a word with a
 //! `:` after it outside brackets, before the next whitespace, is a `TW_VARIANT_SEGMENT`; another
 //! word outside brackets is a `TW_BASE`; a word inside brackets is a CSS identifier or keyword.
 //! The parser never asks for a token to be lexed again. When a token of the tree spans several
-//! letters, such as the value `red-500`, the parser merges them.
+//! atoms, such as the value `red-500`, the parser merges them.
 
 mod classify;
 #[cfg(test)]
@@ -28,9 +28,9 @@ use std::cell::Cell;
 /// The buffers of a [SimdLexer]: its blocks, starts and kinds.
 type Buffers = (Vec<Block>, Vec<u32>, Vec<TailwindSyntaxKind>);
 
-/// The largest number of letters whose buffers [SimdLexer] keeps for the next class string, so
+/// The largest number of atoms whose buffers [SimdLexer] keeps for the next class string, so
 /// that parsing one long class string doesn't keep its memory.
-const MAX_KEPT_LETTERS: usize = 1 << 14;
+const MAX_KEPT_ATOMS: usize = 1 << 14;
 
 thread_local! {
     /// The buffers of the last [SimdLexer] dropped on this thread, so that lexing a class string
@@ -40,14 +40,14 @@ thread_local! {
     static BUFFERS: Cell<Option<Buffers>> = const { Cell::new(None) };
 }
 
-/// The letters of a class string.
+/// The atoms of a class string.
 pub(crate) struct SimdLexer<'src> {
     source: &'src str,
     base_names: &'src BaseNameStore,
     blocks: Vec<Block>,
-    /// The start of each letter, followed by the source length.
+    /// The start of each atom, followed by the source length.
     starts: Vec<u32>,
-    /// The kind of each letter, followed by `EOF`.
+    /// The kind of each atom, followed by `EOF`.
     kinds: Vec<TailwindSyntaxKind>,
     /// The diagnostics of the whitespace that CSS doesn't allow.
     diagnostics: Vec<ParseDiagnostic>,
@@ -55,7 +55,7 @@ pub(crate) struct SimdLexer<'src> {
 
 impl Drop for SimdLexer<'_> {
     fn drop(&mut self) {
-        if self.starts.capacity() <= MAX_KEPT_LETTERS {
+        if self.starts.capacity() <= MAX_KEPT_ATOMS {
             let buffers = (
                 std::mem::take(&mut self.blocks),
                 std::mem::take(&mut self.starts),
@@ -68,7 +68,7 @@ impl Drop for SimdLexer<'_> {
 }
 
 impl<'src> SimdLexer<'src> {
-    /// Lexes `source` into letters. The parser matches dashed basenames against `base_names`.
+    /// Lexes `source` into atoms. The parser matches dashed basenames against `base_names`.
     pub(crate) fn new(source: &'src str, base_names: &'src BaseNameStore) -> Self {
         let (blocks, starts, kinds) = BUFFERS
             .try_with(|cell| cell.take())
@@ -99,7 +99,7 @@ impl<'src> SimdLexer<'src> {
     }
 
     /// [Self::lex], compiled with the bit manipulation instructions of x86_64 CPUs since 2013,
-    /// which the extraction of letter starts uses for every letter.
+    /// which the extraction of atom starts uses for every atom.
     ///
     /// # Safety
     /// The CPU must support AVX2, BMI1, BMI2, LZCNT and POPCNT.
@@ -117,8 +117,8 @@ impl<'src> SimdLexer<'src> {
         self.write_kinds();
     }
 
-    /// Splits a hex color from the letters after it in the same word, as in `#abcxyz`, so that
-    /// the color ends on a letter boundary.
+    /// Splits a hex color from the ASCII letters after it in the same word, as in `#abcxyz`, so
+    /// that the color ends on an atom boundary.
     fn split_hex_colors(&mut self) {
         let bytes = self.source.as_bytes();
         for block_index in 0..self.blocks.len() {
@@ -133,24 +133,24 @@ impl<'src> SimdLexer<'src> {
                 if bytes.get(end).is_some_and(u8::is_ascii_alphanumeric)
                     && bytes[end - 1].is_ascii_alphabetic()
                 {
-                    self.blocks[end / 64].letter_start |= 1 << (end % 64);
+                    self.blocks[end / 64].atom_start |= 1 << (end % 64);
                 }
             }
         }
     }
 
-    /// Writes the start of each letter, and the source length after them.
+    /// Writes the start of each atom, and the source length after them.
     #[inline(always)]
     fn write_starts(&mut self) {
         let len = self.source.len();
         let starts = &mut self.starts;
         starts.clear();
-        // Each letter takes at least one byte.
+        // Each atom takes at least one byte.
         starts.reserve(len + 1);
         let out = &mut starts.spare_capacity_mut()[..len + 1];
         let mut count = 0;
         for (block_index, block) in self.blocks.iter().enumerate() {
-            let mut bits = block.letter_start;
+            let mut bits = block.atom_start;
             while bits != 0 {
                 out[count].write((block_index * 64) as u32 + bits.trailing_zeros());
                 count += 1;
@@ -162,7 +162,7 @@ impl<'src> SimdLexer<'src> {
         unsafe { starts.set_len(count + 1) };
     }
 
-    /// Writes the kind of each letter, and `EOF` after them.
+    /// Writes the kind of each atom, and `EOF` after them.
     fn write_kinds(&mut self) {
         let bytes = self.source.as_bytes();
         let count = self.starts.len() - 1;
@@ -171,13 +171,13 @@ impl<'src> SimdLexer<'src> {
         kinds.reserve(count + 1);
         // How many brackets and parentheses are open in the current class.
         let mut depth = 0u32;
-        // The first letter of the current class that a `:` may still make a variant segment.
+        // The first atom of the current class that a `:` may still make a variant segment.
         let mut unresolved = 0;
         for index in 0..count {
             let start = self.starts[index] as usize;
             let end = self.starts[index + 1] as usize;
             let byte = bytes[start];
-            let kind = match LETTER_KINDS[byte as usize] {
+            let kind = match ATOM_KINDS[byte as usize] {
                 WHITESPACE => {
                     depth = 0;
                     unresolved = index + 1;
@@ -219,13 +219,13 @@ impl<'src> SimdLexer<'src> {
         self.source
     }
 
-    /// Returns the kind of letter `index`, or `EOF` past the last letter.
+    /// Returns the kind of atom `index`, or `EOF` past the last atom.
     #[inline(always)]
     pub(crate) fn kind(&self, index: usize) -> TailwindSyntaxKind {
         self.kinds.get(index).copied().unwrap_or(EOF)
     }
 
-    /// Returns the start of letter `index`, or the source length past the last letter.
+    /// Returns the start of atom `index`, or the source length past the last atom.
     #[inline(always)]
     pub(crate) fn start(&self, index: usize) -> usize {
         self.starts
@@ -233,20 +233,20 @@ impl<'src> SimdLexer<'src> {
             .map_or(self.source.len(), |&start| start as usize)
     }
 
-    /// Returns the first byte of letter `index`, or `None` past the last letter.
+    /// Returns the first byte of atom `index`, or `None` past the last atom.
     #[inline(always)]
     pub(crate) fn byte(&self, index: usize) -> Option<u8> {
         self.source.as_bytes().get(self.start(index)).copied()
     }
 
-    /// Returns the text of letter `index`, which is empty past the last letter.
+    /// Returns the text of atom `index`, which is empty past the last atom.
     #[inline(always)]
     pub(crate) fn text(&self, index: usize) -> &'src str {
         &self.source[self.start(index)..self.start(index + 1)]
     }
 
-    /// Returns the index of the letter that starts at `offset`, searching forward from letter
-    /// `from`. The offset must be a letter boundary.
+    /// Returns the index of the atom that starts at `offset`, searching forward from atom
+    /// `from`. The offset must be an atom boundary.
     #[inline(always)]
     pub(crate) fn index_at(&self, offset: usize, from: usize) -> usize {
         let mut index = from;
@@ -287,9 +287,9 @@ impl<'src> SimdLexer<'src> {
     }
 }
 
-/// The kind of a letter by its first byte, before the rules that look around it: `TW_BASE` for a
+/// The kind of an atom by its first byte, before the rules that look around it: `TW_BASE` for a
 /// word, `TW_NUMBER` for digits, and `ERROR_TOKEN` for a char without a kind of its own.
-static LETTER_KINDS: [TailwindSyntaxKind; 256] = {
+static ATOM_KINDS: [TailwindSyntaxKind; 256] = {
     let mut table = [ERROR_TOKEN; 256];
     let mut byte = 0;
     while byte < 256 {

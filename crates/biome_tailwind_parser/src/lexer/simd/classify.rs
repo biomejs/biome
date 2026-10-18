@@ -16,11 +16,11 @@ pub(super) struct Block {
     /// `:` and whitespace, which bound the variants of a class, and every position past the end
     /// of the source, so that a search for the next one always finds one.
     pub(super) colon_stop: u64,
-    /// `#`, after which the lexer splits a hex color from the letters after it.
+    /// `#`, after which the lexer splits a hex color from the ASCII letters after it.
     pub(super) hash: u64,
-    /// The first byte of each letter: of each sequence of whitespace, ASCII letters, ASCII digits
+    /// The first byte of each atom: of each sequence of whitespace, ASCII letters, ASCII digits
     /// or `_`, and of each other char.
-    pub(super) letter_start: u64,
+    pub(super) atom_start: u64,
 }
 
 const WHITESPACE: u16 = 1 << 0;
@@ -140,7 +140,7 @@ fn classify_with(
     blocks.clear();
     blocks.reserve(source.len() / 64 + 2);
     // The sequence classes of the last byte of the block before, so that a sequence that crosses
-    // a block boundary starts one letter.
+    // a block boundary starts one atom.
     let mut carry = [0u64; 4];
     let mut push = |classes: [u64; CLASS_COUNT], valid: u64| {
         let [
@@ -166,7 +166,7 @@ fn classify_with(
             line_break: line_break & valid,
             colon_stop: colon_stop | !valid,
             hash: hash & valid,
-            letter_start: starts & valid,
+            atom_start: starts & valid,
         });
     };
     let (chunks, tail) = source.as_chunks::<64>();
