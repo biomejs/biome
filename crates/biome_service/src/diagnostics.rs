@@ -969,6 +969,14 @@ mod test {
     }
 
     #[test]
+    fn transport_content_modified() {
+        snap_diagnostic(
+            "transport_content_modified",
+            TransportError::ContentModified.into(),
+        )
+    }
+
+    #[test]
     fn transport_rpc_error() {
         snap_diagnostic(
             "transport_rpc_error",
