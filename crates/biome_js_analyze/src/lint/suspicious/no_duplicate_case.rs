@@ -103,7 +103,8 @@ impl Rule for NoDuplicateCase {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         // Distinct tests grouped by `node_hash`, each group in source order, so the first
-        // equal test of a group is the first equal test of the switch.
+        // equal test of a group is the first equal test of the switch. Not a hash set of
+        // expressions, because those hash and compare by node identity.
         let mut defined_tests: FxHashMap<_, Vec<AnyJsExpression>> = FxHashMap::default();
         let mut signals = Vec::new();
         for case in node.cases() {
