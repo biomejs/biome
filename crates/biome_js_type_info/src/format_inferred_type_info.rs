@@ -4,8 +4,8 @@ use crate::interned_types::{
     InternedClass, InternedConstructor, InternedFunction, InternedGenericTypeParameter,
     InternedInterface, InternedLiteral, InternedMergedReference, InternedModule, InternedNamespace,
     InternedObject, InternedTuple, InternedTypeInstance, InternedTypeofExpression, Literal,
-    NamedFunctionParameter, PatternFunctionParameter, ReturnType, TupleElementType, TypeData,
-    TypeDb, TypeMember, TypeMemberKind, TypeofExpression,
+    NamedFunctionParameter, PatternFunctionParameter, ReturnType, TemplateLiteral,
+    TupleElementType, TypeData, TypeDb, TypeMember, TypeMemberKind, TypeofExpression,
 };
 use crate::interned_types::{InternedMappedType, MappedTypeKeys};
 use crate::{DestructureField, MappedTypeModifier};
@@ -637,8 +637,21 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for Literal<'db> {
                 ]
             ),
             Self::String(lit) => write!(f, [token("string:"), space(), text(lit.as_str(), None)]),
-            Self::Template(tmpl) => write!(f, [token("string:"), space(), text(tmpl, None)]),
+            Self::Template(template) => write!(f, [template]),
         }
+    }
+}
+
+impl<'db> Format<FormatInferredTypeContext<'db>> for TemplateLiteral<'db> {
+    fn fmt(&self, f: &mut Formatter<FormatInferredTypeContext<'db>>) -> FormatResult<()> {
+        write!(f, [token("template:"), space(), token("`")])?;
+        for (index, chunk) in self.texts.iter().enumerate() {
+            write!(f, [text(chunk, None)])?;
+            if let Some(ty) = self.types.get(index) {
+                write!(f, [token("${"), ty, token("}")])?;
+            }
+        }
+        write!(f, [token("`")])
     }
 }
 

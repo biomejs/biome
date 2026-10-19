@@ -455,7 +455,6 @@ impl TypeData {
             | Self::Conditional
             | Self::Global
             | Self::ImportNamespace(_)
-            | Self::Literal(_)
             | Self::Module(_)
             | Self::Namespace(_)
             | Self::NeverKeyword
@@ -469,6 +468,11 @@ impl TypeData {
             | Self::Unknown
             | Self::UnknownKeyword
             | Self::VoidKeyword => true,
+            // Template literals may refer to generics.
+            Self::Literal(literal) => {
+                !matches!(literal.as_ref(), Literal::Template(_))
+                    || instance.type_parameters.is_empty()
+            }
             Self::Constructor(_)
             | Self::Function(_)
             | Self::InstanceOf(_)
@@ -787,7 +791,7 @@ pub enum Literal {
     Object(ObjectLiteral),
     RegExp(RegexpLiteral),
     String(StringLiteral),
-    Template(Text), // TODO: Custom impl of PartialEq for template literals
+    Template(TemplateLiteral),
 }
 
 impl Literal {
@@ -802,6 +806,17 @@ impl Literal {
                 | Self::Template(_)
         )
     }
+}
+
+/// Template literal used as a type, such as `` `on${string}` ``.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct TemplateLiteral {
+    /// The text before, between, and after the placeholders, as written in
+    /// the source. There is one more text than there are placeholders.
+    pub texts: Box<[Text]>,
+
+    /// The type of each placeholder.
+    pub types: Box<[TypeReference]>,
 }
 
 /// A module definition.

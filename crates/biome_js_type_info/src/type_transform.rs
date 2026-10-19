@@ -7,7 +7,9 @@
 
 use crate::TypeOperator;
 use crate::generated::global_types::ids::AWAITED_ID_GLOBAL_TYPE_ID;
-use crate::interned_types::{InternedTypeInstance, TypeData, TypeDataSlotRebuilder, TypeDb};
+use crate::interned_types::{
+    InternedTypeInstance, Literal, TypeData, TypeDataSlotRebuilder, TypeDb,
+};
 use crate::type_operations::{indexed_access, keyof, mapped_type};
 use crate::type_relation::{
     evaluate_extends, may_refer_to_free_generic, referenced_generic, substitute_all,
@@ -662,16 +664,21 @@ where
         false
     }
 
-    /// Instantiates a generic alias whose body contains a conditional type.
+    /// Instantiates a generic alias whose body contains a conditional type or is
+    /// a template literal type.
     ///
     /// Generic aliases are represented as instances of their declarations. For
     /// example, `IsString<"a">` below is an instance of `IsString` with the
     /// type argument `"a"`. Substituting the argument into the body lets the
-    /// conditional be evaluated, producing `"yes"`:
+    /// conditional be evaluated, producing `"yes"`, and turns `Greet<"bob">`
+    /// into `"hi bob"`:
     ///
     /// ```ts
     /// type IsString<T> = T extends string ? "yes" : "no";
     /// type Yes = IsString<"a">;
+    ///
+    /// type Greet<T extends string> = `hi ${T}`;
+    /// type Hi = Greet<"bob">;
     /// ```
     ///
     /// The conditional doesn't have to be the whole body. See
@@ -684,7 +691,7 @@ where
     ///
     /// Aliases with other bodies are left as instances, so they keep their
     /// identity.
-    fn instantiate_conditional_alias(
+    fn instantiate_computed_alias(
         &mut self,
         db: &'db dyn TypeDb,
         instance: InternedTypeInstance<'db>,
@@ -699,7 +706,11 @@ where
         let body = (self.resolve)(alias.ty(db));
         // A conditional can't be evaluated while its arguments are generic,
         // and instantiating a recursive alias with them would never end.
-        if !self.contains_conditional(db, body)
+        let is_template = matches!(
+            body,
+            TypeData::Literal(literal) if matches!(literal.literal(db), Literal::Template(_))
+        );
+        if !is_template && !self.contains_conditional(db, body)
             || type_arguments
                 .iter()
                 .any(|argument| may_refer_to_free_generic(db, *argument, &[]))
@@ -765,7 +776,7 @@ where
             TypeData::InstanceOf(instance)
                 if instance
                     .ty(db)
-                    .should_flatten_instance(instance.type_parameters(db)) =>
+                    .should_flatten_instance(db, instance.type_parameters(db)) =>
             {
                 instance.ty(db)
             }
@@ -773,7 +784,7 @@ where
             // arguments are normalized, so `Awaited` is checked here as well.
             TypeData::InstanceOf(instance) => self
                 .instantiate_awaited(db, instance)
-                .or_else(|| self.instantiate_conditional_alias(db, instance))
+                .or_else(|| self.instantiate_computed_alias(db, instance))
                 .unwrap_or(ty),
             TypeData::Extends(extends) => match evaluate_extends(db, extends, self.resolve) {
                 Some(evaluated) if evaluated.needs_normalization => {

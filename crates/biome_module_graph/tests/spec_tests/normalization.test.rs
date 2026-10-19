@@ -1655,3 +1655,84 @@ fn test_conditional_types_compare_user_generic_instances_structurally() {
         assert_eq!(format_inferred_type(&db, ty), expected, "{name}");
     }
 }
+
+#[test]
+fn test_conditional_types_match_template_literals() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+        type Split<S> = S extends `${infer T} as ${infer A}` ? [T, A] : never;
+        type On<S> = S extends `on${string}` ? true : false;
+        type ToNumber<S> = S extends `${infer N extends number}` ? N : "no";
+        type Pair<S> = S extends `${infer A}${infer B}` ? [A, B] : "no";
+        type Prefixed<S> = S extends `${"ab" | "x"}${string}` ? 1 : 2;
+        type Rest<S> = S extends `a${infer R}` ? R : "no";
+        type IsNumber<S> = S extends `${number}` ? 1 : 2;
+        type IsBigInt<S> = S extends `${bigint}` ? 1 : 2;
+        type IsPixels<S> = S extends `${number}px` ? 1 : 2;
+        type Greet<T extends string> = `hi ${T}`;
+        type Prefix = "ab" | "x";
+        type AliasPrefixed<S> = S extends `${Prefix}${string}` ? 1 : 2;
+        declare const aliasPrefixed: AliasPrefixed<"abc">;
+        declare const split: Split<"payments as p">;
+        declare const splitFirst: Split<"a as b as c">;
+        declare const onClick: On<"onClick">;
+        declare const click: On<"click">;
+        declare const onTemplate: On<`on${string}`>;
+        declare const onString: On<string>;
+        declare const number: ToNumber<"42">;
+        declare const nonCanonicalNumber: ToNumber<"042">;
+        declare const notNumber: ToNumber<"abc">;
+        declare const pair: Pair<"abc">;
+        declare const single: Pair<"a">;
+        declare const empty: Pair<"">;
+        declare const prefixed: Prefixed<"abc">;
+        declare const rest: Rest<`ab${number}`>;
+        declare const decimal: IsNumber<"1.5">;
+        declare const hex: IsNumber<"0x10">;
+        declare const separator: IsNumber<"1_0">;
+        declare const emptyNumber: IsNumber<"">;
+        declare const bigint: IsBigInt<"10">;
+        declare const leadingZero: IsBigInt<"01">;
+        declare const fraction: IsBigInt<"1.0">;
+        declare const pixels: IsPixels<`${number}px`>;
+        declare const bigintPixels: IsPixels<`${bigint}px`>;
+        declare const greet: Greet<"bob">;
+        declare const greetBoth: Greet<"a" | "b">;
+    "#,
+    );
+    let db = build_js_test_module_db(&fs, &["/src/index.ts"], true);
+    let module = db.module_for_path(Utf8Path::new("/src/index.ts")).unwrap();
+    for (name, expected) in [
+        ("split", "[string: payments,\nstring: p]"),
+        ("splitFirst", "[string: a,\nstring: b as c]"),
+        ("onClick", "bool: true"),
+        ("click", "bool: false"),
+        ("onTemplate", "bool: true"),
+        ("onString", "bool: false"),
+        ("number", "number: 42"),
+        ("nonCanonicalNumber", "number"),
+        ("notNumber", "string: no"),
+        ("pair", "[string: a,\nstring: bc]"),
+        ("single", "[string: a,\nstring: ]"),
+        ("empty", "string: no"),
+        ("prefixed", "number: 1"),
+        ("rest", "template: `b${number}`"),
+        ("decimal", "number: 1"),
+        ("hex", "number: 1"),
+        ("separator", "number: 2"),
+        ("emptyNumber", "number: 2"),
+        ("bigint", "number: 1"),
+        ("leadingZero", "number: 2"),
+        ("fraction", "number: 2"),
+        ("pixels", "number: 1"),
+        ("bigintPixels", "number: 2"),
+        ("greet", "string: hi bob"),
+        ("greetBoth", "string: hi a | string: hi b"),
+        ("aliasPrefixed", "number: 1"),
+    ] {
+        let ty = projected_binding(&db, module, name);
+        assert_eq!(format_inferred_type(&db, ty), expected, "{name}");
+    }
+}
