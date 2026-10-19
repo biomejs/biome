@@ -183,7 +183,6 @@ impl Rule for NoFallthroughSwitchClause {
                 // Analyze the found switch clauses to detect any fallthrough.
                 register_fallthrough_switch_clauses(
                     &block_to_switch_clause_range,
-                    &visited_blocks,
                     cfg,
                     &mut fallthrough,
                 );
@@ -227,16 +226,25 @@ fn has_switch_statement(control_flow_root: &JsSyntaxNode) -> bool {
     false
 }
 
+/// Traverses the blocks of the switch statement whose clauses start at the blocks of
+/// `block_to_switch_clause_range`, and registers the clauses that fall through.
 fn register_fallthrough_switch_clauses(
     block_to_switch_clause_range: &FxHashMap<BlockId, Option<TextRange>>,
-    visited_blocks: &RoaringBitmap,
     cfg: &biome_control_flow::ControlFlowGraph<JsLanguage>,
     fallthrough: &mut Vec<TextRange>,
 ) {
     let mut current_switch_clause = None;
     // Register all switch clauses as block to process.
     let mut block_stack: Vec<_> = block_to_switch_clause_range.keys().copied().collect();
-    let mut visited_blocks = visited_blocks.clone();
+    let mut visited_blocks: RoaringBitmap = block_stack.iter().map(|block| block.index()).collect();
+    // Every block outside the switch statement that a clause can jump to (the targets of
+    // `break` and `continue`, and enclosing catch clauses) is allocated before the block of
+    // the first clause, and code outside the switch statement can only enter the clauses
+    // through the switch block. Skipping blocks allocated before the first clause keeps the
+    // traversal inside the switch statement.
+    let Some(first_clause_block) = block_stack.iter().map(|block| block.index()).min() else {
+        return;
+    };
     // Traverse the control flow graph and detect fallthrough
     while let Some(block_id) = block_stack.pop() {
         current_switch_clause = block_to_switch_clause_range
@@ -252,7 +260,9 @@ fn register_fallthrough_switch_clauses(
         {
             // If the block was already visited, skip it.
             // This avoid cycles and checking twice the same block.
-            if visited_blocks.insert(exception_handler.target.index()) {
+            if exception_handler.target.index() >= first_clause_block
+                && visited_blocks.insert(exception_handler.target.index())
+            {
                 block_stack.push(exception_handler.target);
             }
         }
@@ -266,7 +276,9 @@ fn register_fallthrough_switch_clauses(
                 } => {
                     // If the block was already visited, skip it.
                     // This avoid cycles and checking twice the same block.
-                    if visited_blocks.insert(jump_block_id.index()) {
+                    if jump_block_id.index() >= first_clause_block
+                        && visited_blocks.insert(jump_block_id.index())
+                    {
                         block_stack.push(jump_block_id);
                     }
                     if !conditional {
