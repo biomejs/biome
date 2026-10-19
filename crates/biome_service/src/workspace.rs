@@ -96,7 +96,7 @@ use crate::settings::{EditorFeatures, ModuleGraphResolutionKind, SettingsWithEdi
 pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 #[cfg(feature = "lang_grit")]
 pub use search::grit::GritSearchQuery;
-pub use search::{NoopQueryProvider, SearchLanguage, SearchQuery};
+pub use search::{NoopQueryProvider, SearchLanguage, SearchMatch, SearchQuery};
 pub use server::OpenFileReason;
 
 /// Notification regarding a workspace's service data.
@@ -1461,6 +1461,11 @@ pub struct SearchPatternParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
     pub pattern: PatternId,
+    /// Reports the variables that each match captured, in
+    /// [SearchResults::captures]. Defaults to `false`, because recording them
+    /// runs the pattern on the file a second time.
+    #[serde(default)]
+    pub include_captures: bool,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1468,7 +1473,39 @@ pub struct SearchPatternParams {
 #[serde(rename_all = "camelCase")]
 pub struct SearchResults {
     pub path: BiomePath,
+    /// The code matched by the pattern, as ranges of UTF-8 byte offsets.
     pub matches: Vec<TextRange>,
+    /// The variables that each match captured: `captures[i]` belongs to
+    /// `matches[i]`. Every list is empty unless the request sets
+    /// `includeCaptures`.
+    ///
+    /// Captures include variables that a `where` clause binds outside the
+    /// matched code, for example with `within`. Variables of named patterns,
+    /// variables bound to code that is absent from the file, and anonymous
+    /// variables (`$_`) are omitted. A variable that occurs several times in a
+    /// match, as in `` `$x + $x` ``, is reported once, at its first occurrence.
+    ///
+    /// Biome records captures by running the pattern on each candidate syntax
+    /// node. That works for patterns that start from a code snippet, such as
+    /// `` `console.log($message)` ``, or from a syntax node, such as
+    /// `JsConditionalExpression(consequent = $consequent)`. Other patterns
+    /// report empty lists, for example a pattern that is only a variable like
+    /// `$x`, or a pattern that uses `limit`. A list can also be empty when a
+    /// `where` clause selects the match through `contains` rather than by its
+    /// own syntax.
+    pub captures: Vec<Vec<SearchCapture>>,
+}
+
+/// A variable of the pattern, such as `$name` in `` `console.log($name)` ``,
+/// and the code it captured in one match.
+#[derive(Clone, Debug, Eq, PartialEq, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct SearchCapture {
+    /// The variable name, including the leading `$`.
+    pub name: String,
+    /// The captured code, as a range of UTF-8 byte offsets.
+    pub range: TextRange,
 }
 
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
@@ -2191,6 +2228,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             project_key: self.project_key,
             path: self.path.clone(),
             pattern: pattern.clone(),
+            include_captures: false,
         })
     }
 }

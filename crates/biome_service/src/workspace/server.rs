@@ -4417,6 +4417,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             project_key,
             path,
             pattern,
+            include_captures,
         }: SearchPatternParams,
     ) -> Result<SearchResults, WorkspaceError> {
         let workspace_db = self.get_db();
@@ -4435,17 +4436,25 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let settings = self.settings_handle_with_query(&settings, EditorFeatures::default(), query);
         let provider = self.search_provider.clone();
-        let matches = search(
+        let (matches, captures) = search(
             &path,
             &document_file_source,
             parse.into(),
             provider.as_ref(),
             &settings,
             pattern,
+            include_captures,
             workspace_db.into_untracked_db(),
-        )?;
+        )?
+        .into_iter()
+        .map(|found| (found.range, found.captures))
+        .unzip();
 
-        Ok(SearchResults { path, matches })
+        Ok(SearchResults {
+            path,
+            matches,
+            captures,
+        })
     }
 
     fn drop_pattern(&self, params: DropPatternParams) -> Result<(), WorkspaceError> {
