@@ -287,6 +287,7 @@ pub enum RuleName {
     NoNoninteractiveElementToInteractiveRole,
     NoNoninteractiveTabindex,
     NoNonoctalDecimalEscape,
+    NoNull,
     NoObjectConstructor,
     NoObsoleteTags,
     NoOctal,
@@ -904,6 +905,7 @@ impl RuleName {
             }
             Self::NoNoninteractiveTabindex => "noNoninteractiveTabindex",
             Self::NoNonoctalDecimalEscape => "noNonoctalDecimalEscape",
+            Self::NoNull => "noNull",
             Self::NoObjectConstructor => "noObjectConstructor",
             Self::NoObsoleteTags => "noObsoleteTags",
             Self::NoOctal => "noOctal",
@@ -1517,6 +1519,7 @@ impl RuleName {
             Self::NoNoninteractiveElementToInteractiveRole => RuleGroup::A11y,
             Self::NoNoninteractiveTabindex => RuleGroup::A11y,
             Self::NoNonoctalDecimalEscape => RuleGroup::Correctness,
+            Self::NoNull => RuleGroup::Nursery,
             Self::NoObjectConstructor => RuleGroup::Nursery,
             Self::NoObsoleteTags => RuleGroup::Nursery,
             Self::NoOctal => RuleGroup::Nursery,
@@ -2139,6 +2142,7 @@ impl std::str::FromStr for RuleName {
             }
             "noNoninteractiveTabindex" => Ok(Self::NoNoninteractiveTabindex),
             "noNonoctalDecimalEscape" => Ok(Self::NoNonoctalDecimalEscape),
+            "noNull" => Ok(Self::NoNull),
             "noObjectConstructor" => Ok(Self::NoObjectConstructor),
             "noObsoleteTags" => Ok(Self::NoObsoleteTags),
             "noOctal" => Ok(Self::NoOctal),
