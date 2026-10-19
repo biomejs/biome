@@ -50,7 +50,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let content = fs::read_to_string(test_case_path)
         .expect("Expected test path to be a readable file in UTF8 encoding");
 
-    let mut options = CssParserOptions::default().report_scss_exclusive_syntax();
+    let mut options = CssParserOptions::default();
 
     let mut css_modules_enabled = false;
     let mut css_modules_kind = CssModulesKind::Classic;

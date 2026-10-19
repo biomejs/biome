@@ -8,7 +8,7 @@ use biome_console::fmt::Bytes;
 use biome_console::markup;
 use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, MessageAndDescription,
-    Resource, Severity, Visit, category,
+    Severity, Visit, category,
 };
 use biome_formatter::{FormatError, PrintError};
 use biome_fs::{BiomePath, FileSystemDiagnostic};
@@ -796,7 +796,7 @@ impl Diagnostic for PluginErrors {
         for diagnostic in &self.diagnostics {
             fmt.write_str("\n")?;
 
-            if let Some(Resource::File(path)) = diagnostic.location().resource {
+            if let Some(biome_diagnostics::Resource::File(path)) = diagnostic.location().resource {
                 fmt.write_markup(markup!(<Emphasis>{path}</Emphasis>": "))?;
             }
 
