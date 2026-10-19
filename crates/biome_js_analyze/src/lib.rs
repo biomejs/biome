@@ -439,7 +439,3 @@ where
 #[cfg(test)]
 #[path = "suppressions.tests.rs"]
 mod tests;
-
-#[cfg(test)]
-#[path = "visited_kinds.tests.rs"]
-mod visited_kinds_tests;

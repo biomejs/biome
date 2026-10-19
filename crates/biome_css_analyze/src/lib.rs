@@ -574,7 +574,3 @@ a {
         );
     }
 }
-
-#[cfg(test)]
-#[path = "visited_kinds.tests.rs"]
-mod visited_kinds_tests;

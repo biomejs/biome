@@ -417,9 +417,6 @@ where
     /// Returns the union of the kinds the visitors of this phase read, or
     /// `None` if one of them reads every node.
     fn visited_kinds(&self) -> Option<SyntaxKindSet<L>> {
-        if self.options.walk_every_node {
-            return None;
-        }
         let query_kinds = self.query_matcher.syntax_query_kinds(self.phase);
         self.visitors
             .iter()
