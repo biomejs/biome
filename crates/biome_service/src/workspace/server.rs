@@ -1003,6 +1003,9 @@ impl WorkspaceServerWithDb<'_> {
             let Ok(parsed) = self.get_parse(&path) else {
                 return Ok(InternalOpenFileResult::default());
             };
+            if !reason.is_index() && !self.should_update_service_data(&path) {
+                return Ok(InternalOpenFileResult::default());
+            }
             let (dependencies, diagnostics) = self.update_service_data(
                 &path,
                 UpdateKind::AddedOrChanged(reason, parsed.into()),

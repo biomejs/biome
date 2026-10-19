@@ -2166,6 +2166,69 @@ fn incremental_index_retries_pending_write() {
 
 #[cfg(feature = "module_graph")]
 #[test]
+fn reopening_unindexed_client_document_from_server_keeps_it_unindexed() {
+    const PATH: &str = "/project/a.js";
+    const CLIENT_CONTENT: &str = "import 'bar';";
+
+    let fs = MemoryFileSystem::default();
+    fs.insert(Utf8PathBuf::from(PATH), "import 'foo';");
+    let (workspace, project_key) = setup_workspace_and_open_project(fs, "/project");
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromClient {
+                content: CLIENT_CONTENT.to_string(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    assert!(
+        !workspace
+            .get_module_graph(GetModuleGraphParams {})
+            .unwrap()
+            .data
+            .contains_key(PATH)
+    );
+
+    workspace
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromServer,
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    assert_eq!(
+        workspace
+            .get_file_content(GetFileContentParams {
+                project_key,
+                path: BiomePath::new(PATH),
+            })
+            .unwrap(),
+        CLIENT_CONTENT
+    );
+    assert!(
+        !workspace
+            .get_module_graph(GetModuleGraphParams {})
+            .unwrap()
+            .data
+            .contains_key(PATH)
+    );
+}
+
+#[cfg(feature = "module_graph")]
+#[test]
 fn index_keeps_document_opened_by_client_during_index() {
     const PATH: &str = "/project/a.js";
     const DISK_CONTENT: &str = "import 'foo';";
