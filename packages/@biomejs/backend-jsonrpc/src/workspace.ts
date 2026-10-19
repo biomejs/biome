@@ -13602,6 +13602,15 @@ export interface SerializedHtmlModuleInfo {
 	 */
 	styleClasses: string[];
 }
+export interface GetProjectFilesParams {
+	projectKey: ProjectKey;
+}
+export interface GetProjectFilesResult {
+	/**
+	 * The paths of the project's files, in path order.
+	 */
+	paths: BiomePath[];
+}
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;
 	/**
@@ -13959,6 +13968,9 @@ export interface Workspace {
 	getRegisteredTypes(params: GetRegisteredTypesParams): Promise<string>;
 	getSemanticModel(params: GetSemanticModelParams): Promise<string>;
 	getModuleGraph(params: GetModuleGraphParams): Promise<GetModuleGraphResult>;
+	getProjectFiles(
+		params: GetProjectFilesParams,
+	): Promise<GetProjectFilesResult>;
 	pullDiagnostics(
 		params: PullDiagnosticsParams,
 	): Promise<PullDiagnosticsResult>;
@@ -14035,6 +14047,9 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		getModuleGraph(params) {
 			return transport.request("biome/get_module_graph", params);
+		},
+		getProjectFiles(params) {
+			return transport.request("biome/get_project_files", params);
 		},
 		pullDiagnostics(params) {
 			return transport.request("biome/pull_diagnostics", params);

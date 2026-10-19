@@ -932,6 +932,21 @@ pub struct GetModuleGraphParams {}
 #[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
+pub struct GetProjectFilesParams {
+    pub project_key: ProjectKey,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct GetProjectFilesResult {
+    /// The paths of the project's files, in path order.
+    pub paths: Vec<BiomePath>,
+}
+
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct GetFormatterIRParams {
     pub project_key: ProjectKey,
     pub path: BiomePath,
@@ -1886,6 +1901,21 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
         params: GetModuleGraphParams,
     ) -> Result<GetModuleGraphResult, WorkspaceError>;
 
+    /// Returns the paths of the files that the workspace holds for a project:
+    /// the files that the project scan indexed and that still exist on disk,
+    /// and the files that clients opened. Files of dependencies, such as the
+    /// ones in `node_modules`, are not included.
+    ///
+    /// After a scan with [ScanKind::Project], these are all the files of the
+    /// project that its configuration doesn't ignore, plus the ignored files
+    /// that those files import. After a scan with [ScanKind::KnownFiles],
+    /// they're mostly configuration and manifest files. Use
+    /// [Workspace::file_features] to find out whether a file is ignored.
+    fn get_project_files(
+        &self,
+        params: GetProjectFilesParams,
+    ) -> Result<GetProjectFilesResult, WorkspaceError>;
+
     /// Returns debug information about this workspace.
     fn rage(&self, params: RageParams) -> Result<RageResult, WorkspaceError>;
 
@@ -1980,6 +2010,7 @@ impl<W: Workspace> Workspace for RetryingWorkspace<W> {
         fn get_registered_types(params: GetRegisteredTypesParams) -> Result<String, WorkspaceError>;
         fn get_semantic_model(params: GetSemanticModelParams) -> Result<String, WorkspaceError>;
         fn get_module_graph(params: GetModuleGraphParams) -> Result<GetModuleGraphResult, WorkspaceError>;
+        fn get_project_files(params: GetProjectFilesParams) -> Result<GetProjectFilesResult, WorkspaceError>;
         fn rage(params: RageParams) -> Result<RageResult, WorkspaceError>;
     }
 

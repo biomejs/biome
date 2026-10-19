@@ -1,0 +1,39 @@
+---
+source: crates/biome_mcp/src/server_test_utils.rs
+expression: snapshot
+---
+## Input
+
+```text
+search {"pattern": "`console.log("}
+```
+
+## Output
+
+```text
+The pattern is invalid: Missing closing quote
+```
+
+## Input
+
+```text
+search {"pattern": "`console.log($arguments)`", "paths": ["../other"]}
+```
+
+## Output
+
+```text
+The path `../other` is outside the project root `/project`.
+```
+
+## Input
+
+```text
+search {"pattern": "`console.log($arguments)`", "paths": ["src/missing.ts"]}
+```
+
+## Output
+
+```text
+The path `src/missing.ts` doesn't exist.
+```

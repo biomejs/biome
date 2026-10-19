@@ -3,61 +3,51 @@
 //!
 //! An agent harness starts the server as a child process and exchanges MCP
 //! messages with it over standard input and output, one session per process.
+//! Once the session starts, the server loads the Biome configuration of its
+//! working directory, then indexes and watches the project's files, so the
+//! index stays current while the agent edits files. When the configuration has
+//! errors, the tools report them until the configuration is fixed.
 
-use rmcp::handler::server::router::tool::ToolRouter;
-use rmcp::model::{Implementation, ServerCapabilities, ServerConfig};
+mod project;
+mod search;
+mod server;
+#[cfg(test)]
+mod server_test_utils;
+
+pub use project::Project;
+pub use search::{PatternLanguage, SearchOutput, SearchParams};
+pub use server::BiomeServer;
+
+use biome_fs::OsFileSystem;
+use biome_service::WatcherOptions;
+use camino::Utf8PathBuf;
+use rmcp::ServiceExt;
 use rmcp::service::QuitReason;
 use rmcp::transport::stdio;
-use rmcp::{ServerHandler, ServiceExt, tool_handler, tool_router};
 use std::io;
+use std::sync::Arc;
 
-/// Text that clients receive when a session starts. Clients usually pass it to
-/// the model to explain what the server is for.
-const INSTRUCTIONS: &str = "Biome formats and lints the files of the current project.";
-
-/// The MCP server, which answers the requests of one client.
-#[derive(Clone)]
-pub struct BiomeServer {
-    tool_router: ToolRouter<Self>,
-}
-
-#[tool_router(allow_empty)]
-impl BiomeServer {
-    pub fn new() -> Self {
-        Self {
-            tool_router: Self::tool_router(),
-        }
-    }
-}
-
-impl Default for BiomeServer {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-#[tool_handler(router = self.tool_router)]
-impl ServerHandler for BiomeServer {
-    fn get_info(&self) -> ServerConfig {
-        ServerConfig::new(ServerCapabilities::builder().enable_tools().build())
-            .with_server_info(Implementation::new("biome", biome_configuration::VERSION))
-            .with_instructions(INSTRUCTIONS)
-    }
-}
-
-/// Serves MCP over standard input and output until the client closes the
-/// connection.
+/// Serves MCP over standard input and output for the project in the current
+/// working directory, until the client closes the connection.
+///
+/// The server starts even when the project's Biome configuration has errors:
+/// the tools report the errors, and the project resumes once they're fixed.
+/// It also starts when the project can't be created, and the tools report why.
 ///
 /// ## Errors
 ///
-/// Returns an error when the session can't start, for example because the
-/// client's first message isn't a valid MCP request, or when one of the
-/// session's tasks panics or is aborted.
+/// Returns an error when the session can't start because the client's first
+/// message isn't a valid MCP request, or when one of the session's tasks
+/// panics or is aborted.
 pub async fn serve_stdio() -> io::Result<()> {
-    let service = BiomeServer::new()
+    let project = create_project().map(Arc::new);
+    let service = BiomeServer::new(project.clone())
         .serve(stdio())
         .await
         .map_err(io::Error::other)?;
+    if let Ok(project) = project {
+        load_in_background(project);
+    }
     match service.waiting().await.map_err(io::Error::other)? {
         QuitReason::JoinError(error) => Err(io::Error::other(error)),
         // The client closing the connection, or the session being cancelled,
@@ -66,41 +56,35 @@ pub async fn serve_stdio() -> io::Result<()> {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+/// Creates the project of the current working directory.
+///
+/// ## Errors
+///
+/// Returns a message for the agent when the working directory isn't available
+/// or its path isn't valid UTF-8, or when the project's files can't be watched.
+fn create_project() -> Result<Project, String> {
+    let root = std::env::current_dir()
+        .map_err(|error| format!("Biome can't read the working directory: {error}"))?;
+    let root = Utf8PathBuf::from_path_buf(root).map_err(|root| {
+        format!(
+            "Biome can't use the working directory `{}`, because its path isn't valid UTF-8.",
+            root.display()
+        )
+    })?;
+    Project::new(
+        Arc::new(OsFileSystem::new(root.clone())),
+        root,
+        WatcherOptions::default(),
+    )
+    .map_err(|error| format!("Biome can't watch the files of the project: {error}"))
+}
 
-    #[tokio::test]
-    async fn describes_itself_and_lists_its_tools() {
-        let (server_transport, client_transport) = tokio::io::duplex(4096);
-        let server = tokio::spawn(async move {
-            let service = BiomeServer::new()
-                .serve(server_transport)
-                .await
-                .expect("server should start");
-            service.waiting().await.expect("server should stop cleanly");
-        });
-
-        let client = ().serve(client_transport).await.expect("client should connect");
-        let info = client.peer_info().expect("server should describe itself");
-        let tools = client
-            .list_tools(None)
-            .await
-            .expect("server should list its tools");
-        client.cancel().await.expect("client should disconnect");
-        server.await.expect("server task should finish");
-
-        let server_info = info
-            .server_info
-            .as_ref()
-            .expect("server should name itself");
-        assert_eq!(server_info.name, "biome");
-        assert_eq!(server_info.version, biome_configuration::VERSION);
-        assert_eq!(info.instructions.as_deref(), Some(INSTRUCTIONS));
-        assert!(
-            tools.tools.is_empty(),
-            "unexpected tools: {:?}",
-            tools.tools
-        );
-    }
+/// Loads the configuration of `project`, and indexes and watches its files, on
+/// a blocking thread. Doing it after the session started keeps a large project
+/// from delaying the handshake; tool calls that arrive meanwhile wait for it.
+/// Configuration errors are reported by the tools, which also retry loading.
+pub(crate) fn load_in_background(project: Arc<Project>) {
+    tokio::task::spawn_blocking(move || {
+        let _ = project.ensure_loaded();
+    });
 }

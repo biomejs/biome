@@ -1,0 +1,17 @@
+---
+source: crates/biome_mcp/src/server_test_utils.rs
+expression: snapshot
+---
+## Input
+
+```text
+search {"pattern": "`console.log($arguments)`"}
+```
+
+## Output
+
+```text
+Biome stopped because the configuration has errors:
+- biome.json: includes has an incorrect type, expected an array, but received a number.
+Fix the configuration; the next call loads it again.
+```
