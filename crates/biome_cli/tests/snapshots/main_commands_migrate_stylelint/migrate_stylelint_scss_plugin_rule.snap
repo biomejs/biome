@@ -38,7 +38,7 @@ biome.json migrate ━━━━━━━━━━━━━━━━━━━━�
        3 │ + → → "enabled":·true,
        4 │ + → → "rules":·{
        5 │ + → → → "preset":·"none",
-       6 │ + → → → "nursery":·{·"noUninterpolatedScssVariable":·"error"·}
+       6 │ + → → → "nursery":·{·"noMissingScssInterpolation":·"error"·}
        7 │ + → → }
        8 │ + → }
        9 │ + }

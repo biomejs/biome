@@ -3063,6 +3063,11 @@ export interface Nursery {
 	 */
 	noMisplacedListElements?: NoMisplacedListElementsConfiguration;
 	/**
+	 * Disallow Sass variables and function calls in custom property values without #{} interpolation.
+	 * See https://biomejs.dev/linter/rules/no-missing-scss-interpolation
+	 */
+	noMissingScssInterpolation?: NoMissingScssInterpolationConfiguration;
+	/**
 	 * Disallow Promises to be used in places where they are almost certainly a mistake.
 	 * See https://biomejs.dev/linter/rules/no-misused-promises
 	 */
@@ -3252,16 +3257,6 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/no-undeclared-custom-properties
 	 */
 	noUndeclaredCustomProperties?: NoUndeclaredCustomPropertiesConfiguration;
-	/**
-	 * Disallow Sass function calls in custom property values without #{} interpolation.
-	 * See https://biomejs.dev/linter/rules/no-uninterpolated-scss-function
-	 */
-	noUninterpolatedScssFunction?: NoUninterpolatedScssFunctionConfiguration;
-	/**
-	 * Disallow Sass variables in custom property values without #{} interpolation.
-	 * See https://biomejs.dev/linter/rules/no-uninterpolated-scss-variable
-	 */
-	noUninterpolatedScssVariable?: NoUninterpolatedScssVariableConfiguration;
 	/**
 	 * Disallow loop conditions whose variables are never modified in the loop.
 	 * See https://biomejs.dev/linter/rules/no-unmodified-loop-condition
@@ -5902,6 +5897,9 @@ export type NoMisleadingReturnTypeConfiguration =
 export type NoMisplacedListElementsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisplacedListElementsOptions;
+export type NoMissingScssInterpolationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoMissingScssInterpolationOptions;
 export type NoMisusedPromisesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMisusedPromisesOptions;
@@ -6016,12 +6014,6 @@ export type NoUndeclaredClassesConfiguration =
 export type NoUndeclaredCustomPropertiesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUndeclaredCustomPropertiesOptions;
-export type NoUninterpolatedScssFunctionConfiguration =
-	| RulePlainConfiguration
-	| RuleWithNoUninterpolatedScssFunctionOptions;
-export type NoUninterpolatedScssVariableConfiguration =
-	| RulePlainConfiguration
-	| RuleWithNoUninterpolatedScssVariableOptions;
 export type NoUnmodifiedLoopConditionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnmodifiedLoopConditionOptions;
@@ -8465,6 +8457,14 @@ export interface RuleWithNoMisplacedListElementsOptions {
 	level: RulePlainConfiguration;
 	options?: NoMisplacedListElementsOptions;
 }
+export interface RuleWithNoMissingScssInterpolationOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoMissingScssInterpolationOptions;
+}
 export interface RuleWithNoMisusedPromisesOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -8652,18 +8652,6 @@ export interface RuleWithNoUndeclaredClassesOptions {
 export interface RuleWithNoUndeclaredCustomPropertiesOptions {
 	level: RulePlainConfiguration;
 	options?: NoUndeclaredCustomPropertiesOptions;
-}
-export interface RuleWithNoUninterpolatedScssFunctionOptions {
-	level: RulePlainConfiguration;
-	options?: NoUninterpolatedScssFunctionOptions;
-}
-export interface RuleWithNoUninterpolatedScssVariableOptions {
-	/**
-	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
-	 */
-	fix?: FixKind;
-	level: RulePlainConfiguration;
-	options?: NoUninterpolatedScssVariableOptions;
 }
 export interface RuleWithNoUnmodifiedLoopConditionOptions {
 	level: RulePlainConfiguration;
@@ -11166,6 +11154,7 @@ export type NoJsonUnsafeValuesOptions = {};
 export type NoMeaninglessVoidOperatorOptions = {};
 export type NoMisleadingReturnTypeOptions = {};
 export type NoMisplacedListElementsOptions = {};
+export type NoMissingScssInterpolationOptions = {};
 export type NoMisusedPromisesOptions = {};
 export type NoNegationInEqualityCheckOptions = {};
 export type NoNestedSwitchOptions = {};
@@ -11242,8 +11231,6 @@ export type NoThisOutsideOfClassOptions = {};
  */
 export type NoUndeclaredClassesOptions = {};
 export type NoUndeclaredCustomPropertiesOptions = {};
-export type NoUninterpolatedScssFunctionOptions = {};
-export type NoUninterpolatedScssVariableOptions = {};
 export type NoUnmodifiedLoopConditionOptions = {};
 export type NoUnreadableForOfExpressionOptions = {};
 export type NoUnsafeIframeSandboxOptions = {};
@@ -12954,6 +12941,7 @@ export type Category =
 	| "lint/nursery/noMisleadingReturnType"
 	| "lint/nursery/noMisplacedListElements"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
+	| "lint/nursery/noMissingScssInterpolation"
 	| "lint/nursery/noMisusedPromises"
 	| "lint/nursery/noNegationInEqualityCheck"
 	| "lint/nursery/noNestedSwitch"
@@ -13005,8 +12993,6 @@ export type Category =
 	| "lint/nursery/noThisOutsideOfClass"
 	| "lint/nursery/noUndeclaredClasses"
 	| "lint/nursery/noUndeclaredCustomProperties"
-	| "lint/nursery/noUninterpolatedScssFunction"
-	| "lint/nursery/noUninterpolatedScssVariable"
 	| "lint/nursery/noUnmodifiedLoopCondition"
 	| "lint/nursery/noUnreadableForOfExpression"
 	| "lint/nursery/noUnsafeIframeSandbox"

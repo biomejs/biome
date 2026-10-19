@@ -5287,6 +5287,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoMissingScssInterpolationConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoMissingScssInterpolationOptions" }
+			]
+		},
+		"NoMissingScssInterpolationOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoMissingVarFunctionConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -6696,26 +6706,6 @@
 			},
 			"additionalProperties": false
 		},
-		"NoUninterpolatedScssFunctionConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoUninterpolatedScssFunctionOptions" }
-			]
-		},
-		"NoUninterpolatedScssFunctionOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
-		"NoUninterpolatedScssVariableConfiguration": {
-			"oneOf": [
-				{ "$ref": "#/$defs/RulePlainConfiguration" },
-				{ "$ref": "#/$defs/RuleWithNoUninterpolatedScssVariableOptions" }
-			]
-		},
-		"NoUninterpolatedScssVariableOptions": {
-			"type": "object",
-			"additionalProperties": false
-		},
 		"NoUnknownAtRulesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7980,6 +7970,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noMissingScssInterpolation": {
+					"description": "Disallow Sass variables and function calls in custom property values without #{} interpolation.\nSee https://biomejs.dev/linter/rules/no-missing-scss-interpolation",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoMissingScssInterpolationConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noMisusedPromises": {
 					"description": "Disallow Promises to be used in places where they are almost certainly a mistake.\nSee https://biomejs.dev/linter/rules/no-misused-promises",
 					"anyOf": [
@@ -8243,20 +8240,6 @@
 					"description": "Disallow undeclared CSS custom properties in inline styles.\nSee https://biomejs.dev/linter/rules/no-undeclared-custom-properties",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUndeclaredCustomPropertiesConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUninterpolatedScssFunction": {
-					"description": "Disallow Sass function calls in custom property values without #{} interpolation.\nSee https://biomejs.dev/linter/rules/no-uninterpolated-scss-function",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoUninterpolatedScssFunctionConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUninterpolatedScssVariable": {
-					"description": "Disallow Sass variables in custom property values without #{} interpolation.\nSee https://biomejs.dev/linter/rules/no-uninterpolated-scss-variable",
-					"anyOf": [
-						{ "$ref": "#/$defs/NoUninterpolatedScssVariableConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11415,6 +11398,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithNoMissingScssInterpolationOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoMissingScssInterpolationOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithNoMissingVarFunctionOptions": {
 			"type": "object",
 			"properties": {
@@ -12715,28 +12711,6 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUndeclaredVariablesOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithNoUninterpolatedScssFunctionOptions": {
-			"type": "object",
-			"properties": {
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoUninterpolatedScssFunctionOptions" }
-			},
-			"additionalProperties": false,
-			"required": ["level"]
-		},
-		"RuleWithNoUninterpolatedScssVariableOptions": {
-			"type": "object",
-			"properties": {
-				"fix": {
-					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
-					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
-				},
-				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
-				"options": { "$ref": "#/$defs/NoUninterpolatedScssVariableOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
