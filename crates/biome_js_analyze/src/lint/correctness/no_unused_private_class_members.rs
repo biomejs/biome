@@ -275,13 +275,16 @@ fn traverse_members_usage(
     syntax: &JsSyntaxNode,
     private_members: Vec<AnyMember>,
 ) -> Vec<AnyMember> {
+    // Most names belong to a single member. A getter and a setter for the same
+    // property are two members sharing one name, so two inline slots cover
+    // that case without allocating.
     let mut members_by_name: FxHashMap<_, SmallVec<[usize; 2]>> = FxHashMap::default();
     for (index, member) in private_members.iter().enumerate() {
         if let Some(name) = member.name() {
             members_by_name.entry(name).or_default().push(index);
         }
     }
-    let mut is_used = vec![false; private_members.len()];
+    let mut used_members = vec![false; private_members.len()];
     let mut unused_count = private_members.len();
     // Number of unused TypeScript private members like `private member`.
     // The other private members are sharp members `#member`.
@@ -309,10 +312,10 @@ fn traverse_members_usage(
                 let is_write_only = is_write_only(&js_name) == Some(true);
                 for &index in indices {
                     let private_member = &private_members[index];
-                    if is_used[index] || (is_write_only && !private_member.is_accessor()) {
+                    if used_members[index] || (is_write_only && !private_member.is_accessor()) {
                         continue;
                     }
-                    is_used[index] = true;
+                    used_members[index] = true;
                     unused_count -= 1;
                     if !private_member.is_private_sharp() {
                         ts_private_count -= 1;
@@ -354,8 +357,8 @@ fn traverse_members_usage(
                             continue;
                         };
                         for &index in indices {
-                            if !is_used[index] && !private_members[index].is_private_sharp() {
-                                is_used[index] = true;
+                            if !used_members[index] && !private_members[index].is_private_sharp() {
+                                used_members[index] = true;
                                 unused_count -= 1;
                                 ts_private_count -= 1;
                             }
@@ -372,8 +375,8 @@ fn traverse_members_usage(
                 {
                     // We consider that all TypeScript private members are used in expressions like `this[something]`.
                     for (index, private_member) in private_members.iter().enumerate() {
-                        if !is_used[index] && !private_member.is_private_sharp() {
-                            is_used[index] = true;
+                        if !used_members[index] && !private_member.is_private_sharp() {
+                            used_members[index] = true;
                             unused_count -= 1;
                         }
                     }
@@ -385,7 +388,7 @@ fn traverse_members_usage(
 
     private_members
         .into_iter()
-        .zip(is_used)
+        .zip(used_members)
         .filter_map(|(member, is_used)| (!is_used).then_some(member))
         .collect()
 }
