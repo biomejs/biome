@@ -3702,6 +3702,11 @@ export interface Nursery {
 	 * See https://biomejs.dev/linter/rules/use-vue-v-on-exact
 	 */
 	useVueVOnExact?: UseVueVOnExactConfiguration;
+	/**
+	 * Require the condition that ends a loop to be written in the while statement.
+	 * See https://biomejs.dev/linter/rules/use-while-loop-condition
+	 */
+	useWhileLoopCondition?: UseWhileLoopConditionConfiguration;
 }
 /**
  * Configures all rules in one lint group.
@@ -6301,6 +6306,9 @@ export type UseVueTypedRefConfiguration =
 export type UseVueVOnExactConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueVOnExactOptions;
+export type UseWhileLoopConditionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseWhileLoopConditionOptions;
 export type NoAccumulatingSpreadConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoAccumulatingSpreadOptions;
@@ -9185,6 +9193,14 @@ export interface RuleWithUseVueVOnExactOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueVOnExactOptions;
 }
+export interface RuleWithUseWhileLoopConditionOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseWhileLoopConditionOptions;
+}
 export interface RuleWithNoAccumulatingSpreadOptions {
 	level: RulePlainConfiguration;
 	options?: NoAccumulatingSpreadOptions;
@@ -11558,6 +11574,7 @@ export type UseVueMatchingComponentFileNameOptions = {};
 export type UseVueToggleInsideTransitionOptions = {};
 export type UseVueTypedRefOptions = {};
 export type UseVueVOnExactOptions = {};
+export type UseWhileLoopConditionOptions = {};
 export type NoAccumulatingSpreadOptions = {};
 export type NoAwaitInLoopsOptions = {};
 export type NoBarrelFileOptions = {};
@@ -13159,6 +13176,7 @@ export type Category =
 	| "lint/nursery/useVueValidVFor"
 	| "lint/nursery/useVueValidVModel"
 	| "lint/nursery/useVueVOnExact"
+	| "lint/nursery/useWhileLoopCondition"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
 	| "lint/performance/noBarrelFile"

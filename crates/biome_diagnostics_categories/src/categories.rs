@@ -422,6 +422,7 @@ define_categories! {
     "lint/nursery/useVueValidVFor": "https://biomejs.dev/linter/rules/use-vue-valid-v-for",
     "lint/nursery/useVueValidVModel": "https://biomejs.dev/linter/rules/use-vue-valid-v-model",
     "lint/nursery/useVueVOnExact": "https://biomejs.dev/linter/rules/use-vue-v-on-exact",
+    "lint/nursery/useWhileLoopCondition": "https://biomejs.dev/linter/rules/use-while-loop-condition",
     "lint/performance/noAccumulatingSpread": "https://biomejs.dev/linter/rules/no-accumulating-spread",
     "lint/performance/noAwaitInLoops": "https://biomejs.dev/linter/rules/no-await-in-loops",
     "lint/performance/noBarrelFile": "https://biomejs.dev/linter/rules/no-barrel-file",

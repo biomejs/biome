@@ -1,0 +1,208 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+while (hasMore()) {
+	processNext();
+}
+
+while (false) {
+	if (!hasMore()) {
+		break;
+	}
+}
+
+while (1) {
+	if (!hasMore()) {
+		break;
+	}
+}
+
+for (; false;) {
+	if (!hasMore()) {
+		break;
+	}
+}
+
+for (let index = 0;;) {
+	if (!hasMore()) {
+		break;
+	}
+}
+
+for (;; update()) {
+	if (!hasMore()) {
+		break;
+	}
+}
+
+do {
+	if (!hasMore()) {
+		break;
+	}
+} while (false);
+
+// The condition uses variables declared in the loop body.
+{
+	let done = false;
+	while (true) {
+		if (done) {
+			break;
+		}
+		let done = true;
+		work();
+	}
+}
+
+{
+	let done = false;
+	for (;;) {
+		if (done) {
+			break;
+		}
+		const done = true;
+		work();
+	}
+}
+
+{
+	let done = false;
+	do {
+		if (done) {
+			break;
+		}
+		class done {}
+		work();
+	} while (true);
+}
+
+{
+	let done = false;
+	while (true) {
+		if (done) {
+			break;
+		}
+		function done() {}
+		work();
+	}
+}
+
+{
+	let done = false;
+	while (true) {
+		if (done) {
+			break;
+		}
+		const { done } = getState();
+	}
+}
+
+loop: for (;;) {
+	if (!hasMore()) {
+		break;
+	}
+}
+
+loop: do {
+	if (!hasMore()) {
+		break;
+	}
+} while (true);
+
+loop: while (true) {
+	if (!hasMore()) {
+		break;
+	}
+}
+
+outer: {
+	while (true) {
+		if (!hasMore()) {
+			break outer;
+		}
+	}
+}
+
+while (true) {
+	setup();
+	if (!hasMore()) {
+		break;
+	}
+}
+
+while (true) {
+	if (!hasMore()) {
+		break;
+	} else {
+		processNext();
+	}
+}
+
+function process() {
+	while (true) {
+		if (!hasMore()) {
+			return;
+		}
+	}
+}
+
+while (true) {
+	if (!hasMore()) {
+		break;
+		processNext();
+	}
+}
+
+while (true) {
+	if (!hasMore()) {
+		continue;
+	}
+}
+
+while (true) if (!hasMore()) break;
+
+// Another `break` can also stop the loop.
+while (true) {
+	if (!hasMore()) {
+		break;
+	}
+	if (done) {
+		break;
+	}
+}
+
+while (true) {
+	if (!hasMore()) {
+		break;
+	}
+	{
+		if (done) {
+			break;
+		}
+	}
+}
+
+while (true) {
+	if (!hasMore()) {
+		break;
+	}
+	try {
+		processNext();
+	} catch {
+		break;
+	}
+}
+
+while (true) {
+	if (!hasMore()) {
+		break;
+	}
+	label: {
+		break;
+	}
+}
+
+```
