@@ -5,4 +5,3 @@
 @function --separators(--unicode:url(a b,a b),--crlf:url(
 a,b
 ),--cr:url(a,b),--after:1px){result:var(--unicode)}
-.after{background:url([a);background:url({a);background:url(]a);background:url(}a)}

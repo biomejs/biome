@@ -13,7 +13,7 @@ use crate::syntax::{
     parse_metavariable_with_context, parse_number,
 };
 use biome_css_syntax::CssSyntaxKind::*;
-use biome_css_syntax::{CssSyntaxKind, T, TextSize};
+use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{RecoveryError, RecoveryResult};
 use biome_parser::prelude::ParsedSyntax;
@@ -93,18 +93,13 @@ pub(crate) fn parse_legacy_filter_value(
 /// ```scss
 /// @function --inset(--padding: $gap 16px, --other: #{$gap}) {}
 /// ```
-pub(crate) fn parse_function_parameter_default_components(
-    p: &mut CssParser,
-    is_recovering_at_body: bool,
-) -> CompletedMarker {
+pub(crate) fn parse_function_parameter_default_components(p: &mut CssParser) -> CompletedMarker {
     CustomPropertyComponentList {
         boundary: CustomPropertyListBoundary::ParameterDefault,
         comment_mode: CssCustomPropertyCommentMode::ScssLineComments,
-        nested_end_set: is_recovering_at_body.then_some(token_set![T!['{']]),
+        nested_end_set: None,
         legacy_filter_recovery: false,
-        mode: CustomPropertyValueMode::FunctionDefault {
-            is_scss_interpolation_allowed: CssSyntaxFeatures::Scss.is_supported(p),
-        },
+        is_scss_interpolation_allowed: CssSyntaxFeatures::Scss.is_supported(p),
     }
     .parse_list(p)
 }
@@ -141,24 +136,7 @@ struct CustomPropertyComponentList {
     comment_mode: CssCustomPropertyCommentMode,
     nested_end_set: Option<TokenSet<CssSyntaxKind>>,
     legacy_filter_recovery: bool,
-    mode: CustomPropertyValueMode,
-}
-
-#[derive(Clone, Copy)]
-enum CustomPropertyValueMode {
-    General,
-    FunctionDefault { is_scss_interpolation_allowed: bool },
-}
-
-impl CustomPropertyValueMode {
-    fn allows_scss_interpolation(self) -> bool {
-        match self {
-            Self::General => true,
-            Self::FunctionDefault {
-                is_scss_interpolation_allowed,
-            } => is_scss_interpolation_allowed,
-        }
-    }
+    is_scss_interpolation_allowed: bool,
 }
 
 /// Controls which tokens terminate a raw custom-property component list.
@@ -175,7 +153,7 @@ impl CustomPropertyComponentList {
             comment_mode,
             nested_end_set: None,
             legacy_filter_recovery: false,
-            mode: CustomPropertyValueMode::General,
+            is_scss_interpolation_allowed: true,
         }
     }
 
@@ -188,7 +166,7 @@ impl CustomPropertyComponentList {
             comment_mode: CssCustomPropertyCommentMode::PreserveDoubleSlash,
             nested_end_set: Some(nested_end_set),
             legacy_filter_recovery: true,
-            mode: CustomPropertyValueMode::General,
+            is_scss_interpolation_allowed: true,
         }
     }
 
@@ -196,14 +174,14 @@ impl CustomPropertyComponentList {
         comment_mode: CssCustomPropertyCommentMode,
         nested_end_set: Option<TokenSet<CssSyntaxKind>>,
         legacy_filter_recovery: bool,
-        mode: CustomPropertyValueMode,
+        is_scss_interpolation_allowed: bool,
     ) -> Self {
         Self {
             boundary: CustomPropertyListBoundary::Block,
             comment_mode,
             nested_end_set,
             legacy_filter_recovery,
-            mode,
+            is_scss_interpolation_allowed,
         }
     }
 
@@ -224,44 +202,25 @@ impl ParseNodeList for CustomPropertyComponentList {
         let is_parameter_default =
             matches!(self.boundary, CustomPropertyListBoundary::ParameterDefault);
         let context = CssLexContext::CustomPropertyValue(self.comment_mode);
-        if is_parameter_default && p.at_ts(token_set![T![;], T![!]]) {
+        if is_parameter_default && p.at_ts(token_set![T![;], T![!], T![!=]]) {
             let invalid = p.start();
             p.error(expected_component_value(p, p.cur_range()));
             p.bump_any_with_context(context);
             return Present(invalid.complete(p, CSS_BOGUS_PROPERTY_VALUE));
         }
 
-        let component = parse_custom_property_component(
+        parse_custom_property_component(
             p,
             self.comment_mode,
             self.nested_end_set,
             self.legacy_filter_recovery,
-            self.mode,
-        );
-        component.map(|component| {
-            if is_parameter_default
-                && component.kind(p) == CSS_BOGUS_PROPERTY_VALUE
-                && p.at(T![')'])
-                && p.nth_at(1, T![,])
-            {
-                // In `--x: [a), --y: b`, leave the comma for the parameter list.
-                let invalid = component.precede(p);
-                p.bump_with_context(T![')'], context);
-                invalid.complete(p, CSS_BOGUS_PROPERTY_VALUE)
-            } else {
-                component
-            }
-        })
+            self.is_scss_interpolation_allowed,
+        )
     }
 
     fn is_at_list_end(&self, p: &mut Self::Parser<'_>) -> bool {
         match self.boundary {
-            CustomPropertyListBoundary::ParameterDefault => {
-                p.at_ts(token_set![T![,], T![')'], EOF])
-                    || self.nested_end_set.is_some_and(|end_set| {
-                        p.at_ts(end_set.union(CUSTOM_PROPERTY_BLOCK_END_SET))
-                    })
-            }
+            CustomPropertyListBoundary::ParameterDefault => p.at_ts(token_set![T![,], T![')']]),
             CustomPropertyListBoundary::Value(end_set) => {
                 if p.at(T![!]) {
                     p.source()
@@ -287,10 +246,7 @@ impl ParseNodeList for CustomPropertyComponentList {
             return Ok(parsed);
         }
 
-        // A bad default must not force later braced defaults into body recovery.
-        if p.is_speculative_parsing()
-            && !matches!(self.mode, CustomPropertyValueMode::FunctionDefault { .. })
-        {
+        if p.is_speculative_parsing() {
             p.error(expected_component_value(p, p.cur_range()));
             return Err(RecoveryError::RecoveryDisabled);
         }
@@ -314,13 +270,13 @@ fn parse_custom_property_component(
     comment_mode: CssCustomPropertyCommentMode,
     nested_end_set: Option<TokenSet<CssSyntaxKind>>,
     legacy_filter_recovery: bool,
-    mode: CustomPropertyValueMode,
+    is_scss_interpolation_allowed: bool,
 ) -> ParsedSyntax {
     let context = CssLexContext::CustomPropertyValue(comment_mode);
 
     if is_at_metavariable(p) {
         parse_metavariable_with_context(p, context)
-    } else if mode.allows_scss_interpolation() && is_at_scss_interpolation(p) {
+    } else if is_scss_interpolation_allowed && is_at_scss_interpolation(p) {
         parse_scss_interpolation_with_context(p, context)
     } else if is_at_scss_interpolated_string(p) {
         parse_scss_interpolated_string(p, context)
@@ -332,7 +288,7 @@ fn parse_custom_property_component(
             comment_mode,
             nested_end_set,
             legacy_filter_recovery,
-            mode,
+            is_scss_interpolation_allowed,
         )
     } else if is_at_any_dimension(p) {
         parse_any_dimension(p, context)
@@ -366,7 +322,7 @@ fn parse_custom_property_nested_component(
     comment_mode: CssCustomPropertyCommentMode,
     nested_end_set: Option<TokenSet<CssSyntaxKind>>,
     legacy_filter_recovery: bool,
-    mode: CustomPropertyValueMode,
+    is_scss_interpolation_allowed: bool,
 ) -> ParsedSyntax {
     if !is_at_custom_property_nested_component(p) {
         return Absent;
@@ -386,7 +342,7 @@ fn parse_custom_property_nested_component(
         comment_mode,
         nested_end_set,
         legacy_filter_recovery,
-        mode,
+        is_scss_interpolation_allowed,
     );
 
     loop {
@@ -407,7 +363,7 @@ fn parse_custom_property_nested_component(
             }
         }
 
-        let completed = current.complete(p, context, mode);
+        let completed = current.complete(p, context);
         match parents.pop() {
             Some(parent) => current = parent,
             None => return Present(completed),
@@ -418,7 +374,6 @@ fn parse_custom_property_nested_component(
 struct CustomPropertyContainer {
     marker: Marker,
     components: Marker,
-    opening_paren: Option<TextSize>,
     close: CssSyntaxKind,
     kind: CssSyntaxKind,
 }
@@ -439,46 +394,23 @@ impl CustomPropertyContainer {
             };
             (p.start(), close, kind)
         };
-        let opening_paren = p.at(T!['(']).then_some(p.cur_range().start());
         p.bump_any_with_context(context);
         Some(Self {
             marker,
             components: p.start(),
-            opening_paren,
             close,
             kind,
         })
     }
 
-    /// Closes a raw container, retaining failed `(` offsets for header recovery.
+    /// Leaves a mismatched closing delimiter for the enclosing container.
     ///
-    /// Example: `fn(a]` leaves `]` for its parent and marks the function bogus
-    /// when it occurs in a native default.
-    fn complete(
-        self,
-        p: &mut CssParser,
-        context: CssLexContext,
-        mode: CustomPropertyValueMode,
-    ) -> CompletedMarker {
+    /// Example: `fn(a]` leaves `]` for its parent and reports a missing `)`.
+    fn complete(self, p: &mut CssParser, context: CssLexContext) -> CompletedMarker {
         self.components
             .complete(p, CSS_CUSTOM_PROPERTY_COMPONENT_LIST);
-        if let Some(opening) = self.opening_paren
-            && p.at_ts(token_set![T![']'], T!['}'], EOF])
-            && p.is_speculative_parsing()
-            && matches!(mode, CustomPropertyValueMode::FunctionDefault { .. })
-        {
-            p.state_mut()
-                .unclosed_function_default_parens
-                .insert(opening);
-        }
-        let has_close = p.expect_with_context(self.close, context);
-        let kind = if !has_close && matches!(mode, CustomPropertyValueMode::FunctionDefault { .. })
-        {
-            CSS_BOGUS_PROPERTY_VALUE
-        } else {
-            self.kind
-        };
-        self.marker.complete(p, kind)
+        p.expect_with_context(self.close, context);
+        self.marker.complete(p, self.kind)
     }
 }
 

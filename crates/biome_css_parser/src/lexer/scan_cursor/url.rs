@@ -380,11 +380,10 @@ impl<'src> UrlBodyScanner<'src> {
     ///
     /// Example: `url(foo.css)`.
     fn is_url_raw_value_start(byte: u8) -> bool {
-        matches!(byte, b'[' | b']' | b'{' | b'}')
-            || matches!(
-                lookup_byte(byte),
-                IDT | DOL | UNI | PRD | SLH | ZER | DIG | TLD | HAS | AT_ | EXL
-            )
+        matches!(
+            lookup_byte(byte),
+            IDT | DOL | UNI | PRD | SLH | ZER | DIG | TLD | HAS | AT_ | EXL
+        )
     }
 
     /// Returns whether `byte` may appear unescaped in Sass raw URL contents.

@@ -166,8 +166,9 @@ impl<'source> CssParser<'source> {
         CssParserCheckpoint {
             context: self.context.checkpoint(),
             source: self.source.checkpoint(),
-            // Scoped state is restored by its caller; memoized parsing results
-            // must survive rewinds.
+            // `state` is not checkpointed because it (currently) only contains
+            // scoped properties that aren't only dependent on checkpoints and
+            // should be reset manually when the scope of their use is exited.
         }
     }
 
@@ -176,8 +177,9 @@ impl<'source> CssParser<'source> {
 
         self.context.rewind(context);
         self.source.rewind(source);
-        // Scoped state is restored by its caller; memoized parsing results
-        // must survive rewinds.
+        // `state` is not checkpointed because it (currently) only contains
+        // scoped properties that aren't only dependent on checkpoints and
+        // should be reset manually when the scope of their use is exited.
     }
 
     pub fn finish(self) -> (Vec<Event<CssSyntaxKind>>, Vec<ParseDiagnostic>, Vec<Trivia>) {
@@ -218,7 +220,9 @@ impl<'source> Parser for CssParser<'source> {
 pub struct CssParserCheckpoint {
     pub(super) context: ParserContextCheckpoint,
     pub(super) source: CssTokenSourceCheckpoint,
-    // Scoped state and memoized parsing results are not checkpointed.
+    // `state` is not checkpointed because it (currently) only contains
+    // scoped properties that aren't only dependent on checkpoints and
+    // should be reset manually when the scope of their use is exited.
 }
 
 impl From<&CssFileSource> for CssParserOptions {

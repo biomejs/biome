@@ -10,7 +10,7 @@
 @function --tokens(--type: 10px <length>, --colon: 1: 2, --literal: #{$literal}) {
   result: var(--colon);
 }
-@function --blocks(--value: first {a, b} last, --nested: fn({a; b !important}, [c, d]) tail, --empty: {}) {
+@function --blocks(--value: first {a, b} last, --nested: fn({a; b !important}, [c, d, 1 != 2]) tail, --empty: {}) {
   result: var(--value);
 }
 @function --urls(
@@ -20,10 +20,4 @@
   --function: url(var(--image)), --dollar: url($literal,b), --hash: url(#{$literal}),
   --after: 8px 16px
 ) { result: var(--nested); }
-.after {
-  background: url([a);
-  background: url({a);
-  background: url(]a);
-  background: url(}a);
-}
 @function --adjacency(--image: (url (foo) url/**/(bar) url(baz))) { result: var(--image); }

@@ -1,18 +1,5 @@
 $gap: 8px;
-@function --empty(--value: , --after: {a:#{$gap}}) { result: var(--after); }
-@function --delimiters(--value: #{$gap}; 16px !important, --after: {a:b}) { result: var(--after); }
-@function --mismatched(--value: var(--gap, #{$gap}] tail, --after: {a:b}) { result: var(--after); }
-@function --nested(--value: [[#{$gap}]), --after: 4px) { result: var(--after); }
-@function --string(--value: "unterminated
-, --after: {a:#{$gap}}) { result: var(--after); }
-.after-string { color: red; }
-
-@function --missing-outer(--value: #{if(sass(true): $gap; else: 16px)} 16px { result: var(--value); }
-.a, :is(.b) { color: blue; }
-
-@function --#{$gap}(--value: red { result: red; }
-@function --#{$gap} (--value: red { result: red; }
-}
-@function --good(--value: {a; b !important} @raw(value), --after: [c, d]) { result: var(--value); }
-.after { color: green; }
+@function --delimiters(--value: #{$gap}; 16px !important 1 != 2, --after: {a:b}) { result: var(--after); }
 @function --comma(--a: red,, --b: {x:#{$gap}}) { result: var(--b); }
+.after { color: green; }
+@function --missing-close(--value: #{$gap} 16px { result: var(--value); }

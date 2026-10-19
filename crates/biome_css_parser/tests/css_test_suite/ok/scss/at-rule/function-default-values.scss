@@ -5,7 +5,7 @@ $gap: 8px;
 @function --interpolated(--literal: $gap 16px, --operator: 1 + 2, --value: #{if(sass(true): $gap; else: 16px)} 16px, --nested: var(--gap, #{$gap} 16px)) {
   result: var(--value);
 }
-@function --blocks(--value: {a, #{$gap}}, --nested: fn({a; b !important}, [c, d]) tail, --empty: {}) {
+@function --blocks(--value: {a, #{$gap}}, --nested: fn({a; b !important}, [c, d, 1 != 2]) tail, --empty: {}) {
   result: var(--value);
 }
 @function --line-comment(
@@ -18,9 +18,9 @@ $gap: 8px;
   --dollar: url($literal,b), --quoted: url("a,b"), --function: url(var(--image)),
   --a: url([a), --b: url({a), --c: url(]a), --d: url(}a), --after: 8px 16px
 ) { result: var(--interpolated); }
-@function ordinary($value: 1 + 2, $padding: 8px 16px) {
+@function ordinary($value: 1 + 2, $padding: 8px 16px, $different: 1 != 2) {
   @return $value;
 }
-.after { padding: ordinary(); background: url([a); }
+.after { padding: ordinary(); }
 @function --adjacency(--image: (url (foo) url/**/(bar) url(baz))) { result: var(--image); }
 .raw { --image: (url (foo) url/**/(bar) url(baz)); }

@@ -2,4 +2,3 @@ $suffix:b;
 @function --urls(--image:/* before */url(a/*payload*/,#{ $suffix })/* after */,--nested:var(--image,url(../images/a,#{ $suffix }.png)),--quoted:url("a,b"),--literal:url($literal,b)){result:var(--image)}
 @function --boundaries(--a:url(a{#{ $suffix }),--b:url(a]#{ $suffix }),--c:url([a),--d:url({a),--e:url(]a),--f:url(}a),--after:8px 16px){result:var(--a)}
 @function --controls(--upper:URL(a,b),--escaped:u\72l(a,b),--data:url(data:image/png;base64,AAAA),--function:url(var(--image))){result:var(--data)}
-.after{background:url([a);background:url({a);background:url(]a);background:url(}a)}
