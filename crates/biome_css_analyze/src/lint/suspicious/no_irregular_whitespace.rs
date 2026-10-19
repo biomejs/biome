@@ -100,18 +100,17 @@ fn get_irregular_whitespace(syntax: &CssSyntaxNode) -> Vec<TextRange> {
             }
         }
 
-        if !is_bom && !is_string {
-            let text_range = token.text_range();
-            let text_trimmed_range = token.text_trimmed_range();
-            let start = usize::from(text_trimmed_range.start() - text_range.start());
-            let end = usize::from(text_trimmed_range.end() - text_range.start());
+        if is_bom || is_string {
+            continue;
+        }
 
-            if token.text()[start..end]
-                .chars()
-                .any(is_irregular_whitespace)
-            {
-                results.push(text_trimmed_range);
-            }
+        let text_range = token.text_range();
+        let text_trimmed_range = token.text_trimmed_range();
+        let start = usize::from(text_trimmed_range.start() - text_range.start());
+        let end = usize::from(text_trimmed_range.end() - text_range.start());
+
+        if token.text()[start..end].chars().any(is_irregular_whitespace) {
+            results.push(text_trimmed_range);
         }
     }
     results
