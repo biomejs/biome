@@ -551,6 +551,35 @@ impl<L: Language> SyntaxNode<L> {
         }
     }
 
+    /// Return a clone of this node in which each slot named in `edits` is
+    /// replaced with the elements of its replacement, which may be empty to
+    /// remove the slot.
+    ///
+    /// `edits` must be sorted by slot index in ascending order, without
+    /// duplicates, and only name existing slots. The result is the same as
+    /// calling [Self::splice_slots] once per edit in descending order, but the
+    /// slots are copied only once.
+    #[must_use = "syntax elements are immutable, the result of update methods must be propagated to have any effect"]
+    pub(crate) fn splice_many_slots<E, R>(self, edits: E) -> Self
+    where
+        E: IntoIterator<Item = (usize, R)>,
+        R: IntoIterator<Item = Option<SyntaxElement<L>>>,
+    {
+        Self {
+            raw: self
+                .raw
+                .splice_many_slots(edits.into_iter().map(|(index, replacement)| {
+                    (
+                        index,
+                        replacement
+                            .into_iter()
+                            .map(|element| element.map(cursor::SyntaxElement::from)),
+                    )
+                })),
+            _p: PhantomData,
+        }
+    }
+
     /// Return a new version of this node with the element `prev_elem` replaced with `next_elem`
     ///
     /// `prev_elem` can be a direct child of this node, or an indirect child through any descendant node
