@@ -22,6 +22,8 @@ use serde_json::json;
 use std::{
     panic::RefUnwindSafe,
     sync::atomic::{AtomicU64, Ordering},
+    thread,
+    time::Duration,
 };
 use tracing::instrument;
 
@@ -86,7 +88,30 @@ where
         Ok(client)
     }
 
+    /// Sends a request and waits for its response.
+    ///
+    /// A request that the server cancelled because of a concurrent change to
+    /// its workspace is sent again, as
+    /// [`RetryingWorkspace`](crate::workspace::RetryingWorkspace) does in
+    /// process. The parameters are sent unchanged, so a position or range in a
+    /// resent request applies to the content of the document at that time.
     fn request<P, R>(&self, method: &'static str, params: P) -> Result<R, WorkspaceError>
+    where
+        P: Serialize,
+        R: DeserializeOwned,
+    {
+        loop {
+            match self.request_once(method, &params) {
+                Err(WorkspaceError::TransportError(TransportError::ContentModified)) => {
+                    thread::sleep(Duration::from_millis(1));
+                }
+                result => return result,
+            }
+        }
+    }
+
+    /// Sends a request once and waits for its response.
+    fn request_once<P, R>(&self, method: &'static str, params: P) -> Result<R, WorkspaceError>
     where
         P: Serialize,
         R: DeserializeOwned,
@@ -113,7 +138,10 @@ where
     }
 
     fn scan_project(&self, params: ScanProjectParams) -> Result<ScanProjectResult, WorkspaceError> {
-        self.request("biome/scan_project", params)
+        // As in `RetryingWorkspace`, a scan isn't sent again: the server runs it
+        // in a scanner epoch, which queues setter-based writes until the scan
+        // completes instead of cancelling it.
+        self.request_once("biome/scan_project", params)
     }
 
     #[instrument(level = "info", skip_all)]

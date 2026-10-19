@@ -5,7 +5,8 @@ use crate::session::{
     CapabilitySet, CapabilityStatus, ClientInformation, Session, SessionHandle, SessionKey,
 };
 use crate::utils::{
-    cancelled_to_lsp_error, into_lsp_error, panic_to_lsp_error, workspace_error_to_lsp,
+    cancelled_to_lsp_error, into_lsp_error, panic_to_lsp_error, workspace_cancelled_to_lsp_error,
+    workspace_error_to_lsp,
 };
 use crate::{handlers, requests};
 use biome_console::markup;
@@ -748,7 +749,7 @@ macro_rules! workspace_method {
                     match result {
                         Ok(Ok(Ok(Ok(result)))) => Ok(result),
                         Ok(Ok(Ok(Err(err)))) => Err(workspace_error_to_lsp(err)),
-                        Ok(Ok(Err(cancelled))) => Err(cancelled_to_lsp_error(cancelled)),
+                        Ok(Ok(Err(cancelled))) => Err(workspace_cancelled_to_lsp_error(cancelled)),
                         Ok(Err(err)) => Err(into_lsp_error(err)),
                         Err(err) => match err.try_into_panic() {
                             Ok(err) => Err(panic_to_lsp_error(err)),
@@ -978,7 +979,14 @@ impl ServerConnection {
     {
         let stdin = DisconnectOnEof::new(stdin, self.lifecycle.clone());
         let service = DisconnectOnExit::new(self.service, self.lifecycle);
-        Server::new(stdin, stdout, self.socket).serve(service).await;
+        // Workspace methods run on the blocking thread pool, so this limit
+        // decides how many cores a single client can keep busy. The default of
+        // 4 starves `--use-server` runs, which send one request per file.
+        let concurrency = std::thread::available_parallelism().map_or(4, |n| n.get().max(4));
+        Server::new(stdin, stdout, self.socket)
+            .concurrency_level(concurrency)
+            .serve(service)
+            .await;
     }
 }
 
