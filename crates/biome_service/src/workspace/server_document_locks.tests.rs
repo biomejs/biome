@@ -71,6 +71,84 @@ fn assert_content(workspace: &LocalWorkspace, project_key: ProjectKey, expected:
 }
 
 #[test]
+fn reindexing_client_document_does_not_read_disk() {
+    const UNSAVED_PATH: &str = "/project/unsaved.js";
+
+    for owned in [false, true] {
+        let (workspace, project_key) = workspace(owned);
+        open_client(&workspace, project_key, UNSAVED_PATH);
+        // This document exists only in the editor, so reading it from disk would fail.
+        assert!(
+            workspace
+                .fs
+                .read_file_from_path(Utf8Path::new(UNSAVED_PATH))
+                .is_err()
+        );
+
+        WorkspaceScannerBridge::index_file(
+            &workspace.as_workspace(),
+            project_key,
+            BiomePath::new(UNSAVED_PATH),
+            IndexTrigger::Update,
+        )
+        .unwrap();
+
+        assert_eq!(
+            workspace
+                .format_file(FormatFileParams {
+                    project_key,
+                    path: BiomePath::new(UNSAVED_PATH),
+                    inline_config: None,
+                })
+                .unwrap()
+                .as_code(),
+            CLIENT_CONTENT,
+        );
+        #[cfg(feature = "module_graph")]
+        assert!(
+            workspace
+                .get_module_graph(GetModuleGraphParams {})
+                .unwrap()
+                .data
+                .contains_key(UNSAVED_PATH)
+        );
+    }
+}
+
+#[test]
+fn client_open_after_early_check_preserves_client_content() {
+    for owned in [false, true] {
+        let (workspace, project_key) = workspace(owned);
+        let (paused_tx, paused_rx) = mpsc::channel();
+        let (resume_tx, resume_rx) = mpsc::channel();
+        *workspace
+            .scanner_test_state
+            .before_file_commit
+            .lock()
+            .unwrap() = Some(Box::new(move || {
+            paused_tx.send(()).unwrap();
+            resume_rx.recv_timeout(TIMEOUT).unwrap();
+        }));
+        let index_workspace = workspace.clone();
+        let index = std::thread::spawn(move || {
+            WorkspaceScannerBridge::index_file(
+                &index_workspace.as_workspace(),
+                project_key,
+                BiomePath::new(PATH),
+                IndexTrigger::Update,
+            )
+        });
+        paused_rx.recv_timeout(TIMEOUT).unwrap();
+
+        // The early check found no client document, but the client opens before disk data is published.
+        open_client(&workspace, project_key, PATH);
+        resume_tx.send(()).unwrap();
+        index.join().unwrap().unwrap();
+        assert_content(&workspace, project_key, CLIENT_CONTENT);
+    }
+}
+
+#[test]
 fn client_open_cannot_interleave_with_index_publication() {
     for owned in [false, true] {
         let (workspace, project_key) = workspace(owned);

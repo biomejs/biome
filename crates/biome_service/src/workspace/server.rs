@@ -212,6 +212,8 @@ struct ScannerTestState {
     pause_file_settings_read: AtomicBool,
     /// Number of scanner-driven file commit attempts.
     file_commit_attempts: AtomicUsize,
+    /// Pauses an index update after parsing and before acquiring the publication lock.
+    before_file_commit: Mutex<Option<Box<dyn FnOnce() + Send>>>,
     /// Pauses an index update after the client-open check and before publication.
     before_document_publish: Mutex<Option<Box<dyn FnOnce() + Send>>>,
     /// Number of project scan attempts.
@@ -253,6 +255,10 @@ impl ScannerTestState {
     fn enter_file_commit(&self, reason: OpenFileReason) {
         if reason.is_index() {
             self.file_commit_attempts.fetch_add(1, Ordering::AcqRel);
+            let hook = self.before_file_commit.lock().unwrap().take();
+            if let Some(hook) = hook {
+                hook();
+            }
         }
     }
 
@@ -867,6 +873,15 @@ impl WorkspaceServerWithDb<'_> {
         let settings =
             self.settings_handle_with_query(&settings, editor_features.unwrap_or_default(), query);
 
+        // Skip disk I/O and parsing when the client's parse is already authoritative.
+        // Otherwise release the locks before that work, then recheck before publication.
+        if matches!(&content, FileContent::FromServer) {
+            let document_lock = self.lock_document(&path);
+            if self.is_open_by_client(&path) {
+                return self.reindex_client_document(project_key, &path, reason, document_lock);
+            }
+        }
+
         let mut source = if let Some(document_file_source) = document_file_source {
             let path_source = DocumentFileSource::from_path(
                 &path,
@@ -1023,34 +1038,9 @@ impl WorkspaceServerWithDb<'_> {
         // Otherwise a client can open after the check, and the indexer can overwrite its text and parse.
         let document_lock = self.lock_document(&path);
 
-        if version.is_none()
-            && self
-                .documents
-                .pin()
-                .get(path.as_path())
-                .is_some_and(|document| document.version.is_some())
-        {
-            // Initial scans and watcher updates also open files through this method,
-            // independently of the client's didOpen/didClose lifecycle.
-            // An external disk write can therefore reindex a document that the client still has open.
-            // Keep its client text and parse so incremental edits and formatting use the editor's content,
-            // which may differ from the file on disk. See https://github.com/biomejs/biome-vscode/issues/923.
-            let Ok(parsed) = self.get_parse(&path) else {
-                return Ok(InternalOpenFileResult::default());
-            };
-            drop(document_lock);
-            if !reason.is_index() && !self.should_update_service_data(&path) {
-                return Ok(InternalOpenFileResult::default());
-            }
-            let (dependencies, diagnostics) = self.update_service_data(
-                &path,
-                UpdateKind::AddedOrChanged(reason, parsed.into()),
-                project_key,
-            )?;
-            return Ok(InternalOpenFileResult {
-                dependencies,
-                diagnostics,
-            });
+        // The early check may have missed a client opening the file while disk content was being parsed.
+        if version.is_none() && self.is_open_by_client(&path) {
+            return self.reindex_client_document(project_key, &path, reason, document_lock);
         }
 
         #[cfg(test)]
@@ -1171,6 +1161,44 @@ impl WorkspaceServerWithDb<'_> {
         // If the document was never opened by the scanner, we don't care
         // about updating service data.
         Ok(InternalOpenFileResult::default())
+    }
+
+    fn is_open_by_client(&self, path: &Utf8Path) -> bool {
+        self.documents
+            .pin()
+            .get(path)
+            .is_some_and(|document| document.version.is_some())
+    }
+
+    /// Reindexes a client-open document using its current parse.
+    /// Consumes the publication guard so the parse is read under the lock, then releases it before updating service data.
+    fn reindex_client_document(
+        &self,
+        project_key: ProjectKey,
+        path: &Utf8Path,
+        reason: OpenFileReason,
+        document_lock: DocumentWriteGuard<'_>,
+    ) -> Result<InternalOpenFileResult, WorkspaceError> {
+        // Initial scans and watcher updates open files independently of the client's didOpen/didClose lifecycle.
+        // An external disk write can therefore reindex a document that the client still has open.
+        // Keep its client text and parse so incremental edits and formatting use the editor's content,
+        // which may differ from the file on disk. See https://github.com/biomejs/biome-vscode/issues/923.
+        let Ok(parsed) = self.get_parse(path) else {
+            return Ok(InternalOpenFileResult::default());
+        };
+        drop(document_lock);
+        if !reason.is_index() && !self.should_update_service_data(path) {
+            return Ok(InternalOpenFileResult::default());
+        }
+        let (dependencies, diagnostics) = self.update_service_data(
+            path,
+            UpdateKind::AddedOrChanged(reason, parsed.into()),
+            project_key,
+        )?;
+        Ok(InternalOpenFileResult {
+            dependencies,
+            diagnostics,
+        })
     }
 
     /// Returns whether a client update of `path` must update the service data.
