@@ -385,7 +385,6 @@ impl LanguageServer for LSPServer {
                 name: String::from(env!("CARGO_PKG_NAME")),
                 version: Some(biome_configuration::VERSION.to_string()),
             }),
-            offset_encoding: None,
         };
 
         Ok(init)
@@ -1006,3 +1005,7 @@ mod server_goto;
 #[cfg(test)]
 #[path = "server_type_on_format.tests.rs"]
 mod server_type_on_format;
+
+#[cfg(test)]
+#[path = "server_watcher.tests.rs"]
+mod server_watcher;

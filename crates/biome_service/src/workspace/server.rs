@@ -999,7 +999,11 @@ impl WorkspaceServerWithDb<'_> {
                 .get(path.as_path())
                 .is_some_and(|document| document.version.is_some())
         {
-            // The LSP applies incremental client changes to an open document's content.
+            // Initial scans and watcher updates also open files through this method,
+            // independently of the client's didOpen/didClose lifecycle.
+            // An external disk write can therefore reindex a document that the client still has open.
+            // Keep its client text and parse so incremental edits and formatting use the editor's content,
+            // which may differ from the file on disk. See https://github.com/biomejs/biome-vscode/issues/923.
             let Ok(parsed) = self.get_parse(&path) else {
                 return Ok(InternalOpenFileResult::default());
             };
