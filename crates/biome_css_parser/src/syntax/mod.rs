@@ -1218,7 +1218,7 @@ mod tests {
         let reporting_css_parser = CssParser::new_with_metavariables(
             ".selector { color: $color; }",
             CssFileSource::css(),
-            CssParserOptions::default().report_scss_exclusive_syntax(),
+            CssParserOptions::default(),
             &[],
         );
         assert_eq!(

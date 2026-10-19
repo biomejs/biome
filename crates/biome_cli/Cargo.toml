@@ -115,7 +115,8 @@ tokio = { workspace = true, features = ["process"] }
 mimalloc = { workspace = true }
 
 [features]
-docgen = ["bpaf/docgen"]
+docgen   = ["bpaf/docgen"]
+unstable = []
 
 [lints]
 workspace = true
