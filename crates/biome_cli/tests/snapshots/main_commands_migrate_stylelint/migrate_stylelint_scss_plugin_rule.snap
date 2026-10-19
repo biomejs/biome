@@ -1,0 +1,74 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: redactor(content)
+---
+## Command
+
+```shell
+biome migrate stylelint --include-inspired --include-nursery
+```
+
+## `biome.json`
+
+```json
+{ "linter": { "enabled": true } }
+```
+
+## `.stylelintrc.json`
+
+```json
+{
+        "plugins": ["stylelint-scss"],
+        "rules": {
+            "scss/dollar-variable-no-missing-interpolation": true
+        }
+    }
+```
+
+# Emitted Messages
+
+```block
+biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1    │ - {·"linter":·{·"enabled":·true·}·}
+       1 │ + {
+       2 │ + → "linter":·{
+       3 │ + → → "enabled":·true,
+       4 │ + → → "rules":·{
+       5 │ + → → → "preset":·"none",
+       6 │ + → → → "nursery":·{·"noUninterpolatedScssVariable":·"error"·}
+       7 │ + → → }
+       8 │ + → }
+       9 │ + }
+      10 │ + 
+  
+
+```
+
+```block
+migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i 1 Stylelint rules found
+    - 1 can be migrated to Biome's rules (run with --write to migrate)
+    - 100% (1) of your Stylelint rules are fully covered by Biome
+      - 100% (1) via direct migration to Biome rules
+  
+  
+
+```
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Migration results:
+  
+  - biome.json: configuration needs migration.
+  
+  i Use --write to apply the changes.
+  
+  $ biome migrate --write
+  
+
+```

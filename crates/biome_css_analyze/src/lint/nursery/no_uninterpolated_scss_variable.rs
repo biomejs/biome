@@ -2,7 +2,7 @@ use crate::CssRuleAction;
 use crate::fonts::is_function_keyword;
 use crate::utils::{is_custom_function, is_nested_custom_property_value};
 use biome_analyze::{
-    Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_lint_rule,
+    Ast, FixKind, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_css_factory::make;
@@ -78,6 +78,7 @@ declare_lint_rule! {
         language: "css",
         recommended: false,
         severity: Severity::Error,
+        sources: &[RuleSource::StylelintScss("dollar-variable-no-missing-interpolation").inspired()],
         fix_kind: FixKind::Unsafe,
     }
 }

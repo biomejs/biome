@@ -225,6 +225,8 @@ pub enum RuleSource<'a> {
     MarkdownLint(&'a str, &'a str),
     /// Rules from [TanStack Query ESLint Plugin](https://tanstack.com/query/latest/docs/eslint/eslint-plugin-query)
     EslintTanstackQuery(&'a str),
+    /// Rules from [stylelint-scss](https://github.com/stylelint-scss/stylelint-scss)
+    StylelintScss(&'a str),
 }
 
 impl<'a> std::fmt::Display for RuleSource<'a> {
@@ -297,6 +299,7 @@ impl<'a> std::fmt::Display for RuleSource<'a> {
             Self::EslintTypescriptSortKeys(_) => write!(f, "eslint-plugin-typescript-sort-keys"),
             Self::MarkdownLint(_, _) => write!(f, "markdownlint"),
             Self::EslintTanstackQuery(_) => write!(f, "@tanstack/eslint-plugin-query"),
+            Self::StylelintScss(_) => write!(f, "stylelint-scss"),
         }
     }
 }
@@ -388,6 +391,7 @@ impl<'a> RuleSource<'a> {
             | Self::EslintDrizzle(rule_name)
             | Self::EslintTypescriptSortKeys(rule_name)
             | Self::EslintTanstackQuery(rule_name)
+            | Self::StylelintScss(rule_name)
             | Self::MarkdownLint(_, rule_name)
             | Self::Sherif(rule_name) => rule_name,
             Self::SortPackageJson => "sort-package-json",
@@ -457,6 +461,7 @@ impl<'a> RuleSource<'a> {
             Self::EslintDrizzle(_) => "drizzle",
             Self::EslintTypescriptSortKeys(_) => "typescript-sort-keys",
             Self::EslintTanstackQuery(_) => "@tanstack/query",
+            Self::StylelintScss(_) => "scss",
         }
     }
 
@@ -531,6 +536,7 @@ impl<'a> RuleSource<'a> {
             Self::Sherif(rule_name) => format!("https://github.com/QuiiBz/sherif#{rule_name}"),
             Self::EslintTypescriptSortKeys(rule_name) => format!("https://github.com/infctr/eslint-plugin-typescript-sort-keys/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintTanstackQuery(rule_name) => format!("https://tanstack.com/query/latest/docs/eslint/{rule_name}"),
+            Self::StylelintScss(rule_name) => format!("https://github.com/stylelint-scss/stylelint-scss/blob/master/src/rules/{rule_name}/README.md"),
         }
     }
 
@@ -567,6 +573,7 @@ impl<'a> RuleSource<'a> {
                 | Self::Eslint(_)
                 | Self::GraphqlSchemaLinter(_)
                 | Self::Stylelint(_)
+                | Self::StylelintScss(_)
                 | Self::SortPackageJson
                 | Self::Sherif(_)
                 | Self::MarkdownLint(_, _)
@@ -574,7 +581,7 @@ impl<'a> RuleSource<'a> {
     }
 
     pub const fn is_stylelint(&self) -> bool {
-        matches!(self, Self::Stylelint(_))
+        matches!(self, Self::Stylelint(_) | Self::StylelintScss(_))
     }
 }
 
