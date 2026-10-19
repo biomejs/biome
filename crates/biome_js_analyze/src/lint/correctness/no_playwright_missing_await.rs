@@ -165,7 +165,7 @@ impl Rule for NoPlaywrightMissingAwait {
             && !is_call_awaited_or_returned(&promise_combinator)
         {
             let mut mutation = ctx.root().begin();
-            mutation.wrap_node(AnyJsExpression::from(promise_combinator), await_expression)?;
+            mutation.wrap_node(AnyJsExpression::from(promise_combinator), await_expression);
 
             return Some(JsRuleAction::new(
                 ctx.metadata().action_category(ctx.category(), ctx.group()),
@@ -178,7 +178,7 @@ impl Rule for NoPlaywrightMissingAwait {
 
         // Normal case: fix the call directly
         let mut mutation = ctx.root().begin();
-        mutation.wrap_node(AnyJsExpression::from(call_expr.clone()), await_expression)?;
+        mutation.wrap_node(AnyJsExpression::from(call_expr.clone()), await_expression);
 
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),

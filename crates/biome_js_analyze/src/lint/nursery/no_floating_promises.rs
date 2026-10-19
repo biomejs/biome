@@ -314,7 +314,7 @@ impl Rule for NoFloatingPromises {
                         make::token(JsSyntaxKind::AWAIT_KW).with_trailing_space(),
                         call_expression,
                     ))
-                })?;
+                });
                 Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
@@ -328,7 +328,7 @@ impl Rule for NoFloatingPromises {
                         make::token(JsSyntaxKind::AWAIT_KW).with_trailing_space(),
                         expression,
                     ))
-                })?;
+                });
                 Some(JsRuleAction::new(
                     ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),

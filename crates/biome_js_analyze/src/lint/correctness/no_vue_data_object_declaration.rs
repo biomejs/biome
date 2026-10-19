@@ -194,7 +194,7 @@ impl Rule for NoVueDataObjectDeclaration {
                 )
                 .build(),
             )
-        })?;
+        });
 
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
