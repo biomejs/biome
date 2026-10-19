@@ -862,6 +862,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("nursery", "noMisplacedListElements", TypeId::of::<biome_rule_options::no_misplaced_list_elements::NoMisplacedListElementsOptions>()));
     result.push(("suspicious", "noMisrefactoredShorthandAssign", TypeId::of::<biome_rule_options::no_misrefactored_shorthand_assign::NoMisrefactoredShorthandAssignOptions>()));
     result.push((
+        "nursery",
+        "noMissingScssInterpolation",
+        TypeId::of::<
+            biome_rule_options::no_missing_scss_interpolation::NoMissingScssInterpolationOptions,
+        >(),
+    ));
+    result.push((
         "correctness",
         "noMissingVarFunction",
         TypeId::of::<biome_rule_options::no_missing_var_function::NoMissingVarFunctionOptions>(),
@@ -1472,8 +1479,6 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noUndeclaredVariables",
         TypeId::of::<biome_rule_options::no_undeclared_variables::NoUndeclaredVariablesOptions>(),
     ));
-    result.push(("nursery", "noUninterpolatedScssFunction", TypeId::of::<biome_rule_options::no_uninterpolated_scss_function::NoUninterpolatedScssFunctionOptions>()));
-    result.push(("nursery", "noUninterpolatedScssVariable", TypeId::of::<biome_rule_options::no_uninterpolated_scss_variable::NoUninterpolatedScssVariableOptions>()));
     result.push((
         "suspicious",
         "noUnknownAtRules",

@@ -279,7 +279,7 @@ pub(crate) fn migrate_stylelint_any_rule(
             let group = rules.nursery.get_or_insert_with(Default::default);
             let rule = group
                 .unwrap_group_as_mut()
-                .no_uninterpolated_scss_variable
+                .no_missing_scss_interpolation
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_level));
         }

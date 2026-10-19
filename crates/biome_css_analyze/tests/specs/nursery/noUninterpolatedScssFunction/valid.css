@@ -1,4 +1,0 @@
-/* should not generate diagnostics */
-:root {
-	--muted: darken(#fff, 10%);
-}
