@@ -1,5 +1,6 @@
 use std::{borrow::Cow, ops::Neg};
 
+use biome_js_syntax::numbers::canonicalize_js_bigint_literal;
 use biome_rowan::Text;
 
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
@@ -78,6 +79,101 @@ impl NumberLiteral {
             parse(text)
         }
     }
+}
+
+/// Converts a number to a string the way JavaScript does, as in `` `${value}` ``.
+pub(crate) fn number_to_js_string(value: f64) -> String {
+    if value == 0.0 {
+        return "0".to_string();
+    }
+    if !value.is_finite() || (1e-6..1e21).contains(&value.abs()) {
+        return match value {
+            f64::INFINITY => "Infinity".to_string(),
+            f64::NEG_INFINITY => "-Infinity".to_string(),
+            value if value.is_nan() => "NaN".to_string(),
+            // Both languages print the shortest digits that round-trip, and
+            // JavaScript uses positional notation in this range.
+            value => value.to_string(),
+        };
+    }
+    let formatted = format!("{value:e}");
+    match formatted.split_once('e') {
+        Some((mantissa, exponent)) if !exponent.starts_with('-') => {
+            format!("{mantissa}e+{exponent}")
+        }
+        _ => formatted,
+    }
+}
+
+/// Converts a string to a number the way JavaScript's `Number(text)` does.
+///
+/// Returns `None` where JavaScript returns `NaN`.
+pub(crate) fn js_string_to_number(text: &str) -> Option<f64> {
+    let text = text.trim_matches(|c: char| (c.is_whitespace() && c != '\u{85}') || c == '\u{feff}');
+    if text.is_empty() {
+        return Some(0.0);
+    }
+    let radix = match text.get(..2) {
+        Some("0x" | "0X") => Some(16),
+        Some("0o" | "0O") => Some(8),
+        Some("0b" | "0B") => Some(2),
+        _ => None,
+    };
+    if let Some(radix) = radix {
+        let digits = &text[2..];
+        if digits.is_empty() {
+            return None;
+        }
+        return digits.chars().try_fold(0.0, |value, c| {
+            Some(value * f64::from(radix) + f64::from(c.to_digit(radix)?))
+        });
+    }
+    match text {
+        "Infinity" | "+Infinity" => Some(f64::INFINITY),
+        "-Infinity" => Some(f64::NEG_INFINITY),
+        // Rust also accepts names such as `inf` and `NaN`, which JavaScript
+        // doesn't.
+        text if text.bytes().all(|byte| {
+            byte.is_ascii_digit() || matches!(byte, b'.' | b'e' | b'E' | b'+' | b'-')
+        }) =>
+        {
+            text.parse().ok()
+        }
+        _ => None,
+    }
+}
+
+/// Returns whether `text` matches `` `${number}` ``, which accepts any text
+/// that JavaScript converts to a finite number.
+pub(crate) fn is_number_string(text: &str) -> bool {
+    !text.is_empty() && js_string_to_number(text).is_some_and(f64::is_finite)
+}
+
+/// Returns the number that `text` spells, if converting that number back to
+/// a string produces `text` again.
+pub(crate) fn number_from_canonical_string(text: &str) -> Option<f64> {
+    js_string_to_number(text)
+        .filter(|value| value.is_finite() && number_to_js_string(*value) == text)
+}
+
+/// Returns `text` as the canonical text of a bigint literal, such as `10n`
+/// for `0xa`, if `text` matches `` `${bigint}` ``.
+///
+/// Like `BigInt(text)`, this accepts an optional minus sign followed by a
+/// decimal, binary, octal, or hexadecimal integer without separators.
+pub(crate) fn bigint_literal_from_string(text: &str) -> Option<String> {
+    if text.contains('_') {
+        return None;
+    }
+    canonicalize_js_bigint_literal(&format!("{text}n")).map(Cow::into_owned)
+}
+
+/// Returns the text JavaScript produces when converting a bigint literal
+/// such as `0x10n` to a string, as in `` `${value}` ``.
+pub(crate) fn bigint_literal_to_js_string(literal: &str) -> Option<String> {
+    let mut canonical = canonicalize_js_bigint_literal(literal)?.into_owned();
+    canonical.pop();
+    Some(canonical)
 }
 
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
@@ -253,6 +349,42 @@ mod tests {
             Some(81_985_529_216_486_900.0)
         );
         assert_eq!(NumberLiteral(Text::new_static("0XA")).to_f64(), Some(10.0));
+    }
+
+    #[test]
+    fn number_to_js_string_matches_javascript() {
+        assert_eq!(number_to_js_string(16.0), "16");
+        assert_eq!(number_to_js_string(-0.0), "0");
+        assert_eq!(number_to_js_string(0.1), "0.1");
+        assert_eq!(number_to_js_string(1e-6), "0.000001");
+        assert_eq!(number_to_js_string(1e-7), "1e-7");
+        assert_eq!(number_to_js_string(1.5e21), "1.5e+21");
+        assert_eq!(number_to_js_string(1e20), "100000000000000000000");
+    }
+
+    #[test]
+    fn number_strings_match_javascript() {
+        for text in ["1.5", " 1 ", "0x10", "-1e3", ".5", "5.", " "] {
+            assert!(is_number_string(text), "{text}");
+        }
+        for text in ["", "1_0", "Infinity", "inf", "NaN", "-0x10", "0x", "1e"] {
+            assert!(!is_number_string(text), "{text}");
+        }
+        assert_eq!(number_from_canonical_string("42"), Some(42.0));
+        assert_eq!(number_from_canonical_string("042"), None);
+        assert_eq!(number_from_canonical_string("1e3"), None);
+        assert_eq!(number_from_canonical_string("-0"), None);
+    }
+
+    #[test]
+    fn bigint_strings_match_javascript() {
+        assert_eq!(bigint_literal_from_string("10").as_deref(), Some("10n"));
+        assert_eq!(bigint_literal_from_string("-0x10").as_deref(), Some("-16n"));
+        for text in ["", "01", "1.0", "1_0", "+1", "1n"] {
+            assert_eq!(bigint_literal_from_string(text), None, "{text}");
+        }
+        assert_eq!(bigint_literal_to_js_string("0x10n").as_deref(), Some("16"));
+        assert_eq!(bigint_literal_to_js_string("-0n").as_deref(), Some("0"));
     }
 
     #[test]
