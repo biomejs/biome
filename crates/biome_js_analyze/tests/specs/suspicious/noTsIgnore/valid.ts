@@ -12,3 +12,27 @@ const inString = "@ts-ignore";
 const inTemplate = `// @ts-ignore`;
 // @ts-ignor
 let almost;
+
+// see the note on @ts-ignore below
+let mentionedInLineComment;
+
+/**
+ * Documentation that mentions `@ts-ignore` mid-sentence.
+ */
+let mentionedInJsDoc;
+
+/**
+ * @ts-ignore
+ * more comments
+ */
+let notOnLastLineOfBlockComment;
+
+/* @ts-ignore
+ */
+let notOnLastLineOfMultilineBlockComment;
+
+//// @ts-ignore
+let quadrupleSlash;
+
+//@ts-ignore
+let nextLineIsNotWhitespace;
