@@ -48,6 +48,7 @@ biome_languages          = { workspace = true, features = ["lang_json"] }
 biome_lsp                = { workspace = true }
 biome_markdown_analyze   = { workspace = true }
 biome_markdown_syntax    = { workspace = true }
+biome_mcp                = { workspace = true, optional = true }
 biome_migrate            = { workspace = true }
 biome_module_graph       = { workspace = true }
 biome_package            = { workspace = true }
@@ -92,6 +93,8 @@ tracing-tree             = "0.4.1"
 ureq                     = { workspace = true }
 
 [dev-dependencies]
+# Enables the `mcp` feature for the crate's own tests, so they cover the hidden `biome mcp` command.
+biome_cli            = { path = ".", features = ["mcp"] }
 biome_css_formatter  = { path = "../biome_css_formatter" }
 biome_css_parser     = { path = "../biome_css_parser" }
 biome_js_formatter   = { path = "../biome_js_formatter" }
@@ -116,6 +119,8 @@ mimalloc = { workspace = true }
 
 [features]
 docgen = ["bpaf/docgen"]
+# Adds the hidden `biome mcp` command, which serves the Model Context Protocol.
+mcp    = ["dep:biome_mcp"]
 
 [lints]
 workspace = true
