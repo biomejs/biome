@@ -24,7 +24,7 @@ use std::panic::AssertUnwindSafe;
 use std::str::FromStr;
 use std::time::{Duration, Instant};
 
-fn wait_until(timeout: Duration, mut predicate: impl FnMut() -> bool) -> bool {
+pub(super) fn wait_until(timeout: Duration, mut predicate: impl FnMut() -> bool) -> bool {
     let deadline = Instant::now() + timeout;
     while !predicate() {
         if Instant::now() >= deadline {
