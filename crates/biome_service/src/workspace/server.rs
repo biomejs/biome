@@ -39,11 +39,11 @@ use crate::workspace::{
     CloseProjectParams, DropPatternParams, FeaturesBuilder, FileContent, FileExistsParams,
     FileFeaturesResult, FixFileParams, FixFileResult, FormatFileParams, FormatOnTypeParams,
     FormatRangeParams, GetControlFlowGraphParams, GetFileContentParams, GetFormatterIRParams,
-    GetModuleGraphParams, GetModuleGraphResult, GetRegisteredTypesParams, GetSemanticModelParams,
-    GetSyntaxTreeParams, GetSyntaxTreeResult, GetTypeInfoParams, GoToDefinitionParams,
-    GoToDefinitionResult, IgnoreKind, OpenFileParams, OpenFileResult, OpenProjectParams,
-    OpenProjectResult, ParsePatternParams, ParsePatternResult, PathIsIgnoredParams,
-    PullActionsParams, PullActionsResult, PullDiagnosticsAndActionsParams,
+    GetModuleGraphParams, GetModuleGraphResult, GetProjectFilesParams, GetProjectFilesResult,
+    GetRegisteredTypesParams, GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult,
+    GetTypeInfoParams, GoToDefinitionParams, GoToDefinitionResult, IgnoreKind, OpenFileParams,
+    OpenFileResult, OpenProjectParams, OpenProjectResult, ParsePatternParams, ParsePatternResult,
+    PathIsIgnoredParams, PullActionsParams, PullActionsResult, PullDiagnosticsAndActionsParams,
     PullDiagnosticsAndActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RageEntry,
     RageParams, RageResult, RenameParams, RenameResult, ScanKind, ScanProjectParams,
     ScanProjectResult, SearchPatternParams, SearchResults, ServerInfo, ServiceNotification,
@@ -2778,6 +2778,7 @@ impl Workspace for LocalWorkspace {
         fn get_registered_types(params: GetRegisteredTypesParams) -> Result<String, WorkspaceError>;
         fn get_semantic_model(params: GetSemanticModelParams) -> Result<String, WorkspaceError>;
         fn get_module_graph(params: GetModuleGraphParams) -> Result<GetModuleGraphResult, WorkspaceError>;
+        fn get_project_files(params: GetProjectFilesParams) -> Result<GetProjectFilesResult, WorkspaceError>;
     }
 
     fn fs(&self) -> &dyn FsWithResolverProxy {
@@ -4492,6 +4493,30 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             FxHashMap::default()
         };
         Ok(GetModuleGraphResult { data })
+    }
+
+    fn get_project_files(
+        &self,
+        GetProjectFilesParams { project_key }: GetProjectFilesParams,
+    ) -> Result<GetProjectFilesResult, WorkspaceError> {
+        let project_path = self
+            .project_get_path(project_key)
+            .ok_or_else(WorkspaceError::no_project)?;
+        // The watcher doesn't remove the documents of deleted files, so a
+        // document that no client opened is listed only while its file exists.
+        let mut paths: Vec<_> = self
+            .documents
+            .pin()
+            .iter()
+            .filter(|(path, document)| {
+                path.starts_with(&project_path)
+                    && (document.version.is_some() || self.fs.path_exists(path))
+            })
+            .map(|(path, _)| BiomePath::new(path))
+            .filter(|path| !path.is_dependency())
+            .collect();
+        paths.sort_unstable_by(|left, right| left.as_path().cmp(right.as_path()));
+        Ok(GetProjectFilesResult { paths })
     }
 }
 

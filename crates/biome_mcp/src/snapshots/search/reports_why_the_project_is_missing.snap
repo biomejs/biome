@@ -1,0 +1,15 @@
+---
+source: crates/biome_mcp/src/server_test_utils.rs
+expression: snapshot
+---
+## Input
+
+```text
+search {"pattern": "`console.log($arguments)`"}
+```
+
+## Output
+
+```text
+Biome can't read the working directory: No such file or directory (os error 2)
+```

@@ -2,12 +2,13 @@ use super::{
     ChangeFileParams, ChangeFileResult, CloseFileParams, FileExistsParams, FixFileParams,
     FixFileResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
     GetControlFlowGraphParams, GetFormatterIRParams, GetModuleGraphParams, GetModuleGraphResult,
-    GetSemanticModelParams, GetSyntaxTreeParams, GetSyntaxTreeResult, GoToDefinitionParams,
-    GoToDefinitionResult, OpenFileParams, OpenFileResult, ProcessFileParams, ProcessFileResult,
-    PullActionsParams, PullActionsResult, PullDiagnosticsAndActionsParams,
-    PullDiagnosticsAndActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RenameParams,
-    RenameResult, ScanProjectParams, ScanProjectResult, SearchPatternParams, SearchResults,
-    SupportsFeatureParams, UpdateModuleGraphParams, UpdateSettingsParams, UpdateSettingsResult,
+    GetProjectFilesParams, GetProjectFilesResult, GetSemanticModelParams, GetSyntaxTreeParams,
+    GetSyntaxTreeResult, GoToDefinitionParams, GoToDefinitionResult, OpenFileParams,
+    OpenFileResult, ProcessFileParams, ProcessFileResult, PullActionsParams, PullActionsResult,
+    PullDiagnosticsAndActionsParams, PullDiagnosticsAndActionsResult, PullDiagnosticsParams,
+    PullDiagnosticsResult, RenameParams, RenameResult, ScanProjectParams, ScanProjectResult,
+    SearchPatternParams, SearchResults, SupportsFeatureParams, UpdateModuleGraphParams,
+    UpdateSettingsParams, UpdateSettingsResult,
 };
 use crate::workspace::{
     CheckFileSizeParams, CheckFileSizeResult, CloseProjectParams, FileFeaturesResult,
@@ -276,6 +277,13 @@ where
         params: GetModuleGraphParams,
     ) -> Result<GetModuleGraphResult, WorkspaceError> {
         self.request("biome/get_module_graph", params)
+    }
+
+    fn get_project_files(
+        &self,
+        params: GetProjectFilesParams,
+    ) -> Result<GetProjectFilesResult, WorkspaceError> {
+        self.request("biome/get_project_files", params)
     }
 
     fn rage(&self, params: RageParams) -> Result<RageResult, WorkspaceError> {

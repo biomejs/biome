@@ -1,0 +1,90 @@
+---
+source: crates/biome_mcp/src/server_test_utils.rs
+expression: snapshot
+---
+## Input
+
+```text
+search {"pattern": "`console.log($arguments)`"}
+```
+
+## Output
+
+```text
+src/App.tsx
+9:4: console.log("fetched", data);
+
+src/utils/date.ts
+3:2: console.log(date);
+
+src/vendor.min.js
+1:277: …console.log(v1,v2);var total=v0+v1+v2+v3+v4+v5+v6+v7+v8+v9+v10+v11+v12+v13+v14+v15+v16+v17+v18+v19+v20+v21+v22+v23+v24+v25+v26+v27+v28+v29+v30+v31+v32+v33+v34+v35+v36+v37+v38+v39+v40+v41+v42+v43+v44+v…
+
+Found 3 matches in 3 files (3 searched).
+```
+
+## Input
+
+```text
+search {"pattern": "`$function($arguments)`", "output": "files"}
+```
+
+## Output
+
+```text
+src/App.tsx (7)
+src/utils/date.ts (2)
+src/vendor.min.js (2)
+
+Found 11 matches in 3 files (3 searched).
+```
+
+## Input
+
+```text
+search {"pattern": "`useEffect($callback, $dependencies)`", "output": "matches"}
+```
+
+## Output
+
+```text
+src/App.tsx
+7:2: useEffect(() => {
+     	fetchUser(userId).then((data) => {
+     		console.log("fetched", data);
+     		setUser(data);
+     	});
+     … 1 more line
+
+Found 1 match in 1 file (3 searched).
+```
+
+## Input
+
+```text
+search {"pattern": "`useEffect($callback, $dependencies)`", "output": "captures"}
+```
+
+## Output
+
+```text
+src/App.tsx
+7:2: $callback = () => { fetchUser(userId).then((data) => { console.log("fetched", data); setUser(data); }); }  $dependencies = [userId]
+
+Found 1 match in 1 file (3 searched).
+```
+
+## Input
+
+```text
+search {"pattern": "`useState(null)`", "output": "captures"}
+```
+
+## Output
+
+```text
+src/App.tsx
+5:26: const [user, setUser] = useState(null);
+
+Found 1 match in 1 file (3 searched).
+```

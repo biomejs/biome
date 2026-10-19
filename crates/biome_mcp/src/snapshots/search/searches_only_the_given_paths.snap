@@ -1,0 +1,30 @@
+---
+source: crates/biome_mcp/src/server_test_utils.rs
+expression: snapshot
+---
+## Input
+
+```text
+search {"pattern": "`console.log($arguments)`", "paths": ["src/utils"]}
+```
+
+## Output
+
+```text
+src/utils/date.ts
+3:2: console.log(date);
+
+Found 1 match in 1 file (1 searched).
+```
+
+## Input
+
+```text
+search {"pattern": "`console.log($arguments)`", "paths": ["src/styles"]}
+```
+
+## Output
+
+```text
+No files were searched. Check that the paths contain JavaScript files and that the Biome configuration doesn't ignore them.
+```

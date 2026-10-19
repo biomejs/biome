@@ -915,6 +915,7 @@ impl ServerFactory {
         workspace_method!(builder, get_formatter_ir);
         workspace_method!(builder, get_semantic_model);
         workspace_method!(builder, get_module_graph);
+        workspace_method!(builder, get_project_files);
         workspace_method!(builder, get_type_info);
         workspace_method!(builder, change_file);
         workspace_method!(builder, process_file);

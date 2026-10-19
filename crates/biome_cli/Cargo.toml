@@ -118,9 +118,10 @@ tokio = { workspace = true, features = ["process"] }
 mimalloc = { workspace = true }
 
 [features]
-docgen = ["bpaf/docgen"]
+docgen   = ["bpaf/docgen"]
 # Adds the hidden `biome mcp` command, which serves the Model Context Protocol.
-mcp    = ["dep:biome_mcp"]
+mcp      = ["dep:biome_mcp"]
+unstable = ["mcp"]
 
 [lints]
 workspace = true

@@ -1,0 +1,15 @@
+---
+source: crates/biome_mcp/src/server_test_utils.rs
+expression: snapshot
+---
+## Input
+
+```text
+search {"pattern": "`alert($message)`"}
+```
+
+## Output
+
+```text
+No matches in 3 searched files.
+```

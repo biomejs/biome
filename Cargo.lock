@@ -1674,7 +1674,16 @@ name = "biome_mcp"
 version = "0.0.0"
 dependencies = [
  "biome_configuration",
+ "biome_diagnostics",
+ "biome_fs",
+ "biome_languages",
+ "biome_resolver",
+ "biome_service",
+ "camino",
+ "insta",
  "rmcp",
+ "schemars",
+ "serde",
  "tokio",
 ]
 

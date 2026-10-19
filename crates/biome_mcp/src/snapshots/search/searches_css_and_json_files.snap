@@ -1,0 +1,34 @@
+---
+source: crates/biome_mcp/src/server_test_utils.rs
+expression: snapshot
+---
+## Input
+
+```text
+search {"pattern": "`color: $value`", "language": "css"}
+```
+
+## Output
+
+```text
+src/styles/app.css
+2:2: color: red;
+6:2: color: blue;
+
+Found 2 matches in 1 file (1 searched).
+```
+
+## Input
+
+```text
+search {"pattern": "JsonMember(name = $name, value = $range) where { $name <: r\".react.\" }", "language": "json"}
+```
+
+## Output
+
+```text
+package.json
+1:56: { "name": "app", "version": "1.0.0", "dependencies": { "react": "^19.0.0" } }
+
+Found 1 match in 1 file (2 searched).
+```

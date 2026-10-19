@@ -1,0 +1,35 @@
+---
+source: crates/biome_mcp/src/server_test_utils.rs
+expression: snapshot
+---
+## Input
+
+```text
+search {"pattern": "`console.log($arguments)`", "maxMatches": 1}
+```
+
+## Output
+
+```text
+src/App.tsx
+9:4: console.log("fetched", data);
+
+Found 3 matches in 3 files (3 searched).
+Showing the first 1 match. Narrow the pattern or the paths, or raise `maxMatches`, to see the rest.
+```
+
+## Input
+
+```text
+search {"pattern": "`console.log($arguments)`", "output": "files", "maxMatches": 2}
+```
+
+## Output
+
+```text
+src/App.tsx (1)
+src/utils/date.ts (1)
+
+Found 3 matches in 3 files (3 searched).
+Showing the first 2 files. Narrow the pattern or the paths, or raise `maxMatches`, to see the rest.
+```

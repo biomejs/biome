@@ -1,9 +1,10 @@
 use super::{
     ChangeFileParams, CloseFileParams, CloseProjectParams, FileContent, FileFeaturesResult,
-    FileGuard, GetFileContentParams, GetModuleGraphParams, GetSyntaxTreeParams, OpenFileParams,
-    OpenProjectParams, OpenProjectResult, ParsePatternParams, PullDiagnosticsParams, ScanKind,
-    ScanProjectParams, SearchLanguage, SearchPatternParams, UpdateKind, UpdateModuleGraphParams,
-    UpdateSettingsParams, server,
+    FileGuard, GetFileContentParams, GetModuleGraphParams, GetProjectFilesParams,
+    GetProjectFilesResult, GetSyntaxTreeParams, OpenFileParams, OpenProjectParams,
+    OpenProjectResult, ParsePatternParams, PullDiagnosticsParams, ScanKind, ScanProjectParams,
+    SearchLanguage, SearchPatternParams, UpdateKind, UpdateModuleGraphParams, UpdateSettingsParams,
+    server,
 };
 use crate::projects::ProjectKey;
 use crate::settings::ModuleGraphResolutionKind;
@@ -19,7 +20,7 @@ use biome_js_syntax::TextSize;
 use biome_languages::DocumentFileSource;
 use biome_languages::JsFileSource;
 use biome_plugin_loader::{PluginConfiguration, Plugins};
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use insta::{assert_debug_snapshot, assert_snapshot};
 use std::collections::BTreeMap;
 use std::num::NonZeroU64;
@@ -1611,6 +1612,77 @@ fn search_pattern_reports_captures_of_each_match_on_request() {
         [
             [("$first", "1"), ("$second", "2")],
             [("$first", "3"), ("$second", "b.c")],
+        ]
+    );
+}
+
+#[test]
+fn get_project_files_lists_the_indexed_files_of_the_project() {
+    let fs = MemoryFileSystem::default();
+    for (path, content) in [
+        ("/project/a.ts", "export const value = 0;"),
+        ("/project/src/index.ts", "export const value = 1;"),
+        ("/project/src/style.css", "a {}"),
+        ("/project/src/generated/client.js", "export {};"),
+        ("/project/package.json", r#"{ "name": "app" }"#),
+        (
+            "/project/node_modules/library/package.json",
+            r#"{ "name": "library" }"#,
+        ),
+        ("/project/node_modules/library/index.js", "export {};"),
+    ] {
+        fs.insert(Utf8PathBuf::from(path), content);
+    }
+
+    let fs = Arc::new(fs);
+    let workspace = server(fs.clone(), None);
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: Utf8PathBuf::from("/project").into(),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            configuration: Configuration {
+                files: Some(FilesConfiguration {
+                    includes: Some(vec![
+                        biome_glob::NormalizedGlob::from_str("**").unwrap(),
+                        biome_glob::NormalizedGlob::from_str("!**/generated").unwrap(),
+                    ]),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            workspace_directory: Some(BiomePath::new("/project")),
+            extended_configurations: Default::default(),
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+    workspace
+        .scan_project(ScanProjectParams {
+            project_key,
+            watch: false,
+            force: false,
+            scan_kind: ScanKind::Project,
+            verbose: false,
+        })
+        .unwrap();
+
+    fs.remove(Utf8Path::new("/project/src/style.css"));
+
+    let GetProjectFilesResult { paths } = workspace
+        .get_project_files(GetProjectFilesParams { project_key })
+        .unwrap();
+    let paths: Vec<_> = paths.iter().map(|path| path.as_str()).collect();
+
+    assert_eq!(
+        paths,
+        [
+            "/project/a.ts",
+            "/project/package.json",
+            "/project/src/index.ts"
         ]
     );
 }
