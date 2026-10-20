@@ -1,0 +1,12 @@
+# should not generate diagnostics
+# Duplicate arguments are reported by `noDuplicateArgumentNames`.
+query test {
+  users(first: 100, after: 10, filter: "test", first: 50) {
+    id
+  }
+}
+
+# Duplicate variables are reported by `noDuplicateVariableNames`.
+query test($v: String, $t: String, $v: String) {
+  id
+}

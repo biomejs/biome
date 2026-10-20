@@ -3,18 +3,18 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_graphql_syntax::{
-    AnyGraphqlOperationDefinition, AnyGraphqlSelection, GraphqlArguments, GraphqlSelectionSet,
-    GraphqlVariableDefinitions,
+    AnyGraphqlOperationDefinition, AnyGraphqlSelection, GraphqlSelectionSet,
 };
 use biome_rule_options::no_duplicate_fields::NoDuplicateFieldsOptions;
 
 use crate::utils::{DuplicateName, collect_duplicate_names};
 
 declare_lint_rule! {
-    /// Disallow duplicate names inside GraphQL operations.
+    /// Disallow duplicate field names inside GraphQL selection sets.
     ///
-    /// The rule checks selected fields within each selection set, variables declared by an
-    /// operation, and arguments passed to a field. Each name must appear only once in its list.
+    /// The rule checks the fields selected in each selection set. Each field name must appear only
+    /// once in its selection set. Duplicate arguments and duplicate variable definitions are
+    /// reported by `noDuplicateArgumentNames` and `noDuplicateVariableNames` instead.
     ///
     /// ## Examples
     ///
@@ -28,25 +28,6 @@ declare_lint_rule! {
     ///     email
     ///     name
     ///   }
-    /// }
-    /// ```
-    ///
-    /// ```graphql,expect_diagnostic
-    /// query {
-    ///   users(
-    ///     first: 100,
-    ///     after: 10,
-    ///     filter: "test",
-    ///     first: 50
-    ///   ) {
-    ///     id
-    ///   }
-    /// }
-    /// ```
-    ///
-    /// ```graphql,expect_diagnostic
-    /// query ($v: String, $t: String, $v: String) {
-    ///   id
     /// }
     /// ```
     ///
@@ -66,7 +47,7 @@ declare_lint_rule! {
         version: "1.9.0",
         name: "noDuplicateFields",
         language: "graphql",
-        sources: &[RuleSource::EslintGraphql("no-duplicate-fields").same()],
+        sources: &[RuleSource::EslintGraphql("no-duplicate-fields").inspired()],
         recommended: true,
     }
 }
@@ -79,10 +60,8 @@ impl Rule for NoDuplicateFields {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         match ctx.query() {
-            AnyGraphqlOperationDefinition::GraphqlOperationDefinition(operation) => operation
-                .variables()
-                .map(|variables| check_duplicated_variable_definitions(&variables))
-                .unwrap_or_default(),
+            // Variables are covered by `noDuplicateVariableNames`.
+            AnyGraphqlOperationDefinition::GraphqlOperationDefinition(_) => Box::default(),
             // Selection fields of an operation definition are handled by the selection set traversal.
             AnyGraphqlOperationDefinition::GraphqlSelectionSet(selection_set) => {
                 check_duplicated_selection_fields(selection_set)
@@ -133,16 +112,12 @@ impl Rule for NoDuplicateFields {
 #[derive(Debug, Clone, Copy)]
 pub enum DuplicatedFieldKind {
     SelectionField,
-    Argument,
-    Variable,
 }
 
 impl DuplicatedFieldKind {
     fn as_str(&self) -> &'static str {
         match self {
             Self::SelectionField => "field",
-            Self::Argument => "argument",
-            Self::Variable => "variable",
         }
     }
 }
@@ -167,15 +142,11 @@ impl DuplicatedField {
 }
 
 fn check_duplicated_selection_fields(selection_set: &GraphqlSelectionSet) -> Box<[DuplicatedField]> {
-    let mut duplicated_arguments = vec![];
     let mut fields = vec![];
     for selection in selection_set.selections() {
         let AnyGraphqlSelection::GraphqlField(field) = selection else {
             continue;
         };
-        if let Some(arguments) = field.arguments() {
-            duplicated_arguments.extend(check_duplicated_arguments(&arguments));
-        }
 
         // Alias is the final name of the field in the selection set.
         let Ok(name) = field.alias().map_or(field.name(), |alias| alias.value()) else {
@@ -188,32 +159,9 @@ fn check_duplicated_selection_fields(selection_set: &GraphqlSelectionSet) -> Box
         fields.push((name.clone(), name, token.text_trimmed_range()));
     }
 
-    let mut duplicated_fields = DuplicatedField::from_names(
+    DuplicatedField::from_names(
         DuplicatedFieldKind::SelectionField,
         collect_duplicate_names(fields),
-    );
-    duplicated_fields.extend(duplicated_arguments);
-    duplicated_fields.into_boxed_slice()
-}
-
-fn check_duplicated_variable_definitions(
-    variable_definitions: &GraphqlVariableDefinitions,
-) -> Box<[DuplicatedField]> {
-    let names = collect_duplicate_names(variable_definitions.elements().into_iter().filter_map(
-        |variable_definition| {
-            let token = variable_definition.variable().ok()?.name().ok()?.value_token().ok()?;
-            let name = token.token_text_trimmed();
-            Some((name.clone(), name, token.text_trimmed_range()))
-        },
-    ));
-    DuplicatedField::from_names(DuplicatedFieldKind::Variable, names).into_boxed_slice()
-}
-
-fn check_duplicated_arguments(arguments: &GraphqlArguments) -> Vec<DuplicatedField> {
-    let names = collect_duplicate_names(arguments.arguments().into_iter().filter_map(|argument| {
-        let token = argument.name().ok()?.value_token().ok()?;
-        let name = token.token_text_trimmed();
-        Some((name.clone(), name, token.text_trimmed_range()))
-    }));
-    DuplicatedField::from_names(DuplicatedFieldKind::Argument, names)
+    )
+    .into_boxed_slice()
 }

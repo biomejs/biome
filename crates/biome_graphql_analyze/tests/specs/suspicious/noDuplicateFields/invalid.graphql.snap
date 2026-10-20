@@ -4,16 +4,6 @@ expression: invalid.graphql
 ---
 # Input
 ```graphql
-query test($v: String, $t: String, $v: String) {
-  id
-}
-
-query test {
-  users(first: 100, after: 10, filter: "test", first: 50) {
-    id
-  }
-}
-
 query test {
   users {
     id
@@ -44,51 +34,29 @@ query test {
 
 # Diagnostics
 ```
-invalid.graphql:1:13 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:4:5 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The variable `v` is defined multiple times.
+  i The field `name` is defined multiple times.
   
-  > 1 │ query test($v: String, $t: String, $v: String) {
-      │             ^
-    2 │   id
-    3 │ }
+    2 │   users {
+    3 │     id
+  > 4 │     name
+      │     ^^^^
+    5 │     email
+    6 │     name
   
-  i The variable `v` is repeated here.
+  i The field `name` is repeated here.
   
-  > 1 │ query test($v: String, $t: String, $v: String) {
-      │                                     ^
-    2 │   id
-    3 │ }
+    4 │     name
+    5 │     email
+  > 6 │     name
+      │     ^^^^
+    7 │   }
+    8 │ }
   
   i Defining the same name more than once is not allowed, even when the duplicates could be merged.
   
-  i Remove the duplicated variable.
-  
-
-```
-
-```
-invalid.graphql:6:9 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The argument `first` is defined multiple times.
-  
-    5 │ query test {
-  > 6 │   users(first: 100, after: 10, filter: "test", first: 50) {
-      │         ^^^^^
-    7 │     id
-    8 │   }
-  
-  i The argument `first` is repeated here.
-  
-    5 │ query test {
-  > 6 │   users(first: 100, after: 10, filter: "test", first: 50) {
-      │                                                ^^^^^
-    7 │     id
-    8 │   }
-  
-  i Defining the same name more than once is not allowed, even when the duplicates could be merged.
-  
-  i Remove the duplicated argument.
+  i Remove the duplicated field.
   
 
 ```
@@ -96,51 +64,23 @@ invalid.graphql:6:9 lint/suspicious/noDuplicateFields ━━━━━━━━�
 ```
 invalid.graphql:14:5 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i The field `name` is defined multiple times.
-  
-    12 │   users {
-    13 │     id
-  > 14 │     name
-       │     ^^^^
-    15 │     email
-    16 │     name
-  
-  i The field `name` is repeated here.
-  
-    14 │     name
-    15 │     email
-  > 16 │     name
-       │     ^^^^
-    17 │   }
-    18 │ }
-  
-  i Defining the same name more than once is not allowed, even when the duplicates could be merged.
-  
-  i Remove the duplicated field.
-  
-
-```
-
-```
-invalid.graphql:24:5 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
   i The field `email` is defined multiple times.
   
-    22 │     id
-    23 │     name
-  > 24 │     email
+    12 │     id
+    13 │     name
+  > 14 │     email
        │     ^^^^^
-    25 │     email: somethingElse
-    26 │   }
+    15 │     email: somethingElse
+    16 │   }
   
   i The field `email` is repeated here.
   
-    23 │     name
-    24 │     email
-  > 25 │     email: somethingElse
+    13 │     name
+    14 │     email
+  > 15 │     email: somethingElse
        │     ^^^^^
-    26 │   }
-    27 │ }
+    16 │   }
+    17 │ }
   
   i Defining the same name more than once is not allowed, even when the duplicates could be merged.
   
@@ -150,34 +90,34 @@ invalid.graphql:24:5 lint/suspicious/noDuplicateFields ━━━━━━━━�
 ```
 
 ```
-invalid.graphql:31:5 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:21:5 lint/suspicious/noDuplicateFields ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The field `id` is defined multiple times.
   
-    29 │ query test {
-    30 │   users {
-  > 31 │     id
+    19 │ query test {
+    20 │   users {
+  > 21 │     id
        │     ^^
-    32 │     id
-    33 │     id
+    22 │     id
+    23 │     id
   
   i The field `id` is repeated here.
   
-    30 │   users {
-    31 │     id
-  > 32 │     id
+    20 │   users {
+    21 │     id
+  > 22 │     id
        │     ^^
-    33 │     id
-    34 │   }
+    23 │     id
+    24 │   }
   
   i The field `id` is repeated here.
   
-    31 │     id
-    32 │     id
-  > 33 │     id
+    21 │     id
+    22 │     id
+  > 23 │     id
        │     ^^
-    34 │   }
-    35 │ }
+    24 │   }
+    25 │ }
   
   i Defining the same name more than once is not allowed, even when the duplicates could be merged.
   
