@@ -4,7 +4,7 @@ use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, decl
 use biome_console::markup;
 use biome_css_semantic::model::{ResolvedSelector, Rule as CssSemanticRule, RuleId, Selector, Specificity};
 use biome_css_syntax::{
-    AnyCssRoot, CssContainerAtRule, CssLanguage, CssLayerAtRule, CssMediaAtRule,
+    AnyCssRoot, CssContainerAtRule, CssLanguage, CssLayerAtRule, CssMediaAtRule, CssSyntaxKind,
     CssScopeAtRule, CssStartingStyleAtRule, CssSupportsAtRule, ScssAtRootAtRule, ScssEachAtRule,
     ScssElseClause, ScssForAtRule, ScssFunctionAtRule, ScssIfAtRule, ScssIncludeAtRule,
     ScssMixinAtRule, ScssWhileAtRule,
@@ -260,15 +260,25 @@ type SelectorContexts = FxHashMap<SelectorContext, FxHashMap<String, (TextRange,
 /// The tail is taken from the resolved selector, so a nested selector such as
 /// `&:hover` is identified by the selector it resolves to. Reading the literal
 /// `&` would give every nested block the same tail, and selectors that target
-/// different elements would be compared with each other.
+/// different elements would be compared with each other. Likewise, a combinator
+/// inside a functional pseudo-class such as `:has(> img)` belongs to that
+/// pseudo-class, not to the selector, so only combinators outside parentheses
+/// start a new tail.
 fn find_tail_selector_str(selector: &Selector) -> Option<String> {
     let mut result = String::new();
+    let mut depth = 0usize;
     for (kind, text) in selector.resolved().tokens() {
-        if ResolvedSelector::is_combinator(*kind) {
-            result.clear();
-        } else {
-            result.push_str(text);
+        match kind {
+            CssSyntaxKind::L_PAREN => depth += 1,
+            CssSyntaxKind::R_PAREN => depth = depth.saturating_sub(1),
+            _ if depth == 0 && ResolvedSelector::is_combinator(*kind) => {
+                result.clear();
+                continue;
+            }
+            _ => {}
         }
+
+        result.push_str(text);
     }
 
     (!result.is_empty()).then_some(result)

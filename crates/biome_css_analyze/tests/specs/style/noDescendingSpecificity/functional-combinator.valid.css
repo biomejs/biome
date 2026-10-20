@@ -1,0 +1,10 @@
+/* should not generate diagnostics */
+/* The combinator sits inside `:has()`, so it does not separate the tail from
+   the rest of the selector: the two rules do not target the same element. */
+.b:has(> img) {
+  color: red;
+}
+
+div:has(> img) {
+  color: blue;
+}
