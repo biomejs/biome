@@ -431,13 +431,10 @@ impl<L: Language> SyntaxNode<L> {
     ///     .collect();
     /// assert_eq!(events, ["enter LITERAL_EXPRESSION", "leave LITERAL_EXPRESSION"]);
     /// ```
-    pub fn preorder_of_kinds(
-        &self,
-        kinds: SyntaxKindSet<L>,
-    ) -> impl Iterator<Item = WalkEvent<Self>> {
-        self.raw
-            .preorder_matching(move |kind| kinds.matches_raw(kind))
-            .map(|event| event.map(Self::from))
+    pub fn preorder_of_kinds(&self, kinds: SyntaxKindSet<L>) -> PreorderOfKinds<'_, L> {
+        PreorderOfKinds {
+            raw: self.raw.preorder_matching(kinds),
+        }
     }
 
     /// Traverse the subtree rooted at the current node (including the current
@@ -1137,6 +1134,25 @@ impl<L: Language> Preorder<L> {
 }
 
 impl<L: Language> Iterator for Preorder<L> {
+    type Item = WalkEvent<SyntaxNode<L>>;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.raw.next().map(|it| it.map(SyntaxNode::from))
+    }
+}
+
+pub struct PreorderOfKinds<'a, L: Language> {
+    raw: cursor::PreorderMatching<'a, L>,
+}
+
+impl<L: Language> PreorderOfKinds<'_, L> {
+    /// Skips the descendants of the node of the last [WalkEvent::Enter], so
+    /// the next event is the [WalkEvent::Leave] of that node.
+    pub fn skip_subtree(&mut self) {
+        self.raw.skip_subtree()
+    }
+}
+
+impl<L: Language> Iterator for PreorderOfKinds<'_, L> {
     type Item = WalkEvent<SyntaxNode<L>>;
     fn next(&mut self) -> Option<Self::Item> {
         self.raw.next().map(|it| it.map(SyntaxNode::from))
