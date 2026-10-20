@@ -5,10 +5,12 @@
 //! Both sides use UTF-8 byte offsets, but a tsrs node's `pos` includes its leading trivia, so a Biome range is
 //! compared against the tsrs token start.
 
-use std::sync::Arc;
+use std::sync::{Arc, Mutex, RwLock};
+use std::time::SystemTime;
 
 use biome_rowan::TextRange;
-use camino::Utf8Path;
+use camino::{Utf8Path, Utf8PathBuf};
+use rustc_hash::FxHashMap;
 use tsrs_ast::{Node, SourceFile};
 use tsrs_checker::{Checker, Type, TypeFacts, TypeFlags};
 use tsrs_compiler::{CompilerHost, Program, ProgramOptions, new_compiler_host, new_program};
@@ -17,13 +19,24 @@ use tsrs_core::{
     ScriptTarget, Tristate, tspath::ComparePathsOptions,
 };
 use tsrs_tsoptions::{ParseConfigHost, ParsedCommandLine, new_parsed_command_line};
-use tsrs_vfs::{FS, bundled, osvfs};
+use tsrs_vfs::{Entries, FS, FileInfo, bundled, osvfs};
 
-/// A tsrs program: the parsed, bound files of one project plus its checkers.
+/// One project checked by tsrs: a program over all of its files, kept in sync with the text Biome analyzes.
 ///
-/// The program and everything it allocates live for the rest of the process.
-pub struct TsrsProgram {
+/// Every program the project builds, and everything it allocates, lives for the rest of the process.
+pub struct TsrsProject {
+    cwd: String,
+    overlay: Arc<OverlayFs>,
+    program: Mutex<&'static Program>,
+}
+
+/// The project's program at a moment when one file had the text Biome analyzed.
+///
+/// A snapshot stays valid when the project moves on to a newer program.
+#[derive(Clone, Copy)]
+pub struct TsrsSnapshot {
     program: &'static Program,
+    file: P<SourceFile>,
 }
 
 /// A kind of value whose possibility decides whether a branch is reachable.
@@ -48,13 +61,13 @@ impl ParseConfigHost for ConfigHost {
     }
 }
 
-impl TsrsProgram {
-    /// Builds the program a `tsconfig.json` describes, reading files from disk.
+impl TsrsProject {
+    /// Builds the project a `tsconfig.json` describes, reading files from disk.
     pub fn from_tsconfig(tsconfig: &Utf8Path) -> Result<Self, String> {
         let cwd = tsconfig.parent().map_or("/", Utf8Path::as_str).to_string();
-        let fs = os_fs();
+        let overlay = Arc::new(OverlayFs::new(os_fs()));
         let host: &'static ConfigHost = Box::leak(Box::new(ConfigHost {
-            fs: Arc::clone(&fs),
+            fs: overlay.clone(),
             cwd: cwd.clone(),
         }));
         let (config, diagnostics) = tsrs_tsoptions::get_parsed_command_line_of_config_file(
@@ -65,19 +78,22 @@ impl TsrsProgram {
             None,
         );
         let config = config.ok_or_else(|| format!("{} config diagnostics", diagnostics.len()))?;
-        Ok(Self::new(P::new(config), &cwd, fs))
+        Ok(Self::new(P::new(config), &cwd, overlay))
     }
 
-    /// Builds a program over `root_files` with Biome's default options, reading files from disk.
-    ///
-    /// Every file is a module, as Biome parses it, and JavaScript files are checked too.
-    pub fn from_root_files(cwd: &Utf8Path, root_files: &[&Utf8Path]) -> Self {
-        Self::from_root_files_in(cwd, root_files, os_fs())
+    /// Builds a project over every JavaScript and TypeScript file under `directory`, outside `node_modules`,
+    /// with Biome's default options.
+    pub fn from_directory(directory: &Utf8Path) -> Self {
+        let mut root_files = Vec::new();
+        collect_source_files(directory, &mut root_files);
+        let root_files: Vec<_> = root_files.iter().map(Utf8PathBuf::as_path).collect();
+        Self::from_root_files_in(directory, &root_files, os_fs())
     }
 
-    /// Builds a program over `root_files` with Biome's default options, reading files from `fs`.
+    /// Builds a project over `root_files` with Biome's default options, reading files from `fs`.
     ///
-    /// The bundled `lib.*.d.ts` files are always available, whatever `fs` contains.
+    /// Every file is a module, as Biome parses it, and JavaScript files are checked too. The bundled
+    /// `lib.*.d.ts` files are always available, whatever `fs` contains.
     pub fn from_root_files_in(cwd: &Utf8Path, root_files: &[&Utf8Path], fs: Arc<dyn FS>) -> Self {
         let options = CompilerOptions {
             allow_js: Tristate::True,
@@ -99,66 +115,90 @@ impl TsrsProgram {
                 current_directory: cwd.to_string(),
             },
         );
-        Self::new(P::new(config), cwd.as_str(), fs)
+        Self::new(P::new(config), cwd.as_str(), Arc::new(OverlayFs::new(fs)))
     }
 
-    fn new(config: P<ParsedCommandLine>, cwd: &str, fs: Arc<dyn FS>) -> Self {
-        let host: Arc<dyn CompilerHost> =
-            new_compiler_host(cwd, fs, &bundled::default_lib_path(), None, None, None);
-        let mut options = ProgramOptions::new(config, host);
-        options.single_threaded = Tristate::True;
-        let program = new_program(options);
+    fn new(config: P<ParsedCommandLine>, cwd: &str, overlay: Arc<OverlayFs>) -> Self {
+        let host = new_host(cwd, &overlay);
+        let program = new_program(ProgramOptions::new(config, host));
         program.bind_source_files();
-        Self { program }
+        Self {
+            cwd: cwd.to_string(),
+            overlay,
+            program: Mutex::new(program),
+        }
     }
 
-    /// Runs `f` with the checker of `file` and the type of the expression whose trimmed range is `range`.
+    /// Returns a snapshot of the project in which `file` has exactly `text`.
     ///
-    /// Returns `None` when the file isn't part of the program or no expression has exactly that range.
+    /// When the program read other text for `file`, `text` replaces it and the program is updated; the
+    /// other files are reused unless the change affects them (new imports, for example). Returns `None`
+    /// when `file` isn't part of the project.
+    pub fn snapshot(&self, file: &Utf8Path, text: &str) -> Option<TsrsSnapshot> {
+        let mut program = self.program.lock().unwrap();
+        let source_file = program.get_source_file(file.as_str())?;
+        if source_file.text() == text {
+            return Some(TsrsSnapshot {
+                program: *program,
+                file: source_file,
+            });
+        }
+        self.overlay.set(file.as_str(), text);
+        let path = program.to_path(file.as_str());
+        let (updated, _, _) =
+            program.update_program(&path, new_host(&self.cwd, &self.overlay), None, None);
+        updated.bind_source_files();
+        *program = updated;
+        Some(TsrsSnapshot {
+            program: updated,
+            file: updated.get_source_file(file.as_str())?,
+        })
+    }
+}
+
+impl TsrsSnapshot {
+    /// Runs `f` with the checker of the snapshot's file and the type of the expression whose trimmed range is
+    /// `range`.
+    ///
+    /// Returns `None` when no expression has exactly that range.
     pub fn with_type_of_expression<R>(
         &self,
-        file: &Utf8Path,
         range: TextRange,
         f: impl FnOnce(&mut Checker, P<Type>) -> R,
     ) -> Option<R> {
-        let source_file = self.program.get_source_file(file.as_str())?;
-        let node = find_expression(source_file, range)?;
+        let node = find_expression(self.file, range)?;
         let mut checker = self
             .program
-            .get_type_checker_for_file(&Context::background(), source_file);
+            .get_type_checker_for_file(&Context::background(), self.file);
         let ty = checker.get_type_at_location(node);
         Some(f(&mut checker, ty))
     }
 
     /// Prints the type of the expression at `range` as TypeScript would in a diagnostic.
-    pub fn type_to_string(&self, file: &Utf8Path, range: TextRange) -> Option<String> {
-        self.with_type_of_expression(file, range, |checker, ty| {
-            checker.type_to_string_exported(ty)
-        })
+    pub fn type_to_string(&self, range: TextRange) -> Option<String> {
+        self.with_type_of_expression(range, |checker, ty| checker.type_to_string_exported(ty))
     }
 
     /// Whether the expression at `range` may evaluate to a value of the given kind, as the checker decides
     /// whether a `&&`, `||`, `??` or `?:` operand is reachable.
-    pub fn may_be(&self, file: &Utf8Path, range: TextRange, kind: ValueKind) -> Option<bool> {
+    pub fn may_be(&self, range: TextRange, kind: ValueKind) -> Option<bool> {
         let facts = match kind {
             ValueKind::Truthy => TypeFacts::Truthy,
             ValueKind::Falsy => TypeFacts::Falsy,
             ValueKind::Nullish => TypeFacts::EQUndefinedOrNull,
         };
-        self.with_type_of_expression(file, range, |checker, ty| checker.has_type_facts(ty, facts))
+        self.with_type_of_expression(range, |checker, ty| checker.has_type_facts(ty, facts))
     }
 
     /// Whether the expression at `range` is a Promise, as typescript-eslint's `no-floating-promises` decides
     /// with its default options.
-    pub fn is_promise_like(&self, file: &Utf8Path, range: TextRange) -> Option<bool> {
-        self.with_type_of_expression(file, range, |checker, ty| {
-            self.is_promise_like_type(checker, ty)
-        })
+    pub fn is_promise_like(&self, range: TextRange) -> Option<bool> {
+        self.with_type_of_expression(range, |checker, ty| self.is_promise_like_type(checker, ty))
     }
 
     /// Whether the expression at `range` is an array or tuple whose elements are Promises.
-    pub fn is_promise_array(&self, file: &Utf8Path, range: TextRange) -> Option<bool> {
-        self.with_type_of_expression(file, range, |checker, ty| {
+    pub fn is_promise_array(&self, range: TextRange) -> Option<bool> {
+        self.with_type_of_expression(range, |checker, ty| {
             let apparent = checker.get_apparent_type(ty);
             union_constituents(apparent).iter().any(|&part| {
                 if checker.is_array_type(part) {
@@ -238,6 +278,102 @@ impl TsrsProgram {
 
 fn os_fs() -> Arc<dyn FS> {
     Arc::new(bundled::wrap_fs(osvfs::fs()))
+}
+
+fn new_host(cwd: &str, overlay: &Arc<OverlayFs>) -> Arc<dyn CompilerHost> {
+    new_compiler_host(
+        cwd,
+        overlay.clone(),
+        &bundled::default_lib_path(),
+        None,
+        None,
+        None,
+    )
+}
+
+const SOURCE_EXTENSIONS: &[&str] = &["ts", "tsx", "mts", "cts", "js", "jsx", "mjs", "cjs"];
+
+fn collect_source_files(directory: &Utf8Path, files: &mut Vec<Utf8PathBuf>) {
+    let Ok(entries) = directory.read_dir_utf8() else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        let Ok(file_type) = entry.file_type() else {
+            continue;
+        };
+        if file_type.is_dir() {
+            if entry.file_name() != "node_modules" && !entry.file_name().starts_with('.') {
+                collect_source_files(path, files);
+            }
+        } else if path
+            .extension()
+            .is_some_and(|extension| SOURCE_EXTENSIONS.contains(&extension))
+        {
+            files.push(path.to_path_buf());
+        }
+    }
+}
+
+/// A file system that serves the text Biome analyzed in place of what's on disk.
+struct OverlayFs {
+    base: Arc<dyn FS>,
+    files: RwLock<FxHashMap<String, String>>,
+}
+
+impl OverlayFs {
+    fn new(base: Arc<dyn FS>) -> Self {
+        Self {
+            base,
+            files: RwLock::default(),
+        }
+    }
+
+    fn set(&self, path: &str, text: &str) {
+        self.files
+            .write()
+            .unwrap()
+            .insert(path.to_string(), text.to_string());
+    }
+}
+
+impl FS for OverlayFs {
+    fn use_case_sensitive_file_names(&self) -> bool {
+        self.base.use_case_sensitive_file_names()
+    }
+    fn file_exists(&self, path: &str) -> bool {
+        self.files.read().unwrap().contains_key(path) || self.base.file_exists(path)
+    }
+    fn read_file(&self, path: &str) -> Option<String> {
+        match self.files.read().unwrap().get(path) {
+            Some(text) => Some(text.clone()),
+            None => self.base.read_file(path),
+        }
+    }
+    fn write_file(&self, path: &str, data: &str) -> Result<(), String> {
+        self.base.write_file(path, data)
+    }
+    fn append_file(&self, path: &str, data: &str) -> Result<(), String> {
+        self.base.append_file(path, data)
+    }
+    fn remove(&self, path: &str) -> Result<(), String> {
+        self.base.remove(path)
+    }
+    fn chtimes(&self, path: &str, a_time: SystemTime, m_time: SystemTime) -> Result<(), String> {
+        self.base.chtimes(path, a_time, m_time)
+    }
+    fn directory_exists(&self, path: &str) -> bool {
+        self.base.directory_exists(path)
+    }
+    fn get_accessible_entries(&self, path: &str) -> Entries {
+        self.base.get_accessible_entries(path)
+    }
+    fn stat(&self, path: &str) -> Option<FileInfo> {
+        self.base.stat(path)
+    }
+    fn realpath(&self, path: &str) -> String {
+        self.base.realpath(path)
+    }
 }
 
 fn union_constituents(ty: P<Type>) -> Vec<P<Type>> {
