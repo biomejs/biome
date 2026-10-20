@@ -1160,6 +1160,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_restricted_types::NoRestrictedTypesOptions>(),
     ));
     result.push((
+        "nursery",
+        "noReturnArrayPush",
+        TypeId::of::<biome_rule_options::no_return_array_push::NoReturnArrayPushOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noReturnAssign",
         TypeId::of::<biome_rule_options::no_return_assign::NoReturnAssignOptions>(),
