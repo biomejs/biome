@@ -83,9 +83,13 @@ impl TsrsFile {
         let project = match projects.get(&key) {
             Some(project) => project.clone(),
             None => {
+                let start = std::time::Instant::now();
                 let project = tsconfig
                     .and_then(|tsconfig| TsrsProject::from_tsconfig(&tsconfig).ok())
                     .unwrap_or_else(|| TsrsProject::from_directory(directory));
+                if tsrs_verbose() {
+                    eprintln!("tsrs: built project {key} in {:?}", start.elapsed());
+                }
                 projects.entry(key).or_insert(Arc::new(project)).clone()
             }
         };
@@ -101,11 +105,21 @@ impl TsrsFile {
         self.snapshot
             .get_or_init(|| {
                 let root = node.ancestors().last()?;
-                self.project
-                    .snapshot(&self.path, &root.text_with_trivia().to_string())
+                let snapshot = self
+                    .project
+                    .snapshot(&self.path, &root.text_with_trivia().to_string());
+                if snapshot.is_none() && tsrs_verbose() {
+                    eprintln!("tsrs: {} is not part of its project", self.path);
+                }
+                snapshot
             })
             .as_ref()
     }
+}
+
+/// Whether `BIOME_TSRS=verbose` asks for project builds and unplaced files on stderr.
+fn tsrs_verbose() -> bool {
+    std::env::var_os("BIOME_TSRS").is_some_and(|value| value == "verbose")
 }
 
 /// Whether `matches` holds for any operand `expression` can evaluate to, as typescript-eslint's

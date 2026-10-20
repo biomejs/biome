@@ -12,6 +12,7 @@ publish              = false
 [dependencies]
 biome_rowan     = { workspace = true }
 camino          = { workspace = true }
+rayon           = { workspace = true }
 rustc-hash      = { workspace = true }
 tsrs_ast        = { git = "https://github.com/oxc-project/tsrs", rev = "79ea6d25c011a7f498e02bda7f090308f9fb9ac9" }
 tsrs_checker    = { git = "https://github.com/oxc-project/tsrs", rev = "79ea6d25c011a7f498e02bda7f090308f9fb9ac9" }

@@ -2233,6 +2233,7 @@ version = "0.0.0"
 dependencies = [
  "biome_rowan",
  "camino",
+ "rayon",
  "rustc-hash 2.1.3",
  "tsrs_ast",
  "tsrs_checker",

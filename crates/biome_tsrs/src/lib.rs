@@ -5,7 +5,7 @@
 //! Both sides use UTF-8 byte offsets, but a tsrs node's `pos` includes its leading trivia, so a Biome range is
 //! compared against the tsrs token start.
 
-use std::sync::{Arc, Mutex, RwLock};
+use std::sync::{Arc, LazyLock, Mutex, RwLock};
 use std::time::SystemTime;
 
 use biome_rowan::TextRange;
@@ -120,8 +120,11 @@ impl TsrsProject {
 
     fn new(config: P<ParsedCommandLine>, cwd: &str, overlay: Arc<OverlayFs>) -> Self {
         let host = new_host(cwd, &overlay);
-        let program = new_program(ProgramOptions::new(config, host));
-        program.bind_source_files();
+        let program = run_on_tsrs_pool(move || {
+            let program = new_program(ProgramOptions::new(config, host));
+            prepare(program);
+            program
+        });
         Self {
             cwd: cwd.to_string(),
             overlay,
@@ -143,11 +146,18 @@ impl TsrsProject {
                 file: source_file,
             });
         }
+        if std::env::var_os("BIOME_TSRS").is_some_and(|value| value == "verbose") {
+            eprintln!("tsrs: updating {file}");
+        }
         self.overlay.set(file.as_str(), text);
         let path = program.to_path(file.as_str());
-        let (updated, _, _) =
-            program.update_program(&path, new_host(&self.cwd, &self.overlay), None, None);
-        updated.bind_source_files();
+        let host = new_host(&self.cwd, &self.overlay);
+        let current = *program;
+        let updated = run_on_tsrs_pool(move || {
+            let (updated, _, _) = current.update_program(&path, host, None, None);
+            prepare(updated);
+            updated
+        });
         *program = updated;
         Some(TsrsSnapshot {
             program: updated,
@@ -274,6 +284,34 @@ impl TsrsSnapshot {
                 .is_some_and(|file| self.program.is_source_file_default_library(file.path()))
         })
     }
+}
+
+/// The threads that build and update programs.
+///
+/// tsrs parses, binds and creates checkers with rayon. A rayon worker that waits for that work, even on another
+/// pool, runs other jobs of its own pool meanwhile, and deadlocks when one of them waits for a lock the worker
+/// holds (a project's program, or the `OnceLock` behind a program's checkers). Callers send the work here and
+/// block on a channel instead, which runs nothing else.
+static TSRS_POOL: LazyLock<rayon::ThreadPool> = LazyLock::new(|| {
+    rayon::ThreadPoolBuilder::new()
+        .thread_name(|index| format!("tsrs-{index}"))
+        .build()
+        .expect("the tsrs thread pool starts")
+});
+
+/// Binds `program` and creates its checkers, the last work on a program that uses rayon. Queries only lock a
+/// checker afterwards, so they can run on any thread.
+fn prepare(program: &'static Program) {
+    program.bind_source_files();
+    drop(program.get_type_checker(&Context::background()));
+}
+
+fn run_on_tsrs_pool<T: Send + 'static>(work: impl FnOnce() -> T + Send + 'static) -> T {
+    let (sender, receiver) = std::sync::mpsc::sync_channel(1);
+    TSRS_POOL.spawn(move || {
+        let _ = sender.send(work());
+    });
+    receiver.recv().expect("tsrs work doesn't panic")
 }
 
 fn os_fs() -> Arc<dyn FS> {
