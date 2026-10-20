@@ -5,6 +5,8 @@
 //! Both sides use UTF-8 byte offsets, but a tsrs node's `pos` includes its leading trivia, so a Biome range is
 //! compared against the tsrs token start.
 
+mod parse_cache;
+
 use std::sync::{Arc, LazyLock, Mutex, RwLock};
 use std::time::SystemTime;
 
@@ -20,6 +22,8 @@ use tsrs_core::{
 };
 use tsrs_tsoptions::{ParseConfigHost, ParsedCommandLine, new_parsed_command_line};
 use tsrs_vfs::{Entries, FS, FileInfo, bundled, osvfs};
+
+use crate::parse_cache::SharedParseHost;
 
 /// One project checked by tsrs: a program over all of its files, kept in sync with the text Biome analyzes.
 ///
@@ -321,14 +325,14 @@ fn os_fs() -> Arc<dyn FS> {
 }
 
 fn new_host(cwd: &str, overlay: &Arc<OverlayFs>) -> Arc<dyn CompilerHost> {
-    new_compiler_host(
+    Arc::new(SharedParseHost::new(new_compiler_host(
         cwd,
         overlay.clone(),
         &bundled::default_lib_path(),
         None,
         None,
         None,
-    )
+    )))
 }
 
 const SOURCE_EXTENSIONS: &[&str] = &["ts", "tsx", "mts", "cts", "js", "jsx", "mjs", "cjs"];

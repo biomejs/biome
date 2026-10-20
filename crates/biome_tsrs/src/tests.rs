@@ -180,3 +180,48 @@ fn rejects_files_outside_the_project() {
             .is_none()
     );
 }
+
+#[test]
+fn projects_share_parsed_files() {
+    let shared = "export async function load(): Promise<number> { return 1; }\n";
+    let first_index = "import { load } from '../shared/load';\nload();\n";
+    let second_index = "import { load } from '../shared/load';\nvoid load();\n";
+    let files = [
+        ("/sharing/shared/load.ts", shared),
+        ("/sharing/first/index.ts", first_index),
+        ("/sharing/second/index.ts", second_index),
+    ];
+    let fs: Arc<dyn tsrs_vfs::FS> = Arc::new(bundled::wrap_fs(vfstest::from_map(
+        files.iter().copied(),
+        true,
+    )));
+    let first = TsrsProject::from_root_files_in(
+        Utf8Path::new("/sharing/first"),
+        &[Utf8Path::new("/sharing/first/index.ts")],
+        fs.clone(),
+    );
+    let second = TsrsProject::from_root_files_in(
+        Utf8Path::new("/sharing/second"),
+        &[Utf8Path::new("/sharing/second/index.ts")],
+        fs,
+    );
+    let first = first
+        .snapshot(Utf8Path::new("/sharing/first/index.ts"), first_index)
+        .unwrap();
+    let second = second
+        .snapshot(Utf8Path::new("/sharing/second/index.ts"), second_index)
+        .unwrap();
+    assert!(
+        first.program.get_source_file("/sharing/shared/load.ts")
+            == second.program.get_source_file("/sharing/shared/load.ts"),
+        "both programs hold the same parse of the shared file"
+    );
+    assert_eq!(
+        first.is_promise_like(statement_expression(first_index, "load()")),
+        Some(true)
+    );
+    assert_eq!(
+        second.is_promise_like(range_of(second_index, "load()")),
+        Some(true)
+    );
+}
