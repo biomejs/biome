@@ -3368,6 +3368,11 @@ export interface Nursery {
 	 */
 	noUselessSplice?: NoUselessSpliceConfiguration;
 	/**
+	 * Disallow type assertions that don't change the type of an expression.
+	 * See https://biomejs.dev/linter/rules/no-useless-type-assertion
+	 */
+	noUselessTypeAssertion?: NoUselessTypeAssertionConfiguration;
+	/**
 	 * Disallow type conversions that do not change the type of an expression.
 	 * See https://biomejs.dev/linter/rules/no-useless-type-conversion
 	 */
@@ -6360,6 +6365,9 @@ export type NoUselessRecursionConfiguration =
 export type NoUselessSpliceConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessSpliceOptions;
+export type NoUselessTypeAssertionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessTypeAssertionOptions;
 export type NoUselessTypeConversionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessTypeConversionOptions;
@@ -9217,6 +9225,14 @@ export interface RuleWithNoUselessSpliceOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessSpliceOptions;
 }
+export interface RuleWithNoUselessTypeAssertionOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoUselessTypeAssertionOptions;
+}
 export interface RuleWithNoUselessTypeConversionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessTypeConversionOptions;
@@ -11969,6 +11985,7 @@ export type NoUselessCallOptions = {};
 export type NoUselessDateGetTimeOptions = {};
 export type NoUselessRecursionOptions = {};
 export type NoUselessSpliceOptions = {};
+export type NoUselessTypeAssertionOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueBooleanDefaultOptions = {};
 export type NoVueComputedPropertiesInDataOptions = {};
@@ -13834,6 +13851,7 @@ export type Category =
 	| "lint/nursery/noUselessDateGetTime"
 	| "lint/nursery/noUselessRecursion"
 	| "lint/nursery/noUselessSplice"
+	| "lint/nursery/noUselessTypeAssertion"
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueComputedPropertiesInData"
