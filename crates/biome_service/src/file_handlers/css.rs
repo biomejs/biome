@@ -713,7 +713,7 @@ pub(super) fn lint_with_inspector(
     let css_services = CssAnalyzerServices {
         language_db: Some(params.workspace_db.rc_language_db()),
         parsed_source: match &params.parsed_source {
-            super::ParsedOrigin::Workspace(source) => Some(source.clone()),
+            super::ParsedOrigin::Workspace(source) => Some(*source),
             super::ParsedOrigin::Interned { .. } => None,
         },
         file_source,
@@ -878,7 +878,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError> {
     let mut tree: AnyCssRoot = params.parsed_source.tree(&params.workspace_db);
     let mut parsed_source = match &params.parsed_source {
-        super::ParsedOrigin::Workspace(source) => Some(source.clone()),
+        super::ParsedOrigin::Workspace(source) => Some(*source),
         super::ParsedOrigin::Interned { .. } => None,
     };
     let Some(file_source) = params.document_file_source.to_css_file_source() else {
@@ -920,7 +920,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
         loop {
             let css_services = CssAnalyzerServices {
                 language_db: Some(params.workspace_db.rc_language_db()),
-                parsed_source: parsed_source.clone(),
+                parsed_source,
                 file_source,
                 module_db: {
                     #[cfg(feature = "module_graph")]
@@ -980,7 +980,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
     loop {
         let css_services = CssAnalyzerServices {
             language_db: Some(params.workspace_db.rc_language_db()),
-            parsed_source: parsed_source.clone(),
+            parsed_source,
             file_source,
             module_db: {
                 #[cfg(feature = "module_graph")]

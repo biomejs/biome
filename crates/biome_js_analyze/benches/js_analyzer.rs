@@ -101,7 +101,7 @@ fn bench_analyzer(criterion: &mut Criterion) {
 
                         b.iter(|| {
                             let mut db = TestDb::default();
-                            let parsed_source = ParsedSource::new(
+                            let parsed_source = ParsedSource::from_parse(
                                 &db,
                                 test_case.path().to_path_buf(),
                                 parse.tree().syntax().as_send().unwrap().into(),

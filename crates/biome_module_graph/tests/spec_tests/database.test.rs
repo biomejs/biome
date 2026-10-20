@@ -1,4 +1,5 @@
 use super::*;
+use biome_db::SourceParse;
 use biome_module_graph::{ResolutionMode, ResolutionRequest, resolve_module_request};
 use biome_resolver::ResolveError;
 
@@ -180,10 +181,14 @@ fn resolution_query_tracks_tsconfig_source_changes() {
 
     let source = db.files[Utf8Path::new("/project/tsconfig.json")];
     salsa::Setter::to(
-        source.set_parsed(&mut db),
-        parse_json(
-            r#"{"compilerOptions":{"paths":{"@dep":["./src/second.ts"]}}}"#,
-            JsonParserOptions::default(),
+        source.set_content(&mut db),
+        SourceParse::new(
+            parse_json(
+                r#"{"compilerOptions":{"paths":{"@dep":["./src/second.ts"]}}}"#,
+                JsonParserOptions::default(),
+            )
+            .into(),
+            0,
         )
         .into(),
     );

@@ -1,6 +1,7 @@
 pub(crate) mod services;
 
 use crate::diagnostics::FileTooLarge;
+use std::sync::Arc;
 
 #[derive(Clone, Debug)]
 pub(crate) struct Document {
@@ -8,7 +9,9 @@ pub(crate) struct Document {
     ///
     /// The content of the file is only available if it belongs to the project. For example, we don't
     /// want to store the content of files coming from dependencies.
-    pub(crate) content: String,
+    ///
+    /// The database shares the same allocation as the text of the file.
+    pub(crate) content: Arc<str>,
 
     /// The version of the document.
     ///
@@ -16,10 +19,6 @@ pub(crate) struct Document {
     /// typically through the LSP. Documents that are only opened by the scanner
     /// do not have a version.
     pub(crate) version: Option<i32>,
-
-    /// The index of where the original file source is saved.
-    /// Use `WorkspaceServer#file_sources` to retrieve the file source that belongs to the document.
-    pub(crate) file_source_index: usize,
 
     /// The result of the parser (syntax tree + diagnostics).
     /// Types explained:

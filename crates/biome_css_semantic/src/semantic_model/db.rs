@@ -37,7 +37,10 @@ pub(crate) fn css_model_from_parsed_source(db: &dyn Db, file: ParsedSource) -> S
 }
 
 #[salsa::tracked]
-pub(crate) fn css_model_from_parsed_snippet(db: &dyn Db, file: ParsedSnippet) -> SemanticModel {
+pub(crate) fn css_model_from_parsed_snippet<'db>(
+    db: &'db dyn Db,
+    file: ParsedSnippet<'db>,
+) -> SemanticModel {
     let parsed: AnyCssRoot = file.parsed(db).tree();
     semantic_model(&parsed)
 }
@@ -54,9 +57,9 @@ pub fn css_property_definitions_from_source(
 
 /// Returns custom property definitions from an embedded CSS document.
 #[salsa::tracked]
-pub fn css_property_definitions_from_snippet(
-    db: &dyn Db,
-    file: ParsedSnippet,
+pub fn css_property_definitions_from_snippet<'db>(
+    db: &'db dyn Db,
+    file: ParsedSnippet<'db>,
 ) -> Vec<CssPropertyDefinition> {
     let parsed: AnyCssRoot = file.parsed(db).tree();
     collect_property_definitions(&semantic_model(&parsed))
@@ -147,7 +150,7 @@ fn is_global_pseudo_identifier(selector: &CssPseudoClassIdentifier) -> bool {
 pub fn css_semantic_model<'db>(db: &'db dyn Db, file: &AnyParsedSource) -> &'db SemanticModel {
     match file {
         AnyParsedSource::ParsedSource(s) => css_model_from_parsed_source(db, *s),
-        AnyParsedSource::ParsedSnippet(s) => css_model_from_parsed_snippet(db, *s),
+        AnyParsedSource::ParsedSnippet(s) => css_model_from_parsed_snippet(db, s.resolve(db)),
     }
 }
 
@@ -164,7 +167,7 @@ mod tests {
     use biome_db::testing::{
         Events, assert_function_query_was_not_run, assert_function_query_was_run,
     };
-    use biome_db::{ParsedSnippet, ParsedSource};
+    use biome_db::{ParsedSource, SnippetParse, SourceParse};
     use biome_languages::css::CssFileSource;
     use biome_languages::{DocumentFileSource, LanguageDb};
     use biome_rowan::TextSize;
@@ -220,7 +223,7 @@ mod tests {
 
     fn make_file(db: &TestDb, source: &str) -> ParsedSource {
         let parsed = parse_css(source, CssFileSource::css(), CssParserOptions::default()).into();
-        ParsedSource::new(db, Utf8PathBuf::from("test.css"), parsed, 0, vec![])
+        ParsedSource::from_parse(db, Utf8PathBuf::from("test.css"), parsed, 0, vec![])
     }
 
     #[test]
@@ -241,31 +244,30 @@ mod tests {
     fn property_definition_ranges_track_parse_changes() {
         let mut db = TestDb::new();
         let source = "@property --value { syntax: '<color>'; inherits: true; initial-value: red; }";
-        let file = make_file(&db, source);
-        let snippet = ParsedSnippet::new(
+        let with_snippet = |source: &str| {
+            let parse = || parse_css(source, CssFileSource::css(), CssParserOptions::default());
+            SourceParse::new(parse().into(), 0).with_snippets(vec![SnippetParse::new(
+                parse().into(),
+                Default::default(),
+                Default::default(),
+                0.into(),
+                0,
+            )])
+        };
+        let file = ParsedSource::new(
             &db,
-            parse_css(source, CssFileSource::css(), CssParserOptions::default()).into(),
-            Default::default(),
-            Default::default(),
-            0.into(),
-            0,
+            Utf8PathBuf::from("test.css"),
+            with_snippet(source).into(),
         );
         let source_start = css_property_definitions_from_source(&db, file)[0]
             .range()
             .start();
-        let snippet_start = css_property_definitions_from_snippet(&db, snippet)[0]
+        let snippet_start = css_property_definitions_from_snippet(&db, file.snippets(&db)[0])[0]
             .range()
             .start();
         let updated = format!("\n{source}");
 
-        salsa::Setter::to(
-            file.set_parsed(&mut db),
-            parse_css(&updated, CssFileSource::css(), CssParserOptions::default()).into(),
-        );
-        salsa::Setter::to(
-            snippet.set_parsed(&mut db),
-            parse_css(&updated, CssFileSource::css(), CssParserOptions::default()).into(),
-        );
+        salsa::Setter::to(file.set_content(&mut db), with_snippet(&updated).into());
 
         assert_eq!(
             css_property_definitions_from_source(&db, file)[0]
@@ -274,7 +276,7 @@ mod tests {
             source_start + TextSize::from(1)
         );
         assert_eq!(
-            css_property_definitions_from_snippet(&db, snippet)[0]
+            css_property_definitions_from_snippet(&db, file.snippets(&db)[0])[0]
                 .range()
                 .start(),
             snippet_start + TextSize::from(1)
@@ -336,7 +338,10 @@ mod tests {
             CssParserOptions::default(),
         )
         .into();
-        salsa::Setter::to(file.set_parsed(&mut db), new_parsed);
+        salsa::Setter::to(
+            file.set_content(&mut db),
+            SourceParse::new(new_parsed, 0).into(),
+        );
 
         db.clear_salsa_events();
         let _ = css_model_from_parsed_source(&db, file);
@@ -358,7 +363,10 @@ mod tests {
             CssParserOptions::default(),
         )
         .into();
-        salsa::Setter::to(file.set_parsed(&mut db), new_parsed);
+        salsa::Setter::to(
+            file.set_content(&mut db),
+            SourceParse::new(new_parsed, 0).into(),
+        );
 
         db.clear_salsa_events();
         let count = rule_count(&db, file);
@@ -382,7 +390,10 @@ mod tests {
             CssParserOptions::default(),
         )
         .into();
-        salsa::Setter::to(file.set_parsed(&mut db), new_parsed);
+        salsa::Setter::to(
+            file.set_content(&mut db),
+            SourceParse::new(new_parsed, 0).into(),
+        );
 
         assert_eq!(rule_count(&db, file), 1);
     }
@@ -400,7 +411,10 @@ mod tests {
             CssParserOptions::default(),
         )
         .into();
-        salsa::Setter::to(file.set_parsed(&mut db), new_parsed);
+        salsa::Setter::to(
+            file.set_content(&mut db),
+            SourceParse::new(new_parsed, 0).into(),
+        );
 
         db.clear_salsa_events();
         let _ = rule_count(&db, file);
@@ -422,7 +436,10 @@ mod tests {
             CssParserOptions::default(),
         )
         .into();
-        salsa::Setter::to(file.set_parsed(&mut db), new_parsed);
+        salsa::Setter::to(
+            file.set_content(&mut db),
+            SourceParse::new(new_parsed, 0).into(),
+        );
 
         db.clear_salsa_events();
         let _ = rule_count(&db, file);
@@ -450,7 +467,10 @@ mod tests {
             CssParserOptions::default(),
         )
         .into();
-        salsa::Setter::to(file.set_parsed(&mut db), new_parsed);
+        salsa::Setter::to(
+            file.set_content(&mut db),
+            SourceParse::new(new_parsed, 0).into(),
+        );
 
         db.clear_salsa_events();
         assert_eq!(
@@ -481,7 +501,10 @@ mod tests {
             CssParserOptions::default(),
         )
         .into();
-        salsa::Setter::to(file.set_parsed(&mut db), new_parsed);
+        salsa::Setter::to(
+            file.set_content(&mut db),
+            SourceParse::new(new_parsed, 0).into(),
+        );
 
         db.clear_salsa_events();
         assert_eq!(
@@ -514,7 +537,10 @@ mod tests {
             CssParserOptions::default(),
         )
         .into();
-        salsa::Setter::to(file.set_parsed(&mut db), new_parsed);
+        salsa::Setter::to(
+            file.set_content(&mut db),
+            SourceParse::new(new_parsed, 0).into(),
+        );
 
         db.clear_salsa_events();
         assert_eq!(
@@ -540,7 +566,10 @@ mod tests {
             CssParserOptions::default(),
         )
         .into();
-        salsa::Setter::to(file.set_parsed(&mut db), new_parsed);
+        salsa::Setter::to(
+            file.set_content(&mut db),
+            SourceParse::new(new_parsed, 0).into(),
+        );
 
         db.clear_salsa_events();
         let count = rule_count(&db, file);

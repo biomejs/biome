@@ -1323,6 +1323,64 @@ fn process_file_is_stateless_and_reports_diagnostics_for_final_output() {
 /// sources of the files still open under its root through
 /// `DbState::unload_path`. Neither operation touches parsed sources that
 /// belong to a different project.
+/// A node cache is kept only for the documents opened with
+/// `persist_node_cache`, across their changes, until the document or its
+/// project is closed.
+#[test]
+fn node_caches_live_while_their_documents_are_open() {
+    const KEPT: &str = "/project/kept.js";
+    const OTHER: &str = "/project/other.js";
+    const NESTED: &str = "/project/nested/kept.js";
+
+    let (workspace, project_key) =
+        setup_workspace_and_open_project(MemoryFileSystem::default(), "/project");
+    let open = |path: &str, persist_node_cache| {
+        workspace
+            .open_file(OpenFileParams {
+                project_key,
+                path: BiomePath::new(path),
+                content: FileContent::from_client("let a = 1;"),
+                document_file_source: None,
+                persist_node_cache,
+                inline_config: None,
+                editor_features: None,
+            })
+            .unwrap();
+    };
+    open(KEPT, true);
+    open(OTHER, false);
+    open(NESTED, true);
+    let has_node_cache = |path: &str| workspace.db_state.has_node_cache(Utf8Path::new(path));
+    assert!(has_node_cache(KEPT));
+    assert!(!has_node_cache(OTHER));
+
+    workspace
+        .change_file(ChangeFileParams {
+            project_key,
+            path: BiomePath::new(KEPT),
+            content: "let b = 2;".into(),
+            version: 1,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+    assert!(has_node_cache(KEPT));
+
+    workspace
+        .close_file(CloseFileParams {
+            project_key,
+            path: BiomePath::new(KEPT),
+        })
+        .unwrap();
+    assert!(!has_node_cache(KEPT));
+    assert!(has_node_cache(NESTED));
+
+    workspace
+        .close_project(CloseProjectParams { project_key })
+        .unwrap();
+    assert!(!has_node_cache(NESTED));
+}
+
 #[test]
 fn close_file_and_close_project_evict_cached_parsed_sources() {
     const PATH_A: &str = "/project/file_a.js";

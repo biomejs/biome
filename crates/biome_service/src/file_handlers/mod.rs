@@ -64,7 +64,7 @@ use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue, RuleDomai
 use biome_css_analyze::METADATA as css_metadata;
 #[cfg(feature = "lang_css")]
 use biome_css_syntax::CssLanguage;
-use biome_db::{AnyParsedSource, ParsedSnippet, ParsedSource};
+use biome_db::{AnyParsedSource, ParsedSnippetRef, ParsedSource};
 use biome_diagnostics::{Applicability, Diagnostic, DiagnosticExt, Error, Severity, category};
 #[cfg(feature = "html_embeds")]
 use biome_embeds::EmbeddedData;
@@ -164,7 +164,7 @@ pub(crate) enum ParsedOrigin {
 #[derive(Clone, Debug)]
 pub(crate) enum ParsedSnippetOrigin {
     /// The parse result has been queried from the database.
-    Workspace(ParsedSnippet),
+    Workspace(ParsedSnippetRef),
     /// The parse result has been generated from the server during an in-flight operation, and it won't
     /// be saved back to the workspace. This is usually used for in-memory operations or stateless operations.
     Interned {
@@ -250,7 +250,7 @@ impl ParsedOrigin {
     pub(crate) fn snippets<'a>(&'a self, db: &'a WorkspaceDb) -> SnippetsIterator<'a> {
         match self {
             Self::Workspace(AnyParsedSource::ParsedSource(source)) => {
-                SnippetsIterator::Workspace(source.snippets(db).iter())
+                SnippetsIterator::from_source(*source, db)
             }
             Self::Workspace(AnyParsedSource::ParsedSnippet(_)) => {
                 SnippetsIterator::Interned([].iter())
@@ -352,15 +352,9 @@ impl From<ParsedSource> for ParsedOrigin {
     }
 }
 
-impl From<ParsedSnippet> for ParsedOrigin {
-    fn from(source: ParsedSnippet) -> Self {
+impl From<ParsedSnippetRef> for ParsedOrigin {
+    fn from(source: ParsedSnippetRef) -> Self {
         Self::Workspace(source.into())
-    }
-}
-
-impl From<&ParsedSnippet> for ParsedOrigin {
-    fn from(source: &ParsedSnippet) -> Self {
-        Self::Workspace((*source).into())
     }
 }
 
@@ -371,11 +365,17 @@ impl From<AnyParse> for ParsedOrigin {
 }
 
 pub(crate) enum SnippetsIterator<'a> {
-    Workspace(std::slice::Iter<'a, ParsedSnippet>),
+    /// The snippets of a parsed source, by position.
+    Workspace(ParsedSource, std::ops::Range<usize>),
     Interned(std::slice::Iter<'a, ParsedSnippetOrigin>),
 }
 
 impl<'a> SnippetsIterator<'a> {
+    /// Iterates over the snippets of `source`.
+    pub(crate) fn from_source(source: ParsedSource, db: &WorkspaceDb) -> Self {
+        Self::Workspace(source, 0..source.snippets(db).len())
+    }
+
     /// Excludes host-owned template comments from guest analysis, and every
     /// snippet of a Markdown file whose `markdown.analyzeEmbeds` is disabled. The unfiltered iterator remains available for formatting and
     /// host suppression extraction.
@@ -426,9 +426,9 @@ impl Iterator for SnippetsIterator<'_> {
 
     fn next(&mut self) -> Option<Self::Item> {
         match self {
-            Self::Workspace(snippets) => {
-                snippets.next().copied().map(ParsedSnippetOrigin::Workspace)
-            }
+            Self::Workspace(source, indices) => indices
+                .next()
+                .map(|index| ParsedSnippetOrigin::Workspace(ParsedSnippetRef::new(*source, index))),
             Self::Interned(snippets) => snippets.next().cloned(),
         }
     }

@@ -438,6 +438,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use biome_db::SourceParse;
     use biome_db::testing::{
         Events, assert_function_query_was_not_run, assert_function_query_was_run,
         function_query_will_execute_count_by_name,
@@ -544,7 +545,7 @@ mod tests {
     #[test]
     fn package_json_query_tracks_the_parsed_source() {
         let mut db = TestDb::new();
-        let source = ParsedSource::new(
+        let source = ParsedSource::from_parse(
             &db,
             Utf8PathBuf::from("/package.json"),
             parse(r#"{"name":"first"}"#).into(),
@@ -563,8 +564,8 @@ mod tests {
         assert_function_query_was_not_run(&db, package_json_from_source, source, &events);
 
         source
-            .set_parsed(&mut db)
-            .to(parse(r#"{"name":"second"}"#).into());
+            .set_content(&mut db)
+            .to(SourceParse::new(parse(r#"{"name":"second"}"#).into(), 0).into());
         db.clear_events();
 
         assert_eq!(
@@ -629,7 +630,7 @@ mod tests {
             Some("on-disk".into())
         );
 
-        let source = ParsedSource::new(
+        let source = ParsedSource::from_parse(
             &db,
             Utf8PathBuf::from("/package.json"),
             parse(r#"{"name":"unsaved"}"#).into(),

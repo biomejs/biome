@@ -1,7 +1,7 @@
 //! A minimal Salsa database and parsing helpers shared by the crate's unit tests.
 
 use biome_db::testing::Events;
-use biome_db::{ParsedSnippet, ParsedSource};
+use biome_db::{ParsedSource, SnippetParse};
 use biome_html_parser::{HtmlParserOptions, parse_html};
 use biome_js_parser::JsParserOptions;
 use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource, LanguageDb};
@@ -76,7 +76,7 @@ impl LanguageDb for TestDb {
 pub(crate) fn parse_vue_source(db: &TestDb, source: &str) -> Utf8PathBuf {
     let path = Utf8PathBuf::from("src/App.vue");
     let parsed = parse_html(source, HtmlParserOptions::default().with_vue()).into();
-    let file = ParsedSource::new(db, path.clone(), parsed, 0, vec![]);
+    let file = ParsedSource::from_parse(db, path.clone(), parsed, 0, vec![]);
     db.insert_file(path.clone(), file);
     path
 }
@@ -86,7 +86,7 @@ pub(crate) fn parse_vue_source(db: &TestDb, source: &str) -> Utf8PathBuf {
 pub(crate) fn parse_js_source(
     db: &TestDb,
     source: &str,
-    snippets: Vec<ParsedSnippet>,
+    snippets: Vec<SnippetParse>,
 ) -> Utf8PathBuf {
     let path = Utf8PathBuf::from("src/file.js");
     let parsed = biome_js_parser::parse(
@@ -95,7 +95,7 @@ pub(crate) fn parse_js_source(
         JsParserOptions::default(),
     )
     .into();
-    let file = ParsedSource::new(db, path.clone(), parsed, 3, snippets);
+    let file = ParsedSource::from_parse(db, path.clone(), parsed, 3, snippets);
     db.insert_file(path.clone(), file);
     path
 }
@@ -107,15 +107,14 @@ pub(crate) fn parse_html_source_with_js_snippet(db: &TestDb, html: &str, js: &st
         biome_js_parser::parse(js, JsFileSource::js_module(), JsParserOptions::default()).into();
     let content_start = TextSize::from(html.find(js).expect("snippet should exist") as u32);
     let content_end = content_start + TextSize::from(js.len() as u32);
-    let snippet = ParsedSnippet::new(
-        db,
+    let snippet = SnippetParse::new(
         snippet_parse,
         TextRange::new(TextSize::from(0), TextSize::from(html.len() as u32)),
         TextRange::new(content_start, content_end),
         content_start,
         3,
     );
-    let file = ParsedSource::new(db, path.clone(), parsed, 2, vec![snippet]);
+    let file = ParsedSource::from_parse(db, path.clone(), parsed, 2, vec![snippet]);
     db.insert_file(path.clone(), file);
     path
 }
@@ -158,8 +157,7 @@ pub(crate) fn parse_vue_source_with_js_snippets(
                 let start = TextSize::from(offset as u32);
                 TextRange::new(start, start + TextSize::from(js.len() as u32))
             });
-            ParsedSnippet::new(
-                db,
+            SnippetParse::new(
                 snippet_parse,
                 content_range,
                 content_range,
@@ -168,7 +166,7 @@ pub(crate) fn parse_vue_source_with_js_snippets(
             )
         })
         .collect();
-    let file = ParsedSource::new(db, path.clone(), parsed, 0, snippets);
+    let file = ParsedSource::from_parse(db, path.clone(), parsed, 0, snippets);
     db.insert_file(path.clone(), file);
     path
 }

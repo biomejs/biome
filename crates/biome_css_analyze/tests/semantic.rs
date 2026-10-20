@@ -3,7 +3,7 @@ use biome_css_analyze::CssAnalyzerServices;
 use biome_css_parser::{CssParserOptions, parse_css, parse_css_with_offset};
 use biome_css_syntax::AnyCssRoot;
 use biome_db::{
-    AnyParsedSource, Db, ParsedSnippet, ParsedSource,
+    AnyParsedSource, Db, ParsedSource, SnippetParse, SourceParse,
     testing::{Events, function_query_will_execute_count_by_name},
 };
 use biome_languages::{CssFileSource, DocumentFileSource, LanguageDb};
@@ -96,7 +96,7 @@ fn semantic_queries_are_lazy_cached_and_refresh_locations() {
         CssParserOptions::default(),
     );
     let root = parse.tree();
-    let source = ParsedSource::new(&db, "/file.css".into(), parse.into(), 0, vec![]);
+    let source = ParsedSource::from_parse(&db, "/file.css".into(), parse.into(), 0, vec![]);
     let mut db = Rc::new(db);
     let rule = RuleFilter::Rule("suspicious", "noDuplicateProperties");
 
@@ -126,8 +126,8 @@ fn semantic_queries_are_lazy_cached_and_refresh_locations() {
     assert_eq!(analyze(&db, &changed_root, None, rule), shifted);
     assert_eq!(db.query_count("css_model_from_parsed_source"), 0);
     source
-        .set_parsed(Rc::get_mut(&mut db).unwrap())
-        .to(changed.into());
+        .set_content(Rc::get_mut(&mut db).unwrap())
+        .to(SourceParse::new(changed.into(), 0).into());
     assert_eq!(
         analyze(&db, &changed_root, Some(source.into()), rule),
         shifted
@@ -145,15 +145,14 @@ fn semantic_queries_cache_offset_snippets() {
         CssParserOptions::default(),
     );
     let root = parse.tree();
-    let snippet = ParsedSnippet::new(
-        &db,
+    let snippet = SnippetParse::new(
         parse.into(),
         TextRange::default(),
         TextRange::default(),
         100.into(),
         0,
     );
-    let _source = ParsedSource::new(
+    let source = ParsedSource::from_parse(
         &db,
         "/file.css".into(),
         parse_css(
@@ -167,6 +166,7 @@ fn semantic_queries_cache_offset_snippets() {
     );
     let db = Rc::new(db);
     let rule = RuleFilter::Rule("suspicious", "noDuplicateProperties");
+    let snippet = source.snippets(db.as_ref())[0].to_ref(db.as_ref());
 
     let ranges = analyze(&db, &root, Some(snippet.into()), rule);
     assert_eq!(ranges.len(), 1);

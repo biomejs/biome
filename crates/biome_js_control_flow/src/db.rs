@@ -7,7 +7,10 @@ pub fn control_flow_model_from_source(db: &dyn Db, file: ParsedSource) -> Contro
 }
 
 #[salsa::tracked]
-pub fn control_flow_model_from_snippet(db: &dyn Db, file: ParsedSnippet) -> ControlFlowModel {
+pub fn control_flow_model_from_snippet<'db>(
+    db: &'db dyn Db,
+    file: ParsedSnippet<'db>,
+) -> ControlFlowModel {
     control_flow_model(&file.parsed(db).tree())
 }
 
@@ -18,6 +21,8 @@ pub fn js_control_flow_model<'db>(
 ) -> &'db ControlFlowModel {
     match file {
         AnyParsedSource::ParsedSource(source) => control_flow_model_from_source(db, *source),
-        AnyParsedSource::ParsedSnippet(snippet) => control_flow_model_from_snippet(db, *snippet),
+        AnyParsedSource::ParsedSnippet(snippet) => {
+            control_flow_model_from_snippet(db, snippet.resolve(db))
+        }
     }
 }

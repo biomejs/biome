@@ -42,7 +42,7 @@
 //! let _model = js_semantic_model(&db, file);
 //!
 //! // Mutate an input
-//! salsa::Setter::to(file.set_parsed(&mut db), new_parsed);
+//! salsa::Setter::to(file.set_content(&mut db), SourceParse::new(new_parsed, 0).into());
 //!
 //! // Clear events, run the query again, then check
 //! db.clear_salsa_events();

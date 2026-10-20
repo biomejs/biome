@@ -277,7 +277,8 @@ fn insert_test_manifests(db: &mut WorkspaceDb, input_file: &Utf8Path) {
         );
         let path = directory.join(manifest_name);
         let source_index = db.insert_source(DocumentFileSource::Json(JsonFileSource::json()));
-        let parsed = ParsedSource::new(db, path.clone(), parse.into(), source_index, Vec::new());
+        let parsed =
+            ParsedSource::from_parse(db, path.clone(), parse.into(), source_index, Vec::new());
         db.insert_file(&path, parsed);
     }
 }
@@ -335,7 +336,7 @@ pub fn module_graph_for_test_file(
             };
             let parsed = biome_css_parser::parse_css(&content, file_source, options);
             let source_index = db.insert_source(file_source.into());
-            let parsed_source = ParsedSource::new(
+            let parsed_source = ParsedSource::from_parse(
                 &db,
                 path.as_path().to_path_buf(),
                 parsed.into(),
@@ -389,7 +390,7 @@ pub fn module_graph_for_css_test_file(
         };
         let parsed = biome_css_parser::parse_css(&content, file_source, options);
         let source_index = db.insert_source(file_source.into());
-        let parsed_source = ParsedSource::new(
+        let parsed_source = ParsedSource::from_parse(
             &db,
             path.as_path().to_path_buf(),
             parsed.into(),

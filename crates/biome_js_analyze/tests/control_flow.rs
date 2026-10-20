@@ -3,7 +3,7 @@ use biome_analyze::{
     PluginTargetLanguage, RuleFilter, ServiceBag,
 };
 use biome_db::{
-    AnyParsedSource, Db, ParsedSnippet, ParsedSource,
+    AnyParsedSource, Db, ParsedSource, SnippetParse, SourceParse,
     testing::{Events, assert_function_query_was_not_run, assert_function_query_was_run},
 };
 use biome_js_analyze::JsAnalyzerServices;
@@ -108,7 +108,7 @@ fn cfg_only_analysis_reports_unreachable_code() {
     let parse = parsed("function example() { return; neverCalled(); }");
     let root = parse.tree();
     let db = TestDb::default();
-    let source = ParsedSource::new(&db, "/file.js".into(), parse.into(), 0, vec![]);
+    let source = ParsedSource::from_parse(&db, "/file.js".into(), parse.into(), 0, vec![]);
     let db = Rc::new(db);
 
     for services in [
@@ -150,7 +150,7 @@ fn cfg_queries_are_lazy_cached_and_match_the_analyzed_tree() {
     let original = parsed("function f() { return; unreachable(); }");
     let original_root = original.tree();
     let db = TestDb::default();
-    let source = ParsedSource::new(&db, "/file.js".into(), original.into(), 0, vec![]);
+    let source = ParsedSource::from_parse(&db, "/file.js".into(), original.into(), 0, vec![]);
     let mut db = Rc::new(db);
 
     let (_, errors) = biome_js_analyze::analyze(
@@ -219,8 +219,8 @@ fn cfg_queries_are_lazy_cached_and_match_the_analyzed_tree() {
     );
 
     source
-        .set_parsed(Rc::get_mut(&mut db).unwrap())
-        .to(changed.into());
+        .set_content(Rc::get_mut(&mut db).unwrap())
+        .to(SourceParse::new(changed.into(), 0).into());
     db.take_events();
     assert_eq!(
         analyze(&db, &changed_root, Some(source.into()), "noUnreachable"),
@@ -253,23 +253,21 @@ fn cfg_queries_use_the_supplied_snippet_with_identical_content() {
     let first_parse = parsed("function second() { return; second(); }");
     let second_parse = parsed("function second() { return; second(); }");
     let second_root = second_parse.tree();
-    let first = ParsedSnippet::new(
-        &db,
+    let first = SnippetParse::new(
         first_parse.into(),
         TextRange::default(),
         TextRange::default(),
         10.into(),
         0,
     );
-    let second = ParsedSnippet::new(
-        &db,
+    let second = SnippetParse::new(
         second_parse.into(),
         TextRange::default(),
         TextRange::default(),
         100.into(),
         0,
     );
-    let source = ParsedSource::new(
+    let source = ParsedSource::from_parse(
         &db,
         "/file.js".into(),
         parsed("host();").into(),
@@ -277,8 +275,15 @@ fn cfg_queries_use_the_supplied_snippet_with_identical_content() {
         vec![first, second],
     );
     let db = Rc::new(db);
+    let snippets = source.snippets(db.as_ref());
+    let (first, second) = (snippets[0], snippets[1]);
 
-    let ranges = analyze(&db, &second_root, Some(second.into()), "noUnreachable");
+    let ranges = analyze(
+        &db,
+        &second_root,
+        Some(second.to_ref(db.as_ref()).into()),
+        "noUnreachable",
+    );
     assert_eq!(ranges.len(), 1);
     let events = db.take_events();
     assert_function_query_was_not_run(db.as_ref(), semantic_model_from_snippet, second, &events);
@@ -293,7 +298,12 @@ fn cfg_queries_use_the_supplied_snippet_with_identical_content() {
     assert_function_query_was_not_run(db.as_ref(), control_flow_model_from_source, source, &events);
 
     assert_eq!(
-        analyze(&db, &second_root, Some(second.into()), "noUnreachable"),
+        analyze(
+            &db,
+            &second_root,
+            Some(second.to_ref(db.as_ref()).into()),
+            "noUnreachable"
+        ),
         ranges
     );
     assert_function_query_was_not_run(
@@ -348,7 +358,7 @@ fn plugins_request_semantic_models_before_evaluation() {
         let db = TestDb::default();
         let parse = parsed("let value = 1; value;");
         let root = parse.tree();
-        let source = ParsedSource::new(&db, "/file.js".into(), parse.into(), 0, vec![]);
+        let source = ParsedSource::from_parse(&db, "/file.js".into(), parse.into(), 0, vec![]);
         let db = Rc::new(db);
         let evaluations = Arc::new(AtomicUsize::new(0));
         let plugins: Vec<Arc<Box<dyn AnalyzerPlugin>>> =

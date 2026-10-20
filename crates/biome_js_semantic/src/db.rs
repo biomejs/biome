@@ -17,7 +17,10 @@ pub fn semantic_model_from_source(db: &dyn LanguageDb, file: ParsedSource) -> Se
 }
 
 #[salsa::tracked]
-pub fn semantic_model_from_snippet(db: &dyn LanguageDb, file: ParsedSnippet) -> SemanticModel {
+pub fn semantic_model_from_snippet<'db>(
+    db: &'db dyn LanguageDb,
+    file: ParsedSnippet<'db>,
+) -> SemanticModel {
     let parsed = file.parsed(db);
     let source = db.source_from_index(file.document_source_index(db));
     let source_type = source
@@ -32,6 +35,8 @@ pub fn js_semantic_model<'db>(
 ) -> &'db SemanticModel {
     match file {
         AnyParsedSource::ParsedSource(source) => semantic_model_from_source(db, *source),
-        AnyParsedSource::ParsedSnippet(snippet) => semantic_model_from_snippet(db, *snippet),
+        AnyParsedSource::ParsedSnippet(snippet) => {
+            semantic_model_from_snippet(db, snippet.resolve(db))
+        }
     }
 }
