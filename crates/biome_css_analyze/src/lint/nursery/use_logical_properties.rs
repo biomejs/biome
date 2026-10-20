@@ -142,9 +142,8 @@ declare_lint_rule! {
     /// p {
     ///   margin: 1px;
     ///   margin: var(--spacing);
-    ///   margin-block-start: 1px;
+    ///   margin-block: 1px 2px;
     ///   color: red;
-    ///   margin-block-end: 2px;
     /// }
     /// ```
     ///
