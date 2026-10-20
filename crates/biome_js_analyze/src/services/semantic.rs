@@ -114,8 +114,8 @@ impl Visitor for SemanticModelBuilderVisitor {
             .unwrap_or_default();
         if let Some(db) = ctx.services.get_service::<Rc<dyn LanguageDb>>()
             && let Some(source) = ctx.services.get_service::<AnyParsedSource>()
+            && let Some(model) = js_semantic_model(db.as_ref(), source)
         {
-            let model = js_semantic_model(db.as_ref(), source);
             // Semantic equality excludes locations, but analyzer consumers need the
             // current syntax and the embedding flavor of the analyzed source.
             if model.root().syntax().as_send() == ctx.root.syntax().as_send()

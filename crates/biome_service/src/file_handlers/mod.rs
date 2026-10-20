@@ -177,7 +177,7 @@ pub(crate) enum ParsedSnippetOrigin {
 impl ParsedSnippetOrigin {
     pub(crate) fn parsed_origin(&self) -> ParsedOrigin {
         match self {
-            Self::Workspace(snippet) => (*snippet).into(),
+            Self::Workspace(snippet) => snippet.clone().into(),
             Self::Interned { parse, content, .. } => {
                 ParsedOrigin::interned(parse.clone(), Some(content.content_offset))
             }
@@ -186,60 +186,54 @@ impl ParsedSnippetOrigin {
 
     pub(crate) fn file_source(&self, db: &WorkspaceDb) -> Option<DocumentFileSource> {
         match self {
-            Self::Workspace(snippet) => db.source_from_index(snippet.document_source_index(db)),
+            Self::Workspace(snippet) => db.source_from_index(snippet.document_source_index()),
             Self::Interned { file_source, .. } => Some(*file_source),
         }
     }
 
-    pub(crate) fn element_range(&self, db: &WorkspaceDb) -> TextRange {
+    pub(crate) fn element_range(&self) -> TextRange {
         match self {
-            Self::Workspace(snippet) => snippet.element_range(db),
+            Self::Workspace(snippet) => snippet.element_range(),
             Self::Interned { content, .. } => content.element_range,
         }
     }
 
-    pub(crate) fn content_range(&self, db: &WorkspaceDb) -> TextRange {
+    pub(crate) fn content_range(&self) -> TextRange {
         match self {
-            Self::Workspace(snippet) => snippet.content_range(db),
+            Self::Workspace(snippet) => snippet.content_range(),
             Self::Interned { content, .. } => content.content_range,
         }
     }
 
-    pub(crate) fn content_offset(&self, db: &WorkspaceDb) -> TextSize {
+    pub(crate) fn content_offset(&self) -> TextSize {
         match self {
-            Self::Workspace(snippet) => snippet.content_offset(db),
+            Self::Workspace(snippet) => snippet.content_offset(),
             Self::Interned { content, .. } => content.content_offset,
         }
     }
 
-    pub(crate) fn diagnostics<'a>(
-        &'a self,
-        db: &'a WorkspaceDb,
-    ) -> &'a [biome_parser::diagnostic::ParseDiagnostic] {
+    pub(crate) fn diagnostics(&self) -> &[biome_parser::diagnostic::ParseDiagnostic] {
         match self {
-            Self::Workspace(snippet) => snippet.parsed(db).diagnostics(),
+            Self::Workspace(snippet) => snippet.parsed().diagnostics(),
             Self::Interned { parse, .. } => parse.diagnostics(),
         }
     }
 
-    pub(crate) fn serde_diagnostics(
-        &self,
-        db: &WorkspaceDb,
-    ) -> Vec<biome_diagnostics::serde::Diagnostic> {
+    pub(crate) fn serde_diagnostics(&self) -> Vec<biome_diagnostics::serde::Diagnostic> {
         match self {
-            Self::Workspace(snippet) => snippet.serde_diagnostics(db),
+            Self::Workspace(snippet) => snippet.serde_diagnostics(),
             Self::Interned { parse, .. } => parse.clone().into_serde_diagnostics(),
         }
     }
 
-    pub(crate) fn has_errors(&self, db: &WorkspaceDb) -> bool {
-        self.diagnostics(db)
+    pub(crate) fn has_errors(&self) -> bool {
+        self.diagnostics()
             .iter()
             .any(|diagnostic| diagnostic.severity() >= Severity::Error)
     }
 
-    pub(crate) fn error_count(&self, db: &WorkspaceDb) -> usize {
-        self.diagnostics(db)
+    pub(crate) fn error_count(&self) -> usize {
+        self.diagnostics()
             .iter()
             .filter(|diagnostic| diagnostic.severity() >= Severity::Error)
             .count()
@@ -330,9 +324,9 @@ impl ParsedOrigin {
         }
     }
 
-    pub(crate) fn diagnostic_offset(&self, db: &WorkspaceDb) -> Option<TextSize> {
+    pub(crate) fn diagnostic_offset(&self) -> Option<TextSize> {
         match self {
-            Self::Workspace(source) => source.diagnostic_offset(db),
+            Self::Workspace(source) => source.diagnostic_offset(),
             Self::Interned {
                 diagnostic_offset, ..
             } => *diagnostic_offset,
@@ -365,15 +359,20 @@ impl From<AnyParse> for ParsedOrigin {
 }
 
 pub(crate) enum SnippetsIterator<'a> {
-    /// The snippets of a parsed source, by position.
-    Workspace(ParsedSource, std::ops::Range<usize>),
+    /// The snippets of a parsed source.
+    Workspace(std::vec::IntoIter<ParsedSnippetRef>),
     Interned(std::slice::Iter<'a, ParsedSnippetOrigin>),
 }
 
 impl<'a> SnippetsIterator<'a> {
     /// Iterates over the snippets of `source`.
     pub(crate) fn from_source(source: ParsedSource, db: &WorkspaceDb) -> Self {
-        Self::Workspace(source, 0..source.snippets(db).len())
+        let snippets: Vec<_> = source
+            .snippets(db)
+            .iter()
+            .map(|snippet| snippet.to_ref(db))
+            .collect();
+        Self::Workspace(snippets.into_iter())
     }
 
     /// Excludes host-owned template comments from guest analysis, and every
@@ -426,9 +425,7 @@ impl Iterator for SnippetsIterator<'_> {
 
     fn next(&mut self) -> Option<Self::Item> {
         match self {
-            Self::Workspace(source, indices) => indices
-                .next()
-                .map(|index| ParsedSnippetOrigin::Workspace(ParsedSnippetRef::new(*source, index))),
+            Self::Workspace(snippets) => snippets.next().map(ParsedSnippetOrigin::Workspace),
             Self::Interned(snippets) => snippets.next().cloned(),
         }
     }
@@ -472,7 +469,7 @@ pub(crate) struct ParseEmbeddedParams<'a, 'settings> {
     pub(crate) node_cache: &'a mut NodeCache,
 }
 
-type Parse =
+pub(crate) type Parse =
     fn(&BiomePath, DocumentFileSource, &str, &SettingsWithEditor, &mut NodeCache) -> ParseResult;
 type ParseEmbeddedNodes =
     for<'a, 'settings> fn(ParseEmbeddedParams<'a, 'settings>) -> ParseEmbedResult;
@@ -693,7 +690,7 @@ impl<'a> ProcessLint<'a> {
                 || !params.skip.is_empty(),
             rules: params.settings.linter_rules(),
             pull_code_actions: params.pull_code_actions,
-            diagnostic_offset: params.parsed_source.diagnostic_offset(&params.workspace_db),
+            diagnostic_offset: params.parsed_source.diagnostic_offset(),
             max_diagnostics: params.max_diagnostics,
             diagnostic_level: params.diagnostic_level,
             enforce_assist: params.enforce_assist,

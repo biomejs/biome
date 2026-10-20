@@ -76,8 +76,9 @@ impl Visitor for ControlFlowGraphVisitor {
         let db = ctx.services.get_service::<Rc<dyn LanguageDb>>();
         let model = if let Some(db) = db
             && let Some(source) = ctx.services.get_service::<AnyParsedSource>()
+            && let Some(model) = js_control_flow_model(db.as_ref(), source)
         {
-            js_control_flow_model(db.as_ref(), source).clone()
+            model.clone()
         } else {
             // Fix passes and standalone callers can analyze trees that are not stored
             // in the database. A graph for the file's previous tree would have stale nodes.

@@ -13,7 +13,6 @@ use biome_parser::AnyParse;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_rowan::{AstNode, Language, SendNode, SyntaxNode, TextRange, TextSize};
 use camino::{Utf8Path, Utf8PathBuf};
-use std::any::Any;
 use std::fmt::Debug;
 use std::ops::Deref;
 use std::sync::Arc;
@@ -21,15 +20,6 @@ use std::sync::Arc;
 #[salsa::db]
 pub trait Db: salsa::Database {
     fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<ParsedSource>;
-
-    /// Parses `text`, the content of `source`.
-    ///
-    /// Databases that only create sources from a [SourceParse] don't parse
-    /// text. The default implementation panics.
-    fn parse_text(&self, source: ParsedSource, text: &SourceText) -> SourceParse {
-        let _ = (source, text);
-        unimplemented!("this database can't parse text")
-    }
 }
 
 /// The primordial type of the biome database. It represents a file.
@@ -50,7 +40,7 @@ pub struct ParsedSource {
 /// What a [ParsedSource] is made of.
 #[derive(Clone, Debug)]
 pub enum SourceContent {
-    /// The text of the file, parsed with [Db::parse_text].
+    /// The text of the file, and the parser of the text.
     Text(SourceText),
     /// The result of a parse made outside the database.
     ///
@@ -70,43 +60,23 @@ impl From<SourceParse> for SourceContent {
     }
 }
 
-/// The text of a file, and what the database needs to parse it.
+/// The text of a file, and the parser of the text.
 #[derive(Clone, Debug)]
 pub struct SourceText {
     pub text: Arc<str>,
-
-    /// The index of the file source to parse the text as.
-    ///
-    /// The parse can select a more specific file source, which
-    /// [ParsedSource::document_source_index] returns.
-    pub source_index: usize,
-
-    pub context: ParseContext,
+    pub parser: Arc<dyn TextParser>,
 }
 
-/// Data that the database reads to parse a [SourceText], such as the settings
-/// the file was opened with.
+/// Parses the text of a [ParsedSource].
 ///
-/// Only the database that creates the context reads it, so its type is erased
-/// here.
-#[derive(Clone)]
-pub struct ParseContext(Arc<dyn Any + Send + Sync>);
-
-impl ParseContext {
-    pub fn new(value: impl Any + Send + Sync) -> Self {
-        Self(Arc::new(value))
-    }
-
-    /// Returns the value of the context, or `None` when it has another type.
-    pub fn get<T: Any>(&self) -> Option<&T> {
-        self.0.downcast_ref()
-    }
-}
-
-impl Debug for ParseContext {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str("ParseContext(..)")
-    }
+/// The code that publishes a text supplies its parser, along with what the
+/// parse needs, such as the file source and the settings of the file.
+pub trait TextParser: Debug + Send + Sync {
+    /// Parses `text`, the content of `source`, and the snippets embedded in it.
+    ///
+    /// Salsa tracks what the parser reads from `db`, so a change to it parses
+    /// the text again.
+    fn parse(&self, db: &dyn Db, source: ParsedSource, text: &str) -> SourceParse;
 }
 
 /// A parse result compared by allocation identity.
@@ -234,7 +204,7 @@ fn parsed_root(db: &dyn Db, source: ParsedSource) -> ParsedRoot<'_> {
         document_source_index,
         snippets,
     } = match source.content(db) {
-        SourceContent::Text(text) => db.parse_text(source, text),
+        SourceContent::Text(text) => text.parser.parse(db, source, &text.text),
         SourceContent::Parsed(parse) => parse.clone(),
     };
     let snippets = snippets
@@ -371,7 +341,17 @@ impl<'db> ParsedSnippet<'db> {
     }
 
     pub fn to_ref(self, db: &dyn Db) -> ParsedSnippetRef {
-        ParsedSnippetRef::new(self.source(db), self.index(db))
+        ParsedSnippetRef {
+            source: self.source(db),
+            index: self.index(db),
+            snippet: SnippetParse {
+                parse: self.parse(db).clone(),
+                element_range: self.element_range(db),
+                content_range: self.content_range(db),
+                content_offset: self.content_offset(db),
+                document_source_index: self.document_source_index(db),
+            },
+        }
     }
 
     pub fn serde_diagnostics(&self, db: &dyn Db) -> Vec<biome_diagnostics::serde::Diagnostic> {
@@ -383,67 +363,60 @@ impl<'db> ParsedSnippet<'db> {
     }
 }
 
-/// Refers to a [ParsedSnippet] by its document and its position, without
-/// borrowing the database.
+/// A snippet of a [ParsedSource] that doesn't borrow the database.
 ///
-/// The reference resolves to the snippet at that position in the current parse
-/// of the document. It resolves to the snippet it was created from only in the
-/// revision that created it. A database handle keeps that revision current
-/// while it's alive, so resolve a reference while the handle it was created
-/// from, or one created before it, is still alive.
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+/// It holds the parse result and the ranges of the snippet, so reading them
+/// never fails. Queries keyed by a snippet need the [ParsedSnippet] itself,
+/// which [Self::resolve] returns.
+#[derive(Clone, Debug)]
 pub struct ParsedSnippetRef {
     source: ParsedSource,
     index: usize,
+    snippet: SnippetParse,
 }
 
 impl ParsedSnippetRef {
-    /// Refers to the snippet at `index` among the snippets of `source`.
-    pub fn new(source: ParsedSource, index: usize) -> Self {
-        Self { source, index }
+    /// Returns the [ParsedSnippet] this reference was created from, or `None`
+    /// when the current parse of its document doesn't contain it anymore.
+    pub fn resolve<'db>(&self, db: &'db dyn Db) -> Option<ParsedSnippet<'db>> {
+        self.source
+            .snippets(db)
+            .get(self.index)
+            .copied()
+            .filter(|snippet| *snippet.parse(db) == self.snippet.parse)
     }
 
-    /// Returns the snippet.
-    ///
-    /// ## Panics
-    ///
-    /// Panics if the current parse of the document has fewer snippets than
-    /// the one the reference was created from.
-    pub fn resolve(self, db: &dyn Db) -> ParsedSnippet<'_> {
-        self.source.snippets(db)[self.index]
+    pub fn parsed(&self) -> &AnyParse {
+        &self.snippet.parse
     }
 
-    pub fn parsed(self, db: &dyn Db) -> &AnyParse {
-        self.resolve(db).parsed(db)
+    pub fn document_source_index(&self) -> usize {
+        self.snippet.document_source_index
     }
 
-    pub fn document_source_index(self, db: &dyn Db) -> usize {
-        self.resolve(db).document_source_index(db)
+    pub fn element_range(&self) -> TextRange {
+        self.snippet.element_range
     }
 
-    pub fn element_range(self, db: &dyn Db) -> TextRange {
-        self.resolve(db).element_range(db)
+    pub fn content_range(&self) -> TextRange {
+        self.snippet.content_range
     }
 
-    pub fn content_range(self, db: &dyn Db) -> TextRange {
-        self.resolve(db).content_range(db)
+    pub fn content_offset(&self) -> TextSize {
+        self.snippet.content_offset
     }
 
-    pub fn content_offset(self, db: &dyn Db) -> TextSize {
-        self.resolve(db).content_offset(db)
+    pub fn serde_diagnostics(&self) -> Vec<biome_diagnostics::serde::Diagnostic> {
+        self.parsed().clone().into_serde_diagnostics()
     }
 
-    pub fn serde_diagnostics(self, db: &dyn Db) -> Vec<biome_diagnostics::serde::Diagnostic> {
-        self.parsed(db).clone().into_serde_diagnostics()
-    }
-
-    pub fn has_errors(self, db: &dyn Db) -> bool {
-        self.parsed(db).has_errors()
+    pub fn has_errors(&self) -> bool {
+        self.parsed().has_errors()
     }
 }
 
 /// Convenient type for source
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug)]
 pub enum AnyParsedSource {
     ParsedSource(ParsedSource),
     ParsedSnippet(ParsedSnippetRef),
@@ -479,25 +452,25 @@ impl AnyParsedSource {
     pub fn serde_diagnostics(&self, db: &dyn Db) -> Vec<biome_diagnostics::serde::Diagnostic> {
         match self {
             Self::ParsedSource(parsed) => parsed.serde_diagnostics(db),
-            Self::ParsedSnippet(parsed) => parsed.serde_diagnostics(db),
+            Self::ParsedSnippet(parsed) => parsed.serde_diagnostics(),
         }
     }
 
-    pub fn diagnostics<'db>(&self, db: &'db dyn Db) -> &'db [ParseDiagnostic] {
+    pub fn diagnostics<'a>(&'a self, db: &'a dyn Db) -> &'a [ParseDiagnostic] {
         self.any_parse(db).diagnostics()
     }
 
-    pub fn diagnostic_offset(&self, db: &dyn Db) -> Option<TextSize> {
+    pub fn diagnostic_offset(&self) -> Option<TextSize> {
         match self {
             Self::ParsedSource(_) => None,
-            Self::ParsedSnippet(snippet) => Some(snippet.content_offset(db)),
+            Self::ParsedSnippet(snippet) => Some(snippet.content_offset()),
         }
     }
 
     pub fn document_file_index(&self, db: &dyn Db) -> usize {
         match self {
             Self::ParsedSource(source) => source.document_source_index(db),
-            Self::ParsedSnippet(snippet) => snippet.document_source_index(db),
+            Self::ParsedSnippet(snippet) => snippet.document_source_index(),
         }
     }
 
@@ -508,17 +481,17 @@ impl AnyParsedSource {
         }
     }
 
-    pub fn any_parse<'db>(&self, db: &'db dyn Db) -> &'db AnyParse {
+    pub fn any_parse<'a>(&'a self, db: &'a dyn Db) -> &'a AnyParse {
         match self {
             Self::ParsedSource(source) => source.parsed(db),
-            Self::ParsedSnippet(snippet) => snippet.parsed(db),
+            Self::ParsedSnippet(snippet) => snippet.parsed(),
         }
     }
 
     pub fn has_errors(&self, db: &dyn Db) -> bool {
         match self {
             Self::ParsedSource(source) => source.has_errors(db),
-            Self::ParsedSnippet(snippet) => snippet.has_errors(db),
+            Self::ParsedSnippet(snippet) => snippet.has_errors(),
         }
     }
 }

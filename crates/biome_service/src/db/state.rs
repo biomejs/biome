@@ -168,14 +168,17 @@
 //! while the current thread holds a [`DbReadGuard`].
 
 use super::{
-    ParsedSourceUpdateMode, ProjectUpdateMode, SharedWorkspaceDb, WorkspaceDb, WorkspaceDbData,
+    FileView, ParsedSourceUpdateMode, ProjectUpdateMode, SharedWorkspaceDb, WorkspaceDb,
+    WorkspaceDbData, WorkspaceTextParser,
 };
 use crate::WorkspaceError;
+use crate::file_handlers::Parse;
 #[cfg(feature = "module_graph")]
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::projects::ProjectKey;
 use crate::settings::Settings;
-use biome_db::{ParsedSource, SourceContent};
+use crate::settings::SettingsQuery;
+use biome_db::{ParsedSource, SourceContent, SourceText};
 use biome_languages::DocumentFileSource;
 use biome_resolver::FsWithResolverProxy;
 #[cfg(feature = "module_graph")]
@@ -550,13 +553,6 @@ impl DbState {
         }
     }
 
-    pub(crate) fn insert_source(&self, document_file_source: DocumentFileSource) -> usize {
-        match &self.storage {
-            DbStorage::Shared(shared_db) => shared_db.fork().insert_source(document_file_source),
-            DbStorage::Owned(db) => db.data.insert_source(document_file_source),
-        }
-    }
-
     // #region Project functions
 
     /// Inserts a nested setting.
@@ -653,27 +649,68 @@ impl DbState {
         }
     }
 
-    /// Publishes `content` as the content of `path`.
+    /// Publishes `content` as `view` of `path`, and returns the current view
+    /// of `path`. See [FileViews](super::FileViews).
     ///
     /// The content isn't parsed here: the parse runs the first time a query
     /// reads it.
-    pub(crate) fn update_file_content(
+    pub(crate) fn update_file_view(
         &self,
         path: &Utf8Path,
+        view: FileView,
         content: SourceContent,
     ) -> ParsedSource {
         match &self.storage {
             DbStorage::Shared(shared_db) => {
                 let mut db = shared_db.fork();
-                let file = db.update_or_insert_file(path, content, ParsedSourceUpdateMode::Replace);
+                let file =
+                    db.update_or_insert_view(path, view, content, ParsedSourceUpdateMode::Replace);
                 // The replacement publishes a new parsed source for `path`.
                 #[cfg(feature = "module_graph")]
                 self.record_resolver_changes(shared_db.data().resolver_source_change(path));
                 file
             }
             DbStorage::Owned(db) => db.with_setter(|db| {
-                db.update_or_insert_file(path, content, ParsedSourceUpdateMode::Setters)
+                db.update_or_insert_view(path, view, content, ParsedSourceUpdateMode::Setters)
             }),
+        }
+    }
+
+    /// Removes `view` of `path`, and removes the file when it has no view
+    /// left.
+    pub(crate) fn remove_file_view(&self, path: &Utf8Path, view: FileView) {
+        match &self.storage {
+            DbStorage::Shared(shared_db) => {
+                shared_db
+                    .fork()
+                    .remove_view(path, view, ParsedSourceUpdateMode::Replace);
+                // The replacement publishes another parsed source for `path`.
+                #[cfg(feature = "module_graph")]
+                self.record_resolver_changes(shared_db.data().resolver_source_change(path));
+            }
+            DbStorage::Owned(db) => db.with_setter(|db| {
+                db.remove_view(path, view, ParsedSourceUpdateMode::Setters);
+            }),
+        }
+    }
+
+    /// Returns `text` with the parser that parses it as `file_source`, with
+    /// `parse` and the settings that `query` selects.
+    pub(crate) fn source_text(
+        &self,
+        text: Arc<str>,
+        parse: Parse,
+        file_source: DocumentFileSource,
+        query: SettingsQuery,
+    ) -> SourceText {
+        SourceText {
+            text,
+            parser: Arc::new(WorkspaceTextParser::new(
+                parse,
+                file_source,
+                query,
+                self.shared_data(),
+            )),
         }
     }
 
@@ -705,6 +742,31 @@ impl DbState {
                 }
             }
             DbStorage::Owned(db) => db.with_setter(|db| db.unload_path(path)),
+        }
+    }
+
+    /// Removes the disk views of the files within `path`, and the modules
+    /// within it. The files that a client has open keep their editor views.
+    ///
+    /// Use this when the filesystem reports that `path` was removed.
+    pub(crate) fn unload_disk_views(&self, path: &Utf8Path) {
+        match &self.storage {
+            DbStorage::Shared(shared_db) => {
+                shared_db
+                    .fork()
+                    .remove_disk_views_within(path, ParsedSourceUpdateMode::Replace);
+                let data = shared_db.data();
+                data.unload_modules(path);
+                #[cfg(feature = "module_graph")]
+                {
+                    self.mark_module_graph_dirty();
+                    self.record_resolver_changes(data.resolver_changes_within(path));
+                }
+            }
+            DbStorage::Owned(db) => db.with_setter(|db| {
+                db.remove_disk_views_within(path, ParsedSourceUpdateMode::Setters);
+                db.unload_modules(path);
+            }),
         }
     }
 
@@ -934,7 +996,11 @@ mod tests {
         let path = Utf8PathBuf::from("test.js");
         // Insert the file first: only updates to files the database already
         // knows about are applied through salsa setters.
-        state.update_file_content(&path, SourceParse::new(parse_js("let a = 1;"), 0).into());
+        state.update_file_view(
+            &path,
+            FileView::Disk,
+            SourceParse::new(parse_js("let a = 1;"), 0).into(),
+        );
 
         let clone_taken = Arc::new(Barrier::new(2));
         let (done_tx, done_rx) = mpsc::channel();
@@ -950,7 +1016,9 @@ mod tests {
                 wait_for_pending_setter(&state);
                 // This must complete on its own, without waiting for the
                 // lock held by the setter.
-                state.insert_source(DocumentFileSource::Js(JsFileSource::js_script()));
+                state
+                    .shared_data()
+                    .insert_source(DocumentFileSource::Js(JsFileSource::js_script()));
                 drop(db);
             })
         };
@@ -960,8 +1028,11 @@ mod tests {
             let path = path.clone();
             thread::spawn(move || {
                 clone_taken.wait();
-                state
-                    .update_file_content(&path, SourceParse::new(parse_js("let b = 2;"), 0).into());
+                state.update_file_view(
+                    &path,
+                    FileView::Disk,
+                    SourceParse::new(parse_js("let b = 2;"), 0).into(),
+                );
                 done_tx.send(()).unwrap();
             })
         };
@@ -982,7 +1053,11 @@ mod tests {
     fn owned_storage_fork_unwinds_while_setter_is_pending() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_file_content(&path, SourceParse::new(parse_js("let a = 1;"), 0).into());
+        state.update_file_view(
+            &path,
+            FileView::Disk,
+            SourceParse::new(parse_js("let a = 1;"), 0).into(),
+        );
 
         // Hold a clone so the setter below has to wait.
         let db = state.fork();
@@ -991,8 +1066,11 @@ mod tests {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state
-                    .update_file_content(&path, SourceParse::new(parse_js("let b = 2;"), 0).into());
+                state.update_file_view(
+                    &path,
+                    FileView::Disk,
+                    SourceParse::new(parse_js("let b = 2;"), 0).into(),
+                );
             })
         };
 
@@ -1016,15 +1094,22 @@ mod tests {
     fn owned_storage_queues_only_one_pending_setter() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_file_content(&path, SourceParse::new(parse_js("let a = 1;"), 0).into());
+        state.update_file_view(
+            &path,
+            FileView::Disk,
+            SourceParse::new(parse_js("let a = 1;"), 0).into(),
+        );
 
         let db = state.fork();
         let first_setter = {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state
-                    .update_file_content(&path, SourceParse::new(parse_js("let b = 2;"), 0).into());
+                state.update_file_view(
+                    &path,
+                    FileView::Disk,
+                    SourceParse::new(parse_js("let b = 2;"), 0).into(),
+                );
             })
         };
         wait_for_pending_setter(&state);
@@ -1037,7 +1122,7 @@ mod tests {
             thread::spawn(move || {
                 let parsed = parse_js("let c = 3;");
                 second_start.wait();
-                state.update_file_content(&path, SourceParse::new(parsed, 0).into());
+                state.update_file_view(&path, FileView::Disk, SourceParse::new(parsed, 0).into());
             })
         };
         second_start.wait();
@@ -1071,15 +1156,22 @@ mod tests {
     fn untracked_module_membership_does_not_wait_for_pending_setters() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_file_content(&path, SourceParse::new(parse_js("let a = 1;"), 0).into());
+        state.update_file_view(
+            &path,
+            FileView::Disk,
+            SourceParse::new(parse_js("let a = 1;"), 0).into(),
+        );
 
         let db = state.fork();
         let setter = {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state
-                    .update_file_content(&path, SourceParse::new(parse_js("let b = 2;"), 0).into());
+                state.update_file_view(
+                    &path,
+                    FileView::Disk,
+                    SourceParse::new(parse_js("let b = 2;"), 0).into(),
+                );
             })
         };
 
@@ -1097,7 +1189,11 @@ mod tests {
         let path = Utf8PathBuf::from("test.js");
         let _db = state.fork();
 
-        state.update_file_content(&path, SourceParse::new(parse_js("let a = 1;"), 0).into());
+        state.update_file_view(
+            &path,
+            FileView::Disk,
+            SourceParse::new(parse_js("let a = 1;"), 0).into(),
+        );
     }
 
     #[test]
@@ -1106,7 +1202,11 @@ mod tests {
         let path = Utf8PathBuf::from("test.js");
         let db = state.fork();
 
-        state.update_file_content(&path, SourceParse::new(parse_js("let a = 1;"), 0).into());
+        state.update_file_view(
+            &path,
+            FileView::Disk,
+            SourceParse::new(parse_js("let a = 1;"), 0).into(),
+        );
 
         assert_eq!(state.pending_setters(), 0);
         assert!(db.get_parsed_source(&path).is_some());
@@ -1202,7 +1302,11 @@ mod tests {
     fn owned_storage_setter_from_other_thread_waits_for_read_guard() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_file_content(&path, SourceParse::new(parse_js("let a = 1;"), 0).into());
+        state.update_file_view(
+            &path,
+            FileView::Disk,
+            SourceParse::new(parse_js("let a = 1;"), 0).into(),
+        );
 
         let db = state.fork();
         let (done_tx, done_rx) = mpsc::channel();
@@ -1211,8 +1315,11 @@ mod tests {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state
-                    .update_file_content(&path, SourceParse::new(parse_js("let b = 2;"), 0).into());
+                state.update_file_view(
+                    &path,
+                    FileView::Disk,
+                    SourceParse::new(parse_js("let b = 2;"), 0).into(),
+                );
                 done_tx.send(()).unwrap();
             })
         };
@@ -1280,12 +1387,14 @@ mod tests {
             let source = lookup(&state, SOURCE);
             let setters = state.setter_gate_attempts();
 
-            state.update_file_content(
+            state.update_file_view(
                 Utf8Path::new(SOURCE),
+                FileView::Disk,
                 SourceParse::new(parse_js(""), 0).into(),
             );
-            state.update_file_content(
+            state.update_file_view(
                 Utf8Path::new(SOURCE),
+                FileView::Disk,
                 SourceParse::new(parse_js("a"), 0).into(),
             );
             assert_eq!(
@@ -1294,13 +1403,15 @@ mod tests {
                 "sources aren't read by the resolver"
             );
 
-            state.update_file_content(
+            state.update_file_view(
                 Utf8Path::new(MANIFEST),
+                FileView::Disk,
                 SourceParse::new(parse_json("{}"), 0).into(),
             );
             assert_eq!(revision(&state, manifest), 1);
-            state.update_file_content(
+            state.update_file_view(
                 Utf8Path::new(MANIFEST),
+                FileView::Disk,
                 SourceParse::new(parse_json("[]"), 0).into(),
             );
             assert_eq!(
@@ -1362,8 +1473,9 @@ mod tests {
 
             {
                 let epoch = state.scanner_epoch();
-                epoch.view().update_file_content(
+                epoch.view().update_file_view(
                     Utf8Path::new(MANIFEST),
+                    FileView::Disk,
                     SourceParse::new(parse_json("{}"), 0).into(),
                 );
                 fs.insert(SOURCE.into(), "");
@@ -1389,8 +1501,9 @@ mod tests {
 
             fs.insert(SOURCE.into(), "");
             state.sync_resolver_paths(vec![(SOURCE.into(), ResolverPathChange::Kind.into())]);
-            state.update_file_content(
+            state.update_file_view(
                 Utf8Path::new(MANIFEST),
+                FileView::Disk,
                 SourceParse::new(parse_json("{}"), 0).into(),
             );
 

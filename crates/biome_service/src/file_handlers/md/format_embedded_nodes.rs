@@ -63,7 +63,7 @@ pub(super) fn format_embedded(
     // be formatted keeps the Markdown formatter's output.
     let snippets: FxHashMap<_, _> = embedded_nodes
         .into_iter()
-        .map(|snippet| (snippet.content_range(&workspace_db), snippet))
+        .map(|snippet| (snippet.content_range(), snippet))
         .collect();
     let mut formatted = format_node(options, &tree, snippets.keys().copied().collect())?;
     formatted.format_embedded(move |range| {

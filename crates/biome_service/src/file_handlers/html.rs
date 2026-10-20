@@ -250,7 +250,7 @@ pub(crate) fn is_astro_template_comment(
     else {
         return false;
     };
-    HtmlSuppressionService::host_comment_token(&host.tree(db), snippet.content_range(db), token)
+    HtmlSuppressionService::host_comment_token(&host.tree(db), snippet.content_range(), token)
         .is_some()
 }
 
@@ -817,7 +817,7 @@ fn format_embedded(
     // formatted keeps the HTML formatter's output.
     let snippets: FxHashMap<TextRange, super::ParsedSnippetOrigin> = embedded_nodes
         .into_iter()
-        .map(|snippet| (snippet.content_range(&workspace_db), snippet))
+        .map(|snippet| (snippet.content_range(), snippet))
         .collect();
     let mut formatted = format_node(options, &tree, snippets.keys().copied().collect())?;
     formatted.format_embedded(move |range| {
@@ -1117,7 +1117,7 @@ pub(super) fn lint_with_inspector(
             let Some(language) = snippet.file_source(&params.workspace_db) else {
                 continue;
             };
-            let offset = snippet.content_offset(&params.workspace_db);
+            let offset = snippet.content_offset();
             let snippet_params = params.for_snippet(&snippet, language);
             let analyzer = if language.to_js_file_source().is_some() {
                 LintSnippetAnalyzer::new(
@@ -1276,7 +1276,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         disabled_rules: &disabled_rules,
         range,
     };
-    let action_offset = parsed_source.diagnostic_offset(&workspace_db);
+    let action_offset = parsed_source.diagnostic_offset();
     let html_services = HtmlAnalyzerServices {
         module_db: {
             #[cfg(feature = "module_graph")]
