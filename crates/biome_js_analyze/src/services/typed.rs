@@ -6,8 +6,8 @@ use biome_analyze::{
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsFunction, AnyJsRoot, JsCallArgumentList,
-    JsClassDeclaration, JsClassExpression, JsLanguage, JsObjectExpression, JsReferenceIdentifier,
-    JsSyntaxNode,
+    JsClassDeclaration, JsClassExpression, JsLanguage, JsLogicalOperator, JsObjectExpression,
+    JsReferenceIdentifier, JsSyntaxNode,
 };
 use biome_js_type_info::InferredType;
 use biome_module_graph::{
@@ -23,7 +23,11 @@ use biome_module_graph::{
     },
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
+use biome_tsrs::{TsrsProgram, ValueKind};
+use camino::{Utf8Path, Utf8PathBuf};
+use rustc_hash::FxHashMap;
 use std::rc::Rc;
+use std::sync::{Arc, LazyLock, Mutex};
 
 #[derive(Clone)]
 pub(crate) struct TypedModule {
@@ -46,6 +50,92 @@ pub struct TypedService {
     module: Option<TypedModule>,
     model: Option<SemanticModel>,
     caller: TypeInferenceCaller,
+    tsrs: Option<TsrsFile>,
+}
+
+/// A file checked by tsrs instead of Biome's own inference.
+///
+/// Experimental: only enabled when the `BIOME_TSRS` environment variable is set. Each file gets a program of
+/// its own, rooted at that file and read from disk, so the text tsrs checks must match the text Biome parsed.
+#[derive(Clone)]
+struct TsrsFile {
+    program: Arc<TsrsProgram>,
+    path: Utf8PathBuf,
+}
+
+static TSRS_PROGRAMS: LazyLock<Mutex<FxHashMap<Utf8PathBuf, Arc<TsrsProgram>>>> =
+    LazyLock::new(Default::default);
+
+impl TsrsFile {
+    fn new(path: &Utf8Path) -> Option<Self> {
+        std::env::var_os("BIOME_TSRS")?;
+        let path = path.canonicalize_utf8().ok()?;
+        let program = TSRS_PROGRAMS
+            .lock()
+            .unwrap()
+            .entry(path.clone())
+            .or_insert_with(|| {
+                let cwd = path.parent().unwrap_or(&path);
+                Arc::new(TsrsProgram::from_root_files(cwd, &[&path]))
+            })
+            .clone();
+        Some(Self { program, path })
+    }
+
+    /// Whether `matches` holds for any operand `expression` can evaluate to, as typescript-eslint's
+    /// `no-floating-promises` checks: the operands of `&&`, `||` and `??` and the branches of `?:`.
+    ///
+    /// Unlike typescript-eslint, an operand is skipped when the checker proves it unreachable from the type of
+    /// the left operand or the condition. The type of the whole expression isn't enough: in
+    /// `unknown || Promise.reject()`, `unknown` absorbs the Promise.
+    fn any_operand(
+        &self,
+        expression: &AnyJsExpression,
+        matches: impl Fn(&TsrsProgram, &Utf8Path, TextRange) -> Option<bool> + Copy,
+    ) -> Option<bool> {
+        let may_be = |expression: &AnyJsExpression, kind| {
+            self.program
+                .may_be(&self.path, expression.range(), kind)
+                .unwrap_or(true)
+        };
+        match expression {
+            AnyJsExpression::JsParenthesizedExpression(expression) => {
+                self.any_operand(&expression.expression().ok()?, matches)
+            }
+            AnyJsExpression::JsLogicalExpression(expression) => {
+                let left = expression.left().ok()?;
+                if self.any_operand(&left, matches)? {
+                    return Some(true);
+                }
+                let right_reachable = match expression.operator().ok()? {
+                    JsLogicalOperator::LogicalOr => may_be(&left, ValueKind::Falsy),
+                    JsLogicalOperator::LogicalAnd => may_be(&left, ValueKind::Truthy),
+                    JsLogicalOperator::NullishCoalescing => may_be(&left, ValueKind::Nullish),
+                };
+                if !right_reachable {
+                    return Some(false);
+                }
+                self.any_operand(&expression.right().ok()?, matches)
+            }
+            AnyJsExpression::JsConditionalExpression(expression) => {
+                let test = expression.test().ok()?;
+                Some(
+                    (may_be(&test, ValueKind::Truthy)
+                        && self.any_operand(&expression.consequent().ok()?, matches)?)
+                        || (may_be(&test, ValueKind::Falsy)
+                            && self.any_operand(&expression.alternate().ok()?, matches)?),
+                )
+            }
+            _ => matches(&self.program, &self.path, expression.range()),
+        }
+    }
+
+    fn classify(&self, matches: Option<bool>) -> TypeInferenceClassification {
+        match matches {
+            Some(true) => TypeInferenceClassification::Match,
+            Some(false) | None => TypeInferenceClassification::NoMatch,
+        }
+    }
 }
 
 impl TypedService {
@@ -89,6 +179,11 @@ impl TypedService {
         &self,
         expression: &AnyJsExpression,
     ) -> TypeInferenceClassification {
+        if let Some(tsrs) = &self.tsrs {
+            return tsrs.classify(tsrs.any_operand(expression, |program, path, range| {
+                program.is_promise_like(path, range)
+            }));
+        }
         let Some(typed_module) = self.module.as_ref() else {
             return TypeInferenceClassification::Indeterminate;
         };
@@ -120,6 +215,12 @@ impl TypedService {
         &self,
         expression: &AnyJsExpression,
     ) -> TypeInferenceClassification {
+        if let Some(tsrs) = &self.tsrs {
+            return tsrs.classify(
+                tsrs.program
+                    .is_promise_array(&tsrs.path, expression.range()),
+            );
+        }
         let Some(typed_module) = self.module.as_ref() else {
             return TypeInferenceClassification::Indeterminate;
         };
@@ -345,10 +446,14 @@ impl FromServices for TypedService {
             .flatten();
         let model = services.get_service::<SemanticModel>().cloned();
         let caller = TypeInferenceCaller::new(rule_key.group(), rule_key.rule_name());
+        let tsrs = services
+            .get_service::<Utf8PathBuf>()
+            .and_then(|path| TsrsFile::new(path));
         Ok(Self {
             module,
             model,
             caller,
+            tsrs,
         })
     }
 }
