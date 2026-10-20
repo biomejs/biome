@@ -1,0 +1,22 @@
+/* should not generate diagnostics */
+/* `&:hover` resolves to a different selector in each block, so the two rules
+   never target the same element and neither can override the other. */
+.article-content a {
+  color: var(--color-nothing-red);
+
+  &:hover {
+    border-bottom-color: var(--color-nothing-red);
+  }
+}
+
+.blog-section__item {
+  color: var(--color-text-primary);
+
+  &:hover {
+    padding-left: 0.75rem;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+}

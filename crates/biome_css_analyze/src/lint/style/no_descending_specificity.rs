@@ -2,9 +2,9 @@ use rustc_hash::{FxHashMap, FxHashSet};
 
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_css_semantic::model::{Rule as CssSemanticRule, RuleId, Specificity};
+use biome_css_semantic::model::{ResolvedSelector, Rule as CssSemanticRule, RuleId, Selector, Specificity};
 use biome_css_syntax::{
-    AnyCssRoot, AnyCssSelector, CssContainerAtRule, CssLanguage, CssLayerAtRule, CssMediaAtRule,
+    AnyCssRoot, CssContainerAtRule, CssLanguage, CssLayerAtRule, CssMediaAtRule,
     CssScopeAtRule, CssStartingStyleAtRule, CssSupportsAtRule, ScssAtRootAtRule, ScssEachAtRule,
     ScssElseClause, ScssForAtRule, ScssFunctionAtRule, ScssIfAtRule, ScssIncludeAtRule,
     ScssMixinAtRule, ScssWhileAtRule,
@@ -256,29 +256,22 @@ type SelectorContexts = FxHashMap<SelectorContext, FxHashMap<String, (TextRange,
 ///   ^^^^^^^
 /// }
 /// ```
-fn find_tail_selector_str(selector: &AnyCssSelector) -> Option<String> {
-    match selector {
-        AnyCssSelector::CssCompoundSelector(s) => {
-            let mut result = String::new();
-            if let Some(simple) = s.simple_selector() {
-                simple.syntax().text_trimmed().for_each_chunk(|chunk| {
-                    result.push_str(chunk);
-                });
-            }
-
-            s.sub_selectors()
-                .syntax()
-                .text_trimmed()
-                .for_each_chunk(|chunk| result.push_str(chunk));
-
-            Some(result)
+///
+/// The tail is taken from the resolved selector, so a nested selector such as
+/// `&:hover` is identified by the selector it resolves to. Reading the literal
+/// `&` would give every nested block the same tail, and selectors that target
+/// different elements would be compared with each other.
+fn find_tail_selector_str(selector: &Selector) -> Option<String> {
+    let mut result = String::new();
+    for (kind, text) in selector.resolved().tokens() {
+        if ResolvedSelector::is_combinator(*kind) {
+            result.clear();
+        } else {
+            result.push_str(text);
         }
-        AnyCssSelector::CssComplexSelector(s) => {
-            // negligible recursion
-            s.right().as_ref().ok().and_then(find_tail_selector_str)
-        }
-        _ => None,
     }
+
+    (!result.is_empty()).then_some(result)
 }
 
 /// Checks selectors against the highest preceding specificity with the same tail selector in the same at-rule context.
@@ -297,10 +290,7 @@ fn find_descending_selector(
         if resolved_selector.contains('%') || resolved_selector.contains("#{") {
             continue;
         }
-        let Some(casted_selector) = AnyCssSelector::cast(selector.node().syntax().clone()) else {
-            continue;
-        };
-        let Some(tail_selector_str) = find_tail_selector_str(&casted_selector) else {
+        let Some(tail_selector_str) = find_tail_selector_str(selector) else {
             continue;
         };
 
