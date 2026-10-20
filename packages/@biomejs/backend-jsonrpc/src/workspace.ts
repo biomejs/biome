@@ -3083,6 +3083,11 @@ export interface Nursery {
 	 */
 	noJsonUnsafeValues?: NoJsonUnsafeValuesConfiguration;
 	/**
+	 * Disallow calling preventDefault(), stopPropagation(), or stopImmediatePropagation() after the browser has finished handling the event.
+	 * See https://biomejs.dev/linter/rules/no-late-event-control
+	 */
+	noLateEventControl?: NoLateEventControlConfiguration;
+	/**
 	 * Disallow unexplained numbers as the depth argument of Array.prototype.flat().
 	 * See https://biomejs.dev/linter/rules/no-magic-array-flat-depth
 	 */
@@ -6459,6 +6464,9 @@ export type NoJsRestrictedPropertiesConfiguration =
 export type NoJsonUnsafeValuesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoJsonUnsafeValuesOptions;
+export type NoLateEventControlConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoLateEventControlOptions;
 export type NoMagicArrayFlatDepthConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMagicArrayFlatDepthOptions;
@@ -9360,6 +9368,10 @@ export interface RuleWithNoJsRestrictedPropertiesOptions {
 export interface RuleWithNoJsonUnsafeValuesOptions {
 	level: RulePlainConfiguration;
 	options?: NoJsonUnsafeValuesOptions;
+}
+export interface RuleWithNoLateEventControlOptions {
+	level: RulePlainConfiguration;
+	options?: NoLateEventControlOptions;
 }
 export interface RuleWithNoMagicArrayFlatDepthOptions {
 	level: RulePlainConfiguration;
@@ -12610,6 +12622,7 @@ export interface NoJsRestrictedPropertiesOptions {
 	entries?: RestrictedPropertyEntry[];
 }
 export type NoJsonUnsafeValuesOptions = {};
+export type NoLateEventControlOptions = {};
 export type NoMagicArrayFlatDepthOptions = {};
 export type NoMeaninglessVoidOperatorOptions = {};
 export type NoMisleadingReturnTypeOptions = {};
@@ -14752,6 +14765,7 @@ export type Category =
 	| "lint/nursery/noIteratorProperty"
 	| "lint/nursery/noJsRestrictedProperties"
 	| "lint/nursery/noJsonUnsafeValues"
+	| "lint/nursery/noLateEventControl"
 	| "lint/nursery/noMagicArrayFlatDepth"
 	| "lint/nursery/noMeaninglessVoidOperator"
 	| "lint/nursery/noMisleadingReturnType"
