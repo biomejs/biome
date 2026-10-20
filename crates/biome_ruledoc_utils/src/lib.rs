@@ -150,7 +150,7 @@ impl AnalyzerServicesBuilder {
         let html_added_paths = get_html_added_paths(&fs, &html_paths);
         for (path, parse, file_source) in html_added_paths {
             let source_index = db.insert_source(file_source);
-            let parsed_source = ParsedSource::new(
+            let parsed_source = ParsedSource::from_parse(
                 &db,
                 path.as_path().to_path_buf(),
                 parse.into(),
@@ -195,7 +195,7 @@ impl AnalyzerServicesBuilder {
         let source_index = self
             .module_db
             .insert_source(DocumentFileSource::Js(file_source));
-        let parsed_source = ParsedSource::new(
+        let parsed_source = ParsedSource::from_parse(
             &self.module_db,
             path.clone(),
             any_parse,
@@ -234,7 +234,7 @@ impl AnalyzerServicesBuilder {
         let source_index = self
             .module_db
             .insert_source(DocumentFileSource::Html(file_source));
-        let parsed_source = ParsedSource::new(
+        let parsed_source = ParsedSource::from_parse(
             &self.module_db,
             path.clone(),
             parse.into(),

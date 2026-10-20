@@ -209,7 +209,7 @@ pub(crate) fn vue_directive_name_matches_reference_name(
 mod tests {
     use super::*;
     use biome_db::testing::{Events, assert_function_query_was_not_run};
-    use biome_db::{Db, ParsedSnippet, ParsedSource};
+    use biome_db::{Db, ParsedSource, SnippetParse};
     use biome_html_parser::{HtmlParserOptions, parse_html};
     use biome_js_parser::JsParserOptions;
     use biome_languages::javascript::JsEmbeddingKind;
@@ -307,15 +307,14 @@ mod tests {
             JsParserOptions::default(),
         )
         .into();
-        let snippet = ParsedSnippet::new(
-            db,
+        let snippet = SnippetParse::new(
             snippet_parse,
             TextRange::new(TextSize::from(12), TextSize::from(23)),
             TextRange::new(TextSize::from(12), TextSize::from(21)),
             TextSize::from(12),
             1,
         );
-        let parsed = ParsedSource::new(db, path.clone(), parsed, 0, vec![snippet]);
+        let parsed = ParsedSource::from_parse(db, path.clone(), parsed, 0, vec![snippet]);
         db.insert_file(path.clone(), parsed);
         path
     }
@@ -341,15 +340,14 @@ mod tests {
             JsParserOptions::default(),
         )
         .into();
-        let snippet = ParsedSnippet::new(
-            db,
+        let snippet = SnippetParse::new(
             snippet_parse,
             TextRange::default(),
             TextRange::default(),
             TextSize::default(),
             1,
         );
-        let parsed = ParsedSource::new(db, path.clone(), parsed, 0, vec![snippet]);
+        let parsed = ParsedSource::from_parse(db, path.clone(), parsed, 0, vec![snippet]);
         db.insert_file(path.clone(), parsed);
         path
     }
@@ -357,7 +355,7 @@ mod tests {
     fn parse_vue_template_source(db: &TestDb, html_source: &str) -> Utf8PathBuf {
         let path = Utf8PathBuf::from("src/App.vue");
         let parsed = parse_html(html_source, HtmlParserOptions::default().with_vue()).into();
-        let parsed = ParsedSource::new(db, path.clone(), parsed, 0, vec![]);
+        let parsed = ParsedSource::from_parse(db, path.clone(), parsed, 0, vec![]);
         db.insert_file(path.clone(), parsed);
         path
     }

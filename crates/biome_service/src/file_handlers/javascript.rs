@@ -1226,7 +1226,7 @@ fn js_analyzer_services(
     let services = services.with_language_db(workspace_db.rc_language_db());
     match parsed_source {
         Some(source) => services
-            .with_parsed_source(source.clone())
+            .with_parsed_source(*source)
             .with_snippet_offset(source.diagnostic_offset(workspace_db)),
         None => services,
     }

@@ -63,7 +63,7 @@ fn embedded_db(
     source_type: &JsFileSource,
 ) -> (Rc<dyn LanguageDb>, ParsedSource) {
     let mut db = TestDb::default();
-    let parsed = ParsedSource::new(
+    let parsed = ParsedSource::from_parse(
         &db,
         path.into(),
         parsed.syntax().as_send().unwrap().into(),

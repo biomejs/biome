@@ -5,8 +5,8 @@
 
 use crate::db::semantic_model_from_source;
 use crate::{SemanticModel, semantic_model};
-use biome_db::ParsedSource;
 use biome_db::testing::{Events, assert_function_query_was_not_run, assert_function_query_was_run};
+use biome_db::{ParsedSource, SourceParse};
 use biome_js_parser::parse;
 use biome_js_syntax::AnyJsRoot;
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
@@ -149,7 +149,7 @@ impl LanguageDb for TestDb {
 fn semantic_model_is_memoized() {
     let mut db = TestDb::new();
     let parsed = parse("let x = 1;", JsFileSource::tsx(), Default::default()).into();
-    let file = ParsedSource::new(&db, Utf8PathBuf::from("test.tsx"), parsed, 0, vec![]);
+    let file = ParsedSource::from_parse(&db, Utf8PathBuf::from("test.tsx"), parsed, 0, vec![]);
 
     // First query — builds the model
     let _model = semantic_model_from_source(&db, file);
@@ -172,12 +172,15 @@ fn binding_count(db: &dyn LanguageDb, file: ParsedSource) -> usize {
 fn rename_does_recompute_downstream() {
     let mut db = TestDb::new();
     let parsed = parse("let x = 1;", JsFileSource::tsx(), Default::default()).into();
-    let file = ParsedSource::new(&db, Utf8PathBuf::from("test.tsx"), parsed, 0, vec![]);
+    let file = ParsedSource::from_parse(&db, Utf8PathBuf::from("test.tsx"), parsed, 0, vec![]);
     let _ = binding_count(&db, file);
 
     // Rename variable — semantic structure changes
     let new_parsed = parse("let y = 1;", JsFileSource::tsx(), Default::default()).into();
-    salsa::Setter::to(file.set_parsed(&mut db), new_parsed);
+    salsa::Setter::to(
+        file.set_content(&mut db),
+        SourceParse::new(new_parsed, 0).into(),
+    );
 
     db.clear_salsa_events();
     let _ = binding_count(&db, file);
@@ -192,7 +195,7 @@ fn rename_does_recompute_downstream() {
 fn new_export_does_recompute_downstream() {
     let mut db = TestDb::new();
     let parsed = parse("function f() {}", JsFileSource::tsx(), Default::default()).into();
-    let file = ParsedSource::new(&db, Utf8PathBuf::from("test.tsx"), parsed, 0, vec![]);
+    let file = ParsedSource::from_parse(&db, Utf8PathBuf::from("test.tsx"), parsed, 0, vec![]);
     let _ = binding_count(&db, file);
 
     let new_parsed = parse(
@@ -201,7 +204,10 @@ fn new_export_does_recompute_downstream() {
         Default::default(),
     )
     .into();
-    salsa::Setter::to(file.set_parsed(&mut db), new_parsed);
+    salsa::Setter::to(
+        file.set_content(&mut db),
+        SourceParse::new(new_parsed, 0).into(),
+    );
 
     db.clear_salsa_events();
     let _ = binding_count(&db, file);
@@ -220,7 +226,7 @@ fn type_change_does_not_recompute_binding_count() {
         Default::default(),
     )
     .into();
-    let file = ParsedSource::new(&db, Utf8PathBuf::from("test.tsx"), parsed, 0, vec![]);
+    let file = ParsedSource::from_parse(&db, Utf8PathBuf::from("test.tsx"), parsed, 0, vec![]);
 
     let count = binding_count(&db, file);
     assert_eq!(count, 1);
@@ -232,7 +238,10 @@ fn type_change_does_not_recompute_binding_count() {
         Default::default(),
     )
     .into();
-    salsa::Setter::to(file.set_parsed(&mut db), new_parsed);
+    salsa::Setter::to(
+        file.set_content(&mut db),
+        SourceParse::new(new_parsed, 0).into(),
+    );
 
     db.clear_salsa_events();
     let count = binding_count(&db, file);

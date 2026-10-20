@@ -1968,8 +1968,9 @@ mod tests {
     use crate::testing::{
         TestDb, parse_html_source_with_js_snippet, parse_js_source, parse_vue_source, token_text,
     };
-    use biome_db::ParsedSnippet;
+    use biome_db::SnippetParse;
     use biome_js_parser::JsParserOptions;
+    use biome_languages::has_embedded_content;
     use biome_rowan::TextSize;
     use camino::Utf8Path;
 
@@ -1979,7 +1980,7 @@ mod tests {
         let source = "import Component from \"./Component.vue\"; Component;";
         let path = parse_js_source(&db, source, Vec::new());
 
-        assert!(!db.has_embedded_content(&path));
+        assert!(!has_embedded_content(&db, &path));
 
         // The lookups that a `false` answer lets callers skip find nothing.
         assert!(
@@ -2001,7 +2002,7 @@ mod tests {
     fn has_embedded_content_is_false_for_an_unknown_path() {
         let db = TestDb::new();
 
-        assert!(!db.has_embedded_content(Utf8Path::new("src/missing.js")));
+        assert!(!has_embedded_content(&db, Utf8Path::new("src/missing.js")));
     }
 
     #[test]
@@ -2009,7 +2010,7 @@ mod tests {
         let db = TestDb::new();
         let path = parse_vue_source(&db, "<template><Component /></template>");
 
-        assert!(db.has_embedded_content(&path));
+        assert!(has_embedded_content(&db, &path));
     }
 
     #[test]
@@ -2022,7 +2023,7 @@ mod tests {
             js,
         );
 
-        assert!(db.has_embedded_content(&path));
+        assert!(has_embedded_content(&db, &path));
     }
 
     #[test]
@@ -2037,8 +2038,7 @@ mod tests {
         .into();
         let content_start = TextSize::from(source.find("${used}").unwrap() as u32 + 2);
         let content_range = TextRange::at(content_start, TextSize::of("used"));
-        let snippet = ParsedSnippet::new(
-            &db,
+        let snippet = SnippetParse::new(
             snippet_parse,
             content_range,
             content_range,
@@ -2047,7 +2047,7 @@ mod tests {
         );
         let path = parse_js_source(&db, source, vec![snippet]);
 
-        assert!(db.has_embedded_content(&path));
+        assert!(has_embedded_content(&db, &path));
         assert!(is_reference_used(
             &db,
             InternedReference::new(&db, path, token_text("used"))

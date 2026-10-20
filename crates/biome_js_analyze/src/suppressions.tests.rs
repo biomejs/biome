@@ -37,7 +37,7 @@ impl salsa::Database for TestDb {}
 
 fn embedded_db(parsed: &Parse<AnyJsRoot>) -> Rc<dyn LanguageDb> {
     let mut db = TestDb::default();
-    let parsed = ParsedSource::new(
+    let parsed = ParsedSource::from_parse(
         &db,
         Utf8PathBuf::new(),
         parsed.syntax().as_send().unwrap().into(),

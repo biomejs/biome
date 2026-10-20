@@ -57,7 +57,9 @@ use biome_configuration::vcs::VcsClientKind;
 use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
 #[cfg(all(feature = "module_graph", feature = "lang_css"))]
 use biome_css_syntax::AnyCssRoot;
-use biome_db::{AnyParsedSource, Db, ParsedSnippet, ParsedSource};
+use biome_db::{
+    AnyParsedSource, Db, ParseContext, ParsedSnippetRef, ParsedSource, SourceContent, SourceText,
+};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
 use biome_diagnostics::print_diagnostic_to_string;
@@ -105,9 +107,9 @@ use std::ops::Deref;
 use std::panic::RefUnwindSafe;
 #[cfg(feature = "module_graph")]
 use std::rc::Rc;
+use std::sync::Arc;
 #[cfg(test)]
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::sync::watch;
 use tracing::{instrument, warn};
@@ -127,26 +129,6 @@ pub struct WorkspaceServer {
     documents: HashMap<Utf8PathBuf, Document, FxBuildHasher>,
 
     search_provider: Arc<dyn SearchQuery>,
-
-    /// Node cache for faster parsing of modified documents.
-    ///
-    /// ## Concurrency
-    ///
-    /// Because `NodeCache` cannot be cloned, and `papaya` doesn't give us owned
-    /// instances of stored values, we use an `FxHashMap` here, wrapped in a
-    /// `Mutex`. The node cache is only used by writers, meaning this wouldn't
-    /// be a great use case for `papaya` anyway. But it does mean we need to be
-    /// careful with deadlocks and release guards to the mutex as soon as we
-    /// can.
-    ///
-    /// Additionally, we only use the node cache for documents opened through
-    /// the LSP proxy, since the editor use case is the one where we benefit
-    /// most from low-latency parsing, and having a document open in an editor
-    /// gives us a clear signal that edits -- and thus reparsing -- are to be
-    /// expected. For other documents, the performance degradation due to
-    /// lock contention would not be worth the potential of faster reparsing
-    /// that may never actually happen.
-    node_cache: Mutex<FxHashMap<Utf8PathBuf, NodeCache>>,
 
     /// Scanner instance.
     pub(crate) scanner: Scanner,
@@ -248,7 +230,7 @@ impl ProcessFileState {
     fn iter_snippets(&self) -> SnippetsIterator<'_> {
         match &self.parsed {
             ParsedOrigin::Workspace(AnyParsedSource::ParsedSource(source)) => {
-                SnippetsIterator::Workspace(source.snippets(&self.db).iter())
+                SnippetsIterator::from_source(*source, &self.db)
             }
             ParsedOrigin::Workspace(AnyParsedSource::ParsedSnippet(_)) => {
                 unreachable!("a process-file state must contain a document")
@@ -476,7 +458,6 @@ impl WorkspaceServer {
             plugin_caches: Default::default(),
             documents: Default::default(),
             search_provider,
-            node_cache: Default::default(),
             scanner: Scanner::new(watcher_tx),
             fs,
             notification_tx,
@@ -578,7 +559,7 @@ impl LocalWorkspace {
     }
 
     #[cfg(test)]
-    fn get_snippets(&self, path: &Utf8Path) -> Vec<ParsedSnippet> {
+    fn get_snippets(&self, path: &Utf8Path) -> Vec<ParsedSnippetRef> {
         self.as_workspace().get_snippets(path)
     }
 }
@@ -814,7 +795,7 @@ impl WorkspaceServerWithDb<'_> {
             document_file_source,
             persist_node_cache,
             inline_config,
-            editor_features,
+            editor_features: _,
         } = params;
         let path: Utf8PathBuf = biome_path.clone().into();
 
@@ -837,9 +818,11 @@ impl WorkspaceServerWithDb<'_> {
             self.project_get_settings_query(&db, project_key, &path, inline_config)
         }
         .ok_or_else(WorkspaceError::no_project)?;
-        let settings =
-            self.settings_handle_with_query(&settings, editor_features.unwrap_or_default(), query);
 
+        #[cfg_attr(
+            not(any(feature = "lang_js", feature = "lang_css", feature = "lang_md")),
+            expect(unused_mut)
+        )]
         let mut source = if let Some(document_file_source) = document_file_source {
             let path_source = DocumentFileSource::from_path(
                 &path,
@@ -935,75 +918,44 @@ impl WorkspaceServerWithDb<'_> {
             FileContent::FromClient { content, version } => (content, Some(version)),
             FileContent::FromServer => (self.fs.read_file_from_path(&path)?, None),
         };
+        let content = Arc::<str>::from(content);
 
-        let mut file_source_index = self.db_add_source(source);
+        let file_source_index = self.db_add_source(source);
 
         let size = content.len();
         let limit = settings.as_ref().get_max_file_size(&path);
 
-        let parsed = if size > limit {
+        let text = if size > limit {
             Err(FileTooLarge { size, limit })
         } else if document_file_source.is_none() && !DocumentFileSource::can_parse(path.as_path()) {
             Ok(None)
         } else {
-            let mut node_cache = NodeCache::default();
-            let parse_result = self.parse(&path, &content, &settings, source, &mut node_cache)?;
-
-            let ParseResult {
-                any_parse,
-                language,
-            } = parse_result;
-
-            if let Some(language) = language {
-                file_source_index = self.db_add_source(language);
-                source = language;
-            }
-
+            // The text is parsed the first time a query reads it, so a file
+            // source that can't be parsed must be rejected here.
+            self.features
+                .get_deprecated_capabilities(source)
+                .parser
+                .parse
+                .ok_or_else(self.build_capability_error(&path))?;
             if persist_node_cache {
-                self.node_cache
-                    .lock()
-                    .unwrap()
-                    .insert(path.clone(), node_cache);
+                self.db_state.retain_node_cache(&path);
             }
-
-            let html_ish_supported = settings.as_ref().experimental_full_html_support_enabled();
-
-            // Second-pass parsing for HTML files with embedded JavaScript and CSS content.
-            let mut node_cache = NodeCache::default();
-            let embedded_snippets =
-                if DocumentFileSource::can_contain_embeds(path.as_path(), html_ish_supported) {
-                    self.parse_embedded_language_snippets(
-                        &biome_path,
-                        &source,
-                        &any_parse,
-                        &mut node_cache,
-                        &settings,
-                    )?
-                } else {
-                    Default::default()
-                }
-                .into_iter()
-                .map(|(parse, content, source)| (parse, content, self.db_add_source(source)))
-                .collect();
-
-            Ok(Some((any_parse, file_source_index, embedded_snippets)))
+            Ok(Some(SourceText {
+                text: content.clone(),
+                source_index: file_source_index,
+                context: ParseContext::new(query),
+            }))
         };
 
         #[cfg(test)]
         self.scanner_test_state.enter_file_commit(reason);
 
         let mut parsed_source = None;
-        let syntax = match parsed {
+        let syntax = match text {
             Err(error) => Some(Err(error)),
             Ok(None) => None,
-            Ok(Some((any_parse, file_source_index, embedded_snippets))) => {
-                let final_source = self.db_update_parsed_file(
-                    &path,
-                    any_parse,
-                    file_source_index,
-                    embedded_snippets,
-                );
-                parsed_source = Some(final_source);
+            Ok(Some(text)) => {
+                parsed_source = Some(self.db_update_file_text(&path, text));
                 Some(Ok(()))
             }
         };
@@ -1057,14 +1009,12 @@ impl WorkspaceServerWithDb<'_> {
                     Document {
                         content: content.clone(),
                         version,
-                        file_source_index,
                         syntax: syntax.clone(),
                     }
                 },
                 || Document {
                     content: content.clone(),
                     version,
-                    file_source_index,
                     syntax: syntax.clone(),
                 },
             );
@@ -1204,7 +1154,12 @@ impl WorkspaceServerWithDb<'_> {
         }
 
         // Check if cursor falls within an embedded snippet
-        for snippet in workspace_db.parsed_snippets_for_path(path) {
+        let snippets: Vec<_> = parse
+            .snippets(&*workspace_db)
+            .iter()
+            .map(|snippet| snippet.to_ref(&*workspace_db))
+            .collect();
+        for snippet in snippets {
             let snippet_range = snippet.content_range(&*workspace_db);
             if cursor_offset < snippet_range.start() || cursor_offset >= snippet_range.end() {
                 continue;
@@ -1269,31 +1224,6 @@ impl WorkspaceServerWithDb<'_> {
         });
 
         Ok(result.nodes)
-    }
-
-    fn parse(
-        &self,
-        path: &Utf8Path,
-        content: &str,
-        settings: &SettingsWithEditor,
-        file_source: DocumentFileSource,
-        node_cache: &mut NodeCache,
-    ) -> Result<ParseResult, WorkspaceError> {
-        let capabilities = self.features.get_deprecated_capabilities(file_source);
-
-        let parse = capabilities
-            .parser
-            .parse
-            .ok_or_else(self.build_capability_error(path))?;
-
-        let parsed = parse(
-            &BiomePath::new(path),
-            file_source,
-            content,
-            settings,
-            node_cache,
-        );
-        Ok(parsed)
     }
 
     fn process_file_state_from_server(
@@ -2209,7 +2139,7 @@ impl WorkspaceServerWithDb<'_> {
 
                 'resolve: {
                     #[cfg(feature = "lang_js")]
-                    if let Some(js_root) = root.clone().into_language_root::<AnyJsRoot>(&*db) {
+                    if let Some(js_root) = root.into_language_root::<AnyJsRoot>(&*db) {
                         let semantic_model = Arc::new(js_semantic_model(&*db, &root).clone());
                         let (module_info, dependencies, diagnostics) =
                             resolve_js_module(&*db, js_root, path, semantic_model, infer_types);
@@ -2221,7 +2151,7 @@ impl WorkspaceServerWithDb<'_> {
                     }
 
                     #[cfg(feature = "lang_css")]
-                    if let Some(css_root) = root.clone().into_language_root::<AnyCssRoot>(&*db) {
+                    if let Some(css_root) = root.into_language_root::<AnyCssRoot>(&*db) {
                         let (module_info, dependencies, diagnostics) =
                             resolve_css_module(&*db, css_root, path);
                         break 'resolve ResolvedModuleGraphUpdate::Upsert {
@@ -2232,7 +2162,7 @@ impl WorkspaceServerWithDb<'_> {
                     }
 
                     #[cfg(feature = "lang_html")]
-                    if root.clone().into_language_root::<HtmlRoot>(&*db).is_some() {
+                    if root.into_language_root::<HtmlRoot>(&*db).is_some() {
                         let (module_info, dependencies, diagnostics) =
                             resolve_html_module(&*db, path)
                                 .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
@@ -2480,16 +2410,33 @@ impl WorkspaceServerWithDb<'_> {
         self.db_state.remove_file(path);
     }
 
-    /// Adds a [AnyParsedSource] to the database
-    fn db_update_parsed_file(
+    /// Publishes `text` as the content of `path` in the database.
+    fn db_update_file_text(&self, path: &Utf8Path, text: SourceText) -> ParsedSource {
+        self.db_state.update_file_content(path, text.into())
+    }
+
+    /// Returns the index of the file source that a new text of `path` is
+    /// parsed as, and that file source: the one its current text was
+    /// published with, or the one of its path.
+    fn db_get_text_source(
         &self,
         path: &Utf8Path,
-        parsed: AnyParse,
-        language_index: usize,
-        snippets: Vec<(AnyParse, EmbedContent, usize)>,
-    ) -> ParsedSource {
-        self.db_state
-            .update_parsed_file(path, parsed, language_index, snippets)
+        experimental_full_html_support: bool,
+    ) -> (usize, DocumentFileSource) {
+        let current = {
+            let db = self.get_db();
+            db.get_parsed_source(path).and_then(|parsed_source| {
+                let index = match parsed_source.content(&*db) {
+                    SourceContent::Text(text) => text.source_index,
+                    SourceContent::Parsed(parse) => parse.document_source_index,
+                };
+                db.source_from_index(index).map(|source| (index, source))
+            })
+        };
+        current.unwrap_or_else(|| {
+            let source = DocumentFileSource::from_path(path, experimental_full_html_support);
+            (self.db_add_source(source), source)
+        })
     }
 
     /// Retrieves all diagnostics that belong to a document. It contains diagnostics that belong to embedded snippets too
@@ -2524,15 +2471,25 @@ impl WorkspaceServerWithDb<'_> {
         }
     }
 
+    /// Returns the parsed source of `path` and references to its snippets.
+    ///
+    /// The references are created from `db`, so they resolve only while `db`
+    /// is alive.
     fn get_parsed_snippets_and_parse_source(
         &self,
+        db: &WorkspaceDb,
         path: &Utf8Path,
-    ) -> Result<(ParsedSource, Vec<ParsedSnippet>), WorkspaceError> {
+    ) -> Result<(ParsedSource, Vec<ParsedSnippetRef>), WorkspaceError> {
         self.assert_parse(path)?;
-        let db = self.db_state.fork();
-        db.get_parsed_source(path)
-            .map(|parsed_source| (parsed_source, parsed_source.snippets(&*db).clone()))
-            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))
+        let parsed_source = db
+            .get_parsed_source(path)
+            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
+        let snippets = parsed_source
+            .snippets(db)
+            .iter()
+            .map(|snippet| snippet.to_ref(db))
+            .collect();
+        Ok((parsed_source, snippets))
     }
 
     /// Retrieves the supported language of a file.
@@ -2553,9 +2510,17 @@ impl WorkspaceServerWithDb<'_> {
     }
 
     #[cfg(test)]
-    fn get_snippets(&self, path: &Utf8Path) -> Vec<ParsedSnippet> {
+    fn get_snippets(&self, path: &Utf8Path) -> Vec<ParsedSnippetRef> {
         let db = self.db_state.fork();
-        db.parsed_snippets_for_path(path)
+        db.parsed_source_for_path(path)
+            .map(|source| {
+                source
+                    .snippets(&*db)
+                    .iter()
+                    .map(|snippet| snippet.to_ref(&*db))
+                    .collect()
+            })
+            .unwrap_or_default()
     }
 
     // #endregion
@@ -3078,11 +3043,10 @@ impl Workspace for WorkspaceServerWithDb<'_> {
 
         // Unload all the documents within the project folder.
         let documents = self.documents.pin();
-        let mut node_cache = self.node_cache.lock().unwrap();
         for path in documents.keys() {
             if self.path_belongs_only_to_project_with_path(path, &project_path) {
                 documents.remove(path);
-                node_cache.remove(path.as_path());
+                self.db_state.remove_node_cache(path);
             }
         }
 
@@ -3322,7 +3286,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         self.documents
             .pin()
             .get(params.path.as_path())
-            .map(|document| document.content.clone())
+            .map(|document| document.content.to_string())
             .ok_or_else(|| WorkspaceError::not_found(params.path.to_string()))
     }
 
@@ -3353,20 +3317,14 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             content,
             version,
             inline_config,
-            editor_features,
+            editor_features: _,
         }: ChangeFileParams,
     ) -> Result<ChangeFileResult, WorkspaceError> {
         let is_indexed = self.should_update_service_data(&path);
         let documents = self.documents.pin();
-        let (index, existing_version, same_content) = documents
+        let (existing_version, same_content) = documents
             .get(path.as_path())
-            .map(|document| {
-                (
-                    document.file_source_index,
-                    document.version,
-                    document.content == content,
-                )
-            })
+            .map(|document| (document.version, *document.content == *content))
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
 
         if existing_version.is_some_and(|existing_version| existing_version > version)
@@ -3393,75 +3351,32 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             self.project_get_settings_query(&db, project_key, &path, inline_config)
         }
         .ok_or_else(WorkspaceError::no_project)?;
-        let settings =
-            self.settings_handle_with_query(&settings, editor_features.unwrap_or_default(), query);
 
-        // We remove the node cache for the document, if it exists.
-        // This is done so that we need to hold the lock as short as possible
-        // (it's released directly after the statement). The potential downside
-        // is that if two calls to `change_file()` happen concurrently, then the
-        // second would have a cache miss, and not update the cache either.
-        // This seems an unlikely scenario however, and the impact is small
-        // anyway, so this seems a worthwhile tradeoff.
-        let node_cache = self.node_cache.lock().unwrap().remove(path.as_path());
+        let (source_index, document_source) =
+            self.db_get_text_source(&path, settings.experimental_full_html_support_enabled());
+        // The text is parsed the first time a query reads it, so a file source
+        // that can't be parsed must be rejected here.
+        self.features
+            .get_deprecated_capabilities(document_source)
+            .parser
+            .parse
+            .ok_or_else(self.build_capability_error(&path))?;
 
-        let persist_node_cache = node_cache.is_some();
-        let mut node_cache = node_cache.unwrap_or_default();
-
-        let document_source = self.get_file_source(
-            &path,
-            settings.as_ref().experimental_full_html_support_enabled(),
-        );
-
-        let ParseResult {
-            any_parse,
-            language,
-        } = self.parse(&path, &content, &settings, document_source, &mut node_cache)?;
-
-        let (index, document_source) = if let Some(language) = language {
-            (self.db_add_source(language), language)
-        } else {
-            (index, document_source)
-        };
-
-        // Second-pass parsing for HTML files with embedded JavaScript and CSS content
-        let mut node_cache = NodeCache::default();
-
-        // Second-pass parsing for HTML files with embedded JavaScript and CSS content
-        let embedded_snippets = if DocumentFileSource::can_contain_embeds(
+        let content = Arc::<str>::from(content);
+        let parsed = self.db_update_file_text(
             path.as_path(),
-            settings.as_ref().experimental_full_html_support_enabled(),
-        ) {
-            self.parse_embedded_language_snippets(
-                &path,
-                &document_source,
-                &any_parse,
-                &mut node_cache,
-                &settings,
-            )?
-        } else {
-            vec![]
-        }
-        .into_iter()
-        .map(|(parse, content, source)| (parse, content, self.db_add_source(source)))
-        .collect();
-
-        let parsed =
-            self.db_update_parsed_file(path.as_path(), any_parse, index, embedded_snippets);
+            SourceText {
+                text: content.clone(),
+                source_index,
+                context: ParseContext::new(query),
+            },
+        );
 
         let document = Document {
             content,
             version: Some(version),
-            file_source_index: index,
             syntax: Some(Ok(())),
         };
-
-        if persist_node_cache {
-            self.node_cache
-                .lock()
-                .unwrap()
-                .insert(path.to_path_buf(), node_cache);
-        }
 
         documents
             .insert(path.clone().into(), document)
@@ -3740,7 +3655,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         let (working_directory, settings, query_context) = self
             .project_get_settings_query(&workspace_db, project_key, &path, inline_config)
             .ok_or_else(WorkspaceError::no_project)?;
-        let (parse, embedded_snippets) = self.get_parsed_snippets_and_parse_source(&path)?;
+        let parse = self.get_parse(&path)?;
         let language =
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let capabilities = self.features.get_deprecated_capabilities(language);
@@ -3783,7 +3698,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 working_directory: Some(working_directory.as_path()),
             });
 
-            for embedded_node in SnippetsIterator::Workspace(embedded_snippets.iter()).for_analysis(
+            for embedded_node in SnippetsIterator::from_source(parse, &workspace_db).for_analysis(
                 &parse.into(),
                 language,
                 handle.as_ref(),
@@ -3874,7 +3789,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             self.get_file_source(&path, settings.experimental_full_html_support_enabled());
         let settings =
             self.settings_handle_with_query(&settings, EditorFeatures::default(), query_context);
-        let (parsed_source, parsed_snippets) = self.get_parsed_snippets_and_parse_source(&path)?;
+        let parsed_source = self.get_parse(&path)?;
 
         let plugins = cfg_select! {
             feature = "plugins" => {
@@ -3925,13 +3840,15 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             }
         }
 
-        for embedded_snippet in SnippetsIterator::Workspace(parsed_snippets.iter()).for_analysis(
-            &parsed_source.into(),
-            language,
-            settings.as_ref(),
-            &path,
-            &workspace_db,
-        ) {
+        for embedded_snippet in SnippetsIterator::from_source(parsed_source, &workspace_db)
+            .for_analysis(
+                &parsed_source.into(),
+                language,
+                settings.as_ref(),
+                &path,
+                &workspace_db,
+            )
+        {
             let ParsedSnippetOrigin::Workspace(embedded_snippet) = embedded_snippet else {
                 continue;
             };
@@ -4013,7 +3930,8 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             .ok_or_else(self.build_capability_error(&params.path))?;
 
         let format_embedded = capabilities.formatter.format_embedded;
-        let (parse, embedded_nodes) = self.get_parsed_snippets_and_parse_source(&params.path)?;
+        let (parse, embedded_nodes) =
+            self.get_parsed_snippets_and_parse_source(&workspace_db, &params.path)?;
         let document_file_source = self.get_file_source(
             &params.path,
             settings.experimental_full_html_support_enabled(),
@@ -4021,7 +3939,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
 
         if !settings.format_with_errors_enabled_for_this_file_path(&params.path)
             && (parse.parsed(&*workspace_db).has_errors()
-                || SnippetsIterator::Workspace(embedded_nodes.iter())
+                || SnippetsIterator::from_source(parse, &workspace_db)
                     .blocking_formatting(document_file_source)
                     .any(|snippet| snippet.has_errors(&workspace_db)))
         {
@@ -4270,7 +4188,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         }
 
         let (parse, embedded_snippets) =
-            self.get_parsed_snippets_and_parse_source(path.as_path())?;
+            self.get_parsed_snippets_and_parse_source(&workspace_db, path.as_path())?;
 
         let language = self.get_file_source(
             path,
@@ -4343,7 +4261,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         let path = params.path.as_path();
 
         self.documents.pin().remove(path);
-        self.node_cache.lock().unwrap().remove(path);
+        self.db_state.remove_node_cache(path);
         self.db_remove_file(path);
 
         // Without the client's content, the resolver reads the manifest from

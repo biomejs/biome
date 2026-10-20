@@ -1,6 +1,7 @@
 //! This is the database used inside the biome Workspace, mainly the `biome_service` crate.
 //!
 
+mod parse;
 mod state;
 
 pub(crate) use state::DbReadGuard;
@@ -10,7 +11,7 @@ use crate::WorkspaceError;
 use crate::projects::{NestedPath, ProjectDb, ProjectInput, ProjectKey};
 use crate::settings::{Settings, SettingsIdentity, VcsIgnoredPatterns};
 use biome_configuration::vcs::VcsClientKind;
-use biome_db::{ParsedSnippet, ParsedSource};
+use biome_db::{ParsedSource, SnippetParse, SourceContent, SourceParse, SourceText};
 use biome_languages::DocumentFileSource;
 use biome_languages::LanguageDb;
 #[cfg(feature = "module_graph")]
@@ -25,11 +26,12 @@ use biome_resolver::{
     ResolverDb, ResolverFsProxy, ResolverPathChange, ResolverPathChanges, ResolverPaths,
     resolver_paths_need_sync, sync_resolver_paths,
 };
-use biome_rowan::SendNode;
+use biome_rowan::NodeCache;
 #[cfg(feature = "module_graph")]
 use biome_rowan::Text;
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::{Compute, HashMap, Operation};
+use parking_lot::Mutex;
 use salsa::{Setter, Storage};
 use std::convert::Infallible;
 use std::rc::Rc;
@@ -39,6 +41,8 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use tracing::{debug, instrument};
 
 const SETTINGS_QUERY_CACHE_CAPACITY: usize = 256;
+
+type NodeCaches = Arc<HashMap<Utf8PathBuf, Arc<Mutex<NodeCache>>>>;
 type SettingsQueryEventHandler =
     std::panic::AssertUnwindSafe<Arc<dyn Fn(salsa::Event) + Send + Sync>>;
 
@@ -175,6 +179,9 @@ pub(crate) enum ProjectUpdateMode {
 pub struct WorkspaceDb {
     /// It maps a file path to its corresponding parsed version.
     files: Arc<HashMap<Utf8PathBuf, ParsedSource>>,
+    /// Node caches kept between the parses of a path. See
+    /// [WorkspaceDbData::retain_node_cache].
+    node_caches: NodeCaches,
     /// It maps a file path to its module graph representation
     #[cfg(feature = "module_graph")]
     pub modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
@@ -210,6 +217,7 @@ pub struct WorkspaceDb {
 #[derive(Clone)]
 pub struct WorkspaceDbData {
     files: Arc<HashMap<Utf8PathBuf, ParsedSource>>,
+    node_caches: NodeCaches,
     #[cfg(feature = "module_graph")]
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     #[cfg(feature = "module_graph")]
@@ -240,6 +248,24 @@ impl WorkspaceDbData {
     /// Removes the parsed source cached for `path`.
     pub fn remove_file(&self, path: &Utf8Path) {
         self.files.pin().remove(path);
+    }
+
+    /// Keeps a node cache for `path`, which the parses of its text then
+    /// share.
+    ///
+    /// A node cache lets a parse reuse the syntax nodes of the previous parse,
+    /// which makes reparsing a modified text faster. It's worth it for
+    /// documents that are expected to change, such as the ones open in an
+    /// editor. Sharing a cache doesn't change the parse result.
+    pub fn retain_node_cache(&self, path: &Utf8Path) {
+        self.node_caches
+            .pin()
+            .get_or_insert_with(path.to_path_buf(), Arc::default);
+    }
+
+    /// Drops the node cache of `path`, if there is one.
+    pub fn remove_node_cache(&self, path: &Utf8Path) {
+        self.node_caches.pin().remove(path);
     }
 
     /// Checks whether the module data contains `path` without making Salsa
@@ -353,6 +379,7 @@ impl WorkspaceDbData {
         for p in to_remove {
             files.remove(&p);
         }
+        self.node_caches.pin().retain(|p, _| !p.starts_with(path));
 
         #[cfg(feature = "module_graph")]
         {
@@ -384,6 +411,7 @@ impl WorkspaceDb {
     ) -> Self {
         let db = Self {
             files: Arc::default(),
+            node_caches: Arc::default(),
             #[cfg(feature = "module_graph")]
             modules: Arc::default(),
             #[cfg(feature = "module_graph")]
@@ -459,6 +487,7 @@ impl WorkspaceDb {
     pub fn data(&self) -> WorkspaceDbData {
         WorkspaceDbData {
             files: self.files.clone(),
+            node_caches: self.node_caches.clone(),
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
             #[cfg(feature = "module_graph")]
@@ -484,75 +513,59 @@ impl WorkspaceDb {
         self.files.pin().update(path.to_path_buf(), |_| file);
     }
 
-    pub fn update_file_with_mode(
-        &mut self,
-        path: &Utf8Path,
-        file: ParsedSource,
-        mode: ParsedSourceUpdateMode,
-    ) -> ParsedSource {
-        let parsed = file.parsed(self).clone();
-        let document_source_index = file.document_source_index(self);
-        let snippets = file.snippets(self).clone();
-        self.update_or_insert_file(path, parsed, document_source_index, snippets, mode)
-    }
-
+    /// Creates a parsed source from the result of a parse made outside the
+    /// database, and publishes it for `path`.
     pub fn replace_file(
         &mut self,
         path: &Utf8Path,
         parsed: AnyParse,
         document_source_index: usize,
-        snippets: Vec<ParsedSnippet>,
+        snippets: Vec<SnippetParse>,
     ) -> ParsedSource {
-        let file = ParsedSource::new(
-            self,
-            path.to_path_buf(),
-            parsed,
-            document_source_index,
-            snippets,
-        );
+        let content = SourceParse::new(parsed, document_source_index).with_snippets(snippets);
+        self.replace_file_content(path, content.into())
+    }
+
+    fn replace_file_content(&mut self, path: &Utf8Path, content: SourceContent) -> ParsedSource {
+        let file = ParsedSource::new(self, path.to_path_buf(), content);
         self.files.pin().insert(path.to_path_buf(), file);
         file
     }
 
+    /// Publishes the result of a parse made outside the database for `path`,
+    /// updating its parsed source through Salsa setters.
     pub fn upsert_file(
         &mut self,
         path: &Utf8Path,
         parsed: AnyParse,
         document_source_index: usize,
-        snippets: Vec<ParsedSnippet>,
+        snippets: Vec<SnippetParse>,
     ) -> ParsedSource {
-        self.update_or_insert_file(
-            path,
-            parsed,
-            document_source_index,
-            snippets,
-            ParsedSourceUpdateMode::Setters,
-        )
+        let content = SourceParse::new(parsed, document_source_index).with_snippets(snippets);
+        self.update_or_insert_file(path, content.into(), ParsedSourceUpdateMode::Setters)
     }
 
+    /// Publishes `content` as the content of `path`.
+    ///
+    /// The content isn't parsed here: the parse runs the first time a query
+    /// reads it.
     pub fn update_or_insert_file(
         &mut self,
         path: &Utf8Path,
-        parsed: AnyParse,
-        document_source_index: usize,
-        snippets: Vec<ParsedSnippet>,
+        content: SourceContent,
         mode: ParsedSourceUpdateMode,
     ) -> ParsedSource {
         if mode == ParsedSourceUpdateMode::Replace {
-            return self.replace_file(path, parsed, document_source_index, snippets);
+            return self.replace_file_content(path, content);
         }
 
         let existing_file = { self.files.pin().get(path).copied() };
 
         if let Some(existing_file) = existing_file {
-            existing_file.set_parsed(self).to(parsed);
-            existing_file
-                .set_document_source_index(self)
-                .to(document_source_index);
-            existing_file.set_snippets(self).to(snippets);
+            existing_file.set_content(self).to(content);
             existing_file
         } else {
-            let file = self.replace_file(path, parsed, document_source_index, snippets);
+            let file = self.replace_file_content(path, content);
             // Manifest queries look up the parsed source of a path outside
             // Salsa. Publishing a new parsed source must invalidate them.
             #[cfg(feature = "module_graph")]
@@ -634,37 +647,6 @@ impl WorkspaceDb {
         }
     }
 
-    /// It updates the CST of an existing parsed source
-    pub fn update_parsed_root(&mut self, path: &Utf8Path, new_root: SendNode) {
-        self.update_parsed_root_with_mode(path, new_root, ParsedSourceUpdateMode::Setters);
-    }
-
-    /// It updates the CST of an existing parsed source
-    pub fn update_parsed_root_with_mode(
-        &mut self,
-        path: &Utf8Path,
-        new_root: SendNode,
-        mode: ParsedSourceUpdateMode,
-    ) {
-        if let Some(parsed_source) = self.get_parsed_source(path) {
-            let mut any_parse = parsed_source.parsed(self).clone();
-            any_parse.set_new_root(new_root);
-            match mode {
-                ParsedSourceUpdateMode::Replace => {
-                    self.replace_file(
-                        path,
-                        any_parse,
-                        parsed_source.document_source_index(self),
-                        parsed_source.snippets(self).clone(),
-                    );
-                }
-                ParsedSourceUpdateMode::Setters => {
-                    parsed_source.set_parsed(self).to(any_parse);
-                }
-            }
-        }
-    }
-
     #[cfg(feature = "module_graph")]
     pub fn remove_module(&mut self, path: &Utf8Path) {
         if self.modules.pin().contains_key(path) {
@@ -688,6 +670,7 @@ impl WorkspaceDb {
                 files.remove(&p);
             }
         }
+        self.node_caches.pin().retain(|p, _| !p.starts_with(path));
 
         #[cfg(feature = "module_graph")]
         {
@@ -919,6 +902,7 @@ impl WorkspaceDb {
 #[derive(Clone)]
 pub struct SharedWorkspaceDb {
     files: Arc<HashMap<Utf8PathBuf, ParsedSource>>,
+    node_caches: NodeCaches,
     #[cfg(feature = "module_graph")]
     modules: Arc<HashMap<Utf8PathBuf, ModuleInfo>>,
     #[cfg(feature = "module_graph")]
@@ -945,6 +929,7 @@ impl SharedWorkspaceDb {
     pub(crate) fn from_workspace_db(db: WorkspaceDb) -> Self {
         let WorkspaceDb {
             files,
+            node_caches,
             #[cfg(feature = "module_graph")]
             modules,
             #[cfg(feature = "module_graph")]
@@ -958,6 +943,7 @@ impl SharedWorkspaceDb {
         } = db;
         Self {
             files,
+            node_caches,
             #[cfg(feature = "module_graph")]
             modules,
             #[cfg(feature = "module_graph")]
@@ -974,6 +960,7 @@ impl SharedWorkspaceDb {
     pub fn data(&self) -> WorkspaceDbData {
         WorkspaceDbData {
             files: self.files.clone(),
+            node_caches: self.node_caches.clone(),
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
             #[cfg(feature = "module_graph")]
@@ -986,6 +973,7 @@ impl SharedWorkspaceDb {
     pub fn fork(&self) -> WorkspaceDb {
         WorkspaceDb {
             files: self.files.clone(),
+            node_caches: self.node_caches.clone(),
             file_sources: self.file_sources.clone(),
             #[cfg(feature = "module_graph")]
             modules: self.modules.clone(),
@@ -1009,6 +997,11 @@ impl salsa::Database for WorkspaceDb {}
 impl biome_db::Db for WorkspaceDb {
     fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<ParsedSource> {
         self.files.pin().get(path).copied()
+    }
+
+    fn parse_text(&self, source: ParsedSource, text: &SourceText) -> SourceParse {
+        let node_cache = self.node_caches.pin().get(source.path(self)).cloned();
+        parse::parse_source_text(self, source, text, node_cache.as_deref())
     }
 }
 
@@ -1131,7 +1124,7 @@ mod tests {
     use biome_js_parser::{JsParserOptions, parse};
     #[cfg(feature = "lang_js")]
     use biome_js_syntax::JsLanguage;
-    #[cfg(feature = "module_graph")]
+    #[cfg(any(feature = "module_graph", feature = "html_embeds"))]
     use biome_languages::HtmlFileSource;
     #[cfg(feature = "lang_js")]
     use biome_languages::JsFileSource;
@@ -1315,6 +1308,80 @@ mod tests {
 
         assert_eq!(file.as_id(), updated_file.as_id());
         assert_eq!(db.get_parsed_source(path).unwrap().as_id(), file.as_id());
+    }
+
+    /// Returns the content that the workspace publishes for `text`, with the
+    /// default settings of the project at `/`.
+    #[cfg(feature = "lang_js")]
+    fn text_content(
+        db: &mut WorkspaceDb,
+        path: &Utf8Path,
+        text: &str,
+        file_source: DocumentFileSource,
+    ) -> SourceContent {
+        let project_key = db.insert_project(Utf8PathBuf::from("/"));
+        let project = db.get_project(&project_key).unwrap();
+        let query = SettingsQuery::new(
+            project,
+            SettingsSelectionKey::Root,
+            &Settings::default(),
+            None,
+            path,
+        );
+        SourceText {
+            text: text.into(),
+            source_index: db.insert_source(file_source),
+            context: biome_db::ParseContext::new(query),
+        }
+        .into()
+    }
+
+    #[cfg(feature = "lang_js")]
+    #[test]
+    fn published_text_is_parsed_once_when_read() {
+        let (mut db, events) = settings_query_test_db();
+        let path = Utf8Path::new("/test.js");
+        let content = text_content(
+            &mut db,
+            path,
+            "let a = 1;",
+            DocumentFileSource::Js(JsFileSource::js_module()),
+        );
+        let file = db.update_or_insert_file(path, content, ParsedSourceUpdateMode::Setters);
+        let parse_count = |events: &Events| {
+            function_query_will_execute_count_by_name(&db, "parsed_root", &take_events(events))
+        };
+        assert_eq!(parse_count(&events), 0);
+
+        let root = file.parsed(&db).syntax::<JsLanguage>();
+        assert_eq!(root.text_with_trivia().to_string(), "let a = 1;");
+        assert_eq!(parse_count(&events), 1);
+
+        file.parsed(&db);
+        assert_eq!(parse_count(&events), 0);
+    }
+
+    #[cfg(feature = "html_embeds")]
+    #[test]
+    fn updated_text_keeps_the_identity_of_its_snippets() {
+        let mut db = test_db();
+        let path = Utf8Path::new("/test.html");
+        let html = DocumentFileSource::Html(HtmlFileSource::html());
+        let content = text_content(&mut db, path, "<script>let a = 1;</script>", html);
+        let file = db.update_or_insert_file(path, content, ParsedSourceUpdateMode::Setters);
+        let snippet = file.snippets(&db)[0].as_id();
+
+        let content = text_content(&mut db, path, "<script>let b = 2;</script>", html);
+        db.update_or_insert_file(path, content, ParsedSourceUpdateMode::Setters);
+
+        let snippets = file.snippets(&db);
+        assert_eq!(snippets.len(), 1);
+        assert_eq!(snippets[0].as_id(), snippet);
+        let script = snippets[0]
+            .parsed(&db)
+            .clone()
+            .embedded_syntax::<JsLanguage>();
+        assert_eq!(script.node.text_with_trivia().to_string(), "let b = 2;");
     }
 
     #[test]

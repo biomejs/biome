@@ -8,7 +8,7 @@ use biome_embeds::references::{
     InternedReference, is_reference_used, is_svelte_store_reference_used, is_type_reference_used,
     is_value_reference_used, is_vue_directive_reference_used,
 };
-use biome_languages::LanguageDb;
+use biome_languages::{LanguageDb, has_embedded_content};
 use biome_rowan::{TextRange, TextSize, TokenText};
 use camino::Utf8PathBuf;
 use std::rc::Rc;
@@ -33,7 +33,7 @@ enum EmbeddedSource {
 
 impl EmbeddedService {
     pub(crate) fn new(db: Rc<dyn LanguageDb>, path: Utf8PathBuf, snippet_offset: TextSize) -> Self {
-        let source = if db.has_embedded_content(&path) {
+        let source = if has_embedded_content(db.as_ref(), &path) {
             EmbeddedSource::Workspace { db, path }
         } else {
             EmbeddedSource::Empty
@@ -178,7 +178,7 @@ impl FromServices for EmbeddedService {
 mod tests {
     use super::*;
     use biome_db::testing::Events;
-    use biome_db::{ParsedSnippet, ParsedSource};
+    use biome_db::{ParsedSource, SnippetParse};
     use biome_js_parser::{JsParserOptions, parse};
     use biome_languages::{DocumentFileSource, JsFileSource};
     use biome_rowan::RawSyntaxKind;
@@ -236,7 +236,7 @@ mod tests {
                     JsParserOptions::default(),
                 )
                 .into();
-                ParsedSnippet::new(&db, parsed, range, range, start, 0)
+                SnippetParse::new(parsed, range, range, start, 0)
             })
             .collect();
         let path = Utf8PathBuf::from("src/file.js");
@@ -246,7 +246,13 @@ mod tests {
             JsParserOptions::default(),
         )
         .into();
-        db.parsed = Some(ParsedSource::new(&db, path.clone(), parsed, 0, snippets));
+        db.parsed = Some(ParsedSource::from_parse(
+            &db,
+            path.clone(),
+            parsed,
+            0,
+            snippets,
+        ));
 
         let service = EmbeddedService::new(Rc::new(db), path, TextSize::default());
         (service, events)

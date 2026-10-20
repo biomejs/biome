@@ -171,14 +171,12 @@ use super::{
     ParsedSourceUpdateMode, ProjectUpdateMode, SharedWorkspaceDb, WorkspaceDb, WorkspaceDbData,
 };
 use crate::WorkspaceError;
-use crate::embed::EmbedContent;
 #[cfg(feature = "module_graph")]
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::projects::ProjectKey;
 use crate::settings::Settings;
-use biome_db::{ParsedSnippet, ParsedSource};
+use biome_db::{ParsedSource, SourceContent};
 use biome_languages::DocumentFileSource;
-use biome_parser::AnyParse;
 use biome_resolver::FsWithResolverProxy;
 #[cfg(feature = "module_graph")]
 use biome_resolver::ResolverPathChanges;
@@ -655,40 +653,44 @@ impl DbState {
         }
     }
 
-    pub(crate) fn update_parsed_file(
+    /// Publishes `content` as the content of `path`.
+    ///
+    /// The content isn't parsed here: the parse runs the first time a query
+    /// reads it.
+    pub(crate) fn update_file_content(
         &self,
         path: &Utf8Path,
-        parsed: AnyParse,
-        language_index: usize,
-        snippets: Vec<(AnyParse, EmbedContent, usize)>,
+        content: SourceContent,
     ) -> ParsedSource {
         match &self.storage {
             DbStorage::Shared(shared_db) => {
                 let mut db = shared_db.fork();
-                let parsed_snippets = create_parsed_snippets(&db, snippets);
-                let file = db.update_or_insert_file(
-                    path,
-                    parsed,
-                    language_index,
-                    parsed_snippets,
-                    ParsedSourceUpdateMode::Replace,
-                );
+                let file = db.update_or_insert_file(path, content, ParsedSourceUpdateMode::Replace);
                 // The replacement publishes a new parsed source for `path`.
                 #[cfg(feature = "module_graph")]
                 self.record_resolver_changes(shared_db.data().resolver_source_change(path));
                 file
             }
             DbStorage::Owned(db) => db.with_setter(|db| {
-                let parsed_snippets = create_parsed_snippets(db, snippets);
-                db.update_or_insert_file(
-                    path,
-                    parsed,
-                    language_index,
-                    parsed_snippets,
-                    ParsedSourceUpdateMode::Setters,
-                )
+                db.update_or_insert_file(path, content, ParsedSourceUpdateMode::Setters)
             }),
         }
+    }
+
+    /// Keeps a node cache for `path`. See [WorkspaceDbData::retain_node_cache].
+    pub(crate) fn retain_node_cache(&self, path: &Utf8Path) {
+        self.shared_data().retain_node_cache(path);
+    }
+
+    /// Drops the node cache of `path`, if there is one.
+    pub(crate) fn remove_node_cache(&self, path: &Utf8Path) {
+        self.shared_data().remove_node_cache(path);
+    }
+
+    /// Returns whether a node cache is kept for `path`.
+    #[cfg(test)]
+    pub(crate) fn has_node_cache(&self, path: &Utf8Path) -> bool {
+        self.shared_data().node_caches.pin().contains_key(path)
     }
 
     pub(crate) fn unload_path(&self, path: &Utf8Path) {
@@ -788,6 +790,10 @@ impl DbState {
     /// Returns handles to the collections shared by every database fork.
     #[cfg(feature = "module_graph")]
     fn data(&self) -> WorkspaceDbData {
+        self.shared_data()
+    }
+
+    fn shared_data(&self) -> WorkspaceDbData {
         match &self.storage {
             DbStorage::Shared(shared_db) => shared_db.data(),
             DbStorage::Owned(db) => db.data.clone(),
@@ -867,33 +873,16 @@ impl DbState {
     }
 }
 
-fn create_parsed_snippets(
-    db: &WorkspaceDb,
-    snippets: Vec<(AnyParse, EmbedContent, usize)>,
-) -> Vec<ParsedSnippet> {
-    snippets
-        .into_iter()
-        .map(|(parse, content, index)| {
-            ParsedSnippet::new(
-                db,
-                parse,
-                content.element_range,
-                content.content_range,
-                content.content_offset,
-                index,
-            )
-        })
-        .collect()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     use crate::projects::ProjectDb;
     use biome_configuration::vcs::VcsClientKind;
+    use biome_db::SourceParse;
     use biome_js_parser::{JsParserOptions, parse};
     use biome_languages::JsFileSource;
+    use biome_parser::AnyParse;
     use camino::Utf8PathBuf;
     use salsa::plumbing::AsId;
     use std::panic::AssertUnwindSafe;
@@ -945,7 +934,7 @@ mod tests {
         let path = Utf8PathBuf::from("test.js");
         // Insert the file first: only updates to files the database already
         // knows about are applied through salsa setters.
-        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        state.update_file_content(&path, SourceParse::new(parse_js("let a = 1;"), 0).into());
 
         let clone_taken = Arc::new(Barrier::new(2));
         let (done_tx, done_rx) = mpsc::channel();
@@ -971,7 +960,8 @@ mod tests {
             let path = path.clone();
             thread::spawn(move || {
                 clone_taken.wait();
-                state.update_parsed_file(&path, parse_js("let b = 2;"), 0, vec![]);
+                state
+                    .update_file_content(&path, SourceParse::new(parse_js("let b = 2;"), 0).into());
                 done_tx.send(()).unwrap();
             })
         };
@@ -992,7 +982,7 @@ mod tests {
     fn owned_storage_fork_unwinds_while_setter_is_pending() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        state.update_file_content(&path, SourceParse::new(parse_js("let a = 1;"), 0).into());
 
         // Hold a clone so the setter below has to wait.
         let db = state.fork();
@@ -1001,7 +991,8 @@ mod tests {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state.update_parsed_file(&path, parse_js("let b = 2;"), 0, vec![]);
+                state
+                    .update_file_content(&path, SourceParse::new(parse_js("let b = 2;"), 0).into());
             })
         };
 
@@ -1025,14 +1016,15 @@ mod tests {
     fn owned_storage_queues_only_one_pending_setter() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        state.update_file_content(&path, SourceParse::new(parse_js("let a = 1;"), 0).into());
 
         let db = state.fork();
         let first_setter = {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state.update_parsed_file(&path, parse_js("let b = 2;"), 0, vec![]);
+                state
+                    .update_file_content(&path, SourceParse::new(parse_js("let b = 2;"), 0).into());
             })
         };
         wait_for_pending_setter(&state);
@@ -1045,7 +1037,7 @@ mod tests {
             thread::spawn(move || {
                 let parsed = parse_js("let c = 3;");
                 second_start.wait();
-                state.update_parsed_file(&path, parsed, 0, vec![]);
+                state.update_file_content(&path, SourceParse::new(parsed, 0).into());
             })
         };
         second_start.wait();
@@ -1079,14 +1071,15 @@ mod tests {
     fn untracked_module_membership_does_not_wait_for_pending_setters() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        state.update_file_content(&path, SourceParse::new(parse_js("let a = 1;"), 0).into());
 
         let db = state.fork();
         let setter = {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state.update_parsed_file(&path, parse_js("let b = 2;"), 0, vec![]);
+                state
+                    .update_file_content(&path, SourceParse::new(parse_js("let b = 2;"), 0).into());
             })
         };
 
@@ -1104,7 +1097,7 @@ mod tests {
         let path = Utf8PathBuf::from("test.js");
         let _db = state.fork();
 
-        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        state.update_file_content(&path, SourceParse::new(parse_js("let a = 1;"), 0).into());
     }
 
     #[test]
@@ -1113,7 +1106,7 @@ mod tests {
         let path = Utf8PathBuf::from("test.js");
         let db = state.fork();
 
-        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        state.update_file_content(&path, SourceParse::new(parse_js("let a = 1;"), 0).into());
 
         assert_eq!(state.pending_setters(), 0);
         assert!(db.get_parsed_source(&path).is_some());
@@ -1209,7 +1202,7 @@ mod tests {
     fn owned_storage_setter_from_other_thread_waits_for_read_guard() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_parsed_file(&path, parse_js("let a = 1;"), 0, vec![]);
+        state.update_file_content(&path, SourceParse::new(parse_js("let a = 1;"), 0).into());
 
         let db = state.fork();
         let (done_tx, done_rx) = mpsc::channel();
@@ -1218,7 +1211,8 @@ mod tests {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state.update_parsed_file(&path, parse_js("let b = 2;"), 0, vec![]);
+                state
+                    .update_file_content(&path, SourceParse::new(parse_js("let b = 2;"), 0).into());
                 done_tx.send(()).unwrap();
             })
         };
@@ -1286,17 +1280,29 @@ mod tests {
             let source = lookup(&state, SOURCE);
             let setters = state.setter_gate_attempts();
 
-            state.update_parsed_file(Utf8Path::new(SOURCE), parse_js(""), 0, vec![]);
-            state.update_parsed_file(Utf8Path::new(SOURCE), parse_js("a"), 0, vec![]);
+            state.update_file_content(
+                Utf8Path::new(SOURCE),
+                SourceParse::new(parse_js(""), 0).into(),
+            );
+            state.update_file_content(
+                Utf8Path::new(SOURCE),
+                SourceParse::new(parse_js("a"), 0).into(),
+            );
             assert_eq!(
                 revision(&state, source),
                 0,
                 "sources aren't read by the resolver"
             );
 
-            state.update_parsed_file(Utf8Path::new(MANIFEST), parse_json("{}"), 0, vec![]);
+            state.update_file_content(
+                Utf8Path::new(MANIFEST),
+                SourceParse::new(parse_json("{}"), 0).into(),
+            );
             assert_eq!(revision(&state, manifest), 1);
-            state.update_parsed_file(Utf8Path::new(MANIFEST), parse_json("[]"), 0, vec![]);
+            state.update_file_content(
+                Utf8Path::new(MANIFEST),
+                SourceParse::new(parse_json("[]"), 0).into(),
+            );
             assert_eq!(
                 revision(&state, manifest),
                 1,
@@ -1356,11 +1362,9 @@ mod tests {
 
             {
                 let epoch = state.scanner_epoch();
-                epoch.view().update_parsed_file(
+                epoch.view().update_file_content(
                     Utf8Path::new(MANIFEST),
-                    parse_json("{}"),
-                    0,
-                    vec![],
+                    SourceParse::new(parse_json("{}"), 0).into(),
                 );
                 fs.insert(SOURCE.into(), "");
                 epoch
@@ -1385,7 +1389,10 @@ mod tests {
 
             fs.insert(SOURCE.into(), "");
             state.sync_resolver_paths(vec![(SOURCE.into(), ResolverPathChange::Kind.into())]);
-            state.update_parsed_file(Utf8Path::new(MANIFEST), parse_json("{}"), 0, vec![]);
+            state.update_file_content(
+                Utf8Path::new(MANIFEST),
+                SourceParse::new(parse_json("{}"), 0).into(),
+            );
 
             assert_eq!(info(&state, source), Err(ResolveError::NotFound));
             assert_eq!(revision(&state, manifest), 0);

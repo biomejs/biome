@@ -133,7 +133,7 @@ impl TestModuleDb {
     /// Indexes a JSON document, such as a manifest, as a parsed source.
     fn insert_json_source(&mut self, path: Utf8PathBuf, source: &str) {
         let parse = parse_json(source, JsonParserOptions::default());
-        let parsed = ParsedSource::new(self, path.clone(), parse.into(), 0, Vec::new());
+        let parsed = ParsedSource::from_parse(self, path.clone(), parse.into(), 0, Vec::new());
         self.files.insert(path.clone(), parsed);
         sync_resolver_paths(self, [(path, ResolverPathChange::Content.into())]);
     }

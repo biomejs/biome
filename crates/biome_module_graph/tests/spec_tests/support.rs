@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use biome_configuration::{Configuration, HtmlConfiguration};
 use biome_css_parser::{CssModulesKind, CssParserOptions, parse_css};
-use biome_db::{ParsedSnippet, ParsedSource};
+use biome_db::{ParsedSource, SnippetParse};
 use biome_fs::{BiomePath, MemoryFileSystem, OsFileSystem};
 use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleApplicability};
 use biome_languages::{CssFileSource, DocumentFileSource, HtmlFileSource, JsonFileSource};
@@ -96,7 +96,8 @@ pub fn build_css_db(files: &[(&str, &str)]) -> (MemoryFileSystem, WorkspaceDb) {
 
     for (path, source) in files {
         let parse = parse_css(source, CssFileSource::css(), CssParserOptions::default());
-        let parsed = ParsedSource::new(&db, Utf8PathBuf::from(*path), parse.into(), 0, Vec::new());
+        let parsed =
+            ParsedSource::from_parse(&db, Utf8PathBuf::from(*path), parse.into(), 0, Vec::new());
         db.insert_file(Utf8Path::new(path), parsed);
     }
     (fs, db)
@@ -154,8 +155,7 @@ pub fn build_html_db(fs: &MemoryFileSystem, files: &[HtmlTestFile<'_>]) -> Works
             .iter()
             .map(|(parsed, file_source)| {
                 let source_index = db.insert_source(DocumentFileSource::Css(*file_source));
-                ParsedSnippet::new(
-                    &db,
+                SnippetParse::new(
                     parsed.clone(),
                     Default::default(),
                     Default::default(),
@@ -166,7 +166,7 @@ pub fn build_html_db(fs: &MemoryFileSystem, files: &[HtmlTestFile<'_>]) -> Works
             .collect();
         let parsed = biome_html_parser::parse_html(source, file_source.into());
         let source_index = db.insert_source(DocumentFileSource::Html(*file_source));
-        let parsed_source = ParsedSource::new(
+        let parsed_source = ParsedSource::from_parse(
             &db,
             path.as_path().to_path_buf(),
             parsed.into(),
