@@ -42,6 +42,9 @@ pub fn resolve_js_module(
     semantic_model: std::sync::Arc<biome_js_semantic::SemanticModel>,
     enable_type_inference: bool,
 ) -> (JsModuleInfo, ModuleDependencies, Vec<ModuleDiagnostic>) {
+    // Experimental: measures tsrs (`BIOME_TSRS`) without paying for Biome's own inference.
+    let enable_type_inference =
+        enable_type_inference && std::env::var_os("BIOME_TSRS_SKIP_INFERENCE").is_none();
     let inference_mode = if enable_type_inference {
         TypeInferenceMode::RawTypesOnly
     } else {

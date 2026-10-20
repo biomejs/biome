@@ -65,8 +65,9 @@ pub(crate) struct TsrsFile {
     snapshot: OnceLock<Option<TsrsSnapshot>>,
 }
 
-/// Projects by `tsconfig.json` path, or by directory for files without one.
-static TSRS_PROJECTS: LazyLock<Mutex<FxHashMap<Utf8PathBuf, Arc<TsrsProject>>>> =
+/// Projects by `tsconfig.json` path, or by directory for files without one. The map's lock only covers the
+/// lookup, so that different projects build in parallel.
+static TSRS_PROJECTS: LazyLock<Mutex<FxHashMap<Utf8PathBuf, Arc<OnceLock<Arc<TsrsProject>>>>>> =
     LazyLock::new(Default::default);
 
 impl TsrsFile {
@@ -79,10 +80,14 @@ impl TsrsFile {
             .map(|ancestor| ancestor.join("tsconfig.json"))
             .find(|candidate| candidate.is_file());
         let key = tsconfig.clone().unwrap_or_else(|| directory.to_path_buf());
-        let mut projects = TSRS_PROJECTS.lock().unwrap();
-        let project = match projects.get(&key) {
-            Some(project) => project.clone(),
-            None => {
+        let cell = TSRS_PROJECTS
+            .lock()
+            .unwrap()
+            .entry(key.clone())
+            .or_default()
+            .clone();
+        let project = cell
+            .get_or_init(|| {
                 let start = std::time::Instant::now();
                 let project = tsconfig
                     .and_then(|tsconfig| TsrsProject::from_tsconfig(&tsconfig).ok())
@@ -90,9 +95,9 @@ impl TsrsFile {
                 if tsrs_verbose() {
                     eprintln!("tsrs: built project {key} in {:?}", start.elapsed());
                 }
-                projects.entry(key).or_insert(Arc::new(project)).clone()
-            }
-        };
+                Arc::new(project)
+            })
+            .clone();
         Some(Self {
             project,
             path,

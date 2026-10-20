@@ -70,15 +70,17 @@ impl TsrsProject {
             fs: overlay.clone(),
             cwd: cwd.clone(),
         }));
-        let (config, diagnostics) = tsrs_tsoptions::get_parsed_command_line_of_config_file(
-            tsconfig.as_str(),
-            None,
-            None,
-            host,
-            None,
-        );
-        let config = config.ok_or_else(|| format!("{} config diagnostics", diagnostics.len()))?;
-        Ok(Self::new(P::new(config), &cwd, overlay))
+        let tsconfig = tsconfig.to_string();
+        // Expanding `include` patterns uses rayon.
+        let config = run_on_tsrs_pool(move || {
+            let (config, diagnostics) = tsrs_tsoptions::get_parsed_command_line_of_config_file(
+                &tsconfig, None, None, host, None,
+            );
+            config
+                .map(P::new)
+                .ok_or_else(|| format!("{} config diagnostics", diagnostics.len()))
+        })?;
+        Ok(Self::new(config, &cwd, overlay))
     }
 
     /// Builds a project over every JavaScript and TypeScript file under `directory`, outside `node_modules`,
@@ -286,7 +288,7 @@ impl TsrsSnapshot {
     }
 }
 
-/// The threads that build and update programs.
+/// The threads that run every tsrs call except type queries: parsing configs, building and updating programs.
 ///
 /// tsrs parses, binds and creates checkers with rayon. A rayon worker that waits for that work, even on another
 /// pool, runs other jobs of its own pool meanwhile, and deadlocks when one of them waits for a lock the worker
