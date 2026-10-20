@@ -67,8 +67,10 @@ pub(crate) struct TsrsFile {
 
 /// Projects by `tsconfig.json` path, or by directory for files without one. The map's lock only covers the
 /// lookup, so that different projects build in parallel.
-static TSRS_PROJECTS: LazyLock<Mutex<FxHashMap<Utf8PathBuf, Arc<OnceLock<Arc<TsrsProject>>>>>> =
+static TSRS_PROJECTS: LazyLock<Mutex<FxHashMap<Utf8PathBuf, TsrsProjectCell>>> =
     LazyLock::new(Default::default);
+
+type TsrsProjectCell = Arc<OnceLock<Arc<TsrsProject>>>;
 
 impl TsrsFile {
     pub(crate) fn new(path: &Utf8Path) -> Option<Self> {
