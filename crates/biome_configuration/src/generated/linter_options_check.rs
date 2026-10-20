@@ -801,6 +801,12 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_loop_func::NoLoopFuncOptions>(),
     ));
     result.push((
+        "nursery",
+        "noLoopIterableMutation",
+        TypeId::of::<biome_rule_options::no_loop_iterable_mutation::NoLoopIterableMutationOptions>(
+        ),
+    ));
+    result.push((
         "style",
         "noMagicNumbers",
         TypeId::of::<biome_rule_options::no_magic_numbers::NoMagicNumbersOptions>(),
