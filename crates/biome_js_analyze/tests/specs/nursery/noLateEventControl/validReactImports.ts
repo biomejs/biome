@@ -1,0 +1,17 @@
+/* should not generate diagnostics */
+import SyntheticEvent from "react";
+import type { NotEvent as MouseEvent } from "react";
+import type * as React from "react";
+
+async function updateControl(event: SyntheticEvent) {
+	await load();
+	event.preventDefault();
+}
+async function updateControl(event: MouseEvent) {
+	await load();
+	event.preventDefault();
+}
+async function updateControl(event: React.NotEvent) {
+	await load();
+	event.preventDefault();
+}

@@ -167,6 +167,7 @@ pub mod no_jsx_namespace;
 pub mod no_jsx_props_bind;
 pub mod no_label_var;
 pub mod no_label_without_control;
+pub mod no_late_event_control;
 pub mod no_leaked_render;
 pub mod no_loop_func;
 pub mod no_magic_numbers;

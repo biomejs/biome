@@ -791,6 +791,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::no_label_without_control::NoLabelWithoutControlOptions>(),
     ));
     result.push((
+        "nursery",
+        "noLateEventControl",
+        TypeId::of::<biome_rule_options::no_late_event_control::NoLateEventControlOptions>(),
+    ));
+    result.push((
         "suspicious",
         "noLeakedRender",
         TypeId::of::<biome_rule_options::no_leaked_render::NoLeakedRenderOptions>(),

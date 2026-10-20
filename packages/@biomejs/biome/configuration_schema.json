@@ -5149,6 +5149,16 @@
 			},
 			"additionalProperties": false
 		},
+		"NoLateEventControlConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoLateEventControlOptions" }
+			]
+		},
+		"NoLateEventControlOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoLeakedRenderConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7749,6 +7759,13 @@
 					"description": "Disallow unsafe JSON values that may cause interoperability issues.\nSee https://biomejs.dev/linter/rules/no-json-unsafe-values",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoJsonUnsafeValuesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noLateEventControl": {
+					"description": "Disallow calling preventDefault(), stopPropagation(), or stopImmediatePropagation() after the browser has finished handling the event.\nSee https://biomejs.dev/linter/rules/no-late-event-control",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoLateEventControlConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -10900,6 +10917,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoLabelWithoutControlOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoLateEventControlOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoLateEventControlOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
