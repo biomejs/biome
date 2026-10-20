@@ -3190,6 +3190,11 @@ export interface Nursery {
 	 */
 	noLateEventControl?: NoLateEventControlConfiguration;
 	/**
+	 * Disallow changing a collection while a for...of loop iterates over it.
+	 * See https://biomejs.dev/linter/rules/no-loop-iterable-mutation
+	 */
+	noLoopIterableMutation?: NoLoopIterableMutationConfiguration;
+	/**
 	 * Disallow unexplained numbers as the depth argument of Array.prototype.flat().
 	 * See https://biomejs.dev/linter/rules/no-magic-array-flat-depth
 	 */
@@ -7034,6 +7039,9 @@ export type NoLateCurrentTargetAccessConfiguration =
 export type NoLateEventControlConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoLateEventControlOptions;
+export type NoLoopIterableMutationConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoLoopIterableMutationOptions;
 export type NoMagicArrayFlatDepthConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoMagicArrayFlatDepthOptions;
@@ -10290,6 +10298,10 @@ export interface RuleWithNoLateCurrentTargetAccessOptions {
 export interface RuleWithNoLateEventControlOptions {
 	level: RulePlainConfiguration;
 	options?: NoLateEventControlOptions;
+}
+export interface RuleWithNoLoopIterableMutationOptions {
+	level: RulePlainConfiguration;
+	options?: NoLoopIterableMutationOptions;
 }
 export interface RuleWithNoMagicArrayFlatDepthOptions {
 	level: RulePlainConfiguration;
@@ -14132,6 +14144,7 @@ export interface NoJsRestrictedPropertiesOptions {
 export type NoJsonUnsafeValuesOptions = {};
 export type NoLateCurrentTargetAccessOptions = {};
 export type NoLateEventControlOptions = {};
+export type NoLoopIterableMutationOptions = {};
 export type NoMagicArrayFlatDepthOptions = {};
 export interface NoMapSpreadOptions {
 	/**
@@ -16560,6 +16573,7 @@ export type Category =
 	| "lint/nursery/noJsonUnsafeValues"
 	| "lint/nursery/noLateCurrentTargetAccess"
 	| "lint/nursery/noLateEventControl"
+	| "lint/nursery/noLoopIterableMutation"
 	| "lint/nursery/noMagicArrayFlatDepth"
 	| "lint/nursery/noMapSpread"
 	| "lint/nursery/noMeaninglessVoidOperator"

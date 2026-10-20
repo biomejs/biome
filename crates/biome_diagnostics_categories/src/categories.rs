@@ -280,6 +280,7 @@ define_categories! {
     "lint/nursery/noJsonUnsafeValues": "https://biomejs.dev/linter/rules/no-json-unsafe-values",
     "lint/nursery/noLateCurrentTargetAccess": "https://biomejs.dev/linter/rules/no-late-current-target-access",
     "lint/nursery/noLateEventControl": "https://biomejs.dev/linter/rules/no-late-event-control",
+    "lint/nursery/noLoopIterableMutation": "https://biomejs.dev/linter/rules/no-loop-iterable-mutation",
     "lint/nursery/noMagicArrayFlatDepth": "https://biomejs.dev/linter/rules/no-magic-array-flat-depth",
     "lint/nursery/noMapSpread": "https://biomejs.dev/linter/rules/no-map-spread",
     "lint/nursery/noMeaninglessVoidOperator": "https://biomejs.dev/linter/rules/no-meaningless-void-operator",

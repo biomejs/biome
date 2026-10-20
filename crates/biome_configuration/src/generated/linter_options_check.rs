@@ -934,6 +934,12 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noLoopIterableMutation",
+        TypeId::of::<biome_rule_options::no_loop_iterable_mutation::NoLoopIterableMutationOptions>(
+        ),
+    ));
+    result.push((
+        "nursery",
         "noMagicArrayFlatDepth",
         TypeId::of::<biome_rule_options::no_magic_array_flat_depth::NoMagicArrayFlatDepthOptions>(),
     ));
