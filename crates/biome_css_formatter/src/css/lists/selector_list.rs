@@ -1,4 +1,4 @@
-use crate::css::selectors::complex_selector::is_left_selector_preceded_by_comment;
+use crate::css::selectors::complex_selector::has_leading_selector_comment;
 use crate::prelude::*;
 use biome_css_syntax::CssSelectorList;
 
@@ -22,14 +22,14 @@ impl FormatRule<CssSelectorList> for FormatCssSelectorList {
         // parent node can wrap this list in a group and set `should_expand(true)`
         // to have the separator expand into full line breaks instead of trying to
         // fit on a single line.
+        let comments = f.comments().clone();
         let mut joiner = f.join_with(&separator);
 
         for formatted in node.format_separated(",") {
             let selector = formatted.node()?;
             let complex_selector = selector.as_css_complex_selector();
             let is_left_preceded_by_comment = complex_selector
-                .and_then(|selector| selector.left().ok())
-                .is_some_and(|left| is_left_selector_preceded_by_comment(&left));
+                .is_some_and(|selector| has_leading_selector_comment(selector, &comments));
 
             // A leading comment already establishes the list indentation. Adding
             // another indent would move the selector away from its comment.
