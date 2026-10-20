@@ -202,8 +202,9 @@ fn control_flow_graph(ctx: &RuleContext<NoUselessAssignment>) -> Option<JsContro
     let root = ctx.query();
     if let Some(db) = ctx.get_service::<Rc<dyn LanguageDb>>()
         && let Some(source) = ctx.get_service::<AnyParsedSource>()
+        && let Some(model) = js_control_flow_model(db.as_ref(), source)
     {
-        js_control_flow_model(db.as_ref(), source).graph(root)
+        model.graph(root)
     } else {
         // Fix passes and standalone callers analyze trees that are not stored
         // in the database.

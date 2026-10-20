@@ -82,8 +82,8 @@ impl Visitor for SemanticModelBuilderVisitor {
         }
         if let Some(db) = ctx.services.get_service::<Rc<dyn LanguageDb>>()
             && let Some(source) = ctx.services.get_service::<AnyParsedSource>()
+            && let Some(model) = css_semantic_model(db.as_ref(), source)
         {
-            let model = css_semantic_model(db.as_ref(), source);
             // Semantic equality ignores trivia and locations; diagnostics must
             // still use nodes from the syntax tree being analyzed.
             if model.root().syntax().as_send() == ctx.root.syntax().as_send() {

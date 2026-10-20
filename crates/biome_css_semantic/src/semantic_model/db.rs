@@ -147,10 +147,19 @@ fn is_global_pseudo_identifier(selector: &CssPseudoClassIdentifier) -> bool {
         })
 }
 
-pub fn css_semantic_model<'db>(db: &'db dyn Db, file: &AnyParsedSource) -> &'db SemanticModel {
+/// Returns the cached semantic model of a parsed CSS source or snippet.
+///
+/// Returns `None` for a snippet that the current parse of its document doesn't
+/// contain anymore.
+pub fn css_semantic_model<'db>(
+    db: &'db dyn Db,
+    file: &AnyParsedSource,
+) -> Option<&'db SemanticModel> {
     match file {
-        AnyParsedSource::ParsedSource(s) => css_model_from_parsed_source(db, *s),
-        AnyParsedSource::ParsedSnippet(s) => css_model_from_parsed_snippet(db, s.resolve(db)),
+        AnyParsedSource::ParsedSource(s) => Some(css_model_from_parsed_source(db, *s)),
+        AnyParsedSource::ParsedSnippet(s) => s
+            .resolve(db)
+            .map(|snippet| css_model_from_parsed_snippet(db, snippet)),
     }
 }
 

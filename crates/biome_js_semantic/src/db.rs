@@ -29,14 +29,18 @@ pub fn semantic_model_from_snippet<'db>(
     semantic_model(&parsed.tree(), SemanticModelOptions::from(&source_type))
 }
 
+/// Returns the cached semantic model of a parsed JavaScript source or snippet.
+///
+/// Returns `None` for a snippet that the current parse of its document doesn't
+/// contain anymore.
 pub fn js_semantic_model<'db>(
     db: &'db dyn LanguageDb,
     file: &AnyParsedSource,
-) -> &'db SemanticModel {
+) -> Option<&'db SemanticModel> {
     match file {
-        AnyParsedSource::ParsedSource(source) => semantic_model_from_source(db, *source),
-        AnyParsedSource::ParsedSnippet(snippet) => {
-            semantic_model_from_snippet(db, snippet.resolve(db))
-        }
+        AnyParsedSource::ParsedSource(source) => Some(semantic_model_from_source(db, *source)),
+        AnyParsedSource::ParsedSnippet(snippet) => snippet
+            .resolve(db)
+            .map(|snippet| semantic_model_from_snippet(db, snippet)),
     }
 }

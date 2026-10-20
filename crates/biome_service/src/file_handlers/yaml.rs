@@ -564,7 +564,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
     };
 
-    let action_offset = parsed_source.diagnostic_offset(&workspace_db);
+    let action_offset = parsed_source.diagnostic_offset();
     analyze(&tree, filter, &analyzer_options, |signal| {
         if compute_actions {
             actions.extend(

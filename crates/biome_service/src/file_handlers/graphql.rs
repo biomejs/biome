@@ -660,7 +660,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         .with_project_layout(project_layout)
         .finish();
 
-    let action_offset = parsed_source.diagnostic_offset(&workspace_db);
+    let action_offset = parsed_source.diagnostic_offset();
     let filter = AnalysisFilter {
         categories,
         enabled_rules: Some(enabled_rules.as_slice()),

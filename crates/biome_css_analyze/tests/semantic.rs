@@ -168,7 +168,7 @@ fn semantic_queries_cache_offset_snippets() {
     let rule = RuleFilter::Rule("suspicious", "noDuplicateProperties");
     let snippet = source.snippets(db.as_ref())[0].to_ref(db.as_ref());
 
-    let ranges = analyze(&db, &root, Some(snippet.into()), rule);
+    let ranges = analyze(&db, &root, Some(snippet.clone().into()), rule);
     assert_eq!(ranges.len(), 1);
     assert_eq!(db.query_count("css_model_from_parsed_snippet"), 1);
     assert_eq!(analyze(&db, &root, Some(snippet.into()), rule), ranges);

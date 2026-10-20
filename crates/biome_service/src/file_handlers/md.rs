@@ -701,7 +701,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         range,
     };
 
-    let action_offset = parsed_source.diagnostic_offset(&workspace_db);
+    let action_offset = parsed_source.diagnostic_offset();
     let file_source = language.to_markdown_file_source().unwrap_or_default();
     analyze(&tree, filter, &analyzer_options, file_source, |signal| {
         if compute_actions {

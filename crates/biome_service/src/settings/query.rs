@@ -1,5 +1,5 @@
 use super::Settings;
-use crate::projects::{NestedPath, ProjectDb, ProjectInput};
+use crate::projects::{NestedPath, ProjectInput};
 use camino::Utf8Path;
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
@@ -70,9 +70,9 @@ impl SettingsQuerySelection {
         self.selection.clone()
     }
 
-    pub(crate) fn selected_settings(
+    pub(crate) fn selected_settings<Db: ?Sized + salsa::Database>(
         &self,
-        db: &dyn ProjectDb,
+        db: &Db,
         project: ProjectInput,
     ) -> SettingsIdentity {
         match &self.selection {

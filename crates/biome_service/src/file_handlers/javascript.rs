@@ -1028,7 +1028,10 @@ fn debug_control_flow(
     cursor: TextSize,
     workspace_db: WorkspaceDb,
 ) -> String {
-    js_control_flow_model(&workspace_db, &parse)
+    let Some(model) = js_control_flow_model(&workspace_db, &parse) else {
+        return String::new();
+    };
+    model
         .graphs()
         .filter(|graph| graph.node.text_trimmed_range().contains(cursor))
         .min_by_key(|graph| {
@@ -1205,12 +1208,13 @@ impl RawTypeCollector for DebugTypeCollector {
 }
 
 fn debug_semantic_model(
-    _path: &BiomePath,
+    path: &BiomePath,
     parse: AnyParsedSource,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
-    let model = js_semantic_model(&workspace_db, &parse);
-    Ok(model.to_string())
+    js_semantic_model(&workspace_db, &parse)
+        .map(ToString::to_string)
+        .ok_or_else(|| WorkspaceError::not_found(path.to_string()))
 }
 
 fn js_analyzer_services(
@@ -1234,8 +1238,8 @@ fn js_analyzer_services(
     let services = services.with_language_db(workspace_db.rc_language_db());
     match parsed_source {
         Some(source) => services
-            .with_parsed_source(*source)
-            .with_snippet_offset(source.diagnostic_offset(workspace_db)),
+            .with_parsed_source(source.clone())
+            .with_snippet_offset(source.diagnostic_offset()),
         None => services,
     }
 }
@@ -1255,7 +1259,7 @@ fn js_analyzer_services_for_fix(
         params.project_layout.clone(),
         source_type,
     )
-    .with_snippet_offset(params.parsed_source.diagnostic_offset(&params.workspace_db));
+    .with_snippet_offset(params.parsed_source.diagnostic_offset());
     #[cfg(feature = "html_embeds")]
     let services = services.with_embedded_data(params.embedded_data.clone());
 
@@ -1325,7 +1329,7 @@ pub(super) fn lint_with_inspector(
             let Some(language) = snippet.file_source(&params.workspace_db) else {
                 continue;
             };
-            let offset = snippet.content_offset(&params.workspace_db);
+            let offset = snippet.content_offset();
             let snippet_params = params.for_snippet(&snippet, language);
             let analyzer = if language.to_css_file_source().is_some() {
                 LintSnippetAnalyzer::new(
@@ -1362,7 +1366,7 @@ pub(super) fn lint_with_inspector(
         params.project_layout.clone(),
         files_source,
     )
-    .with_snippet_offset(params.parsed_source.diagnostic_offset(&params.workspace_db));
+    .with_snippet_offset(params.parsed_source.diagnostic_offset());
     #[cfg(feature = "html_embeds")]
     let services = services.with_embedded_data(params.embedded_data.clone());
 
@@ -1477,7 +1481,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             actions: Vec::new(),
         };
     };
-    let action_offset = parsed_source.diagnostic_offset(&workspace_db);
+    let action_offset = parsed_source.diagnostic_offset();
     let services = js_analyzer_services(
         &tree,
         Some(&parsed_source),
@@ -1818,7 +1822,7 @@ fn format_embedded(
         // tags for chunks that were actually parsed as embedded languages.
         let snippets: FxHashMap<TextRange, super::ParsedSnippetOrigin> = embedded_nodes
             .into_iter()
-            .map(|snippet| (snippet.content_range(&workspace_db), snippet))
+            .map(|snippet| (snippet.content_range(), snippet))
             .collect();
         let mut formatted = format_node(options, &tree, snippets.keys().copied().collect())?;
 
@@ -2018,7 +2022,7 @@ pub(crate) fn pull_diagnostics_and_actions(
         disabled_rules: &disabled_rules,
         range: None,
     };
-    let diagnostic_offset = parsed_source.diagnostic_offset(&workspace_db);
+    let diagnostic_offset = parsed_source.diagnostic_offset();
     let source_type = workspace_db
         .source_from_index(parsed_source.document_file_index(&workspace_db))
         .map_or(JsFileSource::try_from(path.as_path()).ok(), |file_source| {
