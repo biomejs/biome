@@ -34,7 +34,7 @@ pub use grit_built_in_functions::BuiltInFunction;
 pub use grit_context::{GritExecContext, GritQueryContext, GritTargetFile};
 pub use grit_pattern_matcher::pattern::{Pattern as GritPattern, State as GritQueryState};
 pub use grit_query::{
-    CreateFile, GritQuery, GritQueryEffect, GritQueryResult, Message, OutputFile,
+    CreateFile, GritQuery, GritQueryEffect, GritQueryResult, MatchCapture, Message, OutputFile,
 };
 pub use grit_resolved_pattern::GritResolvedPattern;
 pub use grit_target_language::{
