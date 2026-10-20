@@ -194,7 +194,7 @@ fn number_value(literal: &JsNumberLiteralExpression) -> Option<f64> {
 /// Returns `None` if `text` contains an escape sequence that [`unescape_js_string`] can't
 /// decode correctly: a legacy octal escape such as `\1` or `\01`, or an escape for half of a
 /// surrogate pair such as `\uD83D`.
-fn string_value(text: TokenText) -> Option<Text> {
+pub(crate) fn string_value(text: TokenText) -> Option<Text> {
     let mut chars = text.chars().peekable();
     while let Some(c) = chars.next() {
         if c != '\\' {
