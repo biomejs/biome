@@ -1,0 +1,6 @@
+language json
+
+`{ $key: $value }` where {
+  $key <: JsonMemberName(),
+  $value <: JsonStringValue()
+}

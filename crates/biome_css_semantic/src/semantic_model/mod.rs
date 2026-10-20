@@ -229,6 +229,27 @@ mod tests {
     }
 
     #[test]
+    fn test_scss_functions() {
+        let parse = parse_css(
+            r#"@function rem_from_px($px) { @return $px; }
+.card {
+  @function nested-spacing($n) { @return $n; }
+  padding: rem-from-px(16px);
+}"#,
+            CssFileSource::scss(),
+            CssParserOptions::default(),
+        );
+
+        let root = parse.tree();
+        let model = super::semantic_model(&root);
+
+        assert!(model.has_scss_function("rem_from_px"));
+        assert!(model.has_scss_function("rem-from-px"));
+        assert!(model.has_scss_function("nested_spacing"));
+        assert!(!model.has_scss_function("rem"));
+    }
+
+    #[test]
     fn test_empty_at_property() {
         let parse = parse_css(
             r#"@property --item-size {}"#,

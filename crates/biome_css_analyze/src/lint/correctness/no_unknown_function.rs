@@ -1,10 +1,9 @@
 use crate::fonts::is_function_keyword;
+use crate::services::semantic::Semantic;
 use crate::utils::is_custom_function;
-use biome_analyze::{
-    Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
-};
+use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
-use biome_css_syntax::{CssFunction, ScssFunctionAtRule};
+use biome_css_syntax::CssFunction;
 use biome_diagnostics::Severity;
 use biome_languages::CssFileSource;
 use biome_rowan::{AstNode, TextRange};
@@ -173,7 +172,7 @@ pub struct NoUnknownFunctionState {
 }
 
 impl Rule for NoUnknownFunction {
-    type Query = Ast<CssFunction>;
+    type Query = Semantic<CssFunction>;
     type State = NoUnknownFunctionState;
     type Signals = Option<Self::State>;
     type Options = NoUnknownFunctionOptions;
@@ -186,8 +185,8 @@ impl Rule for NoUnknownFunction {
         })?;
         let function_name = binding.text_trimmed();
 
-        // We don't have a semantic model yet, so we can't determine if functions are defined elsewhere.
-        // Therefore, we ignore these custom functions to prevent false detections.
+        // The semantic model doesn't track custom function definitions, which may also come
+        // from other files, so we ignore custom functions to prevent false detections.
         if is_custom_function(function_name) {
             return None;
         }
@@ -198,20 +197,7 @@ impl Rule for NoUnknownFunction {
 
         if ctx.source_type::<CssFileSource>().is_scss()
             && (is_scss_built_in_function(function_name)
-                || ctx
-                    .root()
-                    .syntax()
-                    .descendants()
-                    .filter_map(ScssFunctionAtRule::cast)
-                    .any(|function| {
-                        function
-                            .name()
-                            .ok()
-                            .and_then(|name| name.value_token().ok())
-                            .is_some_and(|name| {
-                                scss_function_names_equal(name.text_trimmed(), function_name)
-                            })
-                    }))
+                || ctx.model().has_scss_function(function_name))
         {
             return None;
         }
@@ -262,10 +248,6 @@ fn compare_scss_function_names(left: &str, right: &str) -> Ordering {
 
 fn normalize_scss_function_name_byte(byte: u8) -> u8 {
     if byte == b'_' { b'-' } else { byte }
-}
-
-fn scss_function_names_equal(left: &str, right: &str) -> bool {
-    compare_scss_function_names(left, right) == Ordering::Equal
 }
 
 fn should_ignore(name: &str, options: &NoUnknownFunctionOptions) -> bool {
