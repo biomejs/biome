@@ -780,6 +780,35 @@ fn test_resolve_type_definitions() {
             "{base_dir}/node_modules/@types/react/index.d.ts"
         )))
     );
+
+    assert_eq!(
+        resolve("own-typings", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/node_modules/own-typings/typings/own-typings.d.ts"
+        )))
+    );
+}
+
+#[test]
+fn test_resolve_type_definitions_with_stub_in_explicit_type_roots() {
+    let base_dir = get_fixtures_path("resolver_cases_5");
+    let fs = OsFileSystem::new(base_dir.clone());
+
+    let options = ResolveOptions {
+        condition_names: &["types", "import", "default"],
+        default_files: &["index"],
+        extensions: &["ts", "js"],
+        resolve_types: true,
+        type_roots: TypeRoots::Explicit(&["node_modules/@types"]),
+        ..Default::default()
+    };
+
+    assert_eq!(
+        resolve("own-typings", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/node_modules/own-typings/typings/own-typings.d.ts"
+        )))
+    );
 }
 
 #[test]
