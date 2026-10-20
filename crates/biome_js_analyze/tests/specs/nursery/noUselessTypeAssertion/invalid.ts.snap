@@ -1,0 +1,1021 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+
+// Non-null assertions on values that can't be null or undefined.
+const literal = 3;
+const nonNullLiteral = literal!;
+
+function nonNullParameter(x: number): number {
+	return x!;
+}
+
+declare const declared: string;
+declared!;
+(declared)!;
+declared! /* trailing */;
+
+declare const nested: { value: string };
+nested.value!;
+
+declare const withIndex: { known: string; [key: string]: string };
+(withIndex as { known: string }).known!;
+
+function constrained<T extends string>(value: T) {
+	return value!;
+}
+
+class Example {
+	definite!: string;
+
+	method() {
+		return this.definite!;
+	}
+}
+
+let definite!: number;
+definite!;
+
+declare let ambient: number;
+ambient!;
+
+declare const never: never;
+never!;
+
+// Non-null assertions on assignment targets.
+let assigned: number | undefined;
+assigned! = 1;
+
+declare const target: { value?: number };
+target.value! = 1;
+
+// Type assertions that keep the same type.
+const angleBracket = <number>(3 + 5);
+
+type Alias = number;
+const aliased = (3 + 5) as Alias;
+
+declare function getText(): string;
+getText() as string;
+<string>getText();
+(getText()) as string;
+getText() /* comment */ as string;
+
+declare function getUnion(): string | number;
+getUnion() as string | number;
+
+declare function getOptional(): string | undefined;
+getOptional() as string | undefined;
+
+declare function getBig(): bigint;
+getBig() as bigint;
+
+declare function getSymbol(): symbol;
+getSymbol() as symbol;
+
+declare function getBoolean(): boolean;
+getBoolean() as boolean;
+
+async function awaited(promise: Promise<number>) {
+	return (await getNumberAsync()) as number;
+}
+declare function getNumberAsync(): Promise<number>;
+
+declare const a: number;
+declare const b: number;
+(a === b) as boolean;
+(getText() + getText()) as string;
+(getText() as string) as string;
+
+// The fix keeps the parentheses that the operand needs.
+const power = getText() + getText() as string < "b";
+async function awaitedPower() {
+	return await getNumberAsync() as number ** 2;
+}
+
+// Chained type assertions that end at the original type.
+getText() as unknown as string;
+<string>(<unknown>getText());
+(getText() as unknown) as string;
+(3 + 5) as unknown as number;
+const comparison = "a" < <string>(getText() + getText() as unknown);
+
+```
+
+# Diagnostics
+```
+invalid.ts:5:24 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This non-null assertion is unnecessary.
+  
+    3 │ // Non-null assertions on values that can't be null or undefined.
+    4 │ const literal = 3;
+  > 5 │ const nonNullLiteral = literal!;
+      │                        ^^^^^^^^
+    6 │ 
+    7 │ function nonNullParameter(x: number): number {
+  
+  i This value can't be null or undefined, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the non-null assertion.
+  
+    5 │ const·nonNullLiteral·=·literal!;
+      │                               - 
+
+```
+
+```
+invalid.ts:8:9 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This non-null assertion is unnecessary.
+  
+     7 │ function nonNullParameter(x: number): number {
+   > 8 │ 	return x!;
+       │ 	       ^^
+     9 │ }
+    10 │ 
+  
+  i This value can't be null or undefined, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the non-null assertion.
+  
+    8 │ → return·x!;
+      │           - 
+
+```
+
+```
+invalid.ts:12:1 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This non-null assertion is unnecessary.
+  
+    11 │ declare const declared: string;
+  > 12 │ declared!;
+       │ ^^^^^^^^^
+    13 │ (declared)!;
+    14 │ declared! /* trailing */;
+  
+  i This value can't be null or undefined, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the non-null assertion.
+  
+    12 │ declared!;
+       │         - 
+
+```
+
+```
+invalid.ts:13:1 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This non-null assertion is unnecessary.
+  
+    11 │ declare const declared: string;
+    12 │ declared!;
+  > 13 │ (declared)!;
+       │ ^^^^^^^^^^^
+    14 │ declared! /* trailing */;
+    15 │ 
+  
+  i This value can't be null or undefined, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the non-null assertion.
+  
+    13 │ (declared)!;
+       │           - 
+
+```
+
+```
+invalid.ts:14:1 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This non-null assertion is unnecessary.
+  
+    12 │ declared!;
+    13 │ (declared)!;
+  > 14 │ declared! /* trailing */;
+       │ ^^^^^^^^^
+    15 │ 
+    16 │ declare const nested: { value: string };
+  
+  i This value can't be null or undefined, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the non-null assertion.
+  
+    14 │ declared!·/*·trailing·*/;
+       │         -                
+
+```
+
+```
+invalid.ts:17:1 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This non-null assertion is unnecessary.
+  
+    16 │ declare const nested: { value: string };
+  > 17 │ nested.value!;
+       │ ^^^^^^^^^^^^^
+    18 │ 
+    19 │ declare const withIndex: { known: string; [key: string]: string };
+  
+  i This value can't be null or undefined, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the non-null assertion.
+  
+    17 │ nested.value!;
+       │             - 
+
+```
+
+```
+invalid.ts:20:1 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This non-null assertion is unnecessary.
+  
+    19 │ declare const withIndex: { known: string; [key: string]: string };
+  > 20 │ (withIndex as { known: string }).known!;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ 
+    22 │ function constrained<T extends string>(value: T) {
+  
+  i This value can't be null or undefined, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the non-null assertion.
+  
+    20 │ (withIndex·as·{·known:·string·}).known!;
+       │                                       - 
+
+```
+
+```
+invalid.ts:23:9 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This non-null assertion is unnecessary.
+  
+    22 │ function constrained<T extends string>(value: T) {
+  > 23 │ 	return value!;
+       │ 	       ^^^^^^
+    24 │ }
+    25 │ 
+  
+  i This value can't be null or undefined, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the non-null assertion.
+  
+    23 │ → return·value!;
+       │               - 
+
+```
+
+```
+invalid.ts:30:10 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This non-null assertion is unnecessary.
+  
+    29 │ 	method() {
+  > 30 │ 		return this.definite!;
+       │ 		       ^^^^^^^^^^^^^^
+    31 │ 	}
+    32 │ }
+  
+  i This value can't be null or undefined, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the non-null assertion.
+  
+    30 │ → → return·this.definite!;
+       │                         - 
+
+```
+
+```
+invalid.ts:35:1 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This non-null assertion is unnecessary.
+  
+    34 │ let definite!: number;
+  > 35 │ definite!;
+       │ ^^^^^^^^^
+    36 │ 
+    37 │ declare let ambient: number;
+  
+  i This value can't be null or undefined, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the non-null assertion.
+  
+    35 │ definite!;
+       │         - 
+
+```
+
+```
+invalid.ts:38:1 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This non-null assertion is unnecessary.
+  
+    37 │ declare let ambient: number;
+  > 38 │ ambient!;
+       │ ^^^^^^^^
+    39 │ 
+    40 │ declare const never: never;
+  
+  i This value can't be null or undefined, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the non-null assertion.
+  
+    38 │ ambient!;
+       │        - 
+
+```
+
+```
+invalid.ts:41:1 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This non-null assertion is unnecessary.
+  
+    40 │ declare const never: never;
+  > 41 │ never!;
+       │ ^^^^^^
+    42 │ 
+    43 │ // Non-null assertions on assignment targets.
+  
+  i This value can't be null or undefined, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the non-null assertion.
+  
+    41 │ never!;
+       │      - 
+
+```
+
+```
+invalid.ts:45:1 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This non-null assertion is unnecessary.
+  
+    43 │ // Non-null assertions on assignment targets.
+    44 │ let assigned: number | undefined;
+  > 45 │ assigned! = 1;
+       │ ^^^^^^^^^
+    46 │ 
+    47 │ declare const target: { value?: number };
+  
+  i An assignment replaces the current value without reading it, so the value doesn't need to be non-null.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the non-null assertion.
+  
+    45 │ assigned!·=·1;
+       │         -     
+
+```
+
+```
+invalid.ts:48:1 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This non-null assertion is unnecessary.
+  
+    47 │ declare const target: { value?: number };
+  > 48 │ target.value! = 1;
+       │ ^^^^^^^^^^^^^
+    49 │ 
+    50 │ // Type assertions that keep the same type.
+  
+  i An assignment replaces the current value without reading it, so the value doesn't need to be non-null.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the non-null assertion.
+  
+    48 │ target.value!·=·1;
+       │             -     
+
+```
+
+```
+invalid.ts:51:22 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type assertion is unnecessary.
+  
+    50 │ // Type assertions that keep the same type.
+  > 51 │ const angleBracket = <number>(3 + 5);
+       │                      ^^^^^^^^
+    52 │ 
+    53 │ type Alias = number;
+  
+  i The expression already has this type, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the type assertion.
+  
+    51 │ const·angleBracket·=·<number>(3·+·5);
+       │                      --------        
+
+```
+
+```
+invalid.ts:54:25 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type assertion is unnecessary.
+  
+    53 │ type Alias = number;
+  > 54 │ const aliased = (3 + 5) as Alias;
+       │                         ^^^^^^^^
+    55 │ 
+    56 │ declare function getText(): string;
+  
+  i The expression already has this type, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the type assertion.
+  
+    54 │ const·aliased·=·(3·+·5)·as·Alias;
+       │                        --------- 
+
+```
+
+```
+invalid.ts:57:11 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type assertion is unnecessary.
+  
+    56 │ declare function getText(): string;
+  > 57 │ getText() as string;
+       │           ^^^^^^^^^
+    58 │ <string>getText();
+    59 │ (getText()) as string;
+  
+  i The expression already has this type, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the type assertion.
+  
+    57 │ getText()·as·string;
+       │          ---------- 
+
+```
+
+```
+invalid.ts:58:1 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type assertion is unnecessary.
+  
+    56 │ declare function getText(): string;
+    57 │ getText() as string;
+  > 58 │ <string>getText();
+       │ ^^^^^^^^
+    59 │ (getText()) as string;
+    60 │ getText() /* comment */ as string;
+  
+  i The expression already has this type, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the type assertion.
+  
+    58 │ <string>getText();
+       │ --------          
+
+```
+
+```
+invalid.ts:59:13 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type assertion is unnecessary.
+  
+    57 │ getText() as string;
+    58 │ <string>getText();
+  > 59 │ (getText()) as string;
+       │             ^^^^^^^^^
+    60 │ getText() /* comment */ as string;
+    61 │ 
+  
+  i The expression already has this type, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the type assertion.
+  
+    59 │ (getText())·as·string;
+       │            ---------- 
+
+```
+
+```
+invalid.ts:60:25 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type assertion is unnecessary.
+  
+    58 │ <string>getText();
+    59 │ (getText()) as string;
+  > 60 │ getText() /* comment */ as string;
+       │                         ^^^^^^^^^
+    61 │ 
+    62 │ declare function getUnion(): string | number;
+  
+  i The expression already has this type, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the type assertion.
+  
+    60 │ getText()·/*·comment·*/·as·string;
+       │                        ---------- 
+
+```
+
+```
+invalid.ts:63:12 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type assertion is unnecessary.
+  
+    62 │ declare function getUnion(): string | number;
+  > 63 │ getUnion() as string | number;
+       │            ^^^^^^^^^^^^^^^^^^
+    64 │ 
+    65 │ declare function getOptional(): string | undefined;
+  
+  i The expression already has this type, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the type assertion.
+  
+    63 │ getUnion()·as·string·|·number;
+       │           ------------------- 
+
+```
+
+```
+invalid.ts:66:15 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type assertion is unnecessary.
+  
+    65 │ declare function getOptional(): string | undefined;
+  > 66 │ getOptional() as string | undefined;
+       │               ^^^^^^^^^^^^^^^^^^^^^
+    67 │ 
+    68 │ declare function getBig(): bigint;
+  
+  i The expression already has this type, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the type assertion.
+  
+    66 │ getOptional()·as·string·|·undefined;
+       │              ---------------------- 
+
+```
+
+```
+invalid.ts:69:10 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type assertion is unnecessary.
+  
+    68 │ declare function getBig(): bigint;
+  > 69 │ getBig() as bigint;
+       │          ^^^^^^^^^
+    70 │ 
+    71 │ declare function getSymbol(): symbol;
+  
+  i The expression already has this type, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the type assertion.
+  
+    69 │ getBig()·as·bigint;
+       │         ---------- 
+
+```
+
+```
+invalid.ts:72:13 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type assertion is unnecessary.
+  
+    71 │ declare function getSymbol(): symbol;
+  > 72 │ getSymbol() as symbol;
+       │             ^^^^^^^^^
+    73 │ 
+    74 │ declare function getBoolean(): boolean;
+  
+  i The expression already has this type, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the type assertion.
+  
+    72 │ getSymbol()·as·symbol;
+       │            ---------- 
+
+```
+
+```
+invalid.ts:75:14 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type assertion is unnecessary.
+  
+    74 │ declare function getBoolean(): boolean;
+  > 75 │ getBoolean() as boolean;
+       │              ^^^^^^^^^^
+    76 │ 
+    77 │ async function awaited(promise: Promise<number>) {
+  
+  i The expression already has this type, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the type assertion.
+  
+    75 │ getBoolean()·as·boolean;
+       │             ----------- 
+
+```
+
+```
+invalid.ts:78:34 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type assertion is unnecessary.
+  
+    77 │ async function awaited(promise: Promise<number>) {
+  > 78 │ 	return (await getNumberAsync()) as number;
+       │ 	                                ^^^^^^^^^
+    79 │ }
+    80 │ declare function getNumberAsync(): Promise<number>;
+  
+  i The expression already has this type, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the type assertion.
+  
+    78 │ → return·(await·getNumberAsync())·as·number;
+       │                                  ---------- 
+
+```
+
+```
+invalid.ts:84:11 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type assertion is unnecessary.
+  
+    82 │ declare const a: number;
+    83 │ declare const b: number;
+  > 84 │ (a === b) as boolean;
+       │           ^^^^^^^^^^
+    85 │ (getText() + getText()) as string;
+    86 │ (getText() as string) as string;
+  
+  i The expression already has this type, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the type assertion.
+  
+    84 │ (a·===·b)·as·boolean;
+       │          ----------- 
+
+```
+
+```
+invalid.ts:85:25 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type assertion is unnecessary.
+  
+    83 │ declare const b: number;
+    84 │ (a === b) as boolean;
+  > 85 │ (getText() + getText()) as string;
+       │                         ^^^^^^^^^
+    86 │ (getText() as string) as string;
+    87 │ 
+  
+  i The expression already has this type, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the type assertion.
+  
+    85 │ (getText()·+·getText())·as·string;
+       │                        ---------- 
+
+```
+
+```
+invalid.ts:86:23 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type assertion is unnecessary.
+  
+    84 │ (a === b) as boolean;
+    85 │ (getText() + getText()) as string;
+  > 86 │ (getText() as string) as string;
+       │                       ^^^^^^^^^
+    87 │ 
+    88 │ // The fix keeps the parentheses that the operand needs.
+  
+  i The expression already has this type, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the type assertion.
+  
+    86 │ (getText()·as·string)·as·string;
+       │                      ---------- 
+
+```
+
+```
+invalid.ts:86:12 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type assertion is unnecessary.
+  
+    84 │ (a === b) as boolean;
+    85 │ (getText() + getText()) as string;
+  > 86 │ (getText() as string) as string;
+       │            ^^^^^^^^^
+    87 │ 
+    88 │ // The fix keeps the parentheses that the operand needs.
+  
+  i The expression already has this type, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the type assertion.
+  
+    86 │ (getText()·as·string)·as·string;
+       │           ----------            
+
+```
+
+```
+invalid.ts:89:37 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type assertion is unnecessary.
+  
+    88 │ // The fix keeps the parentheses that the operand needs.
+  > 89 │ const power = getText() + getText() as string < "b";
+       │                                     ^^^^^^^^^
+    90 │ async function awaitedPower() {
+    91 │ 	return await getNumberAsync() as number ** 2;
+  
+  i The expression already has this type, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the type assertion.
+  
+     87  87 │   
+     88  88 │   // The fix keeps the parentheses that the operand needs.
+     89     │ - const·power·=·getText()·+·getText()·as·string·<·"b";
+         89 │ + const·power·=·(getText()·+·getText())·<·"b";
+     90  90 │   async function awaitedPower() {
+     91  91 │   	return await getNumberAsync() as number ** 2;
+  
+
+```
+
+```
+invalid.ts:91:32 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This type assertion is unnecessary.
+  
+    89 │ const power = getText() + getText() as string < "b";
+    90 │ async function awaitedPower() {
+  > 91 │ 	return await getNumberAsync() as number ** 2;
+       │ 	                              ^^^^^^^^^
+    92 │ }
+    93 │ 
+  
+  i The expression already has this type, so the assertion has no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the type assertion.
+  
+     89  89 │   const power = getText() + getText() as string < "b";
+     90  90 │   async function awaitedPower() {
+     91     │ - → return·await·getNumberAsync()·as·number·**·2;
+         91 │ + → return·(await·getNumberAsync())·**·2;
+     92  92 │   }
+     93  93 │   
+  
+
+```
+
+```
+invalid.ts:95:1 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These type assertions are unnecessary.
+  
+    94 │ // Chained type assertions that end at the original type.
+  > 95 │ getText() as unknown as string;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    96 │ <string>(<unknown>getText());
+    97 │ (getText() as unknown) as string;
+  
+  i The original expression already has the final type, so the assertions have no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the type assertions.
+  
+    95 │ getText()·as·unknown·as·string;
+       │          --------------------- 
+
+```
+
+```
+invalid.ts:96:1 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These type assertions are unnecessary.
+  
+    94 │ // Chained type assertions that end at the original type.
+    95 │ getText() as unknown as string;
+  > 96 │ <string>(<unknown>getText());
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    97 │ (getText() as unknown) as string;
+    98 │ (3 + 5) as unknown as number;
+  
+  i The original expression already has the final type, so the assertions have no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the type assertions.
+  
+    96 │ <string>(<unknown>getText());
+       │ ------------------        -  
+
+```
+
+```
+invalid.ts:97:1 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These type assertions are unnecessary.
+  
+    95 │ getText() as unknown as string;
+    96 │ <string>(<unknown>getText());
+  > 97 │ (getText() as unknown) as string;
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    98 │ (3 + 5) as unknown as number;
+    99 │ const comparison = "a" < <string>(getText() + getText() as unknown);
+  
+  i The original expression already has the final type, so the assertions have no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the type assertions.
+  
+    97 │ (getText()·as·unknown)·as·string;
+       │ -        ------------ ---------- 
+
+```
+
+```
+invalid.ts:98:1 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These type assertions are unnecessary.
+  
+     96 │ <string>(<unknown>getText());
+     97 │ (getText() as unknown) as string;
+   > 98 │ (3 + 5) as unknown as number;
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     99 │ const comparison = "a" < <string>(getText() + getText() as unknown);
+    100 │ 
+  
+  i The original expression already has the final type, so the assertions have no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the type assertions.
+  
+    98 │ (3·+·5)·as·unknown·as·number;
+       │        --------------------- 
+
+```
+
+```
+invalid.ts:99:26 lint/nursery/noUselessTypeAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! These type assertions are unnecessary.
+  
+     97 │ (getText() as unknown) as string;
+     98 │ (3 + 5) as unknown as number;
+   > 99 │ const comparison = "a" < <string>(getText() + getText() as unknown);
+        │                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    100 │ 
+  
+  i The original expression already has the final type, so the assertions have no effect.
+  
+  i Unnecessary assertions add noise and make the assertions that matter harder to notice.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the type assertions.
+  
+    99 │ const·comparison·=·"a"·<·<string>(getText()·+·getText()·as·unknown);
+       │                          --------                      -----------  
+
+```
