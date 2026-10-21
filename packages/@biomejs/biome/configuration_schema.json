@@ -7859,6 +7859,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueVForTemplateKeyOnChildConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueVForTemplateKeyOnChildOptions" }
+			]
+		},
+		"NoVueVForTemplateKeyOnChildOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueVHtmlConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8712,6 +8722,13 @@
 					"description": "Disallow template refs that are never used.\nSee https://biomejs.dev/linter/rules/no-vue-unused-refs",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueUnusedRefsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueVForTemplateKeyOnChild": {
+					"description": "Disallow placing the key of a \\<template v-for> on its child elements.\nSee https://biomejs.dev/linter/rules/no-vue-v-for-template-key-on-child",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueVForTemplateKeyOnChildConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14270,6 +14287,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueUnusedRefsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueVForTemplateKeyOnChildOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueVForTemplateKeyOnChildOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

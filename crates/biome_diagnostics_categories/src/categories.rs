@@ -349,6 +349,7 @@ define_categories! {
     "lint/nursery/noVueUndeclaredDirectives": "https://biomejs.dev/linter/rules/no-vue-undeclared-directives",
     "lint/nursery/noVueUnusedEmitDeclarations": "https://biomejs.dev/linter/rules/no-vue-unused-emit-declarations",
     "lint/nursery/noVueUnusedRefs": "https://biomejs.dev/linter/rules/no-vue-unused-refs",
+    "lint/nursery/noVueVForTemplateKeyOnChild": "https://biomejs.dev/linter/rules/no-vue-v-for-template-key-on-child",
     "lint/nursery/noVueVHtml": "https://biomejs.dev/linter/rules/no-vue-v-html",
     "lint/nursery/noVueVOnNumberValues": "https://biomejs.dev/linter/rules/no-vue-v-on-number-values",
     "lint/nursery/noVueVText": "https://biomejs.dev/linter/rules/no-vue-v-text",

@@ -3443,6 +3443,11 @@ export interface Nursery {
 	 */
 	noVueUnusedRefs?: NoVueUnusedRefsConfiguration;
 	/**
+	 * Disallow placing the key of a \<template v-for> on its child elements.
+	 * See https://biomejs.dev/linter/rules/no-vue-v-for-template-key-on-child
+	 */
+	noVueVForTemplateKeyOnChild?: NoVueVForTemplateKeyOnChildConfiguration;
+	/**
 	 * Disallow the use of Vue's v-html directive.
 	 * See https://biomejs.dev/linter/rules/no-vue-v-html
 	 */
@@ -6315,6 +6320,9 @@ export type NoVueUnusedEmitDeclarationsConfiguration =
 export type NoVueUnusedRefsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUnusedRefsOptions;
+export type NoVueVForTemplateKeyOnChildConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueVForTemplateKeyOnChildOptions;
 export type NoVueVHtmlConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueVHtmlOptions;
@@ -9137,6 +9145,10 @@ export interface RuleWithNoVueUnusedRefsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUnusedRefsOptions;
 }
+export interface RuleWithNoVueVForTemplateKeyOnChildOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueVForTemplateKeyOnChildOptions;
+}
 export interface RuleWithNoVueVHtmlOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueVHtmlOptions;
@@ -11764,6 +11776,7 @@ export interface NoVueUndeclaredDirectivesOptions {
 }
 export type NoVueUnusedEmitDeclarationsOptions = {};
 export type NoVueUnusedRefsOptions = {};
+export type NoVueVForTemplateKeyOnChildOptions = {};
 export type NoVueVHtmlOptions = {};
 export type NoVueVTextOptions = {};
 export type NoVueVTextVHtmlOnComponentOptions = {};
@@ -13568,6 +13581,7 @@ export type Category =
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueUnusedEmitDeclarations"
 	| "lint/nursery/noVueUnusedRefs"
+	| "lint/nursery/noVueVForTemplateKeyOnChild"
 	| "lint/nursery/noVueVHtml"
 	| "lint/nursery/noVueVOnNumberValues"
 	| "lint/nursery/noVueVText"
