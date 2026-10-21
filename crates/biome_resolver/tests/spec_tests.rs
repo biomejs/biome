@@ -787,6 +787,13 @@ fn test_resolve_type_definitions() {
             "{base_dir}/node_modules/own-typings/typings/own-typings.d.ts"
         )))
     );
+
+    assert_eq!(
+        resolve("invalid-types-exports", &base_dir, &fs, &options),
+        Ok(Utf8PathBuf::from(format!(
+            "{base_dir}/node_modules/invalid-types-exports/index.d.ts"
+        )))
+    );
 }
 
 #[test]
