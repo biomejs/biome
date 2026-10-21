@@ -1,0 +1,327 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { createApp, defineComponent } from "vue";
+
+defineComponent({
+	setup: async function (props, { expose }) {
+		await doSomething();
+		expose({});
+	},
+});
+
+defineComponent({
+	setup: async (props, context) => {
+		await doSomething();
+		context.expose({});
+	},
+});
+
+createApp({
+	async setup(props, { expose }) {
+		await doSomething();
+		expose({});
+	},
+});
+
+defineComponent(
+	async (props, { expose }) => {
+		await doSomething();
+		expose({});
+	},
+	{ props: ["value"] },
+);
+
+// The `await` is inside a block that comes before the call.
+defineComponent({
+	async setup(props, { expose }) {
+		if (shouldLoad) {
+			await doSomething();
+		}
+		expose({});
+	},
+});
+
+// `for await` pauses `setup()` too.
+defineComponent({
+	async setup(props, { expose }) {
+		for await (const item of items) {
+		}
+		expose({});
+	},
+});
+
+// The argument is computed after the pause.
+defineComponent({
+	async setup(props, { expose }) {
+		expose(await load());
+	},
+});
+
+// Every call after the pause is reported.
+defineComponent({
+	async setup(props, { expose }) {
+		await doSomething();
+		expose({});
+		expose({});
+	},
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:7:3 lint/nursery/noVueExposeAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expose() call comes after an await, so it runs too late.
+  
+    5 │ 	setup: async function (props, { expose }) {
+    6 │ 		await doSomething();
+  > 7 │ 		expose({});
+      │ 		^^^^^^^^^^
+    8 │ 	},
+    9 │ });
+  
+  i The component's setup code pauses here. A parent component might not receive the exposed properties.
+  
+    4 │ defineComponent({
+    5 │ 	setup: async function (props, { expose }) {
+  > 6 │ 		await doSomething();
+      │ 		^^^^^
+    7 │ 		expose({});
+    8 │ 	},
+  
+  i Call expose() before the first await.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:3 lint/nursery/noVueExposeAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expose() call comes after an await, so it runs too late.
+  
+    12 │ 	setup: async (props, context) => {
+    13 │ 		await doSomething();
+  > 14 │ 		context.expose({});
+       │ 		^^^^^^^^^^^^^^^^^^
+    15 │ 	},
+    16 │ });
+  
+  i The component's setup code pauses here. A parent component might not receive the exposed properties.
+  
+    11 │ defineComponent({
+    12 │ 	setup: async (props, context) => {
+  > 13 │ 		await doSomething();
+       │ 		^^^^^
+    14 │ 		context.expose({});
+    15 │ 	},
+  
+  i Call expose() before the first await.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:21:3 lint/nursery/noVueExposeAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expose() call comes after an await, so it runs too late.
+  
+    19 │ 	async setup(props, { expose }) {
+    20 │ 		await doSomething();
+  > 21 │ 		expose({});
+       │ 		^^^^^^^^^^
+    22 │ 	},
+    23 │ });
+  
+  i The component's setup code pauses here. A parent component might not receive the exposed properties.
+  
+    18 │ createApp({
+    19 │ 	async setup(props, { expose }) {
+  > 20 │ 		await doSomething();
+       │ 		^^^^^
+    21 │ 		expose({});
+    22 │ 	},
+  
+  i Call expose() before the first await.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:3 lint/nursery/noVueExposeAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expose() call comes after an await, so it runs too late.
+  
+    26 │ 	async (props, { expose }) => {
+    27 │ 		await doSomething();
+  > 28 │ 		expose({});
+       │ 		^^^^^^^^^^
+    29 │ 	},
+    30 │ 	{ props: ["value"] },
+  
+  i The component's setup code pauses here. A parent component might not receive the exposed properties.
+  
+    25 │ defineComponent(
+    26 │ 	async (props, { expose }) => {
+  > 27 │ 		await doSomething();
+       │ 		^^^^^
+    28 │ 		expose({});
+    29 │ 	},
+  
+  i Call expose() before the first await.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:3 lint/nursery/noVueExposeAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expose() call comes after an await, so it runs too late.
+  
+    37 │ 			await doSomething();
+    38 │ 		}
+  > 39 │ 		expose({});
+       │ 		^^^^^^^^^^
+    40 │ 	},
+    41 │ });
+  
+  i The component's setup code pauses here. A parent component might not receive the exposed properties.
+  
+    35 │ 	async setup(props, { expose }) {
+    36 │ 		if (shouldLoad) {
+  > 37 │ 			await doSomething();
+       │ 			^^^^^
+    38 │ 		}
+    39 │ 		expose({});
+  
+  i Call expose() before the first await.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:48:3 lint/nursery/noVueExposeAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expose() call comes after an await, so it runs too late.
+  
+    46 │ 		for await (const item of items) {
+    47 │ 		}
+  > 48 │ 		expose({});
+       │ 		^^^^^^^^^^
+    49 │ 	},
+    50 │ });
+  
+  i The component's setup code pauses here. A parent component might not receive the exposed properties.
+  
+    44 │ defineComponent({
+    45 │ 	async setup(props, { expose }) {
+  > 46 │ 		for await (const item of items) {
+       │ 		    ^^^^^
+    47 │ 		}
+    48 │ 		expose({});
+  
+  i Call expose() before the first await.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:55:3 lint/nursery/noVueExposeAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expose() call comes after an await, so it runs too late.
+  
+    53 │ defineComponent({
+    54 │ 	async setup(props, { expose }) {
+  > 55 │ 		expose(await load());
+       │ 		^^^^^^^^^^^^^^^^^^^^
+    56 │ 	},
+    57 │ });
+  
+  i The component's setup code pauses here. A parent component might not receive the exposed properties.
+  
+    53 │ defineComponent({
+    54 │ 	async setup(props, { expose }) {
+  > 55 │ 		expose(await load());
+       │ 		       ^^^^^
+    56 │ 	},
+    57 │ });
+  
+  i Call expose() before the first await.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:63:3 lint/nursery/noVueExposeAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expose() call comes after an await, so it runs too late.
+  
+    61 │ 	async setup(props, { expose }) {
+    62 │ 		await doSomething();
+  > 63 │ 		expose({});
+       │ 		^^^^^^^^^^
+    64 │ 		expose({});
+    65 │ 	},
+  
+  i The component's setup code pauses here. A parent component might not receive the exposed properties.
+  
+    60 │ defineComponent({
+    61 │ 	async setup(props, { expose }) {
+  > 62 │ 		await doSomething();
+       │ 		^^^^^
+    63 │ 		expose({});
+    64 │ 		expose({});
+  
+  i Call expose() before the first await.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:64:3 lint/nursery/noVueExposeAfterAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expose() call comes after an await, so it runs too late.
+  
+    62 │ 		await doSomething();
+    63 │ 		expose({});
+  > 64 │ 		expose({});
+       │ 		^^^^^^^^^^
+    65 │ 	},
+    66 │ });
+  
+  i The component's setup code pauses here. A parent component might not receive the exposed properties.
+  
+    60 │ defineComponent({
+    61 │ 	async setup(props, { expose }) {
+  > 62 │ 		await doSomething();
+       │ 		^^^^^
+    63 │ 		expose({});
+    64 │ 		expose({});
+  
+  i Call expose() before the first await.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
