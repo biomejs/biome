@@ -509,6 +509,16 @@ impl WorkspaceServer {
         }
     }
 
+    /// Forgets that the files of `client` were closed. See
+    /// [WorkspaceServerWithDb::close_client_files].
+    ///
+    /// Call this once no request of the client can run anymore, such as when
+    /// the session of a connection is dropped, so that the workspace doesn't
+    /// keep a record of every client that disconnected.
+    pub fn forget_closed_client(&self, client: ClientId) {
+        self.closed_clients.lock().remove(&client);
+    }
+
     /// Starts the watcher.
     ///
     /// This method will not return until the watcher stops.
@@ -2748,7 +2758,7 @@ impl WorkspaceServerWithDb<'_> {
 impl WorkspaceServerWithDb<'_> {
     /// Closes the files that the client of this workspace has open, as when it
     /// disconnects. Interrupted operations are retried. The files that the
-    /// client opens or changes afterwards aren't kept.
+    /// client opens or changes afterward aren't kept.
     ///
     /// Returns the first error, after attempting to close every file.
     pub fn close_client_files(&self) -> Result<(), WorkspaceError> {

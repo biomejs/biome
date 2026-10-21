@@ -36,16 +36,16 @@ use papaya::{HashMap, HashSet};
 use parking_lot::RwLock;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use serde_json::Value;
-use std::sync::Arc;
 use std::sync::atomic::Ordering;
 use std::sync::atomic::{AtomicBool, AtomicI32};
+use std::sync::{Arc, OnceLock, Weak};
 use std::time::Duration;
 use tokio::spawn;
 use tokio::sync::Notify;
 use tokio::sync::OnceCell;
 use tokio::sync::RwLock as TokioRwLock;
 use tokio::sync::watch;
-use tokio::task::spawn_blocking;
+use tokio::task::{AbortHandle, spawn_blocking};
 use tokio::time::sleep;
 use tower_lsp_server::Client;
 use tower_lsp_server::ls_types::{
@@ -148,6 +148,10 @@ pub(crate) struct Session {
     /// all refreshed.
     service_rx: watch::Receiver<ServiceNotification>,
 
+    /// The task that refreshes the diagnostics of the open documents when the
+    /// workspace updates its index. It ends with the session.
+    diagnostics_refresh: OnceLock<AbortHandle>,
+
     /// Lock used to synchronize multiple atomic operations to load the configuration file
     loading_operations:
         TokioRwLock<FxHashMap<Utf8PathBuf, tokio::sync::broadcast::Sender<ConfigurationStatus>>>,
@@ -244,6 +248,19 @@ impl CapabilitySet {
     }
 }
 
+impl Drop for Session {
+    /// Forgets the client of the session in the workspace, and stops the
+    /// refresh of its diagnostics. No request of the session can run anymore,
+    /// because each of them holds the session.
+    fn drop(&mut self) {
+        self.workspace
+            .forget_closed_client(ClientId::new(self.key.0));
+        if let Some(task) = self.diagnostics_refresh.get() {
+            task.abort();
+        }
+    }
+}
+
 impl Session {
     pub(crate) fn new(
         key: SessionKey,
@@ -269,6 +286,7 @@ impl Session {
             notified_broken_configuration: Default::default(),
             initialized: AtomicBool::new(false),
             service_rx,
+            diagnostics_refresh: OnceLock::new(),
             loading_operations: Default::default(),
             configuration_status_by_path: Default::default(),
             workspace_folders: Default::default(),
@@ -354,13 +372,21 @@ impl Session {
             error!("Failed to initialize session: {err}");
         }
 
-        let session = self.clone();
-        spawn(async move {
-            let mut service_data_rx = session.service_rx.clone();
+        // The diagnostics of a document can depend on other files, such as
+        // the ones it imports. The workspace announces the end of a project
+        // scan, and every later update of its index, such as a change on disk
+        // or in another document, so the diagnostics of the open documents are
+        // published again. The task holds the session weakly, so that the
+        // session ends with its connection and then aborts the task.
+        let session = Arc::downgrade(self);
+        let mut service_data_rx = self.service_rx.clone();
+        let task = spawn(async move {
             while let Ok(()) = service_data_rx.changed().await {
-                match *session.service_rx.borrow() {
+                let Some(session) = Weak::upgrade(&session) else {
+                    break;
+                };
+                match *service_data_rx.borrow() {
                     ServiceNotification::IndexUpdated => {
-                        let session = session.clone();
                         spawn(async move {
                             session.update_all_diagnostics().await;
                         });
@@ -371,6 +397,10 @@ impl Session {
                 }
             }
         });
+        // A session is initialized once, so a second task is redundant.
+        if let Err(task) = self.diagnostics_refresh.set(task.abort_handle()) {
+            task.abort();
+        }
     }
 
     /// Register a set of capabilities with the client

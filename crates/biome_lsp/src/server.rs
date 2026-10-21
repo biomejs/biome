@@ -809,6 +809,11 @@ pub struct ServerFactory {
     /// If we receive a notification here, diagnostics for open documents are
     /// all refreshed.
     service_rx: watch::Receiver<ServiceNotification>,
+
+    /// The sender of the service notifications, which tests use to count
+    /// their receivers.
+    #[cfg(test)]
+    service_tx: watch::Sender<ServiceNotification>,
 }
 
 impl Default for ServerFactory {
@@ -825,6 +830,8 @@ impl ServerFactory {
         Self {
             cancellation: Arc::default(),
             db_state: Arc::new(DbState::lsp(fs.clone())),
+            #[cfg(test)]
+            service_tx: service_tx.clone(),
             workspace: Arc::new(WorkspaceServer::new(
                 fs,
                 instruction_tx,
@@ -858,6 +865,8 @@ impl ServerFactory {
         let (service_tx, service_rx) = watch::channel(ServiceNotification::IndexUpdated);
         Self {
             cancellation: Arc::default(),
+            #[cfg(test)]
+            service_tx: service_tx.clone(),
             workspace: Arc::new(WorkspaceServer::new(
                 fs,
                 watcher_tx,

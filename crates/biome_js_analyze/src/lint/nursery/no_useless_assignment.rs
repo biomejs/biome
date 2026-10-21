@@ -2,7 +2,6 @@ use crate::services::semantic::Semantic;
 use biome_analyze::{Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule};
 use biome_console::markup;
 use biome_control_flow::{Instruction, InstructionKind, builder::ROOT_BLOCK_ID};
-use biome_parser::db::AnyParsedSource;
 use biome_diagnostics::Severity;
 use biome_js_control_flow::{
     AnyJsControlFlowRoot, JsControlFlowGraph, control_flow_model, js_control_flow_model,
@@ -17,6 +16,7 @@ use biome_js_syntax::{
 };
 use biome_languages::javascript::JsEmbeddingKind;
 use biome_languages::{JsFileSource, LanguageDb};
+use biome_parser::db::AnyParsedSource;
 use biome_rowan::{AstNode, NodeOrToken, SyntaxKindSet, WalkEvent};
 use biome_rule_options::no_useless_assignment::NoUselessAssignmentOptions;
 use roaring::RoaringBitmap;
