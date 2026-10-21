@@ -632,13 +632,19 @@ impl Collector<'_, '_> {
                         continue;
                     }
                     // `{ size }` declares the prop `size` with options held by
-                    // a variable. Any other member that is not `name: value`
-                    // is not a declaration the model can read.
-                    let value = match &member {
-                        AnyJsObjectMember::JsPropertyObjectMember(property) => {
-                            property.value().ok()
-                        }
+                    // a variable, and `{ size() {} }` declares it with an
+                    // inline function, which names no type. Any other member
+                    // that is not `name: value` is not a declaration the model
+                    // can read.
+                    let detail = match &member {
+                        AnyJsObjectMember::JsPropertyObjectMember(property) => property
+                            .value()
+                            .ok()
+                            .map(|value| self.runtime_prop_detail(Some(value))),
                         AnyJsObjectMember::JsShorthandPropertyObjectMember(_) => None,
+                        AnyJsObjectMember::JsMethodObjectMember(_) => {
+                            Some(self.runtime_prop_detail(None))
+                        }
                         _ => {
                             self.builder.open(
                                 component,
@@ -653,16 +659,13 @@ impl Collector<'_, '_> {
                             .open(component, Namespace::Binding, OpenReason::NonLiteral);
                         continue;
                     };
-                    let detail = match value {
-                        Some(value) => self.runtime_prop_detail(Some(value)),
-                        None => PropDetail {
-                            types: TypeSet::from(PropType::Unknown),
-                            required: Tri::Unknown,
-                            defaults: Box::default(),
-                            validator: None,
-                            form: PropForm::Constructor,
-                        },
-                    };
+                    let detail = detail.unwrap_or(PropDetail {
+                        types: TypeSet::from(PropType::Unknown),
+                        required: Tri::Unknown,
+                        defaults: Box::default(),
+                        validator: None,
+                        form: PropForm::Constructor,
+                    });
                     let id = self.add_instance_symbol(
                         component,
                         name,
@@ -686,9 +689,12 @@ impl Collector<'_, '_> {
         let value = value.and_then(|value| value.inner_expression());
         let Some(AnyJsExpression::JsObjectExpression(options)) = &value else {
             return PropDetail {
-                types: value
-                    .as_ref()
-                    .map_or_else(TypeSet::empty, |value| self.constructor_types(value)),
+                types: match &value {
+                    // `size: () => {}` passes an inline function, which names
+                    // no type.
+                    Some(value) if !is_function_expression(value) => self.constructor_types(value),
+                    _ => TypeSet::empty(),
+                },
                 required: Tri::No,
                 defaults: Box::default(),
                 validator: None,
@@ -708,9 +714,11 @@ impl Collector<'_, '_> {
             };
             match name.text() {
                 "type" => {
-                    if let Some(value) = member_value(&member) {
-                        detail.types = self.constructor_types(&value);
-                    }
+                    detail.types = match member_value(&member) {
+                        Some(value) => self.constructor_types(&value),
+                        // `{ type }` holds the type in a variable.
+                        None => TypeSet::from(PropType::Unknown),
+                    };
                 }
                 "required" => {
                     detail.required = match member_value(&member) {
@@ -1577,18 +1585,32 @@ impl Collector<'_, '_> {
                 self.set_role(binding, Origin::DefineEmits, component, None);
             }
         } else if self.is_macro_call(&call, "defineModel") {
-            let name = match first_argument(&call).and_then(|argument| argument.inner_expression())
+            // defineModel('name', options) or defineModel(options)
+            let mut arguments = call
+                .arguments()
+                .ok()
+                .into_iter()
+                .flat_map(|arguments| arguments.args().iter().flatten())
+                .filter_map(|argument| argument.as_any_js_expression().cloned());
+            let mut options = arguments.next();
+            let name = match options
+                .as_ref()
+                .and_then(|argument| argument.inner_expression())
             {
                 Some(AnyJsExpression::AnyJsLiteralExpression(
                     AnyJsLiteralExpression::JsStringLiteralExpression(literal),
-                )) => literal
-                    .inner_string_text()
-                    .ok()
-                    .map(|name| (name, Some(literal.syntax().text_trimmed_range()))),
+                )) => {
+                    options = arguments.next();
+                    literal
+                        .inner_string_text()
+                        .ok()
+                        .map(|name| (name, Some(literal.syntax().text_trimmed_range())))
+                }
                 _ => None,
             };
             let (name, range) = name.unwrap_or_else(|| (synthetic_name("modelValue"), None));
-            self.add_instance_symbol(
+            let ty = first_type_argument(&call);
+            let id = self.add_instance_symbol(
                 component,
                 name,
                 range,
@@ -1596,6 +1618,17 @@ impl Collector<'_, '_> {
                 Namespace::Binding,
                 SymbolKind::Model,
             );
+            // A model declares a prop, whose options are written like those
+            // of `props: { name: options }`. A bare `defineModel()` says
+            // nothing about it.
+            if options.is_some() || ty.is_some() {
+                let mut detail = self.runtime_prop_detail(options);
+                if let Some(ty) = ty {
+                    detail.types = type_set_of(&ty);
+                    detail.form = PropForm::TypeMember;
+                }
+                self.builder.symbol_mut(id).detail = Detail::Prop(detail);
+            }
             if let Some(AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsIdentifierBinding(
                 binding,
             ))) = pattern

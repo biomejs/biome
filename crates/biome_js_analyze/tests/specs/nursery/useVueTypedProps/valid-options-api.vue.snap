@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: valid-options-api.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+import { shared, sharedProps, type } from "./shared";
+
+export default {
+  ...shared,
+  props: {
+    ...sharedProps,
+    constructor: String,
+    union: [String, Number],
+    typed: { type: String },
+    shorthandType: { type, required: true },
+    functionType: { type: function Title() {} },
+    computedKey: { ["type"]: String },
+    validated: { validator: (value) => value > 0 },
+    computedValidator: { ["validator"]: (value) => value > 0 },
+    shorthand,
+    variable: sharedProps.variable,
+    call: makeProp(),
+  },
+};
+</script>
+
+```

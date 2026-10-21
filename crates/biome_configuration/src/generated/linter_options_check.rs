@@ -2895,6 +2895,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useVueTypedProps",
+        TypeId::of::<biome_rule_options::use_vue_typed_props::UseVueTypedPropsOptions>(),
+    ));
+    result.push((
+        "nursery",
         "useVueTypedRef",
         TypeId::of::<biome_rule_options::use_vue_typed_ref::UseVueTypedRefOptions>(),
     ));

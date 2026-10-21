@@ -8698,6 +8698,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueTypedProps": {
+					"description": "Require a type for every prop of a Vue component.\nSee https://biomejs.dev/linter/rules/use-vue-typed-props",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueTypedPropsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueTypedRef": {
 					"description": "Require a type for refs created with ref() or shallowRef() in TypeScript.\nSee https://biomejs.dev/linter/rules/use-vue-typed-ref",
 					"anyOf": [
@@ -15879,6 +15886,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueTypedPropsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueTypedPropsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueTypedRefOptions": {
 			"type": "object",
 			"properties": {
@@ -21163,6 +21179,16 @@
 			]
 		},
 		"UseVueNextTickPromiseOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueTypedPropsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueTypedPropsOptions" }
+			]
+		},
+		"UseVueTypedPropsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

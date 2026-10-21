@@ -1,0 +1,144 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid-setup.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+defineProps({ foo: {}, bar: { required: true } });
+const model = defineModel();
+const named = defineModel("named");
+const empty = defineModel({});
+const namedEmpty = defineModel("namedEmpty", { default: "" });
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-setup.vue:3:15 lint/nursery/useVueTypedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prop foo has no type.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup>
+  > 3 │ defineProps({ foo: {}, bar: { required: true } });
+      │               ^^^
+    4 │ const model = defineModel();
+    5 │ const named = defineModel("named");
+  
+  i Without a type, Vue accepts any value for this prop and can't warn when a component receives the wrong kind of value.
+  
+  i Declare the type of the prop, for example with String or { type: String }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup.vue:3:24 lint/nursery/useVueTypedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prop bar has no type.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <script setup>
+  > 3 │ defineProps({ foo: {}, bar: { required: true } });
+      │                        ^^^
+    4 │ const model = defineModel();
+    5 │ const named = defineModel("named");
+  
+  i Without a type, Vue accepts any value for this prop and can't warn when a component receives the wrong kind of value.
+  
+  i Declare the type of the prop, for example with String or { type: String }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup.vue:4:15 lint/nursery/useVueTypedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prop modelValue has no type.
+  
+    2 │ <script setup>
+    3 │ defineProps({ foo: {}, bar: { required: true } });
+  > 4 │ const model = defineModel();
+      │               ^^^^^^^^^^^^^
+    5 │ const named = defineModel("named");
+    6 │ const empty = defineModel({});
+  
+  i Without a type, Vue accepts any value for this prop and can't warn when a component receives the wrong kind of value.
+  
+  i Declare the type of the prop, for example with String or { type: String }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup.vue:5:27 lint/nursery/useVueTypedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prop named has no type.
+  
+    3 │ defineProps({ foo: {}, bar: { required: true } });
+    4 │ const model = defineModel();
+  > 5 │ const named = defineModel("named");
+      │                           ^^^^^^^
+    6 │ const empty = defineModel({});
+    7 │ const namedEmpty = defineModel("namedEmpty", { default: "" });
+  
+  i Without a type, Vue accepts any value for this prop and can't warn when a component receives the wrong kind of value.
+  
+  i Declare the type of the prop, for example with String or { type: String }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup.vue:6:15 lint/nursery/useVueTypedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prop modelValue has no type.
+  
+    4 │ const model = defineModel();
+    5 │ const named = defineModel("named");
+  > 6 │ const empty = defineModel({});
+      │               ^^^^^^^^^^^^^^^
+    7 │ const namedEmpty = defineModel("namedEmpty", { default: "" });
+    8 │ </script>
+  
+  i Without a type, Vue accepts any value for this prop and can't warn when a component receives the wrong kind of value.
+  
+  i Declare the type of the prop, for example with String or { type: String }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup.vue:7:32 lint/nursery/useVueTypedProps ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The prop namedEmpty has no type.
+  
+    5 │ const named = defineModel("named");
+    6 │ const empty = defineModel({});
+  > 7 │ const namedEmpty = defineModel("namedEmpty", { default: "" });
+      │                                ^^^^^^^^^^^^
+    8 │ </script>
+    9 │ 
+  
+  i Without a type, Vue accepts any value for this prop and can't warn when a component receives the wrong kind of value.
+  
+  i Declare the type of the prop, for example with String or { type: String }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
