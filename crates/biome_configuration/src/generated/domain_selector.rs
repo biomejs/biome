@@ -93,6 +93,7 @@ static REACT_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "useReactCompiler"),
         RuleFilter::Rule("nursery", "useReactFunctionComponentDefinition"),
         RuleFilter::Rule("nursery", "useReactNamingConvention"),
+        RuleFilter::Rule("nursery", "useTanstackQueryStableQueryClient"),
         RuleFilter::Rule("performance", "noJsxPropsBind"),
         RuleFilter::Rule("performance", "noSyncScripts"),
         RuleFilter::Rule("security", "noDangerouslySetInnerHtml"),
@@ -163,6 +164,7 @@ static TANSTACKQUERY_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new
     vec![
         RuleFilter::Rule("nursery", "noTanstackQueryRestDestructuring"),
         RuleFilter::Rule("nursery", "noTanstackQueryVoidQueryFn"),
+        RuleFilter::Rule("nursery", "useTanstackQueryStableQueryClient"),
     ]
 });
 static TEST_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {

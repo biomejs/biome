@@ -3833,6 +3833,11 @@ export interface Nursery {
 	 */
 	useTailwindVariablesShorthand?: UseTailwindVariablesShorthandConfiguration;
 	/**
+	 * Require the TanStack Query QueryClient to be created once, not on every render.
+	 * See https://biomejs.dev/linter/rules/use-tanstack-query-stable-query-client
+	 */
+	useTanstackQueryStableQueryClient?: UseTanstackQueryStableQueryClientConfiguration;
+	/**
 	 * Require Markdown documents to start with a top-level heading.
 	 * See https://biomejs.dev/linter/rules/use-top-level-heading
 	 */
@@ -6649,6 +6654,9 @@ export type UseTailwindStaticClassStringsConfiguration =
 export type UseTailwindVariablesShorthandConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTailwindVariablesShorthandOptions;
+export type UseTanstackQueryStableQueryClientConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseTanstackQueryStableQueryClientOptions;
 export type UseTopLevelHeadingConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseTopLevelHeadingOptions;
@@ -9737,6 +9745,14 @@ export interface RuleWithUseTailwindVariablesShorthandOptions {
 	level: RulePlainConfiguration;
 	options?: UseTailwindVariablesShorthandOptions;
 }
+export interface RuleWithUseTanstackQueryStableQueryClientOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseTanstackQueryStableQueryClientOptions;
+}
 export interface RuleWithUseTopLevelHeadingOptions {
 	level: RulePlainConfiguration;
 	options?: UseTopLevelHeadingOptions;
@@ -12277,6 +12293,7 @@ export type UseTailwindShorthandClassesOptions = {};
 export type UseTailwindSortedClassesOptions = {};
 export type UseTailwindStaticClassStringsOptions = {};
 export type UseTailwindVariablesShorthandOptions = {};
+export type UseTanstackQueryStableQueryClientOptions = {};
 export type UseTopLevelHeadingOptions = {};
 export type UseUnaryMinusOptions = {};
 export interface UseValidTestTitleOptions {
@@ -13971,6 +13988,7 @@ export type Category =
 	| "lint/nursery/useTailwindSortedClasses"
 	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTailwindVariablesShorthand"
+	| "lint/nursery/useTanstackQueryStableQueryClient"
 	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useUnaryMinus"
 	| "lint/nursery/useUniqueArgumentNames"
