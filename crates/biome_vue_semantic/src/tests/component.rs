@@ -483,3 +483,39 @@ fn render_option_range_covers_the_member() {
     let component = model.components().next().expect("a component");
     assert_eq!(component.render_range(), None);
 }
+
+#[test]
+fn model_option_with_an_object_value_is_recorded() {
+    let code = r#"import { defineComponent, createApp } from "vue";
+defineComponent({ model: { prop: "checked", event: "change" } });
+createApp({ model: ({}) });
+defineComponent({ model() { return {}; } });
+const model = {};
+defineComponent({ model });
+"#;
+    let model = js_model(code, JsFileSource::js_module());
+    let ranges: Vec<_> = model
+        .components()
+        .map(|component| component.model_option_range().map(|range| &code[range]))
+        .collect();
+    assert_eq!(
+        ranges,
+        [
+            Some(r#"model: { prop: "checked", event: "change" }"#),
+            Some("model: ({})"),
+            None,
+            None,
+        ]
+    );
+}
+
+#[test]
+fn model_option_in_define_options_is_recorded() {
+    let code = "defineOptions({ model: { prop: \"checked\" } });\n";
+    let model = js_model(code, setup_ts());
+    let component = model.components().next().unwrap();
+    assert_eq!(
+        component.model_option_range().map(|range| &code[range]),
+        Some("model: { prop: \"checked\" }")
+    );
+}
