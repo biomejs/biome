@@ -338,6 +338,7 @@ define_categories! {
     "lint/nursery/useConsistentJsonFileRead": "https://biomejs.dev/linter/rules/use-consistent-json-file-read",
     "lint/nursery/useConsistentObjectDefinition": "https://biomejs.dev/linter/rules/use-consistent-object-definition",
     "lint/nursery/useConsistentObjectKeys": "https://biomejs.dev/linter/rules/use-consistent-object-keys",
+    "lint/nursery/useConsistentUnicodeBom": "https://biomejs.dev/linter/rules/use-consistent-unicode-bom",
     "lint/nursery/useControlLabel": "https://biomejs.dev/linter/rules/use-control-label",
     "lint/nursery/useDisposables": "https://biomejs.dev/linter/rules/use-disposables",
     "lint/nursery/useExhaustiveSwitchCases": "https://biomejs.dev/linter/rules/use-exhaustive-switch-cases",

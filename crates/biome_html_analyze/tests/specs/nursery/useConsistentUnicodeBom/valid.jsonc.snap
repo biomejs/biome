@@ -1,0 +1,30 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid.jsonc
+---
+# Input
+```html
+
+```
+
+# Input
+```html
+<div>text</div>
+```
+
+# Input
+```html
+<!-- header -->
+<div>text</div>
+```
+
+# Input
+```html
+text﻿text
+```
+
+# Input
+```html
+
+﻿<div>text</div>
+```
