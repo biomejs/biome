@@ -3,9 +3,9 @@
 
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsObjectMember, JsAwaitExpression, JsCallExpression,
-    JsForOfStatement, WalkEvent,
+    JsForOfStatement, JsLanguage, WalkEvent,
 };
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::{AstNode, SyntaxKindSet, TextRange};
 
 use crate::frameworks::vue::vue_component::{AnyVueComponent, VueOptionsApiBasedComponent};
 use crate::services::control_flow::AnyJsControlFlowRoot;
@@ -39,7 +39,7 @@ pub fn find_vue_setup_calls_after_await(
 ) -> Box<[VueSetupCallAfterAwait]> {
     let mut first_await = None;
     let mut calls = Vec::new();
-    let mut preorder = body.syntax().preorder();
+    let mut preorder = body.syntax().preorder_of_kinds(VISITED_KINDS);
     while let Some(event) = preorder.next() {
         match event {
             WalkEvent::Enter(node) => {
@@ -73,6 +73,13 @@ pub fn find_vue_setup_calls_after_await(
     }
     calls.into_boxed_slice()
 }
+
+/// The nodes [`find_vue_setup_calls_after_await`] inspects: nested functions, which it skips,
+/// and the nodes that pause `setup()` or call a function.
+const VISITED_KINDS: SyntaxKindSet<JsLanguage> = AnyJsControlFlowRoot::KIND_SET
+    .union(JsForOfStatement::KIND_SET)
+    .union(JsAwaitExpression::KIND_SET)
+    .union(JsCallExpression::KIND_SET);
 
 fn setup_function_body(component: &impl VueOptionsApiBasedComponent) -> Option<AnyJsFunctionBody> {
     let (_, member) = component
