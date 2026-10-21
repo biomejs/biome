@@ -43,6 +43,7 @@ biome_tailwind_logic     = { workspace = true }
 biome_tailwind_parser    = { workspace = true }
 biome_tailwind_syntax    = { workspace = true }
 biome_unicode_table      = { workspace = true }
+biome_vue_semantic       = { workspace = true }
 camino                   = { workspace = true }
 phf                      = { workspace = true }
 schemars                 = { workspace = true, optional = true }
@@ -50,11 +51,13 @@ serde                    = { workspace = true, features = ["derive"] }
 smallvec                 = { workspace = true }
 
 [dev-dependencies]
+biome_db          = { path = "../biome_db" }
 biome_html_parser = { path = "../biome_html_parser" }
 biome_test_utils  = { path = "../biome_test_utils", features = ["html_embeds", "module_graph"] }
 camino            = { workspace = true }
 criterion         = { package = "codspeed-criterion-compat", version = "=5.0.1" }
 insta             = { workspace = true, features = ["glob"] }
+salsa             = { workspace = true }
 tests_macros      = { path = "../tests_macros" }
 
 [build-dependencies]
