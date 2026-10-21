@@ -1,0 +1,32 @@
+<!-- should not generate diagnostics -->
+<script>
+	import {
+		createInfiniteQuery,
+		createMutation,
+		createQueries,
+		createQuery,
+	} from "@tanstack/svelte-query";
+	import { createQuery as createOtherQuery } from "other-package";
+
+	const query = createQuery(() => ({ queryKey: ["todos"] }));
+	const { data, isPending } = createQuery(() => ({ queryKey: ["users"] }));
+	const { data: pages } = createInfiniteQuery(() => ({ queryKey: ["pages"] }));
+
+	const [first, { data: second }, ...others] = createQueries(() => ({
+		queries: [{ queryKey: ["first"] }, { queryKey: ["second"] }],
+	}));
+
+	const queries = createQueries(() => ({ queries: [] }));
+	const queriesCopy = [...queries];
+
+	const { mutate, ...mutationRest } = createMutation(() => ({}));
+
+	const { data: other, ...otherRest } = createOtherQuery();
+	const otherQuery = createOtherQuery();
+	const otherCopy = { ...otherQuery };
+
+	const { id, ...todo } = query.data;
+</script>
+
+<p>{query.data} {data} {isPending} {pages} {first} {second} {others}</p>
+<p>{queriesCopy} {mutate} {mutationRest} {other} {otherRest} {otherCopy} {id} {todo}</p>
