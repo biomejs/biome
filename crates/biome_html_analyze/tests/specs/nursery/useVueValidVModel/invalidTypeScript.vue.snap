@@ -1,0 +1,148 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: invalidTypeScript.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+const a = () => 1
+</script>
+<template>
+  <MyComponent v-model="a() as string"></MyComponent>
+  <MyComponent v-model="a()!"></MyComponent>
+  <MyComponent v-model="a() as unknown as string"></MyComponent>
+  <MyComponent v-model="a()!!!!"></MyComponent>
+  <MyComponent v-model="(((a()!) as unknown)! as string)!"></MyComponent>
+  <MyComponent v-model="a?.b as string"></MyComponent>
+</template>
+
+```
+
+# Diagnostics
+```
+invalidTypeScript.vue:6:25 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of this v-model directive can't be assigned to.
+  
+    4 │ </script>
+    5 │ <template>
+  > 6 │   <MyComponent v-model="a() as string"></MyComponent>
+      │                         ^^^^^^^^^^^^^
+    7 │   <MyComponent v-model="a()!"></MyComponent>
+    8 │   <MyComponent v-model="a() as unknown as string"></MyComponent>
+  
+  i Vue writes the new value of the field back to this expression, so it must be a variable or a property, such as foo or foo.bar.
+  
+  i Replace the expression with the variable or property to keep in sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTypeScript.vue:7:25 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of this v-model directive can't be assigned to.
+  
+    5 │ <template>
+    6 │   <MyComponent v-model="a() as string"></MyComponent>
+  > 7 │   <MyComponent v-model="a()!"></MyComponent>
+      │                         ^^^^
+    8 │   <MyComponent v-model="a() as unknown as string"></MyComponent>
+    9 │   <MyComponent v-model="a()!!!!"></MyComponent>
+  
+  i Vue writes the new value of the field back to this expression, so it must be a variable or a property, such as foo or foo.bar.
+  
+  i Replace the expression with the variable or property to keep in sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTypeScript.vue:8:25 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of this v-model directive can't be assigned to.
+  
+     6 │   <MyComponent v-model="a() as string"></MyComponent>
+     7 │   <MyComponent v-model="a()!"></MyComponent>
+   > 8 │   <MyComponent v-model="a() as unknown as string"></MyComponent>
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │   <MyComponent v-model="a()!!!!"></MyComponent>
+    10 │   <MyComponent v-model="(((a()!) as unknown)! as string)!"></MyComponent>
+  
+  i Vue writes the new value of the field back to this expression, so it must be a variable or a property, such as foo or foo.bar.
+  
+  i Replace the expression with the variable or property to keep in sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTypeScript.vue:9:25 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of this v-model directive can't be assigned to.
+  
+     7 │   <MyComponent v-model="a()!"></MyComponent>
+     8 │   <MyComponent v-model="a() as unknown as string"></MyComponent>
+   > 9 │   <MyComponent v-model="a()!!!!"></MyComponent>
+       │                         ^^^^^^^
+    10 │   <MyComponent v-model="(((a()!) as unknown)! as string)!"></MyComponent>
+    11 │   <MyComponent v-model="a?.b as string"></MyComponent>
+  
+  i Vue writes the new value of the field back to this expression, so it must be a variable or a property, such as foo or foo.bar.
+  
+  i Replace the expression with the variable or property to keep in sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTypeScript.vue:10:25 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of this v-model directive can't be assigned to.
+  
+     8 │   <MyComponent v-model="a() as unknown as string"></MyComponent>
+     9 │   <MyComponent v-model="a()!!!!"></MyComponent>
+  > 10 │   <MyComponent v-model="(((a()!) as unknown)! as string)!"></MyComponent>
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │   <MyComponent v-model="a?.b as string"></MyComponent>
+    12 │ </template>
+  
+  i Vue writes the new value of the field back to this expression, so it must be a variable or a property, such as foo or foo.bar.
+  
+  i Replace the expression with the variable or property to keep in sync.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidTypeScript.vue:11:25 lint/nursery/useVueValidVModel ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The value of this v-model directive uses optional chaining.
+  
+     9 │   <MyComponent v-model="a()!!!!"></MyComponent>
+    10 │   <MyComponent v-model="(((a()!) as unknown)! as string)!"></MyComponent>
+  > 11 │   <MyComponent v-model="a?.b as string"></MyComponent>
+       │                         ^^^^^^^^^^^^^^
+    12 │ </template>
+    13 │ 
+  
+  i Vue writes the new value of the field back to this expression, and a property read with ?. can't be assigned to.
+  
+  i Replace ?. with ., and make sure the object exists before the field is shown, e.g. with v-if.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

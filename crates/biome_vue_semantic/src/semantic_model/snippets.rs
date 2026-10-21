@@ -11,8 +11,8 @@ use super::model::*;
 use biome_js_semantic::SemanticModel as JsSemanticModel;
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsExpression, AnyJsFunctionBody,
-    AnyJsLiteralExpression, AnyJsObjectMember, AnyJsRoot, AnyJsStatement, JsLogicalOperator,
-    JsSyntaxKind, JsSyntaxNode, JsUnaryOperator, inner_string_text,
+    AnyJsLiteralExpression, AnyJsMemberExpression, AnyJsObjectMember, AnyJsRoot, AnyJsStatement,
+    JsLogicalOperator, JsSyntaxKind, JsSyntaxNode, JsUnaryOperator, inner_string_text,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{AstNode, AstNodeList, AstSeparatedList, TextRange, TextSize};
@@ -57,6 +57,7 @@ pub(crate) fn collect_snippets(
             offset: snippet.content_offset,
             host,
             root,
+            assignability: assignability(snippet),
             fingerprint: fingerprint(snippet.root.syntax()),
             operands: first_operand..builder.data.operands.len() as u32,
         });
@@ -302,6 +303,51 @@ fn expression_shape(
         AnyJsExpression::JsConditionalExpression(_) => RootShape::Conditional,
         _ => RootShape::Other,
     }
+}
+
+fn assignability(snippet: &SfcSnippet) -> Assignability {
+    let AnyJsRoot::JsExpressionTemplateRoot(root) = snippet.root else {
+        return Assignability::NotAssignable;
+    };
+    let Some(expression) = root
+        .expression()
+        .and_then(AnyJsExpression::omit_type_wrappers)
+    else {
+        return Assignability::NotAssignable;
+    };
+    let member = match expression {
+        AnyJsExpression::JsIdentifierExpression(_) => return Assignability::Assignable,
+        AnyJsExpression::JsStaticMemberExpression(member) => AnyJsMemberExpression::from(member),
+        AnyJsExpression::JsComputedMemberExpression(member) => AnyJsMemberExpression::from(member),
+        _ => return Assignability::NotAssignable,
+    };
+    if member.is_optional_chain() {
+        return Assignability::OptionalChain;
+    }
+    // Parentheses end an optional chain: `(a?.b).c` reads `c` of `undefined`
+    // when `a` is missing.
+    let mut object = member.object();
+    while let Ok(current) = object {
+        object = match current {
+            AnyJsExpression::JsStaticMemberExpression(member) => member.object(),
+            AnyJsExpression::JsComputedMemberExpression(member) => member.object(),
+            current => {
+                let inner = current.omit_parentheses();
+                if inner.is_optional_chain()
+                    || matches!(
+                        inner,
+                        AnyJsExpression::AnyJsLiteralExpression(
+                            AnyJsLiteralExpression::JsNullLiteralExpression(_)
+                        )
+                    )
+                {
+                    return Assignability::MaybeNullObject;
+                }
+                break;
+            }
+        };
+    }
+    Assignability::Assignable
 }
 
 /// Splits a condition on `||` into groups and each group on `&&` into

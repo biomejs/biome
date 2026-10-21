@@ -3778,6 +3778,11 @@ export interface Nursery {
 	 */
 	useVueValidVIs?: UseVueValidVIsConfiguration;
 	/**
+	 * Enforce valid v-model directives.
+	 * See https://biomejs.dev/linter/rules/use-vue-valid-v-model
+	 */
+	useVueValidVModel?: UseVueValidVModelConfiguration;
+	/**
 	 * Enforce valid v-show directives.
 	 * See https://biomejs.dev/linter/rules/use-vue-valid-v-show
 	 */
@@ -6431,6 +6436,9 @@ export type UseVueVOnExactConfiguration =
 export type UseVueValidVIsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidVIsOptions;
+export type UseVueValidVModelConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidVModelOptions;
 export type UseVueValidVShowConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidVShowOptions;
@@ -9401,6 +9409,10 @@ export interface RuleWithUseVueValidVIsOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidVIsOptions;
 }
+export interface RuleWithUseVueValidVModelOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueValidVModelOptions;
+}
 export interface RuleWithUseVueValidVShowOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidVShowOptions;
@@ -11801,6 +11813,7 @@ export type UseVueToggleInsideTransitionOptions = {};
 export type UseVueTypedRefOptions = {};
 export type UseVueVOnExactOptions = {};
 export type UseVueValidVIsOptions = {};
+export type UseVueValidVModelOptions = {};
 export type UseVueValidVShowOptions = {};
 export type UseWhileLoopConditionOptions = {};
 export type NoAccumulatingSpreadOptions = {};
