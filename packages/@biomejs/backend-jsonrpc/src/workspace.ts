@@ -3247,6 +3247,11 @@ export interface Nursery {
 	 */
 	noUselessDateGetTime?: NoUselessDateGetTimeConfiguration;
 	/**
+	 * Disallow functions that return a call to themselves when a loop can do the same work.
+	 * See https://biomejs.dev/linter/rules/no-useless-recursion
+	 */
+	noUselessRecursion?: NoUselessRecursionConfiguration;
+	/**
 	 * Disallow type conversions that do not change the type of an expression.
 	 * See https://biomejs.dev/linter/rules/no-useless-type-conversion
 	 */
@@ -5877,6 +5882,9 @@ export type NoUselessCallConfiguration =
 export type NoUselessDateGetTimeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessDateGetTimeOptions;
+export type NoUselessRecursionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessRecursionOptions;
 export type NoUselessTypeConversionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessTypeConversionOptions;
@@ -8432,6 +8440,10 @@ export interface RuleWithNoUselessDateGetTimeOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessDateGetTimeOptions;
 }
+export interface RuleWithNoUselessRecursionOptions {
+	level: RulePlainConfiguration;
+	options?: NoUselessRecursionOptions;
+}
 export interface RuleWithNoUselessTypeConversionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessTypeConversionOptions;
@@ -10873,6 +10885,7 @@ export type NoUnusedClassesOptions = {};
 export type NoUselessAssignmentOptions = {};
 export type NoUselessCallOptions = {};
 export type NoUselessDateGetTimeOptions = {};
+export type NoUselessRecursionOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueBooleanDefaultOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
@@ -12516,13 +12529,13 @@ export type Category =
 	| "lint/nursery/noBaseToString"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noEmptyObjectKeys"
 	| "lint/nursery/noExcessiveNestedCallbacks"
@@ -12560,8 +12573,8 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForNavigation"
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
-	| "lint/nursery/noPromiseExecutorReturn"
 	| "lint/nursery/noProcessExit"
+	| "lint/nursery/noPromiseExecutorReturn"
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
@@ -12597,14 +12610,15 @@ export type Category =
 	| "lint/nursery/noUselessBackrefInRegex"
 	| "lint/nursery/noUselessCall"
 	| "lint/nursery/noUselessDateGetTime"
+	| "lint/nursery/noUselessRecursion"
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
-	| "lint/nursery/noVueLifecycleAfterAwait"
-	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueImportCompilerMacros"
+	| "lint/nursery/noVueLifecycleAfterAwait"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRequiredPropWithDefault"
+	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueVHtml"
@@ -12664,8 +12678,8 @@ export type Category =
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useSvelteShorthandDirective"
 	| "lint/nursery/useTailwindShorthandClasses"
-	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTailwindSortedClasses"
+	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useUnaryMinus"
 	| "lint/nursery/useUniqueArgumentNames"
