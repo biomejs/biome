@@ -1,0 +1,292 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+array.splice(0 as const, 1 as const);
+array.splice(0 satisfies number, 1 satisfies number);
+array.splice(<number>0, <number>0, element);
+array.splice(array.length - 1!, 1!);
+array.splice(0!, array.length);
+array.splice(0, array.length as number);
+array.splice((array.length as number) - 1, 1);
+(array as string[]).splice(0);
+(array satisfies string[]).splice((array satisfies string[]).length, 0, element);
+function f(foo: number[]) { foo.splice(); }
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as shift().
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ array.splice(0 as const, 1 as const);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ array.splice(0 satisfies number, 1 satisfies number);
+    4 │ array.splice(<number>0, <number>0, element);
+  
+  i shift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use shift() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - array.splice(0·as·const,·1·as·const);
+        2 │ + array.shift();
+     3  3 │   array.splice(0 satisfies number, 1 satisfies number);
+     4  4 │   array.splice(<number>0, <number>0, element);
+  
+
+```
+
+```
+invalid.ts:3:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as shift().
+  
+    1 │ /* should generate diagnostics */
+    2 │ array.splice(0 as const, 1 as const);
+  > 3 │ array.splice(0 satisfies number, 1 satisfies number);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ array.splice(<number>0, <number>0, element);
+    5 │ array.splice(array.length - 1!, 1!);
+  
+  i shift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use shift() instead.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   array.splice(0 as const, 1 as const);
+     3    │ - array.splice(0·satisfies·number,·1·satisfies·number);
+        3 │ + array.shift();
+     4  4 │   array.splice(<number>0, <number>0, element);
+     5  5 │   array.splice(array.length - 1!, 1!);
+  
+
+```
+
+```
+invalid.ts:4:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as unshift().
+  
+    2 │ array.splice(0 as const, 1 as const);
+    3 │ array.splice(0 satisfies number, 1 satisfies number);
+  > 4 │ array.splice(<number>0, <number>0, element);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ array.splice(array.length - 1!, 1!);
+    6 │ array.splice(0!, array.length);
+  
+  i unshift() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use unshift() instead.
+  
+     2  2 │   array.splice(0 as const, 1 as const);
+     3  3 │   array.splice(0 satisfies number, 1 satisfies number);
+     4    │ - array.splice(<number>0,·<number>0,·element);
+        4 │ + array.unshift(element);
+     5  5 │   array.splice(array.length - 1!, 1!);
+     6  6 │   array.splice(0!, array.length);
+  
+
+```
+
+```
+invalid.ts:5:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as pop().
+  
+    3 │ array.splice(0 satisfies number, 1 satisfies number);
+    4 │ array.splice(<number>0, <number>0, element);
+  > 5 │ array.splice(array.length - 1!, 1!);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ array.splice(0!, array.length);
+    7 │ array.splice(0, array.length as number);
+  
+  i pop() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use pop() instead.
+  
+     3  3 │   array.splice(0 satisfies number, 1 satisfies number);
+     4  4 │   array.splice(<number>0, <number>0, element);
+     5    │ - array.splice(array.length·-·1!,·1!);
+        5 │ + array.pop();
+     6  6 │   array.splice(0!, array.length);
+     7  7 │   array.splice(0, array.length as number);
+  
+
+```
+
+```
+invalid.ts:6:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call removes every element of the array.
+  
+    4 │ array.splice(<number>0, <number>0, element);
+    5 │ array.splice(array.length - 1!, 1!);
+  > 6 │ array.splice(0!, array.length);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ array.splice(0, array.length as number);
+    8 │ array.splice((array.length as number) - 1, 1);
+  
+  i Setting length to 0 does the same thing and is easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Set length to 0 instead.
+  
+     4  4 │   array.splice(<number>0, <number>0, element);
+     5  5 │   array.splice(array.length - 1!, 1!);
+     6    │ - array.splice(0!,·array.length);
+        6 │ + array.length·=·0;
+     7  7 │   array.splice(0, array.length as number);
+     8  8 │   array.splice((array.length as number) - 1, 1);
+  
+
+```
+
+```
+invalid.ts:7:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call removes every element of the array.
+  
+    5 │ array.splice(array.length - 1!, 1!);
+    6 │ array.splice(0!, array.length);
+  > 7 │ array.splice(0, array.length as number);
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ array.splice((array.length as number) - 1, 1);
+    9 │ (array as string[]).splice(0);
+  
+  i Setting length to 0 does the same thing and is easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Set length to 0 instead.
+  
+     5  5 │   array.splice(array.length - 1!, 1!);
+     6  6 │   array.splice(0!, array.length);
+     7    │ - array.splice(0,·array.length·as·number);
+        7 │ + array.length·=·0;
+     8  8 │   array.splice((array.length as number) - 1, 1);
+     9  9 │   (array as string[]).splice(0);
+  
+
+```
+
+```
+invalid.ts:8:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as pop().
+  
+     6 │ array.splice(0!, array.length);
+     7 │ array.splice(0, array.length as number);
+   > 8 │ array.splice((array.length as number) - 1, 1);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ (array as string[]).splice(0);
+    10 │ (array satisfies string[]).splice((array satisfies string[]).length, 0, element);
+  
+  i pop() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use pop() instead.
+  
+     6  6 │   array.splice(0!, array.length);
+     7  7 │   array.splice(0, array.length as number);
+     8    │ - array.splice((array.length·as·number)·-·1,·1);
+        8 │ + array.pop();
+     9  9 │   (array as string[]).splice(0);
+    10 10 │   (array satisfies string[]).splice((array satisfies string[]).length, 0, element);
+  
+
+```
+
+```
+invalid.ts:9:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call removes every element of the array.
+  
+     7 │ array.splice(0, array.length as number);
+     8 │ array.splice((array.length as number) - 1, 1);
+   > 9 │ (array as string[]).splice(0);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ (array satisfies string[]).splice((array satisfies string[]).length, 0, element);
+    11 │ function f(foo: number[]) { foo.splice(); }
+  
+  i Setting length to 0 does the same thing and is easier to read.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Set length to 0 instead.
+  
+     7  7 │   array.splice(0, array.length as number);
+     8  8 │   array.splice((array.length as number) - 1, 1);
+     9    │ - (array·as·string[]).splice(0);
+        9 │ + (array·as·string[]).length·=·0;
+    10 10 │   (array satisfies string[]).splice((array satisfies string[]).length, 0, element);
+    11 11 │   function f(foo: number[]) { foo.splice(); }
+  
+
+```
+
+```
+invalid.ts:10:1 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does the same thing as push().
+  
+     8 │ array.splice((array.length as number) - 1, 1);
+     9 │ (array as string[]).splice(0);
+  > 10 │ (array satisfies string[]).splice((array satisfies string[]).length, 0, element);
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ function f(foo: number[]) { foo.splice(); }
+    12 │ 
+  
+  i push() is easier to read, because its name says what the call does.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Use push() instead.
+  
+     8  8 │   array.splice((array.length as number) - 1, 1);
+     9  9 │   (array as string[]).splice(0);
+    10    │ - (array·satisfies·string[]).splice((array·satisfies·string[]).length,·0,·element);
+       10 │ + (array·satisfies·string[]).push(element);
+    11 11 │   function f(foo: number[]) { foo.splice(); }
+    12 12 │   
+  
+
+```
+
+```
+invalid.ts:11:29 lint/nursery/noUselessSplice  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This splice() call does not change the array.
+  
+     9 │ (array as string[]).splice(0);
+    10 │ (array satisfies string[]).splice((array satisfies string[]).length, 0, element);
+  > 11 │ function f(foo: number[]) { foo.splice(); }
+       │                             ^^^^^^^^^^^^
+    12 │ 
+  
+  i The call removes no elements and adds none. Remove it, or change its arguments if it is meant to modify the array.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the splice() call.
+  
+    11 │ function·f(foo:·number[])·{·foo.splice();·}
+       │                             -------------- 
+
+```
