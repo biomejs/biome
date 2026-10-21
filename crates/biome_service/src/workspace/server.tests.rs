@@ -646,6 +646,27 @@ import Card from './Card.vue';
     assert_eq!(unused_imports(&cli), 0);
 }
 
+/// Forgetting a closed client removes the record of its close, so the files
+/// that a client with the same identifier opens are kept.
+#[cfg(feature = "module_graph")]
+#[test]
+fn forgotten_clients_keep_the_files_they_open() {
+    const PATH: &str = "/project/a.js";
+
+    let (workspace, project_key, _) = lsp_workspace(&[]);
+    let editor = client(&workspace, 1);
+    editor.close_client_files().unwrap();
+    workspace.server.forget_closed_client(ClientId::new(1));
+    open_in(&editor, project_key, PATH, "let a = 1;");
+
+    let exists = editor
+        .file_exists(FileExistsParams {
+            file_path: BiomePath::new(PATH),
+        })
+        .unwrap();
+    assert!(exists);
+}
+
 /// A change that a client sent before its files were closed, and that
 /// publishes its content after the close, doesn't leave the file open.
 #[cfg(feature = "module_graph")]
@@ -2149,6 +2170,51 @@ fn jsx_everywhere_change_parses_open_documents_again() {
             .db_get_parse_diagnostics(Utf8Path::new(PATH))
             .is_empty()
     );
+}
+
+/// `markdown.parser.cjkFriendlyEmphasis`, which only the file source carries
+/// to the Markdown parser, applies to open documents when it changes.
+#[cfg(all(feature = "module_graph", feature = "lang_md"))]
+#[test]
+fn cjk_friendly_emphasis_change_parses_open_documents_again() {
+    use biome_configuration::markdown::{MarkdownConfiguration, MarkdownParserConfiguration};
+    use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxKind};
+
+    const PATH: &str = "/project/notes.md";
+
+    let (workspace, project_key, _) = lsp_workspace(&[]);
+    let cjk_friendly_emphasis = |enabled: bool| Configuration {
+        markdown: Some(MarkdownConfiguration {
+            parser: Some(MarkdownParserConfiguration {
+                cjk_friendly_emphasis: Some(enabled.into()),
+                ..Default::default()
+            }),
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
+    let has_emphasis = |editor: &WorkspaceServerWithDb| {
+        let db = workspace.get_db();
+        editor
+            .get_parse(Utf8Path::new(PATH))
+            .unwrap()
+            .parsed(&db)
+            .syntax::<MarkdownLanguage>()
+            .descendants()
+            .any(|node| node.kind() == MarkdownSyntaxKind::MD_INLINE_EMPHASIS)
+    };
+    update_configuration(&workspace, project_key, cjk_friendly_emphasis(false));
+    let editor = client(&workspace, 1);
+    open_in(
+        &editor,
+        project_key,
+        PATH,
+        "これは**私のやりたかったこと。**だからするの。",
+    );
+    assert!(!has_emphasis(&editor));
+
+    update_configuration(&workspace, project_key, cjk_friendly_emphasis(true));
+    assert!(has_emphasis(&editor));
 }
 
 /// The parser options of the inline configuration of a client apply to the

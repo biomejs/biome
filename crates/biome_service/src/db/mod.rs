@@ -177,9 +177,7 @@ pub(crate) enum ProjectUpdateMode {
 
 /// The views of the content of a file. See [views](crate::workspace::views).
 ///
-/// A query that looks up a path reads the views. In Owned mode, the views of a
-/// path keep their input and change through a setter, so the query runs again
-/// when they change, such as when a client opens or closes the file.
+/// A query that read the views runs again when they change through a setter.
 #[salsa::input]
 #[derive(Debug)]
 pub(crate) struct FileViews {
@@ -213,6 +211,13 @@ pub(crate) struct ProjectsGeneration {
 #[derive(Clone)]
 pub struct WorkspaceDb {
     /// It maps a file path to the views of its content.
+    ///
+    /// Salsa doesn't track this map. In Owned mode, outside a scanner epoch, a
+    /// path keeps its [FileViews] input while it has a view, and its views
+    /// change through a setter. Adding the first view of a path, removing its
+    /// last one, and the updates of a scanner epoch change the map instead:
+    /// of the tracked queries, only the ones of the resolver run again,
+    /// because the database reports these changes to it.
     files: Arc<HashMap<Utf8PathBuf, FileViews>>,
     /// Node caches kept between the parses of a path. See
     /// [WorkspaceDbData::retain_node_cache].
@@ -826,7 +831,8 @@ impl WorkspaceDb {
     }
 
     /// Returns the view of `path` that the services shared by the clients
-    /// read. See [Views::current].
+    /// read: the editor view of the client that opened the file first, or the
+    /// disk view when no client has it open.
     pub fn get_parsed_source(&self, path: &Utf8Path) -> Option<Source> {
         let file_views = self.files.pin().get(path).copied()?;
         Some(*file_views.views(self).current().value())

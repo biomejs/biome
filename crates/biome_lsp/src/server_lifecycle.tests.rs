@@ -147,3 +147,42 @@ async fn disconnect_closes_the_files_of_the_session() -> Result<()> {
     reader.abort();
     Ok(())
 }
+
+/// A session is dropped once its connection ends, although it listens to the
+/// notifications of the workspace for as long as the server runs, and the task
+/// that listens to them ends with it.
+#[tokio::test]
+async fn sessions_are_dropped_when_their_connection_ends() -> Result<()> {
+    let factory = ServerFactory::default();
+    let connection = factory.create();
+    let lifecycle = connection.lifecycle.clone();
+    let (service, client) = connection.into_inner();
+    let (stream, sink) = client.split();
+    let mut server = TestServer::new(service);
+    let (sender, _) = futures::channel::mpsc::channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+    // The session listens to the notifications, and so does its task once
+    // it's initialized.
+    let receivers = factory.service_tx.receiver_count();
+
+    server.initialize().await?;
+    server.initialized().await?;
+    let session = Arc::downgrade(factory.sessions.lock().unwrap().values().next().unwrap());
+
+    lifecycle.disconnect();
+    drop(server);
+    let ended = tokio::time::timeout(Duration::from_secs(5), async {
+        while session.upgrade().is_some() || factory.service_tx.receiver_count() >= receivers {
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+    })
+    .await;
+    assert!(
+        ended.is_ok(),
+        "the session or its task outlived the connection: {} receivers, {receivers} before",
+        factory.service_tx.receiver_count()
+    );
+
+    reader.abort();
+    Ok(())
+}
