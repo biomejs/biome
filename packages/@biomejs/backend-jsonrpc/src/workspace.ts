@@ -3793,6 +3793,11 @@ export interface Nursery {
 	 */
 	useVueValidVShow?: UseVueValidVShowConfiguration;
 	/**
+	 * Enforce valid v-slot directives in Vue templates.
+	 * See https://biomejs.dev/linter/rules/use-vue-valid-v-slot
+	 */
+	useVueValidVSlot?: UseVueValidVSlotConfiguration;
+	/**
 	 * Require the condition that ends a loop to be written in the while statement.
 	 * See https://biomejs.dev/linter/rules/use-while-loop-condition
 	 */
@@ -6450,6 +6455,9 @@ export type UseVueValidVModelConfiguration =
 export type UseVueValidVShowConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidVShowOptions;
+export type UseVueValidVSlotConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidVSlotOptions;
 export type UseWhileLoopConditionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseWhileLoopConditionOptions;
@@ -9429,6 +9437,10 @@ export interface RuleWithUseVueValidVShowOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidVShowOptions;
 }
+export interface RuleWithUseVueValidVSlotOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueValidVSlotOptions;
+}
 export interface RuleWithUseWhileLoopConditionOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -11828,6 +11840,7 @@ export type UseVueVOnExactOptions = {};
 export type UseVueValidVIsOptions = {};
 export type UseVueValidVModelOptions = {};
 export type UseVueValidVShowOptions = {};
+export type UseVueValidVSlotOptions = {};
 export type UseWhileLoopConditionOptions = {};
 export type NoAccumulatingSpreadOptions = {};
 export type NoAwaitInLoopsOptions = {};
@@ -13448,6 +13461,7 @@ export type Category =
 	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useWhileLoopCondition"
 	| "lint/nursery/useVueValidVShow"
+	| "lint/nursery/useVueValidVSlot"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
 	| "lint/performance/noBarrelFile"
