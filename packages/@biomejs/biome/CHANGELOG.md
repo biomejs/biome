@@ -1,5 +1,11 @@
 # @biomejs/biome
 
+## 2.6.2
+
+### Patch Changes
+
+- [#12494](https://github.com/biomejs/biome/pull/12494) [`3f40430`](https://github.com/biomejs/biome/commit/3f4043029bf5db0916b2d302b5797cca4927e178) Thanks [@ematipico](https://github.com/ematipico)! - Fix another patch
+
 ## 2.6.1
 
 ### Patch Changes
