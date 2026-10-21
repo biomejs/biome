@@ -1,10 +1,11 @@
 //! Tests for the database query, with a minimal database holding one file.
 
 use crate::{ComponentKind, SymbolKind, vue_model_from_source};
-use biome_db::{ParsedSnippet, ParsedSource};
+use biome_db::Source;
 use biome_html_parser::{HtmlParserOptions, parse_html};
 use biome_js_parser::{JsParserOptions, parse_js_with_offset};
 use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource, LanguageDb};
+use biome_parser::db::{ParseDb, SnippetParse, SourceParse};
 use biome_rowan::{TextRange, TextSize};
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
@@ -18,8 +19,29 @@ const JS_SOURCE: usize = 3;
 #[salsa::db]
 #[derive(Default)]
 struct TestDb {
-    files: HashMap<Utf8PathBuf, ParsedSource>,
+    files: HashMap<Utf8PathBuf, Source>,
+    /// The snippets of each document: their text, which is in the document,
+    /// and the index of their file source.
+    snippets: HashMap<Utf8PathBuf, Vec<(&'static str, usize)>>,
     storage: Storage<Self>,
+}
+
+impl TestDb {
+    /// Stores the document `text` at `path`, parsed as the file source at
+    /// `source_index`, with the given snippets.
+    fn insert_document(
+        &self,
+        path: &str,
+        text: &str,
+        source_index: usize,
+        snippets: Vec<(&'static str, usize)>,
+    ) -> Source {
+        let path = Utf8PathBuf::from(path);
+        self.snippets.pin().insert(path.clone(), snippets);
+        let file = Source::new(self, path.clone(), text.into(), source_index);
+        self.files.pin().insert(path, file);
+        file
+    }
 }
 
 #[salsa::db]
@@ -27,8 +49,45 @@ impl salsa::Database for TestDb {}
 
 #[salsa::db]
 impl biome_db::Db for TestDb {
-    fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<ParsedSource> {
+    fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<Source> {
         self.files.pin().get(path).copied()
+    }
+}
+
+/// Parses a document, and its snippets the way the workspace does: with their
+/// offset in the document.
+#[salsa::db]
+impl ParseDb for TestDb {
+    fn parse_source(&self, source: Source) -> SourceParse {
+        let text = source.text(self);
+        let source_index = source.file_source_index(self);
+        let js_source = |index| {
+            self.source_from_index(index)
+                .and_then(|source| source.to_js_file_source())
+                .unwrap_or_default()
+        };
+        let parse = match self.source_from_index(source_index) {
+            Some(DocumentFileSource::Html(html)) => {
+                parse_html(text, HtmlParserOptions::from(&html)).into()
+            }
+            _ => biome_js_parser::parse(text, js_source(source_index), JsParserOptions::default())
+                .into(),
+        };
+        let snippets = self
+            .snippets
+            .pin()
+            .get(source.path(self))
+            .into_iter()
+            .flatten()
+            .filter_map(|(snippet, index)| {
+                let start = TextSize::from(text.find(snippet)? as u32);
+                let range = TextRange::at(start, TextSize::of(*snippet));
+                let parsed =
+                    parse_js_with_offset(snippet, start, js_source(*index), JsParserOptions::default());
+                Some(SnippetParse::new(parsed.into(), range, range, start, *index))
+            })
+            .collect();
+        SourceParse::new(parse, source_index).with_snippets(snippets)
     }
 }
 
@@ -58,42 +117,18 @@ fn expression_source() -> JsFileSource {
     })
 }
 
-/// Stores a snippet the way the workspace does: parsed with its offset in the
-/// host document.
-fn snippet(
-    db: &TestDb,
-    host: &str,
-    text: &str,
-    source: JsFileSource,
-    index: usize,
-) -> ParsedSnippet {
-    let start = TextSize::from(host.find(text).expect("the snippet is in the host") as u32);
-    let range = TextRange::at(start, TextSize::from(text.len() as u32));
-    let parsed = parse_js_with_offset(text, start, source, JsParserOptions::default());
-    ParsedSnippet::new(db, parsed.into(), range, range, start, index)
-}
-
 #[test]
 fn single_file_component() {
     let db = TestDb::default();
     let host = "<template><p>{{ title }}</p></template>\n<script setup>\ndefineProps(['title'])\n</script>\n";
-    let snippets = vec![
-        snippet(
-            &db,
-            host,
-            "\ndefineProps(['title'])\n",
-            JsFileSource::vue_setup(),
-            SETUP_SOURCE,
-        ),
-        snippet(&db, host, " title ", expression_source(), EXPRESSION_SOURCE),
-    ];
-    let options = HtmlParserOptions::from(&HtmlFileSource::vue());
-    let file = ParsedSource::new(
-        &db,
-        Utf8PathBuf::from("App.vue"),
-        parse_html(host, options).into(),
+    let file = db.insert_document(
+        "App.vue",
+        host,
         VUE_SOURCE,
-        snippets,
+        vec![
+            ("\ndefineProps(['title'])\n", SETUP_SOURCE),
+            (" title ", EXPRESSION_SOURCE),
+        ],
     );
 
     let model = vue_model_from_source(&db, file);
@@ -116,15 +151,7 @@ fn single_file_component() {
 fn javascript_file() {
     let db = TestDb::default();
     let code = "import { defineComponent } from 'vue';\ndefineComponent({ props: ['a'] });\n";
-    let parsed =
-        biome_js_parser::parse(code, JsFileSource::js_module(), JsParserOptions::default());
-    let file = ParsedSource::new(
-        &db,
-        Utf8PathBuf::from("component.js"),
-        parsed.into(),
-        JS_SOURCE,
-        vec![],
-    );
+    let file = db.insert_document("component.js", code, JS_SOURCE, Vec::new());
 
     let model = vue_model_from_source(&db, file);
     let component = model.components().next().expect("a component");

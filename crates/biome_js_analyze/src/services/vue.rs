@@ -19,15 +19,14 @@ use biome_analyze::{
     AddVisitor, Phases, QueryMatch, Queryable, ServiceBag, Visitor, VisitorContext,
     VisitorStartContext,
 };
-use biome_db::AnyParsedSource;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange};
 use biome_languages::{JsFileSource, LanguageDb};
+use biome_parser::db::AnyParsedSource;
 use biome_rowan::{AstNode, WalkEvent};
 use biome_vue_semantic::{
     Component, Prop, SnippetId, Symbol, VueSemanticModel, component_model, vue_model_from_source,
 };
-use camino::Utf8PathBuf;
 use std::rc::Rc;
 
 /// The Vue semantic model of the analyzed file, and which of its embedded
@@ -57,15 +56,15 @@ impl VueSemanticService {
                     return None;
                 }
                 match source {
-                    AnyParsedSource::ParsedSource(file) => Some(Self {
+                    AnyParsedSource::Source(file) => Some(Self {
                         model: vue_model_from_source(db, *file).clone(),
                         snippet: None,
                     }),
                     AnyParsedSource::ParsedSnippet(snippet) => {
-                        let path = services.get_service::<Utf8PathBuf>()?;
-                        let host = db.parsed_source_for_path(path)?;
-                        let model = vue_model_from_source(db, host).clone();
-                        let snippet = model.snippet_at_offset(snippet.content_offset(db))?.id();
+                        // The host document of the snippet, rather than the
+                        // one of its path, which can be another client's.
+                        let model = vue_model_from_source(db, snippet.source()).clone();
+                        let snippet = model.snippet_at_offset(snippet.content_offset())?.id();
                         Some(Self {
                             model,
                             snippet: Some(snippet),
