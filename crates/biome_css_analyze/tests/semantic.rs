@@ -3,10 +3,11 @@ use biome_css_analyze::CssAnalyzerServices;
 use biome_css_parser::{CssParserOptions, parse_css, parse_css_with_offset};
 use biome_css_syntax::AnyCssRoot;
 use biome_db::{
-    AnyParsedSource, Db, ParsedSource, SnippetParse, SourceParse,
+    Db, Source,
     testing::{Events, function_query_will_execute_count_by_name},
 };
 use biome_languages::{CssFileSource, DocumentFileSource, LanguageDb};
+use biome_parser::db::{AnyParsedSource, ParseDb, ParsedSourceExt, SnippetParse, SourceParse};
 use biome_rowan::{TextRange, TextSize};
 use camino::Utf8Path;
 use salsa::Setter;
@@ -36,8 +37,46 @@ impl salsa::Database for TestDb {}
 
 #[salsa::db]
 impl Db for TestDb {
-    fn parsed_source_for_path(&self, _: &Utf8Path) -> Option<ParsedSource> {
+    fn parsed_source_for_path(&self, _: &Utf8Path) -> Option<Source> {
         None
+    }
+}
+
+/// Marks the start of the snippet that a test document embeds: the text after
+/// the marker.
+const SNIPPET_MARKER: &str = "<style>";
+
+#[salsa::db]
+impl ParseDb for TestDb {
+    /// Parses the text before the [SNIPPET_MARKER] as the document, and the
+    /// text after it as a snippet of the document.
+    fn parse_source(&self, source: Source) -> SourceParse {
+        let text = source.text(self);
+        let Some((document, snippet)) = text.split_once(SNIPPET_MARKER) else {
+            return SourceParse::new(
+                parse_css(text, CssFileSource::css(), CssParserOptions::default()).into(),
+                0,
+            );
+        };
+        let content_offset = TextSize::of(document) + TextSize::of(SNIPPET_MARKER);
+        let snippet = SnippetParse::new(
+            parse_css_with_offset(
+                snippet,
+                CssFileSource::css(),
+                content_offset,
+                CssParserOptions::default(),
+            )
+            .into(),
+            TextRange::default(),
+            TextRange::default(),
+            content_offset,
+            0,
+        );
+        SourceParse::new(
+            parse_css(document, CssFileSource::css(), CssParserOptions::default()).into(),
+            0,
+        )
+        .with_snippets(vec![snippet])
     }
 }
 
@@ -90,13 +129,13 @@ fn analyze(
 #[test]
 fn semantic_queries_are_lazy_cached_and_refresh_locations() {
     let db = TestDb::default();
-    let parse = parse_css(
-        "a { color: red; color: red; }",
-        CssFileSource::css(),
-        CssParserOptions::default(),
+    let source = Source::new(
+        &db,
+        "/file.css".into(),
+        "a { color: red; color: red; }".into(),
+        0,
     );
-    let root = parse.tree();
-    let source = ParsedSource::from_parse(&db, "/file.css".into(), parse.into(), 0, vec![]);
+    let root: AnyCssRoot = source.parsed(&db).tree();
     let mut db = Rc::new(db);
     let rule = RuleFilter::Rule("suspicious", "noDuplicateProperties");
 
@@ -126,8 +165,9 @@ fn semantic_queries_are_lazy_cached_and_refresh_locations() {
     assert_eq!(analyze(&db, &changed_root, None, rule), shifted);
     assert_eq!(db.query_count("css_model_from_parsed_source"), 0);
     source
-        .set_content(Rc::get_mut(&mut db).unwrap())
-        .to(SourceParse::new(changed.into(), 0).into());
+        .set_text(Rc::get_mut(&mut db).unwrap())
+        .to("\na { color: red; color: red; }".into());
+    let changed_root: AnyCssRoot = source.parsed(db.as_ref()).tree();
     assert_eq!(
         analyze(&db, &changed_root, Some(source.into()), rule),
         shifted
@@ -138,35 +178,16 @@ fn semantic_queries_are_lazy_cached_and_refresh_locations() {
 #[test]
 fn semantic_queries_cache_offset_snippets() {
     let db = TestDb::default();
-    let parse = parse_css_with_offset(
-        "a { color: red; color: red; }",
-        CssFileSource::css(),
-        100.into(),
-        CssParserOptions::default(),
-    );
-    let root = parse.tree();
-    let snippet = SnippetParse::new(
-        parse.into(),
-        TextRange::default(),
-        TextRange::default(),
-        100.into(),
-        0,
-    );
-    let source = ParsedSource::from_parse(
+    let source = Source::new(
         &db,
         "/file.css".into(),
-        parse_css(
-            ".host {}",
-            CssFileSource::css(),
-            CssParserOptions::default(),
-        )
-        .into(),
+        ".host {}<style>a { color: red; color: red; }".into(),
         0,
-        vec![snippet],
     );
     let db = Rc::new(db);
     let rule = RuleFilter::Rule("suspicious", "noDuplicateProperties");
     let snippet = source.snippets(db.as_ref())[0].to_ref(db.as_ref());
+    let root: AnyCssRoot = snippet.parsed().tree();
 
     let ranges = analyze(&db, &root, Some(snippet.clone().into()), rule);
     assert_eq!(ranges.len(), 1);

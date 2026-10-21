@@ -1,5 +1,5 @@
 use biome_analyze::{FromServices, RuleKey, RuleMetadata, ServiceBag, ServicesDiagnostic};
-use biome_db::ParsedSource;
+use biome_db::Source;
 use biome_embeds::EmbeddedData;
 use biome_embeds::bindings::{
     InternedBindingText, InternedBindingTokenText, get_binding_by_name, get_binding_by_text,
@@ -27,7 +27,7 @@ enum EmbeddedSource {
     Workspace {
         db: Rc<dyn LanguageDb>,
         /// The host document of the analyzed source.
-        document: ParsedSource,
+        document: Source,
     },
     Interned(Arc<EmbeddedData>),
 }
@@ -38,7 +38,7 @@ impl EmbeddedService {
     /// content.
     pub(crate) fn new(
         db: Rc<dyn LanguageDb>,
-        document: Option<ParsedSource>,
+        document: Option<Source>,
         snippet_offset: TextSize,
     ) -> Self {
         let source = match document {
@@ -189,16 +189,19 @@ impl FromServices for EmbeddedService {
 mod tests {
     use super::*;
     use biome_db::testing::Events;
-    use biome_db::{ParsedSource, SnippetParse};
     use biome_js_parser::{JsParserOptions, parse};
     use biome_languages::{DocumentFileSource, JsFileSource};
+    use biome_parser::db::{ParseDb, SnippetParse, SourceParse};
     use biome_rowan::RawSyntaxKind;
     use camino::{Utf8Path, Utf8PathBuf};
     use salsa::{EventKind, Storage};
 
     #[salsa::db]
     struct TestDb {
-        parsed: Option<ParsedSource>,
+        parsed: Option<Source>,
+        /// The texts of the snippets of the document, each at its last
+        /// occurrence in the document.
+        snippets: Vec<String>,
         storage: Storage<Self>,
     }
 
@@ -206,6 +209,7 @@ mod tests {
         fn new(events: Events) -> Self {
             Self {
                 parsed: None,
+                snippets: Vec::new(),
                 storage: Storage::new(Some(Box::new(move |event| {
                     events.0.lock().unwrap().push(event)
                 }))),
@@ -221,8 +225,31 @@ mod tests {
     }
 
     #[salsa::db]
+    impl ParseDb for TestDb {
+        fn parse_source(&self, source: Source) -> SourceParse {
+            let text = source.text(self);
+            let snippets = self
+                .snippets
+                .iter()
+                .filter_map(|snippet| {
+                    let start = TextSize::from(text.rfind(snippet.as_str())? as u32);
+                    let range = TextRange::at(start, TextSize::of(snippet.as_str()));
+                    let parsed = parse(
+                        snippet,
+                        JsFileSource::js_module(),
+                        JsParserOptions::default(),
+                    );
+                    Some(SnippetParse::new(parsed.into(), range, range, start, 0))
+                })
+                .collect();
+            let parsed = parse(text, JsFileSource::js_module(), JsParserOptions::default());
+            SourceParse::new(parsed.into(), 0).with_snippets(snippets)
+        }
+    }
+
+    #[salsa::db]
     impl biome_db::Db for TestDb {
-        fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<ParsedSource> {
+        fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<Source> {
             self.parsed
         }
     }
@@ -236,28 +263,9 @@ mod tests {
     fn service_for(source: &str, snippets: &[&str]) -> (EmbeddedService, Events) {
         let events = Events::default();
         let mut db = TestDb::new(events.clone());
-        let snippets = snippets
-            .iter()
-            .map(|snippet| {
-                let start = TextSize::from(source.rfind(snippet).unwrap() as u32);
-                let range = TextRange::at(start, TextSize::of(*snippet));
-                let parsed = parse(
-                    snippet,
-                    JsFileSource::js_module(),
-                    JsParserOptions::default(),
-                )
-                .into();
-                SnippetParse::new(parsed, range, range, start, 0)
-            })
-            .collect();
+        db.snippets = snippets.iter().map(ToString::to_string).collect();
         let path = Utf8PathBuf::from("src/file.js");
-        let parsed = parse(
-            source,
-            JsFileSource::js_module(),
-            JsParserOptions::default(),
-        )
-        .into();
-        let document = ParsedSource::from_parse(&db, path, parsed, 0, snippets);
+        let document = Source::new(&db, path, source.into(), 0);
         db.parsed = Some(document);
 
         let service = EmbeddedService::new(Rc::new(db), Some(document), TextSize::default());

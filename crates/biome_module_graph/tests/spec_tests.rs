@@ -1,4 +1,4 @@
-use biome_db::ParsedSource;
+use biome_db::Source;
 use biome_db::testing::{
     Events, assert_function_query_was_not_run, assert_function_query_was_run,
     function_query_will_execute_count_by_name, function_query_will_execute_position,
@@ -26,6 +26,7 @@ use biome_module_graph::{
     infer_constructor_argument_type, infer_module_types, infer_module_types_bottom_up,
     module_for_key, normalize_type as normalize_type_query, resolve_js_module,
 };
+use biome_parser::db::{ParseDb, SourceParse};
 use biome_resolver::{ResolverFsProxy, ResolverPathChange, ResolverPaths, sync_resolver_paths};
 use biome_rowan::{AstNode, Text, TextRange};
 use biome_test_utils::get_added_js_paths;
@@ -90,7 +91,7 @@ mod snap;
 #[salsa::db]
 struct TestModuleDb {
     fs: MemoryFileSystem,
-    files: BTreeMap<Utf8PathBuf, ParsedSource>,
+    files: BTreeMap<Utf8PathBuf, Source>,
     modules: BTreeMap<Utf8PathBuf, ModuleInfo>,
     resolver_paths: ResolverPaths,
     events: Events,
@@ -132,8 +133,7 @@ impl TestModuleDb {
 
     /// Indexes a JSON document, such as a manifest, as a parsed source.
     fn insert_json_source(&mut self, path: Utf8PathBuf, source: &str) {
-        let parse = parse_json(source, JsonParserOptions::default());
-        let parsed = ParsedSource::from_parse(self, path.clone(), parse.into(), 0, Vec::new());
+        let parsed = Source::new(self, path.clone(), source.into(), 0);
         self.files.insert(path.clone(), parsed);
         sync_resolver_paths(self, [(path, ResolverPathChange::Content.into())]);
     }
@@ -144,8 +144,17 @@ impl salsa::Database for TestModuleDb {}
 
 #[salsa::db]
 impl biome_db::Db for TestModuleDb {
-    fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<ParsedSource> {
+    fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<Source> {
         self.files.get(path).copied()
+    }
+}
+
+/// Parses every text as JSON, the only documents the tests index.
+#[salsa::db]
+impl ParseDb for TestModuleDb {
+    fn parse_source(&self, source: Source) -> SourceParse {
+        let parse = parse_json(source.text(self), JsonParserOptions::default());
+        SourceParse::new(parse.into(), 0)
     }
 }
 

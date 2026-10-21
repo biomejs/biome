@@ -19,7 +19,7 @@ use biome_css_parser::CssParserOptions;
 #[cfg(feature = "lang_css")]
 use biome_css_syntax::AnyCssRoot;
 #[cfg(feature = "module_graph")]
-use biome_db::ParsedSource;
+use biome_db::Source;
 use biome_diagnostics::termcolor::Buffer;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDiagnostic};
 #[cfg(feature = "html_embeds")]
@@ -269,16 +269,12 @@ fn insert_test_manifests(db: &mut WorkspaceDb, input_file: &Utf8Path) {
         let Ok(content) = std::fs::read_to_string(input_file.with_extension(manifest_name)) else {
             continue;
         };
-        let parse = biome_json_parser::parse_json(
-            &content,
-            biome_json_parser::JsonParserOptions::default()
-                .with_allow_comments()
-                .with_allow_trailing_commas(),
-        );
         let path = directory.join(manifest_name);
-        let source_index = db.insert_source(DocumentFileSource::Json(JsonFileSource::json()));
-        let parsed =
-            ParsedSource::from_parse(db, path.clone(), parse.into(), source_index, Vec::new());
+        let file_source = JsonFileSource::json()
+            .with_allow_comments()
+            .with_allow_trailing_commas();
+        let source_index = db.insert_source(DocumentFileSource::Json(file_source));
+        let parsed = Source::new(db, path.clone(), content.into(), source_index);
         db.insert_file(&path, parsed);
     }
 }
@@ -329,19 +325,12 @@ pub fn module_graph_for_test_file(
                 continue;
             };
             let content = fs.read_file_from_path(path).expect("CSS test file exists");
-            let options = if file_source.is_css_modules() {
-                CssParserOptions::default().allow_css_modules()
-            } else {
-                CssParserOptions::default()
-            };
-            let parsed = biome_css_parser::parse_css(&content, file_source, options);
             let source_index = db.insert_source(file_source.into());
-            let parsed_source = ParsedSource::from_parse(
+            let parsed_source = Source::new(
                 &db,
                 path.as_path().to_path_buf(),
-                parsed.into(),
+                content.into(),
                 source_index,
-                Vec::new(),
             );
             db.insert_file(path.as_path(), parsed_source);
             let (module_info, _, _) = resolve_css_module(&db, root, path);
@@ -383,19 +372,12 @@ pub fn module_graph_for_css_test_file(
             continue;
         };
         let content = fs.read_file_from_path(path).expect("CSS test file exists");
-        let options = if file_source.is_css_modules() {
-            CssParserOptions::default().allow_css_modules()
-        } else {
-            CssParserOptions::default()
-        };
-        let parsed = biome_css_parser::parse_css(&content, file_source, options);
         let source_index = db.insert_source(file_source.into());
-        let parsed_source = ParsedSource::from_parse(
+        let parsed_source = Source::new(
             &db,
             path.as_path().to_path_buf(),
-            parsed.into(),
+            content.into(),
             source_index,
-            Vec::new(),
         );
         db.insert_file(path.as_path(), parsed_source);
         let (module_info, _, _) = resolve_css_module(&db, root, path);

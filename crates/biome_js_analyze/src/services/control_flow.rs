@@ -3,13 +3,13 @@ use biome_analyze::{
     AddVisitor, FromServices, Phase, Phases, Queryable, RuleKey, RuleMetadata, ServiceBag,
     ServicesDiagnostic, Visitor, VisitorContext,
 };
-use biome_db::AnyParsedSource;
 use biome_js_control_flow::{control_flow_model, js_control_flow_model};
 use biome_js_syntax::AnyJsRoot;
 use biome_js_syntax::JsLanguage;
 use biome_js_syntax::JsSyntaxNode;
 use biome_js_syntax::TextRange;
 use biome_languages::LanguageDb;
+use biome_parser::db::AnyParsedSource;
 use biome_rowan::{AstNode, SyntaxKindSet, WalkEvent};
 use std::rc::Rc;
 

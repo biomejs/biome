@@ -1,6 +1,6 @@
 use crate::data::VueDirectiveResolution;
 use crate::visitor::vue_directive_declarations_from_source;
-use biome_db::ParsedSource;
+use biome_db::Source;
 use biome_languages::LanguageDb;
 
 /// An interned Vue custom-directive lookup in a host document.
@@ -8,7 +8,7 @@ use biome_languages::LanguageDb;
 #[derive(Debug)]
 pub struct InternedVueDirective {
     #[returns(copy)]
-    source: ParsedSource,
+    source: Source,
     name: String,
 }
 

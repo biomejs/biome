@@ -23,7 +23,7 @@ use biome_analyze::{
     Suppression,
 };
 use biome_aria::AriaRoles;
-use biome_db::ParsedSource;
+use biome_db::Source;
 use biome_diagnostics::Error;
 use biome_embeds::EmbeddedData;
 use biome_html_syntax::HtmlLanguage;
@@ -46,11 +46,11 @@ pub struct HtmlAnalyzerServices {
     pub project_layout: Option<Arc<ProjectLayout>>,
     /// The analyzed document, which the embedded queries of `language_db`
     /// read.
-    pub document: Option<ParsedSource>,
+    pub document: Option<Source>,
 }
 
 impl HtmlAnalyzerServices {
-    pub fn with_document(mut self, document: ParsedSource) -> Self {
+    pub fn with_document(mut self, document: Source) -> Self {
         self.document = Some(document);
         self
     }

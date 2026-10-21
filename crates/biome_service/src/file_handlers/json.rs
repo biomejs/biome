@@ -28,7 +28,6 @@ use biome_configuration::json::{
     JsonAssistEnabled, JsonFormatterConfiguration, JsonFormatterEnabled, JsonLinterConfiguration,
     JsonLinterEnabled, JsonParserConfiguration,
 };
-use biome_db::AnyParsedSource;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_formatter::rowan::Printed;
 use biome_formatter::{
@@ -44,6 +43,7 @@ use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_languages::JsonFileSource;
 use biome_manifest::BiomeManifest;
+use biome_parser::db::AnyParsedSource;
 use biome_rowan::{AstNode, NodeCache, SyntaxKind};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use camino::Utf8Path;

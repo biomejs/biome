@@ -2,7 +2,7 @@ use crate::bindings::EmbeddedBinding;
 use crate::components::collect_embedded_elements;
 use crate::data::{EmbeddedData, VueDirectiveDeclarations};
 use crate::references::{EmbeddedTypeReference, EmbeddedValueReference};
-use biome_db::ParsedSource;
+use biome_db::Source;
 use biome_html_syntax::{
     AnyHtmlComponentObjectName, AnyHtmlTagName, AnySvelteBindingAssignmentBinding,
     AnySvelteBindingProperty, AnySvelteBlock, AnySvelteBlockItem, AnySvelteDestructuredName,
@@ -25,6 +25,7 @@ use biome_languages::html::HtmlVariant;
 use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind};
 use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource, LanguageDb};
 use biome_parser::AnyParse;
+use biome_parser::db::ParsedSourceExt;
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, WalkEvent};
 use std::collections::VecDeque;
 
@@ -114,7 +115,7 @@ impl From<&AnySvelteBlock> for EmbeddedBlockKind {
 #[salsa::tracked]
 pub fn embedded_bindings_from_source(
     db: &dyn LanguageDb,
-    file: ParsedSource,
+    file: Source,
 ) -> Vec<Vec<EmbeddedBinding>> {
     let Some(host_source) = db.source_from_index(file.document_source_index(db)) else {
         return Vec::new();
@@ -139,7 +140,7 @@ pub fn embedded_bindings_from_source(
 #[salsa::tracked]
 pub fn vue_directive_declarations_from_source(
     db: &dyn LanguageDb,
-    file: ParsedSource,
+    file: Source,
 ) -> VueDirectiveDeclarations {
     let Some(host_source) = db.source_from_index(file.document_source_index(db)) else {
         return VueDirectiveDeclarations::unknown();
@@ -233,7 +234,7 @@ struct CollectedEmbeddedBindings {
 #[salsa::tracked]
 pub fn embedded_references_from_source(
     db: &dyn LanguageDb,
-    file: ParsedSource,
+    file: Source,
 ) -> Vec<Vec<EmbeddedValueReference>> {
     let Some(builder) = collect_embedded_references_from_source(db, file) else {
         return Vec::new();
@@ -245,7 +246,7 @@ pub fn embedded_references_from_source(
 #[salsa::tracked]
 pub fn embedded_type_references_from_source(
     db: &dyn LanguageDb,
-    file: ParsedSource,
+    file: Source,
 ) -> Vec<Vec<EmbeddedTypeReference>> {
     let Some(builder) = collect_embedded_references_from_source(db, file) else {
         return Vec::new();
@@ -256,7 +257,7 @@ pub fn embedded_type_references_from_source(
 
 fn collect_embedded_references_from_source(
     db: &dyn LanguageDb,
-    file: ParsedSource,
+    file: Source,
 ) -> Option<EmbeddedReferencesBuilder> {
     let host_source = db.source_from_index(file.document_source_index(db))?;
     let snippets = file
@@ -1966,11 +1967,9 @@ mod tests {
     use crate::components::component_at;
     use crate::references::{InternedReference, is_reference_used};
     use crate::testing::{
-        TestDb, document, parse_html_source_with_js_snippet, parse_js_source, parse_vue_source,
-        token_text,
+        TestDb, TestSnippet, document, parse_html_source_with_js_snippet, parse_js_source,
+        parse_vue_source, token_text,
     };
-    use biome_db::SnippetParse;
-    use biome_js_parser::JsParserOptions;
     use biome_languages::has_embedded_content;
     use biome_rowan::TextSize;
 
@@ -2023,21 +2022,15 @@ mod tests {
     fn has_embedded_content_is_true_for_a_script_with_a_snippet() {
         let db = TestDb::new();
         let source = "const used = 1; html`${used}`;";
-        let snippet_parse = biome_js_parser::parse(
-            "used",
-            JsFileSource::js_module(),
-            JsParserOptions::default(),
-        )
-        .into();
         let content_start = TextSize::from(source.find("${used}").unwrap() as u32 + 2);
         let content_range = TextRange::at(content_start, TextSize::of("used"));
-        let snippet = SnippetParse::new(
-            snippet_parse,
+        let snippet = TestSnippet {
+            text: "used".to_string(),
+            element_range: content_range,
             content_range,
-            content_range,
-            content_start,
-            3,
-        );
+            content_offset: content_start,
+            source_index: 3,
+        };
         let path = parse_js_source(&db, source, vec![snippet]);
 
         assert!(has_embedded_content(&db, document(&db, &path)));

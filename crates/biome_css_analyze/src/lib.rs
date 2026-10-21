@@ -22,10 +22,10 @@ use biome_analyze::{
     MetadataRegistry, Phases, PluginTargetLanguage, RuleAction, RuleRegistry,
 };
 use biome_css_syntax::CssLanguage;
-use biome_db::AnyParsedSource;
 use biome_diagnostics::Error;
 use biome_languages::{CssFileSource, LanguageDb};
 use biome_module_graph::ModuleDb;
+use biome_parser::db::AnyParsedSource;
 use biome_project_layout::ProjectLayout;
 use std::ops::Deref;
 use std::rc::Rc;

@@ -44,6 +44,7 @@ use biome_formatter::{
 };
 use biome_fs::BiomePath;
 use biome_languages::DocumentFileSource;
+use biome_parser::db::AnyParsedSource;
 use biome_rowan::{AstNode, NodeCache, SyntaxKind};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use camino::Utf8Path;

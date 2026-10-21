@@ -646,6 +646,37 @@ import Card from './Card.vue';
     assert_eq!(unused_imports(&cli), 0);
 }
 
+/// A change that a client sent before its files were closed, and that
+/// publishes its content after the close, doesn't leave the file open.
+#[cfg(feature = "module_graph")]
+#[test]
+fn change_published_after_the_close_of_its_client_is_closed() {
+    const PATH: &str = "/project/a.js";
+
+    let (workspace, project_key, _) = lsp_workspace(&[]);
+    let editor = client(&workspace, 1);
+    open_in(&editor, project_key, PATH, "let a = 1;");
+    workspace
+        .server
+        .close_client_files_before_change_publish
+        .store(true, Ordering::Release);
+
+    let changed = editor.change_file(ChangeFileParams {
+        project_key,
+        path: BiomePath::new(PATH),
+        content: "let a = 2;".into(),
+        version: 2,
+        inline_config: None,
+        editor_features: None,
+    });
+
+    assert!(changed.is_err());
+    assert_eq!(
+        workspace.get_db().get_parsed_source(Utf8Path::new(PATH)),
+        None
+    );
+}
+
 /// Closing a dependency, which the workspace keeps in the database only,
 /// keeps the views of the other clients that have it open.
 #[cfg(feature = "module_graph")]
@@ -2015,6 +2046,145 @@ fn parser_options_change_parses_open_documents_again() {
     allow_comments(true);
     assert!(
         workspace
+            .db_get_parse_diagnostics(Utf8Path::new(PATH))
+            .is_empty()
+    );
+}
+
+/// Returns a configuration that sets whether JSON files allow comments.
+fn json_allow_comments(allow_comments: bool) -> Configuration {
+    Configuration {
+        json: Some(JsonConfiguration {
+            parser: Some(biome_configuration::json::JsonParserConfiguration {
+                allow_comments: Some(allow_comments.into()),
+                ..Default::default()
+            }),
+            ..Default::default()
+        }),
+        ..Default::default()
+    }
+}
+
+/// Replaces the configuration of the project.
+fn update_configuration(
+    workspace: &LocalWorkspace,
+    project_key: ProjectKey,
+    configuration: Configuration,
+) {
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: Some(BiomePath::new("/project")),
+            configuration,
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+}
+
+/// Settings that a scan applies parse open documents again, even though the
+/// scan replaces the project instead of updating it.
+#[cfg(feature = "module_graph")]
+#[test]
+fn parser_options_change_in_a_scan_parses_open_documents_again() {
+    const PATH: &str = "/project/data.json";
+
+    let (workspace, project_key, _) = lsp_workspace(&[]);
+    update_configuration(&workspace, project_key, json_allow_comments(false));
+    let editor = client(&workspace, 1);
+    open_in(&editor, project_key, PATH, "// comment\n{}");
+    assert!(
+        !editor
+            .db_get_parse_diagnostics(Utf8Path::new(PATH))
+            .is_empty()
+    );
+
+    let mut settings = Settings::default();
+    settings
+        .merge_with_configuration(json_allow_comments(true), None, vec![])
+        .unwrap();
+    {
+        let epoch = workspace.db_state.scanner_epoch();
+        epoch.view().insert_root_settings(project_key, settings);
+    }
+
+    assert!(
+        editor
+            .db_get_parse_diagnostics(Utf8Path::new(PATH))
+            .is_empty()
+    );
+}
+
+/// Parser options that select a variant of the file source, such as
+/// `javascript.parser.jsxEverywhere`, apply to open documents when they
+/// change.
+#[cfg(feature = "module_graph")]
+#[test]
+fn jsx_everywhere_change_parses_open_documents_again() {
+    const PATH: &str = "/project/component.js";
+
+    let (workspace, project_key, _) = lsp_workspace(&[]);
+    let jsx_everywhere = |jsx_everywhere: bool| Configuration {
+        javascript: Some(JsConfiguration {
+            parser: Some(JsParserConfiguration {
+                jsx_everywhere: Some(jsx_everywhere.into()),
+                ..Default::default()
+            }),
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
+    update_configuration(&workspace, project_key, jsx_everywhere(false));
+    let editor = client(&workspace, 1);
+    open_in(&editor, project_key, PATH, "const a = <div />;");
+    assert!(
+        !editor
+            .db_get_parse_diagnostics(Utf8Path::new(PATH))
+            .is_empty()
+    );
+
+    update_configuration(&workspace, project_key, jsx_everywhere(true));
+    assert!(
+        editor
+            .db_get_parse_diagnostics(Utf8Path::new(PATH))
+            .is_empty()
+    );
+}
+
+/// The parser options of the inline configuration of a client apply to the
+/// files it opens, and not to the ones of other clients.
+#[cfg(feature = "module_graph")]
+#[test]
+fn inline_configuration_applies_to_the_parse_of_its_client() {
+    const PATH: &str = "/project/data.json";
+    const CONTENT: &str = "// comment\n{}";
+
+    let (workspace, project_key, _) = lsp_workspace(&[(PATH, CONTENT)]);
+    update_configuration(&workspace, project_key, json_allow_comments(false));
+    let (inline, other) = (client(&workspace, 1), client(&workspace, 2));
+    inline
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: FileContent::FromClient {
+                content: CONTENT.into(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: Some(json_allow_comments(true)),
+            editor_features: None,
+        })
+        .unwrap();
+    open_in(&other, project_key, PATH, CONTENT);
+
+    assert!(
+        inline
+            .db_get_parse_diagnostics(Utf8Path::new(PATH))
+            .is_empty()
+    );
+    assert!(
+        !other
             .db_get_parse_diagnostics(Utf8Path::new(PATH))
             .is_empty()
     );

@@ -1,19 +1,75 @@
 //! A minimal Salsa database and parsing helpers shared by the crate's unit tests.
 
+use biome_db::Source;
 use biome_db::testing::Events;
-use biome_db::{ParsedSource, SnippetParse};
 use biome_html_parser::{HtmlParserOptions, parse_html};
 use biome_js_parser::JsParserOptions;
 use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource, LanguageDb};
+use biome_parser::AnyParse;
+use biome_parser::db::{ParseDb, SnippetParse, SourceParse};
 use biome_rowan::{RawSyntaxKind, TextRange, TextSize, TokenText};
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
 use salsa::Storage;
 
+/// A snippet embedded in a test document, which the test database parses
+/// along with the document.
+#[derive(Clone, Debug)]
+pub(crate) struct TestSnippet {
+    /// The text of the snippet. It isn't necessarily the text of the document
+    /// at `content_range`.
+    pub(crate) text: String,
+    pub(crate) element_range: TextRange,
+    pub(crate) content_range: TextRange,
+    pub(crate) content_offset: TextSize,
+    /// The index of the file source of the snippet.
+    pub(crate) source_index: usize,
+}
+
+/// Parses `text` as the file source at `source_index` in `db`.
+fn parse_text(db: &dyn LanguageDb, text: &str, source_index: usize) -> AnyParse {
+    match db.source_from_index(source_index) {
+        Some(DocumentFileSource::Html(source)) if source.is_vue() => {
+            parse_html(text, HtmlParserOptions::default().with_vue()).into()
+        }
+        Some(DocumentFileSource::Html(_)) => parse_html(text, HtmlParserOptions::default()).into(),
+        source => {
+            let source = source
+                .and_then(|source| source.to_js_file_source())
+                .unwrap_or_default();
+            biome_js_parser::parse(text, source, JsParserOptions::default()).into()
+        }
+    }
+}
+
+/// Parses the text of `source` and its `snippets`, as the test databases do.
+pub(crate) fn parse_test_source(
+    db: &dyn LanguageDb,
+    source: Source,
+    snippets: &[TestSnippet],
+) -> SourceParse {
+    let source_index = source.file_source_index(db);
+    let snippets = snippets
+        .iter()
+        .map(|snippet| {
+            SnippetParse::new(
+                parse_text(db, &snippet.text, snippet.source_index),
+                snippet.element_range,
+                snippet.content_range,
+                snippet.content_offset,
+                snippet.source_index,
+            )
+        })
+        .collect();
+    SourceParse::new(parse_text(db, source.text(db), source_index), source_index)
+        .with_snippets(snippets)
+}
+
 #[salsa::db]
 #[derive(Default)]
 pub(crate) struct TestDb {
-    files: HashMap<Utf8PathBuf, ParsedSource>,
+    files: HashMap<Utf8PathBuf, Source>,
+    snippets: HashMap<Utf8PathBuf, Vec<TestSnippet>>,
     events: Events,
     storage: Storage<Self>,
 }
@@ -23,6 +79,7 @@ impl TestDb {
         let events = Events::default();
         Self {
             files: HashMap::new(),
+            snippets: HashMap::new(),
             storage: salsa::Storage::new(Some(Box::new({
                 let events = events.clone();
                 move |event| {
@@ -41,8 +98,18 @@ impl TestDb {
         self.take_salsa_events();
     }
 
-    pub(crate) fn insert_file(&self, path: Utf8PathBuf, file: ParsedSource) {
-        self.files.pin().insert(path, file);
+    /// Stores the document `text` at `path`, parsed as the file source at
+    /// `source_index`, with the given embedded snippets.
+    pub(crate) fn insert_document(
+        &self,
+        path: &Utf8Path,
+        text: &str,
+        source_index: usize,
+        snippets: Vec<TestSnippet>,
+    ) {
+        self.snippets.pin().insert(path.to_path_buf(), snippets);
+        let file = Source::new(self, path.to_path_buf(), text.into(), source_index);
+        self.files.pin().insert(path.to_path_buf(), file);
     }
 }
 
@@ -50,8 +117,16 @@ impl TestDb {
 impl salsa::Database for TestDb {}
 
 #[salsa::db]
+impl ParseDb for TestDb {
+    fn parse_source(&self, source: Source) -> SourceParse {
+        let snippets = self.snippets.pin().get(source.path(self)).cloned();
+        parse_test_source(self, source, &snippets.unwrap_or_default())
+    }
+}
+
+#[salsa::db]
 impl biome_db::Db for TestDb {
-    fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<ParsedSource> {
+    fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<Source> {
         self.files.pin().get(path).copied()
     }
 }
@@ -75,9 +150,7 @@ impl LanguageDb for TestDb {
 
 pub(crate) fn parse_vue_source(db: &TestDb, source: &str) -> Utf8PathBuf {
     let path = Utf8PathBuf::from("src/App.vue");
-    let parsed = parse_html(source, HtmlParserOptions::default().with_vue()).into();
-    let file = ParsedSource::from_parse(db, path.clone(), parsed, 0, vec![]);
-    db.insert_file(path.clone(), file);
+    db.insert_document(&path, source, 0, Vec::new());
     path
 }
 
@@ -86,36 +159,25 @@ pub(crate) fn parse_vue_source(db: &TestDb, source: &str) -> Utf8PathBuf {
 pub(crate) fn parse_js_source(
     db: &TestDb,
     source: &str,
-    snippets: Vec<SnippetParse>,
+    snippets: Vec<TestSnippet>,
 ) -> Utf8PathBuf {
     let path = Utf8PathBuf::from("src/file.js");
-    let parsed = biome_js_parser::parse(
-        source,
-        JsFileSource::js_module(),
-        JsParserOptions::default(),
-    )
-    .into();
-    let file = ParsedSource::from_parse(db, path.clone(), parsed, 3, snippets);
-    db.insert_file(path.clone(), file);
+    db.insert_document(&path, source, 3, snippets);
     path
 }
 
 pub(crate) fn parse_html_source_with_js_snippet(db: &TestDb, html: &str, js: &str) -> Utf8PathBuf {
     let path = Utf8PathBuf::from("src/file.html");
-    let parsed = parse_html(html, HtmlParserOptions::default()).into();
-    let snippet_parse =
-        biome_js_parser::parse(js, JsFileSource::js_module(), JsParserOptions::default()).into();
     let content_start = TextSize::from(html.find(js).expect("snippet should exist") as u32);
     let content_end = content_start + TextSize::from(js.len() as u32);
-    let snippet = SnippetParse::new(
-        snippet_parse,
-        TextRange::new(TextSize::from(0), TextSize::from(html.len() as u32)),
-        TextRange::new(content_start, content_end),
-        content_start,
-        3,
-    );
-    let file = ParsedSource::from_parse(db, path.clone(), parsed, 2, vec![snippet]);
-    db.insert_file(path.clone(), file);
+    let snippet = TestSnippet {
+        text: js.to_string(),
+        element_range: TextRange::new(TextSize::from(0), TextSize::from(html.len() as u32)),
+        content_range: TextRange::new(content_start, content_end),
+        content_offset: content_start,
+        source_index: 3,
+    };
+    db.insert_document(&path, html, 2, vec![snippet]);
     path
 }
 
@@ -141,38 +203,30 @@ pub(crate) fn parse_vue_source_with_js_snippets(
     snippets: &[(&str, usize)],
 ) -> Utf8PathBuf {
     let path = Utf8PathBuf::from("src/App.vue");
-    let parsed = parse_html(html, HtmlParserOptions::default().with_vue()).into();
     let snippets = snippets
         .iter()
         .map(|(js, source_index)| {
-            let file_source = db
-                .source_from_index(*source_index)
-                .and_then(|source| source.to_js_file_source())
-                .expect("the source index should resolve to a JavaScript file source");
-            let snippet_parse =
-                biome_js_parser::parse(js, file_source, JsParserOptions::default()).into();
             // Snippets whose text is not literally present in the host document keep
             // empty ranges; they are still visited because they are embedded sources.
             let content_range = html.find(js).map_or_else(TextRange::default, |offset| {
                 let start = TextSize::from(offset as u32);
                 TextRange::new(start, start + TextSize::from(js.len() as u32))
             });
-            SnippetParse::new(
-                snippet_parse,
+            TestSnippet {
+                text: js.to_string(),
+                element_range: content_range,
                 content_range,
-                content_range,
-                content_range.start(),
-                *source_index,
-            )
+                content_offset: content_range.start(),
+                source_index: *source_index,
+            }
         })
         .collect();
-    let file = ParsedSource::from_parse(db, path.clone(), parsed, 0, snippets);
-    db.insert_file(path.clone(), file);
+    db.insert_document(&path, html, 0, snippets);
     path
 }
 
 /// Returns the document stored for `path`.
-pub(crate) fn document(db: &TestDb, path: &Utf8Path) -> ParsedSource {
+pub(crate) fn document(db: &TestDb, path: &Utf8Path) -> Source {
     biome_db::Db::parsed_source_for_path(db, path).expect("the document should be stored")
 }
 

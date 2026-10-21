@@ -60,7 +60,7 @@ use biome_configuration::vcs::VcsClientKind;
 use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
 #[cfg(all(feature = "module_graph", feature = "lang_css"))]
 use biome_css_syntax::AnyCssRoot;
-use biome_db::{AnyParsedSource, ParsedSnippetRef, ParsedSource, SourceText};
+use biome_db::Source;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
 use biome_diagnostics::print_diagnostic_to_string;
@@ -82,15 +82,15 @@ use biome_json_parser::JsonParserOptions;
 use biome_languages::CssFileSource;
 #[cfg(feature = "lang_js")]
 use biome_languages::JsFileSource;
-#[cfg(feature = "lang_css")]
-use biome_languages::css::CssVariant;
 #[cfg(feature = "lang_js")]
-use biome_languages::javascript::{JsEmbeddingKind, LanguageVariant, ModuleKind};
+use biome_languages::javascript::{JsEmbeddingKind, ModuleKind};
 use biome_languages::{DocumentFileSource, JsonFileSource, LanguageDb};
 #[cfg(feature = "lang_js")]
 use biome_package::PackageType;
 use biome_package::{Catalogs, PackageJson};
 use biome_parser::AnyParse;
+use biome_parser::db::ParsedSourceExt;
+use biome_parser::db::{AnyParsedSource, ParsedSnippetRef};
 use biome_parser::diagnostic::ParseDiagnostic;
 #[cfg(feature = "plugins")]
 use biome_plugin_loader::Plugins;
@@ -153,6 +153,11 @@ pub struct WorkspaceServer {
 
     #[cfg(test)]
     cancel_change_file_after_document_update: AtomicBool,
+
+    /// Makes the next [Workspace::change_file] close the files of its client
+    /// after it reads the document and before it publishes the change.
+    #[cfg(test)]
+    close_client_files_before_change_publish: AtomicBool,
 
     #[cfg(test)]
     scanner_test_state: ScannerTestState,
@@ -245,7 +250,7 @@ impl ScannerTestState {
 impl ProcessFileState {
     fn iter_snippets(&self) -> SnippetsIterator<'_> {
         match &self.parsed {
-            ParsedOrigin::Workspace(AnyParsedSource::ParsedSource(source)) => {
+            ParsedOrigin::Workspace(AnyParsedSource::Source(source)) => {
                 SnippetsIterator::from_source(*source, &self.db)
             }
             ParsedOrigin::Workspace(AnyParsedSource::ParsedSnippet(_)) => {
@@ -481,6 +486,8 @@ impl WorkspaceServer {
             #[cfg(test)]
             cancel_change_file_after_document_update: AtomicBool::new(false),
             #[cfg(test)]
+            close_client_files_before_change_publish: AtomicBool::new(false),
+            #[cfg(test)]
             scanner_test_state: ScannerTestState::default(),
         }
     }
@@ -567,7 +574,7 @@ impl LocalWorkspace {
     }
 
     #[cfg(test)]
-    fn get_parse(&self, path: &Utf8Path) -> Result<ParsedSource, WorkspaceError> {
+    fn get_parse(&self, path: &Utf8Path) -> Result<Source, WorkspaceError> {
         self.as_workspace().get_parse(path)
     }
 
@@ -596,7 +603,7 @@ impl WorkspaceServerWithDb<'_> {
         &self,
         project_key: ProjectKey,
         path: &BiomePath,
-        parsed: ParsedSource,
+        parsed: Source,
     ) -> Result<ChangeFileResult, WorkspaceError> {
         let mut final_diagnostics = vec![];
 
@@ -838,18 +845,15 @@ impl WorkspaceServerWithDb<'_> {
             return Ok(Default::default());
         }
 
-        let (_, settings, query) = {
+        let (_, settings, _) = {
             #[cfg(test)]
             self.scanner_test_state.enter_file_settings_read(reason);
             let db = self.get_db();
-            self.project_get_settings_query(&db, project_key, &path, inline_config)
+            self.project_get_settings_query(&db, project_key, &path, None)
         }
         .ok_or_else(WorkspaceError::no_project)?;
 
-        #[cfg_attr(
-            not(any(feature = "lang_js", feature = "lang_css", feature = "lang_md")),
-            expect(unused_mut)
-        )]
+        #[cfg_attr(not(feature = "lang_js"), expect(unused_mut))]
         let mut source = if let Some(document_file_source) = document_file_source {
             let path_source = DocumentFileSource::from_path(
                 &path,
@@ -871,6 +875,10 @@ impl WorkspaceServerWithDb<'_> {
             )
         };
 
+        // The variants that the parser settings select are applied when the
+        // text is parsed, so that a settings change parses it again with them.
+        // The module kind depends on the package manifest of the file, which
+        // the database doesn't hold, so it's resolved here.
         #[cfg(feature = "lang_js")]
         if let DocumentFileSource::Js(js) = &mut source {
             match path.extension() {
@@ -887,58 +895,6 @@ impl WorkspaceServerWithDb<'_> {
                 }
                 _ => {}
             }
-            if !js.is_typescript() && !js.is_jsx() {
-                let jsx_everywhere = settings
-                    .as_ref()
-                    .languages
-                    .javascript
-                    .parser
-                    .jsx_everywhere
-                    .unwrap_or_default()
-                    .into();
-                if jsx_everywhere {
-                    js.set_variant(LanguageVariant::Jsx);
-                }
-            }
-        }
-
-        #[cfg(feature = "lang_css")]
-        if let DocumentFileSource::Css(css) = &mut source {
-            if settings
-                .as_ref()
-                .languages
-                .css
-                .parser
-                .css_modules_enabled
-                .unwrap_or_default()
-                .into()
-            {
-                css.set_variant(CssVariant::CssModules)
-            } else if settings
-                .as_ref()
-                .languages
-                .css
-                .parser
-                .tailwind_directives
-                .unwrap_or_default()
-                .into()
-            {
-                css.set_variant(CssVariant::TailwindCss)
-            }
-        }
-
-        #[cfg(feature = "lang_md")]
-        if let DocumentFileSource::Markdown(markdown) = &mut source {
-            markdown.set_cjk_friendly_emphasis(
-                settings
-                    .as_ref()
-                    .languages
-                    .markdown
-                    .parser
-                    .cjk_friendly_emphasis
-                    .unwrap_or_default()
-                    .into(),
-            );
         }
 
         let (content, version) = match content {
@@ -965,8 +921,7 @@ impl WorkspaceServerWithDb<'_> {
         } else {
             // The text is parsed the first time a query reads it, so a file
             // source that can't be parsed must be rejected here.
-            let parse = self
-                .features
+            self.features
                 .get_deprecated_capabilities(source)
                 .parser
                 .parse
@@ -974,12 +929,7 @@ impl WorkspaceServerWithDb<'_> {
             if persist_node_cache {
                 self.db_state.retain_node_cache(&path);
             }
-            Ok(Some(self.db_state.source_text(
-                content.clone(),
-                parse,
-                source,
-                query,
-            )))
+            Ok(Some(content.clone()))
         };
 
         #[cfg(test)]
@@ -990,7 +940,11 @@ impl WorkspaceServerWithDb<'_> {
             Err(error) => Some(Err(error)),
             Ok(None) => None,
             Ok(Some(text)) => {
-                parsed_source = Some(self.db_update_file_view(&path, view, text));
+                parsed_source =
+                    Some(
+                        self.db_state
+                            .update_file_view(&path, view, text, source, inline_config),
+                    );
                 Some(Ok(()))
             }
         };
@@ -1093,7 +1047,7 @@ impl WorkspaceServerWithDb<'_> {
     /// Retrieves the parser result for a given file.
     ///
     /// Returns an error if no file exists in the workspace with this path.
-    fn get_parse(&self, path: &Utf8Path) -> Result<ParsedSource, WorkspaceError> {
+    fn get_parse(&self, path: &Utf8Path) -> Result<Source, WorkspaceError> {
         self.assert_parse(path)?;
 
         let db = self.db_state.fork();
@@ -1112,7 +1066,7 @@ impl WorkspaceServerWithDb<'_> {
         &self,
         path: &BiomePath,
         cursor_offset: TextSize,
-        parse: &ParsedSource,
+        parse: &Source,
         language: DocumentFileSource,
     ) -> Result<(Option<DefinitionReference>, Capabilities), WorkspaceError> {
         let workspace_db = self.get_db();
@@ -2423,18 +2377,6 @@ impl WorkspaceServerWithDb<'_> {
         self.db_state.unload_path(path);
     }
 
-    /// Removes the cached parsed source for `path` from the database.
-    /// Publishes `text` as `view` of `path` in the database, and returns the
-    /// current view of `path`.
-    fn db_update_file_view(
-        &self,
-        path: &Utf8Path,
-        view: FileView,
-        text: SourceText,
-    ) -> ParsedSource {
-        self.db_state.update_file_view(path, view, text.into())
-    }
-
     /// Retrieves all diagnostics that belong to a document. It contains diagnostics that belong to embedded snippets too
     pub fn db_get_parse_diagnostics(&self, path: &Utf8Path) -> Vec<ParseDiagnostic> {
         let db = self.get_db();
@@ -2475,7 +2417,7 @@ impl WorkspaceServerWithDb<'_> {
         &self,
         db: &WorkspaceDb,
         path: &Utf8Path,
-    ) -> Result<(ParsedSource, Vec<ParsedSnippetRef>), WorkspaceError> {
+    ) -> Result<(Source, Vec<ParsedSnippetRef>), WorkspaceError> {
         self.assert_parse(path)?;
         let parsed_source = db
             .get_client_parsed_source(path, self.client)
@@ -3463,16 +3405,13 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             return self.finish_change_file(project_key, &path, parsed);
         }
 
-        let (_, _, query) = {
-            let db = self.get_db();
-            self.project_get_settings_query(&db, project_key, &path, inline_config)
+        if self.get_db().get_project(&project_key).is_none() {
+            return Err(WorkspaceError::no_project());
         }
-        .ok_or_else(WorkspaceError::no_project)?;
 
         // The text is parsed the first time a query reads it, so a file source
         // that can't be parsed must be rejected here.
-        let parse = self
-            .features
+        self.features
             .get_deprecated_capabilities(document_source)
             .parser
             .parse
@@ -3487,31 +3426,46 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             FileView::Disk
         };
         let content = Arc::<str>::from(content);
-        let parsed = self.db_update_file_view(
+        #[cfg(test)]
+        if self
+            .close_client_files_before_change_publish
+            .swap(false, Ordering::AcqRel)
+        {
+            self.close_client_files()?;
+        }
+        let parsed = self.db_state.update_file_view(
             path.as_path(),
             view,
-            self.db_state
-                .source_text(content.clone(), parse, document_source, query),
+            content.clone(),
+            document_source,
+            inline_config,
         );
 
-        documents
-            .update(path.to_path_buf(), |document| match view {
-                FileView::Editor(client) => document.clone().with_editor(
-                    client,
-                    EditorView {
-                        content: content.clone(),
-                        version,
-                        file_source: document_source,
-                        syntax: Some(Ok(())),
-                    },
-                ),
-                FileView::Disk => document.clone().with_disk(DiskView {
+        let updated = documents.update(path.to_path_buf(), |document| match view {
+            FileView::Editor(client) => document.clone().with_editor(
+                client,
+                EditorView {
                     content: content.clone(),
+                    version,
                     file_source: document_source,
                     syntax: Some(Ok(())),
-                }),
-            })
-            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
+                },
+            ),
+            FileView::Disk => document.clone().with_disk(DiskView {
+                content: content.clone(),
+                file_source: document_source,
+                syntax: Some(Ok(())),
+            }),
+        });
+        // The file was closed after it was read, such as when the client
+        // disconnected meanwhile, so the editor view just published must not
+        // outlive it.
+        if updated.is_none() {
+            if view == FileView::Editor(self.client) {
+                self.close_editor_view(&path, Some(project_key))?;
+            }
+            return Err(WorkspaceError::not_found(path.to_string()));
+        }
 
         #[cfg(test)]
         if self

@@ -20,6 +20,8 @@ pub use marker::{CompletedMarker, Marker};
 use std::{any::type_name, ops::Range};
 pub use token_set::TokenSet;
 
+#[cfg(feature = "db")]
+pub mod db;
 pub mod diagnostic;
 pub mod event;
 pub mod lexer;

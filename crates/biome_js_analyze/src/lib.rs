@@ -20,13 +20,14 @@ use biome_analyze::{
     RuleRegistry, SnippetAnalyzer,
 };
 use biome_aria::AriaRoles;
-use biome_db::{AnyParsedSource, ParsedSource};
+use biome_db::Source;
 use biome_diagnostics::Error as DiagnosticError;
 use biome_embeds::EmbeddedData;
 use biome_js_syntax::{AnyJsRoot, JsLanguage};
 use biome_languages::{JsFileSource, LanguageDb};
 use biome_module_graph::ModuleDb;
 use biome_package::TurboJson;
+use biome_parser::db::AnyParsedSource;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::TextSize;
 use biome_tailwind_logic::syntax_service::TwSyntaxService;
@@ -68,7 +69,7 @@ pub struct JsAnalyzerServices {
     /// The host document of the analyzed source, which the embedded queries
     /// of `language_db` read. It's still the host document when the analyzed
     /// tree no longer matches `parsed_source`, such as after fixes.
-    document: Option<ParsedSource>,
+    document: Option<Source>,
     embedded_data: Option<Arc<EmbeddedData>>,
     /// The offset of the analyzed snippet in its host document.
     snippet_offset: Option<TextSize>,
@@ -145,7 +146,7 @@ impl JsAnalyzerServices {
         self
     }
 
-    pub fn with_document(mut self, document: ParsedSource) -> Self {
+    pub fn with_document(mut self, document: Source) -> Self {
         self.document = Some(document);
         self
     }

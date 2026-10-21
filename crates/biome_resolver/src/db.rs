@@ -18,9 +18,10 @@
 //! using [`sync_resolver_paths`], which re-reads the filesystem for known paths
 //! and only updates the inputs whose path info changed.
 
-use biome_db::{Db, ParsedSource};
+use biome_db::Source;
 use biome_fs::is_node_modules_path;
 use biome_package::{Manifest, PackageJson, TsConfigJson};
+use biome_parser::db::{ParseDb, ParsedSourceExt};
 use biome_rowan::Language;
 use camino::{Utf8Path, Utf8PathBuf};
 use enumflags2::{BitFlags, bitflags};
@@ -32,7 +33,7 @@ use crate::{PathInfo, ResolveError, ResolverFsProxy};
 
 /// Provides the path info used by resolver queries.
 #[salsa::db]
-pub trait ResolverDb: Db {
+pub trait ResolverDb: ParseDb {
     /// Returns the filesystem used to read the path info of paths that haven't
     /// been looked up yet, and to read manifests that aren't indexed.
     ///
@@ -315,10 +316,7 @@ pub struct PackageJsonData<'db> {
 /// The returned data contains no manifest when the source is not a JSON
 /// document or does not contain a valid package manifest.
 #[salsa::tracked(returns(copy))]
-pub fn package_json_from_source<'db>(
-    db: &'db dyn Db,
-    source: ParsedSource,
-) -> PackageJsonData<'db> {
+pub fn package_json_from_source<'db>(db: &'db dyn ParseDb, source: Source) -> PackageJsonData<'db> {
     PackageJsonData::new(db, deserialize_manifest(db, source))
 }
 
@@ -391,8 +389,8 @@ pub struct TsConfigJsonData<'db> {
 /// document or does not contain a valid TypeScript configuration.
 #[salsa::tracked(returns(copy))]
 pub fn tsconfig_json_from_source<'db>(
-    db: &'db dyn Db,
-    source: ParsedSource,
+    db: &'db dyn ParseDb,
+    source: Source,
 ) -> TsConfigJsonData<'db> {
     TsConfigJsonData::new(db, deserialize_manifest(db, source))
 }
@@ -422,7 +420,7 @@ pub fn tsconfig_json_for_path<'db>(
     Some(TsConfigJsonData::new(db, manifest))
 }
 
-fn deserialize_manifest<M>(db: &dyn Db, source: ParsedSource) -> Option<M>
+fn deserialize_manifest<M>(db: &dyn ParseDb, source: Source) -> Option<M>
 where
     M: Manifest,
     M::Language: 'static,
@@ -438,13 +436,14 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use biome_db::SourceParse;
+    use biome_db::Db;
     use biome_db::testing::{
         Events, assert_function_query_was_not_run, assert_function_query_was_run,
         function_query_will_execute_count_by_name,
     };
     use biome_fs::MemoryFileSystem;
-    use biome_json_parser::{JsonParse, JsonParserOptions, parse_json};
+    use biome_json_parser::{JsonParserOptions, parse_json};
+    use biome_parser::db::SourceParse;
     use salsa::Storage;
     use std::collections::BTreeMap;
     use std::sync::Mutex;
@@ -453,7 +452,7 @@ mod tests {
     struct TestDb {
         events: Events,
         fs: MemoryFileSystem,
-        files: Arc<Mutex<BTreeMap<Utf8PathBuf, ParsedSource>>>,
+        files: Arc<Mutex<BTreeMap<Utf8PathBuf, Source>>>,
         paths: ResolverPaths,
         storage: Storage<Self>,
     }
@@ -504,7 +503,7 @@ mod tests {
         }
 
         /// Indexes `source` for `path` and reports the new parsed source.
-        fn index(&mut self, path: &str, source: ParsedSource) {
+        fn index(&mut self, path: &str, source: Source) {
             self.files.lock().unwrap().insert(path.into(), source);
             sync_resolver_paths(self, [(path.into(), ResolverPathChange::Content.into())]);
         }
@@ -515,8 +514,16 @@ mod tests {
 
     #[salsa::db]
     impl Db for TestDb {
-        fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<ParsedSource> {
+        fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<Source> {
             self.files.lock().unwrap().get(path).copied()
+        }
+    }
+
+    #[salsa::db]
+    impl ParseDb for TestDb {
+        fn parse_source(&self, source: Source) -> SourceParse {
+            let parse = parse_json(source.text(self), JsonParserOptions::default());
+            SourceParse::new(parse.into(), 0)
         }
     }
 
@@ -531,10 +538,6 @@ mod tests {
         }
     }
 
-    fn parse(source: &str) -> JsonParse {
-        parse_json(source, JsonParserOptions::default())
-    }
-
     fn package_name(db: &TestDb, data: Option<PackageJsonData>) -> Option<String> {
         data?
             .manifest(db)
@@ -545,12 +548,11 @@ mod tests {
     #[test]
     fn package_json_query_tracks_the_parsed_source() {
         let mut db = TestDb::new();
-        let source = ParsedSource::from_parse(
+        let source = Source::new(
             &db,
             Utf8PathBuf::from("/package.json"),
-            parse(r#"{"name":"first"}"#).into(),
+            r#"{"name":"first"}"#.into(),
             0,
-            Vec::new(),
         );
 
         assert_eq!(
@@ -563,9 +565,7 @@ mod tests {
         let events = db.take_events();
         assert_function_query_was_not_run(&db, package_json_from_source, source, &events);
 
-        source
-            .set_content(&mut db)
-            .to(SourceParse::new(parse(r#"{"name":"second"}"#).into(), 0).into());
+        source.set_text(&mut db).to(r#"{"name":"second"}"#.into());
         db.clear_events();
 
         assert_eq!(
@@ -630,12 +630,11 @@ mod tests {
             Some("on-disk".into())
         );
 
-        let source = ParsedSource::from_parse(
+        let source = Source::new(
             &db,
             Utf8PathBuf::from("/package.json"),
-            parse(r#"{"name":"unsaved"}"#).into(),
+            r#"{"name":"unsaved"}"#.into(),
             0,
-            Vec::new(),
         );
         db.index("/package.json", source);
 

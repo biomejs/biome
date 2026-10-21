@@ -1,4 +1,4 @@
-use biome_db::ParsedSource;
+use biome_db::Source;
 use biome_embeds::{
     EmbeddedData, VueDirectiveResolution,
     vue_directives::{InternedVueDirective, resolve_vue_directive},
@@ -17,13 +17,13 @@ enum EmbeddedSource {
     Workspace {
         db: Rc<dyn LanguageDb>,
         /// The analyzed document.
-        document: ParsedSource,
+        document: Source,
     },
     Interned(Arc<EmbeddedData>),
 }
 
 impl EmbeddedService {
-    pub(crate) fn new(db: Rc<dyn LanguageDb>, document: ParsedSource) -> Self {
+    pub(crate) fn new(db: Rc<dyn LanguageDb>, document: Source) -> Self {
         Self {
             source: EmbeddedSource::Workspace { db, document },
         }
