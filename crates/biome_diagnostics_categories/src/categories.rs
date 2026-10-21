@@ -227,6 +227,7 @@ define_categories! {
     "lint/nursery/noBaseToString": "https://biomejs.dev/linter/rules/no-base-to-string",
     "lint/nursery/noBunModules": "https://biomejs.dev/linter/rules/no-bun-modules",
     "lint/nursery/noColorInvalidHex": "https://biomejs.dev/linter/rules/no-color-invalid-hex",
+    "lint/nursery/noDanglingUnderscore": "https://biomejs.dev/linter/rules/no-dangling-underscore",
     "lint/nursery/noDuplicateMapKeys": "https://biomejs.dev/linter/rules/no-duplicate-map-keys",
     "lint/nursery/noComponentHookFactories": "https://biomejs.dev/linter/rules/no-component-hook-factories",
     "lint/nursery/noConditionalExpect": "https://biomejs.dev/linter/rules/no-conditional-expect",
