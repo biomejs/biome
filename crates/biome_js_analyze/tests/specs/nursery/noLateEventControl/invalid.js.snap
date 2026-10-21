@@ -1,0 +1,1307 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+
+// After `await`
+element.addEventListener("click", async (event) => {
+	await somePromise;
+	event.preventDefault();
+});
+element.addEventListener("click", async (event) => {
+	await somePromise;
+	event.stopPropagation();
+});
+element.addEventListener("click", async (event) => {
+	await somePromise;
+	event.stopImmediatePropagation();
+});
+
+// After `yield` in a generator handler
+element.onclick = function* (event) {
+	yield somePromise;
+	event.preventDefault();
+};
+element.onclick = function* (event) {
+	event.stopPropagation(yield ready);
+};
+
+// The body of a generator handler doesn't run during the event
+element.onclick = function* (event) {
+	event.preventDefault();
+	yield somePromise;
+};
+
+// Other parameter names that look like an event
+element.onclick = async (e) => {
+	await somePromise;
+	e.preventDefault();
+};
+element.onclick = async (evt) => {
+	await somePromise;
+	evt.preventDefault();
+};
+element.onclick = async (mouseDownEvent) => {
+	await somePromise;
+	mouseDownEvent.stopPropagation();
+};
+element.onclick = async (key2Event) => {
+	await somePromise;
+	key2Event.stopPropagation();
+};
+
+// An earlier awaited argument pauses the handler first
+element.onclick = async (event) => {
+	log(await ready(), event.preventDefault());
+};
+element.onclick = async (event) => {
+	event.preventDefault(await ready());
+};
+
+// Only the call after the `await` is reported
+element.onclick = async (event) => {
+	event.preventDefault();
+	await somePromise;
+	event.stopPropagation();
+};
+
+// Nested functions
+element.onclick = (event) => setTimeout(() => event.preventDefault());
+element.onclick = (event) => {
+	setTimeout(() => {
+		event.stopPropagation();
+	}, 1);
+};
+element.onclick = (event) => {
+	fetch(url).then(() => event.stopImmediatePropagation());
+};
+element.onclick = (event) => {
+	setTimeout(() => {
+		requestAnimationFrame(() => {
+			event.preventDefault();
+		});
+	});
+};
+element.onclick = (event) => {
+	items.forEach(function (item) {
+		event.preventDefault();
+	});
+};
+
+// A nested function with its own `await` is reported as a nested function
+element.onclick = (event) => {
+	button.addEventListener("click", async () => {
+		await somePromise;
+		event.preventDefault();
+	});
+};
+
+// Optional chaining
+async (event) => {
+	await somePromise;
+	event?.preventDefault();
+};
+async (event) => {
+	await somePromise;
+	event.preventDefault?.();
+};
+
+// Computed method names
+async (event) => {
+	await somePromise;
+	event["preventDefault"]();
+};
+async (event) => {
+	await somePromise;
+	event[`preventDefault`]();
+};
+async (event) => {
+	await somePromise;
+	event?.["stopPropagation"]();
+};
+
+// Parenthesized callee
+async (event) => {
+	await somePromise;
+	(event.preventDefault)();
+};
+
+// Function declarations and methods
+async function handleClick(event) {
+	await somePromise;
+	event.preventDefault();
+}
+class Form {
+	async onSubmit(event) {
+		await this.save();
+		event.preventDefault();
+	}
+	*onReset(event) {
+		event.preventDefault();
+	}
+}
+const handlers = {
+	async onClick(event) {
+		await save();
+		event.preventDefault();
+	},
+};
+
+// Destructured parameter
+async ({ nativeEvent }) => {
+	await somePromise;
+	nativeEvent.preventDefault();
+};
+
+// After a `for await` loop
+element.onclick = async (event) => {
+	for await (const chunk of stream) {
+		log(chunk);
+	}
+	event.preventDefault();
+};
+
+// Inside a `for await` loop body
+element.onclick = async (event) => {
+	for await (const chunk of stream) {
+		event.preventDefault();
+	}
+};
+
+// The iterated expression is awaited before the loop body runs
+element.onclick = async (event) => {
+	for (const item of await load()) {
+		event.preventDefault();
+	}
+};
+
+// The loop body runs again after the `await`
+element.onclick = async (event) => {
+	while (condition) {
+		event.preventDefault();
+		await promise;
+	}
+};
+element.onclick = async (event) => {
+	do {
+		event.preventDefault();
+		await promise;
+	} while (condition);
+};
+element.onclick = async (event) => {
+	for (let index = 0; event.preventDefault(); index++) {
+		await promise;
+	}
+};
+element.onclick = async (event) => {
+	for (const item of items) {
+		event.preventDefault();
+		await render(item);
+	}
+};
+
+// The loop condition runs again after the `await`
+element.onclick = async (event) => {
+	while (event.preventDefault()) {
+		await promise;
+	}
+};
+
+// After an `await` inside a `try` block
+element.onclick = async (event) => {
+	try {
+		await somePromise;
+	} catch {}
+	event.preventDefault();
+};
+
+```
+
+# Diagnostics
+```
+invalid.js:6:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called after the event handler pauses.
+  
+    4 │ element.addEventListener("click", async (event) => {
+    5 │ 	await somePromise;
+  > 6 │ 	event.preventDefault();
+      │ 	^^^^^^^^^^^^^^^^^^^^^^
+    7 │ });
+    8 │ element.addEventListener("click", async (event) => {
+  
+  i The event handler pauses here.
+  
+    3 │ // After `await`
+    4 │ element.addEventListener("click", async (event) => {
+  > 5 │ 	await somePromise;
+      │ 	^^^^^^^^^^^^^^^^^
+    6 │ 	event.preventDefault();
+    7 │ });
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.stopPropagation() is called after the event handler pauses.
+  
+     8 │ element.addEventListener("click", async (event) => {
+     9 │ 	await somePromise;
+  > 10 │ 	event.stopPropagation();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ });
+    12 │ element.addEventListener("click", async (event) => {
+  
+  i The event handler pauses here.
+  
+     7 │ });
+     8 │ element.addEventListener("click", async (event) => {
+   > 9 │ 	await somePromise;
+       │ 	^^^^^^^^^^^^^^^^^
+    10 │ 	event.stopPropagation();
+    11 │ });
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.stopPropagation() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:14:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.stopImmediatePropagation() is called after the event handler pauses.
+  
+    12 │ element.addEventListener("click", async (event) => {
+    13 │ 	await somePromise;
+  > 14 │ 	event.stopImmediatePropagation();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ });
+    16 │ 
+  
+  i The event handler pauses here.
+  
+    11 │ });
+    12 │ element.addEventListener("click", async (event) => {
+  > 13 │ 	await somePromise;
+       │ 	^^^^^^^^^^^^^^^^^
+    14 │ 	event.stopImmediatePropagation();
+    15 │ });
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.stopImmediatePropagation() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called inside a generator function.
+  
+    18 │ element.onclick = function* (event) {
+    19 │ 	yield somePromise;
+  > 20 │ 	event.preventDefault();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    21 │ };
+    22 │ element.onclick = function* (event) {
+  
+  i Calling a generator function doesn't run its body, so this call doesn't happen while the browser handles the event.
+  
+  i Use a regular function as the event handler.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:23:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.stopPropagation() is called inside a generator function.
+  
+    21 │ };
+    22 │ element.onclick = function* (event) {
+  > 23 │ 	event.stopPropagation(yield ready);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    24 │ };
+    25 │ 
+  
+  i Calling a generator function doesn't run its body, so this call doesn't happen while the browser handles the event.
+  
+  i Use a regular function as the event handler.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:28:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called inside a generator function.
+  
+    26 │ // The body of a generator handler doesn't run during the event
+    27 │ element.onclick = function* (event) {
+  > 28 │ 	event.preventDefault();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    29 │ 	yield somePromise;
+    30 │ };
+  
+  i Calling a generator function doesn't run its body, so this call doesn't happen while the browser handles the event.
+  
+  i Use a regular function as the event handler.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! e.preventDefault() is called after the event handler pauses.
+  
+    33 │ element.onclick = async (e) => {
+    34 │ 	await somePromise;
+  > 35 │ 	e.preventDefault();
+       │ 	^^^^^^^^^^^^^^^^^^
+    36 │ };
+    37 │ element.onclick = async (evt) => {
+  
+  i The event handler pauses here.
+  
+    32 │ // Other parameter names that look like an event
+    33 │ element.onclick = async (e) => {
+  > 34 │ 	await somePromise;
+       │ 	^^^^^^^^^^^^^^^^^
+    35 │ 	e.preventDefault();
+    36 │ };
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call e.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! evt.preventDefault() is called after the event handler pauses.
+  
+    37 │ element.onclick = async (evt) => {
+    38 │ 	await somePromise;
+  > 39 │ 	evt.preventDefault();
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    40 │ };
+    41 │ element.onclick = async (mouseDownEvent) => {
+  
+  i The event handler pauses here.
+  
+    36 │ };
+    37 │ element.onclick = async (evt) => {
+  > 38 │ 	await somePromise;
+       │ 	^^^^^^^^^^^^^^^^^
+    39 │ 	evt.preventDefault();
+    40 │ };
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call evt.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:43:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! mouseDownEvent.stopPropagation() is called after the event handler pauses.
+  
+    41 │ element.onclick = async (mouseDownEvent) => {
+    42 │ 	await somePromise;
+  > 43 │ 	mouseDownEvent.stopPropagation();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ };
+    45 │ element.onclick = async (key2Event) => {
+  
+  i The event handler pauses here.
+  
+    40 │ };
+    41 │ element.onclick = async (mouseDownEvent) => {
+  > 42 │ 	await somePromise;
+       │ 	^^^^^^^^^^^^^^^^^
+    43 │ 	mouseDownEvent.stopPropagation();
+    44 │ };
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call mouseDownEvent.stopPropagation() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:47:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! key2Event.stopPropagation() is called after the event handler pauses.
+  
+    45 │ element.onclick = async (key2Event) => {
+    46 │ 	await somePromise;
+  > 47 │ 	key2Event.stopPropagation();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    48 │ };
+    49 │ 
+  
+  i The event handler pauses here.
+  
+    44 │ };
+    45 │ element.onclick = async (key2Event) => {
+  > 46 │ 	await somePromise;
+       │ 	^^^^^^^^^^^^^^^^^
+    47 │ 	key2Event.stopPropagation();
+    48 │ };
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call key2Event.stopPropagation() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:52:21 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called after the event handler pauses.
+  
+    50 │ // An earlier awaited argument pauses the handler first
+    51 │ element.onclick = async (event) => {
+  > 52 │ 	log(await ready(), event.preventDefault());
+       │ 	                   ^^^^^^^^^^^^^^^^^^^^^^
+    53 │ };
+    54 │ element.onclick = async (event) => {
+  
+  i The event handler pauses here.
+  
+    50 │ // An earlier awaited argument pauses the handler first
+    51 │ element.onclick = async (event) => {
+  > 52 │ 	log(await ready(), event.preventDefault());
+       │ 	    ^^^^^^^^^^^^^
+    53 │ };
+    54 │ element.onclick = async (event) => {
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:55:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called after the event handler pauses.
+  
+    53 │ };
+    54 │ element.onclick = async (event) => {
+  > 55 │ 	event.preventDefault(await ready());
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    56 │ };
+    57 │ 
+  
+  i The event handler pauses here.
+  
+    53 │ };
+    54 │ element.onclick = async (event) => {
+  > 55 │ 	event.preventDefault(await ready());
+       │ 	                     ^^^^^^^^^^^^^
+    56 │ };
+    57 │ 
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:62:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.stopPropagation() is called after the event handler pauses.
+  
+    60 │ 	event.preventDefault();
+    61 │ 	await somePromise;
+  > 62 │ 	event.stopPropagation();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^
+    63 │ };
+    64 │ 
+  
+  i The event handler pauses here.
+  
+    59 │ element.onclick = async (event) => {
+    60 │ 	event.preventDefault();
+  > 61 │ 	await somePromise;
+       │ 	^^^^^^^^^^^^^^^^^
+    62 │ 	event.stopPropagation();
+    63 │ };
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.stopPropagation() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:66:47 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called inside a function nested in the event handler.
+  
+    65 │ // Nested functions
+  > 66 │ element.onclick = (event) => setTimeout(() => event.preventDefault());
+       │                                               ^^^^^^^^^^^^^^^^^^^^^^
+    67 │ element.onclick = (event) => {
+    68 │ 	setTimeout(() => {
+  
+  i The nested function may run after the browser finishes handling the event, when this call has no effect.
+  
+  i Call event.preventDefault() directly in the event handler, before any delayed work.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:69:3 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.stopPropagation() is called inside a function nested in the event handler.
+  
+    67 │ element.onclick = (event) => {
+    68 │ 	setTimeout(() => {
+  > 69 │ 		event.stopPropagation();
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^
+    70 │ 	}, 1);
+    71 │ };
+  
+  i The nested function may run after the browser finishes handling the event, when this call has no effect.
+  
+  i Call event.stopPropagation() directly in the event handler, before any delayed work.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:73:24 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.stopImmediatePropagation() is called inside a function nested in the event handler.
+  
+    71 │ };
+    72 │ element.onclick = (event) => {
+  > 73 │ 	fetch(url).then(() => event.stopImmediatePropagation());
+       │ 	                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    74 │ };
+    75 │ element.onclick = (event) => {
+  
+  i The nested function may run after the browser finishes handling the event, when this call has no effect.
+  
+  i Call event.stopImmediatePropagation() directly in the event handler, before any delayed work.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:78:4 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called inside a function nested in the event handler.
+  
+    76 │ 	setTimeout(() => {
+    77 │ 		requestAnimationFrame(() => {
+  > 78 │ 			event.preventDefault();
+       │ 			^^^^^^^^^^^^^^^^^^^^^^
+    79 │ 		});
+    80 │ 	});
+  
+  i The nested function may run after the browser finishes handling the event, when this call has no effect.
+  
+  i Call event.preventDefault() directly in the event handler, before any delayed work.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:84:3 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called inside a function nested in the event handler.
+  
+    82 │ element.onclick = (event) => {
+    83 │ 	items.forEach(function (item) {
+  > 84 │ 		event.preventDefault();
+       │ 		^^^^^^^^^^^^^^^^^^^^^^
+    85 │ 	});
+    86 │ };
+  
+  i The nested function may run after the browser finishes handling the event, when this call has no effect.
+  
+  i Call event.preventDefault() directly in the event handler, before any delayed work.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:92:3 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called inside a function nested in the event handler.
+  
+    90 │ 	button.addEventListener("click", async () => {
+    91 │ 		await somePromise;
+  > 92 │ 		event.preventDefault();
+       │ 		^^^^^^^^^^^^^^^^^^^^^^
+    93 │ 	});
+    94 │ };
+  
+  i The nested function may run after the browser finishes handling the event, when this call has no effect.
+  
+  i Call event.preventDefault() directly in the event handler, before any delayed work.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:99:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called after the event handler pauses.
+  
+     97 │ async (event) => {
+     98 │ 	await somePromise;
+   > 99 │ 	event?.preventDefault();
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^
+    100 │ };
+    101 │ async (event) => {
+  
+  i The event handler pauses here.
+  
+     96 │ // Optional chaining
+     97 │ async (event) => {
+   > 98 │ 	await somePromise;
+        │ 	^^^^^^^^^^^^^^^^^
+     99 │ 	event?.preventDefault();
+    100 │ };
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:103:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called after the event handler pauses.
+  
+    101 │ async (event) => {
+    102 │ 	await somePromise;
+  > 103 │ 	event.preventDefault?.();
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    104 │ };
+    105 │ 
+  
+  i The event handler pauses here.
+  
+    100 │ };
+    101 │ async (event) => {
+  > 102 │ 	await somePromise;
+        │ 	^^^^^^^^^^^^^^^^^
+    103 │ 	event.preventDefault?.();
+    104 │ };
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:109:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called after the event handler pauses.
+  
+    107 │ async (event) => {
+    108 │ 	await somePromise;
+  > 109 │ 	event["preventDefault"]();
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    110 │ };
+    111 │ async (event) => {
+  
+  i The event handler pauses here.
+  
+    106 │ // Computed method names
+    107 │ async (event) => {
+  > 108 │ 	await somePromise;
+        │ 	^^^^^^^^^^^^^^^^^
+    109 │ 	event["preventDefault"]();
+    110 │ };
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:113:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called after the event handler pauses.
+  
+    111 │ async (event) => {
+    112 │ 	await somePromise;
+  > 113 │ 	event[`preventDefault`]();
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^
+    114 │ };
+    115 │ async (event) => {
+  
+  i The event handler pauses here.
+  
+    110 │ };
+    111 │ async (event) => {
+  > 112 │ 	await somePromise;
+        │ 	^^^^^^^^^^^^^^^^^
+    113 │ 	event[`preventDefault`]();
+    114 │ };
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:117:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.stopPropagation() is called after the event handler pauses.
+  
+    115 │ async (event) => {
+    116 │ 	await somePromise;
+  > 117 │ 	event?.["stopPropagation"]();
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    118 │ };
+    119 │ 
+  
+  i The event handler pauses here.
+  
+    114 │ };
+    115 │ async (event) => {
+  > 116 │ 	await somePromise;
+        │ 	^^^^^^^^^^^^^^^^^
+    117 │ 	event?.["stopPropagation"]();
+    118 │ };
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.stopPropagation() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:123:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called after the event handler pauses.
+  
+    121 │ async (event) => {
+    122 │ 	await somePromise;
+  > 123 │ 	(event.preventDefault)();
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    124 │ };
+    125 │ 
+  
+  i The event handler pauses here.
+  
+    120 │ // Parenthesized callee
+    121 │ async (event) => {
+  > 122 │ 	await somePromise;
+        │ 	^^^^^^^^^^^^^^^^^
+    123 │ 	(event.preventDefault)();
+    124 │ };
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:129:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called after the event handler pauses.
+  
+    127 │ async function handleClick(event) {
+    128 │ 	await somePromise;
+  > 129 │ 	event.preventDefault();
+        │ 	^^^^^^^^^^^^^^^^^^^^^^
+    130 │ }
+    131 │ class Form {
+  
+  i The event handler pauses here.
+  
+    126 │ // Function declarations and methods
+    127 │ async function handleClick(event) {
+  > 128 │ 	await somePromise;
+        │ 	^^^^^^^^^^^^^^^^^
+    129 │ 	event.preventDefault();
+    130 │ }
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:134:3 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called after the event handler pauses.
+  
+    132 │ 	async onSubmit(event) {
+    133 │ 		await this.save();
+  > 134 │ 		event.preventDefault();
+        │ 		^^^^^^^^^^^^^^^^^^^^^^
+    135 │ 	}
+    136 │ 	*onReset(event) {
+  
+  i The event handler pauses here.
+  
+    131 │ class Form {
+    132 │ 	async onSubmit(event) {
+  > 133 │ 		await this.save();
+        │ 		^^^^^^^^^^^^^^^^^
+    134 │ 		event.preventDefault();
+    135 │ 	}
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:137:3 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called inside a generator function.
+  
+    135 │ 	}
+    136 │ 	*onReset(event) {
+  > 137 │ 		event.preventDefault();
+        │ 		^^^^^^^^^^^^^^^^^^^^^^
+    138 │ 	}
+    139 │ }
+  
+  i Calling a generator function doesn't run its body, so this call doesn't happen while the browser handles the event.
+  
+  i Use a regular function as the event handler.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:143:3 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called after the event handler pauses.
+  
+    141 │ 	async onClick(event) {
+    142 │ 		await save();
+  > 143 │ 		event.preventDefault();
+        │ 		^^^^^^^^^^^^^^^^^^^^^^
+    144 │ 	},
+    145 │ };
+  
+  i The event handler pauses here.
+  
+    140 │ const handlers = {
+    141 │ 	async onClick(event) {
+  > 142 │ 		await save();
+        │ 		^^^^^^^^^^^^
+    143 │ 		event.preventDefault();
+    144 │ 	},
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:150:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! nativeEvent.preventDefault() is called after the event handler pauses.
+  
+    148 │ async ({ nativeEvent }) => {
+    149 │ 	await somePromise;
+  > 150 │ 	nativeEvent.preventDefault();
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    151 │ };
+    152 │ 
+  
+  i The event handler pauses here.
+  
+    147 │ // Destructured parameter
+    148 │ async ({ nativeEvent }) => {
+  > 149 │ 	await somePromise;
+        │ 	^^^^^^^^^^^^^^^^^
+    150 │ 	nativeEvent.preventDefault();
+    151 │ };
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call nativeEvent.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:158:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called after the event handler pauses.
+  
+    156 │ 		log(chunk);
+    157 │ 	}
+  > 158 │ 	event.preventDefault();
+        │ 	^^^^^^^^^^^^^^^^^^^^^^
+    159 │ };
+    160 │ 
+  
+  i The event handler pauses here.
+  
+    153 │ // After a `for await` loop
+    154 │ element.onclick = async (event) => {
+  > 155 │ 	for await (const chunk of stream) {
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 156 │ 		log(chunk);
+  > 157 │ 	}
+        │ 	^
+    158 │ 	event.preventDefault();
+    159 │ };
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:164:3 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called after the event handler pauses.
+  
+    162 │ element.onclick = async (event) => {
+    163 │ 	for await (const chunk of stream) {
+  > 164 │ 		event.preventDefault();
+        │ 		^^^^^^^^^^^^^^^^^^^^^^
+    165 │ 	}
+    166 │ };
+  
+  i The event handler pauses here.
+  
+    161 │ // Inside a `for await` loop body
+    162 │ element.onclick = async (event) => {
+  > 163 │ 	for await (const chunk of stream) {
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 164 │ 		event.preventDefault();
+  > 165 │ 	}
+        │ 	^
+    166 │ };
+    167 │ 
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:171:3 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called after the event handler pauses.
+  
+    169 │ element.onclick = async (event) => {
+    170 │ 	for (const item of await load()) {
+  > 171 │ 		event.preventDefault();
+        │ 		^^^^^^^^^^^^^^^^^^^^^^
+    172 │ 	}
+    173 │ };
+  
+  i The event handler pauses here.
+  
+    168 │ // The iterated expression is awaited before the loop body runs
+    169 │ element.onclick = async (event) => {
+  > 170 │ 	for (const item of await load()) {
+        │ 	                   ^^^^^^^^^^^^
+    171 │ 		event.preventDefault();
+    172 │ 	}
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:178:3 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called after the event handler pauses.
+  
+    176 │ element.onclick = async (event) => {
+    177 │ 	while (condition) {
+  > 178 │ 		event.preventDefault();
+        │ 		^^^^^^^^^^^^^^^^^^^^^^
+    179 │ 		await promise;
+    180 │ 	}
+  
+  i The event handler pauses here.
+  
+    177 │ 	while (condition) {
+    178 │ 		event.preventDefault();
+  > 179 │ 		await promise;
+        │ 		^^^^^^^^^^^^^
+    180 │ 	}
+    181 │ };
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:184:3 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called after the event handler pauses.
+  
+    182 │ element.onclick = async (event) => {
+    183 │ 	do {
+  > 184 │ 		event.preventDefault();
+        │ 		^^^^^^^^^^^^^^^^^^^^^^
+    185 │ 		await promise;
+    186 │ 	} while (condition);
+  
+  i The event handler pauses here.
+  
+    183 │ 	do {
+    184 │ 		event.preventDefault();
+  > 185 │ 		await promise;
+        │ 		^^^^^^^^^^^^^
+    186 │ 	} while (condition);
+    187 │ };
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:189:22 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called after the event handler pauses.
+  
+    187 │ };
+    188 │ element.onclick = async (event) => {
+  > 189 │ 	for (let index = 0; event.preventDefault(); index++) {
+        │ 	                    ^^^^^^^^^^^^^^^^^^^^^^
+    190 │ 		await promise;
+    191 │ 	}
+  
+  i The event handler pauses here.
+  
+    188 │ element.onclick = async (event) => {
+    189 │ 	for (let index = 0; event.preventDefault(); index++) {
+  > 190 │ 		await promise;
+        │ 		^^^^^^^^^^^^^
+    191 │ 	}
+    192 │ };
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:195:3 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called after the event handler pauses.
+  
+    193 │ element.onclick = async (event) => {
+    194 │ 	for (const item of items) {
+  > 195 │ 		event.preventDefault();
+        │ 		^^^^^^^^^^^^^^^^^^^^^^
+    196 │ 		await render(item);
+    197 │ 	}
+  
+  i The event handler pauses here.
+  
+    194 │ 	for (const item of items) {
+    195 │ 		event.preventDefault();
+  > 196 │ 		await render(item);
+        │ 		^^^^^^^^^^^^^^^^^^
+    197 │ 	}
+    198 │ };
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:202:9 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called after the event handler pauses.
+  
+    200 │ // The loop condition runs again after the `await`
+    201 │ element.onclick = async (event) => {
+  > 202 │ 	while (event.preventDefault()) {
+        │ 	       ^^^^^^^^^^^^^^^^^^^^^^
+    203 │ 		await promise;
+    204 │ 	}
+  
+  i The event handler pauses here.
+  
+    201 │ element.onclick = async (event) => {
+    202 │ 	while (event.preventDefault()) {
+  > 203 │ 		await promise;
+        │ 		^^^^^^^^^^^^^
+    204 │ 	}
+    205 │ };
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:212:2 lint/nursery/noLateEventControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! event.preventDefault() is called after the event handler pauses.
+  
+    210 │ 		await somePromise;
+    211 │ 	} catch {}
+  > 212 │ 	event.preventDefault();
+        │ 	^^^^^^^^^^^^^^^^^^^^^^
+    213 │ };
+    214 │ 
+  
+  i The event handler pauses here.
+  
+    208 │ element.onclick = async (event) => {
+    209 │ 	try {
+  > 210 │ 		await somePromise;
+        │ 		^^^^^^^^^^^^^^^^^
+    211 │ 	} catch {}
+    212 │ 	event.preventDefault();
+  
+  i When the handler pauses, the browser finishes handling the event without waiting for it, so this call has no effect.
+  
+  i Call event.preventDefault() before the event handler pauses.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
