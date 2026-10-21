@@ -1,7 +1,7 @@
 use super::sfc;
 use crate::{
-    Access, BlockKind, BranchKind, Certainty, ComponentKind, EffectiveValue, Namespace, Origin,
-    RefSite, Resolution, RootShape, SymbolKind, Tri,
+    Access, Assignability, BlockKind, BranchKind, Certainty, ComponentKind, EffectiveValue,
+    Namespace, Origin, RefSite, Resolution, RootShape, SymbolKind, Tri,
 };
 
 const LIST: &str = r#"<script setup lang="ts">
@@ -574,6 +574,58 @@ fn equal_expressions_have_equal_fingerprints() {
         on.root(),
         RootShape::Assignment { target, from_event: true } if *target != bind.fingerprint()
     ));
+}
+
+#[test]
+fn assignability_of_directive_values() {
+    let code = r#"<script setup lang="ts">
+const props = defineProps<{ a: any; b: any }>()
+</script>
+<template>
+  <input v-model="a" />
+  <input v-model="(a)" />
+  <input v-model="a.b[0]" />
+  <input v-model="a as string" />
+  <input v-model="a!" />
+  <input v-model="a?.b" />
+  <input v-model="a?.b.c" />
+  <input v-model="a?.().b" />
+  <input v-model="(a?.b).c" />
+  <input v-model="(a?.b)[0].c" />
+  <input v-model="(null).a" />
+  <input v-model="a + b" />
+  <input v-model="a()" />
+  <input v-model="a?.b()" />
+  <input v-model="(a, b)" />
+</template>
+"#;
+    let model = sfc(code);
+    let values: Vec<_> = model
+        .elements()
+        .filter(|element| element.tag() == "input")
+        .filter_map(|element| element.attrs().next()?.value_snippet())
+        .map(|snippet| (&code[snippet.host_range()], snippet.assignability()))
+        .collect();
+    assert_eq!(
+        values,
+        [
+            ("a", Assignability::Assignable),
+            ("(a)", Assignability::Assignable),
+            ("a.b[0]", Assignability::Assignable),
+            ("a as string", Assignability::Assignable),
+            ("a!", Assignability::Assignable),
+            ("a?.b", Assignability::OptionalChain),
+            ("a?.b.c", Assignability::OptionalChain),
+            ("a?.().b", Assignability::OptionalChain),
+            ("(a?.b).c", Assignability::MaybeNullObject),
+            ("(a?.b)[0].c", Assignability::MaybeNullObject),
+            ("(null).a", Assignability::MaybeNullObject),
+            ("a + b", Assignability::NotAssignable),
+            ("a()", Assignability::NotAssignable),
+            ("a?.b()", Assignability::NotAssignable),
+            ("(a, b)", Assignability::NotAssignable),
+        ]
+    );
 }
 
 #[test]
