@@ -632,6 +632,7 @@ pub mod use_vue_valid_v_else_if;
 pub mod use_vue_valid_v_for;
 pub mod use_vue_valid_v_html;
 pub mod use_vue_valid_v_if;
+pub mod use_vue_valid_v_memo;
 pub mod use_vue_valid_v_on;
 pub mod use_vue_valid_v_once;
 pub mod use_vue_valid_v_pre;

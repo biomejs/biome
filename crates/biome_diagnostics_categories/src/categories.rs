@@ -408,6 +408,7 @@ define_categories! {
     "lint/nursery/useVueNextTickPromise": "https://biomejs.dev/linter/rules/use-vue-next-tick-promise",
     "lint/nursery/useVueTypedRef": "https://biomejs.dev/linter/rules/use-vue-typed-ref",
     "lint/nursery/useVueValidVFor": "https://biomejs.dev/linter/rules/use-vue-valid-v-for",
+    "lint/nursery/useVueValidVMemo": "https://biomejs.dev/linter/rules/use-vue-valid-v-memo",
     "lint/nursery/useVueValidVModel": "https://biomejs.dev/linter/rules/use-vue-valid-v-model",
     "lint/performance/noAccumulatingSpread": "https://biomejs.dev/linter/rules/no-accumulating-spread",
     "lint/performance/noAwaitInLoops": "https://biomejs.dev/linter/rules/no-await-in-loops",

@@ -2940,6 +2940,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_vue_valid_v_if::UseVueValidVIfOptions>(),
     ));
     result.push((
+        "nursery",
+        "useVueValidVMemo",
+        TypeId::of::<biome_rule_options::use_vue_valid_v_memo::UseVueValidVMemoOptions>(),
+    ));
+    result.push((
         "correctness",
         "useVueValidVOn",
         TypeId::of::<biome_rule_options::use_vue_valid_v_on::UseVueValidVOnOptions>(),

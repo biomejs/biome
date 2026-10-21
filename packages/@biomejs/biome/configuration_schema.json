@@ -8704,6 +8704,13 @@
 						{ "$ref": "#/$defs/UseVueTypedRefConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useVueValidVMemo": {
+					"description": "Enforce valid v-memo Vue directives.\nSee https://biomejs.dev/linter/rules/use-vue-valid-v-memo",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueValidVMemoConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -15977,6 +15984,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueValidVMemoOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidVMemoOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueValidVOnOptions": {
 			"type": "object",
 			"properties": {
@@ -21260,6 +21276,16 @@
 			]
 		},
 		"UseVueValidVIfOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueValidVMemoConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidVMemoOptions" }
+			]
+		},
+		"UseVueValidVMemoOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
