@@ -329,6 +329,7 @@ define_categories! {
     "lint/nursery/noVueVText": "https://biomejs.dev/linter/rules/no-vue-v-text",
     "lint/nursery/noXorAsExponentiation": "https://biomejs.dev/linter/rules/no-xor-as-exponentiation",
     "lint/nursery/noZeroFractions": "https://biomejs.dev/linter/rules/no-zero-fractions",
+    "lint/nursery/noZeroLengthUnit": "https://biomejs.dev/linter/rules/no-zero-length-unit",
     "lint/nursery/useAstroClientOnlyDirectiveValue": "https://biomejs.dev/linter/rules/use-astro-client-only-directive-value",
     "lint/nursery/useAwaitThenable": "https://biomejs.dev/linter/rules/use-await-thenable",
     "lint/nursery/useBetterDomTraversing": "https://biomejs.dev/linter/rules/use-better-dom-traversing",

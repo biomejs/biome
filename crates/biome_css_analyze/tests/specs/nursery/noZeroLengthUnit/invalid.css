@@ -1,0 +1,50 @@
+/* should generate diagnostics */
+a { top: 0px; }
+a { top: 0px /* comment */; }
+a { TOP: 0PX; }
+a { top: 0pX; }
+a { top: 0.000px; }
+a { top: .0rem; }
+a { top: -0px; }
+a { top: +0.0em; }
+a { top: 0e3px; }
+a { margin: 0q; }
+a { margin: 0cqw; }
+a { margin:0px; }
+a { margin:
+	0px; }
+a { padding: 0px 1px 2px 3px; }
+a { padding: 1px 0vmax 2px 3px; }
+a { padding: 1px 2px 0rem 3px; }
+a { padding: 1px 2px 3px 0em; }
+a { padding: 0px 0em; }
+a { padding: calc(var(--foo, 0in) + 10px) 0px; }
+a { padding: min(1vw, 0in) max(1vw, 0px) clamp(0em, 1vw, 10px) 0px; }
+a { transform: translate(0px); }
+a { margin: var(--foo, 0px); }
+a { flex-basis: 0px; }
+a { grid-template-columns: 0px 0fr 1fr; }
+a { grid-template-columns: repeat(2, 50px 0px) 100px; }
+a { font: normal normal 400 0px / 0px cursive; }
+a { font: normal normal 400 0px/0px cursive; }
+a { font: var(--foo, normal 0px/0px cursive); }
+a { top: 0px !important; }
+a { & b { top: 0px; } }
+
+@media (min-width: 0px) {}
+@media (min-width: 0px /* comment */) {}
+@media screen and (min-width: 0px) {}
+@media (width >= 0px) {}
+@media (0px <= width <= 100px) {}
+@container (width > 0px) {}
+@supports (top: 0px) {}
+
+/* The fix is unsafe for the values of custom properties and custom functions. */
+a { --x: 0px; }
+a { --x: 1px 0px; }
+a { --x: var(--y, 0px); }
+@container style(--x: 0px) {}
+@property --x { syntax: "*"; initial-value: 0px; inherits: false; }
+@function --zero() { result: 0px; }
+@function --pad(--x: 0px) { result: calc(var(--x) + 1px); }
+a { padding: --pad(0px); }
