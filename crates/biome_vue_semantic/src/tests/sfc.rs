@@ -205,6 +205,117 @@ export default {
     assert_eq!(toggle.uses().count(), 1);
 }
 
+/// Returns the name of each emit of the template component, the number of
+/// its uses, and whether those are all of its uses.
+fn emit_uses(code: &str) -> Vec<(String, usize, bool)> {
+    sfc(code)
+        .template_component()
+        .unwrap()
+        .emits()
+        .map(|emit| {
+            (
+                emit.name().to_string(),
+                emit.uses().count(),
+                emit.has_complete_uses(),
+            )
+        })
+        .collect()
+}
+
+#[test]
+fn this_in_template_is_the_component_instance() {
+    let model = sfc(r#"<script>
+export default { props: ['title'], emits: ['a', 'b'] }
+</script>
+<template><button @click="this.$emit('a')">{{ this.title }}</button></template>
+"#);
+    let component = model.template_component().unwrap();
+    let uses: Vec<_> = component
+        .emits()
+        .map(|emit| (emit.name().to_string(), emit.uses().count()))
+        .collect();
+    assert_eq!(uses, [("a".into(), 1), ("b".into(), 0)]);
+    assert!(component.emits().all(|emit| emit.has_complete_uses()));
+    assert_eq!(component.props().next().unwrap().uses().count(), 1);
+}
+
+#[test]
+fn emit_function_passed_on_by_the_template_opens_the_uses() {
+    let uses = emit_uses(
+        r#"<script setup>
+const emit = defineEmits(['a'])
+</script>
+<template><Child :notify="emit" /></template>
+"#,
+    );
+    assert_eq!(uses, [("a".into(), 0, false)]);
+    let uses = emit_uses(
+        r#"<script>
+export default { emits: ['a'] }
+</script>
+<template><Child :notify="$emit" /></template>
+"#,
+    );
+    assert_eq!(uses, [("a".into(), 0, false)]);
+}
+
+#[test]
+fn template_the_model_cannot_read_opens_the_uses() {
+    for template in [
+        r#"<template src="./template.html"></template>"#,
+        r#"<template lang="pug">button(@click="$emit('a')")</template>"#,
+    ] {
+        let code = format!("<script>\nexport default {{ emits: ['a'] }}\n</script>\n{template}\n");
+        assert_eq!(emit_uses(&code), [("a".into(), 0, false)], "{template}");
+    }
+    let uses = emit_uses(
+        "<script>\nexport default { emits: ['a'] }\n</script>\n<template lang=\"html\"><p /></template>\n",
+    );
+    assert_eq!(uses, [("a".into(), 0, true)]);
+}
+
+#[test]
+fn plain_block_emits_the_events_of_the_setup_block() {
+    let model = sfc(r#"<script>
+export default { methods: { go() { this.$emit('a') } } }
+</script>
+<script setup>
+defineEmits(['a', 'b'])
+</script>
+"#);
+    let setup = model.template_component().unwrap();
+    let plain = setup.plain_block_component().unwrap();
+    assert_eq!(plain.setup_block_component(), Some(setup.clone()));
+    let uses: Vec<_> = setup
+        .emits()
+        .map(|emit| (emit.name().to_string(), emit.uses().count()))
+        .collect();
+    assert_eq!(uses, [("a".into(), 1), ("b".into(), 0)]);
+    assert!(setup.emits().all(|emit| emit.has_complete_uses()));
+
+    let uses = emit_uses(
+        r#"<script>
+export default { methods: { go(name) { this.$emit(name) } } }
+</script>
+<script setup>
+defineEmits(['a'])
+</script>
+"#,
+    );
+    assert_eq!(uses, [("a".into(), 0, false)]);
+
+    let uses = emit_uses(
+        r#"<script>
+export default { template: `<button @click="$emit('a')" />` }
+</script>
+<script setup>
+defineEmits(['a'])
+</script>
+"#,
+    );
+    assert_eq!(uses, [("a".into(), 0, false)]);
+}
+
 #[test]
 fn both_script_blocks() {
     let model = sfc(r#"<script>

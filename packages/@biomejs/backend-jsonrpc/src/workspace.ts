@@ -3318,6 +3318,11 @@ export interface Nursery {
 	 */
 	noVueUndeclaredDirectives?: NoVueUndeclaredDirectivesConfiguration;
 	/**
+	 * Disallow declaring events that a Vue component never emits.
+	 * See https://biomejs.dev/linter/rules/no-vue-unused-emit-declarations
+	 */
+	noVueUnusedEmitDeclarations?: NoVueUnusedEmitDeclarationsConfiguration;
+	/**
 	 * Disallow the use of Vue's v-html directive.
 	 * See https://biomejs.dev/linter/rules/no-vue-v-html
 	 */
@@ -5990,6 +5995,9 @@ export type NoVueShadowNativeEventsConfiguration =
 export type NoVueUndeclaredDirectivesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUndeclaredDirectivesOptions;
+export type NoVueUnusedEmitDeclarationsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueUnusedEmitDeclarationsOptions;
 export type NoVueVHtmlConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueVHtmlOptions;
@@ -8613,6 +8621,10 @@ export interface RuleWithNoVueUndeclaredDirectivesOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUndeclaredDirectivesOptions;
 }
+export interface RuleWithNoVueUnusedEmitDeclarationsOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueUnusedEmitDeclarationsOptions;
+}
 export interface RuleWithNoVueVHtmlOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueVHtmlOptions;
@@ -11094,6 +11106,7 @@ export interface NoVueUndeclaredDirectivesOptions {
 	 */
 	globals?: string[];
 }
+export type NoVueUnusedEmitDeclarationsOptions = {};
 export type NoVueVHtmlOptions = {};
 export type NoVueVTextOptions = {};
 export type NoXorAsExponentiationOptions = {};
@@ -12833,6 +12846,7 @@ export type Category =
 	| "lint/nursery/noVueRequiredPropWithDefault"
 	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueUndeclaredDirectives"
+	| "lint/nursery/noVueUnusedEmitDeclarations"
 	| "lint/nursery/noVueVHtml"
 	| "lint/nursery/noVueVOnNumberValues"
 	| "lint/nursery/noVueVText"
