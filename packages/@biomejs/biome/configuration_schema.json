@@ -8295,6 +8295,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useAccessorPairs": {
+					"description": "Require a getter for every setter in objects and classes.\nSee https://biomejs.dev/linter/rules/use-accessor-pairs",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseAccessorPairsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useAstroClientOnlyDirectiveValue": {
 					"description": "Require a value for Astro's client:only directive.\nSee https://biomejs.dev/linter/rules/use-astro-client-only-directive-value",
 					"anyOf": [
@@ -13508,6 +13515,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseAccessorPairsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseAccessorPairsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseAdjacentOverloadSignaturesOptions": {
 			"type": "object",
 			"properties": {
@@ -18311,6 +18327,16 @@
 					"const": "never"
 				}
 			]
+		},
+		"UseAccessorPairsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseAccessorPairsOptions" }
+			]
+		},
+		"UseAccessorPairsOptions": {
+			"type": "object",
+			"additionalProperties": false
 		},
 		"UseAdjacentOverloadSignaturesConfiguration": {
 			"oneOf": [

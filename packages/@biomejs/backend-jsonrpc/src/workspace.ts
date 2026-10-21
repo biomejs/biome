@@ -3353,6 +3353,11 @@ export interface Nursery {
 	 */
 	noZeroLengthUnit?: NoZeroLengthUnitConfiguration;
 	/**
+	 * Require a getter for every setter in objects and classes.
+	 * See https://biomejs.dev/linter/rules/use-accessor-pairs
+	 */
+	useAccessorPairs?: UseAccessorPairsConfiguration;
+	/**
 	 * Require a value for Astro's client:only directive.
 	 * See https://biomejs.dev/linter/rules/use-astro-client-only-directive-value
 	 */
@@ -6021,6 +6026,9 @@ export type NoZeroFractionsConfiguration =
 export type NoZeroLengthUnitConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoZeroLengthUnitOptions;
+export type UseAccessorPairsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseAccessorPairsOptions;
 export type UseAstroClientOnlyDirectiveValueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseAstroClientOnlyDirectiveValueOptions;
@@ -8669,6 +8677,10 @@ export interface RuleWithNoZeroLengthUnitOptions {
 	level: RulePlainConfiguration;
 	options?: NoZeroLengthUnitOptions;
 }
+export interface RuleWithUseAccessorPairsOptions {
+	level: RulePlainConfiguration;
+	options?: UseAccessorPairsOptions;
+}
 export interface RuleWithUseAstroClientOnlyDirectiveValueOptions {
 	level: RulePlainConfiguration;
 	options?: UseAstroClientOnlyDirectiveValueOptions;
@@ -11125,6 +11137,7 @@ export type NoVueVTextOptions = {};
 export type NoXorAsExponentiationOptions = {};
 export type NoZeroFractionsOptions = {};
 export type NoZeroLengthUnitOptions = {};
+export type UseAccessorPairsOptions = {};
 export type UseAstroClientOnlyDirectiveValueOptions = {};
 export type UseAwaitThenableOptions = {};
 export type UseBetterDomTraversingOptions = {};
@@ -12867,6 +12880,7 @@ export type Category =
 	| "lint/nursery/noXorAsExponentiation"
 	| "lint/nursery/noZeroFractions"
 	| "lint/nursery/noZeroLengthUnit"
+	| "lint/nursery/useAccessorPairs"
 	| "lint/nursery/useAstroClientOnlyDirectiveValue"
 	| "lint/nursery/useAwaitThenable"
 	| "lint/nursery/useBetterDomTraversing"
