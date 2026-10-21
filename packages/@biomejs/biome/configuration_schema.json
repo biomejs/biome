@@ -5602,6 +5602,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoPlaywrightNthMethodsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoPlaywrightNthMethodsOptions" }
+			]
+		},
+		"NoPlaywrightNthMethodsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoPlaywrightPagePauseConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -7888,6 +7898,13 @@
 					"description": "Disallow numbers written with an extra leading zero.\nSee https://biomejs.dev/linter/rules/no-octal",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoOctalConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noPlaywrightNthMethods": {
+					"description": "Disallow selecting Playwright elements by position with first(), last(), and nth().\nSee https://biomejs.dev/linter/rules/no-playwright-nth-methods",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoPlaywrightNthMethodsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -11482,6 +11499,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoPlaywrightNetworkidleOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoPlaywrightNthMethodsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoPlaywrightNthMethodsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

@@ -3097,6 +3097,11 @@ export interface Nursery {
 	 */
 	noOctal?: NoOctalConfiguration;
 	/**
+	 * Disallow selecting Playwright elements by position with first(), last(), and nth().
+	 * See https://biomejs.dev/linter/rules/no-playwright-nth-methods
+	 */
+	noPlaywrightNthMethods?: NoPlaywrightNthMethodsConfiguration;
+	/**
 	 * Disallow the use of process.exit().
 	 * See https://biomejs.dev/linter/rules/no-process-exit
 	 */
@@ -5827,6 +5832,9 @@ export type NoObsoleteTagsConfiguration =
 export type NoOctalConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoOctalOptions;
+export type NoPlaywrightNthMethodsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPlaywrightNthMethodsOptions;
 export type NoProcessExitConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoProcessExitOptions;
@@ -8347,6 +8355,10 @@ export interface RuleWithNoObsoleteTagsOptions {
 export interface RuleWithNoOctalOptions {
 	level: RulePlainConfiguration;
 	options?: NoOctalOptions;
+}
+export interface RuleWithNoPlaywrightNthMethodsOptions {
+	level: RulePlainConfiguration;
+	options?: NoPlaywrightNthMethodsOptions;
 }
 export interface RuleWithNoProcessExitOptions {
 	level: RulePlainConfiguration;
@@ -10920,6 +10932,7 @@ export type NoNonScalableViewportOptions = {};
 export type NoObjectConstructorOptions = {};
 export type NoObsoleteTagsOptions = {};
 export type NoOctalOptions = {};
+export type NoPlaywrightNthMethodsOptions = {};
 export type NoProcessExitOptions = {};
 export type NoPromiseExecutorReturnOptions = {};
 export type NoReactObjectTypeAsDefaultPropOptions = {};
@@ -12686,6 +12699,7 @@ export type Category =
 	| "lint/nursery/noPlaywrightForceOption"
 	| "lint/nursery/noPlaywrightMissingAwait"
 	| "lint/nursery/noPlaywrightNetworkidle"
+	| "lint/nursery/noPlaywrightNthMethods"
 	| "lint/nursery/noPlaywrightPagePause"
 	| "lint/nursery/noPlaywrightUselessAwait"
 	| "lint/nursery/noPlaywrightWaitForNavigation"
