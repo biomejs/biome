@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_css_syntax::{
     AnyCssGenericPropertyValueOrExpression, AnyCssValue, AnyScssExpressionItem,
-    CssDeclarationOrRuleList, CssSyntaxToken, css_grid_template_property,
+    CssDeclarationOrRuleList, CssSyntaxToken, css_grid_template_property, inner_string_text,
 };
 use biome_diagnostics::Severity;
 use biome_rowan::{TextRange, TextSize, TokenText};
@@ -116,7 +116,7 @@ impl Rule for NoInvalidGridAreas {
                     .map_or_else(Vec::new, grid_area_string_tokens)
             })
             .map(|token| GridRow {
-                content: string_content(token.token_text_trimmed()),
+                content: inner_string_text(&token),
                 range: token.text_trimmed_range(),
             })
             .collect::<Vec<_>>();
@@ -321,13 +321,4 @@ fn grid_cells(row: &str) -> impl Iterator<Item = TextRange> + '_ {
 /// A cell made only of `.` characters leaves its grid cell unnamed.
 fn is_null_cell(cell: &str) -> bool {
     cell.bytes().all(|byte| byte == b'.')
-}
-
-/// Returns the text between the quotes of a CSS string.
-fn string_content(text: TokenText) -> TokenText {
-    let len = text.len();
-    if len < TextSize::from(2) {
-        return text;
-    }
-    text.slice(TextRange::new(TextSize::from(1), len - TextSize::from(1)))
 }
