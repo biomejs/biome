@@ -169,7 +169,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoExcessiveStatementsPerFunction {
-        version: "next",
+        version: "2.6.0",
         name: "noExcessiveStatementsPerFunction",
         language: "js",
         sources: &[RuleSource::Eslint("max-statements").same()],

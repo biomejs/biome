@@ -111,7 +111,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoTailwindRestyledComponents {
-        version: "next",
+        version: "2.6.0",
         name: "noTailwindRestyledComponents",
         language: "html",
         domains: &[RuleDomain::Tailwind],

@@ -70,7 +70,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUselessCall {
-        version: "next",
+        version: "2.6.0",
         name: "noUselessCall",
         language: "js",
         sources: &[RuleSource::Eslint("no-useless-call").same()],

@@ -73,7 +73,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseMatchingFunctionName {
-        version: "next",
+        version: "2.6.0",
         name: "useMatchingFunctionName",
         language: "js",
         recommended: false,

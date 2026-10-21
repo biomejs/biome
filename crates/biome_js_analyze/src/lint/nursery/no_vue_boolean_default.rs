@@ -82,7 +82,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueBooleanDefault {
-        version: "next",
+        version: "2.6.0",
         name: "noVueBooleanDefault",
         language: "js",
         recommended: true,

@@ -72,7 +72,7 @@ declare_lint_rule! {
     /// - If you want to replace `function` expressions with arrow functions, see [`useArrowFunction`](https://biomejs.dev/linter/rules/use-arrow-function/).
     ///
     pub UseNamedFunction {
-        version: "next",
+        version: "2.6.0",
         name: "useNamedFunction",
         language: "js",
         recommended: false,

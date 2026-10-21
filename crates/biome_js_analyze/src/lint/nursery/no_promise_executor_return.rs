@@ -95,7 +95,7 @@ declare_lint_rule! {
     /// - To disallow `async` functions as the executor, see [`noAsyncPromiseExecutor`](https://biomejs.dev/linter/rules/no-async-promise-executor/).
     ///
     pub NoPromiseExecutorReturn {
-        version: "next",
+        version: "2.6.0",
         name: "noPromiseExecutorReturn",
         language: "js",
         sources: &[RuleSource::Eslint("no-promise-executor-return").same()],
