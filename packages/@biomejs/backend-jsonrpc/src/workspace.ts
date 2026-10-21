@@ -3098,6 +3098,11 @@ export interface Nursery {
 	 */
 	noOctal?: NoOctalConfiguration;
 	/**
+	 * Disallow building file paths and URLs by joining strings to __dirname, __filename, or import.meta values.
+	 * See https://biomejs.dev/linter/rules/no-path-concat
+	 */
+	noPathConcat?: NoPathConcatConfiguration;
+	/**
 	 * Disallow selecting Playwright elements by position with first(), last(), and nth().
 	 * See https://biomejs.dev/linter/rules/no-playwright-nth-methods
 	 */
@@ -5863,6 +5868,9 @@ export type NoObsoleteTagsConfiguration =
 export type NoOctalConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoOctalOptions;
+export type NoPathConcatConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoPathConcatOptions;
 export type NoPlaywrightNthMethodsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoPlaywrightNthMethodsOptions;
@@ -8404,6 +8412,10 @@ export interface RuleWithNoObsoleteTagsOptions {
 export interface RuleWithNoOctalOptions {
 	level: RulePlainConfiguration;
 	options?: NoOctalOptions;
+}
+export interface RuleWithNoPathConcatOptions {
+	level: RulePlainConfiguration;
+	options?: NoPathConcatOptions;
 }
 export interface RuleWithNoPlaywrightNthMethodsOptions {
 	level: RulePlainConfiguration;
@@ -11017,6 +11029,7 @@ export type NoNonScalableViewportOptions = {};
 export type NoObjectConstructorOptions = {};
 export type NoObsoleteTagsOptions = {};
 export type NoOctalOptions = {};
+export type NoPathConcatOptions = {};
 export type NoPlaywrightNthMethodsOptions = {};
 export type NoProcessExitOptions = {};
 export type NoPromiseExecutorReturnOptions = {};
@@ -12785,6 +12798,7 @@ export type Category =
 	| "lint/nursery/noObjectConstructor"
 	| "lint/nursery/noObsoleteTags"
 	| "lint/nursery/noOctal"
+	| "lint/nursery/noPathConcat"
 	| "lint/nursery/noPlaywrightElementHandle"
 	| "lint/nursery/noPlaywrightEval"
 	| "lint/nursery/noPlaywrightForceOption"

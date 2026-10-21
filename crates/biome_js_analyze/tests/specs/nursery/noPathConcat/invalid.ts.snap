@@ -1,0 +1,96 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+const fullPath1 = (__dirname as string) + "/foo.js";
+const fullPath2 = __dirname! + "/foo.js";
+const fullPath3 = __dirname + ("/foo.js" as string);
+const fullPath4 = `${__filename satisfies string}/foo.js`;
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:19 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ const fullPath1 = (__dirname as string) + "/foo.js";
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ const fullPath2 = __dirname! + "/foo.js";
+    4 │ const fullPath3 = __dirname + ("/foo.js" as string);
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:3:19 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    1 │ /* should generate diagnostics */
+    2 │ const fullPath1 = (__dirname as string) + "/foo.js";
+  > 3 │ const fullPath2 = __dirname! + "/foo.js";
+      │                   ^^^^^^^^^^^^^^^^^^^^^^
+    4 │ const fullPath3 = __dirname + ("/foo.js" as string);
+    5 │ const fullPath4 = `${__filename satisfies string}/foo.js`;
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:4:19 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    2 │ const fullPath1 = (__dirname as string) + "/foo.js";
+    3 │ const fullPath2 = __dirname! + "/foo.js";
+  > 4 │ const fullPath3 = __dirname + ("/foo.js" as string);
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ const fullPath4 = `${__filename satisfies string}/foo.js`;
+    6 │ 
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.ts:5:19 lint/nursery/noPathConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This file path is built by joining strings.
+  
+    3 │ const fullPath2 = __dirname! + "/foo.js";
+    4 │ const fullPath3 = __dirname + ("/foo.js" as string);
+  > 5 │ const fullPath4 = `${__filename satisfies string}/foo.js`;
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+  
+  i The character that separates folders depends on the operating system, and joining strings can leave two separators in a row.
+  
+  i Use path.join() or path.resolve() from the node:path module instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
