@@ -1394,6 +1394,11 @@ impl Snippet {
         self.row().range
     }
 
+    /// The range of the snippet's content, in the coordinates of its tree.
+    pub fn range(&self) -> TextRange {
+        self.data.local(self.row().range, Some(self.id))
+    }
+
     /// The position in the host document of the start of the snippet's tree.
     pub fn offset(&self) -> TextSize {
         self.row().offset
