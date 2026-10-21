@@ -408,6 +408,7 @@ pub mod no_vue_ref_as_operand;
 pub mod no_vue_required_prop_with_default;
 pub mod no_vue_reserved_keys;
 pub mod no_vue_reserved_props;
+pub mod no_vue_restricted_call_after_await;
 pub mod no_vue_root_v_if;
 pub mod no_vue_setup_props_reactivity_loss;
 pub mod no_vue_shadow_native_events;

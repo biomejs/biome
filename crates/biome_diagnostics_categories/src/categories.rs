@@ -344,6 +344,7 @@ define_categories! {
     "lint/nursery/noVueLoneTemplate": "https://biomejs.dev/linter/rules/no-vue-lone-template",
     "lint/nursery/noVueMultipleSlotArgs": "https://biomejs.dev/linter/rules/no-vue-multiple-slot-args",
     "lint/nursery/noVueMutatingProps": "https://biomejs.dev/linter/rules/no-vue-mutating-props",
+    "lint/nursery/noVueRestrictedCallAfterAwait": "https://biomejs.dev/linter/rules/no-vue-restricted-call-after-await",
     "lint/nursery/noVueRootVIf": "https://biomejs.dev/linter/rules/no-vue-root-v-if",
     "lint/nursery/noVueImportCompilerMacros": "https://biomejs.dev/linter/rules/no-vue-import-compiler-macros",
     "lint/nursery/noVueRefAsOperand": "https://biomejs.dev/linter/rules/no-vue-ref-as-operand",

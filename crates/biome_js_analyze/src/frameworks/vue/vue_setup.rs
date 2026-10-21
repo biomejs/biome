@@ -37,8 +37,23 @@ pub fn find_vue_setup_calls_after_await(
     body: &AnyJsFunctionBody,
     mut predicate: impl FnMut(&JsCallExpression) -> bool,
 ) -> Box<[VueSetupCallAfterAwait]> {
+    filter_map_vue_setup_calls_after_await(body, |call, first_await| {
+        predicate(&call).then_some(VueSetupCallAfterAwait { call, first_await })
+    })
+}
+
+/// Calls `f` for each call in `body` that runs after `setup()` pauses at an `await`, along with
+/// the range of the first `await` keyword that pauses before the call runs, and collects the
+/// values it returns.
+///
+/// Code inside nested functions is ignored, because it runs when that function is called, not as
+/// part of `setup()`.
+pub fn filter_map_vue_setup_calls_after_await<T>(
+    body: &AnyJsFunctionBody,
+    mut f: impl FnMut(JsCallExpression, TextRange) -> Option<T>,
+) -> Box<[T]> {
     let mut first_await = None;
-    let mut calls = Vec::new();
+    let mut results = Vec::new();
     let mut preorder = body.syntax().preorder_of_kinds(VISITED_KINDS);
     while let Some(event) = preorder.next() {
         match event {
@@ -58,9 +73,9 @@ pub fn find_vue_setup_calls_after_await(
             WalkEvent::Leave(node) => {
                 if let Some(first_await) = first_await {
                     if let Some(call) = JsCallExpression::cast(node)
-                        && predicate(&call)
+                        && let Some(result) = f(call, first_await)
                     {
-                        calls.push(VueSetupCallAfterAwait { call, first_await });
+                        results.push(result);
                     }
                 } else if let Some(await_expression) = JsAwaitExpression::cast(node) {
                     first_await = await_expression
@@ -71,10 +86,10 @@ pub fn find_vue_setup_calls_after_await(
             }
         }
     }
-    calls.into_boxed_slice()
+    results.into_boxed_slice()
 }
 
-/// The nodes [`find_vue_setup_calls_after_await`] inspects: nested functions, which it skips,
+/// The nodes [`filter_map_vue_setup_calls_after_await`] inspects: nested functions, which it skips,
 /// and the nodes that pause `setup()` or call a function.
 const VISITED_KINDS: SyntaxKindSet<JsLanguage> = AnyJsControlFlowRoot::KIND_SET
     .union(JsForOfStatement::KIND_SET)
