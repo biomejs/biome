@@ -622,6 +622,7 @@ pub mod use_vue_multi_word_component_names;
 pub mod use_vue_next_tick_promise;
 pub mod use_vue_typed_ref;
 pub mod use_vue_v_for_key;
+pub mod use_vue_valid_define_emits;
 pub mod use_vue_valid_template_root;
 pub mod use_vue_valid_v_bind;
 pub mod use_vue_valid_v_cloak;
