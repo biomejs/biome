@@ -2383,6 +2383,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("nursery", "useMatchingFunctionName", TypeId::of::<biome_rule_options::use_matching_function_name::UseMatchingFunctionNameOptions>()));
     result.push((
+        "nursery",
+        "useMathAbs",
+        TypeId::of::<biome_rule_options::use_math_abs::UseMathAbsOptions>(),
+    ));
+    result.push((
         "complexity",
         "useMathMinMax",
         TypeId::of::<biome_rule_options::use_math_min_max::UseMathMinMaxOptions>(),
