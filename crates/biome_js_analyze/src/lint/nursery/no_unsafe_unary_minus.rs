@@ -54,7 +54,7 @@ declare_lint_rule! {
     /// -value.x;
     /// ```
     pub NoUnsafeUnaryMinus {
-        version: "next",
+        version: "2.6.0",
         name: "noUnsafeUnaryMinus",
         language: "js",
         sources: &[RuleSource::EslintTypeScript("no-unsafe-unary-minus").same()],

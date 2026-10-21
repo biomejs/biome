@@ -69,7 +69,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseVueMatchingComponentFileName {
-        version: "next",
+        version: "2.6.0",
         name: "useVueMatchingComponentFileName",
         language: "js",
         recommended: false,

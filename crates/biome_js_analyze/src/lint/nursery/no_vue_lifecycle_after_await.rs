@@ -69,7 +69,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueLifecycleAfterAwait {
-        version: "next",
+        version: "2.6.0",
         name: "noVueLifecycleAfterAwait",
         language: "js",
         recommended: true,
