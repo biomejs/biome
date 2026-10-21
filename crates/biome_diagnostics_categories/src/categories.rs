@@ -360,6 +360,7 @@ define_categories! {
     "lint/nursery/useMatchingFunctionName": "https://biomejs.dev/linter/rules/use-matching-function-name",
     "lint/nursery/useMathAbs": "https://biomejs.dev/linter/rules/use-math-abs",
     "lint/nursery/useMathMinMax": "https://biomejs.dev/linter/rules/use-math-min-max",
+    "lint/nursery/useMathTrunc": "https://biomejs.dev/linter/rules/use-math-trunc",
     "lint/nursery/useMaxParams": "https://biomejs.dev/linter/rules/use-max-params",
     "lint/nursery/useModernMathApis": "https://biomejs.dev/linter/rules/use-modern-math-apis",
     "lint/nursery/useNamedCaptureGroup": "https://biomejs.dev/linter/rules/use-named-capture-group",
