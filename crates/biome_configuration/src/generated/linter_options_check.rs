@@ -2838,6 +2838,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_vue_next_tick_promise::UseVueNextTickPromiseOptions>(),
     ));
     result.push((
+        "nursery",
+        "useVueTypedRef",
+        TypeId::of::<biome_rule_options::use_vue_typed_ref::UseVueTypedRefOptions>(),
+    ));
+    result.push((
         "correctness",
         "useVueVForKey",
         TypeId::of::<biome_rule_options::use_vue_v_for_key::UseVueVForKeyOptions>(),
