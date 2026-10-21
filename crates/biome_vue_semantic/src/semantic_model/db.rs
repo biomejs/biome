@@ -1,11 +1,12 @@
 //! Database queries that build a [`VueSemanticModel`] from a stored file.
 
 use super::{SfcSnippet, VueSemanticModel, component_model, sfc_model};
-use biome_db::ParsedSource;
+use biome_db::Source;
 use biome_html_syntax::HtmlRoot;
 use biome_js_semantic::{semantic_model_from_snippet, semantic_model_from_source};
 use biome_js_syntax::AnyJsRoot;
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
+use biome_parser::db::ParsedSourceExt;
 
 /// Returns the Vue semantic model of a stored file.
 ///
@@ -13,7 +14,7 @@ use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 /// JavaScript or TypeScript file it covers the components the file defines.
 /// For any other file the model is empty.
 #[salsa::tracked]
-pub fn vue_model_from_source(db: &dyn LanguageDb, file: ParsedSource) -> VueSemanticModel {
+pub fn vue_model_from_source(db: &dyn LanguageDb, file: Source) -> VueSemanticModel {
     let source = db.source_from_index(file.document_source_index(db));
     match source {
         Some(DocumentFileSource::Html(html)) if html.is_vue() => {
