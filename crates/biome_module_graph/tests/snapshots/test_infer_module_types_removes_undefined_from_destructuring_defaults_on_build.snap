@@ -1,0 +1,304 @@
+---
+source: crates/biome_module_graph/tests/spec_tests.rs
+expression: content
+---
+
+# `/src/index.ts`
+
+## Source
+
+```ts
+export const object: {
+	b?: number;
+	c?: number;
+	d?: string | null;
+	inner?: { x: number };
+} = {};
+export const {
+	b = 1,
+	c: renamed = 1,
+	d = "value",
+	inner: { x } = { x: 1 },
+} = object;
+export const { b: withoutDefault } = object;
+
+export const numbers: (number | undefined)[] = [];
+export const [head = 0] = numbers;
+export const [withoutDefaultHead] = numbers;
+
+export function pick({ b: picked = 1 }: { b?: number }) {
+	return picked;
+}
+export const fromCall = pick({});
+
+export function pickGeneric<T extends { b?: number }>({ b: picked = 1 }: T) {
+	return picked;
+}
+export const fromGenericCall = pickGeneric({});
+
+export function identity<T>(value: T): T {
+	return value;
+}
+export const { b: viaCall = 1 } = identity(object);
+export const [headViaCall = 0] = identity(numbers);
+```
+
+## Inferred types
+
+```
+Binding object "object" => instanceof Object {
+  prototype: No prototype
+  members: [
+    "b"?: number | undefined,
+    "c"?: number | undefined,
+    "d"?: string | null | undefined,
+    "inner"?:
+      Object {
+        prototype: No prototype
+        members: ["x": number]
+      }
+      | undefined
+  ]
+}
+
+Expression "{}" => Object {
+  prototype: No prototype
+  members: []
+}
+
+Binding b "b" => number
+
+Expression "1" => number: 1
+
+Binding renamed "renamed" => number
+
+Expression "1" => number: 1
+
+Binding d "d" => string | null
+
+Expression "\"value\"" => string: value
+
+Binding x "x" => number
+
+Expression "{ x: 1 }" => Object {
+  prototype: No prototype
+  members: ["x": number: 1]
+}
+
+Expression "1" => number: 1
+
+Expression "object" => instanceof Object {
+  prototype: No prototype
+  members: [
+    "b"?: number | undefined,
+    "c"?: number | undefined,
+    "d"?: string | null | undefined,
+    "inner"?:
+      Object {
+        prototype: No prototype
+        members: ["x": number]
+      }
+      | undefined
+  ]
+}
+
+Binding withoutDefault "withoutDefault" => number | undefined
+
+Expression "object" => instanceof Object {
+  prototype: No prototype
+  members: [
+    "b"?: number | undefined,
+    "c"?: number | undefined,
+    "d"?: string | null | undefined,
+    "inner"?:
+      Object {
+        prototype: No prototype
+        members: ["x": number]
+      }
+      | undefined
+  ]
+}
+
+Binding numbers "numbers" => instanceof Array<number | undefined>
+
+Expression "[]" => instanceof Array<unknown>
+
+Binding head "head" => number
+
+Expression "0" => number: 0
+
+Expression "numbers" => instanceof Array<number | undefined>
+
+Binding withoutDefaultHead "withoutDefaultHead" => number | undefined
+
+Expression "numbers" => instanceof Array<number | undefined>
+
+Binding pick "pick" => sync Function "pick" {
+  accepts: {
+    params: [
+      (bindings: picked: number): Object {
+        prototype: No prototype
+        members: ["b"?: number | undefined]
+      }
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Binding picked "picked" => number
+
+Expression "1" => number: 1
+
+Expression "picked" => number
+
+Binding fromCall "fromCall" => number
+
+Expression "pick" => sync Function "pick" {
+  accepts: {
+    params: [
+      (bindings: picked: number): Object {
+        prototype: No prototype
+        members: ["b"?: number | undefined]
+      }
+    ]
+    type_args: []
+  }
+  returns: number
+}
+
+Expression "pick({})" => number
+
+Expression "{}" => Object {
+  prototype: No prototype
+  members: []
+}
+
+Binding pickGeneric "pickGeneric" => sync Function "pickGeneric" {
+  accepts: {
+    params: [
+      (bindings: picked: number): instanceof T
+    ]
+    type_args: [
+      T extends Object {
+        prototype: No prototype
+        members: ["b"?: number | undefined]
+      }
+    ]
+  }
+  returns: number
+}
+
+Binding T "T" => T extends Object {
+  prototype: No prototype
+  members: ["b"?: number | undefined]
+}
+
+Binding picked "picked" => number
+
+Expression "1" => number: 1
+
+Expression "picked" => number
+
+Binding fromGenericCall "fromGenericCall" => number
+
+Expression "pickGeneric" => sync Function "pickGeneric" {
+  accepts: {
+    params: [
+      (bindings: picked: number): instanceof T
+    ]
+    type_args: [
+      T extends Object {
+        prototype: No prototype
+        members: ["b"?: number | undefined]
+      }
+    ]
+  }
+  returns: number
+}
+
+Expression "pickGeneric({})" => number
+
+Expression "{}" => Object {
+  prototype: No prototype
+  members: []
+}
+
+Binding identity "identity" => sync Function "identity" {
+  accepts: {
+    params: [
+      required value: instanceof T
+    ]
+    type_args: [T]
+  }
+  returns: instanceof T
+}
+
+Binding T "T" => T
+
+Binding value "value" => instanceof T
+
+Expression "value" => instanceof T
+
+Binding viaCall "viaCall" => number
+
+Expression "1" => number: 1
+
+Expression "identity" => sync Function "identity" {
+  accepts: {
+    params: [
+      required value: instanceof T
+    ]
+    type_args: [T]
+  }
+  returns: instanceof T
+}
+
+Expression "identity(object)" => instanceof Object {
+  prototype: No prototype
+  members: [
+    "b"?: number | undefined,
+    "c"?: number | undefined,
+    "d"?: string | null | undefined,
+    "inner"?:
+      Object {
+        prototype: No prototype
+        members: ["x": number]
+      }
+      | undefined
+  ]
+}
+
+Expression "object" => instanceof Object {
+  prototype: No prototype
+  members: [
+    "b"?: number | undefined,
+    "c"?: number | undefined,
+    "d"?: string | null | undefined,
+    "inner"?:
+      Object {
+        prototype: No prototype
+        members: ["x": number]
+      }
+      | undefined
+  ]
+}
+
+Binding headViaCall "headViaCall" => number
+
+Expression "0" => number: 0
+
+Expression "identity" => sync Function "identity" {
+  accepts: {
+    params: [
+      required value: instanceof T
+    ]
+    type_args: [T]
+  }
+  returns: instanceof T
+}
+
+Expression "identity(numbers)" => instanceof Array<number | undefined>
+
+Expression "numbers" => instanceof Array<number | undefined>
+```

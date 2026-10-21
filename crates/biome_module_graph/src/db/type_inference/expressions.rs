@@ -186,18 +186,26 @@ impl<'db> ResolutionCtx<'db, '_> {
             }
             RawTypeofExpression::Destructure(expression) => {
                 if self.import_resolution.is_on_demand()
-                    && let RawDestructureField::Name(name) = &expression.destructure_field
+                    && let RawDestructureField::Name { name, .. } = &expression.destructure_field
                     && let Some(ty) = self.resolve_namespace_import_member(&expression.ty, name)
                 {
                     return Some(ty);
                 }
                 let subject = self.resolve(&expression.ty);
                 match &expression.destructure_field {
-                    RawDestructureField::Index(index) => {
-                        self.resolve_element_type_at_index(subject, *index)
+                    RawDestructureField::Index {
+                        index,
+                        has_initializer,
+                    } => {
+                        let ty = self.resolve_element_type_at_index(subject, *index)?;
+                        Some(self.destructured_type(ty, *has_initializer))
                     }
-                    RawDestructureField::Name(name) => {
-                        self.resolve_static_member_expression(subject, name.text())
+                    RawDestructureField::Name {
+                        name,
+                        has_initializer,
+                    } => {
+                        let ty = self.resolve_static_member_expression(subject, name.text())?;
+                        Some(self.destructured_type(ty, *has_initializer))
                     }
                     RawDestructureField::RestExcept(names) => {
                         Some(self.resolve_rest_except_expression(subject, names))
@@ -329,11 +337,20 @@ impl<'db> ResolutionCtx<'db, '_> {
                 ),
             InferredTypeofExpression::Destructure(expression) => {
                 match &expression.destructure_field {
-                    RawDestructureField::Index(index) => {
-                        self.resolve_element_type_at_index(expression.ty, *index)
+                    RawDestructureField::Index {
+                        index,
+                        has_initializer,
+                    } => {
+                        let ty = self.resolve_element_type_at_index(expression.ty, *index)?;
+                        Some(self.destructured_type(ty, *has_initializer))
                     }
-                    RawDestructureField::Name(name) => {
-                        self.resolve_static_member_expression(expression.ty, name.text())
+                    RawDestructureField::Name {
+                        name,
+                        has_initializer,
+                    } => {
+                        let ty =
+                            self.resolve_static_member_expression(expression.ty, name.text())?;
+                        Some(self.destructured_type(ty, *has_initializer))
                     }
                     RawDestructureField::RestExcept(names) => {
                         Some(self.resolve_rest_except_expression(expression.ty, names))
@@ -922,6 +939,19 @@ impl<'db> ResolutionCtx<'db, '_> {
                 self.optional_element_type(parameter.ty(), parameter.is_optional())
             }
         })
+    }
+
+    /// A default value in a destructuring pattern replaces `undefined`.
+    fn destructured_type(
+        &mut self,
+        ty: InferredTypeData<'db>,
+        has_initializer: bool,
+    ) -> InferredTypeData<'db> {
+        if has_initializer {
+            self.type_without_undefined(ty)
+        } else {
+            ty
+        }
     }
 
     fn type_without_undefined(&mut self, ty: InferredTypeData<'db>) -> InferredTypeData<'db> {

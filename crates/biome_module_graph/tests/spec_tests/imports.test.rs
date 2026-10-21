@@ -63,6 +63,62 @@ fn test_infer_module_types_bottom_up_prepares_named_imports() {
 }
 
 #[test]
+fn test_infer_module_types_bottom_up_removes_undefined_from_imported_destructuring_defaults() {
+    let fs = MemoryFileSystem::default();
+    fs.insert(
+        "/src/source.ts".into(),
+        r#"
+            export const object: { b?: number; d?: string | null } = {};
+            export const numbers: (number | undefined)[] = [];
+        "#,
+    );
+    fs.insert(
+        "/src/index.ts".into(),
+        r#"
+            import { numbers, object } from "./source.ts";
+            export const { b = 1, d = "value" } = object;
+            export const { b: withoutDefault } = object;
+            export const [head = 0] = numbers;
+            export const [withoutDefaultHead] = numbers;
+        "#,
+    );
+
+    let db = build_js_test_module_db(&fs, &["/src/source.ts", "/src/index.ts"], true);
+    let index_module = db
+        .module_for_path(Utf8Path::new("/src/index.ts"))
+        .expect("index module must exist");
+    let inferred = infer_module_types_bottom_up(&db, index_module).expect("types must be inferred");
+
+    for name in ["b", "head"] {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} binding type must be inferred"));
+        assert!(
+            contains_inferred_number(&db, ty),
+            "{name} must stay a number"
+        );
+        assert!(
+            !contains_inferred_undefined(&db, ty),
+            "{name} must not include undefined"
+        );
+    }
+
+    let d_ty = inferred_binding_ty_by_name(&db, index_module, inferred, "d")
+        .expect("d binding type must be inferred");
+    assert!(contains_inferred_string(&db, d_ty));
+    assert!(contains_inferred_null(&db, d_ty));
+    assert!(!contains_inferred_undefined(&db, d_ty));
+
+    for name in ["withoutDefault", "withoutDefaultHead"] {
+        let ty = inferred_binding_ty_by_name(&db, index_module, inferred, name)
+            .unwrap_or_else(|| panic!("{name} binding type must be inferred"));
+        assert!(
+            contains_inferred_undefined(&db, ty),
+            "{name} must keep undefined"
+        );
+    }
+}
+
+#[test]
 fn test_infer_module_types_resolves_react_export_equals_namespace() {
     let fs = MemoryFileSystem::default();
     fs.insert(

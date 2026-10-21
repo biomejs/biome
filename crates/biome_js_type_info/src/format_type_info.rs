@@ -485,7 +485,7 @@ impl Format<FormatTypeContext> for TypeofExpression {
                 )
             }
             Self::Destructure(destructure) => match &destructure.destructure_field {
-                DestructureField::Index(index) => {
+                DestructureField::Index { index, .. } => {
                     write!(
                         f,
                         [&format_args![
@@ -496,7 +496,7 @@ impl Format<FormatTypeContext> for TypeofExpression {
                         ]]
                     )
                 }
-                DestructureField::Name(name) => {
+                DestructureField::Name { name, .. } => {
                     write!(f, [&format_args![destructure.ty, token("."), name]])
                 }
                 DestructureField::RestExcept(names) => {
