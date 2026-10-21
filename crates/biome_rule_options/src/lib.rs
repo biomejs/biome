@@ -409,6 +409,7 @@ pub mod no_vue_shadow_native_events;
 pub mod no_vue_side_effects_in_computed;
 pub mod no_vue_undeclared_directives;
 pub mod no_vue_unused_emit_declarations;
+pub mod no_vue_unused_refs;
 pub mod no_vue_v_html;
 pub mod no_vue_v_if_with_v_for;
 pub mod no_vue_v_on_number_values;

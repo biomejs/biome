@@ -670,7 +670,8 @@ pub enum Access {
     Mutate,
     Call,
     /// The value goes somewhere the model does not follow: it is passed as an
-    /// argument, returned, spread, or assigned to another variable.
+    /// argument, returned, spread, assigned to another variable, or its keys
+    /// are enumerated with `for...in`.
     Escape,
 }
 
@@ -756,6 +757,10 @@ pub(crate) struct SemanticModelData {
     /// snippet: index `0` holds the former, index `i + 1` those of snippet `i`.
     pub(crate) references_by_snippet: Vec<Vec<ReferenceId>>,
     pub(crate) components: Vec<ComponentData>,
+    /// Whether template refs may be used in ways the model cannot follow
+    /// while no component renders the template: by `$refs[key]` in the
+    /// template, or by a `<script src>` block.
+    pub(crate) template_ref_uses_open: bool,
 }
 
 impl SemanticModelData {
@@ -1630,12 +1635,19 @@ impl Symbol {
     /// Whether [`Self::uses`] lists every use.
     ///
     /// It does not when the component uses names of this namespace in a way
-    /// the model cannot follow, such as `$refs[key]` or `emit(eventName)`, or
-    /// when the model could not read the template of the component.
+    /// the model cannot follow, such as `$refs[key]` or `emit(eventName)`,
+    /// or when the model could not read the template of the component. For a
+    /// template ref, it also does not when a `<script src>` block keeps a
+    /// script in another file.
     pub fn has_complete_uses(&self) -> bool {
-        self.row().component.is_none_or(|component| {
-            !self.data.components[component.index()].uses_open[self.row().namespace.index()]
-        })
+        match self.row().component {
+            Some(component) => {
+                !self.data.components[component.index()].uses_open[self.row().namespace.index()]
+            }
+            None => {
+                self.row().namespace != Namespace::TemplateRef || !self.data.template_ref_uses_open
+            }
+        }
     }
 
     pub(crate) fn detail(&self) -> &Detail {

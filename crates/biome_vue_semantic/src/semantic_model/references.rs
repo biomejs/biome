@@ -21,7 +21,8 @@ use biome_js_syntax::{
     JsCallArgumentList, JsCallArguments, JsCallExpression, JsComputedMemberAssignment,
     JsComputedMemberExpression, JsIdentifierAssignment, JsIdentifierBinding, JsReferenceIdentifier,
     JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode,
-    JsThisExpression, JsUnaryExpression, JsUnaryOperator,
+    JsThisExpression, JsUnaryExpression, JsUnaryOperator, inner_string_text,
+    static_value::StaticValue,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextLen, TextRange, TextSize, TokenText};
 use biome_string_case::Case;
@@ -375,6 +376,7 @@ fn usage_of(start: &JsSyntaxNode) -> Usage {
             usage.access = Access::Mutate;
         }
         JsSyntaxKind::JS_CALL_ARGUMENT_LIST
+        | JsSyntaxKind::JS_FOR_IN_STATEMENT
         | JsSyntaxKind::JS_SPREAD
         | JsSyntaxKind::JS_RETURN_STATEMENT
         | JsSyntaxKind::JS_INITIALIZER_CLAUSE
@@ -475,8 +477,12 @@ impl Walker<'_> {
     fn mark_uses_open(&mut self, component: Option<ComponentId>, namespace: Namespace) {
         // The use may also reach what the component Vue combines with this
         // one declares.
-        if let Some(component) = component {
-            self.builder.open_uses(component, namespace);
+        match component {
+            Some(component) => self.builder.open_uses(component, namespace),
+            None if namespace == Namespace::TemplateRef => {
+                self.builder.data.template_ref_uses_open = true;
+            }
+            None => {}
         }
     }
 
@@ -1101,9 +1107,13 @@ fn collect_use_template_ref(
     {
         return;
     }
-    let Some(AnyJsExpression::AnyJsLiteralExpression(
-        AnyJsLiteralExpression::JsStringLiteralExpression(literal),
-    )) = call
+    let call_range = walker.host(call.syntax().text_trimmed_range());
+    let component = components.iter().copied().find(|id| {
+        walker.builder.data.components[id.index()]
+            .definition
+            .contains_range(call_range)
+    });
+    let Some(argument) = call
         .arguments()
         .ok()
         .and_then(|arguments| arguments.args().iter().next()?.ok())
@@ -1112,15 +1122,24 @@ fn collect_use_template_ref(
     else {
         return;
     };
-    let Ok(name) = literal.inner_string_text() else {
-        return;
+    // A string, or a template literal without substitutions. A tagged
+    // template calls its tag, so its value is unknown.
+    let token = match argument.as_static_value() {
+        Some(StaticValue::String(token))
+            if argument
+                .as_js_template_expression()
+                .is_none_or(|template| template.tag().is_none()) =>
+        {
+            token
+        }
+        // Any template ref may be the one named.
+        _ => {
+            walker.mark_uses_open(component, Namespace::TemplateRef);
+            return;
+        }
     };
-    let range = walker.host(literal.syntax().text_trimmed_range());
-    let component = components.iter().copied().find(|id| {
-        walker.builder.data.components[id.index()]
-            .definition
-            .contains_range(range)
-    });
+    let name = inner_string_text(&token);
+    let range = walker.host(argument.syntax().text_trimmed_range());
     walker.add_template_ref_reference(component, name, range, None);
 }
 
