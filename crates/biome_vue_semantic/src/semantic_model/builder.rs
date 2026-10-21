@@ -184,6 +184,13 @@ impl ModelBuilder {
         if let Resolution::Symbol(symbol) = reference.resolution {
             self.data.uses[symbol.index()].push(id);
         }
+        let slot = reference.snippet.map_or(0, |snippet| snippet.index() + 1);
+        if self.data.references_by_snippet.len() <= slot {
+            self.data
+                .references_by_snippet
+                .resize_with(slot + 1, Vec::new);
+        }
+        self.data.references_by_snippet[slot].push(id);
         self.data.references.push(reference);
         id
     }

@@ -17,10 +17,11 @@ use super::model::*;
 use super::snippets::SfcSnippet;
 use biome_js_semantic::SemanticModel as JsSemanticModel;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, AnyJsRoot, JsCallExpression,
-    JsComputedMemberAssignment, JsComputedMemberExpression, JsIdentifierAssignment,
-    JsIdentifierBinding, JsReferenceIdentifier, JsStaticMemberAssignment, JsStaticMemberExpression,
-    JsSyntaxKind, JsSyntaxNode, JsThisExpression, JsUnaryExpression, JsUnaryOperator,
+    AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, AnyJsRoot,
+    JsCallArgumentList, JsCallArguments, JsCallExpression, JsComputedMemberAssignment,
+    JsComputedMemberExpression, JsIdentifierAssignment, JsIdentifierBinding, JsReferenceIdentifier,
+    JsStaticMemberAssignment, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode,
+    JsThisExpression, JsUnaryExpression, JsUnaryOperator,
 };
 use biome_rowan::{AstNode, AstSeparatedList, TextLen, TextRange, TextSize, TokenText};
 use biome_string_case::Case;
@@ -212,16 +213,28 @@ struct Usage {
     call_args: Option<u8>,
     /// The call the value is the callee of.
     call: Option<JsCallExpression>,
-    /// The outermost expression of the member chain that starts at the use.
+    /// The outermost expression of the member chain that [`Self::path`]
+    /// describes.
     top: JsSyntaxNode,
+    /// The outermost expression of the whole member chain, including members
+    /// after the end of the path.
+    end: JsSyntaxNode,
 }
 
 /// Follows the member chain that starts at `start` and classifies what
 /// happens to the value at its end.
+///
+/// The path stops at the first member whose name the model cannot read, as in
+/// `list[index]`. The members after it are still followed, so that
+/// `list[index].done = true` is a write to `list`.
 fn usage_of(start: &JsSyntaxNode) -> Usage {
     let mut current = start.clone();
     let mut path = Vec::new();
-    let mut path_open = false;
+    // The end of the chain that `path` describes, once a member the model
+    // cannot read has ended it.
+    let mut path_end = None;
+    // The name of the member `current` reads, when it is static.
+    let mut member_name = None;
     let mut written = matches!(current.kind(), JsSyntaxKind::JS_IDENTIFIER_ASSIGNMENT);
 
     while let Some(parent) = current.parent() {
@@ -243,7 +256,10 @@ fn usage_of(start: &JsSyntaxNode) -> Usage {
                 else {
                     break;
                 };
-                path.push(name.token_text_trimmed());
+                member_name = Some(name.token_text_trimmed());
+                if path_end.is_none() {
+                    path.extend(member_name.clone());
+                }
                 current = parent;
             }
             JsSyntaxKind::JS_STATIC_MEMBER_ASSIGNMENT => {
@@ -252,10 +268,11 @@ fn usage_of(start: &JsSyntaxNode) -> Usage {
                 {
                     break;
                 }
-                if let Some(name) = member
-                    .member()
-                    .ok()
-                    .and_then(|name| name.value_token().ok())
+                if path_end.is_none()
+                    && let Some(name) = member
+                        .member()
+                        .ok()
+                        .and_then(|name| name.value_token().ok())
                 {
                     path.push(name.token_text_trimmed());
                 }
@@ -269,22 +286,15 @@ fn usage_of(start: &JsSyntaxNode) -> Usage {
                 {
                     break;
                 }
-                current = parent;
-                match member.member().ok().map(AnyJsExpression::omit_parentheses) {
-                    Some(AnyJsExpression::AnyJsLiteralExpression(
-                        AnyJsLiteralExpression::JsStringLiteralExpression(literal),
-                    )) => match literal.inner_string_text() {
-                        Ok(name) => path.push(name),
-                        Err(_) => {
-                            path_open = true;
-                            break;
-                        }
-                    },
-                    _ => {
-                        path_open = true;
-                        break;
+                member_name = member.member().ok().and_then(static_key);
+                match &member_name {
+                    Some(name) if path_end.is_none() => path.push(name.clone()),
+                    Some(_) => {}
+                    None => {
+                        path_end.get_or_insert_with(|| current.clone());
                     }
                 }
+                current = parent;
             }
             JsSyntaxKind::JS_COMPUTED_MEMBER_ASSIGNMENT => {
                 let member = JsComputedMemberAssignment::unwrap_cast(parent.clone());
@@ -292,7 +302,13 @@ fn usage_of(start: &JsSyntaxNode) -> Usage {
                 {
                     break;
                 }
-                path_open = true;
+                match member.member().ok().and_then(static_key) {
+                    Some(name) if path_end.is_none() => path.push(name),
+                    Some(_) => {}
+                    None => {
+                        path_end.get_or_insert_with(|| current.clone());
+                    }
+                }
                 written = true;
                 current = parent;
                 break;
@@ -301,13 +317,15 @@ fn usage_of(start: &JsSyntaxNode) -> Usage {
         }
     }
 
+    let path_open = path_end.is_some();
     let mut usage = Usage {
         path,
         path_open,
         access: Access::Read,
         call_args: None,
         call: None,
-        top: current.clone(),
+        top: path_end.unwrap_or_else(|| current.clone()),
+        end: current.clone(),
     };
     if written {
         usage.access = Access::Write;
@@ -323,14 +341,21 @@ fn usage_of(start: &JsSyntaxNode) -> Usage {
                 let args = call
                     .arguments()
                     .map_or(0, |arguments| arguments.args().len() as u8);
-                if !usage.path_open
-                    && usage
-                        .path
-                        .last()
-                        .is_some_and(|name| MUTATING_METHODS.contains(&name.text()))
+                if member_name
+                    .as_ref()
+                    .is_some_and(|name| MUTATING_METHODS.contains(&name.text()))
                 {
-                    usage.path.pop();
                     usage.access = Access::Mutate;
+                    // The method is not part of the path, so the chain ends at
+                    // the object it is called on.
+                    if !usage.path_open {
+                        usage.path.pop();
+                        if let Some(object) = AnyJsMemberExpression::cast_ref(&usage.top)
+                            .and_then(|member| member.object().ok()?.omit_type_wrappers())
+                        {
+                            usage.top = object.into_syntax();
+                        }
+                    }
                 } else {
                     usage.access = Access::Call;
                     usage.call_args = Some(args);
@@ -346,6 +371,9 @@ fn usage_of(start: &JsSyntaxNode) -> Usage {
                 usage.access = Access::Write;
             }
         }
+        JsSyntaxKind::JS_CALL_ARGUMENT_LIST if is_object_assign_target(&current) => {
+            usage.access = Access::Mutate;
+        }
         JsSyntaxKind::JS_CALL_ARGUMENT_LIST
         | JsSyntaxKind::JS_SPREAD
         | JsSyntaxKind::JS_RETURN_STATEMENT
@@ -357,6 +385,56 @@ fn usage_of(start: &JsSyntaxNode) -> Usage {
         _ => {}
     }
     usage
+}
+
+/// Returns `true` when `node` is the first argument of `Object.assign()`, the
+/// object that the call writes to.
+///
+/// `Object` is matched by name: the model doesn't check that it is the global.
+fn is_object_assign_target(node: &JsSyntaxNode) -> bool {
+    let Some(list) = node.parent().and_then(JsCallArgumentList::cast) else {
+        return false;
+    };
+    let is_first = list
+        .first()
+        .and_then(|argument| argument.ok())
+        .is_some_and(|argument| argument.syntax() == node);
+    if !is_first {
+        return false;
+    }
+    let Some(member) = list
+        .parent::<JsCallArguments>()
+        .and_then(|arguments| arguments.parent::<JsCallExpression>())
+        .and_then(|call| call.callee().ok())
+        .and_then(|callee| {
+            callee
+                .omit_parentheses()
+                .as_js_static_member_expression()
+                .cloned()
+        })
+    else {
+        return false;
+    };
+    member
+        .member()
+        .ok()
+        .and_then(|name| name.value_token().ok())
+        .is_some_and(|name| name.text_trimmed() == "assign")
+        && member
+            .object()
+            .ok()
+            .and_then(|object| object.omit_parentheses().as_js_reference_identifier())
+            .is_some_and(|object| object.has_name("Object"))
+}
+
+/// Returns the name a computed member key spells out, as in `list["push"]`.
+fn static_key(key: AnyJsExpression) -> Option<TokenText> {
+    match key.omit_parentheses() {
+        AnyJsExpression::AnyJsLiteralExpression(
+            AnyJsLiteralExpression::JsStringLiteralExpression(literal),
+        ) => literal.inner_string_text().ok(),
+        _ => None,
+    }
 }
 
 /// Returns the node a member chain starts at for a reference node: the
@@ -769,7 +847,7 @@ pub(crate) fn collect_template_references(
             let name = token.token_text_trimmed();
             let mut usage = usage_of(&chain_start(&node));
             // `v-model="value"` assigns to its value.
-            if is_model_value && Some(&usage.top) == root_expression.as_ref() {
+            if is_model_value && Some(&usage.end) == root_expression.as_ref() {
                 usage.access = Access::Write;
             }
 
@@ -905,7 +983,12 @@ pub(crate) fn collect_script_references(
             let node = reference.syntax();
             let usage = usage_of(&chain_start(&node));
             match (role.origin, role.prop) {
-                (Origin::PropsDestructure, Some(prop)) => {
+                (Origin::PropsDestructure, prop) => {
+                    // When the props can't be read, the use resolves to the
+                    // variable, as it does in the template.
+                    let Some(target) = prop.or(symbol) else {
+                        continue;
+                    };
                     let Some(token) = node.first_token() else {
                         continue;
                     };
@@ -921,7 +1004,7 @@ pub(crate) fn collect_script_references(
                         path_open: usage.path_open,
                         access: usage.access,
                         call_args: usage.call_args,
-                        resolution: Resolution::Symbol(prop),
+                        resolution: Resolution::Symbol(target),
                     });
                 }
                 _ => {

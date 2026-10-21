@@ -7,12 +7,17 @@
 //!   compares declarations with each other.
 //! - [`VueProp`] runs the rule once per prop. Use it when the rule judges
 //!   one prop on its own.
+//! - [`VueReference`] runs the rule once per use of a name. Use it when the
+//!   rule judges what a use does, wherever it is written: the diagnostic can
+//!   then point at a template expression.
 //!
 //! The model already folds the different ways Vue lets a declaration be
 //! written into one shape, so a rule never matches on syntax to find them.
 //!
 //! A query for another kind of declaration is one `define_vue_query!` call
-//! and one loop in [`VueSemanticVisitor`].
+//! and one loop in [`VueSemanticVisitor`]. References have their own visitor,
+//! [`VueReferenceVisitor`], so that files analyzed without a rule that asks for
+//! them don't pay for matching every reference.
 
 use crate::services::semantic::{SemanticModelBuilderVisitor, SemanticServices};
 use biome_analyze::{
@@ -25,7 +30,8 @@ use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange};
 use biome_languages::{JsFileSource, LanguageDb};
 use biome_rowan::{AstNode, WalkEvent};
 use biome_vue_semantic::{
-    Component, Prop, SnippetId, Symbol, VueSemanticModel, component_model, vue_model_from_source,
+    Component, Prop, Reference, SnippetId, Symbol, VueSemanticModel, component_model,
+    vue_model_from_source,
 };
 use camino::Utf8PathBuf;
 use std::rc::Rc;
@@ -93,6 +99,15 @@ impl VueSemanticService {
     fn declares(&self, symbol: &Symbol) -> bool {
         symbol.snippet().map(|snippet| snippet.id()) == self.snippet
     }
+
+    /// Inserts the service for the tree being analyzed, unless another visitor
+    /// already did.
+    fn insert_into(ctx: &mut VisitorStartContext<JsLanguage>) {
+        if ctx.services.get_service::<Self>().is_none() {
+            let service = Self::from_services(ctx.root, ctx.services);
+            ctx.services.insert_service(service);
+        }
+    }
 }
 
 /// Builds the Vue semantic model and emits a query match for each component
@@ -102,11 +117,8 @@ pub(crate) struct VueSemanticVisitor;
 impl Visitor for VueSemanticVisitor {
     type Language = JsLanguage;
 
-    fn start(&mut self, ctx: VisitorStartContext<JsLanguage>) {
-        if ctx.services.get_service::<VueSemanticService>().is_none() {
-            let service = VueSemanticService::from_services(ctx.root, ctx.services);
-            ctx.services.insert_service(service);
-        }
+    fn start(&mut self, mut ctx: VisitorStartContext<JsLanguage>) {
+        VueSemanticService::insert_into(&mut ctx);
     }
 
     fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, mut ctx: VisitorContext<JsLanguage>) {
@@ -130,8 +142,38 @@ impl Visitor for VueSemanticVisitor {
     }
 }
 
+/// Builds the Vue semantic model and emits a query match for each reference
+/// written in the analyzed tree.
+pub(crate) struct VueReferenceVisitor;
+
+impl Visitor for VueReferenceVisitor {
+    type Language = JsLanguage;
+
+    fn start(&mut self, mut ctx: VisitorStartContext<JsLanguage>) {
+        VueSemanticService::insert_into(&mut ctx);
+    }
+
+    fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, mut ctx: VisitorContext<JsLanguage>) {
+        let WalkEvent::Enter(node) = event else {
+            return;
+        };
+        if node.parent().is_some() {
+            return;
+        }
+        let Some(service) = ctx.services.get_service::<VueSemanticService>() else {
+            return;
+        };
+        for reference in service.model.references_in(service.snippet) {
+            ctx.match_query(VueReferenceMatch(reference));
+        }
+    }
+}
+
 macro_rules! define_vue_query {
     ($(#[$meta:meta])* $query:ident, $input:ident, $output:ty) => {
+        define_vue_query!($(#[$meta])* $query, $input, $output, VueSemanticVisitor);
+    };
+    ($(#[$meta:meta])* $query:ident, $input:ident, $output:ty, $visitor:ident) => {
         $(#[$meta])*
         pub struct $query;
 
@@ -151,7 +193,7 @@ macro_rules! define_vue_query {
 
             fn build_visitor(analyzer: &mut impl AddVisitor<JsLanguage>, _: &AnyJsRoot) {
                 analyzer.add_visitor(Phases::Syntax, || SemanticModelBuilderVisitor);
-                analyzer.add_visitor(Phases::Semantic, || VueSemanticVisitor);
+                analyzer.add_visitor(Phases::Semantic, || $visitor);
             }
 
             fn unwrap_match(_: &ServiceBag, query: &Self::Input) -> Self::Output {
@@ -172,4 +214,12 @@ define_vue_query!(
     VueProp,
     VuePropMatch,
     Prop
+);
+define_vue_query!(
+    /// Matches each reference written in the analyzed tree, whatever it
+    /// resolves to.
+    VueReference,
+    VueReferenceMatch,
+    Reference,
+    VueReferenceVisitor
 );
