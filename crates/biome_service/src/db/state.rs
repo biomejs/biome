@@ -178,6 +178,7 @@ use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::projects::ProjectKey;
 use crate::settings::Settings;
 use crate::settings::SettingsQuery;
+use crate::workspace::ClientId;
 use biome_db::{ParsedSource, SourceContent, SourceText};
 use biome_languages::DocumentFileSource;
 use biome_resolver::FsWithResolverProxy;
@@ -694,6 +695,37 @@ impl DbState {
         }
     }
 
+    /// Removes the editor view of `client` of `path`. See
+    /// [WorkspaceDb::remove_editor_view].
+    pub(crate) fn remove_editor_view(
+        &self,
+        path: &Utf8Path,
+        client: ClientId,
+        keep_disk_view: bool,
+    ) {
+        match &self.storage {
+            DbStorage::Shared(shared_db) => {
+                shared_db.fork().remove_editor_view(
+                    path,
+                    client,
+                    keep_disk_view,
+                    ParsedSourceUpdateMode::Replace,
+                );
+                // The replacement publishes another parsed source for `path`.
+                #[cfg(feature = "module_graph")]
+                self.record_resolver_changes(shared_db.data().resolver_source_change(path));
+            }
+            DbStorage::Owned(db) => db.with_setter(|db| {
+                db.remove_editor_view(
+                    path,
+                    client,
+                    keep_disk_view,
+                    ParsedSourceUpdateMode::Setters,
+                );
+            }),
+        }
+    }
+
     /// Returns `text` with the parser that parses it as `file_source`, with
     /// `parse` and the settings that `query` selects.
     pub(crate) fn source_text(
@@ -767,28 +799,6 @@ impl DbState {
                 db.remove_disk_views_within(path, ParsedSourceUpdateMode::Setters);
                 db.unload_modules(path);
             }),
-        }
-    }
-
-    /// Removes the cached parsed source for `path`.
-    ///
-    /// Only the resolver reads the `files` map from Salsa-tracked queries, and
-    /// only for the content of manifests. Removing any other parsed source is
-    /// an untracked removal. See the "Remove" section of the module
-    /// documentation above.
-    pub(crate) fn remove_file(&self, path: &Utf8Path) {
-        match &self.storage {
-            DbStorage::Shared(shared_db) => {
-                let data = shared_db.data();
-                data.remove_file(path);
-                #[cfg(feature = "module_graph")]
-                self.record_resolver_changes(data.resolver_source_change(path));
-            }
-            #[cfg(feature = "module_graph")]
-            DbStorage::Owned(db) if db.data.is_resolver_manifest(path) => {
-                db.with_setter(|db| db.remove_file(path));
-            }
-            DbStorage::Owned(db) => db.data.remove_file(path),
         }
     }
 

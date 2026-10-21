@@ -634,15 +634,30 @@ impl SessionLifecycle {
             return;
         }
 
-        let Ok(mut sessions) = self.sessions.lock() else {
-            return;
+        let (removed, is_last) = {
+            let Ok(mut sessions) = self.sessions.lock() else {
+                return;
+            };
+            let removed = sessions.remove(&self.session_key);
+            debug_assert!(removed.is_some(), "Session did not exist.");
+            (removed, sessions.is_empty())
         };
-        let removed = sessions.remove(&self.session_key);
-        debug_assert!(removed.is_some(), "Session did not exist.");
+        let is_removed = removed.is_some();
+        // The workspace update runs without the lock, so that other
+        // connections can start or end meanwhile. It waits for the reads of
+        // the database to end, so it must not block the async runtime.
+        if let Some(session) = removed {
+            match tokio::runtime::Handle::try_current() {
+                Ok(runtime) => {
+                    runtime.spawn_blocking(move || session.close_files());
+                }
+                Err(_) => session.close_files(),
+            }
+        }
 
-        if removed.is_some()
+        if is_removed
             && self.stop_on_disconnect
-            && sessions.is_empty()
+            && is_last
             && self.is_initialized.load(Ordering::Acquire)
         {
             self.cancellation.notify_one();

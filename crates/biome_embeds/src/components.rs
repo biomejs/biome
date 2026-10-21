@@ -4,7 +4,6 @@ use biome_html_syntax::{AnyHtmlComponentObjectName, AnyHtmlTagName, HtmlRoot};
 use biome_languages::{DocumentFileSource, LanguageDb};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, TextRange, TokenText};
-use camino::Utf8Path;
 use smallvec::SmallVec;
 
 /// The segments of a component name, such as `Card` and `Root` for `Card.Root`.
@@ -114,13 +113,12 @@ pub(crate) fn embedded_elements_from_source(
 }
 
 /// Returns the name segments of the component whose tag contains `range` in
-/// the host document at `path`.
+/// the host document `file`.
 pub fn component_at(
     db: &dyn LanguageDb,
-    path: &Utf8Path,
+    file: ParsedSource,
     range: TextRange,
 ) -> Option<ComponentNameSegments> {
-    let file = db.parsed_source_for_path(path)?;
     find_component_at(embedded_elements_from_source(db, file), range).cloned()
 }
 
@@ -128,7 +126,7 @@ pub fn component_at(
 mod tests {
     use super::*;
     use crate::collect_embedded_data;
-    use crate::testing::{TestDb, parse_vue_source};
+    use crate::testing::{TestDb, document, parse_vue_source};
     use biome_html_parser::{HtmlParserOptions, parse_html};
     use biome_languages::HtmlFileSource;
     use biome_rowan::TextSize;
@@ -156,7 +154,7 @@ mod tests {
     fn component_at_finds_the_enclosing_component() {
         let db = TestDb::new();
         let path = parse_vue_source(&db, SOURCE);
-        let component = |text| texts(component_at(&db, &path, range_of(text)));
+        let component = |text| texts(component_at(&db, document(&db, &path), range_of(text)));
 
         assert_eq!(component("\"a\""), None);
         assert_eq!(

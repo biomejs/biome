@@ -1,9 +1,9 @@
+use biome_db::ParsedSource;
 use biome_embeds::{
     EmbeddedData, VueDirectiveResolution,
     vue_directives::{InternedVueDirective, resolve_vue_directive},
 };
 use biome_languages::LanguageDb;
-use camino::Utf8PathBuf;
 use std::rc::Rc;
 use std::sync::Arc;
 
@@ -16,15 +16,16 @@ pub(crate) struct EmbeddedService {
 enum EmbeddedSource {
     Workspace {
         db: Rc<dyn LanguageDb>,
-        path: Utf8PathBuf,
+        /// The analyzed document.
+        document: ParsedSource,
     },
     Interned(Arc<EmbeddedData>),
 }
 
 impl EmbeddedService {
-    pub(crate) fn new(db: Rc<dyn LanguageDb>, path: Utf8PathBuf) -> Self {
+    pub(crate) fn new(db: Rc<dyn LanguageDb>, document: ParsedSource) -> Self {
         Self {
-            source: EmbeddedSource::Workspace { db, path },
+            source: EmbeddedSource::Workspace { db, document },
         }
     }
 
@@ -36,9 +37,9 @@ impl EmbeddedService {
 
     pub(crate) fn resolve_vue_directive(&self, name: &str) -> VueDirectiveResolution {
         match &self.source {
-            EmbeddedSource::Workspace { db, path } => resolve_vue_directive(
+            EmbeddedSource::Workspace { db, document } => resolve_vue_directive(
                 db.as_ref(),
-                InternedVueDirective::new(db.as_ref(), path.clone(), name.to_string()),
+                InternedVueDirective::new(db.as_ref(), *document, name.to_string()),
             ),
             EmbeddedSource::Interned(data) => data.resolve_vue_directive(name),
         }

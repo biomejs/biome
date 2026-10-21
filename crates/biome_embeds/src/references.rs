@@ -1,7 +1,7 @@
 use crate::visitor::{embedded_references_from_source, embedded_type_references_from_source};
+use biome_db::ParsedSource;
 use biome_languages::LanguageDb;
 use biome_rowan::{TextRange, TokenText};
-use camino::Utf8PathBuf;
 
 #[derive(Debug, PartialEq)]
 pub struct EmbeddedValueReference {
@@ -24,54 +24,49 @@ pub struct EmbeddedTypeReference {
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedReference {
-    path: Utf8PathBuf,
+    #[returns(copy)]
+    source: ParsedSource,
     name: TokenText,
 }
 
 #[salsa::tracked(returns(copy))]
 pub fn is_value_reference_used(db: &dyn LanguageDb, reference: InternedReference<'_>) -> bool {
-    let parsed_source = db.parsed_source_for_path(reference.path(db));
-    parsed_source.is_some_and(|parsed_source| {
-        embedded_references_from_source(db, parsed_source)
-            .iter()
-            .any(|refs| {
-                refs.iter()
-                    .any(|value_reference| value_reference.text.text() == *reference.name(db))
-            })
-    })
+    let parsed_source = reference.source(db);
+    embedded_references_from_source(db, parsed_source)
+        .iter()
+        .any(|refs| {
+            refs.iter()
+                .any(|value_reference| value_reference.text.text() == *reference.name(db))
+        })
 }
 
 #[salsa::tracked(returns(copy))]
 pub fn is_type_reference_used(db: &dyn LanguageDb, reference: InternedReference<'_>) -> bool {
-    let parsed_source = db.parsed_source_for_path(reference.path(db));
-    parsed_source.is_some_and(|parsed_source| {
-        embedded_type_references_from_source(db, parsed_source)
-            .iter()
-            .any(|refs| {
-                refs.iter()
-                    .any(|type_reference| type_reference.text.text() == *reference.name(db))
-            })
-    })
+    let parsed_source = reference.source(db);
+    embedded_type_references_from_source(db, parsed_source)
+        .iter()
+        .any(|refs| {
+            refs.iter()
+                .any(|type_reference| type_reference.text.text() == *reference.name(db))
+        })
 }
 
 #[salsa::tracked(returns(copy))]
 pub fn is_reference_used(db: &dyn LanguageDb, reference: InternedReference<'_>) -> bool {
-    let parsed_source = db.parsed_source_for_path(reference.path(db));
-    parsed_source.is_some_and(|parsed_source| {
-        let name = reference.name(db);
-        embedded_references_from_source(db, parsed_source)
+    let parsed_source = reference.source(db);
+    let name = reference.name(db);
+    embedded_references_from_source(db, parsed_source)
+        .iter()
+        .any(|refs| {
+            refs.iter()
+                .any(|value_reference| value_reference.text.text() == *name)
+        })
+        || embedded_type_references_from_source(db, parsed_source)
             .iter()
             .any(|refs| {
                 refs.iter()
-                    .any(|value_reference| value_reference.text.text() == *name)
+                    .any(|type_reference| type_reference.text.text() == *name)
             })
-            || embedded_type_references_from_source(db, parsed_source)
-                .iter()
-                .any(|refs| {
-                    refs.iter()
-                        .any(|type_reference| type_reference.text.text() == *name)
-                })
-    })
 }
 
 /// Svelte stores are a special case. The `$` prefix is used to "dereference" the store and get its value.
@@ -82,9 +77,7 @@ pub fn is_svelte_store_reference_used(
     db: &dyn LanguageDb,
     reference: InternedReference<'_>,
 ) -> bool {
-    let Some(parsed_source) = db.parsed_source_for_path(reference.path(db)) else {
-        return false;
-    };
+    let parsed_source = reference.source(db);
 
     embedded_references_from_source(db, parsed_source)
         .iter()
@@ -134,9 +127,7 @@ pub fn is_vue_directive_reference_used(
         return false;
     }
 
-    let Some(parsed_source) = db.parsed_source_for_path(reference.path(db)) else {
-        return false;
-    };
+    let parsed_source = reference.source(db);
 
     embedded_references_from_source(db, parsed_source)
         .iter()
@@ -258,6 +249,12 @@ mod tests {
     #[salsa::db]
     impl salsa::Database for TestDb {}
 
+    /// Returns the document stored for `path`.
+    fn document(db: &TestDb, path: &Utf8Path) -> ParsedSource {
+        db.parsed_source_for_path(path)
+            .expect("the document should be stored")
+    }
+
     #[salsa::db]
     impl biome_db::Db for TestDb {
         fn parsed_source_for_path(&self, path: &Utf8Path) -> Option<biome_db::ParsedSource> {
@@ -367,7 +364,7 @@ mod tests {
 
         assert!(is_value_reference_used(
             &db,
-            InternedReference::new(&db, path, token_text("disabled")),
+            InternedReference::new(&db, document(&db, &path), token_text("disabled")),
         ));
     }
 
@@ -379,7 +376,7 @@ mod tests {
 
         assert!(is_value_reference_used(
             &db,
-            InternedReference::new(&db, path, token_text("disabled")),
+            InternedReference::new(&db, document(&db, &path), token_text("disabled")),
         ));
     }
 
@@ -393,7 +390,7 @@ mod tests {
 
         assert!(!is_value_reference_used(
             &db,
-            InternedReference::new(&db, path, token_text("disabled")),
+            InternedReference::new(&db, document(&db, &path), token_text("disabled")),
         ));
     }
 
@@ -407,23 +404,23 @@ mod tests {
 
         assert!(is_vue_directive_reference_used(
             &db,
-            InternedReference::new(&db, path.clone(), token_text("vHighlight")),
+            InternedReference::new(&db, document(&db, &path), token_text("vHighlight")),
         ));
         assert!(is_vue_directive_reference_used(
             &db,
-            InternedReference::new(&db, path.clone(), token_text("vClickOutside")),
+            InternedReference::new(&db, document(&db, &path), token_text("vClickOutside")),
         ));
         assert!(is_vue_directive_reference_used(
             &db,
-            InternedReference::new(&db, path.clone(), token_text("vRequire2fa")),
+            InternedReference::new(&db, document(&db, &path), token_text("vRequire2fa")),
         ));
         assert!(is_vue_directive_reference_used(
             &db,
-            InternedReference::new(&db, path.clone(), token_text("v2faForbidden")),
+            InternedReference::new(&db, document(&db, &path), token_text("v2faForbidden")),
         ));
         assert!(is_vue_directive_reference_used(
             &db,
-            InternedReference::new(&db, path.clone(), token_text("vWeird_butValid")),
+            InternedReference::new(&db, document(&db, &path), token_text("vWeird_butValid")),
         ));
     }
 
@@ -434,7 +431,7 @@ mod tests {
 
         assert!(!is_vue_directive_reference_used(
             &db,
-            InternedReference::new(&db, path.clone(), token_text("vCloak")),
+            InternedReference::new(&db, document(&db, &path), token_text("vCloak")),
         ));
     }
 
@@ -445,7 +442,7 @@ mod tests {
 
         assert!(!is_vue_directive_reference_used(
             &db,
-            InternedReference::new(&db, path.clone(), token_text("vSomethingElse")),
+            InternedReference::new(&db, document(&db, &path), token_text("vSomethingElse")),
         ));
     }
 
@@ -456,7 +453,7 @@ mod tests {
 
         assert!(!is_vue_directive_reference_used(
             &db,
-            InternedReference::new(&db, path.clone(), token_text("vFoo")),
+            InternedReference::new(&db, document(&db, &path), token_text("vFoo")),
         ));
     }
 
@@ -467,7 +464,7 @@ mod tests {
 
         assert!(!is_vue_directive_reference_used(
             &db,
-            InternedReference::new(&db, path.clone(), token_text("vFooBar")),
+            InternedReference::new(&db, document(&db, &path), token_text("vFooBar")),
         ));
     }
 
@@ -482,7 +479,7 @@ mod tests {
 
         assert!(!is_vue_directive_reference_used(
             &db,
-            InternedReference::new(&db, path.clone(), token_text("ariaLabel")),
+            InternedReference::new(&db, document(&db, &path), token_text("ariaLabel")),
         ));
     }
 
@@ -493,15 +490,15 @@ mod tests {
 
         assert!(is_value_reference_used(
             &db,
-            InternedReference::new(&db, path.clone(), token_text("Component"))
+            InternedReference::new(&db, document(&db, &path), token_text("Component"))
         ));
         assert!(is_value_reference_used(
             &db,
-            InternedReference::new(&db, path.clone(), token_text("AvatarPrimitive"))
+            InternedReference::new(&db, document(&db, &path), token_text("AvatarPrimitive"))
         ));
         assert!(!is_value_reference_used(
             &db,
-            InternedReference::new(&db, path, token_text("Missing"))
+            InternedReference::new(&db, document(&db, &path), token_text("Missing"))
         ));
     }
 
@@ -512,11 +509,11 @@ mod tests {
 
         assert!(is_value_reference_used(
             &db,
-            InternedReference::new(&db, path.clone(), token_text("isNewSheetOpen"))
+            InternedReference::new(&db, document(&db, &path), token_text("isNewSheetOpen"))
         ));
         assert!(!is_value_reference_used(
             &db,
-            InternedReference::new(&db, path, token_text("Missing"))
+            InternedReference::new(&db, document(&db, &path), token_text("Missing"))
         ));
     }
 
@@ -527,19 +524,19 @@ mod tests {
 
         assert!(is_type_reference_used(
             &db,
-            InternedReference::new(&db, path.clone(), token_text("IconType"))
+            InternedReference::new(&db, document(&db, &path), token_text("IconType"))
         ));
         assert!(!is_value_reference_used(
             &db,
-            InternedReference::new(&db, path.clone(), token_text("IconType"))
+            InternedReference::new(&db, document(&db, &path), token_text("IconType"))
         ));
         assert!(is_reference_used(
             &db,
-            InternedReference::new(&db, path.clone(), token_text("IconType"))
+            InternedReference::new(&db, document(&db, &path), token_text("IconType"))
         ));
         assert!(is_value_reference_used(
             &db,
-            InternedReference::new(&db, path, token_text("foo"))
+            InternedReference::new(&db, document(&db, &path), token_text("foo"))
         ));
     }
 

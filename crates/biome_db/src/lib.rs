@@ -376,6 +376,11 @@ pub struct ParsedSnippetRef {
 }
 
 impl ParsedSnippetRef {
+    /// Returns the document that contains the snippet.
+    pub fn source(&self) -> ParsedSource {
+        self.source
+    }
+
     /// Returns the [ParsedSnippet] this reference was created from, or `None`
     /// when the current parse of its document doesn't contain it anymore.
     pub fn resolve<'db>(&self, db: &'db dyn Db) -> Option<ParsedSnippet<'db>> {
@@ -423,6 +428,15 @@ pub enum AnyParsedSource {
 }
 
 impl AnyParsedSource {
+    /// Returns the document: the source itself, or the document that contains
+    /// the snippet.
+    pub fn document(&self) -> ParsedSource {
+        match self {
+            Self::ParsedSource(source) => *source,
+            Self::ParsedSnippet(snippet) => snippet.source(),
+        }
+    }
+
     pub fn tree<N>(&self, db: &dyn Db) -> N
     where
         N: AstNode,

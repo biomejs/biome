@@ -12,6 +12,8 @@ pub use state::DbState;
 use crate::WorkspaceError;
 use crate::projects::{NestedPath, ProjectDb, ProjectInput, ProjectKey};
 use crate::settings::{Settings, SettingsIdentity, VcsIgnoredPatterns};
+pub(crate) use crate::workspace::views::FileView;
+use crate::workspace::views::{ClientId, Views};
 use biome_configuration::vcs::VcsClientKind;
 use biome_db::{ParsedSource, SnippetParse, SourceContent, SourceParse};
 use biome_languages::DocumentFileSource;
@@ -43,6 +45,8 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use tracing::{debug, instrument};
 
 const SETTINGS_QUERY_CACHE_CAPACITY: usize = 256;
+
+type SourceViews = Views<ParsedSource, ParsedSource>;
 
 type NodeCaches = Arc<HashMap<Utf8PathBuf, Arc<Mutex<NodeCache>>>>;
 type SettingsQueryEventHandler =
@@ -173,7 +177,7 @@ pub(crate) enum ProjectUpdateMode {
     Setters,
 }
 
-/// The views of the content of a file.
+/// The views of the content of a file. See [views](crate::workspace::views).
 ///
 /// A query that looks up a path reads the views. In Owned mode, the views of a
 /// path keep their input and change through a setter, so the query runs again
@@ -181,94 +185,8 @@ pub(crate) enum ProjectUpdateMode {
 #[salsa::input]
 #[derive(Debug)]
 pub(crate) struct FileViews {
-    #[returns(copy)]
-    views: Views,
-}
-
-/// The views a file has: the disk view, which is the content read from the
-/// filesystem, and the editor view, which is the content that a client opened.
-///
-/// The editor view shadows the disk view: [Self::current] returns it while it
-/// exists.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) enum Views {
-    /// Only the scanner or the watcher read the file.
-    Disk(ParsedSource),
-    /// A client opened the file. `disk` is set when the scanner or the watcher
-    /// read it too.
-    Editor {
-        editor: ParsedSource,
-        disk: Option<ParsedSource>,
-    },
-}
-
-/// Selects one of the [Views] of a file.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) enum FileView {
-    Disk,
-    Editor,
-}
-
-impl Views {
-    /// Creates the views of a file that has only `source`, as `view`.
-    fn new(view: FileView, source: ParsedSource) -> Self {
-        match view {
-            FileView::Disk => Self::Disk(source),
-            FileView::Editor => Self::Editor {
-                editor: source,
-                disk: None,
-            },
-        }
-    }
-
-    /// Returns the editor view if there is one, otherwise the disk view.
-    pub(crate) fn current(self) -> ParsedSource {
-        match self {
-            Self::Disk(disk) => disk,
-            Self::Editor { editor, .. } => editor,
-        }
-    }
-
-    fn get(self, view: FileView) -> Option<ParsedSource> {
-        match (self, view) {
-            (Self::Disk(disk), FileView::Disk) => Some(disk),
-            (Self::Disk(_), FileView::Editor) => None,
-            (Self::Editor { disk, .. }, FileView::Disk) => disk,
-            (Self::Editor { editor, .. }, FileView::Editor) => Some(editor),
-        }
-    }
-
-    /// Returns the views with `source` as `view`.
-    fn with(self, view: FileView, source: ParsedSource) -> Self {
-        match (self, view) {
-            (Self::Disk(_), FileView::Disk) => Self::Disk(source),
-            (Self::Disk(disk), FileView::Editor) => Self::Editor {
-                editor: source,
-                disk: Some(disk),
-            },
-            (Self::Editor { editor, .. }, FileView::Disk) => Self::Editor {
-                editor,
-                disk: Some(source),
-            },
-            (Self::Editor { disk, .. }, FileView::Editor) => Self::Editor {
-                editor: source,
-                disk,
-            },
-        }
-    }
-
-    /// Returns the views without `view`, or `None` when `view` is the only
-    /// view.
-    fn without(self, view: FileView) -> Option<Self> {
-        match (self, view) {
-            (Self::Disk(_), FileView::Disk) => None,
-            (Self::Disk(disk), FileView::Editor) => Some(Self::Disk(disk)),
-            (Self::Editor { editor, .. }, FileView::Disk) => {
-                Some(Self::Editor { editor, disk: None })
-            }
-            (Self::Editor { disk, .. }, FileView::Editor) => disk.map(Self::Disk),
-        }
-    }
+    #[returns(ref)]
+    views: SourceViews,
 }
 
 /// The database used by the `biome_service` crate.
@@ -613,7 +531,7 @@ impl WorkspaceDb {
 
     /// Publishes `file` as the disk view of `path`.
     pub fn insert_file(&mut self, path: &Utf8Path, file: ParsedSource) {
-        let views = FileViews::new(self, Views::Disk(file));
+        let views = FileViews::new(self, Views::from_disk(file));
         self.files.pin().insert(path.to_path_buf(), views);
     }
 
@@ -668,15 +586,17 @@ impl WorkspaceDb {
         if mode == ParsedSourceUpdateMode::Replace {
             let source = ParsedSource::new(self, path.to_path_buf(), content);
             let views = self.replace_views(path, |views| {
-                Some(views.map_or(Views::new(view, source), |views| views.with(view, source)))
+                Some(views.map_or(Views::from_view(view, source), |views| {
+                    views.with(view, source)
+                }))
             });
-            return views.map_or(source, Views::current);
+            return views.map_or(source, |views| *views.current().value());
         }
 
         let existing_views = { self.files.pin().get(path).copied() };
         if let Some(file_views) = existing_views {
-            let views = file_views.views(self);
-            let views = match views.get(view) {
+            let views = file_views.views(self).clone();
+            let views = match views.get(view).copied() {
                 Some(source) => {
                     source.set_content(self).to(content);
                     views
@@ -684,14 +604,14 @@ impl WorkspaceDb {
                 None => {
                     let source = ParsedSource::new(self, path.to_path_buf(), content);
                     let views = views.with(view, source);
-                    file_views.set_views(self).to(views);
+                    file_views.set_views(self).to(views.clone());
                     views
                 }
             };
-            views.current()
+            *views.current().value()
         } else {
             let source = ParsedSource::new(self, path.to_path_buf(), content);
-            let file_views = FileViews::new(self, Views::new(view, source));
+            let file_views = FileViews::new(self, Views::from_view(view, source));
             self.files.pin().insert(path.to_path_buf(), file_views);
             // Manifest queries look up the parsed source of a path outside
             // Salsa. Publishing a new parsed source must invalidate them.
@@ -711,15 +631,43 @@ impl WorkspaceDb {
         view: FileView,
         mode: ParsedSourceUpdateMode,
     ) {
+        self.update_views(path, mode, |views| views.without(view));
+    }
+
+    /// Removes the editor view of `client` of `path`. When no client has the
+    /// file open anymore, the file is removed too, unless `keep_disk_view`.
+    pub(crate) fn remove_editor_view(
+        &mut self,
+        path: &Utf8Path,
+        client: ClientId,
+        keep_disk_view: bool,
+        mode: ParsedSourceUpdateMode,
+    ) {
+        self.update_views(path, mode, |views| {
+            views
+                .without_editor(client)
+                .filter(|views| keep_disk_view || views.has_editors())
+        });
+    }
+
+    /// Replaces the views of `path` with the ones `update` derives from them,
+    /// and removes the file when `update` returns `None`. Does nothing when
+    /// `path` has no views.
+    fn update_views(
+        &mut self,
+        path: &Utf8Path,
+        mode: ParsedSourceUpdateMode,
+        update: impl Fn(SourceViews) -> Option<SourceViews>,
+    ) {
         if mode == ParsedSourceUpdateMode::Replace {
-            self.replace_views(path, |views| views.and_then(|views| views.without(view)));
+            self.replace_views(path, |views| views.and_then(&update));
             return;
         }
 
         let Some(file_views) = self.files.pin().get(path).copied() else {
             return;
         };
-        match file_views.views(self).without(view) {
+        match update(file_views.views(self).clone()) {
             Some(views) => {
                 file_views.set_views(self).to(views);
             }
@@ -755,15 +703,15 @@ impl WorkspaceDb {
     fn replace_views(
         &self,
         path: &Utf8Path,
-        replace: impl Fn(Option<Views>) -> Option<Views>,
-    ) -> Option<Views> {
+        replace: impl Fn(Option<SourceViews>) -> Option<SourceViews>,
+    ) -> Option<SourceViews> {
         let files = self.files.pin();
         let mut current = files.get(path).copied();
         loop {
-            let views = replace(current.map(|file_views| file_views.views(self)));
+            let views = replace(current.map(|file_views| file_views.views(self).clone()));
             // Input allocation stays outside Papaya's callback because that
             // callback may be replayed during a compare-and-swap retry.
-            let replacement = views.map(|views| FileViews::new(self, views));
+            let replacement = views.clone().map(|views| FileViews::new(self, views));
             let result = files.compute(path.to_path_buf(), |entry| {
                 let actual = entry.map(|(_, file_views)| *file_views);
                 match (actual, replacement) {
@@ -799,10 +747,35 @@ impl WorkspaceDb {
         self.modules.pin().get(path).copied()
     }
 
-    /// Returns the current view of `path`. See [Views::current].
+    /// Returns the view of `path` that the services shared by the clients
+    /// read. See [Views::current].
     pub fn get_parsed_source(&self, path: &Utf8Path) -> Option<ParsedSource> {
         let file_views = self.files.pin().get(path).copied()?;
-        Some(file_views.views(self).current())
+        Some(*file_views.views(self).current().value())
+    }
+
+    /// Returns the paths of the files that `client` has open.
+    pub(crate) fn paths_open_in(&self, client: ClientId) -> Vec<Utf8PathBuf> {
+        self.files
+            .pin()
+            .iter()
+            .filter(|(_, file_views)| file_views.views(self).editor(client).is_some())
+            .map(|(path, _)| path.clone())
+            .collect()
+    }
+
+    /// Returns the view of `path` that `client` reads. See
+    /// [Views::for_client].
+    pub(crate) fn get_client_parsed_source(
+        &self,
+        path: &Utf8Path,
+        client: ClientId,
+    ) -> Option<ParsedSource> {
+        let file_views = self.files.pin().get(path).copied()?;
+        file_views
+            .views(self)
+            .for_client(client)
+            .map(|view| *view.value())
     }
 
     /// Returns the number of cached parsed sources.
@@ -1630,7 +1603,7 @@ mod tests {
         );
         db.update_or_insert_view(
             path,
-            FileView::Editor,
+            FileView::Editor(ClientId::default()),
             parse("editor"),
             ParsedSourceUpdateMode::Replace,
         );
@@ -1642,11 +1615,13 @@ mod tests {
                 // The client closes the file after its views were read.
                 db.data().remove_file(path);
             }
-            Some(views.map_or(Views::Disk(disk), |views| views.with(FileView::Disk, disk)))
+            Some(views.map_or(Views::from_disk(disk), |views| {
+                views.with(FileView::Disk, disk)
+            }))
         });
 
         assert_eq!(derived_views.get(), 2);
-        assert_eq!(views, Some(Views::Disk(disk)));
+        assert_eq!(views, Some(Views::from_disk(disk)));
         assert_eq!(db.get_parsed_source(path), Some(disk));
     }
 

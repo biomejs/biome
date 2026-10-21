@@ -1,4 +1,5 @@
 use biome_analyze::{FromServices, RuleKey, RuleMetadata, ServiceBag, ServicesDiagnostic};
+use biome_db::ParsedSource;
 use biome_embeds::EmbeddedData;
 use biome_embeds::bindings::{
     InternedBindingText, InternedBindingTokenText, get_binding_by_name, get_binding_by_text,
@@ -10,7 +11,6 @@ use biome_embeds::references::{
 };
 use biome_languages::{LanguageDb, has_embedded_content};
 use biome_rowan::{TextRange, TextSize, TokenText};
-use camino::Utf8PathBuf;
 use std::rc::Rc;
 use std::sync::Arc;
 
@@ -26,17 +26,26 @@ enum EmbeddedSource {
     Empty,
     Workspace {
         db: Rc<dyn LanguageDb>,
-        path: Utf8PathBuf,
+        /// The host document of the analyzed source.
+        document: ParsedSource,
     },
     Interned(Arc<EmbeddedData>),
 }
 
 impl EmbeddedService {
-    pub(crate) fn new(db: Rc<dyn LanguageDb>, path: Utf8PathBuf, snippet_offset: TextSize) -> Self {
-        let source = if has_embedded_content(db.as_ref(), &path) {
-            EmbeddedSource::Workspace { db, path }
-        } else {
-            EmbeddedSource::Empty
+    /// Creates the service for the analyzed source of `document`, its host
+    /// document in `db`. Without a document, the service finds no embedded
+    /// content.
+    pub(crate) fn new(
+        db: Rc<dyn LanguageDb>,
+        document: Option<ParsedSource>,
+        snippet_offset: TextSize,
+    ) -> Self {
+        let source = match document {
+            Some(document) if has_embedded_content(db.as_ref(), document) => {
+                EmbeddedSource::Workspace { db, document }
+            }
+            _ => EmbeddedSource::Empty,
         };
         Self {
             source,
@@ -54,9 +63,9 @@ impl EmbeddedService {
     pub(crate) fn contains_binding(&self, binding: TokenText) -> bool {
         match &self.source {
             EmbeddedSource::Empty => false,
-            EmbeddedSource::Workspace { db, path } => get_binding_by_name(
+            EmbeddedSource::Workspace { db, document } => get_binding_by_name(
                 db.as_ref(),
-                InternedBindingTokenText::new(db.as_ref(), path.clone(), binding),
+                InternedBindingTokenText::new(db.as_ref(), *document, binding),
             )
             .is_some(),
             EmbeddedSource::Interned(data) => data.contains_binding(binding.text()),
@@ -66,9 +75,9 @@ impl EmbeddedService {
     pub(crate) fn contains_binding_text(&self, binding: &str) -> bool {
         match &self.source {
             EmbeddedSource::Empty => false,
-            EmbeddedSource::Workspace { db, path } => get_binding_by_text(
+            EmbeddedSource::Workspace { db, document } => get_binding_by_text(
                 db.as_ref(),
-                InternedBindingText::new(db.as_ref(), path.clone(), binding.to_string()),
+                InternedBindingText::new(db.as_ref(), *document, binding.to_string()),
             )
             .is_some(),
             EmbeddedSource::Interned(data) => data.contains_binding(binding),
@@ -78,9 +87,9 @@ impl EmbeddedService {
     pub(crate) fn is_used_as_value(&self, identifier: TokenText) -> bool {
         match &self.source {
             EmbeddedSource::Empty => false,
-            EmbeddedSource::Workspace { db, path } => is_value_reference_used(
+            EmbeddedSource::Workspace { db, document } => is_value_reference_used(
                 db.as_ref(),
-                InternedReference::new(db.as_ref(), path.clone(), identifier),
+                InternedReference::new(db.as_ref(), *document, identifier),
             ),
             EmbeddedSource::Interned(data) => data.is_used_as_value(identifier.text()),
         }
@@ -89,9 +98,9 @@ impl EmbeddedService {
     pub(crate) fn is_used_as_type(&self, identifier: TokenText) -> bool {
         match &self.source {
             EmbeddedSource::Empty => false,
-            EmbeddedSource::Workspace { db, path } => is_type_reference_used(
+            EmbeddedSource::Workspace { db, document } => is_type_reference_used(
                 db.as_ref(),
-                InternedReference::new(db.as_ref(), path.clone(), identifier),
+                InternedReference::new(db.as_ref(), *document, identifier),
             ),
             EmbeddedSource::Interned(data) => data.is_used_as_type(identifier.text()),
         }
@@ -100,9 +109,9 @@ impl EmbeddedService {
     pub(crate) fn is_used(&self, identifier: TokenText) -> bool {
         match &self.source {
             EmbeddedSource::Empty => false,
-            EmbeddedSource::Workspace { db, path } => is_reference_used(
+            EmbeddedSource::Workspace { db, document } => is_reference_used(
                 db.as_ref(),
-                InternedReference::new(db.as_ref(), path.clone(), identifier),
+                InternedReference::new(db.as_ref(), *document, identifier),
             ),
             EmbeddedSource::Interned(data) => data.is_used(identifier.text()),
         }
@@ -114,9 +123,9 @@ impl EmbeddedService {
     pub(crate) fn is_svelte_store_used(&self, identifier: TokenText) -> bool {
         match &self.source {
             EmbeddedSource::Empty => false,
-            EmbeddedSource::Workspace { db, path } => is_svelte_store_reference_used(
+            EmbeddedSource::Workspace { db, document } => is_svelte_store_reference_used(
                 db.as_ref(),
-                InternedReference::new(db.as_ref(), path.clone(), identifier),
+                InternedReference::new(db.as_ref(), *document, identifier),
             ),
             EmbeddedSource::Interned(data) => data.is_svelte_store_used(identifier.text()),
         }
@@ -130,9 +139,9 @@ impl EmbeddedService {
     pub(crate) fn is_vue_directive_used(&self, identifier: TokenText) -> bool {
         match &self.source {
             EmbeddedSource::Empty => false,
-            EmbeddedSource::Workspace { db, path } => is_vue_directive_reference_used(
+            EmbeddedSource::Workspace { db, document } => is_vue_directive_reference_used(
                 db.as_ref(),
-                InternedReference::new(db.as_ref(), path.clone(), identifier),
+                InternedReference::new(db.as_ref(), *document, identifier),
             ),
             EmbeddedSource::Interned(data) => data.is_vue_directive_used(identifier.text()),
         }
@@ -148,7 +157,9 @@ impl EmbeddedService {
         let range = range + self.snippet_offset;
         match &self.source {
             EmbeddedSource::Empty => None,
-            EmbeddedSource::Workspace { db, path } => component_at(db.as_ref(), path, range),
+            EmbeddedSource::Workspace { db, document } => {
+                component_at(db.as_ref(), *document, range)
+            }
             EmbeddedSource::Interned(data) => data.component_at(range).cloned(),
         }
     }
@@ -182,7 +193,7 @@ mod tests {
     use biome_js_parser::{JsParserOptions, parse};
     use biome_languages::{DocumentFileSource, JsFileSource};
     use biome_rowan::RawSyntaxKind;
-    use camino::Utf8Path;
+    use camino::{Utf8Path, Utf8PathBuf};
     use salsa::{EventKind, Storage};
 
     #[salsa::db]
@@ -246,15 +257,10 @@ mod tests {
             JsParserOptions::default(),
         )
         .into();
-        db.parsed = Some(ParsedSource::from_parse(
-            &db,
-            path.clone(),
-            parsed,
-            0,
-            snippets,
-        ));
+        let document = ParsedSource::from_parse(&db, path, parsed, 0, snippets);
+        db.parsed = Some(document);
 
-        let service = EmbeddedService::new(Rc::new(db), path, TextSize::default());
+        let service = EmbeddedService::new(Rc::new(db), Some(document), TextSize::default());
         (service, events)
     }
 

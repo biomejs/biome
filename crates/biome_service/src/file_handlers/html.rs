@@ -1163,6 +1163,7 @@ pub(super) fn lint_with_inspector(
             }
         },
         project_layout: Some(params.project_layout.clone()),
+        document: params.parsed_source.document(),
         ..HtmlAnalyzerServices::default()
     }
     .with_language_db(params.workspace_db.rc_language_db());
@@ -1289,6 +1290,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             }
         },
         project_layout: Some(project_layout),
+        document: Some(parsed_source.document()),
         ..HtmlAnalyzerServices::default()
     }
     .with_language_db(workspace_db.rc_language_db());
@@ -1394,6 +1396,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                     }
                 },
                 project_layout: Some(params.project_layout.clone()),
+                document: params.parsed_source.document(),
                 ..HtmlAnalyzerServices::default()
             }
             .with_language_db(params.workspace_db.rc_language_db());
@@ -1460,6 +1463,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                 }
             },
             project_layout: Some(params.project_layout.clone()),
+            document: params.parsed_source.document(),
             ..HtmlAnalyzerServices::default()
         }
         .with_language_db(params.workspace_db.rc_language_db());
@@ -1509,6 +1513,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<Option<FixedFileResult>, W
                 }
             },
             project_layout: Some(params.project_layout.clone()),
+            document: params.parsed_source.document(),
             ..HtmlAnalyzerServices::default()
         }
         .with_language_db(params.workspace_db.rc_language_db());

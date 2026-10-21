@@ -1,7 +1,7 @@
 use crate::visitor::embedded_bindings_from_source;
+use biome_db::ParsedSource;
 use biome_languages::LanguageDb;
 use biome_rowan::{TextRange, TokenText};
-use camino::Utf8PathBuf;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct EmbeddedBinding {
@@ -16,7 +16,8 @@ pub struct EmbeddedBinding {
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedBindingTokenText {
-    path: Utf8PathBuf,
+    #[returns(copy)]
+    source: ParsedSource,
 
     name: TokenText,
 }
@@ -24,7 +25,8 @@ pub struct InternedBindingTokenText {
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedBindingText {
-    path: Utf8PathBuf,
+    #[returns(copy)]
+    source: ParsedSource,
 
     name: String,
 }
@@ -34,7 +36,7 @@ pub fn get_binding_by_name<'db>(
     db: &'db dyn LanguageDb,
     binding_name: InternedBindingTokenText<'db>,
 ) -> Option<EmbeddedBinding> {
-    let parsed_source = db.parsed_source_for_path(binding_name.path(db))?;
+    let parsed_source = binding_name.source(db);
 
     for bindings in embedded_bindings_from_source(db, parsed_source) {
         for binding in bindings {
@@ -51,7 +53,7 @@ pub fn get_binding_with_source<'db>(
     db: &'db dyn LanguageDb,
     binding_name: InternedBindingTokenText<'db>,
 ) -> Option<EmbeddedBinding> {
-    let parsed_source = db.parsed_source_for_path(binding_name.path(db))?;
+    let parsed_source = binding_name.source(db);
     for bindings in embedded_bindings_from_source(db, parsed_source) {
         for binding in bindings {
             if binding.text.text() == *binding_name.name(db) && binding.source.is_some() {
@@ -67,7 +69,7 @@ pub fn get_binding_by_token_text<'db>(
     db: &'db dyn LanguageDb,
     binding_name: InternedBindingTokenText<'db>,
 ) -> Option<EmbeddedBinding> {
-    let parsed_source = db.parsed_source_for_path(binding_name.path(db))?;
+    let parsed_source = binding_name.source(db);
 
     for bindings in embedded_bindings_from_source(db, parsed_source) {
         for binding in bindings {
@@ -84,7 +86,7 @@ pub fn get_binding_by_text<'db>(
     db: &'db dyn LanguageDb,
     binding_name: InternedBindingText<'db>,
 ) -> Option<EmbeddedBinding> {
-    let parsed_source = db.parsed_source_for_path(binding_name.path(db))?;
+    let parsed_source = binding_name.source(db);
 
     for bindings in embedded_bindings_from_source(db, parsed_source) {
         for binding in bindings {
@@ -100,7 +102,7 @@ pub fn get_binding_by_text<'db>(
 mod tests {
     use super::*;
     use crate::testing::{
-        TestDb, parse_html_source_with_js_snippet, parse_vue_source,
+        TestDb, document, parse_html_source_with_js_snippet, parse_vue_source,
         parse_vue_source_with_js_snippet, token_text,
     };
     use biome_db::Db;
@@ -116,7 +118,7 @@ mod tests {
 
         let found = get_binding_by_name(
             &db,
-            InternedBindingTokenText::new(&db, path, token_text("Local")),
+            InternedBindingTokenText::new(&db, document(&db, &path), token_text("Local")),
         )
         .as_ref()
         .expect("binding should exist");
@@ -135,7 +137,7 @@ mod tests {
         assert!(
             get_binding_with_source(
                 &db,
-                InternedBindingTokenText::new(&db, path, token_text("Local"))
+                InternedBindingTokenText::new(&db, document(&db, &path), token_text("Local"))
             )
             .is_none()
         );
@@ -152,7 +154,7 @@ mod tests {
 
         let found = get_binding_with_source(
             &db,
-            InternedBindingTokenText::new(&db, path, token_text("Component")),
+            InternedBindingTokenText::new(&db, document(&db, &path), token_text("Component")),
         )
         .as_ref()
         .expect("imported binding should exist");
@@ -177,14 +179,14 @@ mod tests {
         assert!(
             get_binding_by_name(
                 &db,
-                InternedBindingTokenText::new(&db, path.clone(), token_text("_"))
+                InternedBindingTokenText::new(&db, document(&db, &path), token_text("_"))
             )
             .is_some()
         );
         assert!(
             get_binding_by_name(
                 &db,
-                InternedBindingTokenText::new(&db, path, token_text("schema"))
+                InternedBindingTokenText::new(&db, document(&db, &path), token_text("schema"))
             )
             .is_some()
         );

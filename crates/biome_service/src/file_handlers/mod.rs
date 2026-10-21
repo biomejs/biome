@@ -241,6 +241,15 @@ impl ParsedSnippetOrigin {
 }
 
 impl ParsedOrigin {
+    /// Returns the document in the database, or `None` when the parse result
+    /// isn't stored in it.
+    pub(crate) fn document(&self) -> Option<ParsedSource> {
+        match self {
+            Self::Workspace(source) => Some(source.document()),
+            Self::Interned { .. } => None,
+        }
+    }
+
     pub(crate) fn snippets<'a>(&'a self, db: &'a WorkspaceDb) -> SnippetsIterator<'a> {
         match self {
             Self::Workspace(AnyParsedSource::ParsedSource(source)) => {

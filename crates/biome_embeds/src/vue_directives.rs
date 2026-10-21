@@ -1,13 +1,14 @@
 use crate::data::VueDirectiveResolution;
 use crate::visitor::vue_directive_declarations_from_source;
+use biome_db::ParsedSource;
 use biome_languages::LanguageDb;
-use camino::Utf8PathBuf;
 
 /// An interned Vue custom-directive lookup in a host document.
 #[salsa::interned]
 #[derive(Debug)]
 pub struct InternedVueDirective {
-    path: Utf8PathBuf,
+    #[returns(copy)]
+    source: ParsedSource,
     name: String,
 }
 
@@ -17,14 +18,7 @@ pub fn resolve_vue_directive(
     db: &dyn LanguageDb,
     directive: InternedVueDirective<'_>,
 ) -> VueDirectiveResolution {
-    // A host document that is absent from the database carries no declarations we can
-    // read, which is not the same as a document that declares nothing. Reporting here
-    // would turn "the file was not indexed" into "the directive is undeclared".
-    let Some(parsed_source) = db.parsed_source_for_path(directive.path(db)) else {
-        return VueDirectiveResolution::Unknown;
-    };
-
-    vue_directive_declarations_from_source(db, parsed_source).resolve(directive.name(db))
+    vue_directive_declarations_from_source(db, directive.source(db)).resolve(directive.name(db))
 }
 
 #[cfg(test)]
@@ -32,26 +26,17 @@ mod tests {
     use super::*;
     use crate::testing::{
         TestDb, VUE_SCRIPT_SETUP_SOURCE_INDEX, VUE_SCRIPT_SETUP_TS_SOURCE_INDEX,
-        VUE_SCRIPT_SOURCE_INDEX, parse_vue_source_with_js_snippets,
+        VUE_SCRIPT_SOURCE_INDEX, document, parse_vue_source_with_js_snippets,
     };
     use biome_db::Db;
     use biome_db::testing::assert_function_query_was_not_run;
+    use camino::Utf8PathBuf;
 
     fn resolve(db: &TestDb, path: &Utf8PathBuf, name: &str) -> VueDirectiveResolution {
         resolve_vue_directive(
             db,
-            InternedVueDirective::new(db, path.clone(), name.to_string()),
+            InternedVueDirective::new(db, document(db, path), name.to_string()),
         )
-    }
-
-    #[test]
-    fn resolve_vue_directive_is_unknown_for_a_document_outside_the_database() {
-        let db = TestDb::new();
-
-        assert_eq!(
-            resolve(&db, &Utf8PathBuf::from("src/Missing.vue"), "v-highlight"),
-            VueDirectiveResolution::Unknown
-        );
     }
 
     #[test]
