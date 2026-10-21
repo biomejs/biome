@@ -1,0 +1,127 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue8043Invalid.ts
+---
+# Input
+```ts
+// should generate diagnostics
+
+type FormValues = {
+	value: string;
+};
+
+type GenericProps<T extends FormValues> = {
+	values: T;
+	inert?: boolean;
+};
+
+type PlainProps = {
+	inert?: boolean;
+};
+
+export function genericWithoutDefault<T extends FormValues>({
+	inert,
+}: GenericProps<T>) {
+	return inert || undefined;
+}
+
+export function plainWithoutDefault({ inert }: PlainProps) {
+	return inert || undefined;
+}
+
+export function nullableWithDefault({
+	value = "fallback",
+}: {
+	value?: string | null;
+}) {
+	return value || undefined;
+}
+
+declare const list: (number | undefined)[];
+const [head] = list;
+export const arrayResult = head || undefined;
+
+```
+
+# Diagnostics
+```
+issue8043Invalid.ts:19:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    17 │ 	inert,
+    18 │ }: GenericProps<T>) {
+  > 19 │ 	return inert || undefined;
+       │ 	             ^^
+    20 │ }
+    21 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+issue8043Invalid.ts:23:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    22 │ export function plainWithoutDefault({ inert }: PlainProps) {
+  > 23 │ 	return inert || undefined;
+       │ 	             ^^
+    24 │ }
+    25 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+issue8043Invalid.ts:31:15 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    29 │ 	value?: string | null;
+    30 │ }) {
+  > 31 │ 	return value || undefined;
+       │ 	             ^^
+    32 │ }
+    33 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+issue8043Invalid.ts:36:33 lint/nursery/useNullishCoalescing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Use ?? instead of ||.
+  
+    34 │ declare const list: (number | undefined)[];
+    35 │ const [head] = list;
+  > 36 │ export const arrayResult = head || undefined;
+       │                                 ^^
+    37 │ 
+  
+  i The || operator checks for all falsy values (including 0, '', and false), while ?? only checks for null and undefined.
+  
+  i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/8043 for more information or to report possible bugs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
