@@ -7534,6 +7534,23 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueRestrictedCallAfterAwaitConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueRestrictedCallAfterAwaitOptions" }
+			]
+		},
+		"NoVueRestrictedCallAfterAwaitOptions": {
+			"type": "object",
+			"properties": {
+				"functions": {
+					"description": "Functions that must not be called after an `await` in `setup()`. Defaults to an empty list.",
+					"type": ["array", "null"],
+					"items": { "$ref": "#/$defs/RestrictedFunction" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoVueRootVIfConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8215,6 +8232,13 @@
 					"description": "Disallow props that are both required and have a default value.\nSee https://biomejs.dev/linter/rules/no-vue-required-prop-with-default",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueRequiredPropWithDefaultConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueRestrictedCallAfterAwait": {
+					"description": "Disallow calling configured functions after an await in setup().\nSee https://biomejs.dev/linter/rules/no-vue-restricted-call-after-await",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueRestrictedCallAfterAwaitConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -9209,6 +9233,31 @@
 		},
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
 		"Regex": { "type": "string" },
+		"RestrictedFunction": {
+			"type": "object",
+			"properties": {
+				"message": {
+					"description": "The message to show in place of the default message.",
+					"type": ["string", "null"]
+				},
+				"module": {
+					"description": "The module that exports the function, written as it appears in the `import` statement.",
+					"type": "string"
+				},
+				"path": {
+					"description": "The name the function is exported as, or a list of names that leads to the function\nthrough the module's exports. Defaults to `\"default\"`, the module's default export.",
+					"$ref": "#/$defs/RestrictedFunctionPath"
+				}
+			},
+			"additionalProperties": false,
+			"required": ["module"]
+		},
+		"RestrictedFunctionPath": {
+			"anyOf": [
+				{ "type": "string" },
+				{ "type": "array", "items": { "type": "string" } }
+			]
+		},
 		"RestrictedModifier": {
 			"type": "string",
 			"enum": ["abstract", "private", "protected", "readonly", "static"]
@@ -13339,6 +13388,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueReservedPropsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueRestrictedCallAfterAwaitOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueRestrictedCallAfterAwaitOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
