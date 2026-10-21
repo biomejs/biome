@@ -1,5 +1,12 @@
 # @biomejs/runtime
 
+## 2.6.1
+
+### Patch Changes
+
+- Updated dependencies [[`edaa1db`](https://github.com/biomejs/biome/commit/edaa1db68abbef94d9605bc6de0246a1fcab52e1)]:
+  - @biomejs/biome@2.6.1
+
 ## 2.6.0
 
 ### Patch Changes

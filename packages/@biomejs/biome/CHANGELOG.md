@@ -1,5 +1,11 @@
 # @biomejs/biome
 
+## 2.6.1
+
+### Patch Changes
+
+- [#12492](https://github.com/biomejs/biome/pull/12492) [`edaa1db`](https://github.com/biomejs/biome/commit/edaa1db68abbef94d9605bc6de0246a1fcab52e1) Thanks [@ematipico](https://github.com/ematipico)! - Fixes a problem with npm publishing
+
 ## 2.6.0
 
 ### Minor Changes
