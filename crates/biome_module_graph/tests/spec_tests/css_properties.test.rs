@@ -1,4 +1,4 @@
-use biome_db::{Db, SourceParse};
+use biome_db::Db;
 use biome_fs::BiomePath;
 use biome_module_graph::{ModuleDb, SymbolFromModuleInfo, css_property_definitions};
 use biome_rowan::TextSize;
@@ -187,12 +187,7 @@ fn css_property_query_reads_the_current_semantic_model() {
     let parsed = db
         .parsed_source_for_path(Utf8Path::new("/value.css"))
         .unwrap();
-    let replacement =
-        biome_css_parser::parse_css(".value{}", Default::default(), Default::default());
-    salsa::Setter::to(
-        parsed.set_content(&mut db),
-        SourceParse::new(replacement.into(), 0).into(),
-    );
+    salsa::Setter::to(parsed.set_text(&mut db), ".value{}".into());
     let module = db.module_for_path(Utf8Path::new("/value.css")).unwrap();
     assert!(
         css_property_definitions(&db, SymbolFromModuleInfo::new(&db, "--value", module)).is_empty()

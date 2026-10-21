@@ -974,11 +974,15 @@ mod tests {
 
     #[salsa::db]
     impl biome_db::Db for TestDb {
-        fn parsed_source_for_path(
-            &self,
-            _path: &camino::Utf8Path,
-        ) -> Option<biome_db::ParsedSource> {
+        fn parsed_source_for_path(&self, _path: &camino::Utf8Path) -> Option<biome_db::Source> {
             None
+        }
+    }
+
+    #[salsa::db]
+    impl biome_parser::db::ParseDb for TestDb {
+        fn parse_source(&self, _source: biome_db::Source) -> biome_parser::db::SourceParse {
+            unreachable!("The database has no sources")
         }
     }
 

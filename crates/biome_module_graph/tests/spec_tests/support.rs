@@ -1,15 +1,13 @@
 use std::collections::BTreeMap;
 
 use biome_configuration::{Configuration, HtmlConfiguration};
-use biome_css_parser::{CssModulesKind, CssParserOptions, parse_css};
-use biome_db::{ParsedSource, SnippetParse};
+use biome_css_parser::{CssParserOptions, parse_css};
+use biome_db::Source;
 use biome_fs::{BiomePath, MemoryFileSystem, OsFileSystem};
-use biome_languages::css::{CssEmbeddingKind, EmbeddingHtmlKind, EmbeddingStyleApplicability};
 use biome_languages::{CssFileSource, DocumentFileSource, HtmlFileSource, JsonFileSource};
 use biome_module_graph::{
     ModuleInfoKind, resolve_css_module, resolve_html_module, resolve_js_module,
 };
-use biome_parser::AnyParse;
 use biome_resolver::FsWithResolverProxy;
 use biome_service::Workspace;
 use biome_service::db::WorkspaceDb;
@@ -20,12 +18,7 @@ use biome_test_utils::{get_added_js_paths, get_css_added_paths};
 use camino::{Utf8Path, Utf8PathBuf};
 use std::sync::Arc;
 
-type HtmlTestFile<'a> = (
-    &'a str,
-    &'a str,
-    HtmlFileSource,
-    Vec<(AnyParse, CssFileSource)>,
-);
+type HtmlTestFile<'a> = (&'a str, &'a str, HtmlFileSource);
 
 /// A filesystem whose files a test database can read.
 pub trait TestFs: FsWithResolverProxy {
@@ -77,9 +70,11 @@ pub fn build_js_db(fs: &impl TestFs, paths: &[BiomePath], infer_types: bool) -> 
 /// This uses setters, so resolutions already computed from the filesystem are
 /// invalidated, like when the workspace opens a manifest.
 pub fn add_json_file(db: &mut WorkspaceDb, path: &Utf8Path, source: &str) {
-    let parse = biome_json_parser::parse_json(source, Default::default());
-    let source_index = db.insert_source(DocumentFileSource::Json(JsonFileSource::json()));
-    db.upsert_file(path, parse.into(), source_index, Vec::new());
+    db.upsert_file(
+        path,
+        source,
+        DocumentFileSource::Json(JsonFileSource::json()),
+    );
 }
 
 pub fn build_css_db(files: &[(&str, &str)]) -> (MemoryFileSystem, WorkspaceDb) {
@@ -94,10 +89,14 @@ pub fn build_css_db(files: &[(&str, &str)]) -> (MemoryFileSystem, WorkspaceDb) {
     let mut db = WorkspaceDb::new(fs.share());
     add_css_modules(&mut db, &fs, &paths);
 
+    let source_index = db.insert_source(DocumentFileSource::Css(CssFileSource::css()));
     for (path, source) in files {
-        let parse = parse_css(source, CssFileSource::css(), CssParserOptions::default());
-        let parsed =
-            ParsedSource::from_parse(&db, Utf8PathBuf::from(*path), parse.into(), 0, Vec::new());
+        let parsed = Source::new(
+            &db,
+            Utf8PathBuf::from(*path),
+            (*source).into(),
+            source_index,
+        );
         db.insert_file(Utf8Path::new(path), parsed);
     }
     (fs, db)
@@ -128,78 +127,22 @@ pub fn build_tailwind_css_db(files: &[(&str, &str)]) -> WorkspaceDb {
     db
 }
 
-pub fn parse_embedded_css(src: &str, file_source: CssFileSource) -> (AnyParse, CssFileSource) {
-    let css_modules = match file_source.as_embedding_kind() {
-        CssEmbeddingKind::Html(EmbeddingHtmlKind::Vue { .. }) => CssModulesKind::Vue,
-        CssEmbeddingKind::Html(
-            EmbeddingHtmlKind::Astro { .. } | EmbeddingHtmlKind::Svelte { .. },
-        ) => CssModulesKind::Classic,
-        _ => CssModulesKind::None,
-    };
-    let parsed = parse_css(
-        src,
-        file_source,
-        CssParserOptions {
-            css_modules,
-            ..Default::default()
-        },
-    );
-    (parsed.into(), file_source)
-}
-
 pub fn build_html_db(fs: &MemoryFileSystem, files: &[HtmlTestFile<'_>]) -> WorkspaceDb {
     let mut db = WorkspaceDb::new(fs.share());
-    for (path, source, file_source, embedded) in files {
+    for (path, source, file_source) in files {
         let path = BiomePath::new(*path);
-        let snippets = embedded
-            .iter()
-            .map(|(parsed, file_source)| {
-                let source_index = db.insert_source(DocumentFileSource::Css(*file_source));
-                SnippetParse::new(
-                    parsed.clone(),
-                    Default::default(),
-                    Default::default(),
-                    0.into(),
-                    source_index,
-                )
-            })
-            .collect();
-        let parsed = biome_html_parser::parse_html(source, file_source.into());
         let source_index = db.insert_source(DocumentFileSource::Html(*file_source));
-        let parsed_source = ParsedSource::from_parse(
+        let parsed_source = Source::new(
             &db,
             path.as_path().to_path_buf(),
-            parsed.into(),
+            (*source).into(),
             source_index,
-            snippets,
         );
         db.insert_file(path.as_path(), parsed_source);
         let (info, _, _) = resolve_html_module(&db, &path).unwrap();
         db.update_or_insert_module(path.as_path().to_path_buf(), ModuleInfoKind::Html(info));
     }
     db
-}
-
-pub fn html_css_source() -> CssFileSource {
-    CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Html))
-}
-
-pub fn vue_css_source(applicability: EmbeddingStyleApplicability) -> CssFileSource {
-    CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Vue {
-        applicability,
-    }))
-}
-
-pub fn astro_css_source(applicability: EmbeddingStyleApplicability) -> CssFileSource {
-    CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Astro {
-        applicability,
-    }))
-}
-
-pub fn svelte_css_source() -> CssFileSource {
-    CssFileSource::css().with_embedding_kind(CssEmbeddingKind::Html(EmbeddingHtmlKind::Svelte {
-        applicability: EmbeddingStyleApplicability::Local,
-    }))
 }
 
 pub fn build_module_db_via_workspace(files: &[(&str, &str)]) -> WorkspaceDb {

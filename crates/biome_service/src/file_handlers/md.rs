@@ -38,7 +38,6 @@ use biome_configuration::markdown::{
     MarkdownFormatterEnabled, MarkdownLinterEnabled, MarkdownParseCjkFriendlyEmphasis,
     MarkdownParseFrontmatter, MarkdownParseGfm, MarkdownParserConfiguration,
 };
-use biome_db::AnyParsedSource;
 use biome_formatter::rowan::Printed;
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, TrailingNewline};
 use biome_fs::BiomePath;
@@ -50,6 +49,7 @@ use biome_markdown_formatter::format_node;
 use biome_markdown_parser::{MarkdownParserOptions, parse_markdown_with_cache};
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdRoot};
 use biome_parser::NodeParse;
+use biome_parser::db::AnyParsedSource;
 use biome_rowan::{AstNode, NodeCache};
 use camino::Utf8Path;
 use std::borrow::Cow;

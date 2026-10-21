@@ -64,7 +64,7 @@ use biome_configuration::analyzer::{AnalyzerSelector, RuleDomainValue, RuleDomai
 use biome_css_analyze::METADATA as css_metadata;
 #[cfg(feature = "lang_css")]
 use biome_css_syntax::CssLanguage;
-use biome_db::{AnyParsedSource, ParsedSnippetRef, ParsedSource};
+use biome_db::Source;
 use biome_diagnostics::{Applicability, Diagnostic, DiagnosticExt, Error, Severity, category};
 #[cfg(feature = "html_embeds")]
 use biome_embeds::EmbeddedData;
@@ -93,6 +93,8 @@ use biome_languages::{DocumentFileSource, LanguageDb};
 use biome_module_graph::ModuleDb;
 use biome_package::{Dependencies, PackageJson};
 use biome_parser::AnyParse;
+use biome_parser::db::ParsedSourceExt;
+use biome_parser::db::{AnyParsedSource, ParsedSnippetRef};
 use biome_project_layout::ProjectLayout;
 #[cfg(feature = "lang_js")]
 use biome_rowan::TokenText;
@@ -243,7 +245,7 @@ impl ParsedSnippetOrigin {
 impl ParsedOrigin {
     /// Returns the document in the database, or `None` when the parse result
     /// isn't stored in it.
-    pub(crate) fn document(&self) -> Option<ParsedSource> {
+    pub(crate) fn document(&self) -> Option<Source> {
         match self {
             Self::Workspace(source) => Some(source.document()),
             Self::Interned { .. } => None,
@@ -252,7 +254,7 @@ impl ParsedOrigin {
 
     pub(crate) fn snippets<'a>(&'a self, db: &'a WorkspaceDb) -> SnippetsIterator<'a> {
         match self {
-            Self::Workspace(AnyParsedSource::ParsedSource(source)) => {
+            Self::Workspace(AnyParsedSource::Source(source)) => {
                 SnippetsIterator::from_source(*source, db)
             }
             Self::Workspace(AnyParsedSource::ParsedSnippet(_)) => {
@@ -349,8 +351,8 @@ impl From<AnyParsedSource> for ParsedOrigin {
     }
 }
 
-impl From<ParsedSource> for ParsedOrigin {
-    fn from(source: ParsedSource) -> Self {
+impl From<Source> for ParsedOrigin {
+    fn from(source: Source) -> Self {
         Self::Workspace(source.into())
     }
 }
@@ -375,7 +377,7 @@ pub(crate) enum SnippetsIterator<'a> {
 
 impl<'a> SnippetsIterator<'a> {
     /// Iterates over the snippets of `source`.
-    pub(crate) fn from_source(source: ParsedSource, db: &WorkspaceDb) -> Self {
+    pub(crate) fn from_source(source: Source, db: &WorkspaceDb) -> Self {
         let snippets: Vec<_> = source
             .snippets(db)
             .iter()

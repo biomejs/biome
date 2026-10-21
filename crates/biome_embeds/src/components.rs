@@ -1,8 +1,9 @@
-use biome_db::ParsedSource;
+use biome_db::Source;
 use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_html_syntax::{AnyHtmlComponentObjectName, AnyHtmlTagName, HtmlRoot};
 use biome_languages::{DocumentFileSource, LanguageDb};
 use biome_parser::AnyParse;
+use biome_parser::db::ParsedSourceExt;
 use biome_rowan::{AstNode, TextRange, TokenText};
 use smallvec::SmallVec;
 
@@ -104,7 +105,7 @@ pub(crate) fn find_component_at(
 #[salsa::tracked(returns(ref))]
 pub(crate) fn embedded_elements_from_source(
     db: &dyn LanguageDb,
-    file: ParsedSource,
+    file: Source,
 ) -> Vec<EmbeddedElement> {
     let Some(host_source) = db.source_from_index(file.document_source_index(db)) else {
         return Vec::new();
@@ -116,7 +117,7 @@ pub(crate) fn embedded_elements_from_source(
 /// the host document `file`.
 pub fn component_at(
     db: &dyn LanguageDb,
-    file: ParsedSource,
+    file: Source,
     range: TextRange,
 ) -> Option<ComponentNameSegments> {
     find_component_at(embedded_elements_from_source(db, file), range).cloned()

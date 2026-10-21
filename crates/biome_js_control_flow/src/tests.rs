@@ -1,6 +1,6 @@
 use crate::*;
 use biome_db::{
-    Db, ParsedSource, SnippetParse, SourceParse,
+    Db, Source,
     testing::{Events, assert_function_query_was_not_run, assert_function_query_was_run},
 };
 use biome_js_parser::{JsParserOptions, parse};
@@ -9,9 +9,12 @@ use biome_js_syntax::{
     JsSyntaxKind,
 };
 use biome_languages::JsFileSource;
+use biome_parser::AnyParse;
+use biome_parser::db::{ParseDb, ParsedSourceExt, SharedParse, SnippetParse, SourceParse};
 use biome_rowan::{RawSyntaxKind, SyntaxKind, TextRange, TextSize};
-use rustc_hash::FxHashSet;
+use rustc_hash::{FxHashMap, FxHashSet};
 use salsa::Setter;
+use std::sync::Mutex;
 
 static_assertions::assert_impl_all!(ControlFlowModel: Send, Sync, Eq);
 
@@ -81,9 +84,16 @@ fn model_equals_a_visit_of_every_node() {
     }
 }
 
+/// Marks the start of the snippet that a test document embeds: the text after
+/// the marker.
+const SNIPPET_MARKER: &str = "<script>";
+
 #[salsa::db]
 struct TestDb {
     storage: salsa::Storage<Self>,
+    /// The parses of the snippet texts, which are kept while the text of a
+    /// snippet doesn't change, like the parse of an unchanged snippet.
+    snippet_parses: Mutex<FxHashMap<String, SharedParse>>,
     events: Events,
 }
 
@@ -91,6 +101,7 @@ impl Default for TestDb {
     fn default() -> Self {
         let events = Events::default();
         Self {
+            snippet_parses: Mutex::default(),
             storage: salsa::Storage::new(Some(Box::new({
                 let events = events.clone();
                 move |event| events.0.lock().unwrap().push(event)
@@ -111,13 +122,40 @@ impl salsa::Database for TestDb {}
 
 #[salsa::db]
 impl Db for TestDb {
-    fn parsed_source_for_path(&self, _: &camino::Utf8Path) -> Option<ParsedSource> {
+    fn parsed_source_for_path(&self, _: &camino::Utf8Path) -> Option<Source> {
         None
     }
 }
 
+#[salsa::db]
+impl ParseDb for TestDb {
+    /// Parses the text before the [SNIPPET_MARKER] as the document, and the
+    /// text after it as a snippet of the document.
+    fn parse_source(&self, source: Source) -> SourceParse {
+        let text = source.text(self);
+        let Some((document, snippet)) = text.split_once(SNIPPET_MARKER) else {
+            return SourceParse::new(parsed(text).into(), 0);
+        };
+        let parse = self
+            .snippet_parses
+            .lock()
+            .unwrap()
+            .entry(snippet.to_string())
+            .or_insert_with(|| AnyParse::from(parsed(snippet)).into())
+            .clone();
+        let content_offset = TextSize::of(document) + TextSize::of(SNIPPET_MARKER);
+        SourceParse::new(parsed(document).into(), 0).with_snippets(vec![SnippetParse {
+            parse,
+            element_range: TextRange::default(),
+            content_range: TextRange::default(),
+            content_offset,
+            document_source_index: 0,
+        }])
+    }
+}
+
 #[salsa::tracked]
-fn graph_ranges(db: &dyn Db, source: ParsedSource) -> Vec<TextRange> {
+fn graph_ranges(db: &dyn ParseDb, source: Source) -> Vec<TextRange> {
     let mut ranges: Vec<_> = control_flow_model_from_source(db, source)
         .graphs()
         .map(|graph| graph.node.text_trimmed_range())
@@ -129,13 +167,7 @@ fn graph_ranges(db: &dyn Db, source: ParsedSource) -> Vec<TextRange> {
 #[test]
 fn source_query_reuses_equal_models_and_refreshes_locations() {
     let mut db = TestDb::default();
-    let source = ParsedSource::from_parse(
-        &db,
-        "file.ts".into(),
-        parsed("function f() { return; }").into(),
-        0,
-        Vec::new(),
-    );
+    let source = Source::new(&db, "file.ts".into(), "function f() { return; }".into(), 0);
     let original = graph_ranges(&db, source).clone();
     db.take_events();
     assert_eq!(graph_ranges(&db, source), &original);
@@ -147,19 +179,17 @@ fn source_query_reuses_equal_models_and_refreshes_locations() {
     );
 
     source
-        .set_content(&mut db)
-        .to(SourceParse::new(parsed("function f() { return; }").into(), 0).into());
+        .set_text(&mut db)
+        .to("function f() { return; }".into());
     db.take_events();
     assert_eq!(graph_ranges(&db, source), &original);
     let events = db.take_events();
     assert_function_query_was_run(&db, control_flow_model_from_source, source, &events);
     assert_function_query_was_not_run(&db, graph_ranges, source, &events);
 
-    source.set_content(&mut db).to(SourceParse::new(
-        parsed("\nfunction f() { return; }").into(),
-        0,
-    )
-    .into());
+    source
+        .set_text(&mut db)
+        .to("\nfunction f() { return; }".into());
     db.take_events();
     let shifted = graph_ranges(&db, source).clone();
     assert_eq!(
@@ -187,19 +217,11 @@ fn source_query_reuses_equal_models_and_refreshes_locations() {
 #[test]
 fn snippet_query_tracks_its_parse_and_preserves_local_coordinates() {
     let mut db = TestDb::default();
-    let document_parse = SourceParse::new(parsed("").into(), 0);
-    let with_snippet = |snippet: SnippetParse| document_parse.clone().with_snippets(vec![snippet]);
-    let snippet_parse = SnippetParse::new(
-        parsed("function f() { return 1; }").into(),
-        TextRange::default(),
-        TextRange::default(),
-        100.into(),
-        0,
-    );
-    let source = ParsedSource::new(
+    let source = Source::new(
         &db,
         "file.html".into(),
-        with_snippet(snippet_parse.clone()).into(),
+        "<script>function f() { return 1; }".into(),
+        0,
     );
     let snippet = source.snippets(&db)[0];
     let original = control_flow_model_from_snippet(&db, snippet).clone();
@@ -213,13 +235,9 @@ fn snippet_query_tracks_its_parse_and_preserves_local_coordinates() {
     );
 
     // The snippet keeps its parse, so only its offset changes.
-    let moved = SnippetParse {
-        content_offset: 200.into(),
-        ..snippet_parse
-    };
     source
-        .set_content(&mut db)
-        .to(with_snippet(moved.clone()).into());
+        .set_text(&mut db)
+        .to(" <script>function f() { return 1; }".into());
     db.take_events();
     let snippet = source.snippets(&db)[0];
     assert_eq!(*control_flow_model_from_snippet(&db, snippet), original);
@@ -230,14 +248,9 @@ fn snippet_query_tracks_its_parse_and_preserves_local_coordinates() {
         &db.take_events(),
     );
 
-    let changed = SnippetParse::new(
-        parsed("function f() { return 2; }").into(),
-        moved.element_range,
-        moved.content_range,
-        moved.content_offset,
-        0,
-    );
-    source.set_content(&mut db).to(with_snippet(changed).into());
+    source
+        .set_text(&mut db)
+        .to(" <script>function f() { return 2; }".into());
     db.take_events();
     let snippet = source.snippets(&db)[0];
     let changed = control_flow_model_from_snippet(&db, snippet);

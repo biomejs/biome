@@ -50,7 +50,6 @@ use biome_configuration::html::{
 use biome_css_parser::{CssParserOptions, parse_css};
 #[cfg(feature = "html_embeds")]
 use biome_css_syntax::CssLanguage;
-use biome_db::AnyParsedSource;
 #[cfg(feature = "html_embeds")]
 use biome_formatter::rowan::FormatElement;
 use biome_formatter::rowan::Printed;
@@ -99,6 +98,7 @@ use biome_json_syntax::JsonLanguage;
 use biome_languages::HtmlFileSource;
 #[cfg(feature = "html_embeds")]
 use biome_parser::AnyParse;
+use biome_parser::db::AnyParsedSource;
 use biome_rowan::{AstNode, BatchMutation, NodeCache, SendNode, TextRange, TextSize};
 #[cfg(feature = "html_embeds")]
 use biome_rowan::{AstNodeList, TokenAtOffset};

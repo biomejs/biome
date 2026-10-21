@@ -9,7 +9,7 @@ pub use printer::*;
 use anyhow::bail;
 use biome_analyze::{RuleCategory, RuleMetadata};
 use biome_configuration::Configuration;
-use biome_db::ParsedSource;
+use biome_db::Source;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::DiagnosticExt;
 use biome_fs::{BiomePath, MemoryFileSystem};
@@ -17,7 +17,7 @@ use biome_html_analyze::HtmlAnalyzerServices;
 use biome_html_parser::HtmlParse;
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::Parse;
-use biome_js_semantic::semantic_model_from_source;
+use biome_js_semantic::{SemanticModelOptions, semantic_model};
 use biome_json_factory::make;
 use biome_json_parser::{JsonParserOptions, parse_json};
 use biome_json_syntax::{AnyJsonValue, JsonMember, JsonObjectValue};
@@ -150,12 +150,11 @@ impl AnalyzerServicesBuilder {
         let html_added_paths = get_html_added_paths(&fs, &html_paths);
         for (path, parse, file_source) in html_added_paths {
             let source_index = db.insert_source(file_source);
-            let parsed_source = ParsedSource::from_parse(
+            let parsed_source = Source::new(
                 &db,
                 path.as_path().to_path_buf(),
-                parse.into(),
+                parse.syntax().text_with_trivia().to_string().into(),
                 source_index,
-                vec![],
             );
             db.insert_file(path.as_path(), parsed_source);
             let resolved = resolve_html_module(&db, path);
@@ -191,21 +190,13 @@ impl AnalyzerServicesBuilder {
         any_parse: AnyParse,
         file_source: JsFileSource,
     ) -> JsAnalyzerServices {
+        // The analyzer analyzes this tree, so the services build their models
+        // from it rather than from a parse of the database.
         let root: biome_js_parser::AnyJsRoot = any_parse.tree();
-        let source_index = self
-            .module_db
-            .insert_source(DocumentFileSource::Js(file_source));
-        let parsed_source = ParsedSource::from_parse(
-            &self.module_db,
-            path.clone(),
-            any_parse,
-            source_index,
-            vec![],
-        );
-        self.module_db.insert_file(&path, parsed_source);
-
-        let semantic_model =
-            Arc::new(semantic_model_from_source(&self.module_db, parsed_source).clone());
+        let semantic_model = Arc::new(semantic_model(
+            &root,
+            SemanticModelOptions::from(&file_source),
+        ));
         let (module_info, _, _) = resolve_js_module(
             &self.module_db,
             root,
@@ -222,7 +213,6 @@ impl AnalyzerServicesBuilder {
             file_source,
         ))
         .with_language_db(self.module_db.rc_language_db())
-        .with_parsed_source(parsed_source.into())
     }
 
     pub fn build_for_html_parse(
@@ -234,12 +224,11 @@ impl AnalyzerServicesBuilder {
         let source_index = self
             .module_db
             .insert_source(DocumentFileSource::Html(file_source));
-        let parsed_source = ParsedSource::from_parse(
+        let parsed_source = Source::new(
             &self.module_db,
             path.clone(),
-            parse.into(),
+            parse.syntax().text_with_trivia().to_string().into(),
             source_index,
-            vec![],
         );
         self.module_db.insert_file(&path, parsed_source);
 

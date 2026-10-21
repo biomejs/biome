@@ -1,5 +1,5 @@
 use crate::visitor::embedded_bindings_from_source;
-use biome_db::ParsedSource;
+use biome_db::Source;
 use biome_languages::LanguageDb;
 use biome_rowan::{TextRange, TokenText};
 
@@ -17,7 +17,7 @@ pub struct EmbeddedBinding {
 #[derive(Debug)]
 pub struct InternedBindingTokenText {
     #[returns(copy)]
-    source: ParsedSource,
+    source: Source,
 
     name: TokenText,
 }
@@ -26,7 +26,7 @@ pub struct InternedBindingTokenText {
 #[derive(Debug)]
 pub struct InternedBindingText {
     #[returns(copy)]
-    source: ParsedSource,
+    source: Source,
 
     name: String,
 }

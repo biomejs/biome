@@ -2,7 +2,7 @@ use biome_analyze::{
     ActionFilter, AnalysisFilter, AnalyzerAction, AnalyzerPluginSlice, ControlFlow, Never,
     Queryable, RegistryVisitor, Rule, RuleDomain, RuleFilter, RuleGroup,
 };
-use biome_db::ParsedSource;
+use biome_db::Source;
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_fs::OsFileSystem;
 use biome_js_analyze::JsAnalyzerServices;
@@ -10,6 +10,8 @@ use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{AnyJsRoot, JsLanguage};
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb, javascript::ModuleKind};
 use biome_package::PackageType;
+use biome_parser::AnyParse;
+use biome_parser::db::{ParseDb, SharedParse, SourceParse};
 use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::{AstNode, FileSourceError};
 use biome_test_utils::{
@@ -33,11 +35,24 @@ tests_macros::gen_tests! {"tests/multiple_rules/**/*.{cjs,cts,js,jsx,tsx,ts,json
 tests_macros::gen_tests! {"tests/plugin/*.grit", crate::run_plugin_test, "module"}
 
 #[salsa::db]
-#[derive(Default)]
 struct TestDb {
-    parsed: Option<ParsedSource>,
+    parsed: Option<Source>,
+    parse: SharedParse,
     source_type: Option<DocumentFileSource>,
     storage: Storage<Self>,
+}
+
+/// Returns the parse that the test made of the text, which is the tree the
+/// analyzer analyzes.
+#[salsa::db]
+impl ParseDb for TestDb {
+    fn parse_source(&self, _source: Source) -> SourceParse {
+        SourceParse {
+            parse: self.parse.clone(),
+            document_source_index: 0,
+            snippets: Vec::new(),
+        }
+    }
 }
 
 #[salsa::db]
@@ -49,7 +64,7 @@ impl LanguageDb for TestDb {
 
 #[salsa::db]
 impl biome_db::Db for TestDb {
-    fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<ParsedSource> {
+    fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<Source> {
         self.parsed
     }
 }
@@ -61,15 +76,15 @@ fn embedded_db(
     parsed: &AnyJsRoot,
     path: impl Into<Utf8PathBuf>,
     source_type: &JsFileSource,
-) -> (Rc<dyn LanguageDb>, ParsedSource) {
-    let mut db = TestDb::default();
-    let parsed = ParsedSource::from_parse(
-        &db,
-        path.into(),
-        parsed.syntax().as_send().unwrap().into(),
-        0,
-        vec![],
-    );
+) -> (Rc<dyn LanguageDb>, Source) {
+    let mut db = TestDb {
+        parsed: None,
+        parse: AnyParse::from(parsed.syntax().as_send().unwrap()).into(),
+        source_type: None,
+        storage: Storage::default(),
+    };
+    let text = parsed.syntax().text_with_trivia().to_string();
+    let parsed = Source::new(&db, path.into(), text.into(), 0);
     db.parsed = Some(parsed);
     db.source_type = Some(DocumentFileSource::from(*source_type));
     (Rc::new(db), parsed)

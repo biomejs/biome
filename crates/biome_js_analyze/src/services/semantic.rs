@@ -3,10 +3,10 @@ use biome_analyze::{
     RuleMetadata, ServiceBag, ServicesDiagnostic, SyntaxVisitor, Visitor, VisitorContext,
     VisitorStartContext,
 };
-use biome_db::AnyParsedSource;
 use biome_js_semantic::{SemanticModel, SemanticModelOptions, js_semantic_model, semantic_model};
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange, WalkEvent};
 use biome_languages::{JsFileSource, LanguageDb};
+use biome_parser::db::AnyParsedSource;
 use biome_rowan::{AstNode, SyntaxKindSet};
 use std::rc::Rc;
 

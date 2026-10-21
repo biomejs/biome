@@ -6,8 +6,8 @@ use biome_analyze::{
 use biome_css_semantic::model::SemanticModel;
 use biome_css_semantic::{db::css_semantic_model, semantic_model};
 use biome_css_syntax::{AnyCssRoot, CssLanguage, CssSyntaxNode, TextRange};
-use biome_db::AnyParsedSource;
 use biome_languages::LanguageDb;
+use biome_parser::db::AnyParsedSource;
 use biome_rowan::{AstNode, SyntaxKindSet, WalkEvent};
 use std::rc::Rc;
 

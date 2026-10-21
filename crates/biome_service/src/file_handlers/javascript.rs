@@ -48,7 +48,6 @@ use biome_configuration::javascript::{
 use biome_css_parser::parse_css_with_offset_and_cache;
 #[cfg(feature = "js_embeds")]
 use biome_css_syntax::CssLanguage;
-use biome_db::AnyParsedSource;
 #[cfg(feature = "js_embeds")]
 use biome_formatter::rowan::FormatElement;
 use biome_formatter::rowan::Printed;
@@ -103,6 +102,7 @@ use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 use biome_module_graph::ModuleDb;
 #[cfg(feature = "js_embeds")]
 use biome_parser::AnyParse;
+use biome_parser::db::AnyParsedSource;
 use biome_project_layout::ProjectLayout;
 #[cfg(feature = "js_embeds")]
 use biome_rowan::AstNodeList;

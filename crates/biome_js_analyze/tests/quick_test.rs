@@ -3,7 +3,7 @@ use biome_analyze::{
     ActionFilter, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
     RuleFilter,
 };
-use biome_db::ParsedSource;
+use biome_db::Source;
 use biome_deserialize::TextRange;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, Severity, print_diagnostic_to_string};
 use biome_fs::TemporaryFs;
@@ -12,6 +12,8 @@ use biome_js_parser::{JsParserOptions, Parse, parse};
 use biome_js_syntax::AnyJsRoot;
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 use biome_package::{Dependencies, PackageJson};
+use biome_parser::AnyParse;
+use biome_parser::db::{ParseDb, SharedParse, SourceParse};
 use biome_project_layout::ProjectLayout;
 use biome_test_utils::module_graph_for_test_file;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -21,10 +23,23 @@ use std::slice;
 use std::sync::Arc;
 
 #[salsa::db]
-#[derive(Default)]
 struct TestDb {
-    parsed: Option<ParsedSource>,
+    parsed: Option<Source>,
+    parse: SharedParse,
     storage: Storage<Self>,
+}
+
+/// Returns the parse that the test made of the text, which is the tree the
+/// analyzer analyzes.
+#[salsa::db]
+impl ParseDb for TestDb {
+    fn parse_source(&self, _source: Source) -> SourceParse {
+        SourceParse {
+            parse: self.parse.clone(),
+            document_source_index: 0,
+            snippets: Vec::new(),
+        }
+    }
 }
 
 #[salsa::db]
@@ -36,7 +51,7 @@ impl LanguageDb for TestDb {
 
 #[salsa::db]
 impl biome_db::Db for TestDb {
-    fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<ParsedSource> {
+    fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<Source> {
         self.parsed
     }
 }
@@ -45,15 +60,13 @@ impl biome_db::Db for TestDb {
 impl salsa::Database for TestDb {}
 
 fn embedded_db(parsed: &Parse<AnyJsRoot>) -> Rc<dyn LanguageDb> {
-    let mut db = TestDb::default();
-    let parsed = ParsedSource::from_parse(
-        &db,
-        Utf8PathBuf::new(),
-        parsed.syntax().as_send().unwrap().into(),
-        0,
-        vec![],
-    );
-    db.parsed = Some(parsed);
+    let mut db = TestDb {
+        parsed: None,
+        parse: AnyParse::from(parsed.syntax().as_send().unwrap()).into(),
+        storage: Storage::default(),
+    };
+    let text = parsed.syntax().text_with_trivia().to_string();
+    db.parsed = Some(Source::new(&db, Utf8PathBuf::new(), text.into(), 0));
     Rc::new(db)
 }
 

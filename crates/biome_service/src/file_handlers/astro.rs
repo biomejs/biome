@@ -8,12 +8,12 @@ use crate::file_handlers::{
 };
 use crate::settings::SettingsWithEditor;
 use crate::workspace::PullActionsResult;
-use biome_db::AnyParsedSource;
 use biome_formatter::rowan::Printed;
 use biome_fs::BiomePath;
 use biome_js_parser::{JsParserOptions, parse_js_with_cache};
 use biome_js_syntax::{TextRange, TextSize};
 use biome_languages::{DocumentFileSource, JsFileSource};
+use biome_parser::db::AnyParsedSource;
 use biome_rowan::NodeCache;
 use regex::{Matches, Regex, RegexBuilder};
 use std::sync::LazyLock;

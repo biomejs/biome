@@ -169,17 +169,16 @@
 
 use super::{
     FileView, ParsedSourceUpdateMode, ProjectUpdateMode, SharedWorkspaceDb, WorkspaceDb,
-    WorkspaceDbData, WorkspaceTextParser,
+    WorkspaceDbData,
 };
 use crate::WorkspaceError;
-use crate::file_handlers::Parse;
 #[cfg(feature = "module_graph")]
 use crate::module_graph::{ModuleInfo, ModuleInfoKind};
 use crate::projects::ProjectKey;
 use crate::settings::Settings;
-use crate::settings::SettingsQuery;
 use crate::workspace::ClientId;
-use biome_db::{ParsedSource, SourceContent, SourceText};
+use biome_configuration::Configuration;
+use biome_db::Source;
 use biome_languages::DocumentFileSource;
 use biome_resolver::FsWithResolverProxy;
 #[cfg(feature = "module_graph")]
@@ -190,7 +189,6 @@ use std::cell::Cell;
 use std::marker::PhantomData;
 use std::ops::Deref;
 use std::panic::resume_unwind;
-#[cfg(feature = "module_graph")]
 use std::sync::atomic::AtomicBool;
 use std::sync::{
     Arc,
@@ -201,6 +199,8 @@ use tracing::error;
 /// Represents the state of the database in the workspace.
 pub struct DbState {
     storage: DbStorage,
+    /// Records that a scanner epoch's shared view replaced a project.
+    scanner_projects_replaced: Option<Arc<AtomicBool>>,
     /// Records module-map changes made by a scanner epoch's shared view.
     #[cfg(feature = "module_graph")]
     scanner_module_graph_dirty: Option<Arc<AtomicBool>>,
@@ -246,9 +246,9 @@ impl ScannerDbEpoch<'_> {
 enum ScannerDbEpochFinalizer<'a> {
     Shared,
     Owned {
-        #[cfg(feature = "module_graph")]
         owner: &'a OwnedDb,
         setter_guard: MutexGuard<'a, ()>,
+        projects_replaced: Arc<AtomicBool>,
         #[cfg(feature = "module_graph")]
         module_graph_dirty: Arc<AtomicBool>,
         #[cfg(feature = "module_graph")]
@@ -261,30 +261,38 @@ impl Drop for ScannerDbEpochFinalizer<'_> {
         match self {
             Self::Shared => {}
             Self::Owned {
-                #[cfg(feature = "module_graph")]
                 owner,
                 setter_guard,
+                projects_replaced,
                 #[cfg(feature = "module_graph")]
                 module_graph_dirty,
                 #[cfg(feature = "module_graph")]
                 resolver_changes,
             } => {
+                let projects_replaced = projects_replaced.load(Ordering::Acquire);
                 #[cfg(feature = "module_graph")]
-                {
-                    let resolver_changes = std::mem::take(&mut *resolver_changes.lock());
-                    let module_graph_dirty = module_graph_dirty.load(Ordering::Acquire);
-                    if module_graph_dirty || !resolver_changes.is_empty() {
-                        owner.with_setter_gate_held(setter_guard, |db| {
+                let resolver_changes = std::mem::take(&mut *resolver_changes.lock());
+                #[cfg(feature = "module_graph")]
+                let module_graph_dirty = module_graph_dirty.load(Ordering::Acquire);
+                #[cfg(feature = "module_graph")]
+                let needs_setter =
+                    projects_replaced || module_graph_dirty || !resolver_changes.is_empty();
+                #[cfg(not(feature = "module_graph"))]
+                let needs_setter = projects_replaced;
+                if needs_setter {
+                    owner.with_setter_gate_held(setter_guard, |db| {
+                        if projects_replaced {
+                            db.invalidate_projects();
+                        }
+                        #[cfg(feature = "module_graph")]
+                        {
                             db.sync_resolver_paths(resolver_changes);
                             if module_graph_dirty {
                                 db.invalidate_module_graph();
                             }
-                        });
-                    }
+                        }
+                    });
                 }
-
-                #[cfg(not(feature = "module_graph"))]
-                let _ = setter_guard;
             }
         }
     }
@@ -475,6 +483,7 @@ impl DbState {
     pub fn new(fs: Arc<dyn FsWithResolverProxy>) -> Self {
         Self {
             storage: DbStorage::Shared(SharedWorkspaceDb::new(fs)),
+            scanner_projects_replaced: None,
             #[cfg(feature = "module_graph")]
             scanner_module_graph_dirty: None,
             #[cfg(feature = "module_graph")]
@@ -488,6 +497,7 @@ impl DbState {
     pub fn lsp(fs: Arc<dyn FsWithResolverProxy>) -> Self {
         Self {
             storage: DbStorage::Owned(OwnedDb::new(WorkspaceDb::new(fs))),
+            scanner_projects_replaced: None,
             #[cfg(feature = "module_graph")]
             scanner_module_graph_dirty: None,
             #[cfg(feature = "module_graph")]
@@ -502,6 +512,7 @@ impl DbState {
     /// available while preventing setter-based updates from overlapping the
     /// scan. Shared storage returns an equivalent shared view without locking.
     pub(crate) fn scanner_epoch(&self) -> ScannerDbEpoch<'_> {
+        let projects_replaced = Arc::new(AtomicBool::new(false));
         #[cfg(feature = "module_graph")]
         let module_graph_dirty = Arc::new(AtomicBool::new(false));
         #[cfg(feature = "module_graph")]
@@ -511,6 +522,7 @@ impl DbState {
             DbStorage::Shared(shared_db) => ScannerDbEpoch {
                 view: Self {
                     storage: DbStorage::Shared(shared_db.clone()),
+                    scanner_projects_replaced: None,
                     #[cfg(feature = "module_graph")]
                     scanner_module_graph_dirty: None,
                     #[cfg(feature = "module_graph")]
@@ -528,15 +540,16 @@ impl DbState {
                 ScannerDbEpoch {
                     view: Self {
                         storage: DbStorage::Shared(shared_db),
+                        scanner_projects_replaced: Some(projects_replaced.clone()),
                         #[cfg(feature = "module_graph")]
                         scanner_module_graph_dirty: Some(module_graph_dirty.clone()),
                         #[cfg(feature = "module_graph")]
                         scanner_resolver_changes: Some(resolver_changes.clone()),
                     },
                     _finalizer: ScannerDbEpochFinalizer::Owned {
-                        #[cfg(feature = "module_graph")]
                         owner,
                         setter_guard,
+                        projects_replaced,
                         #[cfg(feature = "module_graph")]
                         module_graph_dirty,
                         #[cfg(feature = "module_graph")]
@@ -566,12 +579,15 @@ impl DbState {
         settings: Settings,
     ) {
         match &self.storage {
-            DbStorage::Shared(shared_db) => shared_db.fork().insert_nested_setting_with_mode(
-                project_key,
-                path,
-                settings,
-                ProjectUpdateMode::Replace,
-            ),
+            DbStorage::Shared(shared_db) => {
+                shared_db.fork().insert_nested_setting_with_mode(
+                    project_key,
+                    path,
+                    settings,
+                    ProjectUpdateMode::Replace,
+                );
+                self.record_projects_replaced();
+            }
             DbStorage::Owned(db) => db.with_setter(|db| {
                 db.insert_nested_setting_with_mode(
                     project_key,
@@ -585,11 +601,14 @@ impl DbState {
 
     pub fn insert_root_settings(&self, project_key: ProjectKey, settings: Settings) {
         match &self.storage {
-            DbStorage::Shared(db) => db.fork().insert_root_settings_with_mode(
-                project_key,
-                settings,
-                ProjectUpdateMode::Replace,
-            ),
+            DbStorage::Shared(db) => {
+                db.fork().insert_root_settings_with_mode(
+                    project_key,
+                    settings,
+                    ProjectUpdateMode::Replace,
+                );
+                self.record_projects_replaced();
+            }
             DbStorage::Owned(db) => db.with_setter(|db| {
                 db.insert_root_settings_with_mode(project_key, settings, ProjectUpdateMode::Setters)
             }),
@@ -599,16 +618,33 @@ impl DbState {
     /// Inserts project
     pub fn insert_project(&self, path: Utf8PathBuf) -> ProjectKey {
         match &self.storage {
-            DbStorage::Shared(shared_db) => shared_db.fork().insert_project(path),
-            DbStorage::Owned(db) => db.with_setter(|db| db.insert_project(path)),
+            DbStorage::Shared(shared_db) => {
+                let project_key = shared_db.fork().insert_project(path);
+                self.record_projects_replaced();
+                project_key
+            }
+            DbStorage::Owned(db) => db.with_setter(|db| {
+                let projects = db.projects.pin().len();
+                let project_key = db.insert_project(path);
+                if db.projects.pin().len() != projects {
+                    db.invalidate_projects();
+                }
+                project_key
+            }),
         }
     }
 
-    /// Inserts project
+    /// Removes the project with the given key.
     pub fn remove_project(&self, project_key: ProjectKey) {
         match &self.storage {
-            DbStorage::Shared(shared_db) => shared_db.data().remove_project(project_key),
-            DbStorage::Owned(db) => db.data.remove_project(project_key),
+            DbStorage::Shared(shared_db) => {
+                shared_db.data().remove_project(project_key);
+                self.record_projects_replaced();
+            }
+            DbStorage::Owned(db) => db.with_setter(|db| {
+                db.remove_project(project_key);
+                db.invalidate_projects();
+            }),
         }
     }
 
@@ -619,11 +655,13 @@ impl DbState {
     ) -> Result<(), WorkspaceError> {
         match &self.storage {
             DbStorage::Shared(shared_db) => {
-                shared_db.fork().store_nested_ignore_patterns_with_mode(
+                let result = shared_db.fork().store_nested_ignore_patterns_with_mode(
                     project_key,
                     payload,
                     ProjectUpdateMode::Replace,
-                )
+                );
+                self.record_projects_replaced();
+                result
             }
             DbStorage::Owned(db) => db.with_setter(|db| {
                 db.store_nested_ignore_patterns_with_mode(
@@ -650,35 +688,52 @@ impl DbState {
         }
     }
 
-    /// Publishes `content` as `view` of `path`, and returns the current view
-    /// of `path`. See [FileViews](super::FileViews).
+    /// Publishes `text`, parsed as `file_source` with the
+    /// `inline_configuration` of the client, as `view` of `path`, and returns
+    /// the current view of `path`. See [FileViews](super::FileViews).
     ///
-    /// The content isn't parsed here: the parse runs the first time a query
-    /// reads it.
+    /// The text isn't parsed here: the parse runs the first time a query reads
+    /// it.
     pub(crate) fn update_file_view(
         &self,
         path: &Utf8Path,
         view: FileView,
-        content: SourceContent,
-    ) -> ParsedSource {
+        text: Arc<str>,
+        file_source: DocumentFileSource,
+        inline_configuration: Option<Configuration>,
+    ) -> Source {
         match &self.storage {
             DbStorage::Shared(shared_db) => {
                 let mut db = shared_db.fork();
-                let file =
-                    db.update_or_insert_view(path, view, content, ParsedSourceUpdateMode::Replace);
+                let file = db.update_or_insert_view(
+                    path,
+                    view,
+                    text,
+                    file_source,
+                    inline_configuration,
+                    ParsedSourceUpdateMode::Replace,
+                );
                 // The replacement publishes a new parsed source for `path`.
                 #[cfg(feature = "module_graph")]
                 self.record_resolver_changes(shared_db.data().resolver_source_change(path));
                 file
             }
             DbStorage::Owned(db) => db.with_setter(|db| {
-                db.update_or_insert_view(path, view, content, ParsedSourceUpdateMode::Setters)
+                db.update_or_insert_view(
+                    path,
+                    view,
+                    text,
+                    file_source,
+                    inline_configuration,
+                    ParsedSourceUpdateMode::Setters,
+                )
             }),
         }
     }
 
     /// Removes `view` of `path`, and removes the file when it has no view
     /// left.
+    #[cfg(feature = "module_graph")]
     pub(crate) fn remove_file_view(&self, path: &Utf8Path, view: FileView) {
         match &self.storage {
             DbStorage::Shared(shared_db) => {
@@ -723,26 +778,6 @@ impl DbState {
                     ParsedSourceUpdateMode::Setters,
                 );
             }),
-        }
-    }
-
-    /// Returns `text` with the parser that parses it as `file_source`, with
-    /// `parse` and the settings that `query` selects.
-    pub(crate) fn source_text(
-        &self,
-        text: Arc<str>,
-        parse: Parse,
-        file_source: DocumentFileSource,
-        query: SettingsQuery,
-    ) -> SourceText {
-        SourceText {
-            text,
-            parser: Arc::new(WorkspaceTextParser::new(
-                parse,
-                file_source,
-                query,
-                self.shared_data(),
-            )),
         }
     }
 
@@ -901,6 +936,18 @@ impl DbState {
         }
     }
 
+    /// Records that a replacement update changed the map of projects.
+    ///
+    /// A scanner epoch advances the projects generation when it ends.
+    /// Outside an epoch, Shared storage can't run Salsa setters, so the
+    /// queries that looked up a project keep their results until their inputs
+    /// change.
+    fn record_projects_replaced(&self) {
+        if let Some(replaced) = &self.scanner_projects_replaced {
+            replaced.store(true, Ordering::Release);
+        }
+    }
+
     /// Records that a replacement update changed the external module map.
     #[cfg(feature = "module_graph")]
     fn mark_module_graph_dirty(&self) {
@@ -951,10 +998,7 @@ mod tests {
 
     use crate::projects::ProjectDb;
     use biome_configuration::vcs::VcsClientKind;
-    use biome_db::SourceParse;
-    use biome_js_parser::{JsParserOptions, parse};
     use biome_languages::JsFileSource;
-    use biome_parser::AnyParse;
     use camino::Utf8PathBuf;
     use salsa::plumbing::AsId;
     use std::panic::AssertUnwindSafe;
@@ -968,13 +1012,8 @@ mod tests {
         Arc::new(biome_fs::MemoryFileSystem::default())
     }
 
-    fn parse_js(source: &str) -> AnyParse {
-        parse(
-            source,
-            JsFileSource::js_module(),
-            JsParserOptions::default(),
-        )
-        .into()
+    fn js() -> DocumentFileSource {
+        DocumentFileSource::Js(JsFileSource::js_module())
     }
 
     fn git_settings() -> Settings {
@@ -1006,11 +1045,7 @@ mod tests {
         let path = Utf8PathBuf::from("test.js");
         // Insert the file first: only updates to files the database already
         // knows about are applied through salsa setters.
-        state.update_file_view(
-            &path,
-            FileView::Disk,
-            SourceParse::new(parse_js("let a = 1;"), 0).into(),
-        );
+        state.update_file_view(&path, FileView::Disk, "let a = 1;".into(), js(), None);
 
         let clone_taken = Arc::new(Barrier::new(2));
         let (done_tx, done_rx) = mpsc::channel();
@@ -1038,11 +1073,7 @@ mod tests {
             let path = path.clone();
             thread::spawn(move || {
                 clone_taken.wait();
-                state.update_file_view(
-                    &path,
-                    FileView::Disk,
-                    SourceParse::new(parse_js("let b = 2;"), 0).into(),
-                );
+                state.update_file_view(&path, FileView::Disk, "let b = 2;".into(), js(), None);
                 done_tx.send(()).unwrap();
             })
         };
@@ -1063,11 +1094,7 @@ mod tests {
     fn owned_storage_fork_unwinds_while_setter_is_pending() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_file_view(
-            &path,
-            FileView::Disk,
-            SourceParse::new(parse_js("let a = 1;"), 0).into(),
-        );
+        state.update_file_view(&path, FileView::Disk, "let a = 1;".into(), js(), None);
 
         // Hold a clone so the setter below has to wait.
         let db = state.fork();
@@ -1076,11 +1103,7 @@ mod tests {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state.update_file_view(
-                    &path,
-                    FileView::Disk,
-                    SourceParse::new(parse_js("let b = 2;"), 0).into(),
-                );
+                state.update_file_view(&path, FileView::Disk, "let b = 2;".into(), js(), None);
             })
         };
 
@@ -1104,22 +1127,14 @@ mod tests {
     fn owned_storage_queues_only_one_pending_setter() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_file_view(
-            &path,
-            FileView::Disk,
-            SourceParse::new(parse_js("let a = 1;"), 0).into(),
-        );
+        state.update_file_view(&path, FileView::Disk, "let a = 1;".into(), js(), None);
 
         let db = state.fork();
         let first_setter = {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state.update_file_view(
-                    &path,
-                    FileView::Disk,
-                    SourceParse::new(parse_js("let b = 2;"), 0).into(),
-                );
+                state.update_file_view(&path, FileView::Disk, "let b = 2;".into(), js(), None);
             })
         };
         wait_for_pending_setter(&state);
@@ -1130,9 +1145,8 @@ mod tests {
             let path = path.clone();
             let second_start = second_start.clone();
             thread::spawn(move || {
-                let parsed = parse_js("let c = 3;");
                 second_start.wait();
-                state.update_file_view(&path, FileView::Disk, SourceParse::new(parsed, 0).into());
+                state.update_file_view(&path, FileView::Disk, "let c = 3;".into(), js(), None);
             })
         };
         second_start.wait();
@@ -1166,22 +1180,14 @@ mod tests {
     fn untracked_module_membership_does_not_wait_for_pending_setters() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_file_view(
-            &path,
-            FileView::Disk,
-            SourceParse::new(parse_js("let a = 1;"), 0).into(),
-        );
+        state.update_file_view(&path, FileView::Disk, "let a = 1;".into(), js(), None);
 
         let db = state.fork();
         let setter = {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state.update_file_view(
-                    &path,
-                    FileView::Disk,
-                    SourceParse::new(parse_js("let b = 2;"), 0).into(),
-                );
+                state.update_file_view(&path, FileView::Disk, "let b = 2;".into(), js(), None);
             })
         };
 
@@ -1199,11 +1205,7 @@ mod tests {
         let path = Utf8PathBuf::from("test.js");
         let _db = state.fork();
 
-        state.update_file_view(
-            &path,
-            FileView::Disk,
-            SourceParse::new(parse_js("let a = 1;"), 0).into(),
-        );
+        state.update_file_view(&path, FileView::Disk, "let a = 1;".into(), js(), None);
     }
 
     #[test]
@@ -1212,11 +1214,7 @@ mod tests {
         let path = Utf8PathBuf::from("test.js");
         let db = state.fork();
 
-        state.update_file_view(
-            &path,
-            FileView::Disk,
-            SourceParse::new(parse_js("let a = 1;"), 0).into(),
-        );
+        state.update_file_view(&path, FileView::Disk, "let a = 1;".into(), js(), None);
 
         assert_eq!(state.pending_setters(), 0);
         assert!(db.get_parsed_source(&path).is_some());
@@ -1312,11 +1310,7 @@ mod tests {
     fn owned_storage_setter_from_other_thread_waits_for_read_guard() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_file_view(
-            &path,
-            FileView::Disk,
-            SourceParse::new(parse_js("let a = 1;"), 0).into(),
-        );
+        state.update_file_view(&path, FileView::Disk, "let a = 1;".into(), js(), None);
 
         let db = state.fork();
         let (done_tx, done_rx) = mpsc::channel();
@@ -1325,11 +1319,7 @@ mod tests {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state.update_file_view(
-                    &path,
-                    FileView::Disk,
-                    SourceParse::new(parse_js("let b = 2;"), 0).into(),
-                );
+                state.update_file_view(&path, FileView::Disk, "let b = 2;".into(), js(), None);
                 done_tx.send(()).unwrap();
             })
         };
@@ -1363,8 +1353,8 @@ mod tests {
             Arc::new(MemoryFileSystem::from_files(fs.files.0.clone()))
         }
 
-        fn parse_json(source: &str) -> AnyParse {
-            biome_json_parser::parse_json(source, Default::default()).into()
+        fn json() -> DocumentFileSource {
+            DocumentFileSource::Json(biome_languages::JsonFileSource::json())
         }
 
         /// Looks up the resolver path info of `path`, like a resolver query does.
@@ -1397,15 +1387,13 @@ mod tests {
             let source = lookup(&state, SOURCE);
             let setters = state.setter_gate_attempts();
 
+            state.update_file_view(Utf8Path::new(SOURCE), FileView::Disk, "".into(), js(), None);
             state.update_file_view(
                 Utf8Path::new(SOURCE),
                 FileView::Disk,
-                SourceParse::new(parse_js(""), 0).into(),
-            );
-            state.update_file_view(
-                Utf8Path::new(SOURCE),
-                FileView::Disk,
-                SourceParse::new(parse_js("a"), 0).into(),
+                "a".into(),
+                js(),
+                None,
             );
             assert_eq!(
                 revision(&state, source),
@@ -1416,13 +1404,17 @@ mod tests {
             state.update_file_view(
                 Utf8Path::new(MANIFEST),
                 FileView::Disk,
-                SourceParse::new(parse_json("{}"), 0).into(),
+                "{}".into(),
+                json(),
+                None,
             );
             assert_eq!(revision(&state, manifest), 1);
             state.update_file_view(
                 Utf8Path::new(MANIFEST),
                 FileView::Disk,
-                SourceParse::new(parse_json("[]"), 0).into(),
+                "[]".into(),
+                json(),
+                None,
             );
             assert_eq!(
                 revision(&state, manifest),
@@ -1486,7 +1478,9 @@ mod tests {
                 epoch.view().update_file_view(
                     Utf8Path::new(MANIFEST),
                     FileView::Disk,
-                    SourceParse::new(parse_json("{}"), 0).into(),
+                    "{}".into(),
+                    json(),
+                    None,
                 );
                 fs.insert(SOURCE.into(), "");
                 epoch
@@ -1514,7 +1508,9 @@ mod tests {
             state.update_file_view(
                 Utf8Path::new(MANIFEST),
                 FileView::Disk,
-                SourceParse::new(parse_json("{}"), 0).into(),
+                "{}".into(),
+                json(),
+                None,
             );
 
             assert_eq!(info(&state, source), Err(ResolveError::NotFound));

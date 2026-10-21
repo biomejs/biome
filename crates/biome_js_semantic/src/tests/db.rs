@@ -5,13 +5,14 @@
 
 use crate::db::semantic_model_from_source;
 use crate::{SemanticModel, semantic_model};
+use biome_db::Source;
 use biome_db::testing::{Events, assert_function_query_was_not_run, assert_function_query_was_run};
-use biome_db::{ParsedSource, SourceParse};
 use biome_js_parser::parse;
 use biome_js_syntax::AnyJsRoot;
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
+use biome_parser::db::{ParseDb, SourceParse};
 use camino::{Utf8Path, Utf8PathBuf};
-use salsa::Storage;
+use salsa::{Setter, Storage};
 
 fn build_model(source: &str) -> SemanticModel {
     let parsed = parse(source, JsFileSource::js_module(), Default::default());
@@ -132,8 +133,16 @@ impl TestDb {
 impl salsa::Database for TestDb {}
 
 #[salsa::db]
+impl ParseDb for TestDb {
+    fn parse_source(&self, source: Source) -> SourceParse {
+        let parsed = parse(source.text(self), JsFileSource::tsx(), Default::default());
+        SourceParse::new(parsed.into(), 0)
+    }
+}
+
+#[salsa::db]
 impl biome_db::Db for TestDb {
-    fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<ParsedSource> {
+    fn parsed_source_for_path(&self, _path: &Utf8Path) -> Option<Source> {
         unreachable!("Not currently touched by the test")
     }
 }
@@ -148,8 +157,7 @@ impl LanguageDb for TestDb {
 #[test]
 fn semantic_model_is_memoized() {
     let mut db = TestDb::new();
-    let parsed = parse("let x = 1;", JsFileSource::tsx(), Default::default()).into();
-    let file = ParsedSource::from_parse(&db, Utf8PathBuf::from("test.tsx"), parsed, 0, vec![]);
+    let file = Source::new(&db, Utf8PathBuf::from("test.tsx"), "let x = 1;".into(), 0);
 
     // First query — builds the model
     let _model = semantic_model_from_source(&db, file);
@@ -164,23 +172,18 @@ fn semantic_model_is_memoized() {
 
 // Test-only downstream tracked function that reads from js_semantic_model
 #[salsa::tracked(returns(copy))]
-fn binding_count(db: &dyn LanguageDb, file: ParsedSource) -> usize {
+fn binding_count(db: &dyn LanguageDb, file: Source) -> usize {
     let model = semantic_model_from_source(db, file);
     model.data.bindings.len()
 }
 #[test]
 fn rename_does_recompute_downstream() {
     let mut db = TestDb::new();
-    let parsed = parse("let x = 1;", JsFileSource::tsx(), Default::default()).into();
-    let file = ParsedSource::from_parse(&db, Utf8PathBuf::from("test.tsx"), parsed, 0, vec![]);
+    let file = Source::new(&db, Utf8PathBuf::from("test.tsx"), "let x = 1;".into(), 0);
     let _ = binding_count(&db, file);
 
     // Rename variable — semantic structure changes
-    let new_parsed = parse("let y = 1;", JsFileSource::tsx(), Default::default()).into();
-    salsa::Setter::to(
-        file.set_content(&mut db),
-        SourceParse::new(new_parsed, 0).into(),
-    );
+    file.set_text(&mut db).to("let y = 1;".into());
 
     db.clear_salsa_events();
     let _ = binding_count(&db, file);
@@ -194,20 +197,15 @@ fn rename_does_recompute_downstream() {
 #[test]
 fn new_export_does_recompute_downstream() {
     let mut db = TestDb::new();
-    let parsed = parse("function f() {}", JsFileSource::tsx(), Default::default()).into();
-    let file = ParsedSource::from_parse(&db, Utf8PathBuf::from("test.tsx"), parsed, 0, vec![]);
+    let file = Source::new(
+        &db,
+        Utf8PathBuf::from("test.tsx"),
+        "function f() {}".into(),
+        0,
+    );
     let _ = binding_count(&db, file);
 
-    let new_parsed = parse(
-        "export function f() {}",
-        JsFileSource::tsx(),
-        Default::default(),
-    )
-    .into();
-    salsa::Setter::to(
-        file.set_content(&mut db),
-        SourceParse::new(new_parsed, 0).into(),
-    );
+    file.set_text(&mut db).to("export function f() {}".into());
 
     db.clear_salsa_events();
     let _ = binding_count(&db, file);
@@ -220,28 +218,19 @@ fn new_export_does_recompute_downstream() {
 #[test]
 fn type_change_does_not_recompute_binding_count() {
     let mut db = TestDb::new();
-    let parsed = parse(
-        "export let x: string = 'hello';",
-        JsFileSource::tsx(),
-        Default::default(),
-    )
-    .into();
-    let file = ParsedSource::from_parse(&db, Utf8PathBuf::from("test.tsx"), parsed, 0, vec![]);
+    let file = Source::new(
+        &db,
+        Utf8PathBuf::from("test.tsx"),
+        "export let x: string = 'hello';".into(),
+        0,
+    );
 
     let count = binding_count(&db, file);
     assert_eq!(count, 1);
 
     // Change type annotation — CST changes, but semantic structure doesn't
-    let new_parsed = parse(
-        "export let x: number = 'hello';",
-        JsFileSource::tsx(),
-        Default::default(),
-    )
-    .into();
-    salsa::Setter::to(
-        file.set_content(&mut db),
-        SourceParse::new(new_parsed, 0).into(),
-    );
+    file.set_text(&mut db)
+        .to("export let x: number = 'hello';".into());
 
     db.clear_salsa_events();
     let count = binding_count(&db, file);

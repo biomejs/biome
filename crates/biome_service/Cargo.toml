@@ -75,7 +75,7 @@ biome_markdown_parser    = { workspace = true, optional = true }
 biome_markdown_syntax    = { workspace = true, optional = true }
 biome_module_graph       = { workspace = true, features = ["serde"], optional = true }
 biome_package            = { workspace = true }
-biome_parser             = { workspace = true }
+biome_parser             = { workspace = true, features = ["db"] }
 biome_plugin_loader      = { workspace = true, optional = true }
 biome_project_layout     = { workspace = true }
 biome_resolver           = { workspace = true }

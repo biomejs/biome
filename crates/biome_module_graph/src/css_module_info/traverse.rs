@@ -7,6 +7,7 @@ use biome_css_semantic::db::{
     css_property_definitions_from_snippet, css_property_definitions_from_source,
 };
 use biome_fs::normalize_path;
+use biome_parser::db::ParsedSourceExt;
 use biome_rowan::{TextRange, TextSize, TokenText};
 use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexMap;
