@@ -225,10 +225,10 @@ struct AreaBounds {
 /// cells, and that the cells of each named area form one filled rectangle.
 fn check_grid_rows(rows: &[GridRow]) -> Option<UseConsistentGridAreasState> {
     let first_row = rows.first()?;
-    let first_count = GridCells::new(first_row.content.text()).count();
+    let first_count = GridCellsIterator::new(first_row.content.text()).count();
 
     for row in rows {
-        let count = GridCells::new(row.content.text()).count();
+        let count = GridCellsIterator::new(row.content.text()).count();
         if count == 0 {
             return Some(UseConsistentGridAreasState {
                 span: row.range,
@@ -253,7 +253,7 @@ fn check_grid_rows(rows: &[GridRow]) -> Option<UseConsistentGridAreasState> {
     let mut areas = FxHashMap::<&str, AreaBounds>::default();
     for (row_index, row) in rows.iter().enumerate() {
         let text = row.content.text();
-        let mut cells = GridCells::new(text).enumerate().peekable();
+        let mut cells = GridCellsIterator::new(text).enumerate().peekable();
         while let Some((start, range)) = cells.next() {
             let name = &text[range];
             let mut end = start + 1;
@@ -296,12 +296,12 @@ fn check_grid_rows(rows: &[GridRow]) -> Option<UseConsistentGridAreasState> {
 /// Iterator over the ranges of the cells in a grid row, relative to the row. Cells are separated
 /// by whitespace, and a sequence of `.` is a cell of its own even when it touches a name: `a.b`
 /// contains three cells.
-struct GridCells<'a> {
+struct GridCellsIterator<'a> {
     bytes: &'a [u8],
     index: usize,
 }
 
-impl<'a> GridCells<'a> {
+impl<'a> GridCellsIterator<'a> {
     fn new(row: &'a str) -> Self {
         Self {
             bytes: row.as_bytes(),
@@ -310,7 +310,7 @@ impl<'a> GridCells<'a> {
     }
 }
 
-impl Iterator for GridCells<'_> {
+impl Iterator for GridCellsIterator<'_> {
     type Item = TextRange;
 
     fn next(&mut self) -> Option<Self::Item> {
