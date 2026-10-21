@@ -225,10 +225,10 @@ struct AreaBounds {
 /// cells, and that the cells of each named area form one filled rectangle.
 fn check_grid_rows(rows: &[GridRow]) -> Option<UseConsistentGridAreasState> {
     let first_row = rows.first()?;
-    let first_count = grid_cells(first_row.content.text()).count();
+    let first_count = GridCells::new(first_row.content.text()).count();
 
     for row in rows {
-        let count = grid_cells(row.content.text()).count();
+        let count = GridCells::new(row.content.text()).count();
         if count == 0 {
             return Some(UseConsistentGridAreasState {
                 span: row.range,
@@ -253,7 +253,7 @@ fn check_grid_rows(rows: &[GridRow]) -> Option<UseConsistentGridAreasState> {
     let mut areas = FxHashMap::<&str, AreaBounds>::default();
     for (row_index, row) in rows.iter().enumerate() {
         let text = row.content.text();
-        let mut cells = grid_cells(text).enumerate().peekable();
+        let mut cells = GridCells::new(text).enumerate().peekable();
         while let Some((start, range)) = cells.next() {
             let name = &text[range];
             let mut end = start + 1;
@@ -293,29 +293,44 @@ fn check_grid_rows(rows: &[GridRow]) -> Option<UseConsistentGridAreasState> {
     None
 }
 
-/// Returns the ranges of the cells in `row`, relative to `row`. Cells are separated by
-/// whitespace, and a sequence of `.` is a cell of its own even when it touches a name: `a.b`
+/// Iterator over the ranges of the cells in a grid row, relative to the row. Cells are separated
+/// by whitespace, and a sequence of `.` is a cell of its own even when it touches a name: `a.b`
 /// contains three cells.
-fn grid_cells(row: &str) -> impl Iterator<Item = TextRange> + '_ {
-    let bytes = row.as_bytes();
-    let mut index = 0;
-    std::iter::from_fn(move || {
-        while bytes.get(index)?.is_ascii_whitespace() {
-            index += 1;
+struct GridCells<'a> {
+    bytes: &'a [u8],
+    index: usize,
+}
+
+impl<'a> GridCells<'a> {
+    fn new(row: &'a str) -> Self {
+        Self {
+            bytes: row.as_bytes(),
+            index: 0,
         }
-        let start = index;
-        let is_dot = bytes[start] == b'.';
-        while bytes
-            .get(index)
+    }
+}
+
+impl Iterator for GridCells<'_> {
+    type Item = TextRange;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while self.bytes.get(self.index)?.is_ascii_whitespace() {
+            self.index += 1;
+        }
+        let start = self.index;
+        let is_dot = self.bytes[start] == b'.';
+        while self
+            .bytes
+            .get(self.index)
             .is_some_and(|byte| !byte.is_ascii_whitespace() && (*byte == b'.') == is_dot)
         {
-            index += 1;
+            self.index += 1;
         }
         Some(TextRange::new(
             TextSize::from(start as u32),
-            TextSize::from(index as u32),
+            TextSize::from(self.index as u32),
         ))
-    })
+    }
 }
 
 /// A cell made only of `.` characters leaves its grid cell unnamed.
