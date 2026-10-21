@@ -1,0 +1,14 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: valid-template-dynamic-key.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <input ref="x" />
+  <input ref="y" />
+  <button @click="alert($refs[foo].value)">Click</button>
+</template>
+
+```
