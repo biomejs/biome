@@ -82,9 +82,19 @@ impl ParseDb for TestDb {
             .filter_map(|(snippet, index)| {
                 let start = TextSize::from(text.find(snippet)? as u32);
                 let range = TextRange::at(start, TextSize::of(*snippet));
-                let parsed =
-                    parse_js_with_offset(snippet, start, js_source(*index), JsParserOptions::default());
-                Some(SnippetParse::new(parsed.into(), range, range, start, *index))
+                let parsed = parse_js_with_offset(
+                    snippet,
+                    start,
+                    js_source(*index),
+                    JsParserOptions::default(),
+                );
+                Some(SnippetParse::new(
+                    parsed.into(),
+                    range,
+                    range,
+                    start,
+                    *index,
+                ))
             })
             .collect();
         SourceParse::new(parse, source_index).with_snippets(snippets)
