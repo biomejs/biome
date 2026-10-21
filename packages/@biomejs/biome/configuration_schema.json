@@ -9092,6 +9092,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueValidDefineEmits": {
+					"description": "Enforce valid usage of Vue's defineEmits macro.\nSee https://biomejs.dev/linter/rules/use-vue-valid-define-emits",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueValidDefineEmitsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueValidDefineProps": {
 					"description": "Enforce valid defineProps() calls in Vue components.\nSee https://biomejs.dev/linter/rules/use-vue-valid-define-props",
 					"anyOf": [
@@ -16617,6 +16624,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueValidDefineEmitsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidDefineEmitsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueValidDefinePropsOptions": {
 			"type": "object",
 			"properties": {
@@ -22073,6 +22089,16 @@
 			]
 		},
 		"UseVueVOnExactOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueValidDefineEmitsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidDefineEmitsOptions" }
+			]
+		},
+		"UseVueValidDefineEmitsOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
