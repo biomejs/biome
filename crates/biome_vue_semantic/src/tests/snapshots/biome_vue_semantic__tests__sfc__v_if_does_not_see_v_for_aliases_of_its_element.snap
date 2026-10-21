@@ -1,0 +1,12 @@
+---
+source: crates/biome_vue_semantic/src/tests/sfc.rs
+expression: "references(r#\"<script setup>\ndefineProps(['items', 'item'])\n</script>\n<template>\n  <li v-for=\"item in items\" v-if=\"item.visible\" :key=\"item.id\">{{ item.name }}</li>\n  <p v-if=\"items\" />\n  <li v-else-if=\"entry\" v-for=\"entry in items\">{{ entry }}</li>\n</template>\n\"#)"
+---
+ref items 88..93 Binding Identifier Read -> Prop items
+ref item 101..105 Binding Identifier Read path=visible -> Prop item
+ref item 121..125 Binding Identifier Read path=id -> VForAlias item
+ref item 133..137 Binding Identifier Read path=name -> VForAlias item
+ref items 162..167 Binding Identifier Read -> Prop items
+ref entry 189..194 Binding Identifier Read -> Unresolved
+ref items 212..217 Binding Identifier Read -> Prop items
+ref entry 222..227 Binding Identifier Read -> VForAlias entry

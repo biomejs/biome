@@ -1,14 +1,12 @@
-use crate::frameworks::vue::vue_component::{
-    VueComponent, VueComponentDeclarations, VueComponentQuery, VueDeclaration,
-    VueDeclarationCollectionFilter, VueDeclarationName,
-};
+use crate::services::vue::VueComponent;
 use biome_analyze::{
     Rule, RuleDiagnostic, RuleDomain, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
 use biome_diagnostics::Severity;
+use biome_rowan::TextRange;
 use biome_rule_options::no_vue_reserved_keys::NoVueReservedKeysOptions;
-use enumflags2::BitFlag;
+use biome_vue_semantic::{Symbol, SymbolKind};
 
 declare_lint_rule! {
     /// Disallow reserved keys in Vue component data and computed properties.
@@ -110,43 +108,42 @@ declare_lint_rule! {
 }
 
 impl Rule for NoVueReservedKeys {
-    type Query = VueComponentQuery;
+    type Query = VueComponent;
     type State = RuleState;
     type Signals = Box<[Self::State]>;
     type Options = NoVueReservedKeysOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let Some(component) = VueComponent::from_potential_component(
-            ctx.query(),
-            ctx.model(),
-            ctx.source_type(),
-            ctx.file_path(),
-        ) else {
-            return Box::new([]);
-        };
-        component
-            .declarations(
-                VueDeclarationCollectionFilter::all()
-                    & !(VueDeclarationCollectionFilter::Setup
-                        | VueDeclarationCollectionFilter::SetupImport),
-            )
-            .into_iter()
+        ctx.query()
+            .declarations()
             .filter_map(|declaration| {
-                if let Some(name) = declaration.declaration_name() {
-                    if matches!(
-                        declaration,
-                        VueDeclaration::Data(_) | VueDeclaration::AsyncData(_)
-                    ) && name.text().starts_with('_')
-                    {
-                        return Some(RuleState::StartsWithUnderscore(declaration));
-                    }
-                    if RESERVED_KEYS.binary_search(&name.text()).is_ok() {
-                        return Some(RuleState::Reserved(declaration));
-                    }
+                let is_data = match declaration.kind() {
+                    SymbolKind::Data | SymbolKind::AsyncData => true,
+                    SymbolKind::Prop
+                    | SymbolKind::Computed
+                    | SymbolKind::Method
+                    | SymbolKind::Watcher => false,
+                    _ => return None,
+                };
+                // Only the top-level members of data become keys of the instance.
+                if declaration.parent().is_some() {
+                    return None;
+                }
+                if is_data && declaration.name().starts_with('_') {
+                    return Some(RuleState::StartsWithUnderscore(declaration));
+                }
+                if RESERVED_KEYS.binary_search(&declaration.name()).is_ok() {
+                    return Some(RuleState::Reserved(declaration));
                 }
                 None
             })
-            .collect::<Box<[_]>>()
+            .collect()
+    }
+
+    fn text_range(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<TextRange> {
+        let (RuleState::Reserved(declaration) | RuleState::StartsWithUnderscore(declaration)) =
+            state;
+        Some(declaration.range())
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -155,9 +152,9 @@ impl Rule for NoVueReservedKeys {
                 Some(
                     RuleDiagnostic::new(
                         rule_category!(),
-                        declaration.declaration_name_range()?,
+                        declaration.range(),
                         markup! {
-                            "Key "<Emphasis>{declaration.declaration_name()?.text()}</Emphasis>" is reserved in Vue."
+                            "Key "<Emphasis>{declaration.name()}</Emphasis>" is reserved in Vue."
                         },
                     )
                     .note(markup! {
@@ -169,7 +166,7 @@ impl Rule for NoVueReservedKeys {
                 Some(
                     RuleDiagnostic::new(
                         rule_category!(),
-                        declaration.declaration_name_range()?,
+                        declaration.range(),
                         markup! {
                             "Keys starting with an underscore are reserved in Vue."
                         },
@@ -184,8 +181,8 @@ impl Rule for NoVueReservedKeys {
 }
 
 pub enum RuleState {
-    Reserved(VueDeclaration),
-    StartsWithUnderscore(VueDeclaration),
+    Reserved(Symbol),
+    StartsWithUnderscore(Symbol),
 }
 
 const RESERVED_KEYS: &[&str] = &[
