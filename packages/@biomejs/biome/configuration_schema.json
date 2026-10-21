@@ -8704,6 +8704,13 @@
 						{ "$ref": "#/$defs/UseVueTypedRefConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useVueValidVSlot": {
+					"description": "Enforce valid v-slot directives in Vue templates.\nSee https://biomejs.dev/linter/rules/use-vue-valid-v-slot",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueValidVSlotConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -16012,6 +16019,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueValidVSlotOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidVSlotOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueValidVTextOptions": {
 			"type": "object",
 			"properties": {
@@ -21298,6 +21314,16 @@
 			]
 		},
 		"UseVueValidVPreOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueValidVSlotConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidVSlotOptions" }
+			]
+		},
+		"UseVueValidVSlotOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
