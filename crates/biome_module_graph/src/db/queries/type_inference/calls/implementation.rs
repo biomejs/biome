@@ -17,13 +17,14 @@ use biome_js_type_info::{
     interned_types::{
         CallArgumentType as InferredCallArgumentType,
         FunctionParameter as InferredFunctionParameter, InternedConstructor as InferredConstructor,
-        InternedFunction as InferredFunction, InternedMergedReference as InferredMergedReference,
-        InternedTuple as InferredTuple, InternedTypeInstance as InferredTypeInstance,
-        Literal as InferredLiteral, LocalTypeHandle as InferredLocalTypeHandle,
-        LocalTypeId as InferredLocalTypeId, ModuleKey as InferredModuleKey, ReturnType,
-        TupleElementType as InferredTupleElementType, TypeData as InferredTypeData,
-        TypeMember as InferredTypeMember, TypeSubstitution as InferredTypeSubstitution,
-        TypeTransformResult,
+        InternedFunction as InferredFunction,
+        InternedGenericTypeParameter as InferredGenericTypeParameter,
+        InternedMergedReference as InferredMergedReference, InternedTuple as InferredTuple,
+        InternedTypeInstance as InferredTypeInstance, Literal as InferredLiteral,
+        LocalTypeHandle as InferredLocalTypeHandle, LocalTypeId as InferredLocalTypeId,
+        ModuleKey as InferredModuleKey, ReturnType, TupleElementType as InferredTupleElementType,
+        TypeData as InferredTypeData, TypeMember as InferredTypeMember,
+        TypeSubstitution as InferredTypeSubstitution, TypeTransformResult,
     },
 };
 use biome_rowan::Text;
@@ -105,18 +106,24 @@ fn infer_function_call_type<'db>(
             ) {
                 return None;
             }
-            let substitutions =
-                substitutions_for_instance(db, target, instance.type_parameters(db), &[]);
+            let type_arguments = instance.type_parameters(db);
+            if let Some(members) = call_signature_carrier_members(db, target) {
+                return select_call_signature(db, members, type_arguments, args)
+                    .and_then(|function| infer_function_return_type(db, function, args));
+            }
+            let substitutions = substitutions_for_instance(db, target, type_arguments, &[]);
             let target = apply_substitutions_to_root_body(db, target, &substitutions);
-            infer_function_call_type(db, target, args)
+            infer_function_call_type(db, unwrap_instantiated_carrier(db, target), args)
         }
         InferredTypeData::Interface(interface) => {
-            select_call_signature(db, interface.members(db), args)
+            select_call_signature(db, interface.members(db), &[], args)
                 .and_then(|function| infer_function_return_type(db, function, args))
         }
-        InferredTypeData::Class(class) => select_call_signature(db, class.members(db), args)
-            .and_then(|function| infer_function_return_type(db, function, args)),
-        InferredTypeData::Object(object) => select_call_signature(db, object.members(db), args)
+        InferredTypeData::Object(object) => {
+            select_call_signature(db, object.members(db), &[], args)
+                .and_then(|function| infer_function_return_type(db, function, args))
+        }
+        InferredTypeData::Class(class) => select_call_signature(db, class.members(db), &[], args)
             .and_then(|function| infer_function_return_type(db, function, args)),
         InferredTypeData::Union(union) => collected_type_result(
             db,
@@ -145,12 +152,15 @@ fn infer_function_call_type<'db>(
 fn select_call_signature<'db>(
     db: &'db dyn ModuleDb,
     members: &[InferredTypeMember<'db>],
+    type_arguments: &[InferredTypeData<'db>],
     args: &[ResolvedCallArgument<'db>],
 ) -> Option<InferredFunction<'db>> {
     let mut signatures = members
         .iter()
         .filter(|member| member.kind.is_call_signature())
-        .filter_map(|member| member.ty.expand_canonical_global(db).callable_function(db));
+        .filter_map(|member| member.ty.expand_canonical_global(db).callable_function(db))
+        .filter(|function| accepts_type_arguments(db, *function, type_arguments))
+        .map(|function| instantiate_call_signature(db, function, type_arguments));
     let first = signatures.next()?;
     let Some(second) = signatures.next() else {
         return Some(first);
@@ -160,6 +170,170 @@ fn select_call_signature<'db>(
         .into_iter()
         .chain(signatures)
         .find(|function| signature_accepts_arguments(db, *function, args))
+}
+
+/// Returns whether a signature is a candidate for a call with explicit type
+/// arguments.
+///
+/// As in TypeScript, the number of arguments must lie between the number of
+/// type parameters without a default and their total, and each argument must
+/// satisfy its parameter's constraint. A call without type arguments keeps
+/// every signature a candidate, as does a constraint that inference cannot
+/// compare or instantiate within its work budget.
+///
+/// Here `pick<number>` rules out the constrained signature, and `f<string>`
+/// the one that declares no type parameters:
+///
+/// ```ts
+/// declare function pick<T extends string>(x: T): T;
+/// declare function pick<T>(x: T): T | null;
+///
+/// declare function f<T>(x: T): T;
+/// declare function f(x: null): object;
+/// ```
+fn accepts_type_arguments<'db>(
+    db: &'db dyn ModuleDb,
+    function: InferredFunction<'db>,
+    type_arguments: &[InferredTypeData<'db>],
+) -> bool {
+    if type_arguments.is_empty() {
+        return true;
+    }
+    let type_parameters = function.type_parameters(db);
+    if type_arguments.len() > type_parameters.len() {
+        return false;
+    }
+    let required = type_parameters
+        .iter()
+        .rposition(|parameter| {
+            generic_type_parameter(db, *parameter)
+                .is_none_or(|generic| generic.default(db).is_none())
+        })
+        .map_or(0, |index| index + 1);
+    if type_arguments.len() < required {
+        return false;
+    }
+
+    let substitutions = substitutions_for_instance(
+        db,
+        InferredTypeData::Function(function),
+        type_arguments,
+        &[],
+    );
+    type_parameters
+        .iter()
+        .zip(type_arguments)
+        .all(|(parameter, argument)| {
+            let Some(constraint) =
+                generic_type_parameter(db, *parameter).and_then(|generic| generic.constraint(db))
+            else {
+                return true;
+            };
+            // A constraint may refer to sibling type parameters, so it is
+            // compared after the written arguments have been bound.
+            let mut constraint = constraint;
+            for substitution in &substitutions {
+                let TypeTransformResult::Transformed(substituted) =
+                    constraint.substitute_type(db, *substitution)
+                else {
+                    return true;
+                };
+                constraint = substituted;
+            }
+            ArgumentTypeCompatibility::new(constraint, *argument).is_satisfied(db)
+        })
+}
+
+fn generic_type_parameter<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+) -> Option<InferredGenericTypeParameter<'db>> {
+    match ty {
+        InferredTypeData::Generic(generic) => Some(generic),
+        InferredTypeData::InstanceOf(instance) => match instance.ty(db) {
+            InferredTypeData::Generic(generic) => Some(generic),
+            _ => None,
+        },
+        _ => None,
+    }
+}
+
+/// Members of a callee whose explicit type arguments belong to its call
+/// signatures rather than to the callee itself.
+///
+/// An overload set is collected as an object with one call signature per
+/// declaration, and an interface may declare generic call signatures while
+/// declaring no type parameters of its own. Neither can bind a call's type
+/// arguments, so each signature is instantiated individually. A generic
+/// interface binds them to its own parameters and returns `None`.
+fn call_signature_carrier_members<'db>(
+    db: &'db dyn ModuleDb,
+    target: InferredTypeData<'db>,
+) -> Option<&'db [InferredTypeMember<'db>]> {
+    match target {
+        InferredTypeData::Object(object) => Some(object.members(db)),
+        InferredTypeData::Interface(interface) if interface.type_parameters(db).is_empty() => {
+            Some(interface.members(db))
+        }
+        _ => None,
+    }
+}
+
+/// Unwraps an instantiated generic type alias whose body carries call
+/// signatures.
+///
+/// A generic alias is an instance of its body over the alias's declared
+/// parameters. Once a reference binds those parameters, the arguments left on
+/// the instance belong to the alias, not to the call site, so they are not
+/// re-applied to the body's call signatures.
+///
+/// ```ts
+/// type Fns<T> = { (value: T): T };
+/// declare const format: Fns<string>;
+/// format("value");
+/// ```
+fn unwrap_instantiated_carrier<'db>(
+    db: &'db dyn ModuleDb,
+    ty: InferredTypeData<'db>,
+) -> InferredTypeData<'db> {
+    match ty {
+        InferredTypeData::InstanceOf(instance)
+            if call_signature_carrier_members(db, instance.ty(db)).is_some() =>
+        {
+            instance.ty(db)
+        }
+        ty => ty,
+    }
+}
+
+/// Binds a call's explicit type arguments to one signature.
+///
+/// The signature is returned unchanged when the call has no type arguments,
+/// when it declares no type parameters, or when substitution exceeds its work
+/// budget. An exhausted budget leaves the overload viable rather than ruling
+/// it out.
+///
+/// Here the first signature becomes `(unit: Trooper)`, which `null` does not
+/// satisfy, so the second is selected:
+///
+/// ```ts
+/// declare function garrison<T>(unit: T): { current: T };
+/// declare function garrison<T>(unit: T | null): { current: T | null };
+/// const post = garrison<Trooper>(null);
+/// ```
+fn instantiate_call_signature<'db>(
+    db: &'db dyn ModuleDb,
+    function: InferredFunction<'db>,
+    type_arguments: &[InferredTypeData<'db>],
+) -> InferredFunction<'db> {
+    if type_arguments.is_empty() || function.type_parameters(db).is_empty() {
+        return function;
+    }
+    let ty = InferredTypeData::Function(function);
+    let substitutions = substitutions_for_instance(db, ty, type_arguments, &[]);
+    apply_substitutions_to_root_body(db, ty, &substitutions)
+        .callable_function(db)
+        .unwrap_or(function)
 }
 
 /// Expands tuple spreads and maps a source argument index to the expanded list.
@@ -412,19 +586,29 @@ pub(in crate::db) fn infer_function_argument_type<'db>(
 fn infer_callable_argument_type<'db>(
     db: &'db dyn ModuleDb,
     callee: InferredTypeData<'db>,
+    type_arguments: &[InferredTypeData<'db>],
     args: &[ResolvedCallArgument<'db>],
     argument_index: usize,
 ) -> Option<InferredTypeData<'db>> {
     match callee {
         InferredTypeData::Function(function) => {
+            let function = instantiate_call_signature(db, function, type_arguments);
             infer_single_signature_parameter_type(db, function, args, argument_index)
         }
-        InferredTypeData::Interface(interface) => {
-            infer_call_signature_argument_type(db, interface.members(db), args, argument_index)
-        }
-        InferredTypeData::Object(object) => {
-            infer_call_signature_argument_type(db, object.members(db), args, argument_index)
-        }
+        InferredTypeData::Interface(interface) => infer_call_signature_argument_type(
+            db,
+            interface.members(db),
+            type_arguments,
+            args,
+            argument_index,
+        ),
+        InferredTypeData::Object(object) => infer_call_signature_argument_type(
+            db,
+            object.members(db),
+            type_arguments,
+            args,
+            argument_index,
+        ),
         _ => None,
     }
 }
@@ -432,13 +616,16 @@ fn infer_callable_argument_type<'db>(
 fn infer_call_signature_argument_type<'db>(
     db: &'db dyn ModuleDb,
     members: &[InferredTypeMember<'db>],
+    type_arguments: &[InferredTypeData<'db>],
     args: &[ResolvedCallArgument<'db>],
     argument_index: usize,
 ) -> Option<InferredTypeData<'db>> {
     let mut signatures = members
         .iter()
         .filter(|member| member.kind.is_call_signature())
-        .filter_map(|member| member.ty.expand_global_local(db).callable_function(db));
+        .filter_map(|member| member.ty.expand_global_local(db).callable_function(db))
+        .filter(|function| accepts_type_arguments(db, *function, type_arguments))
+        .map(|function| instantiate_call_signature(db, function, type_arguments));
     let first = signatures.next()?;
     let Some(second) = signatures.next() else {
         return infer_single_signature_parameter_type(db, first, args, argument_index);
@@ -486,6 +673,9 @@ pub(in crate::db) fn infer_constructor_argument_type<'db>(
 fn infer_constructable_argument_type<'db>(
     db: &'db dyn ModuleDb,
     callee: InferredTypeData<'db>,
+    // Explicit type arguments on a class bind to the class before this point;
+    // generic construct signatures declared on objects are not instantiated.
+    _type_arguments: &[InferredTypeData<'db>],
     args: &[ResolvedCallArgument<'db>],
     argument_index: usize,
 ) -> Option<InferredTypeData<'db>> {
@@ -519,7 +709,7 @@ fn infer_argument_type<'db>(
     argument_index: usize,
     infer_direct: ArgumentTypeInference<'db>,
 ) -> Option<InferredTypeData<'db>> {
-    let mut pending = Vec::from([ArgumentTypeItem::Type(callee)]);
+    let mut pending = Vec::from([ArgumentTypeItem::direct(callee)]);
     let mut results = Vec::new();
 
     for _ in 0..MAX_ARGUMENT_TYPE_STEPS {
@@ -529,43 +719,59 @@ fn infer_argument_type<'db>(
         };
 
         match item {
-            ArgumentTypeItem::Type(callee) => match callee {
+            ArgumentTypeItem::Type {
+                callee,
+                type_arguments,
+            } => match callee {
                 InferredTypeData::GlobalType(id) => {
-                    pending.push(ArgumentTypeItem::Type(global_types(db).get(id)));
+                    pending.push(ArgumentTypeItem::direct(global_types(db).get(id)));
                 }
                 InferredTypeData::GlobalLocal(local) => {
-                    pending.push(ArgumentTypeItem::Type(local.expand(db)));
+                    pending.push(ArgumentTypeItem::direct(local.expand(db)));
                 }
                 InferredTypeData::InstanceOf(instance) => {
                     let target = resolve_local_type_on_demand(db, instance.ty(db));
-                    let substitutions =
-                        substitutions_for_instance(db, target, instance.type_parameters(db), &[]);
-                    pending.push(ArgumentTypeItem::Type(apply_substitutions_to_root_body(
-                        db,
-                        target,
-                        &substitutions,
-                    )));
+                    let type_arguments = instance.type_parameters(db);
+                    if call_signature_carrier_members(db, target).is_some() {
+                        pending.push(ArgumentTypeItem::Type {
+                            callee: target,
+                            type_arguments,
+                        });
+                    } else {
+                        let substitutions =
+                            substitutions_for_instance(db, target, type_arguments, &[]);
+                        let target = apply_substitutions_to_root_body(db, target, &substitutions);
+                        pending.push(ArgumentTypeItem::direct(unwrap_instantiated_carrier(
+                            db, target,
+                        )));
+                    }
                 }
                 InferredTypeData::Local(_) => {
                     let resolved = resolve_local_type_on_demand(db, callee);
                     if resolved == callee {
                         return None;
                     }
-                    pending.push(ArgumentTypeItem::Type(resolved));
+                    pending.push(ArgumentTypeItem::direct(resolved));
                 }
                 InferredTypeData::Union(union) => {
                     let types = union.types(db);
                     pending.push(ArgumentTypeItem::CollectUnion(types.len()));
-                    pending.extend(types.iter().rev().copied().map(ArgumentTypeItem::Type));
+                    pending.extend(types.iter().rev().copied().map(ArgumentTypeItem::direct));
                 }
                 InferredTypeData::TypeofType(typeof_type) => {
-                    pending.push(ArgumentTypeItem::Type(typeof_type.ty(db)));
+                    pending.push(ArgumentTypeItem::direct(typeof_type.ty(db)));
                 }
                 InferredTypeData::TypeofValue(typeof_value) => {
-                    pending.push(ArgumentTypeItem::Type(typeof_value.ty(db)));
+                    pending.push(ArgumentTypeItem::direct(typeof_value.ty(db)));
                 }
                 callee => {
-                    results.push(infer_direct(db, callee, args, argument_index)?);
+                    results.push(infer_direct(
+                        db,
+                        callee,
+                        type_arguments,
+                        args,
+                        argument_index,
+                    )?);
                 }
             },
             ArgumentTypeItem::CollectUnion(type_count) => {
@@ -932,18 +1138,68 @@ pub(super) fn resolve_callable_function_impl<'db>(
     resolve_callable_type(db, ty)?.callable_function(db)
 }
 
-/// Returns whether the function declares that its result is discarded.
+/// Returns whether a callback argument remains viable for a callback
+/// parameter during overload selection, judged by their return types.
 ///
-/// A `void` return position accepts a function returning anything, so an
-/// `async` callback satisfies a parameter of type `() => void`.
-fn returns_void<'db>(db: &'db dyn ModuleDb, function: InferredFunction<'db>) -> bool {
-    match function.return_type(db) {
-        ReturnType::Type(ty) => matches!(
-            resolve_local_type_on_demand(db, *ty),
-            InferredTypeData::VoidKeyword
-        ),
-        ReturnType::Predicate(_) | ReturnType::Asserts(_) => false,
+/// A parameter returning `void`, `any`, `unknown`, an unresolved type, or an
+/// unconstrained generic accepts every callback; a constrained generic accepts
+/// whatever its constraint accepts, and a union whatever any member accepts.
+/// Inside a union, `void` is an ordinary member and does not discard the
+/// result. Every other return type, a type predicate included, must agree
+/// with the argument on returning a Promise, which is what separates sync
+/// from async overloads:
+///
+/// ```ts
+/// declare function run(callback: () => unknown): string;
+/// declare function schedule(callback: () => string | void): string;
+/// declare function schedule(callback: () => Promise<string>): number;
+///
+/// run(async () => 1);           // viable: `unknown` accepts a Promise
+/// schedule(async () => "");     // second overload: neither `string` nor
+///                               // `void` accepts a Promise
+/// ```
+fn callback_return_is_viable<'db>(
+    db: &'db dyn ModuleDb,
+    parameter_function: InferredFunction<'db>,
+    argument_function: InferredFunction<'db>,
+) -> bool {
+    let argument_returns_promise = argument_function.returns_promise(db);
+    let parameter_return_ty = match parameter_function.return_type(db) {
+        ReturnType::Type(ty) => resolve_local_type_on_demand(db, *ty),
+        ReturnType::Predicate(_) | ReturnType::Asserts(_) => return !argument_returns_promise,
+    };
+    if parameter_return_ty == InferredTypeData::VoidKeyword {
+        return true;
     }
+
+    let mut pending = Vec::from([parameter_return_ty]);
+    let mut remaining_steps = MAX_ARGUMENT_MATCH_STEPS;
+    while let Some(parameter_return_ty) = pending.pop() {
+        if remaining_steps == 0 {
+            return true;
+        }
+        remaining_steps -= 1;
+        let parameter_return_ty = resolve_local_type_on_demand(db, parameter_return_ty);
+        if let Some(generic) = generic_type_parameter(db, parameter_return_ty) {
+            match generic.constraint(db) {
+                Some(constraint) => pending.push(constraint),
+                None => return true,
+            }
+            continue;
+        }
+        match parameter_return_ty {
+            InferredTypeData::AnyKeyword
+            | InferredTypeData::UnknownKeyword
+            | InferredTypeData::Unknown => return true,
+            InferredTypeData::Union(union) => pending.extend_from_slice(union.types(db)),
+            parameter_return_ty => {
+                if parameter_return_ty.is_promise_instance(db) == argument_returns_promise {
+                    return true;
+                }
+            }
+        }
+    }
+    false
 }
 
 /// A directional relation between an expected parameter type and an actual argument type.
@@ -971,7 +1227,8 @@ impl<'db> ArgumentTypeCompatibility<'db> {
     ///
     /// Unsupported relations and work-budget exhaustion remain viable.
     /// Callable types must also agree on whether they return a Promise, unless
-    /// the parameter discards its return value by declaring `void`.
+    /// the parameter's return type accepts any result; see
+    /// [`callback_return_is_viable`].
     fn is_satisfied(self, db: &'db dyn ModuleDb) -> bool {
         if !self.may_match(db) {
             return false;
@@ -982,9 +1239,7 @@ impl<'db> ArgumentTypeCompatibility<'db> {
             resolve_callable_function(db, CallableFunctionInput::new(db, self.argument_ty)),
         ) {
             (Some(parameter_function), Some(argument_function)) => {
-                returns_void(db, parameter_function)
-                    || parameter_function.returns_promise(db)
-                        == argument_function.returns_promise(db)
+                callback_return_is_viable(db, parameter_function, argument_function)
             }
             _ => true,
         }
@@ -1119,18 +1374,22 @@ impl<'db> ArgumentTypeCompatibility<'db> {
                     ArgumentMatchAction::Mismatch
                 }
             }
-            (InferredTypeData::Union(union), arg_ty) => ArgumentMatchAction::Any(
-                union
-                    .types(db)
-                    .iter()
-                    .map(|parameter_ty| self.with_types(*parameter_ty, arg_ty))
-                    .collect(),
-            ),
+            // Ordered before the union-parameter arm: decomposing the
+            // parameter first would demand that the whole argument fit one
+            // parameter member, rejecting `string | number` for
+            // `string | number | boolean`.
             (parameter_ty, InferredTypeData::Union(union)) => ArgumentMatchAction::All(
                 union
                     .types(db)
                     .iter()
                     .map(|arg_ty| self.with_types(parameter_ty, *arg_ty))
+                    .collect(),
+            ),
+            (InferredTypeData::Union(union), arg_ty) => ArgumentMatchAction::Any(
+                union
+                    .types(db)
+                    .iter()
+                    .map(|parameter_ty| self.with_types(*parameter_ty, arg_ty))
                     .collect(),
             ),
             (InferredTypeData::Intersection(intersection), arg_ty) => ArgumentMatchAction::All(
@@ -2192,13 +2451,28 @@ impl<'db> ResolvedParameters<'db> {
 type ArgumentTypeInference<'db> = fn(
     &'db dyn ModuleDb,
     InferredTypeData<'db>,
+    &[InferredTypeData<'db>],
     &[ResolvedCallArgument<'db>],
     usize,
 ) -> Option<InferredTypeData<'db>>;
 
 enum ArgumentTypeItem<'db> {
-    Type(InferredTypeData<'db>),
+    Type {
+        callee: InferredTypeData<'db>,
+        /// Explicit call type arguments still to be bound by a call-signature
+        /// carrier; empty once they have been applied to the callee.
+        type_arguments: &'db [InferredTypeData<'db>],
+    },
     CollectUnion(usize),
+}
+
+impl<'db> ArgumentTypeItem<'db> {
+    fn direct(callee: InferredTypeData<'db>) -> Self {
+        Self::Type {
+            callee,
+            type_arguments: &[],
+        }
+    }
 }
 
 #[derive(Clone, Copy, Default, Eq, Hash, PartialEq)]
