@@ -3452,6 +3452,11 @@ export interface Nursery {
 	 */
 	useMathAbs?: UseMathAbsConfiguration;
 	/**
+	 * Require Math.trunc() instead of tricks that remove the decimal part of a number.
+	 * See https://biomejs.dev/linter/rules/use-math-trunc
+	 */
+	useMathTrunc?: UseMathTruncConfiguration;
+	/**
 	 * Use modern Math APIs for common mathematical operations.
 	 * See https://biomejs.dev/linter/rules/use-modern-math-apis
 	 */
@@ -6040,6 +6045,9 @@ export type UseMatchingFunctionNameConfiguration =
 export type UseMathAbsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseMathAbsOptions;
+export type UseMathTruncConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseMathTruncOptions;
 export type UseModernMathApisConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseModernMathApisOptions;
@@ -8732,6 +8740,14 @@ export interface RuleWithUseMathAbsOptions {
 	level: RulePlainConfiguration;
 	options?: UseMathAbsOptions;
 }
+export interface RuleWithUseMathTruncOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseMathTruncOptions;
+}
 export interface RuleWithUseModernMathApisOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -11133,6 +11149,7 @@ export interface UseLowercaseTestTitleOptions {
 }
 export type UseMatchingFunctionNameOptions = {};
 export type UseMathAbsOptions = {};
+export type UseMathTruncOptions = {};
 export type UseModernMathApisOptions = {};
 export type UseNamedFunctionOptions = {};
 export type UseNamedLayerOptions = {};
@@ -12777,6 +12794,7 @@ export type Category =
 	| "lint/nursery/useMatchingFunctionName"
 	| "lint/nursery/useMathAbs"
 	| "lint/nursery/useMathMinMax"
+	| "lint/nursery/useMathTrunc"
 	| "lint/nursery/useMaxParams"
 	| "lint/nursery/useModernMathApis"
 	| "lint/nursery/useNamedCaptureGroup"

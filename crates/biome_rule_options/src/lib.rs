@@ -510,6 +510,7 @@ pub mod use_lowercase_test_title;
 pub mod use_matching_function_name;
 pub mod use_math_abs;
 pub mod use_math_min_max;
+pub mod use_math_trunc;
 pub mod use_max_params;
 pub mod use_media_caption;
 pub mod use_modern_math_apis;

@@ -2398,6 +2398,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_math_min_max::UseMathMinMaxOptions>(),
     ));
     result.push((
+        "nursery",
+        "useMathTrunc",
+        TypeId::of::<biome_rule_options::use_math_trunc::UseMathTruncOptions>(),
+    ));
+    result.push((
         "complexity",
         "useMaxParams",
         TypeId::of::<biome_rule_options::use_max_params::UseMaxParamsOptions>(),
