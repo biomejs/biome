@@ -402,6 +402,7 @@ define_categories! {
     "lint/nursery/useVueBaseImport": "https://biomejs.dev/linter/rules/use-vue-base-import",
     "lint/nursery/useVueConsistentDefinePropsDeclaration": "https://biomejs.dev/linter/rules/use-vue-consistent-define-props-declaration",
     "lint/nursery/useVueConsistentEventHyphenation": "https://biomejs.dev/linter/rules/use-vue-consistent-event-hyphenation",
+    "lint/nursery/useVueDefinePropsDestructuring": "https://biomejs.dev/linter/rules/use-vue-define-props-destructuring",
     "lint/nursery/useVueMatchingComponentFileName": "https://biomejs.dev/linter/rules/use-vue-matching-component-file-name",
     "lint/nursery/useVueNextTickPromise": "https://biomejs.dev/linter/rules/use-vue-next-tick-promise",
     "lint/nursery/useVueTypedRef": "https://biomejs.dev/linter/rules/use-vue-typed-ref",

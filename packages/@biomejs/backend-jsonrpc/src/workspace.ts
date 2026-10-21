@@ -3618,6 +3618,11 @@ export interface Nursery {
 	 */
 	useVueConsistentEventHyphenation?: UseVueConsistentEventHyphenationConfiguration;
 	/**
+	 * Require destructuring the props returned by Vue's defineProps macro.
+	 * See https://biomejs.dev/linter/rules/use-vue-define-props-destructuring
+	 */
+	useVueDefinePropsDestructuring?: UseVueDefinePropsDestructuringConfiguration;
+	/**
 	 * Enforce that the name of a Vue component matches its file name.
 	 * See https://biomejs.dev/linter/rules/use-vue-matching-component-file-name
 	 */
@@ -6175,6 +6180,9 @@ export type UseVueBaseImportConfiguration =
 export type UseVueConsistentEventHyphenationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentEventHyphenationOptions;
+export type UseVueDefinePropsDestructuringConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueDefinePropsDestructuringOptions;
 export type UseVueMatchingComponentFileNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueMatchingComponentFileNameOptions;
@@ -8981,6 +8989,10 @@ export interface RuleWithUseVueConsistentEventHyphenationOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentEventHyphenationOptions;
 }
+export interface RuleWithUseVueDefinePropsDestructuringOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueDefinePropsDestructuringOptions;
+}
 export interface RuleWithUseVueMatchingComponentFileNameOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -11342,6 +11354,7 @@ export interface UseVueConsistentEventHyphenationOptions {
 	 */
 	ignoreTags?: string[];
 }
+export type UseVueDefinePropsDestructuringOptions = {};
 export type UseVueMatchingComponentFileNameOptions = {};
 export type UseVueTypedRefOptions = {};
 export type NoAccumulatingSpreadOptions = {};
@@ -12924,6 +12937,7 @@ export type Category =
 	| "lint/nursery/useVueBaseImport"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentEventHyphenation"
+	| "lint/nursery/useVueDefinePropsDestructuring"
 	| "lint/nursery/useVueMatchingComponentFileName"
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVueTypedRef"
