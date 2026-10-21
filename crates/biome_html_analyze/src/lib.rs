@@ -14,6 +14,7 @@ pub use crate::registry::visit_registry;
 pub use crate::services::aria::{Aria, AriaServices};
 use crate::services::embedded::EmbeddedService;
 pub use crate::services::module_graph::{HtmlDbService, HtmlModuleGraph};
+pub use crate::services::vue::{VueSemantic, VueSemanticServices};
 pub use crate::suppression::HtmlSuppression;
 use crate::suppression_action::HtmlSuppressionAction;
 use biome_analyze::{
@@ -276,6 +277,10 @@ where
     ));
     if let Some(module_db) = html_services.module_db {
         services.insert_service(module_db);
+    }
+    if let Some(language_db) = &html_services.language_db {
+        services.insert_service(language_db.clone());
+        services.insert_service(options.file_path.clone());
     }
     if let Some(embedded_data) = html_services.embedded_data {
         services.insert_service(EmbeddedService::from_data(embedded_data));
