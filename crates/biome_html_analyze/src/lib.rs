@@ -23,6 +23,7 @@ use biome_analyze::{
     Suppression,
 };
 use biome_aria::AriaRoles;
+use biome_db::ParsedSource;
 use biome_diagnostics::Error;
 use biome_embeds::EmbeddedData;
 use biome_html_syntax::HtmlLanguage;
@@ -43,9 +44,17 @@ pub struct HtmlAnalyzerServices {
     pub language_db: Option<Rc<dyn LanguageDb>>,
     pub embedded_data: Option<Arc<EmbeddedData>>,
     pub project_layout: Option<Arc<ProjectLayout>>,
+    /// The analyzed document, which the embedded queries of `language_db`
+    /// read.
+    pub document: Option<ParsedSource>,
 }
 
 impl HtmlAnalyzerServices {
+    pub fn with_document(mut self, document: ParsedSource) -> Self {
+        self.document = Some(document);
+        self
+    }
+
     pub fn with_module_db(mut self, module_db: Rc<dyn ModuleDb>) -> Self {
         self.module_db = Some(module_db);
         self
@@ -74,6 +83,7 @@ impl std::fmt::Debug for HtmlAnalyzerServices {
             .field("language_db", &self.language_db.as_ref().map(|_| "..."))
             .field("embedded_data", &self.embedded_data.as_ref().map(|_| "..."))
             .field("project_layout", &self.project_layout)
+            .field("document", &self.document)
             .finish()
     }
 }
@@ -284,8 +294,10 @@ where
     }
     if let Some(embedded_data) = html_services.embedded_data {
         services.insert_service(EmbeddedService::from_data(embedded_data));
-    } else if let Some(language_db) = html_services.language_db {
-        services.insert_service(EmbeddedService::new(language_db, options.file_path.clone()));
+    } else if let Some(language_db) = html_services.language_db
+        && let Some(document) = html_services.document
+    {
+        services.insert_service(EmbeddedService::new(language_db, document));
     }
     if let Some(project_layout) = html_services.project_layout {
         services.insert_service(project_layout);

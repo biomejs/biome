@@ -1252,6 +1252,11 @@ fn js_analyzer_services_for_fix(
         source_type,
     )
     .with_snippet_offset(params.parsed_source.diagnostic_offset());
+    // The fixes change the analyzed tree, not the host document.
+    let services = match params.parsed_source.document() {
+        Some(document) => services.with_document(document),
+        None => services,
+    };
     #[cfg(feature = "html_embeds")]
     let services = services.with_embedded_data(params.embedded_data.clone());
 

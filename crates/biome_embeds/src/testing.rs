@@ -171,6 +171,11 @@ pub(crate) fn parse_vue_source_with_js_snippets(
     path
 }
 
+/// Returns the document stored for `path`.
+pub(crate) fn document(db: &TestDb, path: &Utf8Path) -> ParsedSource {
+    biome_db::Db::parsed_source_for_path(db, path).expect("the document should be stored")
+}
+
 pub(crate) fn token_text(text: &str) -> TokenText {
     TokenText::new_raw(RawSyntaxKind(0), text)
 }

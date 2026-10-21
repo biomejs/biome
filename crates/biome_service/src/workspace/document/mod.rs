@@ -1,27 +1,13 @@
 pub(crate) mod services;
 
 use crate::diagnostics::FileTooLarge;
+use crate::workspace::views::{ClientId, View, Views};
 use biome_languages::DocumentFileSource;
 use std::sync::Arc;
 
-/// The views of a file that the workspace knows about.
-///
-/// The disk view holds the content that the scanner or the watcher last read
-/// from the filesystem. The editor view holds the content that a client opened
-/// and changed, typically an editor through the LSP. When both exist, the
-/// editor view shadows the disk view: a disk update leaves the editor's
-/// content untouched, and closing the file falls back to the disk view.
-#[derive(Clone, Debug)]
-pub(crate) enum Document {
-    /// Only the scanner or the watcher read the file.
-    Disk(DiskView),
-    /// A client opened the file. `disk` is set when the scanner or the watcher
-    /// read it too.
-    Editor {
-        editor: EditorView,
-        disk: Option<DiskView>,
-    },
-}
+/// The views of a file that the workspace knows about. See
+/// [views](crate::workspace::views).
+pub(crate) type Document = Views<DiskView, EditorView>;
 
 /// The content of a file as read from the filesystem.
 #[derive(Clone, Debug)]
@@ -60,95 +46,51 @@ pub(crate) struct EditorView {
     pub(crate) syntax: Option<Result<(), FileTooLarge>>,
 }
 
-impl From<DiskView> for Document {
-    fn from(disk: DiskView) -> Self {
-        Self::Disk(disk)
+impl<'a> View<'a, DiskView, EditorView> {
+    fn content(self) -> &'a Arc<str> {
+        match self {
+            Self::Disk(disk) => &disk.content,
+            Self::Editor(editor) => &editor.content,
+        }
     }
-}
 
-impl From<EditorView> for Document {
-    fn from(editor: EditorView) -> Self {
-        Self::Editor { editor, disk: None }
+    fn file_source(self) -> DocumentFileSource {
+        match self {
+            Self::Disk(disk) => disk.file_source,
+            Self::Editor(editor) => editor.file_source,
+        }
+    }
+
+    fn syntax(self) -> Option<Result<(), FileTooLarge>> {
+        match self {
+            Self::Disk(disk) => disk.syntax.clone(),
+            Self::Editor(editor) => editor.syntax.clone(),
+        }
     }
 }
 
 impl Document {
-    pub(crate) fn editor(&self) -> Option<&EditorView> {
-        match self {
-            Self::Disk(_) => None,
-            Self::Editor { editor, .. } => Some(editor),
-        }
+    /// Returns the content that `client` reads. See [Views::for_client].
+    pub(crate) fn content(&self, client: ClientId) -> Option<&Arc<str>> {
+        self.for_client(client).map(View::content)
     }
 
-    /// Returns the content of the editor view if there is one, otherwise the
-    /// content of the disk view.
-    pub(crate) fn content(&self) -> &Arc<str> {
-        match self {
-            Self::Disk(disk) => &disk.content,
-            Self::Editor { editor, .. } => &editor.content,
-        }
+    /// Returns the parse result of the view that `client` reads.
+    pub(crate) fn syntax(&self, client: ClientId) -> Option<Result<(), FileTooLarge>> {
+        self.for_client(client).and_then(View::syntax)
     }
 
-    /// Returns the file source of the view that [Self::content] reads.
-    pub(crate) fn file_source(&self) -> DocumentFileSource {
-        match self {
-            Self::Disk(disk) => disk.file_source,
-            Self::Editor { editor, .. } => editor.file_source,
-        }
+    /// Returns the file source of the view that `client` reads, or the one of
+    /// the primary editor view when only other clients have the file open.
+    pub(crate) fn file_source(&self, client: ClientId) -> DocumentFileSource {
+        self.for_client(client)
+            .unwrap_or_else(|| self.current())
+            .file_source()
     }
 
-    /// Returns the parse result of the view that [Self::content] reads.
-    pub(crate) fn syntax(&self) -> Option<Result<(), FileTooLarge>> {
-        match self {
-            Self::Disk(disk) => disk.syntax.clone(),
-            Self::Editor { editor, .. } => editor.syntax.clone(),
-        }
-    }
-
-    /// Returns the version of the editor view, or `None` when no client has
-    /// the file open.
-    pub(crate) fn version(&self) -> Option<i32> {
-        self.editor().map(|editor| editor.version)
-    }
-
-    /// Returns the document with `disk` as its disk view.
-    pub(crate) fn with_disk(self, disk: DiskView) -> Self {
-        match self {
-            Self::Disk(_) => Self::Disk(disk),
-            Self::Editor { editor, .. } => Self::Editor {
-                editor,
-                disk: Some(disk),
-            },
-        }
-    }
-
-    /// Returns the document with `editor` as its editor view.
-    pub(crate) fn with_editor(self, editor: EditorView) -> Self {
-        match self {
-            Self::Disk(disk) => Self::Editor {
-                editor,
-                disk: Some(disk),
-            },
-            Self::Editor { disk, .. } => Self::Editor { editor, disk },
-        }
-    }
-
-    /// Returns the document without its editor view, or `None` when it has no
-    /// disk view.
-    pub(crate) fn without_editor(self) -> Option<Self> {
-        match self {
-            Self::Disk(disk) => Some(Self::Disk(disk)),
-            Self::Editor { disk, .. } => disk.map(Self::Disk),
-        }
-    }
-
-    /// Returns the document without its disk view, or `None` when it has no
-    /// editor view.
-    #[cfg(feature = "module_graph")]
-    pub(crate) fn without_disk(self) -> Option<Self> {
-        match self {
-            Self::Disk(_) => None,
-            Self::Editor { editor, .. } => Some(editor.into()),
-        }
+    /// Returns the version of the editor view of `client`, or `None` when it
+    /// doesn't have the file open.
+    pub(crate) fn version(&self, client: ClientId) -> Option<i32> {
+        self.editor(client).map(|editor| editor.version)
     }
 }

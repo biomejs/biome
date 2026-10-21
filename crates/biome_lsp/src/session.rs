@@ -20,11 +20,11 @@ use biome_service::file_handlers::svelte::SvelteFileHandler;
 use biome_service::file_handlers::vue::VueFileHandler;
 use biome_service::projects::ProjectKey;
 use biome_service::settings::{EditorFeature, ModuleGraphResolutionKind};
+use biome_service::workspace::{ClientId, FileFeaturesResult, ServiceNotification};
 use biome_service::workspace::{
     FeaturesBuilder, GetFileContentParams, OpenProjectParams, OpenProjectResult,
     PullDiagnosticsParams, RetryingWorkspace, SupportsFeatureParams,
 };
-use biome_service::workspace::{FileFeaturesResult, ServiceNotification};
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
 use biome_service::workspace::{ScanKind, ScanProjectParams};
 use biome_service::{Workspace, WorkspaceServer};
@@ -294,7 +294,7 @@ impl Session {
     /// LSP request handlers (formatting, code actions, ...) should use
     /// [Self::workspace_for_request] instead.
     pub(crate) fn workspace(&self) -> impl Workspace + '_ {
-        RetryingWorkspace::new(self.workspace.with_db_state(&self.db_state))
+        RetryingWorkspace::new(self.workspace_for_request())
     }
 
     /// Returns the workspace without automatic retries.
@@ -312,7 +312,22 @@ impl Session {
     /// edit. Answering with `ContentModified` instead makes the editor
     /// re-send the request with fresh positions, if it still needs it.
     pub(crate) fn workspace_for_request(&self) -> impl Workspace + '_ {
-        self.workspace.with_db_state(&self.db_state)
+        // Every connection is a separate client with its own view of the files
+        // it opens.
+        self.workspace
+            .with_client(&self.db_state, ClientId::new(self.key.0))
+    }
+
+    /// Closes the files that this session has open, so that their content
+    /// stops shadowing the files on disk for the other clients of the server.
+    pub(crate) fn close_files(&self) {
+        let result = self
+            .workspace
+            .with_client(&self.db_state, ClientId::new(self.key.0))
+            .close_client_files();
+        if let Err(error) = result {
+            error!("Failed to close the files of a disconnected client: {error}");
+        }
     }
 
     /// Initialize this session instance with the incoming initialization parameters from the client

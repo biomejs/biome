@@ -55,6 +55,7 @@ mod client;
 pub(crate) mod document;
 pub mod search;
 mod server;
+pub(crate) mod views;
 
 use biome_analyze::{ActionCategory, RuleCategories};
 use biome_configuration::{Configuration, analyzer::AnalyzerSelector};
@@ -98,6 +99,7 @@ pub use client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 pub use search::grit::GritSearchQuery;
 pub use search::{NoopQueryProvider, SearchLanguage, SearchQuery};
 pub use server::OpenFileReason;
+pub use views::ClientId;
 
 /// Notification regarding a workspace's service data.
 #[derive(Clone, Copy, Debug)]
@@ -1679,11 +1681,20 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 
     /// Opens a new file in the workspace.
     ///
+    /// Content sent by the client belongs to that client: changes on disk and
+    /// requests from other clients don't replace it until the client closes
+    /// the file. When several clients have the file open, the services they
+    /// share, such as the module graph, use the content of the client that
+    /// opened it first.
+    ///
     /// If the file path is under a folder that belongs to an opened project
     /// other than the current one, the current project is changed accordingly.
     fn open_file(&self, params: OpenFileParams) -> Result<OpenFileResult, WorkspaceError>;
 
-    /// Checks if `file_path` exists in the workspace.
+    /// Checks if `file_path` exists in the workspace for this client: the
+    /// client opened it, or Biome read it from the file system, for example
+    /// while scanning the project. A file that only other clients opened
+    /// doesn't exist for this client.
     ///
     /// This method is useful to avoid unexpected errors before using the file method and avoid errors.
     ///
@@ -1710,7 +1721,9 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// considered ignored.
     fn is_path_ignored(&self, params: PathIsIgnoredParams) -> Result<bool, WorkspaceError>;
 
-    /// Returns the content of a given file.
+    /// Returns the content of a given file, as this client sees it: the
+    /// content of the client when it opened the file, otherwise the content
+    /// on disk.
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError>;
 
     /// Returns the size of a given file, as well as the allowed maximum file
@@ -1720,7 +1733,11 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
         params: CheckFileSizeParams,
     ) -> Result<CheckFileSizeResult, WorkspaceError>;
 
-    /// Changes the content of an open file.
+    /// Changes the content of a file.
+    ///
+    /// When the client opened the file, the change applies to the content of
+    /// the client. Otherwise, the change records the content on disk, for
+    /// example after the client wrote the file.
     fn change_file(&self, params: ChangeFileParams) -> Result<ChangeFileResult, WorkspaceError>;
 
     /// Processes a file by applying linting, formatting, and assist without changing the open workspace document.
@@ -1769,11 +1786,12 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
         params: GoToDefinitionParams,
     ) -> Result<Option<GoToDefinitionResult>, WorkspaceError>;
 
-    /// Closes a file that is opened in the workspace.
+    /// Closes a file that this client opened.
     ///
-    /// This only unloads the document from the workspace if the file is NOT
-    /// opened by the scanner as well. If the scanner has opened the file, it
-    /// may still be required for multi-file analysis.
+    /// Other clients that have the file open keep their content. When no
+    /// client has the file open anymore, the file is unloaded from the
+    /// workspace, unless the scanner indexed it: it may still be required for
+    /// multi-file analysis, so its content on disk is used again.
     fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError>;
 
     /// Updates the internal module graph using the provided path.

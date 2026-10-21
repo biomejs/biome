@@ -60,7 +60,7 @@ use biome_configuration::vcs::VcsClientKind;
 use biome_configuration::{BiomeDiagnostic, Configuration, ConfigurationPathHint};
 #[cfg(all(feature = "module_graph", feature = "lang_css"))]
 use biome_css_syntax::AnyCssRoot;
-use biome_db::{AnyParsedSource, Db, ParsedSnippetRef, ParsedSource, SourceText};
+use biome_db::{AnyParsedSource, ParsedSnippetRef, ParsedSource, SourceText};
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
 use biome_diagnostics::print_diagnostic_to_string;
@@ -101,8 +101,10 @@ use biome_resolver::FsWithResolverProxy;
 use biome_rowan::NodeCache;
 use camino::{Utf8Path, Utf8PathBuf};
 use crossbeam::channel::Sender;
-use papaya::{HashMap, Operation};
+use papaya::{Compute, HashMap, Operation};
+use parking_lot::Mutex;
 use rustc_hash::{FxBuildHasher, FxHashMap, FxHashSet};
+use std::collections::BTreeSet;
 use std::fmt::Debug;
 use std::ops::Deref;
 use std::panic::RefUnwindSafe;
@@ -140,6 +142,15 @@ pub struct WorkspaceServer {
     /// Channel sender for sending notifications of service data updates.
     notification_tx: watch::Sender<ServiceNotification>,
 
+    /// The clients whose files were closed, such as the ones that
+    /// disconnected. The requests they sent before can still run, and the
+    /// files these requests open or change aren't kept.
+    ///
+    /// A request checks the set after it publishes a view, and a close adds
+    /// to the set before it looks up the views of the client. The lock orders
+    /// the two, so one of them always sees the other.
+    closed_clients: Mutex<FxHashSet<ClientId>>,
+
     #[cfg(test)]
     cancel_change_file_after_document_update: AtomicBool,
 
@@ -155,10 +166,14 @@ pub struct LocalWorkspace {
     db_state: DbState,
 }
 
-/// A workspace server and the Salsa database used by one operation.
+/// A workspace server and the Salsa database used by one operation, on
+/// behalf of one client.
 pub struct WorkspaceServerWithDb<'a> {
     server: &'a WorkspaceServer,
     db_state: &'a DbState,
+    /// The client that makes the requests. It reads and writes its own editor
+    /// views. See [views](crate::workspace::views).
+    client: ClientId,
 }
 
 struct ProcessFileState {
@@ -462,6 +477,7 @@ impl WorkspaceServer {
             scanner: Scanner::new(watcher_tx),
             fs,
             notification_tx,
+            closed_clients: Default::default(),
             #[cfg(test)]
             cancel_change_file_after_document_update: AtomicBool::new(false),
             #[cfg(test)]
@@ -470,9 +486,19 @@ impl WorkspaceServer {
     }
 
     pub fn with_db_state<'a>(&'a self, db_state: &'a DbState) -> WorkspaceServerWithDb<'a> {
+        self.with_client(db_state, ClientId::default())
+    }
+
+    /// Returns the workspace that serves the requests of `client`.
+    pub fn with_client<'a>(
+        &'a self,
+        db_state: &'a DbState,
+        client: ClientId,
+    ) -> WorkspaceServerWithDb<'a> {
         WorkspaceServerWithDb {
             server: self,
             db_state,
+            client,
         }
     }
 
@@ -924,7 +950,7 @@ impl WorkspaceServerWithDb<'_> {
         // from the filesystem goes to the disk view, which the editor view
         // shadows.
         let view = if version.is_some() {
-            FileView::Editor
+            FileView::Editor(self.client)
         } else {
             FileView::Disk
         };
@@ -998,27 +1024,16 @@ impl WorkspaceServerWithDb<'_> {
                 file_source: source,
                 syntax: syntax.clone(),
             };
+            let client = self.client;
             self.documents.pin().update_or_insert_with(
                 path.clone(),
                 |current| match version {
-                    Some(version) => {
-                        // A client that opens a document that is already open
-                        // most likely means that two clients independently
-                        // specify their own version, with no way for us to
-                        // distinguish them. Or it is a bug. The safest thing
-                        // to do seems to use the _minimum_ of the versions
-                        // specified, so that updates coming from either will
-                        // be accepted.
-                        let version = current
-                            .version()
-                            .map_or(version, |current_version| current_version.min(version));
-                        current.clone().with_editor(editor_view(version))
-                    }
+                    Some(version) => current.clone().with_editor(client, editor_view(version)),
                     None => current.clone().with_disk(disk_view()),
                 },
                 || match version {
-                    Some(version) => editor_view(version).into(),
-                    None => disk_view().into(),
+                    Some(version) => Document::from_editor(client, editor_view(version)),
+                    None => Document::from_disk(disk_view()),
                 },
             );
 
@@ -1026,6 +1041,11 @@ impl WorkspaceServerWithDb<'_> {
             // requests and client requests for files that are already indexed.
             reason.is_index() || self.should_update_service_data(&path)
         };
+
+        if view == FileView::Editor(self.client) && self.is_client_closed() {
+            self.close_editor_view(&path, Some(project_key))?;
+            return Ok(InternalOpenFileResult::default());
+        }
 
         // Manifest files need to update the module graph.
         if is_indexed {
@@ -1077,7 +1097,7 @@ impl WorkspaceServerWithDb<'_> {
         self.assert_parse(path)?;
 
         let db = self.db_state.fork();
-        db.get_parsed_source(path)
+        db.get_client_parsed_source(path, self.client)
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))
     }
 
@@ -1235,7 +1255,7 @@ impl WorkspaceServerWithDb<'_> {
         self.assert_parse(path)?;
         let db = self.get_db().into_untracked_db();
         let parsed = db
-            .get_parsed_source(path.as_path())
+            .get_client_parsed_source(path.as_path(), self.client)
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
         let file_source = db
             .source_from_index(parsed.document_source_index(&db))
@@ -2404,10 +2424,6 @@ impl WorkspaceServerWithDb<'_> {
     }
 
     /// Removes the cached parsed source for `path` from the database.
-    fn db_remove_file(&self, path: &Utf8Path) {
-        self.db_state.remove_file(path);
-    }
-
     /// Publishes `text` as `view` of `path` in the database, and returns the
     /// current view of `path`.
     fn db_update_file_view(
@@ -2422,7 +2438,7 @@ impl WorkspaceServerWithDb<'_> {
     /// Retrieves all diagnostics that belong to a document. It contains diagnostics that belong to embedded snippets too
     pub fn db_get_parse_diagnostics(&self, path: &Utf8Path) -> Vec<ParseDiagnostic> {
         let db = self.get_db();
-        db.parsed_source_for_path(path)
+        db.get_client_parsed_source(path, self.client)
             .map(|parsed_source| {
                 let mut diagnostics = Vec::new();
                 diagnostics.extend(parsed_source.parse_diagnostics(&*db).clone());
@@ -2439,7 +2455,7 @@ impl WorkspaceServerWithDb<'_> {
             .documents
             .pin()
             .get(path)
-            .and_then(|doc| doc.syntax())
+            .and_then(|doc| doc.syntax(self.client))
             .transpose();
 
         match syntax {
@@ -2462,7 +2478,7 @@ impl WorkspaceServerWithDb<'_> {
     ) -> Result<(ParsedSource, Vec<ParsedSnippetRef>), WorkspaceError> {
         self.assert_parse(path)?;
         let parsed_source = db
-            .get_parsed_source(path)
+            .get_client_parsed_source(path, self.client)
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
         let snippets = parsed_source
             .snippets(db)
@@ -2479,7 +2495,7 @@ impl WorkspaceServerWithDb<'_> {
         experimental_full_html_support: bool,
     ) -> DocumentFileSource {
         let db = self.db_state.fork();
-        db.get_parsed_source(path)
+        db.get_client_parsed_source(path, self.client)
             .and_then(|parsed_source| {
                 db.source_from_index(parsed_source.document_source_index(&*db))
             })
@@ -2492,7 +2508,7 @@ impl WorkspaceServerWithDb<'_> {
     #[cfg(test)]
     fn get_snippets(&self, path: &Utf8Path) -> Vec<ParsedSnippetRef> {
         let db = self.db_state.fork();
-        db.parsed_source_for_path(path)
+        db.get_client_parsed_source(path, self.client)
             .map(|source| {
                 source
                     .snippets(&*db)
@@ -2787,6 +2803,104 @@ impl WorkspaceServerWithDb<'_> {
     }
 }
 
+impl WorkspaceServerWithDb<'_> {
+    /// Closes the files that the client of this workspace has open, as when it
+    /// disconnects. Interrupted operations are retried. The files that the
+    /// client opens or changes afterwards aren't kept.
+    ///
+    /// Returns the first error, after attempting to close every file.
+    pub fn close_client_files(&self) -> Result<(), WorkspaceError> {
+        self.closed_clients.lock().insert(self.client);
+        // The editor views of dependencies are in the database only.
+        let mut paths: BTreeSet<_> =
+            retry_on_pending_write(|| self.get_db().paths_open_in(self.client))
+                .into_iter()
+                .collect();
+        paths.extend(
+            self.documents
+                .pin()
+                .iter()
+                .filter(|(_, document)| document.editor(self.client).is_some())
+                .map(|(path, _)| path.clone()),
+        );
+        let mut result = Ok(());
+        for path in paths {
+            let closed = retry_on_pending_write(|| {
+                let project_key = self.find_project_for_path(&path);
+                self.close_editor_view(&path, project_key)
+            });
+            if result.is_ok() {
+                result = closed;
+            }
+        }
+        result
+    }
+
+    /// Returns whether [Self::close_client_files] closed the files of the
+    /// client of this workspace.
+    fn is_client_closed(&self) -> bool {
+        self.closed_clients.lock().contains(&self.client)
+    }
+
+    /// Removes the editor view of `path` of the client of this workspace.
+    ///
+    /// When no client has the file open anymore, the file is unloaded unless
+    /// the scanner indexes it. `project_key` selects the project whose
+    /// dependencies are indexed again when the file is a manifest.
+    fn close_editor_view(
+        &self,
+        path: &Utf8Path,
+        project_key: Option<ProjectKey>,
+    ) -> Result<(), WorkspaceError> {
+        let client = self.client;
+        // The scanner keeps the disk view of an indexed file up to date, so
+        // it becomes the content of the file again when no client has it open.
+        let is_indexed = self.is_indexed(path);
+
+        let documents = self.documents.pin();
+        let result = documents.compute(path.to_path_buf(), |entry| match entry {
+            Some((_, document)) => match document.clone().without_editor(client) {
+                Some(document) if document.has_editors() || is_indexed => {
+                    Operation::Insert(document)
+                }
+                _ => Operation::Remove,
+            },
+            None => Operation::Abort(()),
+        });
+        let is_open = matches!(
+            result,
+            Compute::Updated { new: (_, document), .. } if document.has_editors()
+        );
+        // Another client may open the file meanwhile, so the database decides
+        // on its own views whether the file is still open.
+        self.db_state.remove_editor_view(path, client, is_indexed);
+        if !is_open {
+            self.db_state.remove_node_cache(path);
+        }
+
+        // Without the client's content, the resolver reads the manifest from
+        // the disk view or the filesystem, which may make other dependencies
+        // reachable.
+        #[cfg(feature = "module_graph")]
+        if let Some(project_key) = project_key
+            && self.db_state.is_resolver_manifest(path)
+        {
+            // Diagnostics of dependencies aren't reported to the client.
+            let _diagnostics = self.index_new_dependencies(project_key)?;
+        }
+        #[cfg(not(feature = "module_graph"))]
+        let _ = project_key;
+
+        if is_indexed {
+            // The services were updated from the client's content, so the file
+            // is indexed again from the filesystem.
+            self.scanner.reindex_file(path.to_path_buf());
+        }
+
+        Ok(())
+    }
+}
+
 impl Workspace for WorkspaceServerWithDb<'_> {
     fn open_project(&self, params: OpenProjectParams) -> Result<OpenProjectResult, WorkspaceError> {
         let path = if params.open_uninitialized {
@@ -2810,6 +2924,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             let scanner_workspace = WorkspaceServerWithDb {
                 server: self.server,
                 db_state: epoch.view(),
+                client: self.client,
             };
             scanner_workspace.scan_project_inner(params)
         };
@@ -3058,7 +3173,8 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         Ok(self
             .documents
             .pin()
-            .contains_key(params.file_path.as_path()))
+            .get(params.file_path.as_path())
+            .is_some_and(|document| document.for_client(self.client).is_some()))
     }
 
     fn file_features(
@@ -3266,7 +3382,8 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         self.documents
             .pin()
             .get(params.path.as_path())
-            .map(|document| document.content().to_string())
+            .and_then(|document| document.content(self.client))
+            .map(ToString::to_string)
             .ok_or_else(|| WorkspaceError::not_found(params.path.to_string()))
     }
 
@@ -3275,10 +3392,13 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         params: CheckFileSizeParams,
     ) -> Result<CheckFileSizeResult, WorkspaceError> {
         let documents = self.documents.pin();
-        let Some(document) = documents.get(params.path.as_path()) else {
+        let Some(content) = documents
+            .get(params.path.as_path())
+            .and_then(|document| document.content(self.client))
+        else {
             return Err(WorkspaceError::not_found(params.path.to_string()));
         };
-        let file_size = document.content().len();
+        let file_size = content.len();
         let limit = self
             .project_get_settings_for_path(params.project_key, &params.path)
             .map_or_else(
@@ -3306,13 +3426,23 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             .get(path.as_path())
             .map(|document| {
                 (
-                    document.version(),
-                    **document.content() == *content,
-                    document.file_source(),
-                    document.editor().is_some(),
+                    document.version(self.client),
+                    document
+                        .content(self.client)
+                        .is_some_and(|current| **current == *content),
+                    document.file_source(self.client),
+                    document.editor(self.client).is_some(),
                 )
             })
             .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
+
+        // Once the views of a client are closed, a change it sent before must
+        // not be recorded as the content on disk.
+        if self.is_client_closed() {
+            return Ok(ChangeFileResult {
+                diagnostics: Vec::new(),
+            });
+        }
 
         if existing_version.is_some_and(|existing_version| existing_version > version)
             || existing_version == Some(version) && !same_content
@@ -3352,7 +3482,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         // disk, like the CLI after it writes the fixes of a file that the
         // daemon indexes.
         let view = if is_open {
-            FileView::Editor
+            FileView::Editor(self.client)
         } else {
             FileView::Disk
         };
@@ -3366,12 +3496,15 @@ impl Workspace for WorkspaceServerWithDb<'_> {
 
         documents
             .update(path.to_path_buf(), |document| match view {
-                FileView::Editor => document.clone().with_editor(EditorView {
-                    content: content.clone(),
-                    version,
-                    file_source: document_source,
-                    syntax: Some(Ok(())),
-                }),
+                FileView::Editor(client) => document.clone().with_editor(
+                    client,
+                    EditorView {
+                        content: content.clone(),
+                        version,
+                        file_source: document_source,
+                        syntax: Some(Ok(())),
+                    },
+                ),
                 FileView::Disk => document.clone().with_disk(DiskView {
                     content: content.clone(),
                     file_source: document_source,
@@ -3386,6 +3519,13 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             .swap(false, Ordering::AcqRel)
         {
             std::panic::resume_unwind(Box::new(salsa::Cancelled::PendingWrite));
+        }
+
+        if view == FileView::Editor(self.client) && self.is_client_closed() {
+            self.close_editor_view(&path, Some(project_key))?;
+            return Ok(ChangeFileResult {
+                diagnostics: Vec::new(),
+            });
         }
 
         if is_indexed {
@@ -3588,8 +3728,8 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 let documents = self.documents.pin();
                 let source = documents
                     .get(path.as_path())
-                    .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?
-                    .content();
+                    .and_then(|document| document.content(self.client))
+                    .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
                 process(source, self.process_file_state_from_server(&path)?, true)
             }
             FileContent::FromClient { content, .. } => {
@@ -3831,9 +3971,8 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             .documents
             .pin()
             .get(path.as_path())
-            .and_then(|document| {
-                Self::legacy_diagnostic_offset(&path, language, document.content())
-            })
+            .and_then(|document| document.content(self.client))
+            .and_then(|content| Self::legacy_diagnostic_offset(&path, language, content))
         {
             for action in &mut result.actions {
                 action.offset.get_or_insert(TextSize::from(offset));
@@ -4072,8 +4211,8 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         let documents = self.documents.pin();
         let source = documents
             .get(path.as_path())
-            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?
-            .content();
+            .and_then(|document| document.content(self.client))
+            .ok_or_else(|| WorkspaceError::not_found(path.to_string()))?;
         let mut state = self.process_file_state_from_server(&path)?;
         let (_, settings, query) = self
             .project_get_settings_query(&state.db, project_key, &path, params.inline_config.clone())
@@ -4252,50 +4391,19 @@ impl Workspace for WorkspaceServerWithDb<'_> {
     /// indexed by the scanner. If the scanner has the file indexed, it may
     /// still be required for multi-file analysis.
     fn close_file(&self, params: CloseFileParams) -> Result<(), WorkspaceError> {
-        let path = params.path.as_path();
-        // The scanner keeps the disk view of an indexed file up to date, so
-        // it becomes the content of the file again.
-        let is_indexed = self.is_indexed(path);
-
-        self.documents
-            .pin()
-            .compute(path.to_path_buf(), |entry| match entry {
-                Some((_, document)) if is_indexed => document
-                    .clone()
-                    .without_editor()
-                    .map_or(Operation::Remove, Operation::Insert),
-                Some(_) => Operation::Remove,
-                None => Operation::Abort(()),
-            });
-        self.db_state.remove_node_cache(path);
-        if is_indexed {
-            self.db_state.remove_file_view(path, FileView::Editor);
-        } else {
-            self.db_remove_file(path);
-        }
-
-        // Without the client's content, the resolver reads the manifest from
-        // the disk view or the filesystem, which may make other dependencies
-        // reachable.
-        #[cfg(feature = "module_graph")]
-        if self.db_state.is_resolver_manifest(path) {
-            // Diagnostics of dependencies aren't reported to the client.
-            let _diagnostics = self.index_new_dependencies(params.project_key)?;
-        }
-
-        if is_indexed {
-            // The services were updated from the client's content, so the file
-            // is indexed again from the filesystem.
-            self.scanner.reindex_file(path.to_path_buf());
-        }
-
-        Ok(())
+        self.close_editor_view(params.path.as_path(), Some(params.project_key))
     }
 
     fn update_module_graph(&self, params: UpdateModuleGraphParams) -> Result<(), WorkspaceError> {
         #[cfg(feature = "module_graph")]
         {
-            let parsed = self.get_parse(params.path.as_path())?;
+            // The module graph is shared by the clients, so it reads the view
+            // they share.
+            self.assert_parse(params.path.as_path())?;
+            let parsed = self
+                .get_db()
+                .get_parsed_source(params.path.as_path())
+                .ok_or_else(|| WorkspaceError::not_found(params.path.to_string()))?;
             let settings = self
                 .project_get_settings_for_path(params.project_key, &params.path)
                 .ok_or_else(WorkspaceError::no_project)?;

@@ -368,6 +368,410 @@ fn parsed_text(workspace: &LocalWorkspace, path: &str) -> String {
         .to_string()
 }
 
+/// Returns the workspace that serves the requests of the client `id`.
+#[cfg(feature = "module_graph")]
+fn client(workspace: &LocalWorkspace, id: u64) -> WorkspaceServerWithDb<'_> {
+    workspace
+        .server
+        .with_client(&workspace.db_state, ClientId::new(id))
+}
+
+/// Opens `path` in `client` with `content`.
+#[cfg(feature = "module_graph")]
+fn open_in(client: &WorkspaceServerWithDb, project_key: ProjectKey, path: &str, content: &str) {
+    client
+        .open_file(OpenFileParams {
+            project_key,
+            path: BiomePath::new(path),
+            content: FileContent::FromClient {
+                content: content.into(),
+                version: 1,
+            },
+            document_file_source: None,
+            persist_node_cache: false,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+}
+
+/// Returns the content of `path` that `client` reads.
+#[cfg(feature = "module_graph")]
+fn content_in(client: &WorkspaceServerWithDb, project_key: ProjectKey, path: &str) -> String {
+    client
+        .get_file_content(GetFileContentParams {
+            project_key,
+            path: BiomePath::new(path),
+        })
+        .unwrap()
+}
+
+/// Returns the paths that the module of `path` imports.
+#[cfg(feature = "module_graph")]
+fn imports_of(workspace: &LocalWorkspace, path: &str) -> Option<Vec<String>> {
+    workspace
+        .get_module_graph(GetModuleGraphParams {})
+        .unwrap()
+        .data
+        .get(path)
+        .and_then(|module| module.as_js_module_info())
+        .map(|module| module.static_import_paths.keys().cloned().collect())
+}
+
+/// Each client reads its own content, and the module graph reads the content
+/// of the client that opened the file first, until it closes the file.
+#[cfg(feature = "module_graph")]
+#[test]
+fn clients_keep_their_own_content() {
+    const PATH: &str = "/project/a.js";
+
+    let (workspace, project_key, _) = lsp_workspace(&[(PATH, "import 'disk';")]);
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new(PATH))
+        .unwrap();
+    let (first, second) = (client(&workspace, 1), client(&workspace, 2));
+    open_in(&first, project_key, PATH, "import 'first';");
+    open_in(&second, project_key, PATH, "import 'second';");
+
+    assert_eq!(content_in(&first, project_key, PATH), "import 'first';");
+    assert_eq!(content_in(&second, project_key, PATH), "import 'second';");
+    assert_eq!(
+        imports_of(&workspace, PATH),
+        Some(vec!["first".to_string()])
+    );
+
+    first
+        .close_file(CloseFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+        })
+        .unwrap();
+    assert_eq!(content_in(&first, project_key, PATH), "import 'disk';");
+    assert_eq!(content_in(&second, project_key, PATH), "import 'second';");
+    // Closing the file asks the scanner to index it again.
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new(PATH))
+        .unwrap();
+    assert_eq!(
+        imports_of(&workspace, PATH),
+        Some(vec!["second".to_string()])
+    );
+
+    second
+        .close_file(CloseFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+        })
+        .unwrap();
+    assert_eq!(content_in(&second, project_key, PATH), "import 'disk';");
+}
+
+/// A client that didn't open a file, like the CLI attached to the daemon of an
+/// editor, reads the content on disk, and doesn't see the files that only
+/// other clients opened.
+#[cfg(feature = "module_graph")]
+#[test]
+fn clients_that_did_not_open_a_file_read_the_disk() {
+    const INDEXED: &str = "/project/indexed.js";
+    const UNSAVED: &str = "/project/unsaved.js";
+
+    let (workspace, project_key, _) = lsp_workspace(&[(INDEXED, "import 'disk';")]);
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new(INDEXED))
+        .unwrap();
+    let (editor, cli) = (client(&workspace, 1), client(&workspace, 2));
+    open_in(&editor, project_key, INDEXED, "import 'editor';");
+    open_in(&editor, project_key, UNSAVED, "import 'editor';");
+
+    assert_eq!(content_in(&cli, project_key, INDEXED), "import 'disk';");
+    let db = workspace.get_db();
+    let parse = cli.get_parse(Utf8Path::new(INDEXED)).unwrap();
+    let parsed_text = parse
+        .parsed(&db)
+        .syntax::<JsLanguage>()
+        .text_with_trivia()
+        .to_string();
+    assert_eq!(parsed_text, "import 'disk';");
+    let exists = |client: &WorkspaceServerWithDb, path: &str| {
+        client
+            .file_exists(FileExistsParams {
+                file_path: BiomePath::new(path),
+            })
+            .unwrap()
+    };
+    assert!(exists(&cli, INDEXED));
+    assert!(!exists(&cli, UNSAVED));
+    assert!(exists(&editor, UNSAVED));
+}
+
+/// A change from a client that didn't open a file, like the one the CLI
+/// attached to a daemon sends after writing fixes, records the content on
+/// disk and leaves the content of the client that has the file open untouched.
+#[cfg(feature = "module_graph")]
+#[test]
+fn change_from_another_client_records_the_disk_content() {
+    const PATH: &str = "/project/a.js";
+
+    let (workspace, project_key, _) = lsp_workspace(&[(PATH, "import 'disk';")]);
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new(PATH))
+        .unwrap();
+    let (editor, cli) = (client(&workspace, 1), client(&workspace, 2));
+    open_in(&editor, project_key, PATH, "import 'editor';");
+
+    cli.change_file(ChangeFileParams {
+        project_key,
+        path: BiomePath::new(PATH),
+        content: "import 'written';".into(),
+        version: 5,
+        inline_config: None,
+        editor_features: None,
+    })
+    .unwrap();
+
+    assert_eq!(content_in(&editor, project_key, PATH), "import 'editor';");
+    assert_eq!(content_in(&cli, project_key, PATH), "import 'written';");
+    assert_eq!(
+        imports_of(&workspace, PATH),
+        Some(vec!["editor".to_string()])
+    );
+    // The version of the editor is its own.
+    editor
+        .change_file(ChangeFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+            content: "import 'changed';".into(),
+            version: 2,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+    assert_eq!(content_in(&editor, project_key, PATH), "import 'changed';");
+}
+
+/// Closing the files of a client also closes the dependencies it opened,
+/// which the workspace keeps in the database only.
+#[cfg(feature = "module_graph")]
+#[test]
+fn closing_the_files_of_a_client_closes_its_dependencies() {
+    const PATH: &str = "/project/node_modules/dependency/index.d.ts";
+
+    let (workspace, project_key, _) = lsp_workspace(&[]);
+    let editor = client(&workspace, 1);
+    open_in(
+        &editor,
+        project_key,
+        PATH,
+        "export declare const value: number;",
+    );
+    assert!(
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(PATH))
+            .is_some()
+    );
+
+    editor.close_client_files().unwrap();
+    assert!(
+        workspace
+            .get_db()
+            .get_parsed_source(Utf8Path::new(PATH))
+            .is_none()
+    );
+}
+
+/// The analysis of a script reads the embedded content, such as the template
+/// of a Vue file, of the view that the client reads.
+#[cfg(feature = "module_graph")]
+#[test]
+fn embedded_content_follows_the_view_of_the_client() {
+    const PATH: &str = "/project/App.vue";
+    const DISK: &str = "\
+<script setup>
+import Card from './Card.vue';
+</script>
+<template><Card /></template>
+";
+    const EDITOR: &str = "\
+<script setup>
+import Card from './Card.vue';
+</script>
+<template><div /></template>
+";
+
+    let (workspace, project_key, _) = lsp_workspace(&[(PATH, DISK)]);
+    workspace
+        .update_settings(UpdateSettingsParams {
+            project_key,
+            workspace_directory: None,
+            configuration: Configuration {
+                html: Some(HtmlConfiguration {
+                    experimental_full_support_enabled: Some(true.into()),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            },
+            extended_configurations: vec![],
+            module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+        })
+        .unwrap();
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new(PATH))
+        .unwrap();
+    let (editor, cli) = (client(&workspace, 1), client(&workspace, 2));
+    open_in(&editor, project_key, PATH, EDITOR);
+
+    let unused_imports = |client: &WorkspaceServerWithDb| {
+        let no_unused_imports =
+            AnalyzerSelector::from_str("lint/correctness/noUnusedImports").unwrap();
+        client
+            .pull_diagnostics(PullDiagnosticsParams {
+                project_key,
+                path: BiomePath::new(PATH),
+                categories: RuleCategoriesBuilder::default().with_lint().build(),
+                only: vec![no_unused_imports],
+                skip: vec![],
+                enabled_rules: vec![no_unused_imports],
+                include_code_fix: false,
+                inline_config: None,
+                max_diagnostics: None,
+                diagnostic_level: Severity::Hint,
+                enforce_assist: false,
+            })
+            .unwrap()
+            .diagnostics
+            .len()
+    };
+    assert_eq!(unused_imports(&editor), 1);
+    assert_eq!(unused_imports(&cli), 0);
+}
+
+/// Closing a dependency, which the workspace keeps in the database only,
+/// keeps the views of the other clients that have it open.
+#[cfg(feature = "module_graph")]
+#[test]
+fn closing_a_dependency_keeps_the_views_of_other_clients() {
+    const PATH: &str = "/project/node_modules/dependency/index.d.ts";
+
+    let (workspace, project_key, _) = lsp_workspace(&[]);
+    let (first, second) = (client(&workspace, 1), client(&workspace, 2));
+    open_in(
+        &first,
+        project_key,
+        PATH,
+        "export declare const first: number;",
+    );
+    open_in(
+        &second,
+        project_key,
+        PATH,
+        "export declare const second: number;",
+    );
+
+    first
+        .close_file(CloseFileParams {
+            project_key,
+            path: BiomePath::new(PATH),
+        })
+        .unwrap();
+
+    let db = workspace.get_db();
+    let path = Utf8Path::new(PATH);
+    assert_eq!(db.get_client_parsed_source(path, ClientId::new(1)), None);
+    let parsed_text = db
+        .get_client_parsed_source(path, ClientId::new(2))
+        .expect("the second client keeps its view")
+        .parsed(&db)
+        .syntax::<JsLanguage>()
+        .text_with_trivia()
+        .to_string();
+    assert_eq!(parsed_text, "export declare const second: number;");
+}
+
+/// The requests that a client sent before its files were closed, such as the
+/// ones still running when it disconnects, don't keep the files they open or
+/// change.
+#[cfg(feature = "module_graph")]
+#[test]
+fn closed_clients_do_not_keep_the_files_they_open_or_change() {
+    const OPENED: &str = "/project/opened.js";
+    const INDEXED: &str = "/project/indexed.js";
+
+    let (workspace, project_key, _) = lsp_workspace(&[(INDEXED, "import 'disk';")]);
+    watcher(&workspace)
+        .index_file(project_key, BiomePath::new(INDEXED))
+        .unwrap();
+    let (editor, cli) = (client(&workspace, 1), client(&workspace, 2));
+    open_in(&editor, project_key, INDEXED, "import 'editor';");
+    editor.close_client_files().unwrap();
+
+    open_in(&editor, project_key, OPENED, "import 'late';");
+    editor
+        .change_file(ChangeFileParams {
+            project_key,
+            path: BiomePath::new(INDEXED),
+            content: "import 'late';".into(),
+            version: 2,
+            inline_config: None,
+            editor_features: None,
+        })
+        .unwrap();
+
+    let exists = editor
+        .file_exists(FileExistsParams {
+            file_path: BiomePath::new(OPENED),
+        })
+        .unwrap();
+    assert!(!exists);
+    assert_eq!(
+        workspace.get_db().get_parsed_source(Utf8Path::new(OPENED)),
+        None
+    );
+    assert_eq!(content_in(&cli, project_key, INDEXED), "import 'disk';");
+}
+
+/// Closing the files of a client while another write is pending waits for the
+/// write instead of failing.
+#[cfg(feature = "module_graph")]
+#[test]
+fn closing_the_files_of_a_client_retries_when_a_write_is_pending() {
+    const TIMEOUT: Duration = Duration::from_secs(5);
+    const PATH: &str = "/project/a.js";
+
+    let (workspace, project_key, _) = lsp_workspace(&[]);
+    open_in(&client(&workspace, 1), project_key, PATH, "let a = 1;");
+
+    // The retained read keeps the setter pending, so closing the files must
+    // read the database while a write is waiting.
+    let retained_db = workspace.get_db();
+    let closed = std::thread::scope(|scope| {
+        let update = scope.spawn(|| {
+            workspace
+                .db_state
+                .insert_root_settings(project_key, Settings::default());
+        });
+        assert!(wait_until(TIMEOUT, || workspace.db_state.pending_setters() == 1));
+
+        let close = scope.spawn(|| client(&workspace, 1).close_client_files());
+        std::thread::sleep(Duration::from_millis(50));
+        drop(retained_db);
+
+        update.join().expect("the setter completes");
+        close.join()
+    });
+
+    assert!(
+        closed.expect("closing the files must not unwind").is_ok(),
+        "closing the files succeeds after the write completes"
+    );
+    let exists = client(&workspace, 1)
+        .file_exists(FileExistsParams {
+            file_path: BiomePath::new(PATH),
+        })
+        .unwrap();
+    assert!(!exists);
+}
+
 /// A change to a file that no client opened, like the one the CLI sends after
 /// it writes fixes to a file the daemon indexes, doesn't stop the workspace
 /// from following the file on disk.
@@ -1544,11 +1948,6 @@ fn process_file_is_stateless_and_reports_diagnostics_for_final_output() {
     );
 }
 
-/// Closing a file evicts its own cached parsed source through
-/// `DbState::remove_file`, and closing a project evicts the cached parsed
-/// sources of the files still open under its root through
-/// `DbState::unload_path`. Neither operation touches parsed sources that
-/// belong to a different project.
 /// Changing the parser options of a project parses its open documents again,
 /// without a change from the client.
 #[test]
@@ -1679,6 +2078,11 @@ fn node_caches_live_while_their_documents_are_open() {
     assert!(!has_node_cache(NESTED));
 }
 
+/// Closing a file evicts its own cached parsed source through
+/// `DbState::remove_editor_view`, and closing a project evicts the cached parsed
+/// sources of the files still open under its root through
+/// `DbState::unload_path`. Neither operation touches parsed sources that
+/// belong to a different project.
 #[test]
 fn close_file_and_close_project_evict_cached_parsed_sources() {
     const PATH_A: &str = "/project/file_a.js";
