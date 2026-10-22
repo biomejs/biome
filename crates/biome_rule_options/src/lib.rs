@@ -644,6 +644,7 @@ pub mod use_vue_valid_v_if;
 pub mod use_vue_valid_v_on;
 pub mod use_vue_valid_v_once;
 pub mod use_vue_valid_v_pre;
+pub mod use_vue_valid_v_show;
 pub mod use_vue_valid_v_text;
 pub mod use_vue_vapor;
 pub mod use_while;
