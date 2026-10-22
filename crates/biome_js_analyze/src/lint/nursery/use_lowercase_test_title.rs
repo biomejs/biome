@@ -79,7 +79,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseLowercaseTestTitle {
-        version: "next",
+        version: "2.6.0",
         name: "useLowercaseTestTitle",
         language: "js",
         recommended: false,

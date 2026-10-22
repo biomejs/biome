@@ -1,0 +1,1357 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+/* should generate diagnostics */
+a { top: 0px; }
+a { top: 0px /* comment */; }
+a { TOP: 0PX; }
+a { top: 0pX; }
+a { top: 0.000px; }
+a { top: .0rem; }
+a { top: -0px; }
+a { top: +0.0em; }
+a { top: 0e3px; }
+a { margin: 0q; }
+a { margin: 0cqw; }
+a { margin:0px; }
+a { margin:
+	0px; }
+a { padding: 0px 1px 2px 3px; }
+a { padding: 1px 0vmax 2px 3px; }
+a { padding: 1px 2px 0rem 3px; }
+a { padding: 1px 2px 3px 0em; }
+a { padding: 0px 0em; }
+a { padding: calc(var(--foo, 0in) + 10px) 0px; }
+a { padding: min(1vw, 0in) max(1vw, 0px) clamp(0em, 1vw, 10px) 0px; }
+a { transform: translate(0px); }
+a { margin: var(--foo, 0px); }
+a { flex-basis: 0px; }
+a { grid-template-columns: 0px 0fr 1fr; }
+a { grid-template-columns: repeat(2, 50px 0px) 100px; }
+a { font: normal normal 400 0px / 0px cursive; }
+a { font: normal normal 400 0px/0px cursive; }
+a { font: var(--foo, normal 0px/0px cursive); }
+a { top: 0px !important; }
+a { & b { top: 0px; } }
+
+@media (min-width: 0px) {}
+@media (min-width: 0px /* comment */) {}
+@media screen and (min-width: 0px) {}
+@media (width >= 0px) {}
+@media (0px <= width <= 100px) {}
+@container (width > 0px) {}
+@supports (top: 0px) {}
+
+/* The fix is unsafe for the values of custom properties and custom functions. */
+a { --x: 0px; }
+a { --x: 1px 0px; }
+a { --x: var(--y, 0px); }
+@container style(--x: 0px) {}
+@property --x { syntax: "*"; initial-value: 0px; inherits: false; }
+@function --zero() { result: 0px; }
+@function --pad(--x: 0px) { result: calc(var(--x) + 1px); }
+a { padding: --pad(0px); }
+
+```
+
+# Diagnostics
+```
+invalid.css:2:11 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ a { top: 0px; }
+      │           ^^
+    3 │ a { top: 0px /* comment */; }
+    4 │ a { TOP: 0PX; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+     1  1 │   /* should generate diagnostics */
+     2    │ - a·{·top:·0px;·}
+        2 │ + a·{·top:·0;·}
+     3  3 │   a { top: 0px /* comment */; }
+     4  4 │   a { TOP: 0PX; }
+  
+
+```
+
+```
+invalid.css:3:11 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    1 │ /* should generate diagnostics */
+    2 │ a { top: 0px; }
+  > 3 │ a { top: 0px /* comment */; }
+      │           ^^
+    4 │ a { TOP: 0PX; }
+    5 │ a { top: 0pX; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   a { top: 0px; }
+     3    │ - a·{·top:·0px·/*·comment·*/;·}
+        3 │ + a·{·top:·0·/*·comment·*/;·}
+     4  4 │   a { TOP: 0PX; }
+     5  5 │   a { top: 0pX; }
+  
+
+```
+
+```
+invalid.css:4:11 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit PX is unnecessary on a zero length.
+  
+    2 │ a { top: 0px; }
+    3 │ a { top: 0px /* comment */; }
+  > 4 │ a { TOP: 0PX; }
+      │           ^^
+    5 │ a { top: 0pX; }
+    6 │ a { top: 0.000px; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+     2  2 │   a { top: 0px; }
+     3  3 │   a { top: 0px /* comment */; }
+     4    │ - a·{·TOP:·0PX;·}
+        4 │ + a·{·TOP:·0;·}
+     5  5 │   a { top: 0pX; }
+     6  6 │   a { top: 0.000px; }
+  
+
+```
+
+```
+invalid.css:5:11 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit pX is unnecessary on a zero length.
+  
+    3 │ a { top: 0px /* comment */; }
+    4 │ a { TOP: 0PX; }
+  > 5 │ a { top: 0pX; }
+      │           ^^
+    6 │ a { top: 0.000px; }
+    7 │ a { top: .0rem; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+     3  3 │   a { top: 0px /* comment */; }
+     4  4 │   a { TOP: 0PX; }
+     5    │ - a·{·top:·0pX;·}
+        5 │ + a·{·top:·0;·}
+     6  6 │   a { top: 0.000px; }
+     7  7 │   a { top: .0rem; }
+  
+
+```
+
+```
+invalid.css:6:15 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    4 │ a { TOP: 0PX; }
+    5 │ a { top: 0pX; }
+  > 6 │ a { top: 0.000px; }
+      │               ^^
+    7 │ a { top: .0rem; }
+    8 │ a { top: -0px; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+     4  4 │   a { TOP: 0PX; }
+     5  5 │   a { top: 0pX; }
+     6    │ - a·{·top:·0.000px;·}
+        6 │ + a·{·top:·0.000;·}
+     7  7 │   a { top: .0rem; }
+     8  8 │   a { top: -0px; }
+  
+
+```
+
+```
+invalid.css:7:12 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit rem is unnecessary on a zero length.
+  
+    5 │ a { top: 0pX; }
+    6 │ a { top: 0.000px; }
+  > 7 │ a { top: .0rem; }
+      │            ^^^
+    8 │ a { top: -0px; }
+    9 │ a { top: +0.0em; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+     5  5 │   a { top: 0pX; }
+     6  6 │   a { top: 0.000px; }
+     7    │ - a·{·top:·.0rem;·}
+        7 │ + a·{·top:·.0;·}
+     8  8 │   a { top: -0px; }
+     9  9 │   a { top: +0.0em; }
+  
+
+```
+
+```
+invalid.css:8:12 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+     6 │ a { top: 0.000px; }
+     7 │ a { top: .0rem; }
+   > 8 │ a { top: -0px; }
+       │            ^^
+     9 │ a { top: +0.0em; }
+    10 │ a { top: 0e3px; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+     6  6 │   a { top: 0.000px; }
+     7  7 │   a { top: .0rem; }
+     8    │ - a·{·top:·-0px;·}
+        8 │ + a·{·top:·-0;·}
+     9  9 │   a { top: +0.0em; }
+    10 10 │   a { top: 0e3px; }
+  
+
+```
+
+```
+invalid.css:9:14 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit em is unnecessary on a zero length.
+  
+     7 │ a { top: .0rem; }
+     8 │ a { top: -0px; }
+   > 9 │ a { top: +0.0em; }
+       │              ^^
+    10 │ a { top: 0e3px; }
+    11 │ a { margin: 0q; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+     7  7 │   a { top: .0rem; }
+     8  8 │   a { top: -0px; }
+     9    │ - a·{·top:·+0.0em;·}
+        9 │ + a·{·top:·+0.0;·}
+    10 10 │   a { top: 0e3px; }
+    11 11 │   a { margin: 0q; }
+  
+
+```
+
+```
+invalid.css:10:13 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+     8 │ a { top: -0px; }
+     9 │ a { top: +0.0em; }
+  > 10 │ a { top: 0e3px; }
+       │             ^^
+    11 │ a { margin: 0q; }
+    12 │ a { margin: 0cqw; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+     8  8 │   a { top: -0px; }
+     9  9 │   a { top: +0.0em; }
+    10    │ - a·{·top:·0e3px;·}
+       10 │ + a·{·top:·0e3;·}
+    11 11 │   a { margin: 0q; }
+    12 12 │   a { margin: 0cqw; }
+  
+
+```
+
+```
+invalid.css:11:14 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit q is unnecessary on a zero length.
+  
+     9 │ a { top: +0.0em; }
+    10 │ a { top: 0e3px; }
+  > 11 │ a { margin: 0q; }
+       │              ^
+    12 │ a { margin: 0cqw; }
+    13 │ a { margin:0px; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+     9  9 │   a { top: +0.0em; }
+    10 10 │   a { top: 0e3px; }
+    11    │ - a·{·margin:·0q;·}
+       11 │ + a·{·margin:·0;·}
+    12 12 │   a { margin: 0cqw; }
+    13 13 │   a { margin:0px; }
+  
+
+```
+
+```
+invalid.css:12:14 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit cqw is unnecessary on a zero length.
+  
+    10 │ a { top: 0e3px; }
+    11 │ a { margin: 0q; }
+  > 12 │ a { margin: 0cqw; }
+       │              ^^^
+    13 │ a { margin:0px; }
+    14 │ a { margin:
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    10 10 │   a { top: 0e3px; }
+    11 11 │   a { margin: 0q; }
+    12    │ - a·{·margin:·0cqw;·}
+       12 │ + a·{·margin:·0;·}
+    13 13 │   a { margin:0px; }
+    14 14 │   a { margin:
+  
+
+```
+
+```
+invalid.css:13:13 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    11 │ a { margin: 0q; }
+    12 │ a { margin: 0cqw; }
+  > 13 │ a { margin:0px; }
+       │             ^^
+    14 │ a { margin:
+    15 │ 	0px; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    11 11 │   a { margin: 0q; }
+    12 12 │   a { margin: 0cqw; }
+    13    │ - a·{·margin:0px;·}
+       13 │ + a·{·margin:0;·}
+    14 14 │   a { margin:
+    15 15 │   	0px; }
+  
+
+```
+
+```
+invalid.css:15:3 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    13 │ a { margin:0px; }
+    14 │ a { margin:
+  > 15 │ 	0px; }
+       │ 	 ^^
+    16 │ a { padding: 0px 1px 2px 3px; }
+    17 │ a { padding: 1px 0vmax 2px 3px; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    13 13 │   a { margin:0px; }
+    14 14 │   a { margin:
+    15    │ - → 0px;·}
+       15 │ + → 0;·}
+    16 16 │   a { padding: 0px 1px 2px 3px; }
+    17 17 │   a { padding: 1px 0vmax 2px 3px; }
+  
+
+```
+
+```
+invalid.css:16:15 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    14 │ a { margin:
+    15 │ 	0px; }
+  > 16 │ a { padding: 0px 1px 2px 3px; }
+       │               ^^
+    17 │ a { padding: 1px 0vmax 2px 3px; }
+    18 │ a { padding: 1px 2px 0rem 3px; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    14 14 │   a { margin:
+    15 15 │   	0px; }
+    16    │ - a·{·padding:·0px·1px·2px·3px;·}
+       16 │ + a·{·padding:·0·1px·2px·3px;·}
+    17 17 │   a { padding: 1px 0vmax 2px 3px; }
+    18 18 │   a { padding: 1px 2px 0rem 3px; }
+  
+
+```
+
+```
+invalid.css:17:19 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit vmax is unnecessary on a zero length.
+  
+    15 │ 	0px; }
+    16 │ a { padding: 0px 1px 2px 3px; }
+  > 17 │ a { padding: 1px 0vmax 2px 3px; }
+       │                   ^^^^
+    18 │ a { padding: 1px 2px 0rem 3px; }
+    19 │ a { padding: 1px 2px 3px 0em; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    15 15 │   	0px; }
+    16 16 │   a { padding: 0px 1px 2px 3px; }
+    17    │ - a·{·padding:·1px·0vmax·2px·3px;·}
+       17 │ + a·{·padding:·1px·0·2px·3px;·}
+    18 18 │   a { padding: 1px 2px 0rem 3px; }
+    19 19 │   a { padding: 1px 2px 3px 0em; }
+  
+
+```
+
+```
+invalid.css:18:23 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit rem is unnecessary on a zero length.
+  
+    16 │ a { padding: 0px 1px 2px 3px; }
+    17 │ a { padding: 1px 0vmax 2px 3px; }
+  > 18 │ a { padding: 1px 2px 0rem 3px; }
+       │                       ^^^
+    19 │ a { padding: 1px 2px 3px 0em; }
+    20 │ a { padding: 0px 0em; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    16 16 │   a { padding: 0px 1px 2px 3px; }
+    17 17 │   a { padding: 1px 0vmax 2px 3px; }
+    18    │ - a·{·padding:·1px·2px·0rem·3px;·}
+       18 │ + a·{·padding:·1px·2px·0·3px;·}
+    19 19 │   a { padding: 1px 2px 3px 0em; }
+    20 20 │   a { padding: 0px 0em; }
+  
+
+```
+
+```
+invalid.css:19:27 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit em is unnecessary on a zero length.
+  
+    17 │ a { padding: 1px 0vmax 2px 3px; }
+    18 │ a { padding: 1px 2px 0rem 3px; }
+  > 19 │ a { padding: 1px 2px 3px 0em; }
+       │                           ^^
+    20 │ a { padding: 0px 0em; }
+    21 │ a { padding: calc(var(--foo, 0in) + 10px) 0px; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    17 17 │   a { padding: 1px 0vmax 2px 3px; }
+    18 18 │   a { padding: 1px 2px 0rem 3px; }
+    19    │ - a·{·padding:·1px·2px·3px·0em;·}
+       19 │ + a·{·padding:·1px·2px·3px·0;·}
+    20 20 │   a { padding: 0px 0em; }
+    21 21 │   a { padding: calc(var(--foo, 0in) + 10px) 0px; }
+  
+
+```
+
+```
+invalid.css:20:15 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    18 │ a { padding: 1px 2px 0rem 3px; }
+    19 │ a { padding: 1px 2px 3px 0em; }
+  > 20 │ a { padding: 0px 0em; }
+       │               ^^
+    21 │ a { padding: calc(var(--foo, 0in) + 10px) 0px; }
+    22 │ a { padding: min(1vw, 0in) max(1vw, 0px) clamp(0em, 1vw, 10px) 0px; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    18 18 │   a { padding: 1px 2px 0rem 3px; }
+    19 19 │   a { padding: 1px 2px 3px 0em; }
+    20    │ - a·{·padding:·0px·0em;·}
+       20 │ + a·{·padding:·0·0em;·}
+    21 21 │   a { padding: calc(var(--foo, 0in) + 10px) 0px; }
+    22 22 │   a { padding: min(1vw, 0in) max(1vw, 0px) clamp(0em, 1vw, 10px) 0px; }
+  
+
+```
+
+```
+invalid.css:20:19 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit em is unnecessary on a zero length.
+  
+    18 │ a { padding: 1px 2px 0rem 3px; }
+    19 │ a { padding: 1px 2px 3px 0em; }
+  > 20 │ a { padding: 0px 0em; }
+       │                   ^^
+    21 │ a { padding: calc(var(--foo, 0in) + 10px) 0px; }
+    22 │ a { padding: min(1vw, 0in) max(1vw, 0px) clamp(0em, 1vw, 10px) 0px; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    18 18 │   a { padding: 1px 2px 0rem 3px; }
+    19 19 │   a { padding: 1px 2px 3px 0em; }
+    20    │ - a·{·padding:·0px·0em;·}
+       20 │ + a·{·padding:·0px·0;·}
+    21 21 │   a { padding: calc(var(--foo, 0in) + 10px) 0px; }
+    22 22 │   a { padding: min(1vw, 0in) max(1vw, 0px) clamp(0em, 1vw, 10px) 0px; }
+  
+
+```
+
+```
+invalid.css:21:44 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    19 │ a { padding: 1px 2px 3px 0em; }
+    20 │ a { padding: 0px 0em; }
+  > 21 │ a { padding: calc(var(--foo, 0in) + 10px) 0px; }
+       │                                            ^^
+    22 │ a { padding: min(1vw, 0in) max(1vw, 0px) clamp(0em, 1vw, 10px) 0px; }
+    23 │ a { transform: translate(0px); }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    19 19 │   a { padding: 1px 2px 3px 0em; }
+    20 20 │   a { padding: 0px 0em; }
+    21    │ - a·{·padding:·calc(var(--foo,·0in)·+·10px)·0px;·}
+       21 │ + a·{·padding:·calc(var(--foo,·0in)·+·10px)·0;·}
+    22 22 │   a { padding: min(1vw, 0in) max(1vw, 0px) clamp(0em, 1vw, 10px) 0px; }
+    23 23 │   a { transform: translate(0px); }
+  
+
+```
+
+```
+invalid.css:22:65 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    20 │ a { padding: 0px 0em; }
+    21 │ a { padding: calc(var(--foo, 0in) + 10px) 0px; }
+  > 22 │ a { padding: min(1vw, 0in) max(1vw, 0px) clamp(0em, 1vw, 10px) 0px; }
+       │                                                                 ^^
+    23 │ a { transform: translate(0px); }
+    24 │ a { margin: var(--foo, 0px); }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    20 20 │   a { padding: 0px 0em; }
+    21 21 │   a { padding: calc(var(--foo, 0in) + 10px) 0px; }
+    22    │ - a·{·padding:·min(1vw,·0in)·max(1vw,·0px)·clamp(0em,·1vw,·10px)·0px;·}
+       22 │ + a·{·padding:·min(1vw,·0in)·max(1vw,·0px)·clamp(0em,·1vw,·10px)·0;·}
+    23 23 │   a { transform: translate(0px); }
+    24 24 │   a { margin: var(--foo, 0px); }
+  
+
+```
+
+```
+invalid.css:23:27 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    21 │ a { padding: calc(var(--foo, 0in) + 10px) 0px; }
+    22 │ a { padding: min(1vw, 0in) max(1vw, 0px) clamp(0em, 1vw, 10px) 0px; }
+  > 23 │ a { transform: translate(0px); }
+       │                           ^^
+    24 │ a { margin: var(--foo, 0px); }
+    25 │ a { flex-basis: 0px; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    21 21 │   a { padding: calc(var(--foo, 0in) + 10px) 0px; }
+    22 22 │   a { padding: min(1vw, 0in) max(1vw, 0px) clamp(0em, 1vw, 10px) 0px; }
+    23    │ - a·{·transform:·translate(0px);·}
+       23 │ + a·{·transform:·translate(0);·}
+    24 24 │   a { margin: var(--foo, 0px); }
+    25 25 │   a { flex-basis: 0px; }
+  
+
+```
+
+```
+invalid.css:24:25 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    22 │ a { padding: min(1vw, 0in) max(1vw, 0px) clamp(0em, 1vw, 10px) 0px; }
+    23 │ a { transform: translate(0px); }
+  > 24 │ a { margin: var(--foo, 0px); }
+       │                         ^^
+    25 │ a { flex-basis: 0px; }
+    26 │ a { grid-template-columns: 0px 0fr 1fr; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    22 22 │   a { padding: min(1vw, 0in) max(1vw, 0px) clamp(0em, 1vw, 10px) 0px; }
+    23 23 │   a { transform: translate(0px); }
+    24    │ - a·{·margin:·var(--foo,·0px);·}
+       24 │ + a·{·margin:·var(--foo,·0);·}
+    25 25 │   a { flex-basis: 0px; }
+    26 26 │   a { grid-template-columns: 0px 0fr 1fr; }
+  
+
+```
+
+```
+invalid.css:25:18 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    23 │ a { transform: translate(0px); }
+    24 │ a { margin: var(--foo, 0px); }
+  > 25 │ a { flex-basis: 0px; }
+       │                  ^^
+    26 │ a { grid-template-columns: 0px 0fr 1fr; }
+    27 │ a { grid-template-columns: repeat(2, 50px 0px) 100px; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    23 23 │   a { transform: translate(0px); }
+    24 24 │   a { margin: var(--foo, 0px); }
+    25    │ - a·{·flex-basis:·0px;·}
+       25 │ + a·{·flex-basis:·0;·}
+    26 26 │   a { grid-template-columns: 0px 0fr 1fr; }
+    27 27 │   a { grid-template-columns: repeat(2, 50px 0px) 100px; }
+  
+
+```
+
+```
+invalid.css:26:29 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    24 │ a { margin: var(--foo, 0px); }
+    25 │ a { flex-basis: 0px; }
+  > 26 │ a { grid-template-columns: 0px 0fr 1fr; }
+       │                             ^^
+    27 │ a { grid-template-columns: repeat(2, 50px 0px) 100px; }
+    28 │ a { font: normal normal 400 0px / 0px cursive; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    24 24 │   a { margin: var(--foo, 0px); }
+    25 25 │   a { flex-basis: 0px; }
+    26    │ - a·{·grid-template-columns:·0px·0fr·1fr;·}
+       26 │ + a·{·grid-template-columns:·0·0fr·1fr;·}
+    27 27 │   a { grid-template-columns: repeat(2, 50px 0px) 100px; }
+    28 28 │   a { font: normal normal 400 0px / 0px cursive; }
+  
+
+```
+
+```
+invalid.css:27:44 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    25 │ a { flex-basis: 0px; }
+    26 │ a { grid-template-columns: 0px 0fr 1fr; }
+  > 27 │ a { grid-template-columns: repeat(2, 50px 0px) 100px; }
+       │                                            ^^
+    28 │ a { font: normal normal 400 0px / 0px cursive; }
+    29 │ a { font: normal normal 400 0px/0px cursive; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    25 25 │   a { flex-basis: 0px; }
+    26 26 │   a { grid-template-columns: 0px 0fr 1fr; }
+    27    │ - a·{·grid-template-columns:·repeat(2,·50px·0px)·100px;·}
+       27 │ + a·{·grid-template-columns:·repeat(2,·50px·0)·100px;·}
+    28 28 │   a { font: normal normal 400 0px / 0px cursive; }
+    29 29 │   a { font: normal normal 400 0px/0px cursive; }
+  
+
+```
+
+```
+invalid.css:28:30 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    26 │ a { grid-template-columns: 0px 0fr 1fr; }
+    27 │ a { grid-template-columns: repeat(2, 50px 0px) 100px; }
+  > 28 │ a { font: normal normal 400 0px / 0px cursive; }
+       │                              ^^
+    29 │ a { font: normal normal 400 0px/0px cursive; }
+    30 │ a { font: var(--foo, normal 0px/0px cursive); }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    26 26 │   a { grid-template-columns: 0px 0fr 1fr; }
+    27 27 │   a { grid-template-columns: repeat(2, 50px 0px) 100px; }
+    28    │ - a·{·font:·normal·normal·400·0px·/·0px·cursive;·}
+       28 │ + a·{·font:·normal·normal·400·0·/·0px·cursive;·}
+    29 29 │   a { font: normal normal 400 0px/0px cursive; }
+    30 30 │   a { font: var(--foo, normal 0px/0px cursive); }
+  
+
+```
+
+```
+invalid.css:29:30 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    27 │ a { grid-template-columns: repeat(2, 50px 0px) 100px; }
+    28 │ a { font: normal normal 400 0px / 0px cursive; }
+  > 29 │ a { font: normal normal 400 0px/0px cursive; }
+       │                              ^^
+    30 │ a { font: var(--foo, normal 0px/0px cursive); }
+    31 │ a { top: 0px !important; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    27 27 │   a { grid-template-columns: repeat(2, 50px 0px) 100px; }
+    28 28 │   a { font: normal normal 400 0px / 0px cursive; }
+    29    │ - a·{·font:·normal·normal·400·0px/0px·cursive;·}
+       29 │ + a·{·font:·normal·normal·400·0/0px·cursive;·}
+    30 30 │   a { font: var(--foo, normal 0px/0px cursive); }
+    31 31 │   a { top: 0px !important; }
+  
+
+```
+
+```
+invalid.css:30:30 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    28 │ a { font: normal normal 400 0px / 0px cursive; }
+    29 │ a { font: normal normal 400 0px/0px cursive; }
+  > 30 │ a { font: var(--foo, normal 0px/0px cursive); }
+       │                              ^^
+    31 │ a { top: 0px !important; }
+    32 │ a { & b { top: 0px; } }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    28 28 │   a { font: normal normal 400 0px / 0px cursive; }
+    29 29 │   a { font: normal normal 400 0px/0px cursive; }
+    30    │ - a·{·font:·var(--foo,·normal·0px/0px·cursive);·}
+       30 │ + a·{·font:·var(--foo,·normal·0/0px·cursive);·}
+    31 31 │   a { top: 0px !important; }
+    32 32 │   a { & b { top: 0px; } }
+  
+
+```
+
+```
+invalid.css:31:11 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    29 │ a { font: normal normal 400 0px/0px cursive; }
+    30 │ a { font: var(--foo, normal 0px/0px cursive); }
+  > 31 │ a { top: 0px !important; }
+       │           ^^
+    32 │ a { & b { top: 0px; } }
+    33 │ 
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    29 29 │   a { font: normal normal 400 0px/0px cursive; }
+    30 30 │   a { font: var(--foo, normal 0px/0px cursive); }
+    31    │ - a·{·top:·0px·!important;·}
+       31 │ + a·{·top:·0·!important;·}
+    32 32 │   a { & b { top: 0px; } }
+    33 33 │   
+  
+
+```
+
+```
+invalid.css:32:17 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    30 │ a { font: var(--foo, normal 0px/0px cursive); }
+    31 │ a { top: 0px !important; }
+  > 32 │ a { & b { top: 0px; } }
+       │                 ^^
+    33 │ 
+    34 │ @media (min-width: 0px) {}
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    30 30 │   a { font: var(--foo, normal 0px/0px cursive); }
+    31 31 │   a { top: 0px !important; }
+    32    │ - a·{·&·b·{·top:·0px;·}·}
+       32 │ + a·{·&·b·{·top:·0;·}·}
+    33 33 │   
+    34 34 │   @media (min-width: 0px) {}
+  
+
+```
+
+```
+invalid.css:34:21 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    32 │ a { & b { top: 0px; } }
+    33 │ 
+  > 34 │ @media (min-width: 0px) {}
+       │                     ^^
+    35 │ @media (min-width: 0px /* comment */) {}
+    36 │ @media screen and (min-width: 0px) {}
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    32 32 │   a { & b { top: 0px; } }
+    33 33 │   
+    34    │ - @media·(min-width:·0px)·{}
+       34 │ + @media·(min-width:·0)·{}
+    35 35 │   @media (min-width: 0px /* comment */) {}
+    36 36 │   @media screen and (min-width: 0px) {}
+  
+
+```
+
+```
+invalid.css:35:21 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    34 │ @media (min-width: 0px) {}
+  > 35 │ @media (min-width: 0px /* comment */) {}
+       │                     ^^
+    36 │ @media screen and (min-width: 0px) {}
+    37 │ @media (width >= 0px) {}
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    33 33 │   
+    34 34 │   @media (min-width: 0px) {}
+    35    │ - @media·(min-width:·0px·/*·comment·*/)·{}
+       35 │ + @media·(min-width:·0·/*·comment·*/)·{}
+    36 36 │   @media screen and (min-width: 0px) {}
+    37 37 │   @media (width >= 0px) {}
+  
+
+```
+
+```
+invalid.css:36:32 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    34 │ @media (min-width: 0px) {}
+    35 │ @media (min-width: 0px /* comment */) {}
+  > 36 │ @media screen and (min-width: 0px) {}
+       │                                ^^
+    37 │ @media (width >= 0px) {}
+    38 │ @media (0px <= width <= 100px) {}
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    34 34 │   @media (min-width: 0px) {}
+    35 35 │   @media (min-width: 0px /* comment */) {}
+    36    │ - @media·screen·and·(min-width:·0px)·{}
+       36 │ + @media·screen·and·(min-width:·0)·{}
+    37 37 │   @media (width >= 0px) {}
+    38 38 │   @media (0px <= width <= 100px) {}
+  
+
+```
+
+```
+invalid.css:37:19 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    35 │ @media (min-width: 0px /* comment */) {}
+    36 │ @media screen and (min-width: 0px) {}
+  > 37 │ @media (width >= 0px) {}
+       │                   ^^
+    38 │ @media (0px <= width <= 100px) {}
+    39 │ @container (width > 0px) {}
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    35 35 │   @media (min-width: 0px /* comment */) {}
+    36 36 │   @media screen and (min-width: 0px) {}
+    37    │ - @media·(width·>=·0px)·{}
+       37 │ + @media·(width·>=·0)·{}
+    38 38 │   @media (0px <= width <= 100px) {}
+    39 39 │   @container (width > 0px) {}
+  
+
+```
+
+```
+invalid.css:38:10 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    36 │ @media screen and (min-width: 0px) {}
+    37 │ @media (width >= 0px) {}
+  > 38 │ @media (0px <= width <= 100px) {}
+       │          ^^
+    39 │ @container (width > 0px) {}
+    40 │ @supports (top: 0px) {}
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    36 36 │   @media screen and (min-width: 0px) {}
+    37 37 │   @media (width >= 0px) {}
+    38    │ - @media·(0px·<=·width·<=·100px)·{}
+       38 │ + @media·(0·<=·width·<=·100px)·{}
+    39 39 │   @container (width > 0px) {}
+    40 40 │   @supports (top: 0px) {}
+  
+
+```
+
+```
+invalid.css:39:22 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    37 │ @media (width >= 0px) {}
+    38 │ @media (0px <= width <= 100px) {}
+  > 39 │ @container (width > 0px) {}
+       │                      ^^
+    40 │ @supports (top: 0px) {}
+    41 │ 
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    37 37 │   @media (width >= 0px) {}
+    38 38 │   @media (0px <= width <= 100px) {}
+    39    │ - @container·(width·>·0px)·{}
+       39 │ + @container·(width·>·0)·{}
+    40 40 │   @supports (top: 0px) {}
+    41 41 │   
+  
+
+```
+
+```
+invalid.css:40:18 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    38 │ @media (0px <= width <= 100px) {}
+    39 │ @container (width > 0px) {}
+  > 40 │ @supports (top: 0px) {}
+       │                  ^^
+    41 │ 
+    42 │ /* The fix is unsafe for the values of custom properties and custom functions. */
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Safe fix: Remove the unit.
+  
+    38 38 │   @media (0px <= width <= 100px) {}
+    39 39 │   @container (width > 0px) {}
+    40    │ - @supports·(top:·0px)·{}
+       40 │ + @supports·(top:·0)·{}
+    41 41 │   
+    42 42 │   /* The fix is unsafe for the values of custom properties and custom functions. */
+  
+
+```
+
+```
+invalid.css:43:11 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    42 │ /* The fix is unsafe for the values of custom properties and custom functions. */
+  > 43 │ a { --x: 0px; }
+       │           ^^
+    44 │ a { --x: 1px 0px; }
+    45 │ a { --x: var(--y, 0px); }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i Here, 0 and a zero length aren't always interchangeable. For example, CSS can copy this value into a calc(), where a zero without a unit can't be added to or subtracted from a length. Check how the value is used before removing the unit.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unit.
+  
+    41 41 │   
+    42 42 │   /* The fix is unsafe for the values of custom properties and custom functions. */
+    43    │ - a·{·--x:·0px;·}
+       43 │ + a·{·--x:·0;·}
+    44 44 │   a { --x: 1px 0px; }
+    45 45 │   a { --x: var(--y, 0px); }
+  
+
+```
+
+```
+invalid.css:44:15 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    42 │ /* The fix is unsafe for the values of custom properties and custom functions. */
+    43 │ a { --x: 0px; }
+  > 44 │ a { --x: 1px 0px; }
+       │               ^^
+    45 │ a { --x: var(--y, 0px); }
+    46 │ @container style(--x: 0px) {}
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i Here, 0 and a zero length aren't always interchangeable. For example, CSS can copy this value into a calc(), where a zero without a unit can't be added to or subtracted from a length. Check how the value is used before removing the unit.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unit.
+  
+    42 42 │   /* The fix is unsafe for the values of custom properties and custom functions. */
+    43 43 │   a { --x: 0px; }
+    44    │ - a·{·--x:·1px·0px;·}
+       44 │ + a·{·--x:·1px·0;·}
+    45 45 │   a { --x: var(--y, 0px); }
+    46 46 │   @container style(--x: 0px) {}
+  
+
+```
+
+```
+invalid.css:45:20 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    43 │ a { --x: 0px; }
+    44 │ a { --x: 1px 0px; }
+  > 45 │ a { --x: var(--y, 0px); }
+       │                    ^^
+    46 │ @container style(--x: 0px) {}
+    47 │ @property --x { syntax: "*"; initial-value: 0px; inherits: false; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i Here, 0 and a zero length aren't always interchangeable. For example, CSS can copy this value into a calc(), where a zero without a unit can't be added to or subtracted from a length. Check how the value is used before removing the unit.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unit.
+  
+    43 43 │   a { --x: 0px; }
+    44 44 │   a { --x: 1px 0px; }
+    45    │ - a·{·--x:·var(--y,·0px);·}
+       45 │ + a·{·--x:·var(--y,·0);·}
+    46 46 │   @container style(--x: 0px) {}
+    47 47 │   @property --x { syntax: "*"; initial-value: 0px; inherits: false; }
+  
+
+```
+
+```
+invalid.css:46:24 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    44 │ a { --x: 1px 0px; }
+    45 │ a { --x: var(--y, 0px); }
+  > 46 │ @container style(--x: 0px) {}
+       │                        ^^
+    47 │ @property --x { syntax: "*"; initial-value: 0px; inherits: false; }
+    48 │ @function --zero() { result: 0px; }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i Here, 0 and a zero length aren't always interchangeable. For example, CSS can copy this value into a calc(), where a zero without a unit can't be added to or subtracted from a length. Check how the value is used before removing the unit.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unit.
+  
+    44 44 │   a { --x: 1px 0px; }
+    45 45 │   a { --x: var(--y, 0px); }
+    46    │ - @container·style(--x:·0px)·{}
+       46 │ + @container·style(--x:·0)·{}
+    47 47 │   @property --x { syntax: "*"; initial-value: 0px; inherits: false; }
+    48 48 │   @function --zero() { result: 0px; }
+  
+
+```
+
+```
+invalid.css:47:46 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    45 │ a { --x: var(--y, 0px); }
+    46 │ @container style(--x: 0px) {}
+  > 47 │ @property --x { syntax: "*"; initial-value: 0px; inherits: false; }
+       │                                              ^^
+    48 │ @function --zero() { result: 0px; }
+    49 │ @function --pad(--x: 0px) { result: calc(var(--x) + 1px); }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i Here, 0 and a zero length aren't always interchangeable. For example, CSS can copy this value into a calc(), where a zero without a unit can't be added to or subtracted from a length. Check how the value is used before removing the unit.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unit.
+  
+    45 45 │   a { --x: var(--y, 0px); }
+    46 46 │   @container style(--x: 0px) {}
+    47    │ - @property·--x·{·syntax:·"*";·initial-value:·0px;·inherits:·false;·}
+       47 │ + @property·--x·{·syntax:·"*";·initial-value:·0;·inherits:·false;·}
+    48 48 │   @function --zero() { result: 0px; }
+    49 49 │   @function --pad(--x: 0px) { result: calc(var(--x) + 1px); }
+  
+
+```
+
+```
+invalid.css:48:31 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    46 │ @container style(--x: 0px) {}
+    47 │ @property --x { syntax: "*"; initial-value: 0px; inherits: false; }
+  > 48 │ @function --zero() { result: 0px; }
+       │                               ^^
+    49 │ @function --pad(--x: 0px) { result: calc(var(--x) + 1px); }
+    50 │ a { padding: --pad(0px); }
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i Here, 0 and a zero length aren't always interchangeable. For example, CSS can copy this value into a calc(), where a zero without a unit can't be added to or subtracted from a length. Check how the value is used before removing the unit.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unit.
+  
+    46 46 │   @container style(--x: 0px) {}
+    47 47 │   @property --x { syntax: "*"; initial-value: 0px; inherits: false; }
+    48    │ - @function·--zero()·{·result:·0px;·}
+       48 │ + @function·--zero()·{·result:·0;·}
+    49 49 │   @function --pad(--x: 0px) { result: calc(var(--x) + 1px); }
+    50 50 │   a { padding: --pad(0px); }
+  
+
+```
+
+```
+invalid.css:49:23 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    47 │ @property --x { syntax: "*"; initial-value: 0px; inherits: false; }
+    48 │ @function --zero() { result: 0px; }
+  > 49 │ @function --pad(--x: 0px) { result: calc(var(--x) + 1px); }
+       │                       ^^
+    50 │ a { padding: --pad(0px); }
+    51 │ 
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i Here, 0 and a zero length aren't always interchangeable. For example, CSS can copy this value into a calc(), where a zero without a unit can't be added to or subtracted from a length. Check how the value is used before removing the unit.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unit.
+  
+    47 47 │   @property --x { syntax: "*"; initial-value: 0px; inherits: false; }
+    48 48 │   @function --zero() { result: 0px; }
+    49    │ - @function·--pad(--x:·0px)·{·result:·calc(var(--x)·+·1px);·}
+       49 │ + @function·--pad(--x:·0)·{·result:·calc(var(--x)·+·1px);·}
+    50 50 │   a { padding: --pad(0px); }
+    51 51 │   
+  
+
+```
+
+```
+invalid.css:50:21 lint/nursery/noZeroLengthUnit  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The unit px is unnecessary on a zero length.
+  
+    48 │ @function --zero() { result: 0px; }
+    49 │ @function --pad(--x: 0px) { result: calc(var(--x) + 1px); }
+  > 50 │ a { padding: --pad(0px); }
+       │                     ^^
+    51 │ 
+  
+  i A length of zero is the same in every unit, so 0 is enough.
+  
+  i Here, 0 and a zero length aren't always interchangeable. For example, CSS can copy this value into a calc(), where a zero without a unit can't be added to or subtracted from a length. Check how the value is used before removing the unit.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the unit.
+  
+    48 48 │   @function --zero() { result: 0px; }
+    49 49 │   @function --pad(--x: 0px) { result: calc(var(--x) + 1px); }
+    50    │ - a·{·padding:·--pad(0px);·}
+       50 │ + a·{·padding:·--pad(0);·}
+    51 51 │   
+  
+
+```

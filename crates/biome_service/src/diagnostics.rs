@@ -8,7 +8,7 @@ use biome_console::fmt::Bytes;
 use biome_console::markup;
 use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, MessageAndDescription,
-    Resource, Severity, Visit, category,
+    Severity, Visit, category,
 };
 use biome_formatter::{FormatError, PrintError};
 use biome_fs::{BiomePath, FileSystemDiagnostic};
@@ -605,6 +605,9 @@ pub enum TransportError {
     Timeout,
     /// Error caused by a serialization or deserialization issue
     SerdeError(String),
+    /// Error emitted when the remote workspace cancelled a request because
+    /// its content changed while the request was running.
+    ContentModified,
     /// Generic error type for RPC errors that can't be deserialized into RomeError
     RPCError(String),
     /// A diagnostic returned by a remote workspace.
@@ -639,6 +642,9 @@ impl Diagnostic for TransportError {
                 "a request to the remote workspace failed because the connection was interrupted",
             ),
             Self::Timeout => fmt.write_str("the request to the remote workspace timed out"),
+            Self::ContentModified => fmt.write_str(
+                "the remote workspace cancelled the request because its content changed",
+            ),
             Self::RPCError(err) => fmt.write_str(err),
             Self::RemoteDiagnostic(diagnostic) => diagnostic.description(fmt),
         }
@@ -651,6 +657,9 @@ impl Diagnostic for TransportError {
                 "a request to the remote workspace failed because the connection was interrupted",
             ),
             Self::Timeout => fmt.write_str("the request to the remote workspace timed out"),
+            Self::ContentModified => fmt.write_str(
+                "the remote workspace cancelled the request because its content changed",
+            ),
             Self::RPCError(err) => fmt.write_str(err),
             Self::RemoteDiagnostic(diagnostic) => diagnostic.message(fmt),
         }
@@ -787,7 +796,7 @@ impl Diagnostic for PluginErrors {
         for diagnostic in &self.diagnostics {
             fmt.write_str("\n")?;
 
-            if let Some(Resource::File(path)) = diagnostic.location().resource {
+            if let Some(biome_diagnostics::Resource::File(path)) = diagnostic.location().resource {
                 fmt.write_markup(markup!(<Emphasis>{path}</Emphasis>": "))?;
             }
 
@@ -957,6 +966,14 @@ mod test {
     #[test]
     fn transport_timeout() {
         snap_diagnostic("transport_timeout", TransportError::Timeout.into())
+    }
+
+    #[test]
+    fn transport_content_modified() {
+        snap_diagnostic(
+            "transport_content_modified",
+            TransportError::ContentModified.into(),
+        )
     }
 
     #[test]

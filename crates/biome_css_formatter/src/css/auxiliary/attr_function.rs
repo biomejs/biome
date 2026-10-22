@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use biome_css_syntax::{CssAttrFunction, CssAttrFunctionFields};
+use biome_css_syntax::{AnyCssAttrType, CssAttrFunction, CssAttrFunctionFields};
 use biome_formatter::{format_args, write};
 
 #[derive(Debug, Clone, Default)]
@@ -17,6 +17,22 @@ impl FormatNodeRule<CssAttrFunction> for FormatCssAttrFunction {
         } = node.as_fields();
 
         let should_insert_space = f.options().delimiter_spacing().value();
+        let should_break_before_fallback = match (&attr_type, &fallback_value) {
+            (Some(attr_type), Some(fallback)) => {
+                // A suppressed comma-prefixed fallback needs its own line
+                // so the directive stays leading after reparsing.
+                let has_suppressed_dynamic_fallback =
+                    matches!(
+                        attr_type,
+                        AnyCssAttrType::ScssVariable(_)
+                            | AnyCssAttrType::ScssNamespacedVariable(_)
+                            | AnyCssAttrType::ScssInterpolatedIdentifier(_)
+                    ) && f.comments().is_suppressed(fallback.syntax());
+                has_suppressed_dynamic_fallback
+                    || f.comments().has_trailing_line_comment(attr_type.syntax())
+            }
+            _ => false,
+        };
 
         write!(
             f,
@@ -30,6 +46,10 @@ impl FormatNodeRule<CssAttrFunction> for FormatCssAttrFunction {
 
                             if let Some(attr_type) = &attr_type {
                                 write!(f, [soft_line_break_or_space(), attr_type.format()])?;
+                            }
+
+                            if should_break_before_fallback {
+                                write!(f, [hard_line_break()])?;
                             }
 
                             write!(f, [fallback_value.format()])?;

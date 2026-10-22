@@ -1,0 +1,73 @@
+/* should not generate diagnostics */
+.nested-properties {
+  border: {
+    radius: 4px;
+    width: 1px;
+    style: solid;
+    color: red;
+  }
+}
+
+.nested-groups {
+  border: {
+    top: {
+      left-radius: 1px;
+    }
+  }
+}
+
+.group-with-value {
+  font: 12px/30px {
+    family: sans-serif;
+    weight: bold;
+  }
+}
+
+.vendor-prefixed-group {
+  -webkit-border: {
+    radius: 4px;
+  }
+}
+
+.interpolated-group {
+  #{$side}: {
+    unknown: 1px;
+  }
+}
+
+.nested-rule {
+  a:hover {
+    color: red;
+  }
+}
+
+@mixin with-content {
+  @content;
+}
+
+$bold: true;
+$count: 0;
+.at-rules-in-group {
+  font: {
+    @if $bold {
+      weight: bold;
+    } @else if $count > 0 {
+      variant-numeric: normal;
+    } @else {
+      style: normal;
+    }
+    @each $name in first, second {
+      stretch: normal;
+    }
+    @for $index from 1 through 2 {
+      variant: normal;
+    }
+    @while $count < 1 {
+      variant-caps: normal;
+      $count: $count + 1;
+    }
+    @include with-content {
+      synthesis: none;
+    }
+  }
+}

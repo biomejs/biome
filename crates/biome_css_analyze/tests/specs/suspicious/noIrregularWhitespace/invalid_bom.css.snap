@@ -1,0 +1,33 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid_bom.css
+---
+# Input
+```css
+﻿
+/* should generate diagnostics: U+000C form feed */
+.foo {
+	color: red;
+}
+
+```
+
+_Note: The parser emitted 1 diagnostics which are not shown here._
+
+# Diagnostics
+```
+invalid_bom.css:1:2 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+  > 1 │ �↡
+      │  ^
+    2 │ /* should generate diagnostics: U+000C form feed */
+    3 │ .foo {
+  
+  i Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find.
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```

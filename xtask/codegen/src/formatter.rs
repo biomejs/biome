@@ -834,6 +834,7 @@ fn get_node_concept(
                         | "Length"
                         | "UrlValueRaw"
                         | "HashValue"
+                        | "PercentValue"
                 ) || name.ends_with("Dimension")
                     || name.ends_with("Identifier") =>
                 {

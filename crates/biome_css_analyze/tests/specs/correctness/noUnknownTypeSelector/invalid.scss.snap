@@ -27,6 +27,8 @@ invalid.scss:3:1 lint/correctness/noUnknownTypeSelector ━━━━━━━━
   
   i See MDN web docs for more details.
   
+  i A selector for an element that does not exist never matches, so its styles are never applied.
+  
   i Consider replacing the unknown type selector with valid one.
   
 

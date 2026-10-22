@@ -114,7 +114,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseConsistentBlockLang {
-        version: "next",
+        version: "2.6.0",
         name: "useConsistentBlockLang",
         language: "html",
         recommended: false,

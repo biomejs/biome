@@ -13,6 +13,7 @@ use biome_rowan::SyntaxKind;
 use biome_service::settings::Settings;
 use biome_test_utils::{
     grit_metavariable_ranges, has_bogus_nodes_or_empty_slots, validate_eof_token,
+    validate_text_trimmed_ranges,
 };
 use camino::Utf8Path;
 use std::fmt::Write;
@@ -106,6 +107,18 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
             event_handler: false,
             allow_statements: false,
             slot_props: true,
+            generics_list: false,
+        });
+    } else if file_name.contains(".vue_generics_list.") {
+        // Fixture text is the value of the `generic` attribute of a Vue `<script setup>`.
+        file_source = file_source.with_embedding_kind(JsEmbeddingKind::Vue {
+            is_class_attribute: false,
+            setup: false,
+            is_source: false,
+            event_handler: false,
+            allow_statements: false,
+            slot_props: false,
+            generics_list: true,
         });
     } else if file_name.contains(".astro_expr.") {
         // Fixture text is the brace-less body of an Astro `{...}` expression.
@@ -129,6 +142,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     };
     let parsed = parse_with_metavariables(&content, file_source, options, &metavariables);
     validate_eof_token(parsed.syntax());
+    validate_text_trimmed_ranges(&parsed.syntax());
 
     let formatted_ast = format!("{:#?}", parsed.tree());
 

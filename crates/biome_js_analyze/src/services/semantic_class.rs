@@ -17,7 +17,8 @@ use biome_js_syntax::{
     inner_string_text, static_value::StaticValue,
 };
 use biome_rowan::{
-    AstNode, AstNodeList, AstSeparatedList, SyntaxNode, Text, WalkEvent, declare_node_union,
+    AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, SyntaxNode, Text, WalkEvent,
+    declare_node_union,
 };
 use rustc_hash::FxHashSet;
 use std::option::Option;
@@ -94,6 +95,13 @@ impl Visitor for SyntaxClassMemberReferencesVisitor {
     ) {
     }
 
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(SyntaxKindSet::EMPTY)
+    }
+
     fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
         ctx.services.insert_service(SemanticClassModel {});
     }
@@ -114,6 +122,13 @@ impl Visitor for SemanticClassMemberReferencesVisitor {
         {
             ctx.match_query(node.clone());
         }
+    }
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(AnyJsClass::KIND_SET)
     }
 }
 

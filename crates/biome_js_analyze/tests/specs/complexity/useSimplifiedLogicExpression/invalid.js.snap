@@ -40,6 +40,8 @@ invalid.js:1:11 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━
     2 │ const nonNullExp = 123;
     3 │ const r3 = null ?? nonNullExp;
   
+  i A simpler expression is easier to read and less likely to hide a mistake.
+  
   i Safe fix: Discard redundant terms from the logical expression.
   
     1 │ const·r·=·true·&&·boolExp;
@@ -59,6 +61,8 @@ invalid.js:3:12 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━
     4 │ const boolExpr1 = true;
     5 │ const boolExpr2 = false;
   
+  i A simpler expression is easier to read and less likely to hide a mistake.
+  
   i Safe fix: Discard redundant terms from the logical expression.
   
     3 │ const·r3·=·null·??·nonNullExp;
@@ -77,6 +81,8 @@ invalid.js:6:18 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━
       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     7 │ 
     8 │ if (
+  
+  i A simpler expression is easier to read and less likely to hide a mistake.
   
   i Safe fix: Reduce the complexity of the logical expression.
   
@@ -102,6 +108,8 @@ invalid.js:9:5 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━�
        │     ^^^^^^^^^^^^^^^^^
     11 │ ) {
     12 │     console.log();
+  
+  i A simpler expression is easier to read and less likely to hide a mistake.
   
   i Safe fix: Reduce the complexity of the logical expression.
   
@@ -129,6 +137,8 @@ invalid.js:15:5 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━
     16 │ while (x && true) {}
     17 │ do {} while (x && true);
   
+  i A simpler expression is easier to read and less likely to hide a mistake.
+  
   i Safe fix: Discard redundant terms from the logical expression.
   
     15 │ if·(x·||·false)·{}
@@ -146,6 +156,8 @@ invalid.js:16:8 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━
        │        ^^^^^^^^^
     17 │ do {} while (x && true);
     18 │ for (; x || false; ) {}
+  
+  i A simpler expression is easier to read and less likely to hide a mistake.
   
   i Safe fix: Discard redundant terms from the logical expression.
   
@@ -166,6 +178,8 @@ invalid.js:17:14 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━�
     18 │ for (; x || false; ) {}
     19 │ const t = x || false ? 1 : 2;
   
+  i A simpler expression is easier to read and less likely to hide a mistake.
+  
   i Safe fix: Discard redundant terms from the logical expression.
   
     17 │ do·{}·while·(x·&&·true);
@@ -184,6 +198,8 @@ invalid.js:18:8 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━
        │        ^^^^^^^^^^
     19 │ const t = x || false ? 1 : 2;
     20 │ const n = !(x && true);
+  
+  i A simpler expression is easier to read and less likely to hide a mistake.
   
   i Safe fix: Discard redundant terms from the logical expression.
   
@@ -204,6 +220,8 @@ invalid.js:19:11 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━�
     20 │ const n = !(x && true);
     21 │ if (a && (x || false)) {}
   
+  i A simpler expression is easier to read and less likely to hide a mistake.
+  
   i Safe fix: Discard redundant terms from the logical expression.
   
     19 │ const·t·=·x·||·false·?·1·:·2;
@@ -222,6 +240,8 @@ invalid.js:20:13 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━�
        │             ^^^^^^^^^
     21 │ if (a && (x || false)) {}
     22 │ if ((x || false)) {}
+  
+  i A simpler expression is easier to read and less likely to hide a mistake.
   
   i Safe fix: Discard redundant terms from the logical expression.
   
@@ -242,6 +262,8 @@ invalid.js:21:11 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━�
     22 │ if ((x || false)) {}
     23 │ 
   
+  i A simpler expression is easier to read and less likely to hide a mistake.
+  
   i Safe fix: Discard redundant terms from the logical expression.
   
     21 │ if·(a·&&·(x·||·false))·{}
@@ -259,6 +281,8 @@ invalid.js:22:6 lint/complexity/useSimplifiedLogicExpression  FIXABLE  ━━━
   > 22 │ if ((x || false)) {}
        │      ^^^^^^^^^^
     23 │ 
+  
+  i A simpler expression is easier to read and less likely to hide a mistake.
   
   i Safe fix: Discard redundant terms from the logical expression.
   

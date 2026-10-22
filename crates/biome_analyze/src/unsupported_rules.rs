@@ -493,6 +493,7 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
     ),
     UnsupportedRule(EslintVueJs("no-extra-parens"), FormatterCovers),
     UnsupportedRule(EslintVueJs("no-multi-spaces"), FormatterCovers),
+    UnsupportedRule(EslintVueJs("no-multiple-template-root"), Legacy),
     UnsupportedRule(EslintVueJs("no-parsing-error"), FormatterCovers),
     UnsupportedRule(
         EslintVueJs("no-spaces-around-equal-signs-in-attribute"),

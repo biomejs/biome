@@ -376,7 +376,8 @@ fn quoted_key_with_space_before_colon() {
 fn plain_key_with_space_before_colon() {
     assert_lex!("key   : value",
         MAPPING_START:0,
-        PLAIN_LITERAL:6,
+        PLAIN_LITERAL:3,
+        WHITESPACE:3,
         COLON:1,
         WHITESPACE:1,
         FLOW_START:0,

@@ -9,7 +9,7 @@ impl FormatNodeRule<JsxShorthandAttribute> for FormatJsxShorthandAttribute {
     fn fmt_fields(&self, node: &JsxShorthandAttribute, f: &mut JsFormatter) -> FormatResult<()> {
         let JsxShorthandAttributeFields {
             l_curly_token,
-            name,
+            expression,
             r_curly_token,
         } = node.as_fields();
 
@@ -17,7 +17,7 @@ impl FormatNodeRule<JsxShorthandAttribute> for FormatJsxShorthandAttribute {
             f,
             [
                 l_curly_token.format(),
-                name.format(),
+                expression.format(),
                 r_curly_token.format()
             ]
         ]

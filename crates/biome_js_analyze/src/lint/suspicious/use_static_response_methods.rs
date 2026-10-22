@@ -6,7 +6,7 @@ use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, JsCallArguments, JsCallExpression,
     JsNewExpression, JsPropertyObjectMember, T, global_identifier,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TokenText, TriviaPieceKind};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TokenText};
 use biome_rule_options::use_static_response_methods::UseStaticResponseMethodsOptions;
 use biome_string_case::StrLikeExtension;
 
@@ -92,8 +92,11 @@ impl Rule for UseStaticResponseMethods {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let callee = node.callee().ok()?;
-        let (reference, name) =
-            global_identifier(&callee.omit_parentheses().as_any_global_identifier_expression()?)?;
+        let (reference, name) = global_identifier(
+            &callee
+                .omit_parentheses()
+                .as_any_global_identifier_expression()?,
+        )?;
 
         if name.text() != "Response" {
             return None;
@@ -168,10 +171,7 @@ impl Rule for UseStaticResponseMethods {
 
                 make::js_call_argument_list(
                     [location_arg, status_arg],
-                    Some(
-                        make::token(T![,])
-                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                    ),
+                    Some(make::token(T![,]).with_trailing_space()),
                 )
             }
         };

@@ -416,7 +416,7 @@ impl Slot {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub(crate) struct Slots<'a> {
     pub(crate) raw: slice::Iter<'a, Slot>,
 }
@@ -541,7 +541,7 @@ impl<'a> TryFrom<(usize, &'a Slot)> for Child<'a> {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub(crate) struct Children<'a> {
     slots: Enumerate<Slots<'a>>,
 }

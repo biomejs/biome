@@ -283,3 +283,12 @@ fn nested_declaration_count_change_is_not_eq() {
         "different nested declaration counts should produce different models"
     );
 }
+
+#[test]
+fn scss_function_name_change_is_not_eq() {
+    assert_ne!(
+        build_scss_model("@function rem($px) { @return $px; }"),
+        build_scss_model("@function em($px) { @return $px; }"),
+        "different @function names should produce different models"
+    );
+}

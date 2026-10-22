@@ -4435,6 +4435,12 @@ impl ScssPartialCombinatorSelectorBuilder {
         ))
     }
 }
+pub fn scss_percent_value(percent_token: SyntaxToken) -> ScssPercentValue {
+    ScssPercentValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::SCSS_PERCENT_VALUE,
+        [Some(SyntaxElement::Token(percent_token))],
+    ))
+}
 pub fn scss_placeholder_selector(
     percent_token: SyntaxToken,
     name: AnyCssSelectorCustomIdentifier,

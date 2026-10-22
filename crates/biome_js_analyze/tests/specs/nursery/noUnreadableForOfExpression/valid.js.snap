@@ -1,0 +1,130 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+
+for (const item of items) {}
+for (const item of object.items) {}
+for (const item of this.items) {}
+for (const item of (items)) {}
+for (const item of ((object.items))) {}
+for (const character of "abc") {}
+for (const item of [first, second]) {}
+for (const item of [getFirst(seed), ...rest]) {}
+
+async function asyncLoop() {
+	for await (const item of items) {}
+	for await (const item of items.map(callback)) {}
+	for await (const item of items.filter(callback)) {}
+}
+
+class Foo extends Bar {
+	#items;
+
+	method() {
+		for (const item of super.items) {}
+		for (const item of this.#items) {}
+	}
+}
+
+// Calls with simple arguments
+for (const item of getItems()) {}
+for (const item of getItems(argument)) {}
+for (const item of getItems(first, object.second, "third")) {}
+for (const item of getItems(`argument`)) {}
+for (const item of getItems(`prefix-${argument}`)) {}
+for (const item of getItems(createArgument())) {}
+for (const item of object.getItems(argument)) {}
+for (const item of object.getItems()) {}
+for (const item of getObject().items) {}
+for (const element of root.querySelectorAll(`[data-x=${value}]`)) {}
+for (const part of "a,b".split(",")) {}
+for (const [index, item] of [first, second].entries()) {}
+for (const item of combine([first, object.second, getThird(), "fourth"])) {}
+for (const item of combine([])) {}
+for (const [name, score] of Iterator.zip([names, scores])) {}
+for (const item of Object.keys(object)) {}
+for (const item of Object.values(object.items)) {}
+for (const [key, value] of Object.entries(getObject())) {}
+
+// Direct calls to `.map()` and `.filter()` on something that isn't an iterator
+for (const item of items.map(item => item.value)) {}
+for (const item of items.map(callback)) {}
+for (const item of (items.map(callback))) {}
+for (const item of items.filter(item => item.isEnabled)) {}
+for (const item of getItems(createArgument(seed)).filter(callback)) {}
+for (const item of items?.values.map(callback)) {}
+
+// Methods that iterators also have, called on something that isn't known to be an iterator
+for (const item of items.take(1)) {}
+for (const item of items.values(options).map(callback)) {}
+for (const item of text.matchAll(pattern, extra).map(callback)) {}
+
+// `Iterator` and `globalThis` don't refer to the globals
+function shadowedIteratorFrom() {
+	const Iterator = { from: value => value };
+	for (const item of Iterator.from(items).map(callback)) {}
+}
+function shadowedIteratorConcat() {
+	const Iterator = { concat: value => value };
+	for (const item of Iterator.concat(items).map(callback)) {}
+}
+function shadowedIteratorZip() {
+	const Iterator = { zip: value => value };
+	for (const item of Iterator.zip(items).filter(callback)) {}
+}
+function shadowedIteratorZipKeyed() {
+	const Iterator = { zipKeyed: value => value };
+	for (const item of Iterator.zipKeyed(items).take(1)) {}
+}
+function shadowedGlobalThis() {
+	const globalThis = { Iterator };
+	for (const item of globalThis.Iterator.from(items).map(callback)) {}
+}
+
+// Variables and functions that aren't known to produce an iterator
+function reassignedVariable() {
+	let iterator = items.values();
+	iterator = items;
+	for (const item of iterator.map(callback)) {}
+}
+function letVariable() {
+	let iterator = items.values();
+	for (const item of iterator.map(callback)) {}
+}
+function destructuredVariable() {
+	const { iterator } = { iterator: items.values() };
+	for (const item of iterator.map(callback)) {}
+}
+function selfReferencingVariable() {
+	const iterator = iterator.map(callback);
+	for (const item of iterator.map(callback)) {}
+}
+function variableDeclaredAfterLoop() {
+	for (const item of iterator.map(callback)) {}
+	const iterator = items.values();
+}
+function plainFunction() {
+	function getItems() {
+		return [];
+	}
+	for (const item of getItems().filter(callback)) {}
+}
+function asyncGenerator() {
+	async function* generate() {
+		yield 1;
+	}
+	for (const item of generate().filter(callback)) {}
+}
+function reassignedGenerator() {
+	function* generate() {
+		yield 1;
+	}
+	generate = getItems;
+	for (const item of generate().filter(callback)) {}
+}
+
+```

@@ -896,7 +896,7 @@ fn raw_url_classification_keeps_leading_comments_in_the_value() {
 }
 
 #[test]
-fn css_scan_cursor_classifies_scss_raw_url_bodies() {
+fn css_scan_cursor_classifies_custom_property_url_bodies() {
     let protocol_relative = CssScanCursor::new(
         SourceCursor::new("//cdn.example.com/app.css)", 0),
         true,
@@ -906,9 +906,33 @@ fn css_scan_cursor_classifies_scss_raw_url_bodies() {
         CssScanCursor::new(SourceCursor::new("image\\20 fallback.svg)", 0), true, true);
     let line_comment = CssScanCursor::new(SourceCursor::new("// silent\napp.css)", 0), true, true);
 
-    assert!(protocol_relative.is_scss_raw_url_body());
-    assert!(escaped_whitespace.is_scss_raw_url_body());
-    assert!(!line_comment.is_scss_raw_url_body());
+    assert!(protocol_relative.custom_property_url_lex_context().is_some());
+    assert!(escaped_whitespace.custom_property_url_lex_context().is_some());
+    assert!(line_comment.custom_property_url_lex_context().is_none());
+}
+
+#[test]
+fn custom_property_url_context_reuses_raw_scan_after_lookahead() {
+    let text = "url( $asset.svg)";
+    let mut source = CssTokenSource::from_str(
+        text,
+        CssParserOptions::default(),
+        CssFileSource::scss(),
+        &[],
+    );
+    assert_eq!(source.nth(2), T![$]);
+    let context = source.custom_property_url_lex_context().unwrap();
+    assert!(matches!(
+        context,
+        CssLexContext::UrlRawValue(scan)
+            if scan.start == 5 && scan.end == text.len() - 1 && scan.terminated
+    ));
+    source.bump();
+    source.bump_with_context(context);
+    assert_eq!(source.current(), CssSyntaxKind::CSS_URL_VALUE_RAW_LITERAL);
+    assert_eq!(&text[source.current_range()], "$asset.svg");
+    source.bump();
+    assert_eq!(source.current(), T![')']);
 }
 
 #[test]

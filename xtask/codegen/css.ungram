@@ -274,6 +274,7 @@ AnyCssSelectorIdentifier =
 
 AnyCssSelectorCustomIdentifier =
 	CssCustomIdentifier
+	| CssMetavariable
 	| ScssInterpolatedIdentifier
 
 // [title = "title" i] {}
@@ -782,6 +783,7 @@ AnyCssCustomPropertyComponent =
 	| ScssInterpolatedString
 	| ScssInterpolation
 	| CssCustomPropertyFunction
+	| CssUrlFunction
 	| CssCustomPropertyParenthesizedBlock
 	| CssCustomPropertyBracketedBlock
 	| CssCustomPropertyBracedBlock
@@ -1037,15 +1039,20 @@ AnyCssAtRuleCustomName =
 
 // @font-palette-values --palette-#{$name} { font-family: "Bixa"; }
 //                      ^^^^^^^^^^^^^^^^^^
+// @property #{$name} { syntax: "*"; inherits: false; }
+//           ^^^^^^^^
 AnyCssAtRuleDashedName =
 	CssDashedIdentifier
 	| ScssInterpolatedDashedIdentifier
+	| ScssInterpolatedIdentifier
 	| CssBogusCustomIdentifier
 
 // @property --accent {}
 //           ^^^^^^^^
 // @property --#{$name} {}
 //           ^^^^^^^^^^
+// @property #{$name} {}
+//           ^^^^^^^^
 CssPropertyAtRuleDeclarator =
 	'property'
 	name: AnyCssAtRuleDashedName
@@ -1055,12 +1062,16 @@ CssFontFaceAtRuleDeclarator =
 
 // @font-palette-values --palette-#{$name} { font-family: "Bixa"; }
 //                      ^^^^^^^^^^^^^^^^^^
+// @font-palette-values #{$name} { font-family: "Bixa"; }
+//                      ^^^^^^^^
 CssFontPaletteValuesAtRuleDeclarator =
 	'font-palette-values'
 	name: AnyCssAtRuleDashedName
 
 // @position-try --try-#{$name} { top: 0; }
 //               ^^^^^^^^^^^^^^
+// @position-try #{$name} { top: 0; }
+//               ^^^^^^^^
 CssPositionTryAtRuleDeclarator =
 	'position-try'
 	name: AnyCssAtRuleDashedName
@@ -1748,6 +1759,7 @@ AnyCssQueryFeatureValue =
 	| CssIdentifier
 	| CssRatio
 	| AnyCssFunction
+	| CssMetavariable
 	| ScssVariable
 	| ScssInterpolatedIdentifier
 	| ScssInterpolation
@@ -2358,6 +2370,7 @@ AnyCssValue =
 	| ScssHashValue
 	| ScssModuleMemberAccess
 	| ScssParentSelectorValue
+	| ScssPercentValue
 	| CssString
 	| ScssInterpolatedString
 	| CssNumber
@@ -2804,11 +2817,19 @@ CssRegularAttrUnit =
 CssUnknownAttrUnit =
 	unit: 'ident'
 
+// .card { width: attr(data-width $unit, 10px); }
+//                                ^^^^^
+// .card { width: attr(data-width #{$unit}, 10px); }
+//                                ^^^^^^^^
 AnyCssAttrType =
 	CssRawStringDeclarator
 	| CssTypeFunction
 	| CssNumberDeclarator
 	| AnyCssAttrUnit
+	| ScssVariable
+	| ScssNamespacedVariable
+	| ScssInterpolatedIdentifier
+	| CssBogusPropertyValue
 
 // attr(data-test type(*), rem);
 //                       ^^^^^
@@ -3670,6 +3691,11 @@ AnyScssExpression =
 //     ^
 ScssParentSelectorValue =
 	'&'
+
+// $unit: %;
+//        ^
+ScssPercentValue =
+	'%'
 
 // color: module.$var;
 //        ^^^^^^^^^^^

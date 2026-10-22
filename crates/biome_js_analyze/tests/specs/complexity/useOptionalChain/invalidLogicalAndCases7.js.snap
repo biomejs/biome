@@ -47,6 +47,8 @@ invalidLogicalAndCases7.js:4:1 lint/complexity/useOptionalChain  FIXABLE  ━━
     5 │ 
     6 │ // prefix with longer chain
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
      2  2 │   
@@ -69,6 +71,8 @@ invalidLogicalAndCases7.js:7:1 lint/complexity/useOptionalChain  FIXABLE  ━━
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     8 │ 
     9 │ // multiple unrelated prefixes
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -93,6 +97,8 @@ invalidLogicalAndCases7.js:10:1 lint/complexity/useOptionalChain  FIXABLE  ━�
     11 │ 
     12 │ // prefix with member access in chain
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
      8  8 │   
@@ -115,6 +121,8 @@ invalidLogicalAndCases7.js:13:1 lint/complexity/useOptionalChain  FIXABLE  ━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     14 │ 
     15 │ // prefix is a call expression
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -139,6 +147,8 @@ invalidLogicalAndCases7.js:16:1 lint/complexity/useOptionalChain  FIXABLE  ━�
     17 │ 
     18 │ // prefix with a chain that has a jump
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     14 14 │   
@@ -161,6 +171,8 @@ invalidLogicalAndCases7.js:19:1 lint/complexity/useOptionalChain  FIXABLE  ━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
     20 │ 
     21 │ // prefix with chained calls
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   
@@ -185,6 +197,8 @@ invalidLogicalAndCases7.js:22:1 lint/complexity/useOptionalChain  FIXABLE  ━�
     23 │ 
     24 │ // longer prefix chain
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     20 20 │   
@@ -208,6 +222,8 @@ invalidLogicalAndCases7.js:25:1 lint/complexity/useOptionalChain  FIXABLE  ━�
     26 │ 
     27 │ // the original issue example
   
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
+  
   i Unsafe fix: Change to an optional chain.
   
     23 23 │   
@@ -229,6 +245,8 @@ invalidLogicalAndCases7.js:28:1 lint/complexity/useOptionalChain  FIXABLE  ━�
   > 28 │ bar && foo && foo.length;
        │ ^^^^^^^^^^^^^^^^^^^^^^^^
     29 │ 
+  
+  i An optional chain is shorter, and it avoids repeating the same expression in each check.
   
   i Unsafe fix: Change to an optional chain.
   

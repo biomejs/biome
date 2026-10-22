@@ -28,6 +28,8 @@ invalidUnaryExpression.js:2:1 lint/style/useExponentiationOperator  FIXABLE  ━
     3 │ Math.pow(a, +b)
     4 │ Math.pow(-a, b)
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      1  1 │   // unary expressions are exception by the language - parens are required for the base to disambiguate operator precedence
@@ -50,6 +52,8 @@ invalidUnaryExpression.js:3:1 lint/style/useExponentiationOperator  FIXABLE  ━
       │ ^^^^^^^^^^^^^^^
     4 │ Math.pow(-a, b)
     5 │ Math.pow(a, -b)
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
@@ -75,6 +79,8 @@ invalidUnaryExpression.js:4:1 lint/style/useExponentiationOperator  FIXABLE  ━
     5 │ Math.pow(a, -b)
     6 │ Math.pow(-2, 3)
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      2  2 │   Math.pow(+a, b)
@@ -98,6 +104,8 @@ invalidUnaryExpression.js:5:1 lint/style/useExponentiationOperator  FIXABLE  ━
       │ ^^^^^^^^^^^^^^^
     6 │ Math.pow(-2, 3)
     7 │ Math.pow(2, -3)
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
@@ -123,6 +131,8 @@ invalidUnaryExpression.js:6:1 lint/style/useExponentiationOperator  FIXABLE  ━
     7 │ Math.pow(2, -3)
     8 │ async () => Math.pow(await a, b)
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      4  4 │   Math.pow(-a, b)
@@ -146,6 +156,8 @@ invalidUnaryExpression.js:7:1 lint/style/useExponentiationOperator  FIXABLE  ━
       │ ^^^^^^^^^^^^^^^
     8 │ async () => Math.pow(await a, b)
     9 │ async () => Math.pow(a, await b)
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
@@ -171,6 +183,8 @@ invalidUnaryExpression.js:8:13 lint/style/useExponentiationOperator  FIXABLE  �
      9 │ async () => Math.pow(a, await b)
     10 │ 
   
+  i The exponentiation operator is shorter, and it does not need a function call.
+  
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   
      6  6 │   Math.pow(-2, 3)
@@ -193,6 +207,8 @@ invalidUnaryExpression.js:9:13 lint/style/useExponentiationOperator  FIXABLE  �
    > 9 │ async () => Math.pow(a, await b)
        │             ^^^^^^^^^^^^^^^^^^^^
     10 │ 
+  
+  i The exponentiation operator is shorter, and it does not need a function call.
   
   i Safe fix: Use the '**' operator instead of 'Math.pow'.
   

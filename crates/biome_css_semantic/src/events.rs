@@ -4,8 +4,8 @@ use biome_css_syntax::{
     AnyCssValue, CssDashedIdentifier, CssDeclaration, CssLanguage, CssNestedQualifiedRule,
     CssPropertyAtRule, CssQualifiedRule, CssString,
     CssSyntaxKind::*,
-    ScssAtRootSelector, ScssBinaryExpression, ScssExpression, ScssInterpolation,
-    ScssUnaryExpression, ScssVariable, decode_css_identifier,
+    CssSyntaxToken, ScssAtRootSelector, ScssBinaryExpression, ScssExpression, ScssFunctionAtRule,
+    ScssInterpolation, ScssUnaryExpression, ScssVariable, decode_css_identifier,
     property_syntax::{
         PropertySyntaxErrorKind, PropertySyntaxParseDiagnostic, PropertySyntaxResult, encode,
     },
@@ -60,6 +60,10 @@ pub enum SemanticEvent {
         inherits: Option<bool>,
         inherits_requires_evaluation: bool,
         range: TextRange,
+    },
+    /// An SCSS `@function` rule
+    ScssFunctionDeclaration {
+        name: CssSyntaxToken,
     },
 }
 
@@ -201,6 +205,14 @@ impl SemanticEventExtractor {
                 // SAFETY: the match checks for its kind already.
                 let property = CssPropertyAtRule::cast_ref(node).unwrap();
                 self.process_at_property(property);
+            }
+            SCSS_FUNCTION_AT_RULE => {
+                // SAFETY: the match checks for its kind already.
+                let function = ScssFunctionAtRule::cast_ref(node).unwrap();
+                if let Ok(name) = function.name().and_then(|name| name.value_token()) {
+                    self.stash
+                        .push_back(SemanticEvent::ScssFunctionDeclaration { name });
+                }
             }
             _ => {}
         }

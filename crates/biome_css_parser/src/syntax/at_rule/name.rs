@@ -4,7 +4,7 @@ use crate::syntax::parse_error::scss_only_syntax_error;
 use crate::syntax::scss::{
     complete_scss_interpolated_identifier, is_at_scss_interpolated_dashed_identifier,
     is_at_scss_interpolation, is_nth_at_scss_hyphen_interpolated_identifier,
-    is_nth_at_scss_interpolation, is_nth_source_tight, parse_scss_interpolated_at_rule_name,
+    is_nth_at_scss_interpolation, is_nth_source_tight, parse_scss_interpolated_name_with_suffixes,
 };
 use crate::syntax::{
     CssSyntaxFeatures, is_at_identifier, parse_custom_identifier, parse_dashed_identifier,
@@ -43,7 +43,7 @@ pub(super) fn parse_scss_at_rule_prelude_name(p: &mut CssParser) -> ParsedSyntax
     CssSyntaxFeatures::Scss.parse_exclusive_syntax_with_kind(
         p,
         |p| {
-            parse_scss_interpolated_at_rule_name(p).map(|name| {
+            parse_scss_interpolated_name_with_suffixes(p).map(|name| {
                 if name.kind(p) == SCSS_INTERPOLATION {
                     complete_scss_interpolated_identifier(p, name)
                 } else {
@@ -77,19 +77,22 @@ pub(super) fn parse_custom_at_rule_name(p: &mut CssParser) -> ParsedSyntax {
     }
 }
 
-/// Requires a literal `--` prefix, allowing interpolation in SCSS names.
+/// Requires `--` in literal names; SCSS interpolation can supply the whole name.
 ///
 /// ```scss
 /// @font-palette-values --palette-#{$name} { font-family: "Bixa"; }
 /// @property --#{$name} { syntax: "*"; inherits: false; }
+/// @property #{$name} { syntax: "*"; inherits: false; }
 /// ```
 #[inline]
 pub(super) fn parse_dashed_at_rule_name(p: &mut CssParser) -> ParsedSyntax {
-    if is_at_scss_interpolated_dashed_identifier(p) {
+    if is_at_scss_interpolation(p) {
+        parse_scss_at_rule_prelude_name(p)
+    } else if is_at_scss_interpolated_dashed_identifier(p) {
         CssSyntaxFeatures::Scss.parse_exclusive_syntax_with_kind(
             p,
             |p| {
-                parse_scss_interpolated_at_rule_name(p).map(|mut name| {
+                parse_scss_interpolated_name_with_suffixes(p).map(|mut name| {
                     name.change_kind(p, SCSS_INTERPOLATED_DASHED_IDENTIFIER);
                     name
                 })

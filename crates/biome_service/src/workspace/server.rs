@@ -3945,9 +3945,23 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                 continue;
             };
 
+            // The snippet tree starts at zero, so the document range must be
+            // made relative to the snippet before it filters the signals.
+            let snippet_range = match range {
+                Some(range) => {
+                    let Some(range) =
+                        range.intersect(embedded_snippet.content_range(&*workspace_db))
+                    else {
+                        continue;
+                    };
+                    Some(range - embedded_snippet.content_offset(&*workspace_db))
+                }
+                None => None,
+            };
+
             let embedded_actions_result = code_actions(CodeActionsParams {
                 parsed_source: embedded_snippet.into(),
-                range,
+                range: snippet_range,
                 settings: &settings,
                 path: &path,
                 workspace_db: workspace_db.clone_untracked_db(),

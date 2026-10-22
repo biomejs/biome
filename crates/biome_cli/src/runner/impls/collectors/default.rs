@@ -328,8 +328,8 @@ impl Collector for DefaultCollector {
                     MessageStat::Unchanged => {
                         self.unchanged.fetch_add(1, Ordering::Relaxed);
                     }
-                    MessageStat::Matches => {
-                        self.matches.fetch_add(1, Ordering::Relaxed);
+                    MessageStat::Matches(num_matches) => {
+                        self.matches.fetch_add(num_matches, Ordering::Relaxed);
                     }
                     MessageStat::Skipped => {
                         self.skipped.fetch_add(1, Ordering::Relaxed);

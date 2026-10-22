@@ -3,8 +3,8 @@ use crate::syntax::SyntaxTrivia;
 use crate::syntax::borrowed_token::BorrowedTokensIterator;
 use crate::syntax::element::{SyntaxElement, SyntaxElementKey};
 use crate::{
-    AstNode, Direction, GreenNode, Language, NodeOrToken, SyntaxKind, SyntaxList, SyntaxNodeText,
-    SyntaxToken, SyntaxTriviaPiece, TokenAtOffset, WalkEvent, cursor,
+    AstNode, Direction, GreenNode, Language, NodeOrToken, SyntaxKind, SyntaxKindSet, SyntaxList,
+    SyntaxNodeText, SyntaxToken, SyntaxTriviaPiece, TokenAtOffset, WalkEvent, cursor,
 };
 use biome_text_size::{TextRange, TextSize};
 #[cfg(feature = "serde")]
@@ -395,6 +395,45 @@ impl<L: Language> SyntaxNode<L> {
         Preorder {
             raw: self.raw.preorder(),
             _p: PhantomData,
+        }
+    }
+
+    /// Traverses the subtree rooted at the current node in preorder and yields
+    /// only the nodes whose kind is in `kinds`. The current node is yielded when
+    /// its kind is in `kinds`.
+    ///
+    /// The events are the ones [Self::preorder] yields for those nodes, in the
+    /// same order. Nodes of other kinds are still traversed, but no [SyntaxNode]
+    /// is allocated for them unless one of their descendants is yielded. Prefer
+    /// this method over filtering [Self::preorder] when `kinds` covers a small
+    /// part of the tree.
+    ///
+    /// ```
+    /// # use biome_rowan::raw_language::{RawLanguage, RawLanguageKind, RawSyntaxTreeBuilder};
+    /// # use biome_rowan::{SyntaxKindSet, WalkEvent};
+    /// let mut builder = RawSyntaxTreeBuilder::new();
+    /// builder.start_node(RawLanguageKind::ROOT);
+    /// builder.start_node(RawLanguageKind::EXPRESSION_LIST);
+    /// builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
+    /// builder.token(RawLanguageKind::NUMBER_TOKEN, "1");
+    /// builder.finish_node();
+    /// builder.finish_node();
+    /// builder.finish_node();
+    /// let root = builder.finish();
+    ///
+    /// let literals = SyntaxKindSet::<RawLanguage>::of(RawLanguageKind::LITERAL_EXPRESSION);
+    /// let events: Vec<_> = root
+    ///     .preorder_of_kinds(literals)
+    ///     .map(|event| match event {
+    ///         WalkEvent::Enter(node) => format!("enter {:?}", node.kind()),
+    ///         WalkEvent::Leave(node) => format!("leave {:?}", node.kind()),
+    ///     })
+    ///     .collect();
+    /// assert_eq!(events, ["enter LITERAL_EXPRESSION", "leave LITERAL_EXPRESSION"]);
+    /// ```
+    pub fn preorder_of_kinds(&self, kinds: SyntaxKindSet<L>) -> PreorderOfKinds<'_, L> {
+        PreorderOfKinds {
+            raw: self.raw.preorder_matching(kinds),
         }
     }
 
@@ -1095,6 +1134,25 @@ impl<L: Language> Preorder<L> {
 }
 
 impl<L: Language> Iterator for Preorder<L> {
+    type Item = WalkEvent<SyntaxNode<L>>;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.raw.next().map(|it| it.map(SyntaxNode::from))
+    }
+}
+
+pub struct PreorderOfKinds<'a, L: Language> {
+    raw: cursor::PreorderMatching<'a, L>,
+}
+
+impl<L: Language> PreorderOfKinds<'_, L> {
+    /// Skips the descendants of the node of the last [WalkEvent::Enter], so
+    /// the next event is the [WalkEvent::Leave] of that node.
+    pub fn skip_subtree(&mut self) {
+        self.raw.skip_subtree()
+    }
+}
+
+impl<L: Language> Iterator for PreorderOfKinds<'_, L> {
     type Item = WalkEvent<SyntaxNode<L>>;
     fn next(&mut self) -> Option<Self::Item> {
         self.raw.next().map(|it| it.map(SyntaxNode::from))

@@ -76,6 +76,8 @@ file.html:1:9 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━�
     2 │ <script>import z from "zod"</script>
     3 │ <style>#id .class div { background-color: red; background-color: red;  } </style>
   
+  i A debugger statement pauses the program when a debugger is open. It is meant for debugging only, and it should not be left in code that is shipped.
+  
   i Unsafe fix: Remove debugger statement
   
     1 │ debugger

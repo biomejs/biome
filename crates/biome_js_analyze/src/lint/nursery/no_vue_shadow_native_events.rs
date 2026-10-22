@@ -82,7 +82,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoVueShadowNativeEvents {
-        version: "next",
+        version: "2.6.0",
         name: "noVueShadowNativeEvents",
         language: "js",
         recommended: false,

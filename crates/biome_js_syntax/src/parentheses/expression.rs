@@ -715,6 +715,11 @@ impl NeedsParentheses for TsAsExpression {
 impl NeedsParentheses for TsInstantiationExpression {
     #[inline]
     fn needs_parentheses(&self) -> bool {
+        // `(a<T>)<U>`: `a<T><U>` does not parse
+        if self.parent::<Self>().is_some() {
+            return true;
+        }
+
         self.parent::<AnyJsMemberExpression>()
             .is_some_and(|member_expr| {
                 member_expr
@@ -835,6 +840,7 @@ fn binary_like_needs_parens(node: &JsSyntaxNode) -> bool {
         | JsSyntaxKind::JS_UNARY_EXPRESSION
         | JsSyntaxKind::JS_AWAIT_EXPRESSION
         | JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION
+        | JsSyntaxKind::TS_INSTANTIATION_EXPRESSION
         // in spread
         | JsSyntaxKind::JSX_SPREAD_CHILD
         | JsSyntaxKind::JS_SPREAD
@@ -915,6 +921,7 @@ fn type_cast_like_needs_parens(node: &JsSyntaxNode, parent: JsSyntaxNode) -> boo
         | JsSyntaxKind::JS_UNARY_EXPRESSION
         | JsSyntaxKind::JS_AWAIT_EXPRESSION
         | JsSyntaxKind::TS_NON_NULL_ASSERTION_EXPRESSION
+        | JsSyntaxKind::TS_INSTANTIATION_EXPRESSION
         // Callee
         | JsSyntaxKind::JS_CALL_EXPRESSION
         | JsSyntaxKind::JS_NEW_EXPRESSION

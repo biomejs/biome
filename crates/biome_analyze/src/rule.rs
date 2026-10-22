@@ -682,6 +682,8 @@ pub enum RuleDomain {
     Project,
     /// Tailwind CSS rules
     Tailwind,
+    /// TanStack Query rules
+    TanstackQuery,
     /// Turborepo build system rules
     Turborepo,
     /// Playwright testing framework rules
@@ -706,6 +708,7 @@ impl Display for RuleDomain {
             Self::Vue => fmt.write_str("vue"),
             Self::Project => fmt.write_str("project"),
             Self::Tailwind => fmt.write_str("tailwind"),
+            Self::TanstackQuery => fmt.write_str("tanstackQuery"),
             Self::Turborepo => fmt.write_str("turborepo"),
             Self::Playwright => fmt.write_str("playwright"),
             Self::Types => fmt.write_str("types"),
@@ -751,6 +754,13 @@ impl RuleDomain {
             Self::Vue => &[&("vue", ">=3.0.0")],
             Self::Project => &[],
             Self::Tailwind => &[&("tailwindcss", ">=4.0.0")],
+            Self::TanstackQuery => &[
+                &("@tanstack/react-query", ">=4.0.0"),
+                &("@tanstack/preact-query", ">=5.0.0"),
+                &("@tanstack/solid-query", ">=4.0.0"),
+                &("@tanstack/svelte-query", ">=4.0.0"),
+                &("@tanstack/vue-query", ">=4.0.0"),
+            ],
             Self::Turborepo => &[&("turbo", ">=1.0.0")],
             Self::Playwright => &[&("@playwright/test", ">=1.0.0")],
             Self::Types => &[],
@@ -795,6 +805,7 @@ impl RuleDomain {
             Self::Vue => &[],
             Self::Project => &[],
             Self::Tailwind => &[],
+            Self::TanstackQuery => &[],
             Self::Turborepo => &[],
             Self::Playwright => &["test", "expect"],
             Self::Types => &[],
@@ -815,6 +826,7 @@ impl RuleDomain {
             Self::Vue => "vue",
             Self::Project => "project",
             Self::Tailwind => "tailwind",
+            Self::TanstackQuery => "tanstackQuery",
             Self::Turborepo => "turborepo",
             Self::Playwright => "playwright",
             Self::Types => "types",
@@ -858,6 +870,9 @@ impl RuleDomain {
             Self::Tailwind => {
                 "Use this domain inside Tailwind CSS projects. This domain enables rules that are specific to Tailwind CSS."
             }
+            Self::TanstackQuery => {
+                "Use this domain inside projects that use TanStack Query. This domain enables rules that are specific to TanStack Query."
+            }
             Self::Turborepo => {
                 "Use this domain inside Turborepo projects. This domain enables rules that are specific to Turborepo projects."
             }
@@ -885,6 +900,7 @@ impl FromStr for RuleDomain {
             "vue" => Ok(Self::Vue),
             "project" => Ok(Self::Project),
             "tailwind" => Ok(Self::Tailwind),
+            "tanstackQuery" => Ok(Self::TanstackQuery),
             "turborepo" => Ok(Self::Turborepo),
             "playwright" => Ok(Self::Playwright),
             "types" => Ok(Self::Types),

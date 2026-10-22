@@ -10,7 +10,7 @@ use biome_js_syntax::JsLanguage;
 use biome_js_syntax::JsSyntaxNode;
 use biome_js_syntax::TextRange;
 use biome_languages::LanguageDb;
-use biome_rowan::WalkEvent;
+use biome_rowan::{AstNode, SyntaxKindSet, WalkEvent};
 use std::rc::Rc;
 
 pub(crate) use biome_js_control_flow::AnyJsControlFlowRoot;
@@ -88,5 +88,12 @@ impl Visitor for ControlFlowGraphVisitor {
         for graph in model.graphs() {
             ctx.match_query(ControlFlowGraph { graph });
         }
+    }
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(AnyJsRoot::KIND_SET)
     }
 }

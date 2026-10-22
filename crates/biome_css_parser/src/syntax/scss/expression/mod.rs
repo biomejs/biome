@@ -38,7 +38,7 @@ pub(crate) use precedence::{
 pub(super) struct ScssExpressionOptions {
     function_call_context: FunctionCallContext,
     end_ts: TokenSet<CssSyntaxKind>,
-    boundary: Option<fn(&mut CssParser) -> bool>,
+    boundary: Option<fn(&mut CssParser, usize) -> bool>,
     allows_empty_value: bool,
     allows_keyword_arguments: bool,
     allows_ellipsis: bool,
@@ -108,7 +108,7 @@ impl ScssExpressionOptions {
     }
 
     /// Adds a caller-owned boundary for the outer expression.
-    pub(super) fn with_boundary(mut self, boundary: fn(&mut CssParser) -> bool) -> Self {
+    pub(super) fn with_boundary(mut self, boundary: fn(&mut CssParser, usize) -> bool) -> Self {
         self.boundary = Some(boundary);
         self
     }
@@ -172,6 +172,6 @@ pub(super) fn is_at_scss_expression_end(
 ) -> bool {
     p.at_ts(options.end_ts)
         || p.at(T![')'])
-        || options.boundary.is_some_and(|boundary| boundary(p))
+        || options.boundary.is_some_and(|boundary| boundary(p, 0))
         || (options.stops_before_variable_modifiers && is_at_scss_variable_modifier(p))
 }

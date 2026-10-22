@@ -27,6 +27,8 @@ invalid.svelte:2:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━
     3 │ <div role="datepicker"></div>
     4 │ <div role=""></div>
   
+  i Assistive technologies may ignore an invalid or abstract role, so they may not describe the element correctly to the user.
+  
   i Check WAI-ARIA for valid roles or provide options accordingly.
   
   i Unsafe fix: Remove the invalid role attribute.
@@ -48,6 +50,8 @@ invalid.svelte:3:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━
       │ ^^^^^^^^^^^^^^^^^^^^^^^
     4 │ <div role=""></div>
     5 │ <div role="datepicker" />
+  
+  i Assistive technologies may ignore an invalid or abstract role, so they may not describe the element correctly to the user.
   
   i Check WAI-ARIA for valid roles or provide options accordingly.
   
@@ -71,6 +75,8 @@ invalid.svelte:4:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━
     5 │ <div role="datepicker" />
     6 │ <div role="unknown-invalid-role" />
   
+  i Assistive technologies may ignore an invalid or abstract role, so they may not describe the element correctly to the user.
+  
   i Check WAI-ARIA for valid roles or provide options accordingly.
   
   i Unsafe fix: Remove the invalid role attribute.
@@ -92,6 +98,8 @@ invalid.svelte:5:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
     6 │ <div role="unknown-invalid-role" />
     7 │ <div role="tabpanel row foobar"></div>
+  
+  i Assistive technologies may ignore an invalid or abstract role, so they may not describe the element correctly to the user.
   
   i Check WAI-ARIA for valid roles or provide options accordingly.
   
@@ -115,6 +123,8 @@ invalid.svelte:6:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━
     7 │ <div role="tabpanel row foobar"></div>
     8 │ <div role="doc-endnotes range"></div>
   
+  i Assistive technologies may ignore an invalid or abstract role, so they may not describe the element correctly to the user.
+  
   i Check WAI-ARIA for valid roles or provide options accordingly.
   
   i Unsafe fix: Remove the invalid role attribute.
@@ -137,6 +147,8 @@ invalid.svelte:7:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━
     8 │ <div role="doc-endnotes range"></div>
     9 │ 
   
+  i Assistive technologies may ignore an invalid or abstract role, so they may not describe the element correctly to the user.
+  
   i Check WAI-ARIA for valid roles or provide options accordingly.
   
   i Unsafe fix: Remove the invalid role attribute.
@@ -157,6 +169,8 @@ invalid.svelte:8:1 lint/a11y/useValidAriaRole  FIXABLE  ━━━━━━━━
   > 8 │ <div role="doc-endnotes range"></div>
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     9 │ 
+  
+  i Assistive technologies may ignore an invalid or abstract role, so they may not describe the element correctly to the user.
   
   i Check WAI-ARIA for valid roles or provide options accordingly.
   

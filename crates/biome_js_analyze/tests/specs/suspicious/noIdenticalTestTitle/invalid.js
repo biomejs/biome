@@ -37,3 +37,34 @@ suite('outer suite', () => {
   suite('nested', () => {});
   suite('nested', () => {});
 });
+
+// Three occurrences of the same test title
+describe('triple', () => {
+  it('repeated', () => {});
+  it('repeated', () => {});
+  it('repeated', () => {});
+});
+
+// Interleaved duplicates produce one diagnostic per title
+describe('interleaved', () => {
+  it('a', () => {});
+  it('b', () => {});
+  it('a', () => {});
+  it('b', () => {});
+  it('a', () => {});
+});
+
+// Duplicate describe and duplicate test sharing a title in the same scope
+describe('shared title', () => {
+  describe('same', () => {});
+  describe('same', () => {});
+  it('same', () => {});
+  it('same', () => {});
+});
+
+// Mixed quote styles are the same title
+describe('quotes', () => {
+  it('quoted', () => {});
+  it("quoted", () => {});
+  it(`quoted`, () => {});
+});

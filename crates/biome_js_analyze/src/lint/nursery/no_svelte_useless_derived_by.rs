@@ -62,7 +62,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoSvelteUselessDerivedBy {
-        version: "next",
+        version: "2.6.0",
         name: "noSvelteUselessDerivedBy",
         language: "js",
         domains: &[RuleDomain::Svelte],

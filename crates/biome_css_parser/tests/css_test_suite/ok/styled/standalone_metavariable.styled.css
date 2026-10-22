@@ -1,0 +1,18 @@
+${mixin}
+.child {
+	color: red;
+}
+${first} ${second}
+html {
+	margin: 0;
+}
+${interpolation}
+/* a comment */
+
+.rule {
+	color: red;
+}
+${first},
+${second} {
+	color: red;
+}

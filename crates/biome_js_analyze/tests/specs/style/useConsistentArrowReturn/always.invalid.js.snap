@@ -22,6 +22,8 @@ always.invalid.js:1:30 lint/style/useConsistentArrowReturn  FIXABLE  ━━━�
     2 │ 
     3 │ const returnsAwaitArrow = async () => await fetchData()
   
+  i Using a block body consistently makes the function easier to extend later with more statements.
+  
   i Safe fix: Add braces to the arrow function body.
   
     1   │ - const·returnsSequenceArrow·=·()·=>·(a,·b)
@@ -44,6 +46,8 @@ always.invalid.js:3:27 lint/style/useConsistentArrowReturn  FIXABLE  ━━━�
   > 3 │ const returnsAwaitArrow = async () => await fetchData()
       │                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ 
+  
+  i Using a block body consistently makes the function easier to extend later with more statements.
   
   i Safe fix: Add braces to the arrow function body.
   

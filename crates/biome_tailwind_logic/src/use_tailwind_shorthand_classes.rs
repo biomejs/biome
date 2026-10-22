@@ -120,7 +120,7 @@ fn find_static_class_candidate(
                     .rsplit_once('-')
                     .is_some_and(|(base, value)| candidate_matches(candidate, base, value)))
                 && candidate.negative_token().is_none()
-                && candidate.excl_token().is_some() == important
+                && candidate.is_important() == important
                 && is_node_equal(candidate.variants().syntax(), variants.syntax())
         })
 }
@@ -155,7 +155,7 @@ fn check_truncate_shorthand(candidates: &TwCandidateList) -> Vec<TailwindShortha
             continue;
         }
         let first_variants = first.variants();
-        let important = first.excl_token().is_some();
+        let important = first.is_important();
         let mut matched = Vec::with_capacity(TRUNCATE_PARTS.len());
         for &(base, value) in TRUNCATE_PARTS {
             let Some(candidate) = candidates
@@ -165,7 +165,7 @@ fn check_truncate_shorthand(candidates: &TwCandidateList) -> Vec<TailwindShortha
                 .find(|candidate| {
                     candidate_matches(candidate, base, value)
                         && candidate.negative_token().is_none()
-                        && candidate.excl_token().is_some() == important
+                        && candidate.is_important() == important
                         && !used_candidates.contains(&candidate.range())
                         && is_node_equal(candidate.variants().syntax(), first_variants.syntax())
                 })
@@ -240,7 +240,7 @@ pub fn analyze_tailwind_shorthand(candidates: &TwCandidateList) -> Vec<TailwindS
     fn extract_key_and_base(full: &TwFullCandidate) -> Option<(GroupKey, TokenText)> {
         let variants = full.variants();
         let negative = full.negative_token().is_some();
-        let important = full.excl_token().is_some();
+        let important = full.is_important();
         let candidate = full.candidate().ok()?;
         match candidate {
             AnyTwCandidate::TwFunctionalCandidate(func) => {
@@ -314,12 +314,26 @@ pub fn analyze_tailwind_shorthand(candidates: &TwCandidateList) -> Vec<TailwindS
                     continue;
                 }
 
-                // Skip if the value is a keyword that `size` doesn't support
+                // Named width and height tokens can exist without a matching size token.
                 if is_size_pattern
                     && let Some(value) = &key.value
                     && let Some(value) = value.as_tw_named_value()
                     && let Some(value) = value.value_token().ok()
-                    && SIZE_BLOCKED_VALUES.contains(value.text_trimmed())
+                    && !SIZE_SUPPORTED_VALUES.contains(value.text_trimmed())
+                {
+                    continue;
+                }
+
+                // `start`/`end` use flex-relative alignment, unlike `place-content-*`.
+                if *required_bases == ["content", "justify"]
+                    && !key
+                        .value
+                        .as_ref()
+                        .and_then(AnyTwValue::as_tw_named_value)
+                        .and_then(|value| value.value_token().ok())
+                        .is_some_and(|value| {
+                            PLACE_CONTENT_SUPPORTED_VALUES.contains(value.text_trimmed())
+                        })
                 {
                     continue;
                 }
@@ -620,10 +634,8 @@ pub static TW_COMPRESSABLES: &[&[(&[&str], &[&str])]] = &[
         (&["bottom", "top"], &["inset-y"]),
         (&["inset-x", "inset-y"], &["inset"]),
     ],
-    &[(&["divide-x", "divide-y"], &["divide"])],
     &[(&["gap-x", "gap-y"], &["gap"])],
     &[(&["translate-x", "translate-y"], &["translate"])],
-    &[(&["rotate-x", "rotate-y"], &["rotate"])],
     &[(&["skew-x", "skew-y"], &["skew"])],
     &[
         (&["scale-x", "scale-y", "scale-z"], &["scale", "scale-3d"]),
@@ -636,11 +648,12 @@ pub static TW_COMPRESSABLES: &[&[(&[&str], &[&str])]] = &[
     ],
 ];
 
-/// Values supported by `w`/`h` but NOT by `size`.
-/// These keyword values exist as width/height utilities but have no `size-*` equivalent,
-/// so `w-screen h-screen` should NOT be compressed to `size-screen`.
-static SIZE_BLOCKED_VALUES: phf::Set<&'static str> = phf::phf_set! {
-    "screen", "3xs", "2xs", "xs", "sm", "md", "lg", "xl", "2xl", "3xl", "4xl", "5xl", "6xl", "7xl",
+static SIZE_SUPPORTED_VALUES: phf::Set<&'static str> = phf::phf_set! {
+    "auto", "full", "svw", "lvw", "dvw", "svh", "lvh", "dvh", "min", "max", "fit", "px",
+};
+
+static PLACE_CONTENT_SUPPORTED_VALUES: phf::Set<&'static str> = phf::phf_set! {
+    "center", "center-safe", "between", "around", "evenly", "stretch",
 };
 
 #[cfg(test)]
@@ -671,8 +684,6 @@ mod tests {
         "scroll-mt-2 scroll-mb-2",
         "scroll-pl-2 scroll-pr-2",
         "scroll-pt-2 scroll-pb-2",
-        "divide-x-4 divide-y-4",
-        "rotate-x-45 rotate-y-45",
         "right-4 left-4",
         "bottom-4 top-4",
         "overflow-hidden text-ellipsis whitespace-nowrap",
@@ -712,6 +723,117 @@ mod tests {
         "w-[10px] h-[20px]",
         "w-screen h-screen",
     ];
+
+    #[test]
+    fn preserves_non_equivalent_classes() {
+        let cases = [
+            "rotate-x-45 rotate-y-45",
+            "-rotate-x-45 -rotate-y-45",
+            "hover:rotate-x-45 hover:rotate-y-45",
+            "divide-x divide-y",
+            "divide-x-4 divide-y-4",
+            "divide-x-reverse divide-y-reverse",
+            "content-normal justify-normal",
+            "content-start justify-start",
+            "content-end justify-end",
+            "content-end-safe justify-end-safe",
+            "content-baseline justify-baseline",
+            "content-[center] justify-[center]",
+            "!h-4 w-4",
+            "h-4 !w-4",
+            "h-4! w-4",
+            "h-4 w-4!",
+            "!overflow-hidden text-ellipsis whitespace-nowrap",
+            "overflow-hidden !text-ellipsis whitespace-nowrap",
+            "overflow-hidden text-ellipsis !whitespace-nowrap",
+            "w-sidebar h-sidebar",
+            "hover:w-sidebar hover:h-sidebar",
+            "w-sm h-sm",
+        ];
+        let unexpected: Vec<_> = cases
+            .into_iter()
+            .filter(|input| {
+                let parse = parse_tailwind(input);
+                assert!(!parse.has_errors(), "failed to parse test input: {input}");
+                !analyze_tailwind_shorthand(&parse.tree().candidates()).is_empty()
+            })
+            .collect();
+        assert!(
+            unexpected.is_empty(),
+            "unexpected shorthands: {unexpected:?}"
+        );
+    }
+
+    #[test]
+    fn supported_shorthands() {
+        let cases = [
+            ("!h-4 !w-4", "!size-4"),
+            ("h-4! w-4!", "size-4!"),
+            ("!h-4 w-4!", "size-4!"),
+            ("h-4! !w-4", "!size-4"),
+            ("hover:!h-4 hover:!w-4", "hover:!size-4"),
+            ("!size-4 !h-4 !w-4", "!size-4"),
+            ("size-4! !h-4 !w-4", "!size-4"),
+            ("size-4 !h-4 !w-4", "size-4 !size-4"),
+            (
+                "!overflow-hidden !text-ellipsis !whitespace-nowrap",
+                "!truncate",
+            ),
+            (
+                "!overflow-hidden text-ellipsis! !whitespace-nowrap",
+                "!truncate",
+            ),
+            (
+                "!truncate !overflow-hidden !text-ellipsis !whitespace-nowrap",
+                "!truncate",
+            ),
+            (
+                "!truncate overflow-hidden text-ellipsis whitespace-nowrap",
+                "!truncate truncate",
+            ),
+            ("!border-x !border-y", "!border"),
+            ("content-center justify-center", "place-content-center"),
+            (
+                "content-center-safe justify-center-safe",
+                "place-content-center-safe",
+            ),
+            ("content-between justify-between", "place-content-between"),
+            ("content-around justify-around", "place-content-around"),
+            ("content-evenly justify-evenly", "place-content-evenly"),
+            ("content-stretch justify-stretch", "place-content-stretch"),
+            ("w-1.5 h-1.5", "size-1.5"),
+            ("w-1/2 h-1/2", "size-1/2"),
+            ("w-[10px] h-[10px]", "size-[10px]"),
+            ("w-(--sidebar) h-(--sidebar)", "size-(--sidebar)"),
+        ];
+        for (input, expected) in cases {
+            assert_shorthand_fix(input, expected);
+        }
+        for value in [
+            "auto", "full", "svw", "lvw", "dvw", "svh", "lvh", "dvh", "min", "max", "fit", "px",
+        ] {
+            assert_shorthand_fix(&format!("w-{value} h-{value}"), &format!("size-{value}"));
+        }
+    }
+
+    fn assert_shorthand_fix(input: &str, expected: &str) {
+        let parse = parse_tailwind(input);
+        assert!(!parse.has_errors(), "failed to parse test input: {input}");
+        let root = parse.tree();
+        let violations = analyze_tailwind_shorthand(&root.candidates());
+        assert!(!violations.is_empty(), "expected violations for: {input}");
+        let fixed = auto_fix_all(&root, &violations)
+            .unwrap()
+            .commit()
+            .to_string();
+        assert_eq!(fixed, expected, "incorrect fix for: {input}");
+        let fixed_parse = parse_tailwind(&fixed);
+        assert!(
+            !fixed_parse.has_errors(),
+            "failed to parse fixed output: {fixed}"
+        );
+        assert!(analyze_tailwind_shorthand(&fixed_parse.tree().candidates()).is_empty());
+    }
 
     #[test]
     fn valid_cases() {

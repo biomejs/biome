@@ -18,6 +18,8 @@ invalidIssue2580.js:2:1 lint/style/useTemplate  FIXABLE  ━━━━━━━�
   > 2 │ '```ts\n' + x + '\n```';
       │ ^^^^^^^^^^^^^^^^^^^^^^^
   
+  i Template literals are easier to read than a chain of + operators and quotes, and they avoid mistakes with spaces and escaped quotes.
+  
   i Unsafe fix: Use a template literal.
   
     1 1 │   // Issue https://github.com/biomejs/biome/issues/2580

@@ -68,6 +68,8 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
   > 1 │ statement(    ) ; let a = !b || !c;
       │                       ^
   
+  i A variable that is never reassigned is clearer as const, because it prevents the binding from being reassigned.
+  
   i Safe fix: Use const instead.
   
   - statement(····)·;·let·a·=·!b·||·!c;

@@ -102,21 +102,43 @@ expression: invalid.css
 	color: blue;
 }
 
+/* \u{a0} before a comment */
+.comment-after-irregular-value {
+	color: red /* note */;
+}
+
+/* \u{3000} after a comment */
+.comment-before-string {
+	content:/* note */　"a";
+}
+
+/* \u{3000} before a string */
+.irregular-space-before-string {
+	content:　"a";
+}
+
+/* \u{a0} after a string */
+.irregular-space-after-string {
+	content: "a" ;
+}
+
 ```
 
-_Note: The parser emitted 25 diagnostics which are not shown here._
+_Note: The parser emitted 29 diagnostics which are not shown here._
 
 # Diagnostics
 ```
-invalid.css:2:2 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:2:8 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
   
     1 │ /* \u{b}    */
   > 2 │ @import␋ 'a.css';
-      │  ^^^^^^^^
+      │        ^^
     3 │ /* \u{c}    */
     4 │ @layer↡module, state;
+  
+  i Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find.
   
   i Replace the irregular whitespace with normal whitespaces.
   
@@ -124,16 +146,18 @@ invalid.css:2:2 lint/suspicious/noIrregularWhitespace ━━━━━━━━�
 ```
 
 ```
-invalid.css:4:2 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:4:7 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
   
     2 │ @import␋ 'a.css';
     3 │ /* \u{c}    */
   > 4 │ @layer↡module, state;
-      │  ^^^^^^
+      │       ^
     5 │ /* \u{feff} */
     6 │ .firstClass�.secondClass {
+  
+  i Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find.
   
   i Replace the irregular whitespace with normal whitespaces.
   
@@ -152,6 +176,8 @@ invalid.css:6:2 lint/suspicious/noIrregularWhitespace ━━━━━━━━�
     7 │ 	padding: 10px;
     8 │ }
   
+  i Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find.
+  
   i Replace the irregular whitespace with normal whitespaces.
   
 
@@ -168,6 +194,8 @@ invalid.css:18:12 lint/suspicious/noIrregularWhitespace ━━━━━━━━
        │            ^
     19 │ 	padding: 10px;
     20 │ }
+  
+  i Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find.
   
   i Replace the irregular whitespace with normal whitespaces.
   
@@ -186,6 +214,8 @@ invalid.css:23:9 lint/suspicious/noIrregularWhitespace ━━━━━━━━�
     24 │ }
     25 │ /* \u{2002} */
   
+  i Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find.
+  
   i Replace the irregular whitespace with normal whitespaces.
   
 
@@ -199,9 +229,11 @@ invalid.css:30:25 lint/suspicious/noIrregularWhitespace ━━━━━━━━
     28 │ }
     29 │ /* \u{2003} */
   > 30 │ .firstClass .secondClass␠ {
-       │                         ^^
+       │                         ^
     31 │ 	padding: 10px;
     32 │ }
+  
+  i Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find.
   
   i Replace the irregular whitespace with normal whitespaces.
   
@@ -220,6 +252,8 @@ invalid.css:34:12 lint/suspicious/noIrregularWhitespace ━━━━━━━━
     35 │ 	padding: 10px;
     36 │ }
   
+  i Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find.
+  
   i Replace the irregular whitespace with normal whitespaces.
   
 
@@ -236,6 +270,8 @@ invalid.css:38:12 lint/suspicious/noIrregularWhitespace ━━━━━━━━
        │            ^
     39 │ 	padding: 10px;
     40 │ }
+  
+  i Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find.
   
   i Replace the irregular whitespace with normal whitespaces.
   
@@ -254,6 +290,8 @@ invalid.css:42:12 lint/suspicious/noIrregularWhitespace ━━━━━━━━
     43 │ 	padding: 10px;
     44 │ }
   
+  i Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find.
+  
   i Replace the irregular whitespace with normal whitespaces.
   
 
@@ -270,6 +308,8 @@ invalid.css:46:12 lint/suspicious/noIrregularWhitespace ━━━━━━━━
        │            ^
     47 │ 	padding: 10px;
     48 │ }
+  
+  i Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find.
   
   i Replace the irregular whitespace with normal whitespaces.
   
@@ -288,22 +328,7 @@ invalid.css:51:14 lint/suspicious/noIrregularWhitespace ━━━━━━━━
     52 │ }
     53 │ /* \u{2009} */
   
-  i Replace the irregular whitespace with normal whitespaces.
-  
-
-```
-
-```
-invalid.css:56:11 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Irregular whitespace found.
-  
-    54 │ @layer state {
-    55 │ 	body {
-  > 56 │ 		padding:␠10px;
-       │ 		        ^
-    57 │ 	}
-    58 │ }
+  i Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find.
   
   i Replace the irregular whitespace with normal whitespaces.
   
@@ -321,6 +346,8 @@ invalid.css:56:11 lint/suspicious/noIrregularWhitespace ━━━━━━━━
        │ 		        ^
     57 │ 	}
     58 │ }
+  
+  i Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find.
   
   i Replace the irregular whitespace with normal whitespaces.
   
@@ -339,6 +366,8 @@ invalid.css:60:7 lint/suspicious/noIrregularWhitespace ━━━━━━━━�
     61 │ 	body {
     62 │ 		padding: 10px;
   
+  i Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find.
+  
   i Replace the irregular whitespace with normal whitespaces.
   
 
@@ -355,6 +384,8 @@ invalid.css:67:6 lint/suspicious/noIrregularWhitespace ━━━━━━━━�
        │ 	    ^
     68 │ 		transform: translateX(0%);
     69 │ 	}
+  
+  i Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find.
   
   i Replace the irregular whitespace with normal whitespaces.
   
@@ -373,6 +404,8 @@ invalid.css:76:11 lint/suspicious/noIrregularWhitespace ━━━━━━━━
     77 │   font-family: "Trickster";
     78 │   src:
   
+  i Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find.
+  
   i Replace the irregular whitespace with normal whitespaces.
   
 
@@ -390,6 +423,8 @@ invalid.css:85:11 lint/suspicious/noIrregularWhitespace ━━━━━━━━
     86 │ 	from {
     87 │ 		transform: translateX(0%);
   
+  i Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find.
+  
   i Replace the irregular whitespace with normal whitespaces.
   
 
@@ -406,6 +441,84 @@ invalid.css:95:11 lint/suspicious/noIrregularWhitespace ━━━━━━━━
        │           ^
     96 │ 	color: blue;
     97 │ }
+  
+  i Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find.
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:101:12 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+     99 │ /* \u{a0} before a comment */
+    100 │ .comment-after-irregular-value {
+  > 101 │ 	color: red␠/* note */;
+        │ 	          ^
+    102 │ }
+    103 │ 
+  
+  i Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find.
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:106:20 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    104 │ /* \u{3000} after a comment */
+    105 │ .comment-before-string {
+  > 106 │ 	content:/* note */␠"a";
+        │ 	                  ^
+    107 │ }
+    108 │ 
+  
+  i Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find.
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:111:10 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    109 │ /* \u{3000} before a string */
+    110 │ .irregular-space-before-string {
+  > 111 │ 	content:␠"a";
+        │ 	        ^
+    112 │ }
+    113 │ 
+  
+  i Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find.
+  
+  i Replace the irregular whitespace with normal whitespaces.
+  
+
+```
+
+```
+invalid.css:116:14 lint/suspicious/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Irregular whitespace found.
+  
+    114 │ /* \u{a0} after a string */
+    115 │ .irregular-space-after-string {
+  > 116 │ 	content: "a"␠;
+        │ 	            ^
+    117 │ }
+    118 │ 
+  
+  i Irregular whitespace is hard to see, and tools and browsers can treat it differently from a normal space. This can cause bugs that are hard to find.
   
   i Replace the irregular whitespace with normal whitespaces.
   

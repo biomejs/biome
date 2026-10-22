@@ -105,6 +105,10 @@ where
             f.state_mut().track_token(&token);
 
             match (self.format_token)(&token, range, f)? {
+                CssVerbatimTokenFormat::Source if token.text_trimmed().contains('\r') => {
+                    let source = token.token_text().slice(range - token.text_range().start());
+                    text(&normalize_newlines(&source, ['\r']), Some(range.start())).fmt(f)?;
+                }
                 CssVerbatimTokenFormat::Source => located_token_text(&token, range).fmt(f)?,
                 CssVerbatimTokenFormat::Replacement => {}
             }
@@ -294,7 +298,7 @@ fn write_verbatim_range_source(
     let mut source = range.start();
 
     raw.slice(relative_range).try_for_each_chunk(|chunk| {
-        text(chunk, Some(source)).fmt(f)?;
+        text(&normalize_newlines(chunk, ['\r']), Some(source)).fmt(f)?;
         source += TextSize::from(chunk.len() as u32);
         Ok(())
     })

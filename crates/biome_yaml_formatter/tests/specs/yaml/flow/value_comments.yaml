@@ -1,0 +1,59 @@
+{ "key"
+  # before the colon
+  : value }
+---
+{ key # on the key line
+  # before the colon
+  : value }
+---
+{ "key":
+  # after the colon
+  value }
+---
+{ key:
+  # first
+  # second
+  value }
+---
+{ key:
+  # followed by a blank line
+
+  value }
+---
+{ ? key
+  : # on the colon line
+  value }
+---
+{ key: # on the key line
+  # after the colon
+  value }
+---
+{ key:
+  # before a collection
+  [a, b] }
+---
+{ [a, b]:
+  # after a collection key
+  value }
+---
+[ "key":
+  # in a single pair
+  value ]
+---
+a:
+  b: { key:
+    # nested
+    value }
+---
+{ : # without a key
+  value }
+---
+{ key
+  # separated
+
+  # by a blank line
+  : value }
+---
+[ ? key :
+  # in an explicit single pair
+  value ]

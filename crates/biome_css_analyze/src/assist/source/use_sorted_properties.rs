@@ -7,12 +7,13 @@ use biome_analyze::{
     Ast, FixKind, Rule, RuleDiagnostic, context::RuleContext, declare_source_rule,
 };
 use biome_console::markup;
+use biome_css_factory::make::css_declaration_or_rule_list;
 use biome_css_syntax::{
     AnyCssDeclarationName, AnyCssDeclarationOrRule, AnyCssProperty, AnyCssRule,
     CssDeclarationOrRuleBlock, CssDeclarationOrRuleList, CssDeclarationWithSemicolon,
-    CssSyntaxKind, TextRange, keywords::VENDOR_PREFIXES,
+    CssSyntaxKind, CssSyntaxToken, TextRange, keywords::VENDOR_PREFIXES,
 };
-use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken, SyntaxNode, TokenText};
+use biome_rowan::{AstNode, BatchMutationExt, TokenText};
 use biome_rule_options::use_sorted_properties::UseSortedPropertiesOptions;
 use biome_string_case::StrOnlyExtension;
 use std::{
@@ -183,7 +184,7 @@ impl Rule for UseSortedProperties {
         }
 
         let mut mutation = ctx.root().begin();
-        mutation.replace_node(state.block.items(), sorted_properties.as_sorted()?);
+        mutation.replace_node_discard_trivia(state.block.items(), sorted_properties.as_sorted()?);
 
         Some(CssRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
@@ -191,6 +192,61 @@ impl Rule for UseSortedProperties {
             markup! { "Sort these properties" }.to_owned(),
             mutation,
         ))
+    }
+}
+
+fn with_terminated_line_comment(
+    item: AnyCssDeclarationOrRule,
+    next_item: Option<&AnyCssDeclarationOrRule>,
+) -> Option<AnyCssDeclarationOrRule> {
+    let last_token = item.syntax().last_token()?;
+    if !last_token
+        .trailing_trivia()
+        .pieces()
+        .any(|piece| piece.text().starts_with("//"))
+    {
+        return Some(item);
+    }
+
+    let next_token = match next_item {
+        Some(next) => next.syntax().first_token()?,
+        None => item.syntax().parent()?.last_token()?.next_token()?,
+    };
+    if next_token
+        .leading_trivia()
+        .pieces()
+        .find(|piece| !piece.kind().is_whitespace())
+        .is_some_and(|piece| piece.kind().is_newline())
+    {
+        return Some(item);
+    }
+
+    // The parser attaches the terminating newline to the following token.
+    // Preserve it when sorting would otherwise extend the comment over code.
+    let newline = last_token
+        .next_token()?
+        .leading_trivia()
+        .pieces()
+        .find(|piece| piece.kind().is_newline())?;
+    item.append_trivia_pieces([newline])
+}
+
+fn with_semicolon(item: AnyCssDeclarationOrRule) -> Option<AnyCssDeclarationOrRule> {
+    match item {
+        AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(declaration)
+            if declaration.semicolon_token().is_none() =>
+        {
+            let trailing_trivia = declaration.syntax().last_token()?.trailing_trivia();
+            let semicolon = CssSyntaxToken::new_detached(CssSyntaxKind::SEMICOLON, ";", [], [])
+                .with_trailing_trivia_pieces(trailing_trivia.pieces());
+            Some(
+                declaration
+                    .with_trailing_trivia_pieces([])?
+                    .with_semicolon_token(Some(semicolon))
+                    .into(),
+            )
+        }
+        item => Some(item),
     }
 }
 
@@ -219,14 +275,14 @@ impl RecessOrderProperties {
 
     /// Wrap the sorted list in a CssDeclarationOrRuleList.
     pub fn as_sorted(&self) -> Option<CssDeclarationOrRuleList> {
-        let slots = self
-            .0
-            .iter()
-            .map(|item| Some(NodeOrToken::Node(item.0.clone().into_syntax())));
-        CssDeclarationOrRuleList::cast(SyntaxNode::new_detached(
-            CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST,
-            slots,
-        ))
+        let mut members = self.0.iter().peekable();
+        let mut items = Vec::with_capacity(self.0.len());
+        while let Some(member) = members.next() {
+            let item =
+                with_terminated_line_comment(member.0.clone(), members.peek().map(|next| &next.0))?;
+            items.push(with_semicolon(item)?);
+        }
+        Some(css_declaration_or_rule_list(items))
     }
 }
 
@@ -280,7 +336,8 @@ impl RecessOrderMember {
                             return NodeKindOrder::UnknownKind;
                         };
                         match prop {
-                            AnyCssDeclarationName::AnyCssDashedIdentifier(_) => {
+                            AnyCssDeclarationName::AnyCssDashedIdentifier(_)
+                            | AnyCssDeclarationName::TwValueThemeReference(_) => {
                                 NodeKindOrder::CustomProperty
                             }
                             AnyCssDeclarationName::CssIdentifier(_) => NodeKindOrder::Declaration,
@@ -291,12 +348,7 @@ impl RecessOrderMember {
                                     NodeKindOrder::Declaration
                                 }
                             }
-                            AnyCssDeclarationName::TwValueThemeReference(_) => {
-                                NodeKindOrder::Declaration
-                            }
-                            AnyCssDeclarationName::CssMetavariable(_) => {
-                                NodeKindOrder::UnknownKind
-                            }
+                            AnyCssDeclarationName::CssMetavariable(_) => NodeKindOrder::UnknownKind,
                         }
                     }
                 }

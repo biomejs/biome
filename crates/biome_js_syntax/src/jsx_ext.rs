@@ -16,10 +16,9 @@ impl JsxString {
     ///
     /// ```
     /// use biome_js_factory::make;
-    /// use biome_rowan::TriviaPieceKind;
     ///
     ///let string = make::jsx_string(make::jsx_string_literal("button")
-    ///     .with_leading_trivia(vec![(TriviaPieceKind::Whitespace, " ")]));
+    ///     .with_leading_space());
     /// assert_eq!(string.inner_string_text().unwrap().text(), "button");
     /// ```
     pub fn inner_string_text(&self) -> SyntaxResult<TokenText> {
@@ -332,9 +331,14 @@ impl JsxAttributeList {
                 return false;
             };
             attribute
-                .name()
+                .expression()
                 .ok()
-                .and_then(|name| name.value_token().ok())
+                .and_then(|expression| match expression {
+                    AnyJsExpression::JsIdentifierExpression(expression) => {
+                        expression.name().ok()?.value_token().ok()
+                    }
+                    _ => None,
+                })
                 .is_some_and(|token| token.text_trimmed() == name_to_lookup)
         })
     }

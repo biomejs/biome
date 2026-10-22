@@ -144,6 +144,8 @@ invalid.js:6:2 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
      9 │ }
     10 │ 
   
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
+  
   i Safe fix: Use collapsed if instead.
   
       3   3 │    */
@@ -175,6 +177,8 @@ invalid.js:20:2 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
     22 │ 
     23 │ // Inner one is `JsBlockStatement`
   
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
+  
   i Safe fix: Use collapsed if instead.
   
      17  17 │   }
@@ -204,6 +208,8 @@ invalid.js:24:16 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━
     27 │ 
     28 │ // Outer one is `JsBlockStatement`
   
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
+  
   i Safe fix: Use collapsed if instead.
   
      22  22 │   
@@ -227,6 +233,8 @@ invalid.js:30:2 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     31 │ }
     32 │ 
+  
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
   
   i Safe fix: Use collapsed if instead.
   
@@ -253,6 +261,8 @@ invalid.js:34:16 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━
     35 │ 
     36 │ // `JsEmptyStatement`
   
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
+  
   i Safe fix: Use collapsed if instead.
   
      32  32 │   
@@ -275,6 +285,8 @@ invalid.js:37:16 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━
        │                ^^^^^^^^^^^^^^^^^^^^^^
     38 │ 
     39 │ // Nested
+  
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
   
   i Safe fix: Use collapsed if instead.
   
@@ -302,6 +314,8 @@ invalid.js:45:2 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
        │ 	^
     48 │ }
     49 │ 
+  
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
   
   i Safe fix: Use collapsed if instead.
   
@@ -338,6 +352,8 @@ invalid.js:53:3 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
     61 │ }
     62 │ 
   
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
+  
   i Safe fix: Use collapsed if instead.
   
      50  50 │   // Need parenthesis
@@ -369,6 +385,8 @@ invalid.js:54:4 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
        │ 									^^^^^^^^^^
     61 │ }
     62 │ 
+  
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
   
   i Safe fix: Use collapsed if instead.
   
@@ -403,6 +421,8 @@ invalid.js:55:5 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
     61 │ }
     62 │ 
   
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
+  
   i Safe fix: Use collapsed if instead.
   
      52  52 │     if (a || b)
@@ -435,6 +455,8 @@ invalid.js:56:6 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
     61 │ }
     62 │ 
   
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
+  
   i Safe fix: Use collapsed if instead.
   
      53  53 │       if (a ?? b)
@@ -466,6 +488,8 @@ invalid.js:57:7 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
     61 │ }
     62 │ 
   
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
+  
   i Safe fix: Use collapsed if instead.
   
      54  54 │         if (a ? b : c)
@@ -496,6 +520,8 @@ invalid.js:58:8 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
     61 │ }
     62 │ 
   
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
+  
   i Safe fix: Use collapsed if instead.
   
      55  55 │           if (a = b)
@@ -525,6 +551,8 @@ invalid.js:59:9 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
     61 │ }
     62 │ 
   
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
+  
   i Safe fix: Use collapsed if instead.
   
      56  56 │             if (a += b)
@@ -551,6 +579,8 @@ invalid.js:60:10 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━
        │ 									^^^^^^^^^^
     61 │ }
     62 │ 
+  
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
   
   i Safe fix: Use collapsed if instead.
   
@@ -581,6 +611,8 @@ invalid.js:66:3 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
     69 │ }
     70 │ 
   
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
+  
   i Safe fix: Use collapsed if instead.
   
      63  63 │   // Should not add parenthesis
@@ -610,6 +642,8 @@ invalid.js:67:4 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
     69 │ }
     70 │ 
   
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
+  
   i Safe fix: Use collapsed if instead.
   
      64  64 │   async function foo() {
@@ -637,6 +671,8 @@ invalid.js:68:5 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
     69 │ }
     70 │ 
   
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
+  
   i Safe fix: Use collapsed if instead.
   
      65  65 │     if (a)
@@ -661,6 +697,8 @@ invalid.js:72:17 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━
        │                 ^^^^^^^^^^^^^^^^
     73 │ 
     74 │ // Semicolon
+  
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
   
   i Safe fix: Use collapsed if instead.
   
@@ -688,6 +726,8 @@ invalid.js:76:2 lint/style/useCollapsedIf  FIXABLE  ━━━━━━━━━�
     78 │ 
     79 │ if (a) {
   
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
+  
   i Safe fix: Use collapsed if instead.
   
      73  73 │   
@@ -713,6 +753,8 @@ invalid.js:80:2 lint/style/useCollapsedIf ━━━━━━━━━━━━�
     81 │ }
     82 │ ;[].forEach(bar)
   
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
+  
 
 ```
 
@@ -729,6 +771,8 @@ invalid.js:89:2 lint/style/useCollapsedIf ━━━━━━━━━━━━�
        │ 	^
     92 │ }
     93 │ 
+  
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
   
 
 ```
@@ -748,6 +792,8 @@ invalid.js:96:2 lint/style/useCollapsedIf ━━━━━━━━━━━━�
      99 │ }
     100 │ 
   
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
+  
 
 ```
 
@@ -764,6 +810,8 @@ invalid.js:102:2 lint/style/useCollapsedIf ━━━━━━━━━━━━�
         │ 	^
     105 │ }
     106 │ 
+  
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
   
 
 ```
@@ -782,6 +830,8 @@ invalid.js:108:2 lint/style/useCollapsedIf ━━━━━━━━━━━━�
     111 │ 	// Comment
     112 │ }
   
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
+  
 
 ```
 
@@ -798,6 +848,8 @@ invalid.js:115:2 lint/style/useCollapsedIf ━━━━━━━━━━━━�
     117 │ 
     118 │ // Semicolon
   
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
+  
 
 ```
 
@@ -812,6 +864,8 @@ invalid.js:120:2 lint/style/useCollapsedIf ━━━━━━━━━━━━�
         │ 	^^^^^^^^^^^^
     121 │ }
     122 │ [].forEach(bar)
+  
+  i Nested if statements without an else can be written as one condition, which reduces nesting.
   
 
 ```

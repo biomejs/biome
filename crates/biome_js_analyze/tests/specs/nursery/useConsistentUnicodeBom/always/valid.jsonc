@@ -1,0 +1,9 @@
+// should not generate diagnostics
+[
+  "\ufeffvar value = 1;",
+  "\ufeff",
+  "\ufeff  var value = 1;",
+  "\ufeff\nvar value = 1;",
+  "\ufeff// header\nvar value = 1;",
+  "\ufeff#! /usr/bin/env node\nvar value = 1;"
+]

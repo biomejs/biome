@@ -7,9 +7,7 @@ use biome_json_factory::make;
 use biome_json_syntax::{
     AnyJsonValue, JsonMember, JsonMemberList, JsonRoot, JsonSyntaxKind, JsonSyntaxToken, T,
 };
-use biome_rowan::{
-    AstNode, AstNodeExt, AstSeparatedList, BatchMutationExt, TokenText, TriviaPieceKind,
-};
+use biome_rowan::{AstNode, AstNodeExt, AstSeparatedList, BatchMutationExt, TokenText};
 
 use crate::{MigrationAction, declare_migration};
 
@@ -275,11 +273,11 @@ fn with_tailwind_options(
     }
     let tailwind = make::json_member(
         make::json_member_name(name).into(),
-        make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        make::token(T![:]).with_trailing_space(),
         make::json_object_value(
-            make::token(T!['{']).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            make::token(T!['{']).with_trailing_space(),
             make::json_member_list(tailwind_members, separators),
-            make::token(T!['}']).with_leading_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            make::token(T!['}']).with_leading_space(),
         )
         .into(),
     );
@@ -342,7 +340,7 @@ fn string_array_member(name: &str, values: &[String]) -> JsonMember {
     let separators = (1..elements.len()).map(|_| comma());
     make::json_member(
         make::json_member_name(make::json_string_literal(name)).into(),
-        make::token(T![:]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        make::token(T![:]).with_trailing_space(),
         make::json_array_value(
             make::token(T!['[']),
             make::json_array_element_list(elements, separators),
@@ -353,5 +351,5 @@ fn string_array_member(name: &str, values: &[String]) -> JsonMember {
 }
 
 fn comma() -> JsonSyntaxToken {
-    make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")])
+    make::token(T![,]).with_trailing_space()
 }

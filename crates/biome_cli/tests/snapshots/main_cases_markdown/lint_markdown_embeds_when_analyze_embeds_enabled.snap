@@ -127,6 +127,8 @@ file.md:9:1 lint/suspicious/noDebugger  FIXABLE  ━━━━━━━━━━�
     10 │ ```
     11 │ 
   
+  i A debugger statement pauses the program when a debugger is open. It is meant for debugging only, and it should not be left in code that is shipped.
+  
   i Unsafe fix: Remove debugger statement
   
     1   │ - 

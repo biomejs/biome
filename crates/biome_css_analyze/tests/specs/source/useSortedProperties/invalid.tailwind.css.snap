@@ -1,0 +1,60 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.tailwind.css
+---
+# Input
+```css
+/* should generate diagnostics */
+@theme {
+  color: red;
+  --*: initial;
+  --font-*: initial;
+  --font-custom: Custom;
+  display: block;
+  --color-custom: red;
+  --color-*: initial;
+  --color-custom: blue;
+}
+
+```
+
+# Diagnostics
+```
+invalid.tailwind.css:2:8 assist/source/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The properties are not sorted.
+  
+     1 │ /* should generate diagnostics */
+   > 2 │ @theme {
+       │        ^
+   > 3 │   color: red;
+   > 4 │   --*: initial;
+        ...
+   > 9 │   --color-*: initial;
+  > 10 │   --color-custom: blue;
+  > 11 │ }
+       │ ^
+    12 │ 
+  
+  i Safe fix: Sort these properties
+  
+     1  1 │   /* should generate diagnostics */
+     2  2 │   @theme {
+     3    │ - ··color:·red;
+     4    │ - ··--*:·initial;
+        3 │ + ··--*:·initial;
+     5  4 │     --font-*: initial;
+     6    │ - ··--font-custom:·Custom;
+     7    │ - ··display:·block;
+        5 │ + ··--font-custom:·Custom;
+     8  6 │     --color-custom: red;
+     9  7 │     --color-*: initial;
+    10    │ - ··--color-custom:·blue;
+        8 │ + ··--color-custom:·blue;
+        9 │ + ··display:·block;
+       10 │ + ··color:·red;
+    11 11 │   }
+    12 12 │   
+  
+
+```

@@ -93,7 +93,10 @@ impl Rule for NoApproximativeNumericConstant {
             rule_category!(),
             node.range(),
             markup! { "Prefer constants from the standard library." },
-        ))
+        )
+        .note(markup! {
+            "A value typed by hand is less precise than the built-in constant, and the name of the constant shows what the number means."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, constant_name: &Self::State) -> Option<JsRuleAction> {

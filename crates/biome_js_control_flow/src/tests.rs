@@ -6,9 +6,10 @@ use biome_db::{
 use biome_js_parser::{JsParserOptions, parse};
 use biome_js_syntax::{
     JsExpressionStatement, JsFunctionDeclaration, JsNumberLiteralExpression, JsReturnStatement,
+    JsSyntaxKind,
 };
 use biome_languages::JsFileSource;
-use biome_rowan::{TextRange, TextSize};
+use biome_rowan::{RawSyntaxKind, SyntaxKind, TextRange, TextSize};
 use rustc_hash::FxHashSet;
 use salsa::Setter;
 
@@ -33,6 +34,49 @@ fn equality_includes_source_and_locations() {
             model,
             control_flow_model(&parsed(changed).tree()),
             "{changed}"
+        );
+    }
+}
+
+#[test]
+fn visited_kinds_are_the_kinds_the_visitor_acts_on() {
+    for raw in 0..JsSyntaxKind::__LAST as u16 {
+        let kind = JsSyntaxKind::from_raw(RawSyntaxKind(raw));
+        assert_eq!(
+            visitor::ControlFlowVisitor::VISITED_KINDS.matches(kind),
+            visitor::ControlFlowVisitor::acts_on(kind),
+            "{kind:?}"
+        );
+    }
+}
+
+#[test]
+fn model_equals_a_visit_of_every_node() {
+    for source in [
+        "",
+        "label: for (const a of b) { if (a) continue label; else break; }",
+        "function f(x) { switch (x) { case 1: return; default: throw x; } }",
+        "const f = () => { try { g(() => { debugger; }); } catch { ; } finally { h(); } };",
+        "for (let i = 0; i < 1; i++) { for (const k in o) { while (k) { do { i++; } while (i); } } }",
+        "class A extends B { constructor() { super(); } static { init(); } get a() { return 1; } set a(v) {} m() { return class { n() {} }; } }",
+        "const o = { get a() { return 1; }, set a(v) {}, m() { return function* () { yield 1; }; } };",
+        "namespace N { export function f() { return 1; } } declare module 'm' { const a: number; }",
+        "interface I { a: { b: () => void }; [key: string]: unknown } type T = { c: number };",
+        "a(b(c(d(async function () { await e; return () => { if (f) { return g; } }; }))));",
+        "function f() { if (x) { return } } }",
+        "function f() { for (;;) { break } while (",
+        "class { m() { if } }",
+    ] {
+        let root = parsed(source).tree();
+        let mut visitor = visitor::ControlFlowVisitor::new();
+        let mut graphs = Vec::new();
+        for event in root.syntax().preorder() {
+            visitor.visit(event, &mut graphs);
+        }
+        assert_eq!(
+            control_flow_model(&root),
+            ControlFlowModel::new(&root, graphs),
+            "{source}"
         );
     }
 }

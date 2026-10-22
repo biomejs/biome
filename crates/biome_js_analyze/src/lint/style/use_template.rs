@@ -87,7 +87,10 @@ impl Rule for UseTemplate {
             markup! {
                 <Emphasis>"Template"</Emphasis>" literals are preferred over "<Emphasis>"string concatenation."</Emphasis>
             },
-        ))
+        )
+        .note(markup! {
+            "Template literals are easier to read than a chain of "<Emphasis>"+"</Emphasis>" operators and quotes, and they avoid mistakes with spaces and escaped quotes."
+        }))
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

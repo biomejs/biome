@@ -2895,6 +2895,99 @@ import { useUiModel } from '~/models/ui-model'
 }
 
 #[tokio::test]
+async fn pull_action_in_astro_expression_after_frontmatter_issue_12433() -> Result<()> {
+    let uri = uri!("document.astro");
+    let input = "---\nconst value = true;\n---\n{true && <div class=\"px-2 p-4\" />}\n";
+    for resolve in [false, true] {
+        let fs = MemoryFileSystem::default();
+        fs.insert(
+            to_utf8_file_path_buf(uri!("biome.json")),
+            serde_json::json!({
+                "html": { "experimentalFullSupportEnabled": true },
+                "linter": {
+                    "rules": {
+                        "recommended": false,
+                        "nursery": { "useTailwindSortedClasses": "error" }
+                    }
+                }
+            })
+            .to_string(),
+        );
+        let factory = ServerFactory::new_with_fs(Arc::new(fs));
+        let (service, client) = factory.create().into_inner();
+        let (stream, sink) = client.split();
+        let mut server = Server::new(service);
+        let (sender, _receiver) = channel(CHANNEL_BUFFER_SIZE);
+        let reader = tokio::spawn(client_handler(stream, sink, sender));
+        if resolve {
+            server.initialize_with_resolve_support().await?;
+        } else {
+            server.initialize().await?;
+        }
+        server.initialized().await?;
+        server
+            .open_named_document(input, uri.clone(), "astro")
+            .await?;
+
+        // The cursor sits on the first class name.
+        let cursor = Position::new(3, 21);
+        let actions: CodeActionResponse = server
+            .request(
+                "textDocument/codeAction",
+                "code_actions",
+                CodeActionParams {
+                    text_document: TextDocumentIdentifier { uri: uri.clone() },
+                    range: Range::new(cursor, cursor),
+                    context: CodeActionContext {
+                        diagnostics: vec![],
+                        only: Some(vec![CodeActionKind::new(
+                            "quickfix.biome.nursery.useTailwindSortedClasses",
+                        )]),
+                        trigger_kind: None,
+                    },
+                    work_done_progress_params: Default::default(),
+                    partial_result_params: Default::default(),
+                },
+            )
+            .await?
+            .context("codeAction returned None")?;
+        assert_eq!(actions.len(), 1, "resolve={resolve}");
+        let CodeActionOrCommand::CodeAction(mut action) = actions.into_iter().next().unwrap()
+        else {
+            panic!("Expected a code action");
+        };
+        if resolve {
+            action = server
+                .request("codeAction/resolve", "resolve_code_action", action)
+                .await?
+                .context("codeAction/resolve returned None")?;
+        }
+        let edits = action.edit.unwrap().changes.unwrap().remove(&uri).unwrap();
+        let changes = edits
+            .into_iter()
+            .rev()
+            .map(|edit| TextDocumentContentChangeEvent {
+                range: Some(edit.range),
+                range_length: None,
+                text: edit.new_text,
+            })
+            .collect();
+        let output = crate::utils::apply_document_changes(
+            biome_lsp_converters::negotiated_encoding(&ClientCapabilities::default()),
+            input.to_string(),
+            changes,
+        );
+        assert_eq!(
+            output, "---\nconst value = true;\n---\n{true && <div class=\"p-4 px-2\" />}\n",
+            "resolve={resolve}"
+        );
+        server.shutdown().await?;
+        reader.abort();
+    }
+    Ok(())
+}
+
+#[tokio::test]
 async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Result<()> {
     let fs = MemoryFileSystem::default();
     let config = r#"{

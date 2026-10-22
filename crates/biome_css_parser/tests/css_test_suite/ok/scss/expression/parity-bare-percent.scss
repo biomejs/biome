@@ -1,0 +1,35 @@
+$unit: %;
+$default-list: 10 % !default;
+$global-list: null;
+$global-list: 10 % !global;
+
+@mixin width-in($amount, $unit: %) {
+  width: #{$amount}#{$unit};
+}
+@function percent() {
+  @return %;
+}
+.progress { @include width-in(75); @include width-in(50, %); }
+
+$containers: (unit: %, choices: [%, px], grouped: (10 %));
+$leading: % foo;
+$number-list: 10 %;
+$comparison-list: 10 % == 3;
+$modulo: 10 %3;
+$percentage: 10%3;
+$percent-list: % %;
+$negative-modulo: 10 % -3;
+$three: 3;
+$variable-modulo: 10 % $three;
+
+%placeholder { width: 75%; }
+.controls {
+  @extend %placeholder;
+  width: attr(data-progress %, %);
+  unit: % !important;
+  generic: unknown(%, 10 %);
+  returned: percent();
+  interpolation: #{%};
+  --unit: %;
+  --raw: 10 % +;
+}

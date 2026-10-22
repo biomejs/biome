@@ -8,7 +8,7 @@ use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange, WalkEvent}
 use biome_react_compiler::{
     CompileInput, CompileOutput, ReactCompilerError, compile_program, default_lint_options,
 };
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, SyntaxKindSet};
 use biome_rule_options::use_react_compiler::UseReactCompilerOptions;
 use std::sync::Arc;
 
@@ -116,6 +116,15 @@ impl Visitor for ReactCompilerVisitor {
         }
     }
 
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        // `visit` only reads the options, and the root is the first event of
+        // every walk.
+        Some(AnyJsRoot::KIND_SET)
+    }
+
     fn finish(self: Box<Self>, ctx: VisitorFinishContext<JsLanguage>) {
         if ctx.services.get_service::<ReactCompilerResult>().is_none() {
             let result = match ctx.services.get_service::<SemanticModel>() {
@@ -173,5 +182,12 @@ impl Visitor for ReactCompilerQueryVisitor {
         };
 
         ctx.match_query(ReactCompilerEvent(root.text_range_with_trivia()));
+    }
+
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(AnyJsRoot::KIND_SET)
     }
 }

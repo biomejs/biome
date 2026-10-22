@@ -1102,6 +1102,15 @@ struct MissingYieldVisitor {
 impl Visitor for MissingYieldVisitor {
     type Language = JsLanguage;
 
+    // Declare the node kinds `visit` reads, so the analyzer can skip the others.
+    // Returning `None` makes the whole phase walk every node.
+    fn visited_kinds(
+        &self,
+        _: Option<SyntaxKindSet<JsLanguage>>,
+    ) -> Option<SyntaxKindSet<JsLanguage>> {
+        Some(AnyFunctionLike::KIND_SET.union(JsYieldExpression::KIND_SET))
+    }
+
     fn visit(
         &mut self,
         event: &WalkEvent<SyntaxNode<Self::Language>>,

@@ -9,9 +9,7 @@ use biome_js_syntax::{
     JsDefaultImportSpecifier, JsLanguage, JsNamedImportSpecifierList, JsReferenceIdentifier,
     JsSyntaxToken, T, unescape_js_identifier,
 };
-use biome_rowan::{
-    AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, TextRange, TriviaPieceKind,
-};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutation, BatchMutationExt, TextRange};
 use biome_rule_options::use_consistent_test_it::{TestFunctionKind, UseConsistentTestItOptions};
 
 use crate::{JsRuleAction, services::semantic::Semantic};
@@ -410,9 +408,7 @@ fn update_import(
         let alias: AnyJsNamedImportSpecifier = make::js_named_import_specifier(
             name.with_leading_trivia_pieces([])?
                 .with_trailing_trivia_pieces([])?,
-            make::token(T![as])
-                .with_leading_trivia([(TriviaPieceKind::Whitespace, " ")])
-                .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+            make::token(T![as]).with_surrounding_spaces(),
             make::js_identifier_binding(make::ident(target)).into(),
         )
         .build()
@@ -424,9 +420,7 @@ fn update_import(
             let mut items = list.iter().collect::<Result<Vec<_>, _>>().ok()?;
             let mut separators = list.separators().collect::<Result<Vec<_>, _>>().ok()?;
             if separators.len() < items.len() {
-                separators.push(
-                    make::token(T![,]).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                );
+                separators.push(make::token(T![,]).with_trailing_space());
             }
             items.push(alias);
             mutation.replace_node(

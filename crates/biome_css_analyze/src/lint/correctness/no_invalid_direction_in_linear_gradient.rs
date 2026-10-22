@@ -1,4 +1,7 @@
-#![expect(clippy::disallowed_methods, reason = "This rule compares CSS values that can span multiple tokens.")]
+#![expect(
+    clippy::disallowed_methods,
+    reason = "This rule compares CSS values that can span multiple tokens."
+)]
 
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
@@ -118,8 +121,9 @@ impl Rule for NoInvalidDirectionInLinearGradient {
         None
     }
 
-    fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
         let span = node.range();
+        let has_prefix = vendor_prefixed(&ctx.query().name().ok()?.to_trimmed_text());
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -127,12 +131,24 @@ impl Rule for NoInvalidDirectionInLinearGradient {
                 markup! {
                     "Unexpected nonstandard direction"
                 },
-            ).note(markup! {
-                "You should fix the direction value to follow the syntax."
+            )
+            .note(markup! {
+                "Browsers ignore a declaration that contains a direction they do not recognize, so the gradient is not applied."
             })
+            .note(
+                if has_prefix {
+                    markup! {
+                        "Use a direction that follows the syntax, such as an angle or a side or corner keyword like "<Emphasis>"top"</Emphasis>" or "<Emphasis>"bottom right"</Emphasis>"."
+                    }
+                } else {
+                    markup! {
+                        "Use a direction that follows the syntax, such as an angle or a keyword starting with "<Emphasis>"to"</Emphasis>"."
+                    }
+                }
+            )
             .note(markup! {
                 "See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/CSS/gradient/linear-gradient">"MDN web docs"</Hyperlink>" for more details."
-            })
+            }),
         )
     }
 }

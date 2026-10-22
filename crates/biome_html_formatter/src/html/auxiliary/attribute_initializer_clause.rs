@@ -1,3 +1,4 @@
+use crate::html::auxiliary::attribute_single_text_expression::HtmlAttributeSingleTextExpressionLayout;
 use crate::prelude::*;
 use crate::shared::FmtAnyAttributeInitializer;
 use crate::utils::srcset::{FormatSrcsetCandidates, parse_srcset};
@@ -43,6 +44,8 @@ pub(crate) enum CompactKind {
     Remove,
     /// Removes the `=` and keeps the `{ expression }`
     Curly,
+    /// Removes the `=` and braces while keeping the expression.
+    Unwrap,
 }
 
 impl CompactKind {
@@ -202,6 +205,22 @@ impl FormatNodeRule<HtmlAttributeInitializerClause> for FormatHtmlAttributeIniti
                 };
                 write!(f, [format_removed(&eq_token), &fmt,])?;
                 Ok(())
+            }
+            CompactKind::Unwrap => {
+                let eq_token = eq_token.clone()?;
+                let value = value.clone()?;
+                write!(f, [format_removed(&eq_token)])?;
+                match value {
+                    AnyHtmlAttributeInitializer::HtmlAttributeSingleTextExpression(expression) => {
+                        write!(
+                            f,
+                            [expression
+                                .format()
+                                .with_options(HtmlAttributeSingleTextExpressionLayout::Unwrap)]
+                        )
+                    }
+                    value => write!(f, [value.format()]),
+                }
             }
         }
     }

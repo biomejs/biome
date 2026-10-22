@@ -1,0 +1,49 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-control-flow-boundary.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup lang="ts">
+defineEmits([]);
+if (flag) log()
+defineProps({});
+[1].forEach(log)
+defineModel();
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-control-flow-boundary.vue:5:1 lint/style/useVueDefineMacrosOrder  FIXABLE  ━━━━━━━━━━━━━━━━━
+
+  i defineProps macro is out of order.
+  
+    3 │ defineEmits([]);
+    4 │ if (flag) log()
+  > 5 │ defineProps({});
+      │ ^^^^^^^^^^^^^^^^
+    6 │ [1].forEach(log)
+    7 │ defineModel();
+  
+  i Macros defined in <script setup> should be ordered as follows: defineModel, defineProps, defineEmits
+  
+  i and be placed before any non-macro statements, except for type declarations, imports, exports or debugger statements.
+  
+  i Unsafe fix: Reorder compiler macros.
+  
+    1 1 │   
+      2 │ + defineModel();
+      3 │ + defineProps({});
+    2 4 │   defineEmits([]);
+    3   │ - if·(flag)·log()
+    4   │ - defineProps({});
+      5 │ + if·(flag)·log();
+    5 6 │   [1].forEach(log)
+    6   │ - defineModel();
+    7 7 │   
+  
+
+```

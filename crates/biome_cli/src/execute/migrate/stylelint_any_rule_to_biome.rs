@@ -5,7 +5,7 @@ pub(crate) fn migrate_stylelint_any_rule(
     rules: &mut biome_configuration::Rules,
     stylelint_name: &str,
     rule_level: biome_configuration::RulePlainConfiguration,
-    _options: &eslint_to_biome::MigrationOptions,
+    options: &eslint_to_biome::MigrationOptions,
     results: &mut stylelint_to_biome::StylelintMigrationResults,
 ) -> bool {
     match stylelint_name {
@@ -118,6 +118,36 @@ pub(crate) fn migrate_stylelint_any_rule(
             let rule = group
                 .unwrap_group_as_mut()
                 .no_important_in_keyframe
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_level));
+        }
+        "length-zero-no-unit" => {
+            if !options.include_nursery {
+                results.add(
+                    stylelint_name,
+                    eslint_to_biome::RuleMigrationResult::Nursery,
+                );
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_zero_length_unit
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_level));
+        }
+        "lightness-notation" => {
+            if !options.include_nursery {
+                results.add(
+                    stylelint_name,
+                    eslint_to_biome::RuleMigrationResult::Nursery,
+                );
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_consistent_lightness_notation
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_level));
         }
@@ -238,6 +268,21 @@ pub(crate) fn migrate_stylelint_any_rule(
             let rule = group
                 .unwrap_group_as_mut()
                 .no_unknown_type_selector
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_level));
+        }
+        "time-min-milliseconds" => {
+            if !options.include_nursery {
+                results.add(
+                    stylelint_name,
+                    eslint_to_biome::RuleMigrationResult::Nursery,
+                );
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .no_short_time_values
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_level));
         }

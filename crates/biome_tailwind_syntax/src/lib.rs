@@ -2,6 +2,7 @@
 
 #[macro_use]
 mod generated;
+mod candidate_ext;
 pub mod metadata;
 mod syntax_node;
 mod util;

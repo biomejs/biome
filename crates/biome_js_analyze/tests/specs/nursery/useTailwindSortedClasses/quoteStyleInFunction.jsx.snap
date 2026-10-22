@@ -30,6 +30,8 @@ quoteStyleInFunction.jsx:2:4 lint/nursery/useTailwindSortedClasses  FIXABLE  ━
     3 │ tw({ base: "content-[''] absolute" });
     4 │ tw({ variants: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } });
   
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
+  
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -56,6 +58,8 @@ quoteStyleInFunction.jsx:3:12 lint/nursery/useTailwindSortedClasses  FIXABLE  �
       │            ^^^^^^^^^^^^^^^^^^^^^^^
     4 │ tw({ variants: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } });
     5 │ tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center');
+  
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
@@ -85,6 +89,8 @@ quoteStyleInFunction.jsx:4:24 lint/nursery/useTailwindSortedClasses  FIXABLE  �
     5 │ tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center');
     6 │ 
   
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
+  
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -112,6 +118,8 @@ quoteStyleInFunction.jsx:4:56 lint/nursery/useTailwindSortedClasses  FIXABLE  �
       │                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │ tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center');
     6 │ 
+  
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
@@ -141,6 +149,8 @@ quoteStyleInFunction.jsx:5:4 lint/nursery/useTailwindSortedClasses  FIXABLE  ━
     6 │ 
     7 │ // function in jsx attribute
   
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
+  
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -167,6 +177,8 @@ quoteStyleInFunction.jsx:8:16 lint/nursery/useTailwindSortedClasses  FIXABLE  �
        │                ^^^^^^^^^^^^^^^^^^^^^^^
      9 │ <div class={tw({ base: "content-[''] absolute" })}>Hello</div>;
     10 │ <div class={tw({ variants: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } })}>Hello</div>;
+  
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
@@ -196,6 +208,8 @@ quoteStyleInFunction.jsx:9:24 lint/nursery/useTailwindSortedClasses  FIXABLE  �
     10 │ <div class={tw({ variants: { dark: "content-[''] absolute", light: "flex gap-2 p-4 m-2 [&_svg:not([class*='size-'])]:w-4 items-center" } })}>Hello</div>;
     11 │ <div class={tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center')} />;
   
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
+  
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -223,6 +237,8 @@ quoteStyleInFunction.jsx:10:36 lint/nursery/useTailwindSortedClasses  FIXABLE  �
        │                                    ^^^^^^^^^^^^^^^^^^^^^^^
     11 │ <div class={tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center')} />;
     12 │ 
+  
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
@@ -252,6 +268,8 @@ quoteStyleInFunction.jsx:10:68 lint/nursery/useTailwindSortedClasses  FIXABLE  �
     11 │ <div class={tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center')} />;
     12 │ 
   
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
+  
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -278,6 +296,8 @@ quoteStyleInFunction.jsx:11:16 lint/nursery/useTailwindSortedClasses  FIXABLE  �
   > 11 │ <div class={tw('flex gap-2 p-4 m-2 [&_svg:not([class*="size-"])]:w-4 items-center')} />;
        │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     12 │ 
+  
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   

@@ -61,6 +61,8 @@ src/App.jsx:1:41 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━
     2 │ export const negative = <div className="-zoom-in-50 flex" />;
     3 │ export const template = <div className={`${a}x p-4 flex slide-in-from-top-[48%]`} />;
   
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
+  
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
   i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
@@ -85,6 +87,8 @@ src/App.jsx:2:40 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━
       │                                        ^^^^^^^^^^^^^^^^^^
     3 │ export const template = <div className={`${a}x p-4 flex slide-in-from-top-[48%]`} />;
     4 │ 
+  
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   
@@ -111,6 +115,8 @@ src/App.jsx:3:47 lint/nursery/useTailwindSortedClasses  FIXABLE  ━━━━━
   > 3 │ export const template = <div className={`${a}x p-4 flex slide-in-from-top-[48%]`} />;
       │                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ 
+  
+  i A consistent class order makes class lists easier to read and keeps changes to them small.
   
   i This rule is still being actively worked on, so it may be missing features or have rough edges. Visit https://github.com/biomejs/biome/issues/1274 for more information or to report possible bugs.
   

@@ -26,6 +26,7 @@ impl FormatRule<AnyCssValue> for FormatAnyCssValue {
             AnyCssValue::ScssInterpolatedValue(node) => node.format().fmt(f),
             AnyCssValue::ScssModuleMemberAccess(node) => node.format().fmt(f),
             AnyCssValue::ScssParentSelectorValue(node) => node.format().fmt(f),
+            AnyCssValue::ScssPercentValue(node) => node.format().fmt(f),
             AnyCssValue::ScssVariable(node) => node.format().fmt(f),
             AnyCssValue::TwValueThemeReference(node) => node.format().fmt(f),
         }

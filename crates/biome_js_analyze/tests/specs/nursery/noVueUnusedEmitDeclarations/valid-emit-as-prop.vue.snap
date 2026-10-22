@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-emit-as-prop.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<template>
+  <ChildForm :notify="emit" />
+</template>
+
+<script setup>
+import ChildForm from "./ChildForm.vue";
+
+const emit = defineEmits(["foo"]);
+</script>
+
+```
