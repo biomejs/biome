@@ -3878,6 +3878,11 @@ export interface Nursery {
 	 */
 	useAstroClientOnlyDirectiveValue?: UseAstroClientOnlyDirectiveValueConfiguration;
 	/**
+	 * Disallow assignments that can be based on outdated values because of await or yield.
+	 * See https://biomejs.dev/linter/rules/use-atomic-updates
+	 */
+	useAtomicUpdates?: UseAtomicUpdatesConfiguration;
+	/**
 	 * Enforce that await is only used on Promise values.
 	 * See https://biomejs.dev/linter/rules/use-await-thenable
 	 */
@@ -7166,6 +7171,9 @@ export type UseAccessorPairsConfiguration =
 export type UseAstroClientOnlyDirectiveValueConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseAstroClientOnlyDirectiveValueOptions;
+export type UseAtomicUpdatesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseAtomicUpdatesOptions;
 export type UseAwaitThenableConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseAwaitThenableOptions;
@@ -10537,6 +10545,10 @@ export interface RuleWithUseAstroClientOnlyDirectiveValueOptions {
 	level: RulePlainConfiguration;
 	options?: UseAstroClientOnlyDirectiveValueOptions;
 }
+export interface RuleWithUseAtomicUpdatesOptions {
+	level: RulePlainConfiguration;
+	options?: UseAtomicUpdatesOptions;
+}
 export interface RuleWithUseAwaitThenableOptions {
 	level: RulePlainConfiguration;
 	options?: UseAwaitThenableOptions;
@@ -13626,6 +13638,7 @@ export type NoZeroFractionsOptions = {};
 export type NoZeroLengthUnitOptions = {};
 export type UseAccessorPairsOptions = {};
 export type UseAstroClientOnlyDirectiveValueOptions = {};
+export type UseAtomicUpdatesOptions = {};
 export type UseAwaitThenableOptions = {};
 export type UseBetterDomTraversingOptions = {};
 export type UseBigintLiteralsOptions = {};
@@ -15744,6 +15757,7 @@ export type Category =
 	| "lint/nursery/noZeroLengthUnit"
 	| "lint/nursery/useAccessorPairs"
 	| "lint/nursery/useAstroClientOnlyDirectiveValue"
+	| "lint/nursery/useAtomicUpdates"
 	| "lint/nursery/useAwaitThenable"
 	| "lint/nursery/useBetterDomTraversing"
 	| "lint/nursery/useBigintLiterals"
