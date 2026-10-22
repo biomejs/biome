@@ -7522,6 +7522,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDeprecatedDestroyedLifecycleConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueDeprecatedDestroyedLifecycleOptions" }
+			]
+		},
+		"NoVueDeprecatedDestroyedLifecycleOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueDeprecatedScopedSlotsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8331,6 +8341,15 @@
 					"description": "Disallow default values for Boolean props in Vue components.\nSee https://biomejs.dev/linter/rules/no-vue-boolean-default",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueBooleanDefaultConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueDeprecatedDestroyedLifecycle": {
+					"description": "Disallow the deprecated destroyed and beforeDestroy lifecycle hooks in Vue components.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-destroyed-lifecycle",
+					"anyOf": [
+						{
+							"$ref": "#/$defs/NoVueDeprecatedDestroyedLifecycleConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -13482,6 +13501,21 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueDataObjectDeclarationOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueDeprecatedDestroyedLifecycleOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": {
+					"$ref": "#/$defs/NoVueDeprecatedDestroyedLifecycleOptions"
+				}
 			},
 			"additionalProperties": false,
 			"required": ["level"]
