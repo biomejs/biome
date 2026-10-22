@@ -2998,6 +2998,11 @@ export interface Nursery {
 	 */
 	noDuplicateMapKeys?: NoDuplicateMapKeysConfiguration;
 	/**
+	 * Disallow using the delete operator with a property name that is computed at runtime.
+	 * See https://biomejs.dev/linter/rules/no-dynamic-delete
+	 */
+	noDynamicDelete?: NoDynamicDeleteConfiguration;
+	/**
 	 * Disallow .map() and .filter() calls in the header of for...of loops.
 	 * See https://biomejs.dev/linter/rules/no-eager-array-methods-in-loops
 	 */
@@ -5858,6 +5863,9 @@ export type NoDoubleComparisonConfiguration =
 export type NoDuplicateMapKeysConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoDuplicateMapKeysOptions;
+export type NoDynamicDeleteConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoDynamicDeleteOptions;
 export type NoEagerArrayMethodsInLoopsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoEagerArrayMethodsInLoopsOptions;
@@ -8392,6 +8400,10 @@ export interface RuleWithNoDoubleComparisonOptions {
 export interface RuleWithNoDuplicateMapKeysOptions {
 	level: RulePlainConfiguration;
 	options?: NoDuplicateMapKeysOptions;
+}
+export interface RuleWithNoDynamicDeleteOptions {
+	level: RulePlainConfiguration;
+	options?: NoDynamicDeleteOptions;
 }
 export interface RuleWithNoEagerArrayMethodsInLoopsOptions {
 	level: RulePlainConfiguration;
@@ -11104,6 +11116,7 @@ export type NoBunModulesOptions = {};
 export type NoDanglingUnderscoreOptions = {};
 export type NoDoubleComparisonOptions = {};
 export type NoDuplicateMapKeysOptions = {};
+export type NoDynamicDeleteOptions = {};
 export type NoEagerArrayMethodsInLoopsOptions = {};
 export interface NoExcessiveStatementsPerFunctionOptions {
 	/**
@@ -12918,6 +12931,7 @@ export type Category =
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
 	| "lint/nursery/noDuplicateSelectors"
+	| "lint/nursery/noDynamicDelete"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
 	| "lint/nursery/noExcessiveNestedCallbacks"
