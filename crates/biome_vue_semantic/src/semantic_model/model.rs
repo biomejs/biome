@@ -684,6 +684,8 @@ pub(crate) struct ComponentData {
     pub(crate) decl_open: [OpenReasons; Namespace::COUNT],
     pub(crate) uses_open: [bool; Namespace::COUNT],
     pub(crate) macro_conflict: bool,
+    /// The range of the `mixins` option.
+    pub(crate) mixins: Option<TextRange>,
     /// For a `<script setup>` component, the component defined by the default
     /// export of the plain `<script>` block of the same file.
     pub(crate) merged: Option<ComponentId>,
@@ -1862,6 +1864,13 @@ impl Component {
     /// The value of the `inheritAttrs` option.
     pub fn inherit_attrs(&self) -> Tri {
         self.row().inherit_attrs
+    }
+
+    /// The range of the `mixins` option, in the coordinates of the tree that
+    /// holds it.
+    pub fn mixins_range(&self) -> Option<TextRange> {
+        let range = self.row().mixins?;
+        Some(self.data.local(range, self.row().snippet))
     }
 
     /// Whether the plain `<script>` block declares props or emits that the
