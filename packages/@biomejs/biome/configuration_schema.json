@@ -9287,6 +9287,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueRenderReturn": {
+					"description": "Require the render function of a Vue component to return a value.\nSee https://biomejs.dev/linter/rules/use-vue-render-return",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueRenderReturnConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueTemplateRef": {
 					"description": "Require useTemplateRef() instead of ref() or shallowRef() to access elements of the template.\nSee https://biomejs.dev/linter/rules/use-vue-template-ref",
 					"anyOf": [
@@ -16952,6 +16959,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueRenderReturnOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueRenderReturnOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueTemplateRefOptions": {
 			"type": "object",
 			"properties": {
@@ -22491,6 +22507,16 @@
 			]
 		},
 		"UseVueNextTickPromiseOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueRenderReturnConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueRenderReturnOptions" }
+			]
+		},
+		"UseVueRenderReturnOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
