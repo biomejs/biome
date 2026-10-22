@@ -1,0 +1,29 @@
+/* should generate diagnostics */
+.unknown-nested-property {
+  border: {
+    foo: 1px;
+  }
+}
+
+.unknown-combined-name {
+  font: {
+    color: red;
+  }
+}
+
+.unknown-in-nested-group {
+  border: {
+    top: {
+      bar: 1px;
+    }
+  }
+}
+
+$bold: true;
+.unknown-in-at-rule-in-group {
+  font: {
+    @if $bold {
+      color: red;
+    }
+  }
+}

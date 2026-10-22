@@ -1,15 +1,12 @@
-use crate::utils::vender_prefix;
+use crate::utils::{AnyPropertyStatement, nested_property_name, vender_prefix};
 use biome_analyze::{
     Ast, Rule, RuleDiagnostic, RuleSource, context::RuleContext, declare_lint_rule,
 };
 use biome_console::markup;
-use biome_css_syntax::{
-    CssDeclarationWithSemicolon, CssRegularDimension, CssSyntaxToken, ScssNestingDeclaration,
-};
-use biome_rowan::{AstNode, declare_node_union};
+use biome_css_syntax::CssRegularDimension;
+use biome_rowan::AstNode;
 use biome_rule_options::no_short_time_values::NoShortTimeValuesOptions;
 use biome_string_case::StrLikeExtension;
-use std::iter::successors;
 
 declare_lint_rule! {
     /// Disallow animation and transition times that are shorter than a configured minimum.
@@ -189,60 +186,14 @@ fn is_time_property_value(dimension: &CssRegularDimension) -> bool {
     let Some(group) = statement.group() else {
         return is_time_property_name(name.text_trimmed());
     };
-
-    // Sass joins the name of a nested property to the names of the groups
-    // around it, so `transition: { duration: 1s; }` sets `transition-duration`.
-    let mut full_name = String::from(name.text_trimmed());
-    for group in successors(Some(group), AnyPropertyStatement::group) {
-        let Some(group_name) = group.name() else {
-            return false;
-        };
-        full_name.insert(0, '-');
-        full_name.insert_str(0, group_name.text_trimmed());
-    }
-    is_time_property_name(&full_name)
+    nested_property_name(name.text_trimmed(), group)
+        .is_some_and(|full_name| is_time_property_name(&full_name))
 }
 
 fn is_time_property_name(name: &str) -> bool {
     let name = name.to_ascii_lowercase_cow();
     let name = name.strip_prefix(vender_prefix(&name)).unwrap_or(&name);
     TIME_PROPERTIES.binary_search(&name).is_ok()
-}
-
-declare_node_union! {
-    /// A statement that sets a property: either a declaration, such as
-    /// `transition: all 1s;`, or an SCSS group of nested properties, such as
-    /// `transition: { duration: 1s; }`.
-    ///
-    /// Declarations in a condition, such as `@supports (transition: all 1s)`,
-    /// aren't statements. They only test for browser support.
-    pub AnyPropertyStatement = CssDeclarationWithSemicolon | ScssNestingDeclaration
-}
-
-impl AnyPropertyStatement {
-    /// Returns the token of the property name, or `None` if the name isn't a
-    /// plain identifier.
-    fn name(&self) -> Option<CssSyntaxToken> {
-        let name = match self {
-            Self::CssDeclarationWithSemicolon(statement) => statement
-                .declaration()
-                .ok()?
-                .property()
-                .ok()?
-                .as_css_generic_property()?
-                .name(),
-            Self::ScssNestingDeclaration(group) => group.name(),
-        };
-        name.ok()?.declaration().ok()
-    }
-
-    /// Returns the SCSS group of nested properties whose block directly
-    /// contains this statement.
-    fn group(&self) -> Option<Self> {
-        // The statement is in the list of items of the block of the group.
-        let group = self.syntax().ancestors().nth(3)?;
-        ScssNestingDeclaration::cast(group).map(Self::from)
-    }
 }
 
 /// The properties whose times are checked, without browser prefix.

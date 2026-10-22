@@ -26,3 +26,4 @@ a { transition: opacity 50ms { delay: 5ms; } }
 a { transition: { duration: 10ms; delay: 20ms; } }
 a { -webkit-animation: { delay: 30ms; } }
 a { ANIMATION: { Duration: 40ms; } }
+a { transition: { @if $enabled { duration: 10ms; } } }
