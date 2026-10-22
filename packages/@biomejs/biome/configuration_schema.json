@@ -6958,6 +6958,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoUnsafeReturnConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoUnsafeReturnOptions" }
+			]
+		},
+		"NoUnsafeReturnOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoUnsafeTypeAssertionConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8251,6 +8261,13 @@
 					"description": "Disallow + operations with operands that are known to be unsafe.\nSee https://biomejs.dev/linter/rules/no-unsafe-plus-operands",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoUnsafePlusOperandsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnsafeReturn": {
+					"description": "Disallow returning a value typed as any from a function.\nSee https://biomejs.dev/linter/rules/no-unsafe-return",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoUnsafeReturnConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -12896,6 +12913,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoUnsafePlusOperandsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoUnsafeReturnOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoUnsafeReturnOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

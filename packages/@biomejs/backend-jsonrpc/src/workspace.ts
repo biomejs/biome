@@ -3273,6 +3273,11 @@ export interface Nursery {
 	 */
 	noUnsafePlusOperands?: NoUnsafePlusOperandsConfiguration;
 	/**
+	 * Disallow returning a value typed as any from a function.
+	 * See https://biomejs.dev/linter/rules/no-unsafe-return
+	 */
+	noUnsafeReturn?: NoUnsafeReturnConfiguration;
+	/**
 	 * Disallow TypeScript type assertions other than const assertions.
 	 * See https://biomejs.dev/linter/rules/no-unsafe-type-assertion
 	 */
@@ -6018,6 +6023,9 @@ export type NoUnsafeIframeSandboxConfiguration =
 export type NoUnsafePlusOperandsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnsafePlusOperandsOptions;
+export type NoUnsafeReturnConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUnsafeReturnOptions;
 export type NoUnsafeTypeAssertionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUnsafeTypeAssertionOptions;
@@ -8653,6 +8661,10 @@ export interface RuleWithNoUnsafePlusOperandsOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnsafePlusOperandsOptions;
 }
+export interface RuleWithNoUnsafeReturnOptions {
+	level: RulePlainConfiguration;
+	options?: NoUnsafeReturnOptions;
+}
 export interface RuleWithNoUnsafeTypeAssertionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUnsafeTypeAssertionOptions;
@@ -11218,6 +11230,7 @@ export type NoUnmodifiedLoopConditionOptions = {};
 export type NoUnreadableForOfExpressionOptions = {};
 export type NoUnsafeIframeSandboxOptions = {};
 export type NoUnsafePlusOperandsOptions = {};
+export type NoUnsafeReturnOptions = {};
 export type NoUnsafeTypeAssertionOptions = {};
 export type NoUnsafeUnaryMinusOptions = {};
 export type NoUnusedClassesOptions = {};
@@ -12979,6 +12992,7 @@ export type Category =
 	| "lint/nursery/noUnreadableForOfExpression"
 	| "lint/nursery/noUnsafeIframeSandbox"
 	| "lint/nursery/noUnsafePlusOperands"
+	| "lint/nursery/noUnsafeReturn"
 	| "lint/nursery/noUnsafeTypeAssertion"
 	| "lint/nursery/noUnsafeUnaryMinus"
 	| "lint/nursery/noUnusedClasses"
