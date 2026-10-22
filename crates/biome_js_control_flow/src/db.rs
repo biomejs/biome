@@ -1,6 +1,6 @@
 use crate::{ControlFlowModel, control_flow_model};
 use biome_db::Source;
-use biome_parser::db::{AnyParsedSource, ParseDb, ParsedSnippet, ParsedSourceExt};
+use biome_parser::db::{AnalyzedSource, ParseDb, SourceExt, TrackedSnippet};
 
 #[salsa::tracked]
 pub fn control_flow_model_from_source(db: &dyn ParseDb, file: Source) -> ControlFlowModel {
@@ -10,7 +10,7 @@ pub fn control_flow_model_from_source(db: &dyn ParseDb, file: Source) -> Control
 #[salsa::tracked]
 pub fn control_flow_model_from_snippet<'db>(
     db: &'db dyn ParseDb,
-    file: ParsedSnippet<'db>,
+    file: TrackedSnippet<'db>,
 ) -> ControlFlowModel {
     control_flow_model(&file.parsed(db).tree())
 }
@@ -21,11 +21,11 @@ pub fn control_flow_model_from_snippet<'db>(
 /// contain anymore.
 pub fn js_control_flow_model<'db>(
     db: &'db dyn ParseDb,
-    file: &AnyParsedSource,
+    file: &AnalyzedSource,
 ) -> Option<&'db ControlFlowModel> {
     match file {
-        AnyParsedSource::Source(source) => Some(control_flow_model_from_source(db, *source)),
-        AnyParsedSource::ParsedSnippet(snippet) => snippet
+        AnalyzedSource::Source(source) => Some(control_flow_model_from_source(db, *source)),
+        AnalyzedSource::Snippet(snippet) => snippet
             .resolve(db)
             .map(|snippet| control_flow_model_from_snippet(db, snippet)),
     }

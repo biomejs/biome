@@ -27,7 +27,7 @@ use biome_js_syntax::{AnyJsRoot, JsLanguage};
 use biome_languages::{JsFileSource, LanguageDb};
 use biome_module_graph::ModuleDb;
 use biome_package::TurboJson;
-use biome_parser::db::AnyParsedSource;
+use biome_parser::db::AnalyzedSource;
 use biome_project_layout::ProjectLayout;
 use biome_rowan::TextSize;
 use biome_tailwind_logic::syntax_service::TwSyntaxService;
@@ -65,7 +65,7 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 pub struct JsAnalyzerServices {
     module_db: Option<Rc<dyn ModuleDb>>,
     language_db: Option<Rc<dyn LanguageDb>>,
-    parsed_source: Option<AnyParsedSource>,
+    parsed_source: Option<AnalyzedSource>,
     /// The host document of the analyzed source, which the embedded queries
     /// of `language_db` read. It's still the host document when the analyzed
     /// tree no longer matches `parsed_source`, such as after fixes.
@@ -140,7 +140,7 @@ impl JsAnalyzerServices {
     }
 
     /// Sets the parsed source of the analyzed tree, and its host document.
-    pub fn with_parsed_source(mut self, source: AnyParsedSource) -> Self {
+    pub fn with_parsed_source(mut self, source: AnalyzedSource) -> Self {
         self.document = Some(source.document());
         self.parsed_source = Some(source);
         self

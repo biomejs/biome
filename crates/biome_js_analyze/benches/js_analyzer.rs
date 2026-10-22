@@ -7,7 +7,7 @@ use biome_db::Source;
 use biome_js_analyze::JsAnalyzerServices;
 use biome_js_parser::JsParserOptions;
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
-use biome_parser::db::{ParseDb, SharedParse, SourceParse};
+use biome_parser::db::{ParseDb, ParseHandle, SourceOutput};
 use biome_rowan::AstNode;
 use biome_test_utils::BenchCase;
 use camino::Utf8Path;
@@ -58,14 +58,14 @@ fn bench_analyzer(criterion: &mut Criterion) {
                             parsed: Option<Source>,
                             /// The parse of the text of `parsed`, made once
                             /// so that the benchmark measures the analyzer.
-                            parse: Option<SharedParse>,
+                            parse: Option<ParseHandle>,
                             js_source: Option<JsFileSource>,
                             storage: Storage<Self>,
                         }
 
                         #[salsa::db]
                         impl ParseDb for TestDb {
-                            fn parse_source(&self, source: Source) -> SourceParse {
+                            fn parse_source(&self, source: Source) -> SourceOutput {
                                 let parse = self.parse.clone().unwrap_or_else(|| {
                                     biome_parser::AnyParse::from(biome_js_parser::parse(
                                         source.text(self),
@@ -74,7 +74,7 @@ fn bench_analyzer(criterion: &mut Criterion) {
                                     ))
                                     .into()
                                 });
-                                SourceParse {
+                                SourceOutput {
                                     parse,
                                     document_source_index: 0,
                                     snippets: Vec::new(),
@@ -106,7 +106,7 @@ fn bench_analyzer(criterion: &mut Criterion) {
                             JsFileSource::try_from(test_case.path()).unwrap_or_default();
                         let parse =
                             biome_js_parser::parse(code, file_source, JsParserOptions::default());
-                        let shared_parse = SharedParse::from(biome_parser::AnyParse::from(
+                        let shared_parse = ParseHandle::from(biome_parser::AnyParse::from(
                             parse.tree().syntax().as_send().unwrap(),
                         ));
                         let text = Arc::<str>::from(code);

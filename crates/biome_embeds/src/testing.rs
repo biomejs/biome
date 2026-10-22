@@ -6,7 +6,7 @@ use biome_html_parser::{HtmlParserOptions, parse_html};
 use biome_js_parser::JsParserOptions;
 use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource, LanguageDb};
 use biome_parser::AnyParse;
-use biome_parser::db::{ParseDb, SnippetParse, SourceParse};
+use biome_parser::db::{ParseDb, SnippetOutput, SourceOutput};
 use biome_rowan::{RawSyntaxKind, TextRange, TextSize, TokenText};
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
@@ -47,12 +47,12 @@ pub(crate) fn parse_test_source(
     db: &dyn LanguageDb,
     source: Source,
     snippets: &[TestSnippet],
-) -> SourceParse {
+) -> SourceOutput {
     let source_index = source.file_source_index(db);
     let snippets = snippets
         .iter()
         .map(|snippet| {
-            SnippetParse::new(
+            SnippetOutput::new(
                 parse_text(db, &snippet.text, snippet.source_index),
                 snippet.element_range,
                 snippet.content_range,
@@ -61,7 +61,7 @@ pub(crate) fn parse_test_source(
             )
         })
         .collect();
-    SourceParse::new(parse_text(db, source.text(db), source_index), source_index)
+    SourceOutput::new(parse_text(db, source.text(db), source_index), source_index)
         .with_snippets(snippets)
 }
 
@@ -118,7 +118,7 @@ impl salsa::Database for TestDb {}
 
 #[salsa::db]
 impl ParseDb for TestDb {
-    fn parse_source(&self, source: Source) -> SourceParse {
+    fn parse_source(&self, source: Source) -> SourceOutput {
         let snippets = self.snippets.pin().get(source.path(self)).cloned();
         parse_test_source(self, source, &snippets.unwrap_or_default())
     }

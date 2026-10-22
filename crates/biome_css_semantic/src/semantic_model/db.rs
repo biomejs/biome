@@ -6,7 +6,7 @@ use biome_css_syntax::{
     CssPseudoClassIdentifier, CssQualifiedRule, CssSyntaxNode, decode_css_identifier,
 };
 use biome_db::Source;
-use biome_parser::db::{AnyParsedSource, ParseDb, ParsedSnippet, ParsedSourceExt};
+use biome_parser::db::{AnalyzedSource, ParseDb, SourceExt, TrackedSnippet};
 use biome_rowan::{AstNode, AstNodeList, TextRange, TokenText};
 
 /// The name and source range of a custom property definition.
@@ -40,7 +40,7 @@ pub(crate) fn css_model_from_parsed_source(db: &dyn ParseDb, file: Source) -> Se
 #[salsa::tracked]
 pub(crate) fn css_model_from_parsed_snippet<'db>(
     db: &'db dyn ParseDb,
-    file: ParsedSnippet<'db>,
+    file: TrackedSnippet<'db>,
 ) -> SemanticModel {
     let parsed: AnyCssRoot = file.parsed(db).tree();
     semantic_model(&parsed)
@@ -60,7 +60,7 @@ pub fn css_property_definitions_from_source(
 #[salsa::tracked]
 pub fn css_property_definitions_from_snippet<'db>(
     db: &'db dyn ParseDb,
-    file: ParsedSnippet<'db>,
+    file: TrackedSnippet<'db>,
 ) -> Vec<CssPropertyDefinition> {
     let parsed: AnyCssRoot = file.parsed(db).tree();
     collect_property_definitions(&semantic_model(&parsed))
@@ -154,11 +154,11 @@ fn is_global_pseudo_identifier(selector: &CssPseudoClassIdentifier) -> bool {
 /// contain anymore.
 pub fn css_semantic_model<'db>(
     db: &'db dyn ParseDb,
-    file: &AnyParsedSource,
+    file: &AnalyzedSource,
 ) -> Option<&'db SemanticModel> {
     match file {
-        AnyParsedSource::Source(s) => Some(css_model_from_parsed_source(db, *s)),
-        AnyParsedSource::ParsedSnippet(s) => s
+        AnalyzedSource::Source(s) => Some(css_model_from_parsed_source(db, *s)),
+        AnalyzedSource::Snippet(s) => s
             .resolve(db)
             .map(|snippet| css_model_from_parsed_snippet(db, snippet)),
     }
@@ -180,7 +180,7 @@ mod tests {
     };
     use biome_languages::css::CssFileSource;
     use biome_languages::{DocumentFileSource, LanguageDb};
-    use biome_parser::db::{ParseDb, ParsedSourceExt, SnippetParse, SourceParse};
+    use biome_parser::db::{ParseDb, SnippetOutput, SourceExt, SourceOutput};
     use biome_rowan::TextSize;
     use camino::{Utf8Path, Utf8PathBuf};
     use salsa::{Setter, Storage};
@@ -230,7 +230,7 @@ mod tests {
 
     #[salsa::db]
     impl ParseDb for TestDb {
-        fn parse_source(&self, source: Source) -> SourceParse {
+        fn parse_source(&self, source: Source) -> SourceOutput {
             let parse = || {
                 parse_css(
                     source.text(self),
@@ -239,7 +239,7 @@ mod tests {
                 )
             };
             let snippets = if self.embeds_itself {
-                vec![SnippetParse::new(
+                vec![SnippetOutput::new(
                     parse().into(),
                     Default::default(),
                     Default::default(),
@@ -249,7 +249,7 @@ mod tests {
             } else {
                 Vec::new()
             };
-            SourceParse::new(parse().into(), 0).with_snippets(snippets)
+            SourceOutput::new(parse().into(), 0).with_snippets(snippets)
         }
     }
 

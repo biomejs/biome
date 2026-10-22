@@ -10,7 +10,7 @@ use biome_js_syntax::{
 };
 use biome_languages::JsFileSource;
 use biome_parser::AnyParse;
-use biome_parser::db::{ParseDb, ParsedSourceExt, SharedParse, SnippetParse, SourceParse};
+use biome_parser::db::{ParseDb, ParseHandle, SnippetOutput, SourceExt, SourceOutput};
 use biome_rowan::{RawSyntaxKind, SyntaxKind, TextRange, TextSize};
 use rustc_hash::{FxHashMap, FxHashSet};
 use salsa::Setter;
@@ -93,7 +93,7 @@ struct TestDb {
     storage: salsa::Storage<Self>,
     /// The parses of the snippet texts, which are kept while the text of a
     /// snippet doesn't change, like the parse of an unchanged snippet.
-    snippet_parses: Mutex<FxHashMap<String, SharedParse>>,
+    snippet_parses: Mutex<FxHashMap<String, ParseHandle>>,
     events: Events,
 }
 
@@ -131,10 +131,10 @@ impl Db for TestDb {
 impl ParseDb for TestDb {
     /// Parses the text before the [SNIPPET_MARKER] as the document, and the
     /// text after it as a snippet of the document.
-    fn parse_source(&self, source: Source) -> SourceParse {
+    fn parse_source(&self, source: Source) -> SourceOutput {
         let text = source.text(self);
         let Some((document, snippet)) = text.split_once(SNIPPET_MARKER) else {
-            return SourceParse::new(parsed(text).into(), 0);
+            return SourceOutput::new(parsed(text).into(), 0);
         };
         let parse = self
             .snippet_parses
@@ -144,7 +144,7 @@ impl ParseDb for TestDb {
             .or_insert_with(|| AnyParse::from(parsed(snippet)).into())
             .clone();
         let content_offset = TextSize::of(document) + TextSize::of(SNIPPET_MARKER);
-        SourceParse::new(parsed(document).into(), 0).with_snippets(vec![SnippetParse {
+        SourceOutput::new(parsed(document).into(), 0).with_snippets(vec![SnippetOutput {
             parse,
             element_range: TextRange::default(),
             content_range: TextRange::default(),

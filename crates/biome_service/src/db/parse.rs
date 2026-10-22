@@ -8,7 +8,7 @@ use biome_db::Source;
 use biome_fs::BiomePath;
 use biome_json_parser::JsonParserOptions;
 use biome_languages::{DocumentFileSource, LanguageDb};
-use biome_parser::db::{ParseDb, SnippetParse, SourceParse};
+use biome_parser::db::{ParseDb, SnippetOutput, SourceOutput};
 use biome_rowan::NodeCache;
 use tracing::error;
 
@@ -22,7 +22,7 @@ impl ParseDb for WorkspaceDb {
     /// The workspace publishes only texts whose file source has a parse
     /// capability. Otherwise, the result is an empty document of an unknown
     /// file source.
-    fn parse_source(&self, source: Source) -> SourceParse {
+    fn parse_source(&self, source: Source) -> SourceOutput {
         let data = self.data();
         let path = BiomePath::new(source.path(self));
 
@@ -122,7 +122,7 @@ impl ParseDb for WorkspaceDb {
             .nodes
             .into_iter()
             .map(|(parse, content, source)| {
-                SnippetParse::new(
+                SnippetOutput::new(
                     parse,
                     content.element_range,
                     content.content_range,
@@ -133,16 +133,16 @@ impl ParseDb for WorkspaceDb {
             .collect()
         });
 
-        SourceParse::new(any_parse, data.insert_source(file_source)).with_snippets(snippets)
+        SourceOutput::new(any_parse, data.insert_source(file_source)).with_snippets(snippets)
     }
 }
 
 impl WorkspaceDb {
     /// Returns the parse of an empty document of an unknown file source, for a
     /// text that can't be parsed.
-    fn empty_parse(&self) -> SourceParse {
+    fn empty_parse(&self) -> SourceOutput {
         let parse = biome_json_parser::parse_json("", JsonParserOptions::default());
-        SourceParse::new(
+        SourceOutput::new(
             parse.into(),
             self.data().insert_source(DocumentFileSource::Unknown),
         )

@@ -12,7 +12,7 @@ use biome_js_parser::{JsParserOptions, Parse, parse};
 use biome_js_semantic::{SemanticModel, semantic_model_from_snippet, semantic_model_from_source};
 use biome_js_syntax::{AnyJsRoot, JsSyntaxKind};
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
-use biome_parser::db::{AnyParsedSource, ParseDb, ParsedSourceExt, SnippetParse, SourceParse};
+use biome_parser::db::{AnalyzedSource, ParseDb, SnippetOutput, SourceExt, SourceOutput};
 use biome_rowan::{AnySyntaxNode, RawSyntaxKind, SyntaxKind, TextRange, TextSize};
 use camino::{Utf8Path, Utf8PathBuf};
 use salsa::Setter;
@@ -65,7 +65,7 @@ const SNIPPET_MARKER: &str = "<script>";
 impl ParseDb for TestDb {
     /// Parses the text before the first [SNIPPET_MARKER] as the document, and
     /// the text after each marker as a snippet of the document.
-    fn parse_source(&self, source: Source) -> SourceParse {
+    fn parse_source(&self, source: Source) -> SourceOutput {
         let text = source.text(self);
         let mut parts = text.split(SNIPPET_MARKER);
         let document = parts.next().unwrap_or_default();
@@ -75,7 +75,7 @@ impl ParseDb for TestDb {
                 offset += TextSize::of(SNIPPET_MARKER);
                 let content_offset = offset;
                 offset += TextSize::of(snippet);
-                SnippetParse::new(
+                SnippetOutput::new(
                     parsed(snippet).into(),
                     TextRange::default(),
                     TextRange::default(),
@@ -84,7 +84,7 @@ impl ParseDb for TestDb {
                 )
             })
             .collect();
-        SourceParse::new(parsed(document).into(), 0).with_snippets(snippets)
+        SourceOutput::new(parsed(document).into(), 0).with_snippets(snippets)
     }
 }
 
@@ -106,7 +106,7 @@ fn parsed(source: &str) -> Parse<AnyJsRoot> {
 fn analyze(
     db: &Rc<TestDb>,
     root: &AnyJsRoot,
-    source: Option<AnyParsedSource>,
+    source: Option<AnalyzedSource>,
     rule: &str,
 ) -> Vec<TextRange> {
     let mut ranges = Vec::new();

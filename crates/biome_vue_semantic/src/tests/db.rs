@@ -5,7 +5,7 @@ use biome_db::Source;
 use biome_html_parser::{HtmlParserOptions, parse_html};
 use biome_js_parser::{JsParserOptions, parse_js_with_offset};
 use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource, LanguageDb};
-use biome_parser::db::{ParseDb, SnippetParse, SourceParse};
+use biome_parser::db::{ParseDb, SnippetOutput, SourceOutput};
 use biome_rowan::{TextRange, TextSize};
 use camino::{Utf8Path, Utf8PathBuf};
 use papaya::HashMap;
@@ -58,7 +58,7 @@ impl biome_db::Db for TestDb {
 /// offset in the document.
 #[salsa::db]
 impl ParseDb for TestDb {
-    fn parse_source(&self, source: Source) -> SourceParse {
+    fn parse_source(&self, source: Source) -> SourceOutput {
         let text = source.text(self);
         let source_index = source.file_source_index(self);
         let js_source = |index| {
@@ -88,7 +88,7 @@ impl ParseDb for TestDb {
                     js_source(*index),
                     JsParserOptions::default(),
                 );
-                Some(SnippetParse::new(
+                Some(SnippetOutput::new(
                     parsed.into(),
                     range,
                     range,
@@ -97,7 +97,7 @@ impl ParseDb for TestDb {
                 ))
             })
             .collect();
-        SourceParse::new(parse, source_index).with_snippets(snippets)
+        SourceOutput::new(parse, source_index).with_snippets(snippets)
     }
 }
 

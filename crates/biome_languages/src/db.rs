@@ -1,6 +1,6 @@
 use crate::DocumentFileSource;
 use biome_db::Source;
-use biome_parser::db::{ParseDb, ParsedSourceExt};
+use biome_parser::db::{ParseDb, SourceExt};
 
 #[salsa::db]
 pub trait LanguageDb: ParseDb {

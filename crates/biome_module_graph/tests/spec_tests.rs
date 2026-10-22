@@ -26,7 +26,7 @@ use biome_module_graph::{
     infer_constructor_argument_type, infer_module_types, infer_module_types_bottom_up,
     module_for_key, normalize_type as normalize_type_query, resolve_js_module,
 };
-use biome_parser::db::{ParseDb, SourceParse};
+use biome_parser::db::{ParseDb, SourceOutput};
 use biome_resolver::{ResolverFsProxy, ResolverPathChange, ResolverPaths, sync_resolver_paths};
 use biome_rowan::{AstNode, Text, TextRange};
 use biome_test_utils::get_added_js_paths;
@@ -152,9 +152,9 @@ impl biome_db::Db for TestModuleDb {
 /// Parses every text as JSON, the only documents the tests index.
 #[salsa::db]
 impl ParseDb for TestModuleDb {
-    fn parse_source(&self, source: Source) -> SourceParse {
+    fn parse_source(&self, source: Source) -> SourceOutput {
         let parse = parse_json(source.text(self), JsonParserOptions::default());
-        SourceParse::new(parse.into(), 0)
+        SourceOutput::new(parse.into(), 0)
     }
 }
 

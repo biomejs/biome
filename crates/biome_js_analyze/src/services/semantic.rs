@@ -6,7 +6,7 @@ use biome_analyze::{
 use biome_js_semantic::{SemanticModel, SemanticModelOptions, js_semantic_model, semantic_model};
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange, WalkEvent};
 use biome_languages::{JsFileSource, LanguageDb};
-use biome_parser::db::AnyParsedSource;
+use biome_parser::db::AnalyzedSource;
 use biome_rowan::{AstNode, SyntaxKindSet};
 use std::rc::Rc;
 
@@ -113,7 +113,7 @@ impl Visitor for SemanticModelBuilderVisitor {
             .copied()
             .unwrap_or_default();
         if let Some(db) = ctx.services.get_service::<Rc<dyn LanguageDb>>()
-            && let Some(source) = ctx.services.get_service::<AnyParsedSource>()
+            && let Some(source) = ctx.services.get_service::<AnalyzedSource>()
             && let Some(model) = js_semantic_model(db.as_ref(), source)
         {
             // Semantic equality excludes locations, but analyzer consumers need the

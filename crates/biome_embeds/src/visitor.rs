@@ -25,7 +25,7 @@ use biome_languages::html::HtmlVariant;
 use biome_languages::javascript::{JsEmbeddingKind, SvelteEmbeddingKind};
 use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource, LanguageDb};
 use biome_parser::AnyParse;
-use biome_parser::db::ParsedSourceExt;
+use biome_parser::db::SourceExt;
 use biome_rowan::{AstNode, AstSeparatedList, TextRange, TokenText, WalkEvent};
 use std::collections::VecDeque;
 

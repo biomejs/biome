@@ -7,7 +7,7 @@ use biome_db::{
     testing::{Events, function_query_will_execute_count_by_name},
 };
 use biome_languages::{CssFileSource, DocumentFileSource, LanguageDb};
-use biome_parser::db::{AnyParsedSource, ParseDb, ParsedSourceExt, SnippetParse, SourceParse};
+use biome_parser::db::{AnalyzedSource, ParseDb, SnippetOutput, SourceExt, SourceOutput};
 use biome_rowan::{TextRange, TextSize};
 use camino::Utf8Path;
 use salsa::Setter;
@@ -50,16 +50,16 @@ const SNIPPET_MARKER: &str = "<style>";
 impl ParseDb for TestDb {
     /// Parses the text before the [SNIPPET_MARKER] as the document, and the
     /// text after it as a snippet of the document.
-    fn parse_source(&self, source: Source) -> SourceParse {
+    fn parse_source(&self, source: Source) -> SourceOutput {
         let text = source.text(self);
         let Some((document, snippet)) = text.split_once(SNIPPET_MARKER) else {
-            return SourceParse::new(
+            return SourceOutput::new(
                 parse_css(text, CssFileSource::css(), CssParserOptions::default()).into(),
                 0,
             );
         };
         let content_offset = TextSize::of(document) + TextSize::of(SNIPPET_MARKER);
-        let snippet = SnippetParse::new(
+        let snippet = SnippetOutput::new(
             parse_css_with_offset(
                 snippet,
                 CssFileSource::css(),
@@ -72,7 +72,7 @@ impl ParseDb for TestDb {
             content_offset,
             0,
         );
-        SourceParse::new(
+        SourceOutput::new(
             parse_css(document, CssFileSource::css(), CssParserOptions::default()).into(),
             0,
         )
@@ -97,7 +97,7 @@ impl TestDb {
 fn analyze(
     db: &Rc<TestDb>,
     root: &AnyCssRoot,
-    source: Option<AnyParsedSource>,
+    source: Option<AnalyzedSource>,
     rule: RuleFilter,
 ) -> Vec<TextRange> {
     let mut ranges = Vec::new();

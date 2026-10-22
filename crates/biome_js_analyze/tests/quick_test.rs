@@ -13,7 +13,7 @@ use biome_js_syntax::AnyJsRoot;
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 use biome_package::{Dependencies, PackageJson};
 use biome_parser::AnyParse;
-use biome_parser::db::{ParseDb, SharedParse, SourceParse};
+use biome_parser::db::{ParseDb, ParseHandle, SourceOutput};
 use biome_project_layout::ProjectLayout;
 use biome_test_utils::module_graph_for_test_file;
 use camino::{Utf8Path, Utf8PathBuf};
@@ -25,7 +25,7 @@ use std::sync::Arc;
 #[salsa::db]
 struct TestDb {
     parsed: Option<Source>,
-    parse: SharedParse,
+    parse: ParseHandle,
     storage: Storage<Self>,
 }
 
@@ -33,8 +33,8 @@ struct TestDb {
 /// analyzer analyzes.
 #[salsa::db]
 impl ParseDb for TestDb {
-    fn parse_source(&self, _source: Source) -> SourceParse {
-        SourceParse {
+    fn parse_source(&self, _source: Source) -> SourceOutput {
+        SourceOutput {
             parse: self.parse.clone(),
             document_source_index: 0,
             snippets: Vec::new(),
