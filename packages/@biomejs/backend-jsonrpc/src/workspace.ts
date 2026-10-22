@@ -3418,6 +3418,11 @@ export interface Nursery {
 	 */
 	noVueLoneTemplate?: NoVueLoneTemplateConfiguration;
 	/**
+	 * Disallow the mixins option in Vue components.
+	 * See https://biomejs.dev/linter/rules/no-vue-mixin
+	 */
+	noVueMixin?: NoVueMixinConfiguration;
+	/**
 	 * Disallow passing more than one argument to a Vue slot.
 	 * See https://biomejs.dev/linter/rules/no-vue-multiple-slot-args
 	 */
@@ -6345,6 +6350,9 @@ export type NoVueLifecycleAfterAwaitConfiguration =
 export type NoVueLoneTemplateConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueLoneTemplateOptions;
+export type NoVueMixinConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueMixinOptions;
 export type NoVueMultipleSlotArgsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueMultipleSlotArgsOptions;
@@ -9193,6 +9201,10 @@ export interface RuleWithNoVueLoneTemplateOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueLoneTemplateOptions;
 }
+export interface RuleWithNoVueMixinOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueMixinOptions;
+}
 export interface RuleWithNoVueMultipleSlotArgsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueMultipleSlotArgsOptions;
@@ -11882,6 +11894,7 @@ export interface NoVueLoneTemplateOptions {
 	 */
 	ignoreAccessible?: boolean;
 }
+export type NoVueMixinOptions = {};
 export type NoVueMultipleSlotArgsOptions = {};
 export type NoVueMutatingPropsOptions = {};
 export type NoVueRequiredPropWithDefaultOptions = {};
@@ -13700,6 +13713,7 @@ export type Category =
 	| "lint/nursery/noVueDeprecatedSlotScope"
 	| "lint/nursery/noVueLifecycleAfterAwait"
 	| "lint/nursery/noVueLoneTemplate"
+	| "lint/nursery/noVueMixin"
 	| "lint/nursery/noVueMultipleSlotArgs"
 	| "lint/nursery/noVueMutatingProps"
 	| "lint/nursery/noVueRootVIf"

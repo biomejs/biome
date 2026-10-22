@@ -104,6 +104,7 @@ impl ModelBuilder {
             uses_open: [false; Namespace::COUNT],
             macro_options: MacroOptions::empty(),
             data_function: None,
+            mixins: None,
             merged: None,
             merged_into: None,
             symbols: Vec::new(),
