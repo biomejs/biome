@@ -2900,6 +2900,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "useVueBaseImport",
         TypeId::of::<biome_rule_options::use_vue_base_import::UseVueBaseImportOptions>(),
     ));
+    result.push(("nursery", "useVueComputedPropertyReturn", TypeId::of::<biome_rule_options::use_vue_computed_property_return::UseVueComputedPropertyReturnOptions>()));
     result.push(("style", "useVueConsistentDefinePropsDeclaration", TypeId::of::<biome_rule_options::use_vue_consistent_define_props_declaration::UseVueConsistentDefinePropsDeclarationOptions>()));
     result.push(("nursery", "useVueConsistentEventHyphenation", TypeId::of::<biome_rule_options::use_vue_consistent_event_hyphenation::UseVueConsistentEventHyphenationOptions>()));
     result.push((
