@@ -720,7 +720,7 @@ impl NeedsParentheses for TsInstantiationExpression {
             return true;
         }
 
-        if is_followed_by_operator_after_type_arguments(self.syntax()) {
+        if is_followed_by_operator_after_type_arguments(self) {
             return true;
         }
 
@@ -735,34 +735,31 @@ impl NeedsParentheses for TsInstantiationExpression {
 
 /// TypeScript reads `a<T> + b` as `a < T > +b` and rejects `a<T> >> b`,
 /// also when `a<T>` only ends the left operand (`(c + a<T>) - b`, `(typeof a<T>) + b`).
-fn is_followed_by_operator_after_type_arguments(node: &JsSyntaxNode) -> bool {
-    let mut node = node.clone();
-    while let Some(parent) = node.parent() {
-        if let Some(binary) = JsBinaryExpression::cast_ref(&parent) {
-            if binary.right().map(AstNode::into_syntax).as_ref() == Ok(&node) {
-                node = parent;
-                continue;
+fn is_followed_by_operator_after_type_arguments(node: &TsInstantiationExpression) -> bool {
+    let mut expression = AnyJsExpression::from(node.clone());
+    while let Some(parent) = expression.parent::<AnyJsExpression>() {
+        match &parent {
+            AnyJsExpression::JsBinaryExpression(binary) => {
+                if binary.right().is_ok_and(|right| right == expression) {
+                    expression = parent;
+                    continue;
+                }
+
+                return binary.left().is_ok_and(|left| left == expression)
+                    && matches!(
+                        binary.operator(),
+                        Ok(JsBinaryOperator::Plus
+                            | JsBinaryOperator::Minus
+                            | JsBinaryOperator::LessThan
+                            | JsBinaryOperator::GreaterThan
+                            | JsBinaryOperator::GreaterThanOrEqual
+                            | JsBinaryOperator::RightShift
+                            | JsBinaryOperator::UnsignedRightShift)
+                    );
             }
-
-            return binary.left().map(AstNode::into_syntax).as_ref() == Ok(&node)
-                && matches!(
-                    binary.operator(),
-                    Ok(JsBinaryOperator::Plus
-                        | JsBinaryOperator::Minus
-                        | JsBinaryOperator::LessThan
-                        | JsBinaryOperator::GreaterThan
-                        | JsBinaryOperator::GreaterThanOrEqual
-                        | JsBinaryOperator::RightShift
-                        | JsBinaryOperator::UnsignedRightShift)
-                );
+            AnyJsExpression::JsUnaryExpression(_) => expression = parent,
+            _ => return false,
         }
-
-        if JsUnaryExpression::can_cast(parent.kind()) {
-            node = parent;
-            continue;
-        }
-
-        return false;
     }
 
     false
