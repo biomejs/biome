@@ -9,9 +9,9 @@ use crate::{
     JsBigintLiteralExpression, JsBinaryExpression, JsBinaryOperator, JsBooleanLiteralExpression,
     JsCallExpression, JsClassExpression, JsComputedMemberAssignment, JsComputedMemberExpression,
     JsComputedMemberName, JsConditionalExpression, JsExpressionStatement, JsExpressionTemplateRoot,
-    JsForStatement, JsFunctionExpression, JsIdentifierExpression, JsImportCallExpression,
-    JsImportMetaExpression, JsInExpression, JsInstanceofExpression, JsLogicalExpression,
-    JsLogicalOperator, JsMetavariable, JsNewExpression, JsNewTargetExpression,
+    JsExtendsClause, JsForStatement, JsFunctionExpression, JsIdentifierExpression,
+    JsImportCallExpression, JsImportMetaExpression, JsInExpression, JsInstanceofExpression,
+    JsLogicalExpression, JsLogicalOperator, JsMetavariable, JsNewExpression, JsNewTargetExpression,
     JsNullLiteralExpression, JsNumberLiteralExpression, JsObjectExpression,
     JsParenthesizedExpression, JsPostUpdateExpression, JsPreUpdateExpression, JsPreUpdateOperator,
     JsRegexLiteralExpression, JsSequenceExpression, JsStaticMemberExpression,
@@ -715,8 +715,18 @@ impl NeedsParentheses for TsAsExpression {
 impl NeedsParentheses for TsInstantiationExpression {
     #[inline]
     fn needs_parentheses(&self) -> bool {
-        // `(a<T>)<U>`: `a<T><U>` does not parse
-        if self.parent::<Self>().is_some() {
+        // `(a<T>)<U>` and `(a<T>)!`: `a<T><U>` and `a<T>!` do not parse
+        if self.parent::<Self>().is_some()
+            || self.parent::<TsNonNullAssertionExpression>().is_some()
+        {
+            return true;
+        }
+
+        // `class A extends (B<T>)<U> {}`: `extends B<T><U>` does not parse
+        if self
+            .parent::<JsExtendsClause>()
+            .is_some_and(|clause| clause.type_arguments().is_some())
+        {
             return true;
         }
 
