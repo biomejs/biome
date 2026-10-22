@@ -405,6 +405,7 @@ define_categories! {
     "lint/nursery/noVueDeprecatedVBindSync": "https://biomejs.dev/linter/rules/no-vue-deprecated-v-bind-sync",
     "lint/nursery/noVueDeprecatedVIs": "https://biomejs.dev/linter/rules/no-vue-deprecated-v-is",
     "lint/nursery/noVueDeprecatedVOnNativeModifier": "https://biomejs.dev/linter/rules/no-vue-deprecated-v-on-native-modifier",
+    "lint/nursery/noVueDuplicateVElseIf": "https://biomejs.dev/linter/rules/no-vue-duplicate-v-else-if",
     "lint/nursery/noVueExcessiveProps": "https://biomejs.dev/linter/rules/no-vue-excessive-props",
     "lint/nursery/noVueExposeAfterAwait": "https://biomejs.dev/linter/rules/no-vue-expose-after-await",
     "lint/nursery/noVueImportCompilerMacros": "https://biomejs.dev/linter/rules/no-vue-import-compiler-macros",

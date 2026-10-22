@@ -3733,6 +3733,11 @@ export interface Nursery {
 	 */
 	noVueDeprecatedVOnNativeModifier?: NoVueDeprecatedVOnNativeModifierConfiguration;
 	/**
+	 * Disallow duplicate conditions in v-if / v-else-if chains.
+	 * See https://biomejs.dev/linter/rules/no-vue-duplicate-v-else-if
+	 */
+	noVueDuplicateVElseIf?: NoVueDuplicateVElseIfConfiguration;
+	/**
 	 * Limit the number of props a Vue component can declare.
 	 * See https://biomejs.dev/linter/rules/no-vue-excessive-props
 	 */
@@ -7144,6 +7149,9 @@ export type NoVueDeprecatedVIsConfiguration =
 export type NoVueDeprecatedVOnNativeModifierConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedVOnNativeModifierOptions;
+export type NoVueDuplicateVElseIfConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDuplicateVElseIfOptions;
 export type NoVueExcessivePropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueExcessivePropsOptions;
@@ -10513,6 +10521,10 @@ export interface RuleWithNoVueDeprecatedVOnNativeModifierOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedVOnNativeModifierOptions;
 }
+export interface RuleWithNoVueDuplicateVElseIfOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueDuplicateVElseIfOptions;
+}
 export interface RuleWithNoVueExcessivePropsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueExcessivePropsOptions;
@@ -13765,6 +13777,7 @@ export type NoVueDeprecatedSlotScopeOptions = {};
 export type NoVueDeprecatedVBindSyncOptions = {};
 export type NoVueDeprecatedVIsOptions = {};
 export type NoVueDeprecatedVOnNativeModifierOptions = {};
+export type NoVueDuplicateVElseIfOptions = {};
 export interface NoVueExcessivePropsOptions {
 	/**
 	 * The maximum number of props a component can declare.
@@ -15976,6 +15989,7 @@ export type Category =
 	| "lint/nursery/noVueDeprecatedVBindSync"
 	| "lint/nursery/noVueDeprecatedVIs"
 	| "lint/nursery/noVueDeprecatedVOnNativeModifier"
+	| "lint/nursery/noVueDuplicateVElseIf"
 	| "lint/nursery/noVueExcessiveProps"
 	| "lint/nursery/noVueExposeAfterAwait"
 	| "lint/nursery/noVueImportCompilerMacros"

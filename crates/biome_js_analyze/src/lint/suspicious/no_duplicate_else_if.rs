@@ -9,6 +9,7 @@ use biome_rule_options::no_duplicate_else_if::NoDuplicateElseIfOptions;
 use rustc_hash::{FxHashMap, FxHasher};
 use std::hash::{Hash, Hasher};
 
+use crate::utils::condition::split_by_logical_operator;
 use crate::utils::{is_node_equal, node_hash};
 
 declare_lint_rule! {
@@ -162,7 +163,7 @@ struct Conjunction {
 impl Conjunction {
     fn new(operand: AnyJsExpression) -> Self {
         Self {
-            operands: split_by_logical_operator_wrapper(JsLogicalOperator::LogicalAnd, operand),
+            operands: split_by_logical_operator(JsLogicalOperator::LogicalAnd, operand).collect(),
             hashes: Vec::new(),
         }
     }
@@ -176,8 +177,7 @@ impl Conjunction {
 
 /// Splits `condition` into its `||` operands.
 fn split_into_conjunctions(condition: AnyJsExpression) -> Vec<Conjunction> {
-    split_by_logical_operator_wrapper(JsLogicalOperator::LogicalOr, condition)
-        .into_iter()
+    split_by_logical_operator(JsLogicalOperator::LogicalOr, condition)
         .map(Conjunction::new)
         .collect()
 }
@@ -292,9 +292,7 @@ impl EarlierConditions {
             && let Ok(operator_token) = logical_expression.operator()
             && operator_token == JsLogicalOperator::LogicalAnd
         {
-            return split_by_logical_operator_wrapper(operator_token, condition.clone())
-                .into_iter()
-                .any(|operand| {
+            return split_by_logical_operator(operator_token, condition.clone()).any(|operand| {
                     split_into_conjunctions(operand)
                         .iter_mut()
                         .all(|conjunction| self.covers_conjunction(conjunction))
@@ -324,44 +322,6 @@ impl EarlierConditions {
                 })
             })
         })
-    }
-}
-
-fn split_by_logical_operator_wrapper(
-    operator: JsLogicalOperator,
-    node: AnyJsExpression,
-) -> Vec<AnyJsExpression> {
-    let mut result: Vec<AnyJsExpression> = vec![];
-    split_by_logical_operator(operator, node, &mut result);
-    result
-}
-
-fn split_by_logical_operator(
-    operator: JsLogicalOperator,
-    node: AnyJsExpression,
-    result: &mut Vec<AnyJsExpression>,
-) {
-    let node = node.omit_parentheses();
-    match &node {
-        AnyJsExpression::JsLogicalExpression(logic_expression) => {
-            if let Ok(operator_token) = logic_expression.operator()
-                && operator_token != operator
-            {
-                result.push(node);
-                return;
-            }
-            if let (Ok(left_node), Ok(right_node)) =
-                (logic_expression.left(), logic_expression.right())
-            {
-                split_by_logical_operator(operator, left_node, result);
-                split_by_logical_operator(operator, right_node, result);
-            } else {
-                result.push(node);
-            }
-        }
-        _ => {
-            result.push(node);
-        }
     }
 }
 

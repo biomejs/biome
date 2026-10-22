@@ -8646,6 +8646,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDuplicateVElseIfConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueDuplicateVElseIfOptions" }
+			]
+		},
+		"NoVueDuplicateVElseIfOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueExcessivePropsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -10321,6 +10331,13 @@
 					"description": "Disallow the .native modifier on Vue's v-on directive.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-v-on-native-modifier",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueDeprecatedVOnNativeModifierConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueDuplicateVElseIf": {
+					"description": "Disallow duplicate conditions in v-if / v-else-if chains.\nSee https://biomejs.dev/linter/rules/no-vue-duplicate-v-else-if",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueDuplicateVElseIfConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -17053,6 +17070,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueDuplicateKeysOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueDuplicateVElseIfOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueDuplicateVElseIfOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
