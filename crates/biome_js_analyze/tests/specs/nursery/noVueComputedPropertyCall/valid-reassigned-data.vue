@@ -1,0 +1,32 @@
+<!-- should not generate diagnostics -->
+<template>
+  <button @click="formatter = format">Set formatter</button>
+  <p>{{ activeFormatter(1) }}</p>
+</template>
+
+<script>
+export default {
+  data() {
+    return { validator: null, formatter: null };
+  },
+  computed: {
+    activeValidator() {
+      return this.validator;
+    },
+    activeFormatter() {
+      return this.formatter;
+    },
+  },
+  methods: {
+    format(value) {
+      return `${value}`;
+    },
+    setValidator(fn) {
+      this.validator = fn;
+    },
+    run(value) {
+      return this.activeValidator(value);
+    },
+  },
+};
+</script>

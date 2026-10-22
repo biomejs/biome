@@ -8653,6 +8653,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueComputedPropertyCallConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueComputedPropertyCallOptions" }
+			]
+		},
+		"NoVueComputedPropertyCallOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueContentOutsideBlockConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -10654,6 +10664,13 @@
 					"description": "Disallow using computed properties inside the data function of a Vue component.\nSee https://biomejs.dev/linter/rules/no-vue-computed-properties-in-data",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueComputedPropertiesInDataConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueComputedPropertyCall": {
+					"description": "Disallow calling a Vue computed property whose value is not a function.\nSee https://biomejs.dev/linter/rules/no-vue-computed-property-call",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueComputedPropertyCallConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -17753,6 +17770,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueComputedPropertiesInDataOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueComputedPropertyCallOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueComputedPropertyCallOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

@@ -464,6 +464,7 @@ pub mod no_vue_async_computed;
 pub mod no_vue_boolean_default;
 pub mod no_vue_child_content;
 pub mod no_vue_computed_properties_in_data;
+pub mod no_vue_computed_property_call;
 pub mod no_vue_content_outside_block;
 pub mod no_vue_data_object_declaration;
 pub mod no_vue_define_model_default;

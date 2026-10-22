@@ -2184,6 +2184,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("nursery", "noVueComputedPropertiesInData", TypeId::of::<biome_rule_options::no_vue_computed_properties_in_data::NoVueComputedPropertiesInDataOptions>()));
     result.push((
         "nursery",
+        "noVueComputedPropertyCall",
+        TypeId::of::<
+            biome_rule_options::no_vue_computed_property_call::NoVueComputedPropertyCallOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "noVueContentOutsideBlock",
         TypeId::of::<
             biome_rule_options::no_vue_content_outside_block::NoVueContentOutsideBlockOptions,
