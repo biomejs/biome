@@ -168,6 +168,26 @@ impl<'db> Format<FormatInferredTypeContext<'db>> for TypeData<'db> {
                 ]
             ),
             Self::MappedType(mapped) => write!(f, [mapped]),
+            Self::Extends(extends) => write!(
+                f,
+                [&format_args![
+                    token("("),
+                    extends.check_type(db),
+                    space(),
+                    token("extends"),
+                    space(),
+                    extends.extends_type(db),
+                    space(),
+                    token("?"),
+                    space(),
+                    extends.true_type(db),
+                    space(),
+                    token(":"),
+                    space(),
+                    extends.false_type(db),
+                    token(")")
+                ]]
+            ),
             Self::InstanceOf(instance) => {
                 write!(f, [&format_args![token("instanceof"), space(), instance]])
             }

@@ -1,0 +1,18 @@
+/* should not generate diagnostics */
+
+type Unwrap<T> = T extends Promise<infer U> ? U : T;
+declare const unwrapped: Unwrap<Promise<number>>;
+unwrapped;
+
+type PromiseIfString<T> = T extends string ? Promise<T> : T;
+declare const notPromise: PromiseIfString<number>;
+notPromise;
+
+declare const awaited: Awaited<Promise<string>>;
+awaited;
+
+declare const excluded: Exclude<Promise<void> | number, Promise<void>>;
+excluded;
+
+declare function unwrap<T>(value: T): Unwrap<T>;
+unwrap(Promise.resolve(1));
