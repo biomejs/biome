@@ -1870,6 +1870,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noVueVText",
         TypeId::of::<biome_rule_options::no_vue_v_text::NoVueVTextOptions>(),
     ));
+    result.push(("nursery", "noVueVTextVHtmlOnComponent", TypeId::of::<biome_rule_options::no_vue_v_text_v_html_on_component::NoVueVTextVHtmlOnComponentOptions>()));
     result.push((
         "suspicious",
         "noWith",
