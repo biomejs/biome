@@ -27,6 +27,7 @@ pub mod no_before_interactive_script_outside_document;
 pub mod no_biome_first_exception;
 pub mod no_bitwise_operators;
 pub mod no_blank_target;
+pub mod no_boolean_sort_comparator;
 pub mod no_bun_modules;
 pub mod no_catch_assign;
 pub mod no_children_prop;
