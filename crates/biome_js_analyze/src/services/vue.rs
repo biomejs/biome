@@ -7,6 +7,9 @@
 //!   compares declarations with each other.
 //! - [`VueProp`] runs the rule once per prop. Use it when the rule judges
 //!   one prop on its own.
+//! - [`VueComputedReference`] runs the rule once per use of a computed
+//!   property. Use it when the rule judges how a computed property is used,
+//!   in the script or in the template.
 //!
 //! The model already folds the different ways Vue lets a declaration be
 //! written into one shape, so a rule never matches on syntax to find them.
@@ -25,7 +28,8 @@ use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange};
 use biome_languages::{JsFileSource, LanguageDb};
 use biome_rowan::{AstNode, WalkEvent};
 use biome_vue_semantic::{
-    Component, Prop, SnippetId, Symbol, VueSemanticModel, component_model, vue_model_from_source,
+    Component, Prop, Reference, SnippetId, Symbol, VueSemanticModel, component_model,
+    vue_model_from_source,
 };
 use camino::Utf8PathBuf;
 use std::rc::Rc;
@@ -93,10 +97,15 @@ impl VueSemanticService {
     fn declares(&self, symbol: &Symbol) -> bool {
         symbol.snippet().map(|snippet| snippet.id()) == self.snippet
     }
+
+    /// Returns `true` when `reference` is written in the analyzed tree.
+    fn contains(&self, reference: &Reference) -> bool {
+        reference.snippet().map(|snippet| snippet.id()) == self.snippet
+    }
 }
 
-/// Builds the Vue semantic model and emits a query match for each component
-/// and each declaration written in the analyzed tree.
+/// Builds the Vue semantic model and emits a query match for each component,
+/// declaration and use of a computed property written in the analyzed tree.
 pub(crate) struct VueSemanticVisitor;
 
 impl Visitor for VueSemanticVisitor {
@@ -125,6 +134,14 @@ impl Visitor for VueSemanticVisitor {
             }
             for prop in component.props().filter(|prop| service.declares(prop)) {
                 ctx.match_query(VuePropMatch(prop));
+            }
+            for computed in component.computed() {
+                for reference in computed
+                    .uses()
+                    .filter(|reference| service.contains(reference))
+                {
+                    ctx.match_query(VueComputedReferenceMatch(reference));
+                }
             }
         }
     }
@@ -172,4 +189,11 @@ define_vue_query!(
     VueProp,
     VuePropMatch,
     Prop
+);
+define_vue_query!(
+    /// Matches each use of a computed property of each Vue component, in the
+    /// script or in the template.
+    VueComputedReference,
+    VueComputedReferenceMatch,
+    Reference
 );
