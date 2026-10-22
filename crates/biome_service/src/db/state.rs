@@ -168,7 +168,7 @@
 //! while the current thread holds a [`DbReadGuard`].
 
 use super::{
-    FileView, ParsedSourceUpdateMode, ProjectUpdateMode, SharedWorkspaceDb, WorkspaceDb,
+    ParsedSourceUpdateMode, ProjectUpdateMode, SharedWorkspaceDb, ViewId, WorkspaceDb,
     WorkspaceDbData,
 };
 use crate::WorkspaceError;
@@ -697,7 +697,7 @@ impl DbState {
     pub(crate) fn update_file_view(
         &self,
         path: &Utf8Path,
-        view: FileView,
+        view: ViewId,
         text: Arc<str>,
         file_source: DocumentFileSource,
         inline_configuration: Option<Configuration>,
@@ -734,7 +734,7 @@ impl DbState {
     /// Removes `view` of `path`, and removes the file when it has no view
     /// left.
     #[cfg(feature = "module_graph")]
-    pub(crate) fn remove_file_view(&self, path: &Utf8Path, view: FileView) {
+    pub(crate) fn remove_file_view(&self, path: &Utf8Path, view: ViewId) {
         match &self.storage {
             DbStorage::Shared(shared_db) => {
                 shared_db
@@ -1045,7 +1045,7 @@ mod tests {
         let path = Utf8PathBuf::from("test.js");
         // Insert the file first: only updates to files the database already
         // knows about are applied through salsa setters.
-        state.update_file_view(&path, FileView::Disk, "let a = 1;".into(), js(), None);
+        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(), None);
 
         let clone_taken = Arc::new(Barrier::new(2));
         let (done_tx, done_rx) = mpsc::channel();
@@ -1073,7 +1073,7 @@ mod tests {
             let path = path.clone();
             thread::spawn(move || {
                 clone_taken.wait();
-                state.update_file_view(&path, FileView::Disk, "let b = 2;".into(), js(), None);
+                state.update_file_view(&path, ViewId::Disk, "let b = 2;".into(), js(), None);
                 done_tx.send(()).unwrap();
             })
         };
@@ -1094,7 +1094,7 @@ mod tests {
     fn owned_storage_fork_unwinds_while_setter_is_pending() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_file_view(&path, FileView::Disk, "let a = 1;".into(), js(), None);
+        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(), None);
 
         // Hold a clone so the setter below has to wait.
         let db = state.fork();
@@ -1103,7 +1103,7 @@ mod tests {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state.update_file_view(&path, FileView::Disk, "let b = 2;".into(), js(), None);
+                state.update_file_view(&path, ViewId::Disk, "let b = 2;".into(), js(), None);
             })
         };
 
@@ -1127,14 +1127,14 @@ mod tests {
     fn owned_storage_queues_only_one_pending_setter() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_file_view(&path, FileView::Disk, "let a = 1;".into(), js(), None);
+        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(), None);
 
         let db = state.fork();
         let first_setter = {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state.update_file_view(&path, FileView::Disk, "let b = 2;".into(), js(), None);
+                state.update_file_view(&path, ViewId::Disk, "let b = 2;".into(), js(), None);
             })
         };
         wait_for_pending_setter(&state);
@@ -1146,7 +1146,7 @@ mod tests {
             let second_start = second_start.clone();
             thread::spawn(move || {
                 second_start.wait();
-                state.update_file_view(&path, FileView::Disk, "let c = 3;".into(), js(), None);
+                state.update_file_view(&path, ViewId::Disk, "let c = 3;".into(), js(), None);
             })
         };
         second_start.wait();
@@ -1180,14 +1180,14 @@ mod tests {
     fn untracked_module_membership_does_not_wait_for_pending_setters() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_file_view(&path, FileView::Disk, "let a = 1;".into(), js(), None);
+        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(), None);
 
         let db = state.fork();
         let setter = {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state.update_file_view(&path, FileView::Disk, "let b = 2;".into(), js(), None);
+                state.update_file_view(&path, ViewId::Disk, "let b = 2;".into(), js(), None);
             })
         };
 
@@ -1205,7 +1205,7 @@ mod tests {
         let path = Utf8PathBuf::from("test.js");
         let _db = state.fork();
 
-        state.update_file_view(&path, FileView::Disk, "let a = 1;".into(), js(), None);
+        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(), None);
     }
 
     #[test]
@@ -1214,7 +1214,7 @@ mod tests {
         let path = Utf8PathBuf::from("test.js");
         let db = state.fork();
 
-        state.update_file_view(&path, FileView::Disk, "let a = 1;".into(), js(), None);
+        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(), None);
 
         assert_eq!(state.pending_setters(), 0);
         assert!(db.get_parsed_source(&path).is_some());
@@ -1310,7 +1310,7 @@ mod tests {
     fn owned_storage_setter_from_other_thread_waits_for_read_guard() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_file_view(&path, FileView::Disk, "let a = 1;".into(), js(), None);
+        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(), None);
 
         let db = state.fork();
         let (done_tx, done_rx) = mpsc::channel();
@@ -1319,7 +1319,7 @@ mod tests {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state.update_file_view(&path, FileView::Disk, "let b = 2;".into(), js(), None);
+                state.update_file_view(&path, ViewId::Disk, "let b = 2;".into(), js(), None);
                 done_tx.send(()).unwrap();
             })
         };
@@ -1387,14 +1387,8 @@ mod tests {
             let source = lookup(&state, SOURCE);
             let setters = state.setter_gate_attempts();
 
-            state.update_file_view(Utf8Path::new(SOURCE), FileView::Disk, "".into(), js(), None);
-            state.update_file_view(
-                Utf8Path::new(SOURCE),
-                FileView::Disk,
-                "a".into(),
-                js(),
-                None,
-            );
+            state.update_file_view(Utf8Path::new(SOURCE), ViewId::Disk, "".into(), js(), None);
+            state.update_file_view(Utf8Path::new(SOURCE), ViewId::Disk, "a".into(), js(), None);
             assert_eq!(
                 revision(&state, source),
                 0,
@@ -1403,7 +1397,7 @@ mod tests {
 
             state.update_file_view(
                 Utf8Path::new(MANIFEST),
-                FileView::Disk,
+                ViewId::Disk,
                 "{}".into(),
                 json(),
                 None,
@@ -1411,7 +1405,7 @@ mod tests {
             assert_eq!(revision(&state, manifest), 1);
             state.update_file_view(
                 Utf8Path::new(MANIFEST),
-                FileView::Disk,
+                ViewId::Disk,
                 "[]".into(),
                 json(),
                 None,
@@ -1477,7 +1471,7 @@ mod tests {
                 let epoch = state.scanner_epoch();
                 epoch.view().update_file_view(
                     Utf8Path::new(MANIFEST),
-                    FileView::Disk,
+                    ViewId::Disk,
                     "{}".into(),
                     json(),
                     None,
@@ -1507,7 +1501,7 @@ mod tests {
             state.sync_resolver_paths(vec![(SOURCE.into(), ResolverPathChange::Kind.into())]);
             state.update_file_view(
                 Utf8Path::new(MANIFEST),
-                FileView::Disk,
+                ViewId::Disk,
                 "{}".into(),
                 json(),
                 None,

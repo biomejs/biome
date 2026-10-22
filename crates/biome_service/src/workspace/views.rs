@@ -27,60 +27,61 @@ impl ClientId {
     }
 }
 
-/// Selects one view of a file.
+/// Identifies one view of a file.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) enum FileView {
+pub(crate) enum ViewId {
     Disk,
     /// The editor view of a client.
     Editor(ClientId),
 }
 
-/// The views of a file: its disk view of type `D`, and the editor views, of
-/// type `E`, of the clients that have it open. A file has at least one view.
+/// The views of a file: its disk view, and the editor views of the clients
+/// that have it open. A file has at least one view.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub(crate) enum Views<D, E> {
+pub(crate) enum Views<T> {
     /// No client has the file open.
-    Disk(D),
+    Disk(T),
     /// At least one client has the file open. `disk` is set when the scanner
     /// or the watcher read the file too.
     Editor {
-        editors: Editors<E>,
-        disk: Option<D>,
+        editors: Editors<T>,
+        disk: Option<T>,
     },
-}
-
-/// One view of a file.
-#[derive(Clone, Copy, Debug)]
-pub(crate) enum View<'a, D, E> {
-    Disk(&'a D),
-    Editor(&'a E),
 }
 
 /// The editor views of the clients that have a file open, in the order they
 /// opened it. There is at least one.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub(crate) struct Editors<E> {
+pub(crate) struct Editors<T> {
     /// The view of the client that opened the file first.
-    primary: (ClientId, E),
-    others: Vec<(ClientId, E)>,
+    primary: (ClientId, T),
+    /// The views of the other clients, in the order they opened the file. The
+    /// first one becomes the primary view when the primary client closes the
+    /// file.
+    others: Vec<(ClientId, T)>,
 }
 
-impl<E> Editors<E> {
-    fn new(client: ClientId, editor: E) -> Self {
+impl<T> Editors<T> {
+    fn new(client: ClientId, editor: T) -> Self {
         Self {
             primary: (client, editor),
             others: Vec::new(),
         }
     }
 
-    fn get(&self, client: ClientId) -> Option<&E> {
+    /// Returns the editor view of `client`, or `None` when it doesn't have the
+    /// file open.
+    fn get(&self, client: ClientId) -> Option<&T> {
         std::iter::once(&self.primary)
             .chain(&self.others)
             .find(|(owner, _)| *owner == client)
             .map(|(_, editor)| editor)
     }
 
-    fn with(mut self, client: ClientId, editor: E) -> Self {
+    /// Returns the editor views with `editor` as the view of `client`. A client
+    /// that has the file open keeps its position, and a client that opens it
+    /// comes after the others.
+    fn with(mut self, client: ClientId, editor: T) -> Self {
         if self.primary.0 == client {
             self.primary.1 = editor;
         } else if let Some(entry) = self.others.iter_mut().find(|(owner, _)| *owner == client) {
@@ -115,26 +116,41 @@ impl<E> Editors<E> {
     }
 }
 
-impl<D, E> Views<D, E> {
-    pub(crate) fn from_disk(disk: D) -> Self {
+impl<T> Views<T> {
+    /// Creates the views of a file whose only view is `view`.
+    pub(crate) fn new(view: ViewId, value: T) -> Self {
+        match view {
+            ViewId::Disk => Self::from_disk(value),
+            ViewId::Editor(client) => Self::from_editor(client, value),
+        }
+    }
+
+    pub(crate) fn from_disk(disk: T) -> Self {
         Self::Disk(disk)
     }
 
-    pub(crate) fn from_editor(client: ClientId, editor: E) -> Self {
+    pub(crate) fn from_editor(client: ClientId, editor: T) -> Self {
         Self::Editor {
             editors: Editors::new(client, editor),
             disk: None,
         }
     }
 
-    pub(crate) fn disk(&self) -> Option<&D> {
+    pub(crate) fn get(&self, view: ViewId) -> Option<&T> {
+        match view {
+            ViewId::Disk => self.disk(),
+            ViewId::Editor(client) => self.editor(client),
+        }
+    }
+
+    pub(crate) fn disk(&self) -> Option<&T> {
         match self {
             Self::Disk(disk) => Some(disk),
             Self::Editor { disk, .. } => disk.as_ref(),
         }
     }
 
-    pub(crate) fn editor(&self, client: ClientId) -> Option<&E> {
+    pub(crate) fn editor(&self, client: ClientId) -> Option<&T> {
         match self {
             Self::Disk(_) => None,
             Self::Editor { editors, .. } => editors.get(client),
@@ -148,23 +164,28 @@ impl<D, E> Views<D, E> {
 
     /// Returns the primary editor view if a client has the file open,
     /// otherwise the disk view.
-    pub(crate) fn current(&self) -> View<'_, D, E> {
+    pub(crate) fn current(&self) -> &T {
         match self {
-            Self::Disk(disk) => View::Disk(disk),
-            Self::Editor { editors, .. } => View::Editor(&editors.primary.1),
+            Self::Disk(disk) => disk,
+            Self::Editor { editors, .. } => &editors.primary.1,
         }
     }
 
     /// Returns the editor view of `client` if it has the file open, otherwise
     /// the disk view. Returns `None` when only other clients have the file
     /// open.
-    pub(crate) fn for_client(&self, client: ClientId) -> Option<View<'_, D, E>> {
-        self.editor(client)
-            .map(View::Editor)
-            .or_else(|| self.disk().map(View::Disk))
+    pub(crate) fn for_client(&self, client: ClientId) -> Option<&T> {
+        self.editor(client).or_else(|| self.disk())
     }
 
-    pub(crate) fn with_disk(self, disk: D) -> Self {
+    pub(crate) fn with(self, view: ViewId, value: T) -> Self {
+        match view {
+            ViewId::Disk => self.with_disk(value),
+            ViewId::Editor(client) => self.with_editor(client, value),
+        }
+    }
+
+    pub(crate) fn with_disk(self, disk: T) -> Self {
         match self {
             Self::Disk(_) => Self::Disk(disk),
             Self::Editor { editors, .. } => Self::Editor {
@@ -174,7 +195,7 @@ impl<D, E> Views<D, E> {
         }
     }
 
-    pub(crate) fn with_editor(self, client: ClientId, editor: E) -> Self {
+    pub(crate) fn with_editor(self, client: ClientId, editor: T) -> Self {
         match self {
             Self::Disk(disk) => Self::Editor {
                 editors: Editors::new(client, editor),
@@ -184,6 +205,14 @@ impl<D, E> Views<D, E> {
                 editors: editors.with(client, editor),
                 disk,
             },
+        }
+    }
+
+    /// Returns the views without `view`, or `None` when no view is left.
+    pub(crate) fn without(self, view: ViewId) -> Option<Self> {
+        match view {
+            ViewId::Disk => self.without_disk(),
+            ViewId::Editor(client) => self.without_editor(client),
         }
     }
 
@@ -208,45 +237,6 @@ impl<D, E> Views<D, E> {
                 Some(editors) => Some(Self::Editor { editors, disk }),
                 None => disk.map(Self::Disk),
             },
-        }
-    }
-}
-
-impl<T> Views<T, T> {
-    pub(crate) fn from_view(view: FileView, value: T) -> Self {
-        match view {
-            FileView::Disk => Self::from_disk(value),
-            FileView::Editor(client) => Self::from_editor(client, value),
-        }
-    }
-
-    pub(crate) fn get(&self, view: FileView) -> Option<&T> {
-        match view {
-            FileView::Disk => self.disk(),
-            FileView::Editor(client) => self.editor(client),
-        }
-    }
-
-    pub(crate) fn with(self, view: FileView, value: T) -> Self {
-        match view {
-            FileView::Disk => self.with_disk(value),
-            FileView::Editor(client) => self.with_editor(client, value),
-        }
-    }
-
-    /// Returns the views without `view`, or `None` when no view is left.
-    pub(crate) fn without(self, view: FileView) -> Option<Self> {
-        match view {
-            FileView::Disk => self.without_disk(),
-            FileView::Editor(client) => self.without_editor(client),
-        }
-    }
-}
-
-impl<'a, T> View<'a, T, T> {
-    pub(crate) fn value(self) -> &'a T {
-        match self {
-            Self::Disk(value) | Self::Editor(value) => value,
         }
     }
 }
