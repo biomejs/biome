@@ -1792,6 +1792,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "noVueBooleanDefault",
         TypeId::of::<biome_rule_options::no_vue_boolean_default::NoVueBooleanDefaultOptions>(),
     ));
+    result.push(("nursery", "noVueComputedPropertiesInData", TypeId::of::<biome_rule_options::no_vue_computed_properties_in_data::NoVueComputedPropertiesInDataOptions>()));
     result.push((
         "correctness",
         "noVueDataObjectDeclaration",
