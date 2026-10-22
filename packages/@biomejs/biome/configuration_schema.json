@@ -8345,7 +8345,7 @@
 					]
 				},
 				"noVueComputedPropertyCall": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-vue-computed-property-call",
+					"description": "Disallow calling a Vue computed property whose value is not a function.\nSee https://biomejs.dev/linter/rules/no-vue-computed-property-call",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueComputedPropertyCallConfiguration" },
 						{ "type": "null" }

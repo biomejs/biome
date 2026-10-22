@@ -3323,7 +3323,7 @@ export interface Nursery {
 	 */
 	noVueBooleanDefault?: NoVueBooleanDefaultConfiguration;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow calling a Vue computed property whose value is not a function.
 	 * See https://biomejs.dev/linter/rules/no-vue-computed-property-call
 	 */
 	noVueComputedPropertyCall?: NoVueComputedPropertyCallConfiguration;
