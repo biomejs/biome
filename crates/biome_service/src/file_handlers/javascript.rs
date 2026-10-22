@@ -102,7 +102,7 @@ use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
 use biome_module_graph::ModuleDb;
 #[cfg(feature = "js_embeds")]
 use biome_parser::AnyParse;
-use biome_parser::db::AnyParsedSource;
+use biome_parser::db::AnalyzedSource;
 use biome_project_layout::ProjectLayout;
 #[cfg(feature = "js_embeds")]
 use biome_rowan::AstNodeList;
@@ -1012,7 +1012,7 @@ fn parse_js_matched_embed(
 
 fn debug_syntax_tree(
     _biome_path: &BiomePath,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     workspace_db: WorkspaceDb,
 ) -> GetSyntaxTreeResult {
     let syntax: JsSyntaxNode = parse.syntax(&workspace_db);
@@ -1024,7 +1024,7 @@ fn debug_syntax_tree(
 }
 
 fn debug_control_flow(
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     cursor: TextSize,
     workspace_db: WorkspaceDb,
 ) -> String {
@@ -1047,7 +1047,7 @@ fn debug_control_flow(
 fn debug_formatter_ir(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
@@ -1061,7 +1061,7 @@ fn debug_formatter_ir(
 }
 
 fn debug_type_info(
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
     #[cfg(feature = "type_inference")]
@@ -1127,7 +1127,7 @@ fn debug_type_info(
 
 fn debug_registered_types(
     _path: &BiomePath,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
     #[cfg(feature = "type_inference")]
@@ -1201,7 +1201,7 @@ impl RawTypeCollector for DebugTypeCollector {
 
 fn debug_semantic_model(
     path: &BiomePath,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
     js_semantic_model(&workspace_db, &parse)
@@ -1211,7 +1211,7 @@ fn debug_semantic_model(
 
 fn js_analyzer_services(
     root: &AnyJsRoot,
-    parsed_source: Option<&AnyParsedSource>,
+    parsed_source: Option<&AnalyzedSource>,
     workspace_db: &WorkspaceDb,
     #[cfg(feature = "module_graph")] module_db: Rc<dyn ModuleDb>,
     project_layout: Arc<ProjectLayout>,
@@ -1238,7 +1238,7 @@ fn js_analyzer_services(
 
 fn js_analyzer_services_for_fix(
     root: &AnyJsRoot,
-    parsed_source: Option<&AnyParsedSource>,
+    parsed_source: Option<&AnalyzedSource>,
     params: &FixAllParams,
     source_type: JsFileSource,
 ) -> JsAnalyzerServices {
@@ -1732,7 +1732,7 @@ pub(crate) fn format(
 pub(crate) fn format_range(
     biome_path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     range: TextRange,
     workspace_db: WorkspaceDb,
@@ -1751,7 +1751,7 @@ pub(crate) fn format_range(
 pub(crate) fn format_on_type(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     offset: TextSize,
     workspace_db: WorkspaceDb,
@@ -2056,7 +2056,7 @@ pub(crate) fn pull_diagnostics_and_actions(
 
 fn rename(
     path: &BiomePath,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     symbol_at: TextSize,
     new_name: String,
     workspace_db: WorkspaceDb,
@@ -2132,7 +2132,7 @@ fn update_snippets(
 fn search(
     path: &BiomePath,
     document: &DocumentFileSource,
-    parsed: AnyParsedSource,
+    parsed: AnalyzedSource,
     provider: &dyn SearchQuery,
     settings: &SettingsWithEditor,
     pattern_id: PatternId,

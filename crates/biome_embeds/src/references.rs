@@ -204,7 +204,7 @@ mod tests {
     use biome_db::{Db, Source};
     use biome_languages::javascript::JsEmbeddingKind;
     use biome_languages::{DocumentFileSource, HtmlFileSource, JsFileSource, LanguageDb};
-    use biome_parser::db::{ParseDb, SourceParse};
+    use biome_parser::db::{ParseDb, SourceOutput};
     use biome_rowan::{RawSyntaxKind, TextRange, TextSize};
     use camino::{Utf8Path, Utf8PathBuf};
     use papaya::HashMap;
@@ -263,7 +263,7 @@ mod tests {
 
     #[salsa::db]
     impl ParseDb for TestDb {
-        fn parse_source(&self, source: Source) -> SourceParse {
+        fn parse_source(&self, source: Source) -> SourceOutput {
             let snippets = self.snippets.pin().get(source.path(self)).cloned();
             parse_test_source(self, source, &snippets.unwrap_or_default())
         }

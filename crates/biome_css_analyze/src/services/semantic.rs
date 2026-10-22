@@ -7,7 +7,7 @@ use biome_css_semantic::model::SemanticModel;
 use biome_css_semantic::{db::css_semantic_model, semantic_model};
 use biome_css_syntax::{AnyCssRoot, CssLanguage, CssSyntaxNode, TextRange};
 use biome_languages::LanguageDb;
-use biome_parser::db::AnyParsedSource;
+use biome_parser::db::AnalyzedSource;
 use biome_rowan::{AstNode, SyntaxKindSet, WalkEvent};
 use std::rc::Rc;
 
@@ -81,7 +81,7 @@ impl Visitor for SemanticModelBuilderVisitor {
             return;
         }
         if let Some(db) = ctx.services.get_service::<Rc<dyn LanguageDb>>()
-            && let Some(source) = ctx.services.get_service::<AnyParsedSource>()
+            && let Some(source) = ctx.services.get_service::<AnalyzedSource>()
             && let Some(model) = css_semantic_model(db.as_ref(), source)
         {
             // Semantic equality ignores trivia and locations; diagnostics must

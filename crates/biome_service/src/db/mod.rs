@@ -1396,7 +1396,7 @@ mod tests {
     use biome_module_graph::{ModuleDb, resolve_html_module};
     #[cfg(feature = "lang_js")]
     use biome_package::{Dependencies, PackageJson};
-    use biome_parser::db::{ParseDb, ParsedSourceExt};
+    use biome_parser::db::{ParseDb, SourceExt};
     use salsa::plumbing::{AsId, ZalsaDatabase};
     #[cfg(feature = "lang_js")]
     use std::str::FromStr;
@@ -1595,7 +1595,7 @@ mod tests {
             ParsedSourceUpdateMode::Setters,
         );
         let parse_count = |events: &Events| {
-            function_query_will_execute_count_by_name(&db, "parsed_root", &take_events(events))
+            function_query_will_execute_count_by_name(&db, "tracked_source", &take_events(events))
         };
         assert_eq!(parse_count(&events), 0);
 

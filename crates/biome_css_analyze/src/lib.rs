@@ -25,7 +25,7 @@ use biome_css_syntax::CssLanguage;
 use biome_diagnostics::Error;
 use biome_languages::{CssFileSource, LanguageDb};
 use biome_module_graph::ModuleDb;
-use biome_parser::db::AnyParsedSource;
+use biome_parser::db::AnalyzedSource;
 use biome_project_layout::ProjectLayout;
 use std::ops::Deref;
 use std::rc::Rc;
@@ -43,7 +43,7 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 pub struct CssAnalyzerServices {
     pub language_db: Option<Rc<dyn LanguageDb>>,
     /// The source of the analyzed root in the supplied database, absent for transient roots.
-    pub parsed_source: Option<AnyParsedSource>,
+    pub parsed_source: Option<AnalyzedSource>,
     pub file_source: CssFileSource,
     pub module_db: Option<Rc<dyn ModuleDb>>,
     pub project_layout: Option<Arc<ProjectLayout>>,
@@ -80,7 +80,7 @@ impl CssAnalyzerServices {
 
     /// Associates the analyzed root with its source in the supplied database.
     /// Omit this for transient roots, including roots changed by a fix pass.
-    pub fn with_parsed_source(mut self, source: AnyParsedSource) -> Self {
+    pub fn with_parsed_source(mut self, source: AnalyzedSource) -> Self {
         self.parsed_source = Some(source);
         self
     }

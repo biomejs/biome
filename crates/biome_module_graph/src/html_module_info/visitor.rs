@@ -10,7 +10,7 @@ use biome_html_syntax::{
 use biome_js_syntax::{AnyJsImportLike, AnyJsRoot};
 use biome_languages::css::EmbeddingStyleApplicability;
 use biome_languages::{CssFileSource, LanguageDb};
-use biome_parser::db::ParsedSourceExt;
+use biome_parser::db::SourceExt;
 use biome_rowan::{AstNode, AstSeparatedList, Text, TextSize, TokenText, WalkEvent};
 use camino::{Utf8Path, Utf8PathBuf};
 use indexmap::IndexSet;

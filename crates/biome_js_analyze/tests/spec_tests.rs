@@ -11,7 +11,7 @@ use biome_js_syntax::{AnyJsRoot, JsLanguage};
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb, javascript::ModuleKind};
 use biome_package::PackageType;
 use biome_parser::AnyParse;
-use biome_parser::db::{ParseDb, SharedParse, SourceParse};
+use biome_parser::db::{ParseDb, ParseHandle, SourceOutput};
 use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_rowan::{AstNode, FileSourceError};
 use biome_test_utils::{
@@ -37,7 +37,7 @@ tests_macros::gen_tests! {"tests/plugin/*.grit", crate::run_plugin_test, "module
 #[salsa::db]
 struct TestDb {
     parsed: Option<Source>,
-    parse: SharedParse,
+    parse: ParseHandle,
     source_type: Option<DocumentFileSource>,
     storage: Storage<Self>,
 }
@@ -46,8 +46,8 @@ struct TestDb {
 /// analyzer analyzes.
 #[salsa::db]
 impl ParseDb for TestDb {
-    fn parse_source(&self, _source: Source) -> SourceParse {
-        SourceParse {
+    fn parse_source(&self, _source: Source) -> SourceOutput {
+        SourceOutput {
             parse: self.parse.clone(),
             document_source_index: 0,
             snippets: Vec::new(),

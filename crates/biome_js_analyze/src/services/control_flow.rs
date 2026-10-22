@@ -9,7 +9,7 @@ use biome_js_syntax::JsLanguage;
 use biome_js_syntax::JsSyntaxNode;
 use biome_js_syntax::TextRange;
 use biome_languages::LanguageDb;
-use biome_parser::db::AnyParsedSource;
+use biome_parser::db::AnalyzedSource;
 use biome_rowan::{AstNode, SyntaxKindSet, WalkEvent};
 use std::rc::Rc;
 
@@ -75,7 +75,7 @@ impl Visitor for ControlFlowGraphVisitor {
         }
         let db = ctx.services.get_service::<Rc<dyn LanguageDb>>();
         let model = if let Some(db) = db
-            && let Some(source) = ctx.services.get_service::<AnyParsedSource>()
+            && let Some(source) = ctx.services.get_service::<AnalyzedSource>()
             && let Some(model) = js_control_flow_model(db.as_ref(), source)
         {
             model.clone()

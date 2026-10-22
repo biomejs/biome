@@ -16,7 +16,7 @@ use biome_js_syntax::{
 };
 use biome_languages::javascript::JsEmbeddingKind;
 use biome_languages::{JsFileSource, LanguageDb};
-use biome_parser::db::AnyParsedSource;
+use biome_parser::db::AnalyzedSource;
 use biome_rowan::{AstNode, NodeOrToken, SyntaxKindSet, WalkEvent};
 use biome_rule_options::no_useless_assignment::NoUselessAssignmentOptions;
 use roaring::RoaringBitmap;
@@ -201,7 +201,7 @@ impl Rule for NoUselessAssignment {
 fn control_flow_graph(ctx: &RuleContext<NoUselessAssignment>) -> Option<JsControlFlowGraph> {
     let root = ctx.query();
     if let Some(db) = ctx.get_service::<Rc<dyn LanguageDb>>()
-        && let Some(source) = ctx.get_service::<AnyParsedSource>()
+        && let Some(source) = ctx.get_service::<AnalyzedSource>()
         && let Some(model) = js_control_flow_model(db.as_ref(), source)
     {
         model.graph(root)

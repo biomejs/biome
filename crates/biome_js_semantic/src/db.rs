@@ -2,7 +2,7 @@ use crate::{SemanticModel, SemanticModelOptions, semantic_model};
 use biome_db::Source;
 use biome_languages::JsFileSource;
 use biome_languages::LanguageDb;
-use biome_parser::db::{AnyParsedSource, ParsedSnippet, ParsedSourceExt};
+use biome_parser::db::{AnalyzedSource, SourceExt, TrackedSnippet};
 
 #[salsa::tracked]
 pub fn semantic_model_from_source(db: &dyn LanguageDb, file: Source) -> SemanticModel {
@@ -20,7 +20,7 @@ pub fn semantic_model_from_source(db: &dyn LanguageDb, file: Source) -> Semantic
 #[salsa::tracked]
 pub fn semantic_model_from_snippet<'db>(
     db: &'db dyn LanguageDb,
-    file: ParsedSnippet<'db>,
+    file: TrackedSnippet<'db>,
 ) -> SemanticModel {
     let parsed = file.parsed(db);
     let source = db.source_from_index(file.document_source_index(db));
@@ -36,11 +36,11 @@ pub fn semantic_model_from_snippet<'db>(
 /// contain anymore.
 pub fn js_semantic_model<'db>(
     db: &'db dyn LanguageDb,
-    file: &AnyParsedSource,
+    file: &AnalyzedSource,
 ) -> Option<&'db SemanticModel> {
     match file {
-        AnyParsedSource::Source(source) => Some(semantic_model_from_source(db, *source)),
-        AnyParsedSource::ParsedSnippet(snippet) => snippet
+        AnalyzedSource::Source(source) => Some(semantic_model_from_source(db, *source)),
+        AnalyzedSource::Snippet(snippet) => snippet
             .resolve(db)
             .map(|snippet| semantic_model_from_snippet(db, snippet)),
     }

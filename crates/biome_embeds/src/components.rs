@@ -3,7 +3,7 @@ use biome_html_syntax::element_ext::AnyHtmlTagElement;
 use biome_html_syntax::{AnyHtmlComponentObjectName, AnyHtmlTagName, HtmlRoot};
 use biome_languages::{DocumentFileSource, LanguageDb};
 use biome_parser::AnyParse;
-use biome_parser::db::ParsedSourceExt;
+use biome_parser::db::SourceExt;
 use biome_rowan::{AstNode, TextRange, TokenText};
 use smallvec::SmallVec;
 

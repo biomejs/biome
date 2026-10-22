@@ -21,7 +21,7 @@
 use biome_db::Source;
 use biome_fs::is_node_modules_path;
 use biome_package::{Manifest, PackageJson, TsConfigJson};
-use biome_parser::db::{ParseDb, ParsedSourceExt};
+use biome_parser::db::{ParseDb, SourceExt};
 use biome_rowan::Language;
 use camino::{Utf8Path, Utf8PathBuf};
 use enumflags2::{BitFlags, bitflags};
@@ -443,7 +443,7 @@ mod tests {
     };
     use biome_fs::MemoryFileSystem;
     use biome_json_parser::{JsonParserOptions, parse_json};
-    use biome_parser::db::SourceParse;
+    use biome_parser::db::SourceOutput;
     use salsa::Storage;
     use std::collections::BTreeMap;
     use std::sync::Mutex;
@@ -521,9 +521,9 @@ mod tests {
 
     #[salsa::db]
     impl ParseDb for TestDb {
-        fn parse_source(&self, source: Source) -> SourceParse {
+        fn parse_source(&self, source: Source) -> SourceOutput {
             let parse = parse_json(source.text(self), JsonParserOptions::default());
-            SourceParse::new(parse.into(), 0)
+            SourceOutput::new(parse.into(), 0)
         }
     }
 

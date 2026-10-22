@@ -6,7 +6,7 @@ use biome_html_syntax::HtmlRoot;
 use biome_js_semantic::{semantic_model_from_snippet, semantic_model_from_source};
 use biome_js_syntax::AnyJsRoot;
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
-use biome_parser::db::ParsedSourceExt;
+use biome_parser::db::SourceExt;
 
 /// Returns the Vue semantic model of a stored file.
 ///

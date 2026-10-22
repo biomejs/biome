@@ -89,8 +89,8 @@ use biome_languages::{DocumentFileSource, JsonFileSource, LanguageDb};
 use biome_package::PackageType;
 use biome_package::{Catalogs, PackageJson};
 use biome_parser::AnyParse;
-use biome_parser::db::ParsedSourceExt;
-use biome_parser::db::{AnyParsedSource, ParsedSnippetRef};
+use biome_parser::db::SourceExt;
+use biome_parser::db::{AnalyzedSource, SnippetRef};
 use biome_parser::diagnostic::ParseDiagnostic;
 #[cfg(feature = "plugins")]
 use biome_plugin_loader::Plugins;
@@ -250,10 +250,10 @@ impl ScannerTestState {
 impl ProcessFileState {
     fn iter_snippets(&self) -> SnippetsIterator<'_> {
         match &self.parsed {
-            ParsedOrigin::Workspace(AnyParsedSource::Source(source)) => {
+            ParsedOrigin::Workspace(AnalyzedSource::Source(source)) => {
                 SnippetsIterator::from_source(*source, &self.db)
             }
-            ParsedOrigin::Workspace(AnyParsedSource::ParsedSnippet(_)) => {
+            ParsedOrigin::Workspace(AnalyzedSource::Snippet(_)) => {
                 unreachable!("a process-file state must contain a document")
             }
             ParsedOrigin::Interned { snippets, .. } => SnippetsIterator::Interned(snippets.iter()),
@@ -603,7 +603,7 @@ impl LocalWorkspace {
     }
 
     #[cfg(test)]
-    fn get_snippets(&self, path: &Utf8Path) -> Vec<ParsedSnippetRef> {
+    fn get_snippets(&self, path: &Utf8Path) -> Vec<SnippetRef> {
         self.as_workspace().get_snippets(path)
     }
 }
@@ -2427,7 +2427,7 @@ impl WorkspaceServerWithDb<'_> {
         &self,
         db: &WorkspaceDb,
         path: &Utf8Path,
-    ) -> Result<(Source, Vec<ParsedSnippetRef>), WorkspaceError> {
+    ) -> Result<(Source, Vec<SnippetRef>), WorkspaceError> {
         self.assert_parse(path)?;
         let parsed_source = db
             .get_client_parsed_source(path, self.client)
@@ -2458,7 +2458,7 @@ impl WorkspaceServerWithDb<'_> {
     }
 
     #[cfg(test)]
-    fn get_snippets(&self, path: &Utf8Path) -> Vec<ParsedSnippetRef> {
+    fn get_snippets(&self, path: &Utf8Path) -> Vec<SnippetRef> {
         let db = self.db_state.fork();
         db.get_client_parsed_source(path, self.client)
             .map(|source| {
@@ -4894,7 +4894,7 @@ impl OpenFileReason {
 
 /// Kind of update being performed.
 pub enum UpdateKind {
-    AddedOrChanged(OpenFileReason, AnyParsedSource),
+    AddedOrChanged(OpenFileReason, AnalyzedSource),
     Removed,
 }
 

@@ -93,8 +93,8 @@ use biome_languages::{DocumentFileSource, LanguageDb};
 use biome_module_graph::ModuleDb;
 use biome_package::{Dependencies, PackageJson};
 use biome_parser::AnyParse;
-use biome_parser::db::ParsedSourceExt;
-use biome_parser::db::{AnyParsedSource, ParsedSnippetRef};
+use biome_parser::db::SourceExt;
+use biome_parser::db::{AnalyzedSource, SnippetRef};
 use biome_project_layout::ProjectLayout;
 #[cfg(feature = "lang_js")]
 use biome_rowan::TokenText;
@@ -153,7 +153,7 @@ pub struct FixAllParams<'a> {
 #[derive(Clone, Debug)]
 pub(crate) enum ParsedOrigin {
     /// The parse result has been queried from the database.
-    Workspace(AnyParsedSource),
+    Workspace(AnalyzedSource),
     /// The parse result has been generated from the server during an in-flight operation, and it won't
     /// be saved back to the workspace. This is usually used for in-memory operations or stateless operations.
     Interned {
@@ -166,7 +166,7 @@ pub(crate) enum ParsedOrigin {
 #[derive(Clone, Debug)]
 pub(crate) enum ParsedSnippetOrigin {
     /// The parse result has been queried from the database.
-    Workspace(ParsedSnippetRef),
+    Workspace(SnippetRef),
     /// The parse result has been generated from the server during an in-flight operation, and it won't
     /// be saved back to the workspace. This is usually used for in-memory operations or stateless operations.
     Interned {
@@ -254,12 +254,10 @@ impl ParsedOrigin {
 
     pub(crate) fn snippets<'a>(&'a self, db: &'a WorkspaceDb) -> SnippetsIterator<'a> {
         match self {
-            Self::Workspace(AnyParsedSource::Source(source)) => {
+            Self::Workspace(AnalyzedSource::Source(source)) => {
                 SnippetsIterator::from_source(*source, db)
             }
-            Self::Workspace(AnyParsedSource::ParsedSnippet(_)) => {
-                SnippetsIterator::Interned([].iter())
-            }
+            Self::Workspace(AnalyzedSource::Snippet(_)) => SnippetsIterator::Interned([].iter()),
             Self::Interned { snippets, .. } => SnippetsIterator::Interned(snippets.iter()),
         }
     }
@@ -345,8 +343,8 @@ impl ParsedOrigin {
     }
 }
 
-impl From<AnyParsedSource> for ParsedOrigin {
-    fn from(source: AnyParsedSource) -> Self {
+impl From<AnalyzedSource> for ParsedOrigin {
+    fn from(source: AnalyzedSource) -> Self {
         Self::Workspace(source)
     }
 }
@@ -357,8 +355,8 @@ impl From<Source> for ParsedOrigin {
     }
 }
 
-impl From<ParsedSnippetRef> for ParsedOrigin {
-    fn from(source: ParsedSnippetRef) -> Self {
+impl From<SnippetRef> for ParsedOrigin {
+    fn from(source: SnippetRef) -> Self {
         Self::Workspace(source.into())
     }
 }
@@ -371,7 +369,7 @@ impl From<AnyParse> for ParsedOrigin {
 
 pub(crate) enum SnippetsIterator<'a> {
     /// The snippets of a parsed source.
-    Workspace(std::vec::IntoIter<ParsedSnippetRef>),
+    Workspace(std::vec::IntoIter<SnippetRef>),
     Interned(std::slice::Iter<'a, ParsedSnippetOrigin>),
 }
 
@@ -492,20 +490,20 @@ pub struct ParserCapabilities {
     pub(crate) parse_embedded_nodes: Option<ParseEmbeddedNodes>,
 }
 
-type DebugSyntaxTree = fn(&BiomePath, AnyParsedSource, WorkspaceDb) -> GetSyntaxTreeResult;
-type DebugControlFlow = fn(AnyParsedSource, TextSize, WorkspaceDb) -> String;
+type DebugSyntaxTree = fn(&BiomePath, AnalyzedSource, WorkspaceDb) -> GetSyntaxTreeResult;
+type DebugControlFlow = fn(AnalyzedSource, TextSize, WorkspaceDb) -> String;
 type DebugFormatterIR = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParsedSource,
+    AnalyzedSource,
     &SettingsWithEditor,
     WorkspaceDb,
 ) -> Result<String, WorkspaceError>;
-type DebugTypeInfo = fn(AnyParsedSource, WorkspaceDb) -> Result<String, WorkspaceError>;
+type DebugTypeInfo = fn(AnalyzedSource, WorkspaceDb) -> Result<String, WorkspaceError>;
 type DebugRegisteredTypes =
-    fn(&BiomePath, AnyParsedSource, WorkspaceDb) -> Result<String, WorkspaceError>;
+    fn(&BiomePath, AnalyzedSource, WorkspaceDb) -> Result<String, WorkspaceError>;
 type DebugSemanticModel =
-    fn(&BiomePath, AnyParsedSource, WorkspaceDb) -> Result<String, WorkspaceError>;
+    fn(&BiomePath, AnalyzedSource, WorkspaceDb) -> Result<String, WorkspaceError>;
 
 #[derive(Default)]
 pub struct DebugCapabilities {
@@ -582,7 +580,7 @@ impl<'a> LintParams<'a> {
 }
 
 pub(crate) struct DiagnosticsAndActionsParams<'a> {
-    pub(crate) parsed_source: AnyParsedSource,
+    pub(crate) parsed_source: AnalyzedSource,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) language: DocumentFileSource,
     pub(crate) path: &'a BiomePath,
@@ -1142,7 +1140,7 @@ impl ProcessDiagnosticsAndActions {
 }
 
 pub(crate) struct CodeActionsParams<'a> {
-    pub(crate) parsed_source: AnyParsedSource,
+    pub(crate) parsed_source: AnalyzedSource,
     pub(crate) range: Option<TextRange>,
     pub(crate) settings: &'a SettingsWithEditor<'a>,
     pub(crate) path: &'a BiomePath,
@@ -1179,7 +1177,7 @@ type CodeActions = fn(CodeActionsParams) -> PullActionsResult;
 type FixAll = fn(FixAllParams) -> Result<Option<FixedFileResult>, WorkspaceError>;
 type Rename = fn(
     &BiomePath,
-    AnyParsedSource,
+    AnalyzedSource,
     TextSize,
     String,
     WorkspaceDb,
@@ -1214,7 +1212,7 @@ type Format = fn(
 type FormatRange = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParsedSource,
+    AnalyzedSource,
     &SettingsWithEditor,
     TextRange,
     WorkspaceDb,
@@ -1222,7 +1220,7 @@ type FormatRange = fn(
 type FormatOnType = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParsedSource,
+    AnalyzedSource,
     &SettingsWithEditor,
     TextSize,
     WorkspaceDb,
@@ -1264,7 +1262,7 @@ type Enabled = fn(&Utf8Path, &SettingsWithEditor) -> bool;
 type Search = fn(
     &BiomePath,
     &DocumentFileSource,
-    AnyParsedSource,
+    AnalyzedSource,
     &dyn SearchQuery,
     &SettingsWithEditor,
     PatternId,
@@ -1292,7 +1290,7 @@ pub(crate) struct EditorCapabilities {
 }
 
 pub(crate) struct ResolveBindingParams {
-    pub(crate) parsed_source: AnyParsedSource,
+    pub(crate) parsed_source: AnalyzedSource,
     pub(crate) cursor_offset: TextSize,
     pub(crate) workspace_db: WorkspaceDb,
     pub(crate) path: Utf8PathBuf,
@@ -1302,7 +1300,7 @@ pub(crate) struct ResolveDefinitionParams<'a> {
     pub(crate) path: &'a BiomePath,
     pub(crate) definition_ref: &'a DefinitionReference,
     pub(crate) workspace_db: WorkspaceDb,
-    pub(crate) parsed_source: AnyParsedSource,
+    pub(crate) parsed_source: AnalyzedSource,
 }
 
 type ResolveBinding = fn(ResolveBindingParams) -> Option<DefinitionReference>;

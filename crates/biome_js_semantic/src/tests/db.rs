@@ -10,7 +10,7 @@ use biome_db::testing::{Events, assert_function_query_was_not_run, assert_functi
 use biome_js_parser::parse;
 use biome_js_syntax::AnyJsRoot;
 use biome_languages::{DocumentFileSource, JsFileSource, LanguageDb};
-use biome_parser::db::{ParseDb, SourceParse};
+use biome_parser::db::{ParseDb, SourceOutput};
 use camino::{Utf8Path, Utf8PathBuf};
 use salsa::{Setter, Storage};
 
@@ -134,9 +134,9 @@ impl salsa::Database for TestDb {}
 
 #[salsa::db]
 impl ParseDb for TestDb {
-    fn parse_source(&self, source: Source) -> SourceParse {
+    fn parse_source(&self, source: Source) -> SourceOutput {
         let parsed = parse(source.text(self), JsFileSource::tsx(), Default::default());
-        SourceParse::new(parsed.into(), 0)
+        SourceOutput::new(parsed.into(), 0)
     }
 }
 

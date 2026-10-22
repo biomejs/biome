@@ -981,7 +981,7 @@ mod tests {
 
     #[salsa::db]
     impl biome_parser::db::ParseDb for TestDb {
-        fn parse_source(&self, _source: biome_db::Source) -> biome_parser::db::SourceParse {
+        fn parse_source(&self, _source: biome_db::Source) -> biome_parser::db::SourceOutput {
             unreachable!("The database has no sources")
         }
     }

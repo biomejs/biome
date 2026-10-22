@@ -191,7 +191,7 @@ mod tests {
     use biome_db::testing::Events;
     use biome_js_parser::{JsParserOptions, parse};
     use biome_languages::{DocumentFileSource, JsFileSource};
-    use biome_parser::db::{ParseDb, SnippetParse, SourceParse};
+    use biome_parser::db::{ParseDb, SnippetOutput, SourceOutput};
     use biome_rowan::RawSyntaxKind;
     use camino::{Utf8Path, Utf8PathBuf};
     use salsa::{EventKind, Storage};
@@ -226,7 +226,7 @@ mod tests {
 
     #[salsa::db]
     impl ParseDb for TestDb {
-        fn parse_source(&self, source: Source) -> SourceParse {
+        fn parse_source(&self, source: Source) -> SourceOutput {
             let text = source.text(self);
             let snippets = self
                 .snippets
@@ -239,11 +239,11 @@ mod tests {
                         JsFileSource::js_module(),
                         JsParserOptions::default(),
                     );
-                    Some(SnippetParse::new(parsed.into(), range, range, start, 0))
+                    Some(SnippetOutput::new(parsed.into(), range, range, start, 0))
                 })
                 .collect();
             let parsed = parse(text, JsFileSource::js_module(), JsParserOptions::default());
-            SourceParse::new(parsed.into(), 0).with_snippets(snippets)
+            SourceOutput::new(parsed.into(), 0).with_snippets(snippets)
         }
     }
 

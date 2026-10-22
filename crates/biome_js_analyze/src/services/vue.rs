@@ -22,7 +22,7 @@ use biome_analyze::{
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange};
 use biome_languages::{JsFileSource, LanguageDb};
-use biome_parser::db::AnyParsedSource;
+use biome_parser::db::AnalyzedSource;
 use biome_rowan::{AstNode, WalkEvent};
 use biome_vue_semantic::{
     Component, Prop, SnippetId, Symbol, VueSemanticModel, component_model, vue_model_from_source,
@@ -48,7 +48,7 @@ impl VueSemanticService {
     fn from_services(root: &AnyJsRoot, services: &ServiceBag) -> Self {
         let stored = services
             .get_service::<Rc<dyn LanguageDb>>()
-            .zip(services.get_service::<AnyParsedSource>())
+            .zip(services.get_service::<AnalyzedSource>())
             .and_then(|(db, source)| {
                 let db = db.as_ref();
                 let stored_root: AnyJsRoot = source.tree(db);
@@ -56,11 +56,11 @@ impl VueSemanticService {
                     return None;
                 }
                 match source {
-                    AnyParsedSource::Source(file) => Some(Self {
+                    AnalyzedSource::Source(file) => Some(Self {
                         model: vue_model_from_source(db, *file).clone(),
                         snippet: None,
                     }),
-                    AnyParsedSource::ParsedSnippet(snippet) => {
+                    AnalyzedSource::Snippet(snippet) => {
                         // The host document of the snippet, rather than the
                         // one of its path, which can be another client's.
                         let model = vue_model_from_source(db, snippet.source()).clone();

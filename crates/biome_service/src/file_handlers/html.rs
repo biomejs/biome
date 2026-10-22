@@ -98,7 +98,7 @@ use biome_json_syntax::JsonLanguage;
 use biome_languages::HtmlFileSource;
 #[cfg(feature = "html_embeds")]
 use biome_parser::AnyParse;
-use biome_parser::db::AnyParsedSource;
+use biome_parser::db::AnalyzedSource;
 use biome_rowan::{AstNode, BatchMutation, NodeCache, SendNode, TextRange, TextSize};
 #[cfg(feature = "html_embeds")]
 use biome_rowan::{AstNodeList, TokenAtOffset};
@@ -753,7 +753,7 @@ struct EmbedParseContext<'a, 'b> {
 
 fn debug_syntax_tree(
     _biome_path: &BiomePath,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     workspace_db: WorkspaceDb,
 ) -> GetSyntaxTreeResult {
     let syntax: HtmlSyntaxNode = parse.syntax(&workspace_db);
@@ -767,7 +767,7 @@ fn debug_syntax_tree(
 fn debug_formatter_ir(
     path: &BiomePath,
     document_file_source: &DocumentFileSource,
-    parse: AnyParsedSource,
+    parse: AnalyzedSource,
     settings: &SettingsWithEditor,
     workspace_db: WorkspaceDb,
 ) -> Result<String, WorkspaceError> {
