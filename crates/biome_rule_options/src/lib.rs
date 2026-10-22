@@ -662,6 +662,7 @@ pub mod use_valid_typeof;
 pub mod use_vars_on_top;
 pub mod use_vue_base_import;
 pub mod use_vue_component_is;
+pub mod use_vue_computed_property_return;
 pub mod use_vue_consistent_define_emits_declaration;
 pub mod use_vue_consistent_define_props_declaration;
 pub mod use_vue_consistent_event_hyphenation;

@@ -738,6 +738,7 @@ pub enum RuleName {
     UseVarsOnTop,
     UseVueBaseImport,
     UseVueComponentIs,
+    UseVueComputedPropertyReturn,
     UseVueConsistentDefineEmitsDeclaration,
     UseVueConsistentDefinePropsDeclaration,
     UseVueConsistentEventHyphenation,
@@ -1443,6 +1444,7 @@ impl RuleName {
             Self::UseVarsOnTop => "useVarsOnTop",
             Self::UseVueBaseImport => "useVueBaseImport",
             Self::UseVueComponentIs => "useVueComponentIs",
+            Self::UseVueComputedPropertyReturn => "useVueComputedPropertyReturn",
             Self::UseVueConsistentDefineEmitsDeclaration => {
                 "useVueConsistentDefineEmitsDeclaration"
             }
@@ -2144,6 +2146,7 @@ impl RuleName {
             Self::UseVarsOnTop => RuleGroup::Style,
             Self::UseVueBaseImport => RuleGroup::Nursery,
             Self::UseVueComponentIs => RuleGroup::Nursery,
+            Self::UseVueComputedPropertyReturn => RuleGroup::Nursery,
             Self::UseVueConsistentDefineEmitsDeclaration => RuleGroup::Nursery,
             Self::UseVueConsistentDefinePropsDeclaration => RuleGroup::Style,
             Self::UseVueConsistentEventHyphenation => RuleGroup::Nursery,
@@ -2854,6 +2857,7 @@ impl std::str::FromStr for RuleName {
             "useVarsOnTop" => Ok(Self::UseVarsOnTop),
             "useVueBaseImport" => Ok(Self::UseVueBaseImport),
             "useVueComponentIs" => Ok(Self::UseVueComponentIs),
+            "useVueComputedPropertyReturn" => Ok(Self::UseVueComputedPropertyReturn),
             "useVueConsistentDefineEmitsDeclaration" => {
                 Ok(Self::UseVueConsistentDefineEmitsDeclaration)
             }
