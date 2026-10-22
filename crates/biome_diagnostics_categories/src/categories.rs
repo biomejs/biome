@@ -355,6 +355,7 @@ define_categories! {
     "lint/nursery/noVueRootVIf": "https://biomejs.dev/linter/rules/no-vue-root-v-if",
     "lint/nursery/noVueImportCompilerMacros": "https://biomejs.dev/linter/rules/no-vue-import-compiler-macros",
     "lint/nursery/noVueRefAsOperand": "https://biomejs.dev/linter/rules/no-vue-ref-as-operand",
+    "lint/nursery/noVueRefObjectReactivityLoss": "https://biomejs.dev/linter/rules/no-vue-ref-object-reactivity-loss",
     "lint/nursery/noVueRequiredPropWithDefault": "https://biomejs.dev/linter/rules/no-vue-required-prop-with-default",
     "lint/nursery/noVueShadowNativeEvents": "https://biomejs.dev/linter/rules/no-vue-shadow-native-events",
     "lint/nursery/noVueSideEffectsInComputed": "https://biomejs.dev/linter/rules/no-vue-side-effects-in-computed",

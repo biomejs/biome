@@ -412,6 +412,7 @@ pub mod no_vue_multiple_slot_args;
 pub mod no_vue_mutating_props;
 pub mod no_vue_options_api;
 pub mod no_vue_ref_as_operand;
+pub mod no_vue_ref_object_reactivity_loss;
 pub mod no_vue_required_prop_with_default;
 pub mod no_vue_reserved_keys;
 pub mod no_vue_reserved_props;

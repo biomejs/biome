@@ -3463,6 +3463,11 @@ export interface Nursery {
 	 */
 	noVueMutatingProps?: NoVueMutatingPropsConfiguration;
 	/**
+	 * Disallow reading the value of a Vue ref in a place where the read runs only once.
+	 * See https://biomejs.dev/linter/rules/no-vue-ref-object-reactivity-loss
+	 */
+	noVueRefObjectReactivityLoss?: NoVueRefObjectReactivityLossConfiguration;
+	/**
 	 * Disallow props that are both required and have a default value.
 	 * See https://biomejs.dev/linter/rules/no-vue-required-prop-with-default
 	 */
@@ -6432,6 +6437,9 @@ export type NoVueMultipleSlotArgsConfiguration =
 export type NoVueMutatingPropsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueMutatingPropsOptions;
+export type NoVueRefObjectReactivityLossConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueRefObjectReactivityLossOptions;
 export type NoVueRequiredPropWithDefaultConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueRequiredPropWithDefaultOptions;
@@ -9329,6 +9337,10 @@ export interface RuleWithNoVueMutatingPropsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueMutatingPropsOptions;
 }
+export interface RuleWithNoVueRefObjectReactivityLossOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueRefObjectReactivityLossOptions;
+}
 export interface RuleWithNoVueRequiredPropWithDefaultOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -12043,6 +12055,7 @@ export interface NoVueLoneTemplateOptions {
 export type NoVueMixinOptions = {};
 export type NoVueMultipleSlotArgsOptions = {};
 export type NoVueMutatingPropsOptions = {};
+export type NoVueRefObjectReactivityLossOptions = {};
 export type NoVueRequiredPropWithDefaultOptions = {};
 export interface NoVueRestrictedCallAfterAwaitOptions {
 	/**
@@ -13904,6 +13917,7 @@ export type Category =
 	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"
+	| "lint/nursery/noVueRefObjectReactivityLoss"
 	| "lint/nursery/noVueRequiredPropWithDefault"
 	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueSideEffectsInComputed"
