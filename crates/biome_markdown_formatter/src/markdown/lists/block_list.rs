@@ -9,8 +9,7 @@ use biome_formatter::FormatRuleWithOptions;
 use biome_formatter::write;
 use biome_markdown_syntax::list_ext::AnyListItem;
 use biome_markdown_syntax::{
-    AnyMdBlock, AnyMdCodeBlock, AnyMdInline, AnyMdLeafBlock, GfmTable, MdBlockList, MdBullet,
-    MdParagraph, MdQuote,
+    AnyMdBlock, AnyMdCodeBlock, AnyMdLeafBlock, GfmTable, MdBlockList, MdBullet, MdQuote,
 };
 
 #[derive(Debug, Clone, Default)]
@@ -305,8 +304,7 @@ impl PreviousBlock {
                 AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdHtmlBlock(html)) if !html.is_html_comment()
             ) || matches!(
                 block,
-                AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(paragraph))
-                    if paragraph_has_inner_hard_line(paragraph)
+                AnyMdBlock::AnyMdLeafBlock(AnyMdLeafBlock::MdParagraph(_))
             )
         })
     }
@@ -638,17 +636,6 @@ fn next_content_block_is_link_reference_definition(
         .take_while(|(index, _)| *index < content_count)
         .find(|(_, block)| !block.is_newline())
         .is_some_and(|(_, block)| block.is_link_reference_definition())
-}
-
-fn paragraph_has_inner_hard_line(paragraph: &MdParagraph) -> bool {
-    let mut items = paragraph.list().iter().peekable();
-    while let Some(item) = items.next() {
-        if matches!(item, AnyMdInline::MdHardLine(_)) && items.peek().is_some() {
-            return true;
-        }
-    }
-
-    false
 }
 
 /// Whether the list terminates its own line.
