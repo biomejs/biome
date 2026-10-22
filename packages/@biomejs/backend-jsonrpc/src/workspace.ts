@@ -3678,6 +3678,11 @@ export interface Nursery {
 	 */
 	useVueMatchingComponentFileName?: UseVueMatchingComponentFileNameConfiguration;
 	/**
+	 * Require the type of a Vue prop to be a constructor.
+	 * See https://biomejs.dev/linter/rules/use-vue-prop-type-constructor
+	 */
+	useVuePropTypeConstructor?: UseVuePropTypeConstructorConfiguration;
+	/**
 	 * Require a type for refs created with ref() or shallowRef() in TypeScript.
 	 * See https://biomejs.dev/linter/rules/use-vue-typed-ref
 	 */
@@ -6266,6 +6271,9 @@ export type UseVueConsistentEventHyphenationConfiguration =
 export type UseVueMatchingComponentFileNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueMatchingComponentFileNameOptions;
+export type UseVuePropTypeConstructorConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVuePropTypeConstructorOptions;
 export type UseVueTypedRefConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueTypedRefOptions;
@@ -9129,6 +9137,14 @@ export interface RuleWithUseVueMatchingComponentFileNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueMatchingComponentFileNameOptions;
 }
+export interface RuleWithUseVuePropTypeConstructorOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: UseVuePropTypeConstructorOptions;
+}
 export interface RuleWithUseVueTypedRefOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueTypedRefOptions;
@@ -11501,6 +11517,7 @@ export interface UseVueConsistentEventHyphenationOptions {
 	ignoreTags?: string[];
 }
 export type UseVueMatchingComponentFileNameOptions = {};
+export type UseVuePropTypeConstructorOptions = {};
 export type UseVueTypedRefOptions = {};
 export type NoAccumulatingSpreadOptions = {};
 export type NoAwaitInLoopsOptions = {};
@@ -13096,6 +13113,7 @@ export type Category =
 	| "lint/nursery/useVueConsistentEventHyphenation"
 	| "lint/nursery/useVueMatchingComponentFileName"
 	| "lint/nursery/useVueNextTickPromise"
+	| "lint/nursery/useVuePropTypeConstructor"
 	| "lint/nursery/useVueTypedRef"
 	| "lint/nursery/useVueValidVFor"
 	| "lint/nursery/useVueValidVModel"
