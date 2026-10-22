@@ -44,138 +44,399 @@ suite('outer suite', () => {
   suite('nested', () => {});
 });
 
+// Three occurrences of the same test title
+describe('triple', () => {
+  it('repeated', () => {});
+  it('repeated', () => {});
+  it('repeated', () => {});
+});
+
+// Interleaved duplicates produce one diagnostic per title
+describe('interleaved', () => {
+  it('a', () => {});
+  it('b', () => {});
+  it('a', () => {});
+  it('b', () => {});
+  it('a', () => {});
+});
+
+// Duplicate describe and duplicate test sharing a title in the same scope
+describe('shared title', () => {
+  describe('same', () => {});
+  describe('same', () => {});
+  it('same', () => {});
+  it('same', () => {});
+});
+
+// Mixed quote styles are the same title
+describe('quotes', () => {
+  it('quoted', () => {});
+  it("quoted", () => {});
+  it(`quoted`, () => {});
+});
+
 ```
 
 # Diagnostics
 ```
-invalid.js:6:3 lint/suspicious/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:6 lint/suspicious/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate test title found.
+  ! The test title "should do bar" is used more than once in the same scope.
+  
+    3 │ // Duplicate test titles inside a describe
+    4 │ describe('foo', () => {
+  > 5 │   it('should do bar', () => {});
+      │      ^^^^^^^^^^^^^^^
+    6 │   it('should do bar', () => {});
+    7 │ });
+  
+  i The test title "should do bar" is repeated here.
   
     4 │ describe('foo', () => {
     5 │   it('should do bar', () => {});
   > 6 │   it('should do bar', () => {});
-      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │      ^^^^^^^^^^^^^^^
     7 │ });
     8 │ 
   
-  i A test with this title already exists in the same scope.
-  
-  i Rename the test to give it a unique, descriptive title.
+  i Rename the duplicated test calls to give each a unique, descriptive title.
   
 
 ```
 
 ```
-invalid.js:12:3 lint/suspicious/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:12 lint/suspicious/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate describe title found.
+  ! The describe title "baz" is used more than once in the same scope.
+  
+     9 │ // Duplicate describe titles inside a describe
+    10 │ describe('suite', () => {
+  > 11 │   describe('baz', () => {});
+       │            ^^^^^
+    12 │   describe('baz', () => {});
+    13 │ });
+  
+  i The describe title "baz" is repeated here.
   
     10 │ describe('suite', () => {
     11 │   describe('baz', () => {});
   > 12 │   describe('baz', () => {});
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^
+       │            ^^^^^
     13 │ });
     14 │ 
   
-  i A describe with this title already exists in the same scope.
-  
-  i Rename the describe to give it a unique, descriptive title.
+  i Rename the duplicated describe calls to give each a unique, descriptive title.
   
 
 ```
 
 ```
-invalid.js:17:1 lint/suspicious/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:16:4 lint/suspicious/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate test title found.
+  ! The test title "is awesome" is used more than once in the same scope.
+  
+    15 │ // Top-level duplicate tests (no describe wrapper)
+  > 16 │ it('is awesome', () => {});
+       │    ^^^^^^^^^^^^
+    17 │ it('is awesome', () => {});
+    18 │ 
+  
+  i The test title "is awesome" is repeated here.
   
     15 │ // Top-level duplicate tests (no describe wrapper)
     16 │ it('is awesome', () => {});
   > 17 │ it('is awesome', () => {});
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │    ^^^^^^^^^^^^
     18 │ 
     19 │ // Duplicate no-substitution template literal test titles
   
-  i A test with this title already exists in the same scope.
-  
-  i Rename the test to give it a unique, descriptive title.
+  i Rename the duplicated test calls to give each a unique, descriptive title.
   
 
 ```
 
 ```
-invalid.js:22:3 lint/suspicious/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:21:6 lint/suspicious/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate test title found.
+  ! The test title "same title" is used more than once in the same scope.
+  
+    19 │ // Duplicate no-substitution template literal test titles
+    20 │ describe('template titles', () => {
+  > 21 │   it(`same title`, () => {});
+       │      ^^^^^^^^^^^^
+    22 │   it(`same title`, () => {});
+    23 │ });
+  
+  i The test title "same title" is repeated here.
   
     20 │ describe('template titles', () => {
     21 │   it(`same title`, () => {});
   > 22 │   it(`same title`, () => {});
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │      ^^^^^^^^^^^^
     23 │ });
     24 │ 
   
-  i A test with this title already exists in the same scope.
-  
-  i Rename the test to give it a unique, descriptive title.
+  i Rename the duplicated test calls to give each a unique, descriptive title.
   
 
 ```
 
 ```
-invalid.js:27:1 lint/suspicious/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:26:10 lint/suspicious/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate describe title found.
+  ! The describe title "suite alpha" is used more than once in the same scope.
+  
+    25 │ // Duplicate describe titles using no-substitution templates
+  > 26 │ describe(`suite alpha`, () => {});
+       │          ^^^^^^^^^^^^^
+    27 │ describe(`suite alpha`, () => {});
+    28 │ 
+  
+  i The describe title "suite alpha" is repeated here.
   
     25 │ // Duplicate describe titles using no-substitution templates
     26 │ describe(`suite alpha`, () => {});
   > 27 │ describe(`suite alpha`, () => {});
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │          ^^^^^^^^^^^^^
     28 │ 
     29 │ // Duplicate test titles inside a suite
   
-  i A describe with this title already exists in the same scope.
-  
-  i Rename the describe to give it a unique, descriptive title.
+  i Rename the duplicated describe calls to give each a unique, descriptive title.
   
 
 ```
 
 ```
-invalid.js:32:3 lint/suspicious/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:31:6 lint/suspicious/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate test title found.
+  ! The test title "should do bar" is used more than once in the same scope.
+  
+    29 │ // Duplicate test titles inside a suite
+    30 │ suite('my suite', () => {
+  > 31 │   it('should do bar', () => {});
+       │      ^^^^^^^^^^^^^^^
+    32 │   it('should do bar', () => {});
+    33 │ });
+  
+  i The test title "should do bar" is repeated here.
   
     30 │ suite('my suite', () => {
     31 │   it('should do bar', () => {});
   > 32 │   it('should do bar', () => {});
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │      ^^^^^^^^^^^^^^^
     33 │ });
     34 │ 
   
-  i A test with this title already exists in the same scope.
-  
-  i Rename the test to give it a unique, descriptive title.
+  i Rename the duplicated test calls to give each a unique, descriptive title.
   
 
 ```
 
 ```
-invalid.js:38:3 lint/suspicious/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:37:9 lint/suspicious/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Duplicate describe title found.
+  ! The describe title "nested" is used more than once in the same scope.
+  
+    35 │ // Duplicate suite titles inside a suite
+    36 │ suite('outer suite', () => {
+  > 37 │   suite('nested', () => {});
+       │         ^^^^^^^^
+    38 │   suite('nested', () => {});
+    39 │ });
+  
+  i The describe title "nested" is repeated here.
   
     36 │ suite('outer suite', () => {
     37 │   suite('nested', () => {});
   > 38 │   suite('nested', () => {});
-       │   ^^^^^^^^^^^^^^^^^^^^^^^^^
+       │         ^^^^^^^^
     39 │ });
     40 │ 
   
-  i A describe with this title already exists in the same scope.
+  i Rename the duplicated describe calls to give each a unique, descriptive title.
   
-  i Rename the describe to give it a unique, descriptive title.
+
+```
+
+```
+invalid.js:43:6 lint/suspicious/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test title "repeated" is used more than once in the same scope.
+  
+    41 │ // Three occurrences of the same test title
+    42 │ describe('triple', () => {
+  > 43 │   it('repeated', () => {});
+       │      ^^^^^^^^^^
+    44 │   it('repeated', () => {});
+    45 │   it('repeated', () => {});
+  
+  i The test title "repeated" is repeated here.
+  
+    42 │ describe('triple', () => {
+    43 │   it('repeated', () => {});
+  > 44 │   it('repeated', () => {});
+       │      ^^^^^^^^^^
+    45 │   it('repeated', () => {});
+    46 │ });
+  
+  i The test title "repeated" is repeated here.
+  
+    43 │   it('repeated', () => {});
+    44 │   it('repeated', () => {});
+  > 45 │   it('repeated', () => {});
+       │      ^^^^^^^^^^
+    46 │ });
+    47 │ 
+  
+  i Rename the duplicated test calls to give each a unique, descriptive title.
+  
+
+```
+
+```
+invalid.js:50:6 lint/suspicious/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test title "a" is used more than once in the same scope.
+  
+    48 │ // Interleaved duplicates produce one diagnostic per title
+    49 │ describe('interleaved', () => {
+  > 50 │   it('a', () => {});
+       │      ^^^
+    51 │   it('b', () => {});
+    52 │   it('a', () => {});
+  
+  i The test title "a" is repeated here.
+  
+    50 │   it('a', () => {});
+    51 │   it('b', () => {});
+  > 52 │   it('a', () => {});
+       │      ^^^
+    53 │   it('b', () => {});
+    54 │   it('a', () => {});
+  
+  i The test title "a" is repeated here.
+  
+    52 │   it('a', () => {});
+    53 │   it('b', () => {});
+  > 54 │   it('a', () => {});
+       │      ^^^
+    55 │ });
+    56 │ 
+  
+  i Rename the duplicated test calls to give each a unique, descriptive title.
+  
+
+```
+
+```
+invalid.js:51:6 lint/suspicious/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test title "b" is used more than once in the same scope.
+  
+    49 │ describe('interleaved', () => {
+    50 │   it('a', () => {});
+  > 51 │   it('b', () => {});
+       │      ^^^
+    52 │   it('a', () => {});
+    53 │   it('b', () => {});
+  
+  i The test title "b" is repeated here.
+  
+    51 │   it('b', () => {});
+    52 │   it('a', () => {});
+  > 53 │   it('b', () => {});
+       │      ^^^
+    54 │   it('a', () => {});
+    55 │ });
+  
+  i Rename the duplicated test calls to give each a unique, descriptive title.
+  
+
+```
+
+```
+invalid.js:59:12 lint/suspicious/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The describe title "same" is used more than once in the same scope.
+  
+    57 │ // Duplicate describe and duplicate test sharing a title in the same scope
+    58 │ describe('shared title', () => {
+  > 59 │   describe('same', () => {});
+       │            ^^^^^^
+    60 │   describe('same', () => {});
+    61 │   it('same', () => {});
+  
+  i The describe title "same" is repeated here.
+  
+    58 │ describe('shared title', () => {
+    59 │   describe('same', () => {});
+  > 60 │   describe('same', () => {});
+       │            ^^^^^^
+    61 │   it('same', () => {});
+    62 │   it('same', () => {});
+  
+  i Rename the duplicated describe calls to give each a unique, descriptive title.
+  
+
+```
+
+```
+invalid.js:61:6 lint/suspicious/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test title "same" is used more than once in the same scope.
+  
+    59 │   describe('same', () => {});
+    60 │   describe('same', () => {});
+  > 61 │   it('same', () => {});
+       │      ^^^^^^
+    62 │   it('same', () => {});
+    63 │ });
+  
+  i The test title "same" is repeated here.
+  
+    60 │   describe('same', () => {});
+    61 │   it('same', () => {});
+  > 62 │   it('same', () => {});
+       │      ^^^^^^
+    63 │ });
+    64 │ 
+  
+  i Rename the duplicated test calls to give each a unique, descriptive title.
+  
+
+```
+
+```
+invalid.js:67:6 lint/suspicious/noIdenticalTestTitle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The test title "quoted" is used more than once in the same scope.
+  
+    65 │ // Mixed quote styles are the same title
+    66 │ describe('quotes', () => {
+  > 67 │   it('quoted', () => {});
+       │      ^^^^^^^^
+    68 │   it("quoted", () => {});
+    69 │   it(`quoted`, () => {});
+  
+  i The test title "quoted" is repeated here.
+  
+    66 │ describe('quotes', () => {
+    67 │   it('quoted', () => {});
+  > 68 │   it("quoted", () => {});
+       │      ^^^^^^^^
+    69 │   it(`quoted`, () => {});
+    70 │ });
+  
+  i The test title "quoted" is repeated here.
+  
+    67 │   it('quoted', () => {});
+    68 │   it("quoted", () => {});
+  > 69 │   it(`quoted`, () => {});
+       │      ^^^^^^^^
+    70 │ });
+    71 │ 
+  
+  i Rename the duplicated test calls to give each a unique, descriptive title.
   
 
 ```
