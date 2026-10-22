@@ -339,6 +339,7 @@ define_categories! {
     "lint/nursery/noVueComputedPropertiesInData": "https://biomejs.dev/linter/rules/no-vue-computed-properties-in-data",
     "lint/nursery/noVueDeprecatedConfigKeyCodes": "https://biomejs.dev/linter/rules/no-vue-deprecated-config-key-codes",
     "lint/nursery/noVueDeprecatedDeleteSet": "https://biomejs.dev/linter/rules/no-vue-deprecated-delete-set",
+    "lint/nursery/noVueDeprecatedInlineTemplate": "https://biomejs.dev/linter/rules/no-vue-deprecated-inline-template",
     "lint/nursery/noVueDeprecatedListeners": "https://biomejs.dev/linter/rules/no-vue-deprecated-listeners",
     "lint/nursery/noVueDeprecatedModelDefinition": "https://biomejs.dev/linter/rules/no-vue-deprecated-model-definition",
     "lint/nursery/noVueDeprecatedPropsDefaultThis": "https://biomejs.dev/linter/rules/no-vue-deprecated-props-default-this",

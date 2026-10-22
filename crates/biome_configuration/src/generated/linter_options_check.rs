@@ -1874,6 +1874,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
             biome_rule_options::no_vue_deprecated_delete_set::NoVueDeprecatedDeleteSetOptions,
         >(),
     ));
+    result.push(("nursery", "noVueDeprecatedInlineTemplate", TypeId::of::<biome_rule_options::no_vue_deprecated_inline_template::NoVueDeprecatedInlineTemplateOptions>()));
     result.push((
         "nursery",
         "noVueDeprecatedListeners",
