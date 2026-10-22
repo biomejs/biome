@@ -292,6 +292,9 @@ where
         services.insert_service(language_db.clone());
         services.insert_service(options.file_path.clone());
     }
+    if let Some(document) = html_services.document {
+        services.insert_service(document);
+    }
     if let Some(embedded_data) = html_services.embedded_data {
         services.insert_service(EmbeddedService::from_data(embedded_data));
     } else if let Some(language_db) = html_services.language_db
