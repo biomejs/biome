@@ -9982,6 +9982,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueSlotsAsFunctions": {
+					"description": "Require the slots in this.$slots to be called as functions.\nSee https://biomejs.dev/linter/rules/use-vue-slots-as-functions",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueSlotsAsFunctionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueTemplateRef": {
 					"description": "Require useTemplateRef() instead of ref() or shallowRef() to access elements of the template.\nSee https://biomejs.dev/linter/rules/use-vue-template-ref",
 					"anyOf": [
@@ -18157,6 +18164,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueSlotsAsFunctionsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueSlotsAsFunctionsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueTemplateRefOptions": {
 			"type": "object",
 			"properties": {
@@ -23883,6 +23899,16 @@
 					"anyOf": [{ "$ref": "#/$defs/SlotNameCasing" }, { "type": "null" }]
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseVueSlotsAsFunctionsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueSlotsAsFunctionsOptions" }
+			]
+		},
+		"UseVueSlotsAsFunctionsOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseVueTemplateRefConfiguration": {
