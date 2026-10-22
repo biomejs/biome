@@ -331,6 +331,7 @@ define_categories! {
     "lint/nursery/noUselessSplice": "https://biomejs.dev/linter/rules/no-useless-splice",
     "lint/nursery/noUselessTypeConversion": "https://biomejs.dev/linter/rules/no-useless-type-conversion",
     "lint/nursery/noVueBooleanDefault": "https://biomejs.dev/linter/rules/no-vue-boolean-default",
+    "lint/nursery/noVueComputedPropertiesInData": "https://biomejs.dev/linter/rules/no-vue-computed-properties-in-data",
     "lint/nursery/noVueDeprecatedListeners": "https://biomejs.dev/linter/rules/no-vue-deprecated-listeners",
     "lint/nursery/noVueDeprecatedRouterLinkTagProp": "https://biomejs.dev/linter/rules/no-vue-deprecated-router-link-tag-prop",
     "lint/nursery/noVueDeprecatedScopeAttribute": "https://biomejs.dev/linter/rules/no-vue-deprecated-scope-attribute",

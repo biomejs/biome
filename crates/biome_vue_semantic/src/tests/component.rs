@@ -424,3 +424,36 @@ fn script_block_read_without_its_file_has_open_uses() {
     let uses = emit_uses(r#"export default { emits: ["a"] }"#, JsFileSource::vue());
     assert_eq!(uses, [("a".into(), 0, false)]);
 }
+
+#[test]
+fn data_function_range_covers_each_function_form() {
+    for (code, function) in [
+        (
+            "export default { data() { return {}; } }",
+            "data() { return {}; }",
+        ),
+        (
+            "export default { data: function () { return {}; } }",
+            "function () { return {}; }",
+        ),
+        ("export default { data: (vm) => ({}) }", "(vm) => ({})"),
+    ] {
+        let model = js_model(code, JsFileSource::vue());
+        let component = model.components().next().expect("a component");
+        let range = component.data_function_range().expect("a data function");
+        assert_eq!(&code[range], function);
+    }
+}
+
+#[test]
+fn data_function_range_is_absent_without_a_function() {
+    for code in [
+        "export default { data: { a: 1 } }",
+        "export default { data: createData }",
+        "export default { computed: {} }",
+    ] {
+        let model = js_model(code, JsFileSource::vue());
+        let component = model.components().next().expect("a component");
+        assert_eq!(component.data_function_range(), None, "{code}");
+    }
+}
