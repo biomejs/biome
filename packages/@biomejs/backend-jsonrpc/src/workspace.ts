@@ -3318,7 +3318,7 @@ export interface Nursery {
 	 */
 	noUselessTypeConversion?: NoUselessTypeConversionConfiguration;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow asynchronous code in Vue computed properties.
 	 * See https://biomejs.dev/linter/rules/no-vue-async-computed
 	 */
 	noVueAsyncComputed?: NoVueAsyncComputedConfiguration;
@@ -11251,7 +11251,13 @@ export type NoUselessCallOptions = {};
 export type NoUselessDateGetTimeOptions = {};
 export type NoUselessSpliceOptions = {};
 export type NoUselessTypeConversionOptions = {};
-export type NoVueAsyncComputedOptions = {};
+export interface NoVueAsyncComputedOptions {
+	/**
+	 * Names of objects whose `then()`, `catch()`, and `finally()` methods aren't treated as
+	 * asynchronous, such as `z` from the Zod validation library.
+	 */
+	ignoreObjects?: string[];
+}
 export type NoVueBooleanDefaultOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
 export type NoVueLifecycleAfterAwaitOptions = {};

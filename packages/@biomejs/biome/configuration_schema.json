@@ -7510,6 +7510,13 @@
 		},
 		"NoVueAsyncComputedOptions": {
 			"type": "object",
+			"properties": {
+				"ignoreObjects": {
+					"description": "Names of objects whose `then()`, `catch()`, and `finally()` methods aren't treated as\nasynchronous, such as `z` from the Zod validation library.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
 			"additionalProperties": false
 		},
 		"NoVueBooleanDefaultConfiguration": {
@@ -8338,7 +8345,7 @@
 					]
 				},
 				"noVueAsyncComputed": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-vue-async-computed",
+					"description": "Disallow asynchronous code in Vue computed properties.\nSee https://biomejs.dev/linter/rules/no-vue-async-computed",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueAsyncComputedConfiguration" },
 						{ "type": "null" }
