@@ -1,0 +1,59 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-setup.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+function save(draft = false) {}
+</script>
+<template>
+  <button @click="save()" />
+  <button @click="(event) => save(event)" />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid-setup.vue:6:19 lint/nursery/useVueConsistentVOnHandlerStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This event handler is written as an inline handler instead of a method handler.
+  
+    4 │ </script>
+    5 │ <template>
+  > 6 │   <button @click="save()" />
+      │                   ^^^^^^
+    7 │   <button @click="(event) => save(event)" />
+    8 │ </template>
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i Use the name of the function as the handler, such as @click="save". Vue then passes the arguments of the event to the function, so check that the function expects them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-setup.vue:7:19 lint/nursery/useVueConsistentVOnHandlerStyle ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This event handler is written as an inline function instead of a method handler.
+  
+    5 │ <template>
+    6 │   <button @click="save()" />
+  > 7 │   <button @click="(event) => save(event)" />
+      │                   ^^^^^^^^^^^^^^^^^^^^^^
+    8 │ </template>
+    9 │ 
+  
+  i This project writes every event handler in the same style, so that templates are easier to read.
+  
+  i Use the name of the function as the handler, such as @click="save". Vue then passes the arguments of the event to the function, so check that the function expects them.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
