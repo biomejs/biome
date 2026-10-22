@@ -3533,6 +3533,11 @@ export interface Nursery {
 	 */
 	noVueSideEffectsInComputed?: NoVueSideEffectsInComputedConfiguration;
 	/**
+	 * Disallow the key attribute on \<template> elements in Vue.
+	 * See https://biomejs.dev/linter/rules/no-vue-template-key
+	 */
+	noVueTemplateKey?: NoVueTemplateKeyConfiguration;
+	/**
 	 * Disallow this in the beforeRouteEnter navigation guard of a Vue component.
 	 * See https://biomejs.dev/linter/rules/no-vue-this-in-before-route-enter
 	 */
@@ -6554,6 +6559,9 @@ export type NoVueShadowNativeEventsConfiguration =
 export type NoVueSideEffectsInComputedConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueSideEffectsInComputedOptions;
+export type NoVueTemplateKeyConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueTemplateKeyOptions;
 export type NoVueThisInBeforeRouteEnterConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueThisInBeforeRouteEnterOptions;
@@ -9525,6 +9533,10 @@ export interface RuleWithNoVueSideEffectsInComputedOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueSideEffectsInComputedOptions;
 }
+export interface RuleWithNoVueTemplateKeyOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueTemplateKeyOptions;
+}
 export interface RuleWithNoVueThisInBeforeRouteEnterOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueThisInBeforeRouteEnterOptions;
@@ -12281,6 +12293,7 @@ export interface NoVueRestrictedVOnOptions {
 export type NoVueRootVIfOptions = {};
 export type NoVueShadowNativeEventsOptions = {};
 export type NoVueSideEffectsInComputedOptions = {};
+export type NoVueTemplateKeyOptions = {};
 export type NoVueThisInBeforeRouteEnterOptions = {};
 export interface NoVueUndeclaredDirectivesOptions {
 	/**
@@ -14186,6 +14199,7 @@ export type Category =
 	| "lint/nursery/noVueRestrictedVOn"
 	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueSideEffectsInComputed"
+	| "lint/nursery/noVueTemplateKey"
 	| "lint/nursery/noVueThisInBeforeRouteEnter"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueUndeclaredEmits"
