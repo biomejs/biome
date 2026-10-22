@@ -199,7 +199,7 @@ use tracing::error;
 /// Represents the state of the database in the workspace.
 pub struct DbState {
     storage: DbStorage,
-    /// Records that a scanner epoch's shared view replaced a project.
+    /// Set when the shared view of a scanner epoch replaces a project.
     scanner_projects_replaced: Option<Arc<AtomicBool>>,
     /// Records module-map changes made by a scanner epoch's shared view.
     #[cfg(feature = "module_graph")]
@@ -688,18 +688,19 @@ impl DbState {
         }
     }
 
-    /// Publishes `text`, parsed as `file_source` with the
-    /// `inline_configuration` of the client, as `view` of `path`, and returns
-    /// the current view of `path`. See [FileViews](super::FileViews).
+    /// Publishes `text` as `view` of `path`, and returns the view of `path`
+    /// that the services shared by the clients read. See
+    /// [FileViews](super::FileViews).
     ///
-    /// The text isn't parsed here: the parse runs the first time a query reads
-    /// it.
+    /// The text is parsed as the file source at `file_source_index`, with the
+    /// `inline_configuration` of the client on top of the settings. It isn't
+    /// parsed here: the parse runs the first time a query reads it.
     pub(crate) fn update_file_view(
         &self,
         path: &Utf8Path,
         view: ViewId,
         text: Arc<str>,
-        file_source: DocumentFileSource,
+        file_source_index: usize,
         inline_configuration: Option<Configuration>,
     ) -> Source {
         match &self.storage {
@@ -709,7 +710,7 @@ impl DbState {
                     path,
                     view,
                     text,
-                    file_source,
+                    file_source_index,
                     inline_configuration,
                     ParsedSourceUpdateMode::Replace,
                 );
@@ -723,7 +724,7 @@ impl DbState {
                     path,
                     view,
                     text,
-                    file_source,
+                    file_source_index,
                     inline_configuration,
                     ParsedSourceUpdateMode::Setters,
                 )
@@ -740,7 +741,7 @@ impl DbState {
                 shared_db
                     .fork()
                     .remove_view(path, view, ParsedSourceUpdateMode::Replace);
-                // The replacement publishes another parsed source for `path`.
+                // The replacement publishes another `Source` input for `path`.
                 #[cfg(feature = "module_graph")]
                 self.record_resolver_changes(shared_db.data().resolver_source_change(path));
             }
@@ -750,7 +751,7 @@ impl DbState {
         }
     }
 
-    /// Removes the editor view of `client` of `path`. See
+    /// Removes the editor view that `client` has of `path`. See
     /// [WorkspaceDb::remove_editor_view].
     pub(crate) fn remove_editor_view(
         &self,
@@ -766,7 +767,7 @@ impl DbState {
                     keep_disk_view,
                     ParsedSourceUpdateMode::Replace,
                 );
-                // The replacement publishes another parsed source for `path`.
+                // The replacement publishes another `Source` input for `path`.
                 #[cfg(feature = "module_graph")]
                 self.record_resolver_changes(shared_db.data().resolver_source_change(path));
             }
@@ -779,6 +780,12 @@ impl DbState {
                 );
             }),
         }
+    }
+
+    /// Returns the index of `file_source` in the table of file sources of the
+    /// database, and inserts it first if the table doesn't have it.
+    pub(crate) fn insert_file_source(&self, file_source: DocumentFileSource) -> usize {
+        self.shared_data().insert_source(file_source)
     }
 
     /// Keeps a node cache for `path`. See [WorkspaceDbData::retain_node_cache].
@@ -936,12 +943,12 @@ impl DbState {
         }
     }
 
-    /// Records that a replacement update changed the map of projects.
+    /// Records that a project was replaced.
     ///
-    /// A scanner epoch advances the projects generation when it ends.
-    /// Outside an epoch, Shared storage can't run Salsa setters, so the
-    /// queries that looked up a project keep their results until their inputs
-    /// change.
+    /// When a scanner epoch ends, it advances the projects generation. Outside
+    /// an epoch, the Shared storage can't run Salsa setters, so the queries
+    /// that looked up a project keep their results until another of their
+    /// inputs changes.
     fn record_projects_replaced(&self) {
         if let Some(replaced) = &self.scanner_projects_replaced {
             replaced.store(true, Ordering::Release);
@@ -1012,8 +1019,9 @@ mod tests {
         Arc::new(biome_fs::MemoryFileSystem::default())
     }
 
-    fn js() -> DocumentFileSource {
-        DocumentFileSource::Js(JsFileSource::js_module())
+    /// Returns the index of the JavaScript module file source in `state`.
+    fn js(state: &DbState) -> usize {
+        state.insert_file_source(DocumentFileSource::Js(JsFileSource::js_module()))
     }
 
     fn git_settings() -> Settings {
@@ -1045,7 +1053,7 @@ mod tests {
         let path = Utf8PathBuf::from("test.js");
         // Insert the file first: only updates to files the database already
         // knows about are applied through salsa setters.
-        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(), None);
+        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(&state), None);
 
         let clone_taken = Arc::new(Barrier::new(2));
         let (done_tx, done_rx) = mpsc::channel();
@@ -1073,7 +1081,7 @@ mod tests {
             let path = path.clone();
             thread::spawn(move || {
                 clone_taken.wait();
-                state.update_file_view(&path, ViewId::Disk, "let b = 2;".into(), js(), None);
+                state.update_file_view(&path, ViewId::Disk, "let b = 2;".into(), js(&state), None);
                 done_tx.send(()).unwrap();
             })
         };
@@ -1094,7 +1102,7 @@ mod tests {
     fn owned_storage_fork_unwinds_while_setter_is_pending() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(), None);
+        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(&state), None);
 
         // Hold a clone so the setter below has to wait.
         let db = state.fork();
@@ -1103,7 +1111,7 @@ mod tests {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state.update_file_view(&path, ViewId::Disk, "let b = 2;".into(), js(), None);
+                state.update_file_view(&path, ViewId::Disk, "let b = 2;".into(), js(&state), None);
             })
         };
 
@@ -1127,14 +1135,14 @@ mod tests {
     fn owned_storage_queues_only_one_pending_setter() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(), None);
+        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(&state), None);
 
         let db = state.fork();
         let first_setter = {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state.update_file_view(&path, ViewId::Disk, "let b = 2;".into(), js(), None);
+                state.update_file_view(&path, ViewId::Disk, "let b = 2;".into(), js(&state), None);
             })
         };
         wait_for_pending_setter(&state);
@@ -1146,7 +1154,7 @@ mod tests {
             let second_start = second_start.clone();
             thread::spawn(move || {
                 second_start.wait();
-                state.update_file_view(&path, ViewId::Disk, "let c = 3;".into(), js(), None);
+                state.update_file_view(&path, ViewId::Disk, "let c = 3;".into(), js(&state), None);
             })
         };
         second_start.wait();
@@ -1180,14 +1188,14 @@ mod tests {
     fn untracked_module_membership_does_not_wait_for_pending_setters() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(), None);
+        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(&state), None);
 
         let db = state.fork();
         let setter = {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state.update_file_view(&path, ViewId::Disk, "let b = 2;".into(), js(), None);
+                state.update_file_view(&path, ViewId::Disk, "let b = 2;".into(), js(&state), None);
             })
         };
 
@@ -1205,7 +1213,7 @@ mod tests {
         let path = Utf8PathBuf::from("test.js");
         let _db = state.fork();
 
-        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(), None);
+        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(&state), None);
     }
 
     #[test]
@@ -1214,7 +1222,7 @@ mod tests {
         let path = Utf8PathBuf::from("test.js");
         let db = state.fork();
 
-        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(), None);
+        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(&state), None);
 
         assert_eq!(state.pending_setters(), 0);
         assert!(db.get_parsed_source(&path).is_some());
@@ -1310,7 +1318,7 @@ mod tests {
     fn owned_storage_setter_from_other_thread_waits_for_read_guard() {
         let state = Arc::new(DbState::lsp(test_fs()));
         let path = Utf8PathBuf::from("test.js");
-        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(), None);
+        state.update_file_view(&path, ViewId::Disk, "let a = 1;".into(), js(&state), None);
 
         let db = state.fork();
         let (done_tx, done_rx) = mpsc::channel();
@@ -1319,7 +1327,7 @@ mod tests {
             let state = state.clone();
             let path = path.clone();
             thread::spawn(move || {
-                state.update_file_view(&path, ViewId::Disk, "let b = 2;".into(), js(), None);
+                state.update_file_view(&path, ViewId::Disk, "let b = 2;".into(), js(&state), None);
                 done_tx.send(()).unwrap();
             })
         };
@@ -1353,8 +1361,11 @@ mod tests {
             Arc::new(MemoryFileSystem::from_files(fs.files.0.clone()))
         }
 
-        fn json() -> DocumentFileSource {
-            DocumentFileSource::Json(biome_languages::JsonFileSource::json())
+        /// Returns the index of the JSON file source in `state`.
+        fn json(state: &DbState) -> usize {
+            state.insert_file_source(DocumentFileSource::Json(
+                biome_languages::JsonFileSource::json(),
+            ))
         }
 
         /// Looks up the resolver path info of `path`, like a resolver query does.
@@ -1387,8 +1398,20 @@ mod tests {
             let source = lookup(&state, SOURCE);
             let setters = state.setter_gate_attempts();
 
-            state.update_file_view(Utf8Path::new(SOURCE), ViewId::Disk, "".into(), js(), None);
-            state.update_file_view(Utf8Path::new(SOURCE), ViewId::Disk, "a".into(), js(), None);
+            state.update_file_view(
+                Utf8Path::new(SOURCE),
+                ViewId::Disk,
+                "".into(),
+                js(&state),
+                None,
+            );
+            state.update_file_view(
+                Utf8Path::new(SOURCE),
+                ViewId::Disk,
+                "a".into(),
+                js(&state),
+                None,
+            );
             assert_eq!(
                 revision(&state, source),
                 0,
@@ -1399,7 +1422,7 @@ mod tests {
                 Utf8Path::new(MANIFEST),
                 ViewId::Disk,
                 "{}".into(),
-                json(),
+                json(&state),
                 None,
             );
             assert_eq!(revision(&state, manifest), 1);
@@ -1407,7 +1430,7 @@ mod tests {
                 Utf8Path::new(MANIFEST),
                 ViewId::Disk,
                 "[]".into(),
-                json(),
+                json(&state),
                 None,
             );
             assert_eq!(
@@ -1473,7 +1496,7 @@ mod tests {
                     Utf8Path::new(MANIFEST),
                     ViewId::Disk,
                     "{}".into(),
-                    json(),
+                    json(&state),
                     None,
                 );
                 fs.insert(SOURCE.into(), "");
@@ -1503,7 +1526,7 @@ mod tests {
                 Utf8Path::new(MANIFEST),
                 ViewId::Disk,
                 "{}".into(),
-                json(),
+                json(&state),
                 None,
             );
 

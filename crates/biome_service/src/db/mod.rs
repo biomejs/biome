@@ -175,7 +175,7 @@ pub(crate) enum ProjectUpdateMode {
 
 /// The views of the content of a file. See [views](crate::workspace::views).
 ///
-/// A query that read the views runs again when they change through a setter.
+/// A query that reads the views runs again when a Salsa setter changes them.
 #[salsa::input]
 #[derive(Debug)]
 pub(crate) struct FileViews {
@@ -183,19 +183,19 @@ pub(crate) struct FileViews {
     views: Views<Source>,
 }
 
-/// The project of the texts outside every project, whose settings are the
-/// default ones. Each Salsa storage creates it once.
+/// A project with the default settings, used to parse the texts that are
+/// outside every project. Each Salsa storage creates it once.
 #[salsa::input(singleton)]
 pub(crate) struct DefaultProject {
     #[returns(copy)]
     project: ProjectInput,
 }
 
-/// Changes when the map of projects gains, loses, or replaces a project.
+/// A counter that changes when a project is added, removed, or replaced.
 ///
-/// The map is read without Salsa tracking it, so a query that looks up the
-/// project of a path reads the generation to run again when the lookup can
-/// find another project. Each Salsa storage creates it once.
+/// Salsa doesn't track the map of projects. A query that looks up the project
+/// of a path reads this counter, so it runs again when the lookup could return
+/// another project. Each Salsa storage creates it once.
 #[salsa::input(singleton)]
 pub(crate) struct ProjectsGeneration {
     #[returns(copy)]
@@ -210,12 +210,14 @@ pub(crate) struct ProjectsGeneration {
 pub struct WorkspaceDb {
     /// It maps a file path to the views of its content.
     ///
-    /// Salsa doesn't track this map. In Owned mode, outside a scanner epoch, a
-    /// path keeps its [FileViews] input while it has a view, and its views
-    /// change through a setter. Adding the first view of a path, removing its
-    /// last one, and the updates of a scanner epoch change the map instead:
-    /// of the tracked queries, only the ones of the resolver run again,
-    /// because the database reports these changes to it.
+    /// Salsa tracks the [FileViews] inputs, but not this map. In Owned mode,
+    /// outside a scanner epoch, adding or removing a view updates the input of
+    /// the path through a Salsa setter.
+    ///
+    /// Three changes update the map instead: adding the first view of a path,
+    /// removing its last view, and any update during a scanner epoch. Tracked
+    /// queries don't run again after them, except the ones of the resolver,
+    /// which the database notifies.
     files: Arc<HashMap<Utf8PathBuf, FileViews>>,
     /// Node caches kept between the parses of a path. See
     /// [WorkspaceDbData::retain_node_cache].
@@ -600,57 +602,58 @@ impl WorkspaceDb {
     }
 
     /// Publishes `text` as the disk view of `path`, parsed as `file_source`,
-    /// with a new parsed source.
+    /// in a new [Source] input.
     pub fn replace_file(
         &mut self,
         path: &Utf8Path,
         text: impl Into<Arc<str>>,
         file_source: DocumentFileSource,
     ) -> Source {
+        let file_source_index = self.insert_source(file_source);
         self.update_or_insert_view(
             path,
             ViewId::Disk,
             text.into(),
-            file_source,
+            file_source_index,
             None,
             ParsedSourceUpdateMode::Replace,
         )
     }
 
-    /// Publishes `text` as the disk view of `path`, parsed as `file_source`,
-    /// updating its parsed source through Salsa setters.
+    /// Publishes `text` as the disk view of `path`, parsed as `file_source`.
+    /// The existing [Source] input of the view changes through Salsa setters.
     pub fn upsert_file(
         &mut self,
         path: &Utf8Path,
         text: impl Into<Arc<str>>,
         file_source: DocumentFileSource,
     ) -> Source {
+        let file_source_index = self.insert_source(file_source);
         self.update_or_insert_view(
             path,
             ViewId::Disk,
             text.into(),
-            file_source,
+            file_source_index,
             None,
             ParsedSourceUpdateMode::Setters,
         )
     }
 
-    /// Publishes `text`, parsed as `file_source` with the
-    /// `inline_configuration` of the client, as `view` of `path`, and returns
-    /// the current view of `path`.
+    /// Publishes `text` as `view` of `path`, and returns the view of `path`
+    /// that the services shared by the clients read.
     ///
-    /// The text isn't parsed here: the parse runs the first time a query reads
-    /// it.
+    /// The text is parsed as the file source at `file_source_index`, with the
+    /// `inline_configuration` of the client on top of the settings. It isn't
+    /// parsed here: the parse runs the first time a query reads it.
     pub(crate) fn update_or_insert_view(
         &mut self,
         path: &Utf8Path,
         view: ViewId,
         text: Arc<str>,
-        file_source: DocumentFileSource,
+        file_source_index: usize,
         inline_configuration: Option<Configuration>,
         mode: ParsedSourceUpdateMode,
     ) -> Source {
-        let file_source_index = self.insert_source(file_source);
         let configuration_index = inline_configuration
             .map(|configuration| self.data().insert_inline_configuration(configuration));
         let new_source = |db: &Self, text| {
@@ -713,8 +716,9 @@ impl WorkspaceDb {
         self.update_views(path, mode, |views| views.without(view));
     }
 
-    /// Removes the editor view of `client` of `path`. When no client has the
-    /// file open anymore, the file is removed too, unless `keep_disk_view`.
+    /// Removes the editor view that `client` has of `path`. When no other
+    /// client has the file open, the file is removed too, unless
+    /// `keep_disk_view` is set.
     pub(crate) fn remove_editor_view(
         &mut self,
         path: &Utf8Path,
@@ -1583,7 +1587,7 @@ mod tests {
             path,
             ViewId::Disk,
             "let a = 1;".into(),
-            js(),
+            db.data().insert_source(js()),
             None,
             ParsedSourceUpdateMode::Setters,
         );
@@ -1610,7 +1614,7 @@ mod tests {
             path,
             ViewId::Disk,
             "<script>let a = 1;</script>".into(),
-            html,
+            db.data().insert_source(html),
             None,
             ParsedSourceUpdateMode::Setters,
         );
@@ -1620,7 +1624,7 @@ mod tests {
             path,
             ViewId::Disk,
             "<script>let b = 2;</script>".into(),
-            html,
+            db.data().insert_source(html),
             None,
             ParsedSourceUpdateMode::Setters,
         );
@@ -1635,9 +1639,9 @@ mod tests {
         assert_eq!(script.node.text_with_trivia().to_string(), "let b = 2;");
     }
 
-    /// A replacement derived from views that a concurrent update removed is
-    /// derived again from the latest views, so it can't bring back the
-    /// removed editor view.
+    /// When a concurrent update removes views after a replacement was derived
+    /// from them, the replacement is derived again from the latest views, so
+    /// it can't bring back the removed editor view.
     #[test]
     fn replaced_views_are_derived_from_the_latest_views() {
         let mut db = test_db();
@@ -1646,7 +1650,7 @@ mod tests {
             path,
             ViewId::Disk,
             "disk".into(),
-            js(),
+            db.data().insert_source(js()),
             None,
             ParsedSourceUpdateMode::Replace,
         );
@@ -1654,7 +1658,7 @@ mod tests {
             path,
             ViewId::Editor(ClientId::default()),
             "editor".into(),
-            js(),
+            db.data().insert_source(js()),
             None,
             ParsedSourceUpdateMode::Replace,
         );

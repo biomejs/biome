@@ -643,9 +643,10 @@ impl SessionLifecycle {
             (removed, sessions.is_empty())
         };
         let is_removed = removed.is_some();
-        // The workspace update runs without the lock, so that other
-        // connections can start or end meanwhile. It waits for the reads of
-        // the database to end, so it must not block the async runtime.
+        // Closing the files of the session runs after the lock of the sessions
+        // is released, so that other connections can start or end meanwhile.
+        // It waits for the reads of the database to end, so it runs on the
+        // blocking thread pool rather than on the async runtime.
         if let Some(session) = removed {
             match tokio::runtime::Handle::try_current() {
                 Ok(runtime) => {

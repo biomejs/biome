@@ -56,8 +56,9 @@ fn bench_analyzer(criterion: &mut Criterion) {
                         #[derive(Default)]
                         struct TestDb {
                             parsed: Option<Source>,
-                            /// The parse of the text of `parsed`, made once
-                            /// so that the benchmark measures the analyzer.
+                            /// The parse of the text of `parsed`. The
+                            /// benchmark makes it once, so that it measures
+                            /// the analyzer rather than the parser.
                             parse: Option<ParseHandle>,
                             js_source: Option<JsFileSource>,
                             storage: Storage<Self>,

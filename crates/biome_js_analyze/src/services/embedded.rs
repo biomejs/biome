@@ -33,9 +33,8 @@ enum EmbeddedSource {
 }
 
 impl EmbeddedService {
-    /// Creates the service for the analyzed source of `document`, its host
-    /// document in `db`. Without a document, the service finds no embedded
-    /// content.
+    /// Creates the service for a source whose host document in `db` is
+    /// `document`. Without a document, the service finds no embedded content.
     pub(crate) fn new(
         db: Rc<dyn LanguageDb>,
         document: Option<Source>,
