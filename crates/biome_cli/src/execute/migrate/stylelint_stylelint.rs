@@ -162,6 +162,8 @@ pub(crate) struct RuleData {
     pub(crate) enabled: bool,
     /// The severity set in the secondary options, if any.
     pub(crate) severity: Option<Severity>,
+    /// The primary option, for rules whose Biome equivalent has a matching option.
+    pub(crate) primary_option: Option<PrimaryOption>,
 }
 impl Deserializable for RuleData {
     fn deserialize(
@@ -173,12 +175,14 @@ impl Deserializable for RuleData {
             DeserializableType::Null => Some(Self {
                 enabled: false,
                 severity: None,
+                primary_option: None,
             }),
             DeserializableType::Bool => {
                 let enabled = bool::deserialize(ctx, value, name)?;
                 Some(Self {
                     enabled,
                     severity: None,
+                    primary_option: None,
                 })
             }
             DeserializableType::Array => {
@@ -196,13 +200,18 @@ impl Deserializable for RuleData {
                         name: &str,
                     ) -> Option<Self::Output> {
                         let mut items = items.flatten();
+                        let mut primary_option = None;
                         let enabled = match items.next() {
                             Some(primary) => match primary.visitable_type() {
                                 Some(DeserializableType::Null) => false,
                                 Some(DeserializableType::Bool) => {
                                     bool::deserialize(ctx, &primary, name).unwrap_or(true)
                                 }
-                                _ => true,
+                                _ => {
+                                    primary_option =
+                                        PrimaryOption::from_rule_value(ctx, &primary, name);
+                                    true
+                                }
                             },
                             None => true,
                         };
@@ -212,7 +221,11 @@ impl Deserializable for RuleData {
                                 SecondaryOptions::deserialize(ctx, &secondary, name)
                             })
                             .and_then(|options| options.severity);
-                        Some(RuleData { enabled, severity })
+                        Some(RuleData {
+                            enabled,
+                            severity,
+                            primary_option,
+                        })
                     }
                 }
                 value.deserialize(ctx, Visitor, name)
@@ -221,7 +234,50 @@ impl Deserializable for RuleData {
             _ => Some(Self {
                 enabled: true,
                 severity: None,
+                primary_option: PrimaryOption::from_rule_value(ctx, value, name),
             }),
+        }
+    }
+}
+
+/// The primary option of a Stylelint rule whose Biome equivalent has a matching option.
+#[derive(Debug)]
+pub(crate) enum PrimaryOption {
+    LightnessNotation(LightnessNotation),
+}
+impl PrimaryOption {
+    /// Deserializes the primary option of the Stylelint rule named `rule_name`.
+    ///
+    /// Returns `None` for rules whose primary option isn't migrated.
+    fn from_rule_value(
+        ctx: &mut dyn DeserializationContext,
+        value: &impl DeserializableValue,
+        rule_name: &str,
+    ) -> Option<Self> {
+        match rule_name {
+            "lightness-notation" => {
+                LightnessNotation::deserialize(ctx, value, rule_name).map(Self::LightnessNotation)
+            }
+            _ => None,
+        }
+    }
+}
+
+/// The primary option of the `lightness-notation` rule.
+///
+/// See <https://stylelint.io/user-guide/rules/lightness-notation>
+#[derive(Clone, Copy, Debug, Deserializable)]
+pub(crate) enum LightnessNotation {
+    Percentage,
+    Number,
+}
+impl From<LightnessNotation>
+    for biome_rule_options::use_consistent_lightness_notation::LightnessNotation
+{
+    fn from(value: LightnessNotation) -> Self {
+        match value {
+            LightnessNotation::Percentage => Self::Percentage,
+            LightnessNotation::Number => Self::Number,
         }
     }
 }
@@ -243,6 +299,7 @@ mod tests {
         RuleData {
             enabled,
             severity: None,
+            primary_option: None,
         }
     }
 
