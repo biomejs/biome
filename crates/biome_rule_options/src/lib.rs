@@ -679,6 +679,7 @@ pub mod use_vue_hyphenated_attributes;
 pub mod use_vue_matching_component_file_name;
 pub mod use_vue_multi_word_component_names;
 pub mod use_vue_next_tick_promise;
+pub mod use_vue_prop_type_constructor;
 pub mod use_vue_render_return;
 pub mod use_vue_slot_name_casing;
 pub mod use_vue_template_ref;
