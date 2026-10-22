@@ -1,0 +1,333 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<template>
+  <div v-is:a="foo" />
+  <div v-is.a="foo" />
+  <div v-is.a.b="foo" />
+  <div v-is />
+  <div v-is="" />
+  <div v-is="   " />
+  <MyComponent v-is="foo" />
+  <my-component v-is="foo" />
+  <component v-is="foo" />
+  <Foo.Bar v-is="foo" />
+  <MyComponent v-is:a.b />
+</template>
+
+```
+
+# Diagnostics
+```
+invalid.vue:3:12 lint/nursery/useVueValidVIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-is directive does not accept an argument.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <template>
+  > 3 │   <div v-is:a="foo" />
+      │            ^^
+    4 │   <div v-is.a="foo" />
+    5 │   <div v-is.a.b="foo" />
+  
+  i Remove the argument. Pass the component name as the value instead, like v-is="'my-row'".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:4:12 lint/nursery/useVueValidVIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-is directive does not support modifiers.
+  
+    2 │ <template>
+    3 │   <div v-is:a="foo" />
+  > 4 │   <div v-is.a="foo" />
+      │            ^^
+    5 │   <div v-is.a.b="foo" />
+    6 │   <div v-is />
+  
+  i Remove the modifiers. v-is doesn't accept any.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:5:12 lint/nursery/useVueValidVIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-is directive does not support modifiers.
+  
+    3 │   <div v-is:a="foo" />
+    4 │   <div v-is.a="foo" />
+  > 5 │   <div v-is.a.b="foo" />
+      │            ^^^^
+    6 │   <div v-is />
+    7 │   <div v-is="" />
+  
+  i Remove the modifiers. v-is doesn't accept any.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:8 lint/nursery/useVueValidVIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-is directive is missing a value.
+  
+    4 │   <div v-is.a="foo" />
+    5 │   <div v-is.a.b="foo" />
+  > 6 │   <div v-is />
+      │        ^^^^
+    7 │   <div v-is="" />
+    8 │   <div v-is="   " />
+  
+  i The value tells Vue which component to render. For example, v-is="'my-row'" renders the my-row component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:8 lint/nursery/useVueValidVIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-is directive is missing a value.
+  
+    5 │   <div v-is.a.b="foo" />
+    6 │   <div v-is />
+  > 7 │   <div v-is="" />
+      │        ^^^^^^^
+    8 │   <div v-is="   " />
+    9 │   <MyComponent v-is="foo" />
+  
+  i The value tells Vue which component to render. For example, v-is="'my-row'" renders the my-row component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:8 lint/nursery/useVueValidVIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-is directive is missing a value.
+  
+     6 │   <div v-is />
+     7 │   <div v-is="" />
+   > 8 │   <div v-is="   " />
+       │        ^^^^^^^^^^
+     9 │   <MyComponent v-is="foo" />
+    10 │   <my-component v-is="foo" />
+  
+  i The value tells Vue which component to render. For example, v-is="'my-row'" renders the my-row component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:16 lint/nursery/useVueValidVIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-is directive is used on a component.
+  
+     7 │   <div v-is="" />
+     8 │   <div v-is="   " />
+   > 9 │   <MyComponent v-is="foo" />
+       │                ^^^^^^^^^^
+    10 │   <my-component v-is="foo" />
+    11 │   <component v-is="foo" />
+  
+  i v-is is meant for native HTML elements, such as <tr> or <div>. It tells Vue to render a component in place of the element.
+  
+  i Use the component tag directly, or use <component :is="..."> to choose the component while the app runs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:10:17 lint/nursery/useVueValidVIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-is directive is used on a component.
+  
+     8 │   <div v-is="   " />
+     9 │   <MyComponent v-is="foo" />
+  > 10 │   <my-component v-is="foo" />
+       │                 ^^^^^^^^^^
+    11 │   <component v-is="foo" />
+    12 │   <Foo.Bar v-is="foo" />
+  
+  i v-is is meant for native HTML elements, such as <tr> or <div>. It tells Vue to render a component in place of the element.
+  
+  i Use the component tag directly, or use <component :is="..."> to choose the component while the app runs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:14 lint/nursery/useVueValidVIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-is directive is used on a component.
+  
+     9 │   <MyComponent v-is="foo" />
+    10 │   <my-component v-is="foo" />
+  > 11 │   <component v-is="foo" />
+       │              ^^^^^^^^^^
+    12 │   <Foo.Bar v-is="foo" />
+    13 │   <MyComponent v-is:a.b />
+  
+  i v-is is meant for native HTML elements, such as <tr> or <div>. It tells Vue to render a component in place of the element.
+  
+  i Use the component tag directly, or use <component :is="..."> to choose the component while the app runs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:12:12 lint/nursery/useVueValidVIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-is directive is used on a component.
+  
+    10 │   <my-component v-is="foo" />
+    11 │   <component v-is="foo" />
+  > 12 │   <Foo.Bar v-is="foo" />
+       │            ^^^^^^^^^^
+    13 │   <MyComponent v-is:a.b />
+    14 │ </template>
+  
+  i v-is is meant for native HTML elements, such as <tr> or <div>. It tells Vue to render a component in place of the element.
+  
+  i Use the component tag directly, or use <component :is="..."> to choose the component while the app runs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:16 lint/nursery/useVueValidVIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-is directive is missing a value.
+  
+    11 │   <component v-is="foo" />
+    12 │   <Foo.Bar v-is="foo" />
+  > 13 │   <MyComponent v-is:a.b />
+       │                ^^^^^^^^
+    14 │ </template>
+    15 │ 
+  
+  i The value tells Vue which component to render. For example, v-is="'my-row'" renders the my-row component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:16 lint/nursery/useVueValidVIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-is directive is used on a component.
+  
+    11 │   <component v-is="foo" />
+    12 │   <Foo.Bar v-is="foo" />
+  > 13 │   <MyComponent v-is:a.b />
+       │                ^^^^^^^^
+    14 │ </template>
+    15 │ 
+  
+  i v-is is meant for native HTML elements, such as <tr> or <div>. It tells Vue to render a component in place of the element.
+  
+  i Use the component tag directly, or use <component :is="..."> to choose the component while the app runs.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:20 lint/nursery/useVueValidVIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-is directive does not accept an argument.
+  
+    11 │   <component v-is="foo" />
+    12 │   <Foo.Bar v-is="foo" />
+  > 13 │   <MyComponent v-is:a.b />
+       │                    ^^
+    14 │ </template>
+    15 │ 
+  
+  i Remove the argument. Pass the component name as the value instead, like v-is="'my-row'".
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:22 lint/nursery/useVueValidVIs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The v-is directive does not support modifiers.
+  
+    11 │   <component v-is="foo" />
+    12 │   <Foo.Bar v-is="foo" />
+  > 13 │   <MyComponent v-is:a.b />
+       │                      ^^
+    14 │ </template>
+    15 │ 
+  
+  i Remove the modifiers. v-is doesn't accept any.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a valid expression in template syntax
+  
+    5 │   <div v-is.a.b="foo" />
+    6 │   <div v-is />
+  > 7 │   <div v-is="" />
+      │              
+    8 │   <div v-is="   " />
+    9 │   <MyComponent v-is="foo" />
+  
+  i Template expressions can only contain JavaScript expressions, not statements like 'let', 'if', or 'function'.
+  
+
+```
+
+```
+invalid.vue:8:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a valid expression in template syntax
+  
+     6 │   <div v-is />
+     7 │   <div v-is="" />
+   > 8 │   <div v-is="   " />
+       │                 
+     9 │   <MyComponent v-is="foo" />
+    10 │   <my-component v-is="foo" />
+  
+  i Template expressions can only contain JavaScript expressions, not statements like 'let', 'if', or 'function'.
+  
+
+```
