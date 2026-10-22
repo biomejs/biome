@@ -1963,6 +1963,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("nursery", "noVueRestrictedCallAfterAwait", TypeId::of::<biome_rule_options::no_vue_restricted_call_after_await::NoVueRestrictedCallAfterAwaitOptions>()));
     result.push((
         "nursery",
+        "noVueRestrictedVOn",
+        TypeId::of::<biome_rule_options::no_vue_restricted_v_on::NoVueRestrictedVOnOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noVueRootVIf",
         TypeId::of::<biome_rule_options::no_vue_root_v_if::NoVueRootVIfOptions>(),
     ));

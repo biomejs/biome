@@ -3478,6 +3478,11 @@ export interface Nursery {
 	 */
 	noVueRestrictedCallAfterAwait?: NoVueRestrictedCallAfterAwaitConfiguration;
 	/**
+	 * Disallow configured event listeners in v-on directives.
+	 * See https://biomejs.dev/linter/rules/no-vue-restricted-v-on
+	 */
+	noVueRestrictedVOn?: NoVueRestrictedVOnConfiguration;
+	/**
 	 * Disallow v-if on the root element of a Vue component template.
 	 * See https://biomejs.dev/linter/rules/no-vue-root-v-if
 	 */
@@ -6451,6 +6456,9 @@ export type NoVueRequiredPropWithDefaultConfiguration =
 export type NoVueRestrictedCallAfterAwaitConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueRestrictedCallAfterAwaitOptions;
+export type NoVueRestrictedVOnConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueRestrictedVOnOptions;
 export type NoVueRootVIfConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueRootVIfOptions;
@@ -9361,6 +9369,10 @@ export interface RuleWithNoVueRestrictedCallAfterAwaitOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueRestrictedCallAfterAwaitOptions;
 }
+export interface RuleWithNoVueRestrictedVOnOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueRestrictedVOnOptions;
+}
 export interface RuleWithNoVueRootVIfOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueRootVIfOptions;
@@ -12075,6 +12087,14 @@ export interface NoVueRestrictedCallAfterAwaitOptions {
 	 */
 	functions?: RestrictedFunction[];
 }
+export interface NoVueRestrictedVOnOptions {
+	/**
+	 * Event listeners to restrict.
+	 *
+	 * A `v-on` directive is reported when it matches every condition of an entry.
+	 */
+	listeners?: RestrictedVOnListener[];
+}
 export type NoVueRootVIfOptions = {};
 export type NoVueShadowNativeEventsOptions = {};
 export type NoVueSideEffectsInComputedOptions = {};
@@ -13268,6 +13288,29 @@ export interface RestrictedFunction {
 	 */
 	path?: RestrictedFunctionPath;
 }
+export interface RestrictedVOnListener {
+	/**
+	 * The element or component name the entry applies to, such as `"MyButton"`.
+	 * When omitted, the entry applies to all elements.
+	 */
+	element?: string;
+	/**
+	 * The event name to restrict, such as `"click"` for `@click` and `v-on:click`.
+	 *
+	 * When omitted, the entry restricts `v-on` used without an event name, such as
+	 * `v-on="handlers"`.
+	 */
+	event?: string;
+	/**
+	 * A custom message shown in the diagnostic.
+	 */
+	message?: string;
+	/**
+	 * Modifiers that must all be present for the entry to apply, such as `["prevent"]`
+	 * for `@click.prevent`.
+	 */
+	modifiers?: string[];
+}
 /**
  * The checks for one top-level block.
  */
@@ -13932,6 +13975,7 @@ export type Category =
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRefObjectReactivityLoss"
 	| "lint/nursery/noVueRequiredPropWithDefault"
+	| "lint/nursery/noVueRestrictedVOn"
 	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueSideEffectsInComputed"
 	| "lint/nursery/noVueUndeclaredDirectives"

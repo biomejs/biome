@@ -257,6 +257,7 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "noVueRefObjectReactivityLoss"),
         RuleFilter::Rule("nursery", "noVueRequiredPropWithDefault"),
         RuleFilter::Rule("nursery", "noVueRestrictedCallAfterAwait"),
+        RuleFilter::Rule("nursery", "noVueRestrictedVOn"),
         RuleFilter::Rule("nursery", "noVueRootVIf"),
         RuleFilter::Rule("nursery", "noVueShadowNativeEvents"),
         RuleFilter::Rule("nursery", "noVueSideEffectsInComputed"),

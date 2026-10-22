@@ -357,6 +357,7 @@ define_categories! {
     "lint/nursery/noVueRefAsOperand": "https://biomejs.dev/linter/rules/no-vue-ref-as-operand",
     "lint/nursery/noVueRefObjectReactivityLoss": "https://biomejs.dev/linter/rules/no-vue-ref-object-reactivity-loss",
     "lint/nursery/noVueRequiredPropWithDefault": "https://biomejs.dev/linter/rules/no-vue-required-prop-with-default",
+    "lint/nursery/noVueRestrictedVOn": "https://biomejs.dev/linter/rules/no-vue-restricted-v-on",
     "lint/nursery/noVueShadowNativeEvents": "https://biomejs.dev/linter/rules/no-vue-shadow-native-events",
     "lint/nursery/noVueSideEffectsInComputed": "https://biomejs.dev/linter/rules/no-vue-side-effects-in-computed",
     "lint/nursery/noVueUndeclaredDirectives": "https://biomejs.dev/linter/rules/no-vue-undeclared-directives",
