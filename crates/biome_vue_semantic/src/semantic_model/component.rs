@@ -12,14 +12,15 @@ use super::model::*;
 use biome_js_semantic::SemanticModel as JsSemanticModel;
 use biome_js_syntax::{
     AnyFunctionLike, AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsBinding,
-    AnyJsBindingPattern, AnyJsCallArgument, AnyJsExpression, AnyJsFunctionBody,
+    AnyJsBindingPattern, AnyJsCallArgument, AnyJsExpression, AnyJsFunction, AnyJsFunctionBody,
     AnyJsLiteralExpression, AnyJsMemberExpression, AnyJsModuleItem, AnyJsNamedImportSpecifier,
     AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsParameter, AnyJsRoot, AnyJsStatement,
     AnyTsType, AnyTsTypeMember, JsCallExpression, JsExportDefaultExpressionClause,
     JsGetterClassMember, JsGetterObjectMember, JsIdentifierBinding, JsImport, JsLanguage, JsModule,
     JsObjectBindingPattern, JsObjectExpression, JsParameters, JsReferenceIdentifier,
-    JsReturnStatement, JsSetterClassMember, JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode,
-    TsIdentifierBinding, TsInterfaceDeclaration, TsTypeAliasDeclaration, TsTypeMemberList,
+    JsReturnStatement, JsSetterClassMember, JsSetterObjectMember, JsStaticMemberExpression,
+    JsSyntaxKind, JsSyntaxNode, TsIdentifierBinding, TsInterfaceDeclaration,
+    TsTypeAliasDeclaration, TsTypeMemberList, binding_ext::AnyJsBindingDeclaration,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{
@@ -90,6 +91,10 @@ const LIFECYCLE_FUNCTIONS: &[(&str, &str)] = &[
 
 /// How many type aliases are followed to find the members of a type.
 const MAX_TYPE_ALIAS_DEPTH: u8 = 16;
+
+/// How many variables are followed to their initializers to find what a
+/// value may be.
+const MAX_VALUE_DEPTH: u8 = 8;
 
 const WATCH_FUNCTIONS: &[&str] = &["watch", "watchEffect", "watchPostEffect", "watchSyncEffect"];
 
@@ -1183,6 +1188,28 @@ impl Collector<'_, '_> {
                     .retain(|symbol| *symbol != id);
                 self.builder.symbol_mut(id).parent = Some(parent);
             }
+            // `this` in a data function is the component instance, but the
+            // members it can read there are props only, so `this.name` is not
+            // followed.
+            let mut value = Vec::new();
+            match &member {
+                AnyJsObjectMember::JsMethodObjectMember(_) => value.push(ValueSource::Function),
+                AnyJsObjectMember::JsShorthandPropertyObjectMember(shorthand) => {
+                    match shorthand.name() {
+                        Ok(name) => self.reference_sources(&name, MAX_VALUE_DEPTH, &mut value),
+                        Err(_) => value.push(ValueSource::Unknown),
+                    }
+                }
+                _ => match member_value(&member) {
+                    Some(expression) => {
+                        self.value_sources(&expression, false, MAX_VALUE_DEPTH, &mut value);
+                    }
+                    None => value.push(ValueSource::Unknown),
+                },
+            }
+            self.builder.symbol_mut(id).detail = Detail::Data {
+                value: value.into_boxed_slice(),
+            };
             if kind == SymbolKind::Data
                 && let Some(AnyJsExpression::JsObjectExpression(nested)) =
                     member_value(&member).and_then(|value| value.inner_expression())
@@ -1213,9 +1240,11 @@ impl Collector<'_, '_> {
             };
             let mut getter = None;
             let mut setter = None;
+            let mut getter_function = None;
             match &member {
                 AnyJsObjectMember::JsMethodObjectMember(method) => {
                     getter = Some(method.syntax().text_trimmed_range());
+                    getter_function = member_function(&member);
                 }
                 _ => match member_value(&member).and_then(|value| value.inner_expression()) {
                     Some(AnyJsExpression::JsObjectExpression(accessors)) => {
@@ -1223,6 +1252,7 @@ impl Collector<'_, '_> {
                             match accessor.name().as_ref().map(TokenText::text) {
                                 Some("get") => {
                                     getter = Some(accessor.syntax().text_trimmed_range());
+                                    getter_function = member_function(&accessor);
                                 }
                                 Some("set") => {
                                     setter = Some(accessor.syntax().text_trimmed_range());
@@ -1233,10 +1263,14 @@ impl Collector<'_, '_> {
                     }
                     Some(value) if is_function_expression(&value) => {
                         getter = Some(value.syntax().text_trimmed_range());
+                        getter_function = expression_function(&value);
                     }
                     _ => {}
                 },
             }
+            let returns = getter_function
+                .as_ref()
+                .and_then(|function| self.return_sources(function, binds_instance_this(function)));
             let id = self.add_instance_symbol(
                 component,
                 name,
@@ -1248,6 +1282,7 @@ impl Collector<'_, '_> {
             self.builder.symbol_mut(id).detail = Detail::Computed {
                 getter: getter.map(|range| self.host(range)),
                 setter: setter.map(|range| self.host(range)),
+                returns,
             };
         }
     }
@@ -1280,8 +1315,17 @@ impl Collector<'_, '_> {
                 Namespace::Binding,
                 SymbolKind::Method,
             );
-            if let Some((params, rest)) = function.as_ref().and_then(function_parameters) {
-                self.builder.symbol_mut(id).detail = Detail::Method { params, rest };
+            if let Some(function) = &function
+                && let Some((params, rest)) = function_parameters(function)
+            {
+                let returns = self
+                    .return_sources(function, binds_instance_this(function))
+                    .unwrap_or_else(|| Box::new([ValueSource::Unknown]));
+                self.builder.symbol_mut(id).detail = Detail::Method {
+                    params,
+                    rest,
+                    returns,
+                };
             }
         }
     }
@@ -1542,9 +1586,25 @@ impl Collector<'_, '_> {
                 .ok()
                 .and_then(|arguments| arguments.args().iter().next()?.ok())
                 .map(|argument| self.host(argument.syntax().text_trimmed_range()));
+            // `computed(() => value)`, or `computed({ get, set })`.
+            let getter_function =
+                first_argument(&call).and_then(|argument| match argument.inner_expression() {
+                    Some(AnyJsExpression::JsObjectExpression(accessors)) => accessors
+                        .members()
+                        .iter()
+                        .flatten()
+                        .find(|accessor| accessor.name().is_some_and(|name| name.text() == "get"))
+                        .and_then(|accessor| member_function(&accessor)),
+                    _ => expression_function(&argument),
+                });
+            // `this` is not the component instance in `<script setup>`.
+            let returns = getter_function
+                .as_ref()
+                .and_then(|function| self.return_sources(function, false));
             self.builder.symbol_mut(symbol).detail = Detail::Computed {
                 getter,
                 setter: None,
+                returns,
             };
         }
     }
@@ -1883,6 +1943,167 @@ impl Collector<'_, '_> {
             self.builder.symbol_mut(symbol).origin = origin;
         }
     }
+
+    /// Classifies what each `return` statement of `function` returns. A
+    /// `return` without a value returns `undefined`.
+    ///
+    /// `has_instance_this` says whether `this` in the function is the
+    /// component instance, as in a method of an options object.
+    ///
+    /// Returns `None` when the body of the function cannot be read.
+    fn return_sources(
+        &self,
+        function: &AnyFunctionLike,
+        has_instance_this: bool,
+    ) -> Option<Box<[ValueSource]>> {
+        let mut sources = Vec::new();
+        for value in function_returns(function)? {
+            match value {
+                Some(expression) => self.value_sources(
+                    &expression,
+                    has_instance_this,
+                    MAX_VALUE_DEPTH,
+                    &mut sources,
+                ),
+                None => sources.push(ValueSource::NotFunction),
+            }
+        }
+        Some(sources.into_boxed_slice())
+    }
+
+    /// Adds to `sources` what `expression` may evaluate to. A conditional or
+    /// logical expression adds one source per branch.
+    ///
+    /// `this.name` and `this.name()` are recorded as members of the instance
+    /// only with `has_instance_this`. `depth` limits how many variables are
+    /// followed to their initializers.
+    fn value_sources(
+        &self,
+        expression: &AnyJsExpression,
+        has_instance_this: bool,
+        depth: u8,
+        sources: &mut Vec<ValueSource>,
+    ) {
+        let Some(expression) = expression.inner_expression() else {
+            sources.push(ValueSource::Unknown);
+            return;
+        };
+        let source = match expression {
+            AnyJsExpression::AnyJsLiteralExpression(_)
+            | AnyJsExpression::JsArrayExpression(_)
+            | AnyJsExpression::JsObjectExpression(_)
+            | AnyJsExpression::JsBinaryExpression(_)
+            | AnyJsExpression::JsInExpression(_)
+            | AnyJsExpression::JsInstanceofExpression(_)
+            | AnyJsExpression::JsUnaryExpression(_)
+            | AnyJsExpression::JsPreUpdateExpression(_)
+            | AnyJsExpression::JsPostUpdateExpression(_) => ValueSource::NotFunction,
+            // A tag function can return anything.
+            AnyJsExpression::JsTemplateExpression(template) => {
+                if template.tag().is_some() {
+                    ValueSource::Unknown
+                } else {
+                    ValueSource::NotFunction
+                }
+            }
+            AnyJsExpression::JsArrowFunctionExpression(_)
+            | AnyJsExpression::JsFunctionExpression(_)
+            | AnyJsExpression::JsClassExpression(_) => ValueSource::Function,
+            AnyJsExpression::JsConditionalExpression(conditional) => {
+                for branch in [conditional.consequent(), conditional.alternate()] {
+                    match branch {
+                        Ok(branch) => {
+                            self.value_sources(&branch, has_instance_this, depth, sources);
+                        }
+                        Err(_) => sources.push(ValueSource::Unknown),
+                    }
+                }
+                return;
+            }
+            AnyJsExpression::JsLogicalExpression(logical) => {
+                for operand in [logical.left(), logical.right()] {
+                    match operand {
+                        Ok(operand) => {
+                            self.value_sources(&operand, has_instance_this, depth, sources);
+                        }
+                        Err(_) => sources.push(ValueSource::Unknown),
+                    }
+                }
+                return;
+            }
+            AnyJsExpression::JsSequenceExpression(sequence) => {
+                match sequence.right() {
+                    Ok(right) => self.value_sources(&right, has_instance_this, depth, sources),
+                    Err(_) => sources.push(ValueSource::Unknown),
+                }
+                return;
+            }
+            AnyJsExpression::JsStaticMemberExpression(member) if has_instance_this => {
+                this_member_name(&member).map_or(ValueSource::Unknown, ValueSource::Member)
+            }
+            AnyJsExpression::JsCallExpression(call) if has_instance_this => call
+                .callee()
+                .ok()
+                .and_then(|callee| match callee.omit_parentheses() {
+                    AnyJsExpression::JsStaticMemberExpression(member) => this_member_name(&member),
+                    _ => None,
+                })
+                .map_or(ValueSource::Unknown, ValueSource::MemberCall),
+            AnyJsExpression::JsIdentifierExpression(identifier) => {
+                match identifier.name() {
+                    Ok(name) => self.reference_sources(&name, depth, sources),
+                    Err(_) => sources.push(ValueSource::Unknown),
+                }
+                return;
+            }
+            _ => ValueSource::Unknown,
+        };
+        sources.push(source);
+    }
+
+    /// Adds to `sources` what the variable `reference` names may hold.
+    ///
+    /// A variable that is never reassigned is followed to its initializer.
+    /// Functions and classes declared by name are functions.
+    fn reference_sources(
+        &self,
+        reference: &JsReferenceIdentifier,
+        depth: u8,
+        sources: &mut Vec<ValueSource>,
+    ) {
+        let Some(binding) = self.input.js.binding(reference) else {
+            sources.push(if reference.has_name("undefined") {
+                ValueSource::NotFunction
+            } else {
+                ValueSource::Unknown
+            });
+            return;
+        };
+        let source = match binding.tree().declaration() {
+            Some(
+                AnyJsBindingDeclaration::JsFunctionDeclaration(_)
+                | AnyJsBindingDeclaration::JsClassDeclaration(_),
+            ) => ValueSource::Function,
+            Some(AnyJsBindingDeclaration::JsVariableDeclarator(declarator))
+                if depth > 0 && binding.all_writes().next().is_none() =>
+            {
+                match declarator
+                    .initializer()
+                    .and_then(|initializer| initializer.expression().ok())
+                {
+                    // The initializer may be outside the function the
+                    // reference is in, where `this` is something else.
+                    Some(initializer) => {
+                        self.value_sources(&initializer, false, depth - 1, sources);
+                        return;
+                    }
+                    None => ValueSource::Unknown,
+                }
+            }
+            _ => ValueSource::Unknown,
+        };
+        sources.push(source);
+    }
 }
 
 fn is_imported_from_vue(binding: &JsSyntaxNode) -> bool {
@@ -2137,16 +2358,17 @@ const FUNCTION_KINDS: SyntaxKindSet<JsLanguage> = AnyFunctionLike::KIND_SET
     .union(JsGetterClassMember::KIND_SET)
     .union(JsSetterClassMember::KIND_SET);
 
-/// Returns the object literals a function returns, and whether every value
-/// it returns is one.
+/// Returns the value of each `return` statement of a function, `None` for a
+/// `return` without a value. An arrow function with an expression body
+/// returns that expression.
 ///
-/// Nested functions are not entered.
-fn returned_objects(function: &AnyFunctionLike) -> (Vec<JsObjectExpression>, bool) {
-    let mut expressions = Vec::new();
-    match function.body() {
-        // `() => ({ ... })` returns its body.
-        Ok(AnyJsFunctionBody::AnyJsExpression(expression)) => expressions.push(expression),
-        Ok(AnyJsFunctionBody::JsFunctionBody(body)) => {
+/// Nested functions are not entered. Returns `None` when the body cannot be
+/// read.
+fn function_returns(function: &AnyFunctionLike) -> Option<Vec<Option<AnyJsExpression>>> {
+    let mut values = Vec::new();
+    match function.body().ok()? {
+        AnyJsFunctionBody::AnyJsExpression(expression) => values.push(Some(expression)),
+        AnyJsFunctionBody::JsFunctionBody(body) => {
             let mut preorder = body
                 .syntax()
                 .preorder_of_kinds(FUNCTION_KINDS.union(JsReturnStatement::KIND_SET));
@@ -2158,15 +2380,50 @@ fn returned_objects(function: &AnyFunctionLike) -> (Vec<JsObjectExpression>, boo
                     preorder.skip_subtree();
                     continue;
                 }
-                if let Some(statement) = JsReturnStatement::cast(node)
-                    && let Some(argument) = statement.argument()
-                {
-                    expressions.push(argument);
+                if let Some(statement) = JsReturnStatement::cast(node) {
+                    values.push(statement.argument());
                 }
             }
         }
-        Err(_) => return (Vec::new(), false),
     }
+    Some(values)
+}
+
+/// Returns `true` when Vue calls `function`, a member of an options object,
+/// with the component instance as `this`. An arrow function does not bind
+/// `this`, so `this` in it is something else.
+fn binds_instance_this(function: &AnyFunctionLike) -> bool {
+    !matches!(
+        function,
+        AnyFunctionLike::AnyJsFunction(AnyJsFunction::JsArrowFunctionExpression(_))
+    )
+}
+
+/// Returns the name of the member `this.name` reads.
+fn this_member_name(member: &JsStaticMemberExpression) -> Option<TokenText> {
+    let object = member.object().ok()?.omit_parentheses();
+    if !matches!(object, AnyJsExpression::JsThisExpression(_)) {
+        return None;
+    }
+    Some(
+        member
+            .member()
+            .ok()?
+            .value_token()
+            .ok()?
+            .token_text_trimmed(),
+    )
+}
+
+/// Returns the object literals a function returns, and whether every value
+/// it returns is one.
+///
+/// Nested functions are not entered.
+fn returned_objects(function: &AnyFunctionLike) -> (Vec<JsObjectExpression>, bool) {
+    let Some(values) = function_returns(function) else {
+        return (Vec::new(), false);
+    };
+    let expressions = values.into_iter().flatten();
     let mut objects = Vec::new();
     let mut all_objects = true;
     for expression in expressions {

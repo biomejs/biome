@@ -519,3 +519,143 @@ fn model_option_in_define_options_is_recorded() {
         Some("model: { prop: \"checked\" }")
     );
 }
+
+/// Returns, for each computed property of the first component, its name and
+/// whether its value is a function.
+fn computed_values(code: &str, source: JsFileSource) -> Vec<(String, Tri)> {
+    let model = js_model(code, source);
+    let component = model.components().next().expect("a component");
+    component
+        .computed()
+        .map(|computed| (computed.name().to_string(), computed.value_is_function()))
+        .collect()
+}
+
+#[test]
+fn computed_values_follow_what_the_getter_returns() {
+    let values = computed_values(
+        r#"import { defineComponent } from "vue";
+defineComponent({
+  props: { label: String, onPick: Function, either: [String, Function], loose: null },
+  data() { return { text: "", handler() {}, validator: null }; },
+  computed: {
+    literal() { return 42; },
+    empty() { return; },
+    object: { get: () => ({}) },
+    arrow: () => "a",
+    fromData() { return this.text; },
+    fromDataFunction() { return this.handler; },
+    fromProp() { return this.label; },
+    fromFunctionProp() { return this.onPick; },
+    fromMixedProp() { return this.either; },
+    fromUntypedProp() { return this.loose; },
+    fromMethod() { return this.go; },
+    fromMethodCall() { return this.go(); },
+    fromComputed() { return this.literal; },
+    fromComputedCall() { return this.literal(); },
+    branches() { return this.ok ? "a" : 1; },
+    mixed() { return this.text || (() => {}); },
+    returnsFunction() { return () => {}; },
+    variable() { const value = "a"; return value; },
+    reassigned() { let value = "a"; value = foo; return value; },
+    unknownCall() { return foo(); },
+    arrowThis: () => this.text,
+    cycle() { return this.cycle; },
+    reassignedData() { return this.validator; },
+  },
+  methods: { go() { return 1; }, setValidator(fn) { this.validator = fn; } },
+});"#,
+        JsFileSource::js_module(),
+    );
+    let values: Vec<_> = values
+        .iter()
+        .map(|(name, value)| (name.as_str(), *value))
+        .collect();
+    assert_eq!(
+        values,
+        [
+            ("literal", Tri::No),
+            ("empty", Tri::No),
+            ("object", Tri::No),
+            ("arrow", Tri::No),
+            ("fromData", Tri::No),
+            ("fromDataFunction", Tri::Yes),
+            ("fromProp", Tri::No),
+            ("fromFunctionProp", Tri::Yes),
+            ("fromMixedProp", Tri::Unknown),
+            ("fromUntypedProp", Tri::Unknown),
+            ("fromMethod", Tri::Yes),
+            ("fromMethodCall", Tri::No),
+            ("fromComputed", Tri::No),
+            ("fromComputedCall", Tri::Unknown),
+            ("branches", Tri::No),
+            ("mixed", Tri::Unknown),
+            ("returnsFunction", Tri::Yes),
+            ("variable", Tri::No),
+            ("reassigned", Tri::Unknown),
+            ("unknownCall", Tri::Unknown),
+            ("arrowThis", Tri::Unknown),
+            ("cycle", Tri::Unknown),
+            ("reassignedData", Tri::Unknown),
+        ]
+    );
+}
+
+#[test]
+fn data_values_are_unknown_when_uses_are_incomplete() {
+    // A script block read without its template may have its data assigned
+    // from the template.
+    let values = computed_values(
+        r#"export default {
+  data() { return { text: "" }; },
+  computed: { fromData() { return this.text; } },
+}"#,
+        JsFileSource::vue(),
+    );
+    assert_eq!(values, [("fromData".to_string(), Tri::Unknown)]);
+}
+
+#[test]
+fn computed_values_of_open_components_are_unknown() {
+    let values = computed_values(
+        r#"export default {
+  mixins: [other],
+  computed: { fromMember() { return this.text; }, literal() { return 1; } },
+}"#,
+        JsFileSource::vue(),
+    );
+    assert_eq!(
+        values,
+        [
+            ("fromMember".to_string(), Tri::Unknown),
+            ("literal".to_string(), Tri::No),
+        ]
+    );
+}
+
+#[test]
+fn computed_values_in_script_setup() {
+    let values = computed_values(
+        r#"import { computed } from "vue";
+const count = computed(() => 1);
+const label = computed({ get: () => "a", set: (value) => {} });
+const handler = computed(() => () => {});
+const unknown = computed(() => count.value);
+const fromThis = computed(function () { return this.count; });"#,
+        setup_ts(),
+    );
+    let values: Vec<_> = values
+        .iter()
+        .map(|(name, value)| (name.as_str(), *value))
+        .collect();
+    assert_eq!(
+        values,
+        [
+            ("count", Tri::No),
+            ("label", Tri::No),
+            ("handler", Tri::Yes),
+            ("unknown", Tri::Unknown),
+            ("fromThis", Tri::Unknown),
+        ]
+    );
+}

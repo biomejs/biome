@@ -390,6 +390,7 @@ pub mod no_void_type_return;
 pub mod no_vue_arrow_func_in_watch;
 pub mod no_vue_boolean_default;
 pub mod no_vue_computed_properties_in_data;
+pub mod no_vue_computed_property_call;
 pub mod no_vue_data_object_declaration;
 pub mod no_vue_deprecated_delete_set;
 pub mod no_vue_deprecated_listeners;

@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-array-props.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+export default {
+  props: ["value"],
+  computed: {
+    fromProp() {
+      return this.value;
+    },
+  },
+  methods: {
+    run() {
+      this.fromProp();
+    },
+  },
+};
+</script>
+
+```
