@@ -1,0 +1,47 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 211
+expression: invalid_options_api.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  data() {
+    return { price: 1 };
+  },
+  filters: {
+    currency(value) {
+      return `$${value}`;
+    },
+  },
+};
+</script>
+
+<template>
+  <p>{{ price | currency }}</p>
+</template>
+
+```
+
+# Diagnostics
+```
+invalid_options_api.vue:16:9 lint/nursery/noVueDeprecatedFilter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This expression uses a filter, which Vue 3 no longer supports.
+  
+    15 │ <template>
+  > 16 │   <p>{{ price | currency }}</p>
+       │         ^^^^^^^^^^^^^^^^
+    17 │ </template>
+    18 │ 
+  
+  i Vue 3 reads the | as the bitwise OR operator, so the expression doesn't call the filter.
+  
+  i Call the filter as a function instead, or move the expression into a computed property.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
