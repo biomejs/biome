@@ -43,7 +43,7 @@ declare_lint_rule! {
     ///
     /// A `<script setup>` binding declares the directive:
     ///
-    /// ```vue,ignore
+    /// ```vue
     /// <script setup>
     /// const vHighlight = {};
     /// </script>
@@ -53,7 +53,7 @@ declare_lint_rule! {
     ///
     /// So does the component's `directives` option:
     ///
-    /// ```vue,ignore
+    /// ```vue
     /// <script>
     /// export default {
     ///     directives: { highlight: {} },
