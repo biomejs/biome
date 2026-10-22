@@ -4,9 +4,10 @@ use crate::markdown::auxiliary::newline::FormatMdNewlineOptions;
 use crate::markdown::auxiliary::paragraph::FormatMdParagraphOptions;
 use crate::markdown::auxiliary::quote_prefix::FormatMdQuotePrefixOptions;
 use crate::prelude::*;
+use crate::quote::quote_line_prefix;
 use crate::shared::{TextContext, TextPrintMode, format_removed_quote_boundary};
 use biome_formatter::FormatRuleWithOptions;
-use biome_formatter::write;
+use biome_formatter::{format_args, write};
 use biome_markdown_syntax::list_ext::AnyListItem;
 use biome_markdown_syntax::{
     AnyMdBlock, AnyMdCodeBlock, AnyMdLeafBlock, GfmTable, MdBlockList, MdBullet, MdQuote,
@@ -83,6 +84,30 @@ impl FormatRule<MdBlockList> for FormatMdBlockList {
                         joiner.entry(&prefix.format().with_options(FormatMdQuotePrefixOptions {
                             should_remove: true,
                         }));
+
+                        // A newline printed as text skips the `align` markers, so
+                        // print this quote-only line's markers explicitly.
+                        if let Some((_, newline)) = iter.next_if(|(index, next)| {
+                            quote_trim_range.contains(index)
+                                && next.is_newline()
+                                && !newline_block_has_comments(next)
+                        }) {
+                            prev_content = PrevContentBlock::Other;
+                            let line_prefix = quote_line_prefix(newline.syntax())?;
+                            joiner.entry(&format_with(move |f| {
+                                format_removed_quote_boundary(&newline, f)?;
+                                write!(
+                                    f,
+                                    [
+                                        dedent_to_root(&format_args![
+                                            hard_line_break(),
+                                            line_prefix.format(false)
+                                        ]),
+                                        hard_line_break()
+                                    ]
+                                )
+                            }));
+                        }
                     }
 
                     AnyMdBlock::MdQuotePrefix(prefix)
