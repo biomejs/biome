@@ -3318,6 +3318,11 @@ export interface Nursery {
 	 */
 	noUselessTypeConversion?: NoUselessTypeConversionConfiguration;
 	/**
+	 * Succinct description of the rule.
+	 * See https://biomejs.dev/linter/rules/no-vue-async-computed
+	 */
+	noVueAsyncComputed?: NoVueAsyncComputedConfiguration;
+	/**
 	 * Disallow default values for Boolean props in Vue components.
 	 * See https://biomejs.dev/linter/rules/no-vue-boolean-default
 	 */
@@ -6050,6 +6055,9 @@ export type NoUselessSpliceConfiguration =
 export type NoUselessTypeConversionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessTypeConversionOptions;
+export type NoVueAsyncComputedConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueAsyncComputedOptions;
 export type NoVueBooleanDefaultConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueBooleanDefaultOptions;
@@ -8705,6 +8713,10 @@ export interface RuleWithNoUselessTypeConversionOptions {
 	level: RulePlainConfiguration;
 	options?: NoUselessTypeConversionOptions;
 }
+export interface RuleWithNoVueAsyncComputedOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueAsyncComputedOptions;
+}
 export interface RuleWithNoVueBooleanDefaultOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueBooleanDefaultOptions;
@@ -11239,6 +11251,7 @@ export type NoUselessCallOptions = {};
 export type NoUselessDateGetTimeOptions = {};
 export type NoUselessSpliceOptions = {};
 export type NoUselessTypeConversionOptions = {};
+export type NoVueAsyncComputedOptions = {};
 export type NoVueBooleanDefaultOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
 export type NoVueLifecycleAfterAwaitOptions = {};
@@ -12909,14 +12922,14 @@ export type Category =
 	| "lint/nursery/noBooleanSortComparator"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDanglingUnderscore"
-	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
@@ -12959,8 +12972,8 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForNavigation"
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
-	| "lint/nursery/noPromiseExecutorReturn"
 	| "lint/nursery/noProcessExit"
+	| "lint/nursery/noPromiseExecutorReturn"
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
@@ -13003,13 +13016,14 @@ export type Category =
 	| "lint/nursery/noUselessDateGetTime"
 	| "lint/nursery/noUselessSplice"
 	| "lint/nursery/noUselessTypeConversion"
+	| "lint/nursery/noVueAsyncComputed"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
-	| "lint/nursery/noVueLifecycleAfterAwait"
-	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueImportCompilerMacros"
+	| "lint/nursery/noVueLifecycleAfterAwait"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRequiredPropWithDefault"
+	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueUnusedEmitDeclarations"
@@ -13081,8 +13095,8 @@ export type Category =
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useSvelteShorthandDirective"
 	| "lint/nursery/useTailwindShorthandClasses"
-	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTailwindSortedClasses"
+	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useUnaryMinus"
 	| "lint/nursery/useUniqueArgumentNames"

@@ -1,0 +1,519 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { computed, createApp, defineComponent, computed as vueComputed } from "vue";
+import * as Vue from "vue";
+
+const asyncArrow = computed(async () => {
+	return await someFunc();
+});
+const asyncExpression = computed(async () => await someFunc());
+const asyncFunction = computed(async function () {
+	return await someFunc();
+});
+const asyncWithoutAwait = computed(async () => {
+	bar();
+});
+const newPromise = computed(() => {
+	return new Promise((resolve) => resolve(1));
+});
+const then = computed(() => bar.then((response) => response));
+const promiseAll = computed(() => {
+	return Promise.all([]);
+});
+const getterArrow = computed({
+	get: () => {
+		return Promise.resolve([]);
+	},
+});
+const getterMethod = computed({
+	get() {
+		return Promise.resolve([]);
+	},
+	set(value) {},
+});
+const timers = computed(() => {
+	setTimeout(() => {}, 0);
+	window.requestAnimationFrame(() => {});
+	return 1;
+});
+const renamed = vueComputed(() => Promise.resolve(1));
+const namespaced = Vue.computed(() => Promise.resolve(1));
+const namespacedNextTick = computed(() => {
+	Vue.nextTick(() => {});
+	return 1;
+});
+const nestedComputed = computed(() => {
+	const inner = computed(() => Promise.resolve(1));
+	return inner.value;
+});
+
+defineComponent({
+	computed: {
+		foo() {
+			return Promise.resolve(1);
+		},
+	},
+});
+
+defineComponent({
+	setup() {
+		const foo = computed(async () => 1);
+		return { foo };
+	},
+});
+
+createApp({
+	computed: {
+		async foo() {
+			return 1;
+		},
+	},
+});
+
+```
+
+# Diagnostics
+```
+invalid.js:5:29 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property is an async function, so it returns a Promise instead of a value.
+  
+    3 │ import * as Vue from "vue";
+    4 │ 
+  > 5 │ const asyncArrow = computed(async () => {
+      │                             ^^^^^
+    6 │ 	return await someFunc();
+    7 │ });
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:6:9 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property waits for asynchronous code with await.
+  
+    5 │ const asyncArrow = computed(async () => {
+  > 6 │ 	return await someFunc();
+      │ 	       ^^^^^^^^^^^^^^^^
+    7 │ });
+    8 │ const asyncExpression = computed(async () => await someFunc());
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:34 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property is an async function, so it returns a Promise instead of a value.
+  
+     6 │ 	return await someFunc();
+     7 │ });
+   > 8 │ const asyncExpression = computed(async () => await someFunc());
+       │                                  ^^^^^
+     9 │ const asyncFunction = computed(async function () {
+    10 │ 	return await someFunc();
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:8:46 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property waits for asynchronous code with await.
+  
+     6 │ 	return await someFunc();
+     7 │ });
+   > 8 │ const asyncExpression = computed(async () => await someFunc());
+       │                                              ^^^^^^^^^^^^^^^^
+     9 │ const asyncFunction = computed(async function () {
+    10 │ 	return await someFunc();
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:9:32 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property is an async function, so it returns a Promise instead of a value.
+  
+     7 │ });
+     8 │ const asyncExpression = computed(async () => await someFunc());
+   > 9 │ const asyncFunction = computed(async function () {
+       │                                ^^^^^
+    10 │ 	return await someFunc();
+    11 │ });
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:10:9 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property waits for asynchronous code with await.
+  
+     8 │ const asyncExpression = computed(async () => await someFunc());
+     9 │ const asyncFunction = computed(async function () {
+  > 10 │ 	return await someFunc();
+       │ 	       ^^^^^^^^^^^^^^^^
+    11 │ });
+    12 │ const asyncWithoutAwait = computed(async () => {
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:12:36 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property is an async function, so it returns a Promise instead of a value.
+  
+    10 │ 	return await someFunc();
+    11 │ });
+  > 12 │ const asyncWithoutAwait = computed(async () => {
+       │                                    ^^^^^
+    13 │ 	bar();
+    14 │ });
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:16:9 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property creates a Promise.
+  
+    14 │ });
+    15 │ const newPromise = computed(() => {
+  > 16 │ 	return new Promise((resolve) => resolve(1));
+       │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ });
+    18 │ const then = computed(() => bar.then((response) => response));
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:18:29 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property runs asynchronous code.
+  
+    16 │ 	return new Promise((resolve) => resolve(1));
+    17 │ });
+  > 18 │ const then = computed(() => bar.then((response) => response));
+       │                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ const promiseAll = computed(() => {
+    20 │ 	return Promise.all([]);
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:20:9 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property runs asynchronous code.
+  
+    18 │ const then = computed(() => bar.then((response) => response));
+    19 │ const promiseAll = computed(() => {
+  > 20 │ 	return Promise.all([]);
+       │ 	       ^^^^^^^^^^^^^^^
+    21 │ });
+    22 │ const getterArrow = computed({
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:24:10 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property runs asynchronous code.
+  
+    22 │ const getterArrow = computed({
+    23 │ 	get: () => {
+  > 24 │ 		return Promise.resolve([]);
+       │ 		       ^^^^^^^^^^^^^^^^^^^
+    25 │ 	},
+    26 │ });
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:29:10 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property runs asynchronous code.
+  
+    27 │ const getterMethod = computed({
+    28 │ 	get() {
+  > 29 │ 		return Promise.resolve([]);
+       │ 		       ^^^^^^^^^^^^^^^^^^^
+    30 │ 	},
+    31 │ 	set(value) {},
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:34:2 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property schedules code to run later.
+  
+    32 │ });
+    33 │ const timers = computed(() => {
+  > 34 │ 	setTimeout(() => {}, 0);
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^
+    35 │ 	window.requestAnimationFrame(() => {});
+    36 │ 	return 1;
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:35:2 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property schedules code to run later.
+  
+    33 │ const timers = computed(() => {
+    34 │ 	setTimeout(() => {}, 0);
+  > 35 │ 	window.requestAnimationFrame(() => {});
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    36 │ 	return 1;
+    37 │ });
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:38:35 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property runs asynchronous code.
+  
+    36 │ 	return 1;
+    37 │ });
+  > 38 │ const renamed = vueComputed(() => Promise.resolve(1));
+       │                                   ^^^^^^^^^^^^^^^^^^
+    39 │ const namespaced = Vue.computed(() => Promise.resolve(1));
+    40 │ const namespacedNextTick = computed(() => {
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:39:39 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property runs asynchronous code.
+  
+    37 │ });
+    38 │ const renamed = vueComputed(() => Promise.resolve(1));
+  > 39 │ const namespaced = Vue.computed(() => Promise.resolve(1));
+       │                                       ^^^^^^^^^^^^^^^^^^
+    40 │ const namespacedNextTick = computed(() => {
+    41 │ 	Vue.nextTick(() => {});
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:41:2 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property schedules code to run after Vue updates the page.
+  
+    39 │ const namespaced = Vue.computed(() => Promise.resolve(1));
+    40 │ const namespacedNextTick = computed(() => {
+  > 41 │ 	Vue.nextTick(() => {});
+       │ 	^^^^^^^^^^^^^^^^^^^^^^
+    42 │ 	return 1;
+    43 │ });
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:45:31 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property runs asynchronous code.
+  
+    43 │ });
+    44 │ const nestedComputed = computed(() => {
+  > 45 │ 	const inner = computed(() => Promise.resolve(1));
+       │ 	                             ^^^^^^^^^^^^^^^^^^
+    46 │ 	return inner.value;
+    47 │ });
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:52:11 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property runs asynchronous code.
+  
+    50 │ 	computed: {
+    51 │ 		foo() {
+  > 52 │ 			return Promise.resolve(1);
+       │ 			       ^^^^^^^^^^^^^^^^^^
+    53 │ 		},
+    54 │ 	},
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:59:24 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property is an async function, so it returns a Promise instead of a value.
+  
+    57 │ defineComponent({
+    58 │ 	setup() {
+  > 59 │ 		const foo = computed(async () => 1);
+       │ 		                     ^^^^^
+    60 │ 		return { foo };
+    61 │ 	},
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.js:66:3 lint/nursery/noVueAsyncComputed ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This computed property is an async function, so it returns a Promise instead of a value.
+  
+    64 │ createApp({
+    65 │ 	computed: {
+  > 66 │ 		async foo() {
+       │ 		^^^^^
+    67 │ 			return 1;
+    68 │ 		},
+  
+  i Vue uses the value that a computed property returns right away. Asynchronous code finishes later, so its result never becomes the value of the computed property.
+  
+  i Store the result in a ref() or in data from a watcher or a method, and read it from the computed property instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
