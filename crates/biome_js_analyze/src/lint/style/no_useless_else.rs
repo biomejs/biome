@@ -6,7 +6,9 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_diagnostics::Severity;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsStatement, JsIfStatement, JsStatementList, JsSyntaxKind};
+use biome_js_syntax::{
+    AnyJsStatement, JsBlockStatement, JsIfStatement, JsStatementList, JsSyntaxKind,
+};
 use biome_rowan::{
     AstNode, AstNodeList, BatchMutationExt, SyntaxNodeOptionExt, chain_trivia_pieces,
     trim_leading_trivia_pieces,
@@ -153,6 +155,14 @@ impl Rule for NoUselessElse {
         let else_clause = if_stmt.else_clause()?;
         if let Some(stmts_list) = if_stmt.parent::<JsStatementList>() {
             let else_alternative = else_clause.alternate().ok()?;
+            // Withhold the fix if the else block contains declarations to avoid hoisting collisions
+            // in enclosing scopes (matches upstream ESLint no-else-return).
+            if let AnyJsStatement::JsBlockStatement(else_block_stmts) = &else_alternative
+                && has_declarations(else_block_stmts)
+            {
+                return None;
+            }
+
             let if_pos = stmts_list
                 .iter()
                 .position(|x| x.syntax() == if_stmt.syntax())?;
@@ -250,4 +260,18 @@ fn breaks_early(statement: AnyJsStatement) -> Option<()> {
         }
     }
     Some(())
+}
+
+fn has_declarations(block: &JsBlockStatement) -> bool {
+    block.statements().iter().any(|stmt| {
+        matches!(
+            stmt,
+            AnyJsStatement::JsVariableStatement(_)
+                | AnyJsStatement::JsClassDeclaration(_)
+                | AnyJsStatement::JsFunctionDeclaration(_)
+                | AnyJsStatement::TsEnumDeclaration(_)
+                | AnyJsStatement::TsInterfaceDeclaration(_)
+                | AnyJsStatement::TsTypeAliasDeclaration(_)
+        )
+    })
 }

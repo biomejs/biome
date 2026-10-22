@@ -1,0 +1,225 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: issue_11937.js
+---
+# Input
+```js
+function g(a) {
+  const v = 1;
+  if (a) {
+    return v;
+  } else {
+    const v = 2;
+    return v;
+  }
+}
+console.log(g(false));
+
+function f(a) {
+  {
+    if (a) {
+      var x;
+      return;
+    } else {
+      let x;
+    }
+  }
+}
+
+function h(a) {
+  if (a) {
+    var x;
+    return;
+  } else {
+    let x;
+  }
+}
+
+function k(a) {
+  {
+    while (true) {
+      var x;
+    }
+    if (a) {
+      return;
+    } else {
+      let x;
+    }
+  }
+}
+
+function m(a) {
+  var x;
+  {
+    if (a) {
+      return;
+    } else {
+      let x;
+    }
+  }
+}
+
+function catchTest(a) {
+  try {
+  } catch (e) {
+    if (a) {
+      return;
+    } else {
+      let e;
+    }
+  }
+}
+
+function validFix(a) {
+  let v = 1;
+  if (a) {
+    return v;
+  } else {
+    v = 2;
+    return v;
+  }
+}
+
+```
+
+# Diagnostics
+```
+issue_11937.js:5:5 lint/style/noUselessElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This else clause can be omitted because previous branches break early.
+  
+     3 │   if (a) {
+     4 │     return v;
+   > 5 │   } else {
+       │     ^^^^^^
+   > 6 │     const v = 2;
+   > 7 │     return v;
+   > 8 │   }
+       │   ^
+     9 │ }
+    10 │ console.log(g(false));
+  
+
+```
+
+```
+issue_11937.js:17:7 lint/style/noUselessElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This else clause can be omitted because previous branches break early.
+  
+    15 │       var x;
+    16 │       return;
+  > 17 │     } else {
+       │       ^^^^^^
+  > 18 │       let x;
+  > 19 │     }
+       │     ^
+    20 │   }
+    21 │ }
+  
+
+```
+
+```
+issue_11937.js:27:5 lint/style/noUselessElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This else clause can be omitted because previous branches break early.
+  
+    25 │     var x;
+    26 │     return;
+  > 27 │   } else {
+       │     ^^^^^^
+  > 28 │     let x;
+  > 29 │   }
+       │   ^
+    30 │ }
+    31 │ 
+  
+
+```
+
+```
+issue_11937.js:39:7 lint/style/noUselessElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This else clause can be omitted because previous branches break early.
+  
+    37 │     if (a) {
+    38 │       return;
+  > 39 │     } else {
+       │       ^^^^^^
+  > 40 │       let x;
+  > 41 │     }
+       │     ^
+    42 │   }
+    43 │ }
+  
+
+```
+
+```
+issue_11937.js:50:7 lint/style/noUselessElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This else clause can be omitted because previous branches break early.
+  
+    48 │     if (a) {
+    49 │       return;
+  > 50 │     } else {
+       │       ^^^^^^
+  > 51 │       let x;
+  > 52 │     }
+       │     ^
+    53 │   }
+    54 │ }
+  
+
+```
+
+```
+issue_11937.js:61:7 lint/style/noUselessElse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This else clause can be omitted because previous branches break early.
+  
+    59 │     if (a) {
+    60 │       return;
+  > 61 │     } else {
+       │       ^^^^^^
+  > 62 │       let e;
+  > 63 │     }
+       │     ^
+    64 │   }
+    65 │ }
+  
+
+```
+
+```
+issue_11937.js:71:5 lint/style/noUselessElse  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This else clause can be omitted because previous branches break early.
+  
+    69 │   if (a) {
+    70 │     return v;
+  > 71 │   } else {
+       │     ^^^^^^
+  > 72 │     v = 2;
+  > 73 │     return v;
+  > 74 │   }
+       │   ^
+    75 │ }
+    76 │ 
+  
+  i Safe fix: Omit the else clause.
+  
+    69 69 │     if (a) {
+    70 70 │       return v;
+    71    │ - ··}·else·{
+       71 │ + ··}
+    72 72 │       v = 2;
+    73 73 │       return v;
+    74    │ - ··}
+    75 74 │   }
+    76 75 │   
+  
+
+```
