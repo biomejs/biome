@@ -3368,6 +3368,11 @@ export interface Nursery {
 	 */
 	noVueComputedPropertiesInData?: NoVueComputedPropertiesInDataConfiguration;
 	/**
+	 * Disallow calling a Vue computed property whose value is not a function.
+	 * See https://biomejs.dev/linter/rules/no-vue-computed-property-call
+	 */
+	noVueComputedPropertyCall?: NoVueComputedPropertyCallConfiguration;
+	/**
 	 * Disallow the $set and $delete functions that Vue 3 removed.
 	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-delete-set
 	 */
@@ -6265,6 +6270,9 @@ export type NoVueBooleanDefaultConfiguration =
 export type NoVueComputedPropertiesInDataConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueComputedPropertiesInDataOptions;
+export type NoVueComputedPropertyCallConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueComputedPropertyCallOptions;
 export type NoVueDeprecatedDeleteSetConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedDeleteSetOptions;
@@ -9061,6 +9069,10 @@ export interface RuleWithNoVueComputedPropertiesInDataOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueComputedPropertiesInDataOptions;
 }
+export interface RuleWithNoVueComputedPropertyCallOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueComputedPropertyCallOptions;
+}
 export interface RuleWithNoVueDeprecatedDeleteSetOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedDeleteSetOptions;
@@ -11725,6 +11737,7 @@ export type NoUselessSpliceOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueBooleanDefaultOptions = {};
 export type NoVueComputedPropertiesInDataOptions = {};
+export type NoVueComputedPropertyCallOptions = {};
 export type NoVueDeprecatedDeleteSetOptions = {};
 export type NoVueDeprecatedListenersOptions = {};
 export interface NoVueDeprecatedRouterLinkTagPropOptions {
@@ -13531,6 +13544,7 @@ export type Category =
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueComputedPropertiesInData"
+	| "lint/nursery/noVueComputedPropertyCall"
 	| "lint/nursery/noVueDeprecatedDeleteSet"
 	| "lint/nursery/noVueDeprecatedListeners"
 	| "lint/nursery/noVueDeprecatedRouterLinkTagProp"
