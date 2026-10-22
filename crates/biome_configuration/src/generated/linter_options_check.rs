@@ -3211,6 +3211,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "useVueValidAttributeName",
+        TypeId::of::<
+            biome_rule_options::use_vue_valid_attribute_name::UseVueValidAttributeNameOptions,
+        >(),
+    ));
+    result.push((
+        "nursery",
         "useVueValidDefineEmits",
         TypeId::of::<biome_rule_options::use_vue_valid_define_emits::UseVueValidDefineEmitsOptions>(
         ),
