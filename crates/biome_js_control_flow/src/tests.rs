@@ -377,3 +377,49 @@ fn unlabeled_jump_in_labeled_statement() {
         }
     }
 }
+
+#[test]
+fn expressions_outside_of_statements_are_evaluated() {
+    for (source, expected) in [
+        ("function f(a = b) {}", &["(a = b)"][..]),
+        ("class A { constructor(a = b) {} }", &["(a = b)"]),
+        ("const o = { set a({ x = b }) {} };", &["{ x = b }"]),
+        ("const f = (a = b) => a;", &["(a = b)", "a"]),
+        ("function f() {}", &[]),
+        (
+            "function f(xs) { for (const x of g(xs)) {} }",
+            &["(xs)", "g(xs)"],
+        ),
+        (
+            "function f(o) { for (const k in g(o)) {} }",
+            &["(o)", "g(o)"],
+        ),
+        (
+            "function f(o) { const { a = b } = o; }",
+            &["(o)", "o", "{ a = b }"],
+        ),
+        ("function f(o) { const a = o; }", &["(o)", "o"]),
+    ] {
+        let parse = parsed(source);
+        assert!(!parse.has_errors(), "{source}");
+        let tree = parse.tree();
+        let root = tree
+            .syntax()
+            .descendants()
+            .skip(1)
+            .find_map(AnyJsControlFlowRoot::cast)
+            .unwrap();
+        let graph = control_flow_model(&tree).graph(&root).unwrap();
+        let statements: Vec<_> = graph
+            .blocks
+            .iter()
+            .flat_map(|block| &block.instructions)
+            .filter(|instruction| {
+                instruction.kind == biome_control_flow::InstructionKind::Statement
+            })
+            .filter_map(|instruction| instruction.node.as_ref()?.as_node())
+            .map(|node| node.text_trimmed().to_string())
+            .collect();
+        assert_eq!(statements, expected, "{source}");
+    }
+}

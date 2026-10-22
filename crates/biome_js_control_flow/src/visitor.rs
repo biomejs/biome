@@ -1,13 +1,14 @@
 use std::any::TypeId;
 
 use biome_js_syntax::{
-    AnyJsFunction, JsConstructorClassMember, JsGetterClassMember, JsGetterObjectMember, JsLanguage,
-    JsMethodClassMember, JsMethodObjectMember, JsModule, JsScript, JsSetterClassMember,
-    JsSetterObjectMember, JsStaticInitializationBlockClassMember, JsSyntaxNode,
-    TsModuleDeclaration, TsPropertySignatureTypeMember,
+    AnyJsFunction, AnyJsFunctionBody, JsConstructorClassMember, JsGetterClassMember,
+    JsGetterObjectMember, JsLanguage, JsMethodClassMember, JsMethodObjectMember, JsModule,
+    JsScript, JsSetterClassMember, JsSetterObjectMember, JsStaticInitializationBlockClassMember,
+    JsSyntaxNode, TsModuleDeclaration, TsPropertySignatureTypeMember,
 };
 use biome_rowan::{
-    AstNode, SyntaxError, SyntaxKindSet, SyntaxResult, WalkEvent, declare_node_union,
+    AstNode, AstSeparatedList, SyntaxError, SyntaxKindSet, SyntaxResult, WalkEvent,
+    declare_node_union,
 };
 
 use crate::JsControlFlowGraph;
@@ -231,9 +232,48 @@ declare_node_union! {
 
 impl FunctionVisitor {
     fn enter(node: AnyJsControlFlowRoot) -> Self {
-        Self {
-            builder: Some(FunctionBuilder::new(node.into_syntax())),
+        let mut builder = FunctionBuilder::new(node.syntax().clone());
+        // Default values of parameters run before the body.
+        if let Some(parameters) = node.parameters() {
+            builder.append_statement().with_node(parameters);
         }
+        if let AnyJsControlFlowRoot::AnyJsFunction(AnyJsFunction::JsArrowFunctionExpression(arrow)) =
+            &node
+            && let Ok(AnyJsFunctionBody::AnyJsExpression(body)) = arrow.body()
+        {
+            builder.append_statement().with_node(body.into_syntax());
+        }
+        Self {
+            builder: Some(builder),
+        }
+    }
+}
+
+impl AnyJsControlFlowRoot {
+    /// Returns the parameters of the root, or `None` when it has none.
+    ///
+    /// Also returns `None` for the single parameter of an arrow function
+    /// written without parentheses, which can't have a default value.
+    fn parameters(&self) -> Option<JsSyntaxNode> {
+        let parameters = match self {
+            Self::AnyJsFunction(function) => {
+                function.parameters().ok()?.as_js_parameters()?.clone()
+            }
+            Self::JsMethodObjectMember(method) => method.parameters().ok()?,
+            Self::JsMethodClassMember(method) => method.parameters().ok()?,
+            Self::JsConstructorClassMember(constructor) => {
+                let parameters = constructor.parameters().ok()?;
+                return (!parameters.parameters().is_empty()).then(|| parameters.into_syntax());
+            }
+            Self::JsSetterObjectMember(setter) => {
+                return Some(setter.parameter().ok()?.into_syntax());
+            }
+            Self::JsSetterClassMember(setter) => {
+                return Some(setter.parameter().ok()?.into_syntax());
+            }
+            _ => return None,
+        };
+        (!parameters.items().is_empty()).then(|| parameters.into_syntax())
     }
 }
 

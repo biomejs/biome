@@ -1968,6 +1968,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         TypeId::of::<biome_rule_options::use_at_index::UseAtIndexOptions>(),
     ));
     result.push((
+        "nursery",
+        "useAtomicUpdates",
+        TypeId::of::<biome_rule_options::use_atomic_updates::UseAtomicUpdatesOptions>(),
+    ));
+    result.push((
         "suspicious",
         "useAwait",
         TypeId::of::<biome_rule_options::use_await::UseAwaitOptions>(),
