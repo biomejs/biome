@@ -65,7 +65,8 @@ use list::{
 };
 use quote::{
     at_quote, consume_quote_prefix, consume_quote_prefix_without_virtual, has_quote_prefix,
-    line_has_quote_prefix_at_current, parse_quote,
+    line_has_quote_prefix_at_current, list_indent_inside_quote, parse_quote,
+    unindented_quote_levels,
 };
 use std::rc::Rc;
 use table::{at_gfm_table, at_gfm_table_with_container_prefix, parse_gfm_table};
@@ -903,7 +904,7 @@ fn is_dash_only_thematic_break(p: &MarkdownParser) -> bool {
 }
 
 fn allow_setext_heading(p: &MarkdownParser) -> bool {
-    let required_indent = p.state().list_item_required_indent;
+    let required_indent = list_indent_inside_quote(p);
     if required_indent > 0 {
         // Compute real indent from source text, since leading whitespace
         // may have been consumed as trivia in list item context.
@@ -913,7 +914,7 @@ fn allow_setext_heading(p: &MarkdownParser) -> bool {
         }
     }
 
-    if p.state().list_item_required_indent > 0 && p.at(MD_SETEXT_UNDERLINE_LITERAL) {
+    if required_indent > 0 && p.at(MD_SETEXT_UNDERLINE_LITERAL) {
         let text = p.cur_text().trim_matches(|c| c == ' ' || c == '\t');
         if text == "-" {
             return false;
@@ -936,18 +937,24 @@ fn real_line_indent_from_source(p: &MarkdownParser) -> usize {
     let source = p.source().source_text();
     let pos: usize = p.cur_range().start().into();
 
-    // Find the start of the current line
     let line_start = source[..pos].rfind('\n').map_or(0, |i| i + 1);
-
-    // Count leading whitespace columns on this line
-    let mut column = 0;
-    for c in source[line_start..].chars() {
+    let content_start =
+        quote::skip_quote_prefixes_in_line(p, line_start, pos, p.state().block_quote_depth)
+            .unwrap_or(line_start);
+    let mut column = p.cached_absolute_column_at(content_start);
+    let start_column = if source[..content_start].ends_with(">\t") {
+        p.cached_absolute_column_at(content_start - 1) + 1
+    } else {
+        column
+    };
+    for c in source[content_start..].chars() {
         match c {
             ' ' => column += 1,
             '\t' => column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES),
             _ => break,
         }
     }
+    column -= start_column;
     column
 }
 
@@ -964,7 +971,7 @@ fn classify_quote_break_after_newline(
         // it is a thematic break that ends the list. Reporting it as `Other`
         // (vs `SetextUnderline`) keeps the `>` prefix unconsumed so the outer
         // blockquote can re-process the line.
-        let required_indent = p.state().list_item_required_indent;
+        let required_indent = list_indent_inside_quote(p);
         let residual_indent = leading_indent_at_current(p);
         let underline_in_container = required_indent == 0 || residual_indent >= required_indent;
         with_virtual_line_start(p, p.cur_range().start(), |p| {
@@ -980,12 +987,18 @@ fn classify_quote_break_after_newline(
                 return QuoteBreakKind::Other;
             }
             // Retry after short space indentation because the marker remains mid-line.
-            // Keep 4+ spaces lazy; tabs need retry because their width depends on position.
+            // Keep 4+ spaces past the indent the line reaches (the list item's
+            // content indent, or the quote content) lazy.
+            let reached_indent = if residual_indent >= required_indent {
+                required_indent
+            } else {
+                0
+            };
             let needs_ws_retry = p.at(MD_TEXTUAL_LITERAL) && {
                 let bytes = p.cur_text().as_bytes();
                 !bytes.is_empty()
                     && bytes.iter().all(|b| matches!(b, b' ' | b'\t'))
-                    && (bytes.contains(&b'\t') || residual_indent < INDENT_CODE_BLOCK_SPACES)
+                    && residual_indent - reached_indent < INDENT_CODE_BLOCK_SPACES
             };
             if !needs_ws_retry {
                 return QuoteBreakKind::None;
@@ -1019,7 +1032,13 @@ fn classify_quote_break_after_newline(
 /// candidate without advancing the real parser.
 fn leading_indent_at_current(p: &mut MarkdownParser) -> usize {
     p.lookahead(|p| {
-        let mut indent = 0usize;
+        let start: usize = p.cur_range().start().into();
+        let mut column = p.cached_absolute_column_at(start);
+        let start_column = if p.source().source_text()[..start].ends_with(">\t") {
+            p.cached_absolute_column_at(start - 1) + 1
+        } else {
+            column
+        };
         while p.at(MD_TEXTUAL_LITERAL) {
             let text = p.cur_text();
             if text.is_empty() {
@@ -1028,15 +1047,15 @@ fn leading_indent_at_current(p: &mut MarkdownParser) -> usize {
 
             for c in text.chars() {
                 match c {
-                    ' ' => indent += 1,
-                    '\t' => indent += TAB_STOP_SPACES - (indent % TAB_STOP_SPACES),
-                    _ => return indent,
+                    ' ' => column += 1,
+                    '\t' => column += TAB_STOP_SPACES - (column % TAB_STOP_SPACES),
+                    _ => return column - start_column,
                 }
             }
 
             p.bump(MD_TEXTUAL_LITERAL);
         }
-        indent
+        column - start_column
     })
 }
 
@@ -1405,7 +1424,11 @@ fn handle_line_continuation(
         return InlineNewlineAction::Break;
     }
 
-    let required_indent = p.state().list_item_required_indent;
+    let required_indent = if line_has_quote_prefix {
+        list_indent_inside_quote(p)
+    } else {
+        p.state().list_item_required_indent
+    };
     if break_for_setext_after_inline_newline(p, has_content, required_indent) {
         return InlineNewlineAction::Break;
     }
@@ -1874,6 +1897,7 @@ fn line_starts_with_fence(p: &mut MarkdownParser) -> bool {
 }
 
 fn consume_partial_quote_prefix(p: &mut MarkdownParser, depth: usize) -> bool {
+    let depth = unindented_quote_levels(p, depth);
     let mut consumed = 0usize;
     while consumed < depth && p.at(R_ANGLE) {
         // Emit as MdQuotePrefix (same structure as Phase 1 full quote prefixes)
@@ -1901,6 +1925,7 @@ fn consume_partial_quote_prefix(p: &mut MarkdownParser, depth: usize) -> bool {
 }
 
 fn consume_partial_quote_prefix_lookahead(p: &mut MarkdownParser, depth: usize) -> bool {
+    let depth = unindented_quote_levels(p, depth);
     let mut consumed = 0usize;
     while consumed < depth && p.at(R_ANGLE) {
         p.bump(R_ANGLE);
@@ -2080,7 +2105,7 @@ fn textual_looks_like_list_marker(p: &mut MarkdownParser) -> bool {
 /// means the marker is a sibling/parent boundary instead of an interrupter.
 fn can_ordered_marker_interrupt_paragraph(p: &mut MarkdownParser) -> bool {
     let in_list = p.state().list_nesting_depth > 0;
-    let required_indent = p.state().list_item_required_indent;
+    let required_indent = list_indent_inside_quote(p);
     let physical_indent = physical_line_start_indent(p);
     let is_sibling_or_parent = in_list && physical_indent < required_indent;
 
@@ -2121,23 +2146,10 @@ fn is_ordered_marker_empty_after_whitespace(p: &mut MarkdownParser) -> bool {
     })
 }
 
-/// Count physical leading columns, ignoring `virtual_line_start`.
-///
-/// This is needed after indentation has already been emitted as CST nodes.
-/// Tabs expand to the next multiple of `TAB_STOP_SPACES`.
+/// Count indentation within the current quote container, including whitespace
+/// already consumed as CST nodes.
 fn physical_line_start_indent(p: &MarkdownParser) -> usize {
-    let source = p.source().source_text();
-    let pos: usize = p.cur_range().start().into();
-    let line_start = source[..pos].rfind('\n').map_or(0, |idx| idx + 1);
-    let mut col = 0usize;
-    for c in source[line_start..].chars() {
-        match c {
-            ' ' => col += 1,
-            '\t' => col += TAB_STOP_SPACES - (col % TAB_STOP_SPACES),
-            _ => break,
-        }
-    }
-    col
+    real_line_indent_from_source(p)
 }
 
 /// Check if an ordered list marker starts with the number 1.
