@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-not-component.js
+---
+# Input
+```js
+/* should not generate diagnostics */
+const notAComponent = {
+  render() {
+    return this.$slots.default.length;
+  },
+};
+
+function render() {
+  return [...this.$slots.default];
+}
+
+```
