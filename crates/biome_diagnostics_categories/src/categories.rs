@@ -287,6 +287,7 @@ define_categories! {
     "lint/nursery/noRestrictedDependencies": "https://biomejs.dev/linter/rules/no-restricted-dependencies",
     "lint/nursery/noReturnInFinally": "https://biomejs.dev/linter/rules/no-return-in-finally",
     "lint/nursery/noSelfImport": "https://biomejs.dev/linter/rules/no-self-import",
+    "lint/nursery/noSelfNestedLayer": "https://biomejs.dev/linter/rules/no-self-nested-layer",
     "lint/nursery/noShortTimeValues": "https://biomejs.dev/linter/rules/no-short-time-values",
     "lint/nursery/noSvelteAddEventListener": "https://biomejs.dev/linter/rules/no-svelte-add-event-listener",
     "lint/nursery/noSvelteAtDebugTags": "https://biomejs.dev/linter/rules/no-svelte-at-debug-tags",

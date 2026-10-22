@@ -3153,6 +3153,11 @@ export interface Nursery {
 	 */
 	noSelfImport?: NoSelfImportConfiguration;
 	/**
+	 * Disallow nesting a cascade layer inside a layer with the same name.
+	 * See https://biomejs.dev/linter/rules/no-self-nested-layer
+	 */
+	noSelfNestedLayer?: NoSelfNestedLayerConfiguration;
+	/**
 	 * Disallow animation and transition times that are shorter than a configured minimum.
 	 * See https://biomejs.dev/linter/rules/no-short-time-values
 	 */
@@ -5941,6 +5946,9 @@ export type NoReturnInFinallyConfiguration =
 export type NoSelfImportConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoSelfImportOptions;
+export type NoSelfNestedLayerConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoSelfNestedLayerOptions;
 export type NoShortTimeValuesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoShortTimeValuesOptions;
@@ -8528,6 +8536,10 @@ export interface RuleWithNoReturnInFinallyOptions {
 export interface RuleWithNoSelfImportOptions {
 	level: RulePlainConfiguration;
 	options?: NoSelfImportOptions;
+}
+export interface RuleWithNoSelfNestedLayerOptions {
+	level: RulePlainConfiguration;
+	options?: NoSelfNestedLayerOptions;
 }
 export interface RuleWithNoShortTimeValuesOptions {
 	level: RulePlainConfiguration;
@@ -11144,6 +11156,7 @@ export type NoReactObjectTypeAsDefaultPropOptions = {};
 export type NoRestrictedDependenciesOptions = {};
 export type NoReturnInFinallyOptions = {};
 export type NoSelfImportOptions = {};
+export type NoSelfNestedLayerOptions = {};
 export interface NoShortTimeValuesOptions {
 	/**
 	 * The shortest time allowed for animations and transitions, as a whole number of milliseconds.
@@ -12942,6 +12955,7 @@ export type Category =
 	| "lint/nursery/noRestrictedDependencies"
 	| "lint/nursery/noReturnInFinally"
 	| "lint/nursery/noSelfImport"
+	| "lint/nursery/noSelfNestedLayer"
 	| "lint/nursery/noShortTimeValues"
 	| "lint/nursery/noSvelteAddEventListener"
 	| "lint/nursery/noSvelteAtDebugTags"

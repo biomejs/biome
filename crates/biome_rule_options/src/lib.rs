@@ -262,6 +262,7 @@ pub mod no_secrets;
 pub mod no_self_assign;
 pub mod no_self_compare;
 pub mod no_self_import;
+pub mod no_self_nested_layer;
 pub mod no_setter_return;
 pub mod no_shadow;
 pub mod no_shadow_restricted_names;
