@@ -3,8 +3,8 @@
 
 mod state;
 
-pub(crate) use state::DbReadGuard;
 pub use state::DbState;
+pub(crate) use state::{DbReadGuard, create_parsed_snippets};
 
 use crate::WorkspaceError;
 use crate::projects::{NestedPath, ProjectDb, ProjectInput, ProjectKey};
