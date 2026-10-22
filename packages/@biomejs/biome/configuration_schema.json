@@ -7562,6 +7562,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueMultipleSlotArgsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueMultipleSlotArgsOptions" }
+			]
+		},
+		"NoVueMultipleSlotArgsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueOptionsApiConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8345,6 +8355,13 @@
 					"description": "Disallow registering Vue lifecycle hooks after an await in setup().\nSee https://biomejs.dev/linter/rules/no-vue-lifecycle-after-await",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueLifecycleAfterAwaitConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueMultipleSlotArgs": {
+					"description": "Disallow passing more than one argument to a Vue slot.\nSee https://biomejs.dev/linter/rules/no-vue-multiple-slot-args",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueMultipleSlotArgsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13522,6 +13539,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueLifecycleAfterAwaitOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueMultipleSlotArgsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueMultipleSlotArgsOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
