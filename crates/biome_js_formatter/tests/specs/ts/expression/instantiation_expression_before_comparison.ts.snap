@@ -1,0 +1,29 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: ts/expression/instantiation_expression_before_comparison.ts
+---
+
+# Input
+
+```ts
+// Without the parentheses, these don't parse.
+x = (make<T>) < y;
+x = (make<T>) > y;
+x = (make<T>) >= y;
+x = (make<T>) >> y;
+x = (make<T>) >>> y;
+
+```
+
+
+# Formatted
+
+```ts
+// Without the parentheses, these don't parse.
+x = (make<T>) < y;
+x = (make<T>) > y;
+x = (make<T>) >= y;
+x = (make<T>) >> y;
+x = (make<T>) >>> y;
+
+```
