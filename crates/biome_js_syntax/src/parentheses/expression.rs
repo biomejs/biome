@@ -757,7 +757,8 @@ fn is_followed_by_operator_after_type_arguments(node: &TsInstantiationExpression
                             | JsBinaryOperator::UnsignedRightShift)
                     );
             }
-            AnyJsExpression::JsUnaryExpression(_) => expression = parent,
+            AnyJsExpression::JsUnaryExpression(_)
+            | AnyJsExpression::TsTypeAssertionExpression(_) => expression = parent,
             _ => return false,
         }
     }
