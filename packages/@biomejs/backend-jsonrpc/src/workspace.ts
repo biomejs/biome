@@ -3403,6 +3403,11 @@ export interface Nursery {
 	 */
 	noVueDeprecatedDeleteSet?: NoVueDeprecatedDeleteSetConfiguration;
 	/**
+	 * Disallow the deprecated destroyed and beforeDestroy lifecycle hooks in Vue components.
+	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-destroyed-lifecycle
+	 */
+	noVueDeprecatedDestroyedLifecycle?: NoVueDeprecatedDestroyedLifecycleConfiguration;
+	/**
 	 * Disallow the is attribute on HTML elements in Vue templates.
 	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-html-element-is
 	 */
@@ -6421,6 +6426,9 @@ export type NoVueDeprecatedConfigKeyCodesConfiguration =
 export type NoVueDeprecatedDeleteSetConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedDeleteSetOptions;
+export type NoVueDeprecatedDestroyedLifecycleConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDeprecatedDestroyedLifecycleOptions;
 export type NoVueDeprecatedHtmlElementIsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedHtmlElementIsOptions;
@@ -9313,6 +9321,14 @@ export interface RuleWithNoVueDeprecatedDeleteSetOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedDeleteSetOptions;
 }
+export interface RuleWithNoVueDeprecatedDestroyedLifecycleOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoVueDeprecatedDestroyedLifecycleOptions;
+}
 export interface RuleWithNoVueDeprecatedHtmlElementIsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedHtmlElementIsOptions;
@@ -12080,6 +12096,7 @@ export type NoVueBooleanDefaultOptions = {};
 export type NoVueComputedPropertiesInDataOptions = {};
 export type NoVueDeprecatedConfigKeyCodesOptions = {};
 export type NoVueDeprecatedDeleteSetOptions = {};
+export type NoVueDeprecatedDestroyedLifecycleOptions = {};
 export type NoVueDeprecatedHtmlElementIsOptions = {};
 export type NoVueDeprecatedInlineTemplateOptions = {};
 export type NoVueDeprecatedListenersOptions = {};
@@ -13983,6 +14000,7 @@ export type Category =
 	| "lint/nursery/noVueComputedPropertiesInData"
 	| "lint/nursery/noVueDeprecatedConfigKeyCodes"
 	| "lint/nursery/noVueDeprecatedDeleteSet"
+	| "lint/nursery/noVueDeprecatedDestroyedLifecycle"
 	| "lint/nursery/noVueDeprecatedHtmlElementIs"
 	| "lint/nursery/noVueDeprecatedInlineTemplate"
 	| "lint/nursery/noVueDeprecatedListeners"
