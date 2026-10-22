@@ -8841,6 +8841,13 @@
 						{ "$ref": "#/$defs/UseVueTypedRefConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useVueValidNextTick": {
+					"description": "Enforce valid calls to Vue's nextTick function.\nSee https://biomejs.dev/linter/rules/use-vue-valid-next-tick",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueValidNextTickConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -16123,6 +16130,19 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueValidNextTickOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidNextTickOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueValidTemplateRootOptions": {
 			"type": "object",
 			"properties": {
@@ -21445,6 +21465,16 @@
 			]
 		},
 		"UseVueVForKeyOptions": { "type": "object", "additionalProperties": false },
+		"UseVueValidNextTickConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidNextTickOptions" }
+			]
+		},
+		"UseVueValidNextTickOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseVueValidTemplateRootConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
