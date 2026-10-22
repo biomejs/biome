@@ -8543,6 +8543,13 @@
 						{ "type": "null" }
 					]
 				},
+				"usePackageJsonValidCpu": {
+					"description": "Require the cpu field in package.json to be a valid list of processor types.\nSee https://biomejs.dev/linter/rules/use-package-json-valid-cpu",
+					"anyOf": [
+						{ "$ref": "#/$defs/UsePackageJsonValidCpuConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"usePromiseRejectErrors": {
 					"description": "Require Error objects as Promise rejection reasons.\nSee https://biomejs.dev/linter/rules/use-promise-reject-errors",
 					"anyOf": [
@@ -15030,6 +15037,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUsePackageJsonValidCpuOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UsePackageJsonValidCpuOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseParseIntRadixOptions": {
 			"type": "object",
 			"properties": {
@@ -20120,6 +20136,16 @@
 			]
 		},
 		"UseOptionalChainOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UsePackageJsonValidCpuConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUsePackageJsonValidCpuOptions" }
+			]
+		},
+		"UsePackageJsonValidCpuOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
