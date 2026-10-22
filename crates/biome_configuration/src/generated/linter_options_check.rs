@@ -2941,6 +2941,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "useVueVForKey",
         TypeId::of::<biome_rule_options::use_vue_v_for_key::UseVueVForKeyOptions>(),
     ));
+    result.push((
+        "nursery",
+        "useVueValidAttributeName",
+        TypeId::of::<
+            biome_rule_options::use_vue_valid_attribute_name::UseVueValidAttributeNameOptions,
+        >(),
+    ));
     result.push(("correctness", "useVueValidTemplateRoot", TypeId::of::<biome_rule_options::use_vue_valid_template_root::UseVueValidTemplateRootOptions>()));
     result.push((
         "correctness",
