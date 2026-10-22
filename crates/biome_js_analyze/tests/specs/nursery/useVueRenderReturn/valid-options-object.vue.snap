@@ -1,0 +1,21 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-options-object.vue
+---
+# Input
+```vue
+<script>
+/* should not generate diagnostics */
+import { h } from "vue";
+
+export default {
+	render() {
+		if (this.visible) {
+			return h("div", "hello");
+		}
+		return null;
+	},
+};
+</script>
+
+```

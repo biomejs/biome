@@ -1,7 +1,7 @@
-use biome_analyze::QueryMatch;
+use biome_analyze::context::RuleContext;
 use biome_analyze::{
-    AddVisitor, FromServices, Phase, Phases, Queryable, RuleKey, RuleMetadata, ServiceBag,
-    ServicesDiagnostic, Visitor, VisitorContext,
+    AddVisitor, FromServices, Phase, Phases, QueryMatch, Queryable, Rule, RuleKey, RuleMetadata,
+    ServiceBag, ServicesDiagnostic, Visitor, VisitorContext,
 };
 use biome_db::AnyParsedSource;
 use biome_js_control_flow::{control_flow_model, js_control_flow_model};
@@ -95,5 +95,29 @@ impl Visitor for ControlFlowGraphVisitor {
         _: Option<SyntaxKindSet<JsLanguage>>,
     ) -> Option<SyntaxKindSet<JsLanguage>> {
         Some(AnyJsRoot::KIND_SET)
+    }
+}
+
+/// Returns the control flow graph of `root`, an execution root of the tree the
+/// rule analyzes.
+///
+/// Rules whose query is not [`ControlFlowGraph`] use this to read the graph of
+/// a function they found.
+pub(crate) fn control_flow_graph<R>(
+    ctx: &RuleContext<R>,
+    root: &AnyJsControlFlowRoot,
+) -> Option<JsControlFlowGraph>
+where
+    R: Rule + 'static,
+    R::Query: Queryable<Language = JsLanguage>,
+{
+    if let Some(db) = ctx.get_service::<Rc<dyn LanguageDb>>()
+        && let Some(source) = ctx.get_service::<AnyParsedSource>()
+    {
+        js_control_flow_model(db.as_ref(), source).graph(root)
+    } else {
+        // Fix passes and standalone callers analyze trees that are not stored
+        // in the database.
+        control_flow_model(&ctx.root()).graph(root)
     }
 }
