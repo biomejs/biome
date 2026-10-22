@@ -3763,6 +3763,11 @@ export interface Nursery {
 	 */
 	useVueVOnExact?: UseVueVOnExactConfiguration;
 	/**
+	 * Enforce valid v-show directives.
+	 * See https://biomejs.dev/linter/rules/use-vue-valid-v-show
+	 */
+	useVueValidVShow?: UseVueValidVShowConfiguration;
+	/**
 	 * Require the condition that ends a loop to be written in the while statement.
 	 * See https://biomejs.dev/linter/rules/use-while-loop-condition
 	 */
@@ -6402,6 +6407,9 @@ export type UseVueTypedRefConfiguration =
 export type UseVueVOnExactConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueVOnExactOptions;
+export type UseVueValidVShowConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidVShowOptions;
 export type UseWhileLoopConditionConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseWhileLoopConditionOptions;
@@ -9357,6 +9365,10 @@ export interface RuleWithUseVueVOnExactOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueVOnExactOptions;
 }
+export interface RuleWithUseVueValidVShowOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueValidVShowOptions;
+}
 export interface RuleWithUseWhileLoopConditionOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -11750,6 +11762,7 @@ export type UseVueTemplateRefOptions = {};
 export type UseVueToggleInsideTransitionOptions = {};
 export type UseVueTypedRefOptions = {};
 export type UseVueVOnExactOptions = {};
+export type UseVueValidVShowOptions = {};
 export type UseWhileLoopConditionOptions = {};
 export type NoAccumulatingSpreadOptions = {};
 export type NoAwaitInLoopsOptions = {};
@@ -13365,6 +13378,7 @@ export type Category =
 	| "lint/nursery/useVueValidVModel"
 	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useWhileLoopCondition"
+	| "lint/nursery/useVueValidVShow"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noAwaitInLoops"
 	| "lint/performance/noBarrelFile"
