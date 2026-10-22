@@ -1,0 +1,53 @@
+---
+source: crates/biome_html_analyze/tests/spec_tests.rs
+assertion_line: 121
+expression: invalid.svelte
+---
+# Input
+```svelte
+<!-- should generate diagnostics -->
+<table bgcolor={color}></table>
+<img src="/photo.jpg" alt="" border="0" />
+
+```
+
+# Diagnostics
+```
+invalid.svelte:2:8 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The bgcolor attribute on <table> is obsolete.
+  
+    1 │ <!-- should generate diagnostics -->
+  > 2 │ <table bgcolor={color}></table>
+      │        ^^^^^^^^^^^^^^^
+    3 │ <img src="/photo.jpg" alt="" border="0" />
+    4 │ 
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.svelte:3:30 lint/nursery/noObsoleteAttributes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The border attribute on <img> is obsolete.
+  
+    1 │ <!-- should generate diagnostics -->
+    2 │ <table bgcolor={color}></table>
+  > 3 │ <img src="/photo.jpg" alt="" border="0" />
+      │                              ^^^^^^^^^^
+    4 │ 
+  
+  i Obsolete attributes should no longer be used. Browsers might ignore them or handle them differently from each other.
+  
+  i Use CSS instead.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

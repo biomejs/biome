@@ -3098,6 +3098,11 @@ export interface Nursery {
 	 */
 	noObjectConstructor?: NoObjectConstructorConfiguration;
 	/**
+	 * Disallow obsolete attributes on HTML elements.
+	 * See https://biomejs.dev/linter/rules/no-obsolete-attributes
+	 */
+	noObsoleteAttributes?: NoObsoleteAttributesConfiguration;
+	/**
 	 * Disallow obsolete HTML elements.
 	 * See https://biomejs.dev/linter/rules/no-obsolete-tags
 	 */
@@ -5883,6 +5888,9 @@ export type NoNonScalableViewportConfiguration =
 export type NoObjectConstructorConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoObjectConstructorOptions;
+export type NoObsoleteAttributesConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoObsoleteAttributesOptions;
 export type NoObsoleteTagsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoObsoleteTagsOptions;
@@ -8440,6 +8448,10 @@ export interface RuleWithNoObjectConstructorOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoObjectConstructorOptions;
+}
+export interface RuleWithNoObsoleteAttributesOptions {
+	level: RulePlainConfiguration;
+	options?: NoObsoleteAttributesOptions;
 }
 export interface RuleWithNoObsoleteTagsOptions {
 	level: RulePlainConfiguration;
@@ -11069,6 +11081,7 @@ export type NoNestedTemplateLiteralsOptions = {};
 export type NoNewRequireOptions = {};
 export type NoNonScalableViewportOptions = {};
 export type NoObjectConstructorOptions = {};
+export type NoObsoleteAttributesOptions = {};
 export type NoObsoleteTagsOptions = {};
 export type NoOctalOptions = {};
 export type NoPathConcatOptions = {};
@@ -12841,6 +12854,7 @@ export type Category =
 	| "lint/nursery/noNewRequire"
 	| "lint/nursery/noNonScalableViewport"
 	| "lint/nursery/noObjectConstructor"
+	| "lint/nursery/noObsoleteAttributes"
 	| "lint/nursery/noObsoleteTags"
 	| "lint/nursery/noOctal"
 	| "lint/nursery/noPathConcat"
