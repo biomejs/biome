@@ -9,6 +9,7 @@ mod services;
 mod suppression;
 mod suppression_action;
 mod tailwind;
+mod vue;
 
 pub use crate::registry::visit_registry;
 pub use crate::services::aria::{Aria, AriaServices};

@@ -3763,6 +3763,11 @@ export interface Nursery {
 	 */
 	useVueVOnExact?: UseVueVOnExactConfiguration;
 	/**
+	 * Enforce valid v-is Vue directives.
+	 * See https://biomejs.dev/linter/rules/use-vue-valid-v-is
+	 */
+	useVueValidVIs?: UseVueValidVIsConfiguration;
+	/**
 	 * Enforce valid v-show directives.
 	 * See https://biomejs.dev/linter/rules/use-vue-valid-v-show
 	 */
@@ -6407,6 +6412,9 @@ export type UseVueTypedRefConfiguration =
 export type UseVueVOnExactConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueVOnExactOptions;
+export type UseVueValidVIsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueValidVIsOptions;
 export type UseVueValidVShowConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueValidVShowOptions;
@@ -9365,6 +9373,10 @@ export interface RuleWithUseVueVOnExactOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueVOnExactOptions;
 }
+export interface RuleWithUseVueValidVIsOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueValidVIsOptions;
+}
 export interface RuleWithUseVueValidVShowOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueValidVShowOptions;
@@ -11762,6 +11774,7 @@ export type UseVueTemplateRefOptions = {};
 export type UseVueToggleInsideTransitionOptions = {};
 export type UseVueTypedRefOptions = {};
 export type UseVueVOnExactOptions = {};
+export type UseVueValidVIsOptions = {};
 export type UseVueValidVShowOptions = {};
 export type UseWhileLoopConditionOptions = {};
 export type NoAccumulatingSpreadOptions = {};
@@ -13375,6 +13388,7 @@ export type Category =
 	| "lint/nursery/useVueToggleInsideTransition"
 	| "lint/nursery/useVueTypedRef"
 	| "lint/nursery/useVueValidVFor"
+	| "lint/nursery/useVueValidVIs"
 	| "lint/nursery/useVueValidVModel"
 	| "lint/nursery/useVueVOnExact"
 	| "lint/nursery/useWhileLoopCondition"
