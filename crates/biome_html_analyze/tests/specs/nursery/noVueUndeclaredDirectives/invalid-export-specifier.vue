@@ -1,4 +1,4 @@
-<!-- should not generate diagnostics -->
+<!-- should generate diagnostics -->
 <script>
 const componentOptions = {};
 export { componentOptions as default };

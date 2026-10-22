@@ -1,12 +1,12 @@
-use crate::services::embedded::EmbeddedService;
+use crate::services::vue::VueSemantic;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{Ast, Rule, RuleDiagnostic, RuleDomain, declare_lint_rule};
+use biome_analyze::{Rule, RuleDiagnostic, RuleDomain, declare_lint_rule};
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_embeds::{VueDirectiveResolution, vue_directive_binding_name};
+use biome_embeds::vue_directive_binding_name;
 use biome_html_syntax::{HtmlSyntaxToken, VueDirective};
-use biome_languages::HtmlFileSource;
 use biome_rule_options::no_vue_undeclared_directives::NoVueUndeclaredDirectivesOptions;
+use biome_vue_semantic::Resolution;
 
 declare_lint_rule! {
     /// Disallow custom Vue directives that are not declared.
@@ -100,16 +100,12 @@ declare_lint_rule! {
 }
 
 impl Rule for NoVueUndeclaredDirectives {
-    type Query = Ast<VueDirective>;
+    type Query = VueSemantic<VueDirective>;
     type State = HtmlSyntaxToken;
     type Signals = Option<Self::State>;
     type Options = NoVueUndeclaredDirectivesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        if !ctx.source_type::<HtmlFileSource>().is_vue() {
-            return None;
-        }
-
         let directive = ctx.query();
         if directive.is_builtin() {
             return None;
@@ -129,12 +125,12 @@ impl Rule for NoVueUndeclaredDirectives {
             return None;
         }
 
-        match ctx
-            .get_service::<EmbeddedService>()?
-            .resolve_vue_directive(name)
-        {
-            VueDirectiveResolution::Undeclared => Some(token),
-            VueDirectiveResolution::Declared | VueDirectiveResolution::Unknown => None,
+        // The model holds no reference for a built-in directive, and none at
+        // all when it couldn't read the file.
+        let reference = ctx.model().reference_at(token.text_trimmed_range())?;
+        match reference.resolution() {
+            Resolution::Unresolved => Some(token),
+            Resolution::Symbol(_) | Resolution::Global | Resolution::Unknowable => None,
         }
     }
 
