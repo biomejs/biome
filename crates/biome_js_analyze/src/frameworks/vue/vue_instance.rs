@@ -10,8 +10,8 @@ use crate::frameworks::vue::vue_component::{
 use crate::services::embedded::EmbeddedService;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsIdentifierReference, JsIdentifierExpression, JsName, JsSyntaxToken,
-    JsThisExpression, JsVariableDeclaration, JsVariableDeclarator,
+    AnyJsExpression, AnyJsIdentifierReference, JsIdentifierExpression, JsLanguage, JsName,
+    JsSyntaxToken, JsThisExpression, JsVariableDeclaration, JsVariableDeclarator,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::AstNode;
@@ -71,7 +71,11 @@ pub fn component_instance_property_member(
     Some(token)
 }
 
-fn is_this_or_direct_const_alias(object: AnyJsExpression, model: &SemanticModel) -> bool {
+/// Returns `true` if `object` is `this`, or a variable declared with `const alias = this`.
+///
+/// Parentheses around `object` and around the initializer are ignored. Aliases of aliases and
+/// variables declared with `let` or `var` are not followed.
+pub fn is_this_or_direct_const_alias(object: AnyJsExpression, model: &SemanticModel) -> bool {
     let object = object.omit_parentheses();
     if JsThisExpression::can_cast(object.syntax().kind()) {
         return true;
@@ -117,14 +121,19 @@ fn is_direct_const_this_alias(identifier: &JsIdentifierExpression, model: &Seman
         .is_some_and(|initializer| JsThisExpression::can_cast(initializer.syntax().kind()))
 }
 
-fn is_in_component_definition_object(
-    member: &JsName,
+/// Returns `true` if `node` is inside the object literal that defines an Options API component,
+/// such as the object passed to `defineComponent()` or `createApp()`, or the default export of a
+/// Vue file.
+///
+/// `<script setup>` components have no such object, so code in them never matches.
+pub fn is_in_component_definition_object(
+    node: &impl AstNode<Language = JsLanguage>,
     model: &SemanticModel,
     source: &JsFileSource,
     path: &Utf8Path,
 ) -> bool {
-    let member = member.syntax();
-    member.ancestors().skip(1).any(|ancestor| {
+    let node = node.syntax();
+    node.ancestors().skip(1).any(|ancestor| {
         let Some(potential_component) = AnyPotentialVueComponent::cast(ancestor) else {
             return false;
         };
@@ -144,8 +153,7 @@ fn is_in_component_definition_object(
             .and_then(|definition| definition.inner_expression())
             .and_then(|definition| definition.as_js_object_expression().cloned())
             .is_some_and(|definition| {
-                member
-                    .ancestors()
+                node.ancestors()
                     .any(|ancestor| ancestor == *definition.syntax())
             })
     })

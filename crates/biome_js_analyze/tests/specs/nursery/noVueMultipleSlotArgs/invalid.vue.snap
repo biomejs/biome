@@ -1,0 +1,328 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script>
+export default {
+  render() {
+    this.$slots.default(foo, bar);
+    this.$slots.foo(foo, { bar });
+    this.$slots["header"](foo, bar);
+    this.$slots.default(...foo);
+    this.$slots.default(...foo, bar);
+
+    this?.$slots?.default?.(foo, bar);
+    this.$slots.default?.(foo, bar);
+    (this?.$slots)?.default?.(foo, bar);
+    (this.$slots.default)(foo, bar);
+
+    const vm = this;
+    vm.$slots.default(foo, bar);
+    vm?.$slots?.foo?.(foo, bar);
+
+    const item = this.$slots.item;
+    item(foo, bar);
+
+    let children;
+    children = this.$slots.children;
+    if (children) children(...foo);
+  },
+};
+</script>
+
+```
+
+# Diagnostics
+```
+invalid.vue:5:30 lint/nursery/noVueMultipleSlotArgs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This slot is called with more than one argument.
+  
+    3 │ export default {
+    4 │   render() {
+  > 5 │     this.$slots.default(foo, bar);
+      │                              ^^^
+    6 │     this.$slots.foo(foo, { bar });
+    7 │     this.$slots["header"](foo, bar);
+  
+  i Slot content written in a template receives only the first argument, so the other arguments are lost.
+  
+  i Pass a single object that holds all the values, for example this.$slots.default({ item, index }).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:6:26 lint/nursery/noVueMultipleSlotArgs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This slot is called with more than one argument.
+  
+    4 │   render() {
+    5 │     this.$slots.default(foo, bar);
+  > 6 │     this.$slots.foo(foo, { bar });
+      │                          ^^^^^^^
+    7 │     this.$slots["header"](foo, bar);
+    8 │     this.$slots.default(...foo);
+  
+  i Slot content written in a template receives only the first argument, so the other arguments are lost.
+  
+  i Pass a single object that holds all the values, for example this.$slots.default({ item, index }).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:7:32 lint/nursery/noVueMultipleSlotArgs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This slot is called with more than one argument.
+  
+    5 │     this.$slots.default(foo, bar);
+    6 │     this.$slots.foo(foo, { bar });
+  > 7 │     this.$slots["header"](foo, bar);
+      │                                ^^^
+    8 │     this.$slots.default(...foo);
+    9 │     this.$slots.default(...foo, bar);
+  
+  i Slot content written in a template receives only the first argument, so the other arguments are lost.
+  
+  i Pass a single object that holds all the values, for example this.$slots.default({ item, index }).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:8:25 lint/nursery/noVueMultipleSlotArgs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This slot is called with a spread argument.
+  
+     6 │     this.$slots.foo(foo, { bar });
+     7 │     this.$slots["header"](foo, bar);
+   > 8 │     this.$slots.default(...foo);
+       │                         ^^^^^^
+     9 │     this.$slots.default(...foo, bar);
+    10 │ 
+  
+  i Spreading passes each item as a separate argument, but slot content written in a template receives only the first one.
+  
+  i Pass a single object that holds all the values, for example this.$slots.default({ item, index }).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:25 lint/nursery/noVueMultipleSlotArgs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This slot is called with a spread argument.
+  
+     7 │     this.$slots["header"](foo, bar);
+     8 │     this.$slots.default(...foo);
+   > 9 │     this.$slots.default(...foo, bar);
+       │                         ^^^^^^
+    10 │ 
+    11 │     this?.$slots?.default?.(foo, bar);
+  
+  i Spreading passes each item as a separate argument, but slot content written in a template receives only the first one.
+  
+  i Pass a single object that holds all the values, for example this.$slots.default({ item, index }).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:9:33 lint/nursery/noVueMultipleSlotArgs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This slot is called with more than one argument.
+  
+     7 │     this.$slots["header"](foo, bar);
+     8 │     this.$slots.default(...foo);
+   > 9 │     this.$slots.default(...foo, bar);
+       │                                 ^^^
+    10 │ 
+    11 │     this?.$slots?.default?.(foo, bar);
+  
+  i Slot content written in a template receives only the first argument, so the other arguments are lost.
+  
+  i Pass a single object that holds all the values, for example this.$slots.default({ item, index }).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:11:34 lint/nursery/noVueMultipleSlotArgs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This slot is called with more than one argument.
+  
+     9 │     this.$slots.default(...foo, bar);
+    10 │ 
+  > 11 │     this?.$slots?.default?.(foo, bar);
+       │                                  ^^^
+    12 │     this.$slots.default?.(foo, bar);
+    13 │     (this?.$slots)?.default?.(foo, bar);
+  
+  i Slot content written in a template receives only the first argument, so the other arguments are lost.
+  
+  i Pass a single object that holds all the values, for example this.$slots.default({ item, index }).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:12:32 lint/nursery/noVueMultipleSlotArgs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This slot is called with more than one argument.
+  
+    11 │     this?.$slots?.default?.(foo, bar);
+  > 12 │     this.$slots.default?.(foo, bar);
+       │                                ^^^
+    13 │     (this?.$slots)?.default?.(foo, bar);
+    14 │     (this.$slots.default)(foo, bar);
+  
+  i Slot content written in a template receives only the first argument, so the other arguments are lost.
+  
+  i Pass a single object that holds all the values, for example this.$slots.default({ item, index }).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:13:36 lint/nursery/noVueMultipleSlotArgs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This slot is called with more than one argument.
+  
+    11 │     this?.$slots?.default?.(foo, bar);
+    12 │     this.$slots.default?.(foo, bar);
+  > 13 │     (this?.$slots)?.default?.(foo, bar);
+       │                                    ^^^
+    14 │     (this.$slots.default)(foo, bar);
+    15 │ 
+  
+  i Slot content written in a template receives only the first argument, so the other arguments are lost.
+  
+  i Pass a single object that holds all the values, for example this.$slots.default({ item, index }).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:14:32 lint/nursery/noVueMultipleSlotArgs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This slot is called with more than one argument.
+  
+    12 │     this.$slots.default?.(foo, bar);
+    13 │     (this?.$slots)?.default?.(foo, bar);
+  > 14 │     (this.$slots.default)(foo, bar);
+       │                                ^^^
+    15 │ 
+    16 │     const vm = this;
+  
+  i Slot content written in a template receives only the first argument, so the other arguments are lost.
+  
+  i Pass a single object that holds all the values, for example this.$slots.default({ item, index }).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:17:28 lint/nursery/noVueMultipleSlotArgs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This slot is called with more than one argument.
+  
+    16 │     const vm = this;
+  > 17 │     vm.$slots.default(foo, bar);
+       │                            ^^^
+    18 │     vm?.$slots?.foo?.(foo, bar);
+    19 │ 
+  
+  i Slot content written in a template receives only the first argument, so the other arguments are lost.
+  
+  i Pass a single object that holds all the values, for example this.$slots.default({ item, index }).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:18:28 lint/nursery/noVueMultipleSlotArgs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This slot is called with more than one argument.
+  
+    16 │     const vm = this;
+    17 │     vm.$slots.default(foo, bar);
+  > 18 │     vm?.$slots?.foo?.(foo, bar);
+       │                            ^^^
+    19 │ 
+    20 │     const item = this.$slots.item;
+  
+  i Slot content written in a template receives only the first argument, so the other arguments are lost.
+  
+  i Pass a single object that holds all the values, for example this.$slots.default({ item, index }).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:21:15 lint/nursery/noVueMultipleSlotArgs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This slot is called with more than one argument.
+  
+    20 │     const item = this.$slots.item;
+  > 21 │     item(foo, bar);
+       │               ^^^
+    22 │ 
+    23 │     let children;
+  
+  i Slot content written in a template receives only the first argument, so the other arguments are lost.
+  
+  i Pass a single object that holds all the values, for example this.$slots.default({ item, index }).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid.vue:25:28 lint/nursery/noVueMultipleSlotArgs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This slot is called with a spread argument.
+  
+    23 │     let children;
+    24 │     children = this.$slots.children;
+  > 25 │     if (children) children(...foo);
+       │                            ^^^^^^
+    26 │   },
+    27 │ };
+  
+  i Spreading passes each item as a separate argument, but slot content written in a template receives only the first one.
+  
+  i Pass a single object that holds all the values, for example this.$slots.default({ item, index }).
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
