@@ -10,8 +10,12 @@ use biome_css_syntax::keywords::{
     RESOURCE_STATE_PSEUDO_CLASSES, SHADOW_TREE_PSEUDO_ELEMENTS, SHORTHAND_PROPERTIES, SVG_TAGS,
     VENDOR_PREFIXES, VENDOR_SPECIFIC_PSEUDO_ELEMENTS,
 };
-
+use biome_css_syntax::{
+    CssDeclarationWithSemicolon, CssSyntaxKind, CssSyntaxToken, ScssNestingDeclaration,
+};
+use biome_rowan::{AstNode, declare_node_union};
 use biome_string_case::{StrLikeExtension, StrOnlyExtension};
+use std::iter::successors;
 
 pub fn is_css_variable(value: &str) -> bool {
     value.to_ascii_lowercase_cow().starts_with("var(")
@@ -151,4 +155,78 @@ pub fn is_known_type_selector(prop: &str) -> bool {
 /// See https://github.com/css-modules/css-modules for more details.
 pub fn is_css_module_pseudo_class(prop: &str) -> bool {
     CSS_MODULE_PSEUDO_CLASSES.binary_search(&prop).is_ok()
+}
+
+declare_node_union! {
+    /// A statement that sets a property: either a declaration, such as
+    /// `transition: all 1s;`, or an SCSS group of nested properties, such as
+    /// `transition: { duration: 1s; }`.
+    ///
+    /// Declarations in a condition, such as `@supports (transition: all 1s)`,
+    /// aren't statements. They only test for browser support.
+    pub AnyPropertyStatement = CssDeclarationWithSemicolon | ScssNestingDeclaration
+}
+
+impl AnyPropertyStatement {
+    /// Returns the token of the property name, or `None` if the name isn't a
+    /// plain identifier.
+    pub fn name(&self) -> Option<CssSyntaxToken> {
+        let name = match self {
+            Self::CssDeclarationWithSemicolon(statement) => statement
+                .declaration()
+                .ok()?
+                .property()
+                .ok()?
+                .as_css_generic_property()?
+                .name(),
+            Self::ScssNestingDeclaration(group) => group.name(),
+        };
+        name.ok()?.declaration().ok()
+    }
+
+    /// Returns the SCSS group of nested properties whose block contains this
+    /// statement.
+    ///
+    /// Sass emits the properties in an `@if`, `@else`, `@each`, `@for`,
+    /// `@while`, or `@include` block as part of the group around it, so those
+    /// blocks are looked through. Returns `None` if the statement isn't in a
+    /// group, or if a nested rule or any other at-rule, such as `@media`, is
+    /// between them.
+    pub fn group(&self) -> Option<Self> {
+        self.syntax()
+            .ancestors()
+            .skip(1)
+            .find(|ancestor| {
+                !matches!(
+                    ancestor.kind(),
+                    CssSyntaxKind::CSS_DECLARATION_OR_RULE_LIST
+                        | CssSyntaxKind::CSS_DECLARATION_OR_RULE_BLOCK
+                        | CssSyntaxKind::CSS_AT_RULE
+                        | CssSyntaxKind::SCSS_IF_AT_RULE
+                        | CssSyntaxKind::SCSS_ELSE_CLAUSE
+                        | CssSyntaxKind::SCSS_EACH_AT_RULE
+                        | CssSyntaxKind::SCSS_FOR_AT_RULE
+                        | CssSyntaxKind::SCSS_WHILE_AT_RULE
+                        | CssSyntaxKind::SCSS_INCLUDE_AT_RULE
+                )
+            })
+            .and_then(ScssNestingDeclaration::cast)
+            .map(Self::from)
+    }
+}
+
+/// Returns the name Sass emits for the property `name` nested in `group`.
+///
+/// Sass joins the name of a nested property to the names of the groups
+/// around it, so `left-radius` in `border: { top: { left-radius: 1px; } }` sets
+/// `border-top-left-radius`. Returns `None` if the name of a group isn't a
+/// plain identifier, such as an interpolated `#{$side}`.
+pub fn nested_property_name(name: &str, group: AnyPropertyStatement) -> Option<String> {
+    let mut full_name = String::from(name);
+    for group in successors(Some(group), AnyPropertyStatement::group) {
+        let group_name = group.name()?;
+        full_name.insert(0, '-');
+        full_name.insert_str(0, group_name.text_trimmed());
+    }
+    Some(full_name)
 }
