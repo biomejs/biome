@@ -429,6 +429,7 @@ pub mod no_vue_root_v_if;
 pub mod no_vue_setup_props_reactivity_loss;
 pub mod no_vue_shadow_native_events;
 pub mod no_vue_side_effects_in_computed;
+pub mod no_vue_template_key;
 pub mod no_vue_this_in_before_route_enter;
 pub mod no_vue_undeclared_directives;
 pub mod no_vue_undeclared_emits;
