@@ -203,6 +203,7 @@ pub const UNSUPPORTED_RULES: &[UnsupportedRule] = &[
         EslintBetterTailwindcss("no-unnecessary-whitespace"),
         FormatterCovers,
     ),
+    UnsupportedRule(EslintImport("imports-first"), Deprecated),
     UnsupportedRule(EslintJest("padding-around-after-all-blocks"), Stylistic),
     UnsupportedRule(EslintJest("padding-around-after-each-blocks"), Stylistic),
     UnsupportedRule(EslintJest("padding-around-all"), Stylistic),
