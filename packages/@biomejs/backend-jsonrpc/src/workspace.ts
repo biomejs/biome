@@ -3403,6 +3403,11 @@ export interface Nursery {
 	 */
 	noVueDeprecatedDeleteSet?: NoVueDeprecatedDeleteSetConfiguration;
 	/**
+	 * Disallow the is attribute on HTML elements in Vue templates.
+	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-html-element-is
+	 */
+	noVueDeprecatedHtmlElementIs?: NoVueDeprecatedHtmlElementIsConfiguration;
+	/**
 	 * Disallow the inline-template attribute on Vue components.
 	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-inline-template
 	 */
@@ -6416,6 +6421,9 @@ export type NoVueDeprecatedConfigKeyCodesConfiguration =
 export type NoVueDeprecatedDeleteSetConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedDeleteSetOptions;
+export type NoVueDeprecatedHtmlElementIsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDeprecatedHtmlElementIsOptions;
 export type NoVueDeprecatedInlineTemplateConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedInlineTemplateOptions;
@@ -9305,6 +9313,10 @@ export interface RuleWithNoVueDeprecatedDeleteSetOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedDeleteSetOptions;
 }
+export interface RuleWithNoVueDeprecatedHtmlElementIsOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueDeprecatedHtmlElementIsOptions;
+}
 export interface RuleWithNoVueDeprecatedInlineTemplateOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedInlineTemplateOptions;
@@ -12068,6 +12080,7 @@ export type NoVueBooleanDefaultOptions = {};
 export type NoVueComputedPropertiesInDataOptions = {};
 export type NoVueDeprecatedConfigKeyCodesOptions = {};
 export type NoVueDeprecatedDeleteSetOptions = {};
+export type NoVueDeprecatedHtmlElementIsOptions = {};
 export type NoVueDeprecatedInlineTemplateOptions = {};
 export type NoVueDeprecatedListenersOptions = {};
 export type NoVueDeprecatedModelDefinitionOptions = {};
@@ -13970,6 +13983,7 @@ export type Category =
 	| "lint/nursery/noVueComputedPropertiesInData"
 	| "lint/nursery/noVueDeprecatedConfigKeyCodes"
 	| "lint/nursery/noVueDeprecatedDeleteSet"
+	| "lint/nursery/noVueDeprecatedHtmlElementIs"
 	| "lint/nursery/noVueDeprecatedInlineTemplate"
 	| "lint/nursery/noVueDeprecatedListeners"
 	| "lint/nursery/noVueDeprecatedModelDefinition"
