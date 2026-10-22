@@ -1,0 +1,112 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.ts
+---
+# Input
+```ts
+/* should generate diagnostics */
+var a = (function () { foo(); } as Callback).bind(bar);
+var b = (function () { foo(); } satisfies Callback).bind(bar);
+var c = (function () { foo(); })!.bind(bar);
+var d = function (this: Foo) { foo(); }.bind(bar);
+
+```
+
+# Diagnostics
+```
+invalid.ts:2:46 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    1 │ /* should generate diagnostics */
+  > 2 │ var a = (function () { foo(); } as Callback).bind(bar);
+      │                                              ^^^^
+    3 │ var b = (function () { foo(); } satisfies Callback).bind(bar);
+    4 │ var c = (function () { foo(); })!.bind(bar);
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    2 │ var·a·=·(function·()·{·foo();·}·as·Callback).bind(bar);
+      │                                             ---------- 
+
+```
+
+```
+invalid.ts:3:53 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    1 │ /* should generate diagnostics */
+    2 │ var a = (function () { foo(); } as Callback).bind(bar);
+  > 3 │ var b = (function () { foo(); } satisfies Callback).bind(bar);
+      │                                                     ^^^^
+    4 │ var c = (function () { foo(); })!.bind(bar);
+    5 │ var d = function (this: Foo) { foo(); }.bind(bar);
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    3 │ var·b·=·(function·()·{·foo();·}·satisfies·Callback).bind(bar);
+      │                                                    ---------- 
+
+```
+
+```
+invalid.ts:4:35 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    2 │ var a = (function () { foo(); } as Callback).bind(bar);
+    3 │ var b = (function () { foo(); } satisfies Callback).bind(bar);
+  > 4 │ var c = (function () { foo(); })!.bind(bar);
+      │                                   ^^^^
+    5 │ var d = function (this: Foo) { foo(); }.bind(bar);
+    6 │ 
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    4 │ var·c·=·(function·()·{·foo();·})!.bind(bar);
+      │                                  ---------- 
+
+```
+
+```
+invalid.ts:5:41 lint/nursery/noUselessBind  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i This bind() call is unnecessary.
+  
+    3 │ var b = (function () { foo(); } satisfies Callback).bind(bar);
+    4 │ var c = (function () { foo(); })!.bind(bar);
+  > 5 │ var d = function (this: Foo) { foo(); }.bind(bar);
+      │                                         ^^^^
+    6 │ 
+  
+  i This function doesn't use this, so binding it has no effect.
+  
+  i Remove the bind() call and use the function directly.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+  i Unsafe fix: Remove the bind() call.
+  
+    5 │ var·d·=·function·(this:·Foo)·{·foo();·}.bind(bar);
+      │                                        ---------- 
+
+```

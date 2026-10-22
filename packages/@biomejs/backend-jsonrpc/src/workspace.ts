@@ -3598,6 +3598,11 @@ export interface Nursery {
 	 */
 	noUselessAwait?: NoUselessAwaitConfiguration;
 	/**
+	 * Disallow unnecessary .bind() calls on functions.
+	 * See https://biomejs.dev/linter/rules/no-useless-bind
+	 */
+	noUselessBind?: NoUselessBindConfiguration;
+	/**
 	 * Disallow unnecessary .call() and .apply().
 	 * See https://biomejs.dev/linter/rules/no-useless-call
 	 */
@@ -7193,6 +7198,9 @@ export type NoUselessAssignmentConfiguration =
 export type NoUselessAwaitConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessAwaitOptions;
+export type NoUselessBindConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoUselessBindOptions;
 export type NoUselessCallConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoUselessCallOptions;
@@ -10572,6 +10580,14 @@ export interface RuleWithNoUselessAwaitOptions {
 	fix?: FixKind;
 	level: RulePlainConfiguration;
 	options?: NoUselessAwaitOptions;
+}
+export interface RuleWithNoUselessBindOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoUselessBindOptions;
 }
 export interface RuleWithNoUselessCallOptions {
 	level: RulePlainConfiguration;
@@ -14069,6 +14085,7 @@ export type NoUnsafeUnaryMinusOptions = {};
 export type NoUnusedClassesOptions = {};
 export type NoUselessAssignmentOptions = {};
 export type NoUselessAwaitOptions = {};
+export type NoUselessBindOptions = {};
 export type NoUselessCallOptions = {};
 export type NoUselessDateGetTimeOptions = {};
 export type NoUselessFallbackInSpreadOptions = {};
@@ -16365,6 +16382,7 @@ export type Category =
 	| "lint/nursery/noUselessAssignment"
 	| "lint/nursery/noUselessAwait"
 	| "lint/nursery/noUselessBackrefInRegex"
+	| "lint/nursery/noUselessBind"
 	| "lint/nursery/noUselessCall"
 	| "lint/nursery/noUselessDateGetTime"
 	| "lint/nursery/noUselessFallbackInSpread"
