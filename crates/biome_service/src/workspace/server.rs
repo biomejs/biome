@@ -1,10 +1,10 @@
 use super::{
-    document::{DiskView, Document, EditorView},
+    document::{Document, DocumentView},
     *,
 };
 use crate::Watcher;
 use crate::configuration::{LoadedConfiguration, ProjectScanComputer, read_config};
-use crate::db::{DbReadGuard, DbState, FileView, WorkspaceDb};
+use crate::db::{DbReadGuard, DbState, ViewId, WorkspaceDb};
 use crate::diagnostics::{
     FileTooLarge, NoIgnoreFileFound, TailwindStylesheetNotFound, VcsDiagnostic,
 };
@@ -916,9 +916,9 @@ impl WorkspaceServerWithDb<'_> {
         // from the filesystem goes to the disk view, which the editor view
         // shadows.
         let view = if version.is_some() {
-            FileView::Editor(self.client)
+            ViewId::Editor(self.client)
         } else {
-            FileView::Disk
+            ViewId::Disk
         };
 
         let size = content.len();
@@ -977,28 +977,16 @@ impl WorkspaceServerWithDb<'_> {
             ) {
             true
         } else {
-            let editor_view = |version| EditorView {
+            let document_view = DocumentView {
                 content: content.clone(),
                 version,
                 file_source: source,
                 syntax: syntax.clone(),
             };
-            let disk_view = || DiskView {
-                content: content.clone(),
-                file_source: source,
-                syntax: syntax.clone(),
-            };
-            let client = self.client;
             self.documents.pin().update_or_insert_with(
                 path.clone(),
-                |current| match version {
-                    Some(version) => current.clone().with_editor(client, editor_view(version)),
-                    None => current.clone().with_disk(disk_view()),
-                },
-                || match version {
-                    Some(version) => Document::from_editor(client, editor_view(version)),
-                    None => Document::from_disk(disk_view()),
-                },
+                |current| current.clone().with(view, document_view.clone()),
+                || Document::new(view, document_view.clone()),
             );
 
             // `open_file_internal` must update project data for both index
@@ -1006,7 +994,7 @@ impl WorkspaceServerWithDb<'_> {
             reason.is_index() || self.should_update_service_data(&path)
         };
 
-        if view == FileView::Editor(self.client) && self.is_client_closed() {
+        if view == ViewId::Editor(self.client) && self.is_client_closed() {
             self.close_editor_view(&path, Some(project_key))?;
             return Ok(InternalOpenFileResult::default());
         }
@@ -2246,7 +2234,7 @@ impl WorkspaceServerWithDb<'_> {
                         .map_or(Operation::Remove, Operation::Insert),
                     None => Operation::Abort(()),
                 });
-            self.db_state.remove_file_view(&path, FileView::Disk);
+            self.db_state.remove_file_view(&path, ViewId::Disk);
         }
         if path.is_manifest() {
             self.update_project_layout(&path, &update_kind, project_key)?;
@@ -3431,9 +3419,9 @@ impl Workspace for WorkspaceServerWithDb<'_> {
         // disk, like the CLI after it writes the fixes of a file that the
         // daemon indexes.
         let view = if is_open {
-            FileView::Editor(self.client)
+            ViewId::Editor(self.client)
         } else {
-            FileView::Disk
+            ViewId::Disk
         };
         let content = Arc::<str>::from(content);
         #[cfg(test)]
@@ -3451,27 +3439,20 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             inline_config,
         );
 
-        let updated = documents.update(path.to_path_buf(), |document| match view {
-            FileView::Editor(client) => document.clone().with_editor(
-                client,
-                EditorView {
-                    content: content.clone(),
-                    version,
-                    file_source: document_source,
-                    syntax: Some(Ok(())),
-                },
-            ),
-            FileView::Disk => document.clone().with_disk(DiskView {
-                content: content.clone(),
-                file_source: document_source,
-                syntax: Some(Ok(())),
-            }),
+        let document_view = DocumentView {
+            content: content.clone(),
+            version: matches!(view, ViewId::Editor(_)).then_some(version),
+            file_source: document_source,
+            syntax: Some(Ok(())),
+        };
+        let updated = documents.update(path.to_path_buf(), |document| {
+            document.clone().with(view, document_view.clone())
         });
         // The file was closed after it was read, such as when the client
         // disconnected meanwhile, so the editor view just published must not
         // outlive it.
         if updated.is_none() {
-            if view == FileView::Editor(self.client) {
+            if view == ViewId::Editor(self.client) {
                 self.close_editor_view(&path, Some(project_key))?;
             }
             return Err(WorkspaceError::not_found(path.to_string()));
@@ -3485,7 +3466,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             std::panic::resume_unwind(Box::new(salsa::Cancelled::PendingWrite));
         }
 
-        if view == FileView::Editor(self.client) && self.is_client_closed() {
+        if view == ViewId::Editor(self.client) && self.is_client_closed() {
             self.close_editor_view(&path, Some(project_key))?;
             return Ok(ChangeFileResult {
                 diagnostics: Vec::new(),

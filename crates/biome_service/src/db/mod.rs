@@ -10,7 +10,7 @@ pub use state::DbState;
 use crate::WorkspaceError;
 use crate::projects::{NestedPath, ProjectDb, ProjectInput, ProjectKey};
 use crate::settings::{Settings, SettingsIdentity, VcsIgnoredPatterns};
-pub(crate) use crate::workspace::views::FileView;
+pub(crate) use crate::workspace::views::ViewId;
 use crate::workspace::views::{ClientId, Views};
 use biome_configuration::Configuration;
 use biome_configuration::vcs::VcsClientKind;
@@ -43,8 +43,6 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use tracing::{debug, instrument};
 
 const SETTINGS_QUERY_CACHE_CAPACITY: usize = 256;
-
-type SourceViews = Views<Source, Source>;
 
 type NodeCaches = Arc<HashMap<Utf8PathBuf, Arc<Mutex<NodeCache>>>>;
 type SettingsQueryEventHandler =
@@ -182,7 +180,7 @@ pub(crate) enum ProjectUpdateMode {
 #[derive(Debug)]
 pub(crate) struct FileViews {
     #[returns(ref)]
-    views: SourceViews,
+    views: Views<Source>,
 }
 
 /// The project of the texts outside every project, whose settings are the
@@ -611,7 +609,7 @@ impl WorkspaceDb {
     ) -> Source {
         self.update_or_insert_view(
             path,
-            FileView::Disk,
+            ViewId::Disk,
             text.into(),
             file_source,
             None,
@@ -629,7 +627,7 @@ impl WorkspaceDb {
     ) -> Source {
         self.update_or_insert_view(
             path,
-            FileView::Disk,
+            ViewId::Disk,
             text.into(),
             file_source,
             None,
@@ -646,7 +644,7 @@ impl WorkspaceDb {
     pub(crate) fn update_or_insert_view(
         &mut self,
         path: &Utf8Path,
-        view: FileView,
+        view: ViewId,
         text: Arc<str>,
         file_source: DocumentFileSource,
         inline_configuration: Option<Configuration>,
@@ -663,11 +661,9 @@ impl WorkspaceDb {
         if mode == ParsedSourceUpdateMode::Replace {
             let source = new_source(self, text);
             let views = self.replace_views(path, |views| {
-                Some(views.map_or(Views::from_view(view, source), |views| {
-                    views.with(view, source)
-                }))
+                Some(views.map_or(Views::new(view, source), |views| views.with(view, source)))
             });
-            return views.map_or(source, |views| *views.current().value());
+            return views.map_or(source, |views| *views.current());
         }
 
         let existing_views = { self.files.pin().get(path).copied() };
@@ -691,10 +687,10 @@ impl WorkspaceDb {
                     views
                 }
             };
-            *views.current().value()
+            *views.current()
         } else {
             let source = new_source(self, text);
-            let file_views = FileViews::new(self, Views::from_view(view, source));
+            let file_views = FileViews::new(self, Views::new(view, source));
             self.files.pin().insert(path.to_path_buf(), file_views);
             // Manifest queries look up the parsed source of a path outside
             // Salsa. Publishing a new parsed source must invalidate them.
@@ -711,7 +707,7 @@ impl WorkspaceDb {
     pub(crate) fn remove_view(
         &mut self,
         path: &Utf8Path,
-        view: FileView,
+        view: ViewId,
         mode: ParsedSourceUpdateMode,
     ) {
         self.update_views(path, mode, |views| views.without(view));
@@ -740,7 +736,7 @@ impl WorkspaceDb {
         &mut self,
         path: &Utf8Path,
         mode: ParsedSourceUpdateMode,
-        update: impl Fn(SourceViews) -> Option<SourceViews>,
+        update: impl Fn(Views<Source>) -> Option<Views<Source>>,
     ) {
         if mode == ParsedSourceUpdateMode::Replace {
             self.replace_views(path, |views| views.and_then(&update));
@@ -773,7 +769,7 @@ impl WorkspaceDb {
             .cloned()
             .collect();
         for file_path in paths {
-            self.remove_view(&file_path, FileView::Disk, mode);
+            self.remove_view(&file_path, ViewId::Disk, mode);
         }
     }
 
@@ -786,8 +782,8 @@ impl WorkspaceDb {
     fn replace_views(
         &self,
         path: &Utf8Path,
-        replace: impl Fn(Option<SourceViews>) -> Option<SourceViews>,
-    ) -> Option<SourceViews> {
+        replace: impl Fn(Option<Views<Source>>) -> Option<Views<Source>>,
+    ) -> Option<Views<Source>> {
         let files = self.files.pin();
         let mut current = files.get(path).copied();
         loop {
@@ -835,7 +831,7 @@ impl WorkspaceDb {
     /// disk view when no client has it open.
     pub fn get_parsed_source(&self, path: &Utf8Path) -> Option<Source> {
         let file_views = self.files.pin().get(path).copied()?;
-        Some(*file_views.views(self).current().value())
+        Some(*file_views.views(self).current())
     }
 
     /// Returns the paths of the files that `client` has open.
@@ -856,10 +852,7 @@ impl WorkspaceDb {
         client: ClientId,
     ) -> Option<Source> {
         let file_views = self.files.pin().get(path).copied()?;
-        file_views
-            .views(self)
-            .for_client(client)
-            .map(|view| *view.value())
+        file_views.views(self).for_client(client).copied()
     }
 
     /// Returns the number of cached parsed sources.
@@ -1588,7 +1581,7 @@ mod tests {
         let path = Utf8Path::new("/test.js");
         let file = db.update_or_insert_view(
             path,
-            FileView::Disk,
+            ViewId::Disk,
             "let a = 1;".into(),
             js(),
             None,
@@ -1615,7 +1608,7 @@ mod tests {
         let html = DocumentFileSource::Html(HtmlFileSource::html());
         let file = db.update_or_insert_view(
             path,
-            FileView::Disk,
+            ViewId::Disk,
             "<script>let a = 1;</script>".into(),
             html,
             None,
@@ -1625,7 +1618,7 @@ mod tests {
 
         db.update_or_insert_view(
             path,
-            FileView::Disk,
+            ViewId::Disk,
             "<script>let b = 2;</script>".into(),
             html,
             None,
@@ -1651,7 +1644,7 @@ mod tests {
         let path = Utf8Path::new("test.js");
         db.update_or_insert_view(
             path,
-            FileView::Disk,
+            ViewId::Disk,
             "disk".into(),
             js(),
             None,
@@ -1659,7 +1652,7 @@ mod tests {
         );
         db.update_or_insert_view(
             path,
-            FileView::Editor(ClientId::default()),
+            ViewId::Editor(ClientId::default()),
             "editor".into(),
             js(),
             None,
@@ -1674,7 +1667,7 @@ mod tests {
                 db.data().remove_file(path);
             }
             Some(views.map_or(Views::from_disk(disk), |views| {
-                views.with(FileView::Disk, disk)
+                views.with(ViewId::Disk, disk)
             }))
         });
 
