@@ -13,9 +13,9 @@
 
 /// Identifies a client of the workspace, such as one connection to the daemon.
 ///
-/// The default client is the one of the in-process uses of the workspace, such
-/// as the CLI without a daemon, or the scanner and the watcher of the daemon.
-/// It is distinct from every client that [Self::new] creates.
+/// The default client stands for the in-process uses of the workspace, such as
+/// the CLI without a daemon, or the scanner and the watcher of the daemon. It
+/// is distinct from every client that [Self::new] creates.
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
 pub struct ClientId(Option<u64>);
 

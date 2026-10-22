@@ -148,9 +148,8 @@ async fn disconnect_closes_the_files_of_the_session() -> Result<()> {
     Ok(())
 }
 
-/// A session is dropped once its connection ends, although it listens to the
-/// notifications of the workspace for as long as the server runs, and the task
-/// that listens to them ends with it.
+/// A session is dropped once its connection ends, and so is the task that
+/// listens to the notifications of the workspace for it.
 #[tokio::test]
 async fn sessions_are_dropped_when_their_connection_ends() -> Result<()> {
     let factory = ServerFactory::default();

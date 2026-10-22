@@ -373,11 +373,13 @@ impl Session {
         }
 
         // The diagnostics of a document can depend on other files, such as
-        // the ones it imports. The workspace announces the end of a project
-        // scan, and every later update of its index, such as a change on disk
-        // or in another document, so the diagnostics of the open documents are
-        // published again. The task holds the session weakly, so that the
-        // session ends with its connection and then aborts the task.
+        // the ones it imports. The workspace announces when its index changes:
+        // once at the end of a project scan, and after each later update, such
+        // as a change on disk or in another document. The task then publishes
+        // the diagnostics of the open documents again.
+        //
+        // The task holds the session weakly, so that the session can end with
+        // its connection. The session aborts the task when it's dropped.
         let session = Arc::downgrade(self);
         let mut service_data_rx = self.service_rx.clone();
         let task = spawn(async move {

@@ -91,8 +91,8 @@ const SNIPPET_MARKER: &str = "<script>";
 #[salsa::db]
 struct TestDb {
     storage: salsa::Storage<Self>,
-    /// The parses of the snippet texts, which are kept while the text of a
-    /// snippet doesn't change, like the parse of an unchanged snippet.
+    /// The parses of the snippet texts. A parse is kept while its text
+    /// doesn't change, as for an unchanged snippet.
     snippet_parses: Mutex<FxHashMap<String, ParseHandle>>,
     events: Events,
 }

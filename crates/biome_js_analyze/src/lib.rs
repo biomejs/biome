@@ -67,8 +67,8 @@ pub struct JsAnalyzerServices {
     language_db: Option<Rc<dyn LanguageDb>>,
     parsed_source: Option<AnalyzedSource>,
     /// The host document of the analyzed source, which the embedded queries
-    /// of `language_db` read. It's still the host document when the analyzed
-    /// tree no longer matches `parsed_source`, such as after fixes.
+    /// of `language_db` read. It stays set after fixes, when the analyzed tree
+    /// no longer matches `parsed_source`.
     document: Option<Source>,
     embedded_data: Option<Arc<EmbeddedData>>,
     /// The offset of the analyzed snippet in its host document.

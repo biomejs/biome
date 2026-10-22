@@ -1721,9 +1721,8 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// considered ignored.
     fn is_path_ignored(&self, params: PathIsIgnoredParams) -> Result<bool, WorkspaceError>;
 
-    /// Returns the content of a given file, as this client sees it: the
-    /// content of the client when it opened the file, otherwise the content
-    /// on disk.
+    /// Returns the content of a file as this client sees it: the content that
+    /// the client sent, if it opened the file, otherwise the content on disk.
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError>;
 
     /// Returns the size of a given file, as well as the allowed maximum file

@@ -14,16 +14,16 @@
 //!
 //! The types of this module are of three kinds, one per file:
 //!
-//! - `output`: what a parser returns, plain values that Salsa doesn't track:
+//! - `output`: the values that a parser returns, which Salsa doesn't track:
 //!   [SourceOutput], [SnippetOutput], and [ParseHandle], which compares parses
 //!   by allocation instead of walking their trees.
-//! - `tracked`: what Salsa tracks, which borrows the database: the parse of a
-//!   source, read through [SourceExt], and its [TrackedSnippet]s. Parsing a
-//!   source again creates its snippets again in the same order, so they keep
-//!   their identities, and a query keyed by a snippet runs again only when the
-//!   snippet fields it reads change.
-//! - `handles`: what analyzers hold, which outlives the borrow of the
-//!   database: [SnippetRef] and [AnalyzedSource].
+//! - `tracked`: the values that Salsa tracks, which borrow the database: the
+//!   parse of a source, which [SourceExt] reads, and its [TrackedSnippet]s.
+//!   Parsing a source again creates its snippets again in the same order, so
+//!   they keep their identities. A query keyed by a snippet runs again only
+//!   when the snippet fields it reads change.
+//! - `handles`: the values that analyzers hold, which outlive the borrow of
+//!   the database: [SnippetRef] and [AnalyzedSource].
 
 mod handles;
 mod output;
@@ -42,7 +42,7 @@ pub trait ParseDb: Db {
     /// embedded in it.
     ///
     /// Only the tracked parse of `source` calls it, so Salsa tracks what it
-    /// reads from the database: a change to it, such as to the settings of the
-    /// file, parses the text again.
+    /// reads from the database. A change to anything it read, such as the
+    /// settings of the file, parses the text again.
     fn parse_source(&self, source: Source) -> SourceOutput;
 }

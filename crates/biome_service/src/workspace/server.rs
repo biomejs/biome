@@ -143,12 +143,17 @@ pub struct WorkspaceServer {
     notification_tx: watch::Sender<ServiceNotification>,
 
     /// The clients whose files were closed, such as the ones that
-    /// disconnected. The requests they sent before can still run, and the
-    /// files these requests open or change aren't kept.
+    /// disconnected. Requests that a client sent before its files were closed
+    /// can still be running, and the files they open or change aren't kept.
     ///
-    /// A request checks the set after it publishes a view, and a close adds
-    /// to the set before it looks up the views of the client. The lock orders
-    /// the two, so one of them always sees the other.
+    /// Two operations race when a client disconnects:
+    ///
+    /// 1. A request of the client publishes a view, then checks whether the
+    ///    client is closed.
+    /// 2. The close records the client as closed, then removes its views.
+    ///
+    /// The lock orders them: either the request finds its client closed and
+    /// removes the view itself, or the close finds the view and removes it.
     closed_clients: Mutex<FxHashSet<ClientId>>,
 
     #[cfg(test)]
@@ -885,10 +890,11 @@ impl WorkspaceServerWithDb<'_> {
             )
         };
 
-        // The variants that the parser settings select are applied when the
-        // text is parsed, so that a settings change parses it again with them.
-        // The module kind depends on the package manifest of the file, which
-        // the database doesn't hold, so it's resolved here.
+        // The parse applies the variants that depend on the parser settings,
+        // such as JSX everywhere, so a settings change parses the text again
+        // with the new variants. The module kind depends on the package
+        // manifest of the file, which the database doesn't hold, so it's
+        // chosen here.
         #[cfg(feature = "lang_js")]
         if let DocumentFileSource::Js(js) = &mut source {
             match path.extension() {
@@ -945,16 +951,19 @@ impl WorkspaceServerWithDb<'_> {
         #[cfg(test)]
         self.scanner_test_state.enter_file_commit(reason);
 
+        let file_source_index = self.db_state.insert_file_source(source);
         let mut parsed_source = None;
         let syntax = match text {
             Err(error) => Some(Err(error)),
             Ok(None) => None,
             Ok(Some(text)) => {
-                parsed_source =
-                    Some(
-                        self.db_state
-                            .update_file_view(&path, view, text, source, inline_config),
-                    );
+                parsed_source = Some(self.db_state.update_file_view(
+                    &path,
+                    view,
+                    text,
+                    file_source_index,
+                    inline_config,
+                ));
                 Some(Ok(()))
             }
         };
@@ -980,7 +989,7 @@ impl WorkspaceServerWithDb<'_> {
             let document_view = DocumentView {
                 content: content.clone(),
                 version,
-                file_source: source,
+                file_source_index,
                 syntax: syntax.clone(),
             };
             self.documents.pin().update_or_insert_with(
@@ -2782,7 +2791,8 @@ impl WorkspaceServerWithDb<'_> {
         self.closed_clients.lock().contains(&self.client)
     }
 
-    /// Removes the editor view of `path` of the client of this workspace.
+    /// Removes the editor view that the client of this workspace has of
+    /// `path`.
     ///
     /// When no client has the file open anymore, the file is unloaded unless
     /// the scanner indexes it. `project_key` selects the project whose
@@ -2811,8 +2821,8 @@ impl WorkspaceServerWithDb<'_> {
             result,
             Compute::Updated { new: (_, document), .. } if document.has_editors()
         );
-        // Another client may open the file meanwhile, so the database decides
-        // on its own views whether the file is still open.
+        // Another client may open the file meanwhile, so whether the file is
+        // still open is decided from the views in the database.
         self.db_state.remove_editor_view(path, client, is_indexed);
         if !is_open {
             self.db_state.remove_node_cache(path);
@@ -3362,7 +3372,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
     ) -> Result<ChangeFileResult, WorkspaceError> {
         let is_indexed = self.should_update_service_data(&path);
         let documents = self.documents.pin();
-        let (existing_version, same_content, document_source, is_open) = documents
+        let (existing_version, same_content, file_source_index, is_open) = documents
             .get(path.as_path())
             .map(|document| {
                 (
@@ -3370,7 +3380,7 @@ impl Workspace for WorkspaceServerWithDb<'_> {
                     document
                         .content(self.client)
                         .is_some_and(|current| **current == *content),
-                    document.file_source(self.client),
+                    document.file_source_index(self.client),
                     document.editor(self.client).is_some(),
                 )
             })
@@ -3409,6 +3419,10 @@ impl Workspace for WorkspaceServerWithDb<'_> {
 
         // The text is parsed the first time a query reads it, so a file source
         // that can't be parsed must be rejected here.
+        let document_source = self
+            .get_db()
+            .source_from_index(file_source_index)
+            .ok_or_else(self.build_capability_error(&path))?;
         self.features
             .get_deprecated_capabilities(document_source)
             .parser
@@ -3435,14 +3449,14 @@ impl Workspace for WorkspaceServerWithDb<'_> {
             path.as_path(),
             view,
             content.clone(),
-            document_source,
+            file_source_index,
             inline_config,
         );
 
         let document_view = DocumentView {
             content: content.clone(),
             version: matches!(view, ViewId::Editor(_)).then_some(version),
-            file_source: document_source,
+            file_source_index,
             syntax: Some(Ok(())),
         };
         let updated = documents.update(path.to_path_buf(), |document| {

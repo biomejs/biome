@@ -14,21 +14,22 @@ use tracing::error;
 
 #[salsa::db]
 impl ParseDb for WorkspaceDb {
-    /// Parses the text with the parse capability of its file source, and the
-    /// settings of the project whose root contains the path of the text, with
-    /// the inline configuration of the client that published it on top. A
-    /// path outside every project is parsed with the default settings.
+    /// Parses the text of `source` with the parse capability of its file
+    /// source.
     ///
-    /// The workspace publishes only texts whose file source has a parse
-    /// capability. Otherwise, the result is an empty document of an unknown
-    /// file source.
+    /// The settings are the ones of the project whose root contains the path
+    /// of the text, with the inline configuration of the client that published
+    /// the text on top. A path outside every project gets the default
+    /// settings.
+    ///
+    /// The workspace publishes only texts whose file source can be parsed. If
+    /// it can't, the result is an empty document of an unknown file source.
     fn parse_source(&self, source: Source) -> SourceOutput {
         let data = self.data();
         let path = BiomePath::new(source.path(self));
 
-        // The project of the path is looked up in a map that Salsa doesn't
-        // track, so the parse reads the generation of the map to run again
-        // when the lookup can find another project.
+        // Salsa doesn't track the map of projects. Reading this counter makes
+        // the parse run again when the project of the path could change.
         let _ = ProjectsGeneration::try_get(self).map(|generation| generation.value(self));
         let (project, selection, project_settings) = match self
             .find_project_for_path(&path)

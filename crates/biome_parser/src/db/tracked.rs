@@ -56,8 +56,8 @@ fn tracked_source(db: &dyn ParseDb, source: Source) -> TrackedSource<'_> {
     TrackedSource::new(db, parse, document_source_index, snippets)
 }
 
-/// The parse of a [Source], which a [ParseDb] computes the first time it's
-/// read.
+/// Reads the parse of a [Source]. A [ParseDb] computes the parse the first
+/// time it's read.
 pub trait SourceExt: Copy {
     fn parsed(self, db: &dyn ParseDb) -> &AnyParse;
 

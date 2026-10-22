@@ -61,8 +61,8 @@ impl VueSemanticService {
                         snippet: None,
                     }),
                     AnalyzedSource::Snippet(snippet) => {
-                        // The host document of the snippet, rather than the
-                        // one of its path, which can be another client's.
+                        // Use the host document of the snippet: the document
+                        // of its path can be the one of another client.
                         let model = vue_model_from_source(db, snippet.source()).clone();
                         let snippet = model.snippet_at_offset(snippet.content_offset())?.id();
                         Some(Self {

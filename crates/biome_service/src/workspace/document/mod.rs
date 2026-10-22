@@ -2,7 +2,6 @@ pub(crate) mod services;
 
 use crate::diagnostics::FileTooLarge;
 use crate::workspace::views::{ClientId, Views};
-use biome_languages::DocumentFileSource;
 use std::sync::Arc;
 
 /// The views of a file that the workspace knows about. See
@@ -24,8 +23,10 @@ pub(crate) struct DocumentView {
     /// view. The disk view has none.
     pub(crate) version: Option<i32>,
 
-    /// The file source the content is parsed as.
-    pub(crate) file_source: DocumentFileSource,
+    /// The index of the file source the content is parsed as, in the table of
+    /// file sources of the database. Use `LanguageDb::source_from_index` to
+    /// retrieve the file source.
+    pub(crate) file_source_index: usize,
 
     /// The result of the parser (syntax tree + diagnostics).
     /// Types explained:
@@ -45,12 +46,13 @@ impl Document {
         self.for_client(client).and_then(|view| view.syntax.clone())
     }
 
-    /// Returns the file source of the view that `client` reads, or the one of
-    /// the primary editor view when only other clients have the file open.
-    pub(crate) fn file_source(&self, client: ClientId) -> DocumentFileSource {
+    /// Returns the index of the file source of the view that `client` reads,
+    /// or the one of the primary editor view when only other clients have the
+    /// file open. See [DocumentView::file_source_index].
+    pub(crate) fn file_source_index(&self, client: ClientId) -> usize {
         self.for_client(client)
             .unwrap_or_else(|| self.current())
-            .file_source
+            .file_source_index
     }
 
     /// Returns the version of the editor view of `client`, or `None` when it

@@ -29,9 +29,10 @@ pub struct Source {
     #[returns(copy)]
     pub file_source_index: usize,
 
-    /// The index of the configuration that the client that published the
-    /// text applies on top of the settings of the file, in the table of
-    /// configurations of the database, if there is one.
+    /// The index of the inline configuration of the client that published the
+    /// text, if the client has one. The configuration applies on top of the
+    /// settings of the file, and the index refers to the table of
+    /// configurations of the database.
     #[default]
     #[returns(copy)]
     pub configuration_index: Option<usize>,

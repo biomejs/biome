@@ -418,8 +418,8 @@ fn imports_of(workspace: &LocalWorkspace, path: &str) -> Option<Vec<String>> {
         .map(|module| module.static_import_paths.keys().cloned().collect())
 }
 
-/// Each client reads its own content, and the module graph reads the content
-/// of the client that opened the file first, until it closes the file.
+/// Each client reads its own content. The module graph reads the content of
+/// the client that opened the file first, until that client closes the file.
 #[cfg(feature = "module_graph")]
 #[test]
 fn clients_keep_their_own_content() {
@@ -504,9 +504,10 @@ fn clients_that_did_not_open_a_file_read_the_disk() {
     assert!(exists(&editor, UNSAVED));
 }
 
-/// A change from a client that didn't open a file, like the one the CLI
-/// attached to a daemon sends after writing fixes, records the content on
-/// disk and leaves the content of the client that has the file open untouched.
+/// A change from a client that didn't open a file records the content on
+/// disk, and leaves the content of the client that has the file open
+/// untouched. The CLI attached to a daemon sends such a change after it writes
+/// fixes.
 #[cfg(feature = "module_graph")]
 #[test]
 fn change_from_another_client_records_the_disk_content() {
@@ -535,7 +536,7 @@ fn change_from_another_client_records_the_disk_content() {
         imports_of(&workspace, PATH),
         Some(vec!["editor".to_string()])
     );
-    // The version of the editor is its own.
+    // The editor keeps its own version.
     editor
         .change_file(ChangeFileParams {
             project_key,
@@ -581,7 +582,7 @@ fn closing_the_files_of_a_client_closes_its_dependencies() {
 }
 
 /// The analysis of a script reads the embedded content, such as the template
-/// of a Vue file, of the view that the client reads.
+/// of a Vue file, from the view that the client reads.
 #[cfg(feature = "module_graph")]
 #[test]
 fn embedded_content_follows_the_view_of_the_client() {
@@ -824,9 +825,9 @@ fn closing_the_files_of_a_client_retries_when_a_write_is_pending() {
     assert!(!exists);
 }
 
-/// A change to a file that no client opened, like the one the CLI sends after
-/// it writes fixes to a file the daemon indexes, doesn't stop the workspace
-/// from following the file on disk.
+/// A change to a file that no client opened doesn't stop the workspace from
+/// following the file on disk. The CLI sends such a change after it writes
+/// fixes to a file that the daemon indexes.
 #[cfg(feature = "module_graph")]
 #[test]
 fn change_of_an_unopened_file_follows_the_disk() {

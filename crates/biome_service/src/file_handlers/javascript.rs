@@ -1252,7 +1252,8 @@ fn js_analyzer_services_for_fix(
         source_type,
     )
     .with_snippet_offset(params.parsed_source.diagnostic_offset());
-    // The fixes change the analyzed tree, not the host document.
+    // The fixes change the analyzed tree but not its host document, so the
+    // services keep reading the embedded content of the document.
     let services = match params.parsed_source.document() {
         Some(document) => services.with_document(document),
         None => services,
