@@ -720,6 +720,10 @@ impl NeedsParentheses for TsInstantiationExpression {
             return true;
         }
 
+        if is_followed_by_operator_after_type_arguments(self.syntax()) {
+            return true;
+        }
+
         self.parent::<AnyJsMemberExpression>()
             .is_some_and(|member_expr| {
                 member_expr
@@ -727,6 +731,41 @@ impl NeedsParentheses for TsInstantiationExpression {
                     .is_ok_and(|object| object.syntax() == self.syntax())
             })
     }
+}
+
+/// TypeScript reads `a<T> + b` as `a < T > +b` and rejects `a<T> >> b`,
+/// also when `a<T>` only ends the left operand (`(c + a<T>) - b`, `(typeof a<T>) + b`).
+fn is_followed_by_operator_after_type_arguments(node: &JsSyntaxNode) -> bool {
+    let mut node = node.clone();
+    while let Some(parent) = node.parent() {
+        if let Some(binary) = JsBinaryExpression::cast_ref(&parent) {
+            if binary.right().map(AstNode::into_syntax).as_ref() == Ok(&node) {
+                node = parent;
+                continue;
+            }
+
+            return binary.left().map(AstNode::into_syntax).as_ref() == Ok(&node)
+                && matches!(
+                    binary.operator(),
+                    Ok(JsBinaryOperator::Plus
+                        | JsBinaryOperator::Minus
+                        | JsBinaryOperator::LessThan
+                        | JsBinaryOperator::GreaterThan
+                        | JsBinaryOperator::GreaterThanOrEqual
+                        | JsBinaryOperator::RightShift
+                        | JsBinaryOperator::UnsignedRightShift)
+                );
+        }
+
+        if JsUnaryExpression::can_cast(parent.kind()) {
+            node = parent;
+            continue;
+        }
+
+        return false;
+    }
+
+    false
 }
 
 impl NeedsParentheses for TsNonNullAssertionExpression {
