@@ -4505,9 +4505,7 @@ export function bar() {
 
     let workspace = factory.workspace();
     let db_state = factory.db_state();
-    spawn_blocking(move || {
-        workspace.start_watcher(&db_state, watcher);
-    });
+    spawn_blocking(workspace.prepare_watcher(db_state, watcher));
 
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
@@ -4694,7 +4692,6 @@ export function bar() {
 }
 
 #[tokio::test]
-#[ignore = "Currently flaky, and fails from time to time. To review later"]
 async fn watcher_updates_tailwind_stylesheet() -> Result<()> {
     const THEME_WITH_BRAND: &str = "@theme {\n    --color-brand: #00f;\n}\n";
     const THEME_WITHOUT_BRAND: &str = "@theme {\n}\n";
@@ -4716,9 +4713,7 @@ async fn watcher_updates_tailwind_stylesheet() -> Result<()> {
     let mut factory = ServerFactory::new(true, instruction_channel.sender.clone());
     let workspace = factory.workspace();
     let db_state = factory.db_state();
-    spawn_blocking(move || {
-        workspace.start_watcher(&db_state, watcher);
-    });
+    spawn_blocking(workspace.prepare_watcher(db_state, watcher));
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
@@ -4936,9 +4931,7 @@ export function bar() {
 
     let workspace = factory.workspace();
     let db_state = factory.db_state();
-    spawn_blocking(move || {
-        workspace.start_watcher(&db_state, watcher);
-    });
+    spawn_blocking(workspace.prepare_watcher(db_state, watcher));
 
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();
@@ -5121,9 +5114,7 @@ async fn should_open_and_update_nested_files() -> Result<()> {
 
     let workspace = factory.workspace();
     let db_state = factory.db_state();
-    spawn_blocking(move || {
-        workspace.start_watcher(&db_state, watcher);
-    });
+    spawn_blocking(workspace.prepare_watcher(db_state, watcher));
 
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();

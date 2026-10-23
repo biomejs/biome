@@ -120,9 +120,7 @@ async fn goto_definition_cross_file(
 
     let workspace = factory.workspace();
     let db_state = factory.db_state();
-    spawn_blocking(move || {
-        workspace.start_watcher(&db_state, watcher);
-    });
+    spawn_blocking(workspace.prepare_watcher(db_state, watcher));
 
     let (service, client) = factory.create().into_inner();
     let (stream, sink) = client.split();

@@ -89,9 +89,7 @@ pub(crate) fn run_server(
 
     let workspace = factory.workspace();
     let db_state = factory.db_state();
-    rt.spawn_blocking(move || {
-        workspace.start_watcher(&db_state, watcher);
-    });
+    rt.spawn_blocking(workspace.prepare_watcher(db_state, watcher));
 
     rt.block_on(async move {
         tokio::select! {

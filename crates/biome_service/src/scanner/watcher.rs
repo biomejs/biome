@@ -1,6 +1,7 @@
 use super::WorkspaceWatcherBridge;
 use crate::WorkspaceError;
 use crate::diagnostics::WatchError;
+use crate::workspace::retry_on_pending_write;
 use biome_diagnostics::PrintDescription;
 use biome_diagnostics::serde::Diagnostic;
 use bpaf::Bpaf;
@@ -86,7 +87,7 @@ impl FromStr for WatcherKind {
 }
 
 /// Instructions to let the watcher either watch or unwatch a given folder.
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug)]
 pub enum WatcherInstruction {
     /// Watches the specified paths non-recursively.
     WatchFolders(FxHashSet<Utf8PathBuf>),
@@ -96,6 +97,10 @@ pub enum WatcherInstruction {
 
     /// Re-indexes a file after it was closed by a client.
     ReindexFile(Utf8PathBuf),
+
+    /// Sends `()` through the given sender once every instruction sent before
+    /// this one has been handled.
+    Barrier(Sender<()>),
 
     /// Stops the watcher entirely.
     Stop,
@@ -196,6 +201,12 @@ impl Watcher {
         Ok((watcher, instruction_channel))
     }
 
+    /// Returns whether the watcher watches anything, which isn't the case for
+    /// [`WatcherKind::None`].
+    pub fn is_enabled(&self) -> bool {
+        self.watcher.is_some()
+    }
+
     /// Runs the watcher.
     ///
     /// This function is expected to run continuously until either the workspace
@@ -212,8 +223,14 @@ impl Watcher {
             crossbeam::channel::select! {
                 recv(self.notify_rx) -> event => match event {
                     Ok(Ok(event)) => {
+                        // A read of the workspace database is interrupted
+                        // while an update waits to apply. Handling an event
+                        // only brings the workspace in line with the
+                        // filesystem, so it's safe to handle it again.
                         // TODO: Improve error propagation.
-                        let diagnostics = Self::handle_notify_event(workspace, event);
+                        let diagnostics = retry_on_pending_write(|| {
+                            Self::handle_notify_event(workspace, event.clone())
+                        });
                         for diagnostic in diagnostics {
                             error!("{}", PrintDescription(&diagnostic));
                         }
@@ -237,7 +254,10 @@ impl Watcher {
                         self.unwatch_folder(workspace, path);
                     }
                     Ok(WatcherInstruction::ReindexFile(path)) => {
-                        Self::reindex_file(workspace, &path);
+                        retry_on_pending_write(|| Self::reindex_file(workspace, &path));
+                    }
+                    Ok(WatcherInstruction::Barrier(ack)) => {
+                        let _ = ack.send(());
                     }
                     Ok(WatcherInstruction::Stop) | Err(_) => {
                         debug!("stop");
