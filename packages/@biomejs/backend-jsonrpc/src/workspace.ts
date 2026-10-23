@@ -3453,6 +3453,11 @@ export interface Nursery {
 	 */
 	noVueDeprecatedSlotScope?: NoVueDeprecatedSlotScopeConfiguration;
 	/**
+	 * Disallow the .sync modifier on Vue v-bind directives.
+	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-v-bind-sync
+	 */
+	noVueDeprecatedVBindSync?: NoVueDeprecatedVBindSyncConfiguration;
+	/**
 	 * Disallow registering Vue lifecycle hooks after an await in setup().
 	 * See https://biomejs.dev/linter/rules/no-vue-lifecycle-after-await
 	 */
@@ -6486,6 +6491,9 @@ export type NoVueDeprecatedScopedSlotsConfiguration =
 export type NoVueDeprecatedSlotScopeConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedSlotScopeOptions;
+export type NoVueDeprecatedVBindSyncConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDeprecatedVBindSyncOptions;
 export type NoVueLifecycleAfterAwaitConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueLifecycleAfterAwaitOptions;
@@ -9421,6 +9429,14 @@ export interface RuleWithNoVueDeprecatedSlotScopeOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedSlotScopeOptions;
 }
+export interface RuleWithNoVueDeprecatedVBindSyncOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoVueDeprecatedVBindSyncOptions;
+}
 export interface RuleWithNoVueLifecycleAfterAwaitOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueLifecycleAfterAwaitOptions;
@@ -12191,6 +12207,7 @@ export interface NoVueDeprecatedRouterLinkTagPropOptions {
 export type NoVueDeprecatedScopeAttributeOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
 export type NoVueDeprecatedSlotScopeOptions = {};
+export type NoVueDeprecatedVBindSyncOptions = {};
 export type NoVueLifecycleAfterAwaitOptions = {};
 export interface NoVueLoneTemplateOptions {
 	/**
@@ -14103,6 +14120,7 @@ export type Category =
 	| "lint/nursery/noVueMultipleSlotArgs"
 	| "lint/nursery/noVueMutatingProps"
 	| "lint/nursery/noVueRestrictedCallAfterAwait"
+	| "lint/nursery/noVueDeprecatedVBindSync"
 	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueImportCompilerMacros"
 	| "lint/nursery/noVueRefAsOperand"
