@@ -9959,6 +9959,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueValidDefaultProp": {
+					"description": "Require the default value of a Vue prop to match the type of the prop.\nSee https://biomejs.dev/linter/rules/use-vue-valid-default-prop",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueValidDefaultPropConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueValidDefineEmits": {
 					"description": "Enforce valid usage of Vue's defineEmits macro.\nSee https://biomejs.dev/linter/rules/use-vue-valid-define-emits",
 					"anyOf": [
@@ -18103,6 +18110,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueValidDefaultPropOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidDefaultPropOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueValidDefineEmitsOptions": {
 			"type": "object",
 			"properties": {
@@ -23792,6 +23808,16 @@
 			]
 		},
 		"UseVueValidAttributeNameOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueValidDefaultPropConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidDefaultPropOptions" }
+			]
+		},
+		"UseVueValidDefaultPropOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

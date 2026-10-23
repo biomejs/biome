@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-model-ts.vue
+---
+# Input
+```vue
+<script setup lang="ts">
+/* should generate diagnostics */
+const model = defineModel<string>({ default: 123 });
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-define-model-ts.vue:3:46 lint/nursery/useVueValidDefaultProp ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The default value of the prop modelValue doesn't match the type of the prop.
+  
+    1 │ <script setup lang="ts">
+    2 │ /* should generate diagnostics */
+  > 3 │ const model = defineModel<string>({ default: 123 });
+      │                                              ^^^
+    4 │ </script>
+    5 │ 
+  
+  i The prop accepts String.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
