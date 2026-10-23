@@ -663,16 +663,16 @@ fn write_grouped_arguments(
         && !grouped_breaks
         && matches!(group_layout, GroupedCallArgumentLayout::GroupedLastArgument)
     {
-        // Same as the variants written below when the grouped content breaks.
-        let mut variants = middle_variant_with_spaces
-            .clone()
-            .unwrap_or_else(|| middle_variant_no_spaces.clone());
-        variants.extend(most_expanded.iter().cloned());
-
-        let best_fitting = unsafe {
-            FormatElement::BestFitting(BestFittingVariants::from_vec_unchecked(variants))
-        };
-        if let Some(hugged) = f.intern_vec(vec![FormatElement::ExpandParent, best_fitting]) {
+        // Same as the middle variant written below when the grouped content
+        // breaks, without the best fitting around it: member chains print
+        // the hugged layout in flat mode, which always selects that variant.
+        let middle_variant = middle_variant_with_spaces
+            .as_deref()
+            .unwrap_or(&middle_variant_no_spaces);
+        let mut hugged = vec![FormatElement::ExpandParent];
+        // Skips the `StartBestFittingEntry` and `EndBestFittingEntry` tags.
+        hugged.extend_from_slice(&middle_variant[1..middle_variant.len() - 1]);
+        if let Some(hugged) = f.intern_vec(hugged) {
             f.context_mut()
                 .set_hugged_call_arguments(call_arguments, hugged);
         }
