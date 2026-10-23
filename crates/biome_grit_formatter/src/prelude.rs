@@ -6,7 +6,7 @@ pub(crate) use crate::{
     AsFormat, FormatNodeRule, FormattedIterExt as _, FormattedIterExt, GritFormatContext,
     GritFormatter, IntoFormat, format_removed, verbatim::*,
 };
-pub(crate) use biome_formatter::prelude::*;
+pub(crate) use biome_formatter::rowan::prelude::*;
 pub(crate) use biome_rowan::{AstNode as _, AstSeparatedList};
 
 pub(crate) use crate::separated::FormatAstSeparatedListExtension;

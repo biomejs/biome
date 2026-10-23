@@ -52,16 +52,19 @@ use biome_css_parser::{CssParserOptions, parse_css};
 use biome_css_syntax::CssLanguage;
 use biome_db::AnyParsedSource;
 #[cfg(feature = "html_embeds")]
-use biome_formatter::prelude::{
-    Document, Interned, SimpleFormatContext, format_args, format_with, group, indent,
+use biome_formatter::rowan::FormatElement;
+use biome_formatter::rowan::Printed;
+#[cfg(feature = "html_embeds")]
+use biome_formatter::rowan::prelude::{
+    Document, Interned, RowanSource, SimpleFormatContext, format_args, format_with, group, indent,
     line_suffix_boundary, soft_line_break, token,
 };
 use biome_formatter::{
-    AttributePosition, BracketSameLine, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed,
+    AttributePosition, BracketSameLine, IndentStyle, IndentWidth, LineEnding, LineWidth,
     TrailingNewline,
 };
 #[cfg(feature = "html_embeds")]
-use biome_formatter::{Buffer, FormatElement, QuoteStyle};
+use biome_formatter::{Buffer, QuoteStyle, SimpleFormatOptions};
 use biome_fs::BiomePath;
 #[cfg(feature = "html_embeds")]
 use biome_html_analyze::analyze_with_snippets;
@@ -1011,7 +1014,7 @@ fn format_attribute_value(root: &AnyJsRoot, document: Document) -> Option<Docume
     let content = format_with(|f| f.write_element(FormatElement::Interned(content.clone())));
     let formatted = if hugs_quotes {
         biome_formatter::format!(
-            SimpleFormatContext::default(),
+            SimpleFormatContext::<RowanSource>::from_options(SimpleFormatOptions::default()),
             [
                 token("\""),
                 group(&content),
@@ -1022,7 +1025,7 @@ fn format_attribute_value(root: &AnyJsRoot, document: Document) -> Option<Docume
         )
     } else {
         biome_formatter::format!(
-            SimpleFormatContext::default(),
+            SimpleFormatContext::<RowanSource>::from_options(SimpleFormatOptions::default()),
             [
                 token("\""),
                 group(&format_args![

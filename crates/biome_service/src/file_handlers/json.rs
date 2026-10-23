@@ -30,9 +30,10 @@ use biome_configuration::json::{
 };
 use biome_db::AnyParsedSource;
 use biome_deserialize::json::deserialize_from_json_ast;
+use biome_formatter::rowan::Printed;
 use biome_formatter::{
     BracketSpacing, DelimiterSpacing, Expand, FormatError, IndentStyle, IndentWidth, LineEnding,
-    LineWidth, Printed, TrailingNewline,
+    LineWidth, TrailingNewline,
 };
 use biome_fs::ManifestName;
 use biome_fs::{BiomePath, ConfigName};

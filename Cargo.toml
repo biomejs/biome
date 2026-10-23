@@ -99,7 +99,7 @@ biome_rowan                  = { path = "./crates/biome_rowan", version = "0.7.0
 biome_rule_options           = { path = "./crates/biome_rule_options", version = "0.7.0" }
 biome_ruledoc_utils          = { path = "./crates/biome_ruledoc_utils" }
 biome_service                = { path = "./crates/biome_service" }
-biome_string_case            = { path = "./crates/biome_string_case", version = "0.7.0", features = ["biome_rowan"] }
+biome_string_case            = { path = "./crates/biome_string_case", version = "0.7.0" }
 biome_suppression            = { path = "./crates/biome_suppression", version = "0.7.0" }
 biome_tailwind_factory       = { path = "./crates/biome_tailwind_factory", version = "0.7.0" }
 biome_tailwind_logic         = { path = "./crates/biome_tailwind_logic", version = "0.1.0" }

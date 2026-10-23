@@ -1,14 +1,21 @@
 use crate::format_element::tag::{Condition, Tag};
 use crate::prelude::tag::{DedentMode, GroupMode, LabelId};
 use crate::prelude::*;
-use crate::{
-    Argument, Arguments, FormatContext, FormatOptions, GroupId, TextRange, TextSize, write,
-};
+#[cfg(feature = "rowan")]
+use crate::rowan::RowanSource;
+use crate::{Argument, Arguments, FormatContext, FormatOptions, GroupId, Source, write};
 use crate::{Buffer, VecBuffer};
+#[cfg(feature = "rowan")]
+use crate::{TextRange, TextSize};
 use Tag::*;
-use biome_rowan::{Language, SyntaxNode, SyntaxToken, TextLen, TokenText};
+#[cfg(feature = "rowan")]
+use biome_rowan::{Language, SyntaxNode, SyntaxToken, TokenText};
+#[cfg(feature = "rowan")]
+use biome_text_size::TextLen;
+#[cfg(feature = "rowan")]
 use std::borrow::Cow;
 use std::cell::Cell;
+use std::convert::Infallible;
 use std::marker::PhantomData;
 
 /// A line break that only gets printed if the enclosing `Group` doesn't fit on a single line.
@@ -113,13 +120,31 @@ pub const fn literal_line_break_without_parent() -> Line {
     })
 }
 
+#[cfg(feature = "rowan")]
 #[inline]
-pub(crate) const fn source_mapped_literal_line_break_without_parent(
-    source_position: TextSize,
-) -> Line {
-    Line::new(LineMode::Literal {
-        source_position: Some(source_position),
-    })
+pub(crate) const fn source_mapped_literal_line_break_without_parent<P>(
+    source_position: P,
+) -> SourceMappedLiteralLine<P> {
+    SourceMappedLiteralLine(source_position)
+}
+
+#[cfg(feature = "rowan")]
+/// A [literal_line_break_without_parent] that records its position `P` in
+/// the source code, so that the printer adds it to the source map.
+pub(crate) struct SourceMappedLiteralLine<P>(P);
+
+#[cfg(feature = "rowan")]
+impl<P, Context> Format<Context> for SourceMappedLiteralLine<P>
+where
+    P: Copy,
+    Context: FormatContext,
+    Context::Source: Source<Position = P>,
+{
+    fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+        f.write_element(FormatElement::Line(LineMode::Literal {
+            source_position: Some(self.0),
+        }))
+    }
 }
 
 /// A forced empty line. An empty line inserts enough line breaks in the output for
@@ -213,18 +238,18 @@ pub const fn soft_line_break_or_space() -> Line {
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Line {
-    mode: LineMode,
+    mode: LineMode<Infallible>,
 }
 
 impl Line {
-    const fn new(mode: LineMode) -> Self {
+    const fn new(mode: LineMode<Infallible>) -> Self {
         Self { mode }
     }
 }
 
-impl<Context> Format<Context> for Line {
+impl<Context: FormatContext> Format<Context> for Line {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
-        f.write_element(FormatElement::Line(self.mode))
+        f.write_element(FormatElement::Line(self.mode.with_position()))
     }
 }
 
@@ -285,7 +310,7 @@ pub struct Token {
     text: &'static str,
 }
 
-impl<Context> Format<Context> for Token {
+impl<Context: FormatContext> Format<Context> for Token {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::Token { text: self.text })
     }
@@ -307,14 +332,12 @@ impl std::fmt::Debug for Token {
 /// use biome_formatter::prelude::*;
 ///
 /// # fn main() -> FormatResult<()> {
-/// use biome_rowan::TextSize;
 /// use biome_formatter::{SourceMapGeneration, SourceMarker};
 ///
-///
 /// let elements = format!(SimpleFormatContext::default(), [
-///     source_position(TextSize::from(0)),
+///     source_position(0),
 ///     token("Hello "),
-///     source_position(TextSize::from(7)),
+///     source_position(7),
 ///     token("'Biome'"),
 /// ])?;
 ///
@@ -322,25 +345,27 @@ impl std::fmt::Debug for Token {
 ///
 /// assert_eq!(printed.as_code(), r#"Hello 'Biome'"#);
 /// assert_eq!(printed.sourcemap(), [
-///     SourceMarker { source: TextSize::from(0), dest: TextSize::from(0) },
-///     SourceMarker { source: TextSize::from(6), dest: TextSize::from(6) },
-///     SourceMarker { source: TextSize::from(7), dest: TextSize::from(6) },
-///     SourceMarker { source: TextSize::from(14), dest: TextSize::from(13) },
+///     SourceMarker { source: 0, dest: 0 },
+///     SourceMarker { source: 6, dest: 6 },
+///     SourceMarker { source: 7, dest: 6 },
+///     SourceMarker { source: 14, dest: 13 },
 /// ]);
 ///
 /// # Ok(())
 /// # }
 /// ```
-pub const fn source_position(position: TextSize) -> SourcePosition {
+pub const fn source_position<P>(position: P) -> SourcePosition<P> {
     SourcePosition(position)
 }
 
 #[derive(Eq, PartialEq, Copy, Clone, Debug)]
-pub struct SourcePosition(TextSize);
+pub struct SourcePosition<P>(P);
 
-impl<Context> Format<Context> for SourcePosition
+impl<P, Context> Format<Context> for SourcePosition<P>
 where
+    P: Copy + Eq,
     Context: FormatContext,
+    Context::Source: Source<Position = P>,
 {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         if f.source_map_generation().is_disabled() {
@@ -360,21 +385,23 @@ where
 }
 
 /// Creates a text from a dynamic string and a range of the input source
-pub fn text(text: &str, position: Option<TextSize>) -> Text<'_> {
+pub fn text<P>(text: &str, position: Option<P>) -> Text<'_, P> {
     debug_assert_normalized_newlines(text);
 
     Text { text, position }
 }
 
 #[derive(Eq, PartialEq)]
-pub struct Text<'a> {
+pub struct Text<'a, P> {
     text: &'a str,
-    position: Option<TextSize>,
+    position: Option<P>,
 }
 
-impl<Context> Format<Context> for Text<'_>
+impl<P, Context> Format<Context> for Text<'_, P>
 where
+    P: Copy,
     Context: FormatContext,
+    Context::Source: Source<Position = P>,
 {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         if let Some(position) = self.position
@@ -393,12 +420,13 @@ where
     }
 }
 
-impl std::fmt::Debug for Text<'_> {
+impl<P> std::fmt::Debug for Text<'_, P> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::write!(f, "Text({})", self.text)
     }
 }
 
+#[cfg(feature = "rowan")]
 /// String that is the same as in the input source text if `text` is [`Cow::Borrowed`] or
 /// some replaced content if `text` is [`Cow::Owned`].
 pub fn syntax_token_cow_slice<'a, L: Language>(
@@ -411,12 +439,14 @@ pub fn syntax_token_cow_slice<'a, L: Language>(
     SyntaxTokenCowSlice { text, token, start }
 }
 
+#[cfg(feature = "rowan")]
 pub struct SyntaxTokenCowSlice<'a, L: Language> {
     text: Cow<'a, str>,
     token: &'a SyntaxToken<L>,
     start: TextSize,
 }
 
+#[cfg(feature = "rowan")]
 impl<'a, L: Language> SyntaxTokenCowSlice<'a, L> {
     /// Splits embedded LF characters into non-propagating literal lines.
     ///
@@ -446,7 +476,7 @@ impl<'a, L: Language> SyntaxTokenCowSlice<'a, L> {
         f: &mut Formatter<Context>,
     ) -> FormatResult<()>
     where
-        Context: FormatContext,
+        Context: FormatContext<Source = RowanSource>,
     {
         match &self.text {
             Cow::Borrowed(_) => {
@@ -489,26 +519,30 @@ impl<'a, L: Language> SyntaxTokenCowSlice<'a, L> {
     }
 }
 
+#[cfg(feature = "rowan")]
 impl<L: Language, Context> Format<Context> for SyntaxTokenCowSlice<'_, L>
 where
-    Context: FormatContext,
+    Context: FormatContext<Source = RowanSource>,
 {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         self.fmt_segment(self.text.as_ref(), self.start, f)
     }
 }
 
+#[cfg(feature = "rowan")]
 impl<L: Language> std::fmt::Debug for SyntaxTokenCowSlice<'_, L> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::write!(f, "SyntaxTokenCowSlice({})", self.text)
     }
 }
 
+#[cfg(feature = "rowan")]
 /// Formatter returned by [`SyntaxTokenCowSlice::with_literal_line_breaks`].
 pub struct SyntaxTokenCowSliceWithLiteralLineBreaks<'a, L: Language> {
     slice: SyntaxTokenCowSlice<'a, L>,
 }
 
+#[cfg(feature = "rowan")]
 impl<L: Language> std::fmt::Debug for SyntaxTokenCowSliceWithLiteralLineBreaks<'_, L> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_tuple("SyntaxTokenCowSliceWithLiteralLineBreaks")
@@ -517,9 +551,10 @@ impl<L: Language> std::fmt::Debug for SyntaxTokenCowSliceWithLiteralLineBreaks<'
     }
 }
 
+#[cfg(feature = "rowan")]
 impl<L: Language, Context> Format<Context> for SyntaxTokenCowSliceWithLiteralLineBreaks<'_, L>
 where
-    Context: FormatContext,
+    Context: FormatContext<Source = RowanSource>,
 {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         let text = self.slice.text.as_ref();
@@ -552,6 +587,7 @@ where
     }
 }
 
+#[cfg(feature = "rowan")]
 impl<L: Language> SyntaxTokenCowSliceWithLiteralLineBreaks<'_, L> {
     fn fmt_literal_line_break<Context>(
         &self,
@@ -559,7 +595,7 @@ impl<L: Language> SyntaxTokenCowSliceWithLiteralLineBreaks<'_, L> {
         f: &mut Formatter<Context>,
     ) -> FormatResult<()>
     where
-        Context: FormatContext,
+        Context: FormatContext<Source = RowanSource>,
     {
         if f.source_map_generation().is_enabled() {
             source_mapped_literal_line_break_without_parent(source_position).fmt(f)
@@ -569,6 +605,7 @@ impl<L: Language> SyntaxTokenCowSliceWithLiteralLineBreaks<'_, L> {
     }
 }
 
+#[cfg(feature = "rowan")]
 /// Copies a source text 1:1 into the output text.
 pub fn located_token_text<L: Language>(
     token: &SyntaxToken<L>,
@@ -585,14 +622,16 @@ pub fn located_token_text<L: Language>(
     }
 }
 
+#[cfg(feature = "rowan")]
 pub struct LocatedTokenText {
     text: TokenText,
     source_position: TextSize,
 }
 
+#[cfg(feature = "rowan")]
 impl<Context> Format<Context> for LocatedTokenText
 where
-    Context: FormatContext,
+    Context: FormatContext<Source = RowanSource>,
 {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         if f.source_map_generation().is_enabled() {
@@ -609,6 +648,7 @@ where
     }
 }
 
+#[cfg(feature = "rowan")]
 impl std::fmt::Debug for LocatedTokenText {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::write!(f, "LocatedTokenText({})", self.text)
@@ -659,7 +699,7 @@ pub struct LineSuffix<'a, Context> {
     content: Argument<'a, Context>,
 }
 
-impl<Context> Format<Context> for LineSuffix<'_, Context> {
+impl<Context: FormatContext> Format<Context> for LineSuffix<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::Tag(StartLineSuffix))?;
         Arguments::from(&self.content).fmt(f)?;
@@ -706,7 +746,7 @@ pub const fn line_suffix_boundary() -> LineSuffixBoundary {
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct LineSuffixBoundary;
 
-impl<Context> Format<Context> for LineSuffixBoundary {
+impl<Context: FormatContext> Format<Context> for LineSuffixBoundary {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::LineSuffixBoundary)
     }
@@ -794,7 +834,7 @@ pub struct FormatLabelled<'a, Context> {
     content: Argument<'a, Context>,
 }
 
-impl<Context> Format<Context> for FormatLabelled<'_, Context> {
+impl<Context: FormatContext> Format<Context> for FormatLabelled<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::Tag(StartLabelled(self.label_id)))?;
         Arguments::from(&self.content).fmt(f)?;
@@ -825,12 +865,11 @@ impl<Context> std::fmt::Debug for FormatLabelled<'_, Context> {
 /// ```
 /// use biome_formatter::prelude::*;
 /// use biome_formatter::{format, write};
-/// use biome_rowan::{TextRange, TextSize};
 ///
 /// # fn main() -> FormatResult<()> {
-/// let range = TextRange::new(TextSize::from(3), TextSize::from(10));
+/// let key = 1;
 /// let paragraph = format_with(|f| {
-///     let embedded = FormatEmbedded::new(range, &token("a  +  b"), f)?;
+///     let embedded = FormatEmbedded::new(key, &token("a  +  b"), f)?;
 ///     write!(f, [token("<p>"), embedded, token("</p>")])
 /// });
 ///
@@ -840,45 +879,50 @@ impl<Context> std::fmt::Debug for FormatLabelled<'_, Context> {
 ///
 /// let replacement = format!(SimpleFormatContext::default(), [token("a + b")])?.into_document();
 /// let mut formatted = format!(SimpleFormatContext::default(), [paragraph])?;
-/// formatted.format_embedded(|embedded_range| {
-///     (embedded_range == range).then(|| replacement.clone())
-/// });
+/// formatted.format_embedded(|embedded_key| (embedded_key == key).then(|| replacement.clone()));
 /// assert_eq!("<p>a + b</p>", formatted.print()?.as_code());
 /// # Ok(())
 /// # }
 /// ```
-pub struct FormatEmbedded {
-    range: TextRange,
-    content: Interned,
+pub struct FormatEmbedded<S: Source> {
+    key: S::EmbeddedKey,
+    content: Interned<S>,
 }
 
-impl FormatEmbedded {
+impl<S: Source> FormatEmbedded<S> {
     /// Formats `content`, the host formatter's output for the embedded code
-    /// whose content spans `range`.
+    /// identified by `key`.
     ///
-    /// The caller of the formatter identifies the code by `range` in
-    /// [crate::Formatted::format_embedded]. An element whose range the caller
-    /// doesn't know keeps printing `content`.
+    /// The caller of the formatter identifies the code by `key` in
+    /// [crate::Formatted::format_embedded]. If the caller doesn't replace the
+    /// element, the element prints `content`.
     pub fn new<Context>(
-        range: TextRange,
+        key: S::EmbeddedKey,
         content: &impl Format<Context>,
         f: &mut Formatter<Context>,
-    ) -> FormatResult<Self> {
+    ) -> FormatResult<Self>
+    where
+        Context: FormatContext<Source = S>,
+    {
         let mut buffer = VecBuffer::new(f.state_mut());
         write!(buffer, [content])?;
         Ok(Self {
-            range,
+            key,
             content: Interned::new(buffer.into_vec()),
         })
     }
 }
 
-impl<Context> Format<Context> for FormatEmbedded {
+impl<S, Context> Format<Context> for FormatEmbedded<S>
+where
+    S: Source,
+    Context: FormatContext<Source = S>,
+{
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         // `Document::replace_embedded` replaces the element that follows the
         // start tag, so the content must stay a single interned element.
         f.write_elements([
-            FormatElement::Tag(StartEmbedded(self.range)),
+            FormatElement::Tag(StartEmbedded(self.key.clone())),
             FormatElement::Interned(self.content.clone()),
             FormatElement::Tag(EndEmbedded),
         ])
@@ -996,7 +1040,7 @@ pub fn maybe_space(should_insert: bool) -> Option<Space> {
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct Space;
 
-impl<Context> Format<Context> for Space {
+impl<Context: FormatContext> Format<Context> for Space {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::Space)
     }
@@ -1005,7 +1049,7 @@ impl<Context> Format<Context> for Space {
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct HardSpace;
 
-impl<Context> Format<Context> for HardSpace {
+impl<Context: FormatContext> Format<Context> for HardSpace {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::HardSpace)
     }
@@ -1088,7 +1132,7 @@ pub struct Indent<'a, Context> {
     content: Argument<'a, Context>,
 }
 
-impl<Context> Format<Context> for Indent<'_, Context> {
+impl<Context: FormatContext> Format<Context> for Indent<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::Tag(StartIndent))?;
         Arguments::from(&self.content).fmt(f)?;
@@ -1247,7 +1291,7 @@ pub struct Dedent<'a, Context> {
     mode: DedentMode,
 }
 
-impl<Context> Format<Context> for Dedent<'_, Context> {
+impl<Context: FormatContext> Format<Context> for Dedent<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::Tag(StartDedent(self.mode)))?;
         Arguments::from(&self.content).fmt(f)?;
@@ -1481,7 +1525,7 @@ impl From<String> for AlignedStr {
     }
 }
 
-impl<Context> Format<Context> for Align<'_, Context> {
+impl<Context: FormatContext> Format<Context> for Align<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         // The placeholder is boxed so the `Align` tag payload stays one
         // pointer wide and `FormatElement` keeps its asserted size.
@@ -1913,7 +1957,7 @@ enum IndentMode {
     SoftLineOrSpace,
 }
 
-impl<Context> Format<Context> for BlockIndent<'_, Context> {
+impl<Context: FormatContext> Format<Context> for BlockIndent<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         let snapshot = f.snapshot();
 
@@ -2212,7 +2256,7 @@ impl<Context> Group<'_, Context> {
     }
 }
 
-impl<Context> Format<Context> for Group<'_, Context> {
+impl<Context: FormatContext> Format<Context> for Group<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         let mode = match self.should_expand {
             true => GroupMode::Expand,
@@ -2286,7 +2330,7 @@ pub const fn expand_parent() -> ExpandParent {
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct ExpandParent;
 
-impl<Context> Format<Context> for ExpandParent {
+impl<Context: FormatContext> Format<Context> for ExpandParent {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::ExpandParent)
     }
@@ -2525,7 +2569,7 @@ impl<Context> IfGroupBreaks<'_, Context> {
     }
 }
 
-impl<Context> Format<Context> for IfGroupBreaks<'_, Context> {
+impl<Context: FormatContext> Format<Context> for IfGroupBreaks<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::Tag(StartConditionalContent(
             Condition::new(self.mode).with_group_id(self.group_id),
@@ -2649,7 +2693,7 @@ pub struct IndentIfGroupBreaks<'a, Context> {
     group_id: GroupId,
 }
 
-impl<Context> Format<Context> for IndentIfGroupBreaks<'_, Context> {
+impl<Context: FormatContext> Format<Context> for IndentIfGroupBreaks<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         f.write_element(FormatElement::Tag(StartIndentIfGroupBreaks(self.group_id)))?;
         Arguments::from(&self.content).fmt(f)?;
@@ -2850,6 +2894,7 @@ pub struct JoinBuilder<'fmt, 'buf, Separator, Context> {
 impl<'fmt, 'buf, Separator, Context> JoinBuilder<'fmt, 'buf, Separator, Context>
 where
     Separator: Format<Context>,
+    Context: FormatContext,
 {
     /// Creates a new instance that joins the elements without a separator
     pub(super) fn new(fmt: &'fmt mut Formatter<'buf, Context>) -> Self {
@@ -2906,6 +2951,22 @@ where
     }
 }
 
+/// Counts the line breaks before an item in the source code.
+///
+/// [JoinNodesBuilder] uses this count to keep an empty line between two items
+/// when the source code has one.
+pub trait LinesBefore {
+    /// Returns how many line breaks come before this item in the source code.
+    fn lines_before(&self) -> usize;
+}
+
+#[cfg(feature = "rowan")]
+impl<L: Language> LinesBefore for SyntaxNode<L> {
+    fn lines_before(&self) -> usize {
+        get_lines_before(self)
+    }
+}
+
 /// Builder to join together nodes that ensures that nodes separated by empty lines continue
 /// to be separated by empty lines in the formatted output.
 #[must_use = "must eventually call `finish()` on Format builders"]
@@ -2920,6 +2981,7 @@ pub struct JoinNodesBuilder<'fmt, 'buf, Separator, Context> {
 impl<'fmt, 'buf, Separator, Context> JoinNodesBuilder<'fmt, 'buf, Separator, Context>
 where
     Separator: Format<Context>,
+    Context: FormatContext,
 {
     pub(super) fn new(separator: Separator, fmt: &'fmt mut Formatter<'buf, Context>) -> Self {
         Self {
@@ -2932,10 +2994,10 @@ where
 
     /// Adds a new node with the specified formatted content to the output, respecting any new lines
     /// that appear before the node in the input source.
-    pub fn entry<L: Language>(&mut self, node: &SyntaxNode<L>, content: &dyn Format<Context>) {
+    pub fn entry(&mut self, node: &impl LinesBefore, content: &dyn Format<Context>) {
         self.result = self.result.and_then(|_| {
             if self.has_elements {
-                if get_lines_before(node) > 1 {
+                if node.lines_before() > 1 {
                     write!(self.fmt, [empty_line()])?;
                 } else {
                     self.separator.fmt(self.fmt)?;
@@ -2958,11 +3020,11 @@ where
     }
 
     /// Adds an iterator of entries to the output. Each entry is a `(node, content)` tuple.
-    pub fn entries<L, F, I>(&mut self, entries: I) -> &mut Self
+    pub fn entries<N, F, I>(&mut self, entries: I) -> &mut Self
     where
-        L: Language,
+        N: LinesBefore,
         F: Format<Context>,
-        I: IntoIterator<Item = (SyntaxNode<L>, F)>,
+        I: IntoIterator<Item = (N, F)>,
     {
         for (node, content) in entries {
             self.entry(&node, &content)
@@ -2976,6 +3038,7 @@ where
     }
 }
 
+#[cfg(feature = "rowan")]
 /// Get the number of line breaks between two consecutive SyntaxNodes in the tree
 pub fn get_lines_before<L: Language>(next_node: &SyntaxNode<L>) -> usize {
     // Count the newlines in the leading trivia of the next node
@@ -2986,6 +3049,7 @@ pub fn get_lines_before<L: Language>(next_node: &SyntaxNode<L>) -> usize {
     }
 }
 
+#[cfg(feature = "rowan")]
 pub fn get_lines_before_token<L: Language>(token: &SyntaxToken<L>) -> usize {
     token
         .leading_trivia()
@@ -3007,7 +3071,7 @@ pub struct FillBuilder<'fmt, 'buf, Context> {
     empty: bool,
 }
 
-impl<'a, 'buf, Context> FillBuilder<'a, 'buf, Context> {
+impl<'a, 'buf, Context: FormatContext> FillBuilder<'a, 'buf, Context> {
     pub(crate) fn new(fmt: &'a mut Formatter<'buf, Context>) -> Self {
         let result = fmt.write_element(FormatElement::Tag(StartFill));
 
@@ -3093,7 +3157,7 @@ impl<'a, Context> BestFitting<'a, Context> {
     }
 }
 
-impl<Context> Format<Context> for BestFitting<'_, Context> {
+impl<Context: FormatContext> Format<Context> for BestFitting<'_, Context> {
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         let variants = self.variants.items();
         // Each variant is wrapped in Start/End tags

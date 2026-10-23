@@ -66,7 +66,7 @@ use biome_diagnostics::{
 };
 #[cfg(feature = "html_embeds")]
 use biome_embeds::{EmbeddedData, EmbeddedSnippet, collect_embedded_data};
-use biome_formatter::Printed;
+use biome_formatter::rowan::Printed;
 use biome_fs::{BiomePath, ConfigName, PathKind, normalize_path};
 #[cfg(all(feature = "module_graph", feature = "lang_html"))]
 use biome_html_syntax::HtmlRoot;

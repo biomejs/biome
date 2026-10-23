@@ -1,4 +1,4 @@
-use biome_formatter::Printed;
+use biome_formatter::rowan::Printed;
 use biome_test_utils::BenchCase;
 use biome_yaml_formatter::{YamlFormatOptions, format_node};
 use biome_yaml_parser::parse_yaml;

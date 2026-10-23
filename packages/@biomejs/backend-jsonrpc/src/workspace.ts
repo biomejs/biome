@@ -14216,6 +14216,12 @@ export interface FormatFileParams {
 	path: BiomePath;
 	projectKey: ProjectKey;
 }
+/**
+ * The code printed for a document of source `S`.
+ *
+ * Positions and ranges use the types of `S`, including the positions in the
+ * printed code.
+ */
 export interface Printed {
 	code: string;
 	range?: TextRange;

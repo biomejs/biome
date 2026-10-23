@@ -50,12 +50,13 @@ use biome_css_parser::parse_css_with_offset_and_cache;
 use biome_css_syntax::CssLanguage;
 use biome_db::AnyParsedSource;
 #[cfg(feature = "js_embeds")]
-use biome_formatter::FormatElement;
+use biome_formatter::rowan::FormatElement;
+use biome_formatter::rowan::Printed;
 #[cfg(feature = "js_embeds")]
-use biome_formatter::prelude::{Document, Interned, LineMode, Tag};
+use biome_formatter::rowan::{Document, Interned, LineMode, Tag};
 use biome_formatter::{
     AttributePosition, BracketSameLine, BracketSpacing, DelimiterSpacing, Expand, FormatError,
-    IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle, TrailingNewline,
+    IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle, TrailingNewline,
 };
 use biome_fs::BiomePath;
 #[cfg(all(feature = "js_embeds", feature = "lang_graphql"))]

@@ -2,7 +2,7 @@ use biome_css_formatter::context::CssFormatOptions;
 use biome_css_formatter::format_node;
 use biome_css_parser::{CssParserOptions, parse_css};
 use biome_css_syntax::AnyCssRoot;
-use biome_formatter::Printed;
+use biome_formatter::rowan::Printed;
 use biome_languages::CssFileSource;
 use biome_rowan::AstNode;
 use biome_test_utils::BenchCase;

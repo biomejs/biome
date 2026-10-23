@@ -1,5 +1,5 @@
 use super::{Buffer, Format, Formatter};
-use crate::FormatResult;
+use crate::{FormatContext, FormatResult};
 use std::ffi::c_void;
 use std::marker::PhantomData;
 
@@ -107,7 +107,7 @@ impl<Context> Clone for Arguments<'_, Context> {
     }
 }
 
-impl<Context> Format<Context> for Arguments<'_, Context> {
+impl<Context: FormatContext> Format<Context> for Arguments<'_, Context> {
     #[inline(always)]
     fn fmt(&self, formatter: &mut Formatter<Context>) -> FormatResult<()> {
         formatter.write_fmt(*self)
@@ -134,7 +134,7 @@ mod tests {
 
     #[test]
     fn test_nesting() {
-        let mut context = FormatState::new(());
+        let mut context = FormatState::new(SimpleFormatContext::default());
         let mut buffer = VecBuffer::new(&mut context);
 
         write!(

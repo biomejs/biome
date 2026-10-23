@@ -12,7 +12,7 @@ use crate::markdown::lists::block_list::list_ends_with_line_break;
 use crate::quote::quote_line_prefix;
 use crate::shared::{TextContext, TextPrintMode};
 use crate::{AsFormat, MarkdownFormatter, prelude::format_suppressed_node};
-use biome_formatter::prelude::*;
+use biome_formatter::rowan::prelude::*;
 use biome_formatter::{Format, FormatResult, format_args, write};
 use biome_markdown_syntax::list_ext::{AnyListItem, ListMarker, OrderedListDelimiter};
 use biome_markdown_syntax::thematic_break_ext::MdThematicBreakMarker;

@@ -1,7 +1,7 @@
 use crate::format_element::PrintMode;
 use crate::prelude::AlignedStr;
+use crate::source::Source;
 use crate::{GroupId, TextSize};
-use biome_rowan::TextRange;
 use std::cell::Cell;
 
 /// A Tag marking the start and end of some content to which some special formatting should be applied.
@@ -9,7 +9,7 @@ use std::cell::Cell;
 /// Tags always come in pairs of a start and an end tag and the styling defined by this tag
 /// will be applied to all elements in between the start/end tags.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum Tag {
+pub enum Tag<S: Source> {
     /// Indents the content one level deeper, see [crate::builders::indent] for documentation and examples.
     StartIndent,
     EndIndent,
@@ -73,7 +73,7 @@ pub enum Tag {
     /// can format later.
     ///
     /// See [crate::builders::FormatEmbedded] for documentation.
-    StartEmbedded(TextRange),
+    StartEmbedded(S::EmbeddedKey),
     EndEmbedded,
 
     /// Entry inside of a [crate::FormatElement::BestFitting]
@@ -81,7 +81,7 @@ pub enum Tag {
     EndBestFittingEntry,
 }
 
-impl Tag {
+impl<S: Source> Tag<S> {
     /// Returns `true` if `self` is any start tag.
     pub const fn is_start(&self) -> bool {
         matches!(
