@@ -413,6 +413,7 @@ pub mod no_vue_setup_props_reactivity_loss;
 pub mod no_vue_shadow_native_events;
 pub mod no_vue_side_effects_in_computed;
 pub mod no_vue_undeclared_directives;
+pub mod no_vue_undeclared_emits;
 pub mod no_vue_unused_emit_declarations;
 pub mod no_vue_unused_refs;
 pub mod no_vue_v_for_template_key_on_child;

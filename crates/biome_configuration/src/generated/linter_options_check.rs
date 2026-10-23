@@ -1956,6 +1956,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push((
         "nursery",
+        "noVueUndeclaredEmits",
+        TypeId::of::<biome_rule_options::no_vue_undeclared_emits::NoVueUndeclaredEmitsOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noVueUnusedEmitDeclarations",
         TypeId::of::<
             biome_rule_options::no_vue_unused_emit_declarations::NoVueUnusedEmitDeclarationsOptions,
