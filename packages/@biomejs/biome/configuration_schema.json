@@ -7542,6 +7542,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueExportInScriptSetupConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueExportInScriptSetupOptions" }
+			]
+		},
+		"NoVueExportInScriptSetupOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueImportCompilerMacrosConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8338,6 +8348,13 @@
 					"description": "Disallow the deprecated Vue $scopedSlots API.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-scoped-slots",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueDeprecatedScopedSlotsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueExportInScriptSetup": {
+					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-vue-export-in-script-setup",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueExportInScriptSetupConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13504,6 +13521,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueDuplicateKeysOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueExportInScriptSetupOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueExportInScriptSetupOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
