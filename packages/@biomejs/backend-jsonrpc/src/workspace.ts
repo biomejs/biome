@@ -3673,6 +3673,11 @@ export interface Nursery {
 	 */
 	useVueConsistentEventHyphenation?: UseVueConsistentEventHyphenationConfiguration;
 	/**
+	 * Require the validator function of a Vue event to return a true value when the event is valid.
+	 * See https://biomejs.dev/linter/rules/use-vue-emits-validator-return
+	 */
+	useVueEmitsValidatorReturn?: UseVueEmitsValidatorReturnConfiguration;
+	/**
 	 * Enforce that the name of a Vue component matches its file name.
 	 * See https://biomejs.dev/linter/rules/use-vue-matching-component-file-name
 	 */
@@ -6268,6 +6273,9 @@ export type UseVueBaseImportConfiguration =
 export type UseVueConsistentEventHyphenationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentEventHyphenationOptions;
+export type UseVueEmitsValidatorReturnConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueEmitsValidatorReturnOptions;
 export type UseVueMatchingComponentFileNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueMatchingComponentFileNameOptions;
@@ -9129,6 +9137,10 @@ export interface RuleWithUseVueConsistentEventHyphenationOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentEventHyphenationOptions;
 }
+export interface RuleWithUseVueEmitsValidatorReturnOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueEmitsValidatorReturnOptions;
+}
 export interface RuleWithUseVueMatchingComponentFileNameOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -11512,6 +11524,7 @@ export interface UseVueConsistentEventHyphenationOptions {
 	 */
 	ignoreTags?: string[];
 }
+export type UseVueEmitsValidatorReturnOptions = {};
 export type UseVueMatchingComponentFileNameOptions = {};
 export type UseVueToggleInsideTransitionOptions = {};
 export type UseVueTypedRefOptions = {};
@@ -12922,14 +12935,14 @@ export type Category =
 	| "lint/nursery/noBooleanSortComparator"
 	| "lint/nursery/noBunModules"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDanglingUnderscore"
-	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noComponentHookFactories"
 	| "lint/nursery/noConditionalExpect"
+	| "lint/nursery/noDanglingUnderscore"
 	| "lint/nursery/noDoubleComparison"
 	| "lint/nursery/noDrizzleDeleteWithoutWhere"
 	| "lint/nursery/noDrizzleUpdateWithoutWhere"
 	| "lint/nursery/noDuplicateFieldDefinitionNames"
+	| "lint/nursery/noDuplicateMapKeys"
 	| "lint/nursery/noDuplicateSelectors"
 	| "lint/nursery/noEagerArrayMethodsInLoops"
 	| "lint/nursery/noEmptyObjectKeys"
@@ -12972,8 +12985,8 @@ export type Category =
 	| "lint/nursery/noPlaywrightWaitForNavigation"
 	| "lint/nursery/noPlaywrightWaitForSelector"
 	| "lint/nursery/noPlaywrightWaitForTimeout"
-	| "lint/nursery/noPromiseExecutorReturn"
 	| "lint/nursery/noProcessExit"
+	| "lint/nursery/noPromiseExecutorReturn"
 	| "lint/nursery/noReactNativeDeepImports"
 	| "lint/nursery/noReactNativeLiteralColors"
 	| "lint/nursery/noReactNativeRawText"
@@ -13018,11 +13031,11 @@ export type Category =
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
-	| "lint/nursery/noVueLifecycleAfterAwait"
-	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueImportCompilerMacros"
+	| "lint/nursery/noVueLifecycleAfterAwait"
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRequiredPropWithDefault"
+	| "lint/nursery/noVueRootVIf"
 	| "lint/nursery/noVueShadowNativeEvents"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueUnusedEmitDeclarations"
@@ -13094,8 +13107,8 @@ export type Category =
 	| "lint/nursery/useSvelteRequireEachKey"
 	| "lint/nursery/useSvelteShorthandDirective"
 	| "lint/nursery/useTailwindShorthandClasses"
-	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTailwindSortedClasses"
+	| "lint/nursery/useTailwindStaticClassStrings"
 	| "lint/nursery/useTopLevelHeading"
 	| "lint/nursery/useUnaryMinus"
 	| "lint/nursery/useUniqueArgumentNames"
@@ -13107,6 +13120,7 @@ export type Category =
 	| "lint/nursery/useVueBaseImport"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentEventHyphenation"
+	| "lint/nursery/useVueEmitsValidatorReturn"
 	| "lint/nursery/useVueMatchingComponentFileName"
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVueToggleInsideTransition"

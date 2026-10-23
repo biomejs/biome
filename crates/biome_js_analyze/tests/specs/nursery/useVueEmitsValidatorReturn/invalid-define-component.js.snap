@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalid-define-component.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  emits: {
+    change(value) {
+      console.log(value);
+    },
+  },
+});
+
+```
+
+# Diagnostics
+```
+invalid-define-component.js:6:5 lint/nursery/useVueEmitsValidatorReturn ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The validator of the event change never returns a value.
+  
+     4 │ export default defineComponent({
+     5 │   emits: {
+   > 6 │     change(value) {
+       │     ^^^^^^^^^^^^^^^
+   > 7 │       console.log(value);
+   > 8 │     },
+       │     ^
+     9 │   },
+    10 │ });
+  
+  i Vue prints a warning in development mode each time the event is emitted, because the validator never accepts its values.
+  
+  i Return true when the values of the event are valid, and false otherwise.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

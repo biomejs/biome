@@ -1,0 +1,18 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: valid-define-emits.vue
+---
+# Input
+```vue
+<script setup>
+/* should not generate diagnostics */
+defineEmits({
+  foo() {
+    return true;
+  },
+  bar: (value) => typeof value === "string",
+});
+</script>
+
+```

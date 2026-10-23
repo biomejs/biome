@@ -2918,6 +2918,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("style", "useVueDefineMacrosOrder", TypeId::of::<biome_rule_options::use_vue_define_macros_order::UseVueDefineMacrosOrderOptions>()));
     result.push((
+        "nursery",
+        "useVueEmitsValidatorReturn",
+        TypeId::of::<
+            biome_rule_options::use_vue_emits_validator_return::UseVueEmitsValidatorReturnOptions,
+        >(),
+    ));
+    result.push((
         "style",
         "useVueHyphenatedAttributes",
         TypeId::of::<
