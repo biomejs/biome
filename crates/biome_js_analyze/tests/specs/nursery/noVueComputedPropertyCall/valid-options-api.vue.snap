@@ -1,0 +1,82 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-options-api.vue
+---
+# Input
+```vue
+<!-- should not generate diagnostics -->
+<script>
+import { helper } from "./helper";
+
+export default {
+  props: {
+    onPick: Function,
+    either: [String, Function],
+    untyped: null,
+  },
+  data() {
+    return { text: "hello", handler() {}, items: [] };
+  },
+  computed: {
+    fromFunctionProp() {
+      return this.onPick;
+    },
+    fromMixedProp() {
+      return this.either;
+    },
+    fromUntypedProp() {
+      return this.untyped;
+    },
+    fromDataFunction() {
+      return this.handler;
+    },
+    fromMethod() {
+      return this.format;
+    },
+    arrow() {
+      return () => this.text;
+    },
+    fromImport() {
+      return helper();
+    },
+    fromVariable() {
+      const fn = () => {};
+      return fn;
+    },
+    maybeFunction() {
+      return this.text || this.handler;
+    },
+    fromUnknownMember() {
+      return this.$store.getters.thing;
+    },
+    literal() {
+      return "literal";
+    },
+    cycle() {
+      return this.cycle;
+    },
+  },
+  methods: {
+    format() {},
+    run() {
+      this.fromFunctionProp();
+      this.fromMixedProp();
+      this.fromUntypedProp();
+      this.fromDataFunction();
+      this.fromMethod();
+      this.arrow();
+      this.fromImport();
+      this.fromVariable();
+      this.maybeFunction();
+      this.fromUnknownMember();
+      this.cycle();
+      this.literal;
+      this.literal.toUpperCase();
+      this.items.map(() => this.literal);
+      this.format();
+    },
+  },
+};
+</script>
+
+```
