@@ -3348,6 +3348,11 @@ export interface Nursery {
 	 */
 	noVueShadowNativeEvents?: NoVueShadowNativeEventsConfiguration;
 	/**
+	 * Disallow this in Vue templates.
+	 * See https://biomejs.dev/linter/rules/no-vue-this-in-template
+	 */
+	noVueThisInTemplate?: NoVueThisInTemplateConfiguration;
+	/**
 	 * Disallow custom Vue directives that are not declared.
 	 * See https://biomejs.dev/linter/rules/no-vue-undeclared-directives
 	 */
@@ -6073,6 +6078,9 @@ export type NoVueRootVIfConfiguration =
 export type NoVueShadowNativeEventsConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueShadowNativeEventsOptions;
+export type NoVueThisInTemplateConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueThisInTemplateOptions;
 export type NoVueUndeclaredDirectivesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUndeclaredDirectivesOptions;
@@ -8745,6 +8753,14 @@ export interface RuleWithNoVueShadowNativeEventsOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueShadowNativeEventsOptions;
 }
+export interface RuleWithNoVueThisInTemplateOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoVueThisInTemplateOptions;
+}
 export interface RuleWithNoVueUndeclaredDirectivesOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUndeclaredDirectivesOptions;
@@ -11257,6 +11273,7 @@ export type NoVueLifecycleAfterAwaitOptions = {};
 export type NoVueRequiredPropWithDefaultOptions = {};
 export type NoVueRootVIfOptions = {};
 export type NoVueShadowNativeEventsOptions = {};
+export type NoVueThisInTemplateOptions = {};
 export interface NoVueUndeclaredDirectivesOptions {
 	/**
 	 * Names of directives registered globally with `app.directive(...)`,
@@ -13024,6 +13041,7 @@ export type Category =
 	| "lint/nursery/noVueRefAsOperand"
 	| "lint/nursery/noVueRequiredPropWithDefault"
 	| "lint/nursery/noVueShadowNativeEvents"
+	| "lint/nursery/noVueThisInTemplate"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueUnusedEmitDeclarations"
 	| "lint/nursery/noVueVHtml"

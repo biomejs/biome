@@ -7639,6 +7639,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueThisInTemplateConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueThisInTemplateOptions" }
+			]
+		},
+		"NoVueThisInTemplateOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueUndeclaredDirectivesConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8366,6 +8376,13 @@
 					"description": "Disallow Vue component events named after built-in browser events.\nSee https://biomejs.dev/linter/rules/no-vue-shadow-native-events",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueShadowNativeEventsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueThisInTemplate": {
+					"description": "Disallow this in Vue templates.\nSee https://biomejs.dev/linter/rules/no-vue-this-in-template",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueThisInTemplateConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -13605,6 +13622,19 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueShadowNativeEventsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueThisInTemplateOptions": {
+			"type": "object",
+			"properties": {
+				"fix": {
+					"description": "Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.",
+					"anyOf": [{ "$ref": "#/$defs/FixKind" }, { "type": "null" }]
+				},
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueThisInTemplateOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
