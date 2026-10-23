@@ -28,6 +28,10 @@ pub(crate) struct FormatJsCallArguments {
 
 #[derive(Debug, Clone, Copy, Default)]
 pub(crate) struct FormatJsCallArgumentsOptions {
+    /// Stores the hugged layout with
+    /// [JsFormatContext::set_hugged_call_arguments] if the last argument is
+    /// grouped and doesn't already break. The caller takes it with
+    /// [JsFormatContext::take_hugged_call_arguments].
     pub(crate) store_hugged_layout: bool,
 }
 
@@ -663,9 +667,11 @@ fn write_grouped_arguments(
         && !grouped_breaks
         && matches!(group_layout, GroupedCallArgumentLayout::GroupedLastArgument)
     {
-        // Same as the middle variant written below when the grouped content
-        // breaks, without the best fitting around it: member chains print
-        // the hugged layout in flat mode, which always selects that variant.
+        // What the `grouped_breaks` branch below writes, `expand_parent`
+        // followed by the middle variant, without the best fitting around
+        // the variant. Member chains print the hugged layout in flat mode,
+        // where a best fitting prints its first variant, so the other
+        // variants would never be selected.
         let middle_variant = middle_variant_with_spaces
             .as_deref()
             .unwrap_or(&middle_variant_no_spaces);

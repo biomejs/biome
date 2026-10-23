@@ -52,8 +52,10 @@ pub struct JsFormatContext {
     /// members.
     ///
     /// Member chains use it to keep the chain on one line and break only the
-    /// last argument. The call arguments formatter stores it while formatting
-    /// the arguments, so the member chain doesn't format them twice.
+    /// last argument. When the member chain asks for it, the call arguments
+    /// formatter stores it while formatting the arguments, if the last argument
+    /// is grouped and doesn't already break. This way the member chain doesn't
+    /// format the arguments twice.
     hugged_call_arguments: Option<(JsCallArguments, FormatElement)>,
 
     source_map: Option<TransformSourceMap>,

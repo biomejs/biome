@@ -28,8 +28,8 @@ pub(super) struct StackFrame {
 pub(super) struct PrintElementArgs {
     mode: PrintMode,
     /// Whether the element is excluded from the fits check. `FitsMeasurer` sets
-    /// it inside [crate::builders::skip_fits_check] content. `Printer` never
-    /// sets or reads it.
+    /// it inside [crate::builders::skip_fits_check] content, except when it
+    /// measures fill entries. `Printer` never sets or reads it.
     skip_fits_check: bool,
 }
 

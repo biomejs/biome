@@ -337,25 +337,27 @@ impl MemberChain {
     /// });
     /// ```
     ///
-    /// Without this layout, formatting isn't stable. With `expand: "auto"`, an
-    /// object keeps a line break after `{` from the source. If the source has
-    /// none, the first formatting expands the whole chain and breaks the
+    /// Without this layout, formatting can be unstable. With `expand: "auto"`,
+    /// an object keeps a line break after `{` from the source. If the source
+    /// has none and the object doesn't fit on the last line of the expanded
+    /// chain, the first formatting expands the whole chain and breaks the
     /// object, which adds that line break. The second formatting then keeps the
     /// chain on one line.
     ///
     /// The last argument must be a non-empty object, or an arrow function
-    /// whose body is one, possibly wrapped in parentheses or type assertions.
-    /// Neither the argument list nor the last argument may have comments
-    /// attached. The comments in the body explain the other conditions.
+    /// whose body is one, possibly wrapped in parentheses, `as`, `satisfies`,
+    /// `<T>`, or `!`. Neither the argument list nor the last argument may have
+    /// comments attached, and `should_group_last_argument` must accept the
+    /// arguments. The comments in the body explain the remaining conditions.
     fn can_hug_last_argument(&self, f: &JsFormatter) -> bool {
         if f.options().expand() != Expand::Auto {
             return false;
         }
 
         if self.tail.len() < 2 || self.has_function_like_argument_before_last_call() {
-            // Chains with fewer than two tail groups never reach this layout
-            // without comments, and comments make `groups_should_break` expand
-            // them. `groups_should_break` also expands the chain when the last
+            // Chains with fewer than two tail groups and no comments return
+            // before the `best_fitting!` in `MemberChain::fmt`, and comments
+            // make `groups_should_break` expand them. `groups_should_break` also expands the chain when the last
             // call breaks after a call with a function argument.
             return false;
         }

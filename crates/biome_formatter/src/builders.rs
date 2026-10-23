@@ -735,7 +735,9 @@ impl<Context> Format<Context> for LineSuffixBoundary {
 /// In a [`best_fitting!`](crate::best_fitting) variant, use it for lines that
 /// print the same as in the most expanded variant, which the printer prints
 /// when no other variant fits. Only the other lines then decide whether this
-/// variant fits.
+/// variant fits. The variant is then picked over every later variant, even if
+/// the excluded lines don't fit. If a later variant other than the most
+/// expanded one can fit, make sure the excluded lines fit whenever it does.
 ///
 /// # Examples
 ///
