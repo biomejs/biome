@@ -2001,6 +2001,48 @@ array.map((sentence) => sentence.split(" ")).flat();
 }
 
 #[test]
+fn fix_logical_properties_after_renaming_physical_longhands() {
+    let fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let file_path = Utf8Path::new("styles.css");
+    fs.insert(
+        file_path.into(),
+        b".card {\n  margin-top: 1px;\n  margin-bottom: 2px;\n}\n",
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(
+            [
+                "lint",
+                "--write",
+                "--unsafe",
+                "--only=nursery/useLogicalProperties",
+                file_path.as_str(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    let mut buffer = String::new();
+    fs.open(file_path)
+        .unwrap()
+        .read_to_string(&mut buffer)
+        .unwrap();
+    assert_eq!(buffer, ".card {\n  margin-block: 1px 2px;\n}\n");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "fix_logical_properties_after_renaming_physical_longhands",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn apply_bogus_argument() {
     let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
