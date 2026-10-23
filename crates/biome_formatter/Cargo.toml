@@ -19,15 +19,15 @@ publish              = true
 independent = true
 
 [dependencies]
-biome_console            = { workspace = true }
-biome_deserialize        = { workspace = true }
-biome_deserialize_macros = { workspace = true }
-biome_diagnostics        = { workspace = true }
-biome_rowan              = { workspace = true }
+biome_console            = { workspace = true, optional = true }
+biome_deserialize        = { workspace = true, optional = true }
+biome_deserialize_macros = { workspace = true, optional = true }
+biome_diagnostics        = { workspace = true, optional = true }
+biome_rowan              = { workspace = true, optional = true }
 biome_string_case        = { workspace = true }
-biome_suppression        = { workspace = true }
+biome_suppression        = { workspace = true, optional = true }
+biome_text_size          = { workspace = true }
 camino                   = { workspace = true }
-cfg-if                   = { workspace = true }
 countme                  = { workspace = true, optional = true }
 drop_bomb                = "0.1.5"
 indexmap                 = { workspace = true }
@@ -42,9 +42,13 @@ biome_js_syntax = { path = "../biome_js_syntax" }
 insta           = { workspace = true }
 
 [features]
-countme = ["dep:countme"]
-schema  = ["dep:schemars", "serde"]
-serde   = ["biome_deserialize/serde", "biome_rowan/serde", "dep:serde"]
+countme     = ["dep:countme"]
+default     = ["deserialize", "diagnostics", "rowan"]
+deserialize = ["dep:biome_deserialize", "dep:biome_deserialize_macros"]
+diagnostics = ["dep:biome_console", "dep:biome_diagnostics"]
+rowan       = ["dep:biome_diagnostics", "dep:biome_rowan", "dep:biome_suppression"]
+schema      = ["biome_text_size/schema", "dep:schemars", "serde"]
+serde       = ["biome_deserialize?/serde", "biome_rowan?/serde", "biome_text_size/serde", "dep:serde"]
 
 [lints]
 workspace = true

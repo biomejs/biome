@@ -1,6 +1,7 @@
 use std::{fmt, ops::Deref, rc::Rc, str::FromStr};
 
 use biome_deserialize_macros::{Deserializable, Merge};
+use biome_formatter::rowan::RowanSource;
 use biome_formatter::{
     AttributePosition, BracketSameLine, CstFormatContext, FormatContext, FormatOptions,
     IndentStyle, IndentWidth, LineEnding, LineWidth, TrailingNewline, TransformSourceMap,
@@ -468,6 +469,7 @@ impl HtmlFormatContext {
 
 impl FormatContext for HtmlFormatContext {
     type Options = HtmlFormatOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &self.options

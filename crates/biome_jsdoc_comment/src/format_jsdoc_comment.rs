@@ -1,5 +1,6 @@
 use crate::JsdocComment;
-use biome_formatter::prelude::*;
+use biome_formatter::rowan::RowanSource;
+use biome_formatter::rowan::prelude::*;
 use biome_formatter::{
     FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth,
     SourceMapGeneration, TrailingNewline, TransformSourceMap, format_args, write,
@@ -10,6 +11,7 @@ pub struct JsDocFormatContext;
 
 impl FormatContext for JsDocFormatContext {
     type Options = JsCommentFormatOptions;
+    type Source = RowanSource;
 
     fn options(&self) -> &Self::Options {
         &JsCommentFormatOptions

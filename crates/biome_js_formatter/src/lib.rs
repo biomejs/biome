@@ -184,9 +184,10 @@ pub(crate) mod trivia;
 mod verbatim;
 
 use biome_formatter::format_element::tag::Label;
-use biome_formatter::prelude::*;
+use biome_formatter::rowan::Printed;
+use biome_formatter::rowan::prelude::*;
 use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
-use biome_formatter::{Buffer, FormatOwnedWithRule, FormatRefWithRule, Formatted, Printed};
+use biome_formatter::{Buffer, FormatOwnedWithRule, FormatRefWithRule, Formatted};
 use biome_formatter::{
     CstFormatContext, Format, FormatLanguage, TransformSourceMap, comments::Comments, write,
 };

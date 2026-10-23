@@ -7,7 +7,9 @@
 use crate::prelude::*;
 use biome_formatter::comments::Comments;
 use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
-use biome_formatter::{CstFormatContext, FormatOwnedWithRule, FormatRefWithRule, prelude::*};
+use biome_formatter::{
+    CstFormatContext, FormatOwnedWithRule, FormatRefWithRule, rowan::prelude::*,
+};
 use biome_formatter::{FormatLanguage, FormatResult, Formatted, write};
 use biome_html_syntax::{HtmlLanguage, HtmlSyntaxNode, HtmlSyntaxToken};
 use biome_rowan::{AstNode, SyntaxToken, TextRange};

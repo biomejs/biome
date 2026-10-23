@@ -39,7 +39,8 @@ use biome_configuration::markdown::{
     MarkdownParseFrontmatter, MarkdownParseGfm, MarkdownParserConfiguration,
 };
 use biome_db::AnyParsedSource;
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline};
+use biome_formatter::rowan::Printed;
+use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, TrailingNewline};
 use biome_fs::BiomePath;
 #[cfg(feature = "md_embeds")]
 use biome_markdown_analyze::analyze_with_snippets;

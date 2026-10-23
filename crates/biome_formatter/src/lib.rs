@@ -25,6 +25,7 @@
 mod arguments;
 mod buffer;
 mod builders;
+#[cfg(feature = "rowan")]
 pub mod comments;
 pub mod diagnostics;
 #[cfg(debug_assertions)]
@@ -35,13 +36,19 @@ pub mod formatter;
 pub mod group_id;
 pub mod macros;
 pub mod prelude;
-#[cfg(debug_assertions)]
+#[cfg(all(debug_assertions, feature = "rowan"))]
 pub mod printed_tokens;
 pub mod printer;
+#[cfg(feature = "rowan")]
+pub mod rowan;
+#[cfg(feature = "rowan")]
 pub mod separated;
+mod source;
+#[cfg(feature = "rowan")]
 mod source_map;
 pub mod token;
 mod token_case;
+#[cfg(feature = "rowan")]
 pub mod trivia;
 
 use crate::formatter::Formatter;
@@ -50,7 +57,9 @@ use crate::prelude::TagKind;
 use std::fmt;
 use std::fmt::{Debug, Display};
 
+#[cfg(feature = "rowan")]
 use crate::builders::syntax_token_cow_slice;
+#[cfg(feature = "rowan")]
 use crate::comments::{CommentStyle, Comments, SourceComment};
 pub use crate::diagnostics::{ActualStart, FormatError, InvalidDocumentError, PrintError};
 #[cfg(debug_assertions)]
@@ -59,21 +68,31 @@ use crate::format_element::document::Document;
 pub use crate::format_extensions::{
     FormatScopedOptions, FormatScopedOptionsExt, FormatWithScopedOptions,
 };
-#[cfg(debug_assertions)]
+#[cfg(all(debug_assertions, feature = "rowan"))]
 use crate::printed_tokens::PrintedTokens;
 use crate::printer::{Printer, PrinterOptions};
+#[cfg(feature = "rowan")]
+use crate::rowan::RowanSource;
 pub use arguments::{Argument, Arguments};
+#[cfg(feature = "diagnostics")]
 use biome_console::markup;
+#[cfg(feature = "deserialize")]
 use biome_deserialize::{
     Deserializable, DeserializableValue, DeserializationContext, DeserializationDiagnostic,
     TextNumber,
 };
+#[cfg(feature = "deserialize")]
 use biome_deserialize_macros::Deserializable;
+#[cfg(feature = "deserialize")]
 use biome_deserialize_macros::Merge;
+#[cfg(feature = "rowan")]
 use biome_rowan::{
     Language, NodeOrToken, SyntaxElement, SyntaxNode, SyntaxNodeWithOffset, SyntaxResult,
-    SyntaxToken, SyntaxTriviaPiece, TextLen, TextRange, TextSize, TokenAtOffset,
+    SyntaxToken, SyntaxTriviaPiece, TokenAtOffset,
 };
+#[cfg(feature = "rowan")]
+use biome_text_size::TextLen;
+use biome_text_size::{TextRange, TextSize};
 pub use buffer::{
     Buffer, BufferExtensions, BufferSnapshot, Inspect, PreambleBuffer, RemoveSoftLinesBuffer,
     VecBuffer,
@@ -82,13 +101,19 @@ pub use builders::BestFitting;
 pub use format_element::{FormatElement, LINE_TERMINATORS, normalize_newlines};
 pub use group_id::GroupId;
 pub use printer::SourceMapGeneration;
+pub use source::{NoSourceMap, PlainSource, Source, SourceMap};
+#[cfg(feature = "rowan")]
 pub use source_map::{TransformSourceMap, TransformSourceMapBuilder};
+use std::marker::PhantomData;
 use std::num::ParseIntError;
 use std::str::FromStr;
 use token::string::Quote;
-pub use token_case::{FormatRuleWithTextCase, FormatTextCaseExt, TextCase};
+#[cfg(feature = "rowan")]
+pub use token_case::FormatRuleWithTextCase;
+pub use token_case::{FormatTextCaseExt, TextCase};
 
-#[derive(Debug, Default, Clone, Copy, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[derive(Debug, Default, Clone, Copy, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "deserialize", derive(Deserializable, Merge))]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -139,7 +164,8 @@ impl Display for IndentStyle {
     }
 }
 
-#[derive(Clone, Copy, Debug, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "deserialize", derive(Deserializable, Merge))]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -296,7 +322,8 @@ impl std::fmt::Display for LineEnding {
 /// tab's display width when calculating line length.
 ///
 /// Accepted values range from 0 through 24.
-#[derive(Clone, Copy, Eq, Merge, Hash, PartialEq)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "deserialize", derive(Merge))]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize),
@@ -338,6 +365,7 @@ impl Default for IndentWidth {
     }
 }
 
+#[cfg(feature = "deserialize")]
 impl Deserializable for IndentWidth {
     fn deserialize(
         ctx: &mut dyn DeserializationContext,
@@ -391,6 +419,7 @@ impl TryFrom<u8> for IndentWidth {
     }
 }
 
+#[cfg(feature = "diagnostics")]
 impl biome_console::fmt::Display for IndentWidth {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
         fmt.write_markup(markup! {{self.value()}})
@@ -414,7 +443,8 @@ impl Debug for IndentWidth {
 /// as long unbreakable strings, may still exceed this width.
 ///
 /// Accepted values range from 1 through 320.
-#[derive(Clone, Copy, Eq, Merge, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq)]
+#[cfg_attr(feature = "deserialize", derive(Merge))]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize),
@@ -457,6 +487,7 @@ impl Default for LineWidth {
     }
 }
 
+#[cfg(feature = "deserialize")]
 impl Deserializable for LineWidth {
     fn deserialize(
         ctx: &mut dyn DeserializationContext,
@@ -488,6 +519,7 @@ impl<'de> serde::Deserialize<'de> for LineWidth {
     }
 }
 
+#[cfg(feature = "diagnostics")]
 impl biome_console::fmt::Display for LineWidth {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
         fmt.write_markup(markup! {{self.0}})
@@ -617,7 +649,8 @@ impl From<LineWidth> for u16 {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "deserialize", derive(Deserializable, Merge))]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -702,7 +735,8 @@ impl From<QuoteStyle> for Quote {
     }
 }
 
-#[derive(Clone, Copy, Debug, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "deserialize", derive(Deserializable, Merge))]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -736,6 +770,7 @@ impl std::fmt::Display for BracketSpacing {
     }
 }
 
+#[cfg(feature = "diagnostics")]
 impl biome_console::fmt::Display for BracketSpacing {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
         fmt.write_str(&self.0.to_string())
@@ -762,7 +797,8 @@ impl FromStr for BracketSpacing {
 /// Spaces are not added before the opening delimiter, and empty delimiters are not affected.
 /// Only applies when the content fits on a single line; when content breaks across multiple lines,
 /// no extra spaces are added. The specific delimiters affected depend on the language.
-#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "deserialize", derive(Deserializable, Merge))]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -790,6 +826,7 @@ impl std::fmt::Display for DelimiterSpacing {
     }
 }
 
+#[cfg(feature = "diagnostics")]
 impl biome_console::fmt::Display for DelimiterSpacing {
     fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
         fmt.write_str(&self.0.to_string())
@@ -812,7 +849,8 @@ impl FromStr for DelimiterSpacing {
 }
 
 /// Controls attribute placement in HTML-like languages.
-#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "deserialize", derive(Deserializable, Merge))]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -854,7 +892,8 @@ impl FromStr for AttributePosition {
 /// places the bracket at the end of the last attribute line when enabled and on its own line after
 /// the last attribute when disabled. This option also affects self-closing HTML elements, but
 /// self-closing JSX elements are unaffected.
-#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "deserialize", derive(Deserializable, Merge))]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -895,7 +934,8 @@ impl FromStr for BracketSameLine {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash, Deserializable, Merge, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "deserialize", derive(Deserializable, Merge))]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -942,7 +982,8 @@ impl FromStr for TrailingNewline {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Deserializable, Merge, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "deserialize", derive(Deserializable, Merge))]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -986,15 +1027,19 @@ impl fmt::Display for Expand {
 pub trait FormatContext {
     type Options: FormatOptions;
 
+    /// The source code that this context formats. It sets the types that the
+    /// document uses to point back to the source code.
+    type Source: Source;
+
     /// Returns the formatting options
     fn options(&self) -> &Self::Options;
 
-    /// Returns [None] if the CST has not been pre-processed.
+    /// Returns [None] if the source has not been pre-processed.
     ///
-    /// Returns [Some] if the CST has been pre-processed to simplify formatting.
+    /// Returns [Some] if the source has been pre-processed to simplify formatting.
     /// The source map can be used to map positions of the formatted nodes back to their original
     /// source locations or to resolve the source text.
-    fn source_map(&self) -> Option<&TransformSourceMap>;
+    fn source_map(&self) -> Option<&<Self::Source as Source>::SourceMap>;
 }
 
 /// Options customizing how the source code should be formatted.
@@ -1023,11 +1068,12 @@ pub trait FormatOptions {
     fn as_print_options(&self) -> PrinterOptions;
 }
 
+#[cfg(feature = "rowan")]
 /// The [CstFormatContext] is an extension of the CST unaware [FormatContext] and must be implemented
 /// by every language.
 ///
 /// The context customizes the comments formatting and stores the comments of the CST.
-pub trait CstFormatContext: FormatContext {
+pub trait CstFormatContext: FormatContext<Source = RowanSource> {
     type Language: Language;
     type Style: CommentStyle<Language = Self::Language>;
 
@@ -1038,25 +1084,46 @@ pub trait CstFormatContext: FormatContext {
     fn comments(&self) -> &Comments<Self::Language>;
 }
 
-#[derive(Debug, Default, Eq, PartialEq)]
-pub struct SimpleFormatContext {
+/// A context that only holds the options needed to print a document.
+///
+/// `S` is the source of the document. [Default] and [Self::new] create a
+/// context for [PlainSource]; use [Self::from_options] for any other source.
+#[derive(Debug, Eq, PartialEq)]
+pub struct SimpleFormatContext<S = PlainSource> {
     options: SimpleFormatOptions,
+    source: PhantomData<S>,
 }
 
 impl SimpleFormatContext {
     pub fn new(options: SimpleFormatOptions) -> Self {
-        Self { options }
+        Self::from_options(options)
     }
 }
 
-impl FormatContext for SimpleFormatContext {
+impl<S> SimpleFormatContext<S> {
+    pub fn from_options(options: SimpleFormatOptions) -> Self {
+        Self {
+            options,
+            source: PhantomData,
+        }
+    }
+}
+
+impl Default for SimpleFormatContext {
+    fn default() -> Self {
+        Self::new(SimpleFormatOptions::default())
+    }
+}
+
+impl<S: Source> FormatContext for SimpleFormatContext<S> {
     type Options = SimpleFormatOptions;
+    type Source = S;
 
     fn options(&self) -> &Self::Options {
         &self.options
     }
 
-    fn source_map(&self) -> Option<&TransformSourceMap> {
+    fn source_map(&self) -> Option<&S::SourceMap> {
         None
     }
 }
@@ -1110,21 +1177,21 @@ impl Display for SimpleFormatOptions {
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct SourceMarker {
+pub struct SourceMarker<P> {
     /// Position of the marker in the original source
-    pub source: TextSize,
+    pub source: P,
     /// Position of the marker in the output code
-    pub dest: TextSize,
+    pub dest: P,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Formatted<Context> {
-    document: Document,
+pub struct Formatted<Context: FormatContext> {
+    document: Document<Context::Source>,
     context: Context,
 }
 
-impl<Context> Formatted<Context> {
-    pub fn new(document: Document, context: Context) -> Self {
+impl<Context: FormatContext> Formatted<Context> {
+    pub fn new(document: Document<Context::Source>, context: Context) -> Self {
         Self { document, context }
     }
 
@@ -1134,13 +1201,13 @@ impl<Context> Formatted<Context> {
     }
 
     /// Replaces the content of each embedded element with the [Document] returned by
-    /// `fn_format_embedded` for the element's range.
+    /// `fn_format_embedded` for the element's key.
     ///
     /// When `fn_format_embedded` returns `None`, the element keeps the content the host
     /// formatter wrote for it.
     pub fn format_embedded<F>(&mut self, mut fn_format_embedded: F)
     where
-        F: FnMut(TextRange) -> Option<Document>,
+        F: FnMut(<Context::Source as Source>::EmbeddedKey) -> Option<Document<Context::Source>>,
     {
         self.document.replace_embedded(&mut fn_format_embedded);
     }
@@ -1154,25 +1221,20 @@ impl<Context> Formatted<Context> {
     }
 
     /// Returns the formatted document.
-    pub fn document(&self) -> &Document {
+    pub fn document(&self) -> &Document<Context::Source> {
         &self.document
     }
 
     /// Consumes `self` and returns the formatted document.
-    pub fn into_document(self) -> Document {
+    pub fn into_document(self) -> Document<Context::Source> {
         self.document
     }
 
-    pub fn swap_document(&mut self, document: Document) {
+    pub fn swap_document(&mut self, document: Document<Context::Source>) {
         self.document = document;
     }
-}
 
-impl<Context> Formatted<Context>
-where
-    Context: FormatContext,
-{
-    pub fn print(&self) -> PrintResult<Printed> {
+    pub fn print(&self) -> PrintResult<Printed<Context::Source>> {
         let print_options = self.context.options().as_print_options();
 
         let printed = Printer::new(print_options).print(&self.document)?;
@@ -1196,7 +1258,7 @@ where
         &self,
         indent: u16,
         source_map: SourceMapGeneration,
-    ) -> PrintResult<Printed> {
+    ) -> PrintResult<Printed<Context::Source>> {
         let print_options = self
             .context
             .options()
@@ -1221,26 +1283,40 @@ where
 }
 pub type PrintResult<T> = Result<T, PrintError>;
 
+/// The code printed for a document of source `S`.
+///
+/// Positions and ranges use the types of `S`, including the positions in the
+/// printed code.
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
+    serde(
+        rename_all = "camelCase",
+        bound(
+            serialize = "S::Position: serde::Serialize, S::Span: serde::Serialize",
+            deserialize = "S::Position: serde::Deserialize<'de>, S::Span: serde::Deserialize<'de>"
+        )
+    )
 )]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct Printed {
+#[cfg_attr(
+    feature = "schema",
+    derive(schemars::JsonSchema),
+    schemars(bound = "S::Position: schemars::JsonSchema, S::Span: schemars::JsonSchema")
+)]
+pub struct Printed<S: Source> {
     code: String,
-    range: Option<TextRange>,
-    sourcemap: Vec<SourceMarker>,
-    verbatim_ranges: Vec<TextRange>,
+    range: Option<S::Span>,
+    sourcemap: Vec<SourceMarker<S::Position>>,
+    verbatim_ranges: Vec<S::Span>,
 }
 
-impl Printed {
+impl<S: Source> Printed<S> {
     pub fn new(
         code: String,
-        range: Option<TextRange>,
-        sourcemap: Vec<SourceMarker>,
-        verbatim_source: Vec<TextRange>,
+        range: Option<S::Span>,
+        sourcemap: Vec<SourceMarker<S::Position>>,
+        verbatim_source: Vec<S::Span>,
     ) -> Self {
         Self {
             code,
@@ -1260,28 +1336,28 @@ impl Printed {
         }
     }
 
-    /// [TextRange] of the input source file covered by this formatted code,
+    /// Range of the input source file covered by this formatted code,
     /// or [None] if the entire file is covered in this instance
-    pub fn range(&self) -> Option<TextRange> {
-        self.range
+    pub fn range(&self) -> Option<S::Span> {
+        self.range.clone()
     }
 
-    /// Returns a list of [SourceMarker] mapping byte positions
+    /// Returns a list of [SourceMarker] mapping positions
     /// in the output string to the input source code.
     /// It's not guaranteed that the markers are sorted by source position.
-    pub fn sourcemap(&self) -> &[SourceMarker] {
+    pub fn sourcemap(&self) -> &[SourceMarker<S::Position>] {
         &self.sourcemap
     }
 
-    /// Returns a list of [SourceMarker] mapping byte positions
+    /// Returns a list of [SourceMarker] mapping positions
     /// in the output string to the input source code, consuming the result
-    pub fn into_sourcemap(self) -> Vec<SourceMarker> {
+    pub fn into_sourcemap(self) -> Vec<SourceMarker<S::Position>> {
         self.sourcemap
     }
 
-    /// Takes the list of [SourceMarker] mapping byte positions in the output string
+    /// Takes the list of [SourceMarker] mapping positions in the output string
     /// to the input source code.
-    pub fn take_sourcemap(&mut self) -> Vec<SourceMarker> {
+    pub fn take_sourcemap(&mut self) -> Vec<SourceMarker<S::Position>> {
         std::mem::take(&mut self.sourcemap)
     }
 
@@ -1295,20 +1371,13 @@ impl Printed {
         self.code
     }
 
-    /// The text in the formatted code that has been formatted as verbatim.
-    pub fn verbatim(&self) -> impl Iterator<Item = (TextRange, &str)> {
-        self.verbatim_ranges
-            .iter()
-            .map(|range| (*range, &self.code[*range]))
-    }
-
     /// Ranges of the formatted code that have been formatted as verbatim.
-    pub fn verbatim_ranges(&self) -> &[TextRange] {
+    pub fn verbatim_ranges(&self) -> &[S::Span] {
         &self.verbatim_ranges
     }
 
     /// Takes the ranges of nodes that have been formatted as verbatim, replacing them with an empty list.
-    pub fn take_verbatim_ranges(&mut self) -> Vec<TextRange> {
+    pub fn take_verbatim_ranges(&mut self) -> Vec<S::Span> {
         std::mem::take(&mut self.verbatim_ranges)
     }
 
@@ -1394,6 +1463,7 @@ where
     }
 }
 
+#[cfg(feature = "rowan")]
 impl<T, Context> Format<Context> for SyntaxResult<T>
 where
     T: Format<Context>,
@@ -1621,7 +1691,7 @@ where
 /// ```
 ///
 #[inline(always)]
-pub fn write<Context>(
+pub fn write<Context: FormatContext>(
     output: &mut dyn Buffer<Context = Context>,
     args: Arguments<Context>,
 ) -> FormatResult<()> {
@@ -1680,6 +1750,7 @@ where
     Ok(Formatted::new(document, state.into_context()))
 }
 
+#[cfg(feature = "rowan")]
 /// Entry point for formatting a [SyntaxNode] for a specific language.
 pub trait FormatLanguage {
     type SyntaxLanguage: Language;
@@ -1722,6 +1793,7 @@ pub trait FormatLanguage {
     ) -> Self::Context;
 }
 
+#[cfg(feature = "rowan")]
 /// Formats a syntax node file based on its features.
 ///
 /// It returns a [Formatted] result, which the user can use to override a file.
@@ -1742,6 +1814,7 @@ pub fn format_node<L: FormatLanguage>(
     )
 }
 
+#[cfg(feature = "rowan")]
 /// Formats a syntax node while configuring whether source positions are stored in the IR.
 pub fn format_node_with_source_map_generation<L: FormatLanguage>(
     root: &SyntaxNode<L::SyntaxLanguage>,
@@ -1816,6 +1889,7 @@ pub fn format_node_with_source_map_generation<L: FormatLanguage>(
     Ok(Formatted::new(document, context))
 }
 
+#[cfg(feature = "rowan")]
 /// Formats a syntax node file based on its features.
 ///
 /// It returns a [Formatted] result, which the user can use to override a file.
@@ -1893,6 +1967,7 @@ pub fn format_node_with_offset<L: FormatLanguage>(
     Ok(Formatted::new(document, context))
 }
 
+#[cfg(feature = "rowan")]
 /// Returns the [TextRange] for this [SyntaxElement] with the leading and
 /// trailing whitespace trimmed (but keeping comments or skipped trivias)
 fn text_non_whitespace_range<E, L>(elem: &E) -> TextRange
@@ -1931,6 +2006,7 @@ where
     TextRange::new(start, end)
 }
 
+#[cfg(feature = "rowan")]
 /// Formats a range within a file, supported by Biome
 ///
 /// This runs a simple heuristic to determine the initial indentation
@@ -1946,7 +2022,7 @@ pub fn format_range<Language: FormatLanguage>(
     root: &SyntaxNode<Language::SyntaxLanguage>,
     mut range: TextRange,
     language: Language,
-) -> FormatResult<Printed> {
+) -> FormatResult<Printed<RowanSource>> {
     if range.is_empty() {
         return Ok(Printed::new(
             String::new(),
@@ -2102,8 +2178,8 @@ pub fn format_range<Language: FormatLanguage>(
     // starting before or at said starting point, and the closest
     // marker to the end of the source range starting after or at
     // said ending point respectively
-    let mut range_start: Option<&SourceMarker> = None;
-    let mut range_end: Option<&SourceMarker> = None;
+    let mut range_start: Option<&SourceMarker<TextSize>> = None;
+    let mut range_end: Option<&SourceMarker<TextSize>> = None;
 
     let sourcemap = printed.sourcemap();
     for marker in sourcemap {
@@ -2197,6 +2273,7 @@ pub fn format_range<Language: FormatLanguage>(
     ))
 }
 
+#[cfg(feature = "rowan")]
 /// Formats a single node within a file, supported by Biome.
 ///
 /// This runs a simple heuristic to determine the initial indentation
@@ -2210,7 +2287,7 @@ pub fn format_range<Language: FormatLanguage>(
 pub fn format_sub_tree<L: FormatLanguage>(
     root: &SyntaxNode<L::SyntaxLanguage>,
     language: L,
-) -> FormatResult<Printed> {
+) -> FormatResult<Printed<RowanSource>> {
     // Determine the initial indentation level for the printer by inspecting the trivia pieces
     // of each token from the first token of the common root towards the start of the file
     let mut tokens = std::iter::successors(root.first_token(), |token| token.prev_token());
@@ -2278,7 +2355,12 @@ pub fn format_sub_tree<L: FormatLanguage>(
     ))
 }
 
-impl<L: Language, Context: FormatContext> Format<Context> for SyntaxTriviaPiece<L> {
+#[cfg(feature = "rowan")]
+impl<L, Context> Format<Context> for SyntaxTriviaPiece<L>
+where
+    L: Language,
+    Context: FormatContext<Source = RowanSource>,
+{
     fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
         let range = self.text_range();
 
@@ -2311,7 +2393,7 @@ pub struct FormatState<Context> {
 
     // This is using a RefCell as it only exists in debug mode,
     // the Formatter is still completely immutable in release builds
-    #[cfg(debug_assertions)]
+    #[cfg(all(debug_assertions, feature = "rowan"))]
     pub printed_tokens: PrintedTokens,
     #[cfg(debug_assertions)]
     format_audit: FormatAudit,
@@ -2343,7 +2425,7 @@ impl<Context> FormatState<Context> {
             group_id_builder: Default::default(),
             source_map_generation,
 
-            #[cfg(debug_assertions)]
+            #[cfg(all(debug_assertions, feature = "rowan"))]
             printed_tokens: Default::default(),
             #[cfg(debug_assertions)]
             format_audit: Default::default(),
@@ -2375,12 +2457,12 @@ impl<Context> FormatState<Context> {
         self.group_id_builder.group_id(debug_name)
     }
 
-    #[cfg(not(debug_assertions))]
+    #[cfg(all(not(debug_assertions), feature = "rowan"))]
     #[inline]
     pub fn track_token<L: Language>(&mut self, _token: &SyntaxToken<L>) {}
 
     /// Tracks the given token as formatted
-    #[cfg(debug_assertions)]
+    #[cfg(all(debug_assertions, feature = "rowan"))]
     #[inline]
     pub fn track_token<L: Language>(&mut self, token: &SyntaxToken<L>) {
         self.printed_tokens.track_token(token);
@@ -2397,36 +2479,36 @@ impl<Context> FormatState<Context> {
         self.format_audit.record_event(event);
     }
 
-    #[cfg(not(debug_assertions))]
+    #[cfg(not(all(debug_assertions, feature = "rowan")))]
     #[inline]
     pub fn set_token_tracking_disabled(&mut self, _: bool) {}
 
     /// Disables or enables token tracking for a portion of the code.
     ///
     /// It can be useful to disable the token tracking when it is necessary to re-format a node with different parameters.
-    #[cfg(debug_assertions)]
+    #[cfg(all(debug_assertions, feature = "rowan"))]
     pub fn set_token_tracking_disabled(&mut self, enabled: bool) {
         self.printed_tokens.set_disabled(enabled)
     }
 
-    #[cfg(not(debug_assertions))]
+    #[cfg(not(all(debug_assertions, feature = "rowan")))]
     #[inline]
     pub fn is_token_tracking_disabled(&self) -> bool {
         false
     }
 
     /// Returns `true` if token tracking is currently disabled.
-    #[cfg(debug_assertions)]
+    #[cfg(all(debug_assertions, feature = "rowan"))]
     pub fn is_token_tracking_disabled(&self) -> bool {
         self.printed_tokens.is_disabled()
     }
 
-    #[cfg(not(debug_assertions))]
+    #[cfg(all(not(debug_assertions), feature = "rowan"))]
     #[inline]
     pub fn assert_formatted_all_tokens<L: Language>(&self, _root: &SyntaxNode<L>) {}
 
     /// Asserts in debug builds that all tokens have been printed.
-    #[cfg(debug_assertions)]
+    #[cfg(all(debug_assertions, feature = "rowan"))]
     #[inline]
     pub fn assert_formatted_all_tokens<L: Language>(&self, root: &SyntaxNode<L>) {
         self.printed_tokens.assert_all_tracked(root);
@@ -2450,7 +2532,7 @@ where
 {
     pub fn snapshot(&self) -> FormatStateSnapshot {
         FormatStateSnapshot {
-            #[cfg(debug_assertions)]
+            #[cfg(all(debug_assertions, feature = "rowan"))]
             printed_tokens: self.printed_tokens.snapshot(),
             #[cfg(debug_assertions)]
             format_audit: self.format_audit.snapshot(),
@@ -2459,29 +2541,27 @@ where
 
     pub fn restore_snapshot(&mut self, snapshot: FormatStateSnapshot) {
         let FormatStateSnapshot {
-            #[cfg(debug_assertions)]
+            #[cfg(all(debug_assertions, feature = "rowan"))]
             printed_tokens,
             #[cfg(debug_assertions)]
             format_audit,
         } = snapshot;
 
-        cfg_if::cfg_if! {
-            if #[cfg(debug_assertions)] {
-                self.printed_tokens.restore(printed_tokens);
-                self.format_audit.restore(format_audit);
-            }
-        }
+        #[cfg(all(debug_assertions, feature = "rowan"))]
+        self.printed_tokens.restore(printed_tokens);
+        #[cfg(debug_assertions)]
+        self.format_audit.restore(format_audit);
     }
 }
 
 pub struct FormatStateSnapshot {
-    #[cfg(debug_assertions)]
+    #[cfg(all(debug_assertions, feature = "rowan"))]
     printed_tokens: printed_tokens::PrintedTokensSnapshot,
     #[cfg(debug_assertions)]
     format_audit: format_audit::FormatAuditSnapshot,
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "rowan"))]
 mod tests {
     use std::borrow::Cow;
 
@@ -2490,6 +2570,7 @@ mod tests {
         SimpleFormatContext, SimpleFormatOptions, SourceMapGeneration, SourceMarker, VecBuffer,
     };
     use crate::prelude::*;
+    use crate::rowan::RowanSource;
     use biome_deserialize::json::deserialize_from_json_str;
     use biome_deserialize_macros::Deserializable;
     use biome_diagnostics::Error;
@@ -2497,13 +2578,18 @@ mod tests {
     use biome_js_syntax::{JsSyntaxKind, JsSyntaxToken};
     use biome_rowan::TextSize;
 
+    /// Returns a context for documents built from `biome_rowan` tokens.
+    fn rowan_context(options: SimpleFormatOptions) -> SimpleFormatContext<RowanSource> {
+        SimpleFormatContext::from_options(options)
+    }
+
     fn print_literal_token_slice<'a>(
         syntax_token: &'a JsSyntaxToken,
         text: Cow<'a, str>,
         start: TextSize,
-    ) -> Printed {
+    ) -> Printed<RowanSource> {
         let formatted = crate::format!(
-            SimpleFormatContext::default(),
+            rowan_context(SimpleFormatOptions::default()),
             [syntax_token_cow_slice(text, syntax_token, start).with_literal_line_breaks()]
         )
         .unwrap();
@@ -2517,9 +2603,9 @@ mod tests {
         syntax_token: &'a JsSyntaxToken,
         text: Cow<'a, str>,
         start: TextSize,
-        context: SimpleFormatContext,
+        context: SimpleFormatContext<RowanSource>,
         source_map_generation: SourceMapGeneration,
-    ) -> Printed {
+    ) -> Printed<RowanSource> {
         let formatted = crate::format!(
             context,
             [
@@ -2608,7 +2694,7 @@ mod tests {
     fn syntax_token_slice_without_newlines_keeps_one_text_element() {
         let token = JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, "plain", [], []);
         let formatted = crate::format!(
-            SimpleFormatContext::default(),
+            rowan_context(SimpleFormatOptions::default()),
             [
                 syntax_token_cow_slice(Cow::Borrowed(token.text()), &token, TextSize::from(0),)
                     .with_literal_line_breaks()
@@ -2625,7 +2711,7 @@ mod tests {
 
     #[test]
     fn syntax_token_slice_trailing_literal_lines_advance_source_for_generated_text() {
-        let cases: &[(&str, u32, &[SourceMarker])] = &[
+        let cases: &[(&str, u32, &[SourceMarker<TextSize>])] = &[
             (
                 "a\n",
                 0,
@@ -2701,7 +2787,7 @@ mod tests {
                 &syntax_token,
                 Cow::Borrowed(syntax_token.text()),
                 TextSize::from(start),
-                SimpleFormatContext::default(),
+                rowan_context(SimpleFormatOptions::default()),
                 SourceMapGeneration::Enabled,
             );
 
@@ -2718,7 +2804,7 @@ mod tests {
             &syntax_token,
             Cow::Borrowed(syntax_token.text()),
             TextSize::from(0),
-            SimpleFormatContext::new(SimpleFormatOptions {
+            rowan_context(SimpleFormatOptions {
                 line_ending: LineEnding::Crlf,
                 ..SimpleFormatOptions::default()
             }),
@@ -2754,7 +2840,7 @@ mod tests {
         let syntax_token =
             JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, "a\n\n", [], []);
         let mut state = FormatState::new_with_source_map_generation(
-            SimpleFormatContext::default(),
+            rowan_context(SimpleFormatOptions::default()),
             SourceMapGeneration::Disabled,
         );
         let mut buffer = VecBuffer::new(&mut state);
@@ -2809,7 +2895,7 @@ mod tests {
         let syntax_token =
             JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, "\n", [], []);
         let formatted = crate::format!(
-            SimpleFormatContext::default(),
+            rowan_context(SimpleFormatOptions::default()),
             [
                 source_position(TextSize::from(0)),
                 syntax_token_cow_slice(
@@ -2851,7 +2937,7 @@ mod tests {
         let syntax_token =
             JsSyntaxToken::new_detached(JsSyntaxKind::JS_STRING_LITERAL, "a", [], []);
         let formatted = crate::format!(
-            SimpleFormatContext::default(),
+            rowan_context(SimpleFormatOptions::default()),
             [
                 syntax_token_cow_slice(
                     Cow::Borrowed(syntax_token.text()),
@@ -2935,6 +3021,7 @@ mod tests {
         );
     }
 
+    #[cfg(all(feature = "deserialize", feature = "diagnostics"))]
     #[test]
     fn test_out_of_range_line_width() {
         #[derive(Debug, Default, Deserializable, Eq, PartialEq)]
@@ -2980,32 +3067,32 @@ mod tests {
         use super::Printed;
 
         // Test stripping LF
-        let printed = Printed::new("test\n".to_string(), None, vec![], vec![]);
+        let printed = Printed::<RowanSource>::new("test\n".to_string(), None, vec![], vec![]);
         let stripped = printed.strip_trailing_newlines();
         assert_eq!(stripped.as_code(), "test");
 
         // Test stripping CRLF
-        let printed = Printed::new("test\r\n".to_string(), None, vec![], vec![]);
+        let printed = Printed::<RowanSource>::new("test\r\n".to_string(), None, vec![], vec![]);
         let stripped = printed.strip_trailing_newlines();
         assert_eq!(stripped.as_code(), "test");
 
         // Test stripping CR
-        let printed = Printed::new("test\r".to_string(), None, vec![], vec![]);
+        let printed = Printed::<RowanSource>::new("test\r".to_string(), None, vec![], vec![]);
         let stripped = printed.strip_trailing_newlines();
         assert_eq!(stripped.as_code(), "test");
 
         // Test stripping multiple newlines
-        let printed = Printed::new("test\n\n\n".to_string(), None, vec![], vec![]);
+        let printed = Printed::<RowanSource>::new("test\n\n\n".to_string(), None, vec![], vec![]);
         let stripped = printed.strip_trailing_newlines();
         assert_eq!(stripped.as_code(), "test");
 
         // Test not stripping newlines in the middle
-        let printed = Printed::new("test\ncode".to_string(), None, vec![], vec![]);
+        let printed = Printed::<RowanSource>::new("test\ncode".to_string(), None, vec![], vec![]);
         let stripped = printed.strip_trailing_newlines();
         assert_eq!(stripped.as_code(), "test\ncode");
 
         // Test empty string
-        let printed = Printed::new(String::new(), None, vec![], vec![]);
+        let printed = Printed::<RowanSource>::new(String::new(), None, vec![], vec![]);
         let stripped = printed.strip_trailing_newlines();
         assert_eq!(stripped.as_code(), "");
     }
@@ -3013,7 +3100,7 @@ mod tests {
     #[test]
     fn disabled_source_map_generation_omits_source_position_elements() {
         let mut state = FormatState::new_with_source_map_generation(
-            SimpleFormatContext::default(),
+            rowan_context(SimpleFormatOptions::default()),
             SourceMapGeneration::Disabled,
         );
         let mut buffer = VecBuffer::new(&mut state);
@@ -3029,7 +3116,7 @@ mod tests {
     #[test]
     fn enabled_source_map_generation_inlines_source_position_on_text() {
         let mut state = FormatState::new_with_source_map_generation(
-            SimpleFormatContext::default(),
+            rowan_context(SimpleFormatOptions::default()),
             SourceMapGeneration::Enabled,
         );
         let mut buffer = VecBuffer::new(&mut state);
@@ -3117,6 +3204,7 @@ mod tests {
 
         impl FormatContext for AuditContext {
             type Options = SimpleFormatOptions;
+            type Source = RowanSource;
 
             fn options(&self) -> &Self::Options {
                 &self.options

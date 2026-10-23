@@ -18,7 +18,8 @@ use crate::prelude::{format_bogus_node, format_suppressed_node};
 pub(crate) use crate::trivia::*;
 use crate::{context::MdFormatOptions, cst::FormatMdSyntaxToken};
 use biome_formatter::{
-    FormatContext, FormatLanguage, FormatResult, Formatted, TransformSourceMap, prelude::*, write,
+    FormatContext, FormatLanguage, FormatResult, Formatted, TransformSourceMap, rowan::prelude::*,
+    write,
 };
 use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode};
 use biome_rowan::{AstNode, TextRange};

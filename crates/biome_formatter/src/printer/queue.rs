@@ -2,14 +2,15 @@ use crate::format_element::tag::TagKind;
 use crate::prelude::Tag;
 use crate::printer::stack::{Stack, StackedStack};
 use crate::printer::{invalid_end_tag, invalid_start_tag};
-use crate::{FormatElement, PrintResult};
+use crate::{FormatElement, PrintResult, Source};
 use std::fmt::Debug;
 use std::iter::FusedIterator;
 use std::marker::PhantomData;
 
 /// Queue of [FormatElement]s.
 pub(super) trait Queue<'a> {
-    type Stack: Stack<&'a [FormatElement]>;
+    type Source: Source;
+    type Stack: Stack<&'a [FormatElement<Self::Source>]>;
 
     fn stack(&self) -> &Self::Stack;
 
@@ -20,7 +21,7 @@ pub(super) trait Queue<'a> {
     fn set_next_index(&mut self, index: usize);
 
     /// Pops the element at the end of the queue.
-    fn pop(&mut self) -> Option<&'a FormatElement> {
+    fn pop(&mut self) -> Option<&'a FormatElement<Self::Source>> {
         match self.stack().top() {
             Some(top_slice) => {
                 // SAFETY: Safe because queue ensures that slices inside `slices` are never empty.
@@ -41,14 +42,14 @@ pub(super) trait Queue<'a> {
     }
 
     /// Returns the next element, not traversing into [FormatElement::Interned].
-    fn top_with_interned(&self) -> Option<&'a FormatElement> {
+    fn top_with_interned(&self) -> Option<&'a FormatElement<Self::Source>> {
         self.stack()
             .top()
             .map(|top_slice| &top_slice[self.next_index()])
     }
 
     /// Returns the next element, recursively resolving the first element of [FormatElement::Interned].
-    fn top(&self) -> Option<&'a FormatElement> {
+    fn top(&self) -> Option<&'a FormatElement<Self::Source>> {
         let mut top = self.top_with_interned();
 
         while let Some(FormatElement::Interned(interned)) = top {
@@ -59,12 +60,12 @@ pub(super) trait Queue<'a> {
     }
 
     /// Queues a single element to process before the other elements in this queue.
-    fn push(&mut self, element: &'a FormatElement) {
+    fn push(&mut self, element: &'a FormatElement<Self::Source>) {
         self.extend_back(std::slice::from_ref(element))
     }
 
     /// Queues a slice of elements to process before the other elements in this queue.
-    fn extend_back(&mut self, elements: &'a [FormatElement]) {
+    fn extend_back(&mut self, elements: &'a [FormatElement<Self::Source>]) {
         match elements {
             [] => {
                 // Don't push empty slices
@@ -83,7 +84,7 @@ pub(super) trait Queue<'a> {
     }
 
     /// Removes top slice.
-    fn pop_slice(&mut self) -> Option<&'a [FormatElement]> {
+    fn pop_slice(&mut self) -> Option<&'a [FormatElement<Self::Source>]> {
         self.set_next_index(0);
         self.stack_mut().pop()
     }
@@ -111,13 +112,13 @@ pub(super) trait Queue<'a> {
 
 /// Queue with the elements to print.
 #[derive(Debug, Default, Clone)]
-pub(super) struct PrintQueue<'a> {
-    slices: Vec<&'a [FormatElement]>,
+pub(super) struct PrintQueue<'a, S: Source> {
+    slices: Vec<&'a [FormatElement<S>]>,
     next_index: usize,
 }
 
-impl<'a> PrintQueue<'a> {
-    pub(super) fn new(slice: &'a [FormatElement]) -> Self {
+impl<'a, S: Source> PrintQueue<'a, S> {
+    pub(super) fn new(slice: &'a [FormatElement<S>]) -> Self {
         let slices = match slice {
             [] => Vec::default(),
             slice => vec![slice],
@@ -134,8 +135,9 @@ impl<'a> PrintQueue<'a> {
     }
 }
 
-impl<'a> Queue<'a> for PrintQueue<'a> {
-    type Stack = Vec<&'a [FormatElement]>;
+impl<'a, S: Source> Queue<'a> for PrintQueue<'a, S> {
+    type Source = S;
+    type Stack = Vec<&'a [FormatElement<S>]>;
 
     fn stack(&self) -> &Self::Stack {
         &self.slices
@@ -160,15 +162,15 @@ impl<'a> Queue<'a> for PrintQueue<'a> {
 /// from the [PrintQueue] while measuring.
 #[must_use]
 #[derive(Debug)]
-pub(super) struct FitsQueue<'a, 'print> {
-    stack: StackedStack<'print, &'a [FormatElement]>,
+pub(super) struct FitsQueue<'a, 'print, S: Source> {
+    stack: StackedStack<'print, &'a [FormatElement<S>]>,
     next_index: usize,
 }
 
-impl<'a, 'print> FitsQueue<'a, 'print> {
+impl<'a, 'print, S: Source> FitsQueue<'a, 'print, S> {
     pub(super) fn new(
-        print_queue: &'print PrintQueue<'a>,
-        saved: Vec<&'a [FormatElement]>,
+        print_queue: &'print PrintQueue<'a, S>,
+        saved: Vec<&'a [FormatElement<S>]>,
     ) -> Self {
         let stack = StackedStack::with_vec(&print_queue.slices, saved);
 
@@ -178,13 +180,14 @@ impl<'a, 'print> FitsQueue<'a, 'print> {
         }
     }
 
-    pub(super) fn finish(self) -> Vec<&'a [FormatElement]> {
+    pub(super) fn finish(self) -> Vec<&'a [FormatElement<S>]> {
         self.stack.into_vec()
     }
 }
 
-impl<'a, 'print> Queue<'a> for FitsQueue<'a, 'print> {
-    type Stack = StackedStack<'print, &'a [FormatElement]>;
+impl<'a, 'print, S: Source> Queue<'a> for FitsQueue<'a, 'print, S> {
+    type Source = S;
+    type Stack = StackedStack<'print, &'a [FormatElement<S>]>;
 
     fn stack(&self) -> &Self::Stack {
         &self.stack
@@ -228,7 +231,7 @@ impl<'a, Q> Iterator for QueueContentIterator<'a, '_, Q>
 where
     Q: Queue<'a>,
 {
-    type Item = &'a FormatElement;
+    type Item = &'a FormatElement<Q::Source>;
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.depth {
@@ -270,14 +273,14 @@ impl<'a, Q> FusedIterator for QueueContentIterator<'a, '_, Q> where Q: Queue<'a>
 /// fits on the line. The measuring of the content ends after the first element [`element`](FormatElement) for which this
 /// predicate returns `true` (similar to a take while iterator except that it takes while the predicate returns `false`).
 pub(super) trait FitsEndPredicate {
-    fn is_end(&mut self, element: &FormatElement) -> PrintResult<bool>;
+    fn is_end<S: Source>(&mut self, element: &FormatElement<S>) -> PrintResult<bool>;
 }
 
 /// Filter that includes all elements until it reaches the end of the document.
 pub(super) struct AllPredicate;
 
 impl FitsEndPredicate for AllPredicate {
-    fn is_end(&mut self, _element: &FormatElement) -> PrintResult<bool> {
+    fn is_end<S: Source>(&mut self, _element: &FormatElement<S>) -> PrintResult<bool> {
         Ok(false)
     }
 }
@@ -302,7 +305,7 @@ impl Default for SingleEntryPredicate {
 }
 
 impl FitsEndPredicate for SingleEntryPredicate {
-    fn is_end(&mut self, element: &FormatElement) -> PrintResult<bool> {
+    fn is_end<S: Source>(&mut self, element: &FormatElement<S>) -> PrintResult<bool> {
         let result = match self {
             Self::Done => true,
             Self::Entry { depth } => match element {
@@ -338,12 +341,10 @@ impl FitsEndPredicate for SingleEntryPredicate {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "rowan"))]
 mod tests {
-    use crate::FormatElement;
-    use crate::format_element::LineMode;
-    use crate::prelude::Tag;
     use crate::printer::queue::{PrintQueue, Queue};
+    use crate::rowan::{FormatElement, LineMode, Tag};
 
     #[test]
     fn extend_back_pop_last() {

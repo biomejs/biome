@@ -1,8 +1,13 @@
 use crate::prelude::TagKind;
+#[cfg(feature = "diagnostics")]
 use biome_console::fmt::Formatter;
+#[cfg(feature = "diagnostics")]
 use biome_console::markup;
+#[cfg(feature = "diagnostics")]
 use biome_diagnostics::{Category, Diagnostic, DiagnosticTags, Location, Severity, category};
-use biome_rowan::{SyntaxError, TextRange};
+#[cfg(feature = "rowan")]
+use biome_rowan::SyntaxError;
+use biome_text_size::TextRange;
 use std::error::Error;
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
@@ -54,12 +59,14 @@ impl std::fmt::Display for FormatError {
 
 impl Error for FormatError {}
 
+#[cfg(feature = "rowan")]
 impl From<SyntaxError> for FormatError {
     fn from(error: SyntaxError) -> Self {
         Self::from(&error)
     }
 }
 
+#[cfg(feature = "rowan")]
 impl From<&SyntaxError> for FormatError {
     fn from(syntax_error: &SyntaxError) -> Self {
         match syntax_error {
@@ -84,6 +91,7 @@ impl From<&PrintError> for FormatError {
     }
 }
 
+#[cfg(feature = "diagnostics")]
 impl Diagnostic for FormatError {
     fn location(&self) -> Location<'_> {
         Location::builder().build()
@@ -246,6 +254,7 @@ impl std::fmt::Display for PrintError {
     }
 }
 
+#[cfg(feature = "diagnostics")]
 impl Diagnostic for PrintError {
     fn category(&self) -> Option<&'static Category> {
         Some(category!("format"))
@@ -273,7 +282,7 @@ impl Diagnostic for PrintError {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "diagnostics"))]
 mod test {
     use crate::diagnostics::{ActualStart, InvalidDocumentError};
     use crate::prelude::{FormatError, TagKind};

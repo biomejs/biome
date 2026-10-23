@@ -68,7 +68,7 @@ use biome_db::{AnyParsedSource, ParsedSnippet, ParsedSource};
 use biome_diagnostics::{Applicability, Diagnostic, DiagnosticExt, Error, Severity, category};
 #[cfg(feature = "html_embeds")]
 use biome_embeds::EmbeddedData;
-use biome_formatter::Printed;
+use biome_formatter::rowan::Printed;
 use biome_fs::BiomePath;
 #[cfg(feature = "lang_graphql")]
 use biome_graphql_analyze::METADATA as graphql_metadata;

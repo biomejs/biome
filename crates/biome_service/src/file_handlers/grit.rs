@@ -21,8 +21,9 @@ use biome_configuration::grit::{
 };
 use biome_db::AnyParsedSource;
 use biome_diagnostics::{Diagnostic, Severity};
+use biome_formatter::rowan::Printed;
 use biome_formatter::{
-    FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, TrailingNewline,
+    FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, TrailingNewline,
 };
 use biome_fs::BiomePath;
 use biome_grit_formatter::{context::GritFormatOptions, format_node};

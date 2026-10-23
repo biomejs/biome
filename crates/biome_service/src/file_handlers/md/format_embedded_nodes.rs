@@ -7,10 +7,13 @@ use crate::file_handlers::{
 };
 use crate::settings::{ServiceLanguage, SettingsWithEditor};
 use biome_css_formatter::CssFormatLanguage;
-use biome_formatter::prelude::{Document, Formatter, literal_line_break_without_parent, text};
+use biome_formatter::rowan::Printed;
+use biome_formatter::rowan::prelude::{
+    Document, Formatter, RowanSource, literal_line_break_without_parent, text,
+};
 use biome_formatter::{
-    Buffer, Format, FormatContext, FormatLanguage, FormatResult, Printed, SimpleFormatContext,
-    TrailingNewline, normalize_newlines, write,
+    Buffer, Format, FormatContext, FormatLanguage, FormatResult, SimpleFormatContext,
+    SimpleFormatOptions, TrailingNewline, normalize_newlines, write,
 };
 use biome_fs::BiomePath;
 use biome_graphql_formatter::GraphqlFormatLanguage;
@@ -272,8 +275,8 @@ fn format_markdown_snippet(
 /// Returns a document holding `code`, a snippet printed with the options of its
 /// language.
 fn printed_document(code: &str) -> Option<Document> {
-    let formatted =
-        biome_formatter::format!(SimpleFormatContext::default(), [PrintedCode(code)]).ok()?;
+    let context = SimpleFormatContext::<RowanSource>::from_options(SimpleFormatOptions::default());
+    let formatted = biome_formatter::format!(context, [PrintedCode(code)]).ok()?;
     Some(formatted.into_document())
 }
 

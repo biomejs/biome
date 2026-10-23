@@ -1,7 +1,9 @@
 use crate::{
-    FormatOwnedWithRule, FormatRefWithRule, FormatRule, FormatScopedOptions,
-    FormatScopedOptionsExt as _, FormatWithRule, FormatWithScopedOptions, SyntaxToken,
+    FormatScopedOptions, FormatScopedOptionsExt as _, FormatWithRule, FormatWithScopedOptions,
 };
+#[cfg(feature = "rowan")]
+use crate::{FormatOwnedWithRule, FormatRefWithRule, FormatRule, SyntaxToken};
+#[cfg(feature = "rowan")]
 use biome_rowan::Language;
 
 /// Controls how a formatter rule transforms the case of source text.
@@ -22,6 +24,7 @@ pub enum TextCase {
     Lowercase,
 }
 
+#[cfg(feature = "rowan")]
 /// Token formatting rule that supports an explicit text casing policy.
 ///
 /// Implementing this trait exposes `with_text_case` on the borrowed and owned
@@ -34,6 +37,7 @@ where
     fn with_text_case(self, case: TextCase) -> Self;
 }
 
+#[cfg(feature = "rowan")]
 impl<L, R> FormatRefWithRule<'_, SyntaxToken<L>, R>
 where
     L: Language,
@@ -47,6 +51,7 @@ where
     }
 }
 
+#[cfg(feature = "rowan")]
 impl<L, R> FormatOwnedWithRule<SyntaxToken<L>, R>
 where
     L: Language,
@@ -79,7 +84,7 @@ impl<Formatted, Context> FormatTextCaseExt<Context> for Formatted where
 {
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "rowan"))]
 mod tests {
     use super::*;
     use crate::prelude::*;
@@ -147,6 +152,7 @@ mod tests {
 
     impl FormatContext for CaseContext {
         type Options = SimpleFormatOptions;
+        type Source = crate::rowan::RowanSource;
 
         fn options(&self) -> &Self::Options {
             &self.options
