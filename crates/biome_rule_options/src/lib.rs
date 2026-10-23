@@ -693,6 +693,7 @@ pub mod use_vue_consistent_prop_name_casing;
 pub mod use_vue_consistent_v_bind_style;
 pub mod use_vue_consistent_v_for_delimiter;
 pub mod use_vue_consistent_v_on_style;
+pub mod use_vue_consistent_v_slot_style;
 pub mod use_vue_default_prop;
 pub mod use_vue_define_macros_order;
 pub mod use_vue_define_options;

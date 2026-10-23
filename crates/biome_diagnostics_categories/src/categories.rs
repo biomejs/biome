@@ -480,6 +480,7 @@ define_categories! {
     "lint/nursery/useVueConsistentEventHyphenation": "https://biomejs.dev/linter/rules/use-vue-consistent-event-hyphenation",
     "lint/nursery/useVueConsistentPropNameCasing": "https://biomejs.dev/linter/rules/use-vue-consistent-prop-name-casing",
     "lint/nursery/useVueConsistentVForDelimiter": "https://biomejs.dev/linter/rules/use-vue-consistent-v-for-delimiter",
+    "lint/nursery/useVueConsistentVSlotStyle": "https://biomejs.dev/linter/rules/use-vue-consistent-v-slot-style",
     "lint/nursery/useVueDefinePropsDestructuring": "https://biomejs.dev/linter/rules/use-vue-define-props-destructuring",
     "lint/nursery/useVueDefineOptions": "https://biomejs.dev/linter/rules/use-vue-define-options",
     "lint/nursery/useVueDefaultProp": "https://biomejs.dev/linter/rules/use-vue-default-prop",
