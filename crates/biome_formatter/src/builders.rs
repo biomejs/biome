@@ -714,13 +714,6 @@ impl<Context> Format<Context> for LineSuffixBoundary {
 
 /// Excludes `content` from the fits check.
 ///
-/// Use it in a [`best_fitting!`](crate::best_fitting) variant for lines that
-/// print the same as in the fallback variant, so that only the other lines
-/// decide whether this variant fits. Take `a.b().c().d({ x })` printed with
-/// one call per line: the lines `a`, `.b()` and `.c()` are the same as in the
-/// fallback variant, so only the line of `.d({ x })` should decide whether this
-/// variant fits.
-///
 /// Before deciding how to print some content, such as a group or a best fitting
 /// variant, the printer measures whether it fits on the line. This measurement
 /// is called the fits check. It adds up the width of the current line, fails
@@ -735,10 +728,45 @@ impl<Context> Format<Context> for LineSuffixBoundary {
 /// `content` ends doesn't fit. Fits checks of [`fill`](Formatter::fill) entries
 /// ignore `skip_fits_check`, because an entry must fit on one line.
 ///
+/// In a [`best_fitting!`](crate::best_fitting) variant, use it for lines that
+/// print the same as in the most expanded variant, which the printer prints
+/// when no other variant fits. Only the other lines then decide whether this
+/// variant fits.
+///
 /// # Examples
 ///
-/// The first variant is printed. Its first line exceeds the print width, but
-/// that line is excluded from the fits check, so only `b` is checked.
+/// The group expands because the line where `content` ends doesn't fit.
+/// Without `skip_fits_check`, the fits check of the group passes at the line
+/// break and the group stays on one line.
+///
+/// ```
+/// use biome_formatter::{format, format_args, LineWidth, SimpleFormatOptions};
+/// use biome_formatter::prelude::*;
+///
+/// # fn main() -> FormatResult<()> {
+/// let context = SimpleFormatContext::new(SimpleFormatOptions {
+///     line_width: LineWidth::try_from(10).unwrap(),
+///     ..SimpleFormatOptions::default()
+/// });
+///
+/// let formatted = format!(context, [
+///     group(&format_args![
+///         token("a"),
+///         soft_line_break_or_space(),
+///         token("b")
+///     ]),
+///     skip_fits_check(&format_args![hard_line_break(), token("cccccccccc")]),
+///     token("d")
+/// ])?;
+///
+/// assert_eq!("a\nb\nccccccccccd", formatted.print()?.as_code());
+/// # Ok(())
+/// # }
+/// ```
+///
+/// In a best fitting variant, the first line exceeds the print width, but it
+/// is excluded from the fits check, so only `b` is checked and the first
+/// variant is printed.
 ///
 /// ```
 /// use biome_formatter::{format, format_args, LineWidth, SimpleFormatOptions};
