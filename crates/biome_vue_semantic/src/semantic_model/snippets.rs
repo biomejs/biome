@@ -59,6 +59,7 @@ pub(crate) fn collect_snippets(
             root,
             fingerprint: fingerprint(snippet.root.syntax()),
             operands: first_operand..builder.data.operands.len() as u32,
+            name_scope: None,
         });
 
         match host {

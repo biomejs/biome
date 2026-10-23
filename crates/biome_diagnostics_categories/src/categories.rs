@@ -330,6 +330,7 @@ define_categories! {
     "lint/nursery/noVueRefAsOperand": "https://biomejs.dev/linter/rules/no-vue-ref-as-operand",
     "lint/nursery/noVueRequiredPropWithDefault": "https://biomejs.dev/linter/rules/no-vue-required-prop-with-default",
     "lint/nursery/noVueShadowNativeEvents": "https://biomejs.dev/linter/rules/no-vue-shadow-native-events",
+    "lint/nursery/noVueThisInTemplate": "https://biomejs.dev/linter/rules/no-vue-this-in-template",
     "lint/nursery/noVueUndeclaredDirectives": "https://biomejs.dev/linter/rules/no-vue-undeclared-directives",
     "lint/nursery/noVueUnusedEmitDeclarations": "https://biomejs.dev/linter/rules/no-vue-unused-emit-declarations",
     "lint/nursery/noVueVHtml": "https://biomejs.dev/linter/rules/no-vue-v-html",
