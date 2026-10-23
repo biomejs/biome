@@ -76,6 +76,17 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// Built-in errors take the options in their usual position, which is the third argument for `AggregateError`.
+    /// Other constructors can receive the `cause` in any argument after the first:
+    ///
+    /// ```js
+    /// try {
+    ///   // ...
+    /// } catch (err) {
+    ///   throw new ErrorWithCode("Something went wrong", "E_CODE", { cause: err });
+    /// }
+    /// ```
+    ///
     /// ## Options
     ///
     /// The following options are available:
