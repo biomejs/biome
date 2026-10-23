@@ -3748,6 +3748,11 @@ export interface Nursery {
 	 */
 	useVueConsistentEventHyphenation?: UseVueConsistentEventHyphenationConfiguration;
 	/**
+	 * Enforce defineOptions() instead of a default export in components that use \<script setup>.
+	 * See https://biomejs.dev/linter/rules/use-vue-define-options
+	 */
+	useVueDefineOptions?: UseVueDefineOptionsConfiguration;
+	/**
 	 * Require destructuring the props returned by Vue's defineProps macro.
 	 * See https://biomejs.dev/linter/rules/use-vue-define-props-destructuring
 	 */
@@ -6438,6 +6443,9 @@ export type UseVueComponentIsConfiguration =
 export type UseVueConsistentEventHyphenationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentEventHyphenationOptions;
+export type UseVueDefineOptionsConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueDefineOptionsOptions;
 export type UseVueDefinePropsDestructuringConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueDefinePropsDestructuringOptions;
@@ -9413,6 +9421,10 @@ export interface RuleWithUseVueConsistentEventHyphenationOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentEventHyphenationOptions;
 }
+export interface RuleWithUseVueDefineOptionsOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueDefineOptionsOptions;
+}
 export interface RuleWithUseVueDefinePropsDestructuringOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueDefinePropsDestructuringOptions;
@@ -11855,6 +11867,7 @@ export interface UseVueConsistentEventHyphenationOptions {
 	 */
 	ignoreTags?: string[];
 }
+export type UseVueDefineOptionsOptions = {};
 export type UseVueDefinePropsDestructuringOptions = {};
 export type UseVueMatchingComponentFileNameOptions = {};
 export type UseVueTemplateRefOptions = {};
@@ -13476,6 +13489,7 @@ export type Category =
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentEventHyphenation"
 	| "lint/nursery/useVueDefinePropsDestructuring"
+	| "lint/nursery/useVueDefineOptions"
 	| "lint/nursery/useVueMatchingComponentFileName"
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVueTemplateRef"
