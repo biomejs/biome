@@ -3458,6 +3458,11 @@ export interface Nursery {
 	 */
 	noVueDeprecatedVBindSync?: NoVueDeprecatedVBindSyncConfiguration;
 	/**
+	 * Disallow the .native modifier on Vue's v-on directive.
+	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-v-on-native-modifier
+	 */
+	noVueDeprecatedVOnNativeModifier?: NoVueDeprecatedVOnNativeModifierConfiguration;
+	/**
 	 * Disallow registering Vue lifecycle hooks after an await in setup().
 	 * See https://biomejs.dev/linter/rules/no-vue-lifecycle-after-await
 	 */
@@ -6494,6 +6499,9 @@ export type NoVueDeprecatedSlotScopeConfiguration =
 export type NoVueDeprecatedVBindSyncConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedVBindSyncOptions;
+export type NoVueDeprecatedVOnNativeModifierConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDeprecatedVOnNativeModifierOptions;
 export type NoVueLifecycleAfterAwaitConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueLifecycleAfterAwaitOptions;
@@ -9437,6 +9445,10 @@ export interface RuleWithNoVueDeprecatedVBindSyncOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedVBindSyncOptions;
 }
+export interface RuleWithNoVueDeprecatedVOnNativeModifierOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueDeprecatedVOnNativeModifierOptions;
+}
 export interface RuleWithNoVueLifecycleAfterAwaitOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueLifecycleAfterAwaitOptions;
@@ -12208,6 +12220,7 @@ export type NoVueDeprecatedScopeAttributeOptions = {};
 export type NoVueDeprecatedScopedSlotsOptions = {};
 export type NoVueDeprecatedSlotScopeOptions = {};
 export type NoVueDeprecatedVBindSyncOptions = {};
+export type NoVueDeprecatedVOnNativeModifierOptions = {};
 export type NoVueLifecycleAfterAwaitOptions = {};
 export interface NoVueLoneTemplateOptions {
 	/**
@@ -14113,6 +14126,7 @@ export type Category =
 	| "lint/nursery/noVueDeprecatedScopeAttribute"
 	| "lint/nursery/noVueDeprecatedScopedSlots"
 	| "lint/nursery/noVueDeprecatedSlotScope"
+	| "lint/nursery/noVueDeprecatedVOnNativeModifier"
 	| "lint/nursery/noVueLifecycleAfterAwait"
 	| "lint/nursery/noVueLoneTemplate"
 	| "lint/nursery/noVueMixin"

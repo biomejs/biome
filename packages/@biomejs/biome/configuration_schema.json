@@ -7817,6 +7817,16 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueDeprecatedVOnNativeModifierConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueDeprecatedVOnNativeModifierOptions" }
+			]
+		},
+		"NoVueDeprecatedVOnNativeModifierOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"NoVueDuplicateKeysConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -8986,6 +8996,13 @@
 					"description": "Disallow the .sync modifier on Vue v-bind directives.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-v-bind-sync",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueDeprecatedVBindSyncConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueDeprecatedVOnNativeModifier": {
+					"description": "Disallow the .native modifier on Vue's v-on directive.\nSee https://biomejs.dev/linter/rules/no-vue-deprecated-v-on-native-modifier",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueDeprecatedVOnNativeModifierConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -14797,6 +14814,15 @@
 				},
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueDeprecatedVBindSyncOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueDeprecatedVOnNativeModifierOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueDeprecatedVOnNativeModifierOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]
