@@ -47,7 +47,7 @@ fn logs_the_appropriate_messages_according_to_set_diagnostics_level() {
     assert!(
         messages
             .iter()
-            .filter(|m| m.level == LogLevel::Log)
+            .filter(|m| m.level == LogLevel::Error)
             .any(|m| {
                 let content = format!("{:?}", m.content);
 
@@ -341,7 +341,7 @@ fn max_diagnostics_are_lifted() {
     assert!(
         messages
             .iter()
-            .filter(|m| m.level == LogLevel::Log)
+            .filter(|m| m.level == LogLevel::Error)
             .any(|m| {
                 let content = format!("{:?}", m.content);
 
