@@ -192,6 +192,7 @@ pub fn resolve_plugin(
 
     if plugin_path.extension() == Some("grit") && !fs.path_is_dir(&plugin_path) {
         validate_plugin_file(fs, &plugin_path)?;
+        validate_plugin_file_name(&plugin_path)?;
         return Ok(ResolvedPlugin {
             path: plugin_path,
             selection: None,
@@ -205,6 +206,7 @@ pub fn resolve_plugin(
         && !fs.path_is_dir(&plugin_path)
     {
         validate_plugin_file(fs, &plugin_path)?;
+        validate_plugin_file_name(&plugin_path)?;
         return Ok(ResolvedPlugin {
             path: plugin_path,
             selection: None,
@@ -530,13 +532,27 @@ fn insert_named_rule(
     Ok(())
 }
 
-fn validate_rule_name(name: &str) -> Result<(), PluginDiagnostic> {
-    if name.is_empty()
-        || name.contains('/')
-        || name
+/// Whether `name` can follow `lint/plugin/` in a suppression comment. Must
+/// match the separators in `biome_suppression::parse_suppression_line`.
+fn is_suppressible_plugin_name(name: &str) -> bool {
+    !name.is_empty()
+        && !name
             .chars()
             .any(|character| character == ':' || character == '(' || character.is_whitespace())
-    {
+}
+
+/// Rejects plugin files whose stem can't be used in a suppression comment;
+/// otherwise `--suppress` would add the same comment forever.
+fn validate_plugin_file_name(path: &Utf8Path) -> Result<(), PluginDiagnostic> {
+    if path.file_stem().is_some_and(is_suppressible_plugin_name) {
+        Ok(())
+    } else {
+        Err(PluginDiagnostic::invalid_plugin_file_name(path))
+    }
+}
+
+fn validate_rule_name(name: &str) -> Result<(), PluginDiagnostic> {
+    if name.contains('/') || !is_suppressible_plugin_name(name) {
         return Err(PluginDiagnostic::invalid_manifest(
             markup!(
                 "Package plugin rule name "<Emphasis>{name}</Emphasis>
@@ -828,6 +844,22 @@ mod test {
             resolved,
             "resolution should not read plugin source as UTF-8"
         );
+    }
+
+    #[test]
+    fn resolve_plugin_rejects_file_names_unusable_in_suppressions() {
+        let fs = MemoryFileSystem::default();
+        for file_name in ["no foo.grit", "no:foo.grit", "no(foo.js"] {
+            let path = format!("/{file_name}");
+            fs.insert(path.as_str().into(), "");
+            let error = resolve_plugin(&fs, &format!("./{file_name}"), Utf8Path::new("/"), None)
+                .expect_err("plugin names must be usable in suppression comments");
+            assert!(
+                matches!(error, PluginDiagnostic::InvalidManifest(_)),
+                "{file_name}: {error}"
+            );
+            assert!(error.to_string().contains(file_name), "{error}");
+        }
     }
 
     #[test]
