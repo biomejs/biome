@@ -60,7 +60,7 @@ use biome_diagnostics::serde::Diagnostic;
 use biome_diagnostics::{Diagnostic as _, DiagnosticExt, Error, Severity};
 use biome_fs::{BiomePath, PathInterner, PathKind, TraversalContext, TraversalScope};
 use camino::{Utf8Path, Utf8PathBuf};
-use crossbeam::channel::{Receiver, Sender, unbounded};
+use crossbeam::channel::{Receiver, Sender, bounded, unbounded};
 use papaya::{HashMap, HashSet, HashSetRef, LocalGuard};
 use rayon::Scope;
 use rustc_hash::FxHashSet;
@@ -68,6 +68,7 @@ use std::hash::RandomState;
 use std::mem;
 use std::panic::catch_unwind;
 use std::sync::Mutex;
+use std::sync::atomic::{AtomicBool, Ordering};
 #[cfg(not(target_family = "wasm"))]
 use std::thread;
 use std::time::Duration;
@@ -151,6 +152,9 @@ pub(crate) struct Scanner {
 
     /// Channel sender for instructions to the [`Watcher`].
     watcher_tx: Sender<WatcherInstruction>,
+
+    /// Whether a [`Watcher`] is running through [`Self::run_watcher()`].
+    watcher_running: AtomicBool,
 }
 
 struct ScannedProject {
@@ -168,6 +172,40 @@ impl Scanner {
             projects: Default::default(),
             watched_folders: Default::default(),
             watcher_tx,
+            watcher_running: AtomicBool::new(false),
+        }
+    }
+
+    /// Runs the `watcher` until it stops.
+    ///
+    /// While it runs, [`Self::wait_for_watcher()`] waits for it.
+    pub fn run_watcher<W: WorkspaceScannerBridge>(&self, mut watcher: Watcher, workspace: &W) {
+        self.watcher_running.store(true, Ordering::Release);
+        watcher.run(&ScannerWatcherBridge::new((self, workspace)));
+        self.watcher_running.store(false, Ordering::Release);
+    }
+
+    /// Blocks until the running watcher has handled every instruction sent
+    /// before this call, such as the folders to watch found by a scan.
+    ///
+    /// Returns immediately if no watcher is running, because nothing would
+    /// handle the instruction it waits for.
+    ///
+    /// Must not be called during a scan: the watcher may be waiting for the
+    /// scan to end before it can apply an event received earlier.
+    pub fn wait_for_watcher(&self) {
+        if !self.watcher_running.load(Ordering::Acquire) {
+            return;
+        }
+
+        let (ack_tx, ack_rx) = bounded(1);
+        if self
+            .watcher_tx
+            .send(WatcherInstruction::Barrier(ack_tx))
+            .is_ok()
+        {
+            // Fails if the watcher stops first, which drops the instruction.
+            let _ = ack_rx.recv();
         }
     }
 

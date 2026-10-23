@@ -4,7 +4,7 @@ use crate::db::FileViews;
 use crate::module_graph::ModuleInfo;
 use crate::projects::ProjectInput;
 #[cfg(feature = "module_graph")]
-use crate::scanner::WorkspaceWatcherBridge;
+use crate::scanner::{ScannerWatcherBridge, Watcher, WatcherOptions, WorkspaceWatcherBridge};
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
 use crate::workspace::UpdateSettingsParams;
@@ -17,7 +17,7 @@ use biome_configuration::{
 };
 use biome_css_syntax::CssLanguage;
 use biome_formatter::{IndentStyle, LineWidth, QuoteStyle};
-use biome_fs::MemoryFileSystem;
+use biome_fs::{MemoryFileSystem, TemporaryFs};
 use biome_js_syntax::{JsLanguage, JsSyntaxNode};
 use biome_json_formatter::context::TrailingCommas;
 use biome_languages::css::CssEmbeddingKind;
@@ -3295,6 +3295,107 @@ fn owned_scan_reuses_inputs_of_closed_files() {
     assert_eq!(&**scanned_changed.text(&db), UPDATED);
     drop(db);
     assert_eq!(allocated_file_inputs(&workspace), (2, 2));
+}
+
+#[test]
+#[cfg(feature = "module_graph")]
+fn scan_project_waits_until_the_watcher_watches_scanned_folders() {
+    const TIMEOUT: Duration = Duration::from_secs(5);
+
+    let mut fs = TemporaryFs::new("scan_project_waits_until_the_watcher_watches_scanned_folders");
+    let busy_file = fs.create_file("busy/file.js", "");
+    let busy_project = fs.working_directory.join("busy");
+    let scanned_project = fs.working_directory.join("scanned");
+    let scanned_folder = scanned_project.join("folder");
+    std::fs::create_dir_all(&scanned_folder).unwrap();
+
+    let (watcher, instruction_channel) = Watcher::new(WatcherOptions::default()).unwrap();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let workspace = LocalWorkspace::new(
+        Arc::new(fs.create_os()),
+        instruction_channel.sender.clone(),
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new(&busy_project),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new(&scanned_project),
+            open_uninitialized: true,
+        })
+        .unwrap();
+
+    let test_state = &workspace.server.scanner_test_state;
+    test_state
+        .pause_file_settings_read
+        .store(true, Ordering::Release);
+
+    let (watcher_paused, scan_returned_early, scan_result, folder_watched) =
+        std::thread::scope(|scope| {
+            scope.spawn(|| workspace.start_watcher(watcher));
+
+            // Keeps the watcher busy, so it can only watch the scanned folders
+            // once the pause is lifted.
+            instruction_channel
+                .sender
+                .send(WatcherInstruction::ReindexFile(busy_file))
+                .unwrap();
+            let watcher_paused = wait_until(TIMEOUT, || {
+                test_state
+                    .file_settings_read_attempts
+                    .load(Ordering::Acquire)
+                    >= 1
+            });
+
+            let scan = scope.spawn(|| {
+                workspace.scan_project(ScanProjectParams {
+                    project_key,
+                    watch: true,
+                    force: false,
+                    scan_kind: ScanKind::Project,
+                    verbose: false,
+                })
+            });
+            let scan_returned_early = wait_until(Duration::from_millis(200), || scan.is_finished());
+
+            test_state
+                .pause_file_settings_read
+                .store(false, Ordering::Release);
+            let scan_result = scan.join();
+
+            let mut folder_watched = false;
+            ScannerWatcherBridge::new((&workspace.server.scanner, &workspace))
+                .remove_watched_folders(|path| {
+                    folder_watched |= path == scanned_folder;
+                    false
+                });
+
+            instruction_channel
+                .sender
+                .send(WatcherInstruction::Stop)
+                .unwrap();
+
+            (
+                watcher_paused,
+                scan_returned_early,
+                scan_result,
+                folder_watched,
+            )
+        });
+
+    assert!(watcher_paused, "the watcher did not start indexing");
+    assert!(
+        !scan_returned_early,
+        "the scan returned before the watcher handled its folders"
+    );
+    scan_result.unwrap().unwrap();
+    assert!(folder_watched, "the scanned folder is not watched");
 }
 
 #[test]
