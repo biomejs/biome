@@ -88,7 +88,8 @@ impl HtmlModuleVisitor {
         // Walk the HTML CST to collect class= references and <link> stylesheets.
         // Void elements like <link> and <meta> parse as HtmlSelfClosingElement;
         // normal elements parse as HtmlElement. Both must be handled.
-        for event in html_root.syntax().preorder() {
+        let kinds = HtmlElement::KIND_SET.union(HtmlSelfClosingElement::KIND_SET);
+        for event in html_root.syntax().preorder_of_kinds(kinds) {
             let WalkEvent::Enter(node) = event else {
                 continue;
             };
@@ -141,7 +142,10 @@ impl HtmlModuleVisitor {
         content_offset: TextSize,
         import_paths: &mut ImportPathMap<HtmlImport>,
     ) {
-        for event in js_root.syntax().preorder() {
+        for event in js_root
+            .syntax()
+            .preorder_of_kinds(AnyJsImportLike::KIND_SET)
+        {
             let WalkEvent::Enter(node) = event else {
                 continue;
             };
@@ -320,7 +324,8 @@ pub(crate) fn collect_css_classes(
     let base_applicability = file_source.embedding_applicability();
     let mut global_depth: u32 = 0;
 
-    for event in css_root.syntax().preorder() {
+    let kinds = AnyCssPseudoClassFunctionSelector::KIND_SET.union(CssClassSelector::KIND_SET);
+    for event in css_root.syntax().preorder_of_kinds(kinds) {
         match event {
             WalkEvent::Enter(node) => {
                 if let Some(pseudo_fn) = AnyCssPseudoClassFunctionSelector::cast(node.clone()) {

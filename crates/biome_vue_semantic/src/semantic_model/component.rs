@@ -16,13 +16,15 @@ use biome_js_syntax::{
     AnyJsLiteralExpression, AnyJsMemberExpression, AnyJsModuleItem, AnyJsNamedImportSpecifier,
     AnyJsObjectBindingPatternMember, AnyJsObjectMember, AnyJsParameter, AnyJsRoot, AnyJsStatement,
     AnyTsType, AnyTsTypeMember, JsCallExpression, JsExportDefaultExpressionClause,
-    JsIdentifierBinding, JsImport, JsModule, JsObjectBindingPattern, JsObjectExpression,
-    JsParameters, JsReferenceIdentifier, JsReturnStatement, JsSyntaxKind, JsSyntaxNode,
+    JsGetterClassMember, JsGetterObjectMember, JsIdentifierBinding, JsImport, JsLanguage, JsModule,
+    JsObjectBindingPattern, JsObjectExpression, JsParameters, JsReferenceIdentifier,
+    JsReturnStatement, JsSetterClassMember, JsSetterObjectMember, JsSyntaxKind, JsSyntaxNode,
     TsIdentifierBinding, TsInterfaceDeclaration, TsTypeAliasDeclaration, TsTypeMemberList,
 };
 use biome_languages::JsFileSource;
 use biome_rowan::{
-    AstNode, AstNodeList, AstSeparatedList, TextRange, TextSize, TokenText, WalkEvent,
+    AstNode, AstNodeList, AstSeparatedList, SyntaxKindSet, TextRange, TextSize, TokenText,
+    WalkEvent,
 };
 
 /// One JavaScript tree to look for components in.
@@ -2036,18 +2038,13 @@ fn object_pattern_bindings(
     result
 }
 
-/// Returns `true` for a node that starts a new function, whose `return`
+/// The kinds of the nodes that start a new function, whose `return`
 /// statements belong to it and not to the function around it.
-fn starts_function(kind: JsSyntaxKind) -> bool {
-    AnyFunctionLike::can_cast(kind)
-        || matches!(
-            kind,
-            JsSyntaxKind::JS_GETTER_OBJECT_MEMBER
-                | JsSyntaxKind::JS_SETTER_OBJECT_MEMBER
-                | JsSyntaxKind::JS_GETTER_CLASS_MEMBER
-                | JsSyntaxKind::JS_SETTER_CLASS_MEMBER
-        )
-}
+const FUNCTION_KINDS: SyntaxKindSet<JsLanguage> = AnyFunctionLike::KIND_SET
+    .union(JsGetterObjectMember::KIND_SET)
+    .union(JsSetterObjectMember::KIND_SET)
+    .union(JsGetterClassMember::KIND_SET)
+    .union(JsSetterClassMember::KIND_SET);
 
 /// Returns the object literals a function returns, and whether every value
 /// it returns is one.
@@ -2059,12 +2056,14 @@ fn returned_objects(function: &AnyFunctionLike) -> (Vec<JsObjectExpression>, boo
         // `() => ({ ... })` returns its body.
         Ok(AnyJsFunctionBody::AnyJsExpression(expression)) => expressions.push(expression),
         Ok(AnyJsFunctionBody::JsFunctionBody(body)) => {
-            let mut preorder = body.syntax().preorder();
+            let mut preorder = body
+                .syntax()
+                .preorder_of_kinds(FUNCTION_KINDS.union(JsReturnStatement::KIND_SET));
             while let Some(event) = preorder.next() {
                 let WalkEvent::Enter(node) = event else {
                     continue;
                 };
-                if starts_function(node.kind()) {
+                if FUNCTION_KINDS.matches(node.kind()) {
                     preorder.skip_subtree();
                     continue;
                 }

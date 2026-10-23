@@ -168,7 +168,12 @@ fn find_hooks_after_await(
 ) -> Box<[LifecycleHookAfterAwait]> {
     let mut first_await = None;
     let mut hooks = Vec::new();
-    let mut preorder = body.syntax().preorder();
+    let mut preorder = body.syntax().preorder_of_kinds(
+        AnyJsControlFlowRoot::KIND_SET
+            .union(JsForOfStatement::KIND_SET)
+            .union(JsCallExpression::KIND_SET)
+            .union(JsAwaitExpression::KIND_SET),
+    );
     while let Some(event) = preorder.next() {
         match event {
             WalkEvent::Enter(node) => {
