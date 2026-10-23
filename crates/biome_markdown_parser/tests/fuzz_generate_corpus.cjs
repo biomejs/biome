@@ -404,6 +404,54 @@ function genQuoteInList() {
 
 // #endregion
 
+// #region Offset nested list combinators — class of issues surfaced by
+// issue #12541: three-level lists whose nested markers sit up to three
+// columns past the parent's content column, followed by a marker anywhere
+// between the outermost content column and the innermost one. Absolute
+// marker columns reach 4+ even though each marker is within three columns
+// of its parent, and the returning marker must close exactly the items it
+// no longer reaches. Wide post-marker spacing opens columns where a marker
+// is lazy continuation text instead of a new item.
+
+function genOffsetNestedList() {
+  const outer = pick(["-", "*", "1.", "10.", "100."]);
+  const outerSpace = " ".repeat(randInt(1, 4));
+  const outerCol = outer.length + outerSpace.length;
+  const child = pick(["-", "+", "1.", "2)"]);
+  const childSpace = " ".repeat(randInt(1, 4));
+  const childIndent = outerCol + randInt(0, 3);
+  const childCol = childIndent + child.length + childSpace.length;
+  const grandchildIndent = childCol + randInt(0, 3);
+  const back = randInt(outerCol, childCol + 3);
+  const backMarker = maybe(0.7) ? child : pick(["-", "*", "1.", "3."]);
+  const pad = (n) => " ".repeat(n);
+  let result =
+    `${outer}${outerSpace}Step\n` +
+    `${pad(childIndent)}${child}${childSpace}a\n` +
+    `${pad(grandchildIndent)}- x\n` +
+    `${pad(grandchildIndent)}- y\n` +
+    `${pad(back)}${backMarker} b\n`;
+  if (maybe(0.3)) {
+    result += `${pad(randInt(0, outerCol + 3))}${pick(["-", "1."])} c\n`;
+  }
+  if (maybe(0.2)) {
+    // Replace a leading run of four spaces with a tab on one line.
+    const lines = result.split("\n");
+    const i = randInt(1, lines.length - 2);
+    lines[i] = lines[i].replace(/^ {4}/, "\t");
+    result = lines.join("\n");
+  }
+  if (maybe(0.2)) {
+    result = result
+      .split("\n")
+      .map((line) => (line ? `> ${line}` : line))
+      .join("\n");
+  }
+  return result;
+}
+
+// #endregion
+
 // #endregion
 
 // #region Document generator
@@ -449,6 +497,8 @@ const blockGenerators = [
   { fn: genQuotedSublistAtContentColumn, weight: 3 },
   // Quote-in-list combinators — block quotes inside deep list content.
   { fn: genQuoteInList, weight: 4 },
+  // Offset nested list combinators — class surfaced by issue #12541.
+  { fn: genOffsetNestedList, weight: 4 },
 ];
 
 const totalWeight = blockGenerators.reduce((sum, g) => sum + g.weight, 0);

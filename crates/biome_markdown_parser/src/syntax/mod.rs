@@ -59,7 +59,7 @@ use html_block::{at_html_block, at_html_block_interrupt, parse_html_block};
 use inline::EmphasisContext;
 use link_block::{at_link_block_start, parse_link_block};
 use list::{
-    at_bullet_list_item, at_order_list_item, at_sibling_list_marker,
+    at_bullet_list_item, at_order_list_item, at_sibling_list_marker, enclosing_list_content_indent,
     marker_followed_by_whitespace_or_eol, parse_bullet_list_item, parse_order_list_item,
     textual_starts_with_ordered_marker,
 };
@@ -1246,20 +1246,41 @@ fn break_for_list_interrupt_after_inline_newline(
         return false;
     }
 
-    let indent = p.line_start_leading_indent();
-    if indent < required_indent && indent > p.state().list_item_marker_indent {
-        return false;
+    let indent = leading_indent_at_current(p);
+    if p.state().block_quote_depth > 0
+        && list_indent_inside_quote(p) == 0
+        && !line_has_quote_prefix_at_current(p, p.state().block_quote_depth)
+    {
+        // A partial quote prefix may continue the paragraph lazily, but a
+        // blank line or a new block after it ends the innermost quote.
+        let first_quote_depth = p
+            .state()
+            .open_list_item
+            .as_deref()
+            .map_or(1, |item| item.block_quote_depth + 1);
+        for depth in (first_quote_depth..p.state().block_quote_depth).rev() {
+            if has_quote_prefix(p, depth) {
+                return is_quote_blank_line_from_current(p, depth)
+                    || !matches!(
+                        classify_quote_break_after_newline(p, depth),
+                        QuoteBreakKind::None
+                    );
+            }
+        }
+        let base_indent = enclosing_list_content_indent(p, indent);
+        return indent.saturating_sub(base_indent) <= MAX_BLOCK_PREFIX_INDENT
+            && line_starts_with_list_marker_after_indent(p);
     }
 
-    // Line sits at sibling/parent level. A list marker here ends the
-    // current paragraph (CommonMark §5.2). The tab path checks every marker
-    // kind because `MD_TEXTUAL_LITERAL` can absorb the tab and marker; the
-    // non-tab path only needs to cover non-1 ordered siblings.
+    // The line leaves the current item. A list marker on it ends the
+    // paragraph only when it starts an item in an enclosing context, which
+    // holds when it sits at most three columns past the deepest content
+    // column the line still continues. Further right, the line is lazy
+    // continuation text (CommonMark §5.2).
     if indent < required_indent {
-        if line_start_indent_contains_tab(p) {
-            return line_starts_with_list_marker_after_indent(p);
-        }
-        return line_starts_with_nonone_ordered_marker_after_indent(p);
+        let base_indent = enclosing_list_content_indent(p, indent);
+        return indent - base_indent <= MAX_BLOCK_PREFIX_INDENT
+            && line_starts_with_list_marker_after_indent(p);
     }
 
     if p.state().block_quote_depth == 0
@@ -1283,29 +1304,6 @@ fn break_for_list_interrupt_after_inline_newline(
             breaks
         })
     })
-}
-
-/// True if current `MD_TEXTUAL_LITERAL`'s leading space/tab run contains a tab.
-fn line_start_indent_contains_tab(p: &MarkdownParser) -> bool {
-    p.at(MD_TEXTUAL_LITERAL)
-        && p.cur_text()
-            .chars()
-            .take_while(|c| *c == ' ' || *c == '\t')
-            .any(|c| c == '\t')
-}
-
-/// After leading whitespace, does the line begin a non-1 ordered marker
-/// followed by whitespace or EOL?
-/// Covers `parse_inline_item_list`'s blind spot (`textual_looks_like_list_marker`
-/// only matches `1.`/`1)` for ordered); `1.`/`1)` and bullets are left to the
-/// inline loop.
-fn line_starts_with_nonone_ordered_marker_after_indent(p: &MarkdownParser) -> bool {
-    let source = source_after_indent(p);
-    textual_starts_with_ordered_marker(source)
-        && !source
-            .strip_prefix("1.")
-            .or_else(|| source.strip_prefix("1)"))
-            .is_some_and(|rest| rest.is_empty() || rest.starts_with([' ', '\t']))
 }
 
 /// After leading whitespace, does the line begin a list marker followed by
