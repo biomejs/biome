@@ -692,6 +692,7 @@ pub mod use_vue_default_prop;
 pub mod use_vue_define_macros_order;
 pub mod use_vue_define_options;
 pub mod use_vue_define_props_destructuring;
+pub mod use_vue_emits_validator_return;
 pub mod use_vue_hyphenated_attributes;
 pub mod use_vue_matching_component_file_name;
 pub mod use_vue_multi_word_component_names;

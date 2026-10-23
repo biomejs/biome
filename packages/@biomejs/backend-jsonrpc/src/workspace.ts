@@ -3998,6 +3998,11 @@ export interface Nursery {
 	 */
 	useVueDefinePropsDestructuring?: UseVueDefinePropsDestructuringConfiguration;
 	/**
+	 * Require the validator function of a Vue event to return a true value when the event is valid.
+	 * See https://biomejs.dev/linter/rules/use-vue-emits-validator-return
+	 */
+	useVueEmitsValidatorReturn?: UseVueEmitsValidatorReturnConfiguration;
+	/**
 	 * Enforce that the name of a Vue component matches its file name.
 	 * See https://biomejs.dev/linter/rules/use-vue-matching-component-file-name
 	 */
@@ -6888,6 +6893,9 @@ export type UseVueDefineOptionsConfiguration =
 export type UseVueDefinePropsDestructuringConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueDefinePropsDestructuringOptions;
+export type UseVueEmitsValidatorReturnConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueEmitsValidatorReturnOptions;
 export type UseVueMatchingComponentFileNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueMatchingComponentFileNameOptions;
@@ -10137,6 +10145,10 @@ export interface RuleWithUseVueDefinePropsDestructuringOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueDefinePropsDestructuringOptions;
 }
+export interface RuleWithUseVueEmitsValidatorReturnOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueEmitsValidatorReturnOptions;
+}
 export interface RuleWithUseVueMatchingComponentFileNameOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -12769,6 +12781,7 @@ export interface UseVueConsistentEventHyphenationOptions {
 export type UseVueDefaultPropOptions = {};
 export type UseVueDefineOptionsOptions = {};
 export type UseVueDefinePropsDestructuringOptions = {};
+export type UseVueEmitsValidatorReturnOptions = {};
 export type UseVueMatchingComponentFileNameOptions = {};
 export type UseVuePropTypeConstructorOptions = {};
 export type UseVueRenderReturnOptions = {};
@@ -14499,6 +14512,7 @@ export type Category =
 	| "lint/nursery/useVueDefinePropsDestructuring"
 	| "lint/nursery/useVueDefineOptions"
 	| "lint/nursery/useVueDefaultProp"
+	| "lint/nursery/useVueEmitsValidatorReturn"
 	| "lint/nursery/useVueMatchingComponentFileName"
 	| "lint/nursery/useVueNextTickPromise"
 	| "lint/nursery/useVuePropTypeConstructor"
