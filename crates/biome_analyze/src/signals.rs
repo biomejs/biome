@@ -2,16 +2,21 @@ use crate::categories::{
     SUPPRESSION_INLINE_ACTION_CATEGORY, SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY,
 };
 use crate::{
-    AnalyzerDiagnostic, AnalyzerOptions, FixKind, GroupCategory, OtherActionCategory,
+    AnalyzerDiagnostic, AnalyzerOptions, FixKind, GroupCategory, OtherActionCategory, PLUGIN_GROUP,
     PluginActionData, Queryable, RuleCategory, RuleDiagnostic, RuleGroup, ServiceBag,
     SuppressionAction,
     categories::ActionCategory,
     context::RuleContext,
-    registry::{RuleLanguage, RuleRoot},
-    rule::{Rule, RuleAction, RuleMetadata, SuppressAction},
+    registry::{LanguageRoot, RuleLanguage, RuleRoot},
+    rule::{
+        Rule, RuleAction, RuleMetadata, SuppressAction, build_inline_suppression,
+        build_top_level_suppression,
+    },
 };
 use biome_console::{MarkupBuf, markup};
-use biome_diagnostics::{Applicability, CodeSuggestion, Error, advice::CodeSuggestionAdvice};
+use biome_diagnostics::{
+    Applicability, CodeSuggestion, DiagnosticTags, Error, advice::CodeSuggestionAdvice,
+};
 use biome_rowan::{BatchMutation, Language, SyntaxNode, TextRange};
 use biome_text_edit::TextEdit;
 use enumflags2::{BitFlag, BitFlags, bitflags};
@@ -183,18 +188,29 @@ where
 /// Unlike [DiagnosticSignal] which converts through [Error] into
 /// [DiagnosticKind::Raw](crate::diagnostics::DiagnosticKind::Raw), this type
 /// directly converts via `AnalyzerDiagnostic::from(RuleDiagnostic)`.
-pub struct PluginSignal<L: Language> {
+pub struct PluginSignal<'phase, L: Language> {
     diagnostic: RuleDiagnostic,
     plugin_action: Option<PluginActionData>,
     root: Option<SyntaxNode<L>>,
+    suppression: Option<PluginSuppression<'phase, L>>,
 }
 
-impl<L: Language> PluginSignal<L> {
+/// Context required to build suppression comments for a plugin diagnostic.
+struct PluginSuppression<'phase, L: Language> {
+    /// Name used in `lint/plugin/<name>` suppression comments.
+    plugin_name: Box<str>,
+    file_root: &'phase LanguageRoot<L>,
+    suppression_action: &'phase dyn SuppressionAction<Language = L>,
+    options: &'phase AnalyzerOptions,
+}
+
+impl<'phase, L: Language> PluginSignal<'phase, L> {
     pub fn new(diagnostic: RuleDiagnostic) -> Self {
         Self {
             diagnostic,
             plugin_action: None,
             root: None,
+            suppression: None,
         }
     }
 
@@ -207,34 +223,97 @@ impl<L: Language> PluginSignal<L> {
         self.root = Some(root);
         self
     }
-}
 
-impl<L: Language> AnalyzerSignal<L> for PluginSignal<L> {
-    fn diagnostic(&self) -> Option<AnalyzerDiagnostic> {
-        Some(AnalyzerDiagnostic::from(self.diagnostic.clone()))
+    /// Enables suppression actions for `lint/plugin/<plugin_name>`.
+    pub fn with_suppression(
+        mut self,
+        plugin_name: Box<str>,
+        file_root: &'phase LanguageRoot<L>,
+        suppression_action: &'phase dyn SuppressionAction<Language = L>,
+        options: &'phase AnalyzerOptions,
+    ) -> Self {
+        self.suppression = Some(PluginSuppression {
+            plugin_name,
+            file_root,
+            suppression_action,
+            options,
+        });
+        self
     }
 
-    fn actions(&self, filter: ActionFilter) -> AnalyzerActionIter<L> {
-        if !filter.is_rule_fix() {
-            return AnalyzerActionIter::new(vec![]);
+    /// Verbose diagnostics, such as GritQL `log()` output, aren't suppressed.
+    fn suppression(&self) -> Option<&PluginSuppression<'phase, L>> {
+        if self.diagnostic.tags.contains(DiagnosticTags::VERBOSE) {
+            return None;
         }
+        self.suppression.as_ref()
+    }
 
-        let Some(action_data) = &self.plugin_action else {
-            return AnalyzerActionIter::new(vec![]);
-        };
+    fn rule_fix_action(&self) -> Option<AnalyzerAction<L>> {
+        let action_data = self.plugin_action.as_ref()?;
+        let root = self.root.as_ref()?;
 
-        let Some(root) = &self.root else {
-            return AnalyzerActionIter::new(vec![]);
-        };
-
-        AnalyzerActionIter::new(vec![AnalyzerAction {
+        Some(AnalyzerAction {
             rule_name: None,
             category: ActionCategory::QuickFix(Cow::Borrowed("plugin")),
             applicability: action_data.applicability,
             message: markup!({ action_data.message }).to_owned(),
             mutation: BatchMutation::new(root.clone()),
             text_edit: Some((action_data.source_range, action_data.text_edit.clone())),
-        }])
+        })
+    }
+}
+
+impl<L: Language> AnalyzerSignal<L> for PluginSignal<'_, L> {
+    fn diagnostic(&self) -> Option<AnalyzerDiagnostic> {
+        Some(AnalyzerDiagnostic::from(self.diagnostic.clone()))
+    }
+
+    fn actions(&self, filter: ActionFilter) -> AnalyzerActionIter<L> {
+        let mut actions = Vec::new();
+
+        if filter.is_rule_fix()
+            && let Some(action) = self.rule_fix_action()
+        {
+            actions.push(action);
+        }
+
+        if let Some(suppression) = self.suppression() {
+            if filter.is_inline_suppression()
+                && let Some(text_range) = self.diagnostic.span()
+                && let Some(action) = build_inline_suppression(
+                    suppression.file_root.clone(),
+                    &text_range,
+                    RuleCategory::Lint,
+                    PLUGIN_GROUP,
+                    &suppression.plugin_name,
+                    suppression.suppression_action,
+                    suppression.options.suppression_reason.as_deref(),
+                )
+            {
+                actions.push(plugin_suppress_action_to_analyzer_action(
+                    ActionCategory::Other(OtherActionCategory::InlineSuppression),
+                    action,
+                ));
+            }
+
+            if filter.is_toplevel_suppression()
+                && let Some(action) = build_top_level_suppression(
+                    suppression.file_root.clone(),
+                    RuleCategory::Lint,
+                    PLUGIN_GROUP,
+                    &suppression.plugin_name,
+                    suppression.suppression_action,
+                )
+            {
+                actions.push(plugin_suppress_action_to_analyzer_action(
+                    ActionCategory::Other(OtherActionCategory::ToplevelSuppression),
+                    action,
+                ));
+            }
+        }
+
+        AnalyzerActionIter::new(actions)
     }
 
     fn actions_metadata(&self) -> Vec<ActionMetadata> {
@@ -243,6 +322,21 @@ impl<L: Language> AnalyzerSignal<L> for PluginSignal<L> {
 
     fn transformations(&self) -> AnalyzerTransformationIter<L> {
         AnalyzerTransformationIter::new(vec![])
+    }
+}
+
+/// Plugin names aren't `'static`, so these actions have no `rule_name`.
+fn plugin_suppress_action_to_analyzer_action<L: Language>(
+    category: ActionCategory,
+    action: SuppressAction<L>,
+) -> AnalyzerAction<L> {
+    AnalyzerAction {
+        rule_name: None,
+        category,
+        applicability: Applicability::Always,
+        mutation: action.mutation,
+        message: action.message,
+        text_edit: None,
     }
 }
 

@@ -1864,13 +1864,17 @@ async fn pull_plugin_code_action_at_diagnostic_start() -> Result<()> {
         .await?
         .context("codeAction returned None")?;
 
-    let [CodeActionOrCommand::CodeAction(action)] = res.as_slice() else {
+    let plugin_kind = Some(CodeActionKind::new("quickfix.biome.plugin"));
+    let [action] = res
+        .iter()
+        .filter_map(|action| match action {
+            CodeActionOrCommand::CodeAction(action) if action.kind == plugin_kind => Some(action),
+            _ => None,
+        })
+        .collect::<Vec<_>>()[..]
+    else {
         panic!("expected one plugin code action: {res:?}");
     };
-    assert_eq!(
-        action.kind,
-        Some(CodeActionKind::new("quickfix.biome.plugin"))
-    );
     assert_eq!(action.title, "Rewrite suggested by plugin `useConsoleInfo`");
     assert!(action.edit.is_some());
 
@@ -1959,13 +1963,17 @@ export const renameReference = defineRule({
         .await?
         .context("codeAction returned None")?;
 
-    let [CodeActionOrCommand::CodeAction(action)] = res.as_slice() else {
+    let plugin_kind = Some(CodeActionKind::new("quickfix.biome.plugin"));
+    let [action] = res
+        .iter()
+        .filter_map(|action| match action {
+            CodeActionOrCommand::CodeAction(action) if action.kind == plugin_kind => Some(action),
+            _ => None,
+        })
+        .collect::<Vec<_>>()[..]
+    else {
         panic!("expected one JavaScript plugin code action: {res:?}");
     };
-    assert_eq!(
-        action.kind,
-        Some(CodeActionKind::new("quickfix.biome.plugin"))
-    );
     assert_eq!(action.title, "Rename reference");
     assert!(action.edit.is_some());
 
