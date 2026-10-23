@@ -41,13 +41,13 @@ Import the formatter API from `biome_formatter::rowan::prelude`, not from `biome
 
 `biome_formatter` has the following Cargo features:
 
-| Feature       | Enabled by default | What it adds                                                                                                  |
-| ------------- | ------------------ | ------------------------------------------------------------------------------------------------------------- |
+| Feature       | Enabled by default | What it adds                                                                                                      |
+| ------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------- |
 | `rowan`       | Yes                | `RowanSource`, the rowan prelude, comment handling, and the entry points that format a `biome_rowan` syntax tree. |
-| `diagnostics` | Yes                | Biome diagnostics for formatter errors, and console output for formatter options.                            |
-| `deserialize` | Yes                | Reading formatter options from Biome's configuration file.                                                    |
-| `serde`       | No                 | Serialization of formatter options and of the formatted result.                                               |
-| `schema`      | No                 | JSON Schema for formatter options. Also enables `serde`.                                                      |
+| `diagnostics` | Yes                | Biome diagnostics for formatter errors, and console output for formatter options.                                 |
+| `deserialize` | Yes                | Reading formatter options from Biome's configuration file.                                                        |
+| `serde`       | No                 | Serialization of formatter options and of the formatted result.                                                   |
+| `schema`      | No                 | JSON Schema for formatter options. Also enables `serde`.                                                          |
 
 Biome crates use the default features, so a new formatter crate doesn't need to enable any feature.
 

@@ -102,7 +102,7 @@ macro_rules! dbg_write {
     ($dst:expr, [$($arg:expr),+ $(,)?]) => {{
         use $crate::BufferExtensions;
         let mut count = 0;
-        let mut inspect = $dst.inspect(|element: &FormatElement| {
+        let mut inspect = $dst.inspect(|element| {
             std::eprintln!(
                 "[{}:{}][{}] = {element:#?}",
                 std::file!(), std::line!(), count
