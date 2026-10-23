@@ -8835,6 +8835,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueSeparateStaticClass": {
+					"description": "Require static class names to be in a separate class attribute.\nSee https://biomejs.dev/linter/rules/use-vue-separate-static-class",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueSeparateStaticClassConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueToggleInsideTransition": {
 					"description": "Require the element inside a Vue \\<Transition> to be shown and hidden with v-if or v-show.\nSee https://biomejs.dev/linter/rules/use-vue-toggle-inside-transition",
 					"anyOf": [
@@ -16112,6 +16119,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueSeparateStaticClassOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueSeparateStaticClassOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueToggleInsideTransitionOptions": {
 			"type": "object",
 			"properties": {
@@ -21441,6 +21457,16 @@
 			]
 		},
 		"UseVueNextTickPromiseOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueSeparateStaticClassConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueSeparateStaticClassOptions" }
+			]
+		},
+		"UseVueSeparateStaticClassOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},

@@ -2931,6 +2931,13 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
         "useVueNextTickPromise",
         TypeId::of::<biome_rule_options::use_vue_next_tick_promise::UseVueNextTickPromiseOptions>(),
     ));
+    result.push((
+        "nursery",
+        "useVueSeparateStaticClass",
+        TypeId::of::<
+            biome_rule_options::use_vue_separate_static_class::UseVueSeparateStaticClassOptions,
+        >(),
+    ));
     result.push(("nursery", "useVueToggleInsideTransition", TypeId::of::<biome_rule_options::use_vue_toggle_inside_transition::UseVueToggleInsideTransitionOptions>()));
     result.push((
         "nursery",
