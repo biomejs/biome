@@ -393,6 +393,7 @@ pub mod no_vue_computed_properties_in_data;
 pub mod no_vue_data_object_declaration;
 pub mod no_vue_deprecated_delete_set;
 pub mod no_vue_deprecated_listeners;
+pub mod no_vue_deprecated_props_default_this;
 pub mod no_vue_deprecated_router_link_tag_prop;
 pub mod no_vue_deprecated_scope_attribute;
 pub mod no_vue_deprecated_scoped_slots;

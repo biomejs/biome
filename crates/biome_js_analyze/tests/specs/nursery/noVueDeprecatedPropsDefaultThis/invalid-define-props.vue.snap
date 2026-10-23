@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-props.vue
+---
+# Input
+```vue
+<script setup>
+/* should generate diagnostics */
+defineProps({
+  a: String,
+  b: {
+    type: Object,
+    default() {
+      return { a: this.a };
+    },
+  },
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-define-props.vue:8:19 lint/nursery/noVueDeprecatedPropsDefaultThis ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × this is used in the default value function of a prop.
+  
+     6 │     type: Object,
+     7 │     default() {
+   > 8 │       return { a: this.a };
+       │                   ^^^^
+     9 │     },
+    10 │   },
+  
+  i Vue doesn't give this function access to the component, so this doesn't point to the component.
+  
+  i Read other props from the first argument of the function instead, for example default(props) { return props.size }.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
