@@ -1286,6 +1286,25 @@ fn migrate_eslint_rule(
             };
             migrate_block_lang(rules, &name, severity, options, opts, results);
         }
+        eslint_eslint::Rule::VueNoUndefProperties(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                let severity = conf.severity();
+                if let eslint_eslint::RuleConf::Option(_, rule_options) = conf
+                    && let Some(rule_options) = rule_options.into_biome_options()
+                {
+                    let group = rules.nursery.get_or_insert_with(Default::default);
+                    if let SeverityOrGroup::Group(group) = group {
+                        group.no_vue_undeclared_properties =
+                            Some(biome_config::RuleConfiguration::WithOptions(
+                                biome_config::RuleWithOptions {
+                                    level: severity.into(),
+                                    options: rule_options,
+                                },
+                            ));
+                    }
+                }
+            }
+        }
         eslint_eslint::Rule::SvelteNoUnnecessaryStateWrap(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let group = rules.nursery.get_or_insert_with(Default::default);

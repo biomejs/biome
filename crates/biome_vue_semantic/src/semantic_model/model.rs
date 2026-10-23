@@ -626,6 +626,12 @@ pub(crate) enum Detail {
         getter: Option<TextRange>,
         setter: Option<TextRange>,
     },
+    /// A data property whose value is an object literal.
+    Object {
+        /// Whether the object has members the model cannot name, such as a
+        /// spread or a computed key.
+        open: bool,
+    },
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -663,6 +669,9 @@ pub enum RefSite {
     EventName,
     /// The name passed to `useTemplateRef()`, or the member read from `$refs`.
     TemplateRefKey,
+    /// A name written as a string in a component option: a key of `watch`,
+    /// a method named as a watcher, or an entry of `expose`.
+    OptionName,
 }
 
 /// What a reference is reached through.
@@ -1714,6 +1723,30 @@ impl Symbol {
     /// Whether the symbol only exists in the type system.
     pub fn is_type_only(&self) -> bool {
         self.row().type_only
+    }
+
+    /// The symbols nested in this one: `name` for `user` in
+    /// `data() { return { user: { name: '' } } }`.
+    pub fn members(&self) -> impl Iterator<Item = Self> + '_ {
+        let siblings: &[SymbolId] = match self.row().component {
+            Some(component) => &self.data.components[component.index()].symbols,
+            None => &[],
+        };
+        siblings
+            .iter()
+            .filter(|id| self.data.symbols[id.index()].parent == Some(self.id))
+            .map(|id| Self {
+                data: self.data.clone(),
+                id: *id,
+            })
+    }
+
+    /// Whether [`Self::members`] lists every member of the symbol's value.
+    ///
+    /// That is only the case for a data property whose value is an object
+    /// literal with no spread and no computed key.
+    pub fn has_known_members(&self) -> bool {
+        matches!(self.row().detail, Detail::Object { open: false })
     }
 
     /// The references that resolve to this symbol.
