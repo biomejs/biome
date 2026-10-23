@@ -1,0 +1,280 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-options-api-object.vue
+---
+# Input
+```vue
+<script>
+/* should generate diagnostics */
+export default {
+  props: {
+    greeting_text: String,
+    'greeting-text': String,
+    'greeting_text2': String,
+    ['computed-name']: String,
+    [('parenthesized-name')]: String,
+    [`template-name`]: String,
+    shorthand_prop,
+    'abc-123-def': String,
+    _item: String,
+    GreetingText: String,
+    $actionEl: String,
+    '漢字Label': String,
+  }
+}
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-options-api-object.vue:5:5 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop name greeting_text isn't in camelCase.
+  
+    3 │ export default {
+    4 │   props: {
+  > 5 │     greeting_text: String,
+      │     ^^^^^^^^^^^^^
+    6 │     'greeting-text': String,
+    7 │     'greeting_text2': String,
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api-object.vue:6:5 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop name greeting-text isn't in camelCase.
+  
+    4 │   props: {
+    5 │     greeting_text: String,
+  > 6 │     'greeting-text': String,
+      │     ^^^^^^^^^^^^^^^
+    7 │     'greeting_text2': String,
+    8 │     ['computed-name']: String,
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api-object.vue:7:5 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop name greeting_text2 isn't in camelCase.
+  
+    5 │     greeting_text: String,
+    6 │     'greeting-text': String,
+  > 7 │     'greeting_text2': String,
+      │     ^^^^^^^^^^^^^^^^
+    8 │     ['computed-name']: String,
+    9 │     [('parenthesized-name')]: String,
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api-object.vue:8:5 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop name computed-name isn't in camelCase.
+  
+     6 │     'greeting-text': String,
+     7 │     'greeting_text2': String,
+   > 8 │     ['computed-name']: String,
+       │     ^^^^^^^^^^^^^^^^^
+     9 │     [('parenthesized-name')]: String,
+    10 │     [`template-name`]: String,
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api-object.vue:9:5 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop name parenthesized-name isn't in camelCase.
+  
+     7 │     'greeting_text2': String,
+     8 │     ['computed-name']: String,
+   > 9 │     [('parenthesized-name')]: String,
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │     [`template-name`]: String,
+    11 │     shorthand_prop,
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api-object.vue:10:5 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━
+
+  i The prop name template-name isn't in camelCase.
+  
+     8 │     ['computed-name']: String,
+     9 │     [('parenthesized-name')]: String,
+  > 10 │     [`template-name`]: String,
+       │     ^^^^^^^^^^^^^^^^^
+    11 │     shorthand_prop,
+    12 │     'abc-123-def': String,
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api-object.vue:11:5 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━
+
+  i The prop name shorthand_prop isn't in camelCase.
+  
+     9 │     [('parenthesized-name')]: String,
+    10 │     [`template-name`]: String,
+  > 11 │     shorthand_prop,
+       │     ^^^^^^^^^^^^^^
+    12 │     'abc-123-def': String,
+    13 │     _item: String,
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api-object.vue:12:5 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━
+
+  i The prop name abc-123-def isn't in camelCase.
+  
+    10 │     [`template-name`]: String,
+    11 │     shorthand_prop,
+  > 12 │     'abc-123-def': String,
+       │     ^^^^^^^^^^^^^
+    13 │     _item: String,
+    14 │     GreetingText: String,
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api-object.vue:13:5 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━
+
+  i The prop name _item isn't in camelCase.
+  
+    11 │     shorthand_prop,
+    12 │     'abc-123-def': String,
+  > 13 │     _item: String,
+       │     ^^^^^
+    14 │     GreetingText: String,
+    15 │     $actionEl: String,
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api-object.vue:14:5 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━
+
+  i The prop name GreetingText isn't in camelCase.
+  
+    12 │     'abc-123-def': String,
+    13 │     _item: String,
+  > 14 │     GreetingText: String,
+       │     ^^^^^^^^^^^^
+    15 │     $actionEl: String,
+    16 │     '漢字Label': String,
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api-object.vue:15:5 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━
+
+  i The prop name $actionEl isn't in camelCase.
+  
+    13 │     _item: String,
+    14 │     GreetingText: String,
+  > 15 │     $actionEl: String,
+       │     ^^^^^^^^^
+    16 │     '漢字Label': String,
+    17 │   }
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-options-api-object.vue:16:5 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━
+
+  i The prop name 漢字Label isn't in camelCase.
+  
+    14 │     GreetingText: String,
+    15 │     $actionEl: String,
+  > 16 │     '漢字Label': String,
+       │     ^^^^^^^^^^^
+    17 │   }
+    18 │ }
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

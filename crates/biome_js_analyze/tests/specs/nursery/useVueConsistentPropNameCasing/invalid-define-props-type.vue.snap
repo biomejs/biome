@@ -1,0 +1,81 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-props-type.vue
+---
+# Input
+```vue
+<script setup lang="ts">
+/* should generate diagnostics */
+interface Props {
+  greeting_text: number;
+  'greeting-text'?: string;
+  OnClick(): void;
+}
+defineProps<Props>();
+</script>
+
+```
+
+# Diagnostics
+```
+invalid-define-props-type.vue:4:3 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop name greeting_text isn't in camelCase.
+  
+    2 │ /* should generate diagnostics */
+    3 │ interface Props {
+  > 4 │   greeting_text: number;
+      │   ^^^^^^^^^^^^^
+    5 │   'greeting-text'?: string;
+    6 │   OnClick(): void;
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-props-type.vue:5:3 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop name greeting-text isn't in camelCase.
+  
+    3 │ interface Props {
+    4 │   greeting_text: number;
+  > 5 │   'greeting-text'?: string;
+      │   ^^^^^^^^^^^^^^^
+    6 │   OnClick(): void;
+    7 │ }
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-props-type.vue:6:3 lint/nursery/useVueConsistentPropNameCasing ━━━━━━━━━━━━━━━━━━━━━━
+
+  i The prop name OnClick isn't in camelCase.
+  
+    4 │   greeting_text: number;
+    5 │   'greeting-text'?: string;
+  > 6 │   OnClick(): void;
+      │   ^^^^^^^
+    7 │ }
+    8 │ defineProps<Props>();
+  
+  i Using one naming style for all props makes them easier to find and to use.
+  
+  i Rename the prop to camelCase.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```

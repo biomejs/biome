@@ -2902,6 +2902,7 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     ));
     result.push(("style", "useVueConsistentDefinePropsDeclaration", TypeId::of::<biome_rule_options::use_vue_consistent_define_props_declaration::UseVueConsistentDefinePropsDeclarationOptions>()));
     result.push(("nursery", "useVueConsistentEventHyphenation", TypeId::of::<biome_rule_options::use_vue_consistent_event_hyphenation::UseVueConsistentEventHyphenationOptions>()));
+    result.push(("nursery", "useVueConsistentPropNameCasing", TypeId::of::<biome_rule_options::use_vue_consistent_prop_name_casing::UseVueConsistentPropNameCasingOptions>()));
     result.push((
         "style",
         "useVueConsistentVBindStyle",

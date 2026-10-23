@@ -1,0 +1,22 @@
+<script>
+/* should not generate diagnostics */
+export default {
+  props: {
+    greetingText: String,
+    greeting: String,
+    ['computedName']: String,
+    [('parenthesizedName')]: String,
+    [`templateName`]: String,
+    [`greeting${'-'}text`]: String,
+    [greeting_text]: String,
+    [greeting.text]: String,
+    ['greeting' + '-text']: String,
+    [greeting_text()]: String,
+    [1]: String,
+    '漢字': String,
+    shorthandProp,
+    v8Engine: String,
+    ...some_props,
+  }
+}
+</script>
