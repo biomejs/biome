@@ -1,8 +1,8 @@
+#[cfg(feature = "rowan")]
+use crate::{FormatOwnedWithRule, FormatRefWithRule, FormatRule, SyntaxToken};
 use crate::{
     FormatScopedOptions, FormatScopedOptionsExt as _, FormatWithRule, FormatWithScopedOptions,
 };
-#[cfg(feature = "rowan")]
-use crate::{FormatOwnedWithRule, FormatRefWithRule, FormatRule, SyntaxToken};
 #[cfg(feature = "rowan")]
 use biome_rowan::Language;
 

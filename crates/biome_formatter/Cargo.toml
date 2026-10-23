@@ -42,8 +42,8 @@ biome_js_syntax = { path = "../biome_js_syntax" }
 insta           = { workspace = true }
 
 [features]
-countme     = ["dep:countme"]
 default     = ["deserialize", "diagnostics", "rowan"]
+countme     = ["dep:countme"]
 deserialize = ["dep:biome_deserialize", "dep:biome_deserialize_macros"]
 diagnostics = ["dep:biome_console", "dep:biome_diagnostics"]
 rowan       = ["dep:biome_diagnostics", "dep:biome_rowan", "dep:biome_suppression"]

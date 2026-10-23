@@ -3,10 +3,10 @@ use crate::prelude::tag::{DedentMode, GroupMode, LabelId};
 use crate::prelude::*;
 #[cfg(feature = "rowan")]
 use crate::rowan::RowanSource;
-#[cfg(feature = "rowan")]
-use crate::{TextRange, TextSize};
 use crate::{Argument, Arguments, FormatContext, FormatOptions, GroupId, Source, write};
 use crate::{Buffer, VecBuffer};
+#[cfg(feature = "rowan")]
+use crate::{TextRange, TextSize};
 use Tag::*;
 #[cfg(feature = "rowan")]
 use biome_rowan::{Language, SyntaxNode, SyntaxToken, TokenText};
