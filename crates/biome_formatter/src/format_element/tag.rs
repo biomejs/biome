@@ -69,8 +69,10 @@ pub enum Tag {
     StartLabelled(LabelId),
     EndLabelled,
 
-    /// Content that will be formatted later by another formatter.
-    /// These tags must be removed during the second pass.
+    /// Code written in another language, which the formatter of that language
+    /// can format later.
+    ///
+    /// See [crate::builders::FormatEmbedded] for documentation.
     StartEmbedded(TextRange),
     EndEmbedded,
 

@@ -184,12 +184,9 @@ pub(crate) mod trivia;
 mod verbatim;
 
 use biome_formatter::format_element::tag::Label;
-use biome_formatter::prelude::Tag::{EndEmbedded, StartEmbedded};
 use biome_formatter::prelude::*;
 use biome_formatter::trivia::{FormatToken, format_skipped_token_trivia};
-use biome_formatter::{
-    Buffer, FormatOwnedWithRule, FormatRefWithRule, Formatted, Printed, VecBuffer,
-};
+use biome_formatter::{Buffer, FormatOwnedWithRule, FormatRefWithRule, Formatted, Printed};
 use biome_formatter::{
     CstFormatContext, Format, FormatLanguage, TransformSourceMap, comments::Comments, write,
 };
@@ -390,18 +387,9 @@ where
         }
 
         if let Some(range) = self.embedded_node_range(node, f) {
-            // The node's own formatting is printed unless the embedded formatter
-            // replaces it.
-            let content = {
-                let mut buffer = VecBuffer::new(f.state_mut());
-                write!(buffer, [format_with(|f| self.fmt_fields(node, f))])?;
-                buffer.into_vec()
-            };
-            f.write_elements(vec![
-                FormatElement::Tag(StartEmbedded(range)),
-                FormatElement::Interned(Interned::new(content)),
-                FormatElement::Tag(EndEmbedded),
-            ])?;
+            let content = format_with(|f| self.fmt_fields(node, f));
+            let embedded = FormatEmbedded::new(range, &content, f)?;
+            embedded.fmt(f)?;
         } else {
             self.fmt_fields(node, f)?;
         }
@@ -617,10 +605,10 @@ pub fn format_range(
 /// It returns a [Formatted] result, which the user can use to override a file.
 ///
 /// `embedded_node_ranges` contains the ranges of template chunks that were
-/// parsed as embedded languages. Their content isn't formatted; instead, the
-/// formatter emits `StartEmbedded`/`EndEmbedded` tags that the caller must
-/// resolve via [Formatted::format_embedded]. Pass an empty [Vec] when
-/// embedded snippets aren't formatted separately.
+/// parsed as embedded languages. The formatter writes these templates as
+/// embedded elements, whose content the caller can replace with the output of
+/// the embedded language's formatter via [Formatted::format_embedded]. Pass an
+/// empty [Vec] when embedded snippets aren't formatted separately.
 pub fn format_node(
     options: JsFormatOptions,
     root: &JsSyntaxNode,

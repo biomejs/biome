@@ -811,6 +811,80 @@ impl<Context> std::fmt::Debug for FormatLabelled<'_, Context> {
     }
 }
 
+/// Code written in another language, such as the JavaScript inside an HTML
+/// `<script>` tag, that the formatter of that language can format.
+///
+/// The host formatter formats the code first, and the element prints that
+/// output unless the caller of the formatter replaces it with
+/// [crate::Formatted::format_embedded]. The replacement is printed where the
+/// element is and doesn't necessarily end with a line break, so the node that
+/// writes the element is responsible for the line breaks around the code.
+///
+/// # Examples
+///
+/// ```
+/// use biome_formatter::prelude::*;
+/// use biome_formatter::{format, write};
+/// use biome_rowan::{TextRange, TextSize};
+///
+/// # fn main() -> FormatResult<()> {
+/// let range = TextRange::new(TextSize::from(3), TextSize::from(10));
+/// let paragraph = format_with(|f| {
+///     let embedded = FormatEmbedded::new(range, &token("a  +  b"), f)?;
+///     write!(f, [token("<p>"), embedded, token("</p>")])
+/// });
+///
+/// // Without a replacement, the host formatter's output is printed.
+/// let formatted = format!(SimpleFormatContext::default(), [paragraph])?;
+/// assert_eq!("<p>a  +  b</p>", formatted.print()?.as_code());
+///
+/// let replacement = format!(SimpleFormatContext::default(), [token("a + b")])?.into_document();
+/// let mut formatted = format!(SimpleFormatContext::default(), [paragraph])?;
+/// formatted.format_embedded(|embedded_range| {
+///     (embedded_range == range).then(|| replacement.clone())
+/// });
+/// assert_eq!("<p>a + b</p>", formatted.print()?.as_code());
+/// # Ok(())
+/// # }
+/// ```
+pub struct FormatEmbedded {
+    range: TextRange,
+    content: Interned,
+}
+
+impl FormatEmbedded {
+    /// Formats `content`, the host formatter's output for the embedded code
+    /// whose content spans `range`.
+    ///
+    /// The caller of the formatter identifies the code by `range` in
+    /// [crate::Formatted::format_embedded]. An element whose range the caller
+    /// doesn't know keeps printing `content`.
+    pub fn new<Context>(
+        range: TextRange,
+        content: &impl Format<Context>,
+        f: &mut Formatter<Context>,
+    ) -> FormatResult<Self> {
+        let mut buffer = VecBuffer::new(f.state_mut());
+        write!(buffer, [content])?;
+        Ok(Self {
+            range,
+            content: Interned::new(buffer.into_vec()),
+        })
+    }
+}
+
+impl<Context> Format<Context> for FormatEmbedded {
+    fn fmt(&self, f: &mut Formatter<Context>) -> FormatResult<()> {
+        // `Document::replace_embedded` replaces the element that follows the
+        // start tag, so the content must stay a single interned element.
+        f.write_elements([
+            FormatElement::Tag(StartEmbedded(self.range)),
+            FormatElement::Interned(self.content.clone()),
+            FormatElement::Tag(EndEmbedded),
+        ])
+    }
+}
+
 /// Inserts a single space. Allows you to separate different tokens.
 ///
 /// # Examples

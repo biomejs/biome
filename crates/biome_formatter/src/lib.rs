@@ -1726,8 +1726,9 @@ pub trait FormatLanguage {
 ///
 /// It returns a [Formatted] result, which the user can use to override a file.
 ///
-/// When `skip_embedded_nodes` is `true`, the content of `<script>` and `<style` is formatted
-/// verbatim.
+/// `delegate_fmt_embedded_nodes` is forwarded to [FormatLanguage::create_context]. Languages that
+/// support embedded code can use it to write that code as [crate::builders::FormatEmbedded]
+/// elements, whose content the caller can replace with [Formatted::format_embedded].
 pub fn format_node<L: FormatLanguage>(
     root: &SyntaxNode<L::SyntaxLanguage>,
     language: L,
