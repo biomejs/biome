@@ -33,6 +33,21 @@ pub(crate) fn migrate_stylelint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_level));
         }
+        "csstools/use-logical" => {
+            if !options.include_nursery {
+                results.add(
+                    stylelint_name,
+                    eslint_to_biome::RuleMigrationResult::Nursery,
+                );
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_logical_properties
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_level));
+        }
         "custom-property-no-missing-var-function" => {
             let group = rules.correctness.get_or_insert_with(Default::default);
             let rule = group
@@ -133,6 +148,21 @@ pub(crate) fn migrate_stylelint_any_rule(
             let rule = group
                 .unwrap_group_as_mut()
                 .no_zero_length_unit
+                .get_or_insert(Default::default());
+            rule.set_level(rule.level().max(rule_level));
+        }
+        "liberty/use-logical-spec" => {
+            if !options.include_nursery {
+                results.add(
+                    stylelint_name,
+                    eslint_to_biome::RuleMigrationResult::Nursery,
+                );
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .unwrap_group_as_mut()
+                .use_logical_properties
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_level));
         }
