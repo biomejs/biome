@@ -8352,7 +8352,7 @@
 					]
 				},
 				"noVueExportInScriptSetup": {
-					"description": "Succinct description of the rule.\nSee https://biomejs.dev/linter/rules/no-vue-export-in-script-setup",
+					"description": "Disallow export in \\<script setup>.\nSee https://biomejs.dev/linter/rules/no-vue-export-in-script-setup",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueExportInScriptSetupConfiguration" },
 						{ "type": "null" }

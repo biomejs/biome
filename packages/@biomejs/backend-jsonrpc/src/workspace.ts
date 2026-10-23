@@ -3328,7 +3328,7 @@ export interface Nursery {
 	 */
 	noVueDeprecatedScopedSlots?: NoVueDeprecatedScopedSlotsConfiguration;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow export in \<script setup>.
 	 * See https://biomejs.dev/linter/rules/no-vue-export-in-script-setup
 	 */
 	noVueExportInScriptSetup?: NoVueExportInScriptSetupConfiguration;
