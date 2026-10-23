@@ -1,0 +1,51 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/gfm/table-cell-trailing-comment.md
+---
+
+# Input
+
+```md
+| a | b |
+| --- | --- |
+| <!-- c --> | x |
+
+| a | b |
+| --: | --- |
+| <!-- c --> | x |
+
+| a | b |
+| --- | --- |
+| t <!-- c --> | x |
+
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "parser": {
+      "gfm": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+| a          | b   |
+| ---------- | --- |
+| <!-- c --> | x   |
+
+|          a | b   |
+| ---------: | --- |
+| <!-- c --> | x   |
+
+| a            | b   |
+| ------------ | --- |
+| t <!-- c --> | x   |
+
+```

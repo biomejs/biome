@@ -1,0 +1,36 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: markdown/gfm/table-suppressed-at-end-of-file.md
+---
+
+# Input
+
+```md
+<!-- biome-ignore format: keep -->
+| a <!-- note --> | b
+| - | -
+| x | y   
+```
+
+
+# Options
+
+```json
+{
+  "markdown": {
+    "parser": {
+      "gfm": true
+    }
+  }
+}
+```
+
+# Formatted
+
+```md
+<!-- biome-ignore format: keep -->
+| a <!-- note --> | b
+| - | -
+| x | y
+
+```
