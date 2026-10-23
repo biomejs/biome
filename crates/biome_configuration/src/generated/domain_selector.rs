@@ -308,6 +308,7 @@ static VUE_FILTERS: LazyLock<Vec<RuleFilter<'static>>> = LazyLock::new(|| {
         RuleFilter::Rule("nursery", "useVueMatchingComponentFileName"),
         RuleFilter::Rule("nursery", "useVuePropTypeConstructor"),
         RuleFilter::Rule("nursery", "useVueRenderReturn"),
+        RuleFilter::Rule("nursery", "useVueSeparateStaticClass"),
         RuleFilter::Rule("nursery", "useVueSingleEventPayload"),
         RuleFilter::Rule("nursery", "useVueSlotNameCasing"),
         RuleFilter::Rule("nursery", "useVueSlotsAsFunctions"),

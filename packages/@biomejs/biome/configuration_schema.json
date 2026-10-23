@@ -10014,6 +10014,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueSeparateStaticClass": {
+					"description": "Require static class names to be in a separate class attribute.\nSee https://biomejs.dev/linter/rules/use-vue-separate-static-class",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueSeparateStaticClassConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueSingleEventPayload": {
 					"description": "Require Vue component events to carry at most one value.\nSee https://biomejs.dev/linter/rules/use-vue-single-event-payload",
 					"anyOf": [
@@ -18276,6 +18283,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueSeparateStaticClassOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueSeparateStaticClassOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueSingleEventPayloadOptions": {
 			"type": "object",
 			"properties": {
@@ -24084,6 +24100,16 @@
 			]
 		},
 		"UseVueRenderReturnOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
+		"UseVueSeparateStaticClassConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueSeparateStaticClassOptions" }
+			]
+		},
+		"UseVueSeparateStaticClassOptions": {
 			"type": "object",
 			"additionalProperties": false
 		},
