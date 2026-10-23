@@ -218,8 +218,9 @@ impl MemberChainGroup {
     /// once. The regular version goes into the same cache as
     /// [MemberChainGroup::will_break], so later writes of the group reuse it.
     ///
-    /// Returns `None` if the group is already formatted, doesn't end with the
-    /// chain's last call, or the arguments have no hugged layout.
+    /// Returns `None` without formatting if the group is already formatted or
+    /// doesn't end with the chain's last call. Returns `None` after formatting
+    /// if the arguments have no hugged layout.
     pub(super) fn format_with_hugged_last_argument(
         &self,
         f: &mut JsFormatter,

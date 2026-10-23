@@ -718,15 +718,19 @@ impl<Context> Format<Context> for LineSuffixBoundary {
 /// variant, the printer measures whether it fits on the line. This measurement
 /// is called the fits check. It adds up the width of the current line, fails
 /// if the line gets wider than the print width, and passes at the first line
-/// break. Inside `content`, no line fails the check, and line breaks don't end
-/// it. After `content`, the check continues on the line where `content` ends,
-/// including the width that `content` adds to it.
+/// break. Inside `content`, a line wider than the print width doesn't fail
+/// the check, and line breaks don't end it. A line suffix boundary with a
+/// pending line suffix still fails it. After `content`, the check continues on
+/// the line where `content` ends, including the width that `content` adds to
+/// it.
 ///
-/// Fits checks that start inside `content` are unaffected, so `content` prints
-/// the same as without `skip_fits_check`. Content before it can print
-/// differently: for example, a group before it expands if the line where
-/// `content` ends doesn't fit. Fits checks of [`fill`](Formatter::fill) entries
-/// ignore `skip_fits_check`, because an entry must fit on one line.
+/// Fits checks that start inside `content` are unaffected, but groups around
+/// and before `content` can print differently. A group before it expands if
+/// the line where `content` ends doesn't fit. A group around it can print flat
+/// even if `content` is wider than the print width, and groups inside
+/// `content` then print flat too, unless they must expand. Fits checks of
+/// [`fill`](Formatter::fill) entries ignore `skip_fits_check`, because an entry
+/// must fit on one line.
 ///
 /// In a [`best_fitting!`](crate::best_fitting) variant, use it for lines that
 /// print the same as in the most expanded variant, which the printer prints
@@ -781,7 +785,10 @@ impl<Context> Format<Context> for LineSuffixBoundary {
 /// let formatted = format!(context, [
 ///     best_fitting!(
 ///         format_args![
-///             skip_fits_check(&format_args![token("aaaaaaaaaaaaaaa"), hard_line_break()]),
+///             skip_fits_check(&format_args![
+///                 token("aaaaaaaaaaaaaaa"),
+///                 hard_line_break()
+///             ]),
 ///             token("b")
 ///         ],
 ///         token("c")

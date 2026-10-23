@@ -360,8 +360,8 @@ impl MemberChain {
             return false;
         }
 
-        // `FormatExpandedLastLine` doesn't check the lines of the head and the
-        // leading groups. That's only safe if those lines fit whenever the first
+        // `FormatExpandedLastLine` excludes the head and the leading groups from
+        // the fits check. That's only safe if their lines fit whenever the first
         // line of the hugged layout fits. In the expanded chain, each tail group
         // starts its own line, one indentation level deeper. In the hugged
         // layout, the head and all tail groups share the first line. So the
@@ -389,11 +389,12 @@ impl MemberChain {
             return false;
         };
 
-        // `FormatExpandedLastLine` prints the last group in flat mode, while
-        // `format_expanded` prints it in expanded mode. Both print the same only
-        // if the last group has no line break outside a group. Other calls in
-        // the group (like `.c(x)` in `.c(x)[0]({})`) and type arguments that
-        // aren't simple types can have one.
+        // When the printer picks `FormatExpandedLastLine`, it prints the last
+        // group in flat mode, while `format_expanded` prints it in expanded
+        // mode. Both print the same only if the last group has no line break
+        // outside a group. Other calls in the group (like `.c(x)` in
+        // `.c(x)[0]({})`) and type arguments that aren't simple types can have
+        // one.
         let has_one_call = last_group
             .iter()
             .filter(|member| member.is_call_expression())
@@ -599,16 +600,13 @@ impl Format<JsFormatContext> for MemberChain {
     }
 }
 
-/// Formats the expanded layout of a member chain as a variant that only fits
-/// if the line of the last group fits.
+/// Formats the expanded layout of a member chain as a `best_fitting!` variant
+/// that fits if the line of the last group fits.
 ///
 /// It prints the same as `format_expanded`, the most expanded variant in
-/// `MemberChain::fmt` (see the conditions in
-/// [MemberChain::can_hug_last_argument]).
-///
-/// The head and the leading groups are excluded from the fits check because
-/// they print the same as in `format_expanded`. Only the line of the last
-/// group decides whether this variant fits.
+/// `MemberChain::fmt`, under the conditions that
+/// [MemberChain::can_hug_last_argument] checks. That's why the head and the
+/// leading groups are excluded from the fits check.
 struct FormatExpandedLastLine<'a>(&'a MemberChain);
 
 impl Format<JsFormatContext> for FormatExpandedLastLine<'_> {

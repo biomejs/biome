@@ -1462,8 +1462,8 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                 self.stack.push(tag.kind(), args);
             }
             FormatElement::Tag(tag @ StartSkipFitsCheck) => {
-                // Fits checks of fill entries never exclude content, because an
-                // entry must fit on one line.
+                // Only fill entries are measured with `must_be_flat`. See
+                // `skip_fits_check` for why they ignore it.
                 let args = if self.must_be_flat {
                     args
                 } else {
@@ -1540,9 +1540,9 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
                                     return Fits::No;
                                 }
                                 if self.stack.top().skips_fits_check() {
-                                    // Unlike a line break element, a newline in text doesn't
-                                    // flush pending line suffixes when printed, so the line
-                                    // suffix state stays as it is.
+                                    // Unlike `start_new_line`, this keeps `has_line_suffix`:
+                                    // the printer doesn't flush line suffixes at a newline
+                                    // in text.
                                     self.state.line_width = 0;
                                     continue;
                                 }
@@ -1580,7 +1580,8 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
     /// Called only where the measured content prints a line break. Elsewhere,
     /// it would discard the width of the current line.
     fn start_new_line(&mut self, is_literal: bool) {
-        // The printer flushes pending line suffixes before printing a line break.
+        // The printer flushes pending line suffixes before printing a line
+        // break.
         self.state.has_line_suffix = false;
         self.state.line_width = 0;
         self.state.pending_space = false;
