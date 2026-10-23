@@ -2024,6 +2024,11 @@ pub fn config_side_rule_options_types() -> Vec<(&'static str, &'static str, Type
     result.push(("nursery", "noVueThisInBeforeRouteEnter", TypeId::of::<biome_rule_options::no_vue_this_in_before_route_enter::NoVueThisInBeforeRouteEnterOptions>()));
     result.push((
         "nursery",
+        "noVueThisInTemplate",
+        TypeId::of::<biome_rule_options::no_vue_this_in_template::NoVueThisInTemplateOptions>(),
+    ));
+    result.push((
+        "nursery",
         "noVueUndeclaredDirectives",
         TypeId::of::<
             biome_rule_options::no_vue_undeclared_directives::NoVueUndeclaredDirectivesOptions,

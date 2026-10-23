@@ -3568,6 +3568,11 @@ export interface Nursery {
 	 */
 	noVueThisInBeforeRouteEnter?: NoVueThisInBeforeRouteEnterConfiguration;
 	/**
+	 * Disallow this in Vue templates.
+	 * See https://biomejs.dev/linter/rules/no-vue-this-in-template
+	 */
+	noVueThisInTemplate?: NoVueThisInTemplateConfiguration;
+	/**
 	 * Disallow custom Vue directives that are not declared.
 	 * See https://biomejs.dev/linter/rules/no-vue-undeclared-directives
 	 */
@@ -6635,6 +6640,9 @@ export type NoVueTemplateShadowConfiguration =
 export type NoVueThisInBeforeRouteEnterConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueThisInBeforeRouteEnterOptions;
+export type NoVueThisInTemplateConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueThisInTemplateOptions;
 export type NoVueUndeclaredDirectivesConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueUndeclaredDirectivesOptions;
@@ -9653,6 +9661,14 @@ export interface RuleWithNoVueThisInBeforeRouteEnterOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueThisInBeforeRouteEnterOptions;
 }
+export interface RuleWithNoVueThisInTemplateOptions {
+	/**
+	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
+	 */
+	fix?: FixKind;
+	level: RulePlainConfiguration;
+	options?: NoVueThisInTemplateOptions;
+}
 export interface RuleWithNoVueUndeclaredDirectivesOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueUndeclaredDirectivesOptions;
@@ -12470,6 +12486,7 @@ export interface NoVueTemplateShadowOptions {
 	allow?: string[];
 }
 export type NoVueThisInBeforeRouteEnterOptions = {};
+export type NoVueThisInTemplateOptions = {};
 export interface NoVueUndeclaredDirectivesOptions {
 	/**
 	 * Names of directives registered globally with `app.directive(...)`,
@@ -14408,6 +14425,7 @@ export type Category =
 	| "lint/nursery/noVueTemplateKey"
 	| "lint/nursery/noVueTemplateShadow"
 	| "lint/nursery/noVueThisInBeforeRouteEnter"
+	| "lint/nursery/noVueThisInTemplate"
 	| "lint/nursery/noVueUndeclaredDirectives"
 	| "lint/nursery/noVueUndeclaredEmits"
 	| "lint/nursery/noVueUndeclaredProperties"

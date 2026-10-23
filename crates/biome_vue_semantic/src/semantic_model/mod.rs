@@ -8,6 +8,7 @@ mod snippets;
 
 pub use db::vue_model_from_source;
 pub use model::*;
+pub use references::is_template_global;
 pub use snippets::SfcSnippet;
 
 use biome_html_syntax::HtmlRoot;
