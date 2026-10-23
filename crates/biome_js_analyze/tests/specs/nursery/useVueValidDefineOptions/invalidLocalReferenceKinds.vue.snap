@@ -1,0 +1,147 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 196
+expression: invalidLocalReferenceKinds.vue
+---
+# Input
+```vue
+<!-- should generate diagnostics -->
+<script setup>
+import { shared } from "./shared";
+
+const base = { inheritAttrs: false };
+let count = 1;
+const label = `Foo`;
+function getName() {
+  return "Foo";
+}
+
+const options = defineOptions({
+  ...base,
+  ...shared,
+  name: getName(),
+  label,
+  inheritAttrs: count > 0,
+});
+</script>
+
+```
+
+# Diagnostics
+```
+invalidLocalReferenceKinds.vue:13:6 lint/nursery/useVueValidDefineOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineOptions() uses base, which is declared in <script setup>.
+  
+    12 │ const options = defineOptions({
+  > 13 │   ...base,
+       │      ^^^^
+    14 │   ...shared,
+    15 │   name: getName(),
+  
+  i base is declared here.
+  
+    3 │ import { shared } from "./shared";
+    4 │ 
+  > 5 │ const base = { inheritAttrs: false };
+      │       ^^^^
+    6 │ let count = 1;
+    7 │ const label = `Foo`;
+  
+  i Vue moves the options out of <script setup> when it compiles the component, so variables declared there aren't available to them.
+  
+  i Move the declaration to a separate <script> block, or import it from another file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidLocalReferenceKinds.vue:15:9 lint/nursery/useVueValidDefineOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineOptions() uses getName, which is declared in <script setup>.
+  
+    13 │   ...base,
+    14 │   ...shared,
+  > 15 │   name: getName(),
+       │         ^^^^^^^
+    16 │   label,
+    17 │   inheritAttrs: count > 0,
+  
+  i getName is declared here.
+  
+     6 │ let count = 1;
+     7 │ const label = `Foo`;
+   > 8 │ function getName() {
+       │          ^^^^^^^
+     9 │   return "Foo";
+    10 │ }
+  
+  i Vue moves the options out of <script setup> when it compiles the component, so variables declared there aren't available to them.
+  
+  i Move the declaration to a separate <script> block, or import it from another file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidLocalReferenceKinds.vue:16:3 lint/nursery/useVueValidDefineOptions ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineOptions() uses label, which is declared in <script setup>.
+  
+    14 │   ...shared,
+    15 │   name: getName(),
+  > 16 │   label,
+       │   ^^^^^
+    17 │   inheritAttrs: count > 0,
+    18 │ });
+  
+  i label is declared here.
+  
+    5 │ const base = { inheritAttrs: false };
+    6 │ let count = 1;
+  > 7 │ const label = `Foo`;
+      │       ^^^^^
+    8 │ function getName() {
+    9 │   return "Foo";
+  
+  i Vue moves the options out of <script setup> when it compiles the component, so variables declared there aren't available to them.
+  
+  i Move the declaration to a separate <script> block, or import it from another file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalidLocalReferenceKinds.vue:17:17 lint/nursery/useVueValidDefineOptions ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × defineOptions() uses count, which is declared in <script setup>.
+  
+    15 │   name: getName(),
+    16 │   label,
+  > 17 │   inheritAttrs: count > 0,
+       │                 ^^^^^
+    18 │ });
+    19 │ </script>
+  
+  i count is declared here.
+  
+    5 │ const base = { inheritAttrs: false };
+  > 6 │ let count = 1;
+      │     ^^^^^
+    7 │ const label = `Foo`;
+    8 │ function getName() {
+  
+  i Vue moves the options out of <script setup> when it compiles the component, so variables declared there aren't available to them.
+  
+  i Move the declaration to a separate <script> block, or import it from another file.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
