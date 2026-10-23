@@ -3998,6 +3998,11 @@ export interface Nursery {
 	 */
 	useVueConsistentEventHyphenation?: UseVueConsistentEventHyphenationConfiguration;
 	/**
+	 * Enforce a consistent casing style for prop names in Vue components.
+	 * See https://biomejs.dev/linter/rules/use-vue-consistent-prop-name-casing
+	 */
+	useVueConsistentPropNameCasing?: UseVueConsistentPropNameCasingConfiguration;
+	/**
 	 * Enforce a consistent delimiter between the item and the list in v-for directives.
 	 * See https://biomejs.dev/linter/rules/use-vue-consistent-v-for-delimiter
 	 */
@@ -6928,6 +6933,9 @@ export type UseVueConsistentDefineEmitsDeclarationConfiguration =
 export type UseVueConsistentEventHyphenationConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentEventHyphenationOptions;
+export type UseVueConsistentPropNameCasingConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueConsistentPropNameCasingOptions;
 export type UseVueConsistentVForDelimiterConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueConsistentVForDelimiterOptions;
@@ -10213,6 +10221,10 @@ export interface RuleWithUseVueConsistentEventHyphenationOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueConsistentEventHyphenationOptions;
 }
+export interface RuleWithUseVueConsistentPropNameCasingOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueConsistentPropNameCasingOptions;
+}
 export interface RuleWithUseVueConsistentVForDelimiterOptions {
 	/**
 	 * Controls the applicability of the rule's fix. `none` suppresses the fix, while `safe` and `unsafe` reclassify its applicability. This setting does not change the fix itself.
@@ -12889,6 +12901,16 @@ export interface UseVueConsistentEventHyphenationOptions {
 	 */
 	ignoreTags?: string[];
 }
+export interface UseVueConsistentPropNameCasingOptions {
+	/**
+	 * The casing that prop names must follow. If omitted, prop names must be in camelCase.
+	 */
+	casing?: PropNameCasing;
+	/**
+	 * List of prop names to exempt from the check.
+	 */
+	ignore?: string[];
+}
 export interface UseVueConsistentVForDelimiterOptions {
 	/**
 	 * The word to use between the item and the list in `v-for` directives:
@@ -13896,6 +13918,7 @@ export type ComponentDefinitionStyle =
 export type BlockOrderEntry = string | string[];
 export type DefineEmitsDeclarationStyle = "type" | "typeLiteral" | "runtime";
 export type EventHyphenation = "always" | "never";
+export type PropNameCasing = "camelCase" | "snake_case";
 export type VueVForDelimiter = "in" | "of";
 export type SlotNameCasing = "camelCase" | "kebab-case" | "singleword";
 /**
@@ -14634,6 +14657,7 @@ export type Category =
 	| "lint/nursery/useVueConsistentDefineEmitsDeclaration"
 	| "lint/nursery/useVueConsistentDefinePropsDeclaration"
 	| "lint/nursery/useVueConsistentEventHyphenation"
+	| "lint/nursery/useVueConsistentPropNameCasing"
 	| "lint/nursery/useVueConsistentVForDelimiter"
 	| "lint/nursery/useVueDefinePropsDestructuring"
 	| "lint/nursery/useVueDefineOptions"

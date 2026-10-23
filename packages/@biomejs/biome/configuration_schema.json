@@ -9937,6 +9937,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueConsistentPropNameCasing": {
+					"description": "Enforce a consistent casing style for prop names in Vue components.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-prop-name-casing",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueConsistentPropNameCasingConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueConsistentVForDelimiter": {
 					"description": "Enforce a consistent delimiter between the item and the list in v-for directives.\nSee https://biomejs.dev/linter/rules/use-vue-consistent-v-for-delimiter",
 					"anyOf": [
@@ -10634,6 +10641,20 @@
 			"description": "A preset configuration for enabling a set of rules.",
 			"type": "string",
 			"enum": ["recommended", "all", "none"]
+		},
+		"PropNameCasing": {
+			"oneOf": [
+				{
+					"description": "Prop names must be in camelCase, e.g. `greetingText`.",
+					"type": "string",
+					"const": "camelCase"
+				},
+				{
+					"description": "Prop names must be in snake_case, e.g. `greeting_text`.",
+					"type": "string",
+					"const": "snake_case"
+				}
+			]
 		},
 		"PropertyAssignmentMode": {
 			"description": "Specifies whether property assignments on function parameters are allowed or denied.",
@@ -18059,6 +18080,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueConsistentPropNameCasingOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueConsistentPropNameCasingOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueConsistentVBindStyleOptions": {
 			"type": "object",
 			"properties": {
@@ -23785,6 +23815,27 @@
 				},
 				"ignoreTags": {
 					"description": "List of tag names whose events should not be checked.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
+		"UseVueConsistentPropNameCasingConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueConsistentPropNameCasingOptions" }
+			]
+		},
+		"UseVueConsistentPropNameCasingOptions": {
+			"type": "object",
+			"properties": {
+				"casing": {
+					"description": "The casing that prop names must follow. If omitted, prop names must be in camelCase.",
+					"anyOf": [{ "$ref": "#/$defs/PropNameCasing" }, { "type": "null" }]
+				},
+				"ignore": {
+					"description": "List of prop names to exempt from the check.",
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				}

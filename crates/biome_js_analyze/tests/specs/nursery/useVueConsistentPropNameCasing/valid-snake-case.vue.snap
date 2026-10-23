@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-snake-case.vue
+---
+# Input
+```vue
+<script setup>
+/* should not generate diagnostics */
+defineProps({
+  greeting_text: String,
+  greeting: String,
+  item2: String,
+  '漢字': String,
+});
+</script>
+
+```
