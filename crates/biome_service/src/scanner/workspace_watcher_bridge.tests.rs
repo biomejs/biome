@@ -99,9 +99,9 @@ fn close_modified_file_from_client_before_watcher() {
     let instruction = watcher_rx
         .try_recv()
         .expect("instruction should be received");
-    assert_eq!(
-        instruction,
-        WatcherInstruction::ReindexFile(file_path.clone())
+    assert!(
+        matches!(&instruction, WatcherInstruction::ReindexFile(path) if *path == file_path),
+        "unexpected instruction: {instruction:?}"
     );
     // call the instruction handler manually for the sake of the test:
     ScannerWatcherBridge::new((&workspace.scanner, &workspace))
