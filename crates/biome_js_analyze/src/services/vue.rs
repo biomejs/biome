@@ -7,6 +7,8 @@
 //!   compares declarations with each other.
 //! - [`VueProp`] runs the rule once per prop. Use it when the rule judges
 //!   one prop on its own.
+//! - [`VueEmit`] runs the rule once per declared event. Use it when the rule
+//!   judges one event declaration on its own.
 //!
 //! The model already folds the different ways Vue lets a declaration be
 //! written into one shape, so a rule never matches on syntax to find them.
@@ -25,7 +27,8 @@ use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange};
 use biome_languages::{JsFileSource, LanguageDb};
 use biome_rowan::{AstNode, WalkEvent};
 use biome_vue_semantic::{
-    Component, Prop, SnippetId, Symbol, VueSemanticModel, component_model, vue_model_from_source,
+    Component, Emit, Prop, SnippetId, Symbol, VueSemanticModel, component_model,
+    vue_model_from_source,
 };
 use camino::Utf8PathBuf;
 use std::rc::Rc;
@@ -126,6 +129,9 @@ impl Visitor for VueSemanticVisitor {
             for prop in component.props().filter(|prop| service.declares(prop)) {
                 ctx.match_query(VuePropMatch(prop));
             }
+            for emit in component.emits().filter(|emit| service.declares(emit)) {
+                ctx.match_query(VueEmitMatch(emit));
+            }
         }
     }
 }
@@ -172,4 +178,11 @@ define_vue_query!(
     VueProp,
     VuePropMatch,
     Prop
+);
+define_vue_query!(
+    /// Matches each event each Vue component declares, whatever syntax
+    /// declares it.
+    VueEmit,
+    VueEmitMatch,
+    Emit
 );

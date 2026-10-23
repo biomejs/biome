@@ -8828,6 +8828,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useVueEmitsValidatorReturn": {
+					"description": "Require the validator function of a Vue event to return a true value when the event is valid.\nSee https://biomejs.dev/linter/rules/use-vue-emits-validator-return",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueEmitsValidatorReturnConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useVueMatchingComponentFileName": {
 					"description": "Enforce that the name of a Vue component matches its file name.\nSee https://biomejs.dev/linter/rules/use-vue-matching-component-file-name",
 					"anyOf": [
@@ -16068,6 +16075,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueEmitsValidatorReturnOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueEmitsValidatorReturnOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueHyphenatedAttributesOptions": {
 			"type": "object",
 			"properties": {
@@ -21379,6 +21395,16 @@
 					"items": { "type": "string" }
 				}
 			},
+			"additionalProperties": false
+		},
+		"UseVueEmitsValidatorReturnConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueEmitsValidatorReturnOptions" }
+			]
+		},
+		"UseVueEmitsValidatorReturnOptions": {
+			"type": "object",
 			"additionalProperties": false
 		},
 		"UseVueHyphenatedAttributesConfiguration": {
