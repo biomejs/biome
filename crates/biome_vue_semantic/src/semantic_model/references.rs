@@ -76,6 +76,13 @@ const TEMPLATE_GLOBALS: &[&str] = &[
     "undefined",
 ];
 
+/// Returns `true` when `name` is a JavaScript global that a template
+/// expression may use, such as `Math`. Vue reads such a name from the global
+/// scope instead of from the component instance.
+pub fn is_template_global(name: &str) -> bool {
+    TEMPLATE_GLOBALS.binary_search(&name).is_ok()
+}
+
 /// Tags Vue resolves itself.
 const BUILTIN_COMPONENTS: &[&str] = &[
     "KeepAlive",
@@ -867,6 +874,10 @@ pub(crate) fn collect_template_references(
             | SnippetHost::Interpolation(None)
             | SnippetHost::Unknown => scopes.head,
         };
+        builder.data.snippets[id.index()].name_scope = Some(NameScope {
+            scope,
+            hidden_slot_params: slot_owner,
+        });
 
         let root_expression = match snippet.root {
             AnyJsRoot::JsExpressionTemplateRoot(root) => root
@@ -894,7 +905,7 @@ pub(crate) fn collect_template_references(
             let found = lookup(&walker.builder.data, scope, name.text(), slot_owner);
             let resolution = match found {
                 Some(symbol) => Resolution::Symbol(symbol),
-                None if TEMPLATE_GLOBALS.contains(&name.text()) => Resolution::Global,
+                None if is_template_global(name.text()) => Resolution::Global,
                 // A type, as in `$event.target as HTMLInputElement`, can be
                 // declared by the TypeScript libraries, which the model does
                 // not read.
@@ -962,7 +973,7 @@ pub(crate) fn collect_template_references(
 ///
 /// The slot parameters declared in `slot_owner` are skipped: they are not
 /// visible to the directives of the element that declares them.
-fn lookup(
+pub(crate) fn lookup(
     data: &SemanticModelData,
     scope: ScopeId,
     name: &str,
@@ -1543,5 +1554,22 @@ fn resolve_directive(
         Resolution::Unknowable
     } else {
         Resolution::Unresolved
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::TEMPLATE_GLOBALS;
+
+    #[test]
+    fn template_globals_are_sorted() {
+        for pair in TEMPLATE_GLOBALS.windows(2) {
+            assert!(
+                pair[0] < pair[1],
+                "`{}` must come after `{}` in TEMPLATE_GLOBALS",
+                pair[0],
+                pair[1]
+            );
+        }
     }
 }

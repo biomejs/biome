@@ -415,6 +415,19 @@ pub(crate) struct SnippetData {
     pub(crate) fingerprint: u64,
     pub(crate) operands: Range<u32>,
     pub(crate) has_comments: bool,
+    /// Where the bare names of a template expression are looked up. `None`
+    /// for a script block.
+    pub(crate) name_scope: Option<NameScope>,
+}
+
+/// Where the bare names of a template expression are looked up.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) struct NameScope {
+    /// The innermost scope the expression sees.
+    pub(crate) scope: ScopeId,
+    /// The scope whose slot parameters the expression cannot see: the scope
+    /// of the element whose directive the expression is.
+    pub(crate) hidden_slot_params: Option<ScopeId>,
 }
 
 /// One operand of a logical condition. `a || (b && c)` has three operands in
@@ -1603,6 +1616,26 @@ impl Snippet {
                 data: self.data.clone(),
                 id: *id,
             })
+    }
+
+    /// Finds the declaration that the bare name `name` refers to when it is
+    /// written in this snippet, such as a `v-for` variable, a slot parameter
+    /// or a prop.
+    ///
+    /// Returns `None` when nothing the model reads declares `name`, and for
+    /// a script block, which resolves its own names.
+    pub fn lookup(&self, name: &str) -> Option<Symbol> {
+        let name_scope = self.row().name_scope?;
+        let id = super::references::lookup(
+            &self.data,
+            name_scope.scope,
+            name,
+            name_scope.hidden_slot_params,
+        )?;
+        Some(Symbol {
+            data: self.data.clone(),
+            id,
+        })
     }
 }
 
