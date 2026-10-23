@@ -3368,6 +3368,11 @@ export interface Nursery {
 	 */
 	noVueComputedPropertiesInData?: NoVueComputedPropertiesInDataConfiguration;
 	/**
+	 * Disallow the $set and $delete functions that Vue 3 removed.
+	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-delete-set
+	 */
+	noVueDeprecatedDeleteSet?: NoVueDeprecatedDeleteSetConfiguration;
+	/**
 	 * Disallow the deprecated Vue $listeners API.
 	 * See https://biomejs.dev/linter/rules/no-vue-deprecated-listeners
 	 */
@@ -6255,6 +6260,9 @@ export type NoVueBooleanDefaultConfiguration =
 export type NoVueComputedPropertiesInDataConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueComputedPropertiesInDataOptions;
+export type NoVueDeprecatedDeleteSetConfiguration =
+	| RulePlainConfiguration
+	| RuleWithNoVueDeprecatedDeleteSetOptions;
 export type NoVueDeprecatedListenersConfiguration =
 	| RulePlainConfiguration
 	| RuleWithNoVueDeprecatedListenersOptions;
@@ -9045,6 +9053,10 @@ export interface RuleWithNoVueComputedPropertiesInDataOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueComputedPropertiesInDataOptions;
 }
+export interface RuleWithNoVueDeprecatedDeleteSetOptions {
+	level: RulePlainConfiguration;
+	options?: NoVueDeprecatedDeleteSetOptions;
+}
 export interface RuleWithNoVueDeprecatedListenersOptions {
 	level: RulePlainConfiguration;
 	options?: NoVueDeprecatedListenersOptions;
@@ -11701,6 +11713,7 @@ export type NoUselessSpliceOptions = {};
 export type NoUselessTypeConversionOptions = {};
 export type NoVueBooleanDefaultOptions = {};
 export type NoVueComputedPropertiesInDataOptions = {};
+export type NoVueDeprecatedDeleteSetOptions = {};
 export type NoVueDeprecatedListenersOptions = {};
 export interface NoVueDeprecatedRouterLinkTagPropOptions {
 	/**
@@ -13505,6 +13518,7 @@ export type Category =
 	| "lint/nursery/noUselessTypeConversion"
 	| "lint/nursery/noVueBooleanDefault"
 	| "lint/nursery/noVueComputedPropertiesInData"
+	| "lint/nursery/noVueDeprecatedDeleteSet"
 	| "lint/nursery/noVueDeprecatedListeners"
 	| "lint/nursery/noVueDeprecatedRouterLinkTagProp"
 	| "lint/nursery/noVueDeprecatedScopeAttribute"
