@@ -571,17 +571,16 @@ impl Format<JsFormatContext> for MemberChain {
                         f.write_element(hugged_last_group.clone())
                     });
 
-                    // Prefer the expanded chain only if its last group fits on
-                    // one line. Otherwise use the hugged layout. See
-                    // `can_hug_last_argument` for why.
+                    // Try the expanded chain before the hugged layout: if its
+                    // last group fits, the output is already stable. See
+                    // `can_hug_last_argument` for why the hugged layout exists.
                     write!(
                         f,
                         [best_fitting!(
                             format_one_line,
-                            best_fitting!(
-                                FormatExpandedLastLine(self),
-                                best_fitting!(format_one_line_hugged, format_expanded)
-                            )
+                            FormatExpandedLastLine(self),
+                            format_one_line_hugged,
+                            format_expanded
                         )]
                     )
                 } else {
@@ -603,7 +602,7 @@ impl Format<JsFormatContext> for MemberChain {
 /// Formats the expanded layout of a member chain as a variant that only fits
 /// if the line of the last group fits.
 ///
-/// It prints the same as `format_expanded`, the fallback variant in
+/// It prints the same as `format_expanded`, the most expanded variant in
 /// `MemberChain::fmt` (see the conditions in
 /// [MemberChain::can_hug_last_argument]).
 ///
