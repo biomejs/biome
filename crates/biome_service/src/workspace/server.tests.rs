@@ -4,7 +4,9 @@ use crate::db::FileViews;
 use crate::module_graph::ModuleInfo;
 use crate::projects::ProjectInput;
 #[cfg(feature = "module_graph")]
-use crate::scanner::WorkspaceWatcherBridge;
+use crate::scanner::{
+    ScannerWatcherBridge, Watcher, WatcherKind, WatcherOptions, WorkspaceWatcherBridge,
+};
 use crate::settings::ModuleGraphResolutionKind;
 use crate::test_utils::setup_workspace_and_open_project;
 use crate::workspace::UpdateSettingsParams;
@@ -17,7 +19,7 @@ use biome_configuration::{
 };
 use biome_css_syntax::CssLanguage;
 use biome_formatter::{IndentStyle, LineWidth, QuoteStyle};
-use biome_fs::MemoryFileSystem;
+use biome_fs::{MemoryFileSystem, TemporaryFs};
 use biome_js_syntax::{JsLanguage, JsSyntaxNode};
 use biome_json_formatter::context::TrailingCommas;
 use biome_languages::css::CssEmbeddingKind;
@@ -3295,6 +3297,411 @@ fn owned_scan_reuses_inputs_of_closed_files() {
     assert_eq!(&**scanned_changed.text(&db), UPDATED);
     drop(db);
     assert_eq!(allocated_file_inputs(&workspace), (2, 2));
+}
+
+#[test]
+#[cfg(feature = "module_graph")]
+fn scan_project_waits_until_the_watcher_watches_scanned_folders() {
+    const TIMEOUT: Duration = Duration::from_secs(5);
+
+    let mut fs = TemporaryFs::new("scan_project_waits_until_the_watcher_watches_scanned_folders");
+    let busy_file = fs.create_file("busy/file.js", "");
+    let busy_project = fs.working_directory.join("busy");
+    let scanned_project = fs.working_directory.join("scanned");
+    let scanned_folder = scanned_project.join("folder");
+    std::fs::create_dir_all(&scanned_folder).unwrap();
+
+    let (watcher, instruction_channel) = Watcher::new(WatcherOptions::default()).unwrap();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let workspace = LocalWorkspace::new(
+        Arc::new(fs.create_os()),
+        instruction_channel.sender.clone(),
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new(&busy_project),
+            open_uninitialized: true,
+        })
+        .unwrap();
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new(&scanned_project),
+            open_uninitialized: true,
+        })
+        .unwrap();
+
+    let test_state = &workspace.server.scanner_test_state;
+    test_state
+        .pause_file_settings_read
+        .store(true, Ordering::Release);
+
+    let (watcher_paused, scan_returned_early, scan_result, folder_watched) =
+        std::thread::scope(|scope| {
+            scope.spawn(|| workspace.start_watcher(watcher));
+
+            // Keeps the watcher busy, so it can only watch the scanned folders
+            // once the pause is lifted.
+            instruction_channel
+                .sender
+                .send(WatcherInstruction::ReindexFile(busy_file))
+                .unwrap();
+            let watcher_paused = wait_until(TIMEOUT, || {
+                test_state
+                    .file_settings_read_attempts
+                    .load(Ordering::Acquire)
+                    >= 1
+            });
+
+            let scan = scope.spawn(|| {
+                workspace.scan_project(ScanProjectParams {
+                    project_key,
+                    watch: true,
+                    force: false,
+                    scan_kind: ScanKind::Project,
+                    verbose: false,
+                })
+            });
+            let scan_returned_early = wait_until(Duration::from_millis(200), || scan.is_finished());
+
+            test_state
+                .pause_file_settings_read
+                .store(false, Ordering::Release);
+            let scan_result = scan.join();
+
+            let folder_watched = is_watched(&workspace, &scanned_folder);
+
+            instruction_channel
+                .sender
+                .send(WatcherInstruction::Stop)
+                .unwrap();
+
+            (
+                watcher_paused,
+                scan_returned_early,
+                scan_result,
+                folder_watched,
+            )
+        });
+
+    assert!(watcher_paused, "the watcher did not start indexing");
+    assert!(
+        !scan_returned_early,
+        "the scan returned before the watcher handled its folders"
+    );
+    scan_result.unwrap().unwrap();
+    assert!(folder_watched, "the scanned folder is not watched");
+}
+
+#[test]
+#[cfg(feature = "module_graph")]
+fn scan_project_waits_for_a_watcher_that_has_not_started_yet() {
+    let mut fs = TemporaryFs::new("scan_project_waits_for_a_watcher_that_has_not_started_yet");
+    let (watcher, instruction_channel) = Watcher::new(WatcherOptions::default()).unwrap();
+    let (workspace, project_key, folder) =
+        open_project_with_empty_folder(&mut fs, instruction_channel.sender.clone());
+    // `WorkspaceServer::start_watcher()` does this before it spawns the thread
+    // that runs the watcher.
+    workspace.server.scanner.mark_watcher_running(&watcher);
+
+    let (scan_returned_early, scan_result, folder_watched) = std::thread::scope(|scope| {
+        let scan = scope.spawn(|| scan_with_watch(&workspace, project_key));
+        let scan_returned_early = wait_until(Duration::from_millis(200), || scan.is_finished());
+
+        scope.spawn(|| workspace.start_watcher(watcher));
+        let scan_result = scan.join();
+        let folder_watched = is_watched(&workspace, &folder);
+
+        instruction_channel
+            .sender
+            .send(WatcherInstruction::Stop)
+            .unwrap();
+
+        (scan_returned_early, scan_result, folder_watched)
+    });
+
+    assert!(
+        !scan_returned_early,
+        "the scan returned before the watcher started"
+    );
+    scan_result.unwrap().unwrap();
+    assert!(folder_watched, "the scanned folder is not watched");
+}
+
+#[test]
+#[cfg(feature = "module_graph")]
+fn scan_project_does_not_wait_for_a_disabled_watcher() {
+    const TIMEOUT: Duration = Duration::from_secs(5);
+
+    let mut fs = TemporaryFs::new("scan_project_does_not_wait_for_a_disabled_watcher");
+    let (watcher, instruction_channel) = Watcher::new(WatcherOptions {
+        watcher_kind: WatcherKind::None,
+        ..Default::default()
+    })
+    .unwrap();
+    let (workspace, project_key, _) =
+        open_project_with_empty_folder(&mut fs, instruction_channel.sender.clone());
+    workspace.server.scanner.mark_watcher_running(&watcher);
+
+    let (scan_returned, scan_result) = std::thread::scope(|scope| {
+        let scan = scope.spawn(|| scan_with_watch(&workspace, project_key));
+        let scan_returned = wait_until(TIMEOUT, || scan.is_finished());
+
+        // Discards the instructions that a waiting scan sent.
+        drop(watcher);
+        (scan_returned, scan.join())
+    });
+
+    assert!(scan_returned, "the scan waited for a disabled watcher");
+    scan_result.unwrap().unwrap();
+}
+
+#[test]
+#[cfg(feature = "module_graph")]
+fn start_watcher_marks_the_watcher_running_before_returning() {
+    const TIMEOUT: Duration = Duration::from_secs(5);
+
+    let fs = Arc::new(MemoryFileSystem::default());
+    let (watcher, instruction_channel) = Watcher::new(WatcherOptions::default()).unwrap();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let workspace = Arc::new(WorkspaceServer::new(
+        fs.clone(),
+        instruction_channel.sender.clone(),
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    ));
+
+    workspace
+        .start_watcher(Arc::new(DbState::lsp(fs)), watcher)
+        .unwrap();
+    let running = workspace.scanner.is_watcher_running();
+
+    instruction_channel
+        .sender
+        .send(WatcherInstruction::Stop)
+        .unwrap();
+    let stopped = wait_until(TIMEOUT, || !workspace.scanner.is_watcher_running());
+
+    assert!(
+        running,
+        "the watcher wasn't running when start_watcher returned"
+    );
+    assert!(stopped, "the watcher didn't stop");
+}
+
+#[test]
+#[cfg(feature = "module_graph")]
+fn watcher_survives_reads_interrupted_by_a_pending_write() {
+    const TIMEOUT: Duration = Duration::from_secs(5);
+
+    let mut fs = TemporaryFs::new("watcher_survives_reads_interrupted_by_a_pending_write");
+    let file = fs.create_file("project/file.js", "");
+    let project = fs.working_directory.join("project");
+
+    let (watcher, instruction_channel) = Watcher::new(WatcherOptions::default()).unwrap();
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        Arc::new(fs.create_os()),
+        instruction_channel.sender.clone(),
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new(&project),
+            open_uninitialized: true,
+        })
+        .unwrap();
+
+    // Re-indexing starts with a database read, which the pending write below
+    // interrupts.
+    let (ack_tx, ack_rx) = crossbeam::channel::bounded(1);
+    instruction_channel
+        .sender
+        .send(WatcherInstruction::ReindexFile(file))
+        .unwrap();
+    instruction_channel
+        .sender
+        .send(WatcherInstruction::Barrier(ack_tx))
+        .unwrap();
+
+    let (setter_pending, acknowledged_while_pending, acknowledged) = std::thread::scope(|scope| {
+        // The settings update waits for this read to end before it writes.
+        let read = workspace.db_state.fork();
+        let update = scope.spawn(|| {
+            workspace.update_settings(UpdateSettingsParams {
+                project_key,
+                workspace_directory: Some(BiomePath::new(&project)),
+                configuration: Configuration::default(),
+                extended_configurations: vec![],
+                module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+            })
+        });
+        let setter_pending = wait_until(TIMEOUT, || workspace.db_state.pending_setters() > 0);
+
+        scope.spawn(|| workspace.start_watcher(watcher));
+        let acknowledged_while_pending = ack_rx.recv_timeout(Duration::from_millis(200)).is_ok();
+
+        drop(read);
+        let acknowledged = acknowledged_while_pending || ack_rx.recv_timeout(TIMEOUT).is_ok();
+        let update_result = update.join();
+
+        instruction_channel
+            .sender
+            .send(WatcherInstruction::Stop)
+            .unwrap();
+        update_result.unwrap().unwrap();
+
+        (setter_pending, acknowledged_while_pending, acknowledged)
+    });
+
+    assert!(setter_pending, "the settings update did not start writing");
+    assert!(
+        !acknowledged_while_pending,
+        "the watcher handled the instructions while the write was pending"
+    );
+    assert!(acknowledged, "the watcher stopped handling instructions");
+}
+
+#[test]
+#[cfg(feature = "module_graph")]
+fn watcher_applies_events_interrupted_by_a_pending_write() {
+    const TIMEOUT: Duration = Duration::from_secs(5);
+
+    let fs = TemporaryFs::new("watcher_applies_events_interrupted_by_a_pending_write");
+    let project = fs.working_directory.join("project");
+    std::fs::create_dir_all(&project).unwrap();
+
+    let (watcher, instruction_channel) = Watcher::new(WatcherOptions::default()).unwrap();
+    let (service_tx, mut service_rx) =
+        tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let mut workspace = LocalWorkspace::new(
+        Arc::new(fs.create_os()),
+        instruction_channel.sender.clone(),
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    workspace.db_state = DbState::lsp(workspace.server.fs.clone());
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new(&project),
+            open_uninitialized: true,
+        })
+        .unwrap();
+
+    let (watching, setter_pending, notified_while_pending, indexed) = std::thread::scope(|scope| {
+        scope.spawn(|| workspace.start_watcher(watcher));
+        // The watcher handles events only in scanned projects.
+        let watching = scan_with_watch(&workspace, project_key).is_ok();
+        service_rx.mark_unchanged();
+
+        // The settings update waits for this read to end before it writes.
+        let read = workspace.db_state.fork();
+        let update = scope.spawn(|| {
+            workspace.update_settings(UpdateSettingsParams {
+                project_key,
+                workspace_directory: Some(BiomePath::new(&project)),
+                configuration: Configuration::default(),
+                extended_configurations: vec![],
+                module_graph_resolution_kind: ModuleGraphResolutionKind::None,
+            })
+        });
+        let setter_pending = wait_until(TIMEOUT, || workspace.db_state.pending_setters() > 0);
+
+        // Handling the event starts with a database read, which the
+        // pending write interrupts.
+        std::fs::write(project.join("file.js"), "").unwrap();
+        let notified_while_pending = wait_until(Duration::from_millis(200), || {
+            service_rx.has_changed().unwrap_or(true)
+        });
+
+        drop(read);
+        let indexed = wait_until(TIMEOUT, || {
+            service_rx.has_changed().unwrap_or(false)
+                && matches!(
+                    *service_rx.borrow_and_update(),
+                    ServiceNotification::IndexUpdated
+                )
+        });
+        let update_result = update.join();
+
+        instruction_channel
+            .sender
+            .send(WatcherInstruction::Stop)
+            .unwrap();
+        update_result.unwrap().unwrap();
+
+        (watching, setter_pending, notified_while_pending, indexed)
+    });
+
+    assert!(watching, "the watcher did not watch the project");
+    assert!(setter_pending, "the settings update did not start writing");
+    assert!(
+        !notified_while_pending,
+        "the watcher reported a change while the write was pending"
+    );
+    assert!(indexed, "the watcher did not index the created file");
+}
+
+/// Opens a project whose only entry is an empty folder, so scanning it indexes
+/// no file. Returns the project and the folder.
+#[cfg(feature = "module_graph")]
+fn open_project_with_empty_folder(
+    fs: &mut TemporaryFs,
+    watcher_tx: crossbeam::channel::Sender<WatcherInstruction>,
+) -> (LocalWorkspace, ProjectKey, Utf8PathBuf) {
+    let project = fs.working_directory.join("project");
+    let folder = project.join("folder");
+    std::fs::create_dir_all(&folder).unwrap();
+
+    let (service_tx, _) = tokio::sync::watch::channel(ServiceNotification::IndexUpdated);
+    let workspace = LocalWorkspace::new(
+        Arc::new(fs.create_os()),
+        watcher_tx,
+        service_tx,
+        Arc::new(NoopQueryProvider {}),
+        None,
+    );
+    let OpenProjectResult { project_key } = workspace
+        .open_project(OpenProjectParams {
+            path: BiomePath::new(&project),
+            open_uninitialized: true,
+        })
+        .unwrap();
+
+    (workspace, project_key, folder)
+}
+
+#[cfg(feature = "module_graph")]
+fn scan_with_watch(
+    workspace: &LocalWorkspace,
+    project_key: ProjectKey,
+) -> Result<ScanProjectResult, WorkspaceError> {
+    workspace.scan_project(ScanProjectParams {
+        project_key,
+        watch: true,
+        force: false,
+        scan_kind: ScanKind::Project,
+        verbose: false,
+    })
+}
+
+#[cfg(feature = "module_graph")]
+fn is_watched(workspace: &LocalWorkspace, folder: &Utf8Path) -> bool {
+    let mut watched = false;
+    ScannerWatcherBridge::new((&workspace.server.scanner, workspace)).remove_watched_folders(
+        |path| {
+            watched |= path == folder;
+            false
+        },
+    );
+    watched
 }
 
 #[test]
