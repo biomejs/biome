@@ -8180,6 +8180,23 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"NoVueUndeclaredPropertiesConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithNoVueUndeclaredPropertiesOptions" }
+			]
+		},
+		"NoVueUndeclaredPropertiesOptions": {
+			"type": "object",
+			"properties": {
+				"ignore": {
+					"description": "Property names that are never reported, for example properties that a plugin adds to\nevery component.",
+					"type": ["array", "null"],
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoVueUndeclaredSlotsConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
@@ -9281,6 +9298,13 @@
 					"description": "Require Vue components to declare the events they emit.\nSee https://biomejs.dev/linter/rules/no-vue-undeclared-emits",
 					"anyOf": [
 						{ "$ref": "#/$defs/NoVueUndeclaredEmitsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noVueUndeclaredProperties": {
+					"description": "Disallow using properties that a Vue component doesn't declare.\nSee https://biomejs.dev/linter/rules/no-vue-undeclared-properties",
+					"anyOf": [
+						{ "$ref": "#/$defs/NoVueUndeclaredPropertiesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -15295,6 +15319,15 @@
 			"properties": {
 				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
 				"options": { "$ref": "#/$defs/NoVueUndeclaredEmitsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
+		"RuleWithNoVueUndeclaredPropertiesOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/NoVueUndeclaredPropertiesOptions" }
 			},
 			"additionalProperties": false,
 			"required": ["level"]

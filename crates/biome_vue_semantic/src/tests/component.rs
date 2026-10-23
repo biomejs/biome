@@ -1,6 +1,7 @@
 use super::js_model;
 use crate::{
-    ComponentKind, DefaultSource, DefaultSources, Namespace, OpenReason, PropForm, PropType, Tri,
+    Access, ComponentKind, DefaultSource, DefaultSources, Namespace, OpenReason, PropForm,
+    PropType, RefSite, Resolution, Tri,
 };
 use biome_languages::JsFileSource;
 
@@ -726,5 +727,90 @@ fn model_option_in_define_options_is_recorded() {
     assert_eq!(
         component.model_option_range().map(|range| &code[range]),
         Some("model: { prop: \"checked\" }")
+    );
+}
+
+#[test]
+fn object_literal_data_lists_its_members() {
+    let model = js_model(
+        r#"import { defineComponent } from "vue";
+defineComponent({
+  data() {
+    return {
+      user: { name: "", address: { city: "" } },
+      settings: { ...defaults, theme: "dark" },
+      list: [],
+      empty: {},
+    };
+  },
+});"#,
+        JsFileSource::js_module(),
+    );
+    let component = model.components().next().unwrap();
+    let data: Vec<_> = component
+        .data()
+        .map(|symbol| {
+            (
+                symbol.name().to_string(),
+                symbol.has_known_members(),
+                symbol
+                    .members()
+                    .map(|member| member.name().to_string())
+                    .collect::<Vec<_>>(),
+            )
+        })
+        .collect();
+    assert_eq!(
+        data,
+        [
+            ("user".into(), true, vec!["name".into(), "address".into()]),
+            ("settings".into(), false, vec!["theme".into()]),
+            ("list".into(), false, vec![]),
+            ("empty".into(), true, vec![]),
+        ]
+    );
+    let user = component.data().next().unwrap();
+    let address = user.members().nth(1).unwrap();
+    assert!(address.has_known_members());
+    assert_eq!(address.members().next().unwrap().name(), "city");
+}
+
+#[test]
+fn names_written_as_strings_in_options_are_references() {
+    let model = js_model(
+        r#"import { defineComponent } from "vue";
+defineComponent({
+  data() {
+    return { count: 0, user: { name: "" } };
+  },
+  methods: { onCount() {} },
+  watch: { count: "onCount", "user.name": "missing", other() {} },
+  expose: ["count", "hidden"],
+});"#,
+        JsFileSource::js_module(),
+    );
+    let references: Vec<_> = model
+        .references()
+        .filter(|reference| reference.site() == RefSite::OptionName)
+        .map(|reference| {
+            (
+                reference.name().to_string(),
+                reference.path().map(str::to_string).collect::<Vec<_>>(),
+                reference.access(),
+                reference.resolution() == Resolution::Unresolved,
+            )
+        })
+        .collect();
+    assert_eq!(
+        references,
+        [
+            ("count".into(), vec![], Access::Read, false),
+            ("onCount".into(), vec![], Access::Call, false),
+            ("user".into(), vec!["name".into()], Access::Read, false),
+            ("missing".into(), vec![], Access::Call, true),
+            ("other".into(), vec![], Access::Read, true),
+            ("count".into(), vec![], Access::Read, false),
+            ("hidden".into(), vec![], Access::Read, true),
+        ]
     );
 }

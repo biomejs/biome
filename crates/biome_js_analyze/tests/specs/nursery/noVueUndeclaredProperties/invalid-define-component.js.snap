@@ -1,0 +1,95 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-define-component.js
+---
+# Input
+```js
+/* should generate diagnostics */
+import { defineComponent } from "vue";
+
+export default defineComponent({
+  props: { title: String },
+  computed: {
+    upper() {
+      return this.titel.toUpperCase();
+    },
+  },
+  methods: {
+    reset() {
+      this.missing = 0;
+      this.undeclaredMethod();
+    },
+  },
+});
+
+```
+
+# Diagnostics
+```
+invalid-define-component.js:8:19 lint/nursery/noVueUndeclaredProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × titel isn't declared by this component.
+  
+     6 │   computed: {
+     7 │     upper() {
+   > 8 │       return this.titel.toUpperCase();
+       │                   ^^^^^
+     9 │     },
+    10 │   },
+  
+  i Its value is always undefined.
+  
+  i This often means the name has a typo, or its declaration is missing.
+  
+  i Fix the name, or declare it in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:13:12 lint/nursery/noVueUndeclaredProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × missing isn't declared by this component.
+  
+    11 │   methods: {
+    12 │     reset() {
+  > 13 │       this.missing = 0;
+       │            ^^^^^^^
+    14 │       this.undeclaredMethod();
+    15 │     },
+  
+  i Vue doesn't track changes to it, so the page doesn't update when it changes.
+  
+  i This often means the name has a typo, or its declaration is missing.
+  
+  i Fix the name, or declare it in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
+
+```
+invalid-define-component.js:14:12 lint/nursery/noVueUndeclaredProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × undeclaredMethod isn't declared by this component.
+  
+    12 │     reset() {
+    13 │       this.missing = 0;
+  > 14 │       this.undeclaredMethod();
+       │            ^^^^^^^^^^^^^^^^
+    15 │     },
+    16 │   },
+  
+  i Its value is always undefined.
+  
+  i This often means the name has a typo, or its declaration is missing.
+  
+  i Fix the name, or declare it in the component.
+  
+  i This rule belongs to the nursery group, which means it is not yet stable and may change in the future. Visit https://biomejs.dev/linter/#nursery for more information.
+  
+
+```
