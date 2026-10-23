@@ -454,8 +454,9 @@ impl HtmlFormatContext {
     /// Returns `true` when the embedded snippet whose content spans `range` is
     /// formatted by the formatter of its language.
     ///
-    /// A node must only emit embedded tags for such a range: the embedded tags
-    /// of any other range are never filled, and the node's content is lost.
+    /// The caller of the formatter only replaces the content of the embedded
+    /// elements with these ranges. Any other embedded element prints the
+    /// node's own formatting.
     pub fn is_embedded_node_range(&self, range: TextRange) -> bool {
         self.embedded_node_ranges
             .binary_search_by_key(&(range.start(), range.end()), |range| {

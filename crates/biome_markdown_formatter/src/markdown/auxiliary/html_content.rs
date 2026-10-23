@@ -1,4 +1,3 @@
-use crate::FormatEmbedded;
 use crate::prelude::*;
 use biome_formatter::write;
 use biome_markdown_syntax::{MdHtmlBlock, MdHtmlContent, MdHtmlContentFields, MdRoot};
