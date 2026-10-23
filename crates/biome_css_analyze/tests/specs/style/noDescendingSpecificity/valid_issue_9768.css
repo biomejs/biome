@@ -1,0 +1,12 @@
+/* should not generate diagnostics */
+.aaa {
+  ul li {
+    &:hover { color: #1684fc; }
+  }
+}
+
+.bbb {
+  a {
+    &:hover { background: #fff; }
+  }
+}
