@@ -30,6 +30,13 @@ expression: snapshot
 0.
 1)
 
+--
+
+10.item
+
+text
+    - item
+
 ```
 
 
@@ -396,18 +403,66 @@ MdRoot {
                 },
             ],
         },
+        MdNewline {
+            value_token: NEWLINE@324..325 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@325..327 "--" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@327..328 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@328..329 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@329..336 "10.item" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@336..337 "\n" [] [],
+                },
+            ],
+        },
+        MdNewline {
+            value_token: NEWLINE@337..338 "\n" [] [],
+        },
+        MdParagraph {
+            list: MdInlineItemList [
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@338..342 "text" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@342..343 "\n" [] [],
+                },
+                MdIndentToken {
+                    md_indent_char_token: MD_INDENT_CHAR@343..347 "    " [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@347..353 "- item" [] [],
+                },
+                MdTextual {
+                    value_token: MD_TEXTUAL_LITERAL@353..354 "\n" [] [],
+                },
+            ],
+        },
     ],
-    eof_token: EOF@324..324 "" [] [],
+    eof_token: EOF@354..354 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: MD_ROOT@0..324
+0: MD_ROOT@0..354
   0: (empty)
   1: (empty)
-  2: MD_BLOCK_LIST@0..324
+  2: MD_BLOCK_LIST@0..354
     0: MD_BULLET_LIST_ITEM@0..202
       0: MD_BULLET_LIST@0..202
         0: MD_BULLET@0..202
@@ -641,6 +696,36 @@ MdRoot {
           1: MD_BLOCK_LIST@323..324
             0: MD_NEWLINE@323..324
               0: NEWLINE@323..324 "\n" [] []
-  3: EOF@324..324 "" [] []
+    9: MD_NEWLINE@324..325
+      0: NEWLINE@324..325 "\n" [] []
+    10: MD_PARAGRAPH@325..328
+      0: MD_INLINE_ITEM_LIST@325..328
+        0: MD_TEXTUAL@325..327
+          0: MD_TEXTUAL_LITERAL@325..327 "--" [] []
+        1: MD_TEXTUAL@327..328
+          0: MD_TEXTUAL_LITERAL@327..328 "\n" [] []
+    11: MD_NEWLINE@328..329
+      0: NEWLINE@328..329 "\n" [] []
+    12: MD_PARAGRAPH@329..337
+      0: MD_INLINE_ITEM_LIST@329..337
+        0: MD_TEXTUAL@329..336
+          0: MD_TEXTUAL_LITERAL@329..336 "10.item" [] []
+        1: MD_TEXTUAL@336..337
+          0: MD_TEXTUAL_LITERAL@336..337 "\n" [] []
+    13: MD_NEWLINE@337..338
+      0: NEWLINE@337..338 "\n" [] []
+    14: MD_PARAGRAPH@338..354
+      0: MD_INLINE_ITEM_LIST@338..354
+        0: MD_TEXTUAL@338..342
+          0: MD_TEXTUAL_LITERAL@338..342 "text" [] []
+        1: MD_TEXTUAL@342..343
+          0: MD_TEXTUAL_LITERAL@342..343 "\n" [] []
+        2: MD_INDENT_TOKEN@343..347
+          0: MD_INDENT_CHAR@343..347 "    " [] []
+        3: MD_TEXTUAL@347..353
+          0: MD_TEXTUAL_LITERAL@347..353 "- item" [] []
+        4: MD_TEXTUAL@353..354
+          0: MD_TEXTUAL_LITERAL@353..354 "\n" [] []
+  3: EOF@354..354 "" [] []
 
 ```
