@@ -8848,6 +8848,13 @@
 						{ "$ref": "#/$defs/UseVueTypedRefConfiguration" },
 						{ "type": "null" }
 					]
+				},
+				"useVueValidDefineProps": {
+					"description": "Enforce valid defineProps() calls in Vue components.\nSee https://biomejs.dev/linter/rules/use-vue-valid-define-props",
+					"anyOf": [
+						{ "$ref": "#/$defs/UseVueValidDefinePropsConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -16139,6 +16146,15 @@
 			"additionalProperties": false,
 			"required": ["level"]
 		},
+		"RuleWithUseVueValidDefinePropsOptions": {
+			"type": "object",
+			"properties": {
+				"level": { "$ref": "#/$defs/RulePlainConfiguration" },
+				"options": { "$ref": "#/$defs/UseVueValidDefinePropsOptions" }
+			},
+			"additionalProperties": false,
+			"required": ["level"]
+		},
 		"RuleWithUseVueValidTemplateRootOptions": {
 			"type": "object",
 			"properties": {
@@ -21471,6 +21487,16 @@
 			]
 		},
 		"UseVueVForKeyOptions": { "type": "object", "additionalProperties": false },
+		"UseVueValidDefinePropsConfiguration": {
+			"oneOf": [
+				{ "$ref": "#/$defs/RulePlainConfiguration" },
+				{ "$ref": "#/$defs/RuleWithUseVueValidDefinePropsOptions" }
+			]
+		},
+		"UseVueValidDefinePropsOptions": {
+			"type": "object",
+			"additionalProperties": false
+		},
 		"UseVueValidTemplateRootConfiguration": {
 			"oneOf": [
 				{ "$ref": "#/$defs/RulePlainConfiguration" },
