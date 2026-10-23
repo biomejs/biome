@@ -3678,6 +3678,11 @@ export interface Nursery {
 	 */
 	useVueMatchingComponentFileName?: UseVueMatchingComponentFileNameConfiguration;
 	/**
+	 * Require the element inside a Vue \<Transition> to be shown and hidden with v-if or v-show.
+	 * See https://biomejs.dev/linter/rules/use-vue-toggle-inside-transition
+	 */
+	useVueToggleInsideTransition?: UseVueToggleInsideTransitionConfiguration;
+	/**
 	 * Require a type for refs created with ref() or shallowRef() in TypeScript.
 	 * See https://biomejs.dev/linter/rules/use-vue-typed-ref
 	 */
@@ -6266,6 +6271,9 @@ export type UseVueConsistentEventHyphenationConfiguration =
 export type UseVueMatchingComponentFileNameConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueMatchingComponentFileNameOptions;
+export type UseVueToggleInsideTransitionConfiguration =
+	| RulePlainConfiguration
+	| RuleWithUseVueToggleInsideTransitionOptions;
 export type UseVueTypedRefConfiguration =
 	| RulePlainConfiguration
 	| RuleWithUseVueTypedRefOptions;
@@ -9129,6 +9137,10 @@ export interface RuleWithUseVueMatchingComponentFileNameOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueMatchingComponentFileNameOptions;
 }
+export interface RuleWithUseVueToggleInsideTransitionOptions {
+	level: RulePlainConfiguration;
+	options?: UseVueToggleInsideTransitionOptions;
+}
 export interface RuleWithUseVueTypedRefOptions {
 	level: RulePlainConfiguration;
 	options?: UseVueTypedRefOptions;
@@ -11501,6 +11513,7 @@ export interface UseVueConsistentEventHyphenationOptions {
 	ignoreTags?: string[];
 }
 export type UseVueMatchingComponentFileNameOptions = {};
+export type UseVueToggleInsideTransitionOptions = {};
 export type UseVueTypedRefOptions = {};
 export type NoAccumulatingSpreadOptions = {};
 export type NoAwaitInLoopsOptions = {};
@@ -13096,6 +13109,7 @@ export type Category =
 	| "lint/nursery/useVueConsistentEventHyphenation"
 	| "lint/nursery/useVueMatchingComponentFileName"
 	| "lint/nursery/useVueNextTickPromise"
+	| "lint/nursery/useVueToggleInsideTransition"
 	| "lint/nursery/useVueTypedRef"
 	| "lint/nursery/useVueValidVFor"
 	| "lint/nursery/useVueValidVModel"
